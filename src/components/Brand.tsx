@@ -5,8 +5,8 @@ export function Logo({ size = 30 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-label="Vantage">
       <defs>
         <linearGradient id="lg" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#a88ff1" />
-          <stop offset="1" stopColor="#6d5cff" />
+          <stop stopColor="#34d399" />
+          <stop offset="1" stopColor="#059669" />
         </linearGradient>
       </defs>
       <rect x="1" y="1" width="34" height="34" rx="11" fill="url(#lg)" />
@@ -33,16 +33,16 @@ export function HeroMock() {
     <svg viewBox="0 0 520 340" className="hero-mock" role="img" aria-label="Analytics dashboard preview">
       <defs>
         <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#8f6bee" stopOpacity="0.5" />
-          <stop offset="1" stopColor="#6d5cff" stopOpacity="0" />
+          <stop offset="0" stopColor="#10b981" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#059669" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="win" x1="0" y1="0" x2="1" y2="1">
           <stop stopColor="#1a1b22" />
           <stop offset="1" stopColor="#141519" />
         </linearGradient>
         <linearGradient id="ln" x1="0" y1="0" x2="1" y2="0">
-          <stop stopColor="#a88ff1" />
-          <stop offset="1" stopColor="#6d5cff" />
+          <stop stopColor="#34d399" />
+          <stop offset="1" stopColor="#059669" />
         </linearGradient>
       </defs>
       <rect x="0" y="0" width="520" height="340" rx="16" fill="url(#win)" stroke="#2a2c36" />
@@ -52,7 +52,7 @@ export function HeroMock() {
       <line x1="0" y1="44" x2="520" y2="44" stroke="#2a2c36" />
 
       {[
-        { x: 20, label: "Visitors", val: "12.8k", c: "#a88ff1" },
+        { x: 20, label: "Visitors", val: "12.8k", c: "#34d399" },
         { x: 190, label: "Pageviews", val: "48.2k", c: "#f3f4f6" },
         { x: 360, label: "Live", val: "326", c: "#34d399", live: true },
       ].map((k) => (
@@ -72,7 +72,7 @@ export function HeroMock() {
 
       <g transform="translate(20,278)">
         {[70, 55, 40, 28].map((w, i) => (
-          <rect key={i} y={i * 15} width={w * 4} height="9" rx="3" fill="#7c5cff" opacity={0.8 - i * 0.15} />
+          <rect key={i} y={i * 15} width={w * 4} height="9" rx="3" fill="#10b981" opacity={0.8 - i * 0.15} />
         ))}
       </g>
     </svg>
@@ -99,10 +99,10 @@ export function AnalyticsArt() {
     <svg viewBox="0 0 260 150" width="260" height="150" role="img" aria-label="Analytics illustration">
       <defs>
         <linearGradient id="aa-bar" x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#a88ff1" /><stop offset="1" stopColor="#6d5cff" />
+          <stop stopColor="#34d399" /><stop offset="1" stopColor="#059669" />
         </linearGradient>
         <linearGradient id="aa-line" x1="0" y1="0" x2="1" y2="0">
-          <stop stopColor="#22d3ee" /><stop offset="1" stopColor="#a88ff1" />
+          <stop stopColor="#22d3ee" /><stop offset="1" stopColor="#34d399" />
         </linearGradient>
       </defs>
       {/* baseline */}
@@ -123,7 +123,7 @@ export function AnalyticsArt() {
       </path>
       {/* dots */}
       {[[40,78],[91,52],[129,66],[167,34],[205,56]].map(([x,y],i)=>(
-        <circle key={i} cx={x} cy={y} r="4" fill="#fff" stroke="#6d5cff" strokeWidth="2" opacity="0">
+        <circle key={i} cx={x} cy={y} r="4" fill="#fff" stroke="#059669" strokeWidth="2" opacity="0">
           <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin={`${0.8 + i * 0.08}s`} fill="freeze" />
         </circle>
       ))}

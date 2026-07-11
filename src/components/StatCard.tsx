@@ -2,17 +2,18 @@ import { Card, Group, Text, ThemeIcon, Badge } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
 
 const TINT: Record<string, { from: string; to: string; icon: string; ring: string }> = {
-  violet: { from: "rgba(143,107,238,0.18)", to: "rgba(109,92,255,0.02)", icon: "#a88ff1", ring: "rgba(124,92,255,0.35)" },
-  green:  { from: "rgba(52,211,153,0.18)",  to: "rgba(52,211,153,0.02)", icon: "#34d399", ring: "rgba(52,211,153,0.35)" },
-  cyan:   { from: "rgba(34,211,238,0.18)",  to: "rgba(34,211,238,0.02)", icon: "#22d3ee", ring: "rgba(34,211,238,0.35)" },
-  amber:  { from: "rgba(251,191,36,0.18)",  to: "rgba(251,191,36,0.02)", icon: "#fbbf24", ring: "rgba(251,191,36,0.35)" },
-  pink:   { from: "rgba(244,114,182,0.18)", to: "rgba(244,114,182,0.02)", icon: "#f472b6", ring: "rgba(244,114,182,0.35)" },
+  emerald: { from: "rgba(16,185,129,0.16)",  to: "rgba(16,185,129,0.02)",  icon: "#34d399", ring: "rgba(16,185,129,0.32)" },
+  violet:  { from: "rgba(16,185,129,0.16)",  to: "rgba(16,185,129,0.02)",  icon: "#34d399", ring: "rgba(16,185,129,0.32)" },
+  green:   { from: "rgba(52,211,153,0.16)",  to: "rgba(52,211,153,0.02)",  icon: "#34d399", ring: "rgba(52,211,153,0.32)" },
+  cyan:    { from: "rgba(34,211,238,0.16)",  to: "rgba(34,211,238,0.02)",  icon: "#22d3ee", ring: "rgba(34,211,238,0.32)" },
+  amber:   { from: "rgba(245,158,11,0.16)",  to: "rgba(245,158,11,0.02)",  icon: "#f59e0b", ring: "rgba(245,158,11,0.32)" },
+  pink:    { from: "rgba(244,114,182,0.16)", to: "rgba(244,114,182,0.02)", icon: "#f472b6", ring: "rgba(244,114,182,0.32)" },
 };
 
 export function StatCard({
-  icon: Icon, label, value, color = "violet", live,
+  icon: Icon, label, value, color = "emerald", live,
 }: { icon: LucideIcon; label: string; value: number; color?: keyof typeof TINT | string; live?: boolean }) {
-  const t = TINT[color] ?? TINT.violet;
+  const t = TINT[color] ?? TINT.emerald;
   return (
     <Card
       radius="lg"

@@ -18,7 +18,7 @@ import { useWorkspace } from "../workspace";
 import type { Stats, Bucket } from "../types";
 
 const RANGES = ["1h", "24h", "7d", "30d"];
-const CHART = "#7c5cff";
+const CHART = "#10b981";
 const BAR_COLORS = ["indigo", "teal", "cyan", "grape", "yellow"];
 
 function BarList({ title, items, color = "indigo" }: { title: string; items: Bucket[]; color?: string }) {
@@ -103,7 +103,7 @@ export default function Analytics() {
 
   const siteCount = stats?.siteCount ?? 0;
   const kpis = [
-    { icon: Users, label: "Visitors", value: stats?.visitors ?? 0, color: "violet" },
+    { icon: Users, label: "Visitors", value: stats?.visitors ?? 0, color: "emerald" },
     { icon: Eye, label: "Pageviews", value: stats?.pageviews ?? 0, color: "cyan" },
     { icon: Radio, label: "Live now", value: stats?.live ?? 0, color: "green", live: true },
   ];
@@ -135,19 +135,19 @@ export default function Analytics() {
             <AreaChart data={stats?.timeseries ?? []} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
               <defs>
                 <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8f6bee" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#6d5cff" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="#059669" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#a88ff1" />
-                  <stop offset="100%" stopColor="#6d5cff" />
+                  <stop offset="0%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="#059669" />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} allowDecimals={false} tickLine={false} axisLine={false} />
               <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
-              <Area type="monotone" dataKey="views" stroke="url(#stroke)" strokeWidth={3} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#a88ff1" }} />
+              <Area type="monotone" dataKey="views" stroke="url(#stroke)" strokeWidth={3} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#34d399" }} />
             </AreaChart>
           </ResponsiveContainer>
         ) : (

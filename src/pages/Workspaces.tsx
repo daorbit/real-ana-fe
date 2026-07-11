@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import {
   Title, Text, Group, Button, Card, TextInput, Select, ActionIcon, Badge, Stack,
   SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider, Code,
+  Box,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import {
@@ -287,7 +288,7 @@ export default function Workspaces() {
                               {s.framework}
                             </Badge>
                           </Group>
-                          <Text size="xs" c="violet" truncate>{s.domain}</Text>
+                          <Text size="xs" c="emerald" truncate>{s.domain}</Text>
                         </div>
                       </Group>
                       <Group gap={4} wrap="nowrap">
@@ -311,10 +312,11 @@ export default function Workspaces() {
                     No sites yet. Add one to start collecting analytics.
                   </Text>
                 )}
-
-                <Button variant="subtle" fullWidth leftSection={<Plus size={16} />} onClick={() => setSiteOpen(true)}>
+               <Box mt="md" style={{ display: "flex", justifyContent: "center" }}>
+                <Button variant="subtle" style={{width:"fit-content"}} leftSection={<Plus size={16} />} onClick={() => setSiteOpen(true)}>
                   Add Another Site
                 </Button>
+                </Box>
               </Stack>
 
             </Card>

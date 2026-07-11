@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             size="sm"
             radius="md"
             mb="sm"
-            color="violet"
+            color="emerald"
             value={dark ? "dark" : "light"}
             onChange={(v) => setColorScheme(v as "light" | "dark")}
             data={[
@@ -88,7 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ]}
           />
           <Group gap="sm" wrap="nowrap" p="xs" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--mantine-radius-md)" }}>
-            <Avatar variant="gradient" gradient={{ from: "violet.4", to: "violet.6", deg: 135 }} radius="md" size="md">{initials}</Avatar>
+            <Avatar color="emerald" radius="md" size="md">{initials}</Avatar>
             <Box style={{ flex: 1, overflow: "hidden" }}>
               <Text size="sm" fw={600} truncate>{user?.name}</Text>
               <Text size="xs" c="dimmed" truncate>{user?.email}</Text>

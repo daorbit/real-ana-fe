@@ -11,7 +11,7 @@ export const notify = {
     notifications.show({ title, message, color: "red", autoClose: 5000 }),
 
   info: (message: ReactNode, title?: string) =>
-    notifications.show({ title, message, color: "violet", autoClose: 3000 }),
+    notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
 };
 
 // Turns an unknown thrown value into a readable message.
@@ -27,7 +27,7 @@ export function confirmLogout(onConfirm: () => void) {
     radius: "lg",
     children: <Text size="sm" c="dimmed">You'll need to sign in again to see your analytics.</Text>,
     labels: { confirm: "Log out", cancel: "Stay" },
-    confirmProps: { color: "violet" },
+    confirmProps: { color: "emerald" },
     onConfirm,
   });
 }

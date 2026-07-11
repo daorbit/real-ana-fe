@@ -1,9 +1,10 @@
 import { createTheme, rem } from "@mantine/core";
 
-// Modern SaaS dark-first theme, violet accent.
+// Professional dark-first theme, emerald accent, flat surfaces.
 export const theme = createTheme({
-  primaryColor: "violet",
-  primaryShade: { light: 6, dark: 5 },
+  primaryColor: "emerald",
+  // Dark mode: use a deeper shade so filled surfaces don't glare neon.
+  primaryShade: { light: 6, dark: 7 },
   fontFamily: "Inter, system-ui, -apple-system, sans-serif",
   fontFamilyMonospace: "ui-monospace, 'SF Mono', Menlo, monospace",
   headings: {
@@ -15,27 +16,26 @@ export const theme = createTheme({
       h3: { fontSize: rem(18), lineHeight: "1.3" },
     },
   },
-  defaultRadius: "lg",
+  defaultRadius: "md",
   colors: {
-    // tuned violet ramp (matches #7c5cff family)
-    violet: [
-      "#f2effe", "#e3dcfb", "#c6b9f6", "#a88ff1", "#8f6bee",
-      "#7c5cff", "#7048f5", "#5f3ad9", "#4f30b3", "#3f268f",
+    emerald: [
+      "#ecfdf5", "#d1fae5", "#a7f3d0", "#6ee7b7", "#34d399",
+      "#10b981", "#059669", "#047857", "#065f46", "#064e3b",
     ],
-    // premium neutral dark surfaces
+    // neutral dark surfaces (no purple cast)
     dark: [
-      "#C1C2C5", "#A6A7AB", "#909296", "#5c5f66", "#373A40",
-      "#2C2E33", "#25262b", "#1a1b1e", "#141517", "#0c0d10",
+      "#c9ced6", "#a8aeb8", "#8b929e", "#5f6673", "#3a3f4a",
+      "#2b2f38", "#22252c", "#1a1c22", "#131519", "#0b0c0f",
     ],
   },
   shadows: {
-    md: "0 8px 24px -8px rgba(0,0,0,0.5)",
-    lg: "0 16px 48px -12px rgba(0,0,0,0.6)",
+    md: "0 8px 24px -8px rgba(0,0,0,0.45)",
+    lg: "0 16px 40px -12px rgba(0,0,0,0.55)",
   },
   components: {
-    Card: { defaultProps: { radius: "lg" } },
+    Card: { defaultProps: { radius: "md" } },
     Button: { defaultProps: { radius: "md" } },
-    Paper: { defaultProps: { radius: "lg" } },
+    Paper: { defaultProps: { radius: "md" } },
     Input: { defaultProps: { radius: 8 } },
     TextInput: { defaultProps: { radius: 8 } },
     PasswordInput: { defaultProps: { radius: 8 } },

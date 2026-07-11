@@ -143,7 +143,7 @@ function KeysTab() {
         <Card withBorder radius="lg" padding="xl">
           <Center>
             <Stack align="center" gap={8}>
-              <ThemeIcon variant="light" color="violet" size={52} radius="xl"><KeyRound size={24} /></ThemeIcon>
+              <ThemeIcon variant="light" color="emerald" size={52} radius="xl"><KeyRound size={24} /></ThemeIcon>
               <Text fw={600} size="sm">No API keys yet</Text>
               <Text c="dimmed" size="xs" ta="center" maw={320}>
                 Create a key to start creating projects and sites for your users from your own backend.
@@ -159,7 +159,7 @@ function KeysTab() {
               <Card withBorder radius="lg" padding="lg">
                 <Group justify="space-between" align="flex-start" mb="sm">
                   <Group gap="sm">
-                    <ThemeIcon variant="light" color="violet" radius="md" size="lg"><KeyRound size={17} /></ThemeIcon>
+                    <ThemeIcon variant="light" color="emerald" radius="md" size="lg"><KeyRound size={17} /></ThemeIcon>
                     <div>
                       <Text fw={650} size="sm">{k.name}</Text>
                       <Text size="xs" c="dimmed">
@@ -454,7 +454,7 @@ function my_app_stats(string $siteId, string $range = '24h'): array {
       {/* Hero */}
       <Card withBorder radius="lg" padding="xl" className="dev-hero">
         <Group gap="sm" mb="sm">
-          <ThemeIcon variant="light" color="violet" radius="md" size="lg"><Rocket size={18} /></ThemeIcon>
+          <ThemeIcon variant="light" color="emerald" radius="md" size="lg"><Rocket size={18} /></ThemeIcon>
           <Title order={3}>Platform API</Title>
         </Group>
         <Text size="sm" c="dimmed" maw={680} mb="lg">
@@ -463,7 +463,7 @@ function my_app_stats(string $siteId, string $range = '24h'): array {
           the sites, injects the tracker, reads the numbers, and renders them in your design.
         </Text>
         <Group gap="xs" wrap="nowrap" align="center">
-          <Badge size="lg" variant="light" color="violet" leftSection={<Boxes size={12} />}>Workspace</Badge>
+          <Badge size="lg" variant="light" color="emerald" leftSection={<Boxes size={12} />}>Workspace</Badge>
           <ArrowRight size={14} opacity={0.35} />
           <Badge size="lg" variant="light" color="cyan" leftSection={<Blocks size={12} />}>Project</Badge>
           <ArrowRight size={14} opacity={0.35} />
@@ -607,7 +607,7 @@ export default function Developers() {
         </Text>
       </div>
 
-      <Tabs defaultValue="docs" variant="pills" color="violet">
+      <Tabs defaultValue="docs" variant="pills" color="emerald">
         <Tabs.List mb="lg">
           <Tabs.Tab value="docs" leftSection={<BookOpen size={15} />}>Documentation</Tabs.Tab>
           <Tabs.Tab value="keys" leftSection={<KeyRound size={15} />}>API Keys</Tabs.Tab>
