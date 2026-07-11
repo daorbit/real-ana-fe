@@ -120,8 +120,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .sect-ic { color: var(--violet-2); }
 
 /* ============ World map ============ */
-.world-map { width: 100%; }
-.world-map svg { display: block; width: 100%; height: auto; }
+.world-map { display: block; width: 100%; height: auto; }
+.world-map .country { transition: fill 0.12s ease; }
+.world-map .country.has-data { cursor: pointer; }
+.world-map .country.has-data:hover { fill: #065f46; }
 .legend-swatch {
   width: 16px; height: 8px; border-radius: 2px; display: inline-block;
 }
