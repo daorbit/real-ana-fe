@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { apiUrl } from './api'
 import './App.css'
 
 type Analytics = {
@@ -13,7 +14,7 @@ function App() {
 
   const load = async () => {
     try {
-      const res = await fetch('/api/analytics')
+      const res = await fetch(apiUrl('/api/analytics'))
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setData(await res.json())
       setError(null)
