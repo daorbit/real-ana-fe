@@ -1,10 +1,26 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Title, Text, Group, Button, SimpleGrid, Card, ThemeIcon, Stack, Badge, Center,
+} from "@mantine/core";
 import { Users, Eye, Radio, Globe, BarChart3, FolderKanban } from "lucide-react";
 import { api } from "../api";
 import { AppShell } from "../components/AppShell";
 import { useWorkspace } from "../workspace";
 import type { Stats, Site } from "../types";
+
+function KpiCard({ icon: Icon, label, value, live }: { icon: any; label: string; value: number; live?: boolean }) {
+  return (
+    <Card withBorder radius="md" padding="lg">
+      <Group justify="space-between">
+        <ThemeIcon variant="light" color={live ? "green" : "indigo"} size="lg" radius="md"><Icon size={18} /></ThemeIcon>
+        {live && <Badge color="green" variant="dot">live</Badge>}
+      </Group>
+      <Text fw={750} fz={30} mt="sm" lh={1} c={live ? "green" : undefined}>{value.toLocaleString()}</Text>
+      <Text c="dimmed" size="sm" mt={4}>{label}</Text>
+    </Card>
+  );
+}
 
 export default function Home() {
   const { active, loading } = useWorkspace();
@@ -17,64 +33,58 @@ export default function Home() {
     api.get<Site[]>(`/api/workspaces/${active._id}/sites`).then(setSites).catch(() => setSites([]));
   }, [active]);
 
-  if (loading) return <AppShell><p className="muted">Loading…</p></AppShell>;
+  if (loading) return <AppShell><Text c="dimmed">Loading…</Text></AppShell>;
 
   if (!active) {
     return (
       <AppShell>
-        <div className="empty" style={{ marginTop: "2rem" }}>
-          <FolderKanban size={40} />
-          <p>No workspace yet. Create one to get started.</p>
-          <Link to="/app/workspaces" className="btn-primary">Go to Workspaces</Link>
-        </div>
+        <Center mih="60vh">
+          <Stack align="center" gap="sm">
+            <ThemeIcon variant="light" size={56} radius="md"><FolderKanban size={28} /></ThemeIcon>
+            <Text c="dimmed">No workspace yet. Create one to get started.</Text>
+            <Button component={Link} to="/app/workspaces">Go to Workspaces</Button>
+          </Stack>
+        </Center>
       </AppShell>
     );
   }
 
   const kpis = [
-    { icon: Users, label: "Visitors (24h)", val: stats?.visitors ?? 0, live: false },
-    { icon: Eye, label: "Pageviews (24h)", val: stats?.pageviews ?? 0, live: false },
-    { icon: Radio, label: "Live now", val: stats?.live ?? 0, live: true },
-    { icon: Globe, label: "Sites", val: sites.length, live: false },
+    { icon: Users, label: "Visitors (24h)", value: stats?.visitors ?? 0 },
+    { icon: Eye, label: "Pageviews (24h)", value: stats?.pageviews ?? 0 },
+    { icon: Radio, label: "Live now", value: stats?.live ?? 0, live: true },
+    { icon: Globe, label: "Sites", value: sites.length },
   ];
 
   return (
     <AppShell>
-      <div className="page-head">
+      <Group justify="space-between" align="flex-start" mb="lg">
         <div>
-          <h1>Welcome back 👋</h1>
-          <p className="muted">Overview for <strong>{active.name}</strong> — last 24 hours.</p>
+          <Title order={2}>Welcome back 👋</Title>
+          <Text c="dimmed" size="sm" mt={4}>Overview for <b>{active.name}</b> — last 24 hours.</Text>
         </div>
-        <Link to="/app/analytics" className="btn-primary"><BarChart3 size={16} /> Full analytics</Link>
-      </div>
+        <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>Full analytics</Button>
+      </Group>
 
-      <div className="kpi-row" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-        {kpis.map((k) => (
-          <div key={k.label} className={`kpi ${k.live ? "live" : ""}`}>
-            <div className="kpi-icon"><k.icon size={17} /></div>
-            <span className="kpi-val">{k.val.toLocaleString()}</span>
-            <span className="kpi-label">{k.live && <span className="dot-live" />}{k.label}</span>
-          </div>
-        ))}
-      </div>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
+        {kpis.map((k) => <KpiCard key={k.label} {...k} />)}
+      </SimpleGrid>
 
-      <div className="panel">
-        <h3 className="panel-title">Your sites</h3>
+      <Card withBorder radius="md" padding="lg">
+        <Text fw={600} c="dimmed" size="sm" mb="md">Your sites</Text>
         {sites.length === 0 ? (
-          <p className="muted sm">No sites in this workspace. <Link to="/app/workspaces" className="link-cell">Add one</Link>.</p>
+          <Text c="dimmed" size="sm">No sites in this workspace. <Link to="/app/analytics">Add one</Link>.</Text>
         ) : (
-          <div className="card-grid">
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
             {sites.map((s) => (
-              <Link key={s._id} to={`/app/workspaces`} className="tile">
-                <div className="tile-body">
-                  <h3>{s.name}</h3>
-                  <span className="muted">{s.domain}</span>
-                </div>
-              </Link>
+              <Card key={s._id} withBorder radius="md" padding="md" component={Link} to="/app/analytics">
+                <Text fw={600}>{s.name}</Text>
+                <Text c="dimmed" size="sm">{s.domain}</Text>
+              </Card>
             ))}
-          </div>
+          </SimpleGrid>
         )}
-      </div>
+      </Card>
     </AppShell>
   );
 }

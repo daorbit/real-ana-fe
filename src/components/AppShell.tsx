@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import {
+  AppShell as MantineShell, NavLink, Select, Avatar, Group, Text, ActionIcon, ScrollArea, Box,
+} from "@mantine/core";
 import { Home, BarChart3, FolderKanban, LogOut } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { useAuth } from "../auth";
@@ -18,40 +21,61 @@ export function AppShell({ children }: { children: ReactNode }) {
   const initials = (user?.name ?? "?").slice(0, 2).toUpperCase();
 
   return (
-    <div className="shell">
-      <aside className="sidebar">
-        <Link to="/app" className="side-brand"><Wordmark /></Link>
+    <MantineShell
+      navbar={{ width: 250, breakpoint: "sm" }}
+      padding="lg"
+    >
+      <MantineShell.Navbar p="md">
+        <MantineShell.Section>
+          <Box component={Link} to="/app" px={6} pb="md" display="block">
+            <Wordmark />
+          </Box>
+        </MantineShell.Section>
 
         {workspaces.length > 0 && (
-          <div className="ws-switch">
-            <label>Workspace</label>
-            <select value={active?._id ?? ""} onChange={(e) => setActive(e.target.value)}>
-              {workspaces.map((w) => <option key={w._id} value={w._id}>{w.name}</option>)}
-            </select>
-          </div>
+          <MantineShell.Section mb="md">
+            <Select
+              label="Workspace"
+              size="sm"
+              data={workspaces.map((w) => ({ value: w._id, label: w.name }))}
+              value={active?._id ?? null}
+              onChange={(v) => v && setActive(v)}
+              allowDeselect={false}
+              comboboxProps={{ withinPortal: true }}
+            />
+          </MantineShell.Section>
         )}
 
-        <nav className="side-nav">
-          {NAV.map((n) => {
-            const isActive = loc.pathname === n.to;
-            return (
-              <Link key={n.to} to={n.to} className={isActive ? "side-link active" : "side-link"}>
-                <n.icon size={17} /> {n.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <MantineShell.Section grow component={ScrollArea}>
+          {NAV.map((n) => (
+            <NavLink
+              key={n.to}
+              component={Link}
+              to={n.to}
+              label={n.label}
+              leftSection={<n.icon size={18} />}
+              active={loc.pathname === n.to}
+              variant="light"
+              mb={4}
+            />
+          ))}
+        </MantineShell.Section>
 
-        <div className="side-foot">
-          <div className="avatar">{initials}</div>
-          <div className="side-user">
-            <span className="side-name">{user?.name}</span>
-            <span className="side-email">{user?.email}</span>
-          </div>
-          <button className="icon-btn" onClick={logout} title="Log out"><LogOut size={15} /></button>
-        </div>
-      </aside>
-      <main className="shell-main">{children}</main>
-    </div>
+        <MantineShell.Section>
+          <Group gap="sm" wrap="nowrap" pt="sm" style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}>
+            <Avatar color="indigo" radius="xl" size="md">{initials}</Avatar>
+            <Box style={{ flex: 1, overflow: "hidden" }}>
+              <Text size="sm" fw={600} truncate>{user?.name}</Text>
+              <Text size="xs" c="dimmed" truncate>{user?.email}</Text>
+            </Box>
+            <ActionIcon variant="subtle" color="gray" onClick={logout} title="Log out">
+              <LogOut size={16} />
+            </ActionIcon>
+          </Group>
+        </MantineShell.Section>
+      </MantineShell.Navbar>
+
+      <MantineShell.Main bg="gray.0">{children}</MantineShell.Main>
+    </MantineShell>
   );
 }

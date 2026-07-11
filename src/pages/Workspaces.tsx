@@ -1,5 +1,9 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import {
+  Title, Text, Group, Button, SegmentedControl, Table, TextInput, Card, SimpleGrid,
+  ActionIcon, ThemeIcon, Badge, Stack, Center, Collapse, Alert,
+} from "@mantine/core";
 import { Plus, LayoutGrid, Table2, Trash2, Pencil, Check, X, FolderKanban } from "lucide-react";
 import { api } from "../api";
 import { AppShell } from "../components/AppShell";
@@ -8,7 +12,7 @@ import type { Workspace } from "../types";
 
 export default function Workspaces() {
   const { workspaces, active, setActive, refresh, loading } = useWorkspace();
-  const [view, setView] = useState<"table" | "card">("table");
+  const [view, setView] = useState("table");
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,94 +54,109 @@ export default function Workspaces() {
 
   return (
     <AppShell>
-      <div className="page-head">
+      <Group justify="space-between" align="flex-start" mb="lg">
         <div>
-          <h1>Workspaces</h1>
-          <p className="muted">Create, rename or remove the workspaces that group your apps.</p>
+          <Title order={2}>Workspaces</Title>
+          <Text c="dimmed" size="sm" mt={4}>Create, rename or remove the workspaces that group your apps.</Text>
         </div>
-        <div className="head-actions">
-          <div className="view-toggle">
-            <button className={view === "table" ? "active" : ""} onClick={() => setView("table")} title="Table"><Table2 size={16} /></button>
-            <button className={view === "card" ? "active" : ""} onClick={() => setView("card")} title="Cards"><LayoutGrid size={16} /></button>
-          </div>
-          <button className="btn-primary" onClick={() => setOpen((v) => !v)}><Plus size={16} /> New</button>
-        </div>
-      </div>
+        <Group gap="sm">
+          <SegmentedControl
+            value={view} onChange={setView} size="sm"
+            data={[
+              { value: "table", label: <Center><Table2 size={15} /></Center> },
+              { value: "card", label: <Center><LayoutGrid size={15} /></Center> },
+            ]}
+          />
+          <Button leftSection={<Plus size={16} />} onClick={() => setOpen((v) => !v)}>New</Button>
+        </Group>
+      </Group>
 
-      {error && <p className="error-box" style={{ marginBottom: "1rem" }}>{error}</p>}
+      {error && <Alert color="red" variant="light" mb="md">{error}</Alert>}
 
-      {open && (
-        <form className="quick-form" onSubmit={create}>
-          <input autoFocus placeholder="e.g. Acme Inc" value={name} onChange={(e) => setName(e.target.value)} required />
-          <button type="submit" className="btn-primary">Create</button>
-          <button type="button" className="btn-ghost" onClick={() => setOpen(false)}>Cancel</button>
-        </form>
-      )}
+      <Collapse expanded={open}>
+        <Card withBorder radius="md" padding="md" mb="md">
+          <form onSubmit={create}>
+            <Group align="flex-end">
+              <TextInput label="Workspace name" placeholder="e.g. Acme Inc" value={name} onChange={(e) => setName(e.currentTarget.value)} required style={{ flex: 1 }} data-autofocus />
+              <Button type="submit">Create</Button>
+              <Button variant="default" onClick={() => setOpen(false)}>Cancel</Button>
+            </Group>
+          </form>
+        </Card>
+      </Collapse>
 
       {loading ? (
-        <p className="muted">Loading…</p>
+        <Text c="dimmed">Loading…</Text>
       ) : workspaces.length === 0 && !open ? (
-        <div className="empty">
-          <FolderKanban size={40} />
-          <p>No workspaces yet.</p>
-          <button className="btn-primary" onClick={() => setOpen(true)}><Plus size={16} /> Create your first</button>
-        </div>
+        <Center mih="40vh">
+          <Stack align="center" gap="sm">
+            <ThemeIcon variant="light" size={56} radius="md"><FolderKanban size={28} /></ThemeIcon>
+            <Text c="dimmed">No workspaces yet.</Text>
+            <Button leftSection={<Plus size={16} />} onClick={() => setOpen(true)}>Create your first</Button>
+          </Stack>
+        </Center>
       ) : view === "table" ? (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Name</th><th>Slug</th><th>Created</th><th style={{ textAlign: "right" }}>Actions</th></tr>
-            </thead>
-            <tbody>
+        <Card withBorder radius="md" padding={0}>
+          <Table verticalSpacing="sm" horizontalSpacing="lg" highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Name</Table.Th><Table.Th>Slug</Table.Th><Table.Th>Created</Table.Th><Table.Th ta="right">Actions</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
               {workspaces.map((w) => (
-                <tr key={w._id}>
-                  <td>
+                <Table.Tr key={w._id}>
+                  <Table.Td>
                     {editId === w._id ? (
-                      <input value={editName} onChange={(e) => setEditName(e.target.value)} style={{ maxWidth: 220 }} autoFocus />
+                      <TextInput size="xs" value={editName} onChange={(e) => setEditName(e.currentTarget.value)} w={220} autoFocus />
                     ) : (
-                      <span className="row-name link-cell" onClick={() => setActive(w._id)}>
-                        {w.name}{active?._id === w._id && <span className="muted"> · active</span>}
-                      </span>
+                      <Group gap="xs">
+                        <Text fw={600} c="indigo" style={{ cursor: "pointer" }} onClick={() => setActive(w._id)}>{w.name}</Text>
+                        {active?._id === w._id && <Badge size="xs" variant="light" color="green">active</Badge>}
+                      </Group>
                     )}
-                  </td>
-                  <td className="muted">/{w.slug}</td>
-                  <td className="muted">{new Date(w.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <div className="row-actions">
+                  </Table.Td>
+                  <Table.Td c="dimmed">/{w.slug}</Table.Td>
+                  <Table.Td c="dimmed">{new Date(w.createdAt).toLocaleDateString()}</Table.Td>
+                  <Table.Td>
+                    <Group gap={4} justify="flex-end">
                       {editId === w._id ? (
                         <>
-                          <button className="icon-btn" onClick={() => saveEdit(w._id)} title="Save"><Check size={15} /></button>
-                          <button className="icon-btn" onClick={() => setEditId(null)} title="Cancel"><X size={15} /></button>
+                          <ActionIcon variant="subtle" color="green" onClick={() => saveEdit(w._id)}><Check size={15} /></ActionIcon>
+                          <ActionIcon variant="subtle" color="gray" onClick={() => setEditId(null)}><X size={15} /></ActionIcon>
                         </>
                       ) : (
                         <>
-                          <button className="icon-btn" onClick={() => { setEditId(w._id); setEditName(w.name); }} title="Rename"><Pencil size={15} /></button>
-                          <button className="icon-btn" onClick={() => remove(w._id, w.name)} title="Delete"><Trash2 size={15} /></button>
+                          <ActionIcon variant="subtle" color="gray" onClick={() => { setEditId(w._id); setEditName(w.name); }}><Pencil size={15} /></ActionIcon>
+                          <ActionIcon variant="subtle" color="red" onClick={() => remove(w._id, w.name)}><Trash2 size={15} /></ActionIcon>
                         </>
                       )}
-                    </div>
-                  </td>
-                </tr>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </Table.Tbody>
+          </Table>
+        </Card>
       ) : (
-        <div className="card-grid">
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
           {workspaces.map((w) => (
-            <div key={w._id} className="tile">
-              <div className="tile-icon"><FolderKanban size={18} /></div>
-              <div className="tile-body">
-                <h3>{w.name}{active?._id === w._id && <span className="muted"> · active</span>}</h3>
-                <span className="muted">/{w.slug}</span>
-              </div>
-              <div className="row-actions">
-                <button className="icon-btn" onClick={() => setActive(w._id)} title="Set active"><Check size={15} /></button>
-                <button className="icon-btn" onClick={() => remove(w._id, w.name)} title="Delete"><Trash2 size={15} /></button>
-              </div>
-            </div>
+            <Card key={w._id} withBorder radius="md" padding="lg">
+              <Group justify="space-between">
+                <ThemeIcon variant="light" size="lg" radius="md"><FolderKanban size={18} /></ThemeIcon>
+                <Group gap={4}>
+                  <ActionIcon variant="subtle" color="green" onClick={() => setActive(w._id)} title="Set active"><Check size={15} /></ActionIcon>
+                  <ActionIcon variant="subtle" color="red" onClick={() => remove(w._id, w.name)} title="Delete"><Trash2 size={15} /></ActionIcon>
+                </Group>
+              </Group>
+              <Group gap="xs" mt="sm">
+                <Text fw={650}>{w.name}</Text>
+                {active?._id === w._id && <Badge size="xs" variant="light" color="green">active</Badge>}
+              </Group>
+              <Text c="dimmed" size="sm">/{w.slug}</Text>
+            </Card>
           ))}
-        </div>
+        </SimpleGrid>
       )}
     </AppShell>
   );
