@@ -7,6 +7,7 @@ import {
 } from "@mantine/core";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
+import { notify, errMessage } from "../notify";
 
 export default function Signup() {
   const { signup } = useAuth();
@@ -22,9 +23,10 @@ export default function Signup() {
     setBusy(true); setError(null);
     try {
       await signup(email, password, name);
+      notify.success("Account created. Let's get you tracking.", "Welcome to Vantage");
       nav("/app");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "signup failed");
+      setError(errMessage(err, "Signup failed. That email may already be registered."));
     } finally {
       setBusy(false);
     }

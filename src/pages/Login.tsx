@@ -7,6 +7,7 @@ import {
 } from "@mantine/core";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
+import { notify, errMessage } from "../notify";
 
 export default function Login() {
   const { login } = useAuth();
@@ -21,9 +22,10 @@ export default function Login() {
     setBusy(true); setError(null);
     try {
       await login(email, password);
+      notify.success("Welcome back!", "Logged in");
       nav("/app");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "login failed");
+      setError(errMessage(err, "Login failed. Check your email and password."));
     } finally {
       setBusy(false);
     }

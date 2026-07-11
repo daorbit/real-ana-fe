@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Progress,
-  SegmentedControl, Stack, Center, Alert, ThemeIcon,
+  SegmentedControl, Stack, Center, ThemeIcon,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -13,6 +13,7 @@ import { api } from "../api";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
+import { notify, errMessage } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Stats, Bucket } from "../types";
 
@@ -63,13 +64,19 @@ export default function Analytics() {
   const { active, loading } = useWorkspace();
   const [range, setRange] = useState("24h");
   const [stats, setStats] = useState<Stats | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const failedRef = useRef(false);
 
   const loadStats = useCallback(() => {
     if (!active) return;
     api.get<Stats>(`/api/workspaces/${active._id}/stats?range=${range}`)
-      .then((s) => { setStats(s); setError(null); })
-      .catch((e) => setError(e.message));
+      .then((s) => { setStats(s); failedRef.current = false; })
+      .catch((e) => {
+        // Polls every 3s — only surface the first failure, not one toast per tick.
+        if (!failedRef.current) {
+          failedRef.current = true;
+          notify.error(errMessage(e, "Could not load analytics."));
+        }
+      });
   }, [active, range]);
 
   useEffect(() => {
@@ -112,8 +119,6 @@ export default function Analytics() {
         </div>
         <SegmentedControl value={range} onChange={setRange} data={RANGES} size="sm" />
       </Group>
-
-      {error && <Alert color="red" variant="light" mb="md">{error}</Alert>}
 
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="lg">
         {kpis.map((k, i) => (

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import type { FormEvent } from "react";
 import {
   Title, Text, Group, Button, Card, TextInput, Select, ActionIcon, Badge, Stack,
-  SimpleGrid, ThemeIcon, Center, Collapse, Alert, CopyButton, Tooltip, Divider, Code,
+  SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider, Code,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import {
@@ -11,6 +11,7 @@ import {
 import { api, API_ORIGIN } from "../api";
 import { AppShell } from "../components/AppShell";
 import { FrameworkIcon } from "../components/Brand";
+import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
 
@@ -36,7 +37,6 @@ function IdRow({ label, value }: { label: string; value: string }) {
 
 export default function Workspaces() {
   const { workspaces, active, setActive, refresh, loading } = useWorkspace();
-  const [error, setError] = useState<string | null>(null);
 
   // workspace create / rename
   const [wsOpen, setWsOpen] = useState(false);
@@ -61,14 +61,14 @@ export default function Workspaces() {
 
   const createWorkspace = async (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
     try {
       const ws = await api.post<Workspace>("/api/workspaces", { name: wsName });
       setWsName(""); setWsOpen(false);
       await refresh();
       setActive(ws._id);
+      notify.success(`Workspace "${ws.name}" created and set as active.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "failed");
+      notify.error(errMessage(err, "Could not create the workspace."));
     }
   };
 
@@ -78,41 +78,60 @@ export default function Workspaces() {
       await api.patch(`/api/workspaces/${active._id}`, { name: editName });
       setEditing(false);
       await refresh();
+      notify.success("Workspace renamed.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "failed");
+      notify.error(errMessage(err, "Could not rename the workspace."));
     }
   };
 
-  const removeWorkspace = async (w: Workspace) => {
-    if (!confirm(`Delete "${w.name}" and all its sites + analytics? This cannot be undone.`)) return;
-    try {
-      await api.del(`/api/workspaces/${w._id}`);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "failed");
-    }
+  const removeWorkspace = (w: Workspace) => {
+    confirmDelete({
+      title: `Delete "${w.name}"?`,
+      body: "This permanently removes the workspace, every site inside it, and all collected analytics. This cannot be undone.",
+      confirmLabel: "Delete workspace",
+      onConfirm: async () => {
+        try {
+          await api.del(`/api/workspaces/${w._id}`);
+          await refresh();
+          notify.success(`Workspace "${w.name}" deleted.`);
+        } catch (err) {
+          notify.error(errMessage(err, "Could not delete the workspace."));
+        }
+      },
+    });
   };
 
   const addSite = async (e: FormEvent) => {
     e.preventDefault();
     if (!active) return;
-    setError(null);
     try {
       const site = await api.post<Site>(`/api/workspaces/${active._id}/sites`, { name, domain, framework });
       setName(""); setDomain(""); setSiteOpen(false);
       setCreated(site);
       loadSites();
+      notify.success(`Site "${site.name}" added. Copy the snippet to start tracking.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "failed");
+      notify.error(errMessage(err, "Could not add the site."));
     }
   };
 
-  const delSite = async (s: Site) => {
+  const delSite = (s: Site) => {
     if (!active) return;
-    if (!confirm(`Delete site "${s.name}" and its analytics?`)) return;
-    await api.del(`/api/workspaces/${active._id}/sites/${s.siteId}`);
-    if (created?.siteId === s.siteId) setCreated(null);
-    loadSites();
+    confirmDelete({
+      title: `Delete site "${s.name}"?`,
+      body: "This removes the site and every event collected for it. Any app still running the snippet will stop reporting.",
+      confirmLabel: "Delete site",
+      onConfirm: async () => {
+        try {
+          await api.del(`/api/workspaces/${active._id}/sites/${s.siteId}`);
+          if (created?.siteId === s.siteId) setCreated(null);
+          loadSites();
+          notify.success(`Site "${s.name}" deleted.`);
+        } catch (err) {
+          notify.error(errMessage(err, "Could not delete the site."));
+        }
+      },
+    });
   };
 
   const snippet = (siteId: string) =>
@@ -130,19 +149,80 @@ export default function Workspaces() {
         <Button leftSection={<Plus size={16} />} onClick={() => setWsOpen((v) => !v)}>Create Workspace</Button>
       </Group>
 
-      {error && <Alert color="red" variant="light" mb="md">{error}</Alert>}
-
-      <Collapse expanded={wsOpen}>
-        <Card withBorder radius="lg" padding="md" mb="lg">
-          <form onSubmit={createWorkspace}>
-            <Group align="flex-end">
-              <TextInput label="Workspace name" placeholder="e.g. Acme Inc" value={wsName} onChange={(e) => setWsName(e.currentTarget.value)} required style={{ flex: 1 }} />
-              <Button type="submit">Create</Button>
+      {/* Create workspace modal */}
+      <Modal opened={wsOpen} onClose={() => setWsOpen(false)} title="Create workspace" centered radius="lg">
+        <form onSubmit={createWorkspace}>
+          <Stack gap="md">
+            <TextInput
+              label="Workspace name"
+              placeholder="e.g. Acme Inc"
+              description="Groups the sites you want to track together."
+              value={wsName}
+              onChange={(e) => setWsName(e.currentTarget.value)}
+              required
+              data-autofocus
+            />
+            <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => setWsOpen(false)}>Cancel</Button>
+              <Button type="submit">Create workspace</Button>
             </Group>
-          </form>
-        </Card>
-      </Collapse>
+          </Stack>
+        </form>
+      </Modal>
+
+      {/* Add site modal */}
+      <Modal opened={siteOpen} onClose={() => setSiteOpen(false)} title="Add a site" centered radius="lg">
+        <form onSubmit={addSite}>
+          <Stack gap="md">
+            <TextInput label="Site name" placeholder="My App" value={name} onChange={(e) => setName(e.currentTarget.value)} required data-autofocus />
+            <TextInput label="Domain" placeholder="app.com" description="The domain where the tracking script will run." value={domain} onChange={(e) => setDomain(e.currentTarget.value)} required />
+            <Select label="Framework" data={FRAMEWORKS} value={framework} onChange={(v) => v && setFramework(v)} comboboxProps={{ withinPortal: true }} />
+            <Group justify="flex-end" gap="sm">
+              <Button variant="default" onClick={() => setSiteOpen(false)}>Cancel</Button>
+              <Button type="submit">Add site</Button>
+            </Group>
+          </Stack>
+        </form>
+      </Modal>
+
+      {/* Snippet modal — shown right after a site is created */}
+      <Modal
+        opened={!!created}
+        onClose={() => setCreated(null)}
+        title={created ? `Install “${created.name}”` : ""}
+        centered
+        radius="lg"
+        size="lg"
+      >
+        {created && (
+          <Stack gap="md">
+            <Text size="sm" c="dimmed">
+              Paste this snippet just before the closing <Code>&lt;/head&gt;</Code> tag on{" "}
+              <b>{created.domain}</b>. Traffic starts appearing in Analytics within seconds.
+            </Text>
+
+            <Card withBorder radius="md" padding="sm" bg="var(--surface-2)">
+              <Code block style={{ background: "transparent" }}>{snippet(created.siteId)}</Code>
+            </Card>
+
+            <Group gap="xs">
+              <Text size="xs" c="dimmed">Site ID:</Text>
+              <Code>{created.siteId}</Code>
+            </Group>
+
+            <Group justify="flex-end" gap="sm">
+              <Button variant="default" onClick={() => setCreated(null)}>Done</Button>
+              <CopyButton value={snippet(created.siteId)}>
+                {({ copied, copy }) => (
+                  <Button onClick={copy} leftSection={copied ? <Check size={15} /> : <Copy size={15} />}>
+                    {copied ? "Copied" : "Copy snippet"}
+                  </Button>
+                )}
+              </CopyButton>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
 
       {loading ? (
         <Text c="dimmed">Loading…</Text>
@@ -226,48 +306,17 @@ export default function Workspaces() {
                   </Card>
                 ))}
 
-                {sites.length === 0 && !siteOpen && (
+                {sites.length === 0 && (
                   <Text size="sm" c="dimmed" ta="center" py="md">
                     No sites yet. Add one to start collecting analytics.
                   </Text>
                 )}
 
-                <Collapse expanded={siteOpen}>
-                  <Card withBorder radius="md" padding="md">
-                    <form onSubmit={addSite}>
-                      <Group align="flex-end">
-                        <TextInput label="Site name" placeholder="My App" value={name} onChange={(e) => setName(e.currentTarget.value)} required style={{ flex: 1 }} />
-                        <TextInput label="Domain" placeholder="app.com" value={domain} onChange={(e) => setDomain(e.currentTarget.value)} required style={{ flex: 1 }} />
-                        <Select label="Framework" data={FRAMEWORKS} value={framework} onChange={(v) => v && setFramework(v)} w={130} comboboxProps={{ withinPortal: true }} />
-                        <Button type="submit">Add</Button>
-                        <Button variant="default" onClick={() => setSiteOpen(false)}>Cancel</Button>
-                      </Group>
-                    </form>
-                  </Card>
-                </Collapse>
-
-                {!siteOpen && (
-                  <Button variant="subtle" fullWidth leftSection={<Plus size={16} />} onClick={() => setSiteOpen(true)}>
-                    Add Another Site
-                  </Button>
-                )}
+                <Button variant="subtle" fullWidth leftSection={<Plus size={16} />} onClick={() => setSiteOpen(true)}>
+                  Add Another Site
+                </Button>
               </Stack>
 
-              {created && (
-                <Alert color="green" variant="light" icon={<Check size={16} />} mt="md" title={`${created.name} created`}>
-                  <Text size="sm" mb="xs">Paste this before <Code>&lt;/head&gt;</Code> in the site:</Text>
-                  <Group gap="xs" wrap="nowrap">
-                    <Code style={{ flex: 1, overflow: "auto" }}>{snippet(created.siteId)}</Code>
-                    <CopyButton value={snippet(created.siteId)}>
-                      {({ copied, copy }) => (
-                        <Button size="xs" variant="light" color={copied ? "green" : "violet"} onClick={copy} leftSection={copied ? <Check size={13} /> : <Copy size={13} />}>
-                          {copied ? "Copied" : "Copy"}
-                        </Button>
-                      )}
-                    </CopyButton>
-                  </Group>
-                </Alert>
-              )}
             </Card>
           </motion.div>
 

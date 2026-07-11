@@ -14,6 +14,7 @@
     "@fontsource/space-grotesk": "^5.2.10",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",
+    "@mantine/modals": "^9.4.1",
     "@mantine/notifications": "^9.4.1",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.24.0",

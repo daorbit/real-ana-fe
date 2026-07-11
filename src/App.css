@@ -108,6 +108,22 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .site-row { background: var(--surface-2) !important; }
 .sect-ic { color: var(--violet-2); }
 
+/* ============ Developers ============ */
+.dev-hero {
+  background: linear-gradient(135deg, rgba(124,92,255,0.14), rgba(34,211,238,0.05)) !important;
+  border-color: rgba(124, 92, 255, 0.3) !important;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 0.82rem; font-weight: 700;
+  color: var(--violet-2);
+  background: var(--violet-soft);
+  border: 1px solid rgba(124, 92, 255, 0.3);
+}
+
 /* ============ Code tabs (docs) ============ */
 .code-tabs { overflow: hidden; }
 .code-tabs-head {

@@ -7,6 +7,7 @@ import {
 import { Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2 } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { useAuth } from "../auth";
+import { notify, confirmLogout } from "../notify";
 import { useWorkspace } from "../workspace";
 
 const NAV = [
@@ -92,7 +93,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Text size="sm" fw={600} truncate>{user?.name}</Text>
               <Text size="xs" c="dimmed" truncate>{user?.email}</Text>
             </Box>
-            <ActionIcon variant="subtle" color="gray" onClick={logout} title="Log out">
+            <ActionIcon
+              variant="subtle" color="gray" title="Log out"
+              onClick={() => confirmLogout(() => { logout(); notify.info("You have been logged out."); })}
+            >
               <LogOut size={16} />
             </ActionIcon>
           </Group>
