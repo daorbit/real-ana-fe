@@ -1,5 +1,4 @@
 // Inline SVG brand assets — self-contained, no external images (survive strict CSP).
-import { FRAMEWORK_COLORS } from "../utils";
 
 export function Logo({ size = 30 }: { size?: number }) {
   return (
@@ -132,11 +131,3 @@ export function AnalyticsArt() {
   );
 }
 
-export function FrameworkIcon({ name }: { name: string }) {
-  return (
-    <span
-      className="fw-dot"
-      style={{ background: FRAMEWORK_COLORS[name] ?? FRAMEWORK_COLORS.other }}
-    />
-  );
-}

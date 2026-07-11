@@ -272,6 +272,54 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
+/* ============ Code block (editor style) ============ */
+.cb {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #11141a;
+}
+[data-mantine-color-scheme="light"] .cb { background: #1e1e1e; }
+
+.cb-bar {
+  background: #0c0f14;
+  border-bottom: 1px solid #20242c;
+}
+[data-mantine-color-scheme="light"] .cb-bar { background: #181818; border-bottom-color: #2a2a2a; }
+
+.cb-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.cb-dot.r { background: #ff5f57; }
+.cb-dot.y { background: #febc2e; }
+.cb-dot.g { background: #28c840; }
+
+.cb-body { max-height: 320px; overflow: auto; }
+.cb-pre {
+  margin: 0;
+  padding: 0.75rem 0;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+.cb-line { display: flex; padding: 0 0.75rem; }
+.cb-line:hover { background: rgba(255, 255, 255, 0.03); }
+
+.cb-ln {
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: right;
+  padding-right: 1rem;
+  color: #5a6273;
+  user-select: none;
+}
+.cb-code { color: #d4d4d4; white-space: pre; }
+.cb-body.wrap .cb-code { white-space: pre-wrap; word-break: break-word; }
+
+/* VS Code (Dark+) token colours */
+.tk-tag { color: #569cd6; }
+.tk-attr { color: #9cdcfe; }
+.tk-string { color: #ce9178; }
+.tk-punct { color: #808080; }
+
 /* ============ Code tabs (docs) ============ */
 .code-tabs { overflow: hidden; }
 .code-tabs-head {

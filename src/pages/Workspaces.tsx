@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import {
-  Title, Text, Group, Button, Card, TextInput, Select, ActionIcon, Badge, Stack,
+  Title, Text, Group, Button, Card, TextInput, ActionIcon, Badge, Stack,
   SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider, Code,
   Box, Collapse,
 } from "@mantine/core";
@@ -11,16 +11,16 @@ import {
 } from "lucide-react";
 import { api } from "../api";
 import { AppShell } from "../components/AppShell";
-import { FrameworkIcon } from "../components/Brand";
+
 import { InstallCheck } from "../components/InstallCheck";
+import { CodeBlock } from "../components/CodeBlock";
 import { RefreshButton } from "../components/Refresh";
 import { useSites, useSiteInstalled } from "../hooks";
-import { trackingSnippet, FRAMEWORKS as FW } from "../utils";
+import { trackingSnippet, trackingSnippetPretty } from "../utils";
+import * as v from "../utils/validate";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
-
-const FRAMEWORKS = [...FW];
 
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
@@ -64,13 +64,7 @@ function SiteRow({
           </ThemeIcon>
 
           <div style={{ minWidth: 0 }}>
-            <Group gap={8} wrap="nowrap">
-              <Text fw={600} size="sm" truncate>{site.name}</Text>
-              <Group gap={5} wrap="nowrap">
-                <FrameworkIcon name={site.framework} />
-                <Text size="xs" c="dimmed" tt="capitalize">{site.framework}</Text>
-              </Group>
-            </Group>
+            <Text fw={600} size="sm" truncate>{site.name}</Text>
 
             <Group gap={8} wrap="nowrap" mt={3}>
               <Text size="xs" c="dimmed" truncate>{site.domain}</Text>
@@ -134,14 +128,17 @@ export default function Workspaces() {
   // workspace create / rename
   const [wsOpen, setWsOpen] = useState(false);
   const [wsName, setWsName] = useState("");
+  const [wsError, setWsError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
 
-  // sites of the active workspace
+  // add-site form
   const [siteOpen, setSiteOpen] = useState(false);
   const [name, setName] = useState("");
-  const [domain, setDomain] = useState("");
-  const [framework, setFramework] = useState("react");
+  const [domainValue, setDomainValue] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [domainError, setDomainError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [created, setCreated] = useState<Site | null>(null);
 
   // `refresh` (from useWorkspace) reloads the workspace list;
@@ -154,16 +151,27 @@ export default function Workspaces() {
     lastUpdated,
   } = useSites(active?._id);
 
+  const validateName = v.all(v.required("Site name"), v.minLength("Site name", 2), v.maxLength("Site name", 60));
+
+  const resetSiteForm = () => {
+    setName(""); setDomainValue("");
+    setNameError(null); setDomainError(null);
+  };
+
   const createWorkspace = async (e: FormEvent) => {
     e.preventDefault();
+    const err = v.all(v.required("Workspace name"), v.maxLength("Workspace name", 60))(wsName);
+    setWsError(err);
+    if (err) return;
+
     try {
-      const ws = await api.post<Workspace>("/api/workspaces", { name: wsName });
-      setWsName(""); setWsOpen(false);
+      const ws = await api.post<Workspace>("/api/workspaces", { name: wsName.trim() });
+      setWsName(""); setWsOpen(false); setWsError(null);
       await refresh();
       setActive(ws._id);
       notify.success(`Workspace "${ws.name}" created and set as active.`);
-    } catch (err) {
-      notify.error(errMessage(err, "Could not create the workspace."));
+    } catch (err2) {
+      notify.error(errMessage(err2, "Could not create the workspace."));
     }
   };
 
@@ -199,14 +207,36 @@ export default function Workspaces() {
   const addSite = async (e: FormEvent) => {
     e.preventDefault();
     if (!active) return;
+
+    const nErr = validateName(name);
+    const dErr = v.domain(domainValue);
+    setNameError(nErr);
+    setDomainError(dErr);
+    if (nErr || dErr) return;
+
+    // Store the bare hostname, whatever the user pasted in.
+    const cleanDomain = v.normalizeDomain(domainValue);
+
+    if (sites.some((s) => s.domain.toLowerCase() === cleanDomain)) {
+      setDomainError("A site with that domain already exists in this workspace");
+      return;
+    }
+
+    setSaving(true);
     try {
-      const site = await api.post<Site>(`/api/workspaces/${active._id}/sites`, { name, domain, framework });
-      setName(""); setDomain(""); setSiteOpen(false);
+      const site = await api.post<Site>(`/api/workspaces/${active._id}/sites`, {
+        name: name.trim(),
+        domain: cleanDomain,
+      });
+      resetSiteForm();
+      setSiteOpen(false);
       setCreated(site);
       loadSites();
       notify.success(`Site "${site.name}" added. Copy the snippet to start tracking.`);
     } catch (err) {
       notify.error(errMessage(err, "Could not add the site."));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -240,24 +270,32 @@ export default function Workspaces() {
           <Title order={1}>Workspaces</Title>
           <Text c="dimmed" size="sm" mt={6}>Manage your workspaces and the sites they track.</Text>
         </div>
-        <Button leftSection={<Plus size={16} />} onClick={() => setWsOpen((v) => !v)}>Create Workspace</Button>
+        <Button leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>Create Workspace</Button>
       </Group>
 
       {/* Create workspace modal */}
-      <Modal opened={wsOpen} onClose={() => setWsOpen(false)} title="Create workspace" centered radius="lg">
-        <form onSubmit={createWorkspace}>
+      <Modal
+        opened={wsOpen}
+        onClose={() => { setWsOpen(false); setWsError(null); }}
+        title="Create workspace"
+        centered
+        radius="lg"
+      >
+        <form onSubmit={createWorkspace} noValidate>
           <Stack gap="md">
             <TextInput
               label="Workspace name"
               placeholder="e.g. Acme Inc"
               description="Groups the sites you want to track together."
               value={wsName}
-              onChange={(e) => setWsName(e.currentTarget.value)}
-              required
+              error={wsError}
+              onChange={(e) => { setWsName(e.currentTarget.value); if (wsError) setWsError(null); }}
+              onBlur={() => setWsError(v.all(v.required("Workspace name"), v.maxLength("Workspace name", 60))(wsName))}
+              withAsterisk
               data-autofocus
             />
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={() => setWsOpen(false)}>Cancel</Button>
+              <Button variant="default" onClick={() => { setWsOpen(false); setWsError(null); }}>Cancel</Button>
               <Button type="submit">Create workspace</Button>
             </Group>
           </Stack>
@@ -265,15 +303,43 @@ export default function Workspaces() {
       </Modal>
 
       {/* Add site modal */}
-      <Modal opened={siteOpen} onClose={() => setSiteOpen(false)} title="Add a site" centered radius="lg">
-        <form onSubmit={addSite}>
+      <Modal
+        opened={siteOpen}
+        onClose={() => { setSiteOpen(false); resetSiteForm(); }}
+        title="Add a site"
+        centered
+        radius="lg"
+      >
+        <form onSubmit={addSite} noValidate>
           <Stack gap="md">
-            <TextInput label="Site name" placeholder="My App" value={name} onChange={(e) => setName(e.currentTarget.value)} required data-autofocus />
-            <TextInput label="Domain" placeholder="app.com" description="The domain where the tracking script will run." value={domain} onChange={(e) => setDomain(e.currentTarget.value)} required />
-            <Select label="Framework" data={FRAMEWORKS} value={framework} onChange={(v) => v && setFramework(v)} comboboxProps={{ withinPortal: true }} />
+            <TextInput
+              label="Site name"
+              placeholder="My App"
+              description="Just a label — only you see it."
+              value={name}
+              error={nameError}
+              onChange={(e) => { setName(e.currentTarget.value); if (nameError) setNameError(null); }}
+              onBlur={() => setNameError(validateName(name))}
+              withAsterisk
+              data-autofocus
+            />
+            <TextInput
+              label="Domain"
+              placeholder="app.com"
+              description="The domain the tracking script runs on. Paste a full URL and we'll clean it up."
+              value={domainValue}
+              error={domainError}
+              onChange={(e) => { setDomainValue(e.currentTarget.value); if (domainError) setDomainError(null); }}
+              onBlur={() => {
+                const clean = v.normalizeDomain(domainValue);
+                if (clean !== domainValue) setDomainValue(clean);
+                setDomainError(v.domain(clean));
+              }}
+              withAsterisk
+            />
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={() => setSiteOpen(false)}>Cancel</Button>
-              <Button type="submit">Add site</Button>
+              <Button variant="default" onClick={() => { setSiteOpen(false); resetSiteForm(); }}>Cancel</Button>
+              <Button type="submit" loading={saving}>Add site</Button>
             </Group>
           </Stack>
         </form>
@@ -295,9 +361,11 @@ export default function Workspaces() {
               <b>{created.domain}</b>. Traffic starts appearing in Analytics within seconds.
             </Text>
 
-            <Card withBorder radius="md" padding="sm" bg="var(--surface-2)">
-              <Code block style={{ background: "transparent" }}>{snippet(created.siteId)}</Code>
-            </Card>
+            <CodeBlock
+              code={trackingSnippetPretty(created.siteId)}
+              filename="index.html"
+              language="html"
+            />
 
             <Group gap="xs">
               <Text size="xs" c="dimmed">Site ID:</Text>

@@ -8,6 +8,7 @@ import {
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
 import { notify, errMessage } from "../notify";
+import * as v from "../utils/validate";
 
 export default function Login() {
   const { login } = useAuth();
@@ -17,11 +18,22 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const [emailErr, setEmailErr] = useState<string | null>(null);
+  const [pwErr, setPwErr] = useState<string | null>(null);
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+
+    const em = v.email(email);
+    // On login we only require a password to be present — length rules are the
+    // signup form's job, and rejecting an old short password would be wrong.
+    const pw = password ? null : "Password is required";
+    setEmailErr(em); setPwErr(pw);
+    if (em || pw) return;
+
     setBusy(true); setError(null);
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       notify.success("Welcome back!", "Logged in");
       nav("/app");
     } catch (err) {
@@ -38,6 +50,7 @@ export default function Login() {
         <motion.form
           className="auth-form"
           onSubmit={submit}
+          noValidate
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -48,8 +61,17 @@ export default function Login() {
               <Text c="dimmed" size="sm" mt={4}>Log in to your Vantage dashboard.</Text>
             </div>
             {error && <Alert color="red" variant="light">{error}</Alert>}
-            <TextInput label="Email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required size="md" />
-            <PasswordInput label="Password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required size="md" />
+            <TextInput
+              label="Email" type="email" placeholder="you@company.com" size="md" withAsterisk
+              value={email} error={emailErr}
+              onChange={(e) => { setEmail(e.currentTarget.value); if (emailErr) setEmailErr(null); }}
+              onBlur={() => setEmailErr(v.email(email))}
+            />
+            <PasswordInput
+              label="Password" placeholder="••••••••" size="md" withAsterisk
+              value={password} error={pwErr}
+              onChange={(e) => { setPassword(e.currentTarget.value); if (pwErr) setPwErr(null); }}
+            />
             <Button type="submit" loading={busy} fullWidth size="md">Log in</Button>
             <Text c="dimmed" size="sm" ta="center">
               No account? <Anchor component={Link} to="/signup" fw={600}>Sign up free</Anchor>

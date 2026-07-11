@@ -8,6 +8,7 @@ import {
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
 import { notify, errMessage } from "../notify";
+import * as v from "../utils/validate";
 
 export default function Signup() {
   const { signup } = useAuth();
@@ -18,11 +19,25 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // per-field errors, shown under the input
+  const [nameErr, setNameErr] = useState<string | null>(null);
+  const [emailErr, setEmailErr] = useState<string | null>(null);
+  const [pwErr, setPwErr] = useState<string | null>(null);
+
+  const checkName = v.all(v.required("Name"), v.minLength("Name", 2), v.maxLength("Name", 60));
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+
+    const n = checkName(name);
+    const em = v.email(email);
+    const pw = v.password(password);
+    setNameErr(n); setEmailErr(em); setPwErr(pw);
+    if (n || em || pw) return;
+
     setBusy(true); setError(null);
     try {
-      await signup(email, password, name);
+      await signup(email.trim(), password, name.trim());
       notify.success("Account created. Let's get you tracking.", "Welcome to Vantage");
       nav("/app");
     } catch (err) {
@@ -39,6 +54,7 @@ export default function Signup() {
         <motion.form
           className="auth-form"
           onSubmit={submit}
+          noValidate
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -49,9 +65,24 @@ export default function Signup() {
               <Text c="dimmed" size="sm" mt={4}>Start tracking in under two minutes.</Text>
             </div>
             {error && <Alert color="red" variant="light">{error}</Alert>}
-            <TextInput label="Name" placeholder="Jane Doe" value={name} onChange={(e) => setName(e.currentTarget.value)} required size="md" />
-            <TextInput label="Email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required size="md" />
-            <PasswordInput label="Password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required minLength={6} size="md" />
+            <TextInput
+              label="Name" placeholder="Jane Doe" size="md" withAsterisk
+              value={name} error={nameErr}
+              onChange={(e) => { setName(e.currentTarget.value); if (nameErr) setNameErr(null); }}
+              onBlur={() => setNameErr(checkName(name))}
+            />
+            <TextInput
+              label="Email" type="email" placeholder="you@company.com" size="md" withAsterisk
+              value={email} error={emailErr}
+              onChange={(e) => { setEmail(e.currentTarget.value); if (emailErr) setEmailErr(null); }}
+              onBlur={() => setEmailErr(v.email(email))}
+            />
+            <PasswordInput
+              label="Password" placeholder="At least 6 characters" size="md" withAsterisk
+              value={password} error={pwErr}
+              onChange={(e) => { setPassword(e.currentTarget.value); if (pwErr) setPwErr(null); }}
+              onBlur={() => setPwErr(v.password(password))}
+            />
             <Button type="submit" loading={busy} fullWidth size="md">Create account</Button>
             <Text c="dimmed" size="sm" ta="center">
               Have an account? <Anchor component={Link} to="/login" fw={600}>Log in</Anchor>
