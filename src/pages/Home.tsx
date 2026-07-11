@@ -1,26 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Title, Text, Group, Button, SimpleGrid, Card, ThemeIcon, Stack, Badge, Center,
+  Title, Text, Group, Button, SimpleGrid, Card, ThemeIcon, Stack, Center,
 } from "@mantine/core";
 import { Users, Eye, Radio, Globe, BarChart3, FolderKanban } from "lucide-react";
 import { api } from "../api";
 import { AppShell } from "../components/AppShell";
+import { StatCard } from "../components/StatCard";
 import { useWorkspace } from "../workspace";
 import type { Stats, Site } from "../types";
-
-function KpiCard({ icon: Icon, label, value, live }: { icon: any; label: string; value: number; live?: boolean }) {
-  return (
-    <Card withBorder radius="md" padding="lg">
-      <Group justify="space-between">
-        <ThemeIcon variant="light" color={live ? "green" : "indigo"} size="lg" radius="md"><Icon size={18} /></ThemeIcon>
-        {live && <Badge color="green" variant="dot">live</Badge>}
-      </Group>
-      <Text fw={750} fz={30} mt="sm" lh={1} c={live ? "green" : undefined}>{value.toLocaleString()}</Text>
-      <Text c="dimmed" size="sm" mt={4}>{label}</Text>
-    </Card>
-  );
-}
 
 export default function Home() {
   const { active, loading } = useWorkspace();
@@ -50,24 +38,24 @@ export default function Home() {
   }
 
   const kpis = [
-    { icon: Users, label: "Visitors (24h)", value: stats?.visitors ?? 0 },
-    { icon: Eye, label: "Pageviews (24h)", value: stats?.pageviews ?? 0 },
-    { icon: Radio, label: "Live now", value: stats?.live ?? 0, live: true },
-    { icon: Globe, label: "Sites", value: sites.length },
+    { icon: Users, label: "Visitors (24h)", value: stats?.visitors ?? 0, color: "violet" },
+    { icon: Eye, label: "Pageviews (24h)", value: stats?.pageviews ?? 0, color: "cyan" },
+    { icon: Radio, label: "Live now", value: stats?.live ?? 0, color: "green", live: true },
+    { icon: Globe, label: "Sites", value: sites.length, color: "amber" },
   ];
 
   return (
     <AppShell>
       <Group justify="space-between" align="flex-start" mb="lg">
         <div>
-          <Title order={2}>Welcome back 👋</Title>
-          <Text c="dimmed" size="sm" mt={4}>Overview for <b>{active.name}</b> — last 24 hours.</Text>
+          <Title order={1}>Welcome back 👋</Title>
+          <Text c="dimmed" size="sm" mt={6}>Overview for <b>{active.name}</b> — last 24 hours.</Text>
         </div>
         <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>Full analytics</Button>
       </Group>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
-        {kpis.map((k) => <KpiCard key={k.label} {...k} />)}
+        {kpis.map((k) => <StatCard key={k.label} {...k} />)}
       </SimpleGrid>
 
       <Card withBorder radius="md" padding="lg">
