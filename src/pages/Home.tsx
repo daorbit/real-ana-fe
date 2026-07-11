@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, ThemeIcon, Stack, Center,
@@ -14,6 +14,7 @@ import { api } from "../api";
 import { AppShell } from "../components/AppShell";
 import { StatCard } from "../components/StatCard";
 import { AnalyticsArt } from "../components/Brand";
+import { RefreshButton, usePolling } from "../components/Refresh";
 import { useWorkspace } from "../workspace";
 import type { Stats, Site } from "../types";
 
@@ -22,16 +23,15 @@ export default function Home() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [sites, setSites] = useState<Site[]>([]);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!active) { setStats(null); setSites([]); return; }
-    const load = () => {
-      api.get<Stats>(`/api/workspaces/${active._id}/stats?range=24h`).then(setStats).catch(() => setStats(null));
-      api.get<Site[]>(`/api/workspaces/${active._id}/sites`).then(setSites).catch(() => setSites([]));
-    };
-    load();
-    const id = setInterval(load, 4000);
-    return () => clearInterval(id);
+    await Promise.all([
+      api.get<Stats>(`/api/workspaces/${active._id}/stats?range=24h`).then(setStats).catch(() => setStats(null)),
+      api.get<Site[]>(`/api/workspaces/${active._id}/sites`).then(setSites).catch(() => setSites([])),
+    ]);
   }, [active]);
+
+  const { refresh, refreshing, lastUpdated } = usePolling(load, [active?._id]);
 
   if (loading) return <AppShell><Text c="dimmed">Loading…</Text></AppShell>;
 
@@ -66,7 +66,10 @@ export default function Home() {
           <Title order={1}>Welcome back 👋</Title>
           <Text c="dimmed" size="sm" mt={6}>Overview for <b>{active.name}</b> — last 24 hours.</Text>
         </div>
-        <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>Full analytics</Button>
+        <Group gap="sm">
+          <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+          <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>Full analytics</Button>
+        </Group>
       </Group>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">

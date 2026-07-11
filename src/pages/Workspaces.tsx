@@ -13,6 +13,7 @@ import { api, API_ORIGIN } from "../api";
 import { AppShell } from "../components/AppShell";
 import { FrameworkIcon } from "../components/Brand";
 import { InstallCheck } from "../components/InstallCheck";
+import { RefreshButton, usePolling } from "../components/Refresh";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
@@ -151,12 +152,18 @@ export default function Workspaces() {
   const [framework, setFramework] = useState("react");
   const [created, setCreated] = useState<Site | null>(null);
 
-  const loadSites = useCallback(() => {
+  const loadSites = useCallback(async () => {
     if (!active) { setSites([]); return; }
-    api.get<Site[]>(`/api/workspaces/${active._id}/sites`).then(setSites).catch(() => setSites([]));
+    try {
+      setSites(await api.get<Site[]>(`/api/workspaces/${active._id}/sites`));
+    } catch {
+      setSites([]);
+    }
   }, [active]);
 
-  useEffect(loadSites, [loadSites]);
+  // `refresh` (from useWorkspace) reloads the workspace list;
+  // `refreshSites` reloads the sites of the active workspace.
+  const { refresh: refreshSites, refreshing, lastUpdated } = usePolling(loadSites, [active?._id]);
 
   const createWorkspace = async (e: FormEvent) => {
     e.preventDefault();
@@ -375,10 +382,13 @@ export default function Workspaces() {
               <Divider my="lg" />
 
               {/* ---------- Domains & Sites ---------- */}
-              <Group gap={8} mb="md">
-                <Globe size={16} className="sect-ic" />
-                <Text fw={650} size="sm">Domains &amp; Sites</Text>
-                <Badge variant="light" color="gray" size="sm">{sites.length}</Badge>
+              <Group justify="space-between" mb="md">
+                <Group gap={8}>
+                  <Globe size={16} className="sect-ic" />
+                  <Text fw={650} size="sm">Domains &amp; Sites</Text>
+                  <Badge variant="light" color="gray" size="sm">{sites.length}</Badge>
+                </Group>
+                <RefreshButton onRefresh={refreshSites} refreshing={refreshing} lastUpdated={lastUpdated} />
               </Group>
 
               <Stack gap="sm">

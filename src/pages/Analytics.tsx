@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -13,6 +13,7 @@ import { api } from "../api";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
+import { RefreshButton, usePolling } from "../components/Refresh";
 import { notify, errMessage } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Stats, Bucket } from "../types";
@@ -66,24 +67,22 @@ export default function Analytics() {
   const [stats, setStats] = useState<Stats | null>(null);
   const failedRef = useRef(false);
 
-  const loadStats = useCallback(() => {
+  const loadStats = useCallback(async () => {
     if (!active) return;
-    api.get<Stats>(`/api/workspaces/${active._id}/stats?range=${range}`)
-      .then((s) => { setStats(s); failedRef.current = false; })
-      .catch((e) => {
-        // Polls every 3s — only surface the first failure, not one toast per tick.
-        if (!failedRef.current) {
-          failedRef.current = true;
-          notify.error(errMessage(e, "Could not load analytics."));
-        }
-      });
+    try {
+      const s = await api.get<Stats>(`/api/workspaces/${active._id}/stats?range=${range}`);
+      setStats(s);
+      failedRef.current = false;
+    } catch (e) {
+      // Only surface the first failure, not one toast per poll.
+      if (!failedRef.current) {
+        failedRef.current = true;
+        notify.error(errMessage(e, "Could not load analytics."));
+      }
+    }
   }, [active, range]);
 
-  useEffect(() => {
-    loadStats();
-    const id = setInterval(loadStats, 3000);
-    return () => clearInterval(id);
-  }, [loadStats]);
+  const { refresh, refreshing, lastUpdated } = usePolling(loadStats, [active?._id, range]);
 
   if (loading) return <AppShell><Text c="dimmed">Loading…</Text></AppShell>;
 
@@ -117,7 +116,10 @@ export default function Analytics() {
             Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
           </Text>
         </div>
-        <SegmentedControl value={range} onChange={setRange} data={RANGES} size="sm" />
+        <Group gap="sm">
+          <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+          <SegmentedControl value={range} onChange={setRange} data={RANGES} size="sm" />
+        </Group>
       </Group>
 
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="lg">
