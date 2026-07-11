@@ -13,12 +13,14 @@ import { api, API_ORIGIN } from "../api";
 import { AppShell } from "../components/AppShell";
 import { FrameworkIcon } from "../components/Brand";
 import { InstallCheck } from "../components/InstallCheck";
-import { RefreshButton, usePolling } from "../components/Refresh";
+import { RefreshButton } from "../components/Refresh";
+import { useSites, useSiteInstalled } from "../hooks";
+import { trackingSnippet, FRAMEWORKS as FW } from "../utils";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
 
-const FRAMEWORKS = ["react", "vue", "angular", "svelte", "other"];
+const FRAMEWORKS = [...FW];
 
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
@@ -43,16 +45,7 @@ function SiteRow({
   site, workspaceId, snippet, onDelete,
 }: { site: Site; workspaceId: string; snippet: string; onDelete: () => void }) {
   const [open, setOpen] = useState(false);
-  const [installed, setInstalled] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    api
-      .get<{ installed: boolean }>(`/api/workspaces/${workspaceId}/sites/${site.siteId}/status`)
-      .then((s) => alive && setInstalled(s.installed))
-      .catch(() => alive && setInstalled(null));
-    return () => { alive = false; };
-  }, [workspaceId, site.siteId]);
+  const installed = useSiteInstalled(workspaceId, site.siteId);
 
   const status =
     installed === true
@@ -145,25 +138,21 @@ export default function Workspaces() {
   const [editName, setEditName] = useState("");
 
   // sites of the active workspace
-  const [sites, setSites] = useState<Site[]>([]);
   const [siteOpen, setSiteOpen] = useState(false);
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
   const [framework, setFramework] = useState("react");
   const [created, setCreated] = useState<Site | null>(null);
 
-  const loadSites = useCallback(async () => {
-    if (!active) { setSites([]); return; }
-    try {
-      setSites(await api.get<Site[]>(`/api/workspaces/${active._id}/sites`));
-    } catch {
-      setSites([]);
-    }
-  }, [active]);
-
   // `refresh` (from useWorkspace) reloads the workspace list;
   // `refreshSites` reloads the sites of the active workspace.
-  const { refresh: refreshSites, refreshing, lastUpdated } = usePolling(loadSites, [active?._id]);
+  const {
+    sites,
+    reload: loadSites,
+    refresh: refreshSites,
+    refreshing,
+    lastUpdated,
+  } = useSites(active?._id);
 
   const createWorkspace = async (e: FormEvent) => {
     e.preventDefault();
@@ -240,8 +229,7 @@ export default function Workspaces() {
     });
   };
 
-  const snippet = (siteId: string) =>
-    `<script async src="${API_ORIGIN}/tracker.js" data-site="${siteId}"></script>`;
+  const snippet = trackingSnippet;
 
   const others = workspaces.filter((w) => w._id !== active?._id);
 

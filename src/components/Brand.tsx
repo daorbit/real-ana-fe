@@ -1,4 +1,5 @@
 // Inline SVG brand assets — self-contained, no external images (survive strict CSP).
+import { FRAMEWORK_COLORS } from "../utils";
 
 export function Logo({ size = 30 }: { size?: number }) {
   return (
@@ -132,8 +133,10 @@ export function AnalyticsArt() {
 }
 
 export function FrameworkIcon({ name }: { name: string }) {
-  const map: Record<string, string> = {
-    react: "#61dafb", vue: "#42b883", angular: "#dd0031", svelte: "#ff3e00", other: "#98a2b3",
-  };
-  return <span className="fw-dot" style={{ background: map[name] ?? map.other }} />;
+  return (
+    <span
+      className="fw-dot"
+      style={{ background: FRAMEWORK_COLORS[name] ?? FRAMEWORK_COLORS.other }}
+    />
+  );
 }

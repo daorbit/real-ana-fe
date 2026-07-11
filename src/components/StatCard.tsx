@@ -1,4 +1,6 @@
 import { Card, Group, Text, ThemeIcon, Badge } from "@mantine/core";
+import { AreaChart, Area, ResponsiveContainer } from "recharts";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const TINT: Record<string, { from: string; to: string; icon: string; ring: string }> = {
@@ -10,10 +12,55 @@ const TINT: Record<string, { from: string; to: string; icon: string; ring: strin
   pink:    { from: "rgba(244,114,182,0.16)", to: "rgba(244,114,182,0.02)", icon: "#f472b6", ring: "rgba(244,114,182,0.32)" },
 };
 
+/** A rising bounce rate is bad, so some metrics invert the good/bad colouring. */
+function DeltaBadge({ delta, inverse }: { delta: number | null; inverse?: boolean }) {
+  if (delta === null) {
+    return (
+      <Badge size="sm" variant="light" color="gray" leftSection={<Minus size={10} />}>
+        —
+      </Badge>
+    );
+  }
+  const up = delta > 0;
+  const flat = delta === 0;
+  const good = inverse ? !up : up;
+  const color = flat ? "gray" : good ? "teal" : "red";
+  const Icon = flat ? Minus : up ? TrendingUp : TrendingDown;
+
+  return (
+    <Badge size="sm" variant="light" color={color} leftSection={<Icon size={10} />}>
+      {up ? "+" : ""}{delta}%
+    </Badge>
+  );
+}
+
 export function StatCard({
-  icon: Icon, label, value, color = "emerald", live,
-}: { icon: LucideIcon; label: string; value: number; color?: keyof typeof TINT | string; live?: boolean }) {
+  icon: Icon,
+  label,
+  value,
+  color = "emerald",
+  live,
+  delta,
+  inverseDelta,
+  spark,
+  sparkKey = "views",
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number | string;
+  color?: keyof typeof TINT | string;
+  live?: boolean;
+  /** % change vs. the previous equal-length period */
+  delta?: number | null;
+  /** true when a rising value is bad (e.g. bounce rate) */
+  inverseDelta?: boolean;
+  /** tiny trend line rendered at the bottom of the card */
+  spark?: Record<string, number | string>[];
+  sparkKey?: string;
+}) {
   const t = TINT[color] ?? TINT.emerald;
+  const sparkId = `spark-${String(label).replace(/\W/g, "")}`;
+
   return (
     <Card
       radius="lg"
@@ -27,17 +74,54 @@ export function StatCard({
     >
       <Group justify="space-between" align="flex-start">
         <ThemeIcon
-          size={40} radius="md" variant="filled"
+          size={40}
+          radius="md"
+          variant="filled"
           style={{ background: "rgba(255,255,255,0.06)", color: t.icon, border: `1px solid ${t.ring}` }}
         >
           <Icon size={19} />
         </ThemeIcon>
-        {live && <Badge color="green" variant="dot" size="sm">live</Badge>}
+        {live ? (
+          <Badge color="green" variant="dot" size="sm">live</Badge>
+        ) : delta !== undefined ? (
+          <DeltaBadge delta={delta} inverse={inverseDelta} />
+        ) : null}
       </Group>
-      <Text fw={800} fz={32} mt="md" lh={1} style={{ letterSpacing: "-0.03em", color: live ? t.icon : "var(--mantine-color-text)" }}>
-        {value.toLocaleString()}
+
+      <Text
+        fw={800}
+        fz={32}
+        mt="md"
+        lh={1}
+        style={{ letterSpacing: "-0.03em", color: live ? t.icon : "var(--mantine-color-text)" }}
+      >
+        {typeof value === "number" ? value.toLocaleString() : value}
       </Text>
       <Text c="dimmed" size="sm" mt={6}>{label}</Text>
+
+      {spark && spark.length > 1 && (
+        <div style={{ marginTop: 12, marginLeft: -20, marginRight: -20, marginBottom: -20, height: 44 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={spark} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id={sparkId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={t.icon} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={t.icon} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey={sparkKey}
+                stroke={t.icon}
+                strokeWidth={2}
+                fill={`url(#${sparkId})`}
+                dot={false}
+                isAnimationActive={false}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </Card>
   );
 }

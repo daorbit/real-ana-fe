@@ -119,6 +119,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .site-row { background: var(--surface-2) !important; }
 .sect-ic { color: var(--violet-2); }
 
+/* ============ World map ============ */
+.world-map { width: 100%; }
+.world-map svg { display: block; width: 100%; height: auto; }
+.legend-swatch {
+  width: 16px; height: 8px; border-radius: 2px; display: inline-block;
+}
+
 /* Spinner for the refresh button */
 .spin { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }

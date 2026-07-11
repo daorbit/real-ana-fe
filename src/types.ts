@@ -28,16 +28,52 @@ export type ApiKey = {
 
 export type Bucket = { key: string; count: number };
 
+export type Point = { bucket: string; views: number; visitors: number };
+
+export type Deltas = {
+  pageviews: number | null;
+  visitors: number | null;
+  sessions: number | null;
+  bounceRate: number | null;
+  avgSessionMs: number | null;
+  pagesPerSession: number | null;
+};
+
 export type Stats = {
   range: string;
+
+  // headline
   pageviews: number;
   visitors: number;
+  sessions: number;
   live: number;
+
+  // engagement
+  bounceRate: number;
+  avgSessionMs: number;
+  avgTimeOnPageMs: number;
+  pagesPerSession: number;
+
+  deltas: Deltas;
+
+  // breakdowns
   topPages: Bucket[];
+  entryPages: Bucket[];
+  exitPages: Bucket[];
   topReferrers: Bucket[];
   devices: Bucket[];
+  browsers: Bucket[];
+  operatingSystems: Bucket[];
   countries: Bucket[];
+  languages: Bucket[];
+  screenSizes: Bucket[];
   utmSources: Bucket[];
-  timeseries: { bucket: string; views: number }[];
+  utmCampaigns: Bucket[];
+
+  // real-time
+  livePages: Bucket[];
+
+  timeseries: Point[];
+
   siteCount?: number;
 };

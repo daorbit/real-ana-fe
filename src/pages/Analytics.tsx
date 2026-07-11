@@ -1,37 +1,60 @@
-import { useState, useCallback, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Progress,
-  SegmentedControl, Stack, Center, ThemeIcon,
+  SegmentedControl, Stack, Center, ThemeIcon, Badge, Tabs,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import { Users, Eye, Radio, FolderKanban, Inbox } from "lucide-react";
-import { api } from "../api";
+import {
+  Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
+  Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
+} from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
-import { RefreshButton, usePolling } from "../components/Refresh";
-import { notify, errMessage } from "../notify";
+import { WorldMap } from "../components/WorldMap";
+import { RefreshButton } from "../components/Refresh";
+import { useStats } from "../hooks";
+import { countryFlag, countryLabel, duration, share, num } from "../utils";
 import { useWorkspace } from "../workspace";
 import type { Stats, Bucket } from "../types";
 
 const RANGES = ["1h", "24h", "7d", "30d"];
 const CHART = "#10b981";
-const BAR_COLORS = ["indigo", "teal", "cyan", "grape", "yellow"];
 
-function BarList({ title, items, color = "indigo" }: { title: string; items: Bucket[]; color?: string }) {
+function BarList({
+  title,
+  items,
+  color = "teal",
+  icon: Icon,
+  format,
+  empty = "Waiting for data…",
+}: {
+  title: string;
+  items: Bucket[];
+  color?: string;
+  icon?: any;
+  format?: (key: string) => React.ReactNode;
+  empty?: string;
+}) {
+  const total = items.reduce((sum, i) => sum + i.count, 0);
   const max = Math.max(1, ...items.map((i) => i.count));
+
   return (
     <Card withBorder radius="lg" padding="lg">
-      <Text fw={600} c="dimmed" size="sm" mb="md">{title}</Text>
+      <Group gap={8} mb="md">
+        {Icon && <Icon size={15} className="sect-ic" />}
+        <Text fw={600} c="dimmed" size="sm">{title}</Text>
+      </Group>
+
       {items.length === 0 ? (
         <Center py="lg">
           <Stack align="center" gap={4}>
             <ThemeIcon variant="light" color="gray" size="md" radius="md"><Inbox size={16} /></ThemeIcon>
-            <Text c="dimmed" size="xs">Waiting for data…</Text>
+            <Text c="dimmed" size="xs">{empty}</Text>
           </Stack>
         </Center>
       ) : (
@@ -39,8 +62,13 @@ function BarList({ title, items, color = "indigo" }: { title: string; items: Buc
           {items.map((i) => (
             <div key={i.key}>
               <Group justify="space-between" gap="xs" mb={4} wrap="nowrap">
-                <Text size="sm" truncate style={{ flex: 1 }}>{i.key}</Text>
-                <Text size="sm" fw={700}>{i.count}</Text>
+                <Text size="sm" truncate style={{ flex: 1 }}>
+                  {format ? format(i.key) : i.key}
+                </Text>
+                <Group gap={6} wrap="nowrap">
+                  <Text size="xs" c="dimmed">{share(i.count, total)}</Text>
+                  <Text size="sm" fw={700}>{num(i.count)}</Text>
+                </Group>
               </Group>
               <Progress value={(i.count / max) * 100} size="sm" radius="xl" color={color} />
             </div>
@@ -55,8 +83,50 @@ function ChartTip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <Card withBorder shadow="md" padding="xs" radius="md">
-      <Text size="xs" c="dimmed">{label}</Text>
-      <Text size="sm" fw={700}>{payload[0].value} views</Text>
+      <Text size="xs" c="dimmed" mb={2}>{label}</Text>
+      {payload.map((p: any) => (
+        <Text key={p.dataKey} size="sm" fw={700}>
+          {p.value.toLocaleString()} {p.dataKey === "views" ? "views" : "visitors"}
+        </Text>
+      ))}
+    </Card>
+  );
+}
+
+/** Who is on the site right now. */
+function LiveNow({ stats }: { stats: Stats | null }) {
+  const pages = stats?.livePages ?? [];
+  const live = stats?.live ?? 0;
+
+  return (
+    <Card withBorder radius="lg" padding="lg">
+      <Group justify="space-between" mb="md">
+        <Group gap={8}>
+          <span className="status-dot live" style={{ background: "var(--mantine-color-teal-6)" }} />
+          <Text fw={600} c="dimmed" size="sm">Right now</Text>
+        </Group>
+        <Badge variant="light" color="teal" size="sm">
+          {live} visitor{live === 1 ? "" : "s"}
+        </Badge>
+      </Group>
+
+      {pages.length === 0 ? (
+        <Center py="lg">
+          <Text c="dimmed" size="xs">Nobody on the site in the last 5 minutes</Text>
+        </Center>
+      ) : (
+        <Stack gap="xs">
+          <Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.04em" }}>
+            Active pages
+          </Text>
+          {pages.map((p) => (
+            <Group key={p.key} justify="space-between" gap="xs" wrap="nowrap">
+              <Text size="sm" truncate style={{ flex: 1 }}>{p.key}</Text>
+              <Badge variant="light" color="gray" size="sm">{p.count}</Badge>
+            </Group>
+          ))}
+        </Stack>
+      )}
     </Card>
   );
 }
@@ -64,25 +134,7 @@ function ChartTip({ active, payload, label }: any) {
 export default function Analytics() {
   const { active, loading } = useWorkspace();
   const [range, setRange] = useState("24h");
-  const [stats, setStats] = useState<Stats | null>(null);
-  const failedRef = useRef(false);
-
-  const loadStats = useCallback(async () => {
-    if (!active) return;
-    try {
-      const s = await api.get<Stats>(`/api/workspaces/${active._id}/stats?range=${range}`);
-      setStats(s);
-      failedRef.current = false;
-    } catch (e) {
-      // Only surface the first failure, not one toast per poll.
-      if (!failedRef.current) {
-        failedRef.current = true;
-        notify.error(errMessage(e, "Could not load analytics."));
-      }
-    }
-  }, [active, range]);
-
-  const { refresh, refreshing, lastUpdated } = usePolling(loadStats, [active?._id, range]);
+  const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, range);
 
   if (loading) return <AppShell><Text c="dimmed">Loading…</Text></AppShell>;
 
@@ -101,10 +153,22 @@ export default function Analytics() {
   }
 
   const siteCount = stats?.siteCount ?? 0;
-  const kpis = [
-    { icon: Users, label: "Visitors", value: stats?.visitors ?? 0, color: "emerald" },
-    { icon: Eye, label: "Pageviews", value: stats?.pageviews ?? 0, color: "cyan" },
+  const d = stats?.deltas;
+  const series = stats?.timeseries ?? [];
+  const hasData = (stats?.pageviews ?? 0) > 0;
+
+  const audience = [
+    { icon: Users, label: "Visitors", value: stats?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors" },
+    { icon: Eye, label: "Pageviews", value: stats?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views" },
+    { icon: Layers, label: "Sessions", value: stats?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null },
     { icon: Radio, label: "Live now", value: stats?.live ?? 0, color: "green", live: true },
+  ];
+
+  const engagement = [
+    { icon: MousePointerClick, label: "Bounce rate", value: `${stats?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true },
+    { icon: Timer, label: "Avg. session", value: duration(stats?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null },
+    { icon: Timer, label: "Avg. time on page", value: duration(stats?.avgTimeOnPageMs ?? 0), color: "cyan" },
+    { icon: Layers, label: "Pages / session", value: stats?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null },
   ];
 
   return (
@@ -114,6 +178,7 @@ export default function Analytics() {
           <Title order={1}>Analytics</Title>
           <Text c="dimmed" size="sm" mt={6}>
             Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
+            Changes compare to the previous {range}.
           </Text>
         </div>
         <Group gap="sm">
@@ -122,57 +187,126 @@ export default function Analytics() {
         </Group>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 3 }} mb="lg">
-        {kpis.map((k, i) => (
-          <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07, duration: 0.4 }}>
+      {/* audience */}
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="md">
+        {audience.map((k, i) => (
+          <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
             <StatCard {...k} />
           </motion.div>
         ))}
       </SimpleGrid>
 
-      <Card withBorder radius="lg" padding="lg" mb="lg">
-        <Text fw={600} c="dimmed" size="sm" mb="md">Pageviews over time</Text>
-        {(stats?.pageviews ?? 0) > 0 ? (
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={stats?.timeseries ?? []} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-              <defs>
-                <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#059669" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#34d399" />
-                  <stop offset="100%" stopColor="#059669" />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} allowDecimals={false} tickLine={false} axisLine={false} />
-              <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
-              <Area type="monotone" dataKey="views" stroke="url(#stroke)" strokeWidth={3} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#34d399" }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        ) : (
-          <Center h={250}>
-            <Stack align="center" gap={6}>
-              <AnalyticsArt />
-              <Text fw={600} size="sm" mt="xs">No pageviews yet</Text>
-              <Text c="dimmed" size="xs" ta="center" maw={320}>
-                Add a site in Workspaces and paste its snippet into your app. Live traffic streams in here automatically.
-              </Text>
-              <Button component={Link} to="/app/workspaces" size="xs" variant="light" mt={6}>Manage sites</Button>
-            </Stack>
-          </Center>
-        )}
-      </Card>
-
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-        <BarList title="Top Pages" items={stats?.topPages ?? []} color={BAR_COLORS[0]} />
-        <BarList title="Top Referrers" items={stats?.topReferrers ?? []} color={BAR_COLORS[1]} />
-        <BarList title="Devices" items={stats?.devices ?? []} color={BAR_COLORS[2]} />
-        <BarList title="Countries" items={stats?.countries ?? []} color={BAR_COLORS[3]} />
-        <BarList title="UTM Sources" items={stats?.utmSources ?? []} color={BAR_COLORS[4]} />
+      {/* engagement */}
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
+        {engagement.map((k, i) => (
+          <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05, duration: 0.35 }}>
+            <StatCard {...k} />
+          </motion.div>
+        ))}
       </SimpleGrid>
+
+      {/* traffic chart + live */}
+      <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="lg">
+        <div style={{ gridColumn: "span 2" }}>
+          <Card withBorder radius="lg" padding="lg" h="100%">
+            <Text fw={600} c="dimmed" size="sm" mb="md">Traffic over time</Text>
+            {hasData ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={series} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="#059669" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} allowDecimals={false} tickLine={false} axisLine={false} />
+                  <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
+                  <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2.5} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#34d399" }} />
+                  <Area type="monotone" dataKey="visitors" stroke="#22d3ee" strokeWidth={2} fill="url(#g2)" dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <Center h={260}>
+                <Stack align="center" gap={6}>
+                  <AnalyticsArt />
+                  <Text fw={600} size="sm" mt="xs">No pageviews yet</Text>
+                  <Text c="dimmed" size="xs" ta="center" maw={320}>
+                    Add a site in Workspaces and paste its snippet into your app.
+                  </Text>
+                  <Button component={Link} to="/app/workspaces" size="xs" variant="light" mt={6}>Manage sites</Button>
+                </Stack>
+              </Center>
+            )}
+          </Card>
+        </div>
+        <LiveNow stats={stats} />
+      </SimpleGrid>
+
+      {/* breakdowns */}
+      <Tabs defaultValue="pages" variant="pills" color="emerald">
+        <Tabs.List mb="lg">
+          <Tabs.Tab value="pages" leftSection={<Eye size={14} />}>Pages</Tabs.Tab>
+          <Tabs.Tab value="sources" leftSection={<Tag size={14} />}>Sources</Tabs.Tab>
+          <Tabs.Tab value="tech" leftSection={<AppWindow size={14} />}>Technology</Tabs.Tab>
+          <Tabs.Tab value="geo" leftSection={<Globe2 size={14} />}>Geography</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="pages">
+          <SimpleGrid cols={{ base: 1, lg: 3 }}>
+            <BarList title="Top pages" icon={Eye} items={stats?.topPages ?? []} color="teal" />
+            <BarList title="Entry pages" icon={LogIn} items={stats?.entryPages ?? []} color="emerald"
+                     empty="No sessions recorded yet" />
+            <BarList title="Exit pages" icon={LogOut} items={stats?.exitPages ?? []} color="pink"
+                     empty="No completed sessions yet" />
+          </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="sources">
+          <SimpleGrid cols={{ base: 1, lg: 3 }}>
+            <BarList title="Referrers" icon={Tag} items={stats?.topReferrers ?? []} color="cyan" />
+            <BarList title="UTM sources" icon={Tag} items={stats?.utmSources ?? []} color="teal" />
+            <BarList title="UTM campaigns" icon={Tag} items={stats?.utmCampaigns ?? []} color="grape" />
+          </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="tech">
+          <SimpleGrid cols={{ base: 1, lg: 2 }}>
+            <BarList title="Browsers" icon={AppWindow} items={stats?.browsers ?? []} color="cyan" />
+            <BarList title="Operating systems" icon={MonitorSmartphone} items={stats?.operatingSystems ?? []} color="teal" />
+            <BarList title="Devices" icon={MonitorSmartphone} items={stats?.devices ?? []} color="emerald" />
+            <BarList title="Screen sizes" icon={MonitorSmartphone} items={stats?.screenSizes ?? []} color="grape" />
+          </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="geo">
+          <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
+            <div style={{ gridColumn: "span 2" }}>
+              <WorldMap countries={stats?.countries ?? []} />
+            </div>
+            <Stack gap="lg">
+              <BarList
+                title="Countries"
+                icon={Globe2}
+                items={stats?.countries ?? []}
+                color="emerald"
+                format={(k) => (
+                  <span>
+                    <span style={{ marginRight: 6 }}>{countryFlag(k)}</span>
+                    {countryLabel(k)}
+                  </span>
+                )}
+              />
+              <BarList title="Languages" icon={Languages} items={stats?.languages ?? []} color="cyan" />
+            </Stack>
+          </SimpleGrid>
+        </Tabs.Panel>
+      </Tabs>
     </AppShell>
   );
 }
