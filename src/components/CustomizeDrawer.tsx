@@ -13,7 +13,7 @@ import { WidgetPreview } from "./WidgetPreview";
 export function CustomizeDrawer({
   opened,
   onClose,
-  enabled,
+  count,
   has,
   toggle,
   reset,
@@ -21,7 +21,8 @@ export function CustomizeDrawer({
 }: {
   opened: boolean;
   onClose: () => void;
-  enabled: WidgetId[];
+  /** How many widgets are currently on the home page. */
+  count: number;
   has: (id: WidgetId) => boolean;
   toggle: (id: WidgetId) => void;
   reset: () => void;
@@ -57,7 +58,7 @@ export function CustomizeDrawer({
       title={
         <Group gap="sm">
           <Text fw={650}>Customize your home page</Text>
-          <Badge variant="light" color="emerald" size="sm">{enabled.length} selected</Badge>
+          <Badge variant="light" color="emerald" size="sm">{count} on your page</Badge>
         </Group>
       }
     >

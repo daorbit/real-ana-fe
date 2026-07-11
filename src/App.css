@@ -121,6 +121,60 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .click-href { color: var(--muted); flex-shrink: 0; }
 
+/* ============ Home layout grid ============ */
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--mantine-spacing-lg);
+  align-items: stretch;
+}
+/* A widget that spans N columns still collapses gracefully on narrow screens. */
+@media (max-width: 1200px) {
+  .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-grid > * { grid-column: span 1 !important; }
+  .home-grid > .sw[style*="span 3"], .home-grid > .sw[style*="span 4"] { grid-column: span 2 !important; }
+}
+@media (max-width: 700px) {
+  .home-grid { grid-template-columns: 1fr; }
+  .home-grid > * { grid-column: span 1 !important; }
+}
+
+/* Edit mode */
+.home-grid.editing { gap: var(--mantine-spacing-md); }
+
+.sw-frame {
+  height: 100%;
+  border-style: dashed !important;
+  border-color: var(--border-strong) !important;
+  background: var(--surface-2) !important;
+  transition: border-color 0.12s ease, opacity 0.12s ease;
+}
+.sw-handle { cursor: grab; }
+.sw-handle:active { cursor: grabbing; }
+
+/* The item being dragged stays in place, dimmed — the overlay follows the cursor. */
+.sw.is-dragging .sw-frame {
+  opacity: 0.4;
+  border-color: var(--accent-2) !important;
+}
+/* The slot the pointer is currently over. */
+.sw.is-over .sw-frame {
+  border-color: var(--accent-2) !important;
+  background: rgba(16, 185, 129, 0.06) !important;
+}
+
+/* Keep the real widget visible but non-interactive while arranging. */
+.sw-body { pointer-events: none; height: calc(100% - 34px); }
+
+/* The compact card that follows the cursor. */
+.sw-overlay {
+  cursor: grabbing;
+  min-width: 200px;
+  background: var(--surface) !important;
+  border-color: var(--accent-2) !important;
+  box-shadow: var(--shadow);
+}
+
 /* ============ Customize picker ============ */
 .widget-pick {
   cursor: pointer;

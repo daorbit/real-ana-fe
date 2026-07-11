@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Title, Text, Group, Button, SimpleGrid, Card, ThemeIcon, Stack, Center, Badge, Progress,
+  Title, Text, Group, Button, Card, ThemeIcon, Stack, Center, Badge, Progress, Alert,
 } from "@mantine/core";
 import { motion } from "framer-motion";
+import {
+  DndContext, DragOverlay, closestCenter, KeyboardSensor, PointerSensor,
+  useSensor, useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, CartesianGrid } from "recharts";
 import {
   Users, Eye, Radio, Globe, BarChart3, FolderKanban, Plus, ArrowUpRight,
   MousePointerClick, Timer, Layers, Globe2, SlidersHorizontal,
-  LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag,
+  LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag, Pencil, Check, Move,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { StatCard } from "../components/StatCard";
@@ -17,13 +23,15 @@ import { RefreshButton } from "../components/Refresh";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
-import { useStats, useSites, useHomeWidgets, WIDGETS } from "../hooks";
-import type { WidgetId } from "../hooks";
+import { SortableWidget, WidgetDragPreview } from "../components/SortableWidget";
+import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
+import type { WidgetId, Span } from "../hooks";
 import { countryFlag, countryLabel, duration, num } from "../utils";
 import { useWorkspace } from "../workspace";
 import type { Bucket, Stats } from "../types";
 
-/** Compact ranked list used for every Home breakdown panel. */
+/* ----------------------------- shared panels ----------------------------- */
+
 function MiniList({
   title, items, icon: Icon, format, empty,
 }: {
@@ -44,7 +52,7 @@ function MiniList({
         <Center py="lg"><Text c="dimmed" size="xs">{empty}</Text></Center>
       ) : (
         <Stack gap="sm">
-          {items.slice(0, 5).map((i) => (
+          {items.slice(0, 6).map((i) => (
             <div key={i.key}>
               <Group justify="space-between" gap="xs" mb={3} wrap="nowrap">
                 <Text size="sm" truncate style={{ flex: 1 }}>
@@ -136,12 +144,35 @@ function LivePagesCard({ stats }: { stats: Stats | null }) {
   );
 }
 
+/* --------------------------------- page --------------------------------- */
+
 export default function Home() {
   const { active, loading } = useWorkspace();
   const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, "24h");
   const { sites } = useSites(active?._id);
-  const { enabled, has, toggle, reset, clear } = useHomeWidgets();
+  const { layout, has, toggle, remove, setSpan, move, reset, clear } = useHomeWidgets();
+
   const [customizing, setCustomizing] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [dragging, setDragging] = useState<WidgetId | null>(null);
+
+  const sensors = useSensors(
+    // A small distance threshold so a click inside a widget isn't read as a drag.
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const onDragStart = (e: DragStartEvent) => setDragging(e.active.id as WidgetId);
+
+  const onDragEnd = (e: DragEndEvent) => {
+    setDragging(null);
+    const { active: a, over } = e;
+    if (!over || a.id === over.id) return;
+    move(
+      layout.findIndex((p) => p.id === a.id),
+      layout.findIndex((p) => p.id === over.id)
+    );
+  };
 
   if (loading) return <AppShell><Text c="dimmed">Loading…</Text></AppShell>;
 
@@ -195,26 +226,33 @@ export default function Home() {
     utmCampaigns: { title: "UTM campaigns", icon: Tag, items: stats?.utmCampaigns ?? [], empty: "No campaigns yet" },
   };
 
-  const metricIds = WIDGETS.filter((w) => w.group === "Metrics" && has(w.id)).map((w) => w.id);
-  const listIds = WIDGETS.filter((w) => w.group === "Breakdowns" && has(w.id)).map((w) => w.id);
-  const showTraffic = has("traffic" as WidgetId);
-  const showLive = has("livePages" as WidgetId);
-  const showMap = has("worldMap" as WidgetId);
-  const showClicks = has("clicks" as WidgetId);
+  /** Render one widget by id. */
+  const renderWidget = (id: WidgetId) => {
+    if (METRICS[id]) return <StatCard {...METRICS[id]} />;
+    if (LISTS[id]) {
+      const l = LISTS[id];
+      return <MiniList title={l.title} icon={l.icon} items={l.items} empty={l.empty} format={l.format} />;
+    }
+    if (id === "traffic") return <TrafficCard stats={stats} />;
+    if (id === "livePages") return <LivePagesCard stats={stats} />;
+    if (id === "worldMap") return <WorldMap countries={stats?.countries ?? []} />;
+    if (id === "clicks") return <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} />;
+    return null;
+  };
 
   return (
     <AppShell>
       <CustomizeDrawer
         opened={customizing}
         onClose={() => setCustomizing(false)}
-        enabled={enabled}
+        count={layout.length}
         has={has}
         toggle={toggle}
         reset={reset}
         clear={clear}
       />
 
-      <Group justify="space-between" align="flex-start" mb="xl">
+      <Group justify="space-between" align="flex-start" mb="lg">
         <div>
           <Title order={1}>Welcome back 👋</Title>
           <Text c="dimmed" size="sm" mt={6}>
@@ -222,81 +260,88 @@ export default function Home() {
           </Text>
         </div>
         <Group gap="sm">
-          <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+          {!editing && (
+            <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+          )}
+          <Button
+            variant={editing ? "filled" : "default"}
+            color={editing ? "emerald" : undefined}
+            leftSection={editing ? <Check size={15} /> : <Pencil size={15} />}
+            onClick={() => setEditing((v) => !v)}
+          >
+            {editing ? "Done" : "Edit layout"}
+          </Button>
           <Button variant="default" leftSection={<SlidersHorizontal size={15} />} onClick={() => setCustomizing(true)}>
-            Customize
+            Add widgets
           </Button>
-          <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>
-            Full analytics
-          </Button>
+          {!editing && (
+            <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>
+              Full analytics
+            </Button>
+          )}
         </Group>
       </Group>
 
-      {enabled.length === 0 ? (
+      {editing && (
+        <Alert color="emerald" variant="light" icon={<Move size={16} />} mb="lg">
+          <Text size="sm">
+            Drag the handle on any widget to move it, and use the number control to set how many
+            columns wide it is. Changes save automatically.
+          </Text>
+        </Alert>
+      )}
+
+      {layout.length === 0 ? (
         <Center mih="40vh">
           <Stack align="center" gap="sm">
             <ThemeIcon variant="light" color="gray" size={52} radius="md"><SlidersHorizontal size={24} /></ThemeIcon>
             <Text fw={600} size="sm">Your home page is empty</Text>
             <Text c="dimmed" size="xs">Choose the widgets you want to see at a glance.</Text>
-            <Button size="xs" variant="light" mt={4} onClick={() => setCustomizing(true)}>Customize</Button>
+            <Button size="xs" variant="light" mt={4} onClick={() => setCustomizing(true)}>Add widgets</Button>
           </Stack>
         </Center>
       ) : (
-        <>
-          {metricIds.length > 0 && (
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(4, metricIds.length) }} mb="lg">
-              {metricIds.map((id, i) => (
-                <motion.div key={id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
-                  <StatCard {...METRICS[id]} />
-                </motion.div>
-              ))}
-            </SimpleGrid>
-          )}
-
-          {(showTraffic || showLive) && (
-            <SimpleGrid cols={{ base: 1, lg: showTraffic && showLive ? 3 : 1 }} spacing="lg" mb="lg">
-              {showTraffic && (
-                <motion.div
-                  style={showLive ? { gridColumn: "span 2" } : undefined}
-                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.35 }}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragCancel={() => setDragging(null)}
+        >
+          {/* No sorting strategy: the widgets differ wildly in size, and letting
+              dnd-kit transform them warps the cards. Items stay put while a
+              DragOverlay follows the cursor; the drop just reorders the array. */}
+          <SortableContext items={layout.map((p) => p.id)} strategy={undefined}>
+            <div className={editing ? "home-grid editing" : "home-grid"}>
+              {layout.map((p, i) => (
+                <SortableWidget
+                  key={p.id}
+                  id={p.id}
+                  span={p.span}
+                  label={WIDGET_MAP[p.id]?.label ?? p.id}
+                  editing={editing}
+                  onSpan={(s: Span) => setSpan(p.id, s)}
+                  onRemove={() => remove(p.id)}
                 >
-                  <TrafficCard stats={stats} />
-                </motion.div>
-              )}
-              {showLive && (
-                <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.35 }}>
-                  <LivePagesCard stats={stats} />
-                </motion.div>
-              )}
-            </SimpleGrid>
-          )}
-
-          {showMap && (
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.35 }} style={{ marginBottom: "var(--mantine-spacing-lg)" }}>
-              <WorldMap countries={stats?.countries ?? []} />
-            </motion.div>
-          )}
-
-          {showClicks && (
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38, duration: 0.35 }} style={{ marginBottom: "var(--mantine-spacing-lg)" }}>
-              <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} />
-            </motion.div>
-          )}
-
-          {listIds.length > 0 && (
-            <SimpleGrid cols={{ base: 1, md: 2, lg: Math.min(3, listIds.length) }} spacing="lg">
-              {listIds.map((id, i) => {
-                const l = LISTS[id];
-                if (!l) return null;
-                return (
-                  <motion.div key={id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.04, duration: 0.35 }}>
-                    <MiniList title={l.title} icon={l.icon} items={l.items} empty={l.empty} format={l.format} />
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(i, 8) * 0.04, duration: 0.3 }}
+                    style={{ height: "100%" }}
+                  >
+                    {renderWidget(p.id)}
                   </motion.div>
-                );
-              })}
-            </SimpleGrid>
-          )}
-        </>
+                </SortableWidget>
+              ))}
+            </div>
+          </SortableContext>
+
+          <DragOverlay dropAnimation={null}>
+            {dragging ? (
+              <WidgetDragPreview label={WIDGET_MAP[dragging]?.label ?? dragging} />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
     </AppShell>
   );
