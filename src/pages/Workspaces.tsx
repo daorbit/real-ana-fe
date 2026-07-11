@@ -21,6 +21,7 @@ import * as v from "../utils/validate";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
+import { WorkspacesSkeleton } from "../components/Skeletons";
 
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
@@ -263,6 +264,9 @@ export default function Workspaces() {
 
   const others = workspaces.filter((w) => w._id !== active?._id);
 
+  // Render the page shape while the workspace list is still loading.
+  if (loading) return <AppShell><WorkspacesSkeleton /></AppShell>;
+
   return (
     <AppShell>
       <Group justify="space-between" align="flex-start" mb="xl">
@@ -394,9 +398,7 @@ export default function Workspaces() {
         )}
       </Modal>
 
-      {loading ? (
-        <Text c="dimmed">Loading…</Text>
-      ) : !active ? (
+      {!active ? (
         <Center mih="40vh">
           <Stack align="center" gap="sm">
             <ThemeIcon variant="light" size={56} radius="md"><FolderKanban size={28} /></ThemeIcon>

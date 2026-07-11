@@ -29,6 +29,7 @@ import type { WidgetId, Span } from "../hooks";
 import { countryFlag, countryLabel, duration, num } from "../utils";
 import { useWorkspace } from "../workspace";
 import type { Bucket, Stats } from "../types";
+import { HomeSkeleton } from "../components/Skeletons";
 
 /* ----------------------------- shared panels ----------------------------- */
 
@@ -174,7 +175,11 @@ export default function Home() {
     );
   };
 
-  if (loading) return <AppShell><Text c="dimmed">Loading…</Text></AppShell>;
+  // Show the page shape immediately: while the workspace list loads, and again
+  // while the first stats payload is in flight.
+  if (loading || (active && !stats)) {
+    return <AppShell><HomeSkeleton /></AppShell>;
+  }
 
   if (!active) {
     return (

@@ -201,6 +201,21 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .wp-svg { width: 100%; height: 100%; display: block; }
 
+/* ============ Charts ============ */
+/* Recharts makes its wrapper focusable, so clicking a chart paints the browser's
+   default focus ring around it. Suppress it — the chart isn't an interactive
+   control, and keyboard users still get focus rings on real controls. */
+.recharts-wrapper,
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-responsive-container *:focus,
+.recharts-responsive-container *:focus-visible {
+  outline: none !important;
+}
+
 /* ============ World map ============ */
 .world-map { display: block; width: 100%; height: auto; }
 .world-map .country { transition: fill 0.12s ease; }

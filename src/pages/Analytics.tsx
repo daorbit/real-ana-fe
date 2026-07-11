@@ -18,6 +18,7 @@ import { StatCard } from "../components/StatCard";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { RefreshButton } from "../components/Refresh";
+import { AnalyticsSkeleton } from "../components/Skeletons";
 import { useStats } from "../hooks";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
 import { useWorkspace } from "../workspace";
@@ -137,7 +138,11 @@ export default function Analytics() {
   const [range, setRange] = useState("24h");
   const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, range);
 
-  if (loading) return <AppShell><Text c="dimmed">Loading…</Text></AppShell>;
+  // Show the page shape immediately: while the workspace list loads, and again
+  // while the first stats payload is in flight.
+  if (loading || (active && !stats)) {
+    return <AppShell><AnalyticsSkeleton /></AppShell>;
+  }
 
   if (!active) {
     return (

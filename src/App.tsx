@@ -8,19 +8,23 @@ import Home from "./pages/Home";
 import Analytics from "./pages/Analytics";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
+import { AppBootSkeleton } from "./components/Skeletons";
 import "./App.css";
+
+// While the session is being restored we don't yet know whether to show the app
+// or the login page, so hold on a neutral spinner rather than flashing either.
 
 // Protected routes get the workspace context.
 function Protected({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <p className="muted center">Loading…</p>;
+  if (loading) return <AppBootSkeleton />;
   if (!user) return <Navigate to="/login" replace />;
   return <WorkspaceProvider>{children}</WorkspaceProvider>;
 }
 
 function PublicOnly({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <p className="muted center">Loading…</p>;
+  if (loading) return <AppBootSkeleton />;
   if (user) return <Navigate to="/app" replace />;
   return <>{children}</>;
 }
@@ -28,7 +32,7 @@ function PublicOnly({ children }: { children: ReactNode }) {
 // Root: send to app if logged in, else to login.
 function Root() {
   const { user, loading } = useAuth();
-  if (loading) return <p className="muted center">Loading…</p>;
+  if (loading) return <AppBootSkeleton />;
   return <Navigate to={user ? "/app" : "/login"} replace />;
 }
 
