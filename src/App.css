@@ -103,6 +103,33 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .pulse-dot { animation: dotp 1.6s infinite; }
 @keyframes dotp { 0%,100% { opacity: 1;} 50% { opacity: 0.3;} }
 
+/* ============ Code tabs (docs) ============ */
+.code-tabs { overflow: hidden; }
+.code-tabs-head {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.code-tabs-foot {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+}
+.ct-tab {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--muted); font-size: 0.78rem; font-weight: 600;
+  padding: 0.3rem 0.6rem; border-radius: 6px; font-family: inherit;
+  transition: color .12s, background .12s;
+}
+.ct-tab:hover { color: var(--text); }
+.ct-tab.active { color: var(--violet-2); background: var(--violet-soft); }
+.ct-code {
+  margin: 0; padding: 1rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.78rem; line-height: 1.65;
+  color: var(--text-2);
+  white-space: pre;
+}
+[data-mantine-color-scheme="light"] .ct-code { color: #334155; }
+
 /* ============ Auth (split-screen) ============ */
 .auth-split { display: grid; grid-template-columns: 1.05fr 1fr; min-height: 100vh; background: var(--bg); }
 .auth-panel { display: flex; align-items: center; justify-content: center; padding: 2rem; background: var(--bg); }
