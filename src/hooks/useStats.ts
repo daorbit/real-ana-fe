@@ -1,36 +1,55 @@
-import { useCallback, useRef, useState } from "react";
-import { api } from "../api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useGetStatsQuery } from "../store";
 import { notify, errMessage } from "../notify";
-import { usePolling } from "./usePolling";
-import type { Stats } from "../types";
+import { POLL_MS } from "./usePolling";
 
 /**
- * Aggregated analytics for a workspace, polled once a minute.
+ * Aggregated analytics for a workspace.
  *
- * Because it polls, a persistent outage would otherwise fire a toast every
- * tick — so only the first failure in a run of failures is surfaced.
+ * Backed by the RTK Query cache: mounting this on a second page serves the
+ * cached payload instantly and fires no request. The data refreshes only when
+ * the 60s poll ticks, a mutation invalidates the Stats tag, or the user hits
+ * Refresh.
  */
 export function useStats(workspaceId: string | undefined, range: string) {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const failed = useRef(false);
+  const {
+    data: stats,
+    error,
+    refetch,
+    fulfilledTimeStamp,
+  } = useGetStatsQuery(
+    { workspaceId: workspaceId!, range },
+    { skip: !workspaceId, pollingInterval: POLL_MS }
+  );
 
-  const load = useCallback(async () => {
-    if (!workspaceId) {
-      setStats(null);
-      return;
-    }
+  // The spinner should only turn during an explicit refresh — a background poll
+  // shouldn't make the UI look busy.
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
     try {
-      setStats(await api.get<Stats>(`/api/workspaces/${workspaceId}/stats?range=${range}`));
-      failed.current = false;
-    } catch (e) {
-      if (!failed.current) {
-        failed.current = true;
-        notify.error(errMessage(e, "Could not load analytics."));
-      }
+      await refetch().unwrap();
+    } catch {
+      /* the error toast below already covers this */
+    } finally {
+      setRefreshing(false);
     }
-  }, [workspaceId, range]);
+  }, [refetch]);
 
-  const { refresh, refreshing, lastUpdated } = usePolling(load, [workspaceId, range]);
+  // Polling means a persistent outage would otherwise toast on every tick.
+  const notified = useRef(false);
+  useEffect(() => {
+    if (error && !notified.current) {
+      notified.current = true;
+      notify.error(errMessage(error, "Could not load analytics."));
+    }
+    if (!error) notified.current = false;
+  }, [error]);
 
-  return { stats, refresh, refreshing, lastUpdated };
+  return {
+    stats: stats ?? null,
+    refresh,
+    refreshing,
+    lastUpdated: fulfilledTimeStamp ? new Date(fulfilledTimeStamp) : null,
+  };
 }

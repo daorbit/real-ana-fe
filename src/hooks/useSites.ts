@@ -1,25 +1,41 @@
 import { useCallback, useState } from "react";
-import { api } from "../api";
-import { usePolling } from "./usePolling";
+import { useGetSitesQuery } from "../store";
+import { POLL_MS } from "./usePolling";
 import type { Site } from "../types";
 
-/** The sites belonging to a workspace, polled once a minute. */
+/**
+ * The sites belonging to a workspace.
+ *
+ * Cached by RTK Query, so switching pages serves the list instantly. Creating
+ * or deleting a site invalidates the Site tag, which refetches this
+ * automatically — callers no longer have to reload by hand.
+ */
 export function useSites(workspaceId: string | undefined) {
-  const [sites, setSites] = useState<Site[]>([]);
+  const { data, refetch, fulfilledTimeStamp } = useGetSitesQuery(workspaceId!, {
+    skip: !workspaceId,
+    pollingInterval: POLL_MS,
+  });
 
-  const load = useCallback(async () => {
-    if (!workspaceId) {
-      setSites([]);
-      return;
-    }
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
     try {
-      setSites(await api.get<Site[]>(`/api/workspaces/${workspaceId}/sites`));
+      await refetch().unwrap();
     } catch {
-      setSites([]);
+      /* nothing useful to say — the list simply stays as it was */
+    } finally {
+      setRefreshing(false);
     }
-  }, [workspaceId]);
+  }, [refetch]);
 
-  const { refresh, refreshing, lastUpdated } = usePolling(load, [workspaceId]);
+  const sites: Site[] = data ?? [];
 
-  return { sites, reload: load, refresh, refreshing, lastUpdated };
+  return {
+    sites,
+    // Kept for callers that still trigger a manual reload after a mutation.
+    reload: refetch,
+    refresh,
+    refreshing,
+    lastUpdated: fulfilledTimeStamp ? new Date(fulfilledTimeStamp) : null,
+  };
 }

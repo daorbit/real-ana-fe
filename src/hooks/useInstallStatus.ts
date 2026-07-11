@@ -1,40 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../api";
+import { useGetInstallStatusQuery, useLazyGetInstallStatusQuery } from "../store";
 
 export type InstallPhase = "idle" | "listening" | "installed" | "not-found";
-
-type StatusResponse = {
-  installed: boolean;
-  eventCount: number;
-  lastEventAt: string | null;
-};
 
 const LISTEN_MS = 30_000; // how long we wait for the customer to load their site
 const POLL_MS = 2_000;
 
-/** A one-shot read of whether a site has ever reported an event. */
+/** Whether a site has ever reported an event. Cached per site. */
 export function useSiteInstalled(workspaceId: string, siteId: string) {
-  const [installed, setInstalled] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    api
-      .get<StatusResponse>(`/api/workspaces/${workspaceId}/sites/${siteId}/status`)
-      .then((s) => alive && setInstalled(s.installed))
-      .catch(() => alive && setInstalled(null));
-    return () => {
-      alive = false;
-    };
-  }, [workspaceId, siteId]);
-
-  return installed;
+  const { data } = useGetInstallStatusQuery({ workspaceId, siteId });
+  return data ? data.installed : null;
 }
 
 /**
  * Drives the "is my snippet working?" checker: polls the install-status
  * endpoint for 30 seconds and resolves as soon as the first event lands.
+ *
+ * Uses the lazy query so the poll bypasses the cache — we specifically want a
+ * fresh answer on every tick here.
  */
 export function useInstallCheck(workspaceId: string, siteId: string, autoStart = false) {
+  const [trigger] = useLazyGetInstallStatusQuery();
+
   const [phase, setPhase] = useState<InstallPhase>("idle");
   const [elapsed, setElapsed] = useState(0);
   const timers = useRef<{ poll?: number; tick?: number; giveUp?: number }>({});
@@ -48,14 +35,12 @@ export function useInstallCheck(workspaceId: string, siteId: string, autoStart =
 
   const check = useCallback(async (): Promise<boolean> => {
     try {
-      const s = await api.get<StatusResponse>(
-        `/api/workspaces/${workspaceId}/sites/${siteId}/status`
-      );
-      return s.installed;
+      const res = await trigger({ workspaceId, siteId }, false).unwrap();
+      return res.installed;
     } catch {
       return false;
     }
-  }, [workspaceId, siteId]);
+  }, [trigger, workspaceId, siteId]);
 
   const start = useCallback(async () => {
     stop();

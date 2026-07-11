@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
-import { api } from "./api";
+import { useGetWorkspacesQuery } from "./store";
 import type { Workspace } from "./types";
 
 const ACTIVE_KEY = "rta_active_ws";
@@ -10,39 +10,39 @@ type WsState = {
   active: Workspace | null;
   loading: boolean;
   setActive: (id: string) => void;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<unknown>;
 };
 
 const Ctx = createContext<WsState | null>(null);
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(() => localStorage.getItem(ACTIVE_KEY));
-  const [loading, setLoading] = useState(true);
+  // Cached by RTK Query — the list is fetched once and reused across pages.
+  const { data, isLoading, refetch } = useGetWorkspacesQuery();
+  const workspaces = data ?? [];
 
-  const refresh = useCallback(async () => {
-    const list = await api.get<Workspace[]>("/api/workspaces");
-    setWorkspaces(list);
-    setActiveId((cur) => {
-      // keep current if still valid, else fall back to first (0th)
-      if (cur && list.some((w) => w._id === cur)) return cur;
-      return list[0]?._id ?? null;
-    });
-    setLoading(false);
-  }, []);
+  const [activeId, setActiveId] = useState<string | null>(() =>
+    localStorage.getItem(ACTIVE_KEY)
+  );
 
+  // Keep the stored choice if it still exists, otherwise fall back to the first.
   useEffect(() => {
-    refresh().catch(() => setLoading(false));
-  }, [refresh]);
+    if (!workspaces.length) return;
+    setActiveId((cur) =>
+      cur && workspaces.some((w) => w._id === cur) ? cur : workspaces[0]._id
+    );
+  }, [workspaces]);
 
   useEffect(() => {
     if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
   }, [activeId]);
 
+  const setActive = useCallback((id: string) => setActiveId(id), []);
+  const refresh = useCallback(() => refetch(), [refetch]);
+
   const active = workspaces.find((w) => w._id === activeId) ?? null;
 
   return (
-    <Ctx.Provider value={{ workspaces, active, loading, setActive: setActiveId, refresh }}>
+    <Ctx.Provider value={{ workspaces, active, loading: isLoading, setActive, refresh }}>
       {children}
     </Ctx.Provider>
   );
