@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Badge, Progress,
   SegmentedControl, Table, TextInput, Select, Stack, Center, ActionIcon, CopyButton, Code, Alert, Collapse, ThemeIcon,
@@ -8,10 +9,10 @@ import {
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import { Users, Eye, Radio, Plus, Copy, Check, Trash2, FolderKanban } from "lucide-react";
+import { Users, Eye, Radio, Plus, Copy, Check, Trash2, FolderKanban, Inbox } from "lucide-react";
 import { api, API_ORIGIN } from "../api";
 import { AppShell } from "../components/AppShell";
-import { FrameworkIcon } from "../components/Brand";
+import { FrameworkIcon, AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
 import { useWorkspace } from "../workspace";
 import type { Stats, Site, Bucket } from "../types";
@@ -26,18 +27,26 @@ function BarList({ title, items, color = "indigo" }: { title: string; items: Buc
   return (
     <Card withBorder radius="lg" padding="lg">
       <Text fw={600} c="dimmed" size="sm" mb="md">{title}</Text>
-      {items.length === 0 && <Text c="dimmed" size="sm">No data yet</Text>}
-      <Stack gap="sm">
-        {items.map((i) => (
-          <div key={i.key}>
-            <Group justify="space-between" gap="xs" mb={4} wrap="nowrap">
-              <Text size="sm" truncate style={{ flex: 1 }}>{i.key}</Text>
-              <Text size="sm" fw={700}>{i.count}</Text>
-            </Group>
-            <Progress value={(i.count / max) * 100} size="sm" radius="xl" color={color} />
-          </div>
-        ))}
-      </Stack>
+      {items.length === 0 ? (
+        <Center py="lg">
+          <Stack align="center" gap={4}>
+            <ThemeIcon variant="light" color="gray" size="md" radius="md"><Inbox size={16} /></ThemeIcon>
+            <Text c="dimmed" size="xs">Waiting for data…</Text>
+          </Stack>
+        </Center>
+      ) : (
+        <Stack gap="sm">
+          {items.map((i) => (
+            <div key={i.key}>
+              <Group justify="space-between" gap="xs" mb={4} wrap="nowrap">
+                <Text size="sm" truncate style={{ flex: 1 }}>{i.key}</Text>
+                <Text size="sm" fw={700}>{i.count}</Text>
+              </Group>
+              <Progress value={(i.count / max) * 100} size="sm" radius="xl" color={color} />
+            </div>
+          ))}
+        </Stack>
+      )}
     </Card>
   );
 }
@@ -144,30 +153,46 @@ export default function Analytics() {
       {error && <Alert color="red" variant="light" mb="md">{error}</Alert>}
 
       <SimpleGrid cols={{ base: 1, sm: 3 }} mb="lg">
-        {kpis.map((k) => <StatCard key={k.label} {...k} />)}
+        {kpis.map((k, i) => (
+          <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07, duration: 0.4 }}>
+            <StatCard {...k} />
+          </motion.div>
+        ))}
       </SimpleGrid>
 
       <Card withBorder radius="lg" padding="lg" mb="lg">
         <Text fw={600} c="dimmed" size="sm" mb="md">Pageviews over time</Text>
-        <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={stats?.timeseries ?? []} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8f6bee" stopOpacity={0.5} />
-                <stop offset="100%" stopColor="#6d5cff" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#a88ff1" />
-                <stop offset="100%" stopColor="#6d5cff" />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} allowDecimals={false} tickLine={false} axisLine={false} />
-            <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
-            <Area type="monotone" dataKey="views" stroke="url(#stroke)" strokeWidth={3} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#a88ff1" }} />
-          </AreaChart>
-        </ResponsiveContainer>
+        {(stats?.pageviews ?? 0) > 0 ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <AreaChart data={stats?.timeseries ?? []} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+              <defs>
+                <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#8f6bee" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="#6d5cff" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#a88ff1" />
+                  <stop offset="100%" stopColor="#6d5cff" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} allowDecimals={false} tickLine={false} axisLine={false} />
+              <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
+              <Area type="monotone" dataKey="views" stroke="url(#stroke)" strokeWidth={3} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#a88ff1" }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <Center h={250}>
+            <Stack align="center" gap={6}>
+              <AnalyticsArt />
+              <Text fw={600} size="sm" mt="xs">No pageviews yet</Text>
+              <Text c="dimmed" size="xs" ta="center" maw={320}>
+                Add the tracking snippet to a site below. Live traffic will stream in here automatically.
+              </Text>
+            </Stack>
+          </Center>
+        )}
       </Card>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>

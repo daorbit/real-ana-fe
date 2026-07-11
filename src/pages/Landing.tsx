@@ -60,7 +60,7 @@ export default function Landing() {
             happening in your app — <span className="grad-text">right now.</span>
           </h1>
           <p className="lead">
-            Pulse gives every app you ship a live analytics dashboard. Visitors,
+            Vantage gives every app you ship a live analytics dashboard. Visitors,
             pageviews, sources and devices — streaming in real time, from a single
             script tag.
           </p>
@@ -128,7 +128,7 @@ export default function Landing() {
 
       <footer className="lfoot">
         <Wordmark />
-        <span className="muted">© {new Date().getFullYear()} Pulse Analytics</span>
+        <span className="muted">© {new Date().getFullYear()} Vantage Analytics</span>
       </footer>
     </div>
   );

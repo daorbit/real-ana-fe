@@ -1,18 +1,19 @@
 // Inline SVG brand assets — self-contained, no external images (survive strict CSP).
 
-export function Logo({ size = 26 }: { size?: number }) {
+export function Logo({ size = 30 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-label="Pulse">
+    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-label="Vantage">
       <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
-          <stop stopColor="#8f6bee" />
+        <linearGradient id="lg" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#a88ff1" />
           <stop offset="1" stopColor="#6d5cff" />
         </linearGradient>
       </defs>
-      <rect width="32" height="32" rx="9" fill="url(#lg)" />
+      <rect x="1" y="1" width="34" height="34" rx="11" fill="url(#lg)" />
+      <rect x="1" y="1" width="34" height="34" rx="11" fill="url(#lg)" opacity="0.4" style={{ filter: "blur(6px)" }} />
       <path
-        d="M7 17.5h4l2.5-6 3.5 11 2.5-8 1.8 3H25"
-        stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"
+        d="M8 19h4.2l2.3-7.5 4 15 2.6-11 1.7 3.5H28"
+        stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"
       />
     </svg>
   );
@@ -21,8 +22,7 @@ export function Logo({ size = 26 }: { size?: number }) {
 export function Wordmark() {
   return (
     <div className="wordmark">
-      <Logo />
-      <span>Pulse</span>
+      <span className="wordmark-text">Vantage<span className="wordmark-dot">.</span></span>
     </div>
   );
 }
@@ -90,6 +90,44 @@ export function AuthSide() {
         <div className="auth-mock"><HeroMock /></div>
       </div>
     </div>
+  );
+}
+
+// Friendly animated analytics illustration for empty states.
+export function AnalyticsArt() {
+  return (
+    <svg viewBox="0 0 260 150" width="260" height="150" role="img" aria-label="Analytics illustration">
+      <defs>
+        <linearGradient id="aa-bar" x1="0" y1="0" x2="0" y2="1">
+          <stop stopColor="#a88ff1" /><stop offset="1" stopColor="#6d5cff" />
+        </linearGradient>
+        <linearGradient id="aa-line" x1="0" y1="0" x2="1" y2="0">
+          <stop stopColor="#22d3ee" /><stop offset="1" stopColor="#a88ff1" />
+        </linearGradient>
+      </defs>
+      {/* baseline */}
+      <line x1="24" y1="120" x2="236" y2="120" stroke="var(--border)" strokeWidth="1.5" />
+      {/* bars */}
+      {[
+        { x: 40, h: 42 }, { x: 78, h: 70 }, { x: 116, h: 54 }, { x: 154, h: 92 }, { x: 192, h: 66 },
+      ].map((b, i) => (
+        <rect key={i} x={b.x} width="26" rx="6" fill="url(#aa-bar)" opacity={0.85}>
+          <animate attributeName="height" from="0" to={b.h} dur="0.8s" begin={`${i * 0.1}s`} fill="freeze" />
+          <animate attributeName="y" from="120" to={120 - b.h} dur="0.8s" begin={`${i * 0.1}s`} fill="freeze" />
+        </rect>
+      ))}
+      {/* trend line */}
+      <path d="M40 78 L91 52 L129 66 L167 34 L205 56" fill="none" stroke="url(#aa-line)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+        strokeDasharray="260" strokeDashoffset="260">
+        <animate attributeName="stroke-dashoffset" from="260" to="0" dur="1.1s" begin="0.5s" fill="freeze" />
+      </path>
+      {/* dots */}
+      {[[40,78],[91,52],[129,66],[167,34],[205,56]].map(([x,y],i)=>(
+        <circle key={i} cx={x} cy={y} r="4" fill="#fff" stroke="#6d5cff" strokeWidth="2" opacity="0">
+          <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin={`${0.8 + i * 0.08}s`} fill="freeze" />
+        </circle>
+      ))}
+    </svg>
   );
 }
 

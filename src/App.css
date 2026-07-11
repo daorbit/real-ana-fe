@@ -1,11 +1,11 @@
 :root {
   /* dark-first base */
-  --bg: #0c0d10;
-  --bg-2: #101115;
-  --surface: #16171c;
-  --surface-2: #1c1e25;
-  --border: #24262e;
-  --border-strong: #2f323c;
+  --bg: #0e0f13;
+  --bg-2: #14161c;
+  --surface: #1b1d25;
+  --surface-2: #232631;
+  --border: #2b2e3a;
+  --border-strong: #383c4a;
   --text: #f3f4f6;
   --text-2: #b8bcc8;
   --muted: #7b8194;
@@ -44,6 +44,18 @@
 html, body, #root { height: 100%; }
 body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased; }
 
+/* Lift Mantine dark card surfaces off near-black so cards read clearly */
+[data-mantine-color-scheme="dark"] {
+  --mantine-color-body: #14161c;
+  --mantine-color-default: #1b1d25;
+  --mantine-color-default-hover: #232631;
+  --mantine-color-default-border: #2b2e3a;
+}
+[data-mantine-color-scheme="dark"] .mantine-Card-root {
+  background: #000;
+  border-color: #2b2e3a;
+}
+
 /* thin scrollbars */
 * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -80,7 +92,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .btn-primary.lg, .btn-ghost.lg { padding: 0.78rem 1.4rem; font-size: 0.98rem; }
 .btn-primary.sm { padding: 0.46rem 0.9rem; font-size: 0.85rem; }
 
-.wordmark { display: inline-flex; align-items: center; gap: 0.55rem; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; color: var(--text); }
+.wordmark { display: inline-flex; align-items: center; }
+.wordmark-text {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; color: var(--text);
+}
+.wordmark-dot { color: var(--violet); }
 .dot-live { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1.8s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5);} 70% { box-shadow: 0 0 0 6px rgba(52,211,153,0);} 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0);} }
 .pulse-dot { animation: dotp 1.6s infinite; }

@@ -36,7 +36,7 @@ export default function Login() {
           <Stack gap="md">
             <div>
               <Title order={2}>Welcome back</Title>
-              <Text c="dimmed" size="sm">Log in to your Pulse dashboard.</Text>
+              <Text c="dimmed" size="sm">Log in to your Vantage dashboard.</Text>
             </div>
             {error && <Alert color="red" variant="light">{error}</Alert>}
             <TextInput label="Email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required />

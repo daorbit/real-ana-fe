@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, NavLink, Select, Avatar, Group, Text, ActionIcon, ScrollArea, Box,
-  useMantineColorScheme, Switch, useComputedColorScheme,
+  useMantineColorScheme, SegmentedControl, Center, useComputedColorScheme,
 } from "@mantine/core";
 import { Home, BarChart3, FolderKanban, LogOut, Moon, Sun } from "lucide-react";
 import { Wordmark } from "./Brand";
@@ -31,21 +31,23 @@ export function AppShell({ children }: { children: ReactNode }) {
     >
       <MantineShell.Navbar p="md" style={{ background: "var(--bg-2)", borderRight: "1px solid var(--border)" }}>
         <MantineShell.Section>
-          <Box component={Link} to="/app" px={6} pb="md" display="block">
+          <Box component={Link} to="/app" px={4} pt={4} pb="lg" display="block">
             <Wordmark />
           </Box>
         </MantineShell.Section>
 
         {workspaces.length > 0 && (
-          <MantineShell.Section mb="md">
+          <MantineShell.Section mb="lg">
             <Select
               label="Workspace"
               size="sm"
+              radius="md"
               data={workspaces.map((w) => ({ value: w._id, label: w.name }))}
               value={active?._id ?? null}
               onChange={(v) => v && setActive(v)}
               allowDeselect={false}
-              comboboxProps={{ withinPortal: true }}
+              comboboxProps={{ withinPortal: true, radius: "md" }}
+              styles={{ label: { fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--muted)", marginBottom: 6, fontWeight: 600 } }}
             />
           </MantineShell.Section>
         )}
@@ -70,20 +72,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         </MantineShell.Section>
 
         <MantineShell.Section>
-          <Group justify="space-between" wrap="nowrap" pb="sm" mb="sm" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
-            <Group gap={8}>
-              {dark ? <Moon size={16} /> : <Sun size={16} />}
-              <Text size="sm" c="dimmed">{dark ? "Dark" : "Light"} mode</Text>
-            </Group>
-            <Switch
-              size="sm"
-              checked={dark}
-              onChange={(e) => setColorScheme(e.currentTarget.checked ? "dark" : "light")}
-              aria-label="Toggle color scheme"
-            />
-          </Group>
-          <Group gap="sm" wrap="nowrap" pt="sm" style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}>
-            <Avatar color="indigo" radius="xl" size="md">{initials}</Avatar>
+          <SegmentedControl
+            fullWidth
+            size="xs"
+            radius="md"
+            mb="sm"
+            value={dark ? "dark" : "light"}
+            onChange={(v) => setColorScheme(v as "light" | "dark")}
+            data={[
+              { value: "light", label: <Center><Sun size={14} style={{ marginRight: 6 }} /> Light</Center> },
+              { value: "dark", label: <Center><Moon size={14} style={{ marginRight: 6 }} /> Dark</Center> },
+            ]}
+          />
+          <Group gap="sm" wrap="nowrap" p="xs" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--mantine-radius-md)" }}>
+            <Avatar variant="gradient" gradient={{ from: "violet.4", to: "violet.6", deg: 135 }} radius="md" size="md">{initials}</Avatar>
             <Box style={{ flex: 1, overflow: "hidden" }}>
               <Text size="sm" fw={600} truncate>{user?.name}</Text>
               <Text size="xs" c="dimmed" truncate>{user?.email}</Text>
