@@ -9,12 +9,15 @@ import { motion } from "framer-motion";
 import {
   Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Repeat, Radar,
 } from "lucide-react";
-import { api } from "../api";
 import { AppShell } from "../components/AppShell";
 
 import { InstallCheck } from "../components/InstallCheck";
 import { CodeBlock } from "../components/CodeBlock";
 import { RefreshButton } from "../components/Refresh";
+import {
+  useCreateWorkspaceMutation, useRenameWorkspaceMutation, useDeleteWorkspaceMutation,
+  useCreateSiteMutation, useDeleteSiteMutation,
+} from "../store";
 import { useSites, useSiteInstalled } from "../hooks";
 import { trackingSnippet, trackingSnippetPretty } from "../utils";
 import * as v from "../utils/validate";
@@ -124,7 +127,7 @@ function SiteRow({
 }
 
 export default function Workspaces() {
-  const { workspaces, active, setActive, refresh, loading } = useWorkspace();
+  const { workspaces, active, setActive, loading } = useWorkspace();
 
   // workspace create / rename
   const [wsOpen, setWsOpen] = useState(false);
@@ -139,18 +142,17 @@ export default function Workspaces() {
   const [domainValue, setDomainValue] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const [created, setCreated] = useState<Site | null>(null);
 
-  // `refresh` (from useWorkspace) reloads the workspace list;
-  // `refreshSites` reloads the sites of the active workspace.
-  const {
-    sites,
-    reload: loadSites,
-    refresh: refreshSites,
-    refreshing,
-    lastUpdated,
-  } = useSites(active?._id);
+  // Cached by RTK Query; the mutations below invalidate it, so the list
+  // refreshes on its own after a create or delete.
+  const { sites, refresh: refreshSites, refreshing, lastUpdated } = useSites(active?._id);
+
+  const [createWs] = useCreateWorkspaceMutation();
+  const [renameWs] = useRenameWorkspaceMutation();
+  const [deleteWs] = useDeleteWorkspaceMutation();
+  const [createSiteMut, { isLoading: saving }] = useCreateSiteMutation();
+  const [deleteSiteMut] = useDeleteSiteMutation();
 
   const validateName = v.all(v.required("Site name"), v.minLength("Site name", 2), v.maxLength("Site name", 60));
 
@@ -166,9 +168,8 @@ export default function Workspaces() {
     if (err) return;
 
     try {
-      const ws = await api.post<Workspace>("/api/workspaces", { name: wsName.trim() });
+      const ws = await createWs({ name: wsName.trim() }).unwrap();
       setWsName(""); setWsOpen(false); setWsError(null);
-      await refresh();
       setActive(ws._id);
       notify.success(`Workspace "${ws.name}" created and set as active.`);
     } catch (err2) {
@@ -179,9 +180,8 @@ export default function Workspaces() {
   const saveRename = async () => {
     if (!active) return;
     try {
-      await api.patch(`/api/workspaces/${active._id}`, { name: editName });
+      await renameWs({ id: active._id, name: editName }).unwrap();
       setEditing(false);
-      await refresh();
       notify.success("Workspace renamed.");
     } catch (err) {
       notify.error(errMessage(err, "Could not rename the workspace."));
@@ -195,8 +195,7 @@ export default function Workspaces() {
       confirmLabel: "Delete workspace",
       onConfirm: async () => {
         try {
-          await api.del(`/api/workspaces/${w._id}`);
-          await refresh();
+          await deleteWs(w._id).unwrap();
           notify.success(`Workspace "${w.name}" deleted.`);
         } catch (err) {
           notify.error(errMessage(err, "Could not delete the workspace."));
@@ -223,21 +222,18 @@ export default function Workspaces() {
       return;
     }
 
-    setSaving(true);
     try {
-      const site = await api.post<Site>(`/api/workspaces/${active._id}/sites`, {
+      const site = await createSiteMut({
+        workspaceId: active._id,
         name: name.trim(),
         domain: cleanDomain,
-      });
+      }).unwrap();
       resetSiteForm();
       setSiteOpen(false);
       setCreated(site);
-      loadSites();
       notify.success(`Site "${site.name}" added. Copy the snippet to start tracking.`);
     } catch (err) {
       notify.error(errMessage(err, "Could not add the site."));
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -249,9 +245,8 @@ export default function Workspaces() {
       confirmLabel: "Delete site",
       onConfirm: async () => {
         try {
-          await api.del(`/api/workspaces/${active._id}/sites/${s.siteId}`);
+          await deleteSiteMut({ workspaceId: active._id, siteId: s.siteId }).unwrap();
           if (created?.siteId === s.siteId) setCreated(null);
-          loadSites();
           notify.success(`Site "${s.name}" deleted.`);
         } catch (err) {
           notify.error(errMessage(err, "Could not delete the site."));

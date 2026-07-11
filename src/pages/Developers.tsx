@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Title, Text, Group, Button, Card, ActionIcon, Alert, Code, CopyButton, Modal,
   Tabs, TextInput, Stack, Badge, Center, ThemeIcon, List, Divider, Anchor, Table,
@@ -9,7 +9,10 @@ import {
   KeyRound, Plus, Trash2, Copy, Check, BookOpen, Terminal, Boxes, Globe,
   ShieldCheck, ArrowRight, AlertTriangle, Rocket, Blocks, Braces,
 } from "lucide-react";
-import { api, API_ORIGIN } from "../api";
+import { API_ORIGIN } from "../api";
+import {
+  useGetApiKeysQuery, useCreateApiKeyMutation, useRevokeApiKeyMutation,
+} from "../store";
 import { AppShell } from "../components/AppShell";
 import { CodeTabs } from "../components/CodeTabs";
 import { notify, errMessage, confirmDelete } from "../notify";
@@ -20,35 +23,30 @@ import type { ApiKey } from "../types";
 
 function KeysTab() {
   const { active } = useWorkspace();
-  const [keys, setKeys] = useState<ApiKey[]>([]);
   const [modal, setModal] = useState(false);
   const [name, setName] = useState("");
-  const [creating, setCreating] = useState(false);
   const [justCreated, setJustCreated] = useState<ApiKey | null>(null);
 
-  const load = () => {
-    if (!active) return;
-    api.get<ApiKey[]>(`/api/workspaces/${active._id}/keys`)
-      .then(setKeys)
-      .catch((e) => notify.error(errMessage(e, "Could not load API keys.")));
-  };
-  useEffect(load, [active]);
+  // Cached; the mutations below invalidate the ApiKey tag, so the list
+  // refreshes itself after a create or a revoke.
+  const { data: keys = [] } = useGetApiKeysQuery(active!._id, { skip: !active });
+  const [createKey, { isLoading: creating }] = useCreateApiKeyMutation();
+  const [revokeKey] = useRevokeApiKeyMutation();
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!active) return;
-    setCreating(true);
     try {
-      const k = await api.post<ApiKey>(`/api/workspaces/${active._id}/keys`, { name: name || "Default key" });
+      const k = await createKey({
+        workspaceId: active._id,
+        name: name || "Default key",
+      }).unwrap();
       setJustCreated(k);
       setName("");
       setModal(false);
-      load();
       notify.success("API key created. Copy it now — it won't be shown again.");
     } catch (e2) {
       notify.error(errMessage(e2, "Could not create the API key."));
-    } finally {
-      setCreating(false);
     }
   };
 
@@ -60,8 +58,7 @@ function KeysTab() {
       confirmLabel: "Revoke key",
       onConfirm: async () => {
         try {
-          await api.del(`/api/workspaces/${active._id}/keys/${k.id}`);
-          load();
+          await revokeKey({ workspaceId: active._id, keyId: k.id }).unwrap();
           notify.success(`Key "${k.name}" revoked.`);
         } catch (err) {
           notify.error(errMessage(err, "Could not revoke the key."));

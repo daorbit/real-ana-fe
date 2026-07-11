@@ -14,9 +14,31 @@ export const notify = {
     notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
 };
 
-// Turns an unknown thrown value into a readable message.
+/**
+ * Turns an unknown thrown value into a readable message.
+ *
+ * Handles plain Errors as well as RTK Query's rejection shape, which is an
+ * object like `{ status: 404, data: { error: "site not found" } }` rather than
+ * an Error instance.
+ */
 export function errMessage(e: unknown, fallback = "Request failed"): string {
-  return e instanceof Error ? e.message : fallback;
+  if (e instanceof Error) return e.message;
+
+  if (typeof e === "object" && e !== null) {
+    const err = e as { data?: unknown; error?: unknown; status?: unknown };
+
+    // Our API returns { error: "..." } on failure.
+    if (typeof err.data === "object" && err.data !== null) {
+      const msg = (err.data as { error?: unknown }).error;
+      if (typeof msg === "string" && msg) return msg;
+    }
+    if (typeof err.data === "string" && err.data) return err.data;
+
+    // Network / parsing failures surface as { error: "..." }.
+    if (typeof err.error === "string" && err.error) return err.error;
+  }
+
+  return fallback;
 }
 
 // Neutral confirmation (e.g. logging out).
