@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import {
   Title, Text, Group, Button, Card, TextInput, Select, ActionIcon, Badge, Stack,
@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import {
   Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Repeat, Radar,
 } from "lucide-react";
-import { api, API_ORIGIN } from "../api";
+import { api } from "../api";
 import { AppShell } from "../components/AppShell";
 import { FrameworkIcon } from "../components/Brand";
 import { InstallCheck } from "../components/InstallCheck";
