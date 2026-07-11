@@ -1,45 +1,184 @@
-.app {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  font-family: system-ui, sans-serif;
+:root {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --border: #2a2e3a;
+  --text: #e6e8ee;
+  --muted: #8b90a0;
+  --accent: #6366f1;
+  --error: #ef4444;
 }
 
-.stats {
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.center { text-align: center; margin-top: 4rem; }
+.muted { color: var(--muted); }
+.error { color: var(--error); }
+.spacer { flex: 1; }
+
+/* ---- Auth ---- */
+.auth-wrap {
+  min-height: 100vh;
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  align-items: center;
   justify-content: center;
-  margin-top: 2rem;
+  padding: 1rem;
 }
-
-.card {
+.auth-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 360px;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  min-width: 160px;
-  padding: 1.5rem;
-  border: 1px solid #ccc;
+  gap: 0.75rem;
+}
+.auth-card h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+
+input, select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.95rem;
+}
+input:focus, select:focus { outline: 1px solid var(--accent); }
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+button:disabled { opacity: 0.6; cursor: default; }
+button.ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+a { color: var(--accent); text-decoration: none; }
+
+/* ---- Page shell ---- */
+.page { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.topbar h1 { font-size: 1.4rem; margin: 0; }
+
+.inline-form {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.inline-form input { flex: 1; min-width: 140px; }
+
+/* ---- Cards / grid ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 12px;
+  padding: 1.2rem;
+}
+.link-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--text);
+}
+.link-card:hover { border-color: var(--accent); }
+.link-card h3 { margin: 0; }
+.badge {
+  align-self: flex-start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
 }
 
-.label {
-  font-size: 0.9rem;
-  opacity: 0.7;
+/* ---- Snippet ---- */
+.snippet-box {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
 }
-
-.value {
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-
-.ts {
-  width: 100%;
+.snippet-box pre {
+  background: var(--bg);
+  padding: 0.8rem;
+  border-radius: 8px;
+  overflow-x: auto;
   font-size: 0.85rem;
-  opacity: 0.6;
 }
 
-.error {
-  color: #e53935;
+/* ---- KPIs ---- */
+.kpis { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.kpi {
+  flex: 1;
+  min-width: 120px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
+.kpi-val { font-size: 2rem; font-weight: 700; }
+.kpi-label { color: var(--muted); font-size: 0.85rem; }
+.kpi.live .kpi-val { color: #22c55e; }
+
+/* ---- Range tabs ---- */
+.range-tabs { display: flex; gap: 0.3rem; }
+.range-tabs button {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+}
+.range-tabs button.active { color: #fff; border-color: var(--accent); }
+
+/* ---- Chart / bar lists ---- */
+.chart-card { margin-bottom: 1.5rem; }
+.chart-card h3, .list-card h3 { margin: 0 0 1rem; font-size: 1rem; }
+.bar-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  margin-bottom: 0.3rem;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: rgba(99, 102, 241, 0.25);
+  z-index: 0;
+}
+.bar-label { position: relative; z-index: 1; flex: 1; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-count { position: relative; z-index: 1; font-weight: 600; font-size: 0.85rem; }
