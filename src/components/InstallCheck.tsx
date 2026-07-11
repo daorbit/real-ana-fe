@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Card, Group, Text, Button, ThemeIcon, Stack, List, Collapse } from "@mantine/core";
+import { Card, Group, Text, Button, ThemeIcon, List, Collapse } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { Radar, CheckCircle2, AlertTriangle, RotateCw } from "lucide-react";
 import { api } from "../api";
