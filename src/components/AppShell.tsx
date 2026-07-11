@@ -74,14 +74,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         <MantineShell.Section>
           <SegmentedControl
             fullWidth
-            size="xs"
+            size="sm"
             radius="md"
             mb="sm"
+            color="violet"
             value={dark ? "dark" : "light"}
             onChange={(v) => setColorScheme(v as "light" | "dark")}
             data={[
-              { value: "light", label: <Center><Sun size={14} style={{ marginRight: 6 }} /> Light</Center> },
-              { value: "dark", label: <Center><Moon size={14} style={{ marginRight: 6 }} /> Dark</Center> },
+              { value: "light", label: <Center style={{ gap: 6 }}><Sun size={14} /> Light</Center> },
+              { value: "dark", label: <Center style={{ gap: 6 }}><Moon size={14} /> Dark</Center> },
             ]}
           />
           <Group gap="sm" wrap="nowrap" p="xs" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--mantine-radius-md)" }}>

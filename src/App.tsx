@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { AuthProvider, useAuth } from "./auth";
 import { WorkspaceProvider } from "./workspace";
-import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
@@ -25,10 +24,11 @@ function PublicOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+// Root: send to app if logged in, else to login.
 function Root() {
   const { user, loading } = useAuth();
   if (loading) return <p className="muted center">Loading…</p>;
-  return user ? <Navigate to="/app" replace /> : <Landing />;
+  return <Navigate to={user ? "/app" : "/login"} replace />;
 }
 
 export default function App() {

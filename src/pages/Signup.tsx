@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor,
 } from "@mantine/core";
 import { useAuth } from "../auth";
-import { AuthSide } from "../components/Brand";
+import { AuthBrand } from "../components/AuthBrand";
 
 export default function Signup() {
   const { signup } = useAuth();
@@ -31,24 +32,30 @@ export default function Signup() {
 
   return (
     <div className="auth-split">
-      <AuthSide />
+      <AuthBrand />
       <div className="auth-panel">
-        <form className="auth-form" onSubmit={submit}>
-          <Stack gap="md">
+        <motion.form
+          className="auth-form"
+          onSubmit={submit}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Stack gap="lg">
             <div>
               <Title order={2}>Create your account</Title>
-              <Text c="dimmed" size="sm">Start tracking in under two minutes.</Text>
+              <Text c="dimmed" size="sm" mt={4}>Start tracking in under two minutes.</Text>
             </div>
             {error && <Alert color="red" variant="light">{error}</Alert>}
-            <TextInput label="Name" placeholder="Jane Doe" value={name} onChange={(e) => setName(e.currentTarget.value)} required />
-            <TextInput label="Email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required />
-            <PasswordInput label="Password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required minLength={6} />
+            <TextInput label="Name" placeholder="Jane Doe" value={name} onChange={(e) => setName(e.currentTarget.value)} required size="md" />
+            <TextInput label="Email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required size="md" />
+            <PasswordInput label="Password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required minLength={6} size="md" />
             <Button type="submit" loading={busy} fullWidth size="md">Create account</Button>
             <Text c="dimmed" size="sm" ta="center">
-              Have an account? <Anchor component={Link} to="/login">Log in</Anchor>
+              Have an account? <Anchor component={Link} to="/login" fw={600}>Log in</Anchor>
             </Text>
           </Stack>
-        </form>
+        </motion.form>
       </div>
     </div>
   );

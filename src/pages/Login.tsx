@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor,
 } from "@mantine/core";
 import { useAuth } from "../auth";
-import { AuthSide } from "../components/Brand";
+import { AuthBrand } from "../components/AuthBrand";
 
 export default function Login() {
   const { login } = useAuth();
@@ -30,23 +31,29 @@ export default function Login() {
 
   return (
     <div className="auth-split">
-      <AuthSide />
+      <AuthBrand />
       <div className="auth-panel">
-        <form className="auth-form" onSubmit={submit}>
-          <Stack gap="md">
+        <motion.form
+          className="auth-form"
+          onSubmit={submit}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Stack gap="lg">
             <div>
               <Title order={2}>Welcome back</Title>
-              <Text c="dimmed" size="sm">Log in to your Vantage dashboard.</Text>
+              <Text c="dimmed" size="sm" mt={4}>Log in to your Vantage dashboard.</Text>
             </div>
             {error && <Alert color="red" variant="light">{error}</Alert>}
-            <TextInput label="Email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required />
-            <PasswordInput label="Password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required />
+            <TextInput label="Email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required size="md" />
+            <PasswordInput label="Password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required size="md" />
             <Button type="submit" loading={busy} fullWidth size="md">Log in</Button>
             <Text c="dimmed" size="sm" ta="center">
-              No account? <Anchor component={Link} to="/signup">Sign up free</Anchor>
+              No account? <Anchor component={Link} to="/signup" fw={600}>Sign up free</Anchor>
             </Text>
           </Stack>
-        </form>
+        </motion.form>
       </div>
     </div>
   );

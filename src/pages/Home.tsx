@@ -66,7 +66,7 @@ export default function Home() {
           <Title order={1}>Welcome back 👋</Title>
           <Text c="dimmed" size="sm" mt={6}>Overview for <b>{active.name}</b> — last 24 hours.</Text>
         </div>
-        <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>Full analytics</Button>
+        <Button component={Link} to="/app/analytics" variant="gradient" gradient={{ from: "violet.5", to: "violet.7", deg: 135 }} leftSection={<BarChart3 size={16} />}>Full analytics</Button>
       </Group>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">

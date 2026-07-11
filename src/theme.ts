@@ -36,5 +36,9 @@ export const theme = createTheme({
     Card: { defaultProps: { radius: "lg" } },
     Button: { defaultProps: { radius: "md" } },
     Paper: { defaultProps: { radius: "lg" } },
+    Input: { defaultProps: { radius: 8 } },
+    TextInput: { defaultProps: { radius: 8 } },
+    PasswordInput: { defaultProps: { radius: 8 } },
+    Select: { defaultProps: { radius: 8 } },
   },
 });
