@@ -3,15 +3,16 @@ import type { FormEvent } from "react";
 import {
   Title, Text, Group, Button, Card, TextInput, Select, ActionIcon, Badge, Stack,
   SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider, Code,
-  Box,
+  Box, Collapse,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import {
-  Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Repeat,
+  Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Repeat, Radar,
 } from "lucide-react";
 import { api, API_ORIGIN } from "../api";
 import { AppShell } from "../components/AppShell";
 import { FrameworkIcon } from "../components/Brand";
+import { InstallCheck } from "../components/InstallCheck";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
@@ -33,6 +34,103 @@ function IdRow({ label, value }: { label: string; value: string }) {
         )}
       </CopyButton>
     </Group>
+  );
+}
+
+/* A site row with live install status + an expandable verifier */
+function SiteRow({
+  site, workspaceId, snippet, onDelete,
+}: { site: Site; workspaceId: string; snippet: string; onDelete: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [installed, setInstalled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    api
+      .get<{ installed: boolean }>(`/api/workspaces/${workspaceId}/sites/${site.siteId}/status`)
+      .then((s) => alive && setInstalled(s.installed))
+      .catch(() => alive && setInstalled(null));
+    return () => { alive = false; };
+  }, [workspaceId, site.siteId]);
+
+  const status =
+    installed === true
+      ? { dot: "var(--mantine-color-teal-6)", label: "Receiving data", color: "dimmed" as const }
+      : installed === false
+      ? { dot: "var(--muted)", label: "Waiting for first pageview", color: "dimmed" as const }
+      : { dot: "transparent", label: "", color: "dimmed" as const };
+
+  return (
+    <Card withBorder radius="md" padding="md" className="site-row">
+      <Group justify="space-between" wrap="nowrap" gap="lg">
+        {/* identity */}
+        <Group gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+          <ThemeIcon variant="default" radius="md" size={38}>
+            <Globe size={17} />
+          </ThemeIcon>
+
+          <div style={{ minWidth: 0 }}>
+            <Group gap={8} wrap="nowrap">
+              <Text fw={600} size="sm" truncate>{site.name}</Text>
+              <Group gap={5} wrap="nowrap">
+                <FrameworkIcon name={site.framework} />
+                <Text size="xs" c="dimmed" tt="capitalize">{site.framework}</Text>
+              </Group>
+            </Group>
+
+            <Group gap={8} wrap="nowrap" mt={3}>
+              <Text size="xs" c="dimmed" truncate>{site.domain}</Text>
+              {installed !== null && (
+                <>
+                  <Text size="xs" c="dimmed">·</Text>
+                  <Group gap={5} wrap="nowrap">
+                    <span
+                      className={installed ? "status-dot live" : "status-dot"}
+                      style={{ background: status.dot }}
+                    />
+                    <Text size="xs" c={status.color}>{status.label}</Text>
+                  </Group>
+                </>
+              )}
+            </Group>
+          </div>
+        </Group>
+
+        {/* actions */}
+        <Group gap={6} wrap="nowrap">
+          <Tooltip label="Check if the script is reporting" withArrow>
+            <Button
+              size="xs"
+              variant={open ? "light" : "default"}
+              leftSection={<Radar size={13} />}
+              onClick={() => setOpen((v) => !v)}
+            >
+              Verify
+            </Button>
+          </Tooltip>
+          <CopyButton value={snippet}>
+            {({ copied, copy }) => (
+              <Tooltip label={copied ? "Copied" : "Copy install snippet"} withArrow>
+                <Button size="xs" variant="default" onClick={copy} leftSection={copied ? <Check size={13} /> : <Copy size={13} />}>
+                  Snippet
+                </Button>
+              </Tooltip>
+            )}
+          </CopyButton>
+          <Tooltip label="Delete site" withArrow>
+            <ActionIcon variant="subtle" color="gray" size="lg" onClick={onDelete}>
+              <Trash2 size={15} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      </Group>
+
+      <Collapse expanded={open}>
+        <Box pt="md">
+          <InstallCheck workspaceId={workspaceId} siteId={site.siteId} domain={site.domain} />
+        </Box>
+      </Collapse>
+    </Card>
   );
 }
 
@@ -211,6 +309,14 @@ export default function Workspaces() {
               <Code>{created.siteId}</Code>
             </Group>
 
+            {active && (
+              <InstallCheck
+                workspaceId={active._id}
+                siteId={created.siteId}
+                domain={created.domain}
+              />
+            )}
+
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => setCreated(null)}>Done</Button>
               <CopyButton value={snippet(created.siteId)}>
@@ -277,34 +383,13 @@ export default function Workspaces() {
 
               <Stack gap="sm">
                 {sites.map((s) => (
-                  <Card key={s._id} withBorder radius="md" padding="sm" className="site-row">
-                    <Group justify="space-between" wrap="nowrap">
-                      <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                        <ThemeIcon variant="light" color="gray" radius="md" size="lg"><Globe size={16} /></ThemeIcon>
-                        <div style={{ minWidth: 0 }}>
-                          <Group gap={6}>
-                            <Text fw={600} size="sm" truncate>{s.name}</Text>
-                            <Badge size="xs" variant="light" color="gray" leftSection={<FrameworkIcon name={s.framework} />} tt="capitalize">
-                              {s.framework}
-                            </Badge>
-                          </Group>
-                          <Text size="xs" c="emerald" truncate>{s.domain}</Text>
-                        </div>
-                      </Group>
-                      <Group gap={4} wrap="nowrap">
-                        <CopyButton value={snippet(s.siteId)}>
-                          {({ copied, copy }) => (
-                            <Button size="compact-xs" variant="default" onClick={copy} leftSection={copied ? <Check size={12} /> : <Copy size={12} />}>
-                              {copied ? "Copied" : "Snippet"}
-                            </Button>
-                          )}
-                        </CopyButton>
-                        <ActionIcon variant="subtle" color="red" onClick={() => delSite(s)} title="Delete site">
-                          <Trash2 size={15} />
-                        </ActionIcon>
-                      </Group>
-                    </Group>
-                  </Card>
+                  <SiteRow
+                    key={s._id}
+                    site={s}
+                    workspaceId={active._id}
+                    snippet={snippet(s.siteId)}
+                    onDelete={() => delSite(s)}
+                  />
                 ))}
 
                 {sites.length === 0 && (
