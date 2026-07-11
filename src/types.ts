@@ -17,6 +17,15 @@ export type Site = {
   createdAt: string;
 };
 
+export type ApiKey = {
+  id: string;
+  name: string;
+  prefix: string;
+  lastUsedAt?: string;
+  createdAt: string;
+  key?: string; // only present right after creation
+};
+
 export type Bucket = { key: string; count: number };
 
 export type Stats = {

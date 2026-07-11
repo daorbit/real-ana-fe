@@ -4,7 +4,7 @@ import {
   AppShell as MantineShell, NavLink, Select, Avatar, Group, Text, ActionIcon, ScrollArea, Box,
   useMantineColorScheme, SegmentedControl, Center, useComputedColorScheme,
 } from "@mantine/core";
-import { Home, BarChart3, FolderKanban, LogOut, Moon, Sun } from "lucide-react";
+import { Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2 } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { useAuth } from "../auth";
 import { useWorkspace } from "../workspace";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/app", label: "Home", icon: Home },
   { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/app/workspaces", label: "Workspaces", icon: FolderKanban },
+  { to: "/app/developers", label: "Developers", icon: Code2 },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
