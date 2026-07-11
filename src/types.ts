@@ -30,4 +30,5 @@ export type Stats = {
   countries: Bucket[];
   utmSources: Bucket[];
   timeseries: { bucket: string; views: number }[];
+  siteCount?: number;
 };

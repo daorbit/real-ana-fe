@@ -40,6 +40,9 @@ export const api = {
   get: <T>(p: string) => request<T>(p),
   post: <T>(p: string, body: unknown) =>
     request<T>(p, { method: "POST", body: JSON.stringify(body) }),
+  patch: <T>(p: string, body: unknown) =>
+    request<T>(p, { method: "PATCH", body: JSON.stringify(body) }),
+  del: (p: string) => request<void>(p, { method: "DELETE" }),
 };
 
 // Base origin used to build the embed snippet (BE origin)

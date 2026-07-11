@@ -1,31 +1,48 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Plus, Folder, ChevronRight } from "lucide-react";
+import { Plus, LayoutGrid, Table2, Trash2, Pencil, Check, X, FolderKanban } from "lucide-react";
 import { api } from "../api";
 import { AppShell } from "../components/AppShell";
+import { useWorkspace } from "../workspace";
 import type { Workspace } from "../types";
 
 export default function Workspaces() {
-  const [list, setList] = useState<Workspace[]>([]);
+  const { workspaces, active, setActive, refresh, loading } = useWorkspace();
+  const [view, setView] = useState<"table" | "card">("table");
   const [name, setName] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-
-  const load = () =>
-    api.get<Workspace[]>("/api/workspaces").then(setList).catch((e) => setError(e.message));
-
-  useEffect(() => { load(); }, []);
+  const [error, setError] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   const create = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      await api.post<Workspace>("/api/workspaces", { name });
-      setName("");
-      setOpen(false);
-      load();
+      const ws = await api.post<Workspace>("/api/workspaces", { name });
+      setName(""); setOpen(false);
+      await refresh();
+      setActive(ws._id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "failed");
+    }
+  };
+
+  const saveEdit = async (id: string) => {
+    try {
+      await api.patch(`/api/workspaces/${id}`, { name: editName });
+      setEditId(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "failed");
+    }
+  };
+
+  const remove = async (id: string, wsName: string) => {
+    if (!confirm(`Delete "${wsName}" and all its sites + analytics? This cannot be undone.`)) return;
+    try {
+      await api.del(`/api/workspaces/${id}`);
+      await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "failed");
     }
@@ -36,41 +53,92 @@ export default function Workspaces() {
       <div className="page-head">
         <div>
           <h1>Workspaces</h1>
-          <p className="muted">Group the apps you want to track.</p>
+          <p className="muted">Create, rename or remove the workspaces that group your apps.</p>
         </div>
-        <button className="btn-primary" onClick={() => setOpen((v) => !v)}><Plus size={16} /> New workspace</button>
+        <div className="head-actions">
+          <div className="view-toggle">
+            <button className={view === "table" ? "active" : ""} onClick={() => setView("table")} title="Table"><Table2 size={16} /></button>
+            <button className={view === "card" ? "active" : ""} onClick={() => setView("card")} title="Cards"><LayoutGrid size={16} /></button>
+          </div>
+          <button className="btn-primary" onClick={() => setOpen((v) => !v)}><Plus size={16} /> New</button>
+        </div>
       </div>
 
-      {error && <p className="error-box">{error}</p>}
+      {error && <p className="error-box" style={{ marginBottom: "1rem" }}>{error}</p>}
 
       {open && (
-        <motion.form className="quick-form" onSubmit={create} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+        <form className="quick-form" onSubmit={create}>
           <input autoFocus placeholder="e.g. Acme Inc" value={name} onChange={(e) => setName(e.target.value)} required />
           <button type="submit" className="btn-primary">Create</button>
-        </motion.form>
+          <button type="button" className="btn-ghost" onClick={() => setOpen(false)}>Cancel</button>
+        </form>
       )}
 
-      <div className="card-grid">
-        {list.map((w, i) => (
-          <motion.div key={w._id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <Link to={`/workspaces/${w._id}`} className="tile">
-              <div className="tile-icon"><Folder size={20} /></div>
+      {loading ? (
+        <p className="muted">Loading…</p>
+      ) : workspaces.length === 0 && !open ? (
+        <div className="empty">
+          <FolderKanban size={40} />
+          <p>No workspaces yet.</p>
+          <button className="btn-primary" onClick={() => setOpen(true)}><Plus size={16} /> Create your first</button>
+        </div>
+      ) : view === "table" ? (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Slug</th><th>Created</th><th style={{ textAlign: "right" }}>Actions</th></tr>
+            </thead>
+            <tbody>
+              {workspaces.map((w) => (
+                <tr key={w._id}>
+                  <td>
+                    {editId === w._id ? (
+                      <input value={editName} onChange={(e) => setEditName(e.target.value)} style={{ maxWidth: 220 }} autoFocus />
+                    ) : (
+                      <span className="row-name link-cell" onClick={() => setActive(w._id)}>
+                        {w.name}{active?._id === w._id && <span className="muted"> · active</span>}
+                      </span>
+                    )}
+                  </td>
+                  <td className="muted">/{w.slug}</td>
+                  <td className="muted">{new Date(w.createdAt).toLocaleDateString()}</td>
+                  <td>
+                    <div className="row-actions">
+                      {editId === w._id ? (
+                        <>
+                          <button className="icon-btn" onClick={() => saveEdit(w._id)} title="Save"><Check size={15} /></button>
+                          <button className="icon-btn" onClick={() => setEditId(null)} title="Cancel"><X size={15} /></button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="icon-btn" onClick={() => { setEditId(w._id); setEditName(w.name); }} title="Rename"><Pencil size={15} /></button>
+                          <button className="icon-btn" onClick={() => remove(w._id, w.name)} title="Delete"><Trash2 size={15} /></button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="card-grid">
+          {workspaces.map((w) => (
+            <div key={w._id} className="tile">
+              <div className="tile-icon"><FolderKanban size={18} /></div>
               <div className="tile-body">
-                <h3>{w.name}</h3>
+                <h3>{w.name}{active?._id === w._id && <span className="muted"> · active</span>}</h3>
                 <span className="muted">/{w.slug}</span>
               </div>
-              <ChevronRight size={18} className="tile-arrow" />
-            </Link>
-          </motion.div>
-        ))}
-        {list.length === 0 && !open && (
-          <div className="empty">
-            <Folder size={40} />
-            <p>No workspaces yet.</p>
-            <button className="btn-primary" onClick={() => setOpen(true)}><Plus size={16} /> Create your first</button>
-          </div>
-        )}
-      </div>
+              <div className="row-actions">
+                <button className="icon-btn" onClick={() => setActive(w._id)} title="Set active"><Check size={15} /></button>
+                <button className="icon-btn" onClick={() => remove(w._id, w.name)} title="Delete"><Trash2 size={15} /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </AppShell>
   );
 }
