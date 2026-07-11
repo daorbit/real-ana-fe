@@ -28,6 +28,13 @@ export type ApiKey = {
 
 export type Bucket = { key: string; count: number };
 
+/** A CTA click: which label, on which page, and where it pointed. */
+export type ClickBucket = Bucket & {
+  path: string;
+  href?: string;
+  tag?: string;
+};
+
 export type Point = { bucket: string; views: number; visitors: number };
 
 export type Deltas = {
@@ -69,6 +76,10 @@ export type Stats = {
   screenSizes: Bucket[];
   utmSources: Bucket[];
   utmCampaigns: Bucket[];
+
+  // clicks
+  clicks: ClickBucket[];
+  clickCount: number;
 
   // real-time
   livePages: Bucket[];

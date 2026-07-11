@@ -15,6 +15,7 @@ import { StatCard } from "../components/StatCard";
 import { AnalyticsArt } from "../components/Brand";
 import { RefreshButton } from "../components/Refresh";
 import { WorldMap } from "../components/WorldMap";
+import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
 import { useStats, useSites, useHomeWidgets, WIDGETS } from "../hooks";
 import type { WidgetId } from "../hooks";
@@ -199,6 +200,7 @@ export default function Home() {
   const showTraffic = has("traffic" as WidgetId);
   const showLive = has("livePages" as WidgetId);
   const showMap = has("worldMap" as WidgetId);
+  const showClicks = has("clicks" as WidgetId);
 
   return (
     <AppShell>
@@ -272,6 +274,12 @@ export default function Home() {
           {showMap && (
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.35 }} style={{ marginBottom: "var(--mantine-spacing-lg)" }}>
               <WorldMap countries={stats?.countries ?? []} />
+            </motion.div>
+          )}
+
+          {showClicks && (
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38, duration: 0.35 }} style={{ marginBottom: "var(--mantine-spacing-lg)" }}>
+              <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} />
             </motion.div>
           )}
 

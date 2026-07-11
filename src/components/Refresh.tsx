@@ -7,6 +7,7 @@ export function RefreshButton({
   onRefresh,
   refreshing,
   lastUpdated,
+  /** Renders a small button without the "Updated x ago" label — for inline use. */
   compact,
 }: {
   onRefresh: () => void;
@@ -26,10 +27,11 @@ export function RefreshButton({
       {!compact && <Text size="xs" c="dimmed">Updated {timeAgo(lastUpdated)}</Text>}
       <Tooltip label="Auto-refreshes every minute" withArrow>
         <Button
-          size={compact ? "compact-xs" : "xs"}
+          // Default size matches the other header buttons (Customize, Full analytics).
+          size={compact ? "xs" : "sm"}
           variant="default"
           onClick={onRefresh}
-          leftSection={<RotateCw size={13} className={refreshing ? "spin" : undefined} />}
+          leftSection={<RotateCw size={15} className={refreshing ? "spin" : undefined} />}
         >
           Refresh
         </Button>

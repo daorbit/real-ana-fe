@@ -16,6 +16,7 @@ import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
 import { WorldMap } from "../components/WorldMap";
+import { ClicksPanel } from "../components/ClicksPanel";
 import { RefreshButton } from "../components/Refresh";
 import { useStats } from "../hooks";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
@@ -255,6 +256,7 @@ export default function Analytics() {
           <Tabs.Tab value="sources" leftSection={<Tag size={14} />}>Sources</Tabs.Tab>
           <Tabs.Tab value="tech" leftSection={<AppWindow size={14} />}>Technology</Tabs.Tab>
           <Tabs.Tab value="geo" leftSection={<Globe2 size={14} />}>Geography</Tabs.Tab>
+          <Tabs.Tab value="clicks" leftSection={<MousePointerClick size={14} />}>Clicks</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="pages">
@@ -305,6 +307,10 @@ export default function Analytics() {
               <BarList title="Languages" icon={Languages} items={stats?.languages ?? []} color="cyan" />
             </Stack>
           </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="clicks">
+          <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} limit={15} />
         </Tabs.Panel>
       </Tabs>
     </AppShell>

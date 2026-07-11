@@ -376,7 +376,7 @@ export default function Workspaces() {
                   <Text fw={650} size="sm">Domains &amp; Sites</Text>
                   <Badge variant="light" color="gray" size="sm">{sites.length}</Badge>
                 </Group>
-                <RefreshButton onRefresh={refreshSites} refreshing={refreshing} lastUpdated={lastUpdated} />
+                <RefreshButton onRefresh={refreshSites} refreshing={refreshing} lastUpdated={lastUpdated} compact />
               </Group>
 
               <Stack gap="sm">

@@ -119,6 +119,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .site-row { background: var(--surface-2) !important; }
 .sect-ic { color: var(--violet-2); }
 
+.click-href { color: var(--muted); flex-shrink: 0; }
+
 /* ============ Customize picker ============ */
 .widget-pick {
   cursor: pointer;

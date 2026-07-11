@@ -31,6 +31,7 @@ export const WIDGETS = [
   { id: "traffic", label: "Traffic chart", description: "Views over time", group: "Charts", kind: "chart", size: "lg" },
   { id: "livePages", label: "Right now", description: "Pages being viewed live", group: "Charts", kind: "live", size: "md" },
   { id: "worldMap", label: "World map", description: "Visitors by country", group: "Charts", kind: "map", size: "lg" },
+  { id: "clicks", label: "CTA clicks", description: "Which buttons get clicked, and where", group: "Charts", kind: "list", size: "md" },
 
   // --- breakdowns --------------------------------------------------------
   { id: "topPages", label: "Top pages", description: "Most viewed pages", group: "Breakdowns", kind: "list", size: "md" },
