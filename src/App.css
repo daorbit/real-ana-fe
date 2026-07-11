@@ -103,6 +103,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .pulse-dot { animation: dotp 1.6s infinite; }
 @keyframes dotp { 0%,100% { opacity: 1;} 50% { opacity: 0.3;} }
 
+/* ============ Workspaces ============ */
+.ws-active { border-color: rgba(124, 92, 255, 0.35) !important; }
+.site-row { background: var(--surface-2) !important; }
+.sect-ic { color: var(--violet-2); }
+
 /* ============ Code tabs (docs) ============ */
 .code-tabs { overflow: hidden; }
 .code-tabs-head {

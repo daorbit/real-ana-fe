@@ -1,30 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { FormEvent } from "react";
 import {
-  Title, Text, Group, Button, SegmentedControl, Table, TextInput, Card, SimpleGrid,
-  ActionIcon, ThemeIcon, Badge, Stack, Center, Collapse, Alert,
+  Title, Text, Group, Button, Card, TextInput, Select, ActionIcon, Badge, Stack,
+  SimpleGrid, ThemeIcon, Center, Collapse, Alert, CopyButton, Tooltip, Divider, Code,
 } from "@mantine/core";
-import { Plus, LayoutGrid, Table2, Trash2, Pencil, Check, X, FolderKanban } from "lucide-react";
-import { api } from "../api";
+import { motion } from "framer-motion";
+import {
+  Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Repeat,
+} from "lucide-react";
+import { api, API_ORIGIN } from "../api";
 import { AppShell } from "../components/AppShell";
+import { FrameworkIcon } from "../components/Brand";
 import { useWorkspace } from "../workspace";
-import type { Workspace } from "../types";
+import type { Workspace, Site } from "../types";
+
+const FRAMEWORKS = ["react", "vue", "angular", "svelte", "other"];
+
+/* Small id + copy row */
+function IdRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Group gap={6} wrap="nowrap">
+      <Text size="xs" c="dimmed">{label}: {value}</Text>
+      <CopyButton value={value}>
+        {({ copied, copy }) => (
+          <Tooltip label={copied ? "Copied" : "Copy"} withArrow>
+            <ActionIcon variant="subtle" color="gray" size="xs" onClick={copy}>
+              {copied ? <Check size={12} /> : <Copy size={12} />}
+            </ActionIcon>
+          </Tooltip>
+        )}
+      </CopyButton>
+    </Group>
+  );
+}
 
 export default function Workspaces() {
   const { workspaces, active, setActive, refresh, loading } = useWorkspace();
-  const [view, setView] = useState("table");
-  const [name, setName] = useState("");
-  const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
+
+  // workspace create / rename
+  const [wsOpen, setWsOpen] = useState(false);
+  const [wsName, setWsName] = useState("");
+  const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
 
-  const create = async (e: FormEvent) => {
+  // sites of the active workspace
+  const [sites, setSites] = useState<Site[]>([]);
+  const [siteOpen, setSiteOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [domain, setDomain] = useState("");
+  const [framework, setFramework] = useState("react");
+  const [created, setCreated] = useState<Site | null>(null);
+
+  const loadSites = useCallback(() => {
+    if (!active) { setSites([]); return; }
+    api.get<Site[]>(`/api/workspaces/${active._id}/sites`).then(setSites).catch(() => setSites([]));
+  }, [active]);
+
+  useEffect(loadSites, [loadSites]);
+
+  const createWorkspace = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      const ws = await api.post<Workspace>("/api/workspaces", { name });
-      setName(""); setOpen(false);
+      const ws = await api.post<Workspace>("/api/workspaces", { name: wsName });
+      setWsName(""); setWsOpen(false);
       await refresh();
       setActive(ws._id);
     } catch (err) {
@@ -32,54 +72,73 @@ export default function Workspaces() {
     }
   };
 
-  const saveEdit = async (id: string) => {
+  const saveRename = async () => {
+    if (!active) return;
     try {
-      await api.patch(`/api/workspaces/${id}`, { name: editName });
-      setEditId(null);
+      await api.patch(`/api/workspaces/${active._id}`, { name: editName });
+      setEditing(false);
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "failed");
     }
   };
 
-  const remove = async (id: string, wsName: string) => {
-    if (!confirm(`Delete "${wsName}" and all its sites + analytics? This cannot be undone.`)) return;
+  const removeWorkspace = async (w: Workspace) => {
+    if (!confirm(`Delete "${w.name}" and all its sites + analytics? This cannot be undone.`)) return;
     try {
-      await api.del(`/api/workspaces/${id}`);
+      await api.del(`/api/workspaces/${w._id}`);
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "failed");
     }
   };
+
+  const addSite = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!active) return;
+    setError(null);
+    try {
+      const site = await api.post<Site>(`/api/workspaces/${active._id}/sites`, { name, domain, framework });
+      setName(""); setDomain(""); setSiteOpen(false);
+      setCreated(site);
+      loadSites();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "failed");
+    }
+  };
+
+  const delSite = async (s: Site) => {
+    if (!active) return;
+    if (!confirm(`Delete site "${s.name}" and its analytics?`)) return;
+    await api.del(`/api/workspaces/${active._id}/sites/${s.siteId}`);
+    if (created?.siteId === s.siteId) setCreated(null);
+    loadSites();
+  };
+
+  const snippet = (siteId: string) =>
+    `<script async src="${API_ORIGIN}/tracker.js" data-site="${siteId}"></script>`;
+
+  const others = workspaces.filter((w) => w._id !== active?._id);
 
   return (
     <AppShell>
-      <Group justify="space-between" align="flex-start" mb="lg">
+      <Group justify="space-between" align="flex-start" mb="xl">
         <div>
-          <Title order={2}>Workspaces</Title>
-          <Text c="dimmed" size="sm" mt={4}>Create, rename or remove the workspaces that group your apps.</Text>
+          <Title order={1}>Workspaces</Title>
+          <Text c="dimmed" size="sm" mt={6}>Manage your workspaces and the sites they track.</Text>
         </div>
-        <Group gap="sm">
-          <SegmentedControl
-            value={view} onChange={setView} size="sm"
-            data={[
-              { value: "table", label: <Center><Table2 size={15} /></Center> },
-              { value: "card", label: <Center><LayoutGrid size={15} /></Center> },
-            ]}
-          />
-          <Button leftSection={<Plus size={16} />} onClick={() => setOpen((v) => !v)}>New</Button>
-        </Group>
+        <Button leftSection={<Plus size={16} />} onClick={() => setWsOpen((v) => !v)}>Create Workspace</Button>
       </Group>
 
       {error && <Alert color="red" variant="light" mb="md">{error}</Alert>}
 
-      <Collapse expanded={open}>
-        <Card withBorder radius="md" padding="md" mb="md">
-          <form onSubmit={create}>
+      <Collapse expanded={wsOpen}>
+        <Card withBorder radius="lg" padding="md" mb="lg">
+          <form onSubmit={createWorkspace}>
             <Group align="flex-end">
-              <TextInput label="Workspace name" placeholder="e.g. Acme Inc" value={name} onChange={(e) => setName(e.currentTarget.value)} required style={{ flex: 1 }} data-autofocus />
+              <TextInput label="Workspace name" placeholder="e.g. Acme Inc" value={wsName} onChange={(e) => setWsName(e.currentTarget.value)} required style={{ flex: 1 }} />
               <Button type="submit">Create</Button>
-              <Button variant="default" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button variant="default" onClick={() => setWsOpen(false)}>Cancel</Button>
             </Group>
           </form>
         </Card>
@@ -87,76 +146,160 @@ export default function Workspaces() {
 
       {loading ? (
         <Text c="dimmed">Loading…</Text>
-      ) : workspaces.length === 0 && !open ? (
+      ) : !active ? (
         <Center mih="40vh">
           <Stack align="center" gap="sm">
             <ThemeIcon variant="light" size={56} radius="md"><FolderKanban size={28} /></ThemeIcon>
             <Text c="dimmed">No workspaces yet.</Text>
-            <Button leftSection={<Plus size={16} />} onClick={() => setOpen(true)}>Create your first</Button>
+            <Button leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>Create your first</Button>
           </Stack>
         </Center>
-      ) : view === "table" ? (
-        <Card withBorder radius="md" padding={0}>
-          <Table verticalSpacing="sm" horizontalSpacing="lg" highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Name</Table.Th><Table.Th>Slug</Table.Th><Table.Th>Created</Table.Th><Table.Th ta="right">Actions</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {workspaces.map((w) => (
-                <Table.Tr key={w._id}>
-                  <Table.Td>
-                    {editId === w._id ? (
-                      <TextInput size="xs" value={editName} onChange={(e) => setEditName(e.currentTarget.value)} w={220} autoFocus />
-                    ) : (
-                      <Group gap="xs">
-                        <Text fw={600} c="indigo" style={{ cursor: "pointer" }} onClick={() => setActive(w._id)}>{w.name}</Text>
-                        {active?._id === w._id && <Badge size="xs" variant="light" color="green">active</Badge>}
-                      </Group>
-                    )}
-                  </Table.Td>
-                  <Table.Td c="dimmed">/{w.slug}</Table.Td>
-                  <Table.Td c="dimmed">{new Date(w.createdAt).toLocaleDateString()}</Table.Td>
-                  <Table.Td>
-                    <Group gap={4} justify="flex-end">
-                      {editId === w._id ? (
-                        <>
-                          <ActionIcon variant="subtle" color="green" onClick={() => saveEdit(w._id)}><Check size={15} /></ActionIcon>
-                          <ActionIcon variant="subtle" color="gray" onClick={() => setEditId(null)}><X size={15} /></ActionIcon>
-                        </>
-                      ) : (
-                        <>
-                          <ActionIcon variant="subtle" color="gray" onClick={() => { setEditId(w._id); setEditName(w.name); }}><Pencil size={15} /></ActionIcon>
-                          <ActionIcon variant="subtle" color="red" onClick={() => remove(w._id, w.name)}><Trash2 size={15} /></ActionIcon>
-                        </>
-                      )}
-                    </Group>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </Card>
       ) : (
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-          {workspaces.map((w) => (
-            <Card key={w._id} withBorder radius="md" padding="lg">
-              <Group justify="space-between">
-                <ThemeIcon variant="light" size="lg" radius="md"><FolderKanban size={18} /></ThemeIcon>
-                <Group gap={4}>
-                  <ActionIcon variant="subtle" color="green" onClick={() => setActive(w._id)} title="Set active"><Check size={15} /></ActionIcon>
-                  <ActionIcon variant="subtle" color="red" onClick={() => remove(w._id, w.name)} title="Delete"><Trash2 size={15} /></ActionIcon>
-                </Group>
+        <>
+          {/* ---------- Active workspace panel ---------- */}
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+            <Card withBorder radius="lg" padding="xl" mb="xl" className="ws-active">
+              <Group justify="space-between" align="flex-start" mb="xs">
+                <div>
+                  <Group gap="xs" mb={4}>
+                    {editing ? (
+                      <>
+                        <TextInput size="xs" value={editName} onChange={(e) => setEditName(e.currentTarget.value)} w={220} autoFocus />
+                        <ActionIcon variant="subtle" color="green" onClick={saveRename}><Check size={15} /></ActionIcon>
+                        <ActionIcon variant="subtle" color="gray" onClick={() => setEditing(false)}><X size={15} /></ActionIcon>
+                      </>
+                    ) : (
+                      <>
+                        <Title order={3}>{active.name}</Title>
+                        <ActionIcon variant="subtle" color="gray" size="sm" onClick={() => { setEditing(true); setEditName(active.name); }} title="Rename">
+                          <Pencil size={14} />
+                        </ActionIcon>
+                        <Badge color="green" variant="light" size="sm">Active</Badge>
+                      </>
+                    )}
+                  </Group>
+                  <IdRow label="Workspace Id" value={active._id} />
+                </div>
+                <ActionIcon variant="subtle" color="red" onClick={() => removeWorkspace(active)} title="Delete workspace">
+                  <Trash2 size={16} />
+                </ActionIcon>
               </Group>
-              <Group gap="xs" mt="sm">
-                <Text fw={650}>{w.name}</Text>
-                {active?._id === w._id && <Badge size="xs" variant="light" color="green">active</Badge>}
+
+              <Divider my="lg" />
+
+              {/* ---------- Domains & Sites ---------- */}
+              <Group gap={8} mb="md">
+                <Globe size={16} className="sect-ic" />
+                <Text fw={650} size="sm">Domains &amp; Sites</Text>
+                <Badge variant="light" color="gray" size="sm">{sites.length}</Badge>
               </Group>
-              <Text c="dimmed" size="sm">/{w.slug}</Text>
+
+              <Stack gap="sm">
+                {sites.map((s) => (
+                  <Card key={s._id} withBorder radius="md" padding="sm" className="site-row">
+                    <Group justify="space-between" wrap="nowrap">
+                      <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+                        <ThemeIcon variant="light" color="gray" radius="md" size="lg"><Globe size={16} /></ThemeIcon>
+                        <div style={{ minWidth: 0 }}>
+                          <Group gap={6}>
+                            <Text fw={600} size="sm" truncate>{s.name}</Text>
+                            <Badge size="xs" variant="light" color="gray" leftSection={<FrameworkIcon name={s.framework} />} tt="capitalize">
+                              {s.framework}
+                            </Badge>
+                          </Group>
+                          <Text size="xs" c="violet" truncate>{s.domain}</Text>
+                        </div>
+                      </Group>
+                      <Group gap={4} wrap="nowrap">
+                        <CopyButton value={snippet(s.siteId)}>
+                          {({ copied, copy }) => (
+                            <Button size="compact-xs" variant="default" onClick={copy} leftSection={copied ? <Check size={12} /> : <Copy size={12} />}>
+                              {copied ? "Copied" : "Snippet"}
+                            </Button>
+                          )}
+                        </CopyButton>
+                        <ActionIcon variant="subtle" color="red" onClick={() => delSite(s)} title="Delete site">
+                          <Trash2 size={15} />
+                        </ActionIcon>
+                      </Group>
+                    </Group>
+                  </Card>
+                ))}
+
+                {sites.length === 0 && !siteOpen && (
+                  <Text size="sm" c="dimmed" ta="center" py="md">
+                    No sites yet. Add one to start collecting analytics.
+                  </Text>
+                )}
+
+                <Collapse expanded={siteOpen}>
+                  <Card withBorder radius="md" padding="md">
+                    <form onSubmit={addSite}>
+                      <Group align="flex-end">
+                        <TextInput label="Site name" placeholder="My App" value={name} onChange={(e) => setName(e.currentTarget.value)} required style={{ flex: 1 }} />
+                        <TextInput label="Domain" placeholder="app.com" value={domain} onChange={(e) => setDomain(e.currentTarget.value)} required style={{ flex: 1 }} />
+                        <Select label="Framework" data={FRAMEWORKS} value={framework} onChange={(v) => v && setFramework(v)} w={130} comboboxProps={{ withinPortal: true }} />
+                        <Button type="submit">Add</Button>
+                        <Button variant="default" onClick={() => setSiteOpen(false)}>Cancel</Button>
+                      </Group>
+                    </form>
+                  </Card>
+                </Collapse>
+
+                {!siteOpen && (
+                  <Button variant="subtle" fullWidth leftSection={<Plus size={16} />} onClick={() => setSiteOpen(true)}>
+                    Add Another Site
+                  </Button>
+                )}
+              </Stack>
+
+              {created && (
+                <Alert color="green" variant="light" icon={<Check size={16} />} mt="md" title={`${created.name} created`}>
+                  <Text size="sm" mb="xs">Paste this before <Code>&lt;/head&gt;</Code> in the site:</Text>
+                  <Group gap="xs" wrap="nowrap">
+                    <Code style={{ flex: 1, overflow: "auto" }}>{snippet(created.siteId)}</Code>
+                    <CopyButton value={snippet(created.siteId)}>
+                      {({ copied, copy }) => (
+                        <Button size="xs" variant="light" color={copied ? "green" : "violet"} onClick={copy} leftSection={copied ? <Check size={13} /> : <Copy size={13} />}>
+                          {copied ? "Copied" : "Copy"}
+                        </Button>
+                      )}
+                    </CopyButton>
+                  </Group>
+                </Alert>
+              )}
             </Card>
-          ))}
-        </SimpleGrid>
+          </motion.div>
+
+          {/* ---------- Other workspaces ---------- */}
+          {others.length > 0 && (
+            <>
+              <Text fw={650} size="sm" mb="md">Other Workspaces</Text>
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
+                {others.map((w, i) => (
+                  <motion.div key={w._id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                    <Card withBorder radius="lg" padding="lg">
+                      <Group justify="space-between" align="flex-start" mb="xs">
+                        <Text fw={650}>{w.name}</Text>
+                        <ActionIcon variant="subtle" color="red" size="sm" onClick={() => removeWorkspace(w)} title="Delete">
+                          <Trash2 size={14} />
+                        </ActionIcon>
+                      </Group>
+                      <IdRow label="Workspace Id" value={w._id} />
+                      <Button
+                        variant="default" fullWidth mt="md"
+                        leftSection={<Repeat size={14} />}
+                        onClick={() => setActive(w._id)}
+                      >
+                        Switch to workspace
+                      </Button>
+                    </Card>
+                  </motion.div>
+                ))}
+              </SimpleGrid>
+            </>
+          )}
+        </>
       )}
     </AppShell>
   );

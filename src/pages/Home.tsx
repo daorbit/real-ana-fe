@@ -107,7 +107,7 @@ export default function Home() {
                 <Text c="dimmed" size="xs" ta="center" maw={340}>
                   Install the tracking snippet on a site and live visitors will appear here in real time.
                 </Text>
-                <Button component={Link} to="/app/analytics" size="xs" variant="light" mt={6} leftSection={<Plus size={14} />}>Get tracking snippet</Button>
+                <Button component={Link} to="/app/workspaces" size="xs" variant="light" mt={6} leftSection={<Plus size={14} />}>Get tracking snippet</Button>
               </Stack>
             )}
           </Card>
@@ -117,7 +117,7 @@ export default function Home() {
           <Card withBorder radius="lg" padding="lg" h="100%">
             <Text fw={600} size="sm" c="dimmed" mb="md">Quick actions</Text>
             <Stack gap="sm">
-              <Button component={Link} to="/app/analytics" variant="light" color="violet" fullWidth justify="flex-start" leftSection={<Plus size={16} />}>Add a site</Button>
+              <Button component={Link} to="/app/workspaces" variant="light" color="violet" fullWidth justify="flex-start" leftSection={<Plus size={16} />}>Add a site</Button>
               <Button component={Link} to="/app/analytics" variant="light" color="cyan" fullWidth justify="flex-start" leftSection={<BarChart3 size={16} />}>View analytics</Button>
               <Button component={Link} to="/app/workspaces" variant="light" color="grape" fullWidth justify="flex-start" leftSection={<FolderKanban size={16} />}>Manage workspaces</Button>
             </Stack>
