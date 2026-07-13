@@ -2,20 +2,25 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Drawer, Text, Stack, Group, Button, Checkbox, Card, Badge, Divider, Anchor,
-  ScrollArea, TextInput, SimpleGrid, Center, ThemeIcon,
+  ScrollArea, TextInput, SimpleGrid, Center, ThemeIcon, SegmentedControl,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import { RotateCcw, Eraser, Search, SearchX, X } from "lucide-react";
 import { WIDGETS, WIDGET_GROUPS } from "../hooks";
-import type { WidgetId } from "../hooks";
+import type { WidgetId, Span } from "../hooks";
 import { WidgetPreview } from "./WidgetPreview";
+
+/** The home grid is 4 columns wide, so a widget can span 1 to 4 of them. */
+const SPANS: Span[] = [1, 2, 3, 4];
 
 export function CustomizeDrawer({
   opened,
   onClose,
   count,
   has,
+  spanOf,
   toggle,
+  setSpan,
   reset,
   clear,
 }: {
@@ -24,7 +29,10 @@ export function CustomizeDrawer({
   /** How many widgets are currently on the home page. */
   count: number;
   has: (id: WidgetId) => boolean;
+  /** Current width of a widget on the page, or undefined if it isn't on it. */
+  spanOf: (id: WidgetId) => Span | undefined;
   toggle: (id: WidgetId) => void;
+  setSpan: (id: WidgetId, span: Span) => void;
   reset: () => void;
   clear: () => void;
 }) {
@@ -142,6 +150,28 @@ export function CustomizeDrawer({
                           <Text size="xs" c="dimmed" mt="xs" lineClamp={2}>
                             {w.description}
                           </Text>
+
+                          {/* Width only means something once the widget is on the
+                              page, so the control appears with it. Clicks must not
+                              bubble — the card itself toggles the widget off. */}
+                          {active && (
+                            <Group
+                              gap="xs"
+                              wrap="nowrap"
+                              mt="sm"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Text size="xs" c="dimmed" fw={500}>Width</Text>
+                              <SegmentedControl
+                                size="xs"
+                                color="emerald"
+                                value={String(spanOf(w.id) ?? w.defaultSpan)}
+                                onChange={(v) => setSpan(w.id, Number(v) as Span)}
+                                data={SPANS.map((s) => ({ label: String(s), value: String(s) }))}
+                                style={{ flex: 1 }}
+                              />
+                            </Group>
+                          )}
                         </Card>
                       </motion.div>
                     );

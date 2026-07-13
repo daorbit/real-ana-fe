@@ -148,6 +148,12 @@ export function useHomeWidgets() {
     [layout]
   );
 
+  /** Undefined when the widget isn't on the page — it has no width to report. */
+  const spanOf = useCallback(
+    (id: WidgetId) => layout.find((p) => p.id === id)?.span,
+    [layout]
+  );
+
   /** Add at the end with its default width, or remove if already present. */
   const toggle = useCallback(
     (id: WidgetId) => {
@@ -194,6 +200,7 @@ export function useHomeWidgets() {
     save,
     revert,
     has,
+    spanOf,
     toggle,
     remove,
     setSpan,

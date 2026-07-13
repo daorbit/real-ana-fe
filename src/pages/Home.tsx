@@ -154,7 +154,7 @@ export default function Home() {
   const { sites } = useSites(active?._id);
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
-    has, toggle, remove, setSpan, move, reset, clear,
+    has, spanOf, toggle, remove, setSpan, move, reset, clear,
   } = useHomeWidgets();
 
   const [customizing, setCustomizing] = useState(false);
@@ -274,7 +274,9 @@ export default function Home() {
         onClose={() => setCustomizing(false)}
         count={layout.length}
         has={has}
+        spanOf={spanOf}
         toggle={toggle}
+        setSpan={setSpan}
         reset={reset}
         clear={clear}
       />
@@ -287,17 +289,16 @@ export default function Home() {
           </Text>
         </div>
         <Group gap="sm">
-          {!editing && (
+          {!editing && !dirty && (
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
-          {editing ? (
+
+          {/* Widths and widget choices are edited in the drawer, order in edit
+              mode — either can leave unsaved work, so Save follows `dirty`
+              rather than the mode. */}
+          {dirty && (
             <>
-              <Button
-                variant="subtle"
-                color="gray"
-                onClick={onDiscard}
-                disabled={!dirty || saving}
-              >
+              <Button variant="subtle" color="gray" onClick={onDiscard} disabled={saving}>
                 Discard
               </Button>
               <Button
@@ -305,25 +306,28 @@ export default function Home() {
                 leftSection={<Check size={15} />}
                 onClick={onSave}
                 loading={saving}
-                // Nothing to write, so the click would be a no-op round-trip.
-                disabled={!dirty}
               >
                 Save changes
               </Button>
             </>
-          ) : (
+          )}
+
+          {!dirty && (
             <Button
-              variant="default"
-              leftSection={<Pencil size={15} />}
-              onClick={() => setEditing(true)}
+              variant={editing ? "filled" : "default"}
+              color={editing ? "emerald" : undefined}
+              leftSection={editing ? <Check size={15} /> : <Pencil size={15} />}
+              onClick={() => setEditing((v) => !v)}
             >
-              Edit layout
+              {editing ? "Done" : "Edit layout"}
             </Button>
           )}
+
           <Button variant="default" leftSection={<SlidersHorizontal size={15} />} onClick={() => setCustomizing(true)}>
             Add widgets
           </Button>
-          {!editing && (
+
+          {!editing && !dirty && (
             <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>
               Full analytics
             </Button>
