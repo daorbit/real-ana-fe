@@ -377,7 +377,7 @@ export default function RootLayout({ children }) {
       <head>
         <Script
           src="${base}/tracker.js"
-          data-site={process.env.NEXT_PUBLIC_VANTAGE_SITE_ID}
+          data-site={process.env.NEXT_PUBLIC_QUANTALOG_SITE_ID}
           strategy="afterInteractive"
         />
       </head>

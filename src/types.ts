@@ -107,10 +107,42 @@ export type Stats = {
   clicks: ClickBucket[];
   clickCount: number;
 
+  // how far down each page people get
+  scrollDepth: ScrollBucket[];
+
+  // traffic by hour and weekday
+  heatmap: HeatCell[];
+
+  // which entry points actually hold people
+  landingPages: LandingBucket[];
+
   // real-time
   livePages: Bucket[];
 
   timeseries: Point[];
 
   siteCount?: number;
+
+  /** Sites still running a tracker too old to report impressions or scroll depth. */
+  outdatedSites?: { siteId: string; name: string }[];
+};
+
+export type ScrollBucket = {
+  key: string;
+  /** Engagement records behind the average. */
+  count: number;
+  avgDepth: number;
+  /** Share of visits that reached the bottom of the page. */
+  completionRate: number;
+};
+
+/** `day` is 0–6 from Sunday, `hour` is 0–23. */
+export type HeatCell = { day: number; hour: number; count: number };
+
+export type LandingBucket = {
+  key: string;
+  /** Sessions that started here. */
+  count: number;
+  bounceRate: number;
+  pagesPerSession: number;
 };

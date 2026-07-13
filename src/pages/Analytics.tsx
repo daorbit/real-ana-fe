@@ -11,12 +11,16 @@ import {
 import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
+  ArrowDownWideNarrow,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
+import { Heatmap } from "../components/Heatmap";
+import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
+import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
 import { AnalyticsSkeleton } from "../components/Skeletons";
 import { useStats } from "../hooks";
@@ -167,6 +171,9 @@ export default function Analytics() {
   }
 
   const siteCount = view?.siteCount ?? 0;
+  // Impressions and scroll depth cannot exist for a site on an older script, so
+  // their empty states should say that rather than "waiting for data".
+  const anyOutdated = (view?.outdatedSites?.length ?? 0) > 0;
   const d = view?.deltas;
   const series = view?.timeseries ?? [];
   const hasData = (view?.pageviews ?? 0) > 0;
@@ -211,6 +218,10 @@ export default function Analytics() {
           </Group>
         </Group>
       </Group>
+
+      {/* Outside the dimming wrapper below: it is a call to action, not data,
+          so it should not fade out while a range loads. */}
+      <TrackerUpdate sites={view?.outdatedSites ?? []} />
 
       {/* The previous range stays on screen, dimmed, until the new one lands —
           so the numbers visibly go stale rather than the page going blank. */}
@@ -287,6 +298,7 @@ export default function Analytics() {
       <Tabs defaultValue="pages" variant="pills" color="emerald">
         <Tabs.List mb="lg">
           <Tabs.Tab value="pages" leftSection={<Eye size={14} />}>Pages</Tabs.Tab>
+          <Tabs.Tab value="engagement" leftSection={<ArrowDownWideNarrow size={14} />}>Engagement</Tabs.Tab>
           <Tabs.Tab value="sources" leftSection={<Tag size={14} />}>Sources</Tabs.Tab>
           <Tabs.Tab value="tech" leftSection={<AppWindow size={14} />}>Technology</Tabs.Tab>
           <Tabs.Tab value="geo" leftSection={<Globe2 size={14} />}>Geography</Tabs.Tab>
@@ -301,6 +313,14 @@ export default function Analytics() {
             <BarList title="Exit pages" icon={LogOut} items={view?.exitPages ?? []} color="pink"
                      empty="No completed sessions yet" />
           </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="engagement">
+          <SimpleGrid cols={{ base: 1, lg: 2 }} mb="lg">
+            <ScrollPanel items={view?.scrollDepth ?? []} outdated={anyOutdated} />
+            <LandingPanel items={view?.landingPages ?? []} />
+          </SimpleGrid>
+          <Heatmap cells={view?.heatmap ?? []} />
         </Tabs.Panel>
 
         <Tabs.Panel value="sources">

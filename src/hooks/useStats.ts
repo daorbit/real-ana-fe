@@ -37,14 +37,6 @@ export function useStats(workspaceId: string | undefined, range: string) {
    */
   const switchingRange = isFetching && currentData === undefined;
 
-  console.log("[useStats]", {
-    range,
-    isFetching,
-    hasData: stats !== undefined,
-    hasCurrent: currentData !== undefined,
-    switchingRange,
-  });
-
   // The spinner should only turn during an explicit refresh — a background poll
   // shouldn't make the UI look busy.
   const [refreshing, setRefreshing] = useState(false);
