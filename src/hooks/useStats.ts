@@ -17,10 +17,33 @@ export function useStats(workspaceId: string | undefined, range: string) {
     error,
     refetch,
     fulfilledTimeStamp,
+    isFetching,
+    currentData,
   } = useGetStatsQuery(
     { workspaceId: workspaceId!, range },
     { skip: !workspaceId, pollingInterval: POLL_MS }
   );
+
+  /**
+   * True while the data on screen belongs to a different range than the one
+   * asked for.
+   *
+   * `currentData` is undefined exactly when the requested cache key has no
+   * settled payload — which is what a range switch causes, and what a
+   * background poll does not: a poll refetches the same key in place and leaves
+   * `currentData` populated. That is the difference between "these numbers are
+   * for the wrong range" and "these numbers are a minute stale", and only the
+   * first should make the page look busy.
+   */
+  const switchingRange = isFetching && currentData === undefined;
+
+  console.log("[useStats]", {
+    range,
+    isFetching,
+    hasData: stats !== undefined,
+    hasCurrent: currentData !== undefined,
+    switchingRange,
+  });
 
   // The spinner should only turn during an explicit refresh — a background poll
   // shouldn't make the UI look busy.
@@ -48,6 +71,7 @@ export function useStats(workspaceId: string | undefined, range: string) {
 
   return {
     stats: stats ?? null,
+    loading: switchingRange,
     refresh,
     refreshing,
     lastUpdated: fulfilledTimeStamp ? new Date(fulfilledTimeStamp) : null,

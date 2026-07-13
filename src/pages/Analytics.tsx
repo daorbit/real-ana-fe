@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Progress,
-  SegmentedControl, Stack, Center, ThemeIcon, Badge, Tabs,
+  SegmentedControl, Stack, Center, ThemeIcon, Badge, Tabs, Box, Loader,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -136,11 +136,19 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 export default function Analytics() {
   const { active, loading } = useWorkspace();
   const [range, setRange] = useState("24h");
-  const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, range);
+  const { stats, loading: statsLoading, refresh, refreshing, lastUpdated } =
+    useStats(active?._id, range);
 
-  // Show the page shape immediately: while the workspace list loads, and again
-  // while the first stats payload is in flight.
-  if (loading || (active && !stats)) {
+  // The last payload we successfully rendered. Switching range empties `stats`
+  // until the new one arrives, and blanking the whole page to a skeleton each
+  // time would tear the header and range switcher out from under the cursor —
+  // so keep showing the previous numbers, dimmed, while the new range loads.
+  const shown = useRef(stats);
+  if (stats) shown.current = stats;
+  const view = stats ?? shown.current;
+
+  // Skeleton only on a true first load, when there is nothing to show at all.
+  if (loading || (active && !view)) {
     return <AppShell><AnalyticsSkeleton /></AppShell>;
   }
 
@@ -158,23 +166,23 @@ export default function Analytics() {
     );
   }
 
-  const siteCount = stats?.siteCount ?? 0;
-  const d = stats?.deltas;
-  const series = stats?.timeseries ?? [];
-  const hasData = (stats?.pageviews ?? 0) > 0;
+  const siteCount = view?.siteCount ?? 0;
+  const d = view?.deltas;
+  const series = view?.timeseries ?? [];
+  const hasData = (view?.pageviews ?? 0) > 0;
 
   const audience = [
-    { icon: Users, label: "Visitors", value: stats?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors" },
-    { icon: Eye, label: "Pageviews", value: stats?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views" },
-    { icon: Layers, label: "Sessions", value: stats?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null },
-    { icon: Radio, label: "Live now", value: stats?.live ?? 0, color: "green", live: true },
+    { icon: Users, label: "Visitors", value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors" },
+    { icon: Eye, label: "Pageviews", value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views" },
+    { icon: Layers, label: "Sessions", value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null },
+    { icon: Radio, label: "Live now", value: view?.live ?? 0, color: "green", live: true },
   ];
 
   const engagement = [
-    { icon: MousePointerClick, label: "Bounce rate", value: `${stats?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true },
-    { icon: Timer, label: "Avg. session", value: duration(stats?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null },
-    { icon: Timer, label: "Avg. time on page", value: duration(stats?.avgTimeOnPageMs ?? 0), color: "cyan" },
-    { icon: Layers, label: "Pages / session", value: stats?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null },
+    { icon: MousePointerClick, label: "Bounce rate", value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true },
+    { icon: Timer, label: "Avg. session", value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null },
+    { icon: Timer, label: "Avg. time on page", value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan" },
+    { icon: Layers, label: "Pages / session", value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null },
   ];
 
   return (
@@ -189,9 +197,30 @@ export default function Analytics() {
         </div>
         <Group gap="sm">
           <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
-          <SegmentedControl value={range} onChange={setRange} data={RANGES} size="sm" />
+          <Group gap="xs">
+            {statsLoading && <Loader size="xs" color="emerald" />}
+            <SegmentedControl
+              value={range}
+              onChange={setRange}
+              data={RANGES}
+              size="sm"
+              // A second click mid-flight would queue another range change and
+              // land whichever request happened to finish last.
+              disabled={statsLoading}
+            />
+          </Group>
         </Group>
       </Group>
+
+      {/* The previous range stays on screen, dimmed, until the new one lands —
+          so the numbers visibly go stale rather than the page going blank. */}
+      <Box
+        style={{
+          opacity: statsLoading ? 0.45 : 1,
+          pointerEvents: statsLoading ? "none" : undefined,
+          transition: "opacity 140ms ease",
+        }}
+      >
 
       {/* audience */}
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="md">
@@ -251,7 +280,7 @@ export default function Analytics() {
             )}
           </Card>
         </div>
-        <LiveNow stats={stats} />
+        <LiveNow stats={view} />
       </SimpleGrid>
 
       {/* breakdowns */}
@@ -266,41 +295,41 @@ export default function Analytics() {
 
         <Tabs.Panel value="pages">
           <SimpleGrid cols={{ base: 1, lg: 3 }}>
-            <BarList title="Top pages" icon={Eye} items={stats?.topPages ?? []} color="teal" />
-            <BarList title="Entry pages" icon={LogIn} items={stats?.entryPages ?? []} color="emerald"
+            <BarList title="Top pages" icon={Eye} items={view?.topPages ?? []} color="teal" />
+            <BarList title="Entry pages" icon={LogIn} items={view?.entryPages ?? []} color="emerald"
                      empty="No sessions recorded yet" />
-            <BarList title="Exit pages" icon={LogOut} items={stats?.exitPages ?? []} color="pink"
+            <BarList title="Exit pages" icon={LogOut} items={view?.exitPages ?? []} color="pink"
                      empty="No completed sessions yet" />
           </SimpleGrid>
         </Tabs.Panel>
 
         <Tabs.Panel value="sources">
           <SimpleGrid cols={{ base: 1, lg: 3 }}>
-            <BarList title="Referrers" icon={Tag} items={stats?.topReferrers ?? []} color="cyan" />
-            <BarList title="UTM sources" icon={Tag} items={stats?.utmSources ?? []} color="teal" />
-            <BarList title="UTM campaigns" icon={Tag} items={stats?.utmCampaigns ?? []} color="grape" />
+            <BarList title="Referrers" icon={Tag} items={view?.topReferrers ?? []} color="cyan" />
+            <BarList title="UTM sources" icon={Tag} items={view?.utmSources ?? []} color="teal" />
+            <BarList title="UTM campaigns" icon={Tag} items={view?.utmCampaigns ?? []} color="grape" />
           </SimpleGrid>
         </Tabs.Panel>
 
         <Tabs.Panel value="tech">
           <SimpleGrid cols={{ base: 1, lg: 2 }}>
-            <BarList title="Browsers" icon={AppWindow} items={stats?.browsers ?? []} color="cyan" />
-            <BarList title="Operating systems" icon={MonitorSmartphone} items={stats?.operatingSystems ?? []} color="teal" />
-            <BarList title="Devices" icon={MonitorSmartphone} items={stats?.devices ?? []} color="emerald" />
-            <BarList title="Screen sizes" icon={MonitorSmartphone} items={stats?.screenSizes ?? []} color="grape" />
+            <BarList title="Browsers" icon={AppWindow} items={view?.browsers ?? []} color="cyan" />
+            <BarList title="Operating systems" icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal" />
+            <BarList title="Devices" icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald" />
+            <BarList title="Screen sizes" icon={MonitorSmartphone} items={view?.screenSizes ?? []} color="grape" />
           </SimpleGrid>
         </Tabs.Panel>
 
         <Tabs.Panel value="geo">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
             <div style={{ gridColumn: "span 2" }}>
-              <WorldMap countries={stats?.countries ?? []} />
+              <WorldMap countries={view?.countries ?? []} />
             </div>
             <Stack gap="lg">
               <BarList
                 title="Countries"
                 icon={Globe2}
-                items={stats?.countries ?? []}
+                items={view?.countries ?? []}
                 color="emerald"
                 format={(k) => (
                   <span>
@@ -309,15 +338,16 @@ export default function Analytics() {
                   </span>
                 )}
               />
-              <BarList title="Languages" icon={Languages} items={stats?.languages ?? []} color="cyan" />
+              <BarList title="Languages" icon={Languages} items={view?.languages ?? []} color="cyan" />
             </Stack>
           </SimpleGrid>
         </Tabs.Panel>
 
         <Tabs.Panel value="clicks">
-          <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} limit={15} />
+          <ClicksPanel clicks={view?.clicks ?? []} total={view?.clickCount ?? 0} limit={15} />
         </Tabs.Panel>
       </Tabs>
+      </Box>
     </AppShell>
   );
 }
