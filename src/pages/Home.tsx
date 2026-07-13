@@ -179,14 +179,17 @@ export default function Home() {
     );
   };
 
-  const onSave = async () => {
+  /** Returns whether the save landed, so callers can keep their UI open on failure. */
+  const onSave = async (): Promise<boolean> => {
     try {
       await save();
       notify.success("Your layout is saved.", "Layout updated");
       setEditing(false);
+      return true;
     } catch (e) {
-      // Stay in edit mode — the unsaved layout is still on screen to retry.
+      // Stay put — the unsaved layout is still on screen to retry.
       notify.error(errMessage(e, "Could not save your layout."));
+      return false;
     }
   };
 
@@ -279,6 +282,12 @@ export default function Home() {
         setSpan={setSpan}
         reset={reset}
         clear={clear}
+        dirty={dirty}
+        saving={saving}
+        // Keep the drawer open if the save failed, so the edits aren't stranded.
+        onSave={async () => {
+          if (await onSave()) setCustomizing(false);
+        }}
       />
 
       <Group justify="space-between" align="flex-start" mb="lg">

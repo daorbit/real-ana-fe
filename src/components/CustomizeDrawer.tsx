@@ -5,7 +5,7 @@ import {
   ScrollArea, TextInput, SimpleGrid, Center, ThemeIcon, SegmentedControl,
 } from "@mantine/core";
 import { motion } from "framer-motion";
-import { RotateCcw, Eraser, Search, SearchX, X } from "lucide-react";
+import { RotateCcw, Eraser, Search, SearchX, X, Check } from "lucide-react";
 import { WIDGETS, WIDGET_GROUPS } from "../hooks";
 import type { WidgetId, Span } from "../hooks";
 import { WidgetPreview } from "./WidgetPreview";
@@ -23,6 +23,9 @@ export function CustomizeDrawer({
   setSpan,
   reset,
   clear,
+  dirty,
+  saving,
+  onSave,
 }: {
   opened: boolean;
   onClose: () => void;
@@ -35,6 +38,10 @@ export function CustomizeDrawer({
   setSpan: (id: WidgetId, span: Span) => void;
   reset: () => void;
   clear: () => void;
+  /** Whether there are edits not yet written to the server. */
+  dirty: boolean;
+  saving: boolean;
+  onSave: () => void;
 }) {
   const [query, setQuery] = useState("");
 
@@ -63,10 +70,35 @@ export function CustomizeDrawer({
       size="xl"
       radius="lg"
       scrollAreaComponent={ScrollArea.Autosize}
+      styles={{
+        // The list is long, and the save action belongs to the whole drawer —
+        // pin the header so it stays reachable without scrolling back up.
+        header: {
+          position: "sticky",
+          top: 0,
+          zIndex: 2,
+          alignItems: "flex-start",
+        },
+        title: { flex: 1, marginRight: "var(--mantine-spacing-sm)" },
+      }}
       title={
-        <Group gap="sm">
-          <Text fw={650}>Customize your home page</Text>
-          <Badge variant="light" color="emerald" size="sm">{count} on your page</Badge>
+        <Group justify="space-between" wrap="nowrap" w="100%">
+          <Group gap="sm" wrap="nowrap">
+            <Text fw={650}>Customize your home page</Text>
+            <Badge variant="light" color="emerald" size="sm">{count} on your page</Badge>
+          </Group>
+
+          {dirty && (
+            <Button
+              size="xs"
+              color="emerald"
+              leftSection={<Check size={14} />}
+              onClick={onSave}
+              loading={saving}
+            >
+              Save changes
+            </Button>
+          )}
         </Group>
       }
     >
