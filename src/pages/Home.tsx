@@ -23,6 +23,8 @@ import { RefreshButton } from "../components/Refresh";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
+import { Heatmap } from "../components/Heatmap";
+import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
 import { SortableWidget, WidgetDragPreview } from "../components/SortableWidget";
 import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
 import type { WidgetId, Span } from "../hooks";
@@ -267,6 +269,9 @@ export default function Home() {
     if (id === "livePages") return <LivePagesCard stats={stats} />;
     if (id === "worldMap") return <WorldMap countries={stats?.countries ?? []} />;
     if (id === "clicks") return <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} />;
+    if (id === "heatmap") return <Heatmap cells={stats?.heatmap ?? []} />;
+    if (id === "scrollDepth") return <ScrollPanel items={stats?.scrollDepth ?? []} />;
+    if (id === "landingPages") return <LandingPanel items={stats?.landingPages ?? []} />;
     return null;
   };
 
