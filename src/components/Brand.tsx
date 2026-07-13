@@ -2,7 +2,7 @@
 
 export function Logo({ size = 30 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-label="Vantage">
+    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-label="Quantalog">
       <defs>
         <linearGradient id="lg" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
           <stop stopColor="#34d399" />
@@ -22,7 +22,7 @@ export function Logo({ size = 30 }: { size?: number }) {
 export function Wordmark() {
   return (
     <div className="wordmark">
-      <span className="wordmark-text">Vantage<span className="wordmark-dot">.</span></span>
+      <span className="wordmark-text">Quantalog<span className="wordmark-dot">.</span></span>
     </div>
   );
 }

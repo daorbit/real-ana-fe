@@ -58,7 +58,7 @@ export default function Login() {
           <Stack gap="lg">
             <div>
               <Title order={2}>Welcome back</Title>
-              <Text c="dimmed" size="sm" mt={4}>Log in to your Vantage dashboard.</Text>
+              <Text c="dimmed" size="sm" mt={4}>Log in to your Quantalog dashboard.</Text>
             </div>
             {error && <Alert color="red" variant="light">{error}</Alert>}
             <TextInput

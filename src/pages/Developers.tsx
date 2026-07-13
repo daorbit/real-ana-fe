@@ -256,7 +256,7 @@ async function createProject(endUserId, appName) {
     },
     body: JSON.stringify({ name: appName, extUserId: endUserId }),
   });
-  if (!res.ok) throw new Error(\`Vantage: \${res.status}\`);
+  if (!res.ok) throw new Error(\`Quantalog: \${res.status}\`);
   return res.json(); // { _id, name, extUserId, ... }
 }`,
     Python: `import os, requests
@@ -414,7 +414,7 @@ app.get("/api/my-app/:siteId/stats", requireLogin, async (req, res) => {
   // 1. verify this logged-in user actually owns this siteId in YOUR db
   await assertUserOwnsSite(req.user.id, req.params.siteId);
 
-  // 2. call Vantage server-side
+  // 2. call Quantalog server-side
   const r = await fetch(
     \`${base}/v1/sites/\${req.params.siteId}/stats?range=24h\`,
     { headers: { Authorization: \`Bearer \${process.env.VANTAGE_API_KEY}\` } }
@@ -456,7 +456,7 @@ function my_app_stats(string $siteId, string $range = '24h'): array {
         </Group>
         <Text size="sm" c="dimmed" maw={680} mb="lg">
           Give <b>your users</b> real-time analytics inside <b>your own product</b> — the way Vercel and
-          Lovable do. Your users never sign up with Vantage and never see our UI: your backend creates
+          Lovable do. Your users never sign up with Quantalog and never see our UI: your backend creates
           the sites, injects the tracker, reads the numbers, and renders them in your design.
         </Text>
         <Group gap="xs" wrap="nowrap" align="center">
@@ -600,7 +600,7 @@ export default function Developers() {
       <div style={{ marginBottom: 24 }}>
         <Title order={1}>Developers</Title>
         <Text c="dimmed" size="sm" mt={6}>
-          Offer real-time analytics to your own users — powered by Vantage, branded as you.
+          Offer real-time analytics to your own users — powered by Quantalog, branded as you.
         </Text>
       </div>
 
