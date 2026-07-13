@@ -1,4 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { useGetLayoutQuery, useSaveLayoutMutation } from "../store";
+import { useWorkspace } from "../workspace";
 
 /** Visual family — decides which animated preview the picker shows. */
 export type WidgetKind = "metric" | "chart" | "list" | "map" | "live";
@@ -72,38 +75,73 @@ const DEFAULTS: Placed[] = [
   { id: "topReferrers", span: 2 },
 ];
 
-const KEY = "rta_home_layout";
+/**
+ * Widget ids are only meaningful to this build of the frontend, so a layout
+ * saved before a widget was renamed or removed can contain ids we no longer
+ * render. Drop those rather than crashing on them.
+ */
+function sanitise(stored: Placed[]): Placed[] {
+  const valid = new Set<string>(WIDGETS.map((w) => w.id));
+  return stored.filter(
+    (p) => p && valid.has(p.id) && [1, 2, 3, 4].includes(p.span)
+  );
+}
 
-function read(): Placed[] {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return DEFAULTS;
-    const parsed = JSON.parse(raw) as Placed[];
-    const valid = new Set<string>(WIDGETS.map((w) => w.id));
-    const kept = parsed.filter(
-      (p) => p && valid.has(p.id) && [1, 2, 3, 4].includes(p.span)
-    );
-    return kept.length ? kept : DEFAULTS;
-  } catch {
-    return DEFAULTS;
-  }
+/** Order is part of the layout, so compare position by position. */
+function sameLayout(a: Placed[], b: Placed[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((p, i) => p.id === b[i].id && p.span === b[i].span)
+  );
 }
 
 /**
- * The user's home layout: which widgets, in what order, and how wide each is.
- * Persisted per browser.
+ * The home layout: which widgets, in what order, and how wide each is.
+ *
+ * Persisted server-side per workspace, so the arrangement follows the user to
+ * any browser and each workspace keeps its own.
  */
 export function useHomeWidgets() {
-  const [layout, setLayout] = useState<Placed[]>(read);
+  const { active } = useWorkspace();
+  const workspaceId = active?._id;
 
-  const persist = useCallback((next: Placed[]) => {
-    setLayout(next);
-    try {
-      localStorage.setItem(KEY, JSON.stringify(next));
-    } catch {
-      /* storage disabled — the choice just won't survive a reload */
-    }
-  }, []);
+  const { data, isLoading } = useGetLayoutQuery(workspaceId ?? skipToken);
+  const [saveLayout, { isLoading: saving }] = useSaveLayoutMutation();
+
+  // `null` from the server means "never customised" — fall back to the
+  // defaults. An empty array is a deliberate choice and is kept as-is.
+  const saved = useMemo<Placed[]>(() => {
+    if (!data) return DEFAULTS;
+    return data.layout === null ? DEFAULTS : sanitise(data.layout);
+  }, [data]);
+
+  /**
+   * Edits are held here and only written on save, so a half-finished
+   * rearrangement never reaches the server. `null` means "no edits yet" — the
+   * saved layout shows through, including when it arrives from a later fetch.
+   */
+  const [draft, setDraft] = useState<Placed[] | null>(null);
+
+  // A workspace switch makes any in-progress draft belong to the wrong grid.
+  useEffect(() => {
+    setDraft(null);
+  }, [workspaceId]);
+
+  const layout = draft ?? saved;
+  const dirty = draft !== null && !sameLayout(draft, saved);
+
+  const persist = useCallback((next: Placed[]) => setDraft(next), []);
+
+  const save = useCallback(async () => {
+    if (!workspaceId || draft === null) return;
+    await saveLayout({ workspaceId, layout: draft }).unwrap();
+    // The mutation's response refreshes the cache, so the draft has nothing
+    // left to add — drop it and let the saved layout show through again.
+    setDraft(null);
+  }, [workspaceId, draft, saveLayout]);
+
+  /** Throw away unsaved edits and snap back to what the server has. */
+  const revert = useCallback(() => setDraft(null), []);
 
   const has = useCallback(
     (id: WidgetId) => layout.some((p) => p.id === id),
@@ -148,5 +186,19 @@ export function useHomeWidgets() {
   const reset = useCallback(() => persist(DEFAULTS), [persist]);
   const clear = useCallback(() => persist([]), [persist]);
 
-  return { layout, has, toggle, remove, setSpan, move, reset, clear };
+  return {
+    layout,
+    loading: isLoading,
+    saving,
+    dirty,
+    save,
+    revert,
+    has,
+    toggle,
+    remove,
+    setSpan,
+    move,
+    reset,
+    clear,
+  };
 }

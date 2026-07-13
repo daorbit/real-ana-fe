@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getToken } from "../api";
 import type { ApiKey, Site, Stats, Workspace } from "../types";
+import type { Placed } from "../hooks/useHomeWidgets";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -22,7 +23,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -105,6 +106,28 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "InstallStatus", id: siteId }],
     }),
 
+    /* ------------------------------- layout ------------------------------- */
+    // `layout: null` means the workspace has never been customised, which is
+    // different from an empty array (every widget removed on purpose).
+    getLayout: build.query<{ layout: Placed[] | null }, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/layout`,
+      providesTags: (_r, _e, workspaceId) => [{ type: "Layout", id: workspaceId }],
+    }),
+
+    saveLayout: build.mutation<
+      { layout: Placed[] },
+      { workspaceId: string; layout: Placed[] }
+    >({
+      query: ({ workspaceId, layout }) => ({
+        url: `/api/workspaces/${workspaceId}/layout`,
+        method: "PUT",
+        body: layout,
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [
+        { type: "Layout", id: workspaceId },
+      ],
+    }),
+
     /* ------------------------------- api keys ----------------------------- */
     getApiKeys: build.query<ApiKey[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/keys`,
@@ -141,6 +164,8 @@ export const {
   useGetStatsQuery,
   useGetInstallStatusQuery,
   useLazyGetInstallStatusQuery,
+  useGetLayoutQuery,
+  useSaveLayoutMutation,
   useGetApiKeysQuery,
   useCreateApiKeyMutation,
   useRevokeApiKeyMutation,

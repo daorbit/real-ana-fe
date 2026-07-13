@@ -28,6 +28,7 @@ import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
 import type { WidgetId, Span } from "../hooks";
 import { countryFlag, countryLabel, duration, num } from "../utils";
 import { useWorkspace } from "../workspace";
+import { notify, errMessage } from "../notify";
 import type { Bucket, Stats } from "../types";
 import { HomeSkeleton } from "../components/Skeletons";
 
@@ -151,7 +152,10 @@ export default function Home() {
   const { active, loading } = useWorkspace();
   const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, "24h");
   const { sites } = useSites(active?._id);
-  const { layout, has, toggle, remove, setSpan, move, reset, clear } = useHomeWidgets();
+  const {
+    layout, loading: layoutLoading, saving, dirty, save, revert,
+    has, toggle, remove, setSpan, move, reset, clear,
+  } = useHomeWidgets();
 
   const [customizing, setCustomizing] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -175,9 +179,27 @@ export default function Home() {
     );
   };
 
+  const onSave = async () => {
+    try {
+      await save();
+      notify.success("Your layout is saved.", "Layout updated");
+      setEditing(false);
+    } catch (e) {
+      // Stay in edit mode — the unsaved layout is still on screen to retry.
+      notify.error(errMessage(e, "Could not save your layout."));
+    }
+  };
+
+  const onDiscard = () => {
+    revert();
+    setEditing(false);
+  };
+
   // Show the page shape immediately: while the workspace list loads, and again
-  // while the first stats payload is in flight.
-  if (loading || (active && !stats)) {
+  // while the first stats payload is in flight. The layout is waited on too —
+  // rendering the defaults first would visibly reshuffle the grid a moment
+  // later, once the saved arrangement arrives.
+  if (loading || layoutLoading || (active && !stats)) {
     return <AppShell><HomeSkeleton /></AppShell>;
   }
 
@@ -268,14 +290,36 @@ export default function Home() {
           {!editing && (
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
-          <Button
-            variant={editing ? "filled" : "default"}
-            color={editing ? "emerald" : undefined}
-            leftSection={editing ? <Check size={15} /> : <Pencil size={15} />}
-            onClick={() => setEditing((v) => !v)}
-          >
-            {editing ? "Done" : "Edit layout"}
-          </Button>
+          {editing ? (
+            <>
+              <Button
+                variant="subtle"
+                color="gray"
+                onClick={onDiscard}
+                disabled={!dirty || saving}
+              >
+                Discard
+              </Button>
+              <Button
+                color="emerald"
+                leftSection={<Check size={15} />}
+                onClick={onSave}
+                loading={saving}
+                // Nothing to write, so the click would be a no-op round-trip.
+                disabled={!dirty}
+              >
+                Save changes
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="default"
+              leftSection={<Pencil size={15} />}
+              onClick={() => setEditing(true)}
+            >
+              Edit layout
+            </Button>
+          )}
           <Button variant="default" leftSection={<SlidersHorizontal size={15} />} onClick={() => setCustomizing(true)}>
             Add widgets
           </Button>
@@ -291,7 +335,7 @@ export default function Home() {
         <Alert color="emerald" variant="light" icon={<Move size={16} />} mb="lg">
           <Text size="sm">
             Drag the handle on any widget to move it, and use the number control to set how many
-            columns wide it is. Changes save automatically.
+            columns wide it is. Hit <b>Save changes</b> when you're happy with it.
           </Text>
         </Alert>
       )}
