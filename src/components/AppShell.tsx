@@ -1,13 +1,13 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, NavLink, Select, Avatar, Group, Text, ActionIcon, ScrollArea, Box,
-  useMantineColorScheme, SegmentedControl, Center, useComputedColorScheme,
+  useMantineColorScheme, SegmentedControl, Center, useComputedColorScheme, Button, Alert,
 } from "@mantine/core";
-import { Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2 } from "lucide-react";
+import { Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { useAuth } from "../auth";
-import { notify, confirmLogout } from "../notify";
+import { notify, confirmLogout, errMessage } from "../notify";
 import { useWorkspace } from "../workspace";
 
 const NAV = [
@@ -17,14 +17,40 @@ const NAV = [
   { to: "/app/developers", label: "Developers", icon: Code2 },
 ];
 
+/** Only an admin sees these, and only when not already acting as someone else. */
+const ADMIN_NAV = [
+  { to: "/app/impersonate", label: "View as user", icon: Users },
+];
+
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, logout, exitImpersonation } = useAuth();
   const { workspaces, active, setActive } = useWorkspace();
   const { setColorScheme } = useMantineColorScheme();
   const scheme = useComputedColorScheme("light");
   const loc = useLocation();
   const initials = (user?.name ?? "?").slice(0, 2).toUpperCase();
   const dark = scheme === "dark";
+
+  const [leaving, setLeaving] = useState(false);
+
+  const impersonating = Boolean(user?.impersonating);
+  // An impersonation session reports the target's role, so the admin nav would
+  // vanish mid-impersonation anyway — but be explicit about it.
+  const isAdmin = user?.role === "admin" && !impersonating;
+
+  const nav = isAdmin ? [...NAV, ...ADMIN_NAV] : NAV;
+
+  const leave = async () => {
+    setLeaving(true);
+    try {
+      await exitImpersonation();
+      notify.info("Back to your own account.");
+    } catch (e) {
+      notify.error(errMessage(e, "Could not exit impersonation."));
+    } finally {
+      setLeaving(false);
+    }
+  };
 
   return (
     <MantineShell
@@ -55,7 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
 
         <MantineShell.Section grow component={ScrollArea}>
-          {NAV.map((n) => {
+          {nav.map((n) => {
             const isActive = loc.pathname === n.to;
             return (
               <NavLink
@@ -105,7 +131,38 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <MantineShell.Main style={{ background: "var(--bg)", position: "relative" }}>
         <div className="glow glow-a" />
-        <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {/* Full access means an accidental delete lands on a real customer.
+              The banner is deliberately loud and always in reach. */}
+          {impersonating && (
+            <Alert
+              color="orange"
+              variant="filled"
+              radius="md"
+              mb="lg"
+              icon={<Eye size={18} />}
+            >
+              <Group justify="space-between" wrap="nowrap">
+                <Text size="sm" fw={500}>
+                  You are viewing as <b>{user?.email}</b> with full access — changes you
+                  make are real.
+                </Text>
+                <Button
+                  size="xs"
+                  variant="white"
+                  color="orange"
+                  onClick={leave}
+                  loading={leaving}
+                  style={{ flexShrink: 0 }}
+                >
+                  Exit
+                </Button>
+              </Group>
+            </Alert>
+          )}
+
+          {children}
+        </div>
       </MantineShell.Main>
     </MantineShell>
   );

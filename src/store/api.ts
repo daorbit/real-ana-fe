@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getToken } from "../api";
-import type { ApiKey, Site, Stats, Workspace } from "../types";
+import type { AdminUserPage, ApiKey, Site, Stats, Workspace } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -23,7 +23,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -128,6 +128,22 @@ export const api = createApi({
       ],
     }),
 
+    /* -------------------------------- admin ------------------------------- */
+    getAdminUsers: build.query<
+      AdminUserPage,
+      { q?: string; role?: string; page?: number }
+    >({
+      query: ({ q, role, page }) => {
+        const p = new URLSearchParams();
+        if (q) p.set("q", q);
+        if (role) p.set("role", role);
+        if (page && page > 1) p.set("page", String(page));
+        const qs = p.toString();
+        return `/api/admin/users${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: ["AdminUser"],
+    }),
+
     /* ------------------------------- api keys ----------------------------- */
     getApiKeys: build.query<ApiKey[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/keys`,
@@ -166,6 +182,7 @@ export const {
   useLazyGetInstallStatusQuery,
   useGetLayoutQuery,
   useSaveLayoutMutation,
+  useGetAdminUsersQuery,
   useGetApiKeysQuery,
   useCreateApiKeyMutation,
   useRevokeApiKeyMutation,

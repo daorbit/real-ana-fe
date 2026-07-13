@@ -1,4 +1,30 @@
-export type User = { id: string; email: string; name: string };
+export type Role = "admin" | "user";
+
+export type User = {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  /** True when this session is an admin acting as someone else. */
+  impersonating?: boolean;
+};
+
+/** A row in the admin's user switcher. */
+export type AdminUser = {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  createdAt: string;
+  workspaceCount: number;
+};
+
+export type AdminUserPage = {
+  users: AdminUser[];
+  total: number;
+  page: number;
+  pages: number;
+};
 
 export type Workspace = {
   _id: string;

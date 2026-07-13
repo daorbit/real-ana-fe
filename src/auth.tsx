@@ -1,7 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useDispatch } from "react-redux";
-import { api, setToken, clearToken, getToken } from "./api";
+import {
+  api, setToken, clearToken, getToken,
+  startImpersonating, stopImpersonating,
+} from "./api";
 import { api as rtkApi } from "./store";
 import type { User } from "./types";
 
@@ -11,6 +14,9 @@ type AuthState = {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  /** Admin only: act as another user until `exitImpersonation`. */
+  impersonate: (userId: string) => Promise<void>;
+  exitImpersonation: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -58,8 +64,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(rtkApi.util.resetApiState());
   };
 
+  const impersonate = async (userId: string) => {
+    const r = await api.post<AuthResp>(`/api/admin/impersonate/${userId}`, {});
+    startImpersonating(r.token);
+    // The cache is full of the admin's own workspaces and stats. Clearing it is
+    // what makes the switch complete rather than cosmetic.
+    dispatch(rtkApi.util.resetApiState());
+    setUser({ ...r.user, impersonating: true });
+    // The active workspace is remembered per browser, and it belongs to the
+    // admin — leaving it would point every query at a workspace this user
+    // cannot see.
+    localStorage.removeItem("rta_active_ws");
+  };
+
+  const exitImpersonation = async () => {
+    if (!stopImpersonating()) return;
+    dispatch(rtkApi.util.resetApiState());
+    localStorage.removeItem("rta_active_ws");
+    const me = await api.get<User>("/api/auth/me");
+    setUser(me);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, logout, impersonate, exitImpersonation }}
+    >
       {children}
     </AuthContext.Provider>
   );
