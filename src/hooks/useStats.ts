@@ -11,7 +11,11 @@ import { POLL_MS } from "./usePolling";
  * the 60s poll ticks, a mutation invalidates the Stats tag, or the user hits
  * Refresh.
  */
-export function useStats(workspaceId: string | undefined, range: string) {
+export function useStats(
+  workspaceId: string | undefined,
+  range: string,
+  filter?: string
+) {
   const {
     data: stats,
     error,
@@ -20,7 +24,7 @@ export function useStats(workspaceId: string | undefined, range: string) {
     isFetching,
     currentData,
   } = useGetStatsQuery(
-    { workspaceId: workspaceId!, range },
+    { workspaceId: workspaceId!, range, filter },
     { skip: !workspaceId, pollingInterval: POLL_MS }
   );
 

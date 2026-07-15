@@ -118,6 +118,8 @@ export type Stats = {
 
   // custom events fired via rta.track()
   customEvents: EventBucket[];
+  // summed props.value across all custom events (goal revenue)
+  totalRevenue: number;
 
   // real-time
   livePages: Bucket[];
@@ -128,7 +130,32 @@ export type Stats = {
 
   /** Sites still running a tracker too old to report impressions or scroll depth. */
   outdatedSites?: { siteId: string; name: string }[];
+
+  /** The active dashboard-wide filter this payload was computed under. */
+  filters?: StatsFilter;
 };
+
+/** A dashboard-wide filter. Each set key narrows every number to that segment. */
+export type StatsFilter = Partial<{
+  country: string;
+  device: string;
+  browser: string;
+  os: string;
+  referrer: string;
+  path: string;
+  language: string;
+  utmSource: string;
+  utmCampaign: string;
+  eventName: string;
+}>;
+
+/** Serialize a filter object into the `key:value;key:value` query value. */
+export function serializeFilter(f: StatsFilter): string {
+  return Object.entries(f)
+    .filter(([, v]) => v != null && v !== "")
+    .map(([k, v]) => `${k}:${v}`)
+    .join(";");
+}
 
 export type ScrollBucket = {
   key: string;
@@ -159,4 +186,6 @@ export type EventBucket = {
   visitors: number;
   /** Share of all visitors in the window who fired it at least once. */
   conversionRate: number;
+  /** Summed numeric `props.value` across fires — revenue attributed to this event. */
+  revenue: number;
 };

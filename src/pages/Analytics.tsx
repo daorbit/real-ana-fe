@@ -11,7 +11,7 @@ import {
 import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow, Zap,
+  ArrowDownWideNarrow, Zap, Filter,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
@@ -21,21 +21,31 @@ import { ClicksPanel } from "../components/ClicksPanel";
 import { Heatmap } from "../components/Heatmap";
 import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
 import { CustomEventsPanel } from "../components/CustomEventsPanel";
+import { FilterBar } from "../components/FilterBar";
 import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
 import { AnalyticsSkeleton } from "../components/Skeletons";
 import { useStats } from "../hooks";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
 import { useWorkspace } from "../workspace";
-import type { Stats, Bucket } from "../types";
+import type { Stats, Bucket, StatsFilter } from "../types";
+import { serializeFilter } from "../types";
 
 const RANGES = ["1h", "24h", "7d", "30d"];
 const CHART = "#10b981";
 
 /** Small uppercase heading that groups a band of cards under one label. */
-function SectionLabel({ icon: Icon, children }: { icon: any; children: React.ReactNode }) {
+function SectionLabel({
+  icon: Icon,
+  children,
+  noMargin,
+}: {
+  icon: any;
+  children: React.ReactNode;
+  noMargin?: boolean;
+}) {
   return (
-    <Group gap={7} mb="sm">
+    <Group gap={7} mb={noMargin ? 0 : "sm"}>
       <Icon size={14} className="sect-ic" />
       <Text fw={700} size="xs" tt="uppercase" c="dimmed" style={{ letterSpacing: "0.06em" }}>
         {children}
@@ -61,6 +71,8 @@ function BarList({
   icon: Icon,
   format,
   empty = "Waiting for data…",
+  filterKey,
+  onFilter,
 }: {
   title: string;
   items: Bucket[];
@@ -68,9 +80,13 @@ function BarList({
   icon?: any;
   format?: (key: string) => React.ReactNode;
   empty?: string;
+  /** When set, each row filters the dashboard by this dimension on click. */
+  filterKey?: keyof StatsFilter;
+  onFilter?: (key: keyof StatsFilter, value: string) => void;
 }) {
   const total = items.reduce((sum, i) => sum + i.count, 0);
   const max = Math.max(1, ...items.map((i) => i.count));
+  const clickable = Boolean(filterKey && onFilter);
 
   return (
     <Card withBorder radius="lg" padding="lg" h="100%">
@@ -89,12 +105,35 @@ function BarList({
       ) : (
         <Stack gap="sm">
           {items.map((i) => (
-            <div key={i.key}>
+            <div
+              key={i.key}
+              role={clickable ? "button" : undefined}
+              tabIndex={clickable ? 0 : undefined}
+              onClick={clickable ? () => onFilter!(filterKey!, i.key) : undefined}
+              onKeyDown={
+                clickable
+                  ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onFilter!(filterKey!, i.key);
+                      }
+                    }
+                  : undefined
+              }
+              className={clickable ? "bar-row" : undefined}
+              title={clickable ? `Filter by ${i.key}` : undefined}
+            >
               <Group justify="space-between" gap="xs" mb={4} wrap="nowrap">
                 <Text size="sm" truncate style={{ flex: 1 }}>
                   {format ? format(i.key) : i.key}
                 </Text>
                 <Group gap={6} wrap="nowrap">
+                  {clickable && (
+                    <span className="bar-row-filter">
+                      <Filter size={12} />
+                      Filter
+                    </span>
+                  )}
                   <Text size="xs" c="dimmed">{share(i.count, total)}</Text>
                   <Text size="sm" fw={700}>{num(i.count)}</Text>
                 </Group>
@@ -163,8 +202,19 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 export default function Analytics() {
   const { active, loading } = useWorkspace();
   const [range, setRange] = useState("24h");
+  const [filter, setFilter] = useState<StatsFilter>({});
   const { stats, loading: statsLoading, refresh, refreshing, lastUpdated } =
-    useStats(active?._id, range);
+    useStats(active?._id, range, serializeFilter(filter));
+
+  const addFilter = (key: keyof StatsFilter, value: string) =>
+    setFilter((f) => ({ ...f, [key]: value }));
+  const removeFilter = (key: keyof StatsFilter) =>
+    setFilter((f) => {
+      const next = { ...f };
+      delete next[key];
+      return next;
+    });
+  const clearFilter = () => setFilter({});
 
   // The last payload we successfully rendered. Switching range empties `stats`
   // until the new one arrives, and blanking the whole page to a skeleton each
@@ -254,6 +304,10 @@ export default function Analytics() {
           so it should not fade out while a range loads. */}
       <TrackerUpdate sites={view?.outdatedSites ?? []} />
 
+      {/* Active segment. Clicking any breakdown row below adds a chip here and
+          re-scopes every number to that segment. */}
+      <FilterBar filter={filter} onRemove={removeFilter} onClear={clearFilter} />
+
       {/* The previous range stays on screen, dimmed, until the new one lands —
           so the numbers visibly go stale rather than the page going blank. */}
       <Box
@@ -337,7 +391,12 @@ export default function Analytics() {
       </SimpleGrid>
 
       {/* breakdowns */}
-      <SectionLabel icon={Layers}>Breakdowns</SectionLabel>
+      <Group justify="space-between" align="center" mb="sm">
+        <SectionLabel icon={Layers} noMargin>Breakdowns</SectionLabel>
+        <Text size="xs" c="dimmed" visibleFrom="sm">
+          Tip: click any row to filter the whole dashboard by it.
+        </Text>
+      </Group>
       <Tabs defaultValue="pages" variant="pills" color="emerald">
         <Tabs.List mb="lg" style={{ flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4 }}>
           <Tabs.Tab value="pages" leftSection={<Eye size={14} />}>Pages</Tabs.Tab>
@@ -351,11 +410,12 @@ export default function Analytics() {
 
         <Tabs.Panel value="pages">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <BarList title="Top pages" icon={Eye} items={view?.topPages ?? []} color="teal" />
+            <BarList title="Top pages" icon={Eye} items={view?.topPages ?? []} color="teal"
+                     filterKey="path" onFilter={addFilter} />
             <BarList title="Entry pages" icon={LogIn} items={view?.entryPages ?? []} color="emerald"
-                     empty="No sessions recorded yet" />
+                     empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
             <BarList title="Exit pages" icon={LogOut} items={view?.exitPages ?? []} color="pink"
-                     empty="No completed sessions yet" />
+                     empty="No completed sessions yet" filterKey="path" onFilter={addFilter} />
           </SimpleGrid>
         </Tabs.Panel>
 
@@ -369,17 +429,23 @@ export default function Analytics() {
 
         <Tabs.Panel value="sources">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <BarList title="Referrers" icon={Tag} items={view?.topReferrers ?? []} color="cyan" />
-            <BarList title="UTM sources" icon={Tag} items={view?.utmSources ?? []} color="teal" />
-            <BarList title="UTM campaigns" icon={Tag} items={view?.utmCampaigns ?? []} color="grape" />
+            <BarList title="Referrers" icon={Tag} items={view?.topReferrers ?? []} color="cyan"
+                     filterKey="referrer" onFilter={addFilter} />
+            <BarList title="UTM sources" icon={Tag} items={view?.utmSources ?? []} color="teal"
+                     filterKey="utmSource" onFilter={addFilter} />
+            <BarList title="UTM campaigns" icon={Tag} items={view?.utmCampaigns ?? []} color="grape"
+                     filterKey="utmCampaign" onFilter={addFilter} />
           </SimpleGrid>
         </Tabs.Panel>
 
         <Tabs.Panel value="tech">
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-            <BarList title="Browsers" icon={AppWindow} items={view?.browsers ?? []} color="cyan" />
-            <BarList title="Operating systems" icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal" />
-            <BarList title="Devices" icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald" />
+            <BarList title="Browsers" icon={AppWindow} items={view?.browsers ?? []} color="cyan"
+                     filterKey="browser" onFilter={addFilter} />
+            <BarList title="Operating systems" icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal"
+                     filterKey="os" onFilter={addFilter} />
+            <BarList title="Devices" icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald"
+                     filterKey="device" onFilter={addFilter} />
             <BarList title="Screen sizes" icon={MonitorSmartphone} items={view?.screenSizes ?? []} color="grape" />
           </SimpleGrid>
         </Tabs.Panel>
@@ -395,6 +461,8 @@ export default function Analytics() {
                 icon={Globe2}
                 items={view?.countries ?? []}
                 color="emerald"
+                filterKey="country"
+                onFilter={addFilter}
                 format={(k) => (
                   <span>
                     <span style={{ marginRight: 6 }}>{countryFlag(k)}</span>
@@ -402,7 +470,8 @@ export default function Analytics() {
                   </span>
                 )}
               />
-              <BarList title="Languages" icon={Languages} items={view?.languages ?? []} color="cyan" />
+              <BarList title="Languages" icon={Languages} items={view?.languages ?? []} color="cyan"
+                       filterKey="language" onFilter={addFilter} />
             </Stack>
           </SimpleGrid>
         </Tabs.Panel>
@@ -414,7 +483,10 @@ export default function Analytics() {
         <Tabs.Panel value="events">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
             <div style={{ gridColumn: "span 2" }}>
-              <CustomEventsPanel items={view?.customEvents ?? []} />
+              <CustomEventsPanel
+                items={view?.customEvents ?? []}
+                totalRevenue={view?.totalRevenue ?? 0}
+              />
             </div>
             <Card withBorder radius="lg" padding="lg" h="100%">
               <Group gap={8} mb="md">
@@ -429,6 +501,11 @@ export default function Analytics() {
                 <Text size="sm" c="dimmed">
                   Conversion rate is the share of visitors in this period who fired
                   the event at least once.
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Pass a numeric <b>value</b> in the event props — e.g.{" "}
+                  <code>{`{ value: 49 }`}</code> — and it&apos;s summed into revenue
+                  per event and overall.
                 </Text>
                 <Button
                   component={Link}

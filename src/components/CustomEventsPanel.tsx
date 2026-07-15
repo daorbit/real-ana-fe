@@ -10,15 +10,31 @@ import type { EventBucket } from "../types";
  * Each row is one event name with its total fires, distinct visitors, and the
  * share of visitors who did it at least once (its conversion rate).
  */
-export function CustomEventsPanel({ items }: { items: EventBucket[] }) {
+export function CustomEventsPanel({
+  items,
+  totalRevenue = 0,
+}: {
+  items: EventBucket[];
+  /** Summed revenue across all events, shown as a badge when non-zero. */
+  totalRevenue?: number;
+}) {
   const total = items.reduce((sum, i) => sum + i.count, 0);
   const max = Math.max(1, ...items.map((i) => i.count));
+  const money = (n: number) =>
+    n.toLocaleString(undefined, { style: "currency", currency: "USD" });
 
   return (
     <Card withBorder radius="lg" padding="lg">
-      <Group gap={8} mb="md">
-        <Zap size={15} className="sect-ic" />
-        <Text fw={600} c="dimmed" size="sm">Custom events</Text>
+      <Group justify="space-between" mb="md" wrap="nowrap">
+        <Group gap={8}>
+          <Zap size={15} className="sect-ic" />
+          <Text fw={600} c="dimmed" size="sm">Custom events</Text>
+        </Group>
+        {totalRevenue > 0 && (
+          <Badge variant="light" color="emerald" size="lg" radius="sm">
+            {money(totalRevenue)} revenue
+          </Badge>
+        )}
       </Group>
 
       {items.length === 0 ? (
@@ -51,9 +67,14 @@ export function CustomEventsPanel({ items }: { items: EventBucket[] }) {
                 </Group>
               </Group>
               <Progress value={(i.count / max) * 100} size="sm" radius="xl" color="grape" />
-              <Text size="xs" c="dimmed" mt={3}>
-                {num(i.visitors)} visitor{i.visitors === 1 ? "" : "s"}
-              </Text>
+              <Group gap="sm" mt={3}>
+                <Text size="xs" c="dimmed">
+                  {num(i.visitors)} visitor{i.visitors === 1 ? "" : "s"}
+                </Text>
+                {i.revenue > 0 && (
+                  <Text size="xs" c="emerald" fw={600}>{money(i.revenue)}</Text>
+                )}
+              </Group>
             </div>
           ))}
         </Stack>

@@ -89,11 +89,17 @@ export const api = createApi({
     }),
 
     /* ------------------------------ analytics ----------------------------- */
-    getStats: build.query<Stats, { workspaceId: string; range: string }>({
-      query: ({ workspaceId, range }) =>
-        `/api/workspaces/${workspaceId}/stats?range=${range}`,
-      providesTags: (_r, _e, { workspaceId, range }) => [
-        { type: "Stats", id: `${workspaceId}-${range}` },
+    getStats: build.query<
+      Stats,
+      { workspaceId: string; range: string; filter?: string }
+    >({
+      query: ({ workspaceId, range, filter }) => {
+        const qs = new URLSearchParams({ range });
+        if (filter) qs.set("filter", filter);
+        return `/api/workspaces/${workspaceId}/stats?${qs.toString()}`;
+      },
+      providesTags: (_r, _e, { workspaceId, range, filter }) => [
+        { type: "Stats", id: `${workspaceId}-${range}-${filter ?? ""}` },
       ],
     }),
 
