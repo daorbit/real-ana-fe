@@ -32,6 +32,28 @@ import type { Stats, Bucket } from "../types";
 const RANGES = ["1h", "24h", "7d", "30d"];
 const CHART = "#10b981";
 
+/** Small uppercase heading that groups a band of cards under one label. */
+function SectionLabel({ icon: Icon, children }: { icon: any; children: React.ReactNode }) {
+  return (
+    <Group gap={7} mb="sm">
+      <Icon size={14} className="sect-ic" />
+      <Text fw={700} size="xs" tt="uppercase" c="dimmed" style={{ letterSpacing: "0.06em" }}>
+        {children}
+      </Text>
+    </Group>
+  );
+}
+
+/** A coloured dot + label, for the traffic chart's inline legend. */
+function LegendDot({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <Group gap={6} wrap="nowrap">
+      <span style={{ width: 9, height: 9, borderRadius: 3, background: color, display: "inline-block" }} />
+      <Text size="xs" c="dimmed">{children}</Text>
+    </Group>
+  );
+}
+
 function BarList({
   title,
   items,
@@ -51,14 +73,14 @@ function BarList({
   const max = Math.max(1, ...items.map((i) => i.count));
 
   return (
-    <Card withBorder radius="lg" padding="lg">
+    <Card withBorder radius="lg" padding="lg" h="100%">
       <Group gap={8} mb="md">
         {Icon && <Icon size={15} className="sect-ic" />}
         <Text fw={600} c="dimmed" size="sm">{title}</Text>
       </Group>
 
       {items.length === 0 ? (
-        <Center py="lg">
+        <Center py="lg" mih={120}>
           <Stack align="center" gap={4}>
             <ThemeIcon variant="light" color="gray" size="md" radius="md"><Inbox size={16} /></ThemeIcon>
             <Text c="dimmed" size="xs">{empty}</Text>
@@ -106,7 +128,7 @@ function LiveNow({ stats }: { stats: Stats | null }) {
   const live = stats?.live ?? 0;
 
   return (
-    <Card withBorder radius="lg" padding="lg">
+    <Card withBorder radius="lg" padding="lg" h="100%">
       <Group justify="space-between" mb="md">
         <Group gap={8}>
           <span className="status-dot live" style={{ background: "var(--mantine-color-teal-6)" }} />
@@ -243,7 +265,8 @@ export default function Analytics() {
       >
 
       {/* audience */}
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="md">
+      <SectionLabel icon={Users}>Audience</SectionLabel>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb="xl">
         {audience.map((k, i) => (
           <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
             <StatCard {...k} />
@@ -252,7 +275,8 @@ export default function Analytics() {
       </SimpleGrid>
 
       {/* engagement */}
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
+      <SectionLabel icon={ArrowDownWideNarrow}>Engagement</SectionLabel>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb="xl">
         {engagement.map((k, i) => (
           <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05, duration: 0.35 }}>
             <StatCard {...k} />
@@ -261,10 +285,19 @@ export default function Analytics() {
       </SimpleGrid>
 
       {/* traffic chart + live */}
-      <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="lg">
+      <SectionLabel icon={Eye}>Traffic</SectionLabel>
+      <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="xl">
         <div style={{ gridColumn: "span 2" }}>
           <Card withBorder radius="lg" padding="lg" h="100%">
-            <Text fw={600} c="dimmed" size="sm" mb="md">Traffic over time</Text>
+            <Group justify="space-between" mb="md" wrap="nowrap">
+              <Text fw={600} c="dimmed" size="sm">Traffic over time</Text>
+              {hasData && (
+                <Group gap="md" wrap="nowrap">
+                  <LegendDot color="#10b981">Pageviews</LegendDot>
+                  <LegendDot color="#22d3ee">Visitors</LegendDot>
+                </Group>
+              )}
+            </Group>
             {hasData ? (
               <ResponsiveContainer width="100%" height={260}>
                 <AreaChart data={series} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
@@ -304,8 +337,9 @@ export default function Analytics() {
       </SimpleGrid>
 
       {/* breakdowns */}
+      <SectionLabel icon={Layers}>Breakdowns</SectionLabel>
       <Tabs defaultValue="pages" variant="pills" color="emerald">
-        <Tabs.List mb="lg">
+        <Tabs.List mb="lg" style={{ flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4 }}>
           <Tabs.Tab value="pages" leftSection={<Eye size={14} />}>Pages</Tabs.Tab>
           <Tabs.Tab value="engagement" leftSection={<ArrowDownWideNarrow size={14} />}>Engagement</Tabs.Tab>
           <Tabs.Tab value="sources" leftSection={<Tag size={14} />}>Sources</Tabs.Tab>
@@ -316,7 +350,7 @@ export default function Analytics() {
         </Tabs.List>
 
         <Tabs.Panel value="pages">
-          <SimpleGrid cols={{ base: 1, lg: 3 }}>
+          <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
             <BarList title="Top pages" icon={Eye} items={view?.topPages ?? []} color="teal" />
             <BarList title="Entry pages" icon={LogIn} items={view?.entryPages ?? []} color="emerald"
                      empty="No sessions recorded yet" />
@@ -326,7 +360,7 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="engagement">
-          <SimpleGrid cols={{ base: 1, lg: 2 }} mb="lg">
+          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" mb="lg">
             <ScrollPanel items={view?.scrollDepth ?? []} outdated={anyOutdated} />
             <LandingPanel items={view?.landingPages ?? []} />
           </SimpleGrid>
@@ -334,7 +368,7 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="sources">
-          <SimpleGrid cols={{ base: 1, lg: 3 }}>
+          <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
             <BarList title="Referrers" icon={Tag} items={view?.topReferrers ?? []} color="cyan" />
             <BarList title="UTM sources" icon={Tag} items={view?.utmSources ?? []} color="teal" />
             <BarList title="UTM campaigns" icon={Tag} items={view?.utmCampaigns ?? []} color="grape" />
@@ -342,7 +376,7 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="tech">
-          <SimpleGrid cols={{ base: 1, lg: 2 }}>
+          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
             <BarList title="Browsers" icon={AppWindow} items={view?.browsers ?? []} color="cyan" />
             <BarList title="Operating systems" icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal" />
             <BarList title="Devices" icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald" />
@@ -378,7 +412,37 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="events">
-          <CustomEventsPanel items={view?.customEvents ?? []} />
+          <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
+            <div style={{ gridColumn: "span 2" }}>
+              <CustomEventsPanel items={view?.customEvents ?? []} />
+            </div>
+            <Card withBorder radius="lg" padding="lg" h="100%">
+              <Group gap={8} mb="md">
+                <Zap size={15} className="sect-ic" />
+                <Text fw={600} c="dimmed" size="sm">About events</Text>
+              </Group>
+              <Stack gap="sm">
+                <Text size="sm" c="dimmed">
+                  Custom events are actions you care about — a signup, a purchase, a
+                  plan upgrade — sent from your own site with one line of code.
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Conversion rate is the share of visitors in this period who fired
+                  the event at least once.
+                </Text>
+                <Button
+                  component={Link}
+                  to="/app/developers"
+                  variant="light"
+                  size="xs"
+                  mt="xs"
+                  leftSection={<AppWindow size={14} />}
+                >
+                  See the tracking docs
+                </Button>
+              </Stack>
+            </Card>
+          </SimpleGrid>
         </Tabs.Panel>
       </Tabs>
       </Box>

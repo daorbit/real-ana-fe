@@ -164,6 +164,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {children}
         </div>
+        {/* Clear the floating help button so page content never sits under it. */}
+        <div style={{ height: 88 }} />
         <SupportWidget />
       </MantineShell.Main>
     </MantineShell>

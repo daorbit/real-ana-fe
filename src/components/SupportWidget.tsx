@@ -1,13 +1,14 @@
 import { Menu, ActionIcon, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { LifeBuoy, BookOpen, Mail, Bug, MessageSquare } from "lucide-react";
+import { HelpCircle, BookOpen, Mail, Bug, MessageSquare } from "lucide-react";
 
 const SUPPORT_EMAIL = "daorbit2k25@gmail.com";
 
 /**
- * Persistent help affordance, docked bottom-right across the whole app.
- * Opens a small menu of self-serve and human-support routes. Kept dependency-free
- * (no third-party chat widget) so it works offline of any external service.
+ * Floating help button, docked bottom-right across the whole app. Pages add
+ * bottom padding so their content never scrolls under it. Opens self-serve and
+ * human-support routes; dependency-free, so it works with no third-party chat
+ * service.
  */
 export function SupportWidget() {
   const mailto = (subject: string) =>
@@ -17,20 +18,21 @@ export function SupportWidget() {
     <Menu shadow="lg" width={230} position="top-end" radius="md" withArrow>
       <Menu.Target>
         <ActionIcon
-          size={52}
+          size={48}
           radius="xl"
           variant="filled"
           color="emerald"
+          title="Help & support"
           aria-label="Help and support"
           style={{
             position: "fixed",
             right: 24,
             bottom: 24,
-            zIndex: 200,
-            boxShadow: "var(--shadow-md, 0 8px 24px rgba(0,0,0,0.25))",
+            zIndex: 300,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.28)",
           }}
         >
-          <LifeBuoy size={22} />
+          <HelpCircle size={22} />
         </ActionIcon>
       </Menu.Target>
 
