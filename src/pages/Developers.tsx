@@ -557,13 +557,15 @@ function my_app_stats(string $siteId, string $range = '24h'): array {
         <Card withBorder radius="lg" padding="lg">
           <Text fw={650} mb="sm">Custom events</Text>
           <Text size="sm" c="dimmed" mb="md">
-            Once the tracker has loaded, the app can record custom events (signups, purchases, clicks):
+            Once the tracker has loaded, the app can record custom events (signups, purchases, clicks).
+            Each event and its conversion rate shows up under the <b>Events</b> tab in Analytics. Pass an
+            optional properties object as the second argument:
           </Text>
           <CodeTabs
             snippets={{
               JavaScript: `// available on window once tracker.js has loaded
 window.rta.track("signup_completed");
-window.rta.track("checkout_started");`,
+window.rta.track("checkout_started", { plan: "pro", value: 49 });`,
             }}
           />
         </Card>

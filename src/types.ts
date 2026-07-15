@@ -116,6 +116,9 @@ export type Stats = {
   // which entry points actually hold people
   landingPages: LandingBucket[];
 
+  // custom events fired via rta.track()
+  customEvents: EventBucket[];
+
   // real-time
   livePages: Bucket[];
 
@@ -145,4 +148,15 @@ export type LandingBucket = {
   count: number;
   bounceRate: number;
   pagesPerSession: number;
+};
+
+/** A custom event fired via `rta.track(name, props)`. */
+export type EventBucket = {
+  key: string;
+  /** Times the event fired. */
+  count: number;
+  /** Distinct visitors who fired it. */
+  visitors: number;
+  /** Share of all visitors in the window who fired it at least once. */
+  conversionRate: number;
 };

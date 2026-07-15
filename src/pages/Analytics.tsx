@@ -11,7 +11,7 @@ import {
 import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow,
+  ArrowDownWideNarrow, Zap,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
@@ -20,6 +20,7 @@ import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { Heatmap } from "../components/Heatmap";
 import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
+import { CustomEventsPanel } from "../components/CustomEventsPanel";
 import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
 import { AnalyticsSkeleton } from "../components/Skeletons";
@@ -303,6 +304,7 @@ export default function Analytics() {
           <Tabs.Tab value="tech" leftSection={<AppWindow size={14} />}>Technology</Tabs.Tab>
           <Tabs.Tab value="geo" leftSection={<Globe2 size={14} />}>Geography</Tabs.Tab>
           <Tabs.Tab value="clicks" leftSection={<MousePointerClick size={14} />}>Clicks</Tabs.Tab>
+          <Tabs.Tab value="events" leftSection={<Zap size={14} />}>Events</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="pages">
@@ -365,6 +367,10 @@ export default function Analytics() {
 
         <Tabs.Panel value="clicks">
           <ClicksPanel clicks={view?.clicks ?? []} total={view?.clickCount ?? 0} limit={15} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="events">
+          <CustomEventsPanel items={view?.customEvents ?? []} />
         </Tabs.Panel>
       </Tabs>
       </Box>
