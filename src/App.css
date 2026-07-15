@@ -160,6 +160,44 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .bar-row-filter { opacity: 0.7; transform: none; }
 }
 
+/* Retention cohort heatmap. */
+.retention-table {
+  border-collapse: separate;
+  border-spacing: 4px;
+  width: 100%;
+  font-size: 12.5px;
+}
+.retention-table .ret-head {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted, #8b929e);
+  font-weight: 700;
+  text-align: center;
+  padding: 4px 6px;
+}
+.retention-table .ret-week { min-width: 46px; }
+.retention-table .ret-label {
+  white-space: nowrap;
+  font-weight: 600;
+  padding-right: 10px;
+}
+.retention-table .ret-size {
+  text-align: right;
+  color: var(--muted, #8b929e);
+  padding-right: 10px;
+}
+.retention-table .ret-cell {
+  text-align: center;
+  padding: 8px 6px;
+  border-radius: 7px;
+  font-weight: 600;
+  min-width: 46px;
+}
+.retention-table .ret-empty {
+  background: transparent;
+}
+
 .click-href { color: var(--muted); flex-shrink: 0; }
 
 /* ============ Home layout grid ============ */

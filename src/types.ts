@@ -149,6 +149,31 @@ export type StatsFilter = Partial<{
   eventName: string;
 }>;
 
+/** One step a user defines in the funnel builder. */
+export type FunnelStepInput = { type: "page" | "event"; value: string };
+
+/** One computed step of a funnel — how many sessions reached it. */
+export type FunnelResultStep = {
+  label: string;
+  type: "page" | "event";
+  /** Sessions that reached this step in order. */
+  count: number;
+  /** Conversion from the top of the funnel, as a percentage. */
+  rate: number;
+  /** Drop-off from the previous step, as a percentage. */
+  dropFromPrev: number;
+};
+
+/** One weekly retention cohort: how many started, and their return curve. */
+export type RetentionCohort = {
+  /** Week index from the start of the observed window. */
+  cohort: number;
+  /** Visitors first seen in this cohort week. */
+  size: number;
+  /** Retention % per week offset; index 0 is always 100. */
+  retention: number[];
+};
+
 /** Serialize a filter object into the `key:value;key:value` query value. */
 export function serializeFilter(f: StatsFilter): string {
   return Object.entries(f)

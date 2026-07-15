@@ -1,6 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getToken } from "../api";
-import type { AdminUserPage, ApiKey, Site, Stats, Workspace } from "../types";
+import type {
+  AdminUserPage, ApiKey, Site, Stats, Workspace,
+  FunnelStepInput, FunnelResultStep, RetentionCohort,
+} from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -112,6 +115,28 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "InstallStatus", id: siteId }],
     }),
 
+    computeFunnel: build.mutation<
+      { steps: FunnelResultStep[] },
+      { workspaceId: string; steps: FunnelStepInput[]; range: string }
+    >({
+      query: ({ workspaceId, steps, range }) => ({
+        url: `/api/workspaces/${workspaceId}/funnel`,
+        method: "POST",
+        body: { steps, range },
+      }),
+    }),
+
+    getRetention: build.query<
+      { weeks: number; cohorts: RetentionCohort[] },
+      { workspaceId: string; weeks?: number }
+    >({
+      query: ({ workspaceId, weeks = 6 }) =>
+        `/api/workspaces/${workspaceId}/retention?weeks=${weeks}`,
+      providesTags: (_r, _e, { workspaceId }) => [
+        { type: "Stats", id: `retention-${workspaceId}` },
+      ],
+    }),
+
     /* ------------------------------- layout ------------------------------- */
     // `layout: null` means the workspace has never been customised, which is
     // different from an empty array (every widget removed on purpose).
@@ -184,6 +209,8 @@ export const {
   useCreateSiteMutation,
   useDeleteSiteMutation,
   useGetStatsQuery,
+  useComputeFunnelMutation,
+  useGetRetentionQuery,
   useGetInstallStatusQuery,
   useLazyGetInstallStatusQuery,
   useGetLayoutQuery,

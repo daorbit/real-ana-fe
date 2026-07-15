@@ -11,7 +11,7 @@ import {
 import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow, Zap, Filter,
+  ArrowDownWideNarrow, Zap, Filter, GitBranch, Repeat,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
@@ -21,6 +21,8 @@ import { ClicksPanel } from "../components/ClicksPanel";
 import { Heatmap } from "../components/Heatmap";
 import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
 import { CustomEventsPanel } from "../components/CustomEventsPanel";
+import { FunnelBuilder } from "../components/FunnelBuilder";
+import { RetentionGrid } from "../components/RetentionGrid";
 import { FilterBar } from "../components/FilterBar";
 import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
@@ -406,6 +408,8 @@ export default function Analytics() {
           <Tabs.Tab value="geo" leftSection={<Globe2 size={14} />}>Geography</Tabs.Tab>
           <Tabs.Tab value="clicks" leftSection={<MousePointerClick size={14} />}>Clicks</Tabs.Tab>
           <Tabs.Tab value="events" leftSection={<Zap size={14} />}>Events</Tabs.Tab>
+          <Tabs.Tab value="funnel" leftSection={<GitBranch size={14} />}>Funnel</Tabs.Tab>
+          <Tabs.Tab value="retention" leftSection={<Repeat size={14} />}>Retention</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="pages">
@@ -520,6 +524,14 @@ export default function Analytics() {
               </Stack>
             </Card>
           </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="funnel">
+          <FunnelBuilder workspaceId={active._id} range={range} stats={view} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="retention">
+          <RetentionGrid workspaceId={active._id} />
         </Tabs.Panel>
       </Tabs>
       </Box>
