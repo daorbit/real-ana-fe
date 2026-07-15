@@ -1,6 +1,6 @@
-import { Card, Group, Text, ThemeIcon, Badge } from "@mantine/core";
+import { Card, Group, Text, ThemeIcon, Badge, Tooltip } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const TINT: Record<string, { from: string; to: string; icon: string; ring: string }> = {
@@ -44,6 +44,7 @@ export function StatCard({
   inverseDelta,
   spark,
   sparkKey = "views",
+  hint,
 }: {
   icon: LucideIcon;
   label: string;
@@ -57,6 +58,8 @@ export function StatCard({
   /** tiny trend line rendered at the bottom of the card */
   spark?: Record<string, number | string>[];
   sparkKey?: string;
+  /** Plain-language explanation of what this metric means, shown on an info icon. */
+  hint?: string;
 }) {
   const t = TINT[color] ?? TINT.emerald;
   const sparkId = `spark-${String(label).replace(/\W/g, "")}`;
@@ -97,7 +100,14 @@ export function StatCard({
       >
         {typeof value === "number" ? value.toLocaleString() : value}
       </Text>
-      <Text c="dimmed" size="sm" mt={6}>{label}</Text>
+      <Group gap={5} mt={6} wrap="nowrap">
+        <Text c="dimmed" size="sm">{label}</Text>
+        {hint && (
+          <Tooltip label={hint} multiline w={240} withArrow events={{ hover: true, focus: true, touch: true }}>
+            <Info size={13} className="stat-hint" style={{ color: "var(--mantine-color-dimmed)", cursor: "help", flexShrink: 0 }} />
+          </Tooltip>
+        )}
+      </Group>
 
       {spark && spark.length > 1 && (
         <div style={{ marginTop: 12, marginLeft: -20, marginRight: -20, marginBottom: -20, height: 44 }}>

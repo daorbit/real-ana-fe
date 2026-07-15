@@ -17,6 +17,7 @@ import '@fontsource/space-grotesk/600.css'
 import '@fontsource/space-grotesk/700.css'
 import { theme } from './theme'
 import App from './App.tsx'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -24,7 +25,9 @@ createRoot(document.getElementById('root')!).render(
       <MantineProvider theme={theme} defaultColorScheme="dark">
         <Notifications position="top-right" />
         <ModalsProvider>
-          <App />
+          <ErrorBoundary>
+            <App />
+          </ErrorBoundary>
         </ModalsProvider>
       </MantineProvider>
     </Provider>

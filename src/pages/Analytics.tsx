@@ -180,17 +180,25 @@ export default function Analytics() {
   const hasData = (view?.pageviews ?? 0) > 0;
 
   const audience = [
-    { icon: Users, label: "Visitors", value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors" },
-    { icon: Eye, label: "Pageviews", value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views" },
-    { icon: Layers, label: "Sessions", value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null },
-    { icon: Radio, label: "Live now", value: view?.live ?? 0, color: "green", live: true },
+    { icon: Users, label: "Visitors", value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors",
+      hint: "Distinct people in this period. A visitor is a privacy-friendly daily hash of IP and browser — no cookies, so the same person on two days counts twice." },
+    { icon: Eye, label: "Pageviews", value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views",
+      hint: "Every page load, including SPA route changes. One visitor can rack up many pageviews." },
+    { icon: Layers, label: "Sessions", value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null,
+      hint: "A visit — one or more pageviews with no 30-minute gap. A returning visitor later in the day starts a fresh session." },
+    { icon: Radio, label: "Live now", value: view?.live ?? 0, color: "green", live: true,
+      hint: "Distinct visitors active in the last 5 minutes, updated as the page refreshes." },
   ];
 
   const engagement = [
-    { icon: MousePointerClick, label: "Bounce rate", value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true },
-    { icon: Timer, label: "Avg. session", value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null },
-    { icon: Timer, label: "Avg. time on page", value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan" },
-    { icon: Layers, label: "Pages / session", value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null },
+    { icon: MousePointerClick, label: "Bounce rate", value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true,
+      hint: "Share of sessions that left after a single pageview without interacting. Lower is usually better." },
+    { icon: Timer, label: "Avg. session", value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null,
+      hint: "Average visible time across a whole visit. A backgrounded tab doesn't count, so this is real attention time." },
+    { icon: Timer, label: "Avg. time on page", value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan",
+      hint: "Average visible time on a single page before moving on." },
+    { icon: Layers, label: "Pages / session", value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null,
+      hint: "How many pages a typical visit touches. Higher means people explore more." },
   ];
 
   return (

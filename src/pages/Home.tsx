@@ -26,6 +26,7 @@ import { CustomizeDrawer } from "../components/CustomizeDrawer";
 import { Heatmap } from "../components/Heatmap";
 import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
 import { SortableWidget, WidgetDragPreview } from "../components/SortableWidget";
+import { Onboarding } from "../components/Onboarding";
 import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
 import type { WidgetId, Span } from "../hooks";
 import { countryFlag, countryLabel, duration, num } from "../utils";
@@ -348,6 +349,14 @@ export default function Home() {
           )}
         </Group>
       </Group>
+
+      {!editing && !dirty && (
+        <Onboarding
+          hasWorkspace={!!active}
+          hasSite={sites.length > 0}
+          hasData={(stats?.pageviews ?? 0) > 0}
+        />
+      )}
 
       {editing && (
         <Alert color="emerald" variant="light" icon={<Move size={16} />} mb="lg">

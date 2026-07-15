@@ -588,7 +588,7 @@ window.rta.track("checkout_started", { plan: "pro", value: 49 });`,
       </SimpleGrid>
 
       <Text size="xs" c="dimmed" ta="center">
-        Base URL <Code>{base}</Code> · Need something else? <Anchor href="mailto:support@vantage.dev">Talk to us</Anchor>
+        Base URL <Code>{base}</Code> · Need something else? <Anchor href="mailto:daorbit2k25@gmail.com">Talk to us</Anchor>
       </Text>
     </Stack>
   );
