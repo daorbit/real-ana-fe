@@ -94,18 +94,25 @@ export const api = createApi({
     /* ------------------------------ analytics ----------------------------- */
     getStats: build.query<
       Stats,
-      { workspaceId: string; range: string; filter?: string; sites?: string[] }
+      { workspaceId: string; range: string; filter?: string; sites?: string[]; from?: string; to?: string }
     >({
-      query: ({ workspaceId, range, filter, sites }) => {
+      query: ({ workspaceId, range, filter, sites, from, to }) => {
         const qs = new URLSearchParams({ range });
         if (filter) qs.set("filter", filter);
         // Empty selection means "all sites" — the server defaults to that when
         // the param is absent, so only send it when a subset is chosen.
         if (sites && sites.length) qs.set("sites", sites.join(","));
+        if (range === "custom" && from && to) {
+          qs.set("from", from);
+          qs.set("to", to);
+        }
         return `/api/workspaces/${workspaceId}/stats?${qs.toString()}`;
       },
-      providesTags: (_r, _e, { workspaceId, range, filter, sites }) => [
-        { type: "Stats", id: `${workspaceId}-${range}-${filter ?? ""}-${(sites ?? []).join(",")}` },
+      providesTags: (_r, _e, { workspaceId, range, filter, sites, from, to }) => [
+        {
+          type: "Stats",
+          id: `${workspaceId}-${range}-${filter ?? ""}-${(sites ?? []).join(",")}-${from ?? ""}-${to ?? ""}`,
+        },
       ],
     }),
 

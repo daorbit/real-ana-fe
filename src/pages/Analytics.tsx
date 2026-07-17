@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Progress,
-  SegmentedControl, Stack, Center, ThemeIcon, Badge, Tabs, Box, Loader,
+  Stack, Center, ThemeIcon, Badge, Tabs, Box, Loader,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -30,6 +30,8 @@ import { FilterBar } from "../components/FilterBar";
 import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
+import { RangePicker, type RangeState } from "../components/RangePicker";
+import { ExportMenu } from "../components/ExportMenu";
 import { AnalyticsSkeleton } from "../components/Skeletons";
 import { useStats, useSites } from "../hooks";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
@@ -37,7 +39,6 @@ import { useWorkspace } from "../workspace";
 import type { Stats, Bucket, StatsFilter } from "../types";
 import { serializeFilter } from "../types";
 
-const RANGES = ["1h", "24h", "7d", "30d"];
 const CHART = "#10b981";
 
 /** Small uppercase heading that groups a band of cards under one label. */
@@ -207,7 +208,8 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 
 export default function Analytics() {
   const { active, loading } = useWorkspace();
-  const [range, setRange] = useState("24h");
+  const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
+  const range = rangeState.preset;
   const [filter, setFilter] = useState<StatsFilter>({});
   // Top-level section, and the active detail tab within a section.
   const [section, setSection] = useState<string>("overview");
@@ -218,7 +220,7 @@ export default function Analytics() {
 
   const { sites } = useSites(active?._id);
   const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
-    useStats(active?._id, range, serializeFilter(filter), siteScope);
+    useStats(active?._id, range, serializeFilter(filter), siteScope, rangeState.from, rangeState.to);
 
   const addFilter = (key: keyof StatsFilter, value: string) =>
     setFilter((f) => ({ ...f, [key]: value }));
@@ -347,18 +349,24 @@ export default function Analytics() {
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">
           <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
+          <ExportMenu
+            workspaceId={active?._id}
+            range={range}
+            from={rangeState.from}
+            to={rangeState.to}
+            filter={serializeFilter(filter)}
+            sites={siteScope}
+          />
           <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
-          <Group gap="xs">
+          <Group gap="xs" wrap="nowrap">
             {(statsLoading || refetching) && (
               <Loader size="xs" color="emerald" type="oval" />
             )}
-            <SegmentedControl
-              value={range}
-              onChange={setRange}
-              data={RANGES}
-              size="sm"
-              // A second click mid-flight would queue another range change and
-              // land whichever request happened to finish last.
+            {/* A second range change mid-flight would land whichever request
+                finishes last, so lock the control while one is in flight. */}
+            <RangePicker
+              value={rangeState}
+              onChange={setRangeState}
               disabled={statsLoading || refetching}
             />
           </Group>

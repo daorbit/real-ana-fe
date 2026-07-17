@@ -21,6 +21,8 @@ import { StatCard } from "../components/StatCard";
 import { AnalyticsArt } from "../components/Brand";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
+import { RangePicker, type RangeState } from "../components/RangePicker";
+import { ExportMenu } from "../components/ExportMenu";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
@@ -161,7 +163,15 @@ export default function Home() {
   const [siteScope, setSiteScope] = useState<string[]>([]);
   useEffect(() => setSiteScope([]), [active?._id]);
 
-  const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, "24h", undefined, siteScope);
+  const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
+  const { stats, refresh, refreshing, lastUpdated } = useStats(
+    active?._id,
+    rangeState.preset,
+    undefined,
+    siteScope,
+    rangeState.from,
+    rangeState.to,
+  );
   const { sites } = useSites(active?._id);
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
@@ -312,12 +322,24 @@ export default function Home() {
         <div style={{ flex: "1 1 240px", minWidth: 0 }}>
           <Title order={1}>Welcome back 👋</Title>
           <Text c="dimmed" size="sm" mt={6}>
-            A quick look at <b>{active.name}</b> — last 24 hours.
+            A quick look at <b>{active.name}</b>.
           </Text>
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">
           {!editing && !dirty && (
+            <RangePicker value={rangeState} onChange={setRangeState} />
+          )}
+          {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
+          )}
+          {!editing && !dirty && (
+            <ExportMenu
+              workspaceId={active._id}
+              range={rangeState.preset}
+              from={rangeState.from}
+              to={rangeState.to}
+              sites={siteScope}
+            />
           )}
           {!editing && !dirty && (
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />

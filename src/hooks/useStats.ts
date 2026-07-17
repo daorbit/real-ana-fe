@@ -15,7 +15,9 @@ export function useStats(
   workspaceId: string | undefined,
   range: string,
   filter?: string,
-  sites?: string[]
+  sites?: string[],
+  from?: string,
+  to?: string
 ) {
   const {
     data: stats,
@@ -24,7 +26,7 @@ export function useStats(
     fulfilledTimeStamp,
     isFetching,
   } = useGetStatsQuery(
-    { workspaceId: workspaceId!, range, filter, sites },
+    { workspaceId: workspaceId!, range, filter, sites, from, to },
     { skip: !workspaceId, pollingInterval: POLL_MS }
   );
 
