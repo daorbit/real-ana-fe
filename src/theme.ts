@@ -33,6 +33,9 @@ export const theme = createTheme({
     lg: "0 16px 40px -12px rgba(0,0,0,0.55)",
   },
   components: {
+    // The default Mantine loader is bouncing dots, which looks toy-ish inside
+    // buttons and panels. Spin instead, everywhere, in one place.
+    Loader: { defaultProps: { type: "oval" } },
     Card: { defaultProps: { radius: "md" } },
     Button: { defaultProps: { radius: "md" } },
     Paper: { defaultProps: { radius: "md" } },

@@ -205,7 +205,7 @@ export default function Analytics() {
   const { active, loading } = useWorkspace();
   const [range, setRange] = useState("24h");
   const [filter, setFilter] = useState<StatsFilter>({});
-  const { stats, loading: statsLoading, refresh, refreshing, lastUpdated } =
+  const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
     useStats(active?._id, range, serializeFilter(filter));
 
   const addFilter = (key: keyof StatsFilter, value: string) =>
@@ -288,7 +288,9 @@ export default function Analytics() {
         <Group gap="sm">
           <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           <Group gap="xs">
-            {statsLoading && <Loader size="xs" color="emerald" />}
+            {(statsLoading || refetching) && (
+              <Loader size="xs" color="emerald" type="oval" />
+            )}
             <SegmentedControl
               value={range}
               onChange={setRange}
@@ -296,7 +298,7 @@ export default function Analytics() {
               size="sm"
               // A second click mid-flight would queue another range change and
               // land whichever request happened to finish last.
-              disabled={statsLoading}
+              disabled={statsLoading || refetching}
             />
           </Group>
         </Group>

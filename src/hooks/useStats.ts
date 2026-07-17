@@ -22,24 +22,28 @@ export function useStats(
     refetch,
     fulfilledTimeStamp,
     isFetching,
-    currentData,
   } = useGetStatsQuery(
     { workspaceId: workspaceId!, range, filter },
     { skip: !workspaceId, pollingInterval: POLL_MS }
   );
 
   /**
-   * True while the data on screen belongs to a different range than the one
-   * asked for.
+   * Two distinct busy states:
    *
-   * `currentData` is undefined exactly when the requested cache key has no
-   * settled payload — which is what a range switch causes, and what a
-   * background poll does not: a poll refetches the same key in place and leaves
-   * `currentData` populated. That is the difference between "these numbers are
-   * for the wrong range" and "these numbers are a minute stale", and only the
-   * first should make the page look busy.
+   * - `loading`  — the very first fetch, when there is no prior payload to show
+   *   at all. Only this should dim the page and block interaction.
+   * - `refetching` — any fetch while some data is already on screen: a range
+   *   switch, a filter change, or a background poll. The old numbers stay
+   *   visible and readable; a small inline spinner is enough.
+   *
+   * `stats` is RTK Query's `data`, which holds the last settled payload across
+   * cache-key changes. `currentData` was used before, but it goes undefined on
+   * *every* key change — including each filter click — so it made the whole
+   * page flash busy on any filter.
    */
-  const switchingRange = isFetching && currentData === undefined;
+  const hasData = stats !== undefined;
+  const loading = isFetching && !hasData;
+  const refetching = isFetching && hasData;
 
   // The spinner should only turn during an explicit refresh — a background poll
   // shouldn't make the UI look busy.
@@ -67,7 +71,8 @@ export function useStats(
 
   return {
     stats: stats ?? null,
-    loading: switchingRange,
+    loading,
+    refetching,
     refresh,
     refreshing,
     lastUpdated: fulfilledTimeStamp ? new Date(fulfilledTimeStamp) : null,

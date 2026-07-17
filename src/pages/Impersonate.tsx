@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Title, Text, TextInput, Stack, Group, Badge, Card, Center, Loader, ThemeIcon,
-  Avatar, SegmentedControl, Pagination, SimpleGrid, Button, Alert,
+  Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
 } from "@mantine/core";
-import { Search, SearchX, X, LogIn, ShieldAlert } from "lucide-react";
+import { Search, SearchX, X, LogIn, ShieldAlert, Trash2 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
-import { useGetAdminUsersQuery } from "../store";
+import { useGetAdminUsersQuery, useDeleteAdminUserMutation } from "../store";
 import { useAuth } from "../auth";
-import { notify, errMessage } from "../notify";
+import { notify, errMessage, confirmDelete } from "../notify";
 import type { AdminUser } from "../types";
 
 const ROLE_FILTERS = [
@@ -18,10 +18,14 @@ const ROLE_FILTERS = [
 ];
 
 /**
- * Admin-only: browse every account and open the dashboard as one of them.
+ * Admin-only: browse every account, open the dashboard as one of them, or
+ * delete one outright.
  *
- * Admins are listed but not selectable — impersonating one would be a way to
- * climb sideways into another admin's session, and there is no reason to.
+ * Admins are listed but neither selectable nor deletable — impersonating one
+ * would be a way to climb sideways into another admin's session, and deleting
+ * one is an escalation/own-goal path with no legitimate use. Both guards are
+ * enforced server-side too; the disabled controls here are just the friendly
+ * half.
  */
 export default function Impersonate() {
   const { user, impersonate } = useAuth();
@@ -32,6 +36,7 @@ export default function Impersonate() {
   const [role, setRole] = useState("");
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   // Debounced, so typing a name doesn't fire a request per keystroke.
   useEffect(() => {
@@ -48,6 +53,7 @@ export default function Impersonate() {
     { q: search || undefined, role: role || undefined, page },
     { skip: !isAdmin }
   );
+  const [deleteUser] = useDeleteAdminUserMutation();
 
   const enter = async (u: AdminUser) => {
     setBusy(u.id);
@@ -60,6 +66,31 @@ export default function Impersonate() {
     } finally {
       setBusy(null);
     }
+  };
+
+  const remove = (u: AdminUser) => {
+    confirmDelete({
+      title: "Delete this account?",
+      confirmLabel: "Delete account",
+      body: (
+        <>
+          <b>{u.name}</b> ({u.email}) and everything they own — every workspace,
+          site, API key, and all recorded analytics — will be permanently
+          deleted. This cannot be undone.
+        </>
+      ),
+      onConfirm: async () => {
+        setDeleting(u.id);
+        try {
+          await deleteUser(u.id).unwrap();
+          notify.success(`${u.email} has been deleted.`, "Account deleted");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not delete that account."));
+        } finally {
+          setDeleting(null);
+        }
+      },
+    });
   };
 
   // The route is admin-only server-side too; this is just a friendlier wall
@@ -87,9 +118,9 @@ export default function Impersonate() {
     <AppShell>
       <Group justify="space-between" align="flex-start" mb="lg">
         <div>
-          <Title order={1}>View as user</Title>
+          <Title order={1}>Users</Title>
           <Text c="dimmed" size="sm" mt={6}>
-            Open the dashboard as another account.
+            Every account on the platform. Open the dashboard as one, or delete one.
           </Text>
         </div>
         {data && (
@@ -98,13 +129,6 @@ export default function Impersonate() {
           </Badge>
         )}
       </Group>
-
-      <Alert color="orange" variant="light" icon={<ShieldAlert size={16} />} mb="lg">
-        <Text size="sm">
-          You get <b>full access</b> to the account you pick — anything you change or
-          delete is changed for them, for real.
-        </Text>
-      </Alert>
 
       <Group mb="lg" align="flex-end" wrap="wrap">
         <TextInput
@@ -144,52 +168,100 @@ export default function Impersonate() {
         </Center>
       ) : (
         <>
-          {/* Dim the list, rather than swapping it for a spinner, so the rows
+          {/* Dim the table, rather than swapping it for a spinner, so the rows
               don't jump while a page or filter loads. */}
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="sm" style={{ opacity: isFetching ? 0.6 : 1 }}>
-            {users.map((u) => {
-              const admin = u.role === "admin";
-              return (
-                <Card
-                  key={u.id}
-                  withBorder
-                  radius="md"
-                  padding="md"
-                  style={{
-                    cursor: admin ? "not-allowed" : "pointer",
-                    opacity: admin ? 0.55 : 1,
-                  }}
-                  onClick={() => !admin && !busy && enter(u)}
-                >
-                  <Group justify="space-between" wrap="nowrap">
-                    <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                      <Avatar color="emerald" radius="xl" size="md">
-                        {u.name.slice(0, 2).toUpperCase()}
-                      </Avatar>
-                      <div style={{ minWidth: 0 }}>
-                        <Group gap={6} wrap="nowrap">
-                          <Text fw={600} size="sm" truncate>{u.name}</Text>
-                          {admin && <Badge size="xs" variant="light" color="gray">admin</Badge>}
-                        </Group>
-                        <Text size="xs" c="dimmed" truncate>{u.email}</Text>
-                        <Text size="xs" c="dimmed">
-                          {u.workspaceCount} workspace{u.workspaceCount === 1 ? "" : "s"}
-                        </Text>
-                      </div>
-                    </Group>
-
-                    {busy === u.id ? (
-                      <Loader size="xs" />
-                    ) : !admin ? (
-                      <ThemeIcon variant="light" color="emerald" size="md" radius="md">
-                        <LogIn size={15} />
-                      </ThemeIcon>
-                    ) : null}
-                  </Group>
-                </Card>
-              );
-            })}
-          </SimpleGrid>
+          <Card withBorder radius="md" p={0} style={{ opacity: isFetching ? 0.6 : 1, overflow: "hidden" }}>
+            <Table.ScrollContainer minWidth={640}>
+              <Table verticalSpacing="sm" horizontalSpacing="md" highlightOnHover>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Account</Table.Th>
+                    <Table.Th>Role</Table.Th>
+                    <Table.Th>Workspaces</Table.Th>
+                    <Table.Th style={{ textAlign: "right" }}>Actions</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {users.map((u) => {
+                    const admin = u.role === "admin";
+                    const isSelf = u.id === user?.id;
+                    const rowBusy = busy === u.id || deleting === u.id;
+                    return (
+                      <Table.Tr key={u.id}>
+                        <Table.Td>
+                          <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+                            <Avatar color="emerald" radius="xl" size="md">
+                              {u.name.slice(0, 2).toUpperCase()}
+                            </Avatar>
+                            <div style={{ minWidth: 0 }}>
+                              <Text fw={600} size="sm" truncate>{u.name}</Text>
+                              <Text size="xs" c="dimmed" truncate>{u.email}</Text>
+                            </div>
+                          </Group>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            size="sm"
+                            variant="light"
+                            color={admin ? "grape" : "gray"}
+                          >
+                            {u.role}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">
+                            {u.workspaceCount} workspace{u.workspaceCount === 1 ? "" : "s"}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap="xs" justify="flex-end" wrap="nowrap">
+                            <Tooltip
+                              label={admin ? "Admins can't be opened" : "Open dashboard as this user"}
+                              withArrow
+                            >
+                              <Button
+                                size="xs"
+                                variant="light"
+                                color="emerald"
+                                leftSection={
+                                  busy === u.id ? <Loader size={12} color="emerald" /> : <LogIn size={14} />
+                                }
+                                disabled={admin || rowBusy}
+                                onClick={() => enter(u)}
+                              >
+                                Open
+                              </Button>
+                            </Tooltip>
+                            <Tooltip
+                              label={
+                                isSelf
+                                  ? "You can't delete yourself"
+                                  : admin
+                                  ? "Admins can't be deleted"
+                                  : "Delete this account"
+                              }
+                              withArrow
+                            >
+                              <ActionIcon
+                                variant="light"
+                                color="red"
+                                size="lg"
+                                radius="md"
+                                disabled={admin || isSelf || rowBusy}
+                                onClick={() => remove(u)}
+                              >
+                                {deleting === u.id ? <Loader size={14} color="red" /> : <Trash2 size={16} />}
+                              </ActionIcon>
+                            </Tooltip>
+                          </Group>
+                        </Table.Td>
+                      </Table.Tr>
+                    );
+                  })}
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          </Card>
 
           {data && data.pages > 1 && (
             <Center mt="xl">

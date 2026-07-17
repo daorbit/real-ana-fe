@@ -175,6 +175,11 @@ export const api = createApi({
       providesTags: ["AdminUser"],
     }),
 
+    deleteAdminUser: build.mutation<{ ok: true }, string>({
+      query: (userId) => ({ url: `/api/admin/users/${userId}`, method: "DELETE" }),
+      invalidatesTags: ["AdminUser"],
+    }),
+
     /* ------------------------------- api keys ----------------------------- */
     getApiKeys: build.query<ApiKey[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/keys`,
@@ -216,6 +221,7 @@ export const {
   useGetLayoutQuery,
   useSaveLayoutMutation,
   useGetAdminUsersQuery,
+  useDeleteAdminUserMutation,
   useGetApiKeysQuery,
   useCreateApiKeyMutation,
   useRevokeApiKeyMutation,
