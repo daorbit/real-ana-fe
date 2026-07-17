@@ -12,7 +12,7 @@ import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
   ArrowDownWideNarrow, Zap, Filter, GitBranch, Repeat,
-  Split, Target, AlertTriangle,
+  Split, Target, AlertTriangle, LayoutDashboard,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
@@ -209,6 +209,9 @@ export default function Analytics() {
   const { active, loading } = useWorkspace();
   const [range, setRange] = useState("24h");
   const [filter, setFilter] = useState<StatsFilter>({});
+  // Top-level section, and the active detail tab within a section.
+  const [section, setSection] = useState<string>("overview");
+  const [tab, setTab] = useState<string>("pages");
   // Empty = all sites. siteIds don't carry across workspaces, so reset on switch.
   const [siteScope, setSiteScope] = useState<string[]>([]);
   useEffect(() => setSiteScope([]), [active?._id]);
@@ -284,6 +287,54 @@ export default function Analytics() {
       hint: "How many pages a typical visit touches. Higher means people explore more." },
   ];
 
+  // Top-level sections. "Overview" is just the headline widgets; the rest each
+  // hold a small set of detail views, so nothing is buried in a long scroll.
+  type SubTab = { value: string; label: string; icon: any };
+  const SECTIONS: { value: string; label: string; icon: any; tabs: SubTab[] }[] = [
+    { value: "overview", label: "Overview", icon: LayoutDashboard, tabs: [] },
+    {
+      value: "behavior",
+      label: "Behavior",
+      icon: ArrowDownWideNarrow,
+      tabs: [
+        { value: "pages", label: "Pages", icon: Eye },
+        { value: "engagement", label: "Engagement", icon: ArrowDownWideNarrow },
+        { value: "clicks", label: "Clicks", icon: MousePointerClick },
+      ],
+    },
+    {
+      value: "acquisition",
+      label: "Acquisition",
+      icon: Tag,
+      tabs: [
+        { value: "sources", label: "Sources", icon: Tag },
+        { value: "geo", label: "Geography", icon: Globe2 },
+        { value: "tech", label: "Technology", icon: AppWindow },
+      ],
+    },
+    {
+      value: "conversion",
+      label: "Conversion",
+      icon: Target,
+      tabs: [
+        { value: "goals", label: "Goals", icon: Target },
+        { value: "events", label: "Events", icon: Zap },
+        { value: "funnel", label: "Funnel", icon: GitBranch },
+        { value: "retention", label: "Retention", icon: Repeat },
+        { value: "errors", label: "Errors", icon: AlertTriangle },
+      ],
+    },
+  ];
+
+  const activeSection = SECTIONS.find((s) => s.value === section) ?? SECTIONS[0];
+
+  // Switch section: jump to its first detail tab so a panel is always showing.
+  const goSection = (value: string) => {
+    setSection(value);
+    const s = SECTIONS.find((x) => x.value === value);
+    if (s && s.tabs.length) setTab(s.tabs[0].value);
+  };
+
   return (
     <AppShell>
       <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
@@ -314,6 +365,28 @@ export default function Analytics() {
         </Group>
       </Group>
 
+      {/* Primary section nav. Overview keeps the headline widgets; the rest hold
+          the detail views, grouped by the question each answers. */}
+      <Group gap={6} wrap="wrap" mb="lg">
+        {SECTIONS.map((s) => {
+          const active = section === s.value;
+          const Icon = s.icon;
+          return (
+            <Button
+              key={s.value}
+              radius="md"
+              size="sm"
+              variant={active ? "filled" : "default"}
+              color={active ? "emerald" : undefined}
+              leftSection={<Icon size={15} />}
+              onClick={() => goSection(s.value)}
+            >
+              {s.label}
+            </Button>
+          );
+        })}
+      </Group>
+
       {/* Outside the dimming wrapper below: it is a call to action, not data,
           so it should not fade out while a range loads. */}
       <TrackerUpdate sites={view?.outdatedSites ?? []} />
@@ -332,6 +405,7 @@ export default function Analytics() {
         }}
       >
 
+      {section === "overview" && <>
       {/* audience */}
       <SectionLabel icon={Users}>Audience</SectionLabel>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb="xl">
@@ -403,28 +477,37 @@ export default function Analytics() {
         </div>
         <LiveNow stats={view} />
       </SimpleGrid>
+      </>}
 
-      {/* breakdowns */}
-      <Group justify="space-between" align="center" mb="sm">
-        <SectionLabel icon={Layers} noMargin>Breakdowns</SectionLabel>
+      {section !== "overview" && <>
+      {/* Detail views for the active section. One tidy row of pills — a handful
+          per section, so nothing scrolls off-screen. */}
+      <Group justify="space-between" align="center" mb="md" wrap="wrap" gap="sm">
+        <Group gap={6} wrap="wrap">
+          {activeSection.tabs.map((t) => {
+            const active = tab === t.value;
+            const Icon = t.icon;
+            return (
+              <Button
+                key={t.value}
+                size="sm"
+                radius="md"
+                variant={active ? "filled" : "light"}
+                color={active ? "emerald" : "gray"}
+                leftSection={<Icon size={14} />}
+                onClick={() => setTab(t.value)}
+              >
+                {t.label}
+              </Button>
+            );
+          })}
+        </Group>
         <Text size="xs" c="dimmed" visibleFrom="sm">
           Tip: click any row to filter the whole dashboard by it.
         </Text>
       </Group>
-      <Tabs defaultValue="pages" variant="pills" color="emerald">
-        <Tabs.List mb="lg" style={{ flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4 }}>
-          <Tabs.Tab value="pages" leftSection={<Eye size={14} />}>Pages</Tabs.Tab>
-          <Tabs.Tab value="engagement" leftSection={<ArrowDownWideNarrow size={14} />}>Engagement</Tabs.Tab>
-          <Tabs.Tab value="sources" leftSection={<Tag size={14} />}>Sources</Tabs.Tab>
-          <Tabs.Tab value="tech" leftSection={<AppWindow size={14} />}>Technology</Tabs.Tab>
-          <Tabs.Tab value="geo" leftSection={<Globe2 size={14} />}>Geography</Tabs.Tab>
-          <Tabs.Tab value="clicks" leftSection={<MousePointerClick size={14} />}>Clicks</Tabs.Tab>
-          <Tabs.Tab value="events" leftSection={<Zap size={14} />}>Events</Tabs.Tab>
-          <Tabs.Tab value="goals" leftSection={<Target size={14} />}>Goals</Tabs.Tab>
-          <Tabs.Tab value="funnel" leftSection={<GitBranch size={14} />}>Funnel</Tabs.Tab>
-          <Tabs.Tab value="retention" leftSection={<Repeat size={14} />}>Retention</Tabs.Tab>
-          <Tabs.Tab value="errors" leftSection={<AlertTriangle size={14} />}>Errors</Tabs.Tab>
-        </Tabs.List>
+
+      <Tabs value={tab} onChange={(v) => v && setTab(v)} variant="pills" color="emerald" keepMounted={false}>
 
         <Tabs.Panel value="pages">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
@@ -590,6 +673,7 @@ export default function Analytics() {
           <ErrorsPanel items={view?.errors ?? []} />
         </Tabs.Panel>
       </Tabs>
+      </>}
       </Box>
     </AppShell>
   );
