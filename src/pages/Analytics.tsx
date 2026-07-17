@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -26,8 +26,9 @@ import { RetentionGrid } from "../components/RetentionGrid";
 import { FilterBar } from "../components/FilterBar";
 import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
+import { SiteFilter } from "../components/SiteFilter";
 import { AnalyticsSkeleton } from "../components/Skeletons";
-import { useStats } from "../hooks";
+import { useStats, useSites } from "../hooks";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
 import { useWorkspace } from "../workspace";
 import type { Stats, Bucket, StatsFilter } from "../types";
@@ -205,8 +206,13 @@ export default function Analytics() {
   const { active, loading } = useWorkspace();
   const [range, setRange] = useState("24h");
   const [filter, setFilter] = useState<StatsFilter>({});
+  // Empty = all sites. siteIds don't carry across workspaces, so reset on switch.
+  const [siteScope, setSiteScope] = useState<string[]>([]);
+  useEffect(() => setSiteScope([]), [active?._id]);
+
+  const { sites } = useSites(active?._id);
   const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
-    useStats(active?._id, range, serializeFilter(filter));
+    useStats(active?._id, range, serializeFilter(filter), siteScope);
 
   const addFilter = (key: keyof StatsFilter, value: string) =>
     setFilter((f) => ({ ...f, [key]: value }));
@@ -286,6 +292,7 @@ export default function Analytics() {
           </Text>
         </div>
         <Group gap="sm">
+          <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           <Group gap="xs">
             {(statsLoading || refetching) && (
@@ -529,11 +536,11 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="funnel">
-          <FunnelBuilder workspaceId={active._id} range={range} stats={view} />
+          <FunnelBuilder workspaceId={active._id} range={range} stats={view} sites={siteScope} />
         </Tabs.Panel>
 
         <Tabs.Panel value="retention">
-          <RetentionGrid workspaceId={active._id} />
+          <RetentionGrid workspaceId={active._id} sites={siteScope} />
         </Tabs.Panel>
       </Tabs>
       </Box>

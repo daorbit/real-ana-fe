@@ -21,8 +21,15 @@ function cellStyle(pct: number): React.CSSProperties {
  * visitors first seen in one week; each cell shows the share still active N
  * weeks later. Warmer cells = stickier cohorts.
  */
-export function RetentionGrid({ workspaceId }: { workspaceId: string }) {
-  const { data, isLoading } = useGetRetentionQuery({ workspaceId, weeks: 6 });
+export function RetentionGrid({
+  workspaceId,
+  sites,
+}: {
+  workspaceId: string;
+  /** siteIds to scope to; empty/undefined means every site. */
+  sites?: string[];
+}) {
+  const { data, isLoading } = useGetRetentionQuery({ workspaceId, weeks: 6, sites });
 
   const weeks = data?.weeks ?? 6;
   const cohorts = data?.cohorts ?? [];

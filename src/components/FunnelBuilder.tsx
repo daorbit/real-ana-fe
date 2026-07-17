@@ -20,10 +20,13 @@ export function FunnelBuilder({
   workspaceId,
   range,
   stats,
+  sites,
 }: {
   workspaceId: string;
   range: string;
   stats: Stats | null;
+  /** siteIds to scope to; empty/undefined means every site. */
+  sites?: string[];
 }) {
   const [steps, setSteps] = useState<Draft[]>([
     { type: "page", value: "" },
@@ -48,7 +51,7 @@ export function FunnelBuilder({
     const payload: FunnelStepInput[] = steps.filter((s) => s.value);
     if (payload.length < 2) return;
     try {
-      const res = await run({ workspaceId, steps: payload, range }).unwrap();
+      const res = await run({ workspaceId, steps: payload, range, sites }).unwrap();
       setResult(res.steps);
     } catch (e) {
       notify.error(errMessage(e, "Could not compute the funnel."));

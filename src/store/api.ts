@@ -94,15 +94,18 @@ export const api = createApi({
     /* ------------------------------ analytics ----------------------------- */
     getStats: build.query<
       Stats,
-      { workspaceId: string; range: string; filter?: string }
+      { workspaceId: string; range: string; filter?: string; sites?: string[] }
     >({
-      query: ({ workspaceId, range, filter }) => {
+      query: ({ workspaceId, range, filter, sites }) => {
         const qs = new URLSearchParams({ range });
         if (filter) qs.set("filter", filter);
+        // Empty selection means "all sites" — the server defaults to that when
+        // the param is absent, so only send it when a subset is chosen.
+        if (sites && sites.length) qs.set("sites", sites.join(","));
         return `/api/workspaces/${workspaceId}/stats?${qs.toString()}`;
       },
-      providesTags: (_r, _e, { workspaceId, range, filter }) => [
-        { type: "Stats", id: `${workspaceId}-${range}-${filter ?? ""}` },
+      providesTags: (_r, _e, { workspaceId, range, filter, sites }) => [
+        { type: "Stats", id: `${workspaceId}-${range}-${filter ?? ""}-${(sites ?? []).join(",")}` },
       ],
     }),
 
@@ -117,23 +120,26 @@ export const api = createApi({
 
     computeFunnel: build.mutation<
       { steps: FunnelResultStep[] },
-      { workspaceId: string; steps: FunnelStepInput[]; range: string }
+      { workspaceId: string; steps: FunnelStepInput[]; range: string; sites?: string[] }
     >({
-      query: ({ workspaceId, steps, range }) => ({
+      query: ({ workspaceId, steps, range, sites }) => ({
         url: `/api/workspaces/${workspaceId}/funnel`,
         method: "POST",
-        body: { steps, range },
+        body: { steps, range, ...(sites && sites.length ? { sites } : {}) },
       }),
     }),
 
     getRetention: build.query<
       { weeks: number; cohorts: RetentionCohort[] },
-      { workspaceId: string; weeks?: number }
+      { workspaceId: string; weeks?: number; sites?: string[] }
     >({
-      query: ({ workspaceId, weeks = 6 }) =>
-        `/api/workspaces/${workspaceId}/retention?weeks=${weeks}`,
-      providesTags: (_r, _e, { workspaceId }) => [
-        { type: "Stats", id: `retention-${workspaceId}` },
+      query: ({ workspaceId, weeks = 6, sites }) => {
+        const qs = new URLSearchParams({ weeks: String(weeks) });
+        if (sites && sites.length) qs.set("sites", sites.join(","));
+        return `/api/workspaces/${workspaceId}/retention?${qs.toString()}`;
+      },
+      providesTags: (_r, _e, { workspaceId, sites }) => [
+        { type: "Stats", id: `retention-${workspaceId}-${(sites ?? []).join(",")}` },
       ],
     }),
 

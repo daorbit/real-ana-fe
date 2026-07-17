@@ -14,7 +14,8 @@ import { POLL_MS } from "./usePolling";
 export function useStats(
   workspaceId: string | undefined,
   range: string,
-  filter?: string
+  filter?: string,
+  sites?: string[]
 ) {
   const {
     data: stats,
@@ -23,7 +24,7 @@ export function useStats(
     fulfilledTimeStamp,
     isFetching,
   } = useGetStatsQuery(
-    { workspaceId: workspaceId!, range, filter },
+    { workspaceId: workspaceId!, range, filter, sites },
     { skip: !workspaceId, pollingInterval: POLL_MS }
   );
 

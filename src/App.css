@@ -119,6 +119,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .site-row { background: var(--surface-2) !important; }
 .sect-ic { color: var(--violet-2); }
 
+/* Rows in the site-scope picker highlight on hover. */
+.site-filter-row:hover { background: var(--surface-2); }
+
 /* A clickable breakdown row — filters the dashboard on click. */
 .bar-row {
   padding: 6px 8px;

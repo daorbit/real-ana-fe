@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Title, Text, Group, Button, Card, ThemeIcon, Stack, Center, Badge, Progress, Alert,
@@ -20,6 +20,7 @@ import { AppShell } from "../components/AppShell";
 import { StatCard } from "../components/StatCard";
 import { AnalyticsArt } from "../components/Brand";
 import { RefreshButton } from "../components/Refresh";
+import { SiteFilter } from "../components/SiteFilter";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
@@ -153,7 +154,12 @@ function LivePagesCard({ stats }: { stats: Stats | null }) {
 
 export default function Home() {
   const { active, loading } = useWorkspace();
-  const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, "24h");
+  // Empty = all sites in the workspace. Reset when the workspace changes, since
+  // siteIds don't carry across workspaces.
+  const [siteScope, setSiteScope] = useState<string[]>([]);
+  useEffect(() => setSiteScope([]), [active?._id]);
+
+  const { stats, refresh, refreshing, lastUpdated } = useStats(active?._id, "24h", undefined, siteScope);
   const { sites } = useSites(active?._id);
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
@@ -304,6 +310,9 @@ export default function Home() {
           </Text>
         </div>
         <Group gap="sm">
+          {!editing && !dirty && (
+            <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
+          )}
           {!editing && !dirty && (
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
