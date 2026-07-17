@@ -121,6 +121,18 @@ export type Stats = {
   // summed props.value across all custom events (goal revenue)
   totalRevenue: number;
 
+  // marketing channels: how sessions arrived
+  channels: Bucket[];
+
+  // where visitors leave to: outbound links and downloads
+  outboundClicks: OutboundBucket[];
+
+  // client-side errors the tracker forwarded
+  errors: ErrorBucket[];
+
+  // conversion goals scored over this window
+  goals: GoalResult[];
+
   // real-time
   livePages: Bucket[];
 
@@ -200,6 +212,35 @@ export type LandingBucket = {
   count: number;
   bounceRate: number;
   pagesPerSession: number;
+};
+
+/** An outbound link click or file download, grouped by destination. */
+export type OutboundBucket = Bucket & {
+  /** "outbound" | "download" */
+  kind: string;
+};
+
+/** A client-side error, grouped by message and the page it happened on. */
+export type ErrorBucket = Bucket & {
+  path: string;
+  lastSeen: string;
+};
+
+/** A conversion goal definition. */
+export type Goal = {
+  id: string;
+  name: string;
+  kind: "page" | "event";
+  /** Path (page goal) or event name (event goal) that counts as a conversion. */
+  match: string;
+};
+
+/** A goal scored over a window: how many converted and at what rate. */
+export type GoalResult = Goal & {
+  /** Distinct visitors who converted. */
+  conversions: number;
+  /** Share of window visitors who converted, as a percentage. */
+  conversionRate: number;
 };
 
 /** A custom event fired via `rta.track(name, props)`. */

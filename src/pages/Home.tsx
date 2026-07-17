@@ -14,7 +14,7 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, CartesianGrid } f
 import {
   Users, Eye, Radio, Globe, BarChart3, FolderKanban, Plus, ArrowUpRight,
   MousePointerClick, Timer, Layers, Globe2, SlidersHorizontal,
-  LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag, Pencil, Check, Move,
+  LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag, Pencil, Check, Move, Split,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { StatCard } from "../components/StatCard";
@@ -26,6 +26,8 @@ import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
 import { Heatmap } from "../components/Heatmap";
 import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
+import { OutboundPanel, ErrorsPanel } from "../components/OutboundErrorsPanels";
+import { GoalsPanel } from "../components/GoalsPanel";
 import { SortableWidget, WidgetDragPreview } from "../components/SortableWidget";
 import { Onboarding } from "../components/Onboarding";
 import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
@@ -263,6 +265,7 @@ export default function Home() {
     languages: { title: "Languages", icon: Languages, items: stats?.languages ?? [], empty: "No data yet" },
     utmSources: { title: "UTM sources", icon: Tag, items: stats?.utmSources ?? [], empty: "No campaigns yet" },
     utmCampaigns: { title: "UTM campaigns", icon: Tag, items: stats?.utmCampaigns ?? [], empty: "No campaigns yet" },
+    channels: { title: "Channels", icon: Split, items: stats?.channels ?? [], empty: "No traffic yet" },
   };
 
   /** Render one widget by id. */
@@ -279,6 +282,9 @@ export default function Home() {
     if (id === "heatmap") return <Heatmap cells={stats?.heatmap ?? []} />;
     if (id === "scrollDepth") return <ScrollPanel items={stats?.scrollDepth ?? []} />;
     if (id === "landingPages") return <LandingPanel items={stats?.landingPages ?? []} />;
+    if (id === "outbound") return <OutboundPanel items={stats?.outboundClicks ?? []} />;
+    if (id === "errors") return <ErrorsPanel items={stats?.errors ?? []} />;
+    if (id === "goals") return <GoalsPanel workspaceId={active._id} goals={stats?.goals ?? []} />;
     return null;
   };
 
@@ -302,14 +308,14 @@ export default function Home() {
         }}
       />
 
-      <Group justify="space-between" align="flex-start" mb="lg">
-        <div>
+      <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
+        <div style={{ flex: "1 1 240px", minWidth: 0 }}>
           <Title order={1}>Welcome back 👋</Title>
           <Text c="dimmed" size="sm" mt={6}>
             A quick look at <b>{active.name}</b> — last 24 hours.
           </Text>
         </div>
-        <Group gap="sm">
+        <Group gap="sm" wrap="wrap" justify="flex-end">
           {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           )}

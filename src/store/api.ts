@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getToken } from "../api";
 import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
-  FunnelStepInput, FunnelResultStep, RetentionCohort,
+  FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
 } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 
@@ -26,7 +26,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -186,6 +186,33 @@ export const api = createApi({
       invalidatesTags: ["AdminUser"],
     }),
 
+    /* -------------------------------- goals ------------------------------- */
+    getGoals: build.query<Goal[], string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/goals`,
+      providesTags: ["Goal"],
+    }),
+
+    createGoal: build.mutation<
+      Goal,
+      { workspaceId: string; name: string; kind: "page" | "event"; match: string }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/goals`,
+        method: "POST",
+        body,
+      }),
+      // A new goal changes the conversion numbers the stats endpoint reports.
+      invalidatesTags: ["Goal", "Stats"],
+    }),
+
+    deleteGoal: build.mutation<void, { workspaceId: string; goalId: string }>({
+      query: ({ workspaceId, goalId }) => ({
+        url: `/api/workspaces/${workspaceId}/goals/${goalId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Goal", "Stats"],
+    }),
+
     /* ------------------------------- api keys ----------------------------- */
     getApiKeys: build.query<ApiKey[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/keys`,
@@ -228,6 +255,9 @@ export const {
   useSaveLayoutMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
+  useGetGoalsQuery,
+  useCreateGoalMutation,
+  useDeleteGoalMutation,
   useGetApiKeysQuery,
   useCreateApiKeyMutation,
   useRevokeApiKeyMutation,

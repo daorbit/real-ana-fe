@@ -12,6 +12,7 @@ import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
   ArrowDownWideNarrow, Zap, Filter, GitBranch, Repeat,
+  Split, Target, AlertTriangle,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
@@ -23,6 +24,8 @@ import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
 import { CustomEventsPanel } from "../components/CustomEventsPanel";
 import { FunnelBuilder } from "../components/FunnelBuilder";
 import { RetentionGrid } from "../components/RetentionGrid";
+import { GoalsPanel } from "../components/GoalsPanel";
+import { OutboundPanel, ErrorsPanel } from "../components/OutboundErrorsPanels";
 import { FilterBar } from "../components/FilterBar";
 import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
@@ -283,15 +286,15 @@ export default function Analytics() {
 
   return (
     <AppShell>
-      <Group justify="space-between" align="flex-start" mb="lg">
-        <div>
+      <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
+        <div style={{ flex: "1 1 240px", minWidth: 0 }}>
           <Title order={1}>Analytics</Title>
           <Text c="dimmed" size="sm" mt={6}>
             Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
             Changes compare to the previous {range}.
           </Text>
         </div>
-        <Group gap="sm">
+        <Group gap="sm" wrap="wrap" justify="flex-end">
           <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           <Group gap="xs">
@@ -417,8 +420,10 @@ export default function Analytics() {
           <Tabs.Tab value="geo" leftSection={<Globe2 size={14} />}>Geography</Tabs.Tab>
           <Tabs.Tab value="clicks" leftSection={<MousePointerClick size={14} />}>Clicks</Tabs.Tab>
           <Tabs.Tab value="events" leftSection={<Zap size={14} />}>Events</Tabs.Tab>
+          <Tabs.Tab value="goals" leftSection={<Target size={14} />}>Goals</Tabs.Tab>
           <Tabs.Tab value="funnel" leftSection={<GitBranch size={14} />}>Funnel</Tabs.Tab>
           <Tabs.Tab value="retention" leftSection={<Repeat size={14} />}>Retention</Tabs.Tab>
+          <Tabs.Tab value="errors" leftSection={<AlertTriangle size={14} />}>Errors</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="pages">
@@ -441,9 +446,13 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="sources">
-          <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
+          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" mb="lg">
+            <BarList title="Channels" icon={Split} items={view?.channels ?? []} color="emerald"
+                     empty="No traffic yet" />
             <BarList title="Referrers" icon={Tag} items={view?.topReferrers ?? []} color="cyan"
                      filterKey="referrer" onFilter={addFilter} />
+          </SimpleGrid>
+          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
             <BarList title="UTM sources" icon={Tag} items={view?.utmSources ?? []} color="teal"
                      filterKey="utmSource" onFilter={addFilter} />
             <BarList title="UTM campaigns" icon={Tag} items={view?.utmCampaigns ?? []} color="grape"
@@ -490,7 +499,12 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="clicks">
-          <ClicksPanel clicks={view?.clicks ?? []} total={view?.clickCount ?? 0} limit={15} />
+          <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
+            <div style={{ gridColumn: "span 2" }}>
+              <ClicksPanel clicks={view?.clicks ?? []} total={view?.clickCount ?? 0} limit={15} />
+            </div>
+            <OutboundPanel items={view?.outboundClicks ?? []} />
+          </SimpleGrid>
         </Tabs.Panel>
 
         <Tabs.Panel value="events">
@@ -535,12 +549,45 @@ export default function Analytics() {
           </SimpleGrid>
         </Tabs.Panel>
 
+        <Tabs.Panel value="goals">
+          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
+            <GoalsPanel workspaceId={active._id} goals={view?.goals ?? []} />
+            <Card withBorder radius="lg" padding="lg" h="100%">
+              <Group gap={8} mb="md">
+                <Target size={15} className="sect-ic" />
+                <Text fw={600} c="dimmed" size="sm">About goals</Text>
+              </Group>
+              <Stack gap="sm">
+                <Text size="sm" c="dimmed">
+                  A goal is an outcome you care about — reaching a page like{" "}
+                  <code>/thank-you</code>, or firing a custom event like{" "}
+                  <code>purchase</code>. Each goal is scored over the range you&apos;re
+                  viewing.
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Conversion rate is the share of visitors in this period who
+                  converted at least once — a visitor who converts twice still
+                  counts once.
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Goals re-score past traffic, so adding one doesn&apos;t lose
+                  history and removing one keeps your events intact.
+                </Text>
+              </Stack>
+            </Card>
+          </SimpleGrid>
+        </Tabs.Panel>
+
         <Tabs.Panel value="funnel">
           <FunnelBuilder workspaceId={active._id} range={range} stats={view} sites={siteScope} />
         </Tabs.Panel>
 
         <Tabs.Panel value="retention">
           <RetentionGrid workspaceId={active._id} sites={siteScope} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="errors">
+          <ErrorsPanel items={view?.errors ?? []} />
         </Tabs.Panel>
       </Tabs>
       </Box>

@@ -57,6 +57,10 @@ export const WIDGETS = [
   { id: "utmCampaigns", label: "UTM campaigns", description: "Campaign names", group: "Breakdowns", kind: "list", defaultSpan: 1 },
   { id: "scrollDepth", label: "Scroll depth", description: "How far down each page people read", group: "Breakdowns", kind: "list", defaultSpan: 2 },
   { id: "landingPages", label: "Landing pages", description: "Which entry points actually hold people", group: "Breakdowns", kind: "list", defaultSpan: 2 },
+  { id: "channels", label: "Channels", description: "How sessions arrive: Direct, Organic, Paid…", group: "Breakdowns", kind: "list", defaultSpan: 1 },
+  { id: "goals", label: "Conversions", description: "Goal conversion rates", group: "Breakdowns", kind: "list", defaultSpan: 2 },
+  { id: "outbound", label: "Outbound & downloads", description: "Where visitors leave to", group: "Breakdowns", kind: "list", defaultSpan: 1 },
+  { id: "errors", label: "JS errors", description: "Broken pages and failed scripts", group: "Breakdowns", kind: "list", defaultSpan: 1 },
 ] as const satisfies readonly Widget[];
 
 export type WidgetId = (typeof WIDGETS)[number]["id"];
