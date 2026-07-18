@@ -127,6 +127,78 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   overflow: hidden;
 }
 
+/* ============ Onboarding ============
+   Shares the auth split so signup flows straight into setup without the page
+   changing shape. The form column is wider than auth's, because step 3 holds
+   a code block. */
+.onb-split { grid-template-columns: 1fr 1.15fr; }
+
+.onb-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background: var(--bg);
+  overflow-y: auto;
+}
+.onb-col {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* Step list on the brand panel. */
+.onb-steps { display: flex; flex-direction: column; gap: 1.1rem; }
+.onb-step { display: flex; align-items: flex-start; gap: 0.8rem; }
+.onb-step-ic {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; flex-shrink: 0;
+  font-size: 0.78rem; font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.onb-step[data-state="current"] .onb-step-ic {
+  background: #34d399;
+  border-color: #34d399;
+  color: #04150e;
+}
+.onb-step[data-state="done"] .onb-step-ic {
+  background: rgba(52, 211, 153, 0.22);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #34d399;
+}
+.onb-step-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.onb-step-label {
+  font-size: 0.92rem; font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 0.25s ease;
+}
+.onb-step[data-state="current"] .onb-step-label { color: #fff; }
+.onb-step[data-state="done"] .onb-step-label { color: rgba(255, 255, 255, 0.8); }
+.onb-step-hint { font-size: 0.76rem; color: rgba(255, 255, 255, 0.45); }
+
+/* Framework picker tile — logo above label, so the mark is what you scan. */
+.onb-fw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 8px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  /* The brand panel is hidden below 900px by the shared auth rule, so the
+     step list would vanish with it — the "STEP n OF 3" line in the form
+     column is what carries progress there. */
+  .onb-split { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .onb-panel { padding: 1.5rem 1.1rem 3rem; }
+}
+
 /* Analytics section rail — one recessed track, tabs scroll on narrow screens
    rather than wrapping into a second row that shifts the page. */
 .section-rail {

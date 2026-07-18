@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { AuthProvider, useAuth } from "./auth";
-import { WorkspaceProvider } from "./workspace";
+import { WorkspaceProvider, useWorkspace } from "./workspace";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
@@ -10,14 +10,52 @@ import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
 import Impersonate from "./pages/Impersonate";
 import Settings from "./pages/Settings";
+import Onboarding from "./pages/Onboarding";
 import { AppBootSkeleton } from "./components/Skeletons";
 import "./App.css";
 
 // While the session is being restored we don't yet know whether to show the app
 // or the login page, so hold on a neutral spinner rather than flashing either.
 
-// Protected routes get the workspace context.
+/**
+ * Sends an account with no workspace to first-run setup.
+ *
+ * This lives inside WorkspaceProvider because it needs the workspace list, and
+ * it is a route guard rather than a redirect on the signup button so it holds
+ * however someone arrives — a restored session, a bookmark, a direct URL.
+ *
+ * Skipping setup is respected: `onboarding_skipped` suppresses the redirect so
+ * "Skip for now" doesn't bounce straight back here. The Home checklist then
+ * carries the remaining steps.
+ */
+function RequireSetup({ children }: { children: ReactNode }) {
+  const { workspaces, loading } = useWorkspace();
+
+  // Don't judge an empty list until it has actually loaded, or every refresh
+  // would flash the onboarding screen before the workspaces arrive.
+  if (loading) return <AppBootSkeleton />;
+
+  const skipped = localStorage.getItem("quantalog_onboarding_skipped") === "1";
+  if (!workspaces.length && !skipped) {
+    return <Navigate to="/app/onboarding" replace />;
+  }
+  return <>{children}</>;
+}
+
+// Protected routes get the workspace context, and the setup guard.
 function Protected({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <AppBootSkeleton />;
+  if (!user) return <Navigate to="/login" replace />;
+  return (
+    <WorkspaceProvider>
+      <RequireSetup>{children}</RequireSetup>
+    </WorkspaceProvider>
+  );
+}
+
+/** Onboarding itself needs the workspace context but must not guard on it. */
+function ProtectedRaw({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <AppBootSkeleton />;
   if (!user) return <Navigate to="/login" replace />;
@@ -46,6 +84,9 @@ export default function App() {
           <Route path="/" element={<Root />} />
           <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
           <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
+          {/* First-run setup. Protected for the workspace context, but renders
+              without the app shell — a new account has nothing to navigate. */}
+          <Route path="/app/onboarding" element={<ProtectedRaw><Onboarding /></ProtectedRaw>} />
           <Route path="/app" element={<Protected><Home /></Protected>} />
           <Route path="/app/analytics" element={<Protected><Analytics /></Protected>} />
           <Route path="/app/workspaces" element={<Protected><Workspaces /></Protected>} />

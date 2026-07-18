@@ -70,7 +70,9 @@ export default function Signup() {
       const name = `${firstName.trim()} ${lastName.trim()}`.trim();
       await signup(email.trim(), password, name);
       notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
-      nav("/app");
+      // Straight into setup rather than an empty dashboard — a new account has
+      // no workspace, so /app would just show three empty states.
+      nav("/app/onboarding");
     } catch (err) {
       setError(errMessage(err, "Signup failed. That email may already be registered."));
     } finally {

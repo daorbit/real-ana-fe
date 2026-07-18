@@ -62,6 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const r = await api.post<AuthResp>("/api/auth/signup", { email, password, name });
     setToken(r.token);
     dispatch(rtkApi.util.resetApiState());
+    // A previous account may have skipped setup on this browser; the flag is
+    // per-browser, so a new account has to start with a clean slate.
+    localStorage.removeItem("quantalog_onboarding_skipped");
+    localStorage.removeItem("quantalog_onboarding_dismissed");
     setUser(r.user);
   };
 

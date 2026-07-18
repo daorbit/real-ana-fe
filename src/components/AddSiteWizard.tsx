@@ -6,6 +6,7 @@ import {
 import { ArrowLeft, ArrowRight, Check, Globe, PartyPopper } from "lucide-react";
 import { CodeBlock } from "./CodeBlock";
 import { InstallCheck } from "./InstallCheck";
+import { BrandIcon } from "./BrandIcon";
 import { useCreateSiteMutation } from "../store";
 import { type TrackerOptions } from "../utils";
 import {
@@ -184,25 +185,20 @@ export function AddSiteWizard({
               tracker itself is the same everywhere.
             </Text>
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="xs">
-              {FRAMEWORKS.map((f) => {
-                const selected = framework === f.id;
-                return (
-                  <UnstyledButton
-                    key={f.id}
-                    onClick={() => setFramework(f.id)}
-                    aria-pressed={selected}
-                    style={{
-                      padding: "10px 12px",
-                      borderRadius: "var(--mantine-radius-md)",
-                      border: `1px solid ${selected ? "var(--mantine-color-emerald-6)" : "var(--border)"}`,
-                      background: selected ? "var(--mantine-color-emerald-light)" : "var(--surface)",
-                      textAlign: "center",
-                    }}
-                  >
-                    <Text size="sm" fw={selected ? 600 : 500}>{f.label}</Text>
-                  </UnstyledButton>
-                );
-              })}
+              {FRAMEWORKS.map((f) => (
+                <UnstyledButton
+                  key={f.id}
+                  className="onb-fw tile"
+                  data-selected={framework === f.id}
+                  aria-pressed={framework === f.id}
+                  onClick={() => setFramework(f.id)}
+                >
+                  <BrandIcon framework={f.id} size={22} />
+                  <Text size="sm" fw={framework === f.id ? 600 : 500}>
+                    {f.label}
+                  </Text>
+                </UnstyledButton>
+              ))}
             </SimpleGrid>
           </div>
         </Stack>
