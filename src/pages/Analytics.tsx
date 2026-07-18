@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Progress,
-  Stack, Center, ThemeIcon, Badge, Tabs, Box, Loader,
+  Stack, Center, ThemeIcon, Badge, Tabs, Box, Loader, UnstyledButton,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -374,25 +374,28 @@ export default function Analytics() {
 
       {/* Primary section nav. Overview keeps the headline widgets; the rest hold
           the detail views, grouped by the question each answers. */}
-      <Group gap={6} wrap="wrap" mb="lg">
+      {/* A segmented rail rather than a row of filled buttons: eight solid
+          buttons all read as primary actions and fight the page for weight. */}
+      <Box className="section-rail" mb="lg">
         {SECTIONS.map((s) => {
-          const active = section === s.value;
+          const isActive = section === s.value;
           const Icon = s.icon;
           return (
-            <Button
+            <UnstyledButton
               key={s.value}
-              radius="md"
-              size="sm"
-              variant={active ? "filled" : "default"}
-              color={active ? "emerald" : undefined}
-              leftSection={<Icon size={15} />}
+              className="section-tab"
+              data-active={isActive}
               onClick={() => goSection(s.value)}
+              aria-current={isActive ? "page" : undefined}
             >
-              {s.label}
-            </Button>
+              <Icon size={15} />
+              <Text size="sm" fw={isActive ? 600 : 500}>
+                {s.label}
+              </Text>
+            </UnstyledButton>
           );
         })}
-      </Group>
+      </Box>
 
       {/* Active segment. Clicking any breakdown row below adds a chip here and
           re-scopes every number to that segment. */}

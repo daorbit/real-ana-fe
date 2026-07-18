@@ -1,12 +1,13 @@
 import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  AppShell as MantineShell, NavLink, Select, Avatar, Group, Text, ActionIcon, ScrollArea, Box,
-  useMantineColorScheme, SegmentedControl, Center, useComputedColorScheme, Button, Alert,
+  AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
+  Box, useMantineColorScheme, useComputedColorScheme, Button, Alert, Menu,
+  UnstyledButton, Tooltip,
 } from "@mantine/core";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
-  Settings as SettingsIcon,
+  Settings as SettingsIcon, ChevronsUpDown, BookOpen,
 } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
@@ -14,18 +15,68 @@ import { useAuth } from "../auth";
 import { notify, confirmLogout, errMessage } from "../notify";
 import { useWorkspace } from "../workspace";
 
-const NAV = [
-  { to: "/app", label: "Home", icon: Home },
-  { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/app/workspaces", label: "Workspaces", icon: FolderKanban },
-  { to: "/app/developers", label: "Developers", icon: Code2 },
-  { to: "/app/settings", label: "Settings", icon: SettingsIcon },
+/**
+ * Grouped navigation.
+ *
+ * A flat list of five items gives no sense of which are daily tools and which
+ * are occasional setup — grouping costs one line of chrome and makes the shape
+ * of the product visible.
+ */
+const NAV_GROUPS = [
+  {
+    heading: "Analyze",
+    items: [
+      { to: "/app", label: "Home", icon: Home },
+      { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    heading: "Manage",
+    items: [
+      { to: "/app/workspaces", label: "Workspaces", icon: FolderKanban },
+      { to: "/app/developers", label: "Developers", icon: Code2 },
+    ],
+  },
 ];
 
 /** Only an admin sees these, and only when not already acting as someone else. */
-const ADMIN_NAV = [
-  { to: "/app/impersonate", label: "View as user", icon: Users },
-];
+const ADMIN_ITEMS = [{ to: "/app/impersonate", label: "View as user", icon: Users }];
+
+function NavItem({
+  to,
+  label,
+  icon: Icon,
+  active,
+}: {
+  to: string;
+  label: string;
+  icon: typeof Home;
+  active: boolean;
+}) {
+  return (
+    <UnstyledButton
+      component={Link}
+      to={to}
+      className="nav-link"
+      data-active={active}
+      aria-current={active ? "page" : undefined}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        width: "100%",
+        padding: "8px 10px",
+        marginBottom: 2,
+        color: active ? "var(--text)" : "var(--text-2)",
+      }}
+    >
+      <Icon size={17} style={{ flexShrink: 0, color: active ? "var(--violet-2)" : undefined }} />
+      <Text size="sm" fw={active ? 600 : 500} truncate>
+        {label}
+      </Text>
+    </UnstyledButton>
+  );
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, logout, exitImpersonation } = useAuth();
@@ -33,7 +84,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { setColorScheme } = useMantineColorScheme();
   const scheme = useComputedColorScheme("light");
   const loc = useLocation();
-  const initials = (user?.name ?? "?").slice(0, 2).toUpperCase();
   const dark = scheme === "dark";
 
   const [leaving, setLeaving] = useState(false);
@@ -43,7 +93,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   // vanish mid-impersonation anyway — but be explicit about it.
   const isAdmin = user?.role === "admin" && !impersonating;
 
-  const nav = isAdmin ? [...NAV, ...ADMIN_NAV] : NAV;
+  const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
+
+  const groups = isAdmin
+    ? [...NAV_GROUPS, { heading: "Admin", items: ADMIN_ITEMS }]
+    : NAV_GROUPS;
 
   const leave = async () => {
     setLeaving(true);
@@ -58,21 +112,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <MantineShell
-      navbar={{ width: 250, breakpoint: "sm" }}
-      padding="lg"
-    >
-      <MantineShell.Navbar p="md" style={{ background: "var(--bg-2)", borderRight: "1px solid var(--border)" }}>
+    <MantineShell navbar={{ width: 252, breakpoint: "sm" }} padding="lg">
+      <MantineShell.Navbar
+        p="sm"
+        style={{ background: "var(--bg-2)", borderRight: "1px solid var(--border)" }}
+      >
         <MantineShell.Section>
-          <Box component={Link} to="/app" px={4} pt={4} pb="lg" display="block">
+          <Box component={Link} to="/app" px={6} pt={6} pb="md" display="block">
             <Wordmark />
           </Box>
         </MantineShell.Section>
 
         {workspaces.length > 0 && (
-          <MantineShell.Section mb="lg">
+          <MantineShell.Section mb="md">
             <Select
-              label="Workspace"
               size="sm"
               radius="md"
               data={workspaces.map((w) => ({ value: w._id, label: w.name }))}
@@ -80,79 +133,110 @@ export function AppShell({ children }: { children: ReactNode }) {
               onChange={(v) => v && setActive(v)}
               allowDeselect={false}
               comboboxProps={{ withinPortal: true, radius: "md" }}
-              styles={{ label: { fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--muted)", marginBottom: 6, fontWeight: 600 } }}
+              leftSection={<FolderKanban size={15} />}
+              rightSection={<ChevronsUpDown size={14} />}
+              aria-label="Active workspace"
             />
           </MantineShell.Section>
         )}
 
         <MantineShell.Section grow component={ScrollArea}>
-          {nav.map((n) => {
-            const isActive = loc.pathname === n.to;
-            return (
-              <NavLink
-                key={n.to}
-                component={Link}
-                to={n.to}
-                label={<Text fw={isActive ? 600 : 500} size="sm">{n.label}</Text>}
-                leftSection={<n.icon size={18} />}
-                active={isActive}
-                variant="filled"
-                mb={6}
-                styles={{ root: { borderRadius: "var(--mantine-radius-md)" } }}
-              />
-            );
-          })}
+          {groups.map((group) => (
+            <Box key={group.heading} mb="md">
+              <p className="nav-heading">{group.heading}</p>
+              {group.items.map((n) => (
+                <NavItem
+                  key={n.to}
+                  to={n.to}
+                  label={n.label}
+                  icon={n.icon}
+                  active={loc.pathname === n.to}
+                />
+              ))}
+            </Box>
+          ))}
         </MantineShell.Section>
 
         <MantineShell.Section>
-          <SegmentedControl
-            fullWidth
-            size="sm"
-            radius="md"
-            mb="sm"
-            color="emerald"
-            value={dark ? "dark" : "light"}
-            onChange={(v) => setColorScheme(v as "light" | "dark")}
-            data={[
-              { value: "light", label: <Center style={{ gap: 6 }}><Sun size={14} /> Light</Center> },
-              { value: "dark", label: <Center style={{ gap: 6 }}><Moon size={14} /> Dark</Center> },
-            ]}
-          />
-          <Group gap="sm" wrap="nowrap" p="xs" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--mantine-radius-md)" }}>
-            <Avatar src={user?.avatarUrl || null} color="emerald" radius="md" size="md">
-              {initials}
-            </Avatar>
-            <Box
-              component={Link}
-              to="/app/settings"
-              style={{ flex: 1, overflow: "hidden", color: "inherit", textDecoration: "none" }}
-            >
-              <Text size="sm" fw={600} truncate>{user?.name}</Text>
-              <Text size="xs" c="dimmed" truncate>{user?.email}</Text>
-            </Box>
-            <ActionIcon
-              variant="subtle" color="gray" title="Log out"
-              onClick={() => confirmLogout(() => { logout(); notify.info("You have been logged out."); })}
-            >
-              <LogOut size={16} />
-            </ActionIcon>
+          {/* Docs and theme sit together as low-frequency utilities, so they
+              don't compete with the primary nav above. */}
+          <Group gap={4} mb="xs" px={2}>
+            <Tooltip label="Documentation" withArrow>
+              <ActionIcon
+                component="a"
+                href="https://quantalog.daorbit.in/docs"
+                target="_blank"
+                rel="noreferrer"
+                variant="subtle"
+                color="gray"
+                aria-label="Documentation"
+              >
+                <BookOpen size={16} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label={dark ? "Light mode" : "Dark mode"} withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                onClick={() => setColorScheme(dark ? "light" : "dark")}
+                aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {dark ? <Sun size={16} /> : <Moon size={16} />}
+              </ActionIcon>
+            </Tooltip>
           </Group>
+
+          <Menu position="right-end" withArrow radius="md" width={210}>
+            <Menu.Target>
+              <UnstyledButton
+                className="tile"
+                style={{ display: "block", width: "100%", padding: 8 }}
+              >
+                <Group gap="sm" wrap="nowrap">
+                  <Avatar src={user?.avatarUrl || null} color="emerald" radius="md" size="md">
+                    {initials}
+                  </Avatar>
+                  <Box style={{ flex: 1, overflow: "hidden" }}>
+                    <Text size="sm" fw={600} truncate>{user?.name}</Text>
+                    <Text size="xs" c="dimmed" truncate>{user?.email}</Text>
+                  </Box>
+                  <ChevronsUpDown size={14} style={{ flexShrink: 0, color: "var(--muted)" }} />
+                </Group>
+              </UnstyledButton>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                component={Link}
+                to="/app/settings"
+                leftSection={<SettingsIcon size={15} />}
+              >
+                Settings
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item
+                color="red"
+                leftSection={<LogOut size={15} />}
+                onClick={() =>
+                  confirmLogout(() => {
+                    logout();
+                    notify.info("You have been logged out.");
+                  })
+                }
+              >
+                Log out
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </MantineShell.Section>
       </MantineShell.Navbar>
 
       <MantineShell.Main style={{ background: "var(--bg)", position: "relative" }}>
-        <div className="glow glow-a" />
         <div style={{ position: "relative", zIndex: 1 }}>
           {/* Full access means an accidental delete lands on a real customer.
               The banner is deliberately loud and always in reach. */}
           {impersonating && (
-            <Alert
-              color="orange"
-              variant="filled"
-              radius="md"
-              mb="lg"
-              icon={<Eye size={18} />}
-            >
+            <Alert color="orange" variant="filled" radius="md" mb="lg" icon={<Eye size={18} />}>
               <Group justify="space-between" wrap="nowrap">
                 <Text size="sm" fw={500}>
                   You are viewing as <b>{user?.email}</b> with full access — changes you

@@ -1,38 +1,33 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  Title, Text, Card, Stack, Group, TextInput, Button, Avatar, Badge,
-  SimpleGrid, Select, Divider, Box,
+  Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code,
 } from "@mantine/core";
-import { Check, Save } from "lucide-react";
+import { Save, Languages } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { PageHeader, PageStack, Section, Field } from "../components/Page";
 import { useAuth } from "../auth";
 import { notify, errMessage } from "../notify";
-import { shortDate } from "../utils";
 
 /**
- * A short list beats a full CLDR dump: these cover the accounts we have, and
- * the effect of the setting (day/month order, month names) is visible in the
- * preview below the field, so an unlisted locale is a request rather than a
- * guess.
+ * Date formats, previewed rather than named.
+ *
+ * "en-GB" means nothing to most people; "18 Jul 2026" is immediately legible,
+ * so the sample is the label and the tag is the supporting detail.
  */
 const LOCALES = [
-  { value: "", label: "Use my browser's setting" },
-  { value: "en-GB", label: "English (UK) — 18 Jul 2026" },
-  { value: "en-US", label: "English (US) — Jul 18, 2026" },
-  { value: "en-IN", label: "English (India) — 18 Jul 2026" },
-  { value: "de-DE", label: "German — 18. Juli 2026" },
-  { value: "fr-FR", label: "French — 18 juil. 2026" },
-  { value: "es-ES", label: "Spanish — 18 jul 2026" },
-  { value: "ja-JP", label: "Japanese — 2026年7月18日" },
+  { value: "", label: "Match my browser" },
+  { value: "en-GB", label: "18 Jul 2026 · English (UK)" },
+  { value: "en-US", label: "Jul 18, 2026 · English (US)" },
+  { value: "en-IN", label: "18 Jul 2026 · English (India)" },
+  { value: "de-DE", label: "18. Juli 2026 · German" },
+  { value: "fr-FR", label: "18 juil. 2026 · French" },
+  { value: "es-ES", label: "18 jul 2026 · Spanish" },
+  { value: "ja-JP", label: "2026年7月18日 · Japanese" },
 ];
 
-/**
- * Timezones the dashboard is actually used from. The browser's own zone is
- * always offered first so the default needs no lookup.
- */
 const TIMEZONES = [
-  { value: "", label: "Use my browser's timezone" },
+  { value: "", label: "Match my browser" },
   { value: "UTC", label: "UTC" },
   { value: "Asia/Kolkata", label: "Asia/Kolkata (IST)" },
   { value: "Asia/Dubai", label: "Asia/Dubai" },
@@ -48,15 +43,15 @@ const TIMEZONES = [
 /** A phone number people actually type: digits, spaces, +, -, (), 6–20 long. */
 function mobileError(v: string): string | null {
   const s = v.trim();
-  if (!s) return null; // optional
+  if (!s) return null;
   if (!/^\+?[\d\s\-()]{6,20}$/.test(s)) return "Enter a valid phone number";
   return null;
 }
 
 function avatarError(v: string): string | null {
   const s = v.trim();
-  if (!s) return null; // optional
-  if (!/^https?:\/\/\S+$/i.test(s)) return "Must be a link starting with http:// or https://";
+  if (!s) return null;
+  if (!/^https?:\/\/\S+$/i.test(s)) return "Must start with http:// or https://";
   return null;
 }
 
@@ -94,6 +89,23 @@ export default function Settings() {
       dateLocale !== (user.dateLocale ?? "") ||
       timezone !== (user.timezone ?? ""));
 
+  // Preview the pending selection, not the saved one — otherwise the sample
+  // contradicts the dropdown until you hit save.
+  const preview = (() => {
+    try {
+      return new Date().toLocaleString(dateLocale || undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: timezone || undefined,
+      });
+    } catch {
+      return "—";
+    }
+  })();
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -125,128 +137,177 @@ export default function Settings() {
 
   if (!user) return null;
 
-  const initials = `${firstName} ${lastName}`.trim().slice(0, 2).toUpperCase() ||
+  const initials =
+    `${firstName} ${lastName}`.trim().slice(0, 2).toUpperCase() ||
     user.name.slice(0, 2).toUpperCase();
 
   return (
     <AppShell>
-      <Box mb="lg">
-        <Title order={1}>Settings</Title>
-        <Text c="dimmed" size="sm" mt={6}>
-          Your profile and how dates are shown across the dashboard.
-        </Text>
-      </Box>
-
       <form onSubmit={submit}>
-        <Stack gap="lg" style={{ maxWidth: 720 }}>
-          <Card withBorder radius="md" padding="lg">
-            <Group gap="md" mb="lg" wrap="nowrap">
+        <PageHeader
+          title="Settings"
+          description="Your profile and how dates are shown across the dashboard."
+          actions={
+            <Button
+              type="submit"
+              leftSection={<Save size={15} />}
+              loading={saving}
+              disabled={!dirty}
+            >
+              Save changes
+            </Button>
+          }
+        />
+
+        <PageStack>
+          {/* Identity card — the avatar and name read as a profile rather than
+              as two more text inputs. */}
+          <Box className="surface-card" p="lg">
+            <Group gap="lg" wrap="nowrap">
               <Avatar
                 src={avatarError(avatarUrl) ? null : avatarUrl || null}
                 color="emerald"
                 radius="md"
-                size={64}
+                size={72}
               >
                 {initials}
               </Avatar>
-              <div style={{ minWidth: 0 }}>
+              <Box style={{ minWidth: 0 }}>
                 <Group gap="xs">
-                  <Text fw={600} truncate>
+                  <Text fw={700} size="lg" truncate style={{ letterSpacing: "-0.01em" }}>
                     {`${firstName} ${lastName}`.trim() || user.name}
                   </Text>
-                  <Badge size="sm" variant="light" color={user.role === "admin" ? "grape" : "gray"}>
+                  <Badge
+                    size="sm"
+                    variant="light"
+                    color={user.role === "admin" ? "grape" : "gray"}
+                  >
                     {user.role}
                   </Badge>
                 </Group>
                 <Text size="sm" c="dimmed" truncate>{user.email}</Text>
-              </div>
+              </Box>
             </Group>
+          </Box>
 
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+          <Section
+            title="Profile"
+            description="How you appear across Quantalog."
+          >
+            <Field label="First name" hint="Required.">
               <TextInput
-                label="First name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.currentTarget.value)}
                 error={errors.firstName}
-                required
               />
+            </Field>
+            <Field label="Last name">
               <TextInput
-                label="Last name"
                 value={lastName}
                 onChange={(e) => setLastName(e.currentTarget.value)}
               />
+            </Field>
+            <Field
+              label="Email"
+              hint="Your email is your sign-in and can't be changed here."
+            >
+              <TextInput value={user.email} disabled />
+            </Field>
+            <Field label="Mobile number" hint="Optional.">
               <TextInput
-                label="Email"
-                value={user.email}
-                disabled
-                description="Your email is your sign-in and can't be changed here."
-              />
-              <TextInput
-                label="Mobile number"
                 placeholder="+91 98765 43210"
                 value={mobile}
                 onChange={(e) => setMobile(e.currentTarget.value)}
                 error={errors.mobile}
               />
-            </SimpleGrid>
+            </Field>
+            <Field
+              label="Profile image"
+              hint="Paste a link to an image. Uploading isn't supported yet."
+              last
+            >
+              <TextInput
+                placeholder="https://example.com/me.jpg"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.currentTarget.value)}
+                error={errors.avatarUrl}
+              />
+            </Field>
+          </Section>
 
-            <Divider my="lg" />
-
-            <TextInput
-              label="Profile image URL"
-              placeholder="https://example.com/me.jpg"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.currentTarget.value)}
-              error={errors.avatarUrl}
-              description="Paste a link to an image. Uploading one isn't supported yet."
-            />
-          </Card>
-
-          <Card withBorder radius="md" padding="lg">
-            <Text fw={600} mb={4}>Dates</Text>
-            <Text size="sm" c="dimmed" mb="lg">
-              Applies to every date shown in the dashboard.
-            </Text>
-
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+          <Section
+            title="Dates and time"
+            description="Applies to every date shown in the dashboard."
+          >
+            <Field
+              label="Date format"
+              hint="Controls how dates are written — day and month order, and month names."
+            >
               <Select
-                label="Date format"
                 data={LOCALES}
                 value={dateLocale}
                 onChange={(v) => setDateLocale(v ?? "")}
                 allowDeselect={false}
                 comboboxProps={{ withinPortal: true, radius: "md" }}
               />
+            </Field>
+            <Field
+              label="Timezone"
+              hint="Decides which day a stat falls on, and the clock time on every chart."
+            >
               <Select
-                label="Timezone"
                 data={TIMEZONES}
                 value={timezone}
                 onChange={(v) => setTimezone(v ?? "")}
                 allowDeselect={false}
                 searchable
                 comboboxProps={{ withinPortal: true, radius: "md" }}
-                description="Decides which day a stat falls on."
               />
-            </SimpleGrid>
+            </Field>
+            <Field label="Preview" hint="Right now, with the settings above." last>
+              <Code
+                block
+                style={{ fontSize: 13, padding: "10px 12px", background: "var(--surface-2)" }}
+              >
+                {preview}
+              </Code>
+            </Field>
+          </Section>
 
-            {/* Saved settings are already live here, so the preview only tells
-                the truth after a save — say so rather than faking it. */}
-            <Text size="sm" c="dimmed" mt="md">
-              Today currently reads as <b>{shortDate(new Date())}</b>.
-            </Text>
-          </Card>
+          {/* Named rather than hidden: the absence of a language switcher is a
+              real gap, and saying so beats letting people hunt for it. */}
+          <Section
+            title="Language"
+            description="The dashboard interface language."
+          >
+            <Field
+              label="Interface language"
+              hint="Quantalog's interface is currently English only. Translations are planned — the date settings above already follow your region."
+              last
+            >
+              <Group gap="xs" wrap="nowrap">
+                <Languages size={16} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                <Text size="sm" c="dimmed">English</Text>
+                <Badge size="xs" variant="light" color="gray" ml="auto">
+                  More coming
+                </Badge>
+              </Group>
+            </Field>
+          </Section>
 
+          {/* A second save at the foot of a long form, so a change made at the
+              bottom doesn't require scrolling back up. */}
           <Group justify="flex-end">
             <Button
               type="submit"
-              leftSection={saving ? <Check size={15} /> : <Save size={15} />}
+              leftSection={<Save size={15} />}
               loading={saving}
               disabled={!dirty}
             >
               Save changes
             </Button>
           </Group>
-        </Stack>
+        </PageStack>
       </form>
     </AppShell>
   );

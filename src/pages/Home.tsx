@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Title, Text, Group, Button, Card, ThemeIcon, Stack, Center, Badge, Progress, Alert,
+  Text, Group, Button, Card, ThemeIcon, Stack, Center, Badge, Progress, Alert,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import {
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { StatCard } from "../components/StatCard";
+import { HomeHero } from "../components/HomeHero";
 import { AnalyticsArt } from "../components/Brand";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
@@ -313,13 +314,9 @@ export default function Home() {
         }}
       />
 
-      <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
-        <div style={{ flex: "1 1 240px", minWidth: 0 }}>
-          <Title order={1}>Welcome back 👋</Title>
-          <Text c="dimmed" size="sm" mt={6}>
-            A quick look at <b>{active.name}</b>.
-          </Text>
-        </div>
+      {/* Controls first, then the hero band — the toolbar is chrome, so it
+          stays compact above the thing people actually came to read. */}
+      <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap">
         <Group gap="sm" wrap="wrap" justify="flex-end">
           {/* The overview is fixed to the last 24h — range and export live on
               the full analytics page, which is where people go to slice data. */}
@@ -371,6 +368,16 @@ export default function Home() {
           )}
         </Group>
       </Group>
+
+      {!editing && !dirty && (
+        <HomeHero
+          workspaceName={active.name}
+          live={stats?.live ?? 0}
+          visitors={stats?.visitors ?? 0}
+          pageviews={stats?.pageviews ?? 0}
+          series={stats?.timeseries ?? []}
+        />
+      )}
 
       {!editing && !dirty && (
         <Onboarding
