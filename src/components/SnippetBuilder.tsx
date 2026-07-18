@@ -5,7 +5,8 @@ import {
 import { SlidersHorizontal, ChevronDown, ChevronUp, Save } from "lucide-react";
 import { CodeBlock } from "./CodeBlock";
 import { useUpdateSiteOptionsMutation } from "../store";
-import { trackingSnippetPretty, type TrackerOptions } from "../utils";
+import { type TrackerOptions } from "../utils";
+import { getFramework, frameworkLanguage } from "../utils/frameworks";
 import { notify, errMessage } from "../notify";
 
 /** Split a comma-separated field into clean entries. */
@@ -36,11 +37,15 @@ export function SnippetBuilder({
   siteId,
   workspaceId,
   options: saved,
+  framework = "html",
 }: {
   siteId: string;
   workspaceId: string;
   options?: TrackerOptions;
+  /** Which install snippet to show — set when the site was created. */
+  framework?: string;
 }) {
+  const guide = getFramework(framework);
   const [open, setOpen] = useState(false);
   const [updateOptions, { isLoading: saving }] = useUpdateSiteOptionsMutation();
 
@@ -110,7 +115,11 @@ export function SnippetBuilder({
 
   return (
     <Stack gap="sm">
-      <CodeBlock code={trackingSnippetPretty(siteId, options)} filename="index.html" />
+      <CodeBlock
+        code={guide.code(siteId, options)}
+        filename={guide.filename}
+        language={frameworkLanguage(guide.id)}
+      />
 
       <Group justify="space-between">
         <Button

@@ -71,7 +71,13 @@ export const api = createApi({
 
     createSite: build.mutation<
       Site,
-      { workspaceId: string; name: string; domain: string; trackerOptions?: TrackerOptions }
+      {
+        workspaceId: string;
+        name: string;
+        domain: string;
+        framework?: string;
+        trackerOptions?: TrackerOptions;
+      }
     >({
       query: ({ workspaceId, ...body }) => ({
         url: `/api/workspaces/${workspaceId}/sites`,

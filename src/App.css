@@ -416,6 +416,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .tk-attr { color: #9cdcfe; }
 .tk-string { color: #ce9178; }
 .tk-punct { color: #808080; }
+.tk-comment { color: #6a9955; }
 
 /* ============ Code tabs (docs) ============ */
 .code-tabs { overflow: hidden; }

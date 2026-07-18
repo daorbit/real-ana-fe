@@ -1,13 +1,16 @@
 import { useState } from "react";
 import {
   Modal, Stepper, Stack, Group, Button, TextInput, Switch, Divider, Text,
-  Code, ThemeIcon, Box,
+  Code, ThemeIcon, Box, SimpleGrid, UnstyledButton,
 } from "@mantine/core";
 import { ArrowLeft, ArrowRight, Check, Globe, PartyPopper } from "lucide-react";
 import { CodeBlock } from "./CodeBlock";
 import { InstallCheck } from "./InstallCheck";
 import { useCreateSiteMutation } from "../store";
-import { trackingSnippetPretty, type TrackerOptions } from "../utils";
+import { type TrackerOptions } from "../utils";
+import {
+  FRAMEWORKS, getFramework, frameworkLanguage, type FrameworkId,
+} from "../utils/frameworks";
 import * as v from "../utils/validate";
 import { notify, errMessage } from "../notify";
 import type { Site } from "../types";
@@ -43,6 +46,7 @@ export function AddSiteWizard({
   // step 1 — identity
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
+  const [framework, setFramework] = useState<FrameworkId>("html");
   const [nameError, setNameError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
@@ -68,10 +72,13 @@ export function AddSiteWizard({
     domain: reportDomain,
   };
 
+  const guide = getFramework(framework);
+
   const reset = () => {
     setStep(0);
     setName("");
     setDomain("");
+    setFramework("html");
     setNameError(null);
     setDomainError(null);
     setDnt(false);
@@ -119,6 +126,7 @@ export function AddSiteWizard({
           workspaceId,
           name: name.trim(),
           domain: v.normalizeDomain(domain),
+          framework,
           trackerOptions: options,
         }).unwrap();
         setCreated(site);
@@ -168,6 +176,35 @@ export function AddSiteWizard({
             onChange={(e) => { setDomain(e.currentTarget.value); setDomainError(null); }}
             error={domainError}
           />
+
+          <div>
+            <Text size="sm" fw={500} mb={4}>What is it built with?</Text>
+            <Text size="xs" c="dimmed" mb="xs">
+              Only changes the install instructions you get at the end — the
+              tracker itself is the same everywhere.
+            </Text>
+            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="xs">
+              {FRAMEWORKS.map((f) => {
+                const selected = framework === f.id;
+                return (
+                  <UnstyledButton
+                    key={f.id}
+                    onClick={() => setFramework(f.id)}
+                    aria-pressed={selected}
+                    style={{
+                      padding: "10px 12px",
+                      borderRadius: "var(--mantine-radius-md)",
+                      border: `1px solid ${selected ? "var(--mantine-color-emerald-6)" : "var(--border)"}`,
+                      background: selected ? "var(--mantine-color-emerald-light)" : "var(--surface)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Text size="sm" fw={selected ? 600 : 500}>{f.label}</Text>
+                  </UnstyledButton>
+                );
+              })}
+            </SimpleGrid>
+          </div>
         </Stack>
       )}
 
@@ -242,16 +279,20 @@ export function AddSiteWizard({
             <Box>
               <Text fw={600} size="sm">{created.name} is ready</Text>
               <Text size="xs" c="dimmed">
-                Paste this just before the closing &lt;/head&gt; tag on{" "}
-                <b>{created.domain}</b>.
+                {guide.placement}
               </Text>
             </Box>
           </Group>
 
           <CodeBlock
-            code={trackingSnippetPretty(created.siteId, options)}
-            filename="index.html"
+            code={guide.code(created.siteId, options)}
+            filename={guide.filename}
+            language={frameworkLanguage(guide.id)}
           />
+
+          {guide.note && (
+            <Text size="xs" c="dimmed">{guide.note}</Text>
+          )}
 
           <Group gap="xs">
             <Text size="xs" c="dimmed">Site ID:</Text>

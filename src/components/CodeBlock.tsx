@@ -41,6 +41,36 @@ function tokenizeHtml(code: string): Token[] {
   return out;
 }
 
+const JS_KEYWORDS = new Set([
+  "import", "from", "export", "default", "function", "return", "const", "let",
+  "var", "if", "else", "new", "async", "await", "class", "extends", "true",
+  "false", "null", "undefined",
+]);
+
+/**
+ * Minimal JS/TSX tokenizer, for the framework install snippets.
+ *
+ * Same reasoning as the HTML one: we only ever render code we generated
+ * ourselves, so it needs to handle that shape and nothing more.
+ */
+function tokenizeJs(code: string): Token[] {
+  const out: Token[] = [];
+  // strings | line comments | identifiers | numbers | whitespace | punctuation
+  const re = /("[^"]*"|'[^']*'|`[^`]*`)|(\/\/[^\n]*)|([A-Za-z_$][\w$]*)|(\d+)|(\s+)|([^\w\s])/g;
+
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(code))) {
+    const [text] = m;
+    if (m[1]) out.push({ text, cls: "tk-string" });
+    else if (m[2]) out.push({ text, cls: "tk-comment" });
+    else if (m[3]) out.push({ text, cls: JS_KEYWORDS.has(text) ? "tk-tag" : "" });
+    else if (m[4]) out.push({ text, cls: "tk-string" });
+    else if (m[5]) out.push({ text, cls: "" });
+    else out.push({ text, cls: "tk-punct" });
+  }
+  return out;
+}
+
 /**
  * A read-only editor-style code block: dark surface, line numbers, syntax
  * colours, soft wrapping, and a copy button in the title bar.
@@ -57,6 +87,9 @@ export function CodeBlock({
   wrap?: boolean;
 }) {
   const lines = code.replace(/\n$/, "").split("\n");
+  // PHP and Liquid snippets are a script tag wrapped in template syntax, so
+  // the HTML tokenizer is still the closer fit for them.
+  const tokenize = language === "tsx" || language === "ts" ? tokenizeJs : tokenizeHtml;
 
   return (
     <Box className="cb">
@@ -89,7 +122,7 @@ export function CodeBlock({
               <div className="cb-line" key={i}>
                 <span className="cb-ln">{i + 1}</span>
                 <span className="cb-code">
-                  {tokenizeHtml(line).map((t, j) => (
+                  {tokenize(line).map((t, j) => (
                     <Fragment key={j}>
                       {t.cls ? <span className={t.cls}>{t.text}</span> : t.text}
                     </Fragment>

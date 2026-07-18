@@ -19,13 +19,13 @@ import {
   useDeleteSiteMutation,
 } from "../store";
 import { useSites, useSiteInstalled } from "../hooks";
-import { trackingSnippet } from "../utils";
 import * as v from "../utils/validate";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
 import { WorkspacesSkeleton } from "../components/Skeletons";
 import { AddSiteWizard } from "../components/AddSiteWizard";
+import { getFramework } from "../utils/frameworks";
 
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
@@ -47,10 +47,15 @@ function IdRow({ label, value }: { label: string; value: string }) {
 
 /* A site row with live install status + an expandable verifier */
 function SiteRow({
-  site, workspaceId, snippet, onDelete,
-}: { site: Site; workspaceId: string; snippet: string; onDelete: () => void }) {
+  site, workspaceId, onDelete,
+}: { site: Site; workspaceId: string; onDelete: () => void }) {
   const [open, setOpen] = useState(false);
   const installed = useSiteInstalled(workspaceId, site.siteId);
+
+  // Copy the same code the panel below shows — framework and saved options
+  // included — rather than a bare HTML tag that contradicts it.
+  const guide = getFramework(site.framework);
+  const snippet = guide.code(site.siteId, site.trackerOptions ?? {});
 
   const status =
     installed === true
@@ -126,6 +131,7 @@ function SiteRow({
             siteId={site.siteId}
             workspaceId={workspaceId}
             options={site.trackerOptions}
+            framework={site.framework}
           />
         </Box>
       </Collapse>
@@ -214,8 +220,6 @@ export default function Workspaces() {
       },
     });
   };
-
-  const snippet = trackingSnippet;
 
   const others = workspaces.filter((w) => w._id !== active?._id);
 
@@ -328,7 +332,6 @@ export default function Workspaces() {
                     key={s._id}
                     site={s}
                     workspaceId={active._id}
-                    snippet={snippet(s.siteId)}
                     onDelete={() => delSite(s)}
                   />
                 ))}
