@@ -23,10 +23,43 @@ export function email(v: string): string | null {
   return null;
 }
 
+/**
+ * Password rules for a NEW password. Kept in step with `signupError` in the
+ * API's auth route — the server is the copy that counts, this one exists so
+ * the user finds out before submitting.
+ *
+ * Not applied at login: existing accounts predate these rules, and rejecting
+ * someone's working password at the door would lock them out.
+ */
 export function password(v: string): string | null {
   if (!v) return "Password is required";
-  if (v.length < 6) return "Password must be at least 6 characters";
+  if (v.length < 8) return "Password must be at least 8 characters";
+  // bcrypt truncates at 72 bytes, so anything longer is a false sense of
+  // strength rather than extra security.
+  if (v.length > 72) return "Password must be 72 characters or fewer";
+  if (!/[a-zA-Z]/.test(v)) return "Password must contain a letter";
+  if (!/[0-9]/.test(v)) return "Password must contain a number";
   return null;
+}
+
+/** Score 0–4, for the strength meter. Length first, then variety. */
+export function passwordScore(v: string): number {
+  if (!v) return 0;
+  let score = 0;
+  if (v.length >= 8) score++;
+  if (v.length >= 12) score++;
+  if (/[a-zA-Z]/.test(v) && /[0-9]/.test(v)) score++;
+  if (/[^a-zA-Z0-9]/.test(v)) score++;
+  return Math.min(score, 4);
+}
+
+/** Confirmation must match exactly — whitespace included. */
+export function confirmPassword(pw: string) {
+  return (v: string): string | null => {
+    if (!v) return "Please re-enter your password";
+    if (v !== pw) return "Passwords do not match";
+    return null;
+  };
 }
 
 /**
