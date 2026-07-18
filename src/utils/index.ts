@@ -1,4 +1,6 @@
-export { num, compact, duration, ratio, share, timeAgo, shortDate } from "./format";
+export {
+  num, compact, duration, ratio, share, timeAgo, shortDate, dateTime, setDatePrefs,
+} from "./format";
 export { countryName, countryLabel, countryFlag } from "./countries";
 export { trackingSnippet, trackingSnippetPretty } from "./tracker";
 export {

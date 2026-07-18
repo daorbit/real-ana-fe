@@ -49,12 +49,44 @@ export function timeAgo(d: Date | string | null): string {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+/**
+ * The signed-in user's date preferences.
+ *
+ * Held at module scope rather than passed down: `shortDate` is called from
+ * dozens of leaf components, and threading a prop through all of them to
+ * change a date format is not worth the churn. `undefined` means "follow the
+ * browser", which is also what these helpers did before the setting existed.
+ */
+let datePrefs: { locale?: string; timeZone?: string } = {};
+
+/** Called once from the auth provider whenever the session's user changes. */
+export function setDatePrefs(prefs: { locale?: string; timeZone?: string }) {
+  datePrefs = {
+    locale: prefs.locale || undefined,
+    timeZone: prefs.timeZone || undefined,
+  };
+}
+
 /** Locale-aware short date, e.g. "11 Jul 2026" */
 export function shortDate(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(datePrefs.locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: datePrefs.timeZone,
+  });
+}
+
+/** Date and time in the user's locale/zone, e.g. "11 Jul 2026, 14:05" */
+export function dateTime(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleString(datePrefs.locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: datePrefs.timeZone,
   });
 }

@@ -27,7 +27,6 @@ import { RetentionGrid } from "../components/RetentionGrid";
 import { GoalsPanel } from "../components/GoalsPanel";
 import { OutboundPanel, ErrorsPanel } from "../components/OutboundErrorsPanels";
 import { FilterBar } from "../components/FilterBar";
-import { TrackerUpdate } from "../components/TrackerUpdate";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
 import { RangePicker, type RangeState } from "../components/RangePicker";
@@ -394,10 +393,6 @@ export default function Analytics() {
           );
         })}
       </Group>
-
-      {/* Outside the dimming wrapper below: it is a call to action, not data,
-          so it should not fade out while a range loads. */}
-      <TrackerUpdate sites={view?.outdatedSites ?? []} />
 
       {/* Active segment. Clicking any breakdown row below adds a chip here and
           re-scopes every number to that segment. */}

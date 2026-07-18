@@ -3,11 +3,26 @@ export type Role = "admin" | "user";
 export type User = {
   id: string;
   email: string;
+  /** Display name — derived from firstName/lastName by the server. */
   name: string;
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  /** Remote image URL. Empty falls back to initials. */
+  avatarUrl: string;
+  /** BCP 47 tag, e.g. "en-GB". Empty means "follow the browser". */
+  dateLocale: string;
+  /** IANA zone, e.g. "Asia/Kolkata". Empty means "follow the browser". */
+  timezone: string;
   role: Role;
   /** True when this session is an admin acting as someone else. */
   impersonating?: boolean;
 };
+
+/** Fields the settings form can change. Email and role are not among them. */
+export type ProfileUpdate = Partial<
+  Pick<User, "firstName" | "lastName" | "mobile" | "avatarUrl" | "dateLocale" | "timezone">
+>;
 
 /** A row in the admin's user switcher. */
 export type AdminUser = {

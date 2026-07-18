@@ -6,7 +6,8 @@ import {
   startImpersonating, stopImpersonating,
 } from "./api";
 import { api as rtkApi } from "./store";
-import type { User } from "./types";
+import { setDatePrefs } from "./utils";
+import type { ProfileUpdate, User } from "./types";
 
 type AuthState = {
   user: User | null;
@@ -14,6 +15,8 @@ type AuthState = {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  /** Save profile fields and fold the result back into the session. */
+  updateProfile: (patch: ProfileUpdate) => Promise<void>;
   /** Admin only: act as another user until `exitImpersonation`. */
   impersonate: (userId: string) => Promise<void>;
   exitImpersonation: () => Promise<void>;
@@ -27,6 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Every date helper reads these, so they have to be in place before the app
+  // renders anything dated — and re-applied when the user edits them.
+  useEffect(() => {
+    setDatePrefs({ locale: user?.dateLocale, timeZone: user?.timezone });
+  }, [user?.dateLocale, user?.timezone]);
 
   // On mount, restore session if token present
   useEffect(() => {
@@ -54,6 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(r.token);
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
+  };
+
+  const updateProfile = async (patch: ProfileUpdate) => {
+    const updated = await api.patch<User>("/api/auth/me", patch);
+    // /api/auth/me does not echo `impersonating` on PATCH, and losing it would
+    // drop the "you are viewing as …" banner mid-session.
+    setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
   };
 
   const logout = () => {
@@ -87,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, signup, logout, impersonate, exitImpersonation }}
+      value={{ user, loading, login, signup, logout, updateProfile, impersonate, exitImpersonation }}
     >
       {children}
     </AuthContext.Provider>

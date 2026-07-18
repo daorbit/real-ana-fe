@@ -4,7 +4,10 @@ import {
   AppShell as MantineShell, NavLink, Select, Avatar, Group, Text, ActionIcon, ScrollArea, Box,
   useMantineColorScheme, SegmentedControl, Center, useComputedColorScheme, Button, Alert,
 } from "@mantine/core";
-import { Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye } from "lucide-react";
+import {
+  Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
 import { useAuth } from "../auth";
@@ -16,6 +19,7 @@ const NAV = [
   { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/app/workspaces", label: "Workspaces", icon: FolderKanban },
   { to: "/app/developers", label: "Developers", icon: Code2 },
+  { to: "/app/settings", label: "Settings", icon: SettingsIcon },
 ];
 
 /** Only an admin sees these, and only when not already acting as someone else. */
@@ -115,8 +119,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             ]}
           />
           <Group gap="sm" wrap="nowrap" p="xs" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--mantine-radius-md)" }}>
-            <Avatar color="emerald" radius="md" size="md">{initials}</Avatar>
-            <Box style={{ flex: 1, overflow: "hidden" }}>
+            <Avatar src={user?.avatarUrl || null} color="emerald" radius="md" size="md">
+              {initials}
+            </Avatar>
+            <Box
+              component={Link}
+              to="/app/settings"
+              style={{ flex: 1, overflow: "hidden", color: "inherit", textDecoration: "none" }}
+            >
               <Text size="sm" fw={600} truncate>{user?.name}</Text>
               <Text size="xs" c="dimmed" truncate>{user?.email}</Text>
             </Box>

@@ -9,6 +9,7 @@ import Analytics from "./pages/Analytics";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
 import Impersonate from "./pages/Impersonate";
+import Settings from "./pages/Settings";
 import { AppBootSkeleton } from "./components/Skeletons";
 import "./App.css";
 
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="/app/analytics" element={<Protected><Analytics /></Protected>} />
           <Route path="/app/workspaces" element={<Protected><Workspaces /></Protected>} />
           <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
+          <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
           {/* Admin-only, enforced by the page and by every /api/admin route. */}
           <Route path="/app/impersonate" element={<Protected><Impersonate /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
