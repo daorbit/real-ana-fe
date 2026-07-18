@@ -3,11 +3,11 @@ import type { FormEvent } from "react";
 import {
   Title, Text, Group, Button, Card, TextInput, ActionIcon, Badge, Stack,
   SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider,
-  Box, Collapse,
+  Box, Collapse, UnstyledButton,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import {
-  Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Repeat, Radar,
+  Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Radar,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 
@@ -20,6 +20,7 @@ import {
 } from "../store";
 import { useSites, useSiteInstalled } from "../hooks";
 import * as v from "../utils/validate";
+import { shortDate } from "../utils";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
@@ -56,12 +57,12 @@ function SiteRow({
   const [open, setOpen] = useState(false);
   const installed = useSiteInstalled(workspaceId, site.siteId);
 
-  // Copy the same code the panel below shows — framework and saved options
-  // included — rather than a bare HTML tag that contradicts it.
+  // Copy the same code the panel below shows - framework and saved options
+  // included - rather than a bare HTML tag that contradicts it.
   const guide = getFramework(site.framework);
   const snippet = guide.code(site.siteId, site.trackerOptions ?? {});
 
-  // "Other" carries no information worth a badge — every site is something,
+  // "Other" carries no information worth a badge - every site is something,
   // and a row of grey "Other" chips is noise.
   const frameworkLabel = guide.id === "other" ? null : guide.label;
 
@@ -244,8 +245,6 @@ export default function Workspaces() {
     });
   };
 
-  const others = workspaces.filter((w) => w._id !== active?._id);
-
   // Render the page shape while the workspace list is still loading.
   if (loading) return <AppShell><WorkspacesSkeleton /></AppShell>;
 
@@ -301,14 +300,14 @@ export default function Workspaces() {
       )}
 
       {!active ? (
-        <Center mih="40vh">
-          <Stack align="center" gap="sm" maw={340}>
+        <Center mih="50vh">
+          <Stack align="center" gap="sm" maw={360}>
             <ThemeIcon variant="light" color="gray" size={56} radius="md">
               <FolderKanban size={26} />
             </ThemeIcon>
             <Text fw={600} mt={4}>No workspaces yet</Text>
             <Text c="dimmed" size="sm" ta="center">
-              A workspace groups the sites you track together — usually your
+              A workspace groups the sites you track together - usually your
               company, or one client.
             </Text>
             <Button mt="sm" leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>
@@ -317,183 +316,224 @@ export default function Workspaces() {
           </Stack>
         </Center>
       ) : (
-        <>
-          {/* ---------- Active workspace panel ---------- */}
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-            <Box className="surface-card" mb="xl">
-              {/* Workspace identity. The rename control only appears on hover
-                  or focus, so the resting state is a clean title rather than a
-                  row of half-relevant icons. */}
-              <Box p="lg" className="ws-head">
-                <Group justify="space-between" align="flex-start" wrap="nowrap">
-                  <div style={{ minWidth: 0 }}>
-                    {editing ? (
-                      <Group gap="xs" wrap="nowrap">
-                        <TextInput
-                          size="sm"
-                          value={editName}
-                          onChange={(e) => setEditName(e.currentTarget.value)}
-                          onKeyDown={(e) => e.key === "Enter" && saveRename()}
-                          w={260}
-                          autoFocus
-                        />
-                        <ActionIcon variant="light" color="emerald" onClick={saveRename} title="Save">
-                          <Check size={15} />
-                        </ActionIcon>
-                        <ActionIcon variant="subtle" color="gray" onClick={() => setEditing(false)} title="Cancel">
-                          <X size={15} />
-                        </ActionIcon>
-                      </Group>
-                    ) : (
-                      <Group gap="xs" wrap="nowrap">
-                        <Title
-                          order={2}
-                          style={{
-                            letterSpacing: "-0.02em",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {active.name}
-                        </Title>
-                        <Badge color="emerald" variant="light" size="sm" radius="sm">
-                          Active
-                        </Badge>
-                        <ActionIcon
-                          className="ws-rename"
-                          variant="subtle"
-                          color="gray"
-                          size="sm"
-                          onClick={() => { setEditing(true); setEditName(active.name); }}
-                          title="Rename workspace"
-                        >
-                          <Pencil size={14} />
-                        </ActionIcon>
-                      </Group>
-                    )}
-                    <Box mt={6}>
-                      <IdRow label="Workspace ID" value={active._id} />
-                    </Box>
-                  </div>
-
-                  <Group gap="xs" wrap="nowrap">
-                    <Button
-                      leftSection={<Plus size={15} />}
-                      onClick={() => setSiteOpen(true)}
+        /* Two columns: the workspace list stays on the left so switching is
+           one click, rather than scrolling past the active workspace to reach
+           a grid of cards at the bottom of the page. */
+        <div className="ws-layout">
+          <aside className="ws-sidebar">
+            <p className="nav-heading">Workspaces</p>
+            <Stack gap={4}>
+              {workspaces.map((w) => {
+                const isActive = w._id === active._id;
+                return (
+                  <UnstyledButton
+                    key={w._id}
+                    className="ws-item"
+                    data-active={isActive}
+                    onClick={() => setActive(w._id)}
+                    aria-current={isActive ? "true" : undefined}
+                  >
+                    <ThemeIcon
+                      variant={isActive ? "filled" : "light"}
+                      color={isActive ? "emerald" : "gray"}
+                      radius="md"
+                      size={30}
                     >
-                      Add site
-                    </Button>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      size="lg"
-                      onClick={() => removeWorkspace(active)}
-                      title="Delete workspace"
-                    >
-                      <Trash2 size={16} />
-                    </ActionIcon>
-                  </Group>
-                </Group>
-              </Box>
-
-              <Divider />
-
-              {/* ---------- Domains & Sites ---------- */}
-              <Box p="lg">
-                <Group justify="space-between" mb="md" wrap="nowrap">
-                  <Group gap={8}>
-                    <Globe size={15} className="sect-ic" />
-                    <Text fw={650} size="sm">Sites</Text>
-                    <Badge variant="default" size="sm" radius="sm">{sites.length}</Badge>
-                  </Group>
-                  <RefreshButton onRefresh={refreshSites} refreshing={refreshing} lastUpdated={lastUpdated} compact />
-                </Group>
-
-                {sites.length === 0 ? (
-                  <Stack align="center" gap={6} py="xl">
-                    <ThemeIcon variant="light" color="gray" size={44} radius="md">
-                      <Globe size={20} />
+                      <FolderKanban size={14} />
                     </ThemeIcon>
-                    <Text fw={600} size="sm" mt={4}>No sites yet</Text>
-                    <Text c="dimmed" size="xs" ta="center" maw={320}>
-                      Add the site you want to track and we&apos;ll hand you the
-                      install snippet for your framework.
-                    </Text>
-                    <Button size="xs" mt="sm" leftSection={<Plus size={14} />} onClick={() => setSiteOpen(true)}>
-                      Add your first site
-                    </Button>
-                  </Stack>
-                ) : (
-                  <Stack gap="sm">
-                    {sites.map((s) => (
-                      <SiteRow
-                        key={s._id}
-                        site={s}
-                        workspaceId={active._id}
-                        onDelete={() => delSite(s)}
-                      />
-                    ))}
-                    <Button
-                      variant="subtle"
-                      color="gray"
-                      leftSection={<Plus size={15} />}
-                      onClick={() => setSiteOpen(true)}
-                      mt={4}
+                    <Text
+                      size="sm"
+                      fw={isActive ? 600 : 500}
+                      truncate
+                      style={{ flex: 1, minWidth: 0 }}
                     >
-                      Add another site
-                    </Button>
-                  </Stack>
-                )}
-              </Box>
-            </Box>
-          </motion.div>
+                      {w.name}
+                    </Text>
+                  </UnstyledButton>
+                );
+              })}
+            </Stack>
 
-          {/* ---------- Other workspaces ---------- */}
-          {others.length > 0 && (
-            <>
-              <Text fw={650} size="sm" mb="md" c="dimmed">
-                Other workspaces
-              </Text>
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                {others.map((w, i) => (
-                  <motion.div key={w._id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                    <Box className="surface-card ws-other" p="lg">
-                      <Group justify="space-between" align="flex-start" mb={4} wrap="nowrap">
-                        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                          <ThemeIcon variant="light" color="gray" radius="md" size={32}>
-                            <FolderKanban size={15} />
-                          </ThemeIcon>
-                          <Text fw={650} truncate>{w.name}</Text>
-                        </Group>
-                        <ActionIcon
-                          className="ws-other-del"
-                          variant="subtle"
-                          color="red"
-                          size="sm"
-                          onClick={() => removeWorkspace(w)}
-                          title="Delete workspace"
-                        >
-                          <Trash2 size={14} />
-                        </ActionIcon>
-                      </Group>
-                      <Box mt={8}>
-                        <IdRow label="Workspace ID" value={w._id} />
-                      </Box>
-                      <Button
-                        variant="default" fullWidth mt="md"
-                        leftSection={<Repeat size={14} />}
-                        onClick={() => setActive(w._id)}
+            <Button
+              variant="subtle"
+              color="gray"
+              size="sm"
+              fullWidth
+              mt="sm"
+              leftSection={<Plus size={15} />}
+              onClick={() => setWsOpen(true)}
+            >
+              New workspace
+            </Button>
+          </aside>
+
+          {/* Keyed on the workspace id so switching replays the entrance -
+              otherwise the column swaps content with no sign it changed. */}
+          <motion.div
+            key={active._id}
+            className="ws-main"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28 }}
+          >
+            <Box className="ws-head" mb="lg">
+              <Group justify="space-between" align="flex-start" wrap="nowrap" gap="md">
+                <div style={{ minWidth: 0 }}>
+                  {editing ? (
+                    <Group gap="xs" wrap="nowrap">
+                      <TextInput
+                        size="sm"
+                        value={editName}
+                        onChange={(e) => setEditName(e.currentTarget.value)}
+                        onKeyDown={(e) => e.key === "Enter" && saveRename()}
+                        w={260}
+                        autoFocus
+                      />
+                      <ActionIcon variant="light" color="emerald" onClick={saveRename} title="Save">
+                        <Check size={15} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="gray"
+                        onClick={() => setEditing(false)}
+                        title="Cancel"
                       >
-                        Switch
-                      </Button>
-                    </Box>
+                        <X size={15} />
+                      </ActionIcon>
+                    </Group>
+                  ) : (
+                    <Group gap="xs" wrap="nowrap">
+                      <Title
+                        order={2}
+                        style={{
+                          letterSpacing: "-0.02em",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {active.name}
+                      </Title>
+                      <ActionIcon
+                        className="ws-rename"
+                        variant="subtle"
+                        color="gray"
+                        size="sm"
+                        onClick={() => {
+                          setEditing(true);
+                          setEditName(active.name);
+                        }}
+                        title="Rename workspace"
+                      >
+                        <Pencil size={14} />
+                      </ActionIcon>
+                    </Group>
+                  )}
+                  <Box mt={6}>
+                    <IdRow label="Workspace ID" value={active._id} />
+                  </Box>
+                </div>
+
+                <Group gap="xs" wrap="nowrap">
+                  <Button leftSection={<Plus size={15} />} onClick={() => setSiteOpen(true)}>
+                    Add site
+                  </Button>
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    size="lg"
+                    onClick={() => removeWorkspace(active)}
+                    title="Delete workspace"
+                  >
+                    <Trash2 size={16} />
+                  </ActionIcon>
+                </Group>
+              </Group>
+            </Box>
+
+            {/* At-a-glance counts - the first thing you check on opening a
+                workspace, and cheaper to read than counting rows. */}
+            <SimpleGrid cols={3} spacing="md" mb="lg">
+              <Box className="ws-stat">
+                <Text className="ws-stat-label">Sites</Text>
+                <Text className="ws-stat-value">{sites.length}</Text>
+              </Box>
+              <Box className="ws-stat">
+                <Text className="ws-stat-label">Created</Text>
+                <Text className="ws-stat-value sm">{shortDate(active.createdAt)}</Text>
+              </Box>
+              <Box className="ws-stat">
+                <Text className="ws-stat-label">Workspaces</Text>
+                <Text className="ws-stat-value">{workspaces.length}</Text>
+              </Box>
+            </SimpleGrid>
+
+            <Group justify="space-between" mb="sm" wrap="nowrap">
+              <Group gap={8}>
+                <Globe size={15} className="sect-ic" />
+                <Text fw={650} size="sm">Sites</Text>
+                <Badge variant="default" size="sm" radius="sm">
+                  {sites.length}
+                </Badge>
+              </Group>
+              <RefreshButton
+                onRefresh={refreshSites}
+                refreshing={refreshing}
+                lastUpdated={lastUpdated}
+                compact
+              />
+            </Group>
+
+            {sites.length === 0 ? (
+              <Box className="surface-card">
+                <Stack align="center" gap={6} py={48} px="lg">
+                  <ThemeIcon variant="light" color="gray" size={44} radius="md">
+                    <Globe size={20} />
+                  </ThemeIcon>
+                  <Text fw={600} size="sm" mt={4}>No sites yet</Text>
+                  <Text c="dimmed" size="xs" ta="center" maw={340}>
+                    Add the site you want to track and we&apos;ll hand you the
+                    install snippet for your framework.
+                  </Text>
+                  <Button
+                    size="xs"
+                    mt="sm"
+                    leftSection={<Plus size={14} />}
+                    onClick={() => setSiteOpen(true)}
+                  >
+                    Add your first site
+                  </Button>
+                </Stack>
+              </Box>
+            ) : (
+              <Stack gap="sm">
+                {sites.map((s, i) => (
+                  <motion.div
+                    key={s._id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(i, 6) * 0.04, duration: 0.25 }}
+                  >
+                    <SiteRow site={s} workspaceId={active._id} onDelete={() => delSite(s)} />
                   </motion.div>
                 ))}
-              </SimpleGrid>
-            </>
-          )}
-        </>
+                {/* Stack stretches its children, which turned this into a
+                    full-width bar. Centre it at its natural width instead. */}
+                <Group justify="center" mt={4}>
+                  <Button
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    leftSection={<Plus size={15} />}
+                    onClick={() => setSiteOpen(true)}
+                  >
+                    Add another site
+                  </Button>
+                </Group>
+              </Stack>
+            )}
+          </motion.div>
+        </div>
       )}
     </AppShell>
   );
