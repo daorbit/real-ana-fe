@@ -9,6 +9,7 @@ import { AppShell } from "../components/AppShell";
 import { useGetAdminUsersQuery, useDeleteAdminUserMutation } from "../store";
 import { useAuth } from "../auth";
 import { notify, errMessage, confirmDelete } from "../notify";
+import { num, timeAgo, shortDate } from "../utils";
 import type { AdminUser } from "../types";
 
 const ROLE_FILTERS = [
@@ -171,13 +172,16 @@ export default function Impersonate() {
           {/* Dim the table, rather than swapping it for a spinner, so the rows
               don't jump while a page or filter loads. */}
           <Card withBorder radius="md" p={0} style={{ opacity: isFetching ? 0.6 : 1, overflow: "hidden" }}>
-            <Table.ScrollContainer minWidth={640}>
+            <Table.ScrollContainer minWidth={900}>
               <Table verticalSpacing="sm" horizontalSpacing="md" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>Account</Table.Th>
                     <Table.Th>Role</Table.Th>
+                    <Table.Th>Joined</Table.Th>
                     <Table.Th>Workspaces</Table.Th>
+                    <Table.Th>Sites</Table.Th>
+                    <Table.Th>Events</Table.Th>
                     <Table.Th style={{ textAlign: "right" }}>Actions</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -209,9 +213,23 @@ export default function Impersonate() {
                           </Badge>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm">
-                            {u.workspaceCount} workspace{u.workspaceCount === 1 ? "" : "s"}
-                          </Text>
+                          <Text size="sm">{shortDate(u.createdAt)}</Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">{u.workspaceCount}</Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">{u.siteCount}</Text>
+                        </Table.Td>
+                        <Table.Td>
+                          {/* A zero here means the account has never been
+                              tracked, which reads differently from "quiet
+                              lately" — so only show a last-seen when there is
+                              something to have been seen. */}
+                          <Text size="sm">{num(u.eventCount)}</Text>
+                          {u.eventCount > 0 && (
+                            <Text size="xs" c="dimmed">{timeAgo(u.lastEventAt)}</Text>
+                          )}
                         </Table.Td>
                         <Table.Td>
                           <Group gap="xs" justify="flex-end" wrap="nowrap">

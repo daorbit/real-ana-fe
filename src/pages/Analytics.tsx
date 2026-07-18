@@ -348,6 +348,7 @@ export default function Analytics() {
           </Text>
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">
+          <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           <ExportMenu
             workspaceId={active?._id}
@@ -357,7 +358,6 @@ export default function Analytics() {
             filter={serializeFilter(filter)}
             sites={siteScope}
           />
-          <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           <Group gap="xs" wrap="nowrap">
             {(statsLoading || refetching) && (
               <Loader size="xs" color="emerald" type="oval" />

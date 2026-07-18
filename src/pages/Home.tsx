@@ -21,8 +21,6 @@ import { StatCard } from "../components/StatCard";
 import { AnalyticsArt } from "../components/Brand";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
-import { RangePicker, type RangeState } from "../components/RangePicker";
-import { ExportMenu } from "../components/ExportMenu";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
@@ -163,14 +161,11 @@ export default function Home() {
   const [siteScope, setSiteScope] = useState<string[]>([]);
   useEffect(() => setSiteScope([]), [active?._id]);
 
-  const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
   const { stats, refresh, refreshing, lastUpdated } = useStats(
     active?._id,
-    rangeState.preset,
+    "24h",
     undefined,
     siteScope,
-    rangeState.from,
-    rangeState.to,
   );
   const { sites } = useSites(active?._id);
   const {
@@ -326,23 +321,13 @@ export default function Home() {
           </Text>
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">
+          {/* The overview is fixed to the last 24h — range and export live on
+              the full analytics page, which is where people go to slice data. */}
           {!editing && !dirty && (
-            <RangePicker value={rangeState} onChange={setRangeState} />
+            <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
           {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
-          )}
-          {!editing && !dirty && (
-            <ExportMenu
-              workspaceId={active._id}
-              range={rangeState.preset}
-              from={rangeState.from}
-              to={rangeState.to}
-              sites={siteScope}
-            />
-          )}
-          {!editing && !dirty && (
-            <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
 
           {/* Widths and widget choices are edited in the drawer, order in edit

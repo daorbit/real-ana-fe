@@ -17,6 +17,10 @@ export type AdminUser = {
   role: Role;
   createdAt: string;
   workspaceCount: number;
+  siteCount: number;
+  eventCount: number;
+  /** null until the account's first site reports. */
+  lastEventAt: string | null;
 };
 
 export type AdminUserPage = {
