@@ -40,6 +40,9 @@ export type ShareState = {
   enabled: boolean;
   token: string | null;
   panels: SharePanels;
+  /** Times the public link has been opened. Resets when the link is rotated. */
+  views: number;
+  lastViewedAt: string | null;
 };
 
 /** A row in the admin's user switcher. */

@@ -2,9 +2,10 @@ import {
   Box, Group, Text, Switch, Button, CopyButton, TextInput, Tooltip, ActionIcon,
   Badge, Checkbox, SimpleGrid,
 } from "@mantine/core";
-import { Share2, Copy, Check, RefreshCw, ExternalLink } from "lucide-react";
+import { Share2, Copy, Check, RefreshCw, ExternalLink, Eye } from "lucide-react";
 import { useGetShareQuery, useSetShareMutation } from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
+import { num, timeAgo } from "../utils";
 import type { SharePanels } from "../types";
 
 /** The panels an owner can publish, in the order they appear on the page. */
@@ -31,6 +32,7 @@ export function ShareCard({ workspaceId }: { workspaceId: string }) {
 
   const enabled = data?.enabled ?? false;
   const token = data?.token ?? null;
+  const views = data?.views ?? 0;
   const url = token ? `${window.location.origin}/share/${token}` : "";
 
   // Default to everything on, matching the server, so the checkboxes are never
@@ -98,9 +100,19 @@ export function ShareCard({ workspaceId }: { workspaceId: string }) {
                 </Badge>
               )}
             </Group>
-            <Text size="xs" c="dimmed" mt={2}>
-              Share a read-only view with clients or your team — no account needed.
-            </Text>
+            {enabled && views > 0 ? (
+              <Group gap={6} mt={2} wrap="nowrap">
+                <Eye size={12} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                <Text size="xs" c="dimmed">
+                  Opened {num(views)} {views === 1 ? "time" : "times"}
+                  {data?.lastViewedAt ? ` · last ${timeAgo(data.lastViewedAt)}` : ""}
+                </Text>
+              </Group>
+            ) : (
+              <Text size="xs" c="dimmed" mt={2}>
+                Share a read-only view with clients or your team — no account needed.
+              </Text>
+            )}
           </div>
         </Group>
 

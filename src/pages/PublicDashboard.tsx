@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Box, Group, Text, Title, SimpleGrid, Center, Loader, Stack, ThemeIcon,
   UnstyledButton, Progress,
 } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip as RTooltip } from "recharts";
-import { Users, Eye, Radio, EyeOff } from "lucide-react";
+import { EyeOff, BarChart3 } from "lucide-react";
 import { Wordmark } from "../components/Brand";
 import { num, countryFlag, countryLabel } from "../utils";
 
@@ -99,11 +99,18 @@ export default function PublicDashboard() {
   const [data, setData] = useState<Shared | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "missing">("loading");
 
+  // Only the first load counts as a view — switching range re-fetches, and
+  // counting that would inflate one reader into several.
+  const counted = useRef(false);
+
   useEffect(() => {
     let cancelled = false;
     setState((s) => (s === "ready" ? "ready" : "loading"));
 
-    fetch(`${BASE}/api/share/${token}?range=${range}`)
+    const count = counted.current ? "" : "&count=1";
+    counted.current = true;
+
+    fetch(`${BASE}/api/share/${token}?range=${range}${count}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: Shared) => {
         if (!cancelled) {
@@ -115,8 +122,22 @@ export default function PublicDashboard() {
         if (!cancelled) setState("missing");
       });
 
+    // Refresh while the tab is open, so a dashboard left on a screen stays
+    // current — this is what makes the "live" framing honest rather than a
+    // snapshot that quietly goes stale.
+    const poll = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      fetch(`${BASE}/api/share/${token}?range=${range}`)
+        .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+        .then((d: Shared) => {
+          if (!cancelled) setData(d);
+        })
+        .catch(() => {});
+    }, 30_000);
+
     return () => {
       cancelled = true;
+      clearInterval(poll);
     };
   }, [token, range]);
 
@@ -157,12 +178,6 @@ export default function PublicDashboard() {
     totals: true, trend: true, pages: true, sources: true, countries: true, devices: true,
   };
 
-  const stats = [
-    { icon: Users, label: "Visitors", value: data.visitors },
-    { icon: Eye, label: "Pageviews", value: data.pageviews },
-    { icon: Radio, label: "Online now", value: data.live, live: true },
-  ];
-
   const breakdowns = [
     p.pages && { title: "Top pages", rows: data.topPages, empty: "No pageviews yet" },
     p.sources && { title: "Top sources", rows: data.topReferrers, empty: "No referrers yet" },
@@ -184,14 +199,19 @@ export default function PublicDashboard() {
     <Box mih="100vh" style={{ background: "var(--bg)" }}>
       <Box className="pub-bar">
         <Group justify="space-between" wrap="wrap" gap="md" className="pub-inner">
-          <div style={{ minWidth: 0 }}>
-            <Title order={3} style={{ letterSpacing: "-0.02em" }}>
-              {data.workspace}
-            </Title>
-            <Text size="xs" c="dimmed" mt={2}>
-              Public analytics dashboard
-            </Text>
-          </div>
+          <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+            <Box className="pub-mark">
+              <BarChart3 size={17} />
+            </Box>
+            <div style={{ minWidth: 0 }}>
+              <Title order={3} style={{ letterSpacing: "-0.02em" }} lineClamp={1}>
+                {data.workspace}
+              </Title>
+              <Text size="xs" c="dimmed" mt={1}>
+                Live analytics · updates automatically
+              </Text>
+            </div>
+          </Group>
 
           <Box className="section-rail" style={{ flexShrink: 0 }}>
             {RANGES.map((r) => (
@@ -211,31 +231,77 @@ export default function PublicDashboard() {
       </Box>
 
       <Box className="pub-inner" py="xl">
+        {/* Hero band: one big number, the rest as supporting context. Three
+            equal tiles gave the page no focal point — nothing said "start
+            here", so it read as a report rather than a dashboard. */}
         {p.totals && (
-        <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mb="lg">
-          {stats.map((s) => (
-            <Box key={s.label} className="stat-card" p="lg">
-              <Group gap={6} mb="sm" wrap="nowrap">
-                <s.icon size={14} style={{ color: "var(--muted)" }} />
-                <Text size="xs" c="dimmed" fw={500}>{s.label}</Text>
+          <Box className="hero-band" mb="lg">
+            {p.trend && data.timeseries.length > 1 && (
+              <div className="hero-spark" aria-hidden="true">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data.timeseries} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="pubHero" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area
+                      type="monotone"
+                      dataKey="views"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      strokeOpacity={0.5}
+                      fill="url(#pubHero)"
+                      dot={false}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            <Box className="hero-content" p="xl">
+              <Group justify="space-between" align="flex-start" wrap="wrap" gap="xl">
+                <div style={{ minWidth: 0 }}>
+                  <Group gap={8} mb={10} wrap="nowrap">
+                    <span className="status-dot live" style={{ background: "#34d399" }} />
+                    <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
+                      ONLINE NOW
+                    </Text>
+                  </Group>
+                  <Group align="baseline" gap="sm" wrap="nowrap">
+                    <Text fw={700} fz={56} lh={1} style={{ letterSpacing: "-0.04em" }}>
+                      {num(data.live)}
+                    </Text>
+                    <Text size="sm" c="dimmed" pb={8}>
+                      {data.live === 1 ? "visitor" : "visitors"}
+                    </Text>
+                  </Group>
+                </div>
+
+                <Group gap="xl" wrap="wrap">
+                  <div>
+                    <Text size="xs" c="dimmed" fw={500} mb={4}>Visitors</Text>
+                    <Text fw={650} fz={26} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+                      {num(data.visitors)}
+                    </Text>
+                  </div>
+                  <div>
+                    <Text size="xs" c="dimmed" fw={500} mb={4}>Pageviews</Text>
+                    <Text fw={650} fz={26} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+                      {num(data.pageviews)}
+                    </Text>
+                  </div>
+                </Group>
               </Group>
-              <Text
-                fw={700}
-                fz={30}
-                lh={1.05}
-                style={{
-                  letterSpacing: "-0.025em",
-                  color: s.live ? "#34d399" : "var(--text)",
-                }}
-              >
-                {num(s.value)}
-              </Text>
             </Box>
-          ))}
-        </SimpleGrid>
+          </Box>
         )}
 
-        {p.trend && data.timeseries.length > 1 && (
+        {/* The hero already carries the trend as backdrop when totals are on;
+            a second copy of the same curve directly beneath it is noise. */}
+        {p.trend && !p.totals && data.timeseries.length > 1 && (
           <Box className="surface-card" p="lg" mb="lg">
             <Text fw={650} size="sm" mb="md">Traffic</Text>
             <div style={{ height: 220 }}>

@@ -142,6 +142,19 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding-left: 1.25rem;
   padding-right: 1.25rem;
 }
+/* Brand mark in the public header — gives the page an anchor at top-left
+   instead of starting cold with text. */
+.pub-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--violet-2);
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+}
 
 /* ============ Onboarding ============
    Shares the auth split so signup flows straight into setup without the page
