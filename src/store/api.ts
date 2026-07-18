@@ -5,6 +5,7 @@ import type {
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
 } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
+import type { TrackerOptions } from "../utils/tracker";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -68,7 +69,10 @@ export const api = createApi({
       ],
     }),
 
-    createSite: build.mutation<Site, { workspaceId: string; name: string; domain: string }>({
+    createSite: build.mutation<
+      Site,
+      { workspaceId: string; name: string; domain: string; trackerOptions?: TrackerOptions }
+    >({
       query: ({ workspaceId, ...body }) => ({
         url: `/api/workspaces/${workspaceId}/sites`,
         method: "POST",
@@ -77,6 +81,20 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { workspaceId }) => [
         { type: "Site", id: `LIST-${workspaceId}` },
         "Stats",
+      ],
+    }),
+
+    updateSiteOptions: build.mutation<
+      Site,
+      { workspaceId: string; siteId: string; options: TrackerOptions }
+    >({
+      query: ({ workspaceId, siteId, options }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/options`,
+        method: "PATCH",
+        body: options,
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [
+        { type: "Site", id: `LIST-${workspaceId}` },
       ],
     }),
 
@@ -252,6 +270,7 @@ export const {
   useDeleteWorkspaceMutation,
   useGetSitesQuery,
   useCreateSiteMutation,
+  useUpdateSiteOptionsMutation,
   useDeleteSiteMutation,
   useGetStatsQuery,
   useComputeFunnelMutation,

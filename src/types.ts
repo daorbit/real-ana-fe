@@ -1,3 +1,5 @@
+import type { TrackerOptions } from "./utils/tracker";
+
 export type Role = "admin" | "user";
 
 export type User = {
@@ -60,6 +62,12 @@ export type Site = {
   framework: string;
   siteId: string;
   createdAt: string;
+  /**
+   * The options the snippet was built with. Stored so the dashboard can
+   * rebuild the exact tag later — the tracker itself reads them from the
+   * pasted script tag, not from here.
+   */
+  trackerOptions?: TrackerOptions;
 };
 
 export type ApiKey = {

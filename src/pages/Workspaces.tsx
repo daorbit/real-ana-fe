@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import {
   Title, Text, Group, Button, Card, TextInput, ActionIcon, Badge, Stack,
-  SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider, Code,
+  SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider,
   Box, Collapse,
 } from "@mantine/core";
 import { motion } from "framer-motion";
@@ -12,19 +12,20 @@ import {
 import { AppShell } from "../components/AppShell";
 
 import { InstallCheck } from "../components/InstallCheck";
-import { CodeBlock } from "../components/CodeBlock";
+import { SnippetBuilder } from "../components/SnippetBuilder";
 import { RefreshButton } from "../components/Refresh";
 import {
   useCreateWorkspaceMutation, useRenameWorkspaceMutation, useDeleteWorkspaceMutation,
-  useCreateSiteMutation, useDeleteSiteMutation,
+  useDeleteSiteMutation,
 } from "../store";
 import { useSites, useSiteInstalled } from "../hooks";
-import { trackingSnippet, trackingSnippetPretty } from "../utils";
+import { trackingSnippet } from "../utils";
 import * as v from "../utils/validate";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
 import { WorkspacesSkeleton } from "../components/Skeletons";
+import { AddSiteWizard } from "../components/AddSiteWizard";
 
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
@@ -120,6 +121,12 @@ function SiteRow({
       <Collapse expanded={open}>
         <Box pt="md">
           <InstallCheck workspaceId={workspaceId} siteId={site.siteId} domain={site.domain} />
+          <Divider my="lg" label="Install snippet" labelPosition="center" />
+          <SnippetBuilder
+            siteId={site.siteId}
+            workspaceId={workspaceId}
+            options={site.trackerOptions}
+          />
         </Box>
       </Collapse>
     </Card>
@@ -136,13 +143,8 @@ export default function Workspaces() {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
 
-  // add-site form
+  // Add-site is a self-contained wizard; this page only opens and closes it.
   const [siteOpen, setSiteOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [domainValue, setDomainValue] = useState("");
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [domainError, setDomainError] = useState<string | null>(null);
-  const [created, setCreated] = useState<Site | null>(null);
 
   // Cached by RTK Query; the mutations below invalidate it, so the list
   // refreshes on its own after a create or delete.
@@ -151,15 +153,7 @@ export default function Workspaces() {
   const [createWs] = useCreateWorkspaceMutation();
   const [renameWs] = useRenameWorkspaceMutation();
   const [deleteWs] = useDeleteWorkspaceMutation();
-  const [createSiteMut, { isLoading: saving }] = useCreateSiteMutation();
   const [deleteSiteMut] = useDeleteSiteMutation();
-
-  const validateName = v.all(v.required("Site name"), v.minLength("Site name", 2), v.maxLength("Site name", 60));
-
-  const resetSiteForm = () => {
-    setName(""); setDomainValue("");
-    setNameError(null); setDomainError(null);
-  };
 
   const createWorkspace = async (e: FormEvent) => {
     e.preventDefault();
@@ -204,39 +198,6 @@ export default function Workspaces() {
     });
   };
 
-  const addSite = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!active) return;
-
-    const nErr = validateName(name);
-    const dErr = v.domain(domainValue);
-    setNameError(nErr);
-    setDomainError(dErr);
-    if (nErr || dErr) return;
-
-    // Store the bare hostname, whatever the user pasted in.
-    const cleanDomain = v.normalizeDomain(domainValue);
-
-    if (sites.some((s) => s.domain.toLowerCase() === cleanDomain)) {
-      setDomainError("A site with that domain already exists in this workspace");
-      return;
-    }
-
-    try {
-      const site = await createSiteMut({
-        workspaceId: active._id,
-        name: name.trim(),
-        domain: cleanDomain,
-      }).unwrap();
-      resetSiteForm();
-      setSiteOpen(false);
-      setCreated(site);
-      notify.success(`Site "${site.name}" added. Copy the snippet to start tracking.`);
-    } catch (err) {
-      notify.error(errMessage(err, "Could not add the site."));
-    }
-  };
-
   const delSite = (s: Site) => {
     if (!active) return;
     confirmDelete({
@@ -246,7 +207,6 @@ export default function Workspaces() {
       onConfirm: async () => {
         try {
           await deleteSiteMut({ workspaceId: active._id, siteId: s.siteId }).unwrap();
-          if (created?.siteId === s.siteId) setCreated(null);
           notify.success(`Site "${s.name}" deleted.`);
         } catch (err) {
           notify.error(errMessage(err, "Could not delete the site."));
@@ -301,97 +261,15 @@ export default function Workspaces() {
         </form>
       </Modal>
 
-      {/* Add site modal */}
-      <Modal
-        opened={siteOpen}
-        onClose={() => { setSiteOpen(false); resetSiteForm(); }}
-        title="Add a site"
-        centered
-        radius="lg"
-      >
-        <form onSubmit={addSite} noValidate>
-          <Stack gap="md">
-            <TextInput
-              label="Site name"
-              placeholder="My App"
-              description="Just a label — only you see it."
-              value={name}
-              error={nameError}
-              onChange={(e) => { setName(e.currentTarget.value); if (nameError) setNameError(null); }}
-              onBlur={() => setNameError(validateName(name))}
-              withAsterisk
-              data-autofocus
-            />
-            <TextInput
-              label="Domain"
-              placeholder="app.com"
-              description="The domain the tracking script runs on. Paste a full URL and we'll clean it up."
-              value={domainValue}
-              error={domainError}
-              onChange={(e) => { setDomainValue(e.currentTarget.value); if (domainError) setDomainError(null); }}
-              onBlur={() => {
-                const clean = v.normalizeDomain(domainValue);
-                if (clean !== domainValue) setDomainValue(clean);
-                setDomainError(v.domain(clean));
-              }}
-              withAsterisk
-            />
-            <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={() => { setSiteOpen(false); resetSiteForm(); }}>Cancel</Button>
-              <Button type="submit" loading={saving}>Add site</Button>
-            </Group>
-          </Stack>
-        </form>
-      </Modal>
-
-      {/* Snippet modal — shown right after a site is created */}
-      <Modal
-        opened={!!created}
-        onClose={() => setCreated(null)}
-        title={created ? `Install “${created.name}”` : ""}
-        centered
-        radius="lg"
-        size="lg"
-      >
-        {created && (
-          <Stack gap="md">
-            <Text size="sm" c="dimmed">
-              Paste this snippet just before the closing <Code>&lt;/head&gt;</Code> tag on{" "}
-              <b>{created.domain}</b>. Traffic starts appearing in Analytics within seconds.
-            </Text>
-
-            <CodeBlock
-              code={trackingSnippetPretty(created.siteId)}
-              filename="index.html"
-              language="html"
-            />
-
-            <Group gap="xs">
-              <Text size="xs" c="dimmed">Site ID:</Text>
-              <Code>{created.siteId}</Code>
-            </Group>
-
-            {active && (
-              <InstallCheck
-                workspaceId={active._id}
-                siteId={created.siteId}
-                domain={created.domain}
-              />
-            )}
-
-            <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={() => setCreated(null)}>Done</Button>
-              <CopyButton value={snippet(created.siteId)}>
-                {({ copied, copy }) => (
-                  <Button onClick={copy} leftSection={copied ? <Check size={15} /> : <Copy size={15} />}>
-                    {copied ? "Copied" : "Copy snippet"}
-                  </Button>
-                )}
-              </CopyButton>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
+      {/* Add site: details -> tracking options -> snippet */}
+      {active && (
+        <AddSiteWizard
+          opened={siteOpen}
+          onClose={() => setSiteOpen(false)}
+          workspaceId={active._id}
+          existingDomains={sites.map((s) => s.domain.toLowerCase())}
+        />
+      )}
 
       {!active ? (
         <Center mih="40vh">

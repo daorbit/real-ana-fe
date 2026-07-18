@@ -3,6 +3,7 @@ export {
 } from "./format";
 export { countryName, countryLabel, countryFlag } from "./countries";
 export { trackingSnippet, trackingSnippetPretty } from "./tracker";
+export type { TrackerOptions } from "./tracker";
 export {
   required, minLength, maxLength, email, password, domain, normalizeDomain, all,
 } from "./validate";
