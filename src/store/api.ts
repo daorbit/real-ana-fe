@@ -6,6 +6,7 @@ import type {
 } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 import type { TrackerOptions } from "../utils/tracker";
+import type { ShareState, SharePanels } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -27,7 +28,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -58,6 +59,31 @@ export const api = createApi({
       query: (id) => ({ url: `/api/workspaces/${id}`, method: "DELETE" }),
       // Deleting a workspace takes its sites and their analytics with it.
       invalidatesTags: ["Workspace", "Site", "Stats"],
+    }),
+
+    /* ------------------------------- sharing ------------------------------ */
+    getShare: build.query<ShareState, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/share`,
+      providesTags: (_r, _e, workspaceId) => [{ type: "Share", id: workspaceId }],
+    }),
+
+    setShare: build.mutation<
+      ShareState,
+      {
+        workspaceId: string;
+        enabled: boolean;
+        rotate?: boolean;
+        panels?: SharePanels;
+      }
+    >({
+      query: ({ workspaceId, enabled, rotate, panels }) => ({
+        url: `/api/workspaces/${workspaceId}/share`,
+        method: "PUT",
+        body: { enabled, rotate, panels },
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [
+        { type: "Share", id: workspaceId },
+      ],
     }),
 
     /* -------------------------------- sites ------------------------------- */
@@ -274,6 +300,8 @@ export const {
   useCreateWorkspaceMutation,
   useRenameWorkspaceMutation,
   useDeleteWorkspaceMutation,
+  useGetShareQuery,
+  useSetShareMutation,
   useGetSitesQuery,
   useCreateSiteMutation,
   useUpdateSiteOptionsMutation,

@@ -11,6 +11,7 @@ import Developers from "./pages/Developers";
 import Impersonate from "./pages/Impersonate";
 import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
+import PublicDashboard from "./pages/PublicDashboard";
 import { AppBootSkeleton } from "./components/Skeletons";
 import "./App.css";
 
@@ -84,6 +85,10 @@ export default function App() {
           <Route path="/" element={<Root />} />
           <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
           <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
+          {/* Shared dashboards: no auth, and deliberately not PublicOnly —
+              a signed-in user following a shared link should see the shared
+              view, not be bounced to their own dashboard. */}
+          <Route path="/share/:token" element={<PublicDashboard />} />
           {/* First-run setup. Protected for the workspace context, but renders
               without the app shell — a new account has nothing to navigate. */}
           <Route path="/app/onboarding" element={<ProtectedRaw><Onboarding /></ProtectedRaw>} />

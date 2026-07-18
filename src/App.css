@@ -127,6 +127,22 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   overflow: hidden;
 }
 
+/* ============ Public shared dashboard ============ */
+.pub-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.pub-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
 /* ============ Onboarding ============
    Shares the auth split so signup flows straight into setup without the page
    changing shape. The form column is wider than auth's, because step 3 holds

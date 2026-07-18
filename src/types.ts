@@ -26,6 +26,22 @@ export type ProfileUpdate = Partial<
   Pick<User, "firstName" | "lastName" | "mobile" | "avatarUrl" | "dateLocale" | "timezone">
 >;
 
+/** Which panels a public shared dashboard shows. */
+export type SharePanels = {
+  totals: boolean;
+  trend: boolean;
+  pages: boolean;
+  sources: boolean;
+  countries: boolean;
+  devices: boolean;
+};
+
+export type ShareState = {
+  enabled: boolean;
+  token: string | null;
+  panels: SharePanels;
+};
+
 /** A row in the admin's user switcher. */
 export type AdminUser = {
   id: string;
