@@ -129,10 +129,22 @@ export function Field({
   );
 }
 
-/** Vertical rhythm between sections on a settings-style page. */
-export function PageStack({ children }: { children: ReactNode }) {
+/**
+ * Vertical rhythm between sections on a settings-style page.
+ *
+ * The default width keeps prose and single-column forms readable. Pages with
+ * wide content — long URLs, multi-column grids — can opt into more room rather
+ * than every page paying for the widest one.
+ */
+export function PageStack({
+  children,
+  maxWidth = 860,
+}: {
+  children: ReactNode;
+  maxWidth?: number | string;
+}) {
   return (
-    <Stack gap="xl" style={{ maxWidth: 860 }}>
+    <Stack gap="xl" style={{ maxWidth }}>
       {children}
     </Stack>
   );

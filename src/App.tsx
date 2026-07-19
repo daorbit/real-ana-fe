@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Analytics from "./pages/Analytics";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
+import Share from "./pages/Share";
 import Impersonate from "./pages/Impersonate";
 import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
@@ -95,6 +96,7 @@ export default function App() {
           <Route path="/app" element={<Protected><Home /></Protected>} />
           <Route path="/app/analytics" element={<Protected><Analytics /></Protected>} />
           <Route path="/app/workspaces" element={<Protected><Workspaces /></Protected>} />
+          <Route path="/app/share" element={<Protected><Share /></Protected>} />
           <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
           <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
           {/* Admin-only, enforced by the page and by every /api/admin route. */}

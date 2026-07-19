@@ -7,7 +7,7 @@ import {
 import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip as RTooltip } from "recharts";
 import { EyeOff, BarChart3 } from "lucide-react";
 import { Wordmark } from "../components/Brand";
-import { num, countryFlag, countryLabel } from "../utils";
+import { num, duration, countryFlag, countryLabel } from "../utils";
 
 const RANGES = [
   { value: "24h", label: "24 hours" },
@@ -23,6 +23,14 @@ type Panels = {
   sources: boolean;
   countries: boolean;
   devices: boolean;
+  browsers: boolean;
+  operatingSystems: boolean;
+  entryPages: boolean;
+  exitPages: boolean;
+  languages: boolean;
+  channels: boolean;
+  engagement: boolean;
+  visitorSplit: boolean;
 };
 type Shared = {
   workspace: string;
@@ -35,10 +43,34 @@ type Shared = {
   topReferrers: Row[];
   countries: Row[];
   devices: Row[];
+  browsers: Row[];
+  operatingSystems: Row[];
+  entryPages: Row[];
+  exitPages: Row[];
+  languages: Row[];
+  channels: Row[];
+  visitorSplit: { new: number; returning: number; returningRate: number } | null;
+  bounceRate: number;
+  avgSessionMs: number;
+  pagesPerSession: number;
   timeseries: { bucket: string; views: number; visitors: number }[];
 };
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
+
+/** A single labelled number — engagement rates and the visitor split. */
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <Box className="surface-card" p="md">
+      <Text size="xs" c="dimmed" fw={500} mb={6}>
+        {label}
+      </Text>
+      <Text fw={650} fz={22} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+        {value}
+      </Text>
+    </Box>
+  );
+}
 
 /** A ranked breakdown, with a bar showing each row's share of the top value. */
 function Breakdown({
@@ -176,18 +208,30 @@ export default function PublicDashboard() {
   // everything so an older response without the field still renders.
   const p = data.panels ?? {
     totals: true, trend: true, pages: true, sources: true, countries: true, devices: true,
+    browsers: false, operatingSystems: false, entryPages: false, exitPages: false,
+    languages: false, channels: false, engagement: false, visitorSplit: false,
   };
 
   const breakdowns = [
     p.pages && { title: "Top pages", rows: data.topPages, empty: "No pageviews yet" },
+    p.entryPages && { title: "Entry pages", rows: data.entryPages, empty: "No sessions yet" },
+    p.exitPages && { title: "Exit pages", rows: data.exitPages, empty: "No completed sessions yet" },
     p.sources && { title: "Top sources", rows: data.topReferrers, empty: "No referrers yet" },
+    p.channels && { title: "Channels", rows: data.channels, empty: "No traffic yet" },
     p.countries && {
       title: "Countries",
       rows: data.countries,
       empty: "No location data yet",
       format: (k: string) => `${countryFlag(k)} ${countryLabel(k)}`,
     },
+    p.languages && { title: "Languages", rows: data.languages, empty: "No language data yet" },
     p.devices && { title: "Devices", rows: data.devices, empty: "No device data yet" },
+    p.browsers && { title: "Browsers", rows: data.browsers, empty: "No browser data yet" },
+    p.operatingSystems && {
+      title: "Operating systems",
+      rows: data.operatingSystems,
+      empty: "No OS data yet",
+    },
   ].filter(Boolean) as {
     title: string;
     rows: Row[];
@@ -341,6 +385,30 @@ export default function PublicDashboard() {
               </ResponsiveContainer>
             </div>
           </Box>
+        )}
+
+        {/* Engagement and the new/returning split are single numbers, not
+            ranked lists, so they sit above the breakdown grid rather than
+            pretending to be one of its cards. */}
+        {(p.engagement || (p.visitorSplit && data.visitorSplit)) && (
+          <SimpleGrid cols={{ base: 2, sm: 3, md: 5 }} spacing="md" mb="lg">
+            {p.engagement && (
+              <>
+                <MiniStat label="Bounce rate" value={`${data.bounceRate}%`} />
+                <MiniStat label="Avg. session" value={duration(data.avgSessionMs)} />
+                <MiniStat label="Pages / session" value={String(data.pagesPerSession)} />
+              </>
+            )}
+            {p.visitorSplit && data.visitorSplit && (
+              <>
+                <MiniStat label="New visitors" value={num(data.visitorSplit.new)} />
+                <MiniStat
+                  label="Returning"
+                  value={`${num(data.visitorSplit.returning)} · ${data.visitorSplit.returningRate}%`}
+                />
+              </>
+            )}
+          </SimpleGrid>
         )}
 
         {breakdowns.length > 0 && (

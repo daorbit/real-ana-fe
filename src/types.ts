@@ -34,6 +34,15 @@ export type SharePanels = {
   sources: boolean;
   countries: boolean;
   devices: boolean;
+  /** Added after launch — these default to off on the server. */
+  browsers: boolean;
+  operatingSystems: boolean;
+  entryPages: boolean;
+  exitPages: boolean;
+  languages: boolean;
+  channels: boolean;
+  engagement: boolean;
+  visitorSplit: boolean;
 };
 
 export type ShareState = {

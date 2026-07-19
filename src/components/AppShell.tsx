@@ -7,7 +7,7 @@ import {
 } from "@mantine/core";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
-  Settings as SettingsIcon, ChevronsUpDown, BookOpen,
+  Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2,
 } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
@@ -34,6 +34,7 @@ const NAV_GROUPS = [
     heading: "Manage",
     items: [
       { to: "/app/workspaces", label: "Workspaces", icon: FolderKanban },
+      { to: "/app/share", label: "Public dashboard", icon: Share2 },
       { to: "/app/developers", label: "Developers", icon: Code2 },
     ],
   },

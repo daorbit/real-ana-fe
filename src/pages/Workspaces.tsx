@@ -27,7 +27,6 @@ import type { Workspace, Site } from "../types";
 import { WorkspacesSkeleton } from "../components/Skeletons";
 import { AddSiteWizard } from "../components/AddSiteWizard";
 import { SiteFavicon } from "../components/SiteFavicon";
-import { ShareCard } from "../components/ShareCard";
 import { BrandIcon } from "../components/BrandIcon";
 import { PageHeader } from "../components/Page";
 import { getFramework } from "../utils/frameworks";
@@ -468,10 +467,6 @@ export default function Workspaces() {
                 <Text className="ws-stat-value">{workspaces.length}</Text>
               </Box>
             </SimpleGrid>
-
-            <Box mb="lg">
-              <ShareCard workspaceId={active._id} />
-            </Box>
 
             <Group justify="space-between" mb="sm" wrap="nowrap">
               <Group gap={8}>
