@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useGetStatsQuery } from "../store";
 import { notify, errMessage } from "../notify";
+import { useDemo } from "../demo";
+import { demoStats } from "../utils/demoStats";
 import { POLL_MS } from "./usePolling";
 
 /**
@@ -71,6 +73,28 @@ export function useStats(
     }
     if (!error) notified.current = false;
   }, [error]);
+
+  /**
+   * Demo mode substitutes a generated payload for the real one.
+   *
+   * The swap happens here, at the single point both Home and Analytics read
+   * stats from, so every widget switches together and no page needs to know
+   * demo mode exists. The real query keeps running underneath — turning demo
+   * off shows live numbers immediately rather than refetching.
+   */
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo ? demoStats(range) : null), [demo, range]);
+
+  if (sample) {
+    return {
+      stats: sample,
+      loading: false,
+      refetching: false,
+      refresh,
+      refreshing: false,
+      lastUpdated: null,
+    };
+  }
 
   return {
     stats: stats ?? null,

@@ -32,6 +32,7 @@ import { GoalsPanel } from "../components/GoalsPanel";
 import { SortableWidget, WidgetDragPreview } from "../components/SortableWidget";
 import { Onboarding } from "../components/Onboarding";
 import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
+import { useDemo } from "../demo";
 import type { WidgetId, Span } from "../hooks";
 import { countryFlag, countryLabel, duration, num } from "../utils";
 import { useWorkspace } from "../workspace";
@@ -169,6 +170,7 @@ export default function Home() {
     siteScope,
   );
   const { sites } = useSites(active?._id);
+  const { demo } = useDemo();
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
     has, spanOf, toggle, remove, setSpan, move, reset, clear,
@@ -379,7 +381,10 @@ export default function Home() {
         />
       )}
 
-      {!editing && !dirty && (
+      {/* Hidden in demo mode: the checklist reads setup progress off the stats
+          payload, and sample data would mark "install the snippet" done on an
+          account that has never received an event. */}
+      {!editing && !dirty && !demo && (
         <Onboarding
           hasWorkspace={!!active}
           hasSite={sites.length > 0}

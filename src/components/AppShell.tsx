@@ -14,6 +14,8 @@ import { SupportWidget } from "./SupportWidget";
 import { useAuth } from "../auth";
 import { notify, confirmLogout, errMessage } from "../notify";
 import { useWorkspace } from "../workspace";
+import { DemoToggle } from "./DemoToggle";
+import { useDemo } from "../demo";
 
 /**
  * Grouped navigation.
@@ -94,6 +96,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   // vanish mid-impersonation anyway — but be explicit about it.
   const isAdmin = user?.role === "admin" && !impersonating;
 
+  const { demo } = useDemo();
+
   const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
 
   const groups = isAdmin
@@ -159,8 +163,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </MantineShell.Section>
 
         <MantineShell.Section>
-          {/* Docs and theme sit together as low-frequency utilities, so they
-              don't compete with the primary nav above. */}
+          {/* Docs, theme and the demo-data switch sit together as low-frequency
+              utilities, so they don't compete with the primary nav above. */}
           <Group gap={4} mb="xs" px={2}>
             <Tooltip label="Documentation" withArrow>
               <ActionIcon
@@ -185,6 +189,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {dark ? <Sun size={16} /> : <Moon size={16} />}
               </ActionIcon>
             </Tooltip>
+            <DemoToggle />
           </Group>
 
           <Menu position="right-end" withArrow radius="md" width={210}>
@@ -233,6 +238,24 @@ export function AppShell({ children }: { children: ReactNode }) {
       </MantineShell.Navbar>
 
       <MantineShell.Main style={{ background: "var(--bg)", position: "relative" }}>
+        {/* A hairline along the top of the content while demo mode is on.
+            Every number below it is fabricated, and the sidebar switch is easy
+            to forget once scrolled away from — this costs no layout space and
+            is visible from anywhere on the page. */}
+        {demo && (
+          <Box
+            aria-hidden
+            style={{
+              position: "fixed",
+              insetInline: 0,
+              top: 0,
+              height: 2,
+              background: "var(--mantine-color-violet-5)",
+              zIndex: 200,
+            }}
+          />
+        )}
+
         <div style={{ position: "relative", zIndex: 1 }}>
           {/* Full access means an accidental delete lands on a real customer.
               The banner is deliberately loud and always in reach. */}
