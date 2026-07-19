@@ -180,7 +180,7 @@ export default function Workspaces() {
   // refreshes on its own after a create or delete.
   const { sites, refresh: refreshSites, refreshing, lastUpdated } = useSites(active?._id);
 
-  const [createWs] = useCreateWorkspaceMutation();
+  const [createWs, { isLoading: creatingWs }] = useCreateWorkspaceMutation();
   const [renameWs] = useRenameWorkspaceMutation();
   const [deleteWs] = useDeleteWorkspaceMutation();
   const [deleteSiteMut] = useDeleteSiteMutation();
@@ -282,8 +282,8 @@ export default function Workspaces() {
               data-autofocus
             />
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={() => { setWsOpen(false); setWsError(null); }}>Cancel</Button>
-              <Button type="submit">Create workspace</Button>
+              <Button variant="default" disabled={creatingWs} onClick={() => { setWsOpen(false); setWsError(null); }}>Cancel</Button>
+              <Button type="submit" loading={creatingWs}>Create workspace</Button>
             </Group>
           </Stack>
         </form>
