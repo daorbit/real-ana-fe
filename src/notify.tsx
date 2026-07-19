@@ -54,20 +54,54 @@ export function confirmLogout(onConfirm: () => void) {
   });
 }
 
-// Destructive confirmation dialog.
+/**
+ * Destructive confirmation dialog.
+ *
+ * `openConfirmModal` closes as soon as confirm is clicked and ignores whatever
+ * `onConfirm` returns, so an async handler would run invisibly: the dialog
+ * disappears while the request is still in flight and the row only changes
+ * some time later. Instead the modal is opened with an explicit id, held open
+ * on confirm, and closed once the promise settles — with the confirm button
+ * showing a loading state in between, and both buttons disabled so the request
+ * cannot be fired twice.
+ */
 export function confirmDelete(opts: {
   title: string;
   body: ReactNode;
   confirmLabel?: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
 }) {
-  modals.openConfirmModal({
-    title: opts.title,
-    centered: true,
-    radius: "lg",
-    children: <Text size="sm" c="dimmed">{opts.body}</Text>,
-    labels: { confirm: opts.confirmLabel ?? "Delete", cancel: "Cancel" },
-    confirmProps: { color: "red" },
-    onConfirm: opts.onConfirm,
-  });
+  const id = `confirm-delete-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  const open = (busy: boolean) =>
+    modals.openConfirmModal({
+      modalId: id,
+      title: opts.title,
+      centered: true,
+      radius: "lg",
+      // While the request is in flight the outcome is not decided yet, so the
+      // dialog must not be dismissable by escape, overlay click or the X.
+      closeOnClickOutside: !busy,
+      closeOnEscape: !busy,
+      withCloseButton: !busy,
+      children: <Text size="sm" c="dimmed">{opts.body}</Text>,
+      labels: { confirm: opts.confirmLabel ?? "Delete", cancel: "Cancel" },
+      confirmProps: { color: "red", loading: busy },
+      cancelProps: { disabled: busy },
+      onConfirm: () => {
+        const result = opts.onConfirm();
+
+        // Synchronous handler: nothing to wait for, let it close normally.
+        if (!(result instanceof Promise)) return;
+
+        // Re-open with the same id to swap in the loading state. Mantine
+        // replaces the existing modal rather than stacking a second one.
+        open(true);
+        // The call sites report their own errors; this only has to make sure
+        // the dialog closes either way rather than hanging open on rejection.
+        result.catch(() => undefined).finally(() => modals.close(id));
+      },
+    });
+
+  open(false);
 }
