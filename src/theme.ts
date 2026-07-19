@@ -17,6 +17,10 @@ export const theme = createTheme({
     },
   },
   defaultRadius: "md",
+  // Mantine ships checkboxes, switches and radios with the default arrow
+  // cursor, which makes them read as labels rather than controls. One setting
+  // covers every such input in the app.
+  cursorType: "pointer",
   colors: {
     emerald: [
       "#ecfdf5", "#d1fae5", "#a7f3d0", "#6ee7b7", "#34d399",

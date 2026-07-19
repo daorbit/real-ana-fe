@@ -135,6 +135,17 @@ export default function PublicDashboard() {
   // counting that would inflate one reader into several.
   const counted = useRef(false);
 
+ 
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex, nofollow, noarchive";
+    document.head.appendChild(meta);
+    return () => {
+      meta.remove();
+    };
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     setState((s) => (s === "ready" ? "ready" : "loading"));

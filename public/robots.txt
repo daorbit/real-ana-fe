@@ -1,0 +1,8 @@
+# Shared dashboards are reachable by anyone holding the link, and the token in
+# the URL is the only credential. Keep them out of search results so a link
+# that reaches a crawler does not become a permanently indexed page.
+User-agent: *
+Disallow: /share/
+
+# The rest of the app is behind auth and has nothing to index either.
+Disallow: /app/

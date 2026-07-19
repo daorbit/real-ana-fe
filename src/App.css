@@ -851,3 +851,23 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .auth-split { grid-template-columns: 1fr; }
   .auth-brand { display: none; }
 }
+
+/* Mantine leaves the text beside a checkbox, switch or radio with the default
+   arrow cursor, even though clicking it toggles the control. `cursorType` in
+   the theme only covers the input itself, so the labels are matched here. */
+.mantine-Checkbox-label,
+.mantine-Switch-label,
+.mantine-Radio-label,
+.mantine-Chip-label,
+.mantine-Checkbox-description,
+.mantine-Switch-description,
+.mantine-Radio-description {
+  cursor: pointer;
+}
+
+/* A disabled control must not claim to be clickable. */
+.mantine-Checkbox-input:disabled + .mantine-Checkbox-labelWrapper .mantine-Checkbox-label,
+.mantine-Switch-input:disabled + .mantine-Switch-labelWrapper .mantine-Switch-label,
+.mantine-Radio-input:disabled + .mantine-Radio-labelWrapper .mantine-Radio-label {
+  cursor: not-allowed;
+}
