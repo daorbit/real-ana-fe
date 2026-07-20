@@ -62,12 +62,12 @@ export function HomeSkeleton() {
         </Group>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
+      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} mb="lg">
         {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="lg">
-        <div style={{ gridColumn: "span 2" }}><ChartSkeleton /></div>
+        <div className="grid-span-2"><ChartSkeleton /></div>
         <ListSkeleton rows={4} />
       </SimpleGrid>
 
@@ -94,15 +94,15 @@ export function AnalyticsSkeleton() {
         </Group>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="md">
+      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} mb="md">
         {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
       </SimpleGrid>
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
+      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} mb="lg">
         {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="lg">
-        <div style={{ gridColumn: "span 2" }}><ChartSkeleton height={260} /></div>
+        <div className="grid-span-2"><ChartSkeleton height={260} /></div>
         <ListSkeleton rows={4} />
       </SimpleGrid>
 

@@ -75,7 +75,7 @@ export function StatCard({
 
   return (
     <Box className="stat-card">
-      <Box p="lg" pb={spark && spark.length > 1 ? 0 : "lg"}>
+      <Box className="stat-card-body" p="lg" pb={spark && spark.length > 1 ? 0 : "lg"}>
         {/* Label first: you read what it is, then the number. Leading with a
             40px icon block made every card look identical at a glance. */}
         <Group justify="space-between" align="center" wrap="nowrap" mb="sm">
@@ -112,8 +112,8 @@ export function StatCard({
         {/* Proportional figures, not tabular: at 30px, tabular spacing makes a
             number like 121 look gappy. Columns of numbers still use tabular. */}
         <Text
+          className="stat-card-value"
           fw={700}
-          fz={30}
           lh={1.05}
           style={{
             letterSpacing: "-0.025em",

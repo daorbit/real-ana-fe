@@ -24,7 +24,11 @@ export function RefreshButton({
 
   return (
     <Group gap="xs" wrap="nowrap">
-      {!compact && <Text size="xs" c="dimmed">Updated {timeAgo(lastUpdated)}</Text>}
+      {!compact && (
+        <Text size="xs" c="dimmed" className="refresh-ago">
+          Updated {timeAgo(lastUpdated)}
+        </Text>
+      )}
       <Tooltip label="Auto-refreshes every minute" withArrow>
         <Button
           // Default size matches the other header buttons (Customize, Full analytics).

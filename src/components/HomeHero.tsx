@@ -57,7 +57,7 @@ export function HomeHero({
         </div>
       )}
 
-      <Box className="hero-content" p="xl">
+      <Box className="hero-content hero-pad" p="xl">
         <Group justify="space-between" align="flex-start" wrap="wrap" gap="xl">
           <div style={{ minWidth: 0 }}>
             <Group gap={8} mb={10} wrap="nowrap">
@@ -70,8 +70,8 @@ export function HomeHero({
             <Group align="baseline" gap="sm" wrap="nowrap">
               {/* Hero figure: ≥48px, same sans as everything else. */}
               <Text
+                className="hero-figure"
                 fw={700}
-                fz={56}
                 lh={1}
                 style={{ letterSpacing: "-0.04em", color: "var(--text)" }}
               >

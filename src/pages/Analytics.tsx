@@ -346,18 +346,20 @@ export default function Analytics() {
             Changes compare to the previous {range}.
           </Text>
         </div>
-        <Group gap="sm" wrap="wrap" justify="flex-end">
-          <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
-          <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
-          <ExportMenu
-            workspaceId={active?._id}
-            range={range}
-            from={rangeState.from}
-            to={rangeState.to}
-            filter={serializeFilter(filter)}
-            sites={siteScope}
-          />
-          <Group gap="xs" wrap="nowrap">
+        <Group gap="sm" wrap="wrap" justify="flex-end" className="an-toolbar">
+          <Group gap="sm" wrap="wrap" justify="flex-end" className="an-toolbar-btns">
+            <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+            <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
+            <ExportMenu
+              workspaceId={active?._id}
+              range={range}
+              from={rangeState.from}
+              to={rangeState.to}
+              filter={serializeFilter(filter)}
+              sites={siteScope}
+            />
+          </Group>
+          <Group gap="xs" wrap="nowrap" className="an-range">
             {(statsLoading || refetching) && (
               <Loader size="xs" color="emerald" type="oval" />
             )}
@@ -414,7 +416,7 @@ export default function Analytics() {
       {section === "overview" && <>
       {/* audience */}
       <SectionLabel icon={Users}>Audience</SectionLabel>
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb="xl">
+      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} spacing="lg" mb="xl">
         {audience.map((k, i) => (
           <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
             <StatCard {...k} />
@@ -424,7 +426,7 @@ export default function Analytics() {
 
       {/* engagement */}
       <SectionLabel icon={ArrowDownWideNarrow}>Engagement</SectionLabel>
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb="xl">
+      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} spacing="lg" mb="xl">
         {engagement.map((k, i) => (
           <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05, duration: 0.35 }}>
             <StatCard {...k} />
@@ -435,7 +437,7 @@ export default function Analytics() {
       {/* traffic chart + live */}
       <SectionLabel icon={Eye}>Traffic</SectionLabel>
       <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="xl">
-        <div style={{ gridColumn: "span 2" }}>
+        <div className="grid-span-2">
           <Card withBorder radius="lg" padding="lg" h="100%">
             <Group justify="space-between" mb="md" wrap="nowrap">
               <Text fw={600} c="dimmed" size="sm">Traffic over time</Text>
@@ -563,7 +565,7 @@ export default function Analytics() {
 
         <Tabs.Panel value="geo">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <div style={{ gridColumn: "span 2" }}>
+            <div className="grid-span-2">
               <WorldMap countries={view?.countries ?? []} />
             </div>
             <Stack gap="lg">
@@ -589,7 +591,7 @@ export default function Analytics() {
 
         <Tabs.Panel value="clicks">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <div style={{ gridColumn: "span 2" }}>
+            <div className="grid-span-2">
               <ClicksPanel clicks={view?.clicks ?? []} total={view?.clickCount ?? 0} limit={15} />
             </div>
             <OutboundPanel items={view?.outboundClicks ?? []} />
@@ -598,7 +600,7 @@ export default function Analytics() {
 
         <Tabs.Panel value="events">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <div style={{ gridColumn: "span 2" }}>
+            <div className="grid-span-2">
               <CustomEventsPanel
                 items={view?.customEvents ?? []}
                 totalRevenue={view?.totalRevenue ?? 0}

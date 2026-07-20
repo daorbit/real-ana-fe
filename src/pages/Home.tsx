@@ -318,8 +318,8 @@ export default function Home() {
 
       {/* Controls first, then the hero band — the toolbar is chrome, so it
           stays compact above the thing people actually came to read. */}
-      <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap">
-        <Group gap="sm" wrap="wrap" justify="flex-end">
+      <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap" className="home-toolbar">
+        <Group gap="sm" wrap="wrap" justify="flex-end" className="home-toolbar-btns">
           {/* The overview is fixed to the last 24h — range and export live on
               the full analytics page, which is where people go to slice data. */}
           {!editing && !dirty && (

@@ -185,8 +185,8 @@ const DOCS_URL = "https://quantalog.daorbit.in/docs";
 function DocsLink() {
   return (
     <Card withBorder radius="lg" padding="lg" mb="lg" className="dev-hero">
-      <Group justify="space-between" wrap="nowrap" gap="lg">
-        <Group gap="sm" wrap="nowrap">
+      <Group justify="space-between" wrap="wrap" gap="md">
+        <Group gap="sm" wrap="nowrap" style={{ flex: "1 1 240px", minWidth: 0 }}>
           <ThemeIcon variant="light" color="emerald" radius="md" size="lg">
             <BookOpen size={18} />
           </ThemeIcon>

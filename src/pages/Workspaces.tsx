@@ -35,8 +35,8 @@ import type { FrameworkId } from "../utils/frameworks";
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
   return (
-    <Group gap={6} wrap="nowrap">
-      <Text size="xs" c="dimmed">{label}: {value}</Text>
+    <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+      <Text size="xs" c="dimmed" truncate style={{ minWidth: 0 }}>{label}: {value}</Text>
       <CopyButton value={value}>
         {({ copied, copy }) => (
           <Tooltip label={copied ? "Copied" : "Copy"} withArrow>
@@ -75,7 +75,9 @@ function SiteRow({
 
   return (
     <Card withBorder radius="md" padding="md" className="site-row">
-      <Group justify="space-between" wrap="nowrap" gap="lg">
+      {/* Row on desktop; on a phone the actions drop under the identity so the
+          name has the full width instead of being crushed to "Q…". */}
+      <div className="site-row-top">
         {/* identity */}
         <Group gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
           {/* The site's own favicon, so a list of domains is scannable by
@@ -119,7 +121,7 @@ function SiteRow({
         </Group>
 
         {/* actions */}
-        <Group gap={6} wrap="nowrap">
+        <Group gap={6} wrap="nowrap" className="site-row-actions">
           <Tooltip label="Check if the script is reporting" withArrow>
             <Button
               size="xs"
@@ -145,7 +147,7 @@ function SiteRow({
             </ActionIcon>
           </Tooltip>
         </Group>
-      </Group>
+      </div>
 
       <Collapse expanded={open}>
         <Box pt="md">
@@ -377,7 +379,7 @@ export default function Workspaces() {
             transition={{ duration: 0.28 }}
           >
             <Box className="ws-head" mb="lg">
-              <Group justify="space-between" align="flex-start" wrap="nowrap" gap="md">
+              <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
                 <div style={{ minWidth: 0 }}>
                   {editing ? (
                     <Group gap="xs" wrap="nowrap">
@@ -453,7 +455,7 @@ export default function Workspaces() {
 
             {/* At-a-glance counts - the first thing you check on opening a
                 workspace, and cheaper to read than counting rows. */}
-            <SimpleGrid cols={3} spacing="md" mb="lg">
+            <SimpleGrid cols={3} spacing="sm" mb="lg">
               <Box className="ws-stat">
                 <Text className="ws-stat-label">Sites</Text>
                 <Text className="ws-stat-value">{sites.length}</Text>

@@ -58,6 +58,25 @@
 html, body, #root { height: 100%; }
 body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased; }
 
+/* The app shell pads content with `lg` (32px), which eats a phone's whole
+   gutter. Tighten it below the navbar breakpoint so cards get real width. */
+@media (max-width: 48em) {
+  /* Mantine drives main padding off this var, so overriding it beats the
+     inline `padding="lg"` on the shell. */
+  .mantine-AppShell-root { --app-shell-padding: var(--mantine-spacing-md); }
+
+  /* Cards default to lg/xl padding — too generous once the viewport is a
+     phone. Pull every card in so content, not padding, fills the width. */
+  .mantine-Card-root { padding: 14px !important; }
+
+  /* Section titles and page headings step down a size on phones. */
+  .mantine-Title-root { font-size: 1.5rem; }
+
+  /* Grid gaps tighten so two-up rows don't waste a third of the width on
+     the gutter between them. */
+  .mantine-SimpleGrid-root { gap: 10px !important; }
+}
+
 /* Mantine dark surfaces — neutral greys, no purple cast */
 [data-mantine-color-scheme="dark"] {
   --mantine-color-body: #131519;
@@ -291,6 +310,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   position: relative;
   z-index: 1;
 }
+.hero-figure { font-size: 56px; }
+/* Shrink the hero band on phones — 40px pad and a 56px number leave almost no
+   room for the totals beside them. */
+@media (max-width: 48em) {
+  .hero-pad { padding: 18px !important; }
+  .hero-figure { font-size: 40px; }
+}
 
 /* Stat tile. Neutral surface: the sparkline carries the colour, so a row of
    six reads as one instrument panel rather than six competing badges. */
@@ -309,6 +335,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     inset 0 0 0 1px var(--border-strong),
     var(--shadow);
   transform: translateY(-1px);
+}
+.stat-card-value { font-size: 30px; }
+/* Phones: tighter pad and a smaller headline number so a 2-up row of tiles
+   isn't all whitespace and giant digits. */
+@media (max-width: 48em) {
+  .stat-card-body { padding: 14px !important; }
+  .stat-card-value { font-size: 22px; }
 }
 
 /* An interactive tile — settings rows, framework pickers, nav entries. */
@@ -365,6 +398,24 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* ============ Workspaces ============ */
 .ws-active { border-color: rgba(16, 185, 129, 0.35) !important; }
+
+/* Site row: identity beside actions on desktop. On a phone the actions wrap to
+   their own line under the name and stretch to fill, so Verify/Snippet stay
+   real tap targets instead of a cramped huddle beside a truncated title. */
+.site-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--mantine-spacing-lg);
+}
+@media (max-width: 48em) {
+  .site-row-top { flex-direction: column; align-items: stretch; gap: var(--mantine-spacing-sm); }
+  .site-row-actions { width: 100%; }
+  /* The two labelled buttons share the width; the delete icon keeps its size. */
+  .site-row-actions > :first-child,
+  .site-row-actions > :nth-child(2) { flex: 1; }
+  .site-row-actions .mantine-Button-root { width: 100%; }
+}
 .site-row {
   background: var(--surface-2) !important;
   transition: border-color 0.15s ease, transform 0.15s ease;
@@ -464,6 +515,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 /* A date needs to fit the same tile as a two-digit count. */
 .ws-stat-value.sm { font-size: 15px; font-weight: 600; padding-top: 5px; }
 .ws-stat-sub { font-size: 15px; font-weight: 500; color: var(--muted); }
+
+/* Three count tiles across a phone: tighten pad and shrink the figures so they
+   fit without truncating the date. */
+@media (max-width: 48em) {
+  .ws-stat { padding: 10px 11px; }
+  .ws-stat-value { font-size: 19px; }
+  .ws-stat-value.sm { font-size: 12.5px; }
+  .ws-stat-label { font-size: 10px; }
+}
 
 @media (max-width: 900px) {
   /* The rail becomes a horizontal strip above the content — a sticky sidebar
@@ -642,6 +702,60 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: rgba(16, 185, 129, 0.06);
 }
 .wp-svg { width: 100%; height: 100%; display: block; }
+
+/* ============ Page toolbars (Analytics / Home) ============
+   On desktop these are a right-aligned huddle of buttons. On a phone that huddle
+   wraps into a ragged two-and-a-half rows of mismatched widths — so below the
+   breakpoint each control group becomes a full-width row, the range presets get
+   their own line, and everything stretches to equal width. */
+@media (max-width: 48em) {
+  .an-toolbar,
+  .home-toolbar {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  /* The "Updated x ago" label eats width and reads as clutter on a phone —
+     the Refresh button itself is enough. */
+  .refresh-ago { display: none; }
+
+  /* Analytics Refresh / Sites / Export: small buttons, wrap at natural width. */
+  .an-toolbar-btns { width: 100%; justify-content: flex-start; gap: 6px; }
+  .an-toolbar-btns .mantine-Button-root {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+
+  /* Range presets on their own line, full width so the four presets are easy
+     tap targets; Custom stays compact beside them. */
+  .an-range { width: 100%; }
+  .an-range .mantine-SegmentedControl-root { flex: 1; }
+  .an-range .mantine-Button-root { height: 32px; padding: 0 10px; font-size: 12.5px; }
+
+  /* Home has a variable number of buttons (Edit / Add widgets / Full analytics
+     plus Refresh + Sites). Keep them small and let them wrap at their natural
+     width — full-width bars read as five stacked banners, which is worse. */
+  .home-toolbar { width: 100%; }
+  .home-toolbar-btns { width: 100%; justify-content: flex-start; gap: 6px; }
+  .home-toolbar-btns .mantine-Button-root {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+  .home-toolbar-btns .mantine-Button-label { font-weight: 600; }
+}
+
+/* A wide cell inside a responsive SimpleGrid. It spans two tracks only once the
+   grid actually has multiple columns — below that, an inline `span 2` would add
+   a phantom track and push the page into horizontal scroll on a phone. */
+.grid-span-2 { grid-column: auto; }
+/* 75em == Mantine's `lg`, where these grids go from 1 to 3 columns. */
+@media (min-width: 75em) {
+  .grid-span-2 { grid-column: span 2; }
+}
 
 /* ============ Charts ============ */
 /* Recharts makes its wrapper focusable, so clicking a chart paints the browser's

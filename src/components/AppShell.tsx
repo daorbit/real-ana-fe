@@ -1,10 +1,11 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Alert, Menu,
-  UnstyledButton, Tooltip,
+  UnstyledButton, Tooltip, Burger,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2,
@@ -98,6 +99,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const { demo } = useDemo();
 
+  // Mobile nav drawer. The navbar is a permanent rail on desktop and a
+  // slide-over on phones — close it on every navigation so a tap on a link
+  // doesn't leave the overlay covering the page it just opened.
+  const [navOpen, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
+  useEffect(() => {
+    closeNav();
+  }, [loc.pathname, closeNav]);
+
   const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
 
   const groups = isAdmin
@@ -117,12 +126,37 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <MantineShell navbar={{ width: 252, breakpoint: "sm" }} padding="lg">
+    <MantineShell
+      header={{ height: { base: 56, sm: 0 } }}
+      navbar={{
+        width: 252,
+        breakpoint: "sm",
+        collapsed: { mobile: !navOpen },
+      }}
+      padding="lg"
+    >
+      {/* Mobile-only top bar. Hidden on desktop (header collapsed there), it
+          carries the burger and brand so the navbar can slide away on phones. */}
+      <MantineShell.Header
+        px="md"
+        hiddenFrom="sm"
+        style={{ background: "var(--bg-2)", borderBottom: "1px solid var(--border)" }}
+      >
+        <Group h="100%" gap="sm">
+          <Burger opened={navOpen} onClick={toggleNav} size="sm" aria-label="Toggle navigation" />
+          <Box component={Link} to="/app" display="flex">
+            <Wordmark />
+          </Box>
+        </Group>
+      </MantineShell.Header>
+
       <MantineShell.Navbar
         p="sm"
         style={{ background: "var(--bg-2)", borderRight: "1px solid var(--border)" }}
       >
-        <MantineShell.Section>
+        {/* On mobile the wordmark already sits in the top bar, so the one here
+            would double up inside the open drawer — desktop-only. */}
+        <MantineShell.Section visibleFrom="sm">
           <Box component={Link} to="/app" px={6} pt={6} pb="md" display="block">
             <Wordmark />
           </Box>
