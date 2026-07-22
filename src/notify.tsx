@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import { Text } from "@mantine/core";
+import { Text, TextInput, Group, Button, Stack, Code, Alert } from "@mantine/core";
+import { TriangleAlert } from "lucide-react";
 import type { ReactNode } from "react";
 
 export const notify = {
@@ -104,4 +106,135 @@ export function confirmDelete(opts: {
     });
 
   open(false);
+}
+
+/** The body of `confirmDestroy`, split out so it can hold the typed input. */
+function DestroyForm({
+  phrase,
+  body,
+  consequences,
+  confirmLabel,
+  onConfirm,
+  onCancel,
+}: {
+  phrase: string;
+  body: ReactNode;
+  consequences: string[];
+  confirmLabel: string;
+  onConfirm: () => void | Promise<void>;
+  onCancel: () => void;
+}) {
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  // Case-insensitive: the point is deliberate acknowledgement, not a typing
+  // test, and a name with capitals shouldn't make this harder than it is.
+  const matches = typed.trim().toLowerCase() === phrase.toLowerCase();
+
+  const run = async () => {
+    if (!matches || busy) return;
+    setBusy(true);
+    try {
+      await onConfirm();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Stack gap="md">
+      <Text size="sm" c="dimmed">{body}</Text>
+
+      <Alert
+        color="red"
+        variant="light"
+        radius="md"
+        icon={<TriangleAlert size={16} />}
+        title="This cannot be undone"
+      >
+        <Stack gap={4} mt={4}>
+          {consequences.map((c) => (
+            <Text key={c} size="xs">• {c}</Text>
+          ))}
+        </Stack>
+      </Alert>
+
+      <div>
+        <Text size="sm" mb={6}>
+          Type <Code>{phrase}</Code> to confirm.
+        </Text>
+        <TextInput
+          data-autofocus
+          value={typed}
+          placeholder={phrase}
+          onChange={(e) => setTyped(e.currentTarget.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void run();
+            }
+          }}
+          disabled={busy}
+          autoComplete="off"
+          spellCheck={false}
+          aria-label={`Type ${phrase} to confirm`}
+        />
+      </div>
+
+      <Group justify="flex-end" gap="sm">
+        <Button variant="default" onClick={onCancel} disabled={busy}>
+          Cancel
+        </Button>
+        <Button color="red" onClick={run} disabled={!matches} loading={busy}>
+          {confirmLabel}
+        </Button>
+      </Group>
+    </Stack>
+  );
+}
+
+/**
+ * Confirmation for an action that destroys data no backup will bring back.
+ *
+ * `confirmDelete` is right for anything recoverable or small. This one is for
+ * the cases where a mis-click costs history that cannot be re-collected — it
+ * lists exactly what goes, and requires the name to be typed out, so confirming
+ * is a deliberate act rather than a reflex on a familiar dialog.
+ */
+export function confirmDestroy(opts: {
+  title: string;
+  /** The exact text that must be typed — normally the thing's own name. */
+  phrase: string;
+  body: ReactNode;
+  /** Bullet list of what is lost. Be specific; this is the whole point. */
+  consequences: string[];
+  confirmLabel?: string;
+  onConfirm: () => void | Promise<void>;
+}) {
+  const id = `confirm-destroy-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  modals.open({
+    modalId: id,
+    title: opts.title,
+    centered: true,
+    radius: "lg",
+    children: (
+      <DestroyForm
+        phrase={opts.phrase}
+        body={opts.body}
+        consequences={opts.consequences}
+        confirmLabel={opts.confirmLabel ?? "Delete"}
+        onCancel={() => modals.close(id)}
+        onConfirm={async () => {
+          // Call sites report their own errors; this only has to close the
+          // dialog once the request settles either way.
+          try {
+            await opts.onConfirm();
+          } finally {
+            modals.close(id);
+          }
+        }}
+      />
+    ),
+  });
 }

@@ -1,4 +1,6 @@
 export { usePolling, POLL_MS } from "./usePolling";
+export { useCountUp } from "./useCountUp";
+export { useUnsavedGuard } from "./useUnsavedGuard";
 export { useStats } from "./useStats";
 export { useSites } from "./useSites";
 export { useInstallCheck, useSiteInstalled } from "./useInstallStatus";

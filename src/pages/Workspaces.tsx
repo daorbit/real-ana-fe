@@ -7,7 +7,7 @@ import {
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import {
-  Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Radar,
+  Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Radar, Search,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 
@@ -21,7 +21,7 @@ import {
 import { useSites, useSiteInstalled } from "../hooks";
 import * as v from "../utils/validate";
 import { shortDate } from "../utils";
-import { notify, errMessage, confirmDelete } from "../notify";
+import { notify, errMessage, confirmDestroy } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
 import { WorkspacesSkeleton } from "../components/Skeletons";
@@ -178,9 +178,24 @@ export default function Workspaces() {
   // Add-site is a self-contained wizard; this page only opens and closes it.
   const [siteOpen, setSiteOpen] = useState(false);
 
+  // Site search. Only rendered once the list is long enough to scroll, so a
+  // workspace with two sites doesn't carry a control it has no use for.
+  const [siteQuery, setSiteQuery] = useState("");
+
   // Cached by RTK Query; the mutations below invalidate it, so the list
   // refreshes on its own after a create or delete.
   const { sites, refresh: refreshSites, refreshing, lastUpdated } = useSites(active?._id);
+
+  const q = siteQuery.trim().toLowerCase();
+  const shownSites = q
+    ? sites.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) || s.domain.toLowerCase().includes(q)
+      )
+    : sites;
+  // Below this the eye scans faster than any filter would, and the box is just
+  // a dead control taking up header width.
+  const searchable = sites.length >= 3;
 
   const [createWs, { isLoading: creatingWs }] = useCreateWorkspaceMutation();
   const [renameWs] = useRenameWorkspaceMutation();
@@ -203,10 +218,23 @@ export default function Workspaces() {
     }
   };
 
+  const renameError = v.all(
+    v.required("Workspace name"),
+    v.maxLength("Workspace name", 60)
+  )(editName);
+
   const saveRename = async () => {
     if (!active) return;
+    // An empty name would leave the workspace unlabelled everywhere it appears
+    // — the sidebar, the switcher, the palette.
+    if (renameError) return;
+    // Nothing to send, and no reason to show a success toast for a no-op.
+    if (editName.trim() === active.name) {
+      setEditing(false);
+      return;
+    }
     try {
-      await renameWs({ id: active._id, name: editName }).unwrap();
+      await renameWs({ id: active._id, name: editName.trim() }).unwrap();
       setEditing(false);
       notify.success("Workspace renamed.");
     } catch (err) {
@@ -214,10 +242,23 @@ export default function Workspaces() {
     }
   };
 
+  // Deleting a workspace destroys history that cannot be re-collected, so it
+  // asks for the name to be typed rather than for one more click on a dialog
+  // people have learned to dismiss.
   const removeWorkspace = (w: Workspace) => {
-    confirmDelete({
-      title: `Delete "${w.name}"?`,
-      body: "This permanently removes the workspace, every site inside it, and all collected analytics. This cannot be undone.",
+    const count = w._id === active?._id ? sites.length : null;
+    confirmDestroy({
+      title: `Delete workspace "${w.name}"?`,
+      phrase: w.name,
+      body: "Everything tracked under this workspace is removed from Quantalog.",
+      consequences: [
+        count === null
+          ? "Every site in this workspace is deleted"
+          : `${count} ${count === 1 ? "site is" : "sites are"} deleted`,
+        "All collected analytics history is erased",
+        "Public dashboard links for these sites stop working",
+        "Any app still running the snippet stops reporting",
+      ],
       confirmLabel: "Delete workspace",
       onConfirm: async () => {
         try {
@@ -232,9 +273,15 @@ export default function Workspaces() {
 
   const delSite = (s: Site) => {
     if (!active) return;
-    confirmDelete({
+    confirmDestroy({
       title: `Delete site "${s.name}"?`,
-      body: "This removes the site and every event collected for it. Any app still running the snippet will stop reporting.",
+      phrase: s.name,
+      body: `Removes ${s.domain} and everything Quantalog has recorded for it.`,
+      consequences: [
+        "All pageviews, events and goals for this site are erased",
+        "The site's public dashboard link stops working",
+        "Any app still running the snippet stops reporting",
+      ],
       confirmLabel: "Delete site",
       onConfirm: async () => {
         try {
@@ -386,12 +433,25 @@ export default function Workspaces() {
                       <TextInput
                         size="sm"
                         value={editName}
+                        error={editName ? renameError : null}
                         onChange={(e) => setEditName(e.currentTarget.value)}
-                        onKeyDown={(e) => e.key === "Enter" && saveRename()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveRename();
+                          // Escape is what people reach for to back out of an
+                          // inline edit — without it the only way out is the X.
+                          if (e.key === "Escape") setEditing(false);
+                        }}
                         w={260}
                         autoFocus
+                        aria-label="Workspace name"
                       />
-                      <ActionIcon variant="light" color="emerald" onClick={saveRename} title="Save">
+                      <ActionIcon
+                        variant="light"
+                        color="emerald"
+                        onClick={saveRename}
+                        disabled={!!renameError}
+                        title="Save"
+                      >
                         <Check size={15} />
                       </ActionIcon>
                       <ActionIcon
@@ -475,15 +535,43 @@ export default function Workspaces() {
                 <Globe size={15} className="sect-ic" />
                 <Text fw={650} size="sm">Sites</Text>
                 <Badge variant="default" size="sm" radius="sm">
-                  {sites.length}
+                  {/* While filtering, the count has to describe what's on
+                      screen — otherwise it contradicts the list under it. */}
+                  {q ? `${shownSites.length} of ${sites.length}` : sites.length}
                 </Badge>
               </Group>
-              <RefreshButton
-                onRefresh={refreshSites}
-                refreshing={refreshing}
-                lastUpdated={lastUpdated}
-                compact
-              />
+              <Group gap="xs" wrap="nowrap">
+                {searchable && (
+                  <TextInput
+                    size="xs"
+                    w={200}
+                    placeholder="Filter sites…"
+                    value={siteQuery}
+                    onChange={(e) => setSiteQuery(e.currentTarget.value)}
+                    leftSection={<Search size={13} />}
+                    rightSection={
+                      siteQuery ? (
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          size="sm"
+                          onClick={() => setSiteQuery("")}
+                          aria-label="Clear filter"
+                        >
+                          <X size={13} />
+                        </ActionIcon>
+                      ) : null
+                    }
+                    aria-label="Filter sites by name or domain"
+                  />
+                )}
+                <RefreshButton
+                  onRefresh={refreshSites}
+                  refreshing={refreshing}
+                  lastUpdated={lastUpdated}
+                  compact
+                />
+              </Group>
             </Group>
 
             {sites.length === 0 ? (
@@ -509,7 +597,22 @@ export default function Workspaces() {
               </Box>
             ) : (
               <Stack gap="sm">
-                {sites.map((s, i) => (
+                {shownSites.length === 0 && (
+                  <Box className="surface-card">
+                    <Stack align="center" gap={6} py={36} px="lg">
+                      <Text fw={600} size="sm">No sites match “{siteQuery}”</Text>
+                      <Button
+                        size="xs"
+                        variant="subtle"
+                        color="gray"
+                        onClick={() => setSiteQuery("")}
+                      >
+                        Clear filter
+                      </Button>
+                    </Stack>
+                  </Box>
+                )}
+                {shownSites.map((s, i) => (
                   <motion.div
                     key={s._id}
                     initial={{ opacity: 0, y: 8 }}

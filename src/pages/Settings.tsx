@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code,
 } from "@mantine/core";
-import { Save, Languages } from "lucide-react";
+import { Save, Languages, Undo2 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, PageStack, Section, Field } from "../components/Page";
 import { useAuth } from "../auth";
+import { useUnsavedGuard } from "../hooks";
 import { notify, errMessage } from "../notify";
 
 /**
@@ -67,9 +68,9 @@ export default function Settings() {
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [saving, setSaving] = useState(false);
 
-  // Seed from the session once it is known, and re-seed if the session changes
-  // underneath us (an admin entering or leaving an impersonation).
-  useEffect(() => {
+  // Also used by Discard, which is exactly "put every field back to the saved
+  // profile" — the same operation as the initial seed.
+  const seedFromUser = useCallback(() => {
     if (!user) return;
     setFirstName(user.firstName ?? "");
     setLastName(user.lastName ?? "");
@@ -78,6 +79,16 @@ export default function Settings() {
     setDateLocale(user.dateLocale ?? "");
     setTimezone(user.timezone ?? "");
     setErrors({});
+  }, [user]);
+
+  // Seed from the session once it is known, and re-seed if the session changes
+  // underneath us (an admin entering or leaving an impersonation).
+  //
+  // Deliberately keyed on identity rather than on `seedFromUser`: the callback
+  // changes whenever the user object does, including right after a save, and
+  // depending on it would re-seed the form mid-edit.
+  useEffect(() => {
+    seedFromUser();
   }, [user?.id, user?.impersonating]);
 
   const dirty =
@@ -88,6 +99,10 @@ export default function Settings() {
       avatarUrl !== (user.avatarUrl ?? "") ||
       dateLocale !== (user.dateLocale ?? "") ||
       timezone !== (user.timezone ?? ""));
+
+  // A profile edit is quick to make and easy to walk away from — closing the
+  // tab or clicking a nav link would otherwise drop it silently.
+  useUnsavedGuard(dirty, "Your profile changes haven't been saved.");
 
   // Preview the pending selection, not the saved one — otherwise the sample
   // contradicts the dropdown until you hit save.
@@ -295,19 +310,42 @@ export default function Settings() {
             </Field>
           </Section>
 
-          {/* A second save at the foot of a long form, so a change made at the
-              bottom doesn't require scrolling back up. */}
-          <Group justify="flex-end">
-            <Button
-              type="submit"
-              leftSection={<Save size={15} />}
-              loading={saving}
-              disabled={!dirty}
-            >
-              Save changes
-            </Button>
-          </Group>
+          {/* Clears the sticky bar below, so it never covers the last field. */}
+          {dirty && <Box h={64} aria-hidden />}
         </PageStack>
+
+        {/* Save follows you down a long form rather than sitting at the top out
+            of sight. It only appears once there is something to save, so the
+            page isn't carrying a permanent bar for a form nobody touched. */}
+        {dirty && (
+          <Box className="save-bar">
+            <Group justify="space-between" gap="md" wrap="nowrap">
+              <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
+                <span className="save-bar__dot" aria-hidden />
+                <Text size="sm" fw={500} truncate>Unsaved changes</Text>
+              </Group>
+              <Group gap="sm" wrap="nowrap">
+                <Button
+                  variant="default"
+                  size="sm"
+                  leftSection={<Undo2 size={15} />}
+                  onClick={seedFromUser}
+                  disabled={saving}
+                >
+                  Discard
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  leftSection={<Save size={15} />}
+                  loading={saving}
+                >
+                  Save changes
+                </Button>
+              </Group>
+            </Group>
+          </Box>
+        )}
       </form>
     </AppShell>
   );

@@ -84,6 +84,35 @@
   border-radius: 6px;
 }
 
+/* ---- Sticky save bar ------------------------------------------------------
+   Appears only while a form has unsaved edits, so Save is reachable from
+   anywhere in a long form without scrolling back to the header. */
+.save-bar {
+  position: sticky;
+  bottom: 16px;
+  z-index: 20;
+  margin-top: -48px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-2);
+  box-shadow: var(--shadow);
+  animation: save-bar-in 220ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.save-bar__dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--mantine-color-yellow-5, #eab308);
+}
+
+@keyframes save-bar-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ---- Command palette ------------------------------------------------------ */
 .cmdk-item {
   display: flex;
@@ -134,6 +163,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .route-fade,
+  .save-bar,
   .live-badge__dot::after { animation: none; }
 
   .mantine-Card-root:hover,
