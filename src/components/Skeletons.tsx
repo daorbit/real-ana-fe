@@ -1,4 +1,5 @@
-import { Card, Group, Skeleton, SimpleGrid, Stack, Center, Loader } from "@mantine/core";
+import { Card, Group, Skeleton, SimpleGrid, Stack } from "@mantine/core";
+import { SwitchVisual } from "./SwitchOverlay";
 
 /** A stat card placeholder — icon, big number, label. */
 export function StatCardSkeleton() {
@@ -167,11 +168,7 @@ export function WorkspacesSkeleton() {
   );
 }
 
-/** Full-screen spinner — used while the session is being restored. */
+/** Full-screen boot animation — used while the session is being restored. */
 export function AppBootSkeleton() {
-  return (
-    <Center mih="100vh">
-      <Loader color="emerald" size="md" />
-    </Center>
-  );
+  return <SwitchVisual sublabel="Restoring your session" loop />;
 }

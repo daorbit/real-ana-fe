@@ -29,6 +29,7 @@ import { OutboundPanel, ErrorsPanel } from "../components/OutboundErrorsPanels";
 import { FilterBar } from "../components/FilterBar";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
+import { SwitchOverlay, useSwitchOverlay } from "../components/SwitchOverlay";
 import { RangePicker, type RangeState } from "../components/RangePicker";
 import { ExportMenu } from "../components/ExportMenu";
 import { AnalyticsSkeleton } from "../components/Skeletons";
@@ -217,6 +218,10 @@ export default function Analytics() {
   const [siteScope, setSiteScope] = useState<string[]>([]);
   useEffect(() => setSiteScope([]), [active?._id]);
 
+  // Narrowing the site scope swaps every number on the page — cover the swap
+  // with the same transition the workspace switcher uses.
+  const scopeSwitch = useSwitchOverlay(siteScope.join(",") || "all");
+
   const { sites } = useSites(active?._id);
   const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
     useStats(active?._id, range, serializeFilter(filter), siteScope, rangeState.from, rangeState.to);
@@ -338,6 +343,19 @@ export default function Analytics() {
 
   return (
     <AppShell>
+      {scopeSwitch.active && (
+        <SwitchOverlay
+          label={
+            siteScope.length === 0
+              ? "All sites"
+              : siteScope.length === 1
+              ? sites.find((s) => s.siteId === siteScope[0])?.name ?? "1 site"
+              : `${siteScope.length} sites`
+          }
+          sublabel="Updating analytics"
+          onDone={scopeSwitch.dismiss}
+        />
+      )}
       <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
         <div style={{ flex: "1 1 240px", minWidth: 0 }}>
           <Title order={1}>Analytics</Title>

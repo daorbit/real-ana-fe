@@ -22,6 +22,7 @@ import { HomeHero } from "../components/HomeHero";
 import { AnalyticsArt } from "../components/Brand";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
+import { SwitchOverlay, useSwitchOverlay } from "../components/SwitchOverlay";
 import { WorldMap } from "../components/WorldMap";
 import { ClicksPanel } from "../components/ClicksPanel";
 import { CustomizeDrawer } from "../components/CustomizeDrawer";
@@ -163,6 +164,10 @@ export default function Home() {
   const [siteScope, setSiteScope] = useState<string[]>([]);
   useEffect(() => setSiteScope([]), [active?._id]);
 
+  // Narrowing the site scope swaps every number on the page, same as a
+  // workspace switch — cover it with the same transition.
+  const scopeSwitch = useSwitchOverlay(siteScope.join(",") || "all");
+
   const { stats, refresh, refreshing, lastUpdated } = useStats(
     active?._id,
     "24h",
@@ -298,6 +303,19 @@ export default function Home() {
 
   return (
     <AppShell>
+      {scopeSwitch.active && (
+        <SwitchOverlay
+          label={
+            siteScope.length === 0
+              ? "All sites"
+              : siteScope.length === 1
+              ? sites.find((s) => s.siteId === siteScope[0])?.name ?? "1 site"
+              : `${siteScope.length} sites`
+          }
+          sublabel="Updating overview"
+          onDone={scopeSwitch.dismiss}
+        />
+      )}
       <CustomizeDrawer
         opened={customizing}
         onClose={() => setCustomizing(false)}

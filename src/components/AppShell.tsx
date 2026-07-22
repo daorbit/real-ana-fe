@@ -17,6 +17,7 @@ import { notify, confirmLogout, errMessage } from "../notify";
 import { useWorkspace } from "../workspace";
 import { DemoToggle } from "./DemoToggle";
 import { useDemo } from "../demo";
+import { SwitchOverlay, useSwitchOverlay } from "./SwitchOverlay";
 
 /**
  * Grouped navigation.
@@ -99,6 +100,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const { demo } = useDemo();
 
+  // Switching workspace re-renders every panel with a different dataset at
+  // once. The overlay covers that swap; it never gates the fetch.
+  const wsSwitch = useSwitchOverlay(active?._id ?? null);
+
   // Mobile nav drawer. The navbar is a permanent rail on desktop and a
   // slide-over on phones — close it on every navigation so a tap on a link
   // doesn't leave the overlay covering the page it just opened.
@@ -126,6 +131,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
+    <>
+    {wsSwitch.active && active && (
+      <SwitchOverlay
+        label={active.name}
+        sublabel="Loading workspace analytics"
+        onDone={wsSwitch.dismiss}
+      />
+    )}
     <MantineShell
       header={{ height: { base: 56, sm: 0 } }}
       navbar={{
@@ -321,5 +334,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SupportWidget />
       </MantineShell.Main>
     </MantineShell>
+    </>
   );
 }
