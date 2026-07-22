@@ -2,6 +2,7 @@ import { Group, Text, Badge, Tooltip, Box } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useCountUp } from "../hooks/useCountUp";
 
 /**
  * The accent each metric's trend line is drawn in.
@@ -19,6 +20,18 @@ const ACCENT: Record<string, string> = {
   amber: "#f59e0b",
   pink: "#f472b6",
 };
+
+/**
+ * Numeric values count from their previous figure to the new one, so a metric
+ * that moved on a poll is visibly the one that moved. Pre-formatted strings
+ * ("2m 14s", "38%") render as-is — there is no number to interpolate.
+ */
+function StatValue({ value }: { value: number | string }) {
+  const numeric = typeof value === "number";
+  const counted = useCountUp(numeric ? value : 0);
+  if (!numeric) return <>{value}</>;
+  return <>{Math.round(counted).toLocaleString()}</>;
+}
 
 /** A rising bounce rate is bad, so some metrics invert the good/bad colouring. */
 function DeltaBadge({ delta, inverse }: { delta: number | null; inverse?: boolean }) {
@@ -101,9 +114,12 @@ export function StatCard({
             )}
           </Group>
           {live ? (
-            <Badge color="green" variant="dot" size="sm">
+            // A static dot says "this is the live metric"; a pulsing one says
+            // the number is still arriving. Same footprint, more information.
+            <span className="live-badge">
+              <span className="live-badge__dot" aria-hidden />
               live
-            </Badge>
+            </span>
           ) : delta !== undefined ? (
             <DeltaBadge delta={delta} inverse={inverseDelta} />
           ) : null}
@@ -120,7 +136,7 @@ export function StatCard({
             color: live ? accent : "var(--text)",
           }}
         >
-          {typeof value === "number" ? value.toLocaleString() : value}
+          <StatValue value={value} />
         </Text>
       </Box>
 

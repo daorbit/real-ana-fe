@@ -8,7 +8,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
-  Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2,
+  Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search,
 } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
@@ -18,6 +18,7 @@ import { useWorkspace } from "../workspace";
 import { DemoToggle } from "./DemoToggle";
 import { useDemo } from "../demo";
 import { SwitchOverlay, useSwitchOverlay } from "./SwitchOverlay";
+import { CommandPalette } from "./CommandPalette";
 
 /**
  * Grouped navigation.
@@ -132,6 +133,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
+    <CommandPalette />
     {wsSwitch.active && active && (
       <SwitchOverlay
         label={active.name}
@@ -191,6 +193,26 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
           </MantineShell.Section>
         )}
+
+        {/* The palette is keyboard-only, so it needs somewhere visible that
+            says it exists. Clicking dispatches the same shortcut. */}
+        <MantineShell.Section mb="md">
+          <UnstyledButton
+            className="tile"
+            style={{ display: "block", width: "100%", padding: "7px 10px" }}
+            onClick={() =>
+              window.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "k", ctrlKey: true })
+              )
+            }
+          >
+            <Group gap="xs" wrap="nowrap">
+              <Search size={15} style={{ color: "var(--muted)", flexShrink: 0 }} />
+              <Text size="sm" c="dimmed">Search</Text>
+              <kbd className="kbd" style={{ marginLeft: "auto" }}>Ctrl K</kbd>
+            </Group>
+          </UnstyledButton>
+        </MantineShell.Section>
 
         <MantineShell.Section grow component={ScrollArea}>
           {groups.map((group) => (
@@ -327,7 +349,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Alert>
           )}
 
-          {children}
+          {/* Keyed on the path so the entrance animation replays on every
+              navigation rather than only on first mount. */}
+          <div key={loc.pathname} className="route-fade">
+            {children}
+          </div>
         </div>
         {/* Clear the floating help button so page content never sits under it. */}
         <div style={{ height: 88 }} />

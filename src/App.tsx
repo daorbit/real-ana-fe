@@ -16,6 +16,7 @@ import Onboarding from "./pages/Onboarding";
 import PublicDashboard from "./pages/PublicDashboard";
 import { AppBootSkeleton } from "./components/Skeletons";
 import "./App.css";
+import "./polish.css";
 
 // While the session is being restored we don't yet know whether to show the app
 // or the login page, so hold on a neutral spinner rather than flashing either.

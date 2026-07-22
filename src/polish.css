@@ -1,0 +1,144 @@
+/* ---------------------------------------------------------------------------
+   Interaction polish
+
+   Small, shared behaviours that make the app feel responsive: the live
+   indicator, route transitions, and hover/focus feedback. Kept out of App.css
+   so component styling and interaction styling stay separable.
+   --------------------------------------------------------------------------- */
+
+/* ---- Live indicator -------------------------------------------------------
+   A pulsing dot reads as "still arriving", where a static dot only reads as a
+   label. Used wherever a number is polled rather than fetched once. */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  color: var(--violet-2);
+  background: color-mix(in srgb, var(--violet-2) 12%, transparent);
+  white-space: nowrap;
+}
+
+.live-badge__dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* The halo is a separate ring so the dot itself stays a crisp, fixed size. */
+.live-badge__dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0;
+  animation: live-pulse 1900ms cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+@keyframes live-pulse {
+  0%   { opacity: 0.7; transform: scale(0.6); }
+  70%  { opacity: 0;   transform: scale(1.7); }
+  100% { opacity: 0;   transform: scale(1.7); }
+}
+
+/* ---- Route transitions ----------------------------------------------------
+   Pages fade and lift a few pixels on entry. Short enough that navigation still
+   feels instant, long enough that the swap doesn't read as a flash. */
+.route-fade {
+  animation: route-in 280ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes route-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Panels ---------------------------------------------------------------
+   Panels lift slightly under the pointer, matching the stat tiles so the whole
+   grid responds the same way. Nested cards are excluded: a chart tooltip is
+   also a Card, and it must not shift out from under the cursor. */
+.mantine-Card-root:not(.mantine-Card-root .mantine-Card-root) {
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.mantine-Card-root:not(.mantine-Card-root .mantine-Card-root):hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* ---- Focus ----------------------------------------------------------------
+   Keyboard focus gets a visible accent ring everywhere. Pointer focus does not,
+   so clicking a control doesn't leave a ring behind. */
+:where(a, button, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--violet-2);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---- Command palette ------------------------------------------------------ */
+.cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--text-2);
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.cmdk-item[data-active="true"] {
+  background: color-mix(in srgb, var(--violet-2) 12%, transparent);
+  color: var(--text);
+}
+
+.cmdk-item__hint {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cmdk-section {
+  padding: 10px 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* A key cap, for the hint in the navbar and inside the palette. */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 5px;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-2);
+  background: var(--bg-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-fade,
+  .live-badge__dot::after { animation: none; }
+
+  .mantine-Card-root:hover,
+  .stat-card:hover,
+  .bar-row:hover { transform: none; }
+
+  .live-badge__dot::after { opacity: 0; }
+}
