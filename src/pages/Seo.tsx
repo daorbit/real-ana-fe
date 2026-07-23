@@ -265,12 +265,17 @@ export default function Seo() {
   const data = report?.data;
   const loading = analyzing || latestFetching || viewedFetching;
 
+  /** The site's bare hostname, shown as a fixed prefix on the path field. */
+  const domainLabel = useMemo(
+    () => (site ? site.domain.replace(/^https?:\/\//i, "").replace(/\/$/, "") : ""),
+    [site]
+  );
+
   const targetUrl = useMemo(() => {
-    if (!site) return "";
-    const domain = site.domain.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+    if (!domainLabel) return "";
     const suffix = path.startsWith("/") ? path : `/${path}`;
-    return `https://${domain}${suffix === "/" ? "" : suffix}`;
-  }, [site, path]);
+    return `https://${domainLabel}${suffix === "/" ? "" : suffix}`;
+  }, [domainLabel, path]);
 
   async function run(refresh: boolean) {
     if (!site) return;
@@ -370,36 +375,73 @@ export default function Seo() {
 
       <Stack gap="lg">
         <Card withBorder radius="md" padding="lg">
-          <Group gap="sm" align="flex-end" wrap="wrap">
+          {/* Labels sit on one baseline and the domain is a fixed prefix inside
+              the path field, so the thing being audited reads as one address
+              rather than three controls that happen to be adjacent. */}
+          <Group gap="md" align="flex-end" wrap="wrap">
             <Select
               label="Site"
               data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
               value={siteId}
               onChange={(v) => v && setSiteId(v)}
               allowDeselect={false}
-              w={{ base: "100%", sm: 220 }}
+              w={{ base: "100%", sm: 240 }}
               leftSection={<Globe size={15} />}
+              comboboxProps={{ radius: "md" }}
+              radius="md"
             />
-            <TextInput
-              label="Path"
-              description={site ? `Audits ${targetUrl}` : undefined}
-              value={path}
-              onChange={(e) => setPath(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === "Enter" && !analyzing && run(false)}
-              placeholder="/"
-              style={{ flex: "1 1 240px", minWidth: 200 }}
-            />
+
+            <Box style={{ flex: "1 1 320px", minWidth: 240 }}>
+              <Text component="label" htmlFor="seo-path" size="sm" fw={500} display="block" mb={4}>
+                Page to audit
+              </Text>
+              <TextInput
+                id="seo-path"
+                value={path}
+                onChange={(e) => setPath(e.currentTarget.value)}
+                onKeyDown={(e) => e.key === "Enter" && !analyzing && run(false)}
+                placeholder="/"
+                radius="md"
+                leftSectionWidth={domainLabel ? Math.min(260, domainLabel.length * 7.4 + 22) : 0}
+                leftSectionPointerEvents="none"
+                leftSection={
+                  domainLabel ? (
+                    <Text size="sm" c="dimmed" pl="sm" truncate style={{ maxWidth: 240 }}>
+                      {domainLabel}
+                    </Text>
+                  ) : undefined
+                }
+                styles={{ section: { justifyContent: "flex-start" } }}
+              />
+            </Box>
+
             <Button
               color="emerald"
               leftSection={<Search size={15} />}
               loading={analyzing}
               onClick={() => run(false)}
+              radius="md"
+              w={{ base: "100%", sm: "auto" }}
             >
               Analyze
             </Button>
           </Group>
+
+          {/* Spell out the URL that will actually be fetched, so a typo in the
+              path is visible before spending a minute on the audit. */}
+          {targetUrl && !analyzing && (
+            <Group gap={6} mt="sm" wrap="nowrap">
+              <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+                Audits
+              </Text>
+              <Text size="xs" c="dimmed" fw={500} truncate>
+                {targetUrl}
+              </Text>
+            </Group>
+          )}
+
           {analyzing && (
-            <Alert color="gray" variant="light" mt="md" icon={<Info size={15} />}>
+            <Alert color="gray" variant="light" mt="md" radius="md" icon={<Info size={15} />}>
               Running the Lighthouse audit through Google PageSpeed. This usually takes
               20-60 seconds.
             </Alert>
