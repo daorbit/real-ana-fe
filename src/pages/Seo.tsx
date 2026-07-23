@@ -6,7 +6,7 @@ import {
 import {
   Search, RefreshCw, Globe, History, Trash2, AlertTriangle, Sparkles, Info,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
-  TrendingUp, TrendingDown, Minus, Braces, Link2,
+  TrendingUp, TrendingDown, Minus, Braces, Link2, Swords,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
@@ -14,6 +14,8 @@ import { useWorkspace } from "../workspace";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
   useGetLatestSeoReportQuery, useGetSeoReportQuery, useDeleteSeoReportMutation,
+  useGetCompetitorsQuery, useAddCompetitorMutation, useRefreshCompetitorMutation,
+  useDeleteCompetitorMutation,
 } from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { timeAgo, dateTime } from "../utils";
@@ -21,6 +23,7 @@ import { scoreColor } from "../components/seo/ScoreRing";
 import { ScoreTrend } from "../components/seo/ScoreTrend";
 import { SchemaPanel } from "../components/seo/SchemaPanel";
 import { LinksPanel } from "../components/seo/LinksPanel";
+import { ComparePanel } from "../components/seo/ComparePanel";
 import {
   ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
 } from "../components/seo/SeoPanels";
@@ -33,6 +36,7 @@ const TABS = [
   { value: "technical", label: "Technical", icon: Wrench },
   { value: "links", label: "Links", icon: Link2 },
   { value: "schema", label: "Schema", icon: Braces },
+  { value: "compare", label: "Compare", icon: Swords },
   { value: "suggestions", label: "Suggestions", icon: Lightbulb },
   { value: "history", label: "History", icon: History },
 ] as const;
@@ -250,6 +254,48 @@ export default function Seo() {
 
   const [analyze, { isLoading: analyzing }] = useAnalyzeSeoMutation();
   const [deleteReport] = useDeleteSeoReportMutation();
+
+  const { data: competitors = [], isLoading: competitorsLoading } = useGetCompetitorsQuery(
+    { workspaceId, siteId },
+    { skip: !workspaceId || !siteId }
+  );
+  const [addCompetitor, { isLoading: addingCompetitor }] = useAddCompetitorMutation();
+  const [refreshCompetitor] = useRefreshCompetitorMutation();
+  const [deleteCompetitor] = useDeleteCompetitorMutation();
+
+  async function addCompetitorUrl(url: string) {
+    try {
+      await addCompetitor({ workspaceId, siteId, url }).unwrap();
+      notify.success("Competitor added");
+    } catch (e) {
+      notify.error(errMessage(e, "Could not fetch that URL"));
+    }
+  }
+
+  async function refreshOne(competitorId: string) {
+    try {
+      await refreshCompetitor({ workspaceId, siteId, competitorId }).unwrap();
+      notify.success("Competitor refreshed");
+    } catch (e) {
+      notify.error(errMessage(e, "Could not refresh that competitor"));
+    }
+  }
+
+  function removeCompetitor(competitorId: string) {
+    confirmDelete({
+      title: "Remove this competitor?",
+      body: "The stored comparison is deleted. You can add the URL again later.",
+      confirmLabel: "Remove",
+      onConfirm: async () => {
+        try {
+          await deleteCompetitor({ workspaceId, siteId, competitorId }).unwrap();
+          notify.success("Competitor removed");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not remove that competitor"));
+        }
+      },
+    });
+  }
 
   const { data: history = [], isLoading: historyLoading } = useGetSeoReportsQuery(
     { workspaceId, siteId },
@@ -587,6 +633,18 @@ export default function Seo() {
             )}
             {tab === "links" && <LinksPanel links={data.links} />}
             {tab === "schema" && <SchemaPanel schema={data.schema} />}
+            {tab === "compare" && (
+              <ComparePanel
+                data={data}
+                siteName={site?.name ?? "This site"}
+                competitors={competitors}
+                loading={competitorsLoading}
+                adding={addingCompetitor}
+                onAdd={addCompetitorUrl}
+                onRefresh={refreshOne}
+                onDelete={removeCompetitor}
+              />
+            )}
             {tab === "suggestions" && <SuggestionsPanel performance={data.performance} />}
             {tab === "history" && (
               <HistoryPanel

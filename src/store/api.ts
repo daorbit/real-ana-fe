@@ -6,7 +6,9 @@ import type {
 } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 import type { TrackerOptions } from "../utils/tracker";
-import type { ShareState, SharePanels, SeoReport, SeoReportSummary } from "../types";
+import type {
+  ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
+} from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -28,7 +30,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -353,6 +355,48 @@ export const api = createApi({
       }),
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
     }),
+
+    /* ----------------------------- competitors ---------------------------- */
+
+    getCompetitors: build.query<SeoCompetitor[], { workspaceId: string; siteId: string }>({
+      query: ({ workspaceId, siteId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
+    }),
+
+    addCompetitor: build.mutation<
+      SeoCompetitor,
+      { workspaceId: string; siteId: string; url: string; label?: string }
+    >({
+      query: ({ workspaceId, siteId, url, label }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors`,
+        method: "POST",
+        body: { url, label },
+      }),
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
+    }),
+
+    refreshCompetitor: build.mutation<
+      SeoCompetitor,
+      { workspaceId: string; siteId: string; competitorId: string }
+    >({
+      query: ({ workspaceId, siteId, competitorId }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/${competitorId}/refresh`,
+        method: "POST",
+      }),
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
+    }),
+
+    deleteCompetitor: build.mutation<
+      void,
+      { workspaceId: string; siteId: string; competitorId: string }
+    >({
+      query: ({ workspaceId, siteId, competitorId }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/${competitorId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
+    }),
   }),
 });
 
@@ -387,4 +431,8 @@ export const {
   useGetLatestSeoReportQuery,
   useGetSeoReportQuery,
   useDeleteSeoReportMutation,
+  useGetCompetitorsQuery,
+  useAddCompetitorMutation,
+  useRefreshCompetitorMutation,
+  useDeleteCompetitorMutation,
 } = api;

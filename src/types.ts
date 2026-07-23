@@ -576,3 +576,48 @@ export type SeoReport = {
 
 /** A history row: the same document with the heavy body left out. */
 export type SeoReportSummary = Omit<SeoReport, "data">;
+
+/** A competitor page snapshot, scored on on-page signals only. */
+export type SeoCompareSnapshot = {
+  url: string;
+  finalUrl: string;
+  fetchedAt: string;
+  statusCode: number;
+  responseTimeMs: number;
+  pageBytes: number;
+
+  title: string;
+  titleLength: number;
+  description: string;
+  descriptionLength: number;
+  canonical: string;
+
+  h1Count: number;
+  h2Count: number;
+  wordCount: number;
+  imageCount: number;
+  imagesMissingAlt: number;
+  internalLinks: number;
+  externalLinks: number;
+
+  hasHttps: boolean;
+  hasOpenGraph: boolean;
+  hasTwitterCards: boolean;
+  hasStructuredData: boolean;
+  schemaTypes: string[];
+  schemaErrors: number;
+
+  score: number;
+};
+
+export type SeoCompetitor = {
+  _id: string;
+  siteId: string;
+  label: string;
+  url: string;
+  snapshot: SeoCompareSnapshot | null;
+  lastCheckedAt: string | null;
+  /** Why the last fetch failed, when it did. Empty on success. */
+  lastError: string;
+  createdAt: string;
+};
