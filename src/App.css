@@ -1031,11 +1031,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--surface);
   box-shadow: inset 0 0 0 1px var(--border);
   overflow: hidden;
-  transition: box-shadow 0.16s ease, transform 0.16s ease;
+  transition: box-shadow 0.16s ease;
 }
 .seo-issue:hover {
   box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
-  transform: translateY(-1px);
 }
 .seo-issue::before {
   content: "";
@@ -1050,11 +1049,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: inset 0 0 0 1px var(--border);
-  transition: box-shadow 0.16s ease, transform 0.16s ease;
+  transition: box-shadow 0.16s ease;
 }
 .seo-tile:hover {
   box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
-  transform: translateY(-1px);
 }
 
 /* Tabs across the report. Same pill language as Analytics sections. */
@@ -1069,3 +1067,30 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   scrollbar-width: none;
 }
 .seo-tabbar::-webkit-scrollbar { display: none; }
+
+/* Image thumbnail in the SEO content table. The eye overlay only appears on
+   hover, so a column of thumbnails reads as images rather than as buttons. */
+.seo-thumb {
+  position: relative;
+  cursor: zoom-in;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--border);
+  background: var(--bg-2);
+  flex-shrink: 0;
+}
+.seo-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.seo-thumb:hover .seo-thumb-overlay,
+.seo-thumb:focus-visible .seo-thumb-overlay {
+  opacity: 1;
+}
