@@ -6,7 +6,7 @@ import {
 import {
   Search, RefreshCw, Globe, History, Trash2, AlertTriangle, Sparkles, Info,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
-  TrendingUp, TrendingDown, Minus,
+  TrendingUp, TrendingDown, Minus, Braces, Link2,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
@@ -18,6 +18,9 @@ import {
 import { notify, errMessage, confirmDelete } from "../notify";
 import { timeAgo, dateTime } from "../utils";
 import { scoreColor } from "../components/seo/ScoreRing";
+import { ScoreTrend } from "../components/seo/ScoreTrend";
+import { SchemaPanel } from "../components/seo/SchemaPanel";
+import { LinksPanel } from "../components/seo/LinksPanel";
 import {
   ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
 } from "../components/seo/SeoPanels";
@@ -28,6 +31,8 @@ const TABS = [
   { value: "meta", label: "Meta tags", icon: Tags },
   { value: "content", label: "Content", icon: FileText },
   { value: "technical", label: "Technical", icon: Wrench },
+  { value: "links", label: "Links", icon: Link2 },
+  { value: "schema", label: "Schema", icon: Braces },
   { value: "suggestions", label: "Suggestions", icon: Lightbulb },
   { value: "history", label: "History", icon: History },
 ] as const;
@@ -506,6 +511,13 @@ export default function Seo() {
               score={data.score}
               performance={data.performance}
               issues={data.issues}
+              trend={
+                <ScoreTrend
+                  history={history}
+                  url={report.url}
+                  onSelect={setViewingId}
+                />
+              }
             />
 
             <Box className="seo-tabbar">
@@ -517,6 +529,10 @@ export default function Seo() {
                     ? data.issues.length
                     : t.value === "suggestions"
                     ? data.performance.suggestions.length
+                    : t.value === "links"
+                    ? (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0)
+                    : t.value === "schema"
+                    ? data.schema?.errorCount ?? 0
                     : t.value === "history"
                     ? history.length
                     : 0;
@@ -569,6 +585,8 @@ export default function Seo() {
                 siteFiles={data.siteFiles}
               />
             )}
+            {tab === "links" && <LinksPanel links={data.links} />}
+            {tab === "schema" && <SchemaPanel schema={data.schema} />}
             {tab === "suggestions" && <SuggestionsPanel performance={data.performance} />}
             {tab === "history" && (
               <HistoryPanel

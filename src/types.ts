@@ -438,9 +438,102 @@ export type SeoPerformance = {
   suggestions: SeoSuggestion[];
 };
 
+/** One finding from the robots.txt or sitemap validator. */
+export type SeoFileFinding = {
+  severity: "critical" | "warning" | "info";
+  message: string;
+  /** 1-indexed line in robots.txt, where the finding came from one. */
+  line?: number;
+};
+
+export type SeoRobotsGroup = {
+  userAgents: string[];
+  allow: string[];
+  disallow: string[];
+  crawlDelay?: number;
+};
+
+export type SeoRobotsReport = {
+  present: boolean;
+  url: string;
+  content: string;
+  groups: SeoRobotsGroup[];
+  sitemaps: string[];
+  /** True when `User-agent: *` disallows the whole site. */
+  blocksEverything: boolean;
+  blocksAuditedUrl: boolean;
+  findings: SeoFileFinding[];
+};
+
+export type SeoSitemapReport = {
+  present: boolean;
+  urls: string[];
+  urlCount: number;
+  isIndex: boolean;
+  bytes: number;
+  findings: SeoFileFinding[];
+};
+
+/** One structured-data problem. Errors block rich results; warnings weaken them. */
+export type SeoSchemaFinding = {
+  severity: "error" | "warning";
+  type: string;
+  property?: string;
+  message: string;
+};
+
+export type SeoSchemaBlock = {
+  index: number;
+  types: string[];
+  valid: boolean;
+};
+
+export type SeoLinkStatus =
+  | "ok"
+  | "broken"
+  | "server-error"
+  | "redirect"
+  | "timeout"
+  | "blocked"
+  | "skipped";
+
+export type SeoLinkResult = {
+  url: string;
+  /** Visible anchor text, for locating the link on the page. */
+  text: string;
+  internal: boolean;
+  status: SeoLinkStatus;
+  statusCode: number | null;
+  /** Hops when the link redirected; empty otherwise. */
+  chain: string[];
+  elapsedMs: number;
+  note?: string;
+};
+
+export type SeoLinkCheck = {
+  checked: number;
+  skipped: number;
+  broken: number;
+  serverErrors: number;
+  redirects: number;
+  timeouts: number;
+  results: SeoLinkResult[];
+};
+
+export type SeoSchemaValidation = {
+  blocks: SeoSchemaBlock[];
+  types: string[];
+  findings: SeoSchemaFinding[];
+  errorCount: number;
+  warningCount: number;
+};
+
 export type SeoSiteFiles = {
   robotsTxt: { present: boolean; url: string };
   sitemap: { present: boolean; urls: string[] };
+  /** Full validation. Absent on reports stored before the validator shipped. */
+  robotsReport?: SeoRobotsReport;
+  sitemapReport?: SeoSitemapReport;
 };
 
 export type SeoIssue = {
@@ -460,6 +553,10 @@ export type SeoReportData = {
   technical: SeoTechnical;
   performance: SeoPerformance;
   siteFiles: SeoSiteFiles;
+  /** JSON-LD validation. Absent on reports stored before the validator shipped. */
+  schema?: SeoSchemaValidation;
+  /** Link check results. Absent on reports stored before the checker shipped. */
+  links?: SeoLinkCheck;
   issues: SeoIssue[];
   score: number;
 };

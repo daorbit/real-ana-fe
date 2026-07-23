@@ -16,6 +16,7 @@ import type {
 } from "../../types";
 import { num } from "../../utils";
 import { ScoreRing, scoreColor, scoreLabel } from "./ScoreRing";
+import { CrawlerFilesPanel } from "./SchemaPanel";
 
 /* --------------------------------- shared -------------------------------- */
 
@@ -186,10 +187,13 @@ export function ScorePanel({
   score,
   performance,
   issues,
+  trend,
 }: {
   score: number;
   performance: SeoPerformance;
   issues: SeoIssue[];
+  /** Score-over-time chart, when there is more than one run to compare. */
+  trend?: React.ReactNode;
 }) {
   const critical = issues.filter((i) => i.severity === "critical").length;
   const warnings = issues.filter((i) => i.severity === "warning").length;
@@ -224,6 +228,7 @@ export function ScorePanel({
                   </Badge>
                 )}
               </Group>
+              {trend && <Box w="100%">{trend}</Box>}
             </Stack>
           </Box>
 
@@ -1020,37 +1025,46 @@ export function TechnicalPanel({
             </Stack>
           </Panel>
 
-          <Panel
-            title="Crawler files"
-            description="How search engines discover the rest of the site."
-            icon={Bot}
-            color="indigo"
-          >
-            <Stack gap={0}>
-              <CheckRow
-                ok={siteFiles.robotsTxt.present}
-                label="robots.txt"
-                detail={siteFiles.robotsTxt.url}
-                icon={Bot}
-              />
-              <Divider />
-              <CheckRow
-                ok={siteFiles.sitemap.present}
-                label="Sitemap"
-                detail={siteFiles.sitemap.urls[0] ?? "Not referenced in robots.txt or at /sitemap.xml"}
-                icon={FileText}
-              />
-            </Stack>
-            {siteFiles.sitemap.urls.length > 1 && (
-              <Stack gap={2} mt="xs" pl={38}>
-                {siteFiles.sitemap.urls.slice(1).map((u) => (
-                  <Anchor key={u} href={u} target="_blank" size="xs" truncate>
-                    {u}
-                  </Anchor>
-                ))}
+          {/* Reports predating the validator only carry presence flags, so the
+              old two-tick view stays as the fallback for those. */}
+          {siteFiles.robotsReport || siteFiles.sitemapReport ? (
+            <CrawlerFilesPanel
+              robots={siteFiles.robotsReport}
+              sitemap={siteFiles.sitemapReport}
+            />
+          ) : (
+            <Panel
+              title="Crawler files"
+              description="How search engines discover the rest of the site."
+              icon={Bot}
+              color="indigo"
+            >
+              <Stack gap={0}>
+                <CheckRow
+                  ok={siteFiles.robotsTxt.present}
+                  label="robots.txt"
+                  detail={siteFiles.robotsTxt.url}
+                  icon={Bot}
+                />
+                <Divider />
+                <CheckRow
+                  ok={siteFiles.sitemap.present}
+                  label="Sitemap"
+                  detail={siteFiles.sitemap.urls[0] ?? "Not referenced in robots.txt or at /sitemap.xml"}
+                  icon={FileText}
+                />
               </Stack>
-            )}
-          </Panel>
+              {siteFiles.sitemap.urls.length > 1 && (
+                <Stack gap={2} mt="xs" pl={38}>
+                  {siteFiles.sitemap.urls.slice(1).map((u) => (
+                    <Anchor key={u} href={u} target="_blank" size="xs" truncate>
+                      {u}
+                    </Anchor>
+                  ))}
+                </Stack>
+              )}
+            </Panel>
+          )}
         </Stack>
       </SimpleGrid>
 
