@@ -1,0 +1,225 @@
+/*
+ * Print styles for the SEO report.
+ *
+ * Written for paper first: the screen view is simply the same document on a
+ * light background, so what you see before pressing print is what comes out.
+ * Colours are forced on with print-color-adjust because browsers strip
+ * backgrounds by default, and a report whose severity colours vanish is
+ * considerably less useful.
+ */
+
+.print-root {
+  --accent: #10b981;
+  background: #f3f4f6;
+  min-height: 100vh;
+  padding: 24px 16px 64px;
+  color: #111827;
+}
+
+.print-toolbar {
+  max-width: 820px;
+  margin: 0 auto 20px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.print-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ------------------------------- header -------------------------------- */
+
+.print-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--accent);
+}
+.print-brand {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.print-header h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+.print-url {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+  word-break: break-all;
+}
+
+.print-score {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 4px solid;
+}
+.print-score[data-band="good"] { border-color: #10b981; color: #047857; }
+.print-score[data-band="ok"]   { border-color: #f59e0b; color: #b45309; }
+.print-score[data-band="poor"] { border-color: #ef4444; color: #b91c1c; }
+.print-score-value { font-size: 30px; font-weight: 800; line-height: 1; }
+.print-score-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+.print-meta {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* ------------------------------ sections ------------------------------- */
+
+.print-section { margin-top: 32px; }
+.print-section h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.print-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.print-metric {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+.print-metric-value { font-size: 22px; font-weight: 750; line-height: 1.1; }
+.print-metric-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+/* Severity is carried by a coloured rail rather than a filled row, which
+   survives printing far better than a background wash. */
+.print-issues {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: issue;
+}
+.print-issues li {
+  position: relative;
+  padding: 10px 0 10px 16px;
+  border-left: 3px solid #d1d5db;
+  margin-bottom: 8px;
+  /* Never split an issue across a page break mid-sentence. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.print-issues li[data-tone="critical"] { border-left-color: #ef4444; }
+.print-issues li[data-tone="warning"]  { border-left-color: #f59e0b; }
+.print-issues li[data-tone="info"]     { border-left-color: #3b82f6; }
+.print-issues strong { display: block; font-size: 13px; margin-bottom: 2px; }
+.print-issues span { display: block; font-size: 12px; color: #4b5563; }
+
+.print-clean {
+  padding: 16px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  color: #065f46;
+  margin: 0;
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.print-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+  word-break: break-word;
+}
+.print-cell-label { width: 34%; font-weight: 600; color: #374151; }
+.print-check { font-weight: 700; }
+.print-check[data-ok="true"]  { color: #047857; }
+.print-check[data-ok="false"] { color: #b91c1c; }
+.print-note { color: #9ca3af; font-size: 11px; }
+
+.print-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* -------------------------------- print -------------------------------- */
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  .no-print { display: none !important; }
+
+  .print-root {
+    background: #fff;
+    padding: 0;
+  }
+  .print-page {
+    max-width: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 11pt;
+  }
+
+  /* Browsers drop backgrounds and borders when printing unless told not to,
+     which would strip every severity colour out of the report. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Start a fresh sheet where the document has a natural division. */
+  .print-break { break-before: page; page-break-before: always; }
+
+  .print-section { break-inside: auto; }
+  .print-section h2 { break-after: avoid; page-break-after: avoid; }
+
+  /* A table row split from its own content reads as corrupted output. */
+  .print-table tr { break-inside: avoid; page-break-inside: avoid; }
+
+  .print-header { break-after: avoid; }
+  .print-footer { break-before: avoid; }
+
+  /* Print the destination of a link, since a printed href is unclickable. */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #6b7280;
+  }
+}

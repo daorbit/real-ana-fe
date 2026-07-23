@@ -6,7 +6,7 @@ import {
 import {
   Search, RefreshCw, Globe, History, Trash2, AlertTriangle, Sparkles, Info,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
-  TrendingUp, TrendingDown, Minus, Braces, Link2, Swords,
+  TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
@@ -15,7 +15,8 @@ import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
   useGetLatestSeoReportQuery, useGetSeoReportQuery, useDeleteSeoReportMutation,
   useGetCompetitorsQuery, useAddCompetitorMutation, useRefreshCompetitorMutation,
-  useDeleteCompetitorMutation,
+  useDeleteCompetitorMutation, useGetSearchTrafficQuery, useGetFieldVitalsQuery,
+  useRunCrawlMutation, useGetLatestCrawlQuery,
 } from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { timeAgo, dateTime } from "../utils";
@@ -24,6 +25,9 @@ import { ScoreTrend } from "../components/seo/ScoreTrend";
 import { SchemaPanel } from "../components/seo/SchemaPanel";
 import { LinksPanel } from "../components/seo/LinksPanel";
 import { ComparePanel } from "../components/seo/ComparePanel";
+import { SearchPanel } from "../components/seo/SearchPanel";
+import { VitalsPanel } from "../components/seo/VitalsPanel";
+import { CrawlPanel } from "../components/seo/CrawlPanel";
 import {
   ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
 } from "../components/seo/SeoPanels";
@@ -36,6 +40,8 @@ const TABS = [
   { value: "technical", label: "Technical", icon: Wrench },
   { value: "links", label: "Links", icon: Link2 },
   { value: "schema", label: "Schema", icon: Braces },
+  { value: "crawl", label: "Crawl", icon: Layers },
+  { value: "search", label: "Search", icon: Search },
   { value: "compare", label: "Compare", icon: Swords },
   { value: "suggestions", label: "Suggestions", icon: Lightbulb },
   { value: "history", label: "History", icon: History },
@@ -259,6 +265,31 @@ export default function Seo() {
     { workspaceId, siteId },
     { skip: !workspaceId || !siteId }
   );
+  const { data: searchTraffic, isLoading: searchLoading } = useGetSearchTrafficQuery(
+    { workspaceId, siteId },
+    { skip: !workspaceId || !siteId }
+  );
+
+  const { data: fieldVitals } = useGetFieldVitalsQuery(
+    { workspaceId, siteId },
+    { skip: !workspaceId || !siteId }
+  );
+
+  const { data: crawlReport } = useGetLatestCrawlQuery(
+    { workspaceId, siteId },
+    { skip: !workspaceId || !siteId }
+  );
+  const [runCrawl, { isLoading: crawling }] = useRunCrawlMutation();
+
+  async function startCrawl() {
+    try {
+      await runCrawl({ workspaceId, siteId }).unwrap();
+      notify.success("Crawl complete");
+    } catch (e) {
+      notify.error(errMessage(e, "Crawl failed"));
+    }
+  }
+
   const [addCompetitor, { isLoading: addingCompetitor }] = useAddCompetitorMutation();
   const [refreshCompetitor] = useRefreshCompetitorMutation();
   const [deleteCompetitor] = useDeleteCompetitorMutation();
@@ -411,15 +442,26 @@ export default function Seo() {
         description="Audit a tracked site's meta tags, content, technical setup and Lighthouse scores."
         actions={
           report && (
-            <Button
-              variant="light"
-              color="emerald"
-              leftSection={<RefreshCw size={15} />}
-              loading={analyzing}
-              onClick={() => run(true)}
-            >
-              Re-run audit
-            </Button>
+            <Group gap="sm">
+              <Button
+                variant="default"
+                leftSection={<Printer size={15} />}
+                component="a"
+                href={`/app/seo/${siteId}/report/${report._id}/print`}
+                target="_blank"
+              >
+                Export report
+              </Button>
+              <Button
+                variant="light"
+                color="emerald"
+                leftSection={<RefreshCw size={15} />}
+                loading={analyzing}
+                onClick={() => run(true)}
+              >
+                Re-run audit
+              </Button>
+            </Group>
           )
         }
       />
@@ -629,10 +671,17 @@ export default function Seo() {
                 technical={data.technical}
                 performance={data.performance}
                 siteFiles={data.siteFiles}
+                vitals={<VitalsPanel vitals={fieldVitals} />}
               />
             )}
             {tab === "links" && <LinksPanel links={data.links} />}
             {tab === "schema" && <SchemaPanel schema={data.schema} />}
+            {tab === "crawl" && (
+              <CrawlPanel report={crawlReport} running={crawling} onCrawl={startCrawl} />
+            )}
+            {tab === "search" && (
+              <SearchPanel traffic={searchTraffic} loading={searchLoading} />
+            )}
             {tab === "compare" && (
               <ComparePanel
                 data={data}

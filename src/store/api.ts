@@ -8,6 +8,7 @@ import type { Placed } from "../hooks/useHomeWidgets";
 import type { TrackerOptions } from "../utils/tracker";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
+  SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -356,6 +357,38 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
     }),
 
+    getSearchTraffic: build.query<
+      SeoSearchTraffic,
+      { workspaceId: string; siteId: string; days?: number }
+    >({
+      query: ({ workspaceId, siteId, days = 30 }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/search-traffic?days=${days}`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: `search-${siteId}` }],
+    }),
+
+    getFieldVitals: build.query<
+      SeoFieldVitals,
+      { workspaceId: string; siteId: string; days?: number }
+    >({
+      query: ({ workspaceId, siteId, days = 30 }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/vitals?days=${days}`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: `vitals-${siteId}` }],
+    }),
+
+    runCrawl: build.mutation<SeoCrawlReport, { workspaceId: string; siteId: string }>({
+      query: ({ workspaceId, siteId }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/crawl`,
+        method: "POST",
+      }),
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: `crawl-${siteId}` }],
+    }),
+
+    getLatestCrawl: build.query<SeoCrawlReport, { workspaceId: string; siteId: string }>({
+      query: ({ workspaceId, siteId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/crawl/latest`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: `crawl-${siteId}` }],
+    }),
+
     /* ----------------------------- competitors ---------------------------- */
 
     getCompetitors: build.query<SeoCompetitor[], { workspaceId: string; siteId: string }>({
@@ -435,4 +468,8 @@ export const {
   useAddCompetitorMutation,
   useRefreshCompetitorMutation,
   useDeleteCompetitorMutation,
+  useGetSearchTrafficQuery,
+  useGetFieldVitalsQuery,
+  useRunCrawlMutation,
+  useGetLatestCrawlQuery,
 } = api;

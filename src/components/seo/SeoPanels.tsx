@@ -942,13 +942,17 @@ export function TechnicalPanel({
   technical,
   performance,
   siteFiles,
+  vitals,
 }: {
   technical: SeoTechnical;
   performance: SeoPerformance;
   siteFiles: SeoSiteFiles;
+  /** Real-user Core Web Vitals, shown beside the Lighthouse lab numbers. */
+  vitals?: React.ReactNode;
 }) {
   return (
     <Stack gap="lg">
+      {vitals}
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
         <Panel
           title="Page checks"

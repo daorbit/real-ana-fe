@@ -621,3 +621,99 @@ export type SeoCompetitor = {
   lastError: string;
   createdAt: string;
 };
+
+/** Organic search arrivals, derived from stored referrers. */
+export type SeoSearchTraffic = {
+  visits: number;
+  visitors: number;
+  /** All visits in the window, for computing organic share. */
+  totalVisits: number;
+  engines: { engine: string; visits: number; visitors: number }[];
+  landingPages: { path: string; visits: number; visitors: number }[];
+  /**
+   * Query terms actually present in referrers. Usually empty — Google and the
+   * other major engines stopped passing them in 2011.
+   */
+  terms: { term: string; visits: number }[];
+  hasTerms: boolean;
+  /** Window the figures cover. */
+  days: number;
+};
+
+export type SeoVitalKey = "lcp" | "cls" | "inp" | "fcp" | "ttfb";
+
+export type SeoVitalSummary = {
+  /** 75th percentile — the figure Google judges a page on. */
+  p75: number | null;
+  p50: number | null;
+  samples: number;
+  /** Share of samples in each Google band, as percentages. */
+  good: number;
+  needsImprovement: number;
+  poor: number;
+  rating: "good" | "needs-improvement" | "poor" | "none";
+};
+
+/** Core Web Vitals measured by real visitors (tracker v5+). */
+export type SeoFieldVitals = {
+  samples: number;
+  days: number;
+  metrics: Record<SeoVitalKey, SeoVitalSummary>;
+  byPage: { path: string; lcp: number | null; cls: number | null; samples: number }[];
+  /** What this site's script reports, for telling "too old" from "no traffic". */
+  trackerVersion: number;
+  requiredVersion: number;
+};
+
+/** One page as seen by a site-wide crawl. */
+export type SeoCrawlPage = {
+  url: string;
+  path: string;
+  statusCode: number;
+  title: string | null;
+  titleLength: number;
+  description: string;
+  descriptionLength: number;
+  h1Count: number;
+  wordCount: number;
+  canonical: string;
+  noindex: boolean;
+  internalLinks: number;
+  externalLinks: number;
+  imagesMissingAlt: number;
+  hasSchema: boolean;
+  responseTimeMs: number;
+  error?: string;
+};
+
+/** A problem visible only by comparing pages against each other. */
+export type SeoCrawlFinding = {
+  severity: "critical" | "warning" | "info";
+  title: string;
+  detail: string;
+  /** Paths exhibiting the problem, capped for display. */
+  pages: string[];
+};
+
+export type SeoCrawlData = {
+  startedAt: string;
+  finishedAt: string;
+  discovered: number;
+  crawled: number;
+  pages: SeoCrawlPage[];
+  findings: SeoCrawlFinding[];
+  score: number;
+};
+
+export type SeoCrawlReport = {
+  _id: string;
+  siteId: string;
+  origin: string;
+  score: number;
+  crawled: number;
+  discovered: number;
+  findingCount: number;
+  criticalCount: number;
+  data: SeoCrawlData;
+  createdAt: string;
+};

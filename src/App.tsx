@@ -8,6 +8,7 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import Analytics from "./pages/Analytics";
 import Seo from "./pages/Seo";
+import SeoReportPrint from "./pages/SeoReportPrint";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
 import Share from "./pages/Share";
@@ -100,6 +101,13 @@ export default function App() {
             <Route path="/app" element={<Protected><Home /></Protected>} />
             <Route path="/app/analytics" element={<Protected><Analytics /></Protected>} />
             <Route path="/app/seo" element={<Protected><Seo /></Protected>} />
+            {/* Print view: protected for the workspace context, but rendered
+                without the app shell — nothing in a client deliverable should
+                carry our navigation. */}
+            <Route
+              path="/app/seo/:siteId/report/:reportId/print"
+              element={<ProtectedRaw><SeoReportPrint /></ProtectedRaw>}
+            />
             <Route path="/app/workspaces" element={<Protected><Workspaces /></Protected>} />
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
