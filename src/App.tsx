@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import Analytics from "./pages/Analytics";
+import Seo from "./pages/Seo";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
 import Share from "./pages/Share";
@@ -98,6 +99,7 @@ export default function App() {
             <Route path="/app/onboarding" element={<ProtectedRaw><Onboarding /></ProtectedRaw>} />
             <Route path="/app" element={<Protected><Home /></Protected>} />
             <Route path="/app/analytics" element={<Protected><Analytics /></Protected>} />
+            <Route path="/app/seo" element={<Protected><Seo /></Protected>} />
             <Route path="/app/workspaces" element={<Protected><Workspaces /></Protected>} />
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />

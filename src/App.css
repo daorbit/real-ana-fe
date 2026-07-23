@@ -986,3 +986,86 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   cursor: not-allowed;
 }
 
+
+/* ============ SEO audit ============
+   The score band is the page's focal surface, so it earns the same gradient
+   treatment as the Home hero rather than sitting in a plain card. */
+.seo-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.02) 60%),
+    var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border), var(--shadow-sm);
+}
+/* A soft bloom behind the overall ring, so the hero number sits on something
+   rather than floating on a flat fill. */
+.seo-hero::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  left: -6%;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.16), transparent 68%);
+  pointer-events: none;
+}
+.seo-hero-inner { position: relative; z-index: 1; }
+
+/* Divider between the overall score and the Lighthouse categories beside it.
+   Horizontal once they stack on narrow screens. */
+.seo-hero-split { border-left: 1px solid var(--border); }
+@media (max-width: 62em) {
+  .seo-hero-split { border-left: 0; border-top: 1px solid var(--border); }
+}
+
+/* Issue row. The severity colour lives in a left rail rather than the whole
+   surface — a stack of ten tinted cards is noise, one tinted edge is a scan
+   path down the list. */
+.seo-issue {
+  position: relative;
+  padding-left: 4px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border);
+  overflow: hidden;
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
+}
+.seo-issue:hover {
+  box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.seo-issue::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--seo-rail, var(--border));
+}
+
+/* Compact metric tile used across the content and technical tabs. */
+.seo-tile {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px var(--border);
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
+}
+.seo-tile:hover {
+  box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* Tabs across the report. Same pill language as Analytics sections. */
+.seo-tabbar {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--bg-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.seo-tabbar::-webkit-scrollbar { display: none; }

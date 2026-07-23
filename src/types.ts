@@ -310,3 +310,172 @@ export type EventBucket = {
   /** Summed numeric `props.value` across fires — revenue attributed to this event. */
   revenue: number;
 };
+
+/* ---------------------------------- SEO ---------------------------------- */
+
+export type SeoMetaTag = { name: string; content: string };
+
+export type SeoMeta = {
+  title: string;
+  description: string;
+  keywords: string;
+  author: string;
+  robots: string;
+  viewport: string;
+  charset: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  ogUrl: string;
+  ogType: string;
+  ogSiteName: string;
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImage: string;
+  twitterCard: string;
+  twitterSite: string;
+  canonical: string;
+  favicon: string;
+  allMetaTags: SeoMetaTag[];
+};
+
+export type SeoImage = {
+  src: string;
+  alt: string;
+  title: string;
+  width: number | null;
+  height: number | null;
+  loading: string;
+  hasAlt: boolean;
+};
+
+export type SeoHeadingLevel = { level: number; count: number; texts: string[] };
+
+/** A term and how much of the page body it accounts for, as a percentage. */
+export type SeoKeyword = { word: string; count: number; density: number };
+
+export type SeoContent = {
+  h1Count: number;
+  h2Count: number;
+  h3Count: number;
+  imgCount: number;
+  linkCount: number;
+  wordCount: number;
+  hasSchema: boolean;
+  schemaTypes: string[];
+  internalLinks: number;
+  externalLinks: number;
+  headingStructure: SeoHeadingLevel[];
+  keywordDensity: SeoKeyword[];
+  /** Flesch Reading Ease, 0-100. Higher is easier to read. */
+  readabilityScore: number;
+  contentQuality: number;
+  images: SeoImage[];
+};
+
+export type SeoTechnical = {
+  statusCode: number;
+  contentType: string;
+  contentLength: string;
+  server: string;
+  hasHttps: boolean;
+  hasMobileViewport: boolean;
+  hasFavicon: boolean;
+  hasOpenGraph: boolean;
+  hasTwitterCards: boolean;
+  hasStructuredData: boolean;
+  totalImages: number;
+  imageAltCount: number;
+  missingAltImages: number;
+  responseTimeMs: number;
+};
+
+/** Lighthouse category scores, 0-100. Null when the audit did not run. */
+export type SeoScores = {
+  performance: number | null;
+  accessibility: number | null;
+  bestPractices: number | null;
+  seo: number | null;
+};
+
+/** Core Web Vitals and friends, in milliseconds (CLS is unitless). */
+export type SeoMetrics = {
+  firstContentfulPaint: number | null;
+  speedIndex: number | null;
+  largestContentfulPaint: number | null;
+  interactive: number | null;
+  totalBlockingTime: number | null;
+  cumulativeLayoutShift: number | null;
+};
+
+export type SeoStrategyResult = {
+  strategy: "mobile" | "desktop";
+  scores: SeoScores;
+  metrics: SeoMetrics;
+};
+
+export type SeoSuggestion = {
+  id: string;
+  title: string;
+  /** Lighthouse category the audit belongs to, e.g. "performance". */
+  category: string;
+  score: number;
+  displayValue: string | null;
+  description: string;
+  /** Plain-language fix, with estimated savings when Lighthouse reports them. */
+  advice: string;
+  /** Up to five offending URLs from the audit details. */
+  resources: string[];
+};
+
+export type SeoPerformance = {
+  available: boolean;
+  /** Why the Lighthouse run produced nothing, when it did not. */
+  note?: string;
+  scores: SeoScores;
+  desktop: SeoStrategyResult | null;
+  mobile: SeoStrategyResult | null;
+  suggestions: SeoSuggestion[];
+};
+
+export type SeoSiteFiles = {
+  robotsTxt: { present: boolean; url: string };
+  sitemap: { present: boolean; urls: string[] };
+};
+
+export type SeoIssue = {
+  severity: "critical" | "warning" | "info";
+  area: "meta" | "content" | "technical" | "files";
+  title: string;
+  detail: string;
+};
+
+/** The audit body itself, as produced by the server's SEO analyser. */
+export type SeoReportData = {
+  url: string;
+  /** Where the fetch landed after redirects. */
+  finalUrl: string;
+  meta: SeoMeta;
+  content: SeoContent;
+  technical: SeoTechnical;
+  performance: SeoPerformance;
+  siteFiles: SeoSiteFiles;
+  issues: SeoIssue[];
+  score: number;
+};
+
+/** A stored report. History rows omit `data`. */
+export type SeoReport = {
+  _id: string;
+  siteId: string;
+  url: string;
+  score: number;
+  scores: SeoScores;
+  issueCount: number;
+  criticalCount: number;
+  data?: SeoReportData;
+  createdAt: string;
+};
+
+/** A history row: the same document with the heavy body left out. */
+export type SeoReportSummary = Omit<SeoReport, "data">;

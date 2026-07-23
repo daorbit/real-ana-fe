@@ -33,6 +33,7 @@ const NAV_GROUPS = [
     items: [
       { to: "/app", label: "Home", icon: Home },
       { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
+      { to: "/app/seo", label: "SEO", icon: Search },
     ],
   },
   {

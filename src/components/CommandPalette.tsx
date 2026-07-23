@@ -70,6 +70,7 @@ export function CommandPalette() {
     const pages: Command[] = [
       { id: "home", label: "Home", section: "Go to", icon: Home, run: go("/app") },
       { id: "analytics", label: "Analytics", section: "Go to", icon: BarChart3, run: go("/app/analytics") },
+      { id: "seo", label: "SEO", section: "Go to", icon: Search, run: go("/app/seo") },
       { id: "workspaces", label: "Workspaces", section: "Go to", icon: FolderKanban, run: go("/app/workspaces") },
       { id: "share", label: "Public dashboard", section: "Go to", icon: Share2, run: go("/app/share") },
       { id: "developers", label: "Developers", section: "Go to", icon: Code2, run: go("/app/developers") },
