@@ -30,6 +30,7 @@ import { Heatmap } from "../components/Heatmap";
 import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
 import { OutboundPanel, ErrorsPanel } from "../components/OutboundErrorsPanels";
 import { GoalsPanel } from "../components/GoalsPanel";
+import { SeoScoreCard } from "../components/seo/SeoScoreCard";
 import { SortableWidget, WidgetDragPreview } from "../components/SortableWidget";
 import { Onboarding } from "../components/Onboarding";
 import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
@@ -298,6 +299,20 @@ export default function Home() {
     if (id === "outbound") return <OutboundPanel items={stats?.outboundClicks ?? []} />;
     if (id === "errors") return <ErrorsPanel items={stats?.errors ?? []} />;
     if (id === "goals") return <GoalsPanel workspaceId={active._id} goals={stats?.goals ?? []} />;
+    if (id === "seoScore") {
+      // Audits are per-site, so pin the card to one: the site the user has
+      // filtered to when that's a single site, otherwise the first in the list.
+      const seoSite =
+        (siteScope.length === 1 && sites.find((s) => s.siteId === siteScope[0])) ||
+        sites[0];
+      return (
+        <SeoScoreCard
+          workspaceId={active._id}
+          siteId={seoSite?.siteId ?? ""}
+          siteName={sites.length > 1 ? seoSite?.name : undefined}
+        />
+      );
+    }
     return null;
   };
 

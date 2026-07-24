@@ -41,6 +41,7 @@ export const WIDGETS = [
   { id: "clicks", label: "CTA clicks", description: "Which buttons get clicked, and where", group: "Charts", kind: "list", defaultSpan: 2 },
   // 24 hours across 7 days needs the room — anything narrower is unreadable.
   { id: "heatmap", label: "Traffic heatmap", description: "When your visitors show up", group: "Charts", kind: "chart", defaultSpan: 4 },
+  { id: "seoScore", label: "SEO health", description: "Latest audit score for your site", group: "Charts", kind: "chart", defaultSpan: 2 },
 
   // --- breakdowns --------------------------------------------------------
   { id: "topPages", label: "Top pages", description: "Most viewed pages", group: "Breakdowns", kind: "list", defaultSpan: 1 },
