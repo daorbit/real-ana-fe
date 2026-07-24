@@ -9,6 +9,7 @@ import type { TrackerOptions } from "../utils/tracker";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
+  SeoShareState, SeoSharePanels, PublicSeoReport,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -357,6 +358,41 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
     }),
 
+    /* --------------------------- per-report sharing ---------------------- */
+    getSeoShare: build.query<
+      SeoShareState,
+      { workspaceId: string; siteId: string; reportId: string }
+    >({
+      query: ({ workspaceId, siteId, reportId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/reports/${reportId}/share`,
+      providesTags: (_r, _e, { reportId }) => [{ type: "Seo", id: `share-${reportId}` }],
+    }),
+
+    setSeoShare: build.mutation<
+      SeoShareState,
+      {
+        workspaceId: string;
+        siteId: string;
+        reportId: string;
+        enabled: boolean;
+        rotate?: boolean;
+        panels?: SeoSharePanels;
+      }
+    >({
+      query: ({ workspaceId, siteId, reportId, enabled, rotate, panels }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/reports/${reportId}/share`,
+        method: "PUT",
+        body: { enabled, rotate, panels },
+      }),
+      invalidatesTags: (_r, _e, { reportId }) => [{ type: "Seo", id: `share-${reportId}` }],
+    }),
+
+    /** The public read-only view — unauthenticated, token is the whole credential. */
+    getPublicSeoReport: build.query<PublicSeoReport, { token: string; count?: boolean }>({
+      query: ({ token, count }) =>
+        `/api/public/seo/${token}${count ? "?count=1" : ""}`,
+    }),
+
     getSearchTraffic: build.query<
       SeoSearchTraffic,
       { workspaceId: string; siteId: string; days?: number }
@@ -464,6 +500,9 @@ export const {
   useGetLatestSeoReportQuery,
   useGetSeoReportQuery,
   useDeleteSeoReportMutation,
+  useGetSeoShareQuery,
+  useSetSeoShareMutation,
+  useGetPublicSeoReportQuery,
   useGetCompetitorsQuery,
   useAddCompetitorMutation,
   useRefreshCompetitorMutation,

@@ -7,7 +7,7 @@ import {
 import {
   Search, RefreshCw, Globe, History, Trash2, AlertTriangle, Sparkles, Info,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
-  TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
+  TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer, Share2,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
@@ -29,6 +29,7 @@ import { ComparePanel } from "../components/seo/ComparePanel";
 import { SearchPanel } from "../components/seo/SearchPanel";
 import { VitalsPanel } from "../components/seo/VitalsPanel";
 import { CrawlPanel } from "../components/seo/CrawlPanel";
+import { SeoShareModal } from "../components/seo/SeoShareModal";
 import {
   ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
 } from "../components/seo/SeoPanels";
@@ -240,6 +241,7 @@ export default function Seo() {
   const [tab, setTab] = useState<TabValue>("overview");
   /** Set when the user opens an older report from history. */
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const site = sites.find((s) => s.siteId === siteId) ?? null;
 
@@ -446,6 +448,13 @@ export default function Seo() {
             <Group gap="sm">
               <Button
                 variant="default"
+                leftSection={<Share2 size={15} />}
+                onClick={() => setShareOpen(true)}
+              >
+                Share
+              </Button>
+              <Button
+                variant="default"
                 leftSection={<Printer size={15} />}
                 component="a"
                 href={`/app/seo/${siteId}/report/${report._id}/print`}
@@ -466,6 +475,16 @@ export default function Seo() {
           )
         }
       />
+
+      {report && (
+        <SeoShareModal
+          opened={shareOpen}
+          onClose={() => setShareOpen(false)}
+          workspaceId={workspaceId}
+          siteId={siteId}
+          reportId={report._id}
+        />
+      )}
 
       <Stack gap="lg">
         <Card withBorder radius="md" padding="lg">

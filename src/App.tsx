@@ -16,6 +16,7 @@ import Impersonate from "./pages/Impersonate";
 import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
 import PublicDashboard from "./pages/PublicDashboard";
+import PublicSeoReport from "./pages/PublicSeoReport";
 import { AppBootSkeleton } from "./components/Skeletons";
 import "./App.css";
 import "./polish.css";
@@ -95,6 +96,9 @@ export default function App() {
                 a signed-in user following a shared link should see the shared
                 view, not be bounced to their own dashboard. */}
             <Route path="/share/:token" element={<PublicDashboard />} />
+            {/* Public, read-only SEO audit shared per report. Same no-auth,
+                token-in-path model as the shared dashboard. */}
+            <Route path="/seo-report/:token" element={<PublicSeoReport />} />
             {/* First-run setup. Protected for the workspace context, but renders
                 without the app shell — a new account has nothing to navigate. */}
             <Route path="/app/onboarding" element={<ProtectedRaw><Onboarding /></ProtectedRaw>} />

@@ -574,6 +574,54 @@ export type SeoReport = {
   createdAt: string;
 };
 
+/**
+ * Which sections of an audit an owner has chosen to publish. Anything off is
+ * stripped server-side, so it never reaches the public page at all.
+ */
+export type SeoSharePanels = {
+  /** Score band + Lighthouse category rings. */
+  summary: boolean;
+  issues: boolean;
+  technical: boolean;
+  /** Full performance metrics + opportunity list. */
+  performance: boolean;
+  meta: boolean;
+  content: boolean;
+  links: boolean;
+  schema: boolean;
+};
+
+/** Per-report share state, returned by the owner-facing share endpoints. */
+export type SeoShareState = {
+  enabled: boolean;
+  token: string | null;
+  panels: SeoSharePanels;
+  /** Times the public link has been opened. Resets when the link is rotated. */
+  views: number;
+  lastViewedAt: string | null;
+};
+
+/**
+ * The public, read-only shape of a shared audit. Sections the owner did not
+ * publish arrive as null/empty — the server omits them, they are not merely
+ * hidden here.
+ */
+export type PublicSeoReport = {
+  url: string;
+  finalUrl: string;
+  score: number;
+  createdAt: string;
+  panels: SeoSharePanels;
+  performance: SeoPerformance | null;
+  issues: SeoIssue[];
+  meta: SeoMeta | null;
+  content: SeoContent | null;
+  technical: SeoTechnical | null;
+  siteFiles: SeoSiteFiles | null;
+  links: SeoLinkCheck | null;
+  schema: SeoSchemaValidation | null;
+};
+
 /** A history row: the same document with the heavy body left out. */
 export type SeoReportSummary = Omit<SeoReport, "data">;
 
