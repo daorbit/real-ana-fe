@@ -60,10 +60,11 @@ export function ScoreRing({
         label={
           <Stack gap={0} align="center">
             <Text
+              className={hero ? "seo-hero-figure" : undefined}
               ta="center"
-              fw={800}
+              fw={hero ? 700 : 750}
               lh={1}
-              fz={hero ? 34 : 20}
+              fz={hero ? 40 : 21}
               style={{ letterSpacing: "-0.03em" }}
             >
               {score ?? "—"}

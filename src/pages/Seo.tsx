@@ -567,7 +567,7 @@ export default function Seo() {
         )}
 
         {data && report && (
-          <>
+          <Stack className="seo-report" gap="lg">
             <Group justify="space-between" wrap="wrap" gap="xs">
               <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
                 <Anchor
@@ -704,7 +704,7 @@ export default function Seo() {
                 onDelete={remove}
               />
             )}
-          </>
+          </Stack>
         )}
       </Stack>
       <Box h="xl" />

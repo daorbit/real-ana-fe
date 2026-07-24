@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Alert, Anchor, Badge, Box, Button, Card, Center, Group, ScrollArea, SimpleGrid,
+  Alert, Anchor, Badge, Box, Card, Center, ScrollArea, SimpleGrid,
   Stack, Table, Text, ThemeIcon, Tooltip,
 } from "@mantine/core";
 import {
@@ -144,14 +144,24 @@ export function LinksPanel({ links }: { links?: SeoLinkCheck }) {
       )}
 
       <Card withBorder radius="md" padding={0}>
-        <Group gap={6} p="md" wrap="wrap">
-          <FilterChip active={filter === "problems"} onClick={() => setFilter("problems")}>
-            Problems ({problems.length})
-          </FilterChip>
-          <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>
-            All ({links.results.length})
-          </FilterChip>
-        </Group>
+        <Box p="md">
+          <Box className="seo-segment">
+            <button
+              type="button"
+              data-active={filter === "problems" || undefined}
+              onClick={() => setFilter("problems")}
+            >
+              Problems ({problems.length})
+            </button>
+            <button
+              type="button"
+              data-active={filter === "all" || undefined}
+              onClick={() => setFilter("all")}
+            >
+              All ({links.results.length})
+            </button>
+          </Box>
+        </Box>
 
         {shown.length ? (
           <ScrollArea>
@@ -266,27 +276,5 @@ function Tile({
         {label}
       </Text>
     </Box>
-  );
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Button
-      size="xs"
-      radius="md"
-      variant={active ? "filled" : "light"}
-      color={active ? "emerald" : "gray"}
-      onClick={onClick}
-    >
-      {children}
-    </Button>
   );
 }

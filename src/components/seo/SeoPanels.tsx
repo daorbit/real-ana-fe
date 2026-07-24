@@ -212,7 +212,10 @@ export function ScorePanel({
         <Group gap={0} align="stretch" wrap="wrap">
           <Box p="xl" style={{ flex: "1 1 260px", minWidth: 240 }}>
             <Stack align="center" gap="md">
-              <ScoreRing label="Overall score" score={score} size={168} hero />
+              <Text className="seo-eyebrow" ta="center">
+                Audit summary
+              </Text>
+              <ScoreRing label="Overall score" score={score} size={172} hero />
               <Group gap={6} justify="center">
                 {critical > 0 && (
                   <Badge size="sm" variant="light" color="red">
@@ -241,9 +244,7 @@ export function ScorePanel({
 
           <Box className="seo-hero-split" p="xl" style={{ flex: "2 1 420px", minWidth: 280 }}>
             <Group justify="space-between" mb="lg" wrap="nowrap">
-              <Text size="xs" fw={650} c="dimmed" tt="uppercase" style={{ letterSpacing: "0.06em" }}>
-                Lighthouse
-              </Text>
+              <Text className="seo-eyebrow">Lighthouse categories</Text>
               {/* Old reports predate the Lighthouse integration and stored no
                   scores. Say that plainly instead of leaving four blank rings. */}
               {!performance.available && (

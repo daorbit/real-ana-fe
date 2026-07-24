@@ -988,16 +988,78 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 /* ============ SEO audit ============
-   The score band is the page's focal surface, so it earns the same gradient
+   Tuned as a premium report surface: quieter borders, layered shadows, a
+   display face on the numbers, and an eight-point spacing rhythm. Every token
+   is scoped to `.seo-report` so nothing here leaks into the rest of the app.
+   Panels inherit these, so all eleven tabs lift together. */
+.seo-report {
+  /* Softer, warmer surfaces than the app default — reads as paper, not chrome. */
+  --seo-radius: 14px;
+  --seo-radius-sm: 10px;
+  --seo-gap: 20px;
+  --seo-display: "Space Grotesk", "Inter", sans-serif;
+
+  /* A two-layer shadow: a tight contact shadow plus a soft ambient one. This is
+     the single biggest lever on "cheap flat card" vs "considered surface". */
+  --seo-elev: 0 1px 2px rgba(0, 0, 0, 0.28), 0 6px 20px -10px rgba(0, 0, 0, 0.45);
+  --seo-elev-hover: 0 1px 2px rgba(0, 0, 0, 0.3), 0 14px 34px -14px rgba(0, 0, 0, 0.55);
+  /* A crisp, visible card edge. On a near-black background a faded hairline
+     disappears and panels blur together, so this is a solid border tone, not a
+     translucent one. */
+  --seo-hairline: var(--border-strong);
+}
+[data-mantine-color-scheme="light"] .seo-report {
+  --seo-elev: 0 1px 2px rgba(16, 24, 40, 0.06), 0 10px 28px -14px rgba(16, 24, 40, 0.12);
+  --seo-elev-hover: 0 1px 3px rgba(16, 24, 40, 0.09), 0 18px 40px -16px rgba(16, 24, 40, 0.18);
+  --seo-hairline: var(--border);
+}
+
+/* Every Mantine Card inside the report picks up the elevated treatment, so the
+   whole page reads as one system without touching each panel's JSX. The surface
+   fill is set explicitly and the ring kept crisp, so each panel is a distinct
+   readable card rather than floating on the page background. */
+.seo-report .mantine-Card-root {
+  border-radius: var(--seo-radius) !important;
+  border: 1px solid var(--seo-hairline) !important;
+  background: var(--surface);
+  box-shadow: var(--seo-elev);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+/* Display face + tabular figures on the big numbers, so score columns line up
+   and headline figures feel typeset rather than default-bold. */
+.seo-report .seo-tile > *:nth-child(2),
+.seo-report .seo-serp-title,
+.seo-hero .seo-hero-figure {
+  font-family: var(--seo-display);
+  font-feature-settings: "tnum" 1, "cv01" 1;
+}
+
+/* ---- score band -------------------------------------------------------- */
+/* The score band is the page's focal surface, so it earns the same gradient
    treatment as the Home hero rather than sitting in a plain card. */
 .seo-hero {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: var(--seo-radius, var(--radius));
+  /* A restrained accent wash — a whisper of emerald at the top-left corner over
+     a near-flat surface, not a saturated gradient. Premium reads as confident,
+     not loud. */
   background:
-    linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.02) 60%),
+    radial-gradient(120% 140% at 0% 0%, rgba(16, 185, 129, 0.10), transparent 46%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 100%, transparent), var(--surface)),
     var(--surface);
-  box-shadow: inset 0 0 0 1px var(--border), var(--shadow-sm);
+  box-shadow: inset 0 0 0 1px var(--seo-hairline, var(--border)), var(--seo-elev, var(--shadow-sm));
+}
+/* A hairline top edge in the accent — the kind of detail that signals care. */
+.seo-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--violet-2), transparent 60%);
+  opacity: 0.7;
+  pointer-events: none;
 }
 /* A soft bloom behind the overall ring, so the hero number sits on something
    rather than floating on a flat fill. */
@@ -1006,19 +1068,30 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   position: absolute;
   top: -40%;
   left: -6%;
-  width: 320px;
-  height: 320px;
+  width: 340px;
+  height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.16), transparent 68%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12), transparent 68%);
   pointer-events: none;
 }
 .seo-hero-inner { position: relative; z-index: 1; }
+.seo-hero .seo-hero-figure { letter-spacing: -0.04em; }
 
 /* Divider between the overall score and the Lighthouse categories beside it.
    Horizontal once they stack on narrow screens. */
-.seo-hero-split { border-left: 1px solid var(--border); }
+.seo-hero-split { border-left: 1px solid var(--seo-hairline, var(--border)); }
 @media (max-width: 62em) {
-  .seo-hero-split { border-left: 0; border-top: 1px solid var(--border); }
+  .seo-hero-split { border-left: 0; border-top: 1px solid var(--seo-hairline, var(--border)); }
+}
+
+/* Small uppercase eyebrow used above panel groups and hero sections — a
+   report-like label device that adds structure without shouting. */
+.seo-eyebrow {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* Issue row. The severity colour lives in a left rail rather than the whole
@@ -1028,14 +1101,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .seo-issue {
   position: relative;
   padding-left: 6px;
-  border-radius: var(--radius);
+  border-radius: var(--seo-radius-sm, var(--radius));
   background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--border);
+  box-shadow: inset 0 0 0 1px var(--seo-hairline, var(--border));
   overflow: hidden;
-  transition: box-shadow 0.16s ease, transform 0.16s ease;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 .seo-issue:hover {
-  box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
+  box-shadow: inset 0 0 0 1px var(--border-strong), var(--seo-elev, var(--shadow-sm));
 }
 .seo-issue::before {
   content: "";
@@ -1055,13 +1128,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 42%),
     var(--surface);
-  border-radius: var(--radius);
-  box-shadow: inset 0 0 0 1px var(--border);
-  transition: box-shadow 0.16s ease, transform 0.16s ease;
+  border-radius: var(--seo-radius-sm, var(--radius));
+  box-shadow: inset 0 0 0 1px var(--seo-hairline, var(--border));
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 .seo-tile:hover {
-  transform: translateY(-1px);
-  box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px var(--border-strong), var(--seo-elev-hover, var(--shadow-sm));
 }
 [data-mantine-color-scheme="light"] .seo-tile {
   background: var(--surface);
@@ -1109,7 +1182,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .seo-tab:hover .seo-tab-icon { opacity: 1; }
 .seo-tab[data-active] {
   color: var(--text);
+  font-weight: 650;
   border-bottom-color: var(--violet-2);
+  box-shadow: 0 8px 16px -12px var(--violet-2);
 }
 .seo-tab[data-active] .seo-tab-icon { opacity: 1; color: var(--violet-2); }
 .seo-tab:focus-visible {
@@ -1152,7 +1227,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    before; a full-bleed rule under the header gives every tab the same clean
    split between "what this is" and the data. */
 .seo-panel-head {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--seo-hairline, var(--border));
   margin-left: calc(var(--mantine-spacing-lg) * -1);
   margin-right: calc(var(--mantine-spacing-lg) * -1);
   padding-left: var(--mantine-spacing-lg);
@@ -1189,6 +1264,54 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .seo-serp-title:hover { text-decoration: underline; }
 [data-mantine-color-scheme="light"] .seo-serp-title { color: #1a0dab; }
+
+/* Report tables read as a data grid: quiet uppercase headers on a faint bar,
+   hairline row rules, and a comfortable header height. Applied across every
+   tab's table at once. */
+.seo-report table thead th {
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted) !important;
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  border-bottom: 1px solid var(--seo-hairline) !important;
+  padding-top: 11px !important;
+  padding-bottom: 11px !important;
+}
+.seo-report table tbody td {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 75%, transparent) !important;
+}
+.seo-report table tbody tr:last-child td { border-bottom: 0 !important; }
+
+/* A quiet segmented control for in-panel filters — one recessed track with a
+   raised active segment, in place of a row of coloured buttons. */
+.seo-segment {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--seo-hairline, var(--border));
+}
+.seo-segment > button {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 550;
+  border-radius: 7px;
+  color: var(--text-2);
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.seo-segment > button:hover { color: var(--text); }
+.seo-segment > button[data-active] {
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--seo-elev, var(--shadow-sm));
+}
 
 /* Image thumbnail in the SEO content table. The eye overlay only appears on
    hover, so a column of thumbnails reads as images rather than as buttons. */
