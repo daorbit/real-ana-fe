@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Alert, Menu,
-  UnstyledButton, Tooltip, Burger, ThemeIcon, Text,
+  UnstyledButton, Tooltip, Burger, ThemeIcon,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
