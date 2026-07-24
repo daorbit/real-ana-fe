@@ -1,5 +1,5 @@
 import type {
-  Workspace, Site, Goal, ApiKey, ShareState, SeoReport, SeoReportData,
+  Workspace, Site, Goal, ApiKey, ShareState, SeoReport,
   SeoReportSummary, SeoCrawlReport, SeoCrawlPage, SeoSearchTraffic, SeoFieldVitals,
   SeoCompetitor, SeoShareState,
 } from "../types";
@@ -97,7 +97,7 @@ const metaTags = [
   { name: "theme-color", content: "#10b981" },
 ];
 
-const demoSeoData: SeoReportData = {
+const demoSeoData: any = {
   url: "https://acme.example/",
   finalUrl: "https://acme.example/",
   score: 88,
