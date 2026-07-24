@@ -27,11 +27,17 @@
   --amber: #f59e0b;
   --pink: #f472b6;
   --cyan: #22d3ee;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.35);
-  --shadow: 0 12px 32px -12px rgba(0,0,0,0.5);
+  /* Rounder, more generous corners — the biggest single cue that separates a
+     considered B2B dashboard from a default one. */
+  --radius: 16px;
+  --radius-sm: 11px;
+  --radius-lg: 20px;
+  /* Layered elevation: a tight contact shadow plus a soft ambient bloom, so a
+     card reads as a raised surface rather than a bordered box. */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 4px 14px -8px rgba(0,0,0,0.5);
+  --shadow: 0 2px 6px rgba(0,0,0,0.35), 0 20px 48px -20px rgba(0,0,0,0.6);
   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
 }
 
 [data-mantine-color-scheme="light"] {
@@ -50,8 +56,8 @@
   --accent: #059669;
   --accent-2: #047857;
   --accent-soft: rgba(5, 150, 105, 0.09);
-  --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
-  --shadow: 0 10px 28px -12px rgba(16,24,40,0.14);
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.04), 0 6px 16px -10px rgba(16,24,40,0.10);
+  --shadow: 0 2px 6px rgba(16,24,40,0.05), 0 18px 40px -18px rgba(16,24,40,0.16);
 }
 
 * { box-sizing: border-box; }
@@ -84,9 +90,13 @@ body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased;
   --mantine-color-default-hover: #22252c;
   --mantine-color-default-border: #2b2f38;
 }
+/* Cards sit a step *above* the page, not below it: a raised near-black surface
+   on the darker body reads as an elevated panel, the way the reference dark
+   dashboard layers its cards. Pure black made every card a hole in the page. */
 [data-mantine-color-scheme="dark"] .mantine-Card-root {
-  background: #000;
-  border-color: #2b2f38;
+  background: #16181d;
+  border-color: #262a32;
+  box-shadow: var(--shadow-sm);
 }
 
 /* thin scrollbars */
@@ -310,7 +320,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   position: relative;
   z-index: 1;
 }
-.hero-figure { font-size: 56px; }
+.hero-figure {
+  font-family: var(--font-display);
+  font-size: 56px;
+  letter-spacing: -0.035em;
+  font-feature-settings: "tnum" 1;
+}
 /* Shrink the hero band on phones — 40px pad and a 56px number leave almost no
    room for the totals beside them. */
 @media (max-width: 48em) {
@@ -336,7 +351,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     var(--shadow);
   transform: translateY(-1px);
 }
-.stat-card-value { font-size: 30px; }
+.stat-card-value {
+  font-family: var(--font-display);
+  font-size: 30px;
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum" 1;
+}
 /* Phones: tighter pad and a smaller headline number so a 2-up row of tiles
    isn't all whitespace and giant digits. */
 @media (max-width: 48em) {
@@ -365,23 +385,26 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .nav-link {
   position: relative;
   border-radius: var(--radius-sm);
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 .nav-link:hover {
   background: var(--surface-2);
 }
+/* Active item is a soft filled pill with a whisper of elevation — the reference
+   dashboard's selected-nav treatment, quieter than a hard accent bar. */
 .nav-link[data-active="true"] {
   background: var(--accent-soft);
   color: var(--text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 22%, transparent);
 }
 .nav-link[data-active="true"]::before {
   content: "";
   position: absolute;
-  left: 0;
-  top: 20%;
-  bottom: 20%;
-  width: 2.5px;
-  border-radius: 0 3px 3px 0;
+  left: 4px;
+  top: 26%;
+  bottom: 26%;
+  width: 3px;
+  border-radius: 3px;
   background: var(--violet-2);
 }
 
@@ -994,8 +1017,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    Panels inherit these, so all eleven tabs lift together. */
 .seo-report {
   /* Softer, warmer surfaces than the app default — reads as paper, not chrome. */
-  --seo-radius: 14px;
-  --seo-radius-sm: 10px;
+  --seo-radius: 16px;
+  --seo-radius-sm: 11px;
   --seo-gap: 20px;
   --seo-display: "Space Grotesk", "Inter", sans-serif;
 
