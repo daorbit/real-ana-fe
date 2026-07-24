@@ -27,7 +27,10 @@ export default function Login() {
     setError(null);
     try {
       await startDemo();
-      notify.success("You're exploring Quantalog with sample data.", "Demo mode");
+      // No toast here: the app boots straight into a loading overlay, so a
+      // notification would land on top of it and read as an error. The sidebar
+      // carries a persistent "Demo mode" card, which is the better place to say
+      // it anyway — it's still there a minute later.
       nav("/app");
     } catch (err) {
       const e = err as ApiError;

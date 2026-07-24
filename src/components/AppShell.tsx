@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Alert, Menu,
-  UnstyledButton, Tooltip, Burger, ThemeIcon,
+  UnstyledButton, Tooltip, Burger,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -239,35 +239,24 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* Read-only demo session. A persistent card, not a toast, because it
               explains why every action is disabled — and it's the way out. */}
           {isDemo && (
-            <Box className="demo-card" mb="sm">
-              <Group gap={8} wrap="nowrap" mb={6}>
-                <ThemeIcon size={22} radius="md" variant="light" color="emerald">
-                  <PlayCircle size={13} />
-                </ThemeIcon>
-                <Text size="xs" fw={700}>Demo mode</Text>
+            <Box className="demo-card" mb="xs">
+              <Group gap={6} wrap="nowrap" mb={4}>
+                <PlayCircle size={12} style={{ color: "var(--violet-2)", flexShrink: 0 }} />
+                <Text size="xs" fw={650}>Demo mode</Text>
               </Group>
-              <Text size="xs" c="dimmed" lh={1.45} mb="xs">
-                You're exploring with sample data. Creating, editing and deleting
-                are turned off.
+              <Text size="xs" c="dimmed" lh={1.4}>
+                Sample data. Changes are turned off.
               </Text>
-              <Button
-                size="compact-sm"
-                variant="light"
-                color="emerald"
-                fullWidth
-                leftSection={<LogOut size={13} />}
-                onClick={() => {
-                  logout();
-                  notify.info("You've left the demo.");
-                }}
+              <UnstyledButton
+                className="demo-exit"
+                onClick={logout}
               >
+                <LogOut size={11} />
                 Exit demo
-              </Button>
+              </UnstyledButton>
             </Box>
           )}
 
-          {/* Docs, theme and the demo-data switch sit together as low-frequency
-              utilities, so they don't compete with the primary nav above. */}
           <Group gap={4} mb="xs" px={2}>
             <Tooltip label="Documentation" withArrow>
               <ActionIcon
