@@ -8,8 +8,11 @@ import {
   Search, RefreshCw, Globe, History, Trash2, Sparkles, Info,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer, Share2,
+  HelpCircle,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { HelpDrawer } from "../components/HelpDrawer";
+import { SEO_HELP } from "../components/seo/help";
 import { PageHeader } from "../components/Page";
 import { useWorkspace } from "../workspace";
 import {
@@ -241,6 +244,7 @@ export default function Seo() {
   /** Set when the user opens an older report from history. */
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const site = sites.find((s) => s.siteId === siteId) ?? null;
 
@@ -656,7 +660,29 @@ export default function Seo() {
                   );
                 })}
               </Box>
+              {/* Help for the current tab. Opens the shared drawer selected to
+                  whatever tab you're on, so the relevant explanation is already
+                  on screen. */}
+              <Tooltip label="What this tab shows" withArrow position="left">
+                <ActionIcon
+                  className="seo-tab-help"
+                  variant="subtle"
+                  color="gray"
+                  onClick={() => setHelpOpen(true)}
+                  aria-label="Help for this tab"
+                >
+                  <HelpCircle size={17} />
+                </ActionIcon>
+              </Tooltip>
             </Box>
+
+            <HelpDrawer
+              opened={helpOpen}
+              onClose={() => setHelpOpen(false)}
+              title="SEO report help"
+              sections={SEO_HELP}
+              initialId={tab}
+            />
 
             {tab === "overview" && (
               <OverviewPanel

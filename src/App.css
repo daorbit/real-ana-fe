@@ -1232,6 +1232,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   position: sticky;
   top: 0;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0 calc(var(--radius) * -1);
   padding: 0 var(--radius);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -1244,8 +1247,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   gap: 2px;
   overflow-x: auto;
   scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
 }
 .seo-tabbar-track::-webkit-scrollbar { display: none; }
+
+/* The per-tab help trigger, pinned to the right of the tab strip. */
+.seo-tab-help { flex-shrink: 0; }
 
 .seo-tab {
   position: relative;
@@ -1423,3 +1431,74 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .seo-thumb:focus-visible .seo-thumb-overlay {
   opacity: 1;
 }
+
+/* ============ Help drawer ============
+   A right-side drawer: a section nav on the left, the selected section's help
+   on the right. Reused from any page that passes it a set of help sections. */
+.help-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.help-drawer-head {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.help-drawer-close {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 14px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.help-drawer-close:hover { background: var(--surface-2); color: var(--text); }
+
+.help-drawer-body {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+@media (max-width: 34em) {
+  .help-drawer-body { grid-template-columns: 132px 1fr; }
+}
+
+.help-nav {
+  border-right: 1px solid var(--border);
+  padding: 10px;
+  overflow-y: auto;
+  background: var(--bg-2);
+}
+.help-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 2px;
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.help-nav-item:hover { background: var(--surface-2); color: var(--text); }
+.help-nav-item[data-active] {
+  background: var(--accent-soft);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 22%, transparent);
+}
+.help-nav-ic { flex-shrink: 0; opacity: 0.6; }
+.help-nav-item[data-active] .help-nav-ic { opacity: 1; color: var(--violet-2); }
+
+.help-pane { min-width: 0; }
+
+/* A section's items read as a definition list — the "tooltip", written out. */
+.help-items { display: flex; flex-direction: column; }
+.help-item {
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.help-item:first-child { padding-top: 0; border-top: 0; }
