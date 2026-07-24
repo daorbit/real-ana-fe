@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getToken } from "../api";
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { getToken, isDemoToken } from "../api";
+import { notify } from "../notify";
 import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
@@ -22,16 +24,39 @@ const BASE = import.meta.env.VITE_API_BASE ?? "";
  * pages no longer refires the same calls. Data only goes stale when a poll
  * fires, a mutation invalidates its tag, or the user hits Refresh.
  */
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: BASE,
+  prepareHeaders: (headers) => {
+    const token = getToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return headers;
+  },
+});
+
+
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = (
+  args,
+  apiArg,
+  extra
+) => {
+  const method = typeof args === "string" ? "GET" : args.method ?? "GET";
+  const url = typeof args === "string" ? args : args.url;
+  const isWrite = method.toUpperCase() !== "GET";
+  // The funnel endpoint is a POST that only computes and returns — no write —
+  // so it stays available in the demo. Everything else that mutates is blocked.
+  const computeOnly = /\/funnel$/.test(url);
+  if (isWrite && !computeOnly && isDemoToken()) {
+    notify.info("You're in demo mode — changes are turned off here.", "Read-only demo");
+    return Promise.resolve({
+      error: { status: 403, data: { error: "demo mode is read-only" } } as FetchBaseQueryError,
+    });
+  }
+  return rawBaseQuery(args, apiArg, extra);
+};
+
 export const api = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({
-    baseUrl: BASE,
-    prepareHeaders: (headers) => {
-      const token = getToken();
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery,
   tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,

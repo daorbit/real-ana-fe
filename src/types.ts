@@ -19,6 +19,8 @@ export type User = {
   role: Role;
   /** True when this session is an admin acting as someone else. */
   impersonating?: boolean;
+  /** True on the read-only public demo session. */
+  demo?: boolean;
 };
 
 /** Fields the settings form can change. Email and role are not among them. */

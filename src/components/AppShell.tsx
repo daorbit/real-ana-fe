@@ -3,12 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Alert, Menu,
-  UnstyledButton, Tooltip, Burger,
+  UnstyledButton, Tooltip, Burger, ThemeIcon, Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
-  Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search,
+  Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle,
 } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
@@ -86,7 +86,7 @@ function NavItem({
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, logout, exitImpersonation } = useAuth();
+  const { user, logout, exitImpersonation, isDemo } = useAuth();
   const { workspaces, active, setActive } = useWorkspace();
   const { setColorScheme } = useMantineColorScheme();
   const scheme = useComputedColorScheme("light");
@@ -233,6 +233,36 @@ export function AppShell({ children }: { children: ReactNode }) {
         </MantineShell.Section>
 
         <MantineShell.Section>
+          {/* Read-only demo session. A persistent card, not a toast, because it
+              explains why every action is disabled — and it's the way out. */}
+          {isDemo && (
+            <Box className="demo-card" mb="sm">
+              <Group gap={8} wrap="nowrap" mb={6}>
+                <ThemeIcon size={22} radius="md" variant="light" color="emerald">
+                  <PlayCircle size={13} />
+                </ThemeIcon>
+                <Text size="xs" fw={700}>Demo mode</Text>
+              </Group>
+              <Text size="xs" c="dimmed" lh={1.45} mb="xs">
+                You're exploring with sample data. Creating, editing and deleting
+                are turned off.
+              </Text>
+              <Button
+                size="compact-sm"
+                variant="light"
+                color="emerald"
+                fullWidth
+                leftSection={<LogOut size={13} />}
+                onClick={() => {
+                  logout();
+                  notify.info("You've left the demo.");
+                }}
+              >
+                Exit demo
+              </Button>
+            </Box>
+          )}
+
           {/* Docs, theme and the demo-data switch sit together as low-frequency
               utilities, so they don't compete with the primary nav above. */}
           <Group gap={4} mb="xs" px={2}>

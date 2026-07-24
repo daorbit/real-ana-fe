@@ -1502,3 +1502,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-top: 1px solid var(--border);
 }
 .help-item:first-child { padding-top: 0; border-top: 0; }
+
+/* Demo-session card in the sidebar. A soft emerald panel — present enough to
+   explain why actions are disabled, quiet enough not to nag. */
+.demo-card {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 24%, transparent);
+}

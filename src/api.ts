@@ -39,6 +39,17 @@ export function isImpersonating(): boolean {
   return localStorage.getItem(ADMIN_TOKEN_KEY) !== null;
 }
 
+export function isDemoToken(): boolean {
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1] ?? ""));
+    return payload?.demo === true;
+  } catch {
+    return false;
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const res = await fetch(`${BASE}${path}`, {

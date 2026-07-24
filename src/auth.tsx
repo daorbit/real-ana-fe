@@ -12,12 +12,12 @@ import type { ProfileUpdate, User } from "./types";
 type AuthState = {
   user: User | null;
   loading: boolean;
+  isDemo: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
+  startDemo: () => Promise<void>;
   logout: () => void;
-  /** Save profile fields and fold the result back into the session. */
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
-  /** Admin only: act as another user until `exitImpersonation`. */
   impersonate: (userId: string) => Promise<void>;
   exitImpersonation: () => Promise<void>;
 };
@@ -56,6 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Start from a clean cache so nothing from a previous session leaks through.
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
+  };
+
+  const startDemo = async () => {
+    const r = await api.post<AuthResp>("/api/auth/demo", {});
+    setToken(r.token);
+    dispatch(rtkApi.util.resetApiState());
+    localStorage.removeItem("rta_active_ws");
+    setUser({ ...r.user, demo: true });
   };
 
   const signup = async (email: string, password: string, name: string) => {
@@ -107,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, signup, logout, updateProfile, impersonate, exitImpersonation }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, signup, startDemo, logout, updateProfile, impersonate, exitImpersonation }}
     >
       {children}
     </AuthContext.Provider>

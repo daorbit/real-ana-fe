@@ -3,20 +3,36 @@ import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor,
+  TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Divider,
 } from "@mantine/core";
+import { PlayCircle } from "lucide-react";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
 import { notify, errMessage } from "../notify";
 import * as v from "../utils/validate";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, startDemo } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
+
+  const enterDemo = async () => {
+    setDemoBusy(true);
+    setError(null);
+    try {
+      await startDemo();
+      notify.success("You're exploring Quantalog with sample data.", "Demo mode");
+      nav("/app");
+    } catch (err) {
+      setError(errMessage(err, "Could not start the demo. Try again in a moment."));
+    } finally {
+      setDemoBusy(false);
+    }
+  };
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const errors = {
@@ -105,6 +121,19 @@ export default function Login() {
 
             <Button type="submit" loading={busy} fullWidth size="md">
               Log in
+            </Button>
+
+            <Divider label="or" labelPosition="center" my={2} />
+
+            <Button
+              variant="default"
+              fullWidth
+              size="md"
+              leftSection={<PlayCircle size={17} />}
+              loading={demoBusy}
+              onClick={enterDemo}
+            >
+              Explore the live demo
             </Button>
 
             <Text c="dimmed" size="sm" ta="center">
