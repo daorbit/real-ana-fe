@@ -3,20 +3,22 @@ import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Group,
+  TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Group, Divider,
 } from "@mantine/core";
+import { PlayCircle } from "lucide-react";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
 import { PasswordStrength } from "../components/PasswordStrength";
 import { notify, errMessage } from "../notify";
+import { timeUntil } from "../utils";
+import type { ApiError } from "../api";
 import * as v from "../utils/validate";
 
 type Touched = Record<string, boolean>;
 
 export default function Signup() {
-  const { signup } = useAuth();
+  const { signup, startDemo } = useAuth();
   const nav = useNavigate();
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,6 +26,30 @@ export default function Signup() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
+
+  const enterDemo = async () => {
+    setDemoBusy(true);
+    setError(null);
+    try {
+      await startDemo();
+      nav("/app");
+    } catch (err) {
+      const e = err as ApiError;
+      // The demo is capped per address per day. Say when it frees up rather
+      // than leaving "try again later" to be guessed at.
+      if (e?.status === 429) {
+        const retryAt = e.body?.retryAt ? new Date(String(e.body.retryAt)) : null;
+        setError(
+          retryAt ? `${e.message} You can start another demo ${timeUntil(retryAt)}.` : e.message
+        );
+      } else {
+        setError(errMessage(err, "Could not start the demo. Try again in a moment."));
+      }
+    } finally {
+      setDemoBusy(false);
+    }
+  };
 
   // A field shows its error only once it has been left or the form submitted —
   // validating as someone types their first character is just nagging.
@@ -172,6 +198,21 @@ export default function Signup() {
 
             <Button type="submit" loading={busy} fullWidth size="md">
               Create account
+            </Button>
+
+            <Divider label="or" labelPosition="center" my={2} />
+
+            {/* Some people want to see the product before handing over an email.
+                The demo needs neither, so offer it rather than lose them. */}
+            <Button
+              variant="default"
+              fullWidth
+              size="md"
+              leftSection={<PlayCircle size={17} />}
+              loading={demoBusy}
+              onClick={enterDemo}
+            >
+              Explore the live demo
             </Button>
 
             <Text c="dimmed" size="sm" ta="center">
