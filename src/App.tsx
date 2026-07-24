@@ -13,6 +13,7 @@ import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
 import Share from "./pages/Share";
 import Impersonate from "./pages/Impersonate";
+import DemoUsage from "./pages/DemoUsage";
 import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
 import PublicDashboard from "./pages/PublicDashboard";
@@ -118,6 +119,7 @@ export default function App() {
             <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
             {/* Admin-only, enforced by the page and by every /api/admin route. */}
             <Route path="/app/impersonate" element={<Protected><Impersonate /></Protected>} />
+            <Route path="/app/demo-usage" element={<Protected><DemoUsage /></Protected>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

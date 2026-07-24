@@ -1,5 +1,5 @@
 export {
-  num, compact, duration, ratio, share, timeAgo, shortDate, dateTime, setDatePrefs,
+  num, compact, duration, ratio, share, timeAgo, timeUntil, shortDate, dateTime, setDatePrefs,
 } from "./format";
 export { countryName, countryLabel, countryFlag } from "./countries";
 export { trackingSnippet, trackingSnippetPretty } from "./tracker";

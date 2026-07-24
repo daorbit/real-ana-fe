@@ -50,6 +50,12 @@ export function isDemoToken(): boolean {
   }
 }
 
+/** An error from the API, carrying the HTTP status and parsed body. */
+export type ApiError = Error & {
+  status?: number;
+  body?: Record<string, unknown> | null;
+};
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
@@ -62,13 +68,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
   if (!res.ok) {
     let msg = `HTTP ${res.status}`;
+    let body: Record<string, unknown> | null = null;
     try {
-      const body = await res.json();
-      if (body?.error) msg = body.error;
+      body = await res.json();
+      if (body?.error) msg = String(body.error);
     } catch {
       /* ignore */
     }
-    throw new Error(msg);
+    // Carry the status and payload on the error so callers that need more than
+    // a message — a rate limit's retry time, say — can read it without
+    // re-parsing a response that has already been consumed.
+    const err = new Error(msg) as ApiError;
+    err.status = res.status;
+    err.body = body;
+    throw err;
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;

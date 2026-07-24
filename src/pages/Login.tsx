@@ -9,6 +9,8 @@ import { PlayCircle } from "lucide-react";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
 import { notify, errMessage } from "../notify";
+import { timeUntil } from "../utils";
+import type { ApiError } from "../api";
 import * as v from "../utils/validate";
 
 export default function Login() {
@@ -28,7 +30,19 @@ export default function Login() {
       notify.success("You're exploring Quantalog with sample data.", "Demo mode");
       nav("/app");
     } catch (err) {
-      setError(errMessage(err, "Could not start the demo. Try again in a moment."));
+      const e = err as ApiError;
+      // The demo is capped per address per day. Say when it frees up rather
+      // than leaving "try again later" to be guessed at.
+      if (e?.status === 429) {
+        const retryAt = e.body?.retryAt ? new Date(String(e.body.retryAt)) : null;
+        setError(
+          retryAt
+            ? `${e.message} You can start another demo ${timeUntil(retryAt)}.`
+            : e.message
+        );
+      } else {
+        setError(errMessage(err, "Could not start the demo. Try again in a moment."));
+      }
     } finally {
       setDemoBusy(false);
     }

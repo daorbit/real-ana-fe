@@ -56,6 +56,25 @@ export type ShareState = {
   lastViewedAt: string | null;
 };
 
+/**
+ * Admin view of how the public demo is being used.
+ *
+ * A live snapshot of the server's in-process throttle — nothing about demo
+ * visitors is stored, so the counters reset when the server restarts.
+ */
+export type DemoUsage = {
+  /** Sessions one address may start per day before being refused. */
+  limit: number;
+  /** Demo starts in the last 24 hours, across all addresses. */
+  today: number;
+  /** Distinct addresses with a start in the last 24 hours. */
+  activeIps: number;
+  startedSinceBoot: number;
+  blockedSinceBoot: number;
+  /** When the counters last reset (server start). */
+  since: string;
+};
+
 /** A row in the admin's user switcher. */
 export type AdminUser = {
   id: string;

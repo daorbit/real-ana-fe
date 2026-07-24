@@ -47,7 +47,10 @@ const NAV_GROUPS = [
 ];
 
 /** Only an admin sees these, and only when not already acting as someone else. */
-const ADMIN_ITEMS = [{ to: "/app/impersonate", label: "View as user", icon: Users }];
+const ADMIN_ITEMS = [
+  { to: "/app/impersonate", label: "View as user", icon: Users },
+  { to: "/app/demo-usage", label: "Demo usage", icon: PlayCircle },
+];
 
 function NavItem({
   to,

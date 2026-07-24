@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { getToken, isDemoToken } from "../api";
 import { notify } from "../notify";
+import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
@@ -12,6 +13,7 @@ import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
+  DemoUsage,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -42,22 +44,30 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   const method = typeof args === "string" ? "GET" : args.method ?? "GET";
   const url = typeof args === "string" ? args : args.url;
   const isWrite = method.toUpperCase() !== "GET";
-  // The funnel endpoint is a POST that only computes and returns — no write —
-  // so it stays available in the demo. Everything else that mutates is blocked.
-  const computeOnly = /\/funnel$/.test(url);
-  if (isWrite && !computeOnly && isDemoToken()) {
-    notify.info("You're in demo mode — changes are turned off here.", "Read-only demo");
-    return Promise.resolve({
-      error: { status: 403, data: { error: "demo mode is read-only" } } as FetchBaseQueryError,
-    });
+
+  if (isDemoToken()) {
+    // A demo session is served entirely from generated fixtures. Nothing goes
+    // to the server: browsing the product costs no queries, and there is no
+    // real account behind the numbers to protect.
+    if (isWrite) {
+      notify.info("You're in demo mode — changes are turned off here.", "Read-only demo");
+      return Promise.resolve({
+        error: { status: 403, data: { error: "demo mode is read-only" } } as FetchBaseQueryError,
+      });
+    }
+    const data = resolveDemoRequest(url);
+    // An unmapped read resolves empty rather than falling through to the
+    // network — a demo must never be the reason a request goes out.
+    return Promise.resolve({ data: data ?? null });
   }
+
   return rawBaseQuery(args, apiArg, extra);
 };
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -270,6 +280,17 @@ export const api = createApi({
     deleteAdminUser: build.mutation<{ ok: true }, string>({
       query: (userId) => ({ url: `/api/admin/users/${userId}`, method: "DELETE" }),
       invalidatesTags: ["AdminUser"],
+    }),
+
+    /* ----------------------------- demo usage ----------------------------- */
+    getDemoUsage: build.query<DemoUsage, void>({
+      query: () => "/api/admin/demo/usage",
+      providesTags: ["DemoUsage"],
+    }),
+
+    setDemoLimit: build.mutation<{ limit: number }, number>({
+      query: (limit) => ({ url: "/api/admin/demo/limit", method: "PUT", body: { limit } }),
+      invalidatesTags: ["DemoUsage"],
     }),
 
     /* -------------------------------- goals ------------------------------- */
@@ -528,6 +549,8 @@ export const {
   useGetSeoShareQuery,
   useSetSeoShareMutation,
   useGetPublicSeoReportQuery,
+  useGetDemoUsageQuery,
+  useSetDemoLimitMutation,
   useGetCompetitorsQuery,
   useAddCompetitorMutation,
   useRefreshCompetitorMutation,

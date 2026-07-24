@@ -49,6 +49,20 @@ export function timeAgo(d: Date | string | null): string {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+/** A future Date -> "in a moment" / "in 4 minutes" / "in about 3 hours" */
+export function timeUntil(d: Date | string | null): string {
+  if (!d) return "later";
+  const date = typeof d === "string" ? new Date(d) : d;
+  const s = Math.floor((date.getTime() - Date.now()) / 1000);
+  if (s <= 60) return "in a moment";
+  const m = Math.round(s / 60);
+  if (m < 60) return `in ${m} minute${m === 1 ? "" : "s"}`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `in about ${h} hour${h === 1 ? "" : "s"}`;
+  const days = Math.round(h / 24);
+  return `in about ${days} day${days === 1 ? "" : "s"}`;
+}
+
 /**
  * The signed-in user's date preferences.
  *
