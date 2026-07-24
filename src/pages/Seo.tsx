@@ -5,7 +5,7 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import {
-  Search, RefreshCw, Globe, History, Trash2, AlertTriangle, Sparkles, Info,
+  Search, RefreshCw, Globe, History, Trash2, Sparkles, Info,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer, Share2,
 } from "lucide-react";
@@ -22,7 +22,6 @@ import {
 import { notify, errMessage, confirmDelete } from "../notify";
 import { timeAgo, dateTime } from "../utils";
 import { scoreColor } from "../components/seo/ScoreRing";
-import { ScoreTrend } from "../components/seo/ScoreTrend";
 import { SchemaPanel } from "../components/seo/SchemaPanel";
 import { LinksPanel } from "../components/seo/LinksPanel";
 import { ComparePanel } from "../components/seo/ComparePanel";
@@ -31,7 +30,7 @@ import { VitalsPanel } from "../components/seo/VitalsPanel";
 import { CrawlPanel } from "../components/seo/CrawlPanel";
 import { SeoShareModal } from "../components/seo/SeoShareModal";
 import {
-  ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
+  OverviewPanel, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
 } from "../components/seo/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "../types";
 
@@ -615,19 +614,6 @@ export default function Seo() {
               </Tooltip>
             </Group>
 
-            <ScorePanel
-              score={data.score}
-              performance={data.performance}
-              issues={data.issues}
-              trend={
-                <ScoreTrend
-                  history={history}
-                  url={report.url}
-                  onSelect={setViewingId}
-                />
-              }
-            />
-
             <Box className="seo-tabbar">
               <Box className="seo-tabbar-track">
                 {TABS.map((t) => {
@@ -673,15 +659,17 @@ export default function Seo() {
             </Box>
 
             {tab === "overview" && (
-              <Stack gap="md">
-                {data.issues.some((i) => i.severity === "critical") && (
-                  <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-                    {data.issues.filter((i) => i.severity === "critical").length} critical
-                    issue(s) are holding this page back. Fix those first.
-                  </Alert>
-                )}
-                <IssueList issues={data.issues} />
-              </Stack>
+              <OverviewPanel
+                data={{
+                  score: data.score,
+                  performance: data.performance,
+                  issues: data.issues,
+                  content: data.content,
+                  technical: data.technical,
+                  siteFiles: data.siteFiles,
+                }}
+                history={history}
+              />
             )}
             {tab === "meta" && <MetaPanel meta={data.meta} url={data.finalUrl} />}
             {tab === "content" && <ContentPanel content={data.content} />}

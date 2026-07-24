@@ -264,12 +264,21 @@ function Tile({
   color: string;
   onClick: () => void;
 }) {
+  // Count colours are a status signal here (broken=red, working=teal), so they
+  // stay — but a zero is not a problem, so it reads neutral regardless of tone.
+  const live = value > 0 ? color : "gray";
   return (
     <Box className="seo-tile" p="md" onClick={onClick} style={{ cursor: "pointer" }}>
-      <ThemeIcon size={30} radius="md" variant="light" color={color} mb="sm">
-        <Icon size={15} />
+      <ThemeIcon size={28} radius="md" variant="light" color={live} mb="sm">
+        <Icon size={14} />
       </ThemeIcon>
-      <Text fz={26} fw={750} lh={1.1} style={{ letterSpacing: "-0.03em" }}>
+      <Text
+        fz={26}
+        fw={700}
+        lh={1.1}
+        c={value > 0 && color !== "gray" ? `${color}.5` : undefined}
+        style={{ letterSpacing: "-0.03em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}
+      >
         {value}
       </Text>
       <Text size="xs" c="dimmed" mt={2} truncate>

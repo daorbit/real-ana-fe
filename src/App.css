@@ -1037,6 +1037,67 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   --seo-hairline: var(--border);
 }
 
+/* ---- Overview bento -----------------------------------------------------
+   The overview is scanned, not read: one focal score, then a dense grid of
+   small purpose-built widgets. A twelve-column bento so each card is sized to
+   its job instead of every panel getting the same full-width row. */
+.seo-bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+}
+.seo-bento > .col-3  { grid-column: span 3; }
+.seo-bento > .col-4  { grid-column: span 4; }
+.seo-bento > .col-5  { grid-column: span 5; }
+.seo-bento > .col-6  { grid-column: span 6; }
+.seo-bento > .col-7  { grid-column: span 7; }
+.seo-bento > .col-8  { grid-column: span 8; }
+.seo-bento > .col-12 { grid-column: span 12; }
+@media (max-width: 62em) {
+  .seo-bento > * { grid-column: 1 / -1 !important; }
+}
+
+/* Radial gauge — the report's focal figure and, smaller, the severity donut. */
+.seo-gauge { position: relative; display: inline-flex; flex-shrink: 0; }
+.seo-gauge > div {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.seo-gauge .g-num {
+  font-family: var(--font-display);
+  font-weight: 700; line-height: 1; letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.seo-gauge .g-of { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* Category bars beside the hero gauge. */
+.seo-cats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 24px; flex: 1; min-width: 0; }
+.seo-cat .top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.seo-cat .top .v {
+  font-family: var(--font-display); font-weight: 650; font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.seo-track { height: 6px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.seo-track > i { display: block; height: 100%; border-radius: 4px; }
+
+/* Horizontal ranked bars — issues by area. */
+.seo-hbar { display: grid; grid-template-columns: 90px 1fr 26px; align-items: center; gap: 12px; }
+.seo-hbar .t { height: 8px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.seo-hbar .t > i { display: block; height: 100%; border-radius: 5px; }
+
+/* Divided metric strip — a row of headline numbers with no dead space. */
+.seo-mstrip { display: grid; grid-template-columns: repeat(4, 1fr); }
+.seo-mstrip > div { padding: 2px 18px; border-left: 1px solid var(--seo-hairline); min-width: 0; }
+.seo-mstrip > div:first-child { border-left: 0; padding-left: 0; }
+.seo-mstrip .mv {
+  font-family: var(--font-display); font-size: 22px; font-weight: 650;
+  letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+@media (max-width: 40em) {
+  .seo-mstrip { grid-template-columns: repeat(2, 1fr); gap: 14px 0; }
+  .seo-mstrip > div:nth-child(3) { border-left: 0; padding-left: 0; }
+}
+
 /* Every Mantine Card inside the report picks up the elevated treatment, so the
    whole page reads as one system without touching each panel's JSX. The surface
    fill is set explicitly and the ring kept crisp, so each panel is a distinct
