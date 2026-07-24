@@ -1023,15 +1023,16 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Issue row. The severity colour lives in a left rail rather than the whole
    surface — a stack of ten tinted cards is noise, one tinted edge is a scan
-   path down the list. */
+   path down the list. The rail widens slightly on hover so the row you're
+   pointing at reads as the live one. */
 .seo-issue {
   position: relative;
-  padding-left: 4px;
+  padding-left: 6px;
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: inset 0 0 0 1px var(--border);
   overflow: hidden;
-  transition: box-shadow 0.16s ease;
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
 }
 .seo-issue:hover {
   box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
@@ -1042,31 +1043,152 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   inset: 0 auto 0 0;
   width: 3px;
   background: var(--seo-rail, var(--border));
+  transition: width 0.16s ease;
 }
+.seo-issue:hover::before { width: 5px; }
 
-/* Compact metric tile used across the content and technical tabs. */
+/* Compact metric tile used across the content and technical tabs. A faint top
+   sheen lifts it off the panel so a grid of tiles reads as objects, not a flat
+   table, and the whole tile brightens on hover. */
 .seo-tile {
-  background: var(--surface);
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 42%),
+    var(--surface);
   border-radius: var(--radius);
   box-shadow: inset 0 0 0 1px var(--border);
-  transition: box-shadow 0.16s ease;
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
 }
 .seo-tile:hover {
+  transform: translateY(-1px);
   box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm);
 }
+[data-mantine-color-scheme="light"] .seo-tile {
+  background: var(--surface);
+}
 
-/* Tabs across the report. Same pill language as Analytics sections. */
+/* Report navigation. Eleven tabs is too many for a pill row that stays legible,
+   so this is an underline tab strip: quieter at rest, one clear accent on the
+   active tab, and it sticks to the top of the viewport as the panel scrolls so
+   you can jump tabs without scrolling back up. */
 .seo-tabbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 calc(var(--radius) * -1);
+  padding: 0 var(--radius);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
+  -webkit-backdrop-filter: saturate(1.4) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.seo-tabbar-track {
   display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: calc(var(--radius) + 2px);
-  background: var(--bg-2);
-  box-shadow: inset 0 0 0 1px var(--border);
+  gap: 2px;
   overflow-x: auto;
   scrollbar-width: none;
 }
-.seo-tabbar::-webkit-scrollbar { display: none; }
+.seo-tabbar-track::-webkit-scrollbar { display: none; }
+
+.seo-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 12px 12px 13px;
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1;
+  color: var(--muted);
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.seo-tab:hover { color: var(--text-2); }
+.seo-tab:hover .seo-tab-icon { opacity: 1; }
+.seo-tab[data-active] {
+  color: var(--text);
+  border-bottom-color: var(--violet-2);
+}
+.seo-tab[data-active] .seo-tab-icon { opacity: 1; color: var(--violet-2); }
+.seo-tab:focus-visible {
+  outline: 2px solid var(--violet-2);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.seo-tab-icon { opacity: 0.55; transition: opacity 0.15s ease, color 0.15s ease; }
+
+/* Count chip. Neutral tallies (history, suggestions) read grey; problem tallies
+   (broken links, schema errors) turn amber so a bad number is visible before
+   you open the tab. */
+.seo-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1;
+  border-radius: 9px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.seo-tab[data-active] .seo-tab-count {
+  color: var(--violet-2);
+  background: var(--violet-soft);
+  box-shadow: inset 0 0 0 1px transparent;
+}
+.seo-tab-count[data-alarm] {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+/* Panel header hairline. The title/description block and the body ran together
+   before; a full-bleed rule under the header gives every tab the same clean
+   split between "what this is" and the data. */
+.seo-panel-head {
+  border-bottom: 1px solid var(--border);
+  margin-left: calc(var(--mantine-spacing-lg) * -1);
+  margin-right: calc(var(--mantine-spacing-lg) * -1);
+  padding-left: var(--mantine-spacing-lg);
+  padding-right: var(--mantine-spacing-lg);
+}
+
+/* Google-result preview. A favicon dot and a breadcrumb URL make it read as an
+   actual SERP row rather than three stacked lines of text. */
+.seo-serp {
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.seo-serp-crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.seo-serp-favicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+  flex-shrink: 0;
+}
+.seo-serp-title {
+  color: #7aa2ff;
+  cursor: pointer;
+}
+.seo-serp-title:hover { text-decoration: underline; }
+[data-mantine-color-scheme="light"] .seo-serp-title { color: #1a0dab; }
 
 /* Image thumbnail in the SEO content table. The eye overlay only appears on
    hover, so a column of thumbnails reads as images rather than as buttons. */

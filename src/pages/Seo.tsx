@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Alert, Anchor, Badge, Box, Button, Card, Center, Group, Loader, Select, Stack,
   Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   Search, RefreshCw, Globe, History, Trash2, AlertTriangle, Sparkles, Info,
@@ -609,48 +610,47 @@ export default function Seo() {
             />
 
             <Box className="seo-tabbar">
-              {TABS.map((t) => {
-                const activeTab = tab === t.value;
-                const Icon = t.icon;
-                const count =
-                  t.value === "overview"
-                    ? data.issues.length
-                    : t.value === "suggestions"
-                    ? data.performance.suggestions.length
-                    : t.value === "links"
-                    ? (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0)
-                    : t.value === "schema"
-                    ? data.schema?.errorCount ?? 0
-                    : t.value === "history"
-                    ? history.length
-                    : 0;
-                return (
-                  <Button
-                    key={t.value}
-                    size="sm"
-                    radius="md"
-                    variant={activeTab ? "filled" : "subtle"}
-                    color={activeTab ? "emerald" : "gray"}
-                    leftSection={<Icon size={14} />}
-                    onClick={() => setTab(t.value)}
-                    style={{ flex: "0 0 auto" }}
-                    rightSection={
-                      count > 0 ? (
-                        <Badge
-                          size="xs"
-                          circle
-                          variant={activeTab ? "white" : "light"}
-                          color={activeTab ? "emerald" : "gray"}
+              <Box className="seo-tabbar-track">
+                {TABS.map((t) => {
+                  const activeTab = tab === t.value;
+                  const Icon = t.icon;
+                  const count =
+                    t.value === "overview"
+                      ? data.issues.length
+                      : t.value === "suggestions"
+                      ? data.performance.suggestions.length
+                      : t.value === "links"
+                      ? (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0)
+                      : t.value === "schema"
+                      ? data.schema?.errorCount ?? 0
+                      : t.value === "history"
+                      ? history.length
+                      : 0;
+                  // Counts that flag a problem (broken links, schema errors,
+                  // critical issues) read red; neutral tallies stay grey.
+                  const alarm =
+                    (t.value === "links" || t.value === "schema") && count > 0;
+                  return (
+                    <UnstyledButton
+                      key={t.value}
+                      className="seo-tab"
+                      data-active={activeTab || undefined}
+                      onClick={() => setTab(t.value)}
+                    >
+                      <Icon size={15} className="seo-tab-icon" />
+                      <span className="seo-tab-label">{t.label}</span>
+                      {count > 0 && (
+                        <span
+                          className="seo-tab-count"
+                          data-alarm={alarm || undefined}
                         >
                           {count}
-                        </Badge>
-                      ) : undefined
-                    }
-                  >
-                    {t.label}
-                  </Button>
-                );
-              })}
+                        </span>
+                      )}
+                    </UnstyledButton>
+                  );
+                })}
+              </Box>
             </Box>
 
             {tab === "overview" && (

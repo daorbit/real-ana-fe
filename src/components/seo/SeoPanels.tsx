@@ -7,7 +7,7 @@ import {
 import {
   AlertTriangle, CheckCircle2, Info, XCircle, FileText, Image as ImageIcon,
   Link2, Type, Gauge, ShieldCheck, ExternalLink, Smartphone, Monitor, Sparkles,
-  FileSearch, Share2, Bot, Server, Clock, Eye,
+  FileSearch, Share2, Bot, Server, Clock, Eye, Globe,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -79,8 +79,15 @@ function Panel({
   padding?: string | number;
 }) {
   return (
-    <Card withBorder radius="md" padding={padding}>
-      <Group justify="space-between" align="flex-start" wrap="nowrap" mb="md" px={padding === 0 ? "lg" : 0} pt={padding === 0 ? "lg" : 0}>
+    <Card withBorder radius="md" padding={padding} className="seo-panel">
+      <Group
+        justify="space-between"
+        align="flex-start"
+        wrap="nowrap"
+        className="seo-panel-head"
+        mb="md"
+        pb="sm"
+      >
         <Group gap="sm" wrap="nowrap">
           <ThemeIcon size={32} radius="md" variant="light" color={color}>
             <Icon size={16} />
@@ -352,28 +359,68 @@ function MetaField({
  */
 function SerpPreview({ meta, url }: { meta: SeoMeta; url: string }) {
   const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n).trimEnd()}…` : s);
-  let display = url;
+  let host = url;
+  let crumbs: string[] = [];
   try {
     const u = new URL(url);
-    display = `${u.hostname}${u.pathname === "/" ? "" : u.pathname}`;
+    host = u.hostname.replace(/^www\./, "");
+    crumbs = u.pathname.split("/").filter(Boolean);
   } catch {
     /* fall back to the raw string */
   }
 
   return (
-    <Box p="md" style={{ background: "var(--mantine-color-body)", borderRadius: 10 }}>
-      <Text size="xs" c="dimmed" mb={4} truncate>
-        {display}
-      </Text>
-      <Text size="md" c="blue" fw={500} lh={1.3} mb={4}>
+    <Box className="seo-serp">
+      <Box className="seo-serp-crumb" mb={8}>
+        <Box className="seo-serp-favicon">
+          {meta.favicon ? (
+            <FaviconDot src={meta.favicon} />
+          ) : (
+            <Globe size={13} style={{ opacity: 0.5 }} />
+          )}
+        </Box>
+        <div style={{ minWidth: 0 }}>
+          <Text size="xs" fw={550} lh={1.2} truncate>
+            {host}
+          </Text>
+          <Text size="xs" c="dimmed" lh={1.2} truncate>
+            {host}
+            {crumbs.length > 0 && (
+              <Text span c="dimmed">
+                {" › "}
+                {crumbs.join(" › ")}
+              </Text>
+            )}
+          </Text>
+        </div>
+      </Box>
+      <Text className="seo-serp-title" size="lg" fw={500} lh={1.3} mb={4}>
         {clip(meta.title || "Untitled page", 60)}
       </Text>
-      <Text size="xs" c="dimmed" lh={1.55}>
+      <Text size="sm" c="dimmed" lh={1.55}>
         {meta.description
           ? clip(meta.description, 160)
           : "No meta description — search engines will pull a snippet from the page copy instead."}
       </Text>
     </Box>
+  );
+}
+
+/** The site's favicon in the SERP row, degrading to a globe glyph if it 404s. */
+function FaviconDot({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <Globe size={13} style={{ opacity: 0.5 }} />;
+  return (
+    <img
+      src={src}
+      alt=""
+      width={16}
+      height={16}
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+      style={{ borderRadius: 4, objectFit: "contain" }}
+    />
   );
 }
 
