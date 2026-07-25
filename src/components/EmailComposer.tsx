@@ -278,7 +278,7 @@ export function EmailComposer({
               )}
             </Group>
 
-            <Collapse in={showList}>
+            <Collapse expanded={showList}>
               <ScrollArea.Autosize mah={140} mt="xs">
                 <Stack gap={2}>
                   {recipients.map((r) => (
