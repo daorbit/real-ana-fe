@@ -30,10 +30,11 @@ type AuthState = {
   logout: () => void;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
   /**
-   * Upload a new profile picture. Takes the file, not a data URL — the encoding
-   * is this layer's business, not the form's. Saves immediately.
+   * Upload a new profile picture. Takes the image itself, not a data URL — the
+   * encoding is this layer's business, not the form's. A Blob rather than a File
+   * because the cropper produces one. Saves immediately.
    */
-  uploadAvatar: (file: File) => Promise<void>;
+  uploadAvatar: (file: Blob) => Promise<void>;
   removeAvatar: () => Promise<void>;
   impersonate: (userId: string) => Promise<void>;
   exitImpersonation: () => Promise<void>;
@@ -133,9 +134,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    *  file is refused before it is read and encoded rather than after. */
   const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
 
-  const uploadAvatar = async (file: File) => {
+  const uploadAvatar = async (file: Blob) => {
     if (!file.type.startsWith("image/"))
       throw new Error("That file isn't an image.");
+    // The cropper's output is well under this; the check is for the raw-file
+    // path and for anything that bypasses cropping.
     if (file.size > MAX_AVATAR_BYTES)
       throw new Error("Image must be 3MB or smaller.");
 

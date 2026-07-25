@@ -7,6 +7,7 @@ import { Save, Trash2, Undo2, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, PageStack, Section, Field } from "../components/Page";
+import AvatarCropper from "../components/AvatarCropper";
 import { useAuth } from "../auth";
 import { useUnsavedGuard } from "../hooks";
 import { notify, errMessage } from "../notify";
@@ -72,28 +73,32 @@ function mobileError(v: string): string | null {
   return null;
 }
 
-function avatarError(v: string): string | null {
-  const s = v.trim();
-  if (!s) return null;
-  if (!/^https?:\/\/\S+$/i.test(s)) return "settings.avatarBadUrl";
-  return null;
-}
-
 export default function Settings() {
   const { t } = useTranslation();
   const { user, updateProfile, uploadAvatar, removeAvatar } = useAuth();
   const fileInput = useRef<HTMLInputElement | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
+  /** The picked file awaiting a crop. Non-null opens the cropper. */
+  const [cropFile, setCropFile] = useState<File | null>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [mobile, setMobile] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  // The avatar is not a form field: it is saved by its own endpoints the moment
+  // it changes, so it is read straight off the session rather than mirrored into
+  // local state that a later Save could write back stale.
+  const avatarUrl = user?.avatarUrl ?? "";
   const [dateLocale, setDateLocale] = useState("");
   const [timezone, setTimezone] = useState("");
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [saving, setSaving] = useState(false);
   const [avatarBroken, setAvatarBroken] = useState(false);
+
+  // A new URL deserves a fresh attempt: without this, one image that failed to
+  // load would keep every later upload hidden behind the initials fallback.
+  useEffect(() => {
+    setAvatarBroken(false);
+  }, [avatarUrl]);
 
   // Clear a field's error the moment its value becomes valid, rather than
   // leaving stale red text sitting under a field the user has already fixed and
@@ -109,7 +114,6 @@ export default function Settings() {
     setFirstName(user.firstName ?? "");
     setLastName(user.lastName ?? "");
     setMobile(user.mobile ?? "");
-    setAvatarUrl(user.avatarUrl ?? "");
     setDateLocale(user.dateLocale ?? "");
     setTimezone(user.timezone ?? "");
     setErrors({});
@@ -131,7 +135,6 @@ export default function Settings() {
     (firstName !== (user.firstName ?? "") ||
       lastName !== (user.lastName ?? "") ||
       mobile !== (user.mobile ?? "") ||
-      avatarUrl !== (user.avatarUrl ?? "") ||
       dateLocale !== (user.dateLocale ?? "") ||
       timezone !== (user.timezone ?? ""));
 
@@ -177,7 +180,6 @@ export default function Settings() {
     const next: Record<string, string | null> = {
       firstName: firstName.trim() ? null : "settings.firstNameRequired",
       mobile: mobileError(mobile),
-      avatarUrl: avatarError(avatarUrl),
     };
     setErrors(next);
     if (Object.values(next).some(Boolean)) return;
@@ -188,7 +190,9 @@ export default function Settings() {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         mobile: mobile.trim(),
-        avatarUrl: avatarUrl.trim(),
+        // `avatarUrl` is deliberately absent: the picture is managed by its own
+        // upload/remove endpoints, which save immediately. Sending it here would
+        // PATCH whatever this form last held, undoing an upload made since.
         dateLocale,
         timezone,
       });
@@ -201,27 +205,42 @@ export default function Settings() {
   };
 
   /**
-   * Pick a file and upload it right away.
+   * Open the cropper on the picked file.
+   *
+   * Nothing is uploaded here — the crop is confirmed first, so what gets stored
+   * is what the user framed rather than the raw camera roll photo.
+   */
+  const pickAvatar = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      notify.error(t("settings.avatarNotImage"));
+      return;
+    }
+    setCropFile(file);
+    // Clear the input now, so re-picking the same file after a cancel still
+    // fires a change event.
+    if (fileInput.current) fileInput.current.value = "";
+  };
+
+  /**
+   * Upload the cropped square.
    *
    * Deliberately outside the form's save cycle: the picture is stored the moment
-   * it is chosen, so the avatar beside it updates immediately and there is no
+   * it is confirmed, so the avatar beside it updates immediately and there is no
    * uploaded file left unreferenced if the user leaves without saving. The URL
    * field is re-seeded from the new user, keeping the form undirty.
    */
-  const pickAvatar = async (file: File | null) => {
-    if (!file) return;
+  const saveCrop = async (cropped: Blob) => {
     setAvatarBusy(true);
-    setErrors((prev) => ({ ...prev, avatarUrl: null }));
     try {
-      await uploadAvatar(file);
+      await uploadAvatar(cropped);
       setAvatarBroken(false);
+      setCropFile(null);
       notify.success(t("settings.avatarUploaded"), t("common.saved"));
     } catch (err) {
       notify.error(errMessage(err, t("settings.avatarUploadError")));
     } finally {
       setAvatarBusy(false);
-      // Clear the input, so choosing the same file again still fires a change.
-      if (fileInput.current) fileInput.current.value = "";
     }
   };
 
@@ -271,7 +290,10 @@ export default function Settings() {
           <Box className="surface-card" p="lg">
             <Group gap="lg" wrap="nowrap">
               <Avatar
-                src={avatarError(avatarUrl) || avatarBroken ? null : avatarUrl || null}
+                // No URL validation: the value comes from our own Cloudinary
+                // upload or from Google, not from anything typed. `avatarBroken`
+                // still covers a link that stops resolving.
+                src={avatarBroken ? null : avatarUrl || null}
                 color="emerald"
                 radius="md"
                 size={72}
@@ -302,7 +324,7 @@ export default function Settings() {
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   hidden
-                  onChange={(e) => void pickAvatar(e.currentTarget.files?.[0] ?? null)}
+                  onChange={(e) => pickAvatar(e.currentTarget.files?.[0] ?? null)}
                 />
                 <Group gap="xs" mt="sm">
                   <Button
@@ -312,7 +334,7 @@ export default function Settings() {
                     loading={avatarBusy}
                     onClick={() => fileInput.current?.click()}
                   >
-                    {t("settings.avatarUpload")}
+                    {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
                   </Button>
                   {avatarUrl && (
                     <Button
@@ -358,7 +380,7 @@ export default function Settings() {
             >
               <TextInput value={user.email} disabled />
             </Field>
-            <Field label={t("settings.mobile")} hint={t("common.optional")}>
+            <Field label={t("settings.mobile")} hint={t("common.optional")} last>
               <TextInput
                 placeholder="+91 98765 43210"
                 value={mobile}
@@ -368,26 +390,6 @@ export default function Settings() {
                   clearIfValid("mobile", mobileError, v);
                 }}
                 error={errText(errors.mobile)}
-              />
-            </Field>
-            <Field
-              label={t("settings.profileImage")}
-              hint={t("settings.profileImageHint")}
-              last
-            >
-              <TextInput
-                placeholder="https://example.com/me.jpg"
-                value={avatarUrl}
-                onChange={(e) => {
-                  const v = e.currentTarget.value;
-                  setAvatarUrl(v);
-                  setAvatarBroken(false);
-                  clearIfValid("avatarUrl", avatarError, v);
-                }}
-                error={
-                  errText(errors.avatarUrl) ??
-                  (avatarBroken ? t("settings.avatarBroken") : undefined)
-                }
               />
             </Field>
           </Section>
@@ -484,6 +486,15 @@ export default function Settings() {
           </Box>
         )}
       </form>
+
+      {/* Outside the form: a button inside one would submit the profile on click,
+          and the modal is not part of what Save writes. */}
+      <AvatarCropper
+        file={cropFile}
+        busy={avatarBusy}
+        onCancel={() => setCropFile(null)}
+        onConfirm={(cropped) => void saveCrop(cropped)}
+      />
     </AppShell>
   );
 }
