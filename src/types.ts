@@ -103,6 +103,16 @@ export type AdminUserPage = {
 /** Which accounts a broadcast goes to. Mirrors the server's segment ids. */
 export type EmailSegmentId = "all" | "not-installed" | "no-sites" | "installed";
 
+/**
+ * A template's intended audience.
+ *
+ * "custom" is not a segment the server can resolve — it means the message is
+ * addressed at people who have no account, so the composer collects addresses
+ * by hand instead of resolving a user list. Kept out of `EmailSegmentId` for
+ * exactly that reason: passing it to `/email/recipients` would be an error.
+ */
+export type MailAudience = EmailSegmentId | "custom";
+
 export type EmailSegment = {
   id: EmailSegmentId;
   label: string;
@@ -122,16 +132,27 @@ export type EmailStatus = {
   from: string;
 };
 
+/**
+ * How the server renders a message body.
+ *
+ * "plain" turns the author's text into paragraphs and nothing more. "invite"
+ * adds the designed feature list and closing note under it — for the one
+ * template addressed at people who have never heard of Quantalog.
+ */
+export type MailLayout = "plain" | "invite";
+
 /** A canned message. The copy lives server-side so it can be fixed without a build. */
 export type MailTemplate = {
   id: string;
   label: string;
   hint: string;
-  segment: EmailSegmentId;
+  segment: MailAudience;
   subject: string;
   body: string;
   /** Optional button. Not every template has one — a check-in wants no call to action. */
   cta?: { label: string; href: string };
+  /** Absent means "plain". */
+  layout?: MailLayout;
 };
 
 export type EmailSendResult = {

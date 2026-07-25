@@ -7,6 +7,7 @@ import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
+  MailLayout,
 } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 import type { TrackerOptions } from "../utils/tracker";
@@ -294,7 +295,13 @@ export const api = createApi({
 
     previewEmail: build.mutation<
       { subject: string; html: string; sampleName: string },
-      { subject: string; body: string; userId?: string; cta?: { label: string; href: string } }
+      {
+        subject: string;
+        body: string;
+        userId?: string;
+        cta?: { label: string; href: string };
+        layout?: MailLayout;
+      }
     >({
       query: (payload) => ({ url: "/api/admin/email/preview", method: "POST", body: payload }),
     }),
@@ -316,7 +323,10 @@ export const api = createApi({
         body: string;
         segment?: EmailSegmentId;
         userIds?: string[];
+        /** Hand-entered addresses, for people who have no account. Wins over `userIds`. */
+        emails?: string[];
         cta?: { label: string; href: string };
+        layout?: MailLayout;
       }
     >({
       query: (payload) => ({ url: "/api/admin/email/send", method: "POST", body: payload }),
@@ -324,7 +334,12 @@ export const api = createApi({
 
     sendTestEmail: build.mutation<
       { ok: true; email: string },
-      { subject: string; body: string; cta?: { label: string; href: string } }
+      {
+        subject: string;
+        body: string;
+        cta?: { label: string; href: string };
+        layout?: MailLayout;
+      }
     >({
       query: (payload) => ({ url: "/api/admin/email/test", method: "POST", body: payload }),
     }),

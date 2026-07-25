@@ -7,3 +7,5 @@ export type { TrackerOptions } from "./tracker";
 export {
   required, minLength, maxLength, email, password, domain, normalizeDomain, all,
 } from "./validate";
+export { parseAddressList } from "./mailAddresses";
+export type { ParsedAddress, ParsedAddressList } from "./mailAddresses";
