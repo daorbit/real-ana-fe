@@ -26,7 +26,7 @@
     "developers": "开发者",
     "workspaces": "工作区",
     "share": "公开仪表板",
-    "viewAsUser": "以用户身份查看",
+    "viewAsUser": "模拟用户",
     "demoUsage": "演示用量",
     "settings": "设置",
     "logout": "退出登录",

@@ -26,7 +26,7 @@
     "developers": "Développeurs",
     "workspaces": "Espaces de travail",
     "share": "Tableau de bord public",
-    "viewAsUser": "Voir en tant qu'utilisateur",
+    "viewAsUser": "Usurper l'identité",
     "demoUsage": "Utilisation de la démo",
     "settings": "Paramètres",
     "logout": "Se déconnecter",

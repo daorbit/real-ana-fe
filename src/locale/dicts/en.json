@@ -26,7 +26,7 @@
     "developers": "Developers",
     "workspaces": "Workspaces",
     "share": "Public dashboard",
-    "viewAsUser": "View as user",
+    "viewAsUser": "Impersonate",
     "demoUsage": "Demo usage",
     "settings": "Settings",
     "logout": "Log out",

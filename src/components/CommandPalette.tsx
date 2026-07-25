@@ -80,7 +80,7 @@ export function CommandPalette() {
     if (isAdmin) {
       pages.push({
         id: "impersonate",
-        label: "View as user",
+        label: "Impersonate",
         section: "Go to",
         icon: Users,
         run: go("/app/impersonate"),
