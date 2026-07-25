@@ -101,6 +101,8 @@ export default function GoogleSignInButton({
   const holder = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
 
   // The GIS button takes a fixed pixel width, not a percentage, so it has to be
   // measured from the container and re-measured when the window changes —
@@ -118,6 +120,11 @@ export default function GoogleSignInButton({
   const handleCredential = useCallback(
     async (response: { credential: string }) => {
       setBusy(true);
+      // The overlay stops taking pointer events while busy, so it will never
+      // send the matching pointerup/leave. Clearing here keeps the button from
+      // staying visually pressed for the whole exchange.
+      setPressed(false);
+      setHovered(false);
       onBusyChange?.(true);
       try {
         const { created } = await googleSignIn(response.credential);
@@ -189,7 +196,21 @@ export default function GoogleSignInButton({
   }
 
   return (
-    <Box pos="relative" h={HEIGHT}>
+    <Box
+      pos="relative"
+      h={HEIGHT}
+      // Hover and press are tracked here rather than on the visual button: that
+      // button has pointer events switched off so clicks can reach Google's, and
+      // an element that never sees the pointer never matches :hover. The wrapper
+      // does see it, so it is what tells the button how to look.
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => {
+        setHovered(false);
+        setPressed(false);
+      }}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+    >
       {/* The button people see. Hidden from assistive tech: the overlay below is
           the real control, and announcing both would read as two buttons. */}
       <Button
@@ -199,9 +220,17 @@ export default function GoogleSignInButton({
         loading={busy}
         leftSection={busy ? undefined : <GoogleIcon />}
         aria-hidden="true"
-        // Pointer events pass straight through to Google's button underneath, so
-        // this never swallows the click that has to reach GIS.
-        style={{ pointerEvents: "none" }}
+        // Mantine's own :hover cannot fire here, so the hover and active looks
+        // are applied directly — same variables Mantine's `default` variant uses,
+        // so this tracks the theme rather than hard-coding a grey.
+        style={{
+          pointerEvents: "none",
+          backgroundColor: hovered
+            ? "var(--mantine-color-default-hover)"
+            : undefined,
+          transform: pressed ? "translateY(1px)" : undefined,
+          transition: "background-color 100ms ease",
+        }}
       >
         {label}
       </Button>
@@ -218,6 +247,7 @@ export default function GoogleSignInButton({
           opacity: 0,
           overflow: "hidden",
           colorScheme: "light",
+          cursor: busy ? "default" : "pointer",
           pointerEvents: busy ? "none" : "auto",
         }}
       />
