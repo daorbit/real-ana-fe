@@ -88,7 +88,11 @@ const DEFAULT_PANELS: SharePanels = {
  */
 function ShareSettings({ workspaceId }: { workspaceId: string }) {
   const { data, isLoading } = useGetShareQuery(workspaceId);
-  const [setShare, { isLoading: saving }] = useSetShareMutation();
+  const [setShare] = useSetShareMutation();
+  // The mutation's shared `isLoading` would light up the link toggle and
+  // New-link spinners during a panel-save, so the instant link actions
+  // (enable/rotate) carry their own flag.
+  const [linkBusy, setLinkBusy] = useState(false);
 
   const enabled = data?.enabled ?? false;
   const token = data?.token ?? null;
@@ -130,6 +134,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
   });
 
   const toggle = async (next: boolean) => {
+    setLinkBusy(true);
     try {
       await setShare({ workspaceId, enabled: next }).unwrap();
       notify.success(
@@ -138,6 +143,8 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
       );
     } catch (e) {
       notify.error(errMessage(e, "Could not update sharing."));
+    } finally {
+      setLinkBusy(false);
     }
   };
 
@@ -152,11 +159,14 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
         </>
       ),
       onConfirm: async () => {
+        setLinkBusy(true);
         try {
           await setShare({ workspaceId, enabled: true, rotate: true }).unwrap();
           notify.success("A new link has been generated.", "Link replaced");
         } catch (e) {
           notify.error(errMessage(e, "Could not generate a new link."));
+        } finally {
+          setLinkBusy(false);
         }
       },
     });
@@ -196,7 +206,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
               checked={enabled}
               onChange={(e) => toggle(e.currentTarget.checked)}
               color="emerald"
-              disabled={saving}
+              disabled={linkBusy}
               aria-label="Enable public dashboard"
             />
           </Group>
@@ -264,7 +274,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   variant="default"
                   leftSection={<RefreshCw size={14} />}
                   onClick={rotate}
-                  loading={saving}
+                  loading={linkBusy}
                 >
                   New link
                 </Button>
@@ -290,7 +300,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   size="compact-xs"
                   variant="subtle"
                   color="gray"
-                  disabled={saving || onCount === ALL_PANELS.length}
+                  disabled={onCount === ALL_PANELS.length}
                   onClick={() => setAll(true)}
                 >
                   All
@@ -299,7 +309,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   size="compact-xs"
                   variant="subtle"
                   color="gray"
-                  disabled={saving || onCount === 0}
+                  disabled={onCount === 0}
                   onClick={() => setAll(false)}
                 >
                   None
@@ -329,7 +339,6 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                           label={p.label}
                           description={p.hint}
                           checked={panels[p.key]}
-                          disabled={saving}
                           onChange={(e) => togglePanel(p.key, e.currentTarget.checked)}
                         />
                       ))}

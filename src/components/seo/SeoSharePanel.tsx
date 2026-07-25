@@ -65,7 +65,11 @@ export function SeoSharePanel({
   reportId: string;
 }) {
   const { data, isLoading } = useGetSeoShareQuery({ workspaceId, siteId, reportId });
-  const [setShare, { isLoading: saving }] = useSetSeoShareMutation();
+  const [setShare] = useSetSeoShareMutation();
+  // The mutation's own `isLoading` is shared across every call it makes, so a
+  // panel-save would light up the link toggle and New-link spinners too. Track
+  // the instant link actions (enable/rotate) with their own flag instead.
+  const [linkBusy, setLinkBusy] = useState(false);
 
   const enabled = data?.enabled ?? false;
   const token = data?.token ?? null;
@@ -105,6 +109,7 @@ export function SeoSharePanel({
   });
 
   const toggle = async (next: boolean) => {
+    setLinkBusy(true);
     try {
       await setShare({ workspaceId, siteId, reportId, enabled: next }).unwrap();
       notify.success(
@@ -113,6 +118,8 @@ export function SeoSharePanel({
       );
     } catch (e) {
       notify.error(errMessage(e, "Could not update sharing."));
+    } finally {
+      setLinkBusy(false);
     }
   };
 
@@ -122,11 +129,14 @@ export function SeoSharePanel({
       confirmLabel: "Generate new link",
       body: "The current link stops working immediately. Anyone you already sent it to will lose access until you send the new one.",
       onConfirm: async () => {
+        setLinkBusy(true);
         try {
           await setShare({ workspaceId, siteId, reportId, enabled: true, rotate: true }).unwrap();
           notify.success("A new link has been generated.", "Link replaced");
         } catch (e) {
           notify.error(errMessage(e, "Could not generate a new link."));
+        } finally {
+          setLinkBusy(false);
         }
       },
     });
@@ -161,7 +171,7 @@ export function SeoSharePanel({
             checked={enabled}
             onChange={(e) => toggle(e.currentTarget.checked)}
             color="emerald"
-            disabled={saving}
+            disabled={linkBusy}
             aria-label="Enable public link"
           />
         </Group>
@@ -221,11 +231,11 @@ export function SeoSharePanel({
               <Group gap="xs" wrap="nowrap">
                 <Text size="xs" c="dimmed">{onCount} of {ALL_PANELS.length} on</Text>
                 <Button size="compact-xs" variant="subtle" color="gray"
-                  disabled={saving || onCount === ALL_PANELS.length} onClick={() => setAll(true)}>
+                  disabled={onCount === ALL_PANELS.length} onClick={() => setAll(true)}>
                   All
                 </Button>
                 <Button size="compact-xs" variant="subtle" color="gray"
-                  disabled={saving || onCount === 0} onClick={() => setAll(false)}>
+                  disabled={onCount === 0} onClick={() => setAll(false)}>
                   None
                 </Button>
               </Group>
@@ -249,7 +259,6 @@ export function SeoSharePanel({
                         label={p.label}
                         description={p.hint}
                         checked={panels[p.key]}
-                        disabled={saving}
                         onChange={(e) => togglePanel(p.key, e.currentTarget.checked)}
                       />
                     ))}
@@ -276,7 +285,7 @@ export function SeoSharePanel({
               variant="default"
               leftSection={<RefreshCw size={13} />}
               onClick={rotate}
-              loading={saving}
+              loading={linkBusy}
             >
               New link
             </Button>
