@@ -1,55 +1,66 @@
-import { Gauge, LineChart, Layers } from "lucide-react";
+import { Users, ArrowDownWideNarrow, Tag, Target } from "lucide-react";
 import type { HelpSection } from "./HelpDrawer";
 
 /**
- * In-app help for the home / analytics widgets, grouped the way the widget
- * picker groups them. Each item explains one widget — the same thing a tooltip
- * would say, with room to say it properly.
+ * In-app help for the Analytics page, grouped to mirror the page's own
+ * sections — Audience, Behavior, Acquisition, Conversion — and the tabs within
+ * them. Each item explains one number or panel the way a tooltip would, with
+ * room to say it properly. Kept in step with the SECTIONS/tabs in Analytics.tsx
+ * so the drawer never describes a view that isn't there.
  */
 export const ANALYTICS_HELP: HelpSection[] = [
   {
-    id: "metrics",
-    label: "Headline metrics",
-    icon: Gauge,
+    id: "audience",
+    label: "Audience",
+    icon: Users,
     blurb:
-      "The single-number tiles at the top of the overview. Each shows a total for the last 24 hours with its change against the day before.",
+      "The headline tiles — how many people came, how much they looked at, and how many are here right now.",
     items: [
-      { term: "Visitors", detail: "Unique people, counted once no matter how many pages they view. This is your real audience size." },
-      { term: "Pageviews", detail: "Every page load, including repeat views by the same person. Always higher than visitors." },
-      { term: "Live now", detail: "People active on the site in the last five minutes. Updates as you watch." },
-      { term: "Sessions", detail: "Distinct visits. One person coming back later in the day is two sessions but one visitor." },
-      { term: "Bounce rate", detail: "The share of sessions that left after a single page. A lower number here is better — the arrow is coloured accordingly." },
-      { term: "Avg. session", detail: "How long a typical visit lasts. Longer usually means the content is holding attention." },
-      { term: "Pages / session", detail: "How many pages a visit covers on average — a measure of how far people explore." },
+      { term: "Visitors", detail: "Distinct people in the selected period. A visitor is a privacy-friendly daily hash of IP and browser — no cookies — so the same person on two days counts twice." },
+      { term: "Pageviews", detail: "Every page load, including SPA route changes. One visitor can rack up many pageviews, so this is always higher than visitors." },
+      { term: "Sessions", detail: "A visit — one or more pageviews with no 30-minute gap. A returning visitor later in the day starts a fresh session." },
+      { term: "Live now", detail: "Distinct visitors active in the last five minutes, updated as the page refreshes. The 'Right now' panel lists the pages they're on." },
     ],
   },
   {
-    id: "charts",
-    label: "Charts",
-    icon: LineChart,
+    id: "behavior",
+    label: "Behavior",
+    icon: ArrowDownWideNarrow,
     blurb:
-      "The visual panels — traffic over time, the world map, click and scroll behaviour. These show shape and trend rather than a single figure.",
+      "How engaged visits are, and what people do once they arrive — the Pages, Engagement and Clicks tabs.",
     items: [
-      { term: "Traffic chart", detail: "Views over the selected range, so you can see peaks, dips and the daily rhythm at a glance." },
-      { term: "Right now", detail: "The pages people are viewing live, refreshing in real time — useful during a launch or campaign." },
-      { term: "World map", detail: "Where visitors are, shaded by volume. Hover a country for its exact count." },
-      { term: "CTA clicks", detail: "Which buttons and calls-to-action get clicked, and where on the page — so you know what's working." },
-      { term: "Traffic heatmap", detail: "When your visitors show up, across the hours of the day and days of the week. Time your posts to the bright cells." },
+      { term: "Bounce rate", detail: "Share of sessions that left after a single pageview without interacting. Lower is usually better — the delta arrow is coloured accordingly." },
+      { term: "Avg. session", detail: "Average visible time across a whole visit. A backgrounded tab doesn't count, so this is real attention time, not just tab-open time." },
+      { term: "Avg. time on page / Pages per session", detail: "How long a single page holds attention, and how many pages a typical visit touches. Higher pages-per-session means people explore more." },
+      { term: "Pages, Entry & Exit", detail: "Your most-viewed pages, plus where visits begin (entry) and where they end (exit). Click a row to filter every number to that page." },
+      { term: "Engagement & Clicks", detail: "Scroll depth and landing performance, a traffic heatmap by hour and weekday, and which CTAs get clicked and where on the page." },
     ],
   },
   {
-    id: "breakdowns",
-    label: "Breakdowns",
-    icon: Layers,
+    id: "acquisition",
+    label: "Acquisition",
+    icon: Tag,
     blurb:
-      "The ranked lists — top pages, sources, countries, devices and the rest. Each answers a 'which are the top…?' question about your traffic.",
+      "Where visitors come from — the Sources, Geography and Technology tabs.",
     items: [
-      { term: "Top pages", detail: "Your most-viewed pages. Entry and exit variants show where visits begin and end." },
-      { term: "Referrers", detail: "The sites sending you traffic. Channels groups them into Direct, Organic, Social and Paid." },
-      { term: "Countries & languages", detail: "Who's visiting and what language their browser is set to — useful for deciding what to translate." },
-      { term: "Devices, browsers, OS", detail: "What people view the site on. A surprise here (lots of an old browser, say) can explain layout complaints." },
+      { term: "Channels & Referrers", detail: "Channels group traffic into Direct, Organic, Social and Paid; Referrers name the exact sites sending it. Click a referrer to filter by it." },
       { term: "UTM sources & campaigns", detail: "Traffic tagged with campaign parameters, so you can measure a specific push separately from everything else." },
-      { term: "Conversions", detail: "Goal completion rates — the share of visitors doing the thing you actually care about." },
+      { term: "Geography", detail: "A world map shaded by volume, plus ranked countries and browser languages — useful for deciding what to translate." },
+      { term: "Technology", detail: "Browsers, operating systems, devices and screen sizes. A surprise here — lots of an old browser, say — can explain layout complaints." },
+    ],
+  },
+  {
+    id: "conversion",
+    label: "Conversion",
+    icon: Target,
+    blurb:
+      "Whether visits turn into the outcomes you care about — the Goals, Events, Funnel, Retention and Errors tabs.",
+    items: [
+      { term: "Goals", detail: "Completion rates for the actions you've defined as goals — the share of visitors doing the thing that matters." },
+      { term: "Events", detail: "Custom events fired via rta.track(), with their totals and any revenue value summed across them." },
+      { term: "Funnel", detail: "A step-by-step path you define. Each step shows how many sessions reached it and where people drop off." },
+      { term: "Retention", detail: "Weekly cohorts and how many visitors come back over the following weeks — a read on whether the product holds people." },
+      { term: "Errors", detail: "Client-side errors the tracker forwarded, so a broken page shows up here rather than only in complaints." },
     ],
   },
 ];

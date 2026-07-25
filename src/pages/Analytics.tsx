@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Progress,
   Stack, Center, ThemeIcon, Badge, Tabs, Box, Loader, UnstyledButton,
+  ActionIcon, Tooltip as MTooltip,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -12,7 +14,7 @@ import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
   ArrowDownWideNarrow, Zap, Filter, GitBranch, Repeat,
-  Split, Target, AlertTriangle, LayoutDashboard,
+  Split, Target, AlertTriangle, LayoutDashboard, HelpCircle,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { AnalyticsArt } from "../components/Brand";
@@ -33,6 +35,8 @@ import { SwitchOverlay, useSwitchOverlay } from "../components/SwitchOverlay";
 import { RangePicker, type RangeState } from "../components/RangePicker";
 import { ExportMenu } from "../components/ExportMenu";
 import { AnalyticsSkeleton } from "../components/Skeletons";
+import { HelpDrawer } from "../components/HelpDrawer";
+import { ANALYTICS_HELP } from "../components/analyticsHelp";
 import { useStats, useSites } from "../hooks";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
 import { useWorkspace } from "../workspace";
@@ -77,7 +81,7 @@ function BarList({
   color = "teal",
   icon: Icon,
   format,
-  empty = "Waiting for data…",
+  empty,
   filterKey,
   onFilter,
 }: {
@@ -91,6 +95,8 @@ function BarList({
   filterKey?: keyof StatsFilter;
   onFilter?: (key: keyof StatsFilter, value: string) => void;
 }) {
+  const { t } = useTranslation();
+  const emptyText = empty ?? t("analytics.waitingForData");
   const total = items.reduce((sum, i) => sum + i.count, 0);
   const max = Math.max(1, ...items.map((i) => i.count));
   const clickable = Boolean(filterKey && onFilter);
@@ -106,7 +112,7 @@ function BarList({
         <Center py="lg" mih={120}>
           <Stack align="center" gap={4}>
             <ThemeIcon variant="light" color="gray" size="md" radius="md"><Inbox size={16} /></ThemeIcon>
-            <Text c="dimmed" size="xs">{empty}</Text>
+            <Text c="dimmed" size="xs">{emptyText}</Text>
           </Stack>
         </Center>
       ) : (
@@ -170,6 +176,7 @@ function ChartTip({ active, payload, label }: any) {
 
 /** Who is on the site right now. */
 function LiveNow({ stats }: { stats: Stats | null }) {
+  const { t } = useTranslation();
   const pages = stats?.livePages ?? [];
   const live = stats?.live ?? 0;
 
@@ -178,7 +185,7 @@ function LiveNow({ stats }: { stats: Stats | null }) {
       <Group justify="space-between" mb="md">
         <Group gap={8}>
           <span className="status-dot live" style={{ background: "var(--mantine-color-teal-6)" }} />
-          <Text fw={600} c="dimmed" size="sm">Right now</Text>
+          <Text fw={600} c="dimmed" size="sm">{t("analytics.rightNow")}</Text>
         </Group>
         <Badge variant="light" color="teal" size="sm">
           {live} visitor{live === 1 ? "" : "s"}
@@ -187,7 +194,7 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 
       {pages.length === 0 ? (
         <Center py="lg">
-          <Text c="dimmed" size="xs">Nobody on the site in the last 5 minutes</Text>
+          <Text c="dimmed" size="xs">{t("analytics.nobodyOnSite")}</Text>
         </Center>
       ) : (
         <Stack gap="xs">
@@ -207,11 +214,13 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 }
 
 export default function Analytics() {
+  const { t } = useTranslation();
   const { active, loading } = useWorkspace();
   const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
   const range = rangeState.preset;
   const [filter, setFilter] = useState<StatsFilter>({});
   // Top-level section, and the active detail tab within a section.
+  const [helpOpen, setHelpOpen] = useState(false);
   const [section, setSection] = useState<string>("overview");
   const [tab, setTab] = useState<string>("pages");
   // Empty = all sites. siteIds don't carry across workspaces, so reset on switch.
@@ -271,25 +280,27 @@ export default function Analytics() {
   const series = view?.timeseries ?? [];
   const hasData = (view?.pageviews ?? 0) > 0;
 
+  // Stat `label`s are translated; the long `hint` tooltips stay English for a
+  // later pass — they fall back cleanly and aren't blocking to read.
   const audience = [
-    { icon: Users, label: "Visitors", value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors",
+    { icon: Users, label: t("analytics.stat.visitors"), value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors",
       hint: "Distinct people in this period. A visitor is a privacy-friendly daily hash of IP and browser — no cookies, so the same person on two days counts twice." },
-    { icon: Eye, label: "Pageviews", value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views",
+    { icon: Eye, label: t("analytics.stat.pageviews"), value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views",
       hint: "Every page load, including SPA route changes. One visitor can rack up many pageviews." },
-    { icon: Layers, label: "Sessions", value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null,
+    { icon: Layers, label: t("analytics.stat.sessions"), value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null,
       hint: "A visit — one or more pageviews with no 30-minute gap. A returning visitor later in the day starts a fresh session." },
-    { icon: Radio, label: "Live now", value: view?.live ?? 0, color: "green", live: true,
+    { icon: Radio, label: t("analytics.stat.live"), value: view?.live ?? 0, color: "green", live: true,
       hint: "Distinct visitors active in the last 5 minutes, updated as the page refreshes." },
   ];
 
   const engagement = [
-    { icon: MousePointerClick, label: "Bounce rate", value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true,
+    { icon: MousePointerClick, label: t("analytics.stat.bounce"), value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true,
       hint: "Share of sessions that left after a single pageview without interacting. Lower is usually better." },
-    { icon: Timer, label: "Avg. session", value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null,
+    { icon: Timer, label: t("analytics.stat.avgSession"), value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null,
       hint: "Average visible time across a whole visit. A backgrounded tab doesn't count, so this is real attention time." },
-    { icon: Timer, label: "Avg. time on page", value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan",
+    { icon: Timer, label: t("analytics.stat.avgTimeOnPage"), value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan",
       hint: "Average visible time on a single page before moving on." },
-    { icon: Layers, label: "Pages / session", value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null,
+    { icon: Layers, label: t("analytics.stat.pagesPerSession"), value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null,
       hint: "How many pages a typical visit touches. Higher means people explore more." },
   ];
 
@@ -297,37 +308,37 @@ export default function Analytics() {
   // hold a small set of detail views, so nothing is buried in a long scroll.
   type SubTab = { value: string; label: string; icon: any };
   const SECTIONS: { value: string; label: string; icon: any; tabs: SubTab[] }[] = [
-    { value: "overview", label: "Overview", icon: LayoutDashboard, tabs: [] },
+    { value: "overview", label: t("analytics.sec.overview"), icon: LayoutDashboard, tabs: [] },
     {
       value: "behavior",
-      label: "Behavior",
+      label: t("analytics.sec.behavior"),
       icon: ArrowDownWideNarrow,
       tabs: [
-        { value: "pages", label: "Pages", icon: Eye },
-        { value: "engagement", label: "Engagement", icon: ArrowDownWideNarrow },
-        { value: "clicks", label: "Clicks", icon: MousePointerClick },
+        { value: "pages", label: t("analytics.tab.pages"), icon: Eye },
+        { value: "engagement", label: t("analytics.tab.engagement"), icon: ArrowDownWideNarrow },
+        { value: "clicks", label: t("analytics.tab.clicks"), icon: MousePointerClick },
       ],
     },
     {
       value: "acquisition",
-      label: "Acquisition",
+      label: t("analytics.sec.acquisition"),
       icon: Tag,
       tabs: [
-        { value: "sources", label: "Sources", icon: Tag },
-        { value: "geo", label: "Geography", icon: Globe2 },
-        { value: "tech", label: "Technology", icon: AppWindow },
+        { value: "sources", label: t("analytics.tab.sources"), icon: Tag },
+        { value: "geo", label: t("analytics.tab.geo"), icon: Globe2 },
+        { value: "tech", label: t("analytics.tab.tech"), icon: AppWindow },
       ],
     },
     {
       value: "conversion",
-      label: "Conversion",
+      label: t("analytics.sec.conversion"),
       icon: Target,
       tabs: [
-        { value: "goals", label: "Goals", icon: Target },
-        { value: "events", label: "Events", icon: Zap },
-        { value: "funnel", label: "Funnel", icon: GitBranch },
-        { value: "retention", label: "Retention", icon: Repeat },
-        { value: "errors", label: "Errors", icon: AlertTriangle },
+        { value: "goals", label: t("analytics.tab.goals"), icon: Target },
+        { value: "events", label: t("analytics.tab.events"), icon: Zap },
+        { value: "funnel", label: t("analytics.tab.funnel"), icon: GitBranch },
+        { value: "retention", label: t("analytics.tab.retention"), icon: Repeat },
+        { value: "errors", label: t("analytics.tab.errors"), icon: AlertTriangle },
       ],
     },
   ];
@@ -356,9 +367,16 @@ export default function Analytics() {
           onDone={scopeSwitch.dismiss}
         />
       )}
+      <HelpDrawer
+        opened={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title={t("analytics.help")}
+        sections={ANALYTICS_HELP}
+      />
+
       <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
         <div style={{ flex: "1 1 240px", minWidth: 0 }}>
-          <Title order={1}>Analytics</Title>
+          <Title order={1}>{t("analytics.title")}</Title>
           <Text c="dimmed" size="sm" mt={6}>
             Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
             Changes compare to the previous {range}.
@@ -376,6 +394,18 @@ export default function Analytics() {
               filter={serializeFilter(filter)}
               sites={siteScope}
             />
+            {/* Same help affordance as the dashboard — every metric on this page
+                has a plain-language definition behind it. */}
+            <MTooltip label={t("analytics.helpTooltip")} withArrow>
+              <ActionIcon
+                variant="default"
+                size="lg"
+                onClick={() => setHelpOpen(true)}
+                aria-label={t("analytics.help")}
+              >
+                <HelpCircle size={17} />
+              </ActionIcon>
+            </MTooltip>
           </Group>
           <Group gap="xs" wrap="nowrap" className="an-range">
             {(statsLoading || refetching) && (
@@ -433,7 +463,7 @@ export default function Analytics() {
 
       {section === "overview" && <>
       {/* audience */}
-      <SectionLabel icon={Users}>Audience</SectionLabel>
+      <SectionLabel icon={Users}>{t("analytics.sectionAudience")}</SectionLabel>
       <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} spacing="lg" mb="xl">
         {audience.map((k, i) => (
           <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
@@ -443,7 +473,7 @@ export default function Analytics() {
       </SimpleGrid>
 
       {/* engagement */}
-      <SectionLabel icon={ArrowDownWideNarrow}>Engagement</SectionLabel>
+      <SectionLabel icon={ArrowDownWideNarrow}>{t("analytics.sectionEngagement")}</SectionLabel>
       <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} spacing="lg" mb="xl">
         {engagement.map((k, i) => (
           <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05, duration: 0.35 }}>
@@ -453,12 +483,12 @@ export default function Analytics() {
       </SimpleGrid>
 
       {/* traffic chart + live */}
-      <SectionLabel icon={Eye}>Traffic</SectionLabel>
+      <SectionLabel icon={Eye}>{t("analytics.sectionTraffic")}</SectionLabel>
       <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="xl">
         <div className="grid-span-2">
           <Card withBorder radius="lg" padding="lg" h="100%">
             <Group justify="space-between" mb="md" wrap="nowrap">
-              <Text fw={600} c="dimmed" size="sm">Traffic over time</Text>
+              <Text fw={600} c="dimmed" size="sm">{t("analytics.trafficOverTime")}</Text>
               {hasData && (
                 <Group gap="md" wrap="nowrap">
                   <LegendDot color="#10b981">Pageviews</LegendDot>
@@ -491,7 +521,7 @@ export default function Analytics() {
               <Center h={260}>
                 <Stack align="center" gap={6}>
                   <AnalyticsArt />
-                  <Text fw={600} size="sm" mt="xs">No pageviews yet</Text>
+                  <Text fw={600} size="sm" mt="xs">{t("analytics.noPageviews")}</Text>
                   <Text c="dimmed" size="xs" ta="center" maw={320}>
                     Add a site in Workspaces and paste its snippet into your app.
                   </Text>
@@ -537,11 +567,11 @@ export default function Analytics() {
 
         <Tabs.Panel value="pages">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <BarList title="Top pages" icon={Eye} items={view?.topPages ?? []} color="teal"
+            <BarList title={t("analytics.list.topPages")} icon={Eye} items={view?.topPages ?? []} color="teal"
                      filterKey="path" onFilter={addFilter} />
-            <BarList title="Entry pages" icon={LogIn} items={view?.entryPages ?? []} color="emerald"
+            <BarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="emerald"
                      empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
-            <BarList title="Exit pages" icon={LogOut} items={view?.exitPages ?? []} color="pink"
+            <BarList title={t("analytics.list.exitPages")} icon={LogOut} items={view?.exitPages ?? []} color="pink"
                      empty="No completed sessions yet" filterKey="path" onFilter={addFilter} />
           </SimpleGrid>
         </Tabs.Panel>
@@ -556,28 +586,28 @@ export default function Analytics() {
 
         <Tabs.Panel value="sources">
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" mb="lg">
-            <BarList title="Channels" icon={Split} items={view?.channels ?? []} color="emerald"
+            <BarList title={t("analytics.list.channels")} icon={Split} items={view?.channels ?? []} color="emerald"
                      empty="No traffic yet" />
-            <BarList title="Referrers" icon={Tag} items={view?.topReferrers ?? []} color="cyan"
+            <BarList title={t("analytics.list.referrers")} icon={Tag} items={view?.topReferrers ?? []} color="cyan"
                      filterKey="referrer" onFilter={addFilter} />
           </SimpleGrid>
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-            <BarList title="UTM sources" icon={Tag} items={view?.utmSources ?? []} color="teal"
+            <BarList title={t("analytics.list.utmSources")} icon={Tag} items={view?.utmSources ?? []} color="teal"
                      filterKey="utmSource" onFilter={addFilter} />
-            <BarList title="UTM campaigns" icon={Tag} items={view?.utmCampaigns ?? []} color="grape"
+            <BarList title={t("analytics.list.utmCampaigns")} icon={Tag} items={view?.utmCampaigns ?? []} color="grape"
                      filterKey="utmCampaign" onFilter={addFilter} />
           </SimpleGrid>
         </Tabs.Panel>
 
         <Tabs.Panel value="tech">
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-            <BarList title="Browsers" icon={AppWindow} items={view?.browsers ?? []} color="cyan"
+            <BarList title={t("analytics.list.browsers")} icon={AppWindow} items={view?.browsers ?? []} color="cyan"
                      filterKey="browser" onFilter={addFilter} />
-            <BarList title="Operating systems" icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal"
+            <BarList title={t("analytics.list.operatingSystems")} icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal"
                      filterKey="os" onFilter={addFilter} />
-            <BarList title="Devices" icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald"
+            <BarList title={t("analytics.list.devices")} icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald"
                      filterKey="device" onFilter={addFilter} />
-            <BarList title="Screen sizes" icon={MonitorSmartphone} items={view?.screenSizes ?? []} color="grape" />
+            <BarList title={t("analytics.list.screenSizes")} icon={MonitorSmartphone} items={view?.screenSizes ?? []} color="grape" />
           </SimpleGrid>
         </Tabs.Panel>
 
@@ -588,7 +618,7 @@ export default function Analytics() {
             </div>
             <Stack gap="lg">
               <BarList
-                title="Countries"
+                title={t("analytics.list.countries")}
                 icon={Globe2}
                 items={view?.countries ?? []}
                 color="emerald"
@@ -601,7 +631,7 @@ export default function Analytics() {
                   </span>
                 )}
               />
-              <BarList title="Languages" icon={Languages} items={view?.languages ?? []} color="cyan"
+              <BarList title={t("analytics.list.languages")} icon={Languages} items={view?.languages ?? []} color="cyan"
                        filterKey="language" onFilter={addFilter} />
             </Stack>
           </SimpleGrid>

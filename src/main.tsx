@@ -19,6 +19,11 @@ import '@fontsource/space-grotesk/700.css'
 import { theme } from './theme'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary'
+// Initialise i18next before the first render so `t()` resolves on first paint,
+// and set the document language/direction to match the saved preference.
+import { i18n, applyDocumentLang, readLanguage } from './locale'
+void i18n
+applyDocumentLang(readLanguage())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

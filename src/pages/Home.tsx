@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Text, Group, Button, Card, ThemeIcon, Stack, Center, Badge, Progress, Alert,
-  ActionIcon, Tooltip as MTooltip,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import {
@@ -16,7 +15,6 @@ import {
   Users, Eye, Radio, Globe, BarChart3, FolderKanban, Plus, ArrowUpRight,
   MousePointerClick, Timer, Layers, Globe2, SlidersHorizontal,
   LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag, Pencil, Check, Move, Split,
-  HelpCircle,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { StatCard } from "../components/StatCard";
@@ -33,8 +31,6 @@ import { ScrollPanel, LandingPanel } from "../components/EngagementPanels";
 import { OutboundPanel, ErrorsPanel } from "../components/OutboundErrorsPanels";
 import { GoalsPanel } from "../components/GoalsPanel";
 import { SeoScoreCard } from "../components/seo/SeoScoreCard";
-import { HelpDrawer } from "../components/HelpDrawer";
-import { ANALYTICS_HELP } from "../components/analyticsHelp";
 import { SortableWidget, WidgetDragPreview } from "../components/SortableWidget";
 import { Onboarding } from "../components/Onboarding";
 import { useStats, useSites, useHomeWidgets, WIDGET_MAP } from "../hooks";
@@ -187,7 +183,6 @@ export default function Home() {
   } = useHomeWidgets();
 
   const [customizing, setCustomizing] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [dragging, setDragging] = useState<WidgetId | null>(null);
 
@@ -354,12 +349,6 @@ export default function Home() {
         }}
       />
 
-      <HelpDrawer
-        opened={helpOpen}
-        onClose={() => setHelpOpen(false)}
-        title="Dashboard help"
-        sections={ANALYTICS_HELP}
-      />
 
       {/* Controls first, then the hero band — the toolbar is chrome, so it
           stays compact above the thing people actually came to read. */}
@@ -408,16 +397,6 @@ export default function Home() {
             Add widgets
           </Button>
 
-          <MTooltip label="What each widget shows" withArrow>
-            <ActionIcon
-              variant="default"
-              size="lg"
-              onClick={() => setHelpOpen(true)}
-              aria-label="Widget help"
-            >
-              <HelpCircle size={17} />
-            </ActionIcon>
-          </MTooltip>
 
           {!editing && !dirty && (
             <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>

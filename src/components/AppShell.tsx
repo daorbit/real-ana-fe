@@ -19,6 +19,8 @@ import { DemoToggle } from "./DemoToggle";
 import { useDemo } from "../demo";
 import { SwitchOverlay, useSwitchOverlay } from "./SwitchOverlay";
 import { CommandPalette } from "./CommandPalette";
+import { LanguagePicker } from "./LanguagePicker";
+import { useTranslation } from "react-i18next";
 
 /**
  * Grouped navigation.
@@ -27,29 +29,34 @@ import { CommandPalette } from "./CommandPalette";
  * are occasional setup — grouping costs one line of chrome and makes the shape
  * of the product visible.
  */
+// `labelKey` is an i18n key resolved at render, so the rail follows the chosen
+// language. `headingKey` likewise. Items without a shipped key (Public
+// dashboard, admin-only) fall back to their English label via a plain string.
 const NAV_GROUPS = [
   {
+    headingKey: "nav.groupAnalyze",
     heading: "Analyze",
     items: [
-      { to: "/app", label: "Home", icon: Home },
-      { to: "/app/analytics", label: "Analytics", icon: BarChart3 },
-      { to: "/app/seo", label: "SEO", icon: Search },
+      { to: "/app", labelKey: "nav.home", label: "Home", icon: Home },
+      { to: "/app/analytics", labelKey: "nav.analytics", label: "Analytics", icon: BarChart3 },
+      { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
     ],
   },
   {
+    headingKey: "nav.groupManage",
     heading: "Manage",
     items: [
-      { to: "/app/workspaces", label: "Workspaces", icon: FolderKanban },
-      { to: "/app/share", label: "Public dashboard", icon: Share2 },
-      { to: "/app/developers", label: "Developers", icon: Code2 },
+      { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
+      { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
+      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
     ],
   },
 ];
 
 /** Only an admin sees these, and only when not already acting as someone else. */
 const ADMIN_ITEMS = [
-  { to: "/app/impersonate", label: "View as user", icon: Users },
-  { to: "/app/demo-usage", label: "Demo usage", icon: PlayCircle },
+  { to: "/app/impersonate", labelKey: "nav.viewAsUser", label: "View as user", icon: Users },
+  { to: "/app/demo-usage", labelKey: "nav.demoUsage", label: "Demo usage", icon: PlayCircle },
 ];
 
 function NavItem({
@@ -89,6 +96,7 @@ function NavItem({
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const { user, logout, exitImpersonation, isDemo } = useAuth();
   const { workspaces, active, setActive } = useWorkspace();
   const { setColorScheme } = useMantineColorScheme();
@@ -120,16 +128,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
 
   const groups = isAdmin
-    ? [...NAV_GROUPS, { heading: "Admin", items: ADMIN_ITEMS }]
+    ? [...NAV_GROUPS, { headingKey: "nav.groupAdmin", heading: "Admin", items: ADMIN_ITEMS }]
     : NAV_GROUPS;
 
   const leave = async () => {
     setLeaving(true);
     try {
       await exitImpersonation();
-      notify.info("Back to your own account.");
+      notify.info(t("nav.backToAccount"));
     } catch (e) {
-      notify.error(errMessage(e, "Could not exit impersonation."));
+      notify.error(errMessage(e, t("nav.exitImpersonationError")));
     } finally {
       setLeaving(false);
     }
@@ -141,7 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     {wsSwitch.active && active && (
       <SwitchOverlay
         label={active.name}
-        sublabel="Loading workspace analytics"
+        sublabel={t("nav.loadingWorkspace")}
         onDone={wsSwitch.dismiss}
       />
     )}
@@ -162,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{ background: "var(--bg-2)", borderBottom: "1px solid var(--border)" }}
       >
         <Group h="100%" gap="sm">
-          <Burger opened={navOpen} onClick={toggleNav} size="sm" aria-label="Toggle navigation" />
+          <Burger opened={navOpen} onClick={toggleNav} size="sm" aria-label={t("nav.toggleNav")} />
           <Box component={Link} to="/app" display="flex">
             <Wordmark />
           </Box>
@@ -193,7 +201,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               comboboxProps={{ withinPortal: true, radius: "md" }}
               leftSection={<FolderKanban size={15} />}
               rightSection={<ChevronsUpDown size={14} />}
-              aria-label="Active workspace"
+              aria-label={t("nav.activeWorkspace")}
             />
           </MantineShell.Section>
         )}
@@ -212,7 +220,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Group gap="xs" wrap="nowrap">
               <Search size={15} style={{ color: "var(--muted)", flexShrink: 0 }} />
-              <Text size="sm" c="dimmed">Search</Text>
+              <Text size="sm" c="dimmed">{t("nav.search")}</Text>
               <kbd className="kbd" style={{ marginLeft: "auto" }}>Ctrl K</kbd>
             </Group>
           </UnstyledButton>
@@ -221,12 +229,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <MantineShell.Section grow component={ScrollArea}>
           {groups.map((group) => (
             <Box key={group.heading} mb="md">
-              <p className="nav-heading">{group.heading}</p>
+              <p className="nav-heading">{t(group.headingKey, group.heading)}</p>
               {group.items.map((n) => (
                 <NavItem
                   key={n.to}
                   to={n.to}
-                  label={n.label}
+                  label={t(n.labelKey, n.label)}
                   icon={n.icon}
                   active={loc.pathname === n.to}
                 />
@@ -242,23 +250,23 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Box className="demo-card" mb="xs">
               <Group gap={6} wrap="nowrap" mb={4}>
                 <PlayCircle size={12} style={{ color: "var(--violet-2)", flexShrink: 0 }} />
-                <Text size="xs" fw={650}>Demo mode</Text>
+                <Text size="xs" fw={650}>{t("nav.demoMode")}</Text>
               </Group>
               <Text size="xs" c="dimmed" lh={1.4}>
-                Sample data. Changes are turned off.
+                {t("nav.demoBlurb")}
               </Text>
               <UnstyledButton
                 className="demo-exit"
                 onClick={logout}
               >
                 <LogOut size={11} />
-                Exit demo
+                {t("nav.exitDemo")}
               </UnstyledButton>
             </Box>
           )}
 
           <Group gap={4} mb="xs" px={2}>
-            <Tooltip label="Documentation" withArrow>
+            <Tooltip label={t("nav.documentation")} withArrow>
               <ActionIcon
                 component="a"
                 href="https://quantalog.daorbit.in/docs"
@@ -266,21 +274,22 @@ export function AppShell({ children }: { children: ReactNode }) {
                 rel="noreferrer"
                 variant="subtle"
                 color="gray"
-                aria-label="Documentation"
+                aria-label={t("nav.documentation")}
               >
                 <BookOpen size={16} />
               </ActionIcon>
             </Tooltip>
-            <Tooltip label={dark ? "Light mode" : "Dark mode"} withArrow>
+            <Tooltip label={dark ? t("nav.lightMode") : t("nav.darkMode")} withArrow>
               <ActionIcon
                 variant="subtle"
                 color="gray"
                 onClick={() => setColorScheme(dark ? "light" : "dark")}
-                aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+                aria-label={dark ? t("nav.switchToLight") : t("nav.switchToDark")}
               >
                 {dark ? <Sun size={16} /> : <Moon size={16} />}
               </ActionIcon>
             </Tooltip>
+            <LanguagePicker />
             <DemoToggle />
           </Group>
 
@@ -309,7 +318,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to="/app/settings"
                 leftSection={<SettingsIcon size={15} />}
               >
-                Settings
+                {t("nav.settings")}
               </Menu.Item>
               <Menu.Divider />
               <Menu.Item
@@ -318,11 +327,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={() =>
                   confirmLogout(() => {
                     logout();
-                    notify.info("You have been logged out.");
+                    notify.info(t("nav.loggedOut"));
                   })
                 }
               >
-                Log out
+                {t("nav.logout")}
               </Menu.Item>
             </Menu.Dropdown>
           </Menu>
@@ -355,8 +364,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Alert color="orange" variant="filled" radius="md" mb="lg" icon={<Eye size={18} />}>
               <Group justify="space-between" wrap="nowrap">
                 <Text size="sm" fw={500}>
-                  You are viewing as <b>{user?.email}</b> with full access — changes you
-                  make are real.
+                  {t("nav.viewingAs")} <b>{user?.email}</b> {t("nav.viewingAsRest")}
                 </Text>
                 <Button
                   size="xs"
@@ -366,7 +374,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   loading={leaving}
                   style={{ flexShrink: 0 }}
                 >
-                  Exit
+                  {t("nav.exit")}
                 </Button>
               </Group>
             </Alert>

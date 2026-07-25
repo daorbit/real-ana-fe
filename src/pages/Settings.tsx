@@ -3,7 +3,8 @@ import type { FormEvent } from "react";
 import {
   Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code,
 } from "@mantine/core";
-import { Save, Languages, Undo2 } from "lucide-react";
+import { Save, Undo2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, PageStack, Section, Field } from "../components/Page";
 import { useAuth } from "../auth";
@@ -41,22 +42,45 @@ const TIMEZONES = [
   { value: "Australia/Sydney", label: "Australia/Sydney" },
 ];
 
+const BROWSER_LOCALE = (() => {
+  try {
+    return new Intl.DateTimeFormat().resolvedOptions().locale || null;
+  } catch {
+    return null;
+  }
+})();
+
+const BROWSER_TZ = (() => {
+  try {
+    return new Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
+})();
+
+/**
+ * Validators return an i18n key (or null), not a finished message, so the error
+ * shown under a field follows the interface language like everything else. The
+ * caller runs the key through `t()`.
+ */
+
 /** A phone number people actually type: digits, spaces, +, -, (), 6–20 long. */
 function mobileError(v: string): string | null {
   const s = v.trim();
   if (!s) return null;
-  if (!/^\+?[\d\s\-()]{6,20}$/.test(s)) return "Enter a valid phone number";
+  if (!/^\+?[\d\s\-()]{6,20}$/.test(s)) return "settings.badPhone";
   return null;
 }
 
 function avatarError(v: string): string | null {
   const s = v.trim();
   if (!s) return null;
-  if (!/^https?:\/\/\S+$/i.test(s)) return "Must start with http:// or https://";
+  if (!/^https?:\/\/\S+$/i.test(s)) return "settings.avatarBadUrl";
   return null;
 }
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { user, updateProfile } = useAuth();
 
   const [firstName, setFirstName] = useState("");
@@ -67,6 +91,14 @@ export default function Settings() {
   const [timezone, setTimezone] = useState("");
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [saving, setSaving] = useState(false);
+  const [avatarBroken, setAvatarBroken] = useState(false);
+
+  // Clear a field's error the moment its value becomes valid, rather than
+  // leaving stale red text sitting under a field the user has already fixed and
+  // is waiting on the next Save to acknowledge.
+  const clearIfValid = (key: string, check: (v: string) => string | null, v: string) => {
+    setErrors((prev) => (prev[key] && !check(v) ? { ...prev, [key]: null } : prev));
+  };
 
   // Also used by Discard, which is exactly "put every field back to the saved
   // profile" — the same operation as the initial seed.
@@ -79,6 +111,7 @@ export default function Settings() {
     setDateLocale(user.dateLocale ?? "");
     setTimezone(user.timezone ?? "");
     setErrors({});
+    setAvatarBroken(false);
   }, [user]);
 
   // Seed from the session once it is known, and re-seed if the session changes
@@ -102,7 +135,22 @@ export default function Settings() {
 
   // A profile edit is quick to make and easy to walk away from — closing the
   // tab or clicking a nav link would otherwise drop it silently.
-  useUnsavedGuard(dirty, "Your profile changes haven't been saved.");
+  useUnsavedGuard(dirty, t("settings.unsavedGuard"));
+
+  // Esc discards the pending edit — the keyboard twin of the Discard button, so
+  // you can back out without reaching for the mouse. Skipped while a dropdown is
+  // open (Esc closes that first) and while saving (nothing to safely revert).
+  useEffect(() => {
+    if (!dirty || saving) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (document.querySelector('[role="listbox"]')) return;
+      e.preventDefault();
+      seedFromUser();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dirty, saving, seedFromUser]);
 
   // Preview the pending selection, not the saved one — otherwise the sample
   // contradicts the dropdown until you hit save.
@@ -125,7 +173,7 @@ export default function Settings() {
     e.preventDefault();
 
     const next: Record<string, string | null> = {
-      firstName: firstName.trim() ? null : "First name is required",
+      firstName: firstName.trim() ? null : "settings.firstNameRequired",
       mobile: mobileError(mobile),
       avatarUrl: avatarError(avatarUrl),
     };
@@ -142,13 +190,16 @@ export default function Settings() {
         dateLocale,
         timezone,
       });
-      notify.success("Your profile has been updated.", "Saved");
+      notify.success(t("settings.savedToast"), t("common.saved"));
     } catch (err) {
-      notify.error(errMessage(err, "Could not save your profile."));
+      notify.error(errMessage(err, t("settings.saveError")));
     } finally {
       setSaving(false);
     }
   };
+
+  // Errors are stored as i18n keys; resolve to the current language at render.
+  const errText = (key: string | null | undefined) => (key ? t(key) : undefined);
 
   if (!user) return null;
 
@@ -160,8 +211,8 @@ export default function Settings() {
     <AppShell>
       <form onSubmit={submit}>
         <PageHeader
-          title="Settings"
-          description="Your profile and how dates are shown across the dashboard."
+          title={t("settings.title")}
+          description={t("settings.description")}
           actions={
             <Button
               type="submit"
@@ -169,7 +220,7 @@ export default function Settings() {
               loading={saving}
               disabled={!dirty}
             >
-              Save changes
+              {t("common.save")}
             </Button>
           }
         />
@@ -180,10 +231,11 @@ export default function Settings() {
           <Box className="surface-card" p="lg">
             <Group gap="lg" wrap="nowrap">
               <Avatar
-                src={avatarError(avatarUrl) ? null : avatarUrl || null}
+                src={avatarError(avatarUrl) || avatarBroken ? null : avatarUrl || null}
                 color="emerald"
                 radius="md"
                 size={72}
+                imageProps={{ onError: () => setAvatarBroken(true) }}
               >
                 {initials}
               </Avatar>
@@ -206,57 +258,77 @@ export default function Settings() {
           </Box>
 
           <Section
-            title="Profile"
-            description="How you appear across Quantalog."
+            title={t("settings.profile")}
+            description={t("settings.profileDesc")}
           >
-            <Field label="First name" hint="Required.">
+            <Field label={t("settings.firstName")} hint={t("common.required")}>
               <TextInput
                 value={firstName}
-                onChange={(e) => setFirstName(e.currentTarget.value)}
-                error={errors.firstName}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setFirstName(v);
+                  clearIfValid("firstName", (s) => (s.trim() ? null : "x"), v);
+                }}
+                error={errText(errors.firstName)}
               />
             </Field>
-            <Field label="Last name">
+            <Field label={t("settings.lastName")}>
               <TextInput
                 value={lastName}
                 onChange={(e) => setLastName(e.currentTarget.value)}
               />
             </Field>
             <Field
-              label="Email"
-              hint="Your email is your sign-in and can't be changed here."
+              label={t("settings.email")}
+              hint={t("settings.emailHint")}
             >
               <TextInput value={user.email} disabled />
             </Field>
-            <Field label="Mobile number" hint="Optional.">
+            <Field label={t("settings.mobile")} hint={t("common.optional")}>
               <TextInput
                 placeholder="+91 98765 43210"
                 value={mobile}
-                onChange={(e) => setMobile(e.currentTarget.value)}
-                error={errors.mobile}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setMobile(v);
+                  clearIfValid("mobile", mobileError, v);
+                }}
+                error={errText(errors.mobile)}
               />
             </Field>
             <Field
-              label="Profile image"
-              hint="Paste a link to an image. Uploading isn't supported yet."
+              label={t("settings.profileImage")}
+              hint={t("settings.profileImageHint")}
               last
             >
               <TextInput
                 placeholder="https://example.com/me.jpg"
                 value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.currentTarget.value)}
-                error={errors.avatarUrl}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setAvatarUrl(v);
+                  setAvatarBroken(false);
+                  clearIfValid("avatarUrl", avatarError, v);
+                }}
+                error={
+                  errText(errors.avatarUrl) ??
+                  (avatarBroken ? t("settings.avatarBroken") : undefined)
+                }
               />
             </Field>
           </Section>
 
           <Section
-            title="Dates and time"
-            description="Applies to every date shown in the dashboard."
+            title={t("settings.datesTitle")}
+            description={t("settings.datesDesc")}
           >
             <Field
-              label="Date format"
-              hint="Controls how dates are written — day and month order, and month names."
+              label={t("settings.dateFormat")}
+              hint={
+                !dateLocale && BROWSER_LOCALE
+                  ? t("settings.dateFormatHintDetected", { value: BROWSER_LOCALE })
+                  : t("settings.dateFormatHint")
+              }
             >
               <Select
                 data={LOCALES}
@@ -267,8 +339,12 @@ export default function Settings() {
               />
             </Field>
             <Field
-              label="Timezone"
-              hint="Decides which day a stat falls on, and the clock time on every chart."
+              label={t("settings.timezone")}
+              hint={
+                !timezone && BROWSER_TZ
+                  ? t("settings.timezoneHintDetected", { value: BROWSER_TZ })
+                  : t("settings.timezoneHint")
+              }
             >
               <Select
                 data={TIMEZONES}
@@ -279,7 +355,7 @@ export default function Settings() {
                 comboboxProps={{ withinPortal: true, radius: "md" }}
               />
             </Field>
-            <Field label="Preview" hint="Right now, with the settings above." last>
+            <Field label={t("settings.preview")} hint={t("settings.previewHint")} last>
               <Code
                 block
                 style={{ fontSize: 13, padding: "10px 12px", background: "var(--surface-2)" }}
@@ -289,26 +365,9 @@ export default function Settings() {
             </Field>
           </Section>
 
-          {/* Named rather than hidden: the absence of a language switcher is a
-              real gap, and saying so beats letting people hunt for it. */}
-          <Section
-            title="Language"
-            description="The dashboard interface language."
-          >
-            <Field
-              label="Interface language"
-              hint="Quantalog's interface is currently English only. Translations are planned — the date settings above already follow your region."
-              last
-            >
-              <Group gap="xs" wrap="nowrap">
-                <Languages size={16} style={{ color: "var(--muted)", flexShrink: 0 }} />
-                <Text size="sm" c="dimmed">English</Text>
-                <Badge size="xs" variant="light" color="gray" ml="auto">
-                  More coming
-                </Badge>
-              </Group>
-            </Field>
-          </Section>
+          {/* Interface language moved to the sidebar — it's a client-only,
+              app-wide switch, not a saved-profile field, so it belongs with the
+              other global controls rather than behind a Save button here. */}
 
           {/* Clears the sticky bar below, so it never covers the last field. */}
           {dirty && <Box h={64} aria-hidden />}
@@ -322,7 +381,7 @@ export default function Settings() {
             <Group justify="space-between" gap="md" wrap="nowrap">
               <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
                 <span className="save-bar__dot" aria-hidden />
-                <Text size="sm" fw={500} truncate>Unsaved changes</Text>
+                <Text size="sm" fw={500} truncate>{t("common.unsavedChanges")}</Text>
               </Group>
               <Group gap="sm" wrap="nowrap">
                 <Button
@@ -331,8 +390,12 @@ export default function Settings() {
                   leftSection={<Undo2 size={15} />}
                   onClick={seedFromUser}
                   disabled={saving}
+                  title={`${t("common.discard")} (Esc)`}
                 >
-                  Discard
+                  {t("common.discard")}
+                  <Text component="span" size="xs" c="dimmed" ml={6} visibleFrom="sm">
+                    Esc
+                  </Text>
                 </Button>
                 <Button
                   type="submit"
@@ -340,7 +403,7 @@ export default function Settings() {
                   leftSection={<Save size={15} />}
                   loading={saving}
                 >
-                  Save changes
+                  {t("common.save")}
                 </Button>
               </Group>
             </Group>

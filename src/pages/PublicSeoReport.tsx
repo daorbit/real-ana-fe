@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Box, Center, Loader, Stack, Text, Group, ThemeIcon, Anchor, Tooltip,
+  Box, Center, Loader, Stack, Text, Group, ThemeIcon, Anchor,
 } from "@mantine/core";
 import { EyeOff, ExternalLink, ShieldCheck } from "lucide-react";
 import { Wordmark } from "../components/Brand";
