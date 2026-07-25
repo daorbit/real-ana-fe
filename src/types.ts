@@ -118,6 +118,16 @@ export type EmailStatus = {
   from: string;
 };
 
+/** A canned message. The copy lives server-side so it can be fixed without a build. */
+export type MailTemplate = {
+  id: string;
+  label: string;
+  hint: string;
+  segment: EmailSegmentId;
+  subject: string;
+  body: string;
+};
+
 export type EmailSendResult = {
   sent: number;
   failed: number;

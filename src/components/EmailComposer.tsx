@@ -1,111 +1,85 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Modal, Stack, Group, Button, TextInput, Textarea, Text, Card, Badge,
-  Radio, Alert, Loader, Checkbox, ScrollArea, Divider, Code, ThemeIcon, Center,
+  Modal, Stack, Group, Button, TextInput, Textarea, Text, Badge,
+  Alert, Loader, ScrollArea, Code, Center, UnstyledButton, Collapse, Box,
 } from "@mantine/core";
-import { Mail, Send, AlertTriangle, Users, FlaskConical, Info } from "lucide-react";
+import {
+  Send, AlertTriangle, FlaskConical, ArrowLeft, ChevronRight, ChevronDown, Check,
+} from "lucide-react";
 import {
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
+  useGetEmailTemplatesQuery,
   useGetEmailRecipientsQuery,
   useSendAdminEmailMutation,
   useSendTestEmailMutation,
 } from "../store";
 import { notify, errMessage } from "../notify";
-import type { EmailSegmentId } from "../types";
-
-/** Starting points, so a routine nudge doesn't have to be written from scratch. */
-const TEMPLATES: { label: string; segment: EmailSegmentId; subject: string; body: string }[] = [
-  {
-    label: "Install reminder",
-    segment: "not-installed",
-    subject: "One step left to start seeing your traffic",
-    body: `Hi {{name}},
-
-Thanks for signing up to Quantalog. Your site is set up, but we haven't seen any traffic from it yet — which usually means the tracking snippet hasn't been added to the site.
-
-It's one line in your page's <head>, and you'll find it under Settings in your dashboard. Once it's live, your analytics start filling in within a minute or two.
-
-If you hit a snag, reply to this email and I'll help you get it working.`,
-  },
-  {
-    label: "Welcome",
-    segment: "no-sites",
-    subject: "Welcome to Quantalog",
-    body: `Hi {{name}},
-
-Welcome aboard, and thanks for signing up.
-
-To get started, add your first site from the dashboard — you'll get a tracking snippet to drop into your pages, and your traffic starts showing up right away.
-
-If anything is unclear, just reply to this email.`,
-  },
-];
+import type { AdminUser, EmailSegmentId } from "../types";
 
 /**
- * Admin-only: compose and send a message to a group of accounts.
+ * Admin-only: compose and send a message, either to a segment or to one
+ * account.
  *
- * Sending mail to real people is not undoable, so the flow is deliberately
- * slow at the point that matters: the recipient list is resolved and shown in
- * full before anything sends, individuals can be unticked, and the send button
- * names the exact count it is about to mail.
+ * Two steps rather than one long form. Choosing who to mail and writing what
+ * they read are different decisions, and putting them on one screen meant the
+ * audience — the part that is expensive to get wrong — competed for attention
+ * with a textarea.
  *
- * Delivery goes through Gmail SMTP, which sends sequentially — a list of a
- * hundred takes the better part of a minute, so the modal stays open and
- * blocked while it runs rather than pretending it finished.
+ * When `user` is set the audience is already decided, so step one is skipped
+ * entirely and the modal opens on the message.
  */
-export function EmailComposer({ opened, onClose }: { opened: boolean; onClose: () => void }) {
+export function EmailComposer({
+  opened,
+  onClose,
+  user,
+}: {
+  opened: boolean;
+  onClose: () => void;
+  /** Set to address exactly one account; omit for a segment broadcast. */
+  user?: AdminUser | null;
+}) {
+  const single = Boolean(user);
+
   const { data: status, isLoading: statusLoading } = useGetEmailStatusQuery(undefined, {
     skip: !opened,
   });
-  const { data: segmentData } = useGetEmailSegmentsQuery(undefined, { skip: !opened });
+  const { data: segmentData } = useGetEmailSegmentsQuery(undefined, {
+    skip: !opened || single,
+  });
+  const { data: templateData } = useGetEmailTemplatesQuery(undefined, { skip: !opened });
 
+  const [step, setStep] = useState<"audience" | "write">("audience");
   const [segment, setSegment] = useState<EmailSegmentId>("not-installed");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  // Which recipients are unticked. Tracking exclusions rather than inclusions
-  // means a segment that grows between preview and send still mails the new
-  // people, which is what "everyone who hasn't installed" should mean.
-  const [excluded, setExcluded] = useState<Set<string>>(new Set());
+  const [showList, setShowList] = useState(false);
 
   const [sendEmail, { isLoading: sending }] = useSendAdminEmailMutation();
   const [sendTest, { isLoading: testing }] = useSendTestEmailMutation();
 
   const { data: recipientData, isFetching: loadingRecipients } = useGetEmailRecipientsQuery(
     segment,
-    { skip: !opened },
+    { skip: !opened || single },
   );
 
-  // A different audience makes the previous exclusions meaningless.
-  useEffect(() => setExcluded(new Set()), [segment]);
+  // A single-user send has no audience step to return to.
+  useEffect(() => {
+    if (opened) setStep(single ? "write" : "audience");
+  }, [opened, single]);
 
-  const recipients = recipientData?.recipients ?? [];
-  const selected = useMemo(
-    () => recipients.filter((r) => !excluded.has(r.id)),
-    [recipients, excluded],
+  const recipients = useMemo(
+    () => (single && user ? [{ id: user.id, email: user.email, name: user.name }] : recipientData?.recipients ?? []),
+    [single, user, recipientData],
   );
 
-  const canSend = Boolean(status?.configured && subject.trim() && body.trim() && selected.length);
+  const templates = templateData?.templates ?? [];
+  const busy = sending || testing;
+  const canSend = Boolean(status?.configured && subject.trim() && body.trim() && recipients.length);
 
-  const reset = () => {
-    setSubject("");
-    setBody("");
-    setExcluded(new Set());
-  };
-
-  const applyTemplate = (t: (typeof TEMPLATES)[number]) => {
-    setSegment(t.segment);
-    setSubject(t.subject);
-    setBody(t.body);
-  };
-
-  const toggle = (id: string) => {
-    setExcluded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const close = () => {
+    if (busy) return;
+    onClose();
   };
 
   const send = async () => {
@@ -113,10 +87,7 @@ export function EmailComposer({ opened, onClose }: { opened: boolean; onClose: (
       const result = await sendEmail({
         subject: subject.trim(),
         body: body.trim(),
-        // Send the resolved ids, not the segment — the admin approved this
-        // exact list, and re-resolving server-side could mail someone they
-        // just unticked.
-        userIds: selected.map((r) => r.id),
+        userIds: recipients.map((r) => r.id),
       }).unwrap();
 
       if (result.failed) {
@@ -127,8 +98,14 @@ export function EmailComposer({ opened, onClose }: { opened: boolean; onClose: (
           "Partly sent",
         );
       } else {
-        notify.success(`Sent to ${result.sent} recipient${result.sent === 1 ? "" : "s"}.`, "Sent");
-        reset();
+        notify.success(
+          single
+            ? `Message sent to ${recipients[0]?.email}.`
+            : `Sent to ${result.sent} recipient${result.sent === 1 ? "" : "s"}.`,
+          "Sent",
+        );
+        setSubject("");
+        setBody("");
         onClose();
       }
     } catch (e) {
@@ -145,18 +122,16 @@ export function EmailComposer({ opened, onClose }: { opened: boolean; onClose: (
     }
   };
 
-  const busy = sending || testing;
+  const title = single ? `Message ${user?.name}` : step === "audience" ? "Who gets this?" : "Write your message";
 
   return (
     <Modal
       opened={opened}
-      onClose={onClose}
-      title="Send a message"
+      onClose={close}
+      title={title}
       centered
       radius="lg"
-      size="xl"
-      // A half-finished draft shouldn't vanish on a stray click, and a send in
-      // progress must not be interrupted.
+      size={single ? "lg" : "lg"}
       closeOnClickOutside={false}
       closeOnEscape={!busy}
       withCloseButton={!busy}
@@ -169,66 +144,136 @@ export function EmailComposer({ opened, onClose }: { opened: boolean; onClose: (
             The server has no Gmail credentials, so nothing can be sent yet. Set{" "}
             <Code>SMTP_USER</Code> and <Code>SMTP_PASS</Code> in the backend environment
             — <Code>SMTP_PASS</Code> must be a Google App Password, not the account
-            password, and it's generated under Security in the Google account settings.
+            password.
           </Text>
         </Alert>
-      ) : (
-        <Stack gap="lg">
-          <Group gap="xs">
-            <ThemeIcon variant="light" color="emerald" size="sm" radius="sm">
-              <Mail size={13} />
-            </ThemeIcon>
-            <Text size="xs" c="dimmed">
-              Sending as <b>{status.from}</b>
-            </Text>
+      ) : step === "audience" ? (
+        /* ------------------------------ step 1 ------------------------------ */
+        <Stack gap="xs">
+          {(segmentData?.segments ?? []).map((s) => {
+            const active = segment === s.id;
+            return (
+              <UnstyledButton
+                key={s.id}
+                onClick={() => setSegment(s.id)}
+                style={{
+                  border: `1px solid var(${active ? "--mantine-color-emerald-6" : "--mantine-color-default-border"})`,
+                  background: active ? "var(--mantine-color-emerald-light)" : undefined,
+                  borderRadius: 10,
+                  padding: "12px 14px",
+                }}
+              >
+                <Group justify="space-between" wrap="nowrap">
+                  <div style={{ minWidth: 0 }}>
+                    <Group gap={7} wrap="nowrap">
+                      {active && <Check size={14} />}
+                      <Text size="sm" fw={600}>{s.label}</Text>
+                    </Group>
+                    <Text size="xs" c="dimmed" mt={2}>{s.description}</Text>
+                  </div>
+                  <Badge variant="light" color={active ? "emerald" : "gray"} size="lg">
+                    {s.count}
+                  </Badge>
+                </Group>
+              </UnstyledButton>
+            );
+          })}
+
+          <Group justify="flex-end" mt="md">
+            <Button variant="subtle" color="gray" onClick={close}>Cancel</Button>
+            <Button
+              color="emerald"
+              radius="md"
+              rightSection={<ChevronRight size={15} />}
+              disabled={!recipients.length}
+              onClick={() => setStep("write")}
+            >
+              Next
+            </Button>
           </Group>
-
-          <div>
-            <Text size="sm" fw={600} mb={6}>Start from a template</Text>
-            <Group gap="xs">
-              {TEMPLATES.map((t) => (
-                <Button
-                  key={t.label}
-                  size="xs"
-                  variant="default"
-                  radius="md"
-                  disabled={busy}
-                  onClick={() => applyTemplate(t)}
-                >
-                  {t.label}
-                </Button>
-              ))}
+        </Stack>
+      ) : (
+        /* ------------------------------ step 2 ------------------------------ */
+        <Stack gap="md">
+          {/* Who this is going to, always visible while writing — the list
+              itself is behind a toggle because it's reassurance, not something
+              that needs to be read every time. */}
+          <Box
+            style={{
+              border: "1px solid var(--mantine-color-default-border)",
+              borderRadius: 10,
+              padding: "10px 12px",
+            }}
+          >
+            <Group justify="space-between" wrap="nowrap">
+              <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
+                <Text size="sm" c="dimmed">To</Text>
+                {single ? (
+                  <Text size="sm" fw={600} truncate>
+                    {user?.name}{" "}
+                    <Text span c="dimmed" fw={400}>· {user?.email}</Text>
+                  </Text>
+                ) : (
+                  <Text size="sm" fw={600}>
+                    {loadingRecipients ? "…" : `${recipients.length} recipient${recipients.length === 1 ? "" : "s"}`}
+                  </Text>
+                )}
+              </Group>
+              {!single && recipients.length > 0 && (
+                <UnstyledButton onClick={() => setShowList((v) => !v)}>
+                  <Group gap={3}>
+                    <Text size="xs" c="emerald.6" fw={500}>
+                      {showList ? "Hide" : "View"}
+                    </Text>
+                    {showList ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                  </Group>
+                </UnstyledButton>
+              )}
             </Group>
-          </div>
 
-          <Divider />
+            <Collapse in={showList}>
+              <ScrollArea.Autosize mah={140} mt="xs">
+                <Stack gap={2}>
+                  {recipients.map((r) => (
+                    <Text key={r.id} size="xs" c="dimmed">
+                      {r.name} · {r.email}
+                    </Text>
+                  ))}
+                </Stack>
+              </ScrollArea.Autosize>
+            </Collapse>
+          </Box>
 
-          <div>
-            <Text size="sm" fw={600} mb={8}>Who gets this</Text>
-            <Radio.Group value={segment} onChange={(v) => setSegment(v as EmailSegmentId)}>
-              <Stack gap={8}>
-                {(segmentData?.segments ?? []).map((s) => (
-                  <Radio
-                    key={s.id}
-                    value={s.id}
-                    color="emerald"
+          {templates.length > 0 && (
+            <div>
+              <Text size="xs" fw={600} c="dimmed" mb={6} tt="uppercase">
+                Start from
+              </Text>
+              <Group gap={6}>
+                {templates.map((t) => (
+                  <UnstyledButton
+                    key={t.id}
                     disabled={busy}
-                    label={
-                      <Group gap="xs" wrap="nowrap">
-                        <Text size="sm" fw={500}>{s.label}</Text>
-                        <Badge size="xs" variant="light" color="gray">{s.count}</Badge>
-                      </Group>
-                    }
-                    description={s.description}
-                  />
+                    onClick={() => {
+                      setSubject(t.subject);
+                      setBody(t.body);
+                    }}
+                    style={{
+                      border: "1px solid var(--mantine-color-default-border)",
+                      borderRadius: 8,
+                      padding: "6px 11px",
+                    }}
+                  >
+                    <Text size="xs" fw={500}>{t.label}</Text>
+                  </UnstyledButton>
                 ))}
-              </Stack>
-            </Radio.Group>
-          </div>
+              </Group>
+            </div>
+          )}
 
           <TextInput
             label="Subject"
-            placeholder="One step left to start seeing your traffic"
+            placeholder="Your Quantalog site isn't reporting yet"
             value={subject}
             onChange={(e) => setSubject(e.currentTarget.value)}
             disabled={busy}
@@ -236,77 +281,46 @@ export function EmailComposer({ opened, onClose }: { opened: boolean; onClose: (
 
           <Textarea
             label="Message"
-            description="Plain text. Use {{name}} and {{email}} to personalise each message."
+            description="Use {{name}} and {{email}} to personalise each message."
             placeholder="Hi {{name}}, …"
             value={body}
             onChange={(e) => setBody(e.currentTarget.value)}
-            minRows={9}
+            minRows={8}
             autosize
-            maxRows={16}
+            maxRows={14}
             disabled={busy}
           />
 
-          <Card withBorder radius="md" p="sm">
-            <Group justify="space-between" mb={selected.length ? "xs" : 0}>
-              <Group gap="xs">
-                <Users size={15} />
-                <Text size="sm" fw={600}>
-                  Recipients{" "}
-                  <Text span c="dimmed" fw={400}>
-                    ({selected.length} of {recipients.length})
-                  </Text>
-                </Text>
-              </Group>
-              {loadingRecipients && <Loader size="xs" />}
-            </Group>
-
-            {!loadingRecipients && !recipients.length ? (
-              <Text size="sm" c="dimmed">No accounts match this group.</Text>
-            ) : (
-              <ScrollArea.Autosize mah={200}>
-                <Stack gap={6}>
-                  {recipients.map((r) => (
-                    <Checkbox
-                      key={r.id}
-                      size="xs"
-                      color="emerald"
-                      disabled={busy}
-                      checked={!excluded.has(r.id)}
-                      onChange={() => toggle(r.id)}
-                      label={
-                        <Text size="xs">
-                          {r.name} <Text span c="dimmed">· {r.email}</Text>
-                        </Text>
-                      }
-                    />
-                  ))}
-                </Stack>
-              </ScrollArea.Autosize>
-            )}
-          </Card>
-
-          {selected.length > 20 && (
-            <Alert color="blue" icon={<Info size={15} />} p="xs">
-              <Text size="xs">
-                Gmail sends these one at a time, so {selected.length} messages will take
-                roughly {Math.ceil(selected.length * 0.5)} seconds. Keep this window open.
-              </Text>
-            </Alert>
+          {recipients.length > 20 && (
+            <Text size="xs" c="dimmed">
+              Sent one at a time — {recipients.length} messages take about{" "}
+              {Math.ceil(recipients.length * 0.5)}s. Keep this window open.
+            </Text>
           )}
 
-          <Group justify="space-between">
-            <Button
-              variant="default"
-              radius="md"
-              leftSection={testing ? <Loader size={13} /> : <FlaskConical size={15} />}
-              disabled={!subject.trim() || !body.trim() || busy}
-              onClick={test}
-            >
-              Send test to myself
-            </Button>
+          <Group justify="space-between" mt="xs">
+            {single ? (
+              <div />
+            ) : (
+              <Button
+                variant="subtle"
+                color="gray"
+                leftSection={<ArrowLeft size={15} />}
+                disabled={busy}
+                onClick={() => setStep("audience")}
+              >
+                Back
+              </Button>
+            )}
             <Group gap="xs">
-              <Button variant="subtle" color="gray" disabled={busy} onClick={onClose}>
-                Cancel
+              <Button
+                variant="default"
+                radius="md"
+                leftSection={testing ? <Loader size={13} /> : <FlaskConical size={15} />}
+                disabled={!subject.trim() || !body.trim() || busy}
+                onClick={test}
+              >
+                Test to me
               </Button>
               <Button
                 color="emerald"
@@ -316,8 +330,10 @@ export function EmailComposer({ opened, onClose }: { opened: boolean; onClose: (
                 onClick={send}
               >
                 {sending
-                  ? `Sending ${selected.length}…`
-                  : `Send to ${selected.length}`}
+                  ? "Sending…"
+                  : single
+                  ? "Send"
+                  : `Send to ${recipients.length}`}
               </Button>
             </Group>
           </Group>

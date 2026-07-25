@@ -40,6 +40,8 @@ export default function Impersonate() {
   const [busy, setBusy] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [composing, setComposing] = useState(false);
+  // The one account being messaged, when the mail button in a row is used.
+  const [messaging, setMessaging] = useState<AdminUser | null>(null);
 
   // Debounced, so typing a name doesn't fire a request per keystroke.
   useEffect(() => {
@@ -145,6 +147,14 @@ export default function Impersonate() {
       </Group>
 
       <EmailComposer opened={composing} onClose={() => setComposing(false)} />
+
+      {/* Keyed by account so the draft never carries over between recipients. */}
+      <EmailComposer
+        key={messaging?.id}
+        opened={Boolean(messaging)}
+        user={messaging}
+        onClose={() => setMessaging(null)}
+      />
 
       <Group mb="lg" align="flex-end" wrap="wrap">
         <TextInput
@@ -264,6 +274,18 @@ export default function Impersonate() {
                               >
                                 Open
                               </Button>
+                            </Tooltip>
+                            <Tooltip label={`Email ${u.email}`} withArrow>
+                              <ActionIcon
+                                variant="light"
+                                color="gray"
+                                size="lg"
+                                radius="md"
+                                disabled={rowBusy}
+                                onClick={() => setMessaging(u)}
+                              >
+                                <Mail size={16} />
+                              </ActionIcon>
                             </Tooltip>
                             <Tooltip
                               label={

@@ -6,7 +6,7 @@ import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
-  EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult,
+  EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
 } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 import type { TrackerOptions } from "../utils/tracker";
@@ -288,6 +288,10 @@ export const api = createApi({
       query: () => "/api/admin/email/status",
     }),
 
+    getEmailTemplates: build.query<{ templates: MailTemplate[] }, void>({
+      query: () => "/api/admin/email/templates",
+    }),
+
     getEmailSegments: build.query<{ segments: EmailSegment[] }, void>({
       query: () => "/api/admin/email/segments",
       providesTags: ["EmailSegment"],
@@ -567,6 +571,7 @@ export const {
   useDeleteAdminUserMutation,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
+  useGetEmailTemplatesQuery,
   useGetEmailRecipientsQuery,
   useSendAdminEmailMutation,
   useSendTestEmailMutation,
