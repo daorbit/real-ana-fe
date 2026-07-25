@@ -3,7 +3,7 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import {
-  Send, FlaskConical, ArrowLeft, Eye, PencilLine,
+  Send, FlaskConical, ArrowLeft, Eye, PencilLine, Check,
 } from "lucide-react";
 import type { AdminUser } from "../../types";
 import type { EmailComposerState } from "../../hooks/useEmailComposer";
@@ -25,7 +25,7 @@ export function WriteStep({
 }) {
   const {
     single, setStep,
-    templates, applyTemplate,
+    templates, applyTemplate, templateId,
     subject, setSubject,
     body, setBody,
     tab, setTab,
@@ -45,21 +45,30 @@ export function WriteStep({
             Start from
           </Text>
           <Group gap={6}>
-            {templates.map((t) => (
-              <UnstyledButton
-                key={t.id}
-                disabled={busy}
-                onClick={() => applyTemplate(t)}
-                title={t.hint}
-                style={{
-                  border: "1px solid var(--mantine-color-default-border)",
-                  borderRadius: 8,
-                  padding: "6px 11px",
-                }}
-              >
-                <Text size="xs" fw={500}>{t.label}</Text>
-              </UnstyledButton>
-            ))}
+            {templates.map((t) => {
+              const active = templateId === t.id;
+              return (
+                <UnstyledButton
+                  key={t.id}
+                  disabled={busy}
+                  onClick={() => applyTemplate(t)}
+                  title={t.hint}
+                  style={{
+                    // Selection reads as border plus fill, matching how the
+                    // audience step marks its chosen option.
+                    border: `1px solid var(${active ? "--mantine-color-emerald-6" : "--mantine-color-default-border"})`,
+                    background: active ? "var(--mantine-color-emerald-light)" : undefined,
+                    borderRadius: 8,
+                    padding: "6px 11px",
+                  }}
+                >
+                  <Group gap={5} wrap="nowrap">
+                    {active && <Check size={12} />}
+                    <Text size="xs" fw={active ? 600 : 500}>{t.label}</Text>
+                  </Group>
+                </UnstyledButton>
+              );
+            })}
           </Group>
         </div>
       )}

@@ -58,6 +58,8 @@ export function useEmailComposer({
   const [layout, setLayout] = useState<MailLayout>("plain");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  /** The template the draft came from. Null once the copy is edited by hand. */
+  const [templateId, setTemplateId] = useState<string | null>(null);
   const [showList, setShowList] = useState(false);
   const [tab, setTab] = useState<ComposerTab>("write");
   // The button under the message. Comes from a template but stays editable —
@@ -106,6 +108,7 @@ export function useEmailComposer({
     setAudience("segment");
     setCustomTo("");
     setLayout("plain");
+    setTemplateId(null);
   }, [opened, single]);
 
   // Re-render the preview while it's on screen, debounced so editing the body
@@ -156,6 +159,25 @@ export function useEmailComposer({
     // The layout belongs to the template, not the author — the invite's feature
     // list only makes sense with the invite's own copy.
     setLayout(t.layout ?? "plain");
+    setTemplateId(t.id);
+  }, []);
+
+  /**
+   * Which template the current draft came from, if any.
+   *
+   * Cleared as soon as the subject or body is edited: once the copy has been
+   * changed, showing a template as selected would claim the draft is something
+   * it no longer is. This is why the flag is dropped in the setters below rather
+   * than compared against the template text on every render.
+   */
+  const editSubject = useCallback((v: string) => {
+    setSubject(v);
+    setTemplateId(null);
+  }, []);
+
+  const editBody = useCallback((v: string) => {
+    setBody(v);
+    setTemplateId(null);
   }, []);
 
   const close = useCallback(() => {
@@ -198,6 +220,7 @@ export function useEmailComposer({
       setCtaLabel("");
       setCtaHref("");
       setCustomTo("");
+      setTemplateId(null);
       onClose();
     } catch (e) {
       notify.error(errMessage(e, "Could not send the message."));
@@ -243,8 +266,9 @@ export function useEmailComposer({
     // Message
     templates,
     applyTemplate,
-    subject, setSubject,
-    body, setBody,
+    templateId,
+    subject, setSubject: editSubject,
+    body, setBody: editBody,
     layout,
 
     // Preview
