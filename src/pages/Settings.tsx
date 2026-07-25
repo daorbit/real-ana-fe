@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
   Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code,
 } from "@mantine/core";
-import { Save, Undo2 } from "lucide-react";
+import { Save, Trash2, Undo2, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, PageStack, Section, Field } from "../components/Page";
@@ -81,7 +81,9 @@ function avatarError(v: string): string | null {
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, uploadAvatar, removeAvatar } = useAuth();
+  const fileInput = useRef<HTMLInputElement | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -198,6 +200,44 @@ export default function Settings() {
     }
   };
 
+  /**
+   * Pick a file and upload it right away.
+   *
+   * Deliberately outside the form's save cycle: the picture is stored the moment
+   * it is chosen, so the avatar beside it updates immediately and there is no
+   * uploaded file left unreferenced if the user leaves without saving. The URL
+   * field is re-seeded from the new user, keeping the form undirty.
+   */
+  const pickAvatar = async (file: File | null) => {
+    if (!file) return;
+    setAvatarBusy(true);
+    setErrors((prev) => ({ ...prev, avatarUrl: null }));
+    try {
+      await uploadAvatar(file);
+      setAvatarBroken(false);
+      notify.success(t("settings.avatarUploaded"), t("common.saved"));
+    } catch (err) {
+      notify.error(errMessage(err, t("settings.avatarUploadError")));
+    } finally {
+      setAvatarBusy(false);
+      // Clear the input, so choosing the same file again still fires a change.
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  };
+
+  const clearAvatar = async () => {
+    setAvatarBusy(true);
+    try {
+      await removeAvatar();
+      setAvatarBroken(false);
+      notify.success(t("settings.avatarRemoved"), t("common.saved"));
+    } catch (err) {
+      notify.error(errMessage(err, t("settings.avatarRemoveError")));
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
   // Errors are stored as i18n keys; resolve to the current language at render.
   const errText = (key: string | null | undefined) => (key ? t(key) : undefined);
 
@@ -253,6 +293,40 @@ export default function Settings() {
                   </Badge>
                 </Group>
                 <Text size="sm" c="dimmed" truncate>{user.email}</Text>
+
+                {/* The file input is hidden and driven by the button: a bare
+                    input styles inconsistently across browsers and cannot be
+                    made to match the rest of the page. */}
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  hidden
+                  onChange={(e) => void pickAvatar(e.currentTarget.files?.[0] ?? null)}
+                />
+                <Group gap="xs" mt="sm">
+                  <Button
+                    size="xs"
+                    variant="light"
+                    leftSection={<Upload size={14} />}
+                    loading={avatarBusy}
+                    onClick={() => fileInput.current?.click()}
+                  >
+                    {t("settings.avatarUpload")}
+                  </Button>
+                  {avatarUrl && (
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      color="red"
+                      leftSection={<Trash2 size={14} />}
+                      disabled={avatarBusy}
+                      onClick={() => void clearAvatar()}
+                    >
+                      {t("settings.avatarRemove")}
+                    </Button>
+                  )}
+                </Group>
               </Box>
             </Group>
           </Box>

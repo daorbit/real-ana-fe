@@ -94,6 +94,8 @@ export const api = {
   patch: <T>(p: string, body: unknown) =>
     request<T>(p, { method: "PATCH", body: JSON.stringify(body) }),
   del: (p: string) => request<void>(p, { method: "DELETE" }),
+  /** DELETE for the endpoints that answer with the updated resource. */
+  delFor: <T>(p: string) => request<T>(p, { method: "DELETE" }),
 };
 
 // Base origin used to build the embed snippet (BE origin)

@@ -29,6 +29,12 @@ type AuthState = {
   startDemo: () => Promise<void>;
   logout: () => void;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
+  /**
+   * Upload a new profile picture. Takes the file, not a data URL — the encoding
+   * is this layer's business, not the form's. Saves immediately.
+   */
+  uploadAvatar: (file: File) => Promise<void>;
+  removeAvatar: () => Promise<void>;
   impersonate: (userId: string) => Promise<void>;
   exitImpersonation: () => Promise<void>;
 };
@@ -123,6 +129,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
   };
 
+  /** The largest image the avatar endpoint accepts, matched here so an oversized
+   *  file is refused before it is read and encoded rather than after. */
+  const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
+
+  const uploadAvatar = async (file: File) => {
+    if (!file.type.startsWith("image/"))
+      throw new Error("That file isn't an image.");
+    if (file.size > MAX_AVATAR_BYTES)
+      throw new Error("Image must be 3MB or smaller.");
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("Could not read that file."));
+      reader.readAsDataURL(file);
+    });
+
+    const updated = await api.post<User>("/api/auth/me/avatar", { file: dataUrl });
+    // As with updateProfile: the endpoint does not echo `impersonating`, and
+    // losing it would drop the "you are viewing as …" banner.
+    setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
+  };
+
+  const removeAvatar = async () => {
+    const updated = await api.delFor<User>("/api/auth/me/avatar");
+    setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
+  };
+
   const logout = () => {
     clearToken();
     setUser(null);
@@ -154,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, impersonate, exitImpersonation }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation }}
     >
       {children}
     </AuthContext.Provider>

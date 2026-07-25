@@ -130,6 +130,8 @@ export type MailTemplate = {
   segment: EmailSegmentId;
   subject: string;
   body: string;
+  /** Optional button. Not every template has one — a check-in wants no call to action. */
+  cta?: { label: string; href: string };
 };
 
 export type EmailSendResult = {
