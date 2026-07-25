@@ -4,6 +4,7 @@ import {
   Divider, Tabs, Select,
 } from "@mantine/core";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Share2, Copy, Check, RefreshCw, ExternalLink, Eye, ShieldCheck, Link2Off,
   BarChart3, Search, Globe,
@@ -22,46 +23,40 @@ import { SeoSharePanel } from "../components/seo/SeoSharePanel";
 import { SaveBarProvider, useSaveRegistration } from "../components/SaveBar";
 import type { SharePanels } from "../types";
 
-type PanelDef = { key: keyof SharePanels; label: string; hint: string };
+// Panel `key` doubles as the i18n stem: label is `share.panel.<key>`, hint is
+// `share.panel.<key>Hint`. Group headings/notes resolve from `share.group.*`.
+// Keeping only keys here means the whole grid follows the interface language.
+type PanelDef = { key: keyof SharePanels };
 
 /**
  * The panels an owner can publish, grouped the way they'd be reasoned about
  * rather than the order they happen to appear on the public page.
  */
-const PANEL_GROUPS: { heading: string; note?: string; panels: PanelDef[] }[] = [
+const PANEL_GROUPS: { headingKey: string; noteKey?: string; panels: PanelDef[] }[] = [
   {
-    heading: "Overview",
+    headingKey: "share.group.overview",
     panels: [
-      { key: "totals", label: "Headline numbers", hint: "Visitors, pageviews, live" },
-      { key: "trend", label: "Traffic chart", hint: "Views over the range" },
-      { key: "engagement", label: "Engagement", hint: "Bounce rate, session length" },
-      { key: "visitorSplit", label: "New vs returning", hint: "First-time and repeat" },
+      { key: "totals" }, { key: "trend" }, { key: "engagement" }, { key: "visitorSplit" },
     ],
   },
   {
-    heading: "Content",
-    note: "Page paths can carry internal URLs you never meant to publish.",
+    headingKey: "share.group.content",
+    noteKey: "share.group.contentNote",
     panels: [
-      { key: "pages", label: "Top pages", hint: "Most visited paths" },
-      { key: "entryPages", label: "Entry pages", hint: "Where sessions start" },
-      { key: "exitPages", label: "Exit pages", hint: "Where sessions end" },
+      { key: "pages" }, { key: "entryPages" }, { key: "exitPages" },
     ],
   },
   {
-    heading: "Acquisition",
+    headingKey: "share.group.acquisition",
     panels: [
-      { key: "sources", label: "Top sources", hint: "Referring sites" },
-      { key: "channels", label: "Channels", hint: "Organic, paid, social, direct" },
+      { key: "sources" }, { key: "channels" },
     ],
   },
   {
-    heading: "Audience",
+    headingKey: "share.group.audience",
     panels: [
-      { key: "countries", label: "Countries", hint: "Visitors by country" },
-      { key: "languages", label: "Languages", hint: "Browser language" },
-      { key: "devices", label: "Devices", hint: "Desktop, mobile, tablet" },
-      { key: "browsers", label: "Browsers", hint: "Chrome, Safari, Firefox" },
-      { key: "operatingSystems", label: "Operating systems", hint: "Windows, macOS, iOS" },
+      { key: "countries" }, { key: "languages" }, { key: "devices" },
+      { key: "browsers" }, { key: "operatingSystems" },
     ],
   },
 ];
@@ -87,6 +82,7 @@ const DEFAULT_PANELS: SharePanels = {
  * destructive because it silently breaks links already sent to other people.
  */
 function ShareSettings({ workspaceId }: { workspaceId: string }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useGetShareQuery(workspaceId);
   const [setShare] = useSetShareMutation();
   // The mutation's shared `isLoading` would light up the link toggle and
@@ -121,9 +117,9 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
     try {
       await setShare({ workspaceId, enabled, panels: draft }).unwrap();
       setDraft(null);
-      notify.success("What visitors can see has been updated.");
+      notify.success(t("share.panelsUpdated"));
     } catch (e) {
-      notify.error(errMessage(e, "Could not update what is shared."));
+      notify.error(errMessage(e, t("share.panelsError")));
     }
   };
 
@@ -138,11 +134,11 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
     try {
       await setShare({ workspaceId, enabled: next }).unwrap();
       notify.success(
-        next ? "Anyone with the link can now view this dashboard." : "The public link is now off.",
-        next ? "Sharing on" : "Sharing off",
+        next ? t("share.sharingOnBody") : t("share.sharingOffBody"),
+        next ? t("share.sharingOn") : t("share.sharingOff"),
       );
     } catch (e) {
-      notify.error(errMessage(e, "Could not update sharing."));
+      notify.error(errMessage(e, t("share.sharingError")));
     } finally {
       setLinkBusy(false);
     }
@@ -150,21 +146,16 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
 
   const rotate = () => {
     confirmDelete({
-      title: "Generate a new link?",
-      confirmLabel: "Generate new link",
-      body: (
-        <>
-          The current link will stop working immediately. Anyone you have
-          already sent it to will lose access until you send them the new one.
-        </>
-      ),
+      title: t("share.rotateTitle"),
+      confirmLabel: t("share.rotateConfirm"),
+      body: <>{t("share.rotateBody")}</>,
       onConfirm: async () => {
         setLinkBusy(true);
         try {
           await setShare({ workspaceId, enabled: true, rotate: true }).unwrap();
-          notify.success("A new link has been generated.", "Link replaced");
+          notify.success(t("share.rotateSuccess"), t("share.rotateSuccessTitle"));
         } catch (e) {
-          notify.error(errMessage(e, "Could not generate a new link."));
+          notify.error(errMessage(e, t("share.rotateError")));
         } finally {
           setLinkBusy(false);
         }
@@ -184,22 +175,18 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
   return (
     <PageStack maxWidth={1080}>
       <Section
-        title="Public link"
-        description="Share a read-only view with clients or your team — no account needed."
+        title={t("share.publicLink")}
+        description={t("share.publicLinkDesc")}
       >
         <Field
-          label="Public dashboard"
-          hint={
-            enabled
-              ? "Live. Anyone with the link can view these numbers."
-              : "Off. The link returns 404 until you turn this on."
-          }
+          label={t("share.publicDashboard")}
+          hint={enabled ? t("share.liveHint") : t("share.offHint")}
           last={!enabled}
         >
           <Group justify="flex-end" gap="sm" wrap="nowrap">
             {enabled && (
               <Badge size="sm" variant="light" color="emerald" radius="sm">
-                Live
+                {t("share.live")}
               </Badge>
             )}
             <Switch
@@ -207,7 +194,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
               onChange={(e) => toggle(e.currentTarget.checked)}
               color="emerald"
               disabled={linkBusy}
-              aria-label="Enable public dashboard"
+              aria-label={t("share.enableAria")}
             />
           </Group>
         </Field>
@@ -218,9 +205,9 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                 a share URL is long, and a truncated one can't be read back to
                 check it before sending. */}
             <Box px="lg" py="md">
-              <Text size="sm" fw={500}>Link</Text>
+              <Text size="sm" fw={500}>{t("share.link")}</Text>
               <Text size="xs" c="dimmed" mt={3} mb="sm">
-                Treat this like a password — the token is the only credential.
+                {t("share.linkWarning")}
               </Text>
               <Group gap="xs" wrap="nowrap">
                 <TextInput
@@ -230,7 +217,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   style={{ flex: 1, minWidth: 0 }}
                   styles={{ input: { fontFamily: "var(--mono, monospace)", fontSize: 13 } }}
                   onFocus={(e) => e.currentTarget.select()}
-                  aria-label="Public dashboard link"
+                  aria-label={t("share.linkAria")}
                 />
                 <CopyButton value={url}>
                   {({ copied, copy }) => (
@@ -242,11 +229,11 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                       leftSection={copied ? <Check size={14} /> : <Copy size={14} />}
                       style={{ flexShrink: 0 }}
                     >
-                      {copied ? "Copied" : "Copy"}
+                      {copied ? t("share.copied") : t("share.copy")}
                     </Button>
                   )}
                 </CopyButton>
-                <Tooltip label="Open in a new tab" withArrow>
+                <Tooltip label={t("share.openNewTab")} withArrow>
                   <ActionIcon
                     component="a"
                     href={url}
@@ -254,7 +241,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                     rel="noreferrer"
                     variant="default"
                     size="lg"
-                    aria-label="Open public dashboard"
+                    aria-label={t("share.openAria")}
                   >
                     <ExternalLink size={15} />
                   </ActionIcon>
@@ -264,8 +251,8 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
             <Divider />
 
             <Field
-              label="Replace the link"
-              hint="Use this if the current link reached someone it shouldn't have."
+              label={t("share.replaceLink")}
+              hint={t("share.replaceHint")}
               last
             >
               <Group justify="flex-end">
@@ -276,7 +263,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   onClick={rotate}
                   loading={linkBusy}
                 >
-                  New link
+                  {t("share.newLink")}
                 </Button>
               </Group>
             </Field>
@@ -289,12 +276,12 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
           {/* What the viewer sees is the owner's call — page paths in particular
               can carry internal URLs they never meant to publish. */}
           <Section
-            title="What visitors can see"
-            description="Anything turned off is never sent to the public page at all."
+            title={t("share.whatVisitorsSee")}
+            description={t("share.whatVisitorsSeeDesc")}
             actions={
               <Group gap="xs" wrap="nowrap">
                 <Text size="xs" c="dimmed">
-                  {onCount} of {ALL_PANELS.length} on
+                  {t("share.onOf", { on: onCount, total: ALL_PANELS.length })}
                 </Text>
                 <Button
                   size="compact-xs"
@@ -303,7 +290,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   disabled={onCount === ALL_PANELS.length}
                   onClick={() => setAll(true)}
                 >
-                  All
+                  {t("share.all")}
                 </Button>
                 <Button
                   size="compact-xs"
@@ -312,22 +299,22 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   disabled={onCount === 0}
                   onClick={() => setAll(false)}
                 >
-                  None
+                  {t("share.none")}
                 </Button>
               </Group>
             }
           >
             <Stack gap={0}>
               {PANEL_GROUPS.map((g, i) => (
-                <Box key={g.heading}>
+                <Box key={g.headingKey}>
                   {i > 0 && <Divider />}
                   <Box p="lg">
                     <Text size="xs" fw={650} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.04em" }}>
-                      {g.heading}
+                      {t(g.headingKey)}
                     </Text>
-                    {g.note && (
+                    {g.noteKey && (
                       <Text size="xs" c="dimmed" mt={4}>
-                        {g.note}
+                        {t(g.noteKey)}
                       </Text>
                     )}
                     <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md" mt="md">
@@ -336,8 +323,8 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                           key={p.key}
                           size="sm"
                           color="emerald"
-                          label={p.label}
-                          description={p.hint}
+                          label={t(`share.panel.${p.key}`)}
+                          description={t(`share.panel.${p.key}Hint`)}
                           checked={panels[p.key]}
                           onChange={(e) => togglePanel(p.key, e.currentTarget.checked)}
                         />
@@ -349,7 +336,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
             </Stack>
           </Section>
 
-          <Section title="Activity" description="How often the public link has been opened.">
+          <Section title={t("share.activity")} description={t("share.activityDesc")}>
             <Box p="lg">
               <Group gap="sm" wrap="nowrap">
                 <ThemeIcon variant="light" color="emerald" radius="md" size="lg">
@@ -357,12 +344,14 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                 </ThemeIcon>
                 <div>
                   <Text fw={650}>
-                    {num(views)} {views === 1 ? "open" : "opens"}
+                    {views === 1
+                      ? t("share.opensOne", { count: num(views) })
+                      : t("share.opensOther", { count: num(views) })}
                   </Text>
                   <Text size="xs" c="dimmed">
                     {data?.lastViewedAt
-                      ? `Last opened ${timeAgo(data.lastViewedAt)}. Resets when you replace the link.`
-                      : "Not opened yet. Resets when you replace the link."}
+                      ? t("share.lastOpened", { ago: timeAgo(data.lastViewedAt) })
+                      : t("share.notOpened")}
                   </Text>
                 </div>
               </Group>
@@ -375,11 +364,10 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
         variant="light"
         color="gray"
         icon={<ShieldCheck size={16} />}
-        title="What is never shared"
+        title={t("share.neverShared")}
       >
         <Text size="sm">
-          Site keys, workspace settings, team members and raw events stay
-          private. The public page is read-only and cannot send events.
+          {t("share.neverSharedBody")}
         </Text>
       </Alert>
     </PageStack>
