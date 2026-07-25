@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Modal, Stack, Group, Button, TextInput, Textarea, Text, Badge,
-  Alert, Loader, ScrollArea, Code, Center, UnstyledButton, Collapse, Box,
+  Alert, Loader, ScrollArea, Code, Center, UnstyledButton, Collapse, Box, Tabs,
 } from "@mantine/core";
 import {
   Send, AlertTriangle, FlaskConical, ArrowLeft, ChevronRight, ChevronDown, Check,
+  Eye, PencilLine,
 } from "lucide-react";
 import {
   useGetEmailStatusQuery,
@@ -13,6 +14,7 @@ import {
   useGetEmailRecipientsQuery,
   useSendAdminEmailMutation,
   useSendTestEmailMutation,
+  usePreviewEmailMutation,
 } from "../store";
 import { notify, errMessage } from "../notify";
 import type { AdminUser, EmailSegmentId } from "../types";
@@ -54,19 +56,59 @@ export function EmailComposer({
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [showList, setShowList] = useState(false);
+  const [tab, setTab] = useState<"write" | "preview">("write");
+  // The button under the message. Comes from a template but stays editable —
+  // and an empty label or link simply means no button.
+  const [ctaLabel, setCtaLabel] = useState("");
+  const [ctaHref, setCtaHref] = useState("");
+  const [preview, setPreview] = useState<{ html: string; sampleName: string } | null>(null);
 
   const [sendEmail, { isLoading: sending }] = useSendAdminEmailMutation();
   const [sendTest, { isLoading: testing }] = useSendTestEmailMutation();
+  const [renderPreview, { isLoading: previewing }] = usePreviewEmailMutation();
 
   const { data: recipientData, isFetching: loadingRecipients } = useGetEmailRecipientsQuery(
     segment,
     { skip: !opened || single },
   );
 
+  // Both halves or nothing — a labelled button with no target, or a target with
+  // no label, is not a button. Declared before the preview effect that reads it.
+  const cta = useMemo(
+    () =>
+      ctaLabel.trim() && /^https?:\/\//i.test(ctaHref.trim())
+        ? { label: ctaLabel.trim(), href: ctaHref.trim() }
+        : undefined,
+    [ctaLabel, ctaHref],
+  );
+
   // A single-user send has no audience step to return to.
   useEffect(() => {
-    if (opened) setStep(single ? "write" : "audience");
+    if (opened) {
+      setStep(single ? "write" : "audience");
+      setTab("write");
+    }
   }, [opened, single]);
+
+  // Re-render the preview while it's on screen, debounced so editing the body
+  // with the tab open doesn't fire a request per keystroke.
+  useEffect(() => {
+    if (tab !== "preview" || !body.trim()) return;
+    const t = setTimeout(async () => {
+      try {
+        const r = await renderPreview({
+          subject: subject.trim(),
+          body: body.trim(),
+          userId: user?.id,
+          cta,
+        }).unwrap();
+        setPreview({ html: r.html, sampleName: r.sampleName });
+      } catch {
+        setPreview(null);
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [tab, subject, body, user?.id, cta, renderPreview]);
 
   const recipients = useMemo(
     () => (single && user ? [{ id: user.id, email: user.email, name: user.name }] : recipientData?.recipients ?? []),
@@ -88,6 +130,7 @@ export function EmailComposer({
         subject: subject.trim(),
         body: body.trim(),
         userIds: recipients.map((r) => r.id),
+        cta,
       }).unwrap();
 
       if (result.failed) {
@@ -106,6 +149,8 @@ export function EmailComposer({
         );
         setSubject("");
         setBody("");
+        setCtaLabel("");
+        setCtaHref("");
         onClose();
       }
     } catch (e) {
@@ -115,7 +160,7 @@ export function EmailComposer({
 
   const test = async () => {
     try {
-      const r = await sendTest({ subject: subject.trim(), body: body.trim() }).unwrap();
+      const r = await sendTest({ subject: subject.trim(), body: body.trim(), cta }).unwrap();
       notify.success(`Test message sent to ${r.email}.`, "Test sent");
     } catch (e) {
       notify.error(errMessage(e, "Could not send the test."));
@@ -131,7 +176,9 @@ export function EmailComposer({
       title={title}
       centered
       radius="lg"
-      size={single ? "lg" : "lg"}
+      // The preview needs room to show the mail at something near its real
+      // width; the audience step does not.
+      size={step === "audience" ? "md" : "lg"}
       closeOnClickOutside={false}
       closeOnEscape={!busy}
       withCloseButton={!busy}
@@ -257,6 +304,8 @@ export function EmailComposer({
                     onClick={() => {
                       setSubject(t.subject);
                       setBody(t.body);
+                      setCtaLabel(t.cta?.label ?? "");
+                      setCtaHref(t.cta?.href ?? "");
                     }}
                     style={{
                       border: "1px solid var(--mantine-color-default-border)",
@@ -279,17 +328,71 @@ export function EmailComposer({
             disabled={busy}
           />
 
-          <Textarea
-            label="Message"
-            description="Use {{name}} and {{email}} to personalise each message."
-            placeholder="Hi {{name}}, …"
-            value={body}
-            onChange={(e) => setBody(e.currentTarget.value)}
-            minRows={8}
-            autosize
-            maxRows={14}
-            disabled={busy}
-          />
+          <Tabs
+            value={tab}
+            onChange={(v) => setTab((v as "write" | "preview") ?? "write")}
+            variant="outline"
+            radius="md"
+          >
+            <Tabs.List>
+              <Tabs.Tab value="write" leftSection={<PencilLine size={14} />}>
+                Message
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="preview"
+                leftSection={<Eye size={14} />}
+                disabled={!body.trim()}
+              >
+                Preview
+              </Tabs.Tab>
+            </Tabs.List>
+
+            <Tabs.Panel value="write" pt="sm">
+              <Textarea
+                description="Use {{name}} and {{email}} to personalise each message."
+                placeholder="Hi {{name}}, …"
+                value={body}
+                onChange={(e) => setBody(e.currentTarget.value)}
+                minRows={8}
+                autosize
+                maxRows={14}
+                disabled={busy}
+              />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="preview" pt="sm">
+              {/* Rendered server-side by the same code that builds the real
+                  message, so this is the mail itself rather than an impression
+                  of it. */}
+              {previewing ? (
+                <Center py="xl"><Loader size="sm" /></Center>
+              ) : preview ? (
+                <Stack gap={6}>
+                  <Text size="xs" c="dimmed">
+                    Shown as {preview.sampleName} would receive it.
+                  </Text>
+                  <Box
+                    style={{
+                      border: "1px solid var(--mantine-color-default-border)",
+                      borderRadius: 10,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <iframe
+                      title="Email preview"
+                      srcDoc={preview.html}
+                      sandbox=""
+                      style={{ width: "100%", height: 420, border: 0, display: "block" }}
+                    />
+                  </Box>
+                </Stack>
+              ) : (
+                <Center py="xl">
+                  <Text size="sm" c="dimmed">Could not render a preview.</Text>
+                </Center>
+              )}
+            </Tabs.Panel>
+          </Tabs>
 
           {recipients.length > 20 && (
             <Text size="xs" c="dimmed">

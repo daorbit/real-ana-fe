@@ -292,6 +292,13 @@ export const api = createApi({
       query: () => "/api/admin/email/templates",
     }),
 
+    previewEmail: build.mutation<
+      { subject: string; html: string; sampleName: string },
+      { subject: string; body: string; userId?: string; cta?: { label: string; href: string } }
+    >({
+      query: (payload) => ({ url: "/api/admin/email/preview", method: "POST", body: payload }),
+    }),
+
     getEmailSegments: build.query<{ segments: EmailSegment[] }, void>({
       query: () => "/api/admin/email/segments",
       providesTags: ["EmailSegment"],
@@ -304,14 +311,20 @@ export const api = createApi({
 
     sendAdminEmail: build.mutation<
       EmailSendResult,
-      { subject: string; body: string; segment?: EmailSegmentId; userIds?: string[] }
+      {
+        subject: string;
+        body: string;
+        segment?: EmailSegmentId;
+        userIds?: string[];
+        cta?: { label: string; href: string };
+      }
     >({
       query: (payload) => ({ url: "/api/admin/email/send", method: "POST", body: payload }),
     }),
 
     sendTestEmail: build.mutation<
       { ok: true; email: string },
-      { subject: string; body: string }
+      { subject: string; body: string; cta?: { label: string; href: string } }
     >({
       query: (payload) => ({ url: "/api/admin/email/test", method: "POST", body: payload }),
     }),
@@ -572,6 +585,7 @@ export const {
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,
+  usePreviewEmailMutation,
   useGetEmailRecipientsQuery,
   useSendAdminEmailMutation,
   useSendTestEmailMutation,
