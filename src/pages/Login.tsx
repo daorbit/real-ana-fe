@@ -8,6 +8,7 @@ import {
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 import { notify, errMessage } from "../notify";
 import { timeUntil } from "../utils";
 import type { ApiError } from "../api";
@@ -21,6 +22,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   const enterDemo = async () => {
     setDemoBusy(true);
@@ -136,11 +138,24 @@ export default function Login() {
               onBlur={blur("password")}
             />
 
-            <Button type="submit" loading={busy} fullWidth size="md">
+            <Button type="submit" loading={busy} disabled={googleBusy} fullWidth size="md">
               Log in
             </Button>
 
             <Divider label="or" labelPosition="center" my={2} />
+
+            <GoogleSignInButton
+              text="signin_with"
+              onBusyChange={setGoogleBusy}
+              onSuccess={(created) => {
+                notify.success(
+                  created ? "Your account is ready." : "Welcome back!",
+                  created ? "Signed up with Google" : "Logged in"
+                );
+                nav("/app");
+              }}
+              onError={setError}
+            />
 
             <Button
               variant="default"

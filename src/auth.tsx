@@ -14,6 +14,13 @@ type AuthState = {
   loading: boolean;
   isDemo: boolean;
   login: (email: string, password: string) => Promise<void>;
+  /**
+   * Exchange a Google credential for a session. Serves signup and login both —
+   * Google has already proved the address, so a first-time user is created here.
+   * Resolves with whether the account was just created, so the caller can send
+   * new users to onboarding.
+   */
+  googleSignIn: (credential: string) => Promise<{ created: boolean }>;
   /** Starts a signup and emails a code. No account exists until `verifySignup`. */
   signup: (email: string, password: string, name: string) => Promise<void>;
   /** Proves the code and creates the account, signing the user in. */
@@ -60,6 +67,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Start from a clean cache so nothing from a previous session leaks through.
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
+  };
+
+  const googleSignIn = async (credential: string) => {
+    const r = await api.post<AuthResp & { created?: boolean }>(
+      "/api/auth/google",
+      { credential }
+    );
+    setToken(r.token);
+    dispatch(rtkApi.util.resetApiState());
+    if (r.created) {
+      // A brand-new account must not inherit the onboarding flags a previous
+      // account left in this browser.
+      localStorage.removeItem("quantalog_onboarding_skipped");
+      localStorage.removeItem("quantalog_onboarding_dismissed");
+      localStorage.removeItem("rta_active_ws");
+    }
+    setUser(r.user);
+    return { created: Boolean(r.created) };
   };
 
   const startDemo = async () => {
@@ -129,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, impersonate, exitImpersonation }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, impersonate, exitImpersonation }}
     >
       {children}
     </AuthContext.Provider>

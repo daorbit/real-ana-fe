@@ -17,6 +17,10 @@ export type User = {
   /** IANA zone, e.g. "Asia/Kolkata". Empty means "follow the browser". */
   timezone: string;
   role: Role;
+  /** True once the account has signed in with Google at least once. */
+  googleLinked?: boolean;
+  /** False on Google-only accounts, which have never set a password. */
+  hasPassword?: boolean;
   /** True when this session is an admin acting as someone else. */
   impersonating?: boolean;
   /** True on the read-only public demo session. */

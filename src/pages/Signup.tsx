@@ -8,6 +8,7 @@ import {
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 import { PasswordStrength } from "../components/PasswordStrength";
 import { VerifyEmailStep } from "../components/VerifyEmailStep";
 import { notify, errMessage } from "../notify";
@@ -28,6 +29,7 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   // Set once a code has been sent; switches this page to the verify step.
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
@@ -217,11 +219,30 @@ export default function Signup() {
               onBlur={blur("confirm")}
             />
 
-            <Button type="submit" loading={busy} fullWidth size="md">
+            <Button type="submit" loading={busy} disabled={googleBusy} fullWidth size="md">
               Create account
             </Button>
 
             <Divider label="or" labelPosition="center" my={2} />
+
+            {/* Google has already verified the address, so this path skips the
+                emailed code entirely and lands straight in setup. */}
+            <GoogleSignInButton
+              text="signup_with"
+              onBusyChange={setGoogleBusy}
+              onSuccess={(created) => {
+                if (created) {
+                  notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
+                  nav("/app/onboarding");
+                } else {
+                  // The email already had an account — this was a login, and a
+                  // returning user does not need the setup wizard.
+                  notify.success("Welcome back!", "Logged in");
+                  nav("/app");
+                }
+              }}
+              onError={setError}
+            />
 
             {/* Some people want to see the product before handing over an email.
                 The demo needs neither, so offer it rather than lose them. */}
