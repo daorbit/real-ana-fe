@@ -155,6 +155,29 @@ export default function Signup() {
               </Alert>
             )}
 
+            {/* Google first, and by a wider margin than on login: it skips five
+                fields *and* the emailed code, because the address is already
+                verified. */}
+            <GoogleSignInButton
+              label="Sign up with Google"
+              text="signup_with"
+              onBusyChange={setGoogleBusy}
+              onSuccess={(created) => {
+                if (created) {
+                  notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
+                  nav("/app/onboarding");
+                } else {
+                  // The email already had an account — this was a login, and a
+                  // returning user does not need the setup wizard.
+                  notify.success("Welcome back!", "Logged in");
+                  nav("/app");
+                }
+              }}
+              onError={setError}
+            />
+
+            <Divider label="or sign up with email" labelPosition="center" />
+
             <Group grow align="flex-start" gap="sm">
               <TextInput
                 label="First name"
@@ -223,40 +246,27 @@ export default function Signup() {
               Create account
             </Button>
 
-            <Divider label="or" labelPosition="center" my={2} />
-
-            {/* Google has already verified the address, so this path skips the
-                emailed code entirely and lands straight in setup. */}
-            <GoogleSignInButton
-              label="Sign up with Google"
-              text="signup_with"
-              onBusyChange={setGoogleBusy}
-              onSuccess={(created) => {
-                if (created) {
-                  notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
-                  nav("/app/onboarding");
-                } else {
-                  // The email already had an account — this was a login, and a
-                  // returning user does not need the setup wizard.
-                  notify.success("Welcome back!", "Logged in");
-                  nav("/app");
-                }
-              }}
-              onError={setError}
-            />
-
+            {/* Logging in is the primary thing to offer someone who already has
+                an account. The demo sits under it as a quieter alternative for
+                people who want to see the product before handing over an email —
+                worth offering, but not worth a full-width button competing with
+                the two real sign-up paths. */}
             {/* Some people want to see the product before handing over an email.
-                The demo needs neither, so offer it rather than lose them. */}
-            <Button
-              variant="default"
-              fullWidth
-              size="md"
-              leftSection={<PlayCircle size={17} />}
-              loading={demoBusy}
-              onClick={enterDemo}
-            >
-              Explore the live demo
-            </Button>
+                A real button so it's findable, but subtle and not full width —
+                it should read as a third option, not as a peer of the two real
+                sign-up paths. */}
+            <Group justify="center" mt={2}>
+              <Button
+                variant="subtle"
+                color="gray"
+                size="sm"
+                leftSection={<PlayCircle size={15} />}
+                loading={demoBusy}
+                onClick={enterDemo}
+              >
+                Explore the live demo
+              </Button>
+            </Group>
 
             <Text c="dimmed" size="sm" ta="center">
               Have an account?{" "}

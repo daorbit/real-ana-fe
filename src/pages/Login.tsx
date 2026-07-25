@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Divider,
+  Group,
 } from "@mantine/core";
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "../auth";
@@ -113,6 +114,25 @@ export default function Login() {
               </Alert>
             )}
 
+            {/* Google first: it's one click against two fields and a password,
+                and putting it under the form makes the slower path look like the
+                intended one. */}
+            <GoogleSignInButton
+              label="Continue with Google"
+              text="signin_with"
+              onBusyChange={setGoogleBusy}
+              onSuccess={(created) => {
+                notify.success(
+                  created ? "Your account is ready." : "Welcome back!",
+                  created ? "Signed up with Google" : "Logged in"
+                );
+                nav("/app");
+              }}
+              onError={setError}
+            />
+
+            <Divider label="or use your email" labelPosition="center" />
+
             <TextInput
               label="Email"
               type="email"
@@ -142,32 +162,25 @@ export default function Login() {
               Log in
             </Button>
 
-            <Divider label="or" labelPosition="center" my={2} />
-
-            <GoogleSignInButton
-              label="Continue with Google"
-              text="signin_with"
-              onBusyChange={setGoogleBusy}
-              onSuccess={(created) => {
-                notify.success(
-                  created ? "Your account is ready." : "Welcome back!",
-                  created ? "Signed up with Google" : "Logged in"
-                );
-                nav("/app");
-              }}
-              onError={setError}
-            />
-
-            <Button
-              variant="default"
-              fullWidth
-              size="md"
-              leftSection={<PlayCircle size={17} />}
-              loading={demoBusy}
-              onClick={enterDemo}
-            >
-              Explore the live demo
-            </Button>
+            {/* Sign-up is the primary thing to offer someone who can't log in, so
+                it gets the emphasis. The demo sits beside it as a quieter
+                alternative — it was a full-width button competing with Google,
+                which is far more weight than "have a look around" deserves. */}
+            {/* A real button so the demo is actually findable, but subtle and
+                not full width — it should read as a third option, not as a peer
+                of Google and the password form. */}
+            <Group justify="center" mt={2}>
+              <Button
+                variant="subtle"
+                color="gray"
+                size="sm"
+                leftSection={<PlayCircle size={15} />}
+                loading={demoBusy}
+                onClick={enterDemo}
+              >
+                Explore the live demo
+              </Button>
+            </Group>
 
             <Text c="dimmed" size="sm" ta="center">
               No account?{" "}
