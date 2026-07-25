@@ -9,6 +9,7 @@ import { PlayCircle } from "lucide-react";
 import { useAuth } from "../auth";
 import { AuthBrand } from "../components/AuthBrand";
 import { PasswordStrength } from "../components/PasswordStrength";
+import { VerifyEmailStep } from "../components/VerifyEmailStep";
 import { notify, errMessage } from "../notify";
 import { timeUntil } from "../utils";
 import type { ApiError } from "../api";
@@ -27,6 +28,8 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
+  // Set once a code has been sent; switches this page to the verify step.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   const enterDemo = async () => {
     setDemoBusy(true);
@@ -94,17 +97,35 @@ export default function Signup() {
     setError(null);
     try {
       const name = `${firstName.trim()} ${lastName.trim()}`.trim();
+      // This only sends a code — the account is created once it's verified.
       await signup(email.trim(), password, name);
-      notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
-      // Straight into setup rather than an empty dashboard — a new account has
-      // no workspace, so /app would just show three empty states.
-      nav("/app/onboarding");
+      setPendingEmail(email.trim());
     } catch (err) {
-      setError(errMessage(err, "Signup failed. That email may already be registered."));
+      setError(errMessage(err, "Signup failed. Please try again."));
     } finally {
       setBusy(false);
     }
   };
+
+  // The details are held server-side against this address until it's verified,
+  // so the code screen needs nothing from this form but the email.
+  if (pendingEmail) {
+    return (
+      <div className="auth-split">
+        <AuthBrand />
+        <VerifyEmailStep
+          email={pendingEmail}
+          onBack={() => setPendingEmail(null)}
+          onVerified={() => {
+            notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
+            // Straight into setup rather than an empty dashboard — a new account
+            // has no workspace, so /app would just show three empty states.
+            nav("/app/onboarding");
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="auth-split">

@@ -6,6 +6,7 @@ import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
+  EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult,
 } from "../types";
 import type { Placed } from "../hooks/useHomeWidgets";
 import type { TrackerOptions } from "../utils/tracker";
@@ -67,7 +68,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -280,6 +281,35 @@ export const api = createApi({
     deleteAdminUser: build.mutation<{ ok: true }, string>({
       query: (userId) => ({ url: `/api/admin/users/${userId}`, method: "DELETE" }),
       invalidatesTags: ["AdminUser"],
+    }),
+
+    /* ---------------------------- admin email ----------------------------- */
+    getEmailStatus: build.query<EmailStatus, void>({
+      query: () => "/api/admin/email/status",
+    }),
+
+    getEmailSegments: build.query<{ segments: EmailSegment[] }, void>({
+      query: () => "/api/admin/email/segments",
+      providesTags: ["EmailSegment"],
+    }),
+
+    getEmailRecipients: build.query<{ recipients: EmailRecipient[] }, EmailSegmentId>({
+      query: (segment) => `/api/admin/email/recipients?segment=${segment}`,
+      providesTags: ["EmailSegment"],
+    }),
+
+    sendAdminEmail: build.mutation<
+      EmailSendResult,
+      { subject: string; body: string; segment?: EmailSegmentId; userIds?: string[] }
+    >({
+      query: (payload) => ({ url: "/api/admin/email/send", method: "POST", body: payload }),
+    }),
+
+    sendTestEmail: build.mutation<
+      { ok: true; email: string },
+      { subject: string; body: string }
+    >({
+      query: (payload) => ({ url: "/api/admin/email/test", method: "POST", body: payload }),
     }),
 
     /* ----------------------------- demo usage ----------------------------- */
@@ -535,6 +565,11 @@ export const {
   useSaveLayoutMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
+  useGetEmailStatusQuery,
+  useGetEmailSegmentsQuery,
+  useGetEmailRecipientsQuery,
+  useSendAdminEmailMutation,
+  useSendTestEmailMutation,
   useGetGoalsQuery,
   useCreateGoalMutation,
   useDeleteGoalMutation,

@@ -96,6 +96,35 @@ export type AdminUserPage = {
   pages: number;
 };
 
+/** Which accounts a broadcast goes to. Mirrors the server's segment ids. */
+export type EmailSegmentId = "all" | "not-installed" | "no-sites" | "installed";
+
+export type EmailSegment = {
+  id: EmailSegmentId;
+  label: string;
+  description: string;
+  count: number;
+};
+
+export type EmailRecipient = {
+  id: string;
+  email: string;
+  name: string;
+};
+
+/** Whether the server has SMTP credentials, and the address it sends as. */
+export type EmailStatus = {
+  configured: boolean;
+  from: string;
+};
+
+export type EmailSendResult = {
+  sent: number;
+  failed: number;
+  /** Only bounced addresses — successes are just the recipient list echoed back. */
+  failures: { email: string; ok: false; error?: string }[];
+};
+
 export type Workspace = {
   _id: string;
   name: string;

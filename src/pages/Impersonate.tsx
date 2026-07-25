@@ -4,8 +4,9 @@ import {
   Title, Text, TextInput, Stack, Group, Badge, Card, Center, Loader, ThemeIcon,
   Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
 } from "@mantine/core";
-import { Search, SearchX, X, LogIn, ShieldAlert, Trash2 } from "lucide-react";
+import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { EmailComposer } from "../components/EmailComposer";
 import { useGetAdminUsersQuery, useDeleteAdminUserMutation } from "../store";
 import { useAuth } from "../auth";
 import { notify, errMessage, confirmDelete } from "../notify";
@@ -38,6 +39,7 @@ export default function Impersonate() {
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [composing, setComposing] = useState(false);
 
   // Debounced, so typing a name doesn't fire a request per keystroke.
   useEffect(() => {
@@ -124,12 +126,25 @@ export default function Impersonate() {
             Every account on the platform. Open the dashboard as one, or delete one.
           </Text>
         </div>
-        {data && (
-          <Badge variant="light" color="emerald" size="lg">
-            {data.total} account{data.total === 1 ? "" : "s"}
-          </Badge>
-        )}
+        <Group gap="sm">
+          <Button
+            variant="light"
+            color="emerald"
+            radius="md"
+            leftSection={<Mail size={15} />}
+            onClick={() => setComposing(true)}
+          >
+            Send a message
+          </Button>
+          {data && (
+            <Badge variant="light" color="emerald" size="lg">
+              {data.total} account{data.total === 1 ? "" : "s"}
+            </Badge>
+          )}
+        </Group>
       </Group>
+
+      <EmailComposer opened={composing} onClose={() => setComposing(false)} />
 
       <Group mb="lg" align="flex-end" wrap="wrap">
         <TextInput

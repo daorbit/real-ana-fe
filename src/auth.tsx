@@ -14,7 +14,11 @@ type AuthState = {
   loading: boolean;
   isDemo: boolean;
   login: (email: string, password: string) => Promise<void>;
+  /** Starts a signup and emails a code. No account exists until `verifySignup`. */
   signup: (email: string, password: string, name: string) => Promise<void>;
+  /** Proves the code and creates the account, signing the user in. */
+  verifySignup: (email: string, code: string) => Promise<void>;
+  resendSignupCode: (email: string) => Promise<void>;
   startDemo: () => Promise<void>;
   logout: () => void;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
@@ -66,8 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser({ ...r.user, demo: true });
   };
 
+  // Signing up no longer signs anyone in: it only stashes the details server-
+  // side and sends a code. Nothing local changes until the code is verified.
   const signup = async (email: string, password: string, name: string) => {
-    const r = await api.post<AuthResp>("/api/auth/signup", { email, password, name });
+    await api.post("/api/auth/signup", { email, password, name });
+  };
+
+  const verifySignup = async (email: string, code: string) => {
+    const r = await api.post<AuthResp>("/api/auth/signup/verify", { email, code });
     setToken(r.token);
     dispatch(rtkApi.util.resetApiState());
     // A previous account may have skipped setup on this browser; the flag is
@@ -75,6 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("quantalog_onboarding_skipped");
     localStorage.removeItem("quantalog_onboarding_dismissed");
     setUser(r.user);
+  };
+
+  const resendSignupCode = async (email: string) => {
+    await api.post("/api/auth/signup/resend", { email });
   };
 
   const updateProfile = async (patch: ProfileUpdate) => {
@@ -115,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, signup, startDemo, logout, updateProfile, impersonate, exitImpersonation }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, impersonate, exitImpersonation }}
     >
       {children}
     </AuthContext.Provider>
