@@ -228,6 +228,7 @@ export default function Signup() {
             {/* Google has already verified the address, so this path skips the
                 emailed code entirely and lands straight in setup. */}
             <GoogleSignInButton
+              label="Sign up with Google"
               text="signup_with"
               onBusyChange={setGoogleBusy}
               onSuccess={(created) => {

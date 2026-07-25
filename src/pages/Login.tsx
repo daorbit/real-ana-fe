@@ -145,6 +145,7 @@ export default function Login() {
             <Divider label="or" labelPosition="center" my={2} />
 
             <GoogleSignInButton
+              label="Continue with Google"
               text="signin_with"
               onBusyChange={setGoogleBusy}
               onSuccess={(created) => {
