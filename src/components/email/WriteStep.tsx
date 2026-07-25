@@ -89,8 +89,8 @@ export function WriteStep({
 
         <Tabs.Panel value="write" pt="sm">
           <Textarea
-            description="Use {{name}} and {{email}} to personalise each message."
-            placeholder="Hi {{name}}, …"
+            description="{{greeting}} becomes “Hi Alex”, or just “Hello” when no name is known. {{name}} and {{email}} are also available."
+            placeholder="{{greeting}}, …"
             value={body}
             onChange={(e) => setBody(e.currentTarget.value)}
             minRows={8}
@@ -108,7 +108,9 @@ export function WriteStep({
           ) : preview ? (
             <Stack gap={6}>
               <Text size="xs" c="dimmed">
-                Shown as {preview.sampleName} would receive it.
+                {preview.sampleName
+                  ? `Shown as ${preview.sampleName} would receive it.`
+                  : "Shown as a recipient with no name on file would receive it."}
               </Text>
               <Box
                 style={{

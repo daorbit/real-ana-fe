@@ -9,7 +9,14 @@
 
 export type ParsedAddress = {
   email: string;
-  /** Falls back to the address's local part, matching the server's `personalize`. */
+  /**
+   * Empty unless the entry was written as `Name <address>`.
+   *
+   * Deliberately not derived from the address's local part: a message greeting
+   * someone as "alex" because their address starts that way is the clearest
+   * possible sign a machine wrote it. Templates use `{{greeting}}`, which the
+   * server resolves to a plain "Hello" when no name is known.
+   */
   name: string;
   /** The entry as typed, so the server receives what the admin actually wrote. */
   raw: string;
@@ -56,7 +63,7 @@ export function parseAddressList(input: string): ParsedAddressList {
     if (seen.has(email)) continue;
     seen.add(email);
 
-    valid.push({ email, name: name || email.split("@")[0], raw });
+    valid.push({ email, name, raw });
   }
 
   return { valid, invalid };

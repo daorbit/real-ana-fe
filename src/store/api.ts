@@ -299,6 +299,8 @@ export const api = createApi({
         subject: string;
         body: string;
         userId?: string;
+        /** Render as a recipient with no name on file — the usual case for invites. */
+        anonymous?: boolean;
         cta?: { label: string; href: string };
         layout?: MailLayout;
       }

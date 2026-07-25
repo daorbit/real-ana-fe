@@ -118,6 +118,9 @@ export function useEmailComposer({
           subject: subject.trim(),
           body: body.trim(),
           userId: user?.id,
+          // Most hand-entered recipients are a bare address, so previewing with
+          // a made-up name would hide the version almost everyone receives.
+          anonymous: audience === "custom" && !single && !customList.valid.some((r) => r.name),
           cta,
           layout,
         }).unwrap();
@@ -127,7 +130,7 @@ export function useEmailComposer({
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [tab, subject, body, user?.id, cta, layout, renderPreview]);
+  }, [tab, subject, body, user?.id, audience, single, customList, cta, layout, renderPreview]);
 
   const templates = templateData?.templates ?? [];
   const busy = sending || testing;
