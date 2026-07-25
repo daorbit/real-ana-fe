@@ -436,17 +436,25 @@ export default function PublicDashboard() {
           </SimpleGrid>
         )}
 
-        {/* Attribution: every shared dashboard is this product in front of
-            someone who does not have it. */}
-        <Center mt="xl" pt="lg" style={{ borderTop: "1px solid var(--border)" }}>
-          <Group gap={8}>
-            <Text size="xs" c="dimmed">Powered by</Text>
-            <a href="https://quantalog.daorbit.in" target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-              <Wordmark />
-            </a>
-          </Group>
-        </Center>
+        <PoweredBy />
       </Box>
     </Box>
+  );
+}
+
+/**
+ * Attribution footer: every shared dashboard is this product in front of
+ * someone who does not have it.
+ */
+function PoweredBy() {
+  return (
+    <Center mt="xl" pt="lg" style={{ borderTop: "1px solid var(--border)" }}>
+      <Group gap={8}>
+        <Text size="xs" c="dimmed">Powered by</Text>
+        <a href="https://quantalog.daorbit.in" target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+          <Wordmark />
+        </a>
+      </Group>
+    </Center>
   );
 }

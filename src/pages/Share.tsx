@@ -1,17 +1,25 @@
 import {
   Text, Group, Button, Switch, TextInput, CopyButton, Tooltip, ActionIcon,
   Badge, Checkbox, SimpleGrid, Stack, Box, Center, ThemeIcon, Alert, Skeleton,
-  Divider,
+  Divider, Tabs, Select,
 } from "@mantine/core";
+import { useState } from "react";
 import {
   Share2, Copy, Check, RefreshCw, ExternalLink, Eye, ShieldCheck, Link2Off,
+  BarChart3, Search, Globe,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, Section, Field, PageStack } from "../components/Page";
-import { useGetShareQuery, useSetShareMutation } from "../store";
+import {
+  useGetShareQuery, useSetShareMutation, useGetSitesQuery, useGetSeoReportsQuery,
+  useGetSeoShareQuery,
+} from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import { num, timeAgo } from "../utils";
+import { scoreColor } from "../components/seo/ScoreRing";
+import { SeoSharePanel } from "../components/seo/SeoSharePanel";
+import { SaveBarProvider, useSaveRegistration } from "../components/SaveBar";
 import type { SharePanels } from "../types";
 
 type PanelDef = { key: keyof SharePanels; label: string; hint: string };
@@ -87,27 +95,39 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
   const views = data?.views ?? 0;
   const url = token ? `${window.location.origin}/share/${token}` : "";
 
-  // Default to everything on, matching the server, so the checkboxes are never
-  // blank while the first request is in flight.
-  const panels = { ...DEFAULT_PANELS, ...(data?.panels ?? {}) };
-  const onCount = ALL_PANELS.filter((p) => panels[p.key]).length;
+  // Server-side panels, with the launch defaults filled in.
+  const serverPanels = { ...DEFAULT_PANELS, ...(data?.panels ?? {}) };
 
-  const writePanels = async (next: SharePanels, failMessage: string) => {
+  // Checkbox edits buffer locally and commit through the floating Save bar —
+  // only the link on/off and rotate act instantly. `null` means "no local
+  // edits, follow the server".
+  const [draft, setDraft] = useState<SharePanels | null>(null);
+  const panels = draft ?? serverPanels;
+  const onCount = ALL_PANELS.filter((p) => panels[p.key]).length;
+  const dirty = draft !== null && ALL_PANELS.some((p) => draft[p.key] !== serverPanels[p.key]);
+
+  const togglePanel = (key: keyof SharePanels, next: boolean) =>
+    setDraft({ ...panels, [key]: next });
+
+  const setAll = (next: boolean) =>
+    setDraft(Object.fromEntries(ALL_PANELS.map((p) => [p.key, next])) as SharePanels);
+
+  const savePanels = async () => {
+    if (!draft) return;
     try {
-      await setShare({ workspaceId, enabled, panels: next }).unwrap();
+      await setShare({ workspaceId, enabled, panels: draft }).unwrap();
+      setDraft(null);
+      notify.success("What visitors can see has been updated.");
     } catch (e) {
-      notify.error(errMessage(e, failMessage));
+      notify.error(errMessage(e, "Could not update what is shared."));
     }
   };
 
-  const togglePanel = (key: keyof SharePanels, next: boolean) =>
-    writePanels({ ...panels, [key]: next }, "Could not update what is shared.");
-
-  const setAll = (next: boolean) =>
-    writePanels(
-      Object.fromEntries(ALL_PANELS.map((p) => [p.key, next])) as SharePanels,
-      "Could not update what is shared.",
-    );
+  useSaveRegistration(`analytics-panels`, {
+    dirty,
+    save: savePanels,
+    reset: () => setDraft(null),
+  });
 
   const toggle = async (next: boolean) => {
     try {
@@ -357,6 +377,225 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
   );
 }
 
+/** Hostname + path of an audited URL, for the audit list. */
+function prettyUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const path = u.pathname === "/" ? "" : u.pathname;
+    return `${u.hostname.replace(/^www\./, "")}${path}`;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * One audited page as a card: a header row (score, page, live/off status) and
+ * the full share controls revealed in place when expanded. No accordion chrome
+ * — the whole card is a surface, and Manage flips it open.
+ *
+ * The status badge reads from the same share query the panel uses, so opening
+ * the card costs no extra request — RTK serves the cached result.
+ */
+function AuditShareCard({
+  workspaceId,
+  siteId,
+  reportId,
+  url,
+  score,
+  createdAt,
+  defaultOpen = false,
+}: {
+  workspaceId: string;
+  siteId: string;
+  reportId: string;
+  url: string;
+  score: number;
+  createdAt: string;
+  /** The first card starts open so the controls are visible without a click. */
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const { data } = useGetSeoShareQuery({ workspaceId, siteId, reportId });
+  const live = Boolean(data?.enabled);
+
+  return (
+    <Box
+      style={{
+        border: "1px solid var(--mantine-color-default-border)",
+        borderRadius: "var(--mantine-radius-md)",
+        overflow: "hidden",
+      }}
+    >
+      <Group justify="space-between" wrap="nowrap" p="md" gap="sm">
+        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+          <Badge size="lg" variant="light" color={scoreColor(score)} radius="sm">
+            {score}
+          </Badge>
+          <div style={{ minWidth: 0 }}>
+            <Text size="sm" fw={600} truncate>
+              {prettyUrl(url)}
+            </Text>
+            <Text size="xs" c="dimmed">
+              Audited {timeAgo(createdAt)}
+            </Text>
+          </div>
+        </Group>
+
+        <Group gap="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
+          <Badge
+            size="sm"
+            variant={live ? "light" : "outline"}
+            color={live ? "emerald" : "gray"}
+            radius="sm"
+          >
+            {live ? "Live" : "Off"}
+          </Badge>
+          <Button
+            size="compact-sm"
+            variant={open ? "light" : "default"}
+            onClick={() => setOpen((o) => !o)}
+          >
+            {open ? "Close" : "Manage"}
+          </Button>
+        </Group>
+      </Group>
+
+      {/* Kept mounted while collapsed so an unsaved draft and its Save-bar
+          registration survive closing the card. */}
+      <Box
+        p="lg"
+        display={open ? undefined : "none"}
+        style={{
+          borderTop: "1px solid var(--mantine-color-default-border)",
+          background: "var(--mantine-color-body)",
+        }}
+      >
+        <SeoSharePanel workspaceId={workspaceId} siteId={siteId} reportId={reportId} />
+      </Box>
+    </Box>
+  );
+}
+
+/**
+ * SEO sharing for the active workspace: every audited page, each with its own
+ * public link and section toggles. This is the same per-report control that
+ * used to live behind a Share button on the SEO page — moved here so all of a
+ * workspace's public links are managed in one place.
+ */
+function SeoShareTab({ workspaceId }: { workspaceId: string }) {
+  const { data: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
+    skip: !workspaceId,
+  });
+
+  const [siteId, setSiteId] = useState<string>("");
+  const site = sites.find((s) => s.siteId === siteId) ?? sites[0] ?? null;
+  const activeSiteId = site?.siteId ?? "";
+
+  const { data: reports = [], isLoading: reportsLoading } = useGetSeoReportsQuery(
+    { workspaceId, siteId: activeSiteId },
+    { skip: !workspaceId || !activeSiteId }
+  );
+
+  // One row per audited page — the newest run of each URL. Re-runs of the same
+  // page share a link, so listing every run would be noise.
+  const latestPerUrl = (() => {
+    const seen = new Set<string>();
+    return reports.filter((r) => (seen.has(r.url) ? false : (seen.add(r.url), true)));
+  })();
+
+  if (sitesLoading) {
+    return (
+      <PageStack maxWidth={1080}>
+        <Skeleton height={80} radius="lg" />
+        <Skeleton height={200} radius="lg" />
+      </PageStack>
+    );
+  }
+
+  if (!sites.length) {
+    return (
+      <PageStack maxWidth={1080}>
+        <Center py={48}>
+          <Stack align="center" gap={8} maw={400}>
+            <ThemeIcon variant="light" color="gray" size={48} radius="md">
+              <Globe size={22} />
+            </ThemeIcon>
+            <Text fw={650} mt={4}>No sites yet</Text>
+            <Text c="dimmed" size="sm" ta="center">
+              SEO audits run against a workspace's sites. Add one, run an audit,
+              and its public link controls will show up here.
+            </Text>
+          </Stack>
+        </Center>
+      </PageStack>
+    );
+  }
+
+  return (
+    <PageStack maxWidth={1080}>
+      <Section
+        title="Shared audits"
+        description="Each audited page gets its own read-only public link. Turn a link on, then choose what it shows."
+        actions={
+          sites.length > 1 && (
+            <Select
+              data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
+              value={activeSiteId}
+              onChange={(v) => v && setSiteId(v)}
+              allowDeselect={false}
+              size="sm"
+              w={220}
+              leftSection={<Globe size={15} />}
+              radius="md"
+              comboboxProps={{ radius: "md" }}
+            />
+          )
+        }
+      >
+        {reportsLoading ? (
+          <Box p="lg">
+            <Skeleton height={120} radius="md" />
+          </Box>
+        ) : latestPerUrl.length === 0 ? (
+          <Box p="lg">
+            <Text size="sm" c="dimmed">
+              No audits for this site yet. Run one on the SEO page and it will
+              appear here.
+            </Text>
+          </Box>
+        ) : (
+          <Stack gap="md" p="lg">
+            {latestPerUrl.map((r, i) => (
+              <AuditShareCard
+                key={r._id}
+                workspaceId={workspaceId}
+                siteId={activeSiteId}
+                reportId={r._id}
+                url={r.url}
+                score={r.score}
+                createdAt={r.createdAt}
+                defaultOpen={i === 0}
+              />
+            ))}
+          </Stack>
+        )}
+      </Section>
+
+      <Alert
+        variant="light"
+        color="gray"
+        icon={<ShieldCheck size={16} />}
+        title="What is never shared"
+      >
+        <Text size="sm">
+          Your site key, other audits and workspace settings are never shared.
+          Each public page is read-only.
+        </Text>
+      </Alert>
+    </PageStack>
+  );
+}
+
 /** Shown when there is no workspace to configure sharing for. */
 function NoWorkspace() {
   return (
@@ -384,8 +623,8 @@ export default function Share() {
   return (
     <AppShell>
       <PageHeader
-        title="Public dashboard"
-        description="Publish a read-only view of this workspace at a link anyone can open."
+        title="Public sharing"
+        description="Publish read-only views of this workspace — analytics and SEO audits — at links anyone can open."
         actions={
           <Badge
             variant="light"
@@ -397,7 +636,31 @@ export default function Share() {
           </Badge>
         }
       />
-      {active ? <ShareSettings key={active._id} workspaceId={active._id} /> : <NoWorkspace />}
+      {active ? (
+        <Tabs key={active._id} defaultValue="analytics" keepMounted={false}>
+          <Tabs.List mb="xl">
+            <Tabs.Tab value="analytics" leftSection={<BarChart3 size={15} />}>
+              Analytics
+            </Tabs.Tab>
+            <Tabs.Tab value="seo" leftSection={<Search size={15} />}>
+              SEO
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="analytics">
+            <SaveBarProvider>
+              <ShareSettings workspaceId={active._id} />
+            </SaveBarProvider>
+          </Tabs.Panel>
+          <Tabs.Panel value="seo">
+            <SaveBarProvider>
+              <SeoShareTab workspaceId={active._id} />
+            </SaveBarProvider>
+          </Tabs.Panel>
+        </Tabs>
+      ) : (
+        <NoWorkspace />
+      )}
     </AppShell>
   );
 }

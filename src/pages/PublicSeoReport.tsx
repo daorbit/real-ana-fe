@@ -1,19 +1,12 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Box, Center, Loader, Stack, Text, Group, Alert, ThemeIcon, Anchor,
-  Tooltip,
+  Box, Center, Loader, Stack, Text, Group, ThemeIcon, Anchor, Tooltip,
 } from "@mantine/core";
 import { EyeOff, ExternalLink, ShieldCheck } from "lucide-react";
 import { Wordmark } from "../components/Brand";
 import { useGetPublicSeoReportQuery } from "../store";
-import { dateTime, timeAgo } from "../utils";
-import {
-  ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
-} from "../components/seo/SeoPanels";
-import { LinksPanel } from "../components/seo/LinksPanel";
-import { SchemaPanel } from "../components/seo/SchemaPanel";
-import { AlertTriangle } from "lucide-react";
+import { PublicSeoBody } from "../components/seo/PublicSeoBody";
 
 /**
  * The public, read-only view of a shared SEO audit.
@@ -69,9 +62,6 @@ export default function PublicSeoReport() {
     );
   }
 
-  const p = data.panels;
-  const critical = data.issues.filter((i) => i.severity === "critical").length;
-
   return (
     <Box mih="100vh" style={{ background: "var(--bg)" }}>
       {/* Branded header — the client sees who produced the report. */}
@@ -98,48 +88,7 @@ export default function PublicSeoReport() {
 
       <Box className="pub-inner seo-report" style={{ maxWidth: 1080, paddingTop: 24, paddingBottom: 64 }}>
         <Stack gap="lg">
-          <Group justify="space-between" wrap="wrap" gap="xs">
-            <Text fw={700} fz={22} style={{ letterSpacing: "-0.02em" }}>
-              SEO audit
-            </Text>
-            <Tooltip label={dateTime(data.createdAt)} withArrow>
-              <Text size="xs" c="dimmed">Audited {timeAgo(data.createdAt)}</Text>
-            </Tooltip>
-          </Group>
-
-          {p.summary && data.performance && (
-            <ScorePanel
-              score={data.score}
-              performance={data.performance}
-              issues={p.issues ? data.issues : []}
-            />
-          )}
-
-          {p.issues && (
-            <Stack gap="md">
-              {critical > 0 && (
-                <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-                  {critical} critical issue{critical === 1 ? "" : "s"} on this page.
-                </Alert>
-              )}
-              <IssueList issues={data.issues} />
-            </Stack>
-          )}
-
-          {p.meta && data.meta && <MetaPanel meta={data.meta} url={data.finalUrl} />}
-          {p.content && data.content && <ContentPanel content={data.content} />}
-          {p.technical && data.technical && data.siteFiles && data.performance && (
-            <TechnicalPanel
-              technical={data.technical}
-              performance={data.performance}
-              siteFiles={data.siteFiles}
-            />
-          )}
-          {p.performance && data.performance && (
-            <SuggestionsPanel performance={data.performance} />
-          )}
-          {p.links && data.links && <LinksPanel links={data.links} />}
-          {p.schema && data.schema && <SchemaPanel schema={data.schema} />}
+          <PublicSeoBody data={data} />
 
           <Group justify="center" gap={6} mt="md">
             <ShieldCheck size={13} style={{ opacity: 0.5 }} />
