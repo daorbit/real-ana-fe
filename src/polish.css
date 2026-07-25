@@ -172,3 +172,16 @@
 
   .live-badge__dot::after { opacity: 0; }
 }
+
+/* A destructive menu item.
+   Mantine paints `color="red"` items a solid red on hover, which reads as an
+   alert firing rather than a pointer resting — and nothing else destructive in
+   the app behaves that way. Tint the background and keep the label red, so it
+   matches the subtle/light treatment used by every other delete control. */
+.danger-item {
+  --menu-item-hover: var(--mantine-color-red-light);
+}
+
+.danger-item:where(:hover, :focus, [data-menu-active]) {
+  color: var(--mantine-color-red-4);
+}

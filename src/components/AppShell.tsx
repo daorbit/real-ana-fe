@@ -321,8 +321,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {t("nav.settings")}
               </Menu.Item>
               <Menu.Divider />
+              {/* Mantine fills a coloured menu item solid on hover, which for a
+                  destructive-red item reads as an alert rather than a hover
+                  state. `danger-item` tints it instead — see polish.css. */}
               <Menu.Item
                 color="red"
+                className="danger-item"
                 leftSection={<LogOut size={15} />}
                 onClick={() =>
                   confirmLogout(() => {
