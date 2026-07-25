@@ -24,7 +24,7 @@ export function WriteStep({
   user?: AdminUser | null;
 }) {
   const {
-    single, setStep,
+    single, setStep, audience,
     templates, applyTemplate, templateId,
     subject, setSubject,
     body, setBody,
@@ -44,6 +44,13 @@ export function WriteStep({
           <Text size="xs" fw={600} c="dimmed" mb={6} tt="uppercase">
             Start from
           </Text>
+      
+          {templateId === "invite" && audience !== "custom" && !single && (
+            <Text size="xs" c="orange" mb={6}>
+              This one introduces Quantalog to someone new — the recipients you
+              picked already have accounts.
+            </Text>
+          )}
           <Group gap={6}>
             {templates.map((t) => {
               const active = templateId === t.id;
