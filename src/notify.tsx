@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import { Text, TextInput, Group, Button, Stack, Code, Alert } from "@mantine/core";
-import { TriangleAlert, ArrowUpCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Text, TextInput, Group, Button, Stack, Code, Alert, ThemeIcon } from "@mantine/core";
+import { TriangleAlert, ArrowUpCircle, Lock } from "lucide-react";
 import type { ReactNode } from "react";
 
 export const notify = {
@@ -17,32 +16,52 @@ export const notify = {
     notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
 
   /**
-   * A plan/quota limit was hit (workspace, site, audit, or crawl caps). Same
-   * red toast as `error`, but doesn't auto-dismiss and carries a link to
-   * Billing — the fix is always "upgrade your plan", so the toast should say
-   * that rather than leave it to the reader to work out.
+   * A plan/quota limit was hit (workspace, site, audit, crawl, or analytics
+   * range caps). A centered dialog, not a toast — this is a decision the
+   * reader needs to actually stop and consider ("upgrade?"), not a fire-and-
+   * forget status update that's gone in five seconds. Routed through
+   * Mantine's `modals` singleton, the same mechanism every other confirm
+   * dialog in this file uses, so there's one dialog stack for the whole app
+   * rather than a second ad hoc one per feature.
    */
-  quotaLimit: (message: ReactNode) =>
-    notifications.show({
-      title: "Plan limit reached",
-      message: (
-        <Stack gap="xs">
-          <Text size="sm">{message}</Text>
-          <Button
-            component={Link}
-            to="/app/billing"
-            size="xs"
-            color="emerald"
-            leftSection={<ArrowUpCircle size={14} />}
-            onClick={() => notifications.clean()}
-          >
-            Upgrade plan
-          </Button>
+  quotaLimit: (message: ReactNode) => {
+    const id = "quota-limit";
+    modals.open({
+      modalId: id,
+      centered: true,
+      radius: "lg",
+      size: "sm",
+      withCloseButton: false,
+      children: (
+        <Stack align="center" gap="sm" py="sm">
+          <ThemeIcon size={52} radius="xl" variant="light" color="emerald">
+            <Lock size={22} />
+          </ThemeIcon>
+          <Text fw={650} size="lg" ta="center">Upgrade to unlock this</Text>
+          <Text size="sm" c="dimmed" ta="center" maw={300}>{message}</Text>
+          <Group mt="sm">
+            <Button variant="subtle" color="gray" onClick={() => modals.close(id)}>
+              Not now
+            </Button>
+            <Button
+              color="emerald"
+              leftSection={<ArrowUpCircle size={15} />}
+              onClick={() => {
+                modals.close(id);
+                // A plain navigation, not <Link> — Mantine renders modal
+                // content as a sibling of ModalsProvider's own children, so
+                // it sits outside App's <BrowserRouter> and has no Router
+                // context to read a client-side <Link> against.
+                window.location.assign("/app/billing");
+              }}
+            >
+              Upgrade plan
+            </Button>
+          </Group>
         </Stack>
       ),
-      color: "red",
-      autoClose: false,
-    }),
+    });
+  },
 };
 
 /**
@@ -86,13 +105,16 @@ export function errCode(e: unknown): string | undefined {
   return typeof code === "string" ? code : undefined;
 }
 
-/** Show `notify.quotaLimit` for a quota_exceeded error, `notify.error` for anything else. */
+/**
+ * `notify.error` for anything except a quota_exceeded error, which is
+ * skipped here — the RTK Query `baseQuery` in `store/api.ts` already opens
+ * `notify.quotaLimit` for every request that comes back with that code, so a
+ * call site using this doesn't also need to check for it or risk a duplicate
+ * toast stacked under the dialog.
+ */
 export function notifyError(e: unknown, fallback = "Request failed") {
-  if (errCode(e) === "quota_exceeded") {
-    notify.quotaLimit(errMessage(e, fallback));
-  } else {
-    notify.error(errMessage(e, fallback));
-  }
+  if (errCode(e) === "quota_exceeded") return;
+  notify.error(errMessage(e, fallback));
 }
 
 // Neutral confirmation (e.g. logging out).

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useGetStatsQuery } from "../store";
-import { notify, errMessage } from "../notify";
+import { notifyError } from "../notify";
 import { useDemo } from "../demo";
 import { demoStats } from "../utils/demoStats";
 import { POLL_MS } from "./usePolling";
@@ -69,7 +69,7 @@ export function useStats(
   useEffect(() => {
     if (error && !notified.current) {
       notified.current = true;
-      notify.error(errMessage(error, "Could not load analytics."));
+      notifyError(error, "Could not load analytics.");
     }
     if (!error) notified.current = false;
   }, [error]);

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Button, Group, Modal, Popover, Stack, Text, Tooltip, UnstyledButton, ThemeIcon } from "@mantine/core";
+import { Button, Group, Popover, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
-import { CalendarDays, Lock, ArrowUpCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { CalendarDays, Lock } from "lucide-react";
 import dayjs from "dayjs";
 import { useAuth } from "../auth";
+import { notify } from "../notify";
 
 /** The preset windows, matching the backend's RANGES keys. */
 export const RANGE_PRESETS = [
@@ -43,7 +43,6 @@ export function RangePicker({
 }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
   // Local calendar selection, only pushed up on Apply. Mantine v9 dates are
   // "YYYY-MM-DD" strings, not Date objects.
   const [draft, setDraft] = useState<[string | null, string | null]>([
@@ -63,9 +62,16 @@ export function RangePicker({
       : "Custom";
   const customLocked = isLocked("custom");
 
+  const promptUpgrade = () => {
+    const planName = user?.billing?.plan.name ?? "Your current";
+    notify.quotaLimit(
+      `${planName} plan only includes 1h and 24h ranges. Upgrade to unlock 7d, 30d, and custom date ranges.`
+    );
+  };
+
   const pick = (range: string) => {
     if (isLocked(range)) {
-      setUpgradeOpen(true);
+      promptUpgrade();
       return;
     }
     onChange({ preset: range });
@@ -74,7 +80,7 @@ export function RangePicker({
   const apply = () => {
     if (customLocked) {
       setOpen(false);
-      setUpgradeOpen(true);
+      promptUpgrade();
       return;
     }
     const [f, t] = draft;
@@ -124,7 +130,7 @@ export function RangePicker({
                 variant={isCustom ? "filled" : "default"}
                 color={isCustom ? "emerald" : undefined}
                 leftSection={customLocked ? <Lock size={13} /> : <CalendarDays size={15} />}
-                onClick={() => (customLocked ? setUpgradeOpen(true) : setOpen((o) => !o))}
+                onClick={() => (customLocked ? promptUpgrade() : setOpen((o) => !o))}
                 disabled={disabled}
               >
                 {customLabel}
@@ -158,39 +164,6 @@ export function RangePicker({
           </Popover.Dropdown>
         </Popover>
       </Group>
-
-      <Modal
-        opened={upgradeOpen}
-        onClose={() => setUpgradeOpen(false)}
-        centered
-        radius="lg"
-        size="sm"
-        title="Upgrade to unlock this range"
-      >
-        <Stack align="center" gap="sm" py="sm">
-          <ThemeIcon size={52} radius="xl" variant="light" color="emerald">
-            <Lock size={22} />
-          </ThemeIcon>
-          <Text size="sm" c="dimmed" ta="center" maw={280}>
-            {user?.billing?.plan.name ?? "Your current"} plan only includes 1h and 24h ranges.
-            Upgrade to unlock 7d, 30d, and custom date ranges.
-          </Text>
-          <Group mt="sm">
-            <Button variant="subtle" color="gray" onClick={() => setUpgradeOpen(false)}>
-              Not now
-            </Button>
-            <Button
-              component={Link}
-              to="/app/billing"
-              color="emerald"
-              leftSection={<ArrowUpCircle size={15} />}
-              onClick={() => setUpgradeOpen(false)}
-            >
-              Upgrade plan
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
     </>
   );
 }

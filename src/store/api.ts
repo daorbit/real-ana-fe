@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { getToken, isDemoToken } from "../api";
-import { notify } from "../notify";
+import { notify, errMessage } from "../notify";
 import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
@@ -41,7 +41,7 @@ const rawBaseQuery = fetchBaseQuery({
 });
 
 
-const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = (
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   apiArg,
   extra
@@ -66,7 +66,18 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     return Promise.resolve({ data: data ?? null });
   }
 
-  return rawBaseQuery(args, apiArg, extra);
+  const result = await rawBaseQuery(args, apiArg, extra);
+
+  // A plan/quota limit hit anywhere in the app — workspace, site, audit,
+  // crawl, analytics range, whatever comes next — surfaces the same upgrade
+  // dialog automatically. This is the one place every request passes
+  // through, so a call site doesn't have to remember to check for
+  // `quota_exceeded` itself; it only has to set the code server-side.
+  const code = (result.error?.data as { code?: unknown } | undefined)?.code;
+  if (code === "quota_exceeded") {
+    notify.quotaLimit(errMessage(result.error, "Upgrade your plan to continue."));
+  }
+  return result;
 };
 
 export const api = createApi({
