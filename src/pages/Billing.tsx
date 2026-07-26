@@ -569,7 +569,8 @@ function UsageCell({
   quota: number;
   credits?: number;
 }) {
-  const pct = used === null ? null : quota > 0 ? Math.min(100, (used / quota) * 100) : 100;
+  const total = quota + (credits ?? 0);
+  const pct = used === null ? null : total > 0 ? Math.min(100, (used / total) * 100) : 100;
   const exhausted = pct !== null && pct >= 100;
   return (
     <Box p="lg" style={{ borderRight: "1px solid var(--border)", borderTop: "1px solid var(--border)" }}>
@@ -583,8 +584,11 @@ function UsageCell({
         <>
           <Group gap={6} align="baseline">
             <Text fz={22} fw={700} style={{ letterSpacing: "-0.02em" }}>{used}</Text>
-            <Text size="sm" c="dimmed">/ {quota}{credits ? ` +${credits}` : ""}</Text>
+            <Text size="sm" c="dimmed">/ {total}</Text>
           </Group>
+          {credits ? (
+            <Text size="xs" c="dimmed" mt={2}>{quota} plan + {credits} addon</Text>
+          ) : null}
           <Progress value={pct ?? 0} color={exhausted ? (credits ? "yellow" : "red") : "emerald"} size={4} radius="xl" mt={8} />
         </>
       )}
