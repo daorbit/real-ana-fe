@@ -4,7 +4,7 @@ import { getToken, isDemoToken } from "../api";
 import { notify, errMessage } from "../notify";
 import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
-  AdminUserPage, ApiKey, Site, Stats, Workspace,
+  AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout,
@@ -296,6 +296,10 @@ export const api = createApi({
     deleteAdminUser: build.mutation<{ ok: true }, string>({
       query: (userId) => ({ url: `/api/admin/users/${userId}`, method: "DELETE" }),
       invalidatesTags: ["AdminUser"],
+    }),
+
+    getAdminUserBilling: build.query<AdminUserBilling, string>({
+      query: (userId) => `/api/admin/users/${userId}/billing`,
     }),
 
     /* ---------------------------- admin email ----------------------------- */
@@ -721,6 +725,7 @@ export const {
   useSaveLayoutMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
+  useGetAdminUserBillingQuery,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,

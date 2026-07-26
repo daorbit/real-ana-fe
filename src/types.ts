@@ -184,6 +184,8 @@ export type AdminUser = {
   eventCount: number;
   /** null until the account's first site reports. */
   lastEventAt: string | null;
+  /** null when the account has no subscription row at all. */
+  plan: { slug: string; name: string; expired: boolean } | null;
 };
 
 export type AdminUserPage = {
@@ -192,6 +194,13 @@ export type AdminUserPage = {
   page: number;
   pages: number;
 };
+
+/** Full billing detail for one account, shown in the admin plan dialog. */
+export type AdminUserBilling =
+  | { subscribed: false }
+  | ({
+      subscribed: true;
+    } & QuotaSummary);
 
 /** Which accounts a broadcast goes to. Mirrors the server's segment ids. */
 export type EmailSegmentId = "all" | "not-installed" | "no-sites" | "installed";

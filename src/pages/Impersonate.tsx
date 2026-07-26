@@ -4,9 +4,10 @@ import {
   Title, Text, TextInput, Stack, Group, Badge, Card, Center, Loader, ThemeIcon,
   Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
 } from "@mantine/core";
-import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail } from "lucide-react";
+import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { EmailComposer } from "../components/EmailComposer";
+import { AdminPlanDialog } from "../components/AdminPlanDialog";
 import { useGetAdminUsersQuery, useDeleteAdminUserMutation } from "../store";
 import { useAuth } from "../auth";
 import { notify, errMessage, confirmDelete } from "../notify";
@@ -42,6 +43,8 @@ export default function Impersonate() {
   const [composing, setComposing] = useState(false);
   // The one account being messaged, when the mail button in a row is used.
   const [messaging, setMessaging] = useState<AdminUser | null>(null);
+  // The one account whose plan dialog is open.
+  const [planUser, setPlanUser] = useState<AdminUser | null>(null);
 
   // Debounced, so typing a name doesn't fire a request per keystroke.
   useEffect(() => {
@@ -156,6 +159,8 @@ export default function Impersonate() {
         onClose={() => setMessaging(null)}
       />
 
+      <AdminPlanDialog user={planUser} onClose={() => setPlanUser(null)} />
+
       <Group mb="lg" align="flex-end" wrap="wrap">
         <TextInput
           placeholder="Search by name or email…"
@@ -197,12 +202,13 @@ export default function Impersonate() {
           {/* Dim the table, rather than swapping it for a spinner, so the rows
               don't jump while a page or filter loads. */}
           <Card withBorder radius="md" p={0} style={{ opacity: isFetching ? 0.6 : 1, overflow: "hidden" }}>
-            <Table.ScrollContainer minWidth={900}>
+            <Table.ScrollContainer minWidth={1000}>
               <Table verticalSpacing="sm" horizontalSpacing="md" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>Account</Table.Th>
                     <Table.Th>Role</Table.Th>
+                    <Table.Th>Plan</Table.Th>
                     <Table.Th>Joined</Table.Th>
                     <Table.Th>Workspaces</Table.Th>
                     <Table.Th>Sites</Table.Th>
@@ -236,6 +242,19 @@ export default function Impersonate() {
                           >
                             {u.role}
                           </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          {u.plan ? (
+                            <Badge
+                              size="sm"
+                              variant="light"
+                              color={u.plan.expired ? "red" : u.plan.slug === "pro" ? "emerald" : "gray"}
+                            >
+                              {u.plan.name}{u.plan.expired ? " (expired)" : ""}
+                            </Badge>
+                          ) : (
+                            <Text size="xs" c="dimmed">none</Text>
+                          )}
                         </Table.Td>
                         <Table.Td>
                           <Text size="sm">{shortDate(u.createdAt)}</Text>
@@ -274,6 +293,17 @@ export default function Impersonate() {
                               >
                                 Open
                               </Button>
+                            </Tooltip>
+                            <Tooltip label="Plan details" withArrow>
+                              <ActionIcon
+                                variant="light"
+                                color="gray"
+                                size="lg"
+                                radius="md"
+                                onClick={() => setPlanUser(u)}
+                              >
+                                <CreditCard size={16} />
+                              </ActionIcon>
                             </Tooltip>
                             <Tooltip label={`Email ${u.email}`} withArrow>
                               <ActionIcon
