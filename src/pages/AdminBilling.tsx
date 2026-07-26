@@ -56,16 +56,26 @@ function PlansTab() {
 
   const [modal, setModal] = useState(false);
   const [draft, setDraft] = useState<Plan | null>(null);
+  // Same rupee/paise split as the addon form — editing `draft.priceMonthly`
+  // directly and re-deriving the display value as `/100` on every render
+  // double-divides an already-rupee value on the second keystroke.
+  const [priceMonthlyRupees, setPriceMonthlyRupees] = useState(0);
+  const [priceYearlyRupees, setPriceYearlyRupees] = useState(0);
 
-  const openEdit = (p: Plan) => { setDraft(p); setModal(true); };
+  const openEdit = (p: Plan) => {
+    setDraft(p);
+    setPriceMonthlyRupees(p.priceMonthly / 100);
+    setPriceYearlyRupees(p.priceYearly / 100);
+    setModal(true);
+  };
 
   const submit = async () => {
     if (!draft) return;
     try {
       await save({
         slug: draft.slug,
-        priceMonthly: Math.round(Number(draft.priceMonthly ?? 0) * 100),
-        priceYearly: Math.round(Number(draft.priceYearly ?? 0) * 100),
+        priceMonthly: Math.round(priceMonthlyRupees * 100),
+        priceYearly: Math.round(priceYearlyRupees * 100),
       }).unwrap();
       notify.success(`${draft.name} price updated.`, "Plan updated");
       setModal(false);
@@ -124,8 +134,8 @@ function PlansTab() {
               are fixed in code.
             </Text>
             <Group grow>
-              <NumberInput label="Price / month (₹)" value={(draft.priceMonthly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceMonthly: Number(v) || 0 })} min={0} />
-              <NumberInput label="Price / year (₹)" value={(draft.priceYearly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceYearly: Number(v) || 0 })} min={0} />
+              <NumberInput label="Price / month (₹)" value={priceMonthlyRupees || undefined} onChange={(v) => setPriceMonthlyRupees(Number(v) || 0)} min={0} />
+              <NumberInput label="Price / year (₹)" value={priceYearlyRupees || undefined} onChange={(v) => setPriceYearlyRupees(Number(v) || 0)} min={0} />
             </Group>
             <Group justify="flex-end" mt="sm">
               <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
@@ -151,15 +161,20 @@ function AddonsTab() {
 
   const [modal, setModal] = useState(false);
   const [draft, setDraft] = useState<Partial<AddonPack>>(emptyAddon);
+  // Price is edited in rupees but stored (and returned by the API) in paise.
+  // Keeping a separate rupee field for the input avoids re-deriving it from
+  // `draft.price / 100` on every keystroke — dividing an already-rupee value
+  // by 100 again on the next render is what turned "500" into "0.000002".
+  const [priceRupees, setPriceRupees] = useState(0);
 
-  const openNew = () => { setDraft(emptyAddon); setModal(true); };
-  const openEdit = (a: AddonPack) => { setDraft(a); setModal(true); };
+  const openNew = () => { setDraft(emptyAddon); setPriceRupees(0); setModal(true); };
+  const openEdit = (a: AddonPack) => { setDraft(a); setPriceRupees(a.price / 100); setModal(true); };
 
   const submit = async () => {
     try {
       await save({
         ...draft,
-        price: Math.round(Number(draft.price ?? 0) * 100),
+        price: Math.round(priceRupees * 100),
       }).unwrap();
       notify.success(`${draft.name} saved.`, draft._id ? "Addon updated" : "Addon created");
       setModal(false);
@@ -255,7 +270,7 @@ function AddonsTab() {
             />
             <NumberInput label="Quantity" value={draft.quantity} onChange={(v) => setDraft({ ...draft, quantity: Number(v) || 1 })} min={1} />
           </Group>
-          <NumberInput label="Price (₹)" value={(draft.price ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, price: Number(v) || 0 })} min={0} />
+          <NumberInput label="Price (₹)" value={priceRupees || undefined} onChange={(v) => setPriceRupees(Number(v) || 0)} min={0} />
           <Switch label="Active (visible on the Billing page)" checked={draft.active !== false} onChange={(e) => setDraft({ ...draft, active: e.currentTarget.checked })} />
           <Group justify="flex-end" mt="sm">
             <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>

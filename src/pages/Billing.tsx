@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
-  SegmentedControl, Progress, Divider, ThemeIcon, Alert, Modal, TextInput,
+  SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
 } from "@mantine/core";
-import { Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X } from "lucide-react";
+import {
+  Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
+  FolderKanban, Layers, Sparkles, Clock,
+} from "lucide-react";
+import { PlanIcon } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
@@ -15,7 +19,7 @@ import {
 import { notify, errMessage } from "../notify";
 import { useAuth } from "../auth";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "../utils/razorpay";
-import type { BillingCycle, Plan, AddonPack, CouponCheckResult } from "../types";
+import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary } from "../types";
 
 /** Paise to a display INR string — Razorpay's amounts are always the smallest unit. */
 function money(paise: number): string {
@@ -40,7 +44,6 @@ export default function Billing() {
   // Plan/quota state travels on the user's own profile rather than a separate
   // endpoint — every authenticated page already has it via `useAuth()`.
   const usage = user?.billing ?? null;
-  const usageLoading = false;
 
   const [startSubscription] = useStartSubscriptionMutation();
   const [verifySubscription] = useVerifySubscriptionMutation();
@@ -143,8 +146,18 @@ export default function Billing() {
     }
   };
 
-  const loading = plansLoading || addonsLoading || usageLoading;
+  const loading = plansLoading || addonsLoading;
   const expired = usage?.status === "expired";
+  // The plan one tier above the current one is the one worth calling out —
+  // sorted by monthly price, since that's the one axis every plan (including
+  // Free) actually has.
+  const featuredSlug = (() => {
+    if (!plans.length) return null;
+    const sorted = [...plans].sort((a, b) => a.priceMonthly - b.priceMonthly);
+    const currentIdx = usage ? sorted.findIndex((p) => p.slug === usage.plan.slug) : -1;
+    const next = currentIdx >= 0 ? sorted[currentIdx + 1] : sorted[sorted.length - 2];
+    return next?.slug ?? sorted[sorted.length - 1]?.slug ?? null;
+  })();
 
   return (
     <AppShell>
@@ -153,44 +166,8 @@ export default function Billing() {
       {loading ? (
         <Center py={64}><Loader size="sm" /></Center>
       ) : (
-        <Stack gap="xl">
-          {usage && (
-            <Card withBorder radius="md" padding="lg">
-              <Group justify="space-between" align="flex-start" wrap="wrap">
-                <div>
-                  <Group gap="xs">
-                    <Text fw={650}>{usage.plan.name}</Text>
-                    <Badge size="sm" variant="light" color={expired ? "red" : "emerald"}>
-                      {expired ? "expired" : "active"}
-                    </Badge>
-                    <Badge size="sm" variant="light" color="gray">{usage.cycle}</Badge>
-                  </Group>
-                  {usage.currentPeriodEnd && (
-                    <Text size="xs" c="dimmed" mt={4}>
-                      {expired ? "Expired" : "Renews"} {new Date(usage.currentPeriodEnd).toLocaleDateString()}
-                    </Text>
-                  )}
-                </div>
-              </Group>
-
-              {expired && (
-                <Alert variant="light" color="red" icon={<Info size={16} />} radius="md" mt="md">
-                  <Text size="sm">
-                    Your plan period has ended — audits and crawls are paused until you renew below.
-                    Any unused addon credits are untouched.
-                  </Text>
-                </Alert>
-              )}
-
-              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mt="lg">
-                <UsageBar icon={Search} label="SEO audits" used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
-                <UsageBar icon={Globe2} label="Site crawls" used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
-              </SimpleGrid>
-              <Text size="xs" c="dimmed" mt="md">
-                {usage.workspaces.used} / {usage.workspaces.quota} workspaces · up to {usage.maxSitesPerWorkspace} site{usage.maxSitesPerWorkspace === 1 ? "" : "s"} each
-              </Text>
-            </Card>
-          )}
+        <Stack gap={40}>
+          {usage && <UsageSummary usage={usage} expired={expired} />}
 
           {!usage && (
             <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
@@ -199,20 +176,24 @@ export default function Billing() {
           )}
 
           <div>
-            <Group justify="space-between" align="center" mb="md">
-              <Title order={4}>Plans</Title>
+            <Group justify="space-between" align="center" mb="lg">
+              <div>
+                <Title order={3} style={{ letterSpacing: "-0.01em" }}>Plans</Title>
+                <Text size="sm" c="dimmed" mt={2}>Every plan includes SEO audits, crawls, and the full dashboard.</Text>
+              </div>
               <SegmentedControl
-                size="xs"
+                size="sm"
+                radius="md"
                 value={cycle}
                 onChange={(v) => setCycle(v as BillingCycle)}
                 data={[
                   { label: "Monthly", value: "monthly" },
-                  { label: "Yearly", value: "yearly" },
+                  { label: "Yearly · save 2 months", value: "yearly" },
                 ]}
               />
             </Group>
 
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(plans.length, 4) || 1 }} spacing="md">
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(plans.length, 4) || 1 }} spacing="lg">
               {plans.map((plan) => {
                 const price = cycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
                 // Free (or any zero-price plan) is assigned directly, not
@@ -220,28 +201,74 @@ export default function Billing() {
                 // so there's nothing to re-buy.
                 const buyable = price > 0;
                 const current = usage?.plan.slug === plan.slug && !expired;
+                const featured = plan.slug === featuredSlug && !current;
                 return (
-                  <Card key={plan.slug} withBorder radius="md" padding="lg">
-                    <Text fw={650}>{plan.name}</Text>
-                    {plan.description && <Text size="xs" c="dimmed" mt={2}>{plan.description}</Text>}
-                    <Group gap={4} align="baseline" mt="md">
-                      <Text fz={28} fw={700} style={{ letterSpacing: "-0.02em" }}>{money(price)}</Text>
-                      <Text size="xs" c="dimmed">/ {cycle === "yearly" ? "year" : "month"}</Text>
+                  <Card
+                    key={plan.slug}
+                    withBorder
+                    radius="lg"
+                    padding="lg"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      ...(featured
+                        ? {
+                            borderColor: "var(--violet-2)",
+                            boxShadow: "0 0 0 1px var(--violet-2)",
+                          }
+                        : {}),
+                    }}
+                  >
+                    {featured && (
+                      <Badge
+                        size="sm"
+                        radius="xl"
+                        variant="filled"
+                        color="emerald"
+                        mb="sm"
+                        leftSection={<Sparkles size={11} />}
+                        style={{ alignSelf: "flex-start" }}
+                      >
+                        Recommended
+                      </Badge>
+                    )}
+
+                    <Group justify="space-between" align="flex-start" wrap="nowrap">
+                      <Group gap={10} wrap="nowrap">
+                        <PlanIcon slug={plan.slug} size={30} uid={`card-${plan.slug}`} />
+                        <Text fw={700} size="lg">{plan.name}</Text>
+                      </Group>
+                      {current && (
+                        <Badge size="sm" variant="light" color="emerald">Current</Badge>
+                      )}
+                    </Group>
+                    {plan.description && (
+                      <Text size="sm" c="dimmed" mt={4} lh={1.4}>{plan.description}</Text>
+                    )}
+
+                    <Group gap={4} align="baseline" mt="lg">
+                      <Text fz={32} fw={800} style={{ letterSpacing: "-0.03em" }}>{money(price)}</Text>
+                      {buyable && (
+                        <Text size="sm" c="dimmed">/ {cycle === "yearly" ? "year" : "month"}</Text>
+                      )}
                     </Group>
 
-                    <Stack gap={4} mt="md">
+                    <Divider my="md" />
+
+                    <Stack gap={7} mb="lg" style={{ flex: 1 }}>
                       <FeatureLine text={`${plan.maxWorkspaces} workspace${plan.maxWorkspaces === 1 ? "" : "s"}`} />
                       <FeatureLine text={`${plan.maxSitesPerWorkspace} site${plan.maxSitesPerWorkspace === 1 ? "" : "s"} per workspace`} />
-                      <FeatureLine text={`${plan.monthlyAuditQuota} SEO audits / month`} />
-                      <FeatureLine text={`${plan.monthlyCrawlQuota} crawls / month`} />
+                      <FeatureLine text={`${plan.monthlyAuditQuota} SEO audit${plan.monthlyAuditQuota === 1 ? "" : "s"} / month`} />
+                      <FeatureLine text={`${plan.monthlyCrawlQuota} crawl${plan.monthlyCrawlQuota === 1 ? "" : "s"} / month`} />
                       {plan.features.map((f) => <FeatureLine key={f} text={f} />)}
                     </Stack>
 
                     <Button
                       fullWidth
-                      mt="lg"
+                      size="md"
+                      radius="md"
                       color="emerald"
-                      variant={current ? "light" : "filled"}
+                      variant={current ? "light" : featured ? "filled" : "outline"}
                       disabled={current || !buyable}
                       loading={subscribing === plan.slug}
                       leftSection={<CreditCard size={15} />}
@@ -256,26 +283,37 @@ export default function Billing() {
           </div>
 
           <div>
-            <Title order={4} mb="md">Addon packs</Title>
-            <Text size="sm" c="dimmed" mb="md">
-              Used past your plan's monthly quota? Buy extra audits or crawls — a one-time purchase, credits never expire.
-            </Text>
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+            <Group justify="space-between" align="center" mb="lg">
+              <div>
+                <Title order={3} style={{ letterSpacing: "-0.01em" }}>Addon packs</Title>
+                <Text size="sm" c="dimmed" mt={2}>
+                  Used past your plan's monthly quota? Buy extra audits or crawls — credits never expire.
+                </Text>
+              </div>
+            </Group>
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
               {addons.map((pack) => (
-                <Card key={pack._id} withBorder radius="md" padding="lg">
-                  <Group justify="space-between" align="flex-start">
+                <Card key={pack._id} withBorder radius="lg" padding="lg">
+                  <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <div>
-                      <Text fw={600} size="sm">{pack.name}</Text>
-                      <Text size="xs" c="dimmed" mt={2}>+{pack.quantity} {pack.type}s</Text>
+                      <Text fw={650} size="md">{pack.name}</Text>
+                      <Text size="sm" c="dimmed" mt={2}>+{pack.quantity} {pack.type}s</Text>
                     </div>
-                    <ThemeIcon size={30} radius="md" variant="light" color="emerald">
-                      {pack.type === "audit" ? <Search size={15} /> : <Globe2 size={15} />}
+                    <ThemeIcon size={38} radius="md" variant="light" color="emerald">
+                      {pack.type === "audit" ? <Search size={17} /> : <Globe2 size={17} />}
                     </ThemeIcon>
                   </Group>
-                  <Divider my="sm" />
+                  <Divider my="md" />
                   <Group justify="space-between" align="center">
-                    <Text fw={650}>{money(pack.price)}</Text>
-                    <Button size="xs" color="emerald" loading={buying === pack._id} onClick={() => { setAddonCoupon(null); setConfirmAddon(pack); }}>
+                    <Text fz={22} fw={700} style={{ letterSpacing: "-0.02em" }}>{money(pack.price)}</Text>
+                    <Button
+                      size="sm"
+                      radius="md"
+                      variant="outline"
+                      color="emerald"
+                      loading={buying === pack._id}
+                      onClick={() => { setAddonCoupon(null); setConfirmAddon(pack); }}
+                    >
                       Buy
                     </Button>
                   </Group>
@@ -396,13 +434,127 @@ export default function Billing() {
   );
 }
 
+/**
+ * The hero usage panel: current plan, renewal date, and progress toward each
+ * quota. Sits above the pricing grid so "what am I on, and how close to the
+ * edge" is answered before "what could I switch to."
+ */
+function UsageSummary({
+  usage,
+  expired,
+}: {
+  usage: NonNullable<QuotaSummary>;
+  expired: boolean;
+}) {
+  return (
+    <Card
+      withBorder
+      radius="lg"
+      padding={0}
+      style={{ overflow: "hidden" }}
+    >
+      <Box
+        p="lg"
+        style={{
+          background: expired
+            ? "color-mix(in srgb, var(--mantine-color-red-6) 8%, transparent)"
+            : "linear-gradient(135deg, color-mix(in srgb, var(--violet-2) 10%, transparent), transparent)",
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        <Group justify="space-between" align="flex-start" wrap="wrap">
+          <Group gap="sm" wrap="nowrap">
+            <Box
+              style={{
+                width: 44, height: 44, borderRadius: 10, display: "flex",
+                alignItems: "center", justifyContent: "center",
+                background: "var(--bg-2)", border: "1px solid var(--border)",
+              }}
+            >
+              <PlanIcon slug={usage.plan.slug} size={26} uid="hero" />
+            </Box>
+            <div>
+              <Group gap={8}>
+                <Text fw={700} size="lg">{usage.plan.name} plan</Text>
+                <Badge size="sm" variant="light" color={expired ? "red" : "emerald"} tt="none">
+                  {expired ? "Expired" : "Active"}
+                </Badge>
+              </Group>
+              {usage.currentPeriodEnd && (
+                <Group gap={5} mt={2}>
+                  <Clock size={12} style={{ color: "var(--muted, var(--mantine-color-dimmed))" }} />
+                  <Text size="xs" c="dimmed">
+                    {expired ? "Expired" : "Renews"} {new Date(usage.currentPeriodEnd).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+                    {" · billed "}{usage.cycle}
+                  </Text>
+                </Group>
+              )}
+            </div>
+          </Group>
+        </Group>
+      </Box>
+
+      {expired && (
+        <Box p="md" style={{ borderBottom: "1px solid var(--border)" }}>
+          <Alert variant="light" color="red" icon={<Info size={16} />} radius="md" p="sm">
+            <Text size="sm">
+              Your plan period has ended — audits and crawls are paused until you renew.
+              Any unused addon credits are untouched.
+            </Text>
+          </Alert>
+        </Box>
+      )}
+
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing={0}>
+        <UsageCell icon={Search} label="SEO audits" used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
+        <UsageCell icon={Globe2} label="Crawls" used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
+        <UsageCell icon={FolderKanban} label="Workspaces" used={usage.workspaces.used} quota={usage.workspaces.quota} />
+        <UsageCell icon={Layers} label="Sites / workspace" used={null} quota={usage.maxSitesPerWorkspace} />
+      </SimpleGrid>
+    </Card>
+  );
+}
+
+function UsageCell({
+  icon: Icon, label, used, quota, credits,
+}: {
+  icon: typeof Search;
+  label: string;
+  /** Null when the number is a flat limit rather than a used/quota pair (sites per workspace). */
+  used: number | null;
+  quota: number;
+  credits?: number;
+}) {
+  const pct = used === null ? null : quota > 0 ? Math.min(100, (used / quota) * 100) : 100;
+  const exhausted = pct !== null && pct >= 100;
+  return (
+    <Box p="lg" style={{ borderRight: "1px solid var(--border)", borderTop: "1px solid var(--border)" }}>
+      <Group gap={6} mb={8}>
+        <Icon size={14} style={{ color: "var(--muted, var(--mantine-color-dimmed))" }} />
+        <Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.02em" }}>{label}</Text>
+      </Group>
+      {used === null ? (
+        <Text fz={22} fw={700} style={{ letterSpacing: "-0.02em" }}>{quota}</Text>
+      ) : (
+        <>
+          <Group gap={6} align="baseline">
+            <Text fz={22} fw={700} style={{ letterSpacing: "-0.02em" }}>{used}</Text>
+            <Text size="sm" c="dimmed">/ {quota}{credits ? ` +${credits}` : ""}</Text>
+          </Group>
+          <Progress value={pct ?? 0} color={exhausted ? (credits ? "yellow" : "red") : "emerald"} size={4} radius="xl" mt={8} />
+        </>
+      )}
+    </Box>
+  );
+}
+
 function FeatureLine({ text }: { text: string }) {
   return (
-    <Group gap={6} wrap="nowrap">
-      <ThemeIcon size={16} radius="xl" variant="light" color="emerald">
+    <Group gap={8} wrap="nowrap">
+      <ThemeIcon size={17} radius="xl" variant="light" color="emerald">
         <Check size={10} />
       </ThemeIcon>
-      <Text size="xs" c="dimmed">{text}</Text>
+      <Text size="sm" c="dimmed">{text}</Text>
     </Group>
   );
 }
@@ -474,30 +626,5 @@ function CouponField({
       rightSection={isLoading ? <Loader size={12} /> : undefined}
       error={result?.error}
     />
-  );
-}
-
-function UsageBar({
-  icon: Icon, label, used, quota, credits,
-}: {
-  icon: typeof Search;
-  label: string;
-  used: number;
-  quota: number;
-  credits: number;
-}) {
-  const pct = quota > 0 ? Math.min(100, (used / quota) * 100) : 100;
-  const exhausted = quota > 0 && used >= quota;
-  return (
-    <div>
-      <Group justify="space-between" mb={4}>
-        <Group gap={6}>
-          <Icon size={14} />
-          <Text size="sm" fw={600}>{label}</Text>
-        </Group>
-        <Text size="xs" c="dimmed">{used} / {quota}{credits > 0 ? ` +${credits} addon` : ""}</Text>
-      </Group>
-      <Progress value={pct} color={exhausted ? (credits > 0 ? "yellow" : "red") : "emerald"} size="sm" radius="xl" />
-    </div>
   );
 }

@@ -3,14 +3,15 @@ import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Alert, Menu,
-  UnstyledButton, Tooltip, Burger,
+  UnstyledButton, Tooltip, Burger, Progress, Badge,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle,
-  CreditCard,
+  CreditCard, ArrowUpRight,
 } from "lucide-react";
+import { PlanIcon } from "./PlanIcons";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
 import { useAuth } from "../auth";
@@ -247,6 +248,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </MantineShell.Section>
 
         <MantineShell.Section>
+          {!isDemo && <PlanCard />}
+
           {/* Read-only demo session. A persistent card, not a toast, because it
               explains why every action is disabled — and it's the way out. */}
           {isDemo && (
@@ -399,5 +402,94 @@ export function AppShell({ children }: { children: ReactNode }) {
       </MantineShell.Main>
     </MantineShell>
     </>
+  );
+}
+
+/**
+ * Which plan the account is on, and how close it is to the plan's limits —
+ * always visible in the rail rather than something you find only by opening
+ * Billing. The nudge to upgrade is deliberately quiet on Free/plenty-of-room
+ * (a plain badge) and gets louder (a card with a bar and a button) once a
+ * quota is actually close to biting, so it reads as useful information most
+ * of the time and only becomes a prompt when there's something to act on.
+ */
+function PlanCard() {
+  const { user } = useAuth();
+  const billing = user?.billing;
+  if (!billing) return null;
+
+  const expired = billing.status === "expired";
+
+  // The tightest of the two usage ratios is what decides whether this nudges
+  // — a plan can have plenty of crawl headroom left while audits are nearly
+  // exhausted, and that's the number that should drive the warning.
+  const auditPct = billing.audits.planQuota > 0
+    ? billing.audits.used / billing.audits.planQuota
+    : 1;
+  const crawlPct = billing.crawls.planQuota > 0
+    ? billing.crawls.used / billing.crawls.planQuota
+    : 1;
+  const worstPct = Math.max(auditPct, crawlPct);
+  const nearLimit = worstPct >= 0.8 && billing.audits.addonCredits === 0 && billing.crawls.addonCredits === 0;
+
+  const nudge = expired || nearLimit;
+
+  if (!nudge) {
+    return (
+      <UnstyledButton
+        component={Link}
+        to="/app/billing"
+        className="tile"
+        style={{ display: "block", width: "100%", padding: "8px 10px", marginBottom: 8 }}
+      >
+        <Group justify="space-between" wrap="nowrap">
+          <Group gap={6} wrap="nowrap">
+            <PlanIcon slug={billing.plan.slug} size={16} uid="rail" />
+            <Text size="xs" fw={600} truncate>{billing.plan.name} plan</Text>
+          </Group>
+          <Badge size="xs" variant="light" color="gray" tt="none">{billing.cycle}</Badge>
+        </Group>
+      </UnstyledButton>
+    );
+  }
+
+  return (
+    <Box className="tile" style={{ padding: 10, marginBottom: 8 }}>
+      <Group justify="space-between" wrap="nowrap" mb={6}>
+        <Group gap={6} wrap="nowrap">
+          <PlanIcon slug={billing.plan.slug} size={16} uid="rail-warn" />
+          <Text size="xs" fw={650}>{billing.plan.name} plan</Text>
+        </Group>
+        {expired && (
+          <Badge size="xs" variant="light" color="red" tt="none">expired</Badge>
+        )}
+      </Group>
+
+      {expired ? (
+        <Text size="xs" c="dimmed" lh={1.4} mb={8}>
+          Your period ended — audits and crawls are paused until you renew.
+        </Text>
+      ) : (
+        <>
+          <Text size="xs" c="dimmed" lh={1.4} mb={6}>
+            You've used {billing.audits.used}/{billing.audits.planQuota} audits and{" "}
+            {billing.crawls.used}/{billing.crawls.planQuota} crawls this cycle.
+          </Text>
+          <Progress value={worstPct * 100} size={4} radius="xl" color="yellow" mb={8} />
+        </>
+      )}
+
+      <Button
+        component={Link}
+        to="/app/billing"
+        size="compact-xs"
+        fullWidth
+        color={expired ? "red" : "emerald"}
+        variant={expired ? "filled" : "light"}
+        rightSection={<ArrowUpRight size={12} />}
+      >
+        {expired ? "Renew plan" : "Upgrade plan"}
+      </Button>
+    </Box>
   );
 }
