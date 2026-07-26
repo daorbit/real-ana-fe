@@ -1,7 +1,7 @@
 import { Alert, Badge, Box, Card, Center, Group, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
 import {
   AlertTriangle, CheckCircle2, XCircle, FileText, Image as ImageIcon, Share2, Bot,
-  Lock, Braces, Smartphone, Sparkles, TrendingUp, TrendingDown, Minus,
+  Lock, Braces, Smartphone, CircleCheck, TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -66,7 +66,7 @@ export function OverviewPanel({
           ) : (
             <Center py="lg">
               <Group gap={8}>
-                <ThemeIcon size={30} radius="xl" variant="light" color="teal"><Sparkles size={15} /></ThemeIcon>
+                <ThemeIcon size={30} radius="xl" variant="light" color="teal"><CircleCheck size={15} /></ThemeIcon>
                 <Text size="sm" c="dimmed">Every check came back clean.</Text>
               </Group>
             </Center>

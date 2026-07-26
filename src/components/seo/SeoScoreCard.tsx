@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import {
   Card, Group, Stack, Text, Badge, Button, Center, ThemeIcon, Skeleton, Box, Tooltip,
 } from "@mantine/core";
-import { ArrowUpRight, Search, Sparkles, Gauge } from "lucide-react";
+import { ArrowUpRight, Search, Gauge } from "lucide-react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetLatestSeoReportQuery } from "../../store";
 import { ScoreRing, scoreColor } from "./ScoreRing";
@@ -71,7 +71,7 @@ export function SeoScoreCard({
         <Center mih={150}>
           <Stack align="center" gap={8} maw={240}>
             <ThemeIcon size={40} radius="xl" variant="light" color="emerald">
-              <Sparkles size={19} />
+              <Search size={19} />
             </ThemeIcon>
             <Text fw={600} size="sm" ta="center">
               No audit yet

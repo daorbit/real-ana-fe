@@ -1,5 +1,5 @@
 import { Badge, Box, Card, Center, Group, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
-import { Sparkles } from "lucide-react";
+import { CircleCheck } from "lucide-react";
 import type { SeoIssue, SeoPerformance } from "../../../types";
 import { ScoreRing } from "../ScoreRing";
 import { SEVERITY } from "../shared/Panel";
@@ -12,7 +12,7 @@ export function IssueList({ issues }: { issues: SeoIssue[] }) {
         <Center>
           <Stack align="center" gap="xs" maw={380}>
             <ThemeIcon size={48} radius="xl" variant="light" color="teal">
-              <Sparkles size={24} />
+              <CircleCheck size={24} />
             </ThemeIcon>
             <Text fw={650}>Nothing to fix</Text>
             <Text size="sm" c="dimmed" ta="center">

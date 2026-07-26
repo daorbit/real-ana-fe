@@ -5,7 +5,7 @@ import {
   Button, Group, Text, Title, TextInput, SimpleGrid, UnstyledButton,
   Stack, Anchor, Badge,
 } from "@mantine/core";
-import { ArrowRight, ArrowLeft, Globe, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowLeft, Globe, Zap } from "lucide-react";
 import { OnboardingBrand } from "../components/OnboardingBrand";
 import { BrandIcon } from "../components/BrandIcon";
 import { CodeBlock } from "../components/CodeBlock";
@@ -296,7 +296,7 @@ export default function Onboarding() {
                   )}
 
                   <Group gap={6}>
-                    <Sparkles size={14} style={{ color: "var(--violet-2)" }} />
+                    <Zap size={14} style={{ color: "var(--violet-2)" }} />
                     <Text size="xs" c="dimmed">
                       Numbers appear within seconds of your first visitor.
                     </Text>

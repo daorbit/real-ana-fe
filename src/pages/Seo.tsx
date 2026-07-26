@@ -5,7 +5,7 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import {
-  Search, RefreshCw, Globe, History, Trash2, Sparkles, Info,
+  Search, RefreshCw, Globe, History, Trash2, Info, Trophy,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
   HelpCircle,
@@ -145,7 +145,7 @@ function HistoryPanel({
                       {h.score === best && history.length > 1 && (
                         <Tooltip label="Best score recorded" withArrow>
                           <ThemeIcon size={16} radius="xl" variant="light" color="yellow">
-                            <Sparkles size={10} />
+                            <Trophy size={10} />
                           </ThemeIcon>
                         </Tooltip>
                       )}
@@ -558,7 +558,7 @@ export default function Seo() {
             <Center>
               <Stack align="center" gap="sm" maw={420}>
                 <ThemeIcon size={44} radius="xl" variant="light" color="emerald">
-                  <Sparkles size={22} />
+                  <Search size={22} />
                 </ThemeIcon>
                 <Text fw={600}>No audit yet</Text>
                 <Text size="sm" c="dimmed" ta="center">

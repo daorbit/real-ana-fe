@@ -2,7 +2,7 @@ import {
   Anchor, Badge, Box, Group, Progress, ScrollArea, SimpleGrid, Stack, Table, Text,
 } from "@mantine/core";
 import {
-  FileText, Image as ImageIcon, Link2, Type, Gauge, ExternalLink, Sparkles,
+  FileText, Image as ImageIcon, Link2, Type, Gauge, ExternalLink, Hash,
 } from "lucide-react";
 import type { SeoContent } from "../../../types";
 import { num } from "../../../utils";
@@ -139,7 +139,7 @@ export function ContentPanel({ content }: { content: SeoContent }) {
         <Panel
           title="Top keywords"
           description="Share of body text, common words excluded."
-          icon={Sparkles}
+          icon={Hash}
           color="grape"
         >
           {content.keywordDensity.length ? (
