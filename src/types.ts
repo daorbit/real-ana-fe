@@ -79,6 +79,65 @@ export type DemoUsage = {
   since: string;
 };
 
+/* ---------------------------------- billing --------------------------------- */
+
+export type Plan = {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  /** Paise (INR smallest unit). */
+  priceMonthly: number;
+  priceYearly: number;
+  razorpayPlanIdMonthly: string;
+  razorpayPlanIdYearly: string;
+  maxSites: number;
+  monthlyAuditQuota: number;
+  monthlyCrawlQuota: number;
+  features: string[];
+  active: boolean;
+  sortOrder: number;
+};
+
+export type BillingCycle = "monthly" | "yearly";
+
+export type AddonType = "audit" | "crawl";
+
+export type AddonPack = {
+  _id: string;
+  name: string;
+  slug: string;
+  type: AddonType;
+  quantity: number;
+  /** Paise. */
+  price: number;
+  active: boolean;
+  sortOrder: number;
+};
+
+export type QuotaSummary = {
+  plan: { id: string; name: string; slug: string };
+  cycle: BillingCycle;
+  status: "created" | "active" | "past_due" | "cancelled" | "expired";
+  currentPeriodEnd: string | null;
+  audits: { planQuota: number; used: number; addonCredits: number };
+  crawls: { planQuota: number; used: number; addonCredits: number };
+} | null;
+
+export type StartSubscriptionResponse = {
+  subscriptionId: string;
+  razorpayKeyId: string;
+  plan: { name: string; cycle: BillingCycle };
+};
+
+export type StartAddonPurchaseResponse = {
+  orderId: string;
+  amount: number;
+  currency: string;
+  razorpayKeyId: string;
+  addon: { name: string; type: AddonType; quantity: number };
+};
+
 /** A row in the admin's user switcher. */
 export type AdminUser = {
   id: string;

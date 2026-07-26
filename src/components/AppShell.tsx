@@ -9,6 +9,7 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle,
+  CreditCard,
 } from "lucide-react";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
@@ -49,6 +50,7 @@ const NAV_GROUPS = [
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
+      { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
     ],
   },
 ];
@@ -57,6 +59,7 @@ const NAV_GROUPS = [
 const ADMIN_ITEMS = [
   { to: "/app/impersonate", labelKey: "nav.viewAsUser", label: "Impersonate", icon: Users },
   { to: "/app/demo-usage", labelKey: "nav.demoUsage", label: "Demo usage", icon: PlayCircle },
+  { to: "/app/admin/billing", labelKey: "nav.adminBilling", label: "Plans & addons", icon: CreditCard },
 ];
 
 function NavItem({

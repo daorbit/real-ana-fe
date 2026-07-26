@@ -15,6 +15,8 @@ import Share from "./pages/Share";
 import Impersonate from "./pages/Impersonate";
 import DemoUsage from "./pages/DemoUsage";
 import Settings from "./pages/Settings";
+import Billing from "./pages/Billing";
+import AdminBilling from "./pages/AdminBilling";
 import Onboarding from "./pages/Onboarding";
 import PublicDashboard from "./pages/PublicDashboard";
 import PublicSeoReport from "./pages/PublicSeoReport";
@@ -117,9 +119,11 @@ export default function App() {
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
             <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
+            <Route path="/app/billing" element={<Protected><Billing /></Protected>} />
             {/* Admin-only, enforced by the page and by every /api/admin route. */}
             <Route path="/app/impersonate" element={<Protected><Impersonate /></Protected>} />
             <Route path="/app/demo-usage" element={<Protected><DemoUsage /></Protected>} />
+            <Route path="/app/admin/billing" element={<Protected><AdminBilling /></Protected>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

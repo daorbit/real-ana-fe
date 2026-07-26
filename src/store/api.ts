@@ -16,6 +16,8 @@ import type {
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
+  Plan, AddonPack, QuotaSummary, BillingCycle,
+  StartSubscriptionResponse, StartAddonPurchaseResponse,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -69,7 +71,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -576,6 +578,95 @@ export const api = createApi({
       }),
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
     }),
+
+    /* -------------------------------- billing ------------------------------ */
+
+    getPlans: build.query<Plan[], void>({
+      query: () => "/api/billing/plans",
+      providesTags: ["Plan"],
+    }),
+
+    getAddonPacks: build.query<AddonPack[], void>({
+      query: () => "/api/billing/addons",
+      providesTags: ["AddonPack"],
+    }),
+
+    getMySubscription: build.query<QuotaSummary, void>({
+      query: () => "/api/billing/me",
+      providesTags: ["Billing"],
+    }),
+
+    startSubscription: build.mutation<
+      StartSubscriptionResponse,
+      { planId: string; cycle: BillingCycle }
+    >({
+      query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
+    }),
+
+    verifySubscription: build.mutation<
+      { ok: true },
+      { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string }
+    >({
+      query: (body) => ({ url: "/api/billing/subscribe/verify", method: "POST", body }),
+      invalidatesTags: ["Billing"],
+    }),
+
+    cancelSubscription: build.mutation<{ ok: true }, void>({
+      query: () => ({ url: "/api/billing/cancel", method: "POST" }),
+      invalidatesTags: ["Billing"],
+    }),
+
+    startAddonPurchase: build.mutation<StartAddonPurchaseResponse, string>({
+      query: (slug) => ({ url: `/api/billing/addons/${slug}/purchase`, method: "POST" }),
+    }),
+
+    verifyAddonPurchase: build.mutation<
+      { ok: true },
+      { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
+    >({
+      query: (body) => ({ url: "/api/billing/addons/verify", method: "POST", body }),
+      invalidatesTags: ["Billing"],
+    }),
+
+    /* ---------------------------- admin billing ----------------------------- */
+
+    getAdminPlans: build.query<Plan[], void>({
+      query: () => "/api/admin/billing/plans",
+      providesTags: ["Plan"],
+    }),
+
+    saveAdminPlan: build.mutation<Plan, Partial<Plan> & { _id?: string }>({
+      query: ({ _id, ...body }) => ({
+        url: _id ? `/api/admin/billing/plans/${_id}` : "/api/admin/billing/plans",
+        method: _id ? "PUT" : "POST",
+        body,
+      }),
+      invalidatesTags: ["Plan"],
+    }),
+
+    deleteAdminPlan: build.mutation<void, string>({
+      query: (id) => ({ url: `/api/admin/billing/plans/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Plan"],
+    }),
+
+    getAdminAddonPacks: build.query<AddonPack[], void>({
+      query: () => "/api/admin/billing/addons",
+      providesTags: ["AddonPack"],
+    }),
+
+    saveAdminAddonPack: build.mutation<AddonPack, Partial<AddonPack> & { _id?: string }>({
+      query: ({ _id, ...body }) => ({
+        url: _id ? `/api/admin/billing/addons/${_id}` : "/api/admin/billing/addons",
+        method: _id ? "PUT" : "POST",
+        body,
+      }),
+      invalidatesTags: ["AddonPack"],
+    }),
+
+    deleteAdminAddonPack: build.mutation<void, string>({
+      query: (id) => ({ url: `/api/admin/billing/addons/${id}`, method: "DELETE" }),
+      invalidatesTags: ["AddonPack"],
+    }),
   }),
 });
 
@@ -630,4 +721,18 @@ export const {
   useGetFieldVitalsQuery,
   useRunCrawlMutation,
   useGetLatestCrawlQuery,
+  useGetPlansQuery,
+  useGetAddonPacksQuery,
+  useGetMySubscriptionQuery,
+  useStartSubscriptionMutation,
+  useVerifySubscriptionMutation,
+  useCancelSubscriptionMutation,
+  useStartAddonPurchaseMutation,
+  useVerifyAddonPurchaseMutation,
+  useGetAdminPlansQuery,
+  useSaveAdminPlanMutation,
+  useDeleteAdminPlanMutation,
+  useGetAdminAddonPacksQuery,
+  useSaveAdminAddonPackMutation,
+  useDeleteAdminAddonPackMutation,
 } = api;

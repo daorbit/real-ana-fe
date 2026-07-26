@@ -28,6 +28,8 @@
     "share": "Public dashboard",
     "viewAsUser": "Impersonate",
     "demoUsage": "Demo usage",
+    "billing": "Billing",
+    "adminBilling": "Plans & addons",
     "settings": "Settings",
     "logout": "Log out",
     "search": "Search",
