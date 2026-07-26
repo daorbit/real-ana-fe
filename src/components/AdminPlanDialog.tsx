@@ -53,7 +53,7 @@ export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onC
 
           <Text size="xs" c="dimmed">
             {data.status === "expired" ? "Expired" : "Renews"}{" "}
-            {shortDate(data.currentPeriodEnd)}
+            {data.currentPeriodEnd ? shortDate(data.currentPeriodEnd) : "—"}
           </Text>
 
           <Divider />
