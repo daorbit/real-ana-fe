@@ -6,7 +6,7 @@ import {
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
-  FolderKanban, Layers, Sparkles, Clock, PartyPopper,
+  FolderKanban, Layers, Star, Clock, PartyPopper,
 } from "lucide-react";
 import { PlanIcon } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
@@ -242,7 +242,7 @@ export default function Billing() {
                         variant="filled"
                         color="emerald"
                         mb="sm"
-                        leftSection={<Sparkles size={11} />}
+                        leftSection={<Star size={11} fill="currentColor" />}
                         style={{ alignSelf: "flex-start" }}
                       >
                         Recommended

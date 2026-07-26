@@ -1,101 +1,75 @@
 // Inline SVG plan marks — self-contained, no external images (survive strict
-// CSP), same convention as Brand.tsx's Logo. Solid rounded-square app-icon
-// style: a filled gradient tile with a white glyph and a soft top highlight,
-// like a home-screen icon — not a flat line badge. One glyph per tier so
-// Free/Starter/Pro read as distinct marks at a glance.
+// CSP), same convention as Brand.tsx's Logo. Flat rounded-square badge, one
+// bold recognizable glyph per tier — the common SaaS pricing-badge pattern
+// (Stripe/Vercel/Linear): a single flat colour, no gradients, no shine, so it
+// reads clean at 20-30px instead of competing for attention.
 //
 // Shared between the dashboard and the landing page — this file is
 // duplicated at quantalog-lp/src/components/PlanIcons.tsx since the two are
 // separate builds with no shared package; keep them in sync by hand.
 
-const GRADIENTS: Record<string, [string, string]> = {
-  free: ["#94a3b8", "#64748b"], // slate — plain, no charge
-  starter: ["#34d399", "#059669"], // the app's own emerald, same as Logo
-  pro: ["#fb923c", "#ea580c"], // orange — the tier worth calling out
+const COLORS: Record<string, string> = {
+  free: "#64748b", // slate — plain, no charge
+  starter: "#059669", // the app's own emerald, same as Logo
+  pro: "#d97706", // amber — the tier worth calling out
 };
 
-function ids(slug: string, uid: string) {
-  return { fill: `plan-fill-${slug}-${uid}`, shine: `plan-shine-${slug}-${uid}` };
-}
-
-/** Shared tile background: rounded square, gradient fill, soft glass highlight across the top. */
-function Tile({
-  id,
-  shineId,
-  from,
-  to,
-  children,
-}: {
-  id: string;
-  shineId: string;
-  from: string;
-  to: string;
-  children: React.ReactNode;
-}) {
+/** Flat rounded-square tile, tinted background + solid-colour glyph on top. */
+function Tile({ color, children }: { color: string; children: React.ReactNode }) {
   return (
     <>
-      <defs>
-        <linearGradient id={id} x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor={from} />
-          <stop offset="1" stopColor={to} />
-        </linearGradient>
-        <linearGradient id={shineId} x1="18" y1="2" x2="18" y2="16" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#fff" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <rect x="1.5" y="1.5" width="33" height="33" rx="10" fill={`url(#${id})`} />
-      <rect x="1.5" y="1.5" width="33" height="15" rx="10" fill={`url(#${shineId})`} />
+      <rect x="1" y="1" width="34" height="34" rx="9" fill={color} fillOpacity="0.12" />
       {children}
     </>
   );
 }
 
-/** A ring — Free costs nothing and asks nothing, so the mark is the plainest of the three: an open circle. */
-export function FreePlanIcon({ size = 24, uid = "a" }: { size?: number; uid?: string }) {
-  const { fill, shine } = ids("free", uid);
-  const [from, to] = GRADIENTS.free;
+/** A leaf — Free costs nothing, so the mark is the simplest and most organic of the three. */
+export function FreePlanIcon({ size = 24 }: { size?: number; uid?: string }) {
+  const color = COLORS.free;
   return (
     <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-hidden="true">
-      <Tile id={fill} shineId={shine} from={from} to={to}>
-        <circle cx="18" cy="18" r="7.5" stroke="#fff" strokeWidth="2.6" fill="none" />
+      <Tile color={color}>
+        <path
+          d="M12 24c-1.5-5.5 1-11.5 8-13.5 5-1.4 8 .3 8 .3s-.3 5.5-4 9c-3.2 3-7.2 3.5-9 3.5-1 0-2.3-.1-3-.6Z"
+          stroke={color} strokeWidth="1.8" strokeLinejoin="round" fill="none"
+        />
+        <path d="M12 24c2-3 5-6 9.5-9" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
       </Tile>
     </svg>
   );
 }
 
-/** An upward chevron with a shaft — Starter is the first paid step, so the mark points up and out. */
-export function StarterPlanIcon({ size = 24, uid = "a" }: { size?: number; uid?: string }) {
-  const { fill, shine } = ids("starter", uid);
-  const [from, to] = GRADIENTS.starter;
+/** A rocket — Starter is the first paid step, the one that gets you moving. */
+export function StarterPlanIcon({ size = 24 }: { size?: number; uid?: string }) {
+  const color = COLORS.starter;
   return (
     <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-hidden="true">
-      <Tile id={fill} shineId={shine} from={from} to={to}>
+      <Tile color={color}>
         <path
-          d="M11 21.5 L18 13 L25 21.5"
-          stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none"
+          d="M18 9c3 1.6 5 5 5 9.5 0 1.9-.4 3.5-.9 4.6l-4.1 2.4-4.1-2.4c-.5-1.1-.9-2.7-.9-4.6C13 14 15 10.6 18 9Z"
+          fill={color}
         />
-        <path d="M18 13 L18 25" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" />
+        <circle cx="18" cy="17" r="1.8" fill="white" />
+        <path d="M13.5 20.5 10 22.5l1-4.3 2.5.3" fill={color} />
+        <path d="M22.5 20.5 26 22.5l-1-4.3-2.5.3" fill={color} />
+        <path d="M16.3 26 18 28.5 19.7 26" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       </Tile>
     </svg>
   );
 }
 
-/** A faceted gem — Pro is the top tier, drawn like a cut stone rather than a plain shape. */
-export function ProPlanIcon({ size = 24, uid = "a" }: { size?: number; uid?: string }) {
-  const { fill, shine } = ids("pro", uid);
-  const [from, to] = GRADIENTS.pro;
+/** A crown — Pro is the top tier, marked the way a top tier usually is. */
+export function ProPlanIcon({ size = 24 }: { size?: number; uid?: string }) {
+  const color = COLORS.pro;
   return (
     <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-hidden="true">
-      <Tile id={fill} shineId={shine} from={from} to={to}>
+      <Tile color={color}>
         <path
-          d="M12 13.5 L24 13.5 L27.5 17.5 L18 27 L8.5 17.5 Z"
-          fill="#fff" opacity="0.95"
+          d="M10 23.5 8.5 14l4.8 3.6L18 11l4.7 6.6 4.8-3.6-1.5 9.5H10Z"
+          fill={color}
         />
-        <path
-          d="M12 13.5 L24 13.5 M18 13.5 L14 17.5 L18 27 L22 17.5 Z M8.5 17.5 L27.5 17.5"
-          stroke={to} strokeWidth="1" strokeLinejoin="round" opacity="0.35" fill="none"
-        />
+        <rect x="10" y="24.5" width="16" height="2.2" rx="1.1" fill={color} />
       </Tile>
     </svg>
   );
@@ -110,7 +84,7 @@ const ICONS: Record<PlanSlug, typeof FreePlanIcon> = {
 };
 
 /** Pick the right badge by plan slug, falling back to the Starter mark for any tier added later. */
-export function PlanIcon({ slug, size = 24, uid = "a" }: { slug: string; size?: number; uid?: string }) {
+export function PlanIcon({ slug, size = 24 }: { slug: string; size?: number; uid?: string }) {
   const Icon = ICONS[slug as PlanSlug] ?? StarterPlanIcon;
-  return <Icon size={size} uid={uid} />;
+  return <Icon size={size} />;
 }
