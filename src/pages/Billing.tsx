@@ -3,9 +3,10 @@ import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
   SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
 } from "@mantine/core";
+import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
-  FolderKanban, Layers, Sparkles, Clock,
+  FolderKanban, Layers, Sparkles, Clock, PartyPopper,
 } from "lucide-react";
 import { PlanIcon } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
@@ -56,6 +57,18 @@ export default function Billing() {
   const [confirmAddon, setConfirmAddon] = useState<AddonPack | null>(null);
   const [planCoupon, setPlanCoupon] = useState<CouponCheckResult | null>(null);
   const [addonCoupon, setAddonCoupon] = useState<CouponCheckResult | null>(null);
+  // What to celebrate once a purchase actually completes — set right before
+  // the confetti burst, cleared when the dialog closes.
+  const [celebration, setCelebration] = useState<
+    { kind: "plan"; planName: string } | { kind: "addon"; pack: AddonPack } | null
+  >(null);
+
+  const fireConfetti = () => {
+    const colors = ["#10b981", "#059669", "#34d399", "#fbbf24"];
+    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, colors });
+    confetti({ particleCount: 60, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors, angle: 60, decay: 0.9 });
+    confetti({ particleCount: 60, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors, angle: 120, decay: 0.9 });
+  };
 
   const doSubscribe = async (plan: Plan) => {
     setConfirmPlan(null);
@@ -70,8 +83,9 @@ export default function Billing() {
       // A ₹0 plan (Free) is assigned directly server-side — no order, no
       // Razorpay modal to open.
       if ("free" in started && started.free) {
-        notify.success(`You're on the ${plan.name} plan.`, "Updated");
         await refreshUser();
+        setCelebration({ kind: "plan", planName: plan.name });
+        fireConfetti();
         return;
       }
 
@@ -92,8 +106,9 @@ export default function Billing() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
-            notify.success(`You're on the ${plan.name} plan.`, "Subscribed");
             await refreshUser();
+            setCelebration({ kind: "plan", planName: plan.name });
+            fireConfetti();
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
           }
@@ -132,8 +147,9 @@ export default function Billing() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
-            notify.success(`+${pack.quantity} ${pack.type}s added.`, "Purchase complete");
             await refreshUser();
+            setCelebration({ kind: "addon", pack });
+            fireConfetti();
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
           }
@@ -427,6 +443,34 @@ export default function Billing() {
                 Continue to payment
               </Button>
             </Group>
+          </Stack>
+        )}
+      </Modal>
+
+      <Modal
+        opened={!!celebration}
+        onClose={() => setCelebration(null)}
+        centered
+        radius="lg"
+        withCloseButton={false}
+        size="sm"
+      >
+        {celebration && (
+          <Stack align="center" gap="sm" py="md">
+            <ThemeIcon size={56} radius="xl" variant="light" color="emerald">
+              <PartyPopper size={26} />
+            </ThemeIcon>
+            <Title order={3} ta="center" style={{ letterSpacing: "-0.01em" }}>
+              {celebration.kind === "plan" ? "You're all set!" : "Credits added!"}
+            </Title>
+            <Text size="sm" c="dimmed" ta="center" maw={280}>
+              {celebration.kind === "plan"
+                ? `You're now on the ${celebration.planName} plan. Your new quota is ready to use.`
+                : `+${celebration.pack.quantity} ${celebration.pack.type}s added to your account — ready whenever you need them.`}
+            </Text>
+            <Button color="emerald" radius="md" mt="sm" onClick={() => setCelebration(null)}>
+              Let's go
+            </Button>
           </Stack>
         )}
       </Modal>
