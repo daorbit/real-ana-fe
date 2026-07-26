@@ -40,7 +40,6 @@ export default function Impersonate() {
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [composing, setComposing] = useState(false);
   // The one account being messaged, when the mail button in a row is used.
   const [messaging, setMessaging] = useState<AdminUser | null>(null);
   // The one account whose plan dialog is open.
@@ -132,15 +131,6 @@ export default function Impersonate() {
           </Text>
         </div>
         <Group gap="sm">
-          <Button
-            variant="light"
-            color="emerald"
-            radius="md"
-            leftSection={<Mail size={15} />}
-            onClick={() => setComposing(true)}
-          >
-            Send a message
-          </Button>
           {data && (
             <Badge variant="light" color="emerald" size="lg">
               {data.total} account{data.total === 1 ? "" : "s"}
@@ -148,8 +138,6 @@ export default function Impersonate() {
           )}
         </Group>
       </Group>
-
-      <EmailComposer opened={composing} onClose={() => setComposing(false)} />
 
       {/* Keyed by account so the draft never carries over between recipients. */}
       <EmailComposer

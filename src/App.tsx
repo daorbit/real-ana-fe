@@ -18,6 +18,7 @@ import DemoUsage from "./pages/DemoUsage";
 import Settings from "./pages/Settings";
 import Billing from "./pages/Billing";
 import AdminBilling from "./pages/AdminBilling";
+import AdminBroadcast from "./pages/AdminBroadcast";
 import Onboarding from "./pages/Onboarding";
 import PublicDashboard from "./pages/PublicDashboard";
 import PublicSeoReport from "./pages/PublicSeoReport";
@@ -133,6 +134,7 @@ export default function App() {
             <Route path="/app/impersonate" element={<Protected><Impersonate /></Protected>} />
             <Route path="/app/demo-usage" element={<Protected><DemoUsage /></Protected>} />
             <Route path="/app/admin/billing" element={<Protected><AdminBilling /></Protected>} />
+            <Route path="/app/admin/broadcast" element={<Protected><AdminBroadcast /></Protected>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
