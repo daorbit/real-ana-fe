@@ -1,9 +1,9 @@
 import { useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
-  SegmentedControl, Progress, Divider, ThemeIcon, Alert,
+  SegmentedControl, Progress, Divider, ThemeIcon, Alert, Modal,
 } from "@mantine/core";
-import { Check, Search, Globe2, Info, CreditCard } from "lucide-react";
+import { Check, Search, Globe2, Info, CreditCard, ShoppingCart } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
@@ -46,8 +46,11 @@ export default function Billing() {
 
   const [subscribing, setSubscribing] = useState<string | null>(null);
   const [buying, setBuying] = useState<string | null>(null);
+  const [confirmPlan, setConfirmPlan] = useState<Plan | null>(null);
+  const [confirmAddon, setConfirmAddon] = useState<AddonPack | null>(null);
 
-  const subscribe = async (plan: Plan) => {
+  const doSubscribe = async (plan: Plan) => {
+    setConfirmPlan(null);
     setSubscribing(plan._id);
     try {
       const { subscriptionId, razorpayKeyId } = await startSubscription({
@@ -83,7 +86,8 @@ export default function Billing() {
     }
   };
 
-  const buyAddon = async (pack: AddonPack) => {
+  const doBuyAddon = async (pack: AddonPack) => {
+    setConfirmAddon(null);
     setBuying(pack._id);
     try {
       const { orderId, amount, currency, razorpayKeyId } = await startAddonPurchase(pack.slug).unwrap();
@@ -209,6 +213,11 @@ export default function Billing() {
                 // Free (or any zero-price plan) never goes through Razorpay
                 // checkout — it's assigned directly, not bought.
                 const buyable = price > 0;
+                const rzpPlanId = cycle === "yearly" ? plan.razorpayPlanIdYearly : plan.razorpayPlanIdMonthly;
+                // A paid plan with no Razorpay plan id wired up yet can't take
+                // checkout — surface that as a disabled state with an explanation
+                // instead of letting the click reach the server and bounce.
+                const notConfigured = buyable && !rzpPlanId;
                 return (
                   <Card key={plan._id} withBorder radius="md" padding="lg">
                     <Text fw={650}>{plan.name}</Text>
@@ -231,13 +240,18 @@ export default function Billing() {
                       mt="lg"
                       color="emerald"
                       variant={current ? "light" : "filled"}
-                      disabled={current || !buyable}
+                      disabled={current || !buyable || notConfigured}
                       loading={subscribing === plan._id}
                       leftSection={<CreditCard size={15} />}
-                      onClick={() => subscribe(plan)}
+                      onClick={() => setConfirmPlan(plan)}
                     >
-                      {current ? "Current plan" : buyable ? "Subscribe" : "Included free"}
+                      {current ? "Current plan" : !buyable ? "Included free" : notConfigured ? "Not available yet" : "Subscribe"}
                     </Button>
+                    {notConfigured && (
+                      <Text size="xs" c="dimmed" mt={6}>
+                        This plan isn't set up for checkout yet — ask an admin to add its Razorpay {cycle} price.
+                      </Text>
+                    )}
                   </Card>
                 );
               })}
@@ -264,7 +278,7 @@ export default function Billing() {
                   <Divider my="sm" />
                   <Group justify="space-between" align="center">
                     <Text fw={650}>{money(pack.price)}</Text>
-                    <Button size="xs" color="emerald" loading={buying === pack._id} onClick={() => buyAddon(pack)}>
+                    <Button size="xs" color="emerald" loading={buying === pack._id} onClick={() => setConfirmAddon(pack)}>
                       Buy
                     </Button>
                   </Group>
@@ -277,6 +291,78 @@ export default function Billing() {
           </div>
         </Stack>
       )}
+
+      <Modal
+        opened={!!confirmPlan}
+        onClose={() => setConfirmPlan(null)}
+        title="Confirm subscription"
+        centered
+        radius="lg"
+      >
+        {confirmPlan && (
+          <Stack gap="md">
+            <Group justify="space-between">
+              <div>
+                <Text fw={650}>{confirmPlan.name}</Text>
+                <Text size="xs" c="dimmed">Billed {cycle}</Text>
+              </div>
+              <Text fz={22} fw={700}>
+                {money(cycle === "yearly" ? confirmPlan.priceYearly : confirmPlan.priceMonthly)}
+              </Text>
+            </Group>
+            <Text size="sm" c="dimmed">
+              You'll be taken to Razorpay to complete payment. The plan renews automatically
+              {cycle === "yearly" ? " every year" : " every month"} until you cancel.
+            </Text>
+            <Group justify="flex-end">
+              <Button variant="subtle" onClick={() => setConfirmPlan(null)}>Cancel</Button>
+              <Button
+                color="emerald"
+                leftSection={<CreditCard size={15} />}
+                loading={subscribing === confirmPlan._id}
+                onClick={() => doSubscribe(confirmPlan)}
+              >
+                Continue to payment
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
+
+      <Modal
+        opened={!!confirmAddon}
+        onClose={() => setConfirmAddon(null)}
+        title="Confirm purchase"
+        centered
+        radius="lg"
+      >
+        {confirmAddon && (
+          <Stack gap="md">
+            <Group justify="space-between">
+              <div>
+                <Text fw={650}>{confirmAddon.name}</Text>
+                <Text size="xs" c="dimmed">+{confirmAddon.quantity} {confirmAddon.type}s, one-time</Text>
+              </div>
+              <Text fz={22} fw={700}>{money(confirmAddon.price)}</Text>
+            </Group>
+            <Text size="sm" c="dimmed">
+              A one-time charge via Razorpay. Credits are added to your account as soon as payment
+              is confirmed and never expire.
+            </Text>
+            <Group justify="flex-end">
+              <Button variant="subtle" onClick={() => setConfirmAddon(null)}>Cancel</Button>
+              <Button
+                color="emerald"
+                leftSection={<ShoppingCart size={15} />}
+                loading={buying === confirmAddon._id}
+                onClick={() => doBuyAddon(confirmAddon)}
+              >
+                Continue to payment
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </AppShell>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Title, Text, Group, Button, Card, Table, Badge, Modal, TextInput, NumberInput,
+  Text, Group, Button, Card, Table, Badge, Modal, TextInput, NumberInput,
   Textarea, Stack, Switch, Tabs, ActionIcon, Center, Loader, Select,
 } from "@mantine/core";
 import { Plus, Pencil, Trash2, Search, Globe2 } from "lucide-react";
@@ -62,12 +62,22 @@ function PlansTab() {
 
   const submit = async () => {
     try {
-      await save({
-        ...draft,
-        priceMonthly: Math.round(Number(draft.priceMonthly ?? 0) * 100),
-        priceYearly: Math.round(Number(draft.priceYearly ?? 0) * 100),
-        features: (draft.features ?? []),
-      }).unwrap();
+      // Editing an existing plan only ever sends price — the server ignores
+      // (and the form below doesn't even show) anything else for an edit, so
+      // sending the full draft would be misleading about what actually changes.
+      const payload = draft._id
+        ? {
+            _id: draft._id,
+            priceMonthly: Math.round(Number(draft.priceMonthly ?? 0) * 100),
+            priceYearly: Math.round(Number(draft.priceYearly ?? 0) * 100),
+          }
+        : {
+            ...draft,
+            priceMonthly: Math.round(Number(draft.priceMonthly ?? 0) * 100),
+            priceYearly: Math.round(Number(draft.priceYearly ?? 0) * 100),
+            features: (draft.features ?? []),
+          };
+      await save(payload).unwrap();
       notify.success(`${draft.name} saved.`, draft._id ? "Plan updated" : "Plan created");
       setModal(false);
     } catch (e) {
@@ -149,36 +159,51 @@ function PlansTab() {
         </Table>
       </Card>
 
-      <Modal opened={modal} onClose={() => setModal(false)} title={draft._id ? "Edit plan" : "New plan"} radius="lg" centered size="lg">
+      <Modal opened={modal} onClose={() => setModal(false)} title={draft._id ? `Edit ${draft.name} price` : "New plan"} radius="lg" centered size="lg">
         <Stack gap="sm">
-          <Group grow>
-            <TextInput label="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.currentTarget.value })} />
-            <TextInput label="Slug" value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: e.currentTarget.value })} placeholder="starter" />
-          </Group>
-          <Textarea label="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.currentTarget.value })} autosize minRows={2} />
-          <Group grow>
-            <NumberInput label="Price / month (₹)" value={(draft.priceMonthly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceMonthly: Number(v) || 0 })} min={0} />
-            <NumberInput label="Price / year (₹)" value={(draft.priceYearly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceYearly: Number(v) || 0 })} min={0} />
-          </Group>
-          <Group grow>
-            <TextInput label="Razorpay plan id (monthly)" value={draft.razorpayPlanIdMonthly} onChange={(e) => setDraft({ ...draft, razorpayPlanIdMonthly: e.currentTarget.value })} placeholder="plan_xxxxx" />
-            <TextInput label="Razorpay plan id (yearly)" value={draft.razorpayPlanIdYearly} onChange={(e) => setDraft({ ...draft, razorpayPlanIdYearly: e.currentTarget.value })} placeholder="plan_xxxxx" />
-          </Group>
-          <Group grow>
-            <NumberInput label="Max workspaces" value={draft.maxWorkspaces} onChange={(v) => setDraft({ ...draft, maxWorkspaces: Number(v) || 1 })} min={1} />
-            <NumberInput label="Max sites per workspace" value={draft.maxSitesPerWorkspace} onChange={(v) => setDraft({ ...draft, maxSitesPerWorkspace: Number(v) || 1 })} min={1} />
-          </Group>
-          <Group grow>
-            <NumberInput label="Audits / month" value={draft.monthlyAuditQuota} onChange={(v) => setDraft({ ...draft, monthlyAuditQuota: Number(v) || 0 })} min={0} />
-            <NumberInput label="Crawls / month" value={draft.monthlyCrawlQuota} onChange={(v) => setDraft({ ...draft, monthlyCrawlQuota: Number(v) || 0 })} min={0} />
-          </Group>
-          <Textarea
-            label="Features (one per line)"
-            value={(draft.features ?? []).join("\n")}
-            onChange={(e) => setDraft({ ...draft, features: e.currentTarget.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
-            autosize minRows={2}
-          />
-          <Switch label="Active (visible on the Billing page)" checked={draft.active !== false} onChange={(e) => setDraft({ ...draft, active: e.currentTarget.checked })} />
+          {draft._id ? (
+            <>
+              <Text size="sm" c="dimmed">
+                Only price can be changed here. Everything else about a plan — quotas, workspace
+                and site limits, Razorpay ids — is fixed once it's created.
+              </Text>
+              <Group grow>
+                <NumberInput label="Price / month (₹)" value={(draft.priceMonthly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceMonthly: Number(v) || 0 })} min={0} />
+                <NumberInput label="Price / year (₹)" value={(draft.priceYearly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceYearly: Number(v) || 0 })} min={0} />
+              </Group>
+            </>
+          ) : (
+            <>
+              <Group grow>
+                <TextInput label="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.currentTarget.value })} />
+                <TextInput label="Slug" value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: e.currentTarget.value })} placeholder="starter" />
+              </Group>
+              <Textarea label="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.currentTarget.value })} autosize minRows={2} />
+              <Group grow>
+                <NumberInput label="Price / month (₹)" value={(draft.priceMonthly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceMonthly: Number(v) || 0 })} min={0} />
+                <NumberInput label="Price / year (₹)" value={(draft.priceYearly ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, priceYearly: Number(v) || 0 })} min={0} />
+              </Group>
+              <Group grow>
+                <TextInput label="Razorpay plan id (monthly)" value={draft.razorpayPlanIdMonthly} onChange={(e) => setDraft({ ...draft, razorpayPlanIdMonthly: e.currentTarget.value })} placeholder="plan_xxxxx" />
+                <TextInput label="Razorpay plan id (yearly)" value={draft.razorpayPlanIdYearly} onChange={(e) => setDraft({ ...draft, razorpayPlanIdYearly: e.currentTarget.value })} placeholder="plan_xxxxx" />
+              </Group>
+              <Group grow>
+                <NumberInput label="Max workspaces" value={draft.maxWorkspaces} onChange={(v) => setDraft({ ...draft, maxWorkspaces: Number(v) || 1 })} min={1} />
+                <NumberInput label="Max sites per workspace" value={draft.maxSitesPerWorkspace} onChange={(v) => setDraft({ ...draft, maxSitesPerWorkspace: Number(v) || 1 })} min={1} />
+              </Group>
+              <Group grow>
+                <NumberInput label="Audits / month" value={draft.monthlyAuditQuota} onChange={(v) => setDraft({ ...draft, monthlyAuditQuota: Number(v) || 0 })} min={0} />
+                <NumberInput label="Crawls / month" value={draft.monthlyCrawlQuota} onChange={(v) => setDraft({ ...draft, monthlyCrawlQuota: Number(v) || 0 })} min={0} />
+              </Group>
+              <Textarea
+                label="Features (one per line)"
+                value={(draft.features ?? []).join("\n")}
+                onChange={(e) => setDraft({ ...draft, features: e.currentTarget.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
+                autosize minRows={2}
+              />
+              <Switch label="Active (visible on the Billing page)" checked={draft.active !== false} onChange={(e) => setDraft({ ...draft, active: e.currentTarget.checked })} />
+            </>
+          )}
           <Group justify="flex-end" mt="sm">
             <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
             <Button color="emerald" loading={saving} onClick={submit}>Save</Button>
