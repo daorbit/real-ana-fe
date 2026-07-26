@@ -128,6 +128,8 @@ export type QuotaSummary = {
   crawls: { planQuota: number; used: number; addonCredits: number };
   workspaces: { quota: number; used: number };
   maxSitesPerWorkspace: number;
+  /** Analytics date ranges this plan may query — everything else needs an upgrade. */
+  allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
 } | null;
 
 /**
