@@ -1,18 +1,10 @@
 import {
-  createContext, useContext, useCallback, useEffect, useRef, useState,
+  createContext, useContext, useCallback, useEffect, useMemo, useRef, useState,
   type ReactNode,
 } from "react";
 import { Box, Button, Group, Text, Transition, Portal } from "@mantine/core";
 
-/**
- * A shared "you have unsaved changes" bar that floats at the bottom of a tab.
- *
- * The problem it solves: several independent editors on one page (the analytics
- * panel list, and one panel list per expanded SEO audit) each hold a local
- * draft. Rather than each growing its own inline Save button, they register a
- * `{ dirty, save, reset }` here, and this renders a single bar that commits or
- * discards all of them at once. The bar only appears while something is dirty.
- */
+ 
 type Entry = { dirty: boolean; save: () => Promise<void>; reset: () => void };
 
 type Ctx = { register: (id: string, entry: Entry) => void; unregister: (id: string) => void };
@@ -39,6 +31,9 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
   const dirty = [...entries.current.values()].filter((e) => e.dirty);
   const count = dirty.length;
 
+ 
+  const ctxValue = useMemo(() => ({ register, unregister }), [register, unregister]);
+
   const saveAll = async () => {
     setSaving(true);
     try {
@@ -56,7 +51,7 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SaveBarContext.Provider value={{ register, unregister }}>
+    <SaveBarContext.Provider value={ctxValue}>
       {children}
       {/* Portalled to the body so `position: fixed` anchors to the viewport, not
           to AppShell's transformed scroll container (a transformed ancestor
