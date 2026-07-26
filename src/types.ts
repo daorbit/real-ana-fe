@@ -91,7 +91,8 @@ export type Plan = {
   priceYearly: number;
   razorpayPlanIdMonthly: string;
   razorpayPlanIdYearly: string;
-  maxSites: number;
+  maxWorkspaces: number;
+  maxSitesPerWorkspace: number;
   monthlyAuditQuota: number;
   monthlyCrawlQuota: number;
   features: string[];
@@ -122,6 +123,8 @@ export type QuotaSummary = {
   currentPeriodEnd: string | null;
   audits: { planQuota: number; used: number; addonCredits: number };
   crawls: { planQuota: number; used: number; addonCredits: number };
+  workspaces: { quota: number; used: number };
+  maxSitesPerWorkspace: number;
 } | null;
 
 export type StartSubscriptionResponse = {

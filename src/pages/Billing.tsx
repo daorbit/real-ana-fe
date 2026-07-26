@@ -176,6 +176,9 @@ export default function Billing() {
                 <UsageBar icon={Search} label="SEO audits" used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
                 <UsageBar icon={Globe2} label="Site crawls" used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
               </SimpleGrid>
+              <Text size="xs" c="dimmed" mt="md">
+                {usage.workspaces.used} / {usage.workspaces.quota} workspaces · up to {usage.maxSitesPerWorkspace} site{usage.maxSitesPerWorkspace === 1 ? "" : "s"} each
+              </Text>
             </Card>
           )}
 
@@ -216,7 +219,8 @@ export default function Billing() {
                     </Group>
 
                     <Stack gap={4} mt="md">
-                      <FeatureLine text={`${plan.maxSites} site${plan.maxSites === 1 ? "" : "s"}`} />
+                      <FeatureLine text={`${plan.maxWorkspaces} workspace${plan.maxWorkspaces === 1 ? "" : "s"}`} />
+                      <FeatureLine text={`${plan.maxSitesPerWorkspace} site${plan.maxSitesPerWorkspace === 1 ? "" : "s"} per workspace`} />
                       <FeatureLine text={`${plan.monthlyAuditQuota} SEO audits / month`} />
                       <FeatureLine text={`${plan.monthlyCrawlQuota} crawls / month`} />
                       {plan.features.map((f) => <FeatureLine key={f} text={f} />)}

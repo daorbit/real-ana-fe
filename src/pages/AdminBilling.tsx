@@ -45,7 +45,7 @@ const emptyPlan: Partial<Plan> = {
   name: "", slug: "", description: "",
   priceMonthly: 0, priceYearly: 0,
   razorpayPlanIdMonthly: "", razorpayPlanIdYearly: "",
-  maxSites: 1, monthlyAuditQuota: 0, monthlyCrawlQuota: 0,
+  maxWorkspaces: 1, maxSitesPerWorkspace: 1, monthlyAuditQuota: 0, monthlyCrawlQuota: 0,
   features: [], active: true, sortOrder: 0,
 };
 
@@ -107,7 +107,8 @@ function PlansTab() {
               <Table.Th>Name</Table.Th>
               <Table.Th>Monthly</Table.Th>
               <Table.Th>Yearly</Table.Th>
-              <Table.Th>Sites</Table.Th>
+              <Table.Th>Workspaces</Table.Th>
+              <Table.Th>Sites/ws</Table.Th>
               <Table.Th>Audits/mo</Table.Th>
               <Table.Th>Crawls/mo</Table.Th>
               <Table.Th>Status</Table.Th>
@@ -120,7 +121,8 @@ function PlansTab() {
                 <Table.Td><Text size="sm" fw={600}>{p.name}</Text></Table.Td>
                 <Table.Td>{money(p.priceMonthly)}</Table.Td>
                 <Table.Td>{money(p.priceYearly)}</Table.Td>
-                <Table.Td>{p.maxSites}</Table.Td>
+                <Table.Td>{p.maxWorkspaces}</Table.Td>
+                <Table.Td>{p.maxSitesPerWorkspace}</Table.Td>
                 <Table.Td>{p.monthlyAuditQuota}</Table.Td>
                 <Table.Td>{p.monthlyCrawlQuota}</Table.Td>
                 <Table.Td>
@@ -141,7 +143,7 @@ function PlansTab() {
               </Table.Tr>
             ))}
             {!plans.length && (
-              <Table.Tr><Table.Td colSpan={8}><Text size="sm" c="dimmed" py="md">No plans yet.</Text></Table.Td></Table.Tr>
+              <Table.Tr><Table.Td colSpan={9}><Text size="sm" c="dimmed" py="md">No plans yet.</Text></Table.Td></Table.Tr>
             )}
           </Table.Tbody>
         </Table>
@@ -163,7 +165,10 @@ function PlansTab() {
             <TextInput label="Razorpay plan id (yearly)" value={draft.razorpayPlanIdYearly} onChange={(e) => setDraft({ ...draft, razorpayPlanIdYearly: e.currentTarget.value })} placeholder="plan_xxxxx" />
           </Group>
           <Group grow>
-            <NumberInput label="Max sites" value={draft.maxSites} onChange={(v) => setDraft({ ...draft, maxSites: Number(v) || 1 })} min={1} />
+            <NumberInput label="Max workspaces" value={draft.maxWorkspaces} onChange={(v) => setDraft({ ...draft, maxWorkspaces: Number(v) || 1 })} min={1} />
+            <NumberInput label="Max sites per workspace" value={draft.maxSitesPerWorkspace} onChange={(v) => setDraft({ ...draft, maxSitesPerWorkspace: Number(v) || 1 })} min={1} />
+          </Group>
+          <Group grow>
             <NumberInput label="Audits / month" value={draft.monthlyAuditQuota} onChange={(v) => setDraft({ ...draft, monthlyAuditQuota: Number(v) || 0 })} min={0} />
             <NumberInput label="Crawls / month" value={draft.monthlyCrawlQuota} onChange={(v) => setDraft({ ...draft, monthlyCrawlQuota: Number(v) || 0 })} min={0} />
           </Group>
