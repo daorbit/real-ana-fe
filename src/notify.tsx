@@ -3,6 +3,7 @@ import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import { Text, TextInput, Group, Button, Stack, Code, Alert, ThemeIcon } from "@mantine/core";
 import { TriangleAlert, ArrowUpCircle, Lock } from "lucide-react";
+import { navigateTo } from "./navigation";
 import type { ReactNode } from "react";
 
 export const notify = {
@@ -48,11 +49,13 @@ export const notify = {
               leftSection={<ArrowUpCircle size={15} />}
               onClick={() => {
                 modals.close(id);
-                // A plain navigation, not <Link> — Mantine renders modal
-                // content as a sibling of ModalsProvider's own children, so
-                // it sits outside App's <BrowserRouter> and has no Router
-                // context to read a client-side <Link> against.
-                window.location.assign("/app/billing");
+                // Not <Link> — Mantine renders modal content as a sibling of
+                // ModalsProvider's own children, so it sits outside App's
+                // <BrowserRouter> and has no Router context to read a
+                // client-side <Link> against. `navigateTo` reaches the
+                // router's own `navigate` via a module-level handle instead
+                // of falling back to a full-page reload.
+                navigateTo("/app/billing");
               }}
             >
               Upgrade plan

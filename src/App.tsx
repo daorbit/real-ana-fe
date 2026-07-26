@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import type { ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useEffect, type ReactNode } from "react";
+import { setNavigate } from "./navigation";
 import { AuthProvider, useAuth } from "./auth";
 import { WorkspaceProvider, useWorkspace } from "./workspace";
 import { DemoProvider } from "./demo";
@@ -79,6 +80,13 @@ function PublicOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+/** Captures the router's `navigate` for use outside the component tree — see `navigation.ts`. */
+function NavigationCapture() {
+  const navigate = useNavigate();
+  useEffect(() => setNavigate(navigate), [navigate]);
+  return null;
+}
+
 // Root: send to app if logged in, else to login.
 function Root() {
   const { user, loading } = useAuth();
@@ -91,6 +99,7 @@ export default function App() {
     <AuthProvider>
       <DemoProvider>
         <BrowserRouter>
+          <NavigationCapture />
           <Routes>
             <Route path="/" element={<Root />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
