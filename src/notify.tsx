@@ -2,7 +2,8 @@ import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import { Text, TextInput, Group, Button, Stack, Code, Alert } from "@mantine/core";
-import { TriangleAlert } from "lucide-react";
+import { TriangleAlert, ArrowUpCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 
 export const notify = {
@@ -14,6 +15,34 @@ export const notify = {
 
   info: (message: ReactNode, title?: string) =>
     notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
+
+  /**
+   * A plan/quota limit was hit (workspace, site, audit, or crawl caps). Same
+   * red toast as `error`, but doesn't auto-dismiss and carries a link to
+   * Billing — the fix is always "upgrade your plan", so the toast should say
+   * that rather than leave it to the reader to work out.
+   */
+  quotaLimit: (message: ReactNode) =>
+    notifications.show({
+      title: "Plan limit reached",
+      message: (
+        <Stack gap="xs">
+          <Text size="sm">{message}</Text>
+          <Button
+            component={Link}
+            to="/app/billing"
+            size="xs"
+            color="emerald"
+            leftSection={<ArrowUpCircle size={14} />}
+            onClick={() => notifications.clean()}
+          >
+            Upgrade plan
+          </Button>
+        </Stack>
+      ),
+      color: "red",
+      autoClose: false,
+    }),
 };
 
 /**
@@ -41,6 +70,29 @@ export function errMessage(e: unknown, fallback = "Request failed"): string {
   }
 
   return fallback;
+}
+
+/**
+ * The machine-readable `code` our API attaches to some errors — currently
+ * just `"quota_exceeded"`, sent by the billing/workspace/site/SEO routes when
+ * a plan limit is hit. Lets a caller branch on the failure kind instead of
+ * pattern-matching the human message.
+ */
+export function errCode(e: unknown): string | undefined {
+  if (typeof e !== "object" || e === null) return undefined;
+  const err = e as { data?: unknown };
+  if (typeof err.data !== "object" || err.data === null) return undefined;
+  const code = (err.data as { code?: unknown }).code;
+  return typeof code === "string" ? code : undefined;
+}
+
+/** Show `notify.quotaLimit` for a quota_exceeded error, `notify.error` for anything else. */
+export function notifyError(e: unknown, fallback = "Request failed") {
+  if (errCode(e) === "quota_exceeded") {
+    notify.quotaLimit(errMessage(e, fallback));
+  } else {
+    notify.error(errMessage(e, fallback));
+  }
 }
 
 // Neutral confirmation (e.g. logging out).

@@ -7,7 +7,7 @@ import { Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X } from "l
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
-  useGetPlansQuery, useGetAddonPacksQuery, useGetMySubscriptionQuery,
+  useGetPlansQuery, useGetAddonPacksQuery,
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
   useStartAddonPurchaseMutation, useVerifyAddonPurchaseMutation,
   useCheckCouponMutation,
@@ -32,12 +32,15 @@ function money(paise: number): string {
  * different one.
  */
 export default function Billing() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
 
   const { data: plans = [], isLoading: plansLoading } = useGetPlansQuery();
   const { data: addons = [], isLoading: addonsLoading } = useGetAddonPacksQuery();
-  const { data: usage, isLoading: usageLoading } = useGetMySubscriptionQuery();
+  // Plan/quota state travels on the user's own profile rather than a separate
+  // endpoint — every authenticated page already has it via `useAuth()`.
+  const usage = user?.billing ?? null;
+  const usageLoading = false;
 
   const [startSubscription] = useStartSubscriptionMutation();
   const [verifySubscription] = useVerifySubscriptionMutation();
@@ -65,6 +68,7 @@ export default function Billing() {
       // Razorpay modal to open.
       if ("free" in started && started.free) {
         notify.success(`You're on the ${plan.name} plan.`, "Updated");
+        await refreshUser();
         return;
       }
 
@@ -86,6 +90,7 @@ export default function Billing() {
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
             notify.success(`You're on the ${plan.name} plan.`, "Subscribed");
+            await refreshUser();
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
           }
@@ -125,6 +130,7 @@ export default function Billing() {
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
             notify.success(`+${pack.quantity} ${pack.type}s added.`, "Purchase complete");
+            await refreshUser();
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
           }

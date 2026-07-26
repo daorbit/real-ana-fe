@@ -22,7 +22,7 @@ import {
   useDeleteCompetitorMutation, useGetSearchTrafficQuery, useGetFieldVitalsQuery,
   useRunCrawlMutation, useGetLatestCrawlQuery,
 } from "../store";
-import { notify, errMessage, confirmDelete } from "../notify";
+import { notify, errMessage, notifyError, confirmDelete } from "../notify";
 import { timeAgo, dateTime } from "../utils";
 import { scoreColor } from "../components/seo/ScoreRing";
 import { SchemaPanel } from "../components/seo/SchemaPanel";
@@ -290,7 +290,7 @@ export default function Seo() {
       await runCrawl({ workspaceId, siteId }).unwrap();
       notify.success("Crawl complete");
     } catch (e) {
-      notify.error(errMessage(e, "Crawl failed"));
+      notifyError(e, "Crawl failed");
     }
   }
 
@@ -377,7 +377,7 @@ export default function Seo() {
         res.cached ? "Showing the most recent audit for this URL" : "Analysis complete"
       );
     } catch (e) {
-      notify.error(errMessage(e, "Analysis failed"));
+      notifyError(e, "Analysis failed");
     }
   }
 

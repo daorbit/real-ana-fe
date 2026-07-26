@@ -25,6 +25,8 @@ export type User = {
   impersonating?: boolean;
   /** True on the read-only public demo session. */
   demo?: boolean;
+  /** Plan and usage-quota state, bundled with the profile — null if never subscribed (shouldn't happen post-signup). */
+  billing?: QuotaSummary;
 };
 
 /** Fields the settings form can change. Email and role are not among them. */

@@ -16,7 +16,7 @@ import type {
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
-  Plan, AddonPack, QuotaSummary, BillingCycle,
+  Plan, AddonPack, BillingCycle,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult,
 } from "../types";
@@ -592,11 +592,6 @@ export const api = createApi({
       providesTags: ["AddonPack"],
     }),
 
-    getMySubscription: build.query<QuotaSummary, void>({
-      query: () => "/api/billing/me",
-      providesTags: ["Billing"],
-    }),
-
     startSubscription: build.mutation<
       StartSubscriptionResponse,
       { planSlug: string; cycle: BillingCycle; couponCode?: string }
@@ -748,7 +743,6 @@ export const {
   useGetLatestCrawlQuery,
   useGetPlansQuery,
   useGetAddonPacksQuery,
-  useGetMySubscriptionQuery,
   useStartSubscriptionMutation,
   useVerifySubscriptionMutation,
   useStartAddonPurchaseMutation,

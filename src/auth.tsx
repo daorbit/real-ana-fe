@@ -38,6 +38,8 @@ type AuthState = {
   removeAvatar: () => Promise<void>;
   impersonate: (userId: string) => Promise<void>;
   exitImpersonation: () => Promise<void>;
+  /** Re-fetch the profile — used after a billing action changes `user.billing`. */
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -189,9 +191,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(me);
   };
 
+  const refreshUser = async () => {
+    const me = await api.get<User>("/api/auth/me");
+    setUser((prev) => ({ ...me, impersonating: prev?.impersonating }));
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

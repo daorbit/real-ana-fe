@@ -13,7 +13,7 @@ import {
   FRAMEWORKS, getFramework, frameworkLanguage, type FrameworkId,
 } from "../utils/frameworks";
 import * as v from "../utils/validate";
-import { notify, errMessage } from "../notify";
+import { notify, notifyError } from "../notify";
 import type { Site } from "../types";
 
 /** Split a comma-separated field into clean entries. */
@@ -134,7 +134,7 @@ export function AddSiteWizard({
         setStep(2);
         notify.success(`Site "${site.name}" added.`);
       } catch (err) {
-        notify.error(errMessage(err, "Could not add the site."));
+        notifyError(err, "Could not add the site.");
       }
     }
   };

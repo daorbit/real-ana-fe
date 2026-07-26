@@ -15,7 +15,7 @@ import { useWorkspace } from "../workspace";
 import { FRAMEWORKS, getFramework, frameworkLanguage } from "../utils/frameworks";
 import type { FrameworkId } from "../utils/frameworks";
 import * as v from "../utils/validate";
-import { notify, errMessage } from "../notify";
+import { notifyError } from "../notify";
 import type { Site } from "../types";
 
 const STEPS = [
@@ -89,7 +89,7 @@ export default function Onboarding() {
       setActive(ws._id);
       setStep(1);
     } catch (e) {
-      notify.error(errMessage(e, "Could not create the workspace."));
+      notifyError(e, "Could not create the workspace.");
     }
   };
 
@@ -110,7 +110,7 @@ export default function Onboarding() {
       setSite(created);
       setStep(2);
     } catch (e) {
-      notify.error(errMessage(e, "Could not add the site."));
+      notifyError(e, "Could not add the site.");
     }
   };
 
