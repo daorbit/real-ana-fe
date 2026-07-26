@@ -598,21 +598,16 @@ export const api = createApi({
 
     startSubscription: build.mutation<
       StartSubscriptionResponse,
-      { planId: string; cycle: BillingCycle }
+      { planSlug: string; cycle: BillingCycle }
     >({
       query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
     }),
 
     verifySubscription: build.mutation<
       { ok: true },
-      { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string }
+      { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
     >({
       query: (body) => ({ url: "/api/billing/subscribe/verify", method: "POST", body }),
-      invalidatesTags: ["Billing"],
-    }),
-
-    cancelSubscription: build.mutation<{ ok: true }, void>({
-      query: () => ({ url: "/api/billing/cancel", method: "POST" }),
       invalidatesTags: ["Billing"],
     }),
 
@@ -635,17 +630,13 @@ export const api = createApi({
       providesTags: ["Plan"],
     }),
 
-    saveAdminPlan: build.mutation<Plan, Partial<Plan> & { _id?: string }>({
-      query: ({ _id, ...body }) => ({
-        url: _id ? `/api/admin/billing/plans/${_id}` : "/api/admin/billing/plans",
-        method: _id ? "PUT" : "POST",
+    /** Price is the only editable field — plans themselves are fixed in backend code. */
+    saveAdminPlanPrice: build.mutation<Plan, { slug: string; priceMonthly: number; priceYearly: number }>({
+      query: ({ slug, ...body }) => ({
+        url: `/api/admin/billing/plans/${slug}`,
+        method: "PUT",
         body,
       }),
-      invalidatesTags: ["Plan"],
-    }),
-
-    deleteAdminPlan: build.mutation<void, string>({
-      query: (id) => ({ url: `/api/admin/billing/plans/${id}`, method: "DELETE" }),
       invalidatesTags: ["Plan"],
     }),
 
@@ -726,12 +717,10 @@ export const {
   useGetMySubscriptionQuery,
   useStartSubscriptionMutation,
   useVerifySubscriptionMutation,
-  useCancelSubscriptionMutation,
   useStartAddonPurchaseMutation,
   useVerifyAddonPurchaseMutation,
   useGetAdminPlansQuery,
-  useSaveAdminPlanMutation,
-  useDeleteAdminPlanMutation,
+  useSaveAdminPlanPriceMutation,
   useGetAdminAddonPacksQuery,
   useSaveAdminAddonPackMutation,
   useDeleteAdminAddonPackMutation,

@@ -9,10 +9,9 @@ import { PageHeader } from "../components/Page";
 import {
   useGetPlansQuery, useGetAddonPacksQuery, useGetMySubscriptionQuery,
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
-  useCancelSubscriptionMutation, useStartAddonPurchaseMutation,
-  useVerifyAddonPurchaseMutation,
+  useStartAddonPurchaseMutation, useVerifyAddonPurchaseMutation,
 } from "../store";
-import { notify, errMessage, confirmDelete } from "../notify";
+import { notify, errMessage } from "../notify";
 import { useAuth } from "../auth";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "../utils/razorpay";
 import type { BillingCycle, Plan, AddonPack } from "../types";
@@ -25,10 +24,11 @@ function money(paise: number): string {
 /**
  * Subscription plans, addon credit packs, and the current usage against them.
  *
- * Checkout is Razorpay's own modal: this page only ever creates the
- * subscription/order server-side and hands the id to Checkout, then posts the
- * signed callback back for verification. Nothing about a card ever touches
- * this code.
+ * Every purchase — a plan period or an addon pack — is a one-time Razorpay
+ * Order, not an auto-recurring subscription: nothing here ever charges a
+ * card again on its own. A plan period simply ends at `currentPeriodEnd`, and
+ * "renewing" is just buying the same plan again, same as switching to a
+ * different one.
  */
 export default function Billing() {
   const { user } = useAuth();
@@ -40,7 +40,6 @@ export default function Billing() {
 
   const [startSubscription] = useStartSubscriptionMutation();
   const [verifySubscription] = useVerifySubscriptionMutation();
-  const [cancelSubscription, { isLoading: cancelling }] = useCancelSubscriptionMutation();
   const [startAddonPurchase] = useStartAddonPurchaseMutation();
   const [verifyAddonPurchase] = useVerifyAddonPurchaseMutation();
 
@@ -51,17 +50,23 @@ export default function Billing() {
 
   const doSubscribe = async (plan: Plan) => {
     setConfirmPlan(null);
-    setSubscribing(plan._id);
+    setSubscribing(plan.slug);
     try {
-      const { subscriptionId, razorpayKeyId } = await startSubscription({
-        planId: plan._id,
-        cycle,
-      }).unwrap();
+      const started = await startSubscription({ planSlug: plan.slug, cycle }).unwrap();
+
+      // A ₹0 plan (Free) is assigned directly server-side — no order, no
+      // Razorpay modal to open.
+      if ("free" in started && started.free) {
+        notify.success(`You're on the ${plan.name} plan.`, "Updated");
+        return;
+      }
 
       await loadRazorpayCheckout();
       openRazorpayCheckout({
-        key: razorpayKeyId,
-        subscription_id: subscriptionId,
+        key: started.razorpayKeyId,
+        amount: started.amount,
+        currency: started.currency,
+        order_id: started.orderId,
         name: "Quantalog",
         description: `${plan.name} — ${cycle}`,
         prefill: { name: user?.name, email: user?.email },
@@ -70,7 +75,7 @@ export default function Billing() {
           try {
             await verifySubscription({
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_subscription_id: response.razorpay_subscription_id,
+              razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
             notify.success(`You're on the ${plan.name} plan.`, "Subscribed");
@@ -122,23 +127,8 @@ export default function Billing() {
     }
   };
 
-  const cancel = () => {
-    confirmDelete({
-      title: "Cancel subscription?",
-      body: "You'll keep access until the end of the current billing period, then the plan won't renew.",
-      confirmLabel: "Cancel plan",
-      onConfirm: async () => {
-        try {
-          await cancelSubscription().unwrap();
-          notify.success("Your plan will not renew after the current period.", "Cancelled");
-        } catch (e) {
-          notify.error(errMessage(e, "Could not cancel."));
-        }
-      },
-    });
-  };
-
   const loading = plansLoading || addonsLoading || usageLoading;
+  const expired = usage?.status === "expired";
 
   return (
     <AppShell>
@@ -154,27 +144,27 @@ export default function Billing() {
                 <div>
                   <Group gap="xs">
                     <Text fw={650}>{usage.plan.name}</Text>
-                    <Badge
-                      size="sm"
-                      variant="light"
-                      color={usage.status === "active" ? "emerald" : usage.status === "past_due" ? "yellow" : "gray"}
-                    >
-                      {usage.status.replace("_", " ")}
+                    <Badge size="sm" variant="light" color={expired ? "red" : "emerald"}>
+                      {expired ? "expired" : "active"}
                     </Badge>
                     <Badge size="sm" variant="light" color="gray">{usage.cycle}</Badge>
                   </Group>
                   {usage.currentPeriodEnd && (
                     <Text size="xs" c="dimmed" mt={4}>
-                      Renews {new Date(usage.currentPeriodEnd).toLocaleDateString()}
+                      {expired ? "Expired" : "Renews"} {new Date(usage.currentPeriodEnd).toLocaleDateString()}
                     </Text>
                   )}
                 </div>
-                {usage.status === "active" && (
-                  <Button size="xs" variant="light" color="red" loading={cancelling} onClick={cancel}>
-                    Cancel plan
-                  </Button>
-                )}
               </Group>
+
+              {expired && (
+                <Alert variant="light" color="red" icon={<Info size={16} />} radius="md" mt="md">
+                  <Text size="sm">
+                    Your plan period has ended — audits and crawls are paused until you renew below.
+                    Any unused addon credits are untouched.
+                  </Text>
+                </Alert>
+              )}
 
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mt="lg">
                 <UsageBar icon={Search} label="SEO audits" used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
@@ -209,17 +199,13 @@ export default function Billing() {
             <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(plans.length, 4) || 1 }} spacing="md">
               {plans.map((plan) => {
                 const price = cycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
-                const current = usage?.plan.id === plan._id && usage.status === "active";
-                // Free (or any zero-price plan) never goes through Razorpay
-                // checkout — it's assigned directly, not bought.
+                // Free (or any zero-price plan) is assigned directly, not
+                // bought — it stays "current" once assigned and never expires,
+                // so there's nothing to re-buy.
                 const buyable = price > 0;
-                const rzpPlanId = cycle === "yearly" ? plan.razorpayPlanIdYearly : plan.razorpayPlanIdMonthly;
-                // A paid plan with no Razorpay plan id wired up yet can't take
-                // checkout — surface that as a disabled state with an explanation
-                // instead of letting the click reach the server and bounce.
-                const notConfigured = buyable && !rzpPlanId;
+                const current = usage?.plan.slug === plan.slug && !expired;
                 return (
-                  <Card key={plan._id} withBorder radius="md" padding="lg">
+                  <Card key={plan.slug} withBorder radius="md" padding="lg">
                     <Text fw={650}>{plan.name}</Text>
                     {plan.description && <Text size="xs" c="dimmed" mt={2}>{plan.description}</Text>}
                     <Group gap={4} align="baseline" mt="md">
@@ -240,18 +226,13 @@ export default function Billing() {
                       mt="lg"
                       color="emerald"
                       variant={current ? "light" : "filled"}
-                      disabled={current || !buyable || notConfigured}
-                      loading={subscribing === plan._id}
+                      disabled={current || !buyable}
+                      loading={subscribing === plan.slug}
                       leftSection={<CreditCard size={15} />}
                       onClick={() => setConfirmPlan(plan)}
                     >
-                      {current ? "Current plan" : !buyable ? "Included free" : notConfigured ? "Not available yet" : "Subscribe"}
+                      {current ? "Current plan" : !buyable ? "Included free" : usage?.plan.slug === plan.slug ? "Renew" : "Subscribe"}
                     </Button>
-                    {notConfigured && (
-                      <Text size="xs" c="dimmed" mt={6}>
-                        This plan isn't set up for checkout yet — ask an admin to add its Razorpay {cycle} price.
-                      </Text>
-                    )}
                   </Card>
                 );
               })}
@@ -311,18 +292,19 @@ export default function Billing() {
               </Text>
             </Group>
             <Text size="sm" c="dimmed">
-              You'll be taken to Razorpay to complete payment. The plan renews automatically
-              {cycle === "yearly" ? " every year" : " every month"} until you cancel.
+              {confirmPlan.priceMonthly === 0 && confirmPlan.priceYearly === 0
+                ? "This plan is free — no payment needed."
+                : `A one-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. It does not auto-renew — come back and buy again when the period ends.`}
             </Text>
             <Group justify="flex-end">
               <Button variant="subtle" onClick={() => setConfirmPlan(null)}>Cancel</Button>
               <Button
                 color="emerald"
                 leftSection={<CreditCard size={15} />}
-                loading={subscribing === confirmPlan._id}
+                loading={subscribing === confirmPlan.slug}
                 onClick={() => doSubscribe(confirmPlan)}
               >
-                Continue to payment
+                {confirmPlan.priceMonthly === 0 && confirmPlan.priceYearly === 0 ? "Confirm" : "Continue to payment"}
               </Button>
             </Group>
           </Stack>

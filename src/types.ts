@@ -81,23 +81,24 @@ export type DemoUsage = {
 
 /* ---------------------------------- billing --------------------------------- */
 
+/**
+ * A resolved plan: the fixed catalogue entry (name, quotas, limits — all
+ * decided in backend code) merged with its current price (the one thing an
+ * admin can change). There's no `_id`/`active`/`sortOrder` here because plans
+ * aren't documents the client creates or deletes — `slug` is the identity.
+ */
 export type Plan = {
-  _id: string;
-  name: string;
   slug: string;
+  name: string;
   description: string;
   /** Paise (INR smallest unit). */
   priceMonthly: number;
   priceYearly: number;
-  razorpayPlanIdMonthly: string;
-  razorpayPlanIdYearly: string;
   maxWorkspaces: number;
   maxSitesPerWorkspace: number;
   monthlyAuditQuota: number;
   monthlyCrawlQuota: number;
   features: string[];
-  active: boolean;
-  sortOrder: number;
 };
 
 export type BillingCycle = "monthly" | "yearly";
@@ -117,9 +118,9 @@ export type AddonPack = {
 };
 
 export type QuotaSummary = {
-  plan: { id: string; name: string; slug: string };
+  plan: { slug: string; name: string };
   cycle: BillingCycle;
-  status: "created" | "active" | "past_due" | "cancelled" | "expired";
+  status: "active" | "expired";
   currentPeriodEnd: string | null;
   audits: { planQuota: number; used: number; addonCredits: number };
   crawls: { planQuota: number; used: number; addonCredits: number };
@@ -127,11 +128,21 @@ export type QuotaSummary = {
   maxSitesPerWorkspace: number;
 } | null;
 
-export type StartSubscriptionResponse = {
-  subscriptionId: string;
-  razorpayKeyId: string;
-  plan: { name: string; cycle: BillingCycle };
-};
+/**
+ * A ₹0 plan (Free) is assigned server-side with no order — `free: true` and
+ * nothing else. A paid plan returns a Razorpay Order to check out with, same
+ * shape as `StartAddonPurchaseResponse`.
+ */
+export type StartSubscriptionResponse =
+  | { free: true; plan: { name: string; cycle: BillingCycle } }
+  | {
+      free?: false;
+      orderId: string;
+      amount: number;
+      currency: string;
+      razorpayKeyId: string;
+      plan: { name: string; cycle: BillingCycle };
+    };
 
 export type StartAddonPurchaseResponse = {
   orderId: string;
