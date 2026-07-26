@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import type { ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useEffect, type ReactNode } from "react";
+import { setNavigate } from "./navigation";
 import { AuthProvider, useAuth } from "./auth";
 import { WorkspaceProvider, useWorkspace } from "./workspace";
 import { DemoProvider } from "./demo";
@@ -15,6 +16,8 @@ import Share from "./pages/Share";
 import Impersonate from "./pages/Impersonate";
 import DemoUsage from "./pages/DemoUsage";
 import Settings from "./pages/Settings";
+import Billing from "./pages/Billing";
+import AdminBilling from "./pages/AdminBilling";
 import Onboarding from "./pages/Onboarding";
 import PublicDashboard from "./pages/PublicDashboard";
 import PublicSeoReport from "./pages/PublicSeoReport";
@@ -77,6 +80,13 @@ function PublicOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+/** Captures the router's `navigate` for use outside the component tree — see `navigation.ts`. */
+function NavigationCapture() {
+  const navigate = useNavigate();
+  useEffect(() => setNavigate(navigate), [navigate]);
+  return null;
+}
+
 // Root: send to app if logged in, else to login.
 function Root() {
   const { user, loading } = useAuth();
@@ -89,6 +99,7 @@ export default function App() {
     <AuthProvider>
       <DemoProvider>
         <BrowserRouter>
+          <NavigationCapture />
           <Routes>
             <Route path="/" element={<Root />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
@@ -117,9 +128,11 @@ export default function App() {
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
             <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
+            <Route path="/app/billing" element={<Protected><Billing /></Protected>} />
             {/* Admin-only, enforced by the page and by every /api/admin route. */}
             <Route path="/app/impersonate" element={<Protected><Impersonate /></Protected>} />
             <Route path="/app/demo-usage" element={<Protected><DemoUsage /></Protected>} />
+            <Route path="/app/admin/billing" element={<Protected><AdminBilling /></Protected>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

@@ -25,6 +25,8 @@ export type User = {
   impersonating?: boolean;
   /** True on the read-only public demo session. */
   demo?: boolean;
+  /** Plan and usage-quota state, bundled with the profile — null if never subscribed (shouldn't happen post-signup). */
+  billing?: QuotaSummary;
 };
 
 /** Fields the settings form can change. Email and role are not among them. */
@@ -77,6 +79,97 @@ export type DemoUsage = {
   blockedSinceBoot: number;
   /** When the counters last reset (server start). */
   since: string;
+};
+
+/* ---------------------------------- billing --------------------------------- */
+
+/**
+ * A resolved plan: the fixed catalogue entry (name, quotas, limits — all
+ * decided in backend code) merged with its current price (the one thing an
+ * admin can change). There's no `_id`/`active`/`sortOrder` here because plans
+ * aren't documents the client creates or deletes — `slug` is the identity.
+ */
+export type Plan = {
+  slug: string;
+  name: string;
+  description: string;
+  /** Paise (INR smallest unit). */
+  priceMonthly: number;
+  priceYearly: number;
+  maxWorkspaces: number;
+  maxSitesPerWorkspace: number;
+  monthlyAuditQuota: number;
+  monthlyCrawlQuota: number;
+  features: string[];
+};
+
+export type BillingCycle = "monthly" | "yearly";
+
+export type AddonType = "audit" | "crawl";
+
+export type AddonPack = {
+  _id: string;
+  name: string;
+  slug: string;
+  type: AddonType;
+  quantity: number;
+  /** Paise. */
+  price: number;
+  active: boolean;
+  sortOrder: number;
+};
+
+export type QuotaSummary = {
+  plan: { slug: string; name: string };
+  cycle: BillingCycle;
+  status: "active" | "expired";
+  currentPeriodEnd: string | null;
+  audits: { planQuota: number; used: number; addonCredits: number };
+  crawls: { planQuota: number; used: number; addonCredits: number };
+  workspaces: { quota: number; used: number };
+  maxSitesPerWorkspace: number;
+  /** Analytics date ranges this plan may query — everything else needs an upgrade. */
+  allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
+} | null;
+
+/**
+ * A ₹0 plan (Free) is assigned server-side with no order — `free: true` and
+ * nothing else. A paid plan returns a Razorpay Order to check out with, same
+ * shape as `StartAddonPurchaseResponse`.
+ */
+export type StartSubscriptionResponse =
+  | { free: true; plan: { name: string; cycle: BillingCycle } }
+  | {
+      free?: false;
+      orderId: string;
+      amount: number;
+      currency: string;
+      razorpayKeyId: string;
+      plan: { name: string; cycle: BillingCycle };
+    };
+
+export type StartAddonPurchaseResponse = {
+  orderId: string;
+  amount: number;
+  currency: string;
+  razorpayKeyId: string;
+  addon: { name: string; type: AddonType; quantity: number };
+};
+
+/* ---------------------------------- coupons ---------------------------------- */
+
+export type Coupon = {
+  _id: string;
+  code: string;
+  percentOff: number;
+  active: boolean;
+  expiresAt: string | null;
+};
+
+export type CouponCheckResult = {
+  amount: number;
+  error?: string;
+  coupon?: { code: string; percentOff: number };
 };
 
 /** A row in the admin's user switcher. */

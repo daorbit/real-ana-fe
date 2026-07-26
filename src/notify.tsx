@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import { Text, TextInput, Group, Button, Stack, Code, Alert } from "@mantine/core";
-import { TriangleAlert } from "lucide-react";
+import { Text, TextInput, Group, Button, Stack, Code, Alert, ThemeIcon } from "@mantine/core";
+import { TriangleAlert, ArrowUpCircle, Lock } from "lucide-react";
+import { navigateTo } from "./navigation";
 import type { ReactNode } from "react";
 
 export const notify = {
@@ -14,6 +15,56 @@ export const notify = {
 
   info: (message: ReactNode, title?: string) =>
     notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
+
+  /**
+   * A plan/quota limit was hit (workspace, site, audit, crawl, or analytics
+   * range caps). A centered dialog, not a toast — this is a decision the
+   * reader needs to actually stop and consider ("upgrade?"), not a fire-and-
+   * forget status update that's gone in five seconds. Routed through
+   * Mantine's `modals` singleton, the same mechanism every other confirm
+   * dialog in this file uses, so there's one dialog stack for the whole app
+   * rather than a second ad hoc one per feature.
+   */
+  quotaLimit: (message: ReactNode) => {
+    const id = "quota-limit";
+    modals.open({
+      modalId: id,
+      centered: true,
+      radius: "lg",
+      size: "sm",
+      withCloseButton: false,
+      children: (
+        <Stack align="center" gap="sm" py="sm">
+          <ThemeIcon size={52} radius="xl" variant="light" color="emerald">
+            <Lock size={22} />
+          </ThemeIcon>
+          <Text fw={650} size="lg" ta="center">Upgrade to unlock this</Text>
+          <Text size="sm" c="dimmed" ta="center" maw={300}>{message}</Text>
+          <Group mt="sm">
+            <Button variant="subtle" color="gray" onClick={() => modals.close(id)}>
+              Not now
+            </Button>
+            <Button
+              color="emerald"
+              leftSection={<ArrowUpCircle size={15} />}
+              onClick={() => {
+                modals.close(id);
+                // Not <Link> — Mantine renders modal content as a sibling of
+                // ModalsProvider's own children, so it sits outside App's
+                // <BrowserRouter> and has no Router context to read a
+                // client-side <Link> against. `navigateTo` reaches the
+                // router's own `navigate` via a module-level handle instead
+                // of falling back to a full-page reload.
+                navigateTo("/app/billing");
+              }}
+            >
+              Upgrade plan
+            </Button>
+          </Group>
+        </Stack>
+      ),
+    });
+  },
 };
 
 /**
@@ -41,6 +92,32 @@ export function errMessage(e: unknown, fallback = "Request failed"): string {
   }
 
   return fallback;
+}
+
+/**
+ * The machine-readable `code` our API attaches to some errors — currently
+ * just `"quota_exceeded"`, sent by the billing/workspace/site/SEO routes when
+ * a plan limit is hit. Lets a caller branch on the failure kind instead of
+ * pattern-matching the human message.
+ */
+export function errCode(e: unknown): string | undefined {
+  if (typeof e !== "object" || e === null) return undefined;
+  const err = e as { data?: unknown };
+  if (typeof err.data !== "object" || err.data === null) return undefined;
+  const code = (err.data as { code?: unknown }).code;
+  return typeof code === "string" ? code : undefined;
+}
+
+/**
+ * `notify.error` for anything except a quota_exceeded error, which is
+ * skipped here — the RTK Query `baseQuery` in `store/api.ts` already opens
+ * `notify.quotaLimit` for every request that comes back with that code, so a
+ * call site using this doesn't also need to check for it or risk a duplicate
+ * toast stacked under the dialog.
+ */
+export function notifyError(e: unknown, fallback = "Request failed") {
+  if (errCode(e) === "quota_exceeded") return;
+  notify.error(errMessage(e, fallback));
 }
 
 // Neutral confirmation (e.g. logging out).

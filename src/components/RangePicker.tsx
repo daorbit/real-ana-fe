@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Button, Group, Popover, SegmentedControl, Stack, Text } from "@mantine/core";
+import { Button, Group, Popover, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Lock } from "lucide-react";
 import dayjs from "dayjs";
+import { useAuth } from "../auth";
+import { notify } from "../notify";
 
 /** The preset windows, matching the backend's RANGES keys. */
 export const RANGE_PRESETS = [
@@ -24,6 +26,11 @@ export type RangeState = {
  * Range control: preset buttons plus a Custom option that opens a from–to
  * calendar. Custom is only committed when both ends are chosen, so a
  * half-picked range never fires a request.
+ *
+ * Ranges outside the account's plan (Free is 1h/24h only) render locked —
+ * clicking one opens an upgrade prompt instead of switching, so the picker
+ * still shows every range that exists rather than hiding what a paid plan
+ * would unlock.
  */
 export function RangePicker({
   value,
@@ -34,6 +41,7 @@ export function RangePicker({
   onChange: (next: RangeState) => void;
   disabled?: boolean;
 }) {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   // Local calendar selection, only pushed up on Apply. Mantine v9 dates are
   // "YYYY-MM-DD" strings, not Date objects.
@@ -42,13 +50,39 @@ export function RangePicker({
     value.to ? dayjs(value.to).format("YYYY-MM-DD") : null,
   ]);
 
+  // No `billing` (shouldn't happen post-signup) defaults to allowing
+  // everything rather than locking a user out over a transient loading gap.
+  const allowed = user?.billing?.allowedRanges;
+  const isLocked = (range: string) => Boolean(allowed && !allowed.includes(range as never));
+
   const isCustom = value.preset === "custom";
   const customLabel =
     isCustom && value.from && value.to
       ? `${dayjs(value.from).format("MMM D")} – ${dayjs(value.to).format("MMM D")}`
       : "Custom";
+  const customLocked = isLocked("custom");
+
+  const promptUpgrade = () => {
+    const planName = user?.billing?.plan.name ?? "Your current";
+    notify.quotaLimit(
+      `${planName} plan only includes 1h and 24h ranges. Upgrade to unlock 7d, 30d, and custom date ranges.`
+    );
+  };
+
+  const pick = (range: string) => {
+    if (isLocked(range)) {
+      promptUpgrade();
+      return;
+    }
+    onChange({ preset: range });
+  };
 
   const apply = () => {
+    if (customLocked) {
+      setOpen(false);
+      promptUpgrade();
+      return;
+    }
     const [f, t] = draft;
     if (!f || !t) return;
     // Cover whole days: start at 00:00 of the first, end at 23:59:59 of the last.
@@ -59,54 +93,77 @@ export function RangePicker({
   };
 
   return (
-    <Group gap="xs" wrap="nowrap">
-      <SegmentedControl
-        size="sm"
-        value={isCustom ? "" : value.preset}
-        onChange={(v) => v && onChange({ preset: v })}
-        data={RANGE_PRESETS}
-        disabled={disabled}
-      />
-
-      <Popover opened={open} onChange={setOpen} position="bottom-end" shadow="md" radius="md" withArrow>
-        <Popover.Target>
-          <Button
-            size="sm"
-            variant={isCustom ? "filled" : "default"}
-            color={isCustom ? "emerald" : undefined}
-            leftSection={<CalendarDays size={15} />}
-            onClick={() => setOpen((o) => !o)}
-            disabled={disabled}
-          >
-            {customLabel}
-          </Button>
-        </Popover.Target>
-        <Popover.Dropdown>
-          <Stack gap="sm">
-            <Text size="xs" fw={600} c="dimmed">Pick a start and end date</Text>
-            <DatePicker
-              type="range"
-              value={draft}
-              onChange={setDraft}
-              maxDate={dayjs().format("YYYY-MM-DD")}
-              allowSingleDateInRange
-            />
-            <Group justify="flex-end" gap="xs">
-              <Button size="xs" variant="subtle" color="gray" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                size="xs"
-                color="emerald"
-                onClick={apply}
-                disabled={!draft[0] || !draft[1]}
+    <>
+      <Group gap="xs" wrap="nowrap">
+        {/* A plain SegmentedControl can't grey out one option while keeping
+            the others clickable, so this is hand-rolled from buttons. */}
+        <Group gap={2} wrap="nowrap" className="range-segmented">
+          {RANGE_PRESETS.map((r) => {
+            const locked = isLocked(r.value);
+            const active = !isCustom && value.preset === r.value;
+            const btn = (
+              <UnstyledButton
+                key={r.value}
+                disabled={disabled}
+                onClick={() => pick(r.value)}
+                className="range-seg-btn"
+                data-active={active}
+                data-locked={locked}
               >
-                Apply
+                {locked && <Lock size={10} style={{ marginRight: 4 }} />}
+                {r.label}
+              </UnstyledButton>
+            );
+            return locked ? (
+              <Tooltip key={r.value} label="Upgrade to unlock this range" withArrow>
+                {btn}
+              </Tooltip>
+            ) : btn;
+          })}
+        </Group>
+
+        <Popover opened={open} onChange={setOpen} position="bottom-end" shadow="md" radius="md" withArrow>
+          <Popover.Target>
+            <Tooltip label={customLocked ? "Upgrade to unlock custom ranges" : undefined} disabled={!customLocked} withArrow>
+              <Button
+                size="sm"
+                variant={isCustom ? "filled" : "default"}
+                color={isCustom ? "emerald" : undefined}
+                leftSection={customLocked ? <Lock size={13} /> : <CalendarDays size={15} />}
+                onClick={() => (customLocked ? promptUpgrade() : setOpen((o) => !o))}
+                disabled={disabled}
+              >
+                {customLabel}
               </Button>
-            </Group>
-          </Stack>
-        </Popover.Dropdown>
-      </Popover>
-    </Group>
+            </Tooltip>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Stack gap="sm">
+              <Text size="xs" fw={600} c="dimmed">Pick a start and end date</Text>
+              <DatePicker
+                type="range"
+                value={draft}
+                onChange={setDraft}
+                maxDate={dayjs().format("YYYY-MM-DD")}
+                allowSingleDateInRange
+              />
+              <Group justify="flex-end" gap="xs">
+                <Button size="xs" variant="subtle" color="gray" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  size="xs"
+                  color="emerald"
+                  onClick={apply}
+                  disabled={!draft[0] || !draft[1]}
+                >
+                  Apply
+                </Button>
+              </Group>
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
+      </Group>
+    </>
   );
 }

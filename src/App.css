@@ -380,6 +380,40 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--accent-soft);
 }
 
+/* Hand-rolled segmented control for the analytics range picker — a plain
+   Mantine SegmentedControl can't grey out one option while keeping its
+   siblings clickable, which is what a plan-locked range (7d/30d on Free)
+   needs. */
+.range-segmented {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.range-seg-btn {
+  padding: 5px 12px;
+  border-radius: calc(var(--radius-sm) - 3px);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.range-seg-btn:hover:not([data-locked="true"]) {
+  color: var(--text);
+}
+.range-seg-btn[data-active="true"] {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.range-seg-btn[data-locked="true"] {
+  color: var(--muted);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
 /* Sidebar nav: a resting state with no border, an accent rail when active.
    The rail reads faster than a filled pill and survives long labels. */
 .nav-link {

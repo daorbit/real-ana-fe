@@ -22,7 +22,8 @@ import {
   useDeleteCompetitorMutation, useGetSearchTrafficQuery, useGetFieldVitalsQuery,
   useRunCrawlMutation, useGetLatestCrawlQuery,
 } from "../store";
-import { notify, errMessage, confirmDelete } from "../notify";
+import { notify, errMessage, notifyError, confirmDelete } from "../notify";
+import { useAuth } from "../auth";
 import { timeAgo, dateTime } from "../utils";
 import { scoreColor } from "../components/seo/ScoreRing";
 import { SchemaPanel } from "../components/seo/SchemaPanel";
@@ -231,6 +232,7 @@ function HistoryPanel({
  */
 export default function Seo() {
   const { active } = useWorkspace();
+  const { refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
 
   const { data: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
@@ -289,8 +291,12 @@ export default function Seo() {
     try {
       await runCrawl({ workspaceId, siteId }).unwrap();
       notify.success("Crawl complete");
+      // A crawl always spends quota, so the sidebar/Billing numbers are stale
+      // the instant this resolves — pull the fresh count now rather than
+      // waiting for the next unrelated `/me` refetch.
+      await refreshUser();
     } catch (e) {
-      notify.error(errMessage(e, "Crawl failed"));
+      notifyError(e, "Crawl failed");
     }
   }
 
@@ -376,8 +382,10 @@ export default function Seo() {
       notify.success(
         res.cached ? "Showing the most recent audit for this URL" : "Analysis complete"
       );
+      // A cache hit costs no quota — only refresh when a real audit ran.
+      if (!res.cached) await refreshUser();
     } catch (e) {
-      notify.error(errMessage(e, "Analysis failed"));
+      notifyError(e, "Analysis failed");
     }
   }
 

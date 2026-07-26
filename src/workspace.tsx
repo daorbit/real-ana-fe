@@ -5,6 +5,12 @@ import type { Workspace } from "./types";
 
 const ACTIVE_KEY = "rta_active_ws";
 
+/** A stable empty array — `data ?? []` would mint a new reference on every
+ *  render while `data` is undefined, which is a dependency-array trap: the
+ *  effect below depends on `workspaces`, so a fresh `[]` every render meant
+ *  it never stopped firing (setState -> render -> new [] -> effect -> setState -> ...). */
+const EMPTY: Workspace[] = [];
+
 type WsState = {
   workspaces: Workspace[];
   active: Workspace | null;
@@ -18,7 +24,7 @@ const Ctx = createContext<WsState | null>(null);
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Cached by RTK Query — the list is fetched once and reused across pages.
   const { data, isLoading, refetch } = useGetWorkspacesQuery();
-  const workspaces = data ?? [];
+  const workspaces = data ?? EMPTY;
 
   const [activeId, setActiveId] = useState<string | null>(() =>
     localStorage.getItem(ACTIVE_KEY)

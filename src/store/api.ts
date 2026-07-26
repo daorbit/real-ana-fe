@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { getToken, isDemoToken } from "../api";
-import { notify } from "../notify";
+import { notify, errMessage } from "../notify";
 import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
   AdminUserPage, ApiKey, Site, Stats, Workspace,
@@ -16,6 +16,9 @@ import type {
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
+  Plan, AddonPack, BillingCycle,
+  StartSubscriptionResponse, StartAddonPurchaseResponse,
+  Coupon, CouponCheckResult,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -38,7 +41,7 @@ const rawBaseQuery = fetchBaseQuery({
 });
 
 
-const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = (
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   apiArg,
   extra
@@ -63,13 +66,24 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     return Promise.resolve({ data: data ?? null });
   }
 
-  return rawBaseQuery(args, apiArg, extra);
+  const result = await rawBaseQuery(args, apiArg, extra);
+
+  // A plan/quota limit hit anywhere in the app — workspace, site, audit,
+  // crawl, analytics range, whatever comes next — surfaces the same upgrade
+  // dialog automatically. This is the one place every request passes
+  // through, so a call site doesn't have to remember to check for
+  // `quota_exceeded` itself; it only has to set the code server-side.
+  const code = (result.error?.data as { code?: unknown } | undefined)?.code;
+  if (code === "quota_exceeded") {
+    notify.quotaLimit(errMessage(result.error, "Upgrade your plan to continue."));
+  }
+  return result;
 };
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -576,6 +590,114 @@ export const api = createApi({
       }),
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
     }),
+
+    /* -------------------------------- billing ------------------------------ */
+
+    getPlans: build.query<Plan[], void>({
+      query: () => "/api/billing/plans",
+      providesTags: ["Plan"],
+    }),
+
+    getAddonPacks: build.query<AddonPack[], void>({
+      query: () => "/api/billing/addons",
+      providesTags: ["AddonPack"],
+    }),
+
+    startSubscription: build.mutation<
+      StartSubscriptionResponse,
+      { planSlug: string; cycle: BillingCycle; couponCode?: string }
+    >({
+      query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
+    }),
+
+    verifySubscription: build.mutation<
+      { ok: true },
+      { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
+    >({
+      query: (body) => ({ url: "/api/billing/subscribe/verify", method: "POST", body }),
+      invalidatesTags: ["Billing"],
+    }),
+
+    startAddonPurchase: build.mutation<
+      StartAddonPurchaseResponse,
+      { slug: string; couponCode?: string }
+    >({
+      query: ({ slug, couponCode }) => ({
+        url: `/api/billing/addons/${slug}/purchase`,
+        method: "POST",
+        body: { couponCode },
+      }),
+    }),
+
+    verifyAddonPurchase: build.mutation<
+      { ok: true },
+      { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
+    >({
+      query: (body) => ({ url: "/api/billing/addons/verify", method: "POST", body }),
+      invalidatesTags: ["Billing"],
+    }),
+
+    /** Preview a coupon's discount against a known amount before checkout starts. */
+    checkCoupon: build.mutation<CouponCheckResult, { amount: number; code: string }>({
+      query: (body) => ({ url: "/api/billing/coupons/check", method: "POST", body }),
+    }),
+
+    /* ---------------------------- admin billing ----------------------------- */
+
+    getAdminPlans: build.query<Plan[], void>({
+      query: () => "/api/admin/billing/plans",
+      providesTags: ["Plan"],
+    }),
+
+    /** Price is the only editable field — plans themselves are fixed in backend code. */
+    saveAdminPlanPrice: build.mutation<Plan, { slug: string; priceMonthly: number; priceYearly: number }>({
+      query: ({ slug, ...body }) => ({
+        url: `/api/admin/billing/plans/${slug}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Plan"],
+    }),
+
+    getAdminAddonPacks: build.query<AddonPack[], void>({
+      query: () => "/api/admin/billing/addons",
+      providesTags: ["AddonPack"],
+    }),
+
+    saveAdminAddonPack: build.mutation<AddonPack, Partial<AddonPack> & { _id?: string }>({
+      query: ({ _id, ...body }) => ({
+        url: _id ? `/api/admin/billing/addons/${_id}` : "/api/admin/billing/addons",
+        method: _id ? "PUT" : "POST",
+        body,
+      }),
+      invalidatesTags: ["AddonPack"],
+    }),
+
+    deleteAdminAddonPack: build.mutation<void, string>({
+      query: (id) => ({ url: `/api/admin/billing/addons/${id}`, method: "DELETE" }),
+      invalidatesTags: ["AddonPack"],
+    }),
+
+    /* ---------------------------- admin coupons ----------------------------- */
+
+    getAdminCoupons: build.query<Coupon[], void>({
+      query: () => "/api/admin/billing/coupons",
+      providesTags: ["Coupon"],
+    }),
+
+    saveAdminCoupon: build.mutation<Coupon, Partial<Coupon> & { _id?: string }>({
+      query: ({ _id, ...body }) => ({
+        url: _id ? `/api/admin/billing/coupons/${_id}` : "/api/admin/billing/coupons",
+        method: _id ? "PUT" : "POST",
+        body,
+      }),
+      invalidatesTags: ["Coupon"],
+    }),
+
+    deleteAdminCoupon: build.mutation<void, string>({
+      query: (id) => ({ url: `/api/admin/billing/coupons/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Coupon"],
+    }),
   }),
 });
 
@@ -630,4 +752,19 @@ export const {
   useGetFieldVitalsQuery,
   useRunCrawlMutation,
   useGetLatestCrawlQuery,
+  useGetPlansQuery,
+  useGetAddonPacksQuery,
+  useStartSubscriptionMutation,
+  useVerifySubscriptionMutation,
+  useStartAddonPurchaseMutation,
+  useVerifyAddonPurchaseMutation,
+  useGetAdminPlansQuery,
+  useSaveAdminPlanPriceMutation,
+  useGetAdminAddonPacksQuery,
+  useSaveAdminAddonPackMutation,
+  useDeleteAdminAddonPackMutation,
+  useCheckCouponMutation,
+  useGetAdminCouponsQuery,
+  useSaveAdminCouponMutation,
+  useDeleteAdminCouponMutation,
 } = api;

@@ -21,7 +21,7 @@ import {
 import { useSites, useSiteInstalled } from "../hooks";
 import * as v from "../utils/validate";
 import { shortDate } from "../utils";
-import { notify, errMessage, confirmDestroy } from "../notify";
+import { notify, errMessage, notifyError, confirmDestroy } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { Workspace, Site } from "../types";
 import { WorkspacesSkeleton } from "../components/Skeletons";
@@ -214,7 +214,7 @@ export default function Workspaces() {
       setActive(ws._id);
       notify.success(`Workspace "${ws.name}" created and set as active.`);
     } catch (err2) {
-      notify.error(errMessage(err2, "Could not create the workspace."));
+      notifyError(err2, "Could not create the workspace.");
     }
   };
 
