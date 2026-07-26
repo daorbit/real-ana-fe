@@ -3,15 +3,16 @@ import {
   Text, Group, Button, Card, Table, Badge, Modal, TextInput, NumberInput,
   Stack, Switch, Tabs, ActionIcon, Center, Loader, Select,
 } from "@mantine/core";
-import { Plus, Pencil, Trash2, Search, Globe2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Globe2, Tag } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
   useGetAdminPlansQuery, useSaveAdminPlanPriceMutation,
   useGetAdminAddonPacksQuery, useSaveAdminAddonPackMutation, useDeleteAdminAddonPackMutation,
+  useGetAdminCouponsQuery, useSaveAdminCouponMutation, useDeleteAdminCouponMutation,
 } from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
-import type { Plan, AddonPack, AddonType } from "../types";
+import type { Plan, AddonPack, AddonType, Coupon } from "../types";
 
 function money(paise: number): string {
   return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -31,9 +32,11 @@ export default function AdminBilling() {
         <Tabs.List mb="lg">
           <Tabs.Tab value="plans">Plans</Tabs.Tab>
           <Tabs.Tab value="addons">Addon packs</Tabs.Tab>
+          <Tabs.Tab value="coupons">Coupons</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="plans"><PlansTab /></Tabs.Panel>
         <Tabs.Panel value="addons"><AddonsTab /></Tabs.Panel>
+        <Tabs.Panel value="coupons"><CouponsTab /></Tabs.Panel>
       </Tabs>
     </AppShell>
   );
@@ -254,6 +257,138 @@ function AddonsTab() {
           </Group>
           <NumberInput label="Price (₹)" value={(draft.price ?? 0) / 100 || undefined} onChange={(v) => setDraft({ ...draft, price: Number(v) || 0 })} min={0} />
           <Switch label="Active (visible on the Billing page)" checked={draft.active !== false} onChange={(e) => setDraft({ ...draft, active: e.currentTarget.checked })} />
+          <Group justify="flex-end" mt="sm">
+            <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
+            <Button color="emerald" loading={saving} onClick={submit}>Save</Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </Stack>
+  );
+}
+
+/* --------------------------------- coupons ------------------------------------ */
+
+const emptyCoupon: Partial<Coupon> = { code: "", percentOff: 10, active: true, expiresAt: null };
+
+function CouponsTab() {
+  const { data: coupons = [], isLoading } = useGetAdminCouponsQuery();
+  const [save, { isLoading: saving }] = useSaveAdminCouponMutation();
+  const [remove] = useDeleteAdminCouponMutation();
+
+  const [modal, setModal] = useState(false);
+  const [draft, setDraft] = useState<Partial<Coupon>>(emptyCoupon);
+
+  const openNew = () => { setDraft(emptyCoupon); setModal(true); };
+  const openEdit = (c: Coupon) => { setDraft(c); setModal(true); };
+
+  const submit = async () => {
+    try {
+      await save(draft).unwrap();
+      notify.success(`${draft.code} saved.`, draft._id ? "Coupon updated" : "Coupon created");
+      setModal(false);
+    } catch (e) {
+      notify.error(errMessage(e, "Could not save the coupon."));
+    }
+  };
+
+  const remove_ = (c: Coupon) => {
+    confirmDelete({
+      title: `Delete ${c.code}?`,
+      body: "Anyone with this code will no longer be able to apply it. Past orders that used it are unaffected.",
+      onConfirm: async () => {
+        try {
+          await remove(c._id).unwrap();
+          notify.success(`${c.code} deleted.`);
+        } catch (e) {
+          notify.error(errMessage(e, "Could not delete the coupon."));
+        }
+      },
+    });
+  };
+
+  if (isLoading) return <Center py={64}><Loader size="sm" /></Center>;
+
+  const expired = (c: Coupon) => c.expiresAt && new Date(c.expiresAt).getTime() < Date.now();
+
+  return (
+    <Stack gap="md">
+      <Group justify="flex-end">
+        <Button size="xs" color="emerald" leftSection={<Plus size={14} />} onClick={openNew}>
+          New coupon
+        </Button>
+      </Group>
+
+      <Card withBorder radius="md" padding={0}>
+        <Table verticalSpacing="sm" horizontalSpacing="md">
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Code</Table.Th>
+              <Table.Th>Discount</Table.Th>
+              <Table.Th>Expires</Table.Th>
+              <Table.Th>Status</Table.Th>
+              <Table.Th />
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {coupons.map((c) => (
+              <Table.Tr key={c._id}>
+                <Table.Td>
+                  <Badge size="sm" variant="light" color="gray" leftSection={<Tag size={11} />}>{c.code}</Badge>
+                </Table.Td>
+                <Table.Td>{c.percentOff}% off</Table.Td>
+                <Table.Td>{c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : "never"}</Table.Td>
+                <Table.Td>
+                  <Badge size="sm" variant="light" color={!c.active ? "gray" : expired(c) ? "red" : "emerald"}>
+                    {!c.active ? "inactive" : expired(c) ? "expired" : "active"}
+                  </Badge>
+                </Table.Td>
+                <Table.Td>
+                  <Group gap={4} wrap="nowrap">
+                    <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(c)}>
+                      <Pencil size={14} />
+                    </ActionIcon>
+                    <ActionIcon variant="subtle" size="sm" color="red" onClick={() => remove_(c)}>
+                      <Trash2 size={14} />
+                    </ActionIcon>
+                  </Group>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+            {!coupons.length && (
+              <Table.Tr><Table.Td colSpan={5}><Text size="sm" c="dimmed" py="md">No coupons yet.</Text></Table.Td></Table.Tr>
+            )}
+          </Table.Tbody>
+        </Table>
+      </Card>
+
+      <Modal opened={modal} onClose={() => setModal(false)} title={draft._id ? "Edit coupon" : "New coupon"} radius="lg" centered>
+        <Stack gap="sm">
+          <TextInput
+            label="Code"
+            value={draft.code}
+            onChange={(e) => setDraft({ ...draft, code: e.currentTarget.value.toUpperCase() })}
+            placeholder="SAVE20"
+          />
+          <NumberInput
+            label="Percent off"
+            value={draft.percentOff}
+            onChange={(v) => setDraft({ ...draft, percentOff: Number(v) || 1 })}
+            min={1}
+            max={100}
+            suffix="%"
+          />
+          <TextInput
+            label="Expires (optional)"
+            type="date"
+            value={draft.expiresAt ? new Date(draft.expiresAt).toISOString().slice(0, 10) : ""}
+            onChange={(e) => setDraft({ ...draft, expiresAt: e.currentTarget.value || null })}
+          />
+          <Switch
+            label="Active"
+            checked={draft.active !== false}
+            onChange={(e) => setDraft({ ...draft, active: e.currentTarget.checked })}
+          />
           <Group justify="flex-end" mt="sm">
             <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
             <Button color="emerald" loading={saving} onClick={submit}>Save</Button>

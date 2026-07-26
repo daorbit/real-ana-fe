@@ -152,6 +152,22 @@ export type StartAddonPurchaseResponse = {
   addon: { name: string; type: AddonType; quantity: number };
 };
 
+/* ---------------------------------- coupons ---------------------------------- */
+
+export type Coupon = {
+  _id: string;
+  code: string;
+  percentOff: number;
+  active: boolean;
+  expiresAt: string | null;
+};
+
+export type CouponCheckResult = {
+  amount: number;
+  error?: string;
+  coupon?: { code: string; percentOff: number };
+};
+
 /** A row in the admin's user switcher. */
 export type AdminUser = {
   id: string;

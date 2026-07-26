@@ -18,6 +18,7 @@ import type {
   DemoUsage,
   Plan, AddonPack, QuotaSummary, BillingCycle,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
+  Coupon, CouponCheckResult,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -71,7 +72,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -598,7 +599,7 @@ export const api = createApi({
 
     startSubscription: build.mutation<
       StartSubscriptionResponse,
-      { planSlug: string; cycle: BillingCycle }
+      { planSlug: string; cycle: BillingCycle; couponCode?: string }
     >({
       query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
     }),
@@ -611,8 +612,15 @@ export const api = createApi({
       invalidatesTags: ["Billing"],
     }),
 
-    startAddonPurchase: build.mutation<StartAddonPurchaseResponse, string>({
-      query: (slug) => ({ url: `/api/billing/addons/${slug}/purchase`, method: "POST" }),
+    startAddonPurchase: build.mutation<
+      StartAddonPurchaseResponse,
+      { slug: string; couponCode?: string }
+    >({
+      query: ({ slug, couponCode }) => ({
+        url: `/api/billing/addons/${slug}/purchase`,
+        method: "POST",
+        body: { couponCode },
+      }),
     }),
 
     verifyAddonPurchase: build.mutation<
@@ -621,6 +629,11 @@ export const api = createApi({
     >({
       query: (body) => ({ url: "/api/billing/addons/verify", method: "POST", body }),
       invalidatesTags: ["Billing"],
+    }),
+
+    /** Preview a coupon's discount against a known amount before checkout starts. */
+    checkCoupon: build.mutation<CouponCheckResult, { amount: number; code: string }>({
+      query: (body) => ({ url: "/api/billing/coupons/check", method: "POST", body }),
     }),
 
     /* ---------------------------- admin billing ----------------------------- */
@@ -657,6 +670,27 @@ export const api = createApi({
     deleteAdminAddonPack: build.mutation<void, string>({
       query: (id) => ({ url: `/api/admin/billing/addons/${id}`, method: "DELETE" }),
       invalidatesTags: ["AddonPack"],
+    }),
+
+    /* ---------------------------- admin coupons ----------------------------- */
+
+    getAdminCoupons: build.query<Coupon[], void>({
+      query: () => "/api/admin/billing/coupons",
+      providesTags: ["Coupon"],
+    }),
+
+    saveAdminCoupon: build.mutation<Coupon, Partial<Coupon> & { _id?: string }>({
+      query: ({ _id, ...body }) => ({
+        url: _id ? `/api/admin/billing/coupons/${_id}` : "/api/admin/billing/coupons",
+        method: _id ? "PUT" : "POST",
+        body,
+      }),
+      invalidatesTags: ["Coupon"],
+    }),
+
+    deleteAdminCoupon: build.mutation<void, string>({
+      query: (id) => ({ url: `/api/admin/billing/coupons/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Coupon"],
     }),
   }),
 });
@@ -724,4 +758,8 @@ export const {
   useGetAdminAddonPacksQuery,
   useSaveAdminAddonPackMutation,
   useDeleteAdminAddonPackMutation,
+  useCheckCouponMutation,
+  useGetAdminCouponsQuery,
+  useSaveAdminCouponMutation,
+  useDeleteAdminCouponMutation,
 } = api;

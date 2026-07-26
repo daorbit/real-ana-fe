@@ -1,20 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
-  SegmentedControl, Progress, Divider, ThemeIcon, Alert, Modal,
+  SegmentedControl, Progress, Divider, ThemeIcon, Alert, Modal, TextInput,
 } from "@mantine/core";
-import { Check, Search, Globe2, Info, CreditCard, ShoppingCart } from "lucide-react";
+import { Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
   useGetPlansQuery, useGetAddonPacksQuery, useGetMySubscriptionQuery,
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
   useStartAddonPurchaseMutation, useVerifyAddonPurchaseMutation,
+  useCheckCouponMutation,
 } from "../store";
 import { notify, errMessage } from "../notify";
 import { useAuth } from "../auth";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "../utils/razorpay";
-import type { BillingCycle, Plan, AddonPack } from "../types";
+import type { BillingCycle, Plan, AddonPack, CouponCheckResult } from "../types";
 
 /** Paise to a display INR string — Razorpay's amounts are always the smallest unit. */
 function money(paise: number): string {
@@ -47,12 +48,18 @@ export default function Billing() {
   const [buying, setBuying] = useState<string | null>(null);
   const [confirmPlan, setConfirmPlan] = useState<Plan | null>(null);
   const [confirmAddon, setConfirmAddon] = useState<AddonPack | null>(null);
+  const [planCoupon, setPlanCoupon] = useState<CouponCheckResult | null>(null);
+  const [addonCoupon, setAddonCoupon] = useState<CouponCheckResult | null>(null);
 
   const doSubscribe = async (plan: Plan) => {
     setConfirmPlan(null);
     setSubscribing(plan.slug);
     try {
-      const started = await startSubscription({ planSlug: plan.slug, cycle }).unwrap();
+      const started = await startSubscription({
+        planSlug: plan.slug,
+        cycle,
+        couponCode: planCoupon?.coupon?.code,
+      }).unwrap();
 
       // A ₹0 plan (Free) is assigned directly server-side — no order, no
       // Razorpay modal to open.
@@ -95,7 +102,10 @@ export default function Billing() {
     setConfirmAddon(null);
     setBuying(pack._id);
     try {
-      const { orderId, amount, currency, razorpayKeyId } = await startAddonPurchase(pack.slug).unwrap();
+      const { orderId, amount, currency, razorpayKeyId } = await startAddonPurchase({
+        slug: pack.slug,
+        couponCode: addonCoupon?.coupon?.code,
+      }).unwrap();
 
       await loadRazorpayCheckout();
       openRazorpayCheckout({
@@ -229,7 +239,7 @@ export default function Billing() {
                       disabled={current || !buyable}
                       loading={subscribing === plan.slug}
                       leftSection={<CreditCard size={15} />}
-                      onClick={() => setConfirmPlan(plan)}
+                      onClick={() => { setPlanCoupon(null); setConfirmPlan(plan); }}
                     >
                       {current ? "Current plan" : !buyable ? "Included free" : usage?.plan.slug === plan.slug ? "Renew" : "Subscribe"}
                     </Button>
@@ -259,7 +269,7 @@ export default function Billing() {
                   <Divider my="sm" />
                   <Group justify="space-between" align="center">
                     <Text fw={650}>{money(pack.price)}</Text>
-                    <Button size="xs" color="emerald" loading={buying === pack._id} onClick={() => setConfirmAddon(pack)}>
+                    <Button size="xs" color="emerald" loading={buying === pack._id} onClick={() => { setAddonCoupon(null); setConfirmAddon(pack); }}>
                       Buy
                     </Button>
                   </Group>
@@ -280,35 +290,52 @@ export default function Billing() {
         centered
         radius="lg"
       >
-        {confirmPlan && (
-          <Stack gap="md">
-            <Group justify="space-between">
-              <div>
-                <Text fw={650}>{confirmPlan.name}</Text>
-                <Text size="xs" c="dimmed">Billed {cycle}</Text>
-              </div>
-              <Text fz={22} fw={700}>
-                {money(cycle === "yearly" ? confirmPlan.priceYearly : confirmPlan.priceMonthly)}
+        {confirmPlan && (() => {
+          const listPrice = cycle === "yearly" ? confirmPlan.priceYearly : confirmPlan.priceMonthly;
+          const finalPrice = planCoupon?.coupon ? planCoupon.amount : listPrice;
+          const free = confirmPlan.priceMonthly === 0 && confirmPlan.priceYearly === 0;
+          return (
+            <Stack gap="md">
+              <Group justify="space-between">
+                <div>
+                  <Text fw={650}>{confirmPlan.name}</Text>
+                  <Text size="xs" c="dimmed">Billed {cycle}</Text>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  {planCoupon?.coupon && (
+                    <Text size="xs" c="dimmed" td="line-through">{money(listPrice)}</Text>
+                  )}
+                  <Text fz={22} fw={700}>{money(finalPrice)}</Text>
+                </div>
+              </Group>
+
+              {!free && (
+                <CouponField
+                  amount={listPrice}
+                  result={planCoupon}
+                  onChange={setPlanCoupon}
+                />
+              )}
+
+              <Text size="sm" c="dimmed">
+                {free
+                  ? "This plan is free — no payment needed."
+                  : `A one-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. It does not auto-renew — come back and buy again when the period ends.`}
               </Text>
-            </Group>
-            <Text size="sm" c="dimmed">
-              {confirmPlan.priceMonthly === 0 && confirmPlan.priceYearly === 0
-                ? "This plan is free — no payment needed."
-                : `A one-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. It does not auto-renew — come back and buy again when the period ends.`}
-            </Text>
-            <Group justify="flex-end">
-              <Button variant="subtle" onClick={() => setConfirmPlan(null)}>Cancel</Button>
-              <Button
-                color="emerald"
-                leftSection={<CreditCard size={15} />}
-                loading={subscribing === confirmPlan.slug}
-                onClick={() => doSubscribe(confirmPlan)}
-              >
-                {confirmPlan.priceMonthly === 0 && confirmPlan.priceYearly === 0 ? "Confirm" : "Continue to payment"}
-              </Button>
-            </Group>
-          </Stack>
-        )}
+              <Group justify="flex-end">
+                <Button variant="subtle" onClick={() => setConfirmPlan(null)}>Cancel</Button>
+                <Button
+                  color="emerald"
+                  leftSection={<CreditCard size={15} />}
+                  loading={subscribing === confirmPlan.slug}
+                  onClick={() => doSubscribe(confirmPlan)}
+                >
+                  {free || finalPrice === 0 ? "Confirm" : "Continue to payment"}
+                </Button>
+              </Group>
+            </Stack>
+          );
+        })()}
       </Modal>
 
       <Modal
@@ -325,8 +352,22 @@ export default function Billing() {
                 <Text fw={650}>{confirmAddon.name}</Text>
                 <Text size="xs" c="dimmed">+{confirmAddon.quantity} {confirmAddon.type}s, one-time</Text>
               </div>
-              <Text fz={22} fw={700}>{money(confirmAddon.price)}</Text>
+              <div style={{ textAlign: "right" }}>
+                {addonCoupon?.coupon && (
+                  <Text size="xs" c="dimmed" td="line-through">{money(confirmAddon.price)}</Text>
+                )}
+                <Text fz={22} fw={700}>
+                  {money(addonCoupon?.coupon ? addonCoupon.amount : confirmAddon.price)}
+                </Text>
+              </div>
             </Group>
+
+            <CouponField
+              amount={confirmAddon.price}
+              result={addonCoupon}
+              onChange={setAddonCoupon}
+            />
+
             <Text size="sm" c="dimmed">
               A one-time charge via Razorpay. Credits are added to your account as soon as payment
               is confirmed and never expire.
@@ -357,6 +398,76 @@ function FeatureLine({ text }: { text: string }) {
       </ThemeIcon>
       <Text size="xs" c="dimmed">{text}</Text>
     </Group>
+  );
+}
+
+/**
+ * A coupon code field that checks itself against the server as the user types
+ * (debounced) and reports the result up — the parent modal owns the applied
+ * result so it survives the field being edited again without losing the
+ * price shown, and so checkout can read the final coupon code from one place.
+ */
+function CouponField({
+  amount,
+  result,
+  onChange,
+}: {
+  amount: number;
+  result: CouponCheckResult | null;
+  onChange: (result: CouponCheckResult | null) => void;
+}) {
+  const [code, setCode] = useState("");
+  const [checkCoupon, { isLoading }] = useCheckCouponMutation();
+
+  useEffect(() => {
+    const trimmed = code.trim();
+    if (!trimmed) {
+      onChange(null);
+      return;
+    }
+    const t = setTimeout(async () => {
+      try {
+        const res = await checkCoupon({ amount, code: trimmed }).unwrap();
+        onChange(res);
+      } catch (e) {
+        onChange({ amount, error: errMessage(e, "invalid coupon") });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, amount]);
+
+  const applied = result?.coupon;
+
+  if (applied) {
+    return (
+      <Group gap={6} wrap="nowrap">
+        <Badge size="sm" variant="light" color="emerald" leftSection={<Tag size={11} />}>
+          {applied.code} — {applied.percentOff}% off
+        </Badge>
+        <Button
+          size="compact-xs"
+          variant="subtle"
+          color="gray"
+          onClick={() => { setCode(""); onChange(null); }}
+        >
+          <X size={12} />
+        </Button>
+      </Group>
+    );
+  }
+
+  return (
+    <TextInput
+      placeholder="Coupon code"
+      size="sm"
+      value={code}
+      onChange={(e) => setCode(e.currentTarget.value.toUpperCase())}
+      leftSection={<Tag size={14} />}
+      rightSection={isLoading ? <Loader size={12} /> : undefined}
+      error={result?.error}
+    />
   );
 }
 
