@@ -28,6 +28,7 @@ import { FunnelBuilder } from "../components/FunnelBuilder";
 import { RetentionGrid } from "../components/RetentionGrid";
 import { GoalsPanel } from "../components/GoalsPanel";
 import { OutboundPanel, ErrorsPanel } from "../components/OutboundErrorsPanels";
+import { VisitorSplitPanel } from "../components/VisitorSplitPanel";
 import { FilterBar } from "../components/FilterBar";
 import { RefreshButton } from "../components/Refresh";
 import { SiteFilter } from "../components/SiteFilter";
@@ -84,6 +85,7 @@ function BarList({
   empty,
   filterKey,
   onFilter,
+  fill = true,
 }: {
   title: string;
   items: Bucket[];
@@ -94,6 +96,12 @@ function BarList({
   /** When set, each row filters the dashboard by this dimension on click. */
   filterKey?: keyof StatsFilter;
   onFilter?: (key: keyof StatsFilter, value: string) => void;
+  /**
+   * Stretch to the height of the grid row. Correct inside a SimpleGrid, wrong
+   * inside a `.masonry` column — there is no row there to fill, so a card asked
+   * to be 100% tall collapses instead.
+   */
+  fill?: boolean;
 }) {
   const { t } = useTranslation();
   const emptyText = empty ?? t("analytics.waitingForData");
@@ -102,7 +110,7 @@ function BarList({
   const clickable = Boolean(filterKey && onFilter);
 
   return (
-    <Card withBorder radius="lg" padding="lg" h="100%">
+    <Card withBorder radius="lg" padding="lg" h={fill ? "100%" : undefined}>
       <Group gap={8} mb="md">
         {Icon && <Icon size={15} className="sect-ic" />}
         <Text fw={600} c="dimmed" size="sm">{title}</Text>
@@ -585,18 +593,20 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="sources">
-          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" mb="lg">
+          {/* Masonry rather than a grid: these lists differ wildly in length —
+              three channels beside nine referrers — and a grid row would pad the
+              short card out to the tall one's height, leaving a dead block. */}
+          <div className="masonry">
             <BarList title={t("analytics.list.channels")} icon={Split} items={view?.channels ?? []} color="emerald"
-                     empty="No traffic yet" />
+                     empty="No traffic yet" fill={false} />
             <BarList title={t("analytics.list.referrers")} icon={Tag} items={view?.topReferrers ?? []} color="cyan"
-                     filterKey="referrer" onFilter={addFilter} />
-          </SimpleGrid>
-          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
+                     filterKey="referrer" onFilter={addFilter} fill={false} />
+            <VisitorSplitPanel split={view?.visitorSplit} />
             <BarList title={t("analytics.list.utmSources")} icon={Tag} items={view?.utmSources ?? []} color="teal"
-                     filterKey="utmSource" onFilter={addFilter} />
+                     filterKey="utmSource" onFilter={addFilter} fill={false} />
             <BarList title={t("analytics.list.utmCampaigns")} icon={Tag} items={view?.utmCampaigns ?? []} color="grape"
-                     filterKey="utmCampaign" onFilter={addFilter} />
-          </SimpleGrid>
+                     filterKey="utmCampaign" onFilter={addFilter} fill={false} />
+          </div>
         </Tabs.Panel>
 
         <Tabs.Panel value="tech">

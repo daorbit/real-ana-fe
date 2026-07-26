@@ -149,6 +149,12 @@ export function demoStats(range: string): Stats {
     utmCampaigns: ranked(UTM_CAMPAIGNS, Math.round(sessions * 0.18)),
     channels: ranked(CHANNELS, sessions, 0.7),
 
+    visitorSplit: {
+      new: visitors - Math.round(visitors * 0.31),
+      returning: Math.round(visitors * 0.31),
+      returningRate: 31,
+    },
+
     clicks: [
       { key: "Start free trial", count: 412, path: "/", href: "/signup", tag: "a" },
       { key: "View pricing", count: 288, path: "/", href: "/pricing", tag: "a" },

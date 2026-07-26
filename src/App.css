@@ -780,6 +780,35 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .grid-span-2 { grid-column: span 2; }
 }
 
+/* A masonry band of cards.
+
+   A CSS grid gives every card in a row the height of the tallest one, so a
+   short list (three channels) is padded out to match a long one (nine
+   referrers) and leaves a block of dead space. Columns let each card take only
+   the height it needs; `break-inside: avoid` keeps a card from being sliced
+   across the column boundary.
+
+   Cards inside must not set `h="100%"` — with no row to fill, that collapses
+   them. The gap is `--mantine-spacing-lg` to match the SimpleGrid bands above
+   and below, so the whole page keeps one rhythm. */
+.masonry {
+  column-count: 1;
+  column-gap: var(--mantine-spacing-lg);
+}
+.masonry > * {
+  break-inside: avoid;
+  /* Columns have no row gap of their own — the bottom margin is the row gap. */
+  margin-bottom: var(--mantine-spacing-lg);
+  /* Without this, a card can still be split across columns in WebKit. */
+  display: inline-block;
+  width: 100%;
+}
+/* 75em == Mantine's `lg`, the same breakpoint the grids beside it use. */
+@media (min-width: 75em) {
+  .masonry { column-count: 2; }
+  .masonry-3 { column-count: 3; }
+}
+
 /* ============ Charts ============ */
 /* Recharts makes its wrapper focusable, so clicking a chart paints the browser's
    default focus ring around it. Suppress it — the chart isn't an interactive

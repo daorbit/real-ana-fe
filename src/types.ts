@@ -205,6 +205,16 @@ export type ClickBucket = Bucket & {
 
 export type Point = { bucket: string; views: number; visitors: number };
 
+/** First-time vs repeat visitors over the selected window. */
+export type VisitorSplit = {
+  /** Visitors not seen before this window opened. */
+  new: number;
+  /** Visitors already seen before this window opened. */
+  returning: number;
+  /** `returning` as a percentage of all visitors in the window. */
+  returningRate: number;
+};
+
 export type Deltas = {
   pageviews: number | null;
   visitors: number | null;
@@ -265,6 +275,7 @@ export type Stats = {
 
   // marketing channels: how sessions arrived
   channels: Bucket[];
+  visitorSplit: VisitorSplit;
 
   // where visitors leave to: outbound links and downloads
   outboundClicks: OutboundBucket[];
