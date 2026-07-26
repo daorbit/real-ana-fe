@@ -17,6 +17,8 @@ import {
   Split, Target, AlertTriangle, LayoutDashboard, HelpCircle,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { PlanGate } from "../components/PlanGate";
+import { useAuth } from "../auth";
 import { AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
 import { WorldMap } from "../components/WorldMap";
@@ -223,6 +225,8 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 
 export default function Analytics() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const funnelLocked = (user?.billing?.plan?.slug ?? "free") === "free";
   const { active, loading } = useWorkspace();
   const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
   const range = rangeState.preset;
@@ -728,7 +732,13 @@ export default function Analytics() {
         </Tabs.Panel>
 
         <Tabs.Panel value="funnel">
-          <FunnelBuilder workspaceId={active._id} range={range} stats={view} sites={siteScope} />
+          <PlanGate
+            locked={funnelLocked}
+            title="Funnels need Starter or Pro"
+            body="Track step-by-step drop-off across pages and events. Upgrade to unlock funnel analysis."
+          >
+            <FunnelBuilder workspaceId={active._id} range={range} stats={view} sites={siteScope} />
+          </PlanGate>
         </Tabs.Panel>
 
         <Tabs.Panel value="retention">
