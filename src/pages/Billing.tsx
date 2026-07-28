@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
   SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
+  ActionIcon, Tooltip,
 } from "@mantine/core";
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
-  FolderKanban, Layers, Star, Clock, PartyPopper,
+  FolderKanban, Layers, Star, Clock, PartyPopper, RefreshCw,
 } from "lucide-react";
 import { PlanIcon } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
@@ -20,12 +21,10 @@ import {
 import { notify, errMessage } from "../notify";
 import { useAuth } from "../auth";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "../utils/razorpay";
-import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary } from "../types";
-
-/** Paise to a display INR string — Razorpay's amounts are always the smallest unit. */
-function money(paise: number): string {
-  return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
-}
+import {
+  CURRENCIES, detectCurrency, formatMoney, priceIn, getStoredCurrency, setStoredCurrency,
+} from "../utils/currency";
+import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Currency } from "../types";
 
 /**
  * Subscription plans, addon credit packs, and the current usage against them.
@@ -39,9 +38,22 @@ function money(paise: number): string {
 export default function Billing() {
   const { user, refreshUser } = useAuth();
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const [currency, setCurrency] = useState<Currency>(() => getStoredCurrency() ?? detectCurrency());
 
-  const { data: plans = [], isLoading: plansLoading } = useGetPlansQuery();
-  const { data: addons = [], isLoading: addonsLoading } = useGetAddonPacksQuery();
+  const changeCurrency = (v: Currency) => {
+    setCurrency(v);
+    setStoredCurrency(v);
+  };
+
+  const money = (amountMinor: number) => formatMoney(amountMinor, currency);
+
+  const {
+    data: plans = [], isLoading: plansLoading, isFetching: plansFetching, refetch: refetchPlans,
+  } = useGetPlansQuery({ currency }, { refetchOnMountOrArgChange: true });
+  const {
+    data: addons = [], isLoading: addonsLoading, isFetching: addonsFetching, refetch: refetchAddons,
+  } = useGetAddonPacksQuery({ currency }, { refetchOnMountOrArgChange: true });
+  const refetching = plansFetching || addonsFetching;
   // Plan/quota state travels on the user's own profile rather than a separate
   // endpoint — every authenticated page already has it via `useAuth()`.
   const usage = user?.billing ?? null;
@@ -78,6 +90,7 @@ export default function Billing() {
         planSlug: plan.slug,
         cycle,
         couponCode: planCoupon?.coupon?.code,
+        currency,
       }).unwrap();
 
       // A ₹0 plan (Free) is assigned directly server-side — no order, no
@@ -125,16 +138,17 @@ export default function Billing() {
     setConfirmAddon(null);
     setBuying(pack._id);
     try {
-      const { orderId, amount, currency, razorpayKeyId } = await startAddonPurchase({
+      const { orderId, amount, currency: orderCurrency, razorpayKeyId } = await startAddonPurchase({
         slug: pack.slug,
         couponCode: addonCoupon?.coupon?.code,
+        currency,
       }).unwrap();
 
       await loadRazorpayCheckout();
       openRazorpayCheckout({
         key: razorpayKeyId,
         amount,
-        currency,
+        currency: orderCurrency,
         order_id: orderId,
         name: "Quantalog",
         description: pack.name,
@@ -169,7 +183,7 @@ export default function Billing() {
   // Free) actually has.
   const featuredSlug = (() => {
     if (!plans.length) return null;
-    const sorted = [...plans].sort((a, b) => a.priceMonthly - b.priceMonthly);
+    const sorted = [...plans].sort((a, b) => priceIn(a.priceMonthly, currency) - priceIn(b.priceMonthly, currency));
     const currentIdx = usage ? sorted.findIndex((p) => p.slug === usage.plan.slug) : -1;
     const next = currentIdx >= 0 ? sorted[currentIdx + 1] : sorted[sorted.length - 2];
     return next?.slug ?? sorted[sorted.length - 1]?.slug ?? null;
@@ -192,26 +206,47 @@ export default function Billing() {
           )}
 
           <div>
-            <Group justify="space-between" align="center" mb="lg">
+            <Group justify="space-between" align="center" mb="lg" wrap="wrap">
               <div>
                 <Title order={3} style={{ letterSpacing: "-0.01em" }}>Plans</Title>
                 <Text size="sm" c="dimmed" mt={2}>Every plan includes SEO audits, crawls, and the full dashboard.</Text>
               </div>
-              <SegmentedControl
-                size="sm"
-                radius="md"
-                value={cycle}
-                onChange={(v) => setCycle(v as BillingCycle)}
-                data={[
-                  { label: "Monthly", value: "monthly" },
-                  { label: "Yearly · save 2 months", value: "yearly" },
-                ]}
-              />
+              <Group gap="sm" wrap="wrap">
+                <SegmentedControl
+                  size="sm"
+                  radius="md"
+                  value={currency}
+                  onChange={(v) => changeCurrency(v as Currency)}
+                  data={CURRENCIES.map((c) => ({ label: c, value: c }))}
+                />
+                <SegmentedControl
+                  size="sm"
+                  radius="md"
+                  value={cycle}
+                  onChange={(v) => setCycle(v as BillingCycle)}
+                  data={[
+                    { label: "Monthly", value: "monthly" },
+                    { label: "Yearly · save 2 months", value: "yearly" },
+                  ]}
+                />
+                <Tooltip label="Refetch prices">
+                  <ActionIcon
+                    variant="light"
+                    color="gray"
+                    size="lg"
+                    radius="md"
+                    loading={refetching}
+                    onClick={() => { refetchPlans(); refetchAddons(); }}
+                  >
+                    <RefreshCw size={15} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
             </Group>
 
             <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(plans.length, 4) || 1 }} spacing="lg">
               {plans.map((plan) => {
-                const price = cycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
+                const price = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
                 // Free (or any zero-price plan) is assigned directly, not
                 // bought — it stays "current" once assigned and never expires,
                 // so there's nothing to re-buy.
@@ -321,7 +356,7 @@ export default function Billing() {
                   </Group>
                   <Divider my="md" />
                   <Group justify="space-between" align="center">
-                    <Text fz={22} fw={700} style={{ letterSpacing: "-0.02em" }}>{money(pack.price)}</Text>
+                    <Text fz={22} fw={700} style={{ letterSpacing: "-0.02em" }}>{money(priceIn(pack.price, currency))}</Text>
                     <Button
                       size="sm"
                       radius="md"
@@ -351,9 +386,9 @@ export default function Billing() {
         radius="lg"
       >
         {confirmPlan && (() => {
-          const listPrice = cycle === "yearly" ? confirmPlan.priceYearly : confirmPlan.priceMonthly;
+          const listPrice = priceIn(cycle === "yearly" ? confirmPlan.priceYearly : confirmPlan.priceMonthly, currency);
           const finalPrice = planCoupon?.coupon ? planCoupon.amount : listPrice;
-          const free = confirmPlan.priceMonthly === 0 && confirmPlan.priceYearly === 0;
+          const free = priceIn(confirmPlan.priceMonthly, currency) === 0 && priceIn(confirmPlan.priceYearly, currency) === 0;
           return (
             <Stack gap="md">
               <Group justify="space-between">
@@ -414,16 +449,16 @@ export default function Billing() {
               </div>
               <div style={{ textAlign: "right" }}>
                 {addonCoupon?.coupon && (
-                  <Text size="xs" c="dimmed" td="line-through">{money(confirmAddon.price)}</Text>
+                  <Text size="xs" c="dimmed" td="line-through">{money(priceIn(confirmAddon.price, currency))}</Text>
                 )}
                 <Text fz={22} fw={700}>
-                  {money(addonCoupon?.coupon ? addonCoupon.amount : confirmAddon.price)}
+                  {money(addonCoupon?.coupon ? addonCoupon.amount : priceIn(confirmAddon.price, currency))}
                 </Text>
               </div>
             </Group>
 
             <CouponField
-              amount={confirmAddon.price}
+              amount={priceIn(confirmAddon.price, currency)}
               result={addonCoupon}
               onChange={setAddonCoupon}
             />

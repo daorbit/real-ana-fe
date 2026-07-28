@@ -83,6 +83,15 @@ export type DemoUsage = {
 
 /* ---------------------------------- billing --------------------------------- */
 
+/** Currencies sold through Razorpay's international checkout. */
+export const CURRENCIES = ["INR", "USD"] as const;
+export type Currency = (typeof CURRENCIES)[number];
+
+export const CURRENCY_SYMBOLS: Record<Currency, string> = { INR: "₹", USD: "$" };
+
+/** Amount in the smallest unit of each currency (paise/cents). */
+export type CurrencyPrices = Record<Currency, number>;
+
 /**
  * A resolved plan: the fixed catalogue entry (name, quotas, limits — all
  * decided in backend code) merged with its current price (the one thing an
@@ -93,9 +102,8 @@ export type Plan = {
   slug: string;
   name: string;
   description: string;
-  /** Paise (INR smallest unit). */
-  priceMonthly: number;
-  priceYearly: number;
+  priceMonthly: CurrencyPrices;
+  priceYearly: CurrencyPrices;
   maxWorkspaces: number;
   maxSitesPerWorkspace: number;
   monthlyAuditQuota: number;
@@ -113,8 +121,7 @@ export type AddonPack = {
   slug: string;
   type: AddonType;
   quantity: number;
-  /** Paise. */
-  price: number;
+  price: CurrencyPrices;
   active: boolean;
   sortOrder: number;
 };

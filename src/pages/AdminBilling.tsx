@@ -12,10 +12,50 @@ import {
   useGetAdminCouponsQuery, useSaveAdminCouponMutation, useDeleteAdminCouponMutation,
 } from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
-import type { Plan, AddonPack, AddonType, Coupon } from "../types";
+import { CURRENCIES, CURRENCY_SYMBOLS } from "../types";
+import type { Plan, AddonPack, AddonType, Coupon, Currency, CurrencyPrices } from "../types";
+import { formatMoney } from "../utils/currency";
 
-function money(paise: number): string {
-  return `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+function money(amountMinor: number, currency: Currency = "INR"): string {
+  return formatMoney(amountMinor, currency);
+}
+
+const emptyPrices = (): CurrencyPrices =>
+  Object.fromEntries(CURRENCIES.map((c) => [c, 0])) as CurrencyPrices;
+
+const toRupees = (prices: CurrencyPrices): CurrencyPrices =>
+  Object.fromEntries(CURRENCIES.map((c) => [c, (prices[c] ?? 0) / 100])) as CurrencyPrices;
+
+const toMinor = (rupees: CurrencyPrices): CurrencyPrices =>
+  Object.fromEntries(CURRENCIES.map((c) => [c, Math.round((rupees[c] ?? 0) * 100)])) as CurrencyPrices;
+
+/** One numeric input per currency, sharing a label prefix (e.g. "Price / month"). */
+function CurrencyPriceInputs({
+  label,
+  values,
+  onChange,
+}: {
+  label: string;
+  values: CurrencyPrices;
+  onChange: (values: CurrencyPrices) => void;
+}) {
+  return (
+    <Stack gap={4}>
+      <Text size="sm" fw={500}>{label}</Text>
+      <Group grow>
+        {CURRENCIES.map((c) => (
+          <NumberInput
+            key={c}
+            label={c}
+            leftSection={<Text size="sm" c="dimmed">{CURRENCY_SYMBOLS[c]}</Text>}
+            value={values[c] || undefined}
+            onChange={(v) => onChange({ ...values, [c]: Number(v) || 0 })}
+            min={0}
+          />
+        ))}
+      </Group>
+    </Stack>
+  );
 }
 
 /**
@@ -59,13 +99,13 @@ function PlansTab() {
   // Same rupee/paise split as the addon form — editing `draft.priceMonthly`
   // directly and re-deriving the display value as `/100` on every render
   // double-divides an already-rupee value on the second keystroke.
-  const [priceMonthlyRupees, setPriceMonthlyRupees] = useState(0);
-  const [priceYearlyRupees, setPriceYearlyRupees] = useState(0);
+  const [priceMonthlyRupees, setPriceMonthlyRupees] = useState<CurrencyPrices>(emptyPrices);
+  const [priceYearlyRupees, setPriceYearlyRupees] = useState<CurrencyPrices>(emptyPrices);
 
   const openEdit = (p: Plan) => {
     setDraft(p);
-    setPriceMonthlyRupees(p.priceMonthly / 100);
-    setPriceYearlyRupees(p.priceYearly / 100);
+    setPriceMonthlyRupees(toRupees(p.priceMonthly));
+    setPriceYearlyRupees(toRupees(p.priceYearly));
     setModal(true);
   };
 
@@ -74,8 +114,8 @@ function PlansTab() {
     try {
       await save({
         slug: draft.slug,
-        priceMonthly: Math.round(priceMonthlyRupees * 100),
-        priceYearly: Math.round(priceYearlyRupees * 100),
+        priceMonthly: toMinor(priceMonthlyRupees),
+        priceYearly: toMinor(priceYearlyRupees),
       }).unwrap();
       notify.success(`${draft.name} price updated.`, "Plan updated");
       setModal(false);
@@ -106,8 +146,8 @@ function PlansTab() {
             {plans.map((p) => (
               <Table.Tr key={p.slug}>
                 <Table.Td><Text size="sm" fw={600}>{p.name}</Text></Table.Td>
-                <Table.Td>{money(p.priceMonthly)}</Table.Td>
-                <Table.Td>{money(p.priceYearly)}</Table.Td>
+                <Table.Td>{CURRENCIES.map((c) => money(p.priceMonthly[c], c)).join(" / ")}</Table.Td>
+                <Table.Td>{CURRENCIES.map((c) => money(p.priceYearly[c], c)).join(" / ")}</Table.Td>
                 <Table.Td>{p.maxWorkspaces}</Table.Td>
                 <Table.Td>{p.maxSitesPerWorkspace}</Table.Td>
                 <Table.Td>{p.monthlyAuditQuota}</Table.Td>
@@ -133,10 +173,8 @@ function PlansTab() {
               Only price can be changed here. Quotas, workspace and site limits, and Razorpay ids
               are fixed in code.
             </Text>
-            <Group grow>
-              <NumberInput label="Price / month (₹)" value={priceMonthlyRupees || undefined} onChange={(v) => setPriceMonthlyRupees(Number(v) || 0)} min={0} />
-              <NumberInput label="Price / year (₹)" value={priceYearlyRupees || undefined} onChange={(v) => setPriceYearlyRupees(Number(v) || 0)} min={0} />
-            </Group>
+            <CurrencyPriceInputs label="Price / month" values={priceMonthlyRupees} onChange={setPriceMonthlyRupees} />
+            <CurrencyPriceInputs label="Price / year" values={priceYearlyRupees} onChange={setPriceYearlyRupees} />
             <Group justify="flex-end" mt="sm">
               <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
               <Button color="emerald" loading={saving} onClick={submit}>Save</Button>
@@ -151,7 +189,7 @@ function PlansTab() {
 /* --------------------------------- addons ------------------------------------ */
 
 const emptyAddon: Partial<AddonPack> = {
-  name: "", slug: "", type: "audit", quantity: 10, price: 0, active: true, sortOrder: 0,
+  name: "", slug: "", type: "audit", quantity: 10, price: emptyPrices(), active: true, sortOrder: 0,
 };
 
 function AddonsTab() {
@@ -165,16 +203,16 @@ function AddonsTab() {
   // Keeping a separate rupee field for the input avoids re-deriving it from
   // `draft.price / 100` on every keystroke — dividing an already-rupee value
   // by 100 again on the next render is what turned "500" into "0.000002".
-  const [priceRupees, setPriceRupees] = useState(0);
+  const [priceRupees, setPriceRupees] = useState<CurrencyPrices>(emptyPrices);
 
-  const openNew = () => { setDraft(emptyAddon); setPriceRupees(0); setModal(true); };
-  const openEdit = (a: AddonPack) => { setDraft(a); setPriceRupees(a.price / 100); setModal(true); };
+  const openNew = () => { setDraft(emptyAddon); setPriceRupees(emptyPrices()); setModal(true); };
+  const openEdit = (a: AddonPack) => { setDraft(a); setPriceRupees(toRupees(a.price)); setModal(true); };
 
   const submit = async () => {
     try {
       await save({
         ...draft,
-        price: Math.round(priceRupees * 100),
+        price: toMinor(priceRupees),
       }).unwrap();
       notify.success(`${draft.name} saved.`, draft._id ? "Addon updated" : "Addon created");
       setModal(false);
@@ -230,7 +268,7 @@ function AddonsTab() {
                   </Badge>
                 </Table.Td>
                 <Table.Td>{a.quantity}</Table.Td>
-                <Table.Td>{money(a.price)}</Table.Td>
+                <Table.Td>{CURRENCIES.map((c) => money(a.price[c], c)).join(" / ")}</Table.Td>
                 <Table.Td>
                   <Badge size="sm" variant="light" color={a.active ? "emerald" : "gray"}>
                     {a.active ? "active" : "inactive"}
@@ -270,7 +308,7 @@ function AddonsTab() {
             />
             <NumberInput label="Quantity" value={draft.quantity} onChange={(v) => setDraft({ ...draft, quantity: Number(v) || 1 })} min={1} />
           </Group>
-          <NumberInput label="Price (₹)" value={priceRupees || undefined} onChange={(v) => setPriceRupees(Number(v) || 0)} min={0} />
+          <CurrencyPriceInputs label="Price" values={priceRupees} onChange={setPriceRupees} />
           <Switch label="Active (visible on the Billing page)" checked={draft.active !== false} onChange={(e) => setDraft({ ...draft, active: e.currentTarget.checked })} />
           <Group justify="flex-end" mt="sm">
             <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>

@@ -16,7 +16,7 @@ import type {
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
-  Plan, AddonPack, BillingCycle,
+  Plan, AddonPack, BillingCycle, Currency, CurrencyPrices,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult,
 } from "../types";
@@ -597,19 +597,19 @@ export const api = createApi({
 
     /* -------------------------------- billing ------------------------------ */
 
-    getPlans: build.query<Plan[], void>({
-      query: () => "/api/billing/plans",
+    getPlans: build.query<Plan[], { currency: Currency }>({
+      query: ({ currency }) => `/api/billing/plans?currency=${currency}`,
       providesTags: ["Plan"],
     }),
 
-    getAddonPacks: build.query<AddonPack[], void>({
-      query: () => "/api/billing/addons",
+    getAddonPacks: build.query<AddonPack[], { currency: Currency }>({
+      query: ({ currency }) => `/api/billing/addons?currency=${currency}`,
       providesTags: ["AddonPack"],
     }),
 
     startSubscription: build.mutation<
       StartSubscriptionResponse,
-      { planSlug: string; cycle: BillingCycle; couponCode?: string }
+      { planSlug: string; cycle: BillingCycle; couponCode?: string; currency: Currency }
     >({
       query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
     }),
@@ -624,12 +624,12 @@ export const api = createApi({
 
     startAddonPurchase: build.mutation<
       StartAddonPurchaseResponse,
-      { slug: string; couponCode?: string }
+      { slug: string; couponCode?: string; currency: Currency }
     >({
-      query: ({ slug, couponCode }) => ({
+      query: ({ slug, couponCode, currency }) => ({
         url: `/api/billing/addons/${slug}/purchase`,
         method: "POST",
-        body: { couponCode },
+        body: { couponCode, currency },
       }),
     }),
 
@@ -654,7 +654,7 @@ export const api = createApi({
     }),
 
     /** Price is the only editable field — plans themselves are fixed in backend code. */
-    saveAdminPlanPrice: build.mutation<Plan, { slug: string; priceMonthly: number; priceYearly: number }>({
+    saveAdminPlanPrice: build.mutation<Plan, { slug: string; priceMonthly: CurrencyPrices; priceYearly: CurrencyPrices }>({
       query: ({ slug, ...body }) => ({
         url: `/api/admin/billing/plans/${slug}`,
         method: "PUT",
