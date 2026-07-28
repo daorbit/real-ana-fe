@@ -4,7 +4,7 @@ import {
   Title, Text, TextInput, Stack, Group, Badge, Card, Center, Loader, ThemeIcon,
   Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
 } from "@mantine/core";
-import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, ShieldPlus, ShieldMinus } from "lucide-react";
+import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, ShieldPlus, ShieldMinus, RefreshCw } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { EmailComposer } from "../components/EmailComposer";
 import { AdminPlanDialog } from "../components/AdminPlanDialog";
@@ -57,7 +57,7 @@ export default function Impersonate() {
 
   const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
 
-  const { data, isLoading, isFetching } = useGetAdminUsersQuery(
+  const { data, isLoading, isFetching, refetch } = useGetAdminUsersQuery(
     { q: search || undefined, role: role || undefined, page },
     { skip: !isAdmin }
   );
@@ -169,6 +169,11 @@ export default function Impersonate() {
               {data.total} account{data.total === 1 ? "" : "s"}
             </Badge>
           )}
+          <Tooltip label="Refetch">
+            <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={isFetching} onClick={refetch}>
+              <RefreshCw size={15} />
+            </ActionIcon>
+          </Tooltip>
         </Group>
       </Group>
 

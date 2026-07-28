@@ -1,9 +1,9 @@
 import { useState } from "react";
 import {
   Text, Group, Button, Card, Table, Badge, Modal, TextInput, NumberInput,
-  Stack, Switch, Tabs, ActionIcon, Center, Loader, Select,
+  Stack, Switch, Tabs, ActionIcon, Center, Loader, Select, Tooltip,
 } from "@mantine/core";
-import { Plus, Pencil, Trash2, Search, Globe2, Tag, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Globe2, Tag, Eye, RefreshCw } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
@@ -59,6 +59,16 @@ function CurrencyPriceInputs({
   );
 }
 
+function RefetchButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+  return (
+    <Tooltip label="Refetch">
+      <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={loading} onClick={onClick}>
+        <RefreshCw size={15} />
+      </ActionIcon>
+    </Tooltip>
+  );
+}
+
 /**
  * Admin-only: create and edit the plans and addon packs sold on the Billing
  * page. Prices are entered in rupees here and converted to paise on save —
@@ -92,7 +102,7 @@ export default function AdminBilling() {
  * adding or retiring a tier is a code change and a deploy, not a form submit.
  */
 function PlansTab() {
-  const { data: plans = [], isLoading } = useGetAdminPlansQuery();
+  const { data: plans = [], isLoading, isFetching, refetch } = useGetAdminPlansQuery();
   const [save, { isLoading: saving }] = useSaveAdminPlanPriceMutation();
 
   const [modal, setModal] = useState(false);
@@ -129,6 +139,9 @@ function PlansTab() {
 
   return (
     <Stack gap="md">
+      <Group justify="flex-end">
+        <RefetchButton onClick={refetch} loading={isFetching} />
+      </Group>
       <Card withBorder radius="md" padding={0}>
         <Table verticalSpacing="sm" horizontalSpacing="md">
           <Table.Thead>
@@ -194,7 +207,7 @@ const emptyAddon: Partial<AddonPack> = {
 };
 
 function AddonsTab() {
-  const { data: addons = [], isLoading } = useGetAdminAddonPacksQuery();
+  const { data: addons = [], isLoading, isFetching, refetch } = useGetAdminAddonPacksQuery();
   const [save, { isLoading: saving }] = useSaveAdminAddonPackMutation();
   const [remove] = useDeleteAdminAddonPackMutation();
 
@@ -242,6 +255,7 @@ function AddonsTab() {
   return (
     <Stack gap="md">
       <Group justify="flex-end">
+        <RefetchButton onClick={refetch} loading={isFetching} />
         <Button size="xs" color="emerald" leftSection={<Plus size={14} />} onClick={openNew}>
           New addon pack
         </Button>
@@ -326,7 +340,7 @@ function AddonsTab() {
 const emptyCoupon: Partial<Coupon> = { code: "", percentOff: 10, active: true, expiresAt: null };
 
 function CouponsTab() {
-  const { data: coupons = [], isLoading } = useGetAdminCouponsQuery();
+  const { data: coupons = [], isLoading, isFetching, refetch } = useGetAdminCouponsQuery();
   const { data: plans = [] } = useGetAdminPlansQuery();
   const [save, { isLoading: saving }] = useSaveAdminCouponMutation();
   const [remove] = useDeleteAdminCouponMutation();
@@ -370,6 +384,7 @@ function CouponsTab() {
   return (
     <Stack gap="md">
       <Group justify="flex-end">
+        <RefetchButton onClick={refetch} loading={isFetching} />
         <Button size="xs" color="emerald" leftSection={<Plus size={14} />} onClick={openNew}>
           New coupon
         </Button>
