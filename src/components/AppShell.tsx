@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const impersonating = Boolean(user?.impersonating);
   // An impersonation session reports the target's role, so the admin nav would
   // vanish mid-impersonation anyway — but be explicit about it.
-  const isAdmin = user?.role === "admin" && !impersonating;
+  const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !impersonating;
 
   const { demo } = useDemo();
 

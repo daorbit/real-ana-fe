@@ -26,7 +26,7 @@ const Ctx = createContext<DemoValue>({ demo: false, available: false, toggle: ()
  */
 export function DemoProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const available = user?.role === "admin";
+  const available = user?.role === "admin" || user?.role === "super_admin";
 
   const [on, setOn] = useState(() => sessionStorage.getItem(KEY) === "1");
 

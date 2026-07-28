@@ -40,7 +40,7 @@ export function CommandPalette() {
   const scheme = useComputedColorScheme("light");
   const dark = scheme === "dark";
 
-  const isAdmin = user?.role === "admin" && !user?.impersonating;
+  const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
 
   // Global hotkey. Bound on the window so it works from anywhere, including
   // while a field elsewhere on the page has focus.

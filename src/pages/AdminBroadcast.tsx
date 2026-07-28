@@ -17,7 +17,7 @@ import { useAuth } from "../auth";
 export default function AdminBroadcast() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = user?.role === "admin" && !user?.impersonating;
+  const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
 
   // Nothing to close back to on this page — a broadcast page has no "was
   // this open" state, so onClose just resets the draft.

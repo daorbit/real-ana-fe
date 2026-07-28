@@ -242,6 +242,12 @@ export default function Impersonate() {
                     const admin = u.role === "admin" || u.role === "super_admin";
                     const isSelf = u.id === user?.id;
                     const rowBusy = busy === u.id || deleting === u.id || settingRole === u.id;
+                    // The superadmin can open a regular admin's dashboard for
+                    // oversight — everyone else is blocked from any admin row,
+                    // and nobody (including the superadmin) opens another
+                    // superadmin's, matching the server-side guard.
+                    const impersonateBlocked =
+                      u.role === "super_admin" || (u.role === "admin" && !isSuperAdmin);
                     return (
                       <Table.Tr key={u.id}>
                         <Table.Td>
@@ -299,7 +305,13 @@ export default function Impersonate() {
                         <Table.Td>
                           <Group gap="xs" justify="flex-end" wrap="nowrap">
                             <Tooltip
-                              label={admin ? "Admins can't be opened" : "Open dashboard as this user"}
+                              label={
+                                u.role === "super_admin"
+                                  ? "The superadmin can't be opened"
+                                  : impersonateBlocked
+                                  ? "Admins can't be opened"
+                                  : "Open dashboard as this user"
+                              }
                               withArrow
                             >
                               <Button
@@ -309,7 +321,7 @@ export default function Impersonate() {
                                 leftSection={
                                   busy === u.id ? <Loader size={12} color="emerald" /> : <LogIn size={14} />
                                 }
-                                disabled={admin || rowBusy}
+                                disabled={impersonateBlocked || rowBusy}
                                 onClick={() => enter(u)}
                               >
                                 Open

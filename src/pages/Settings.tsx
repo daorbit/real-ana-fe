@@ -309,7 +309,7 @@ export default function Settings() {
                   <Badge
                     size="sm"
                     variant="light"
-                    color={user.role === "admin" ? "grape" : "gray"}
+                    color={user.role === "admin" || user.role === "super_admin" ? "grape" : "gray"}
                   >
                     {user.role}
                   </Badge>
