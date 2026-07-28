@@ -4,7 +4,7 @@ import { getToken, isDemoToken } from "../api";
 import { notify, errMessage } from "../notify";
 import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
-  AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace,
+  AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace, Role,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout,
@@ -295,6 +295,12 @@ export const api = createApi({
 
     deleteAdminUser: build.mutation<{ ok: true }, string>({
       query: (userId) => ({ url: `/api/admin/users/${userId}`, method: "DELETE" }),
+      invalidatesTags: ["AdminUser"],
+    }),
+
+    /** Grant or revoke admin on another account. Superadmin-only server-side. */
+    setAdminUserRole: build.mutation<{ id: string; email: string; role: Role }, { userId: string; role: Role }>({
+      query: ({ userId, role }) => ({ url: `/api/admin/users/${userId}/role`, method: "PUT", body: { role } }),
       invalidatesTags: ["AdminUser"],
     }),
 
@@ -725,6 +731,7 @@ export const {
   useSaveLayoutMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
+  useSetAdminUserRoleMutation,
   useGetAdminUserBillingQuery,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,

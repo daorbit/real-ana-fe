@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Group, Divider,
@@ -15,12 +15,25 @@ import { notify, errMessage } from "../notify";
 import { timeUntil } from "../utils";
 import type { ApiError } from "../api";
 import * as v from "../utils/validate";
+import { CURRENCIES, setStoredCurrency } from "../utils/currency";
+import type { Currency } from "../types";
 
 type Touched = Record<string, boolean>;
 
 export default function Signup() {
   const { signup, startDemo } = useAuth();
   const nav = useNavigate();
+  const [params] = useSearchParams();
+
+  // Carries the currency picked on the landing page's pricing toggle through
+  // to Billing, which reads the same storage key — so switching to USD there
+  // and clicking "Get started" doesn't land back on INR.
+  useEffect(() => {
+    const currency = params.get("currency");
+    if ((CURRENCIES as readonly string[]).includes(currency ?? "")) {
+      setStoredCurrency(currency as Currency);
+    }
+  }, [params]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");

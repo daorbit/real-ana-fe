@@ -1,6 +1,7 @@
 import type { TrackerOptions } from "./utils/tracker";
 
-export type Role = "admin" | "user";
+/** `super_admin` is never returned by any role-change endpoint — only a direct DB write sets it. */
+export type Role = "super_admin" | "admin" | "user";
 
 export type User = {
   id: string;
