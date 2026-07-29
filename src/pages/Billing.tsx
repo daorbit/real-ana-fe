@@ -35,6 +35,13 @@ import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Cu
  * "renewing" is just buying the same plan again, same as switching to a
  * different one.
  */
+/**
+ * Logo shown in Razorpay Checkout. Razorpay needs an absolute URL and only
+ * renders raster images — without it Checkout falls back to drawing the first
+ * letter of the merchant name.
+ */
+const CHECKOUT_LOGO = `${window.location.origin}/favicon.png`;
+
 export default function Billing() {
   const { user, refreshUser } = useAuth();
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
@@ -74,6 +81,9 @@ export default function Billing() {
   const [celebration, setCelebration] = useState<
     { kind: "plan"; planName: string } | { kind: "addon"; pack: AddonPack } | null
   >(null);
+  // What was being bought when the Razorpay window was dismissed — nothing was
+  // charged, but closing the modal silently leaves no trace of the attempt.
+  const [cancelled, setCancelled] = useState<string | null>(null);
 
   const fireConfetti = () => {
     const colors = ["#10b981", "#059669", "#34d399", "#fbbf24"];
@@ -102,6 +112,11 @@ export default function Billing() {
         return;
       }
 
+      // Razorpay closes its modal after a successful payment too, so `ondismiss`
+      // alone can't tell "walked away" from "just paid" — this records that the
+      // handler ran first.
+      let paid = false;
+
       await loadRazorpayCheckout();
       openRazorpayCheckout({
         key: started.razorpayKeyId,
@@ -110,9 +125,11 @@ export default function Billing() {
         order_id: started.orderId,
         name: "Quantalog",
         description: `${plan.name} — ${cycle}`,
+        image: CHECKOUT_LOGO,
         prefill: { name: user?.name, email: user?.email },
         theme: { color: "#059669" },
         handler: async (response) => {
+          paid = true;
           try {
             await verifySubscription({
               razorpay_payment_id: response.razorpay_payment_id,
@@ -125,6 +142,11 @@ export default function Billing() {
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
           }
+        },
+        modal: {
+          ondismiss: () => {
+            if (!paid) setCancelled(`${plan.name} — ${cycle}`);
+          },
         },
       });
     } catch (e) {
@@ -144,6 +166,9 @@ export default function Billing() {
         currency,
       }).unwrap();
 
+      // Same success/dismiss ambiguity as the plan flow above.
+      let paid = false;
+
       await loadRazorpayCheckout();
       openRazorpayCheckout({
         key: razorpayKeyId,
@@ -152,9 +177,11 @@ export default function Billing() {
         order_id: orderId,
         name: "Quantalog",
         description: pack.name,
+        image: CHECKOUT_LOGO,
         prefill: { name: user?.name, email: user?.email },
         theme: { color: "#059669" },
         handler: async (response) => {
+          paid = true;
           try {
             await verifyAddonPurchase({
               razorpay_payment_id: response.razorpay_payment_id,
@@ -167,6 +194,11 @@ export default function Billing() {
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
           }
+        },
+        modal: {
+          ondismiss: () => {
+            if (!paid) setCancelled(pack.name);
+          },
         },
       });
     } catch (e) {
@@ -480,6 +512,32 @@ export default function Billing() {
             </Group>
           </Stack>
         )}
+      </Modal>
+
+      <Modal
+        opened={!!cancelled}
+        onClose={() => setCancelled(null)}
+        centered
+        radius="lg"
+        withCloseButton={false}
+        size="sm"
+      >
+        <Stack align="center" gap="sm" py="md">
+          <ThemeIcon size={56} radius="xl" variant="light" color="gray">
+            <X size={26} />
+          </ThemeIcon>
+          <Title order={3} ta="center" style={{ letterSpacing: "-0.01em" }}>
+            Payment cancelled
+          </Title>
+          <Text size="sm" c="dimmed" ta="center" maw={280}>
+            {cancelled
+              ? `You closed the payment window before ${cancelled} was paid for. Nothing was charged.`
+              : "Nothing was charged."}
+          </Text>
+          <Button variant="light" color="gray" radius="md" mt="sm" onClick={() => setCancelled(null)}>
+            Close
+          </Button>
+        </Stack>
       </Modal>
 
       <Modal

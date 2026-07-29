@@ -25,6 +25,8 @@ export type RazorpayCheckoutOptions = {
   currency?: string;
   name: string;
   description?: string;
+  /** Absolute URL — Razorpay falls back to the first letter of `name` without it. */
+  image?: string;
   order_id?: string;
   subscription_id?: string;
   prefill?: { name?: string; email?: string };
