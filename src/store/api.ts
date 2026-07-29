@@ -41,6 +41,25 @@ const rawBaseQuery = fetchBaseQuery({
 });
 
 
+/**
+ * The plan and addon catalogue, which a demo session reads from the server like
+ * anyone else.
+ *
+ * This is the one exception to the demo's "never hit the network" rule, and it
+ * earns it: prices are set per deployment and live only in the database, so a
+ * fixture would have to invent them — and invented prices shown on a pricing
+ * page are worse than a request. The data is public, read-only, and identical
+ * for every visitor. Buying still goes nowhere: checkout is a write, and writes
+ * are refused above.
+ */
+const DEMO_LIVE_READS = ["/api/billing/plans", "/api/billing/addons"];
+
+function isPublicCatalogue(url: string, isWrite: boolean): boolean {
+  if (isWrite) return false;
+  const path = url.split("?")[0];
+  return DEMO_LIVE_READS.includes(path);
+}
+
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   apiArg,
@@ -50,7 +69,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   const url = typeof args === "string" ? args : args.url;
   const isWrite = method.toUpperCase() !== "GET";
 
-  if (isDemoToken()) {
+  if (isDemoToken() && !isPublicCatalogue(url, isWrite)) {
     // A demo session is served entirely from generated fixtures. Nothing goes
     // to the server: browsing the product costs no queries, and there is no
     // real account behind the numbers to protect.
@@ -63,7 +82,12 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     const data = resolveDemoRequest(url);
     // An unmapped read resolves empty rather than falling through to the
     // network — a demo must never be the reason a request goes out.
-    return Promise.resolve({ data: data ?? null });
+    //
+    // Empty is `undefined`, not `null`: a call site's `data = []` default only
+    // fires on `undefined`, so `null` would sail past it and reach code that
+    // expects an array. An unmapped endpoint should degrade to a bare page, not
+    // crash it.
+    return Promise.resolve({ data: data ?? undefined });
   }
 
   const result = await rawBaseQuery(args, apiArg, extra);

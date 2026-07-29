@@ -43,7 +43,7 @@ import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Cu
 const CHECKOUT_LOGO = `${window.location.origin}/favicon.png`;
 
 export default function Billing() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, isDemo } = useAuth();
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [currency, setCurrency] = useState<Currency>(() => getStoredCurrency() ?? detectCurrency());
 
@@ -231,7 +231,17 @@ export default function Billing() {
         <Stack gap={40}>
           {usage && <UsageSummary usage={usage} expired={expired} />}
 
-          {!usage && (
+          {/* The demo has no account behind it, so it has no plan either —
+              saying "you don't have a plan yet" would read as a problem to fix
+              rather than the nature of a demo. Prices below are the real ones. */}
+          {isDemo ? (
+            <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
+              <Text size="sm">
+                These are our real plans and prices, but nothing can be bought in
+                the demo — it runs without an account. Sign up to subscribe.
+              </Text>
+            </Alert>
+          ) : !usage && (
             <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
               <Text size="sm">You don't have a plan yet — pick one below to unlock SEO audits and crawls.</Text>
             </Alert>
@@ -352,12 +362,16 @@ export default function Billing() {
                       radius="md"
                       color="emerald"
                       variant={current ? "light" : featured ? "filled" : "outline"}
-                      disabled={current || !buyable}
+                      disabled={current || !buyable || isDemo}
                       loading={subscribing === plan.slug}
                       leftSection={<CreditCard size={15} />}
                       onClick={() => { setPlanCoupon(null); setConfirmPlan(plan); }}
                     >
-                      {current ? "Current plan" : !buyable ? "Included free" : usage?.plan.slug === plan.slug ? "Renew" : "Subscribe"}
+                      {isDemo ? "Sign up to subscribe"
+                        : current ? "Current plan"
+                        : !buyable ? "Included free"
+                        : usage?.plan.slug === plan.slug ? "Renew"
+                        : "Subscribe"}
                     </Button>
                   </Card>
                 );
@@ -394,10 +408,11 @@ export default function Billing() {
                       radius="md"
                       variant="outline"
                       color="emerald"
+                      disabled={isDemo}
                       loading={buying === pack._id}
                       onClick={() => { setAddonCoupon(null); setConfirmAddon(pack); }}
                     >
-                      Buy
+                      {isDemo ? "Sign up to buy" : "Buy"}
                     </Button>
                   </Group>
                 </Card>
