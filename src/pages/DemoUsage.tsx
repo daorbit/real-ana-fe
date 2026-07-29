@@ -3,7 +3,7 @@ import {
   Text, Stack, Group, Card, Center, Loader, ThemeIcon, SimpleGrid,
   NumberInput, Button, Alert,
 } from "@mantine/core";
-import { PlayCircle, ShieldAlert, Globe2, Gauge, Check, Info } from "lucide-react";
+import { PlayCircle, ShieldAlert, Globe2, Check, Info } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import { useGetDemoUsageQuery, useSetDemoLimitMutation } from "../store";
@@ -13,9 +13,9 @@ import { num, timeAgo } from "../utils";
 /**
  * Admin-only: how the public demo is being used, and the knob that controls it.
  *
- * The figures are a live snapshot of the server's in-process throttle. Nothing
- * about a demo visitor is stored — no addresses, no activity log — so there is
- * no history to browse here, only the current picture.
+ * The figures cover a rolling 24 hours, which is the whole window the throttle
+ * keeps. No visitor address is stored — only a keyed hash used to count repeat
+ * starts — so there is no history to browse here, only the current picture.
  */
 export default function DemoUsage() {
   const { data: usage, isLoading } = useGetDemoUsageQuery();
@@ -58,16 +58,15 @@ export default function DemoUsage() {
       />
 
       <Stack gap="lg">
-        <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
+        <SimpleGrid cols={{ base: 2, md: 3 }} spacing="md">
           <Stat icon={PlayCircle} label="Demos in last 24h" value={num(usage?.today ?? 0)} />
           <Stat icon={Globe2} label="Active addresses" value={num(usage?.activeIps ?? 0)} />
           <Stat
             icon={ShieldAlert}
-            label="Blocked since restart"
-            value={num(usage?.blockedSinceBoot ?? 0)}
-            tone={(usage?.blockedSinceBoot ?? 0) > 0 ? "warn" : undefined}
+            label="Blocked in last 24h"
+            value={num(usage?.blocked ?? 0)}
+            tone={(usage?.blocked ?? 0) > 0 ? "warn" : undefined}
           />
-          <Stat icon={Gauge} label="Started since restart" value={num(usage?.startedSinceBoot ?? 0)} />
         </SimpleGrid>
 
         <Card withBorder radius="md" padding="lg">
@@ -106,12 +105,11 @@ export default function DemoUsage() {
 
         <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
           <Text size="sm">
-            Demo visitors are never recorded. The throttle keeps a count in the
-            server's memory for 24 hours and nothing more — no addresses are
-            stored, so these counters reset when the server restarts
-            {usage?.since ? ` (last ${timeAgo(usage.since)})` : ""} and each
-            server instance keeps its own. The limit is a deterrent, not an
-            exact quota.
+            Demo visitors are never recorded. Each start is kept for 24 hours as
+            a one-way hash of the caller's address and nothing else — enough to
+            count repeat visits, not enough to identify anyone. Rows expire on
+            their own, so these figures only ever cover the last 24 hours
+            {usage?.since ? ` (since ${timeAgo(usage.since)})` : ""}.
           </Text>
         </Alert>
       </Stack>

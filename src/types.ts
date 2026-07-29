@@ -66,8 +66,8 @@ export type ShareState = {
 /**
  * Admin view of how the public demo is being used.
  *
- * A live snapshot of the server's in-process throttle — nothing about demo
- * visitors is stored, so the counters reset when the server restarts.
+ * A rolling 24-hour window, which is all the throttle keeps — no visitor
+ * address is stored and nothing older survives, so there is no history here.
  */
 export type DemoUsage = {
   /** Sessions one address may start per day before being refused. */
@@ -76,9 +76,9 @@ export type DemoUsage = {
   today: number;
   /** Distinct addresses with a start in the last 24 hours. */
   activeIps: number;
-  startedSinceBoot: number;
-  blockedSinceBoot: number;
-  /** When the counters last reset (server start). */
+  /** Attempts the limit turned away in the same window. */
+  blocked: number;
+  /** Start of the window these figures cover. */
   since: string;
 };
 
