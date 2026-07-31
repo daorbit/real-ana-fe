@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Modal, TextInput, ScrollArea, Text, Box, UnstyledButton } from "@mantine/core";
 import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import {
-  Home, BarChart3, FolderKanban, Code2, Share2, Users, Settings as SettingsIcon,
+  Home, BarChart3, FolderKanban, Code2, Share2, CalendarClock, Users, Settings as SettingsIcon,
   Search, Moon, Sun, BookOpen, CornerDownLeft,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -73,6 +73,7 @@ export function CommandPalette() {
       { id: "seo", label: "SEO", section: "Go to", icon: Search, run: go("/app/seo") },
       { id: "workspaces", label: "Workspaces", section: "Go to", icon: FolderKanban, run: go("/app/workspaces") },
       { id: "share", label: "Public dashboard", section: "Go to", icon: Share2, run: go("/app/share") },
+      { id: "reports", label: "Email reports", section: "Go to", icon: CalendarClock, run: go("/app/reports") },
       { id: "developers", label: "Developers", section: "Go to", icon: Code2, run: go("/app/developers") },
       { id: "settings", label: "Settings", section: "Go to", icon: SettingsIcon, run: go("/app/settings") },
     ];

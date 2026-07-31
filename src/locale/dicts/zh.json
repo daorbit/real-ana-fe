@@ -26,6 +26,7 @@
     "developers": "开发者",
     "workspaces": "工作区",
     "share": "公开仪表板",
+    "reports": "邮件报告",
     "viewAsUser": "模拟用户",
     "demoUsage": "演示用量",
     "settings": "设置",

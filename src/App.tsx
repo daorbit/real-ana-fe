@@ -13,6 +13,7 @@ import SeoReportPrint from "./pages/SeoReportPrint";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
 import Share from "./pages/Share";
+import Reports from "./pages/Reports";
 import Impersonate from "./pages/Impersonate";
 import DemoUsage from "./pages/DemoUsage";
 import Settings from "./pages/Settings";
@@ -127,6 +128,7 @@ export default function App() {
             />
             <Route path="/app/workspaces" element={<Protected><Workspaces /></Protected>} />
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
+            <Route path="/app/reports" element={<Protected><Reports /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
             <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
             <Route path="/app/billing" element={<Protected><Billing /></Protected>} />

@@ -130,6 +130,48 @@ export type FxStatus = {
   snapshot: FxSnapshot | null;
 };
 
+/**
+ * A recurring emailed report.
+ *
+ * Frequencies stop at "daily" on purpose — a schedule can never send more than
+ * once in 24 hours, enforced server-side rather than only by this list.
+ */
+export const REPORT_FREQUENCIES = ["daily", "weekly", "monthly"] as const;
+export type ReportFrequency = (typeof REPORT_FREQUENCIES)[number];
+
+export type ReportRecipient = {
+  email: string;
+  /** They followed the unsubscribe link — still listed, but skipped at send time. */
+  unsubscribed: boolean;
+};
+
+export type ReportSchedule = {
+  id: string;
+  name: string;
+  /** Empty means every site in the workspace, resolved when the report is sent. */
+  siteIds: string[];
+  frequency: ReportFrequency;
+  recipients: ReportRecipient[];
+  include: { analytics: boolean; seo: boolean; dashboardLink: boolean };
+  attachXlsx: boolean;
+  enabled: boolean;
+  lastSentAt?: string;
+  nextRunAt: string;
+  /** Why the last run failed, if it did. */
+  lastError?: string;
+};
+
+export type ReportScheduleInput = {
+  name: string;
+  siteIds: string[];
+  frequency: ReportFrequency;
+  /** Extra addresses only — the owner's own is always added server-side. */
+  recipients: string[];
+  include: { analytics: boolean; seo: boolean; dashboardLink: boolean };
+  attachXlsx: boolean;
+  enabled?: boolean;
+};
+
 export type BillingCycle = "monthly" | "yearly";
 
 export type AddonType = "audit" | "crawl";

@@ -8,7 +8,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
-  Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle,
+  Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
   CreditCard, ArrowUpRight, Mail,
 } from "lucide-react";
 import { PlanIcon } from "./PlanIcons";
@@ -50,6 +50,7 @@ const NAV_GROUPS = [
     items: [
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
+      { to: "/app/reports", labelKey: "nav.reports", label: "Email reports", icon: CalendarClock },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
     ],

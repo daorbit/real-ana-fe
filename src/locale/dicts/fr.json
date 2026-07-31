@@ -26,6 +26,7 @@
     "developers": "Développeurs",
     "workspaces": "Espaces de travail",
     "share": "Tableau de bord public",
+    "reports": "Rapports par e-mail",
     "viewAsUser": "Usurper l'identité",
     "demoUsage": "Utilisation de la démo",
     "settings": "Paramètres",

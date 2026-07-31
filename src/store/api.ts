@@ -17,6 +17,7 @@ import type {
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
   Plan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
+  ReportSchedule, ReportScheduleInput,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult,
 } from "../types";
@@ -107,7 +108,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -676,6 +677,41 @@ export const api = createApi({
       query: (body) => ({ url: "/api/billing/coupons/check", method: "POST", body }),
     }),
 
+    /* -------------------------- scheduled reports --------------------------- */
+
+    getReportSchedules: build.query<{ schedules: ReportSchedule[]; mailConfigured: boolean }, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/reports`,
+      providesTags: ["ReportSchedule"],
+    }),
+
+    saveReportSchedule: build.mutation<
+      ReportSchedule,
+      { workspaceId: string; id?: string } & ReportScheduleInput
+    >({
+      query: ({ workspaceId, id, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/reports${id ? `/${id}` : ""}`,
+        method: id ? "PUT" : "POST",
+        body,
+      }),
+      invalidatesTags: ["ReportSchedule"],
+    }),
+
+    deleteReportSchedule: build.mutation<void, { workspaceId: string; id: string }>({
+      query: ({ workspaceId, id }) => ({
+        url: `/api/workspaces/${workspaceId}/reports/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ReportSchedule"],
+    }),
+
+    /** Send this report now, to the owner only — a preview, not a way to mail the whole list. */
+    testReportSchedule: build.mutation<{ ok: true; sentTo: string[] }, { workspaceId: string; id: string }>({
+      query: ({ workspaceId, id }) => ({
+        url: `/api/workspaces/${workspaceId}/reports/${id}/test`,
+        method: "POST",
+      }),
+    }),
+
     /* ---------------------------- admin billing ----------------------------- */
 
     getAdminPlans: build.query<Plan[], void>({
@@ -808,6 +844,10 @@ export const {
   useVerifyAddonPurchaseMutation,
   useGetAdminPlansQuery,
   useSaveAdminPlanPriceMutation,
+  useGetReportSchedulesQuery,
+  useSaveReportScheduleMutation,
+  useDeleteReportScheduleMutation,
+  useTestReportScheduleMutation,
   useGetAdminFxQuery,
   useSyncAdminPlanCurrencyMutation,
   useGetAdminAddonPacksQuery,
