@@ -112,6 +112,24 @@ export type Plan = {
   features: string[];
 };
 
+/**
+ * The exchange rate the non-INR plan prices were last computed from.
+ *
+ * `rates` is quote-units per 1 INR, so a USD rate of 0.0115 means ₹1 ≈ $0.0115.
+ */
+export type FxSnapshot = {
+  rates: Partial<Record<Currency, number>>;
+  fetchedAt: string;
+  nextUpdateAt?: string;
+};
+
+export type FxStatus = {
+  /** False when the backend has no exchangerate-api key — the sync button can't work. */
+  configured: boolean;
+  base: Currency;
+  snapshot: FxSnapshot | null;
+};
+
 export type BillingCycle = "monthly" | "yearly";
 
 export type AddonType = "audit" | "crawl";

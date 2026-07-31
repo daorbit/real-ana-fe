@@ -16,7 +16,7 @@ import type {
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
-  Plan, AddonPack, BillingCycle, Currency, CurrencyPrices,
+  Plan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult,
 } from "../types";
@@ -107,7 +107,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -693,6 +693,18 @@ export const api = createApi({
       invalidatesTags: ["Plan"],
     }),
 
+    /** The rate the USD column was last derived from — cached, never fetched live. */
+    getAdminFx: build.query<FxStatus, void>({
+      query: () => "/api/admin/billing/fx",
+      providesTags: ["Fx"],
+    }),
+
+    /** Refetch the live rate and recompute every plan's non-INR price from its INR price. */
+    syncAdminPlanCurrency: build.mutation<{ snapshot: FxSnapshot; base: Currency; derived: Currency[] }, void>({
+      query: () => ({ url: "/api/admin/billing/plans/sync-currency", method: "POST" }),
+      invalidatesTags: ["Plan", "Fx"],
+    }),
+
     getAdminAddonPacks: build.query<AddonPack[], void>({
       query: () => "/api/admin/billing/addons",
       providesTags: ["AddonPack"],
@@ -796,6 +808,8 @@ export const {
   useVerifyAddonPurchaseMutation,
   useGetAdminPlansQuery,
   useSaveAdminPlanPriceMutation,
+  useGetAdminFxQuery,
+  useSyncAdminPlanCurrencyMutation,
   useGetAdminAddonPacksQuery,
   useSaveAdminAddonPackMutation,
   useDeleteAdminAddonPackMutation,

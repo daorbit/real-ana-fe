@@ -8,6 +8,7 @@ import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
   useGetAdminPlansQuery, useSaveAdminPlanPriceMutation,
+  useGetAdminFxQuery, useSyncAdminPlanCurrencyMutation,
   useGetAdminAddonPacksQuery, useSaveAdminAddonPackMutation, useDeleteAdminAddonPackMutation,
   useGetAdminCouponsQuery, useSaveAdminCouponMutation, useDeleteAdminCouponMutation,
   useCheckCouponMutation,
@@ -95,6 +96,70 @@ export default function AdminBilling() {
 
 /* ---------------------------------- plans ----------------------------------- */
 
+/** "3 hours ago" for a rate's age — precision past the hour tells an admin nothing. */
+function relativeTime(iso: string): string {
+  const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (!Number.isFinite(minutes)) return "unknown";
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
+}
+
+/**
+ * Recompute the non-INR prices from INR at the current exchange rate.
+ *
+ * On purpose a button rather than a background job: the admin sees the rate and
+ * its age, decides the move is worth repricing for, and presses. Prices that
+ * drift on a schedule change what a customer is quoted without anyone choosing
+ * it — the drift is silent, and the first person to notice is the customer.
+ */
+function CurrencySync() {
+  const { data: fx } = useGetAdminFxQuery();
+  const [sync, { isLoading: syncing }] = useSyncAdminPlanCurrencyMutation();
+
+  const run = async () => {
+    try {
+      const result = await sync().unwrap();
+      const rate = result.snapshot.rates.USD;
+      notify.success(
+        rate ? `Repriced at 1 ${result.base} = ${rate.toFixed(4)} USD.` : "Prices repriced.",
+        "USD prices updated"
+      );
+    } catch (e) {
+      notify.error(errMessage(e, "Could not fetch the exchange rate. Prices are unchanged."));
+    }
+  };
+
+  const rate = fx?.snapshot?.rates.USD;
+
+  return (
+    <Group gap="sm">
+      <Text size="xs" c="dimmed">
+        {fx && !fx.configured
+          ? "Exchange rate API key not configured"
+          : rate && fx?.snapshot
+            ? `1 ${fx.base} = $${rate.toFixed(4)} · ${relativeTime(fx.snapshot.fetchedAt)}`
+            : "USD prices never synced"}
+      </Text>
+      <Tooltip label="Recompute USD prices from the INR price at today's rate">
+        <Button
+          size="xs"
+          variant="light"
+          radius="md"
+          loading={syncing}
+          disabled={fx ? !fx.configured : false}
+          leftSection={<RefreshCw size={14} />}
+          onClick={run}
+        >
+          Sync USD prices
+        </Button>
+      </Tooltip>
+    </Group>
+  );
+}
+
 /**
  * Plans themselves — name, quotas, workspace/site limits, Razorpay ids — are
  * fixed in backend code (`src/plans.ts`), not admin-editable. The only thing
@@ -139,7 +204,8 @@ function PlansTab() {
 
   return (
     <Stack gap="md">
-      <Group justify="flex-end">
+      <Group justify="space-between">
+        <CurrencySync />
         <RefetchButton onClick={refetch} loading={isFetching} />
       </Group>
       <Card withBorder radius="md" padding={0}>
@@ -185,7 +251,8 @@ function PlansTab() {
           <Stack gap="sm">
             <Text size="sm" c="dimmed">
               Only price can be changed here. Quotas, workspace and site limits, and Razorpay ids
-              are fixed in code.
+              are fixed in code. A USD price typed here holds until the next "Sync USD prices",
+              which recomputes it from the INR price.
             </Text>
             <CurrencyPriceInputs label="Price / month" values={priceMonthlyRupees} onChange={setPriceMonthlyRupees} />
             <CurrencyPriceInputs label="Price / year" values={priceYearlyRupees} onChange={setPriceYearlyRupees} />
