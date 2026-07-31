@@ -372,14 +372,24 @@ export default function Reports() {
     }
   };
 
-  const destroy = async (s: ReportSchedule) => {
-    if (!(await confirmDelete(s.name))) return;
-    try {
-      await remove({ workspaceId, id: s.id }).unwrap();
-      notify.success("Report deleted.");
-    } catch (e) {
-      notify.error(errMessage(e, "Could not delete the report."));
-    }
+  const destroy = (s: ReportSchedule) => {
+    confirmDelete({
+      title: "Delete report",
+      body: (
+        <>
+          "{s.name}" will be deleted and no longer sent to its recipients. This
+          cannot be undone.
+        </>
+      ),
+      onConfirm: async () => {
+        try {
+          await remove({ workspaceId, id: s.id }).unwrap();
+          notify.success("Report deleted.");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not delete the report."));
+        }
+      },
+    });
   };
 
   const addEmail = () => {
