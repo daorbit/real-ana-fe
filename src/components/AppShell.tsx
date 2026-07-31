@@ -50,7 +50,7 @@ const NAV_GROUPS = [
     items: [
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
-      { to: "/app/reports", labelKey: "nav.reports", label: "Email reports", icon: CalendarClock },
+      { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
     ],

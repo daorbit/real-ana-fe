@@ -1,10 +1,13 @@
 import { useState } from "react";
 import {
   Text, Group, Button, Stack, Badge, Modal, TextInput, Select, Switch,
-  ActionIcon, Center, Loader, Alert, Checkbox, Table, Tooltip, MultiSelect, Box, ThemeIcon,
+  ActionIcon, Center, Loader, Alert, Checkbox, Tooltip, MultiSelect, Box,
+  ThemeIcon, SimpleGrid, Divider, Menu,
 } from "@mantine/core";
 import {
   Plus, Pencil, Trash2, Send, Mail, MailWarning, CalendarClock, AlertTriangle,
+  BarChart3, Search, FileSpreadsheet, Link2, MoreVertical, Pause, Play, Clock,
+  Users, CheckCircle2,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, PageStack } from "../components/Page";
@@ -20,22 +23,32 @@ import { REPORT_FREQUENCIES } from "../types";
 import type { ReportSchedule, ReportFrequency } from "../types";
 
 /**
- * Scheduled email reports.
+ * Reports.
  *
  * The two things this screen has to make obvious, because getting either wrong
  * is what turns a useful report into an embarrassing one:
  *
  *  - who receives it. Recipients are usually people outside the account — a
- *    client, a manager — so the list is shown in full rather than summarised,
- *    and anyone who has unsubscribed stays visible instead of quietly vanishing.
- *  - that the live dashboard link is public. Turning it on publishes the
+ *    client, a manager — so addresses are listed rather than counted, and
+ *    anyone who unsubscribed stays visible instead of quietly vanishing.
+ *  - that the live dashboard link is public. Including it publishes the
  *    workspace to anyone holding the link, which the UI says in those words.
+ *
+ * Laid out as cards rather than table rows: a report is a configuration with
+ * five or six facets, and a row forces each of them into a column too narrow to
+ * say anything useful.
  */
 
 const FREQUENCY_HINTS: Record<ReportFrequency, string> = {
   daily: "Every morning, covering the last 24 hours",
   weekly: "Monday mornings, covering the previous week",
   monthly: "The 1st of each month, covering the previous month",
+};
+
+const FREQUENCY_LABEL: Record<ReportFrequency, string> = {
+  daily: "Daily",
+  weekly: "Weekly",
+  monthly: "Monthly",
 };
 
 type Draft = {
@@ -66,8 +79,8 @@ const fromSchedule = (s: ReportSchedule): Draft => ({
   name: s.name,
   frequency: s.frequency,
   siteIds: s.siteIds,
-  // The owner's address is added server-side on every save, so it is not shown
-  // as an editable chip — removing it would be a no-op and look like a bug.
+  // The owner's address is added server-side on every save, so it isn't shown
+  // as a removable chip — removing it would be a no-op and look like a bug.
   recipients: s.recipients.slice(1).map((r) => r.email),
   analytics: s.include.analytics,
   seo: s.include.seo,
@@ -75,6 +88,182 @@ const fromSchedule = (s: ReportSchedule): Draft => ({
   attachXlsx: s.attachXlsx,
   enabled: s.enabled,
 });
+
+/** A short, absolute-ish description of when the next send lands. */
+function nextSendLabel(s: ReportSchedule): string {
+  if (!s.enabled) return "Paused";
+  const when = new Date(s.nextRunAt);
+  const days = Math.round((when.getTime() - Date.now()) / 86_400_000);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Tomorrow";
+  if (days < 7) return when.toLocaleDateString(undefined, { weekday: "long" });
+  return when.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+/** One number in the strip above the list. */
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: typeof Mail;
+  label: string;
+  value: string;
+  hint?: string;
+}) {
+  return (
+    <Box className="surface-card" p="md">
+      <Group gap={8} mb={6}>
+        <Icon size={14} style={{ opacity: 0.6 }} />
+        <Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.04em" }}>
+          {label}
+        </Text>
+      </Group>
+      <Text fw={700} size="24px" lh={1.1}>{value}</Text>
+      {hint && <Text size="xs" c="dimmed" mt={4}>{hint}</Text>}
+    </Box>
+  );
+}
+
+/** The contents of a report, as labelled chips — faster to scan than a sentence. */
+function IncludeChips({ s }: { s: ReportSchedule }) {
+  const items = [
+    { on: s.include.analytics, icon: BarChart3, label: "Analytics" },
+    { on: s.include.seo, icon: Search, label: "SEO" },
+    { on: s.attachXlsx, icon: FileSpreadsheet, label: "Spreadsheet" },
+    { on: s.include.dashboardLink, icon: Link2, label: "Live link" },
+  ].filter((i) => i.on);
+
+  return (
+    <Group gap={6}>
+      {items.map((i) => (
+        <Badge
+          key={i.label}
+          size="sm"
+          variant="light"
+          color="gray"
+          leftSection={<i.icon size={11} />}
+          styles={{ label: { fontWeight: 500 } }}
+        >
+          {i.label}
+        </Badge>
+      ))}
+    </Group>
+  );
+}
+
+function ReportCard({
+  s,
+  siteNames,
+  onEdit,
+  onTest,
+  onDelete,
+  onToggle,
+  testing,
+}: {
+  s: ReportSchedule;
+  siteNames: string;
+  onEdit: () => void;
+  onTest: () => void;
+  onDelete: () => void;
+  onToggle: () => void;
+  testing: boolean;
+}) {
+  const active = s.recipients.filter((r) => !r.unsubscribed);
+  const optedOut = s.recipients.filter((r) => r.unsubscribed);
+
+  return (
+    <Box className="surface-card" p="lg" style={{ opacity: s.enabled ? 1 : 0.72 }}>
+      <Group justify="space-between" align="flex-start" wrap="nowrap" mb="sm">
+        <div style={{ minWidth: 0 }}>
+          <Group gap={8} wrap="nowrap">
+            <Text fw={650} size="md" truncate>{s.name}</Text>
+            {s.enabled ? (
+              <Badge size="sm" variant="light" color="emerald">{FREQUENCY_LABEL[s.frequency]}</Badge>
+            ) : (
+              <Badge size="sm" variant="light" color="gray">Paused</Badge>
+            )}
+            {s.lastError && (
+              <Tooltip label={s.lastError} multiline w={280} withArrow>
+                <AlertTriangle size={15} color="var(--mantine-color-orange-6)" />
+              </Tooltip>
+            )}
+          </Group>
+          <Text size="xs" c="dimmed" mt={3} truncate>{siteNames}</Text>
+        </div>
+
+        <Group gap={4} wrap="nowrap">
+          <Tooltip label="Send a copy to yourself now" withArrow>
+            <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest}>
+              <Send size={15} />
+            </ActionIcon>
+          </Tooltip>
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="subtle" size="lg" radius="md" color="gray">
+                <MoreVertical size={16} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>Edit</Menu.Item>
+              <Menu.Item
+                leftSection={s.enabled ? <Pause size={14} /> : <Play size={14} />}
+                onClick={onToggle}
+              >
+                {s.enabled ? "Pause" : "Resume"}
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item color="red" leftSection={<Trash2 size={14} />} onClick={onDelete}>
+                Delete
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+      </Group>
+
+      <IncludeChips s={s} />
+
+      <Divider my="md" />
+
+      <Group justify="space-between" align="flex-end" wrap="wrap" gap="md">
+        <div>
+          <Group gap={6} mb={4}>
+            <Users size={13} style={{ opacity: 0.6 }} />
+            <Text size="xs" c="dimmed" fw={500}>
+              {active.length} recipient{active.length === 1 ? "" : "s"}
+              {optedOut.length > 0 && ` · ${optedOut.length} unsubscribed`}
+            </Text>
+          </Group>
+          {/* Addresses, not just a count: the owner needs to see at a glance
+              that a report is going to the right client. */}
+          <Text size="xs" c="dimmed" lineClamp={1} maw={340}>
+            {active.map((r) => r.email).join(", ") || "No active recipients"}
+          </Text>
+        </div>
+
+        <Group gap="lg">
+          <div>
+            <Group gap={5}>
+              <Clock size={12} style={{ opacity: 0.6 }} />
+              <Text size="xs" c="dimmed">Next</Text>
+            </Group>
+            <Text size="sm" fw={600} mt={2}>{nextSendLabel(s)}</Text>
+          </div>
+          <div>
+            <Group gap={5}>
+              <CheckCircle2 size={12} style={{ opacity: 0.6 }} />
+              <Text size="xs" c="dimmed">Last sent</Text>
+            </Group>
+            <Text size="sm" fw={600} mt={2} c={s.lastSentAt ? undefined : "dimmed"}>
+              {s.lastSentAt ? timeAgo(s.lastSentAt) : "Never"}
+            </Text>
+          </div>
+        </Group>
+      </Group>
+    </Box>
+  );
+}
 
 export default function Reports() {
   const { active } = useWorkspace();
@@ -92,9 +281,28 @@ export default function Reports() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailInput, setEmailInput] = useState("");
+  const [testingId, setTestingId] = useState<string | null>(null);
 
   const schedules = data?.schedules ?? [];
   const mailReady = data?.mailConfigured ?? true;
+
+  const enabled = schedules.filter((s) => s.enabled);
+  const nextUp = enabled
+    .slice()
+    .sort((a, b) => +new Date(a.nextRunAt) - +new Date(b.nextRunAt))[0];
+  // Counted across reports, deduped: the same client on two reports is one
+  // person receiving mail from you, which is the number that matters.
+  const reach = new Set(
+    enabled.flatMap((s) => s.recipients.filter((r) => !r.unsubscribed).map((r) => r.email))
+  ).size;
+
+  const siteNameFor = (s: ReportSchedule): string => {
+    if (!s.siteIds.length) return `All sites in ${active?.name ?? "this workspace"}`;
+    const names = s.siteIds
+      .map((id) => sites.find((site) => site.siteId === id)?.name)
+      .filter(Boolean);
+    return names.length ? names.join(", ") : `${s.siteIds.length} site(s)`;
+  };
 
   const openNew = () => {
     setEditingId(null);
@@ -110,6 +318,20 @@ export default function Reports() {
     setModal(true);
   };
 
+  const persist = async (d: Draft, id: string | null) => {
+    await save({
+      workspaceId,
+      id: id ?? undefined,
+      name: d.name.trim(),
+      siteIds: d.siteIds,
+      frequency: d.frequency,
+      recipients: d.recipients,
+      include: { analytics: d.analytics, seo: d.seo, dashboardLink: d.dashboardLink },
+      attachXlsx: d.attachXlsx,
+      enabled: d.enabled,
+    }).unwrap();
+  };
+
   const submit = async () => {
     if (!draft.name.trim()) {
       notify.error("Give the report a name so you can tell it apart from the others.");
@@ -121,17 +343,7 @@ export default function Reports() {
     }
 
     try {
-      await save({
-        workspaceId,
-        id: editingId ?? undefined,
-        name: draft.name.trim(),
-        siteIds: draft.siteIds,
-        frequency: draft.frequency,
-        recipients: draft.recipients,
-        include: { analytics: draft.analytics, seo: draft.seo, dashboardLink: draft.dashboardLink },
-        attachXlsx: draft.attachXlsx,
-        enabled: draft.enabled,
-      }).unwrap();
+      await persist(draft, editingId);
       notify.success(editingId ? "Report updated." : "Report scheduled.");
       setModal(false);
     } catch (e) {
@@ -139,12 +351,24 @@ export default function Reports() {
     }
   };
 
+  const toggleEnabled = async (s: ReportSchedule) => {
+    try {
+      await persist({ ...fromSchedule(s), enabled: !s.enabled }, s.id);
+      notify.success(s.enabled ? "Report paused." : "Report resumed.");
+    } catch (e) {
+      notify.error(errMessage(e, "Could not update the report."));
+    }
+  };
+
   const runTest = async (s: ReportSchedule) => {
+    setTestingId(s.id);
     try {
       const result = await sendTest({ workspaceId, id: s.id }).unwrap();
       notify.success(`Sent to ${result.sentTo.join(", ")}.`, "Test report sent");
     } catch (e) {
       notify.error(errMessage(e, "Could not send the test report."));
+    } finally {
+      setTestingId(null);
     }
   };
 
@@ -175,13 +399,10 @@ export default function Reports() {
 
   return (
     <AppShell>
-      {/* Wider than the 860px prose default: the schedule table carries five
-          columns, and squeezing it into a settings-form width wraps the
-          recipient and timing cells for no benefit. */}
       <PageStack maxWidth={1180}>
         <PageHeader
-          title="Email reports"
-          description="Send analytics and SEO summaries on a schedule — to yourself, or to anyone you choose."
+          title="Reports"
+          description="Scheduled summaries of your traffic and SEO — delivered by email, with the detail attached."
           actions={
             <Button leftSection={<Plus size={15} />} onClick={openNew} disabled={!workspaceId}>
               New report
@@ -191,107 +412,89 @@ export default function Reports() {
 
         {!mailReady && (
           <Alert color="orange" icon={<MailWarning size={16} />} radius="md">
-            Outbound email isn't configured on this deployment, so scheduled reports won't be
-            delivered. Existing schedules are saved and will start sending once it is.
+            Outbound email isn&apos;t configured on this deployment, so reports won&apos;t be
+            delivered. Schedules are saved and start sending once it is.
           </Alert>
         )}
 
         {isLoading ? (
           <Center py={64}><Loader size="sm" /></Center>
         ) : !schedules.length ? (
-          <Box className="surface-card" py={56} px="xl">
+          <Box className="surface-card" py={64} px="xl">
             <Stack align="center" gap={6}>
-              <ThemeIcon size={52} radius="xl" variant="light" color="emerald" mb="xs">
-                <CalendarClock size={24} />
+              <ThemeIcon size={56} radius="xl" variant="light" color="emerald" mb="xs">
+                <CalendarClock size={26} />
               </ThemeIcon>
-              <Text fw={650} size="lg">No scheduled reports yet</Text>
-              <Text size="sm" c="dimmed" ta="center" maw={420} lh={1.6}>
-                Email your headline numbers, an SEO summary and a spreadsheet of the detail —
-                daily, weekly or monthly. Useful for the people who want the numbers but never
-                log in.
+              <Text fw={650} size="lg">No reports yet</Text>
+              <Text size="sm" c="dimmed" ta="center" maw={460} lh={1.6}>
+                A report emails your headline numbers and SEO scores on a schedule, with the full
+                breakdown attached as a spreadsheet. Built for the people who want the numbers but
+                never log in — a client, a manager, whoever asked.
               </Text>
-              <Button mt="md" leftSection={<Plus size={15} />} onClick={openNew} disabled={!workspaceId}>
+
+              <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mt="xl" w="100%" maw={620}>
+                {[
+                  { icon: BarChart3, title: "Traffic & SEO", body: "Headline metrics with change vs. the previous period" },
+                  { icon: FileSpreadsheet, title: "Spreadsheet", body: "Every breakdown on its own sheet, attached" },
+                  { icon: Users, title: "Anyone", body: "No account needed, unsubscribe in every email" },
+                ].map((f) => (
+                  <Stack key={f.title} gap={4} align="center">
+                    <ThemeIcon size={34} radius="md" variant="default">
+                      <f.icon size={16} />
+                    </ThemeIcon>
+                    <Text size="sm" fw={600} mt={2}>{f.title}</Text>
+                    <Text size="xs" c="dimmed" ta="center" lh={1.5}>{f.body}</Text>
+                  </Stack>
+                ))}
+              </SimpleGrid>
+
+              <Button mt="xl" leftSection={<Plus size={15} />} onClick={openNew} disabled={!workspaceId}>
                 Create your first report
               </Button>
             </Stack>
           </Box>
         ) : (
-          <Box className="surface-card" p={0}>
-            <Table.ScrollContainer minWidth={720}>
-            <Table verticalSpacing="sm" horizontalSpacing="md">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Report</Table.Th>
-                  <Table.Th>Frequency</Table.Th>
-                  <Table.Th>Recipients</Table.Th>
-                  <Table.Th>Next</Table.Th>
-                  <Table.Th />
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {schedules.map((s) => (
-                  <Table.Tr key={s.id}>
-                    <Table.Td>
-                      <Group gap={8} wrap="nowrap">
-                        <Text size="sm" fw={600}>{s.name}</Text>
-                        {!s.enabled && <Badge size="xs" color="gray" variant="light">Paused</Badge>}
-                        {s.lastError && (
-                          <Tooltip label={s.lastError} multiline w={280}>
-                            <AlertTriangle size={14} color="var(--mantine-color-orange-6)" />
-                          </Tooltip>
-                        )}
-                      </Group>
-                      <Text size="xs" c="dimmed">
-                        {[s.include.analytics && "Analytics", s.include.seo && "SEO",
-                          s.include.dashboardLink && "Live link", s.attachXlsx && "Spreadsheet"]
-                          .filter(Boolean).join(" · ")}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm" tt="capitalize">{s.frequency}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Group gap={6}>
-                        <Mail size={13} opacity={0.6} />
-                        <Text size="sm">{s.recipients.filter((r) => !r.unsubscribed).length}</Text>
-                        {s.recipients.some((r) => r.unsubscribed) && (
-                          <Tooltip label={`${s.recipients.filter((r) => r.unsubscribed).length} unsubscribed`}>
-                            <Badge size="xs" color="gray" variant="light">
-                              {s.recipients.filter((r) => r.unsubscribed).length} out
-                            </Badge>
-                          </Tooltip>
-                        )}
-                      </Group>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm" c={s.enabled ? undefined : "dimmed"}>
-                        {s.enabled ? timeAgo(s.nextRunAt) : "—"}
-                      </Text>
-                      {s.lastSentAt && (
-                        <Text size="xs" c="dimmed">Last sent {timeAgo(s.lastSentAt)}</Text>
-                      )}
-                    </Table.Td>
-                    <Table.Td>
-                      <Group gap={4} justify="flex-end" wrap="nowrap">
-                        <Tooltip label="Send a copy to yourself now">
-                          <ActionIcon variant="subtle" size="sm" loading={testing} onClick={() => runTest(s)}>
-                            <Send size={14} />
-                          </ActionIcon>
-                        </Tooltip>
-                        <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(s)}>
-                          <Pencil size={14} />
-                        </ActionIcon>
-                        <ActionIcon variant="subtle" size="sm" color="red" onClick={() => destroy(s)}>
-                          <Trash2 size={14} />
-                        </ActionIcon>
-                      </Group>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-            </Table.ScrollContainer>
-          </Box>
+          <Stack gap="lg">
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+              <StatTile
+                icon={CalendarClock}
+                label="Active reports"
+                value={String(enabled.length)}
+                hint={
+                  schedules.length > enabled.length
+                    ? `${schedules.length - enabled.length} paused`
+                    : "All running"
+                }
+              />
+              <StatTile
+                icon={Clock}
+                label="Next delivery"
+                value={nextUp ? nextSendLabel(nextUp) : "—"}
+                hint={nextUp ? nextUp.name : "Nothing scheduled"}
+              />
+              <StatTile
+                icon={Mail}
+                label="People reached"
+                value={String(reach)}
+                hint="Unique addresses across active reports"
+              />
+            </SimpleGrid>
+
+            <Stack gap="md">
+              {schedules.map((s) => (
+                <ReportCard
+                  key={s.id}
+                  s={s}
+                  siteNames={siteNameFor(s)}
+                  testing={testing && testingId === s.id}
+                  onEdit={() => openEdit(s)}
+                  onTest={() => runTest(s)}
+                  onDelete={() => destroy(s)}
+                  onToggle={() => toggleEnabled(s)}
+                />
+              ))}
+            </Stack>
+          </Stack>
         )}
       </PageStack>
 
@@ -314,10 +517,7 @@ export default function Reports() {
           <Select
             label="How often"
             description={FREQUENCY_HINTS[draft.frequency]}
-            data={REPORT_FREQUENCIES.map((f) => ({
-              value: f,
-              label: f[0].toUpperCase() + f.slice(1),
-            }))}
+            data={REPORT_FREQUENCIES.map((f) => ({ value: f, label: FREQUENCY_LABEL[f] }))}
             value={draft.frequency}
             onChange={(v) => v && setDraft({ ...draft, frequency: v as ReportFrequency })}
             allowDeselect={false}
@@ -337,7 +537,7 @@ export default function Reports() {
           <div>
             <Text size="sm" fw={500} mb={4}>Also send to</Text>
             <Text size="xs" c="dimmed" mb={8}>
-              You always receive this report. Add anyone else who should — they don't need an
+              You always receive this report. Add anyone else who should — they don&apos;t need an
               account, and every email includes an unsubscribe link.
             </Text>
             <Group gap="xs" mb={draft.recipients.length ? "xs" : 0}>
@@ -415,7 +615,7 @@ export default function Reports() {
               <Alert color="yellow" mt="xs" radius="md" p="xs">
                 <Text size="xs">
                   The public dashboard is currently off, so no link will be included. Turn it on
-                  under Public dashboard first — note that it makes this workspace's analytics
+                  under Public dashboard first — note that it makes this workspace&apos;s analytics
                   readable by anyone with the link.
                 </Text>
               </Alert>
