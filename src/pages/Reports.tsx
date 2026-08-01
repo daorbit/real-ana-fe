@@ -7,7 +7,7 @@ import {
 import {
   Plus, Pencil, Trash2, Send, Mail, MailWarning, CalendarClock, AlertTriangle,
   BarChart3, Search, FileSpreadsheet, Link2, MoreVertical, Pause, Play, Clock,
-  Users, CheckCircle2, MessageCircle,
+  Users, CheckCircle2, MessageCircle, ChevronRight,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, PageStack } from "../components/Page";
@@ -52,6 +52,9 @@ const FREQUENCY_LABEL: Record<ReportFrequency, string> = {
   weekly: "Weekly",
   monthly: "Monthly",
 };
+
+/** The order Next walks, and the order the tabs are shown in. */
+const TAB_ORDER = ["schedule", "delivery", "content"] as const;
 
 type Draft = {
   name: string;
@@ -357,7 +360,9 @@ export default function Reports() {
   const [emailInput, setEmailInput] = useState("");
   const [testingId, setTestingId] = useState<string | null>(null);
   /** Reset per open, so editing a second report doesn't land on the last tab used. */
-  const [tab, setTab] = useState("schedule");
+  const [tab, setTab] = useState<string>(TAB_ORDER[0]);
+  const tabIndex = Math.max(0, TAB_ORDER.indexOf(tab));
+  const isLastTab = tabIndex === TAB_ORDER.length - 1;
 
   const schedules = data?.schedules ?? [];
   const mailReady = data?.mailConfigured ?? true;
@@ -384,7 +389,7 @@ export default function Reports() {
     setEditingId(null);
     setDraft(emptyDraft());
     setEmailInput("");
-    setTab("schedule");
+    setTab(TAB_ORDER[0]);
     setModal(true);
   };
 
@@ -392,7 +397,7 @@ export default function Reports() {
     setEditingId(s.id);
     setDraft(fromSchedule(s));
     setEmailInput("");
-    setTab("schedule");
+    setTab(TAB_ORDER[0]);
     setModal(true);
   };
 
@@ -633,7 +638,7 @@ export default function Reports() {
             save button used to sit below the fold, and the groups are read at
             different times — schedule once, delivery when a client changes,
             content when the report looks wrong. */}
-        <Tabs value={tab} onChange={(v) => setTab(v ?? "schedule")} keepMounted={false}>
+        <Tabs value={tab} onChange={(v) => setTab(v ?? TAB_ORDER[0])} keepMounted={false}>
           <Tabs.List mb="md">
             <Tabs.Tab value="schedule" leftSection={<CalendarClock size={14} />}>
               Schedule
@@ -823,13 +828,25 @@ export default function Reports() {
         </Tabs>
 
         {/* Outside the panels: saving is not a step of any one tab, and a
-            button that moves with the tab reads as saving only that tab. */}
+            button that moves with the tab reads as saving only that tab.
+
+            Next rather than Save on the first two tabs, so a new report walks
+            through all three — the tabs alone don't say there is more to see,
+            and a Save offered on tab one invites submitting a half-filled form.
+            Editing skips the walkthrough: the reason for opening is usually one
+            known field, so Save is available from wherever that field is. */}
         <Divider my="md" />
         <Group justify="flex-end">
           <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
-          <Button loading={saving} onClick={submit}>
-            {editingId ? "Save changes" : "Schedule report"}
-          </Button>
+          {isLastTab || editingId ? (
+            <Button loading={saving} onClick={submit}>
+              {editingId ? "Save changes" : "Schedule report"}
+            </Button>
+          ) : (
+            <Button onClick={() => setTab(TAB_ORDER[tabIndex + 1])} rightSection={<ChevronRight size={15} />}>
+              Next
+            </Button>
+          )}
         </Group>
       </Modal>
     </AppShell>
