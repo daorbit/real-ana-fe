@@ -1,5 +1,5 @@
 import {
-  Text, Group, Badge, ActionIcon, Tooltip, Box, ThemeIcon, Divider, Menu,
+  Text, Group, Badge, ActionIcon, Tooltip, Box, Divider, Menu,
 } from "@mantine/core";
 import {
   Pencil, Trash2, Send, Mail, AlertTriangle, BarChart3, Search,

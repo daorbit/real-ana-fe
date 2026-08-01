@@ -40,13 +40,26 @@ import "./polish.css";
  * Skipping setup is respected: `onboarding_skipped` suppresses the redirect so
  * "Skip for now" doesn't bounce straight back here. The Home checklist then
  * carries the remaining steps.
+ *
+ * A missing mobile number is the one thing `skipped` does not excuse. The step
+ * that asks for it cannot be skipped, so an account without one either predates
+ * that step or left before reaching it — and neither has anywhere else to
+ * supply it short of finding the field in Settings.
  */
 function RequireSetup({ children }: { children: ReactNode }) {
   const { workspaces, loading } = useWorkspace();
+  const { user } = useAuth();
 
   // Don't judge an empty list until it has actually loaded, or every refresh
   // would flash the onboarding screen before the workspaces arrive.
   if (loading) return <AppBootSkeleton />;
+
+  // Demo accounts are handed out pre-filled and are never a real person, so
+  // asking one for a phone number would block a tour on a detail that has
+  // nowhere to go.
+  if (!user?.mobile && !user?.demo) {
+    return <Navigate to="/app/onboarding" replace />;
+  }
 
   const skipped = localStorage.getItem("quantalog_onboarding_skipped") === "1";
   if (!workspaces.length && !skipped) {

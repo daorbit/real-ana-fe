@@ -1,5 +1,5 @@
 import {
-  Text, Group, Button, Stack, Center, Loader, Alert, Box, ThemeIcon, SimpleGrid,
+  Text, Button, Stack, Center, Loader, Alert, Box, ThemeIcon, SimpleGrid,
 } from "@mantine/core";
 import {
   Plus, Mail, MailWarning, CalendarClock, BarChart3, FileSpreadsheet, Clock, Users,
@@ -40,7 +40,10 @@ export default function Reports() {
 
   return (
     <AppShell>
-      <PageStack maxWidth={1180}>
+      {/* Full width rather than the usual capped column: a report card is a row
+          of facets — channels, recipients, next send — and a narrow page pushes
+          them onto stacked lines that read as unrelated. */}
+      <PageStack maxWidth="100%">
         <PageHeader
           title="Reports"
           description="Scheduled summaries of your traffic and SEO — delivered by email, with the detail attached."

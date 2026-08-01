@@ -7,6 +7,7 @@ import {
 } from "@mantine/core";
 import { ArrowRight, ArrowLeft, Globe, Zap } from "lucide-react";
 import { OnboardingBrand } from "../components/OnboardingBrand";
+import { ProfileStep } from "../components/ProfileStep";
 import { BrandIcon } from "../components/BrandIcon";
 import { CodeBlock } from "../components/CodeBlock";
 import { InstallCheck } from "../components/InstallCheck";
@@ -19,24 +20,36 @@ import { notifyError } from "../notify";
 import type { Site } from "../types";
 
 const STEPS = [
+  { label: "Your details", hint: "Name, mobile and photo" },
   { label: "Workspace", hint: "Where your sites live" },
   { label: "Your site", hint: "What you want to track" },
   { label: "Install", hint: "One script tag" },
 ];
 
 /**
- * First-run setup: workspace, site, snippet.
+ * The first step is the only one that can't be skipped.
+ *
+ * Everything after it has a fallback — the Home checklist picks up a missing
+ * workspace or site. A missing mobile has no such recovery: WhatsApp delivery
+ * simply refuses to turn on, in a screen far away from here, and the reason is
+ * not obvious from there.
+ */
+const FIRST_SKIPPABLE_STEP = 1;
+
+/**
+ * First-run setup: your details, workspace, site, snippet.
  *
  * Full-page, using the same split as the auth screens — someone arriving from
  * signup stays in one continuous flow. The step list sits in the brand panel
  * so the form column holds exactly one question at a time.
  *
- * Every step is skippable; the Home checklist covers anyone who leaves early,
- * so this is never a wall between someone and the product.
+ * Every step but the first is skippable; the Home checklist covers anyone who
+ * leaves early, so this is never a wall between someone and the product. The
+ * exception is explained at `FIRST_SKIPPABLE_STEP`.
  */
 export default function Onboarding() {
   const nav = useNavigate();
-  const { setActive } = useWorkspace();
+  const { setActive, workspaces } = useWorkspace();
 
   const [step, setStep] = useState(0);
   const [createWorkspace, { isLoading: creatingWs }] = useCreateWorkspaceMutation();
@@ -87,7 +100,7 @@ export default function Onboarding() {
       const ws = await createWorkspace({ name: wsName.trim() }).unwrap();
       setWsId(ws._id);
       setActive(ws._id);
-      setStep(1);
+      setStep(2);
     } catch (e) {
       notifyError(e, "Could not create the workspace.");
     }
@@ -108,7 +121,7 @@ export default function Onboarding() {
         framework,
       }).unwrap();
       setSite(created);
-      setStep(2);
+      setStep(3);
     } catch (e) {
       notifyError(e, "Could not add the site.");
     }
@@ -124,7 +137,7 @@ export default function Onboarding() {
             <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
               STEP {step + 1} OF {STEPS.length}
             </Text>
-            {step < 2 && (
+            {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
               <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
                 Skip for now
               </Anchor>
@@ -139,7 +152,14 @@ export default function Onboarding() {
               exit={{ opacity: 0, x: -16 }}
               transition={{ duration: 0.25 }}
             >
+              {/* An existing account sent back here only for its missing mobile
+                  already has a workspace — walking it through setup again would
+                  ask it to create a second one. */}
               {step === 0 && (
+                <ProfileStep onDone={() => (workspaces.length ? done() : setStep(1))} />
+              )}
+
+              {step === 1 && (
                 <Stack gap="xl">
                   <div>
                     <Title order={2} style={{ letterSpacing: "-0.02em" }}>
@@ -177,7 +197,7 @@ export default function Onboarding() {
                 </Stack>
               )}
 
-              {step === 1 && (
+              {step === 2 && (
                 <Stack gap="xl">
                   <div>
                     <Title order={2} style={{ letterSpacing: "-0.02em" }}>
@@ -245,7 +265,7 @@ export default function Onboarding() {
                       size="md"
                       variant="default"
                       leftSection={<ArrowLeft size={15} />}
-                      onClick={() => setStep(0)}
+                      onClick={() => setStep(1)}
                     >
                       Back
                     </Button>
@@ -261,7 +281,7 @@ export default function Onboarding() {
                 </Stack>
               )}
 
-              {step === 2 && site && (
+              {step === 3 && site && (
                 <Stack gap="lg">
                   <div>
                     <Title order={2} style={{ letterSpacing: "-0.02em" }}>
