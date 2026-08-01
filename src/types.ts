@@ -225,6 +225,8 @@ export type QuotaSummary = {
   maxSitesPerWorkspace: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
+  /** Whether reports may be delivered over WhatsApp. Pro only. */
+  whatsappReports: boolean;
 } | null;
 
 /**
