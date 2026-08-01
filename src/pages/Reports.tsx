@@ -54,7 +54,7 @@ const FREQUENCY_LABEL: Record<ReportFrequency, string> = {
 };
 
 /** The order Next walks, and the order the tabs are shown in. */
-const TAB_ORDER = ["schedule", "delivery", "content"] as const;
+const TAB_ORDER: string[] = ["schedule", "delivery", "content"];
 
 type Draft = {
   name: string;
