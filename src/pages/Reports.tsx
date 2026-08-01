@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Text, Group, Button, Stack, Badge, Modal, TextInput, Select, Switch,
   ActionIcon, Center, Loader, Alert, Checkbox, Tooltip, MultiSelect, Box,
-  ThemeIcon, SimpleGrid, Divider, Menu,
+  ThemeIcon, SimpleGrid, Divider, Menu, Tabs,
 } from "@mantine/core";
 import {
   Plus, Pencil, Trash2, Send, Mail, MailWarning, CalendarClock, AlertTriangle,
@@ -356,6 +356,8 @@ export default function Reports() {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailInput, setEmailInput] = useState("");
   const [testingId, setTestingId] = useState<string | null>(null);
+  /** Reset per open, so editing a second report doesn't land on the last tab used. */
+  const [tab, setTab] = useState("schedule");
 
   const schedules = data?.schedules ?? [];
   const mailReady = data?.mailConfigured ?? true;
@@ -382,6 +384,7 @@ export default function Reports() {
     setEditingId(null);
     setDraft(emptyDraft());
     setEmailInput("");
+    setTab("schedule");
     setModal(true);
   };
 
@@ -389,6 +392,7 @@ export default function Reports() {
     setEditingId(s.id);
     setDraft(fromSchedule(s));
     setEmailInput("");
+    setTab("schedule");
     setModal(true);
   };
 
@@ -408,20 +412,28 @@ export default function Reports() {
   };
 
   const submit = async () => {
+    // Each check names its tab: with the fields split across three panels, a
+    // message about a control the user cannot currently see reads as the save
+    // silently failing. Switch to the tab, then say what is wrong on it.
+    const fail = (tabName: string, message: string) => {
+      setTab(tabName);
+      notify.error(message);
+    };
+
     if (!draft.name.trim()) {
-      notify.error("Give the report a name so you can tell it apart from the others.");
+      fail("schedule", "Give the report a name so you can tell it apart from the others.");
       return;
     }
     if (!draft.analytics && !draft.seo) {
-      notify.error("Include analytics, SEO, or both — a report of neither is empty.");
+      fail("content", "Include analytics, SEO, or both — a report of neither is empty.");
       return;
     }
     if (!draft.emailChannel && !draft.whatsappChannel) {
-      notify.error("Pick at least one delivery channel.");
+      fail("delivery", "Pick at least one delivery channel.");
       return;
     }
     if (draft.whatsappChannel && !ownerMobile) {
-      notify.error("Add your mobile number in Settings before turning on WhatsApp delivery.");
+      fail("delivery", "Add your mobile number in Settings before turning on WhatsApp delivery.");
       return;
     }
 
@@ -617,6 +629,24 @@ export default function Reports() {
         size="lg"
         centered
       >
+        {/* Three tabs rather than one column: the form is long enough that the
+            save button used to sit below the fold, and the groups are read at
+            different times — schedule once, delivery when a client changes,
+            content when the report looks wrong. */}
+        <Tabs value={tab} onChange={(v) => setTab(v ?? "schedule")} keepMounted={false}>
+          <Tabs.List mb="md">
+            <Tabs.Tab value="schedule" leftSection={<CalendarClock size={14} />}>
+              Schedule
+            </Tabs.Tab>
+            <Tabs.Tab value="delivery" leftSection={<Send size={14} />}>
+              Delivery
+            </Tabs.Tab>
+            <Tabs.Tab value="content" leftSection={<BarChart3 size={14} />}>
+              Content
+            </Tabs.Tab>
+          </Tabs.List>
+
+        <Tabs.Panel value="schedule">
         <Stack gap="md">
           <TextInput
             label="Name"
@@ -645,6 +675,17 @@ export default function Reports() {
             clearable
           />
 
+          <Switch
+            label="Active"
+            description="Paused reports keep their settings but stop sending"
+            checked={draft.enabled}
+            onChange={(e) => setDraft({ ...draft, enabled: e.currentTarget.checked })}
+          />
+        </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="delivery">
+        <Stack gap="md">
           <div>
             <Text size="sm" fw={500} mb={4}>Deliver by</Text>
             <Text size="xs" c="dimmed" mb={8}>
@@ -730,7 +771,11 @@ export default function Reports() {
               ))}
             </Group>
           </div>
+        </Stack>
+        </Tabs.Panel>
 
+        <Tabs.Panel value="content">
+        <Stack gap="md">
           <div>
             <Text size="sm" fw={500} mb={8}>What to include</Text>
             <Stack gap={8}>
@@ -773,21 +818,19 @@ export default function Reports() {
               </Alert>
             )}
           </div>
-
-          <Switch
-            label="Active"
-            description="Paused reports keep their settings but stop sending"
-            checked={draft.enabled}
-            onChange={(e) => setDraft({ ...draft, enabled: e.currentTarget.checked })}
-          />
-
-          <Group justify="flex-end" mt="xs">
-            <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
-            <Button loading={saving} onClick={submit}>
-              {editingId ? "Save changes" : "Schedule report"}
-            </Button>
-          </Group>
         </Stack>
+        </Tabs.Panel>
+        </Tabs>
+
+        {/* Outside the panels: saving is not a step of any one tab, and a
+            button that moves with the tab reads as saving only that tab. */}
+        <Divider my="md" />
+        <Group justify="flex-end">
+          <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
+          <Button loading={saving} onClick={submit}>
+            {editingId ? "Save changes" : "Schedule report"}
+          </Button>
+        </Group>
       </Modal>
     </AppShell>
   );
