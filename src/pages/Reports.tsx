@@ -7,7 +7,7 @@ import {
 import {
   Plus, Pencil, Trash2, Send, Mail, MailWarning, CalendarClock, AlertTriangle,
   BarChart3, Search, FileSpreadsheet, Link2, MoreVertical, Pause, Play, Clock,
-  Users, CheckCircle2,
+  Users, CheckCircle2, MessageCircle,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, PageStack } from "../components/Page";
@@ -15,9 +15,11 @@ import {
   useGetReportSchedulesQuery, useSaveReportScheduleMutation,
   useDeleteReportScheduleMutation, useTestReportScheduleMutation,
   useGetSitesQuery, useGetShareQuery,
+  useGetWhatsAppStatusQuery, useTestReportWhatsAppMutation,
 } from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
+import { useAuth } from "../auth";
 import { timeAgo } from "../utils";
 import { REPORT_FREQUENCIES } from "../types";
 import type { ReportSchedule, ReportFrequency } from "../types";
@@ -56,6 +58,8 @@ type Draft = {
   frequency: ReportFrequency;
   siteIds: string[];
   recipients: string[];
+  emailChannel: boolean;
+  whatsappChannel: boolean;
   analytics: boolean;
   seo: boolean;
   dashboardLink: boolean;
@@ -68,6 +72,8 @@ const emptyDraft = (): Draft => ({
   frequency: "weekly",
   siteIds: [],
   recipients: [],
+  emailChannel: true,
+  whatsappChannel: false,
   analytics: true,
   seo: true,
   dashboardLink: false,
@@ -82,6 +88,8 @@ const fromSchedule = (s: ReportSchedule): Draft => ({
   // The owner's address is added server-side on every save, so it isn't shown
   // as a removable chip — removing it would be a no-op and look like a bug.
   recipients: s.recipients.slice(1).map((r) => r.email),
+  emailChannel: s.channels.email,
+  whatsappChannel: s.channels.whatsapp,
   analytics: s.include.analytics,
   seo: s.include.seo,
   dashboardLink: s.include.dashboardLink,
@@ -126,6 +134,26 @@ function StatTile({
   );
 }
 
+/** How a report goes out. Shown first, because it changes who sees it at all. */
+function ChannelChips({ s }: { s: ReportSchedule }) {
+  return (
+    <Group gap={6}>
+      {s.channels.email && (
+        <Badge size="sm" variant="light" color="blue" leftSection={<Mail size={11} />}
+          styles={{ label: { fontWeight: 500 } }}>
+          Email
+        </Badge>
+      )}
+      {s.channels.whatsapp && (
+        <Badge size="sm" variant="light" color="teal" leftSection={<MessageCircle size={11} />}
+          styles={{ label: { fontWeight: 500 } }}>
+          WhatsApp
+        </Badge>
+      )}
+    </Group>
+  );
+}
+
 /** The contents of a report, as labelled chips — faster to scan than a sentence. */
 function IncludeChips({ s }: { s: ReportSchedule }) {
   const items = [
@@ -153,11 +181,40 @@ function IncludeChips({ s }: { s: ReportSchedule }) {
   );
 }
 
+/** "3 emails · 1 WhatsApp · 1 unsubscribed", counting only channels that are on. */
+function recipientSummary(s: ReportSchedule): string {
+  const parts: string[] = [];
+  if (s.channels.email) {
+    const active = s.recipients.filter((r) => !r.unsubscribed).length;
+    parts.push(`${active} email${active === 1 ? "" : "s"}`);
+  }
+  if (s.channels.whatsapp) {
+    const active = s.phoneRecipients.filter((p) => !p.optedOut).length;
+    parts.push(`${active} WhatsApp`);
+  }
+  const out =
+    s.recipients.filter((r) => r.unsubscribed).length +
+    s.phoneRecipients.filter((p) => p.optedOut).length;
+  if (out) parts.push(`${out} opted out`);
+  return parts.join(" · ");
+}
+
+/** The actual destinations, so an owner can confirm a report goes where they think. */
+function destinations(s: ReportSchedule): string {
+  return [
+    ...(s.channels.email ? s.recipients.filter((r) => !r.unsubscribed).map((r) => r.email) : []),
+    ...(s.channels.whatsapp
+      ? s.phoneRecipients.filter((p) => !p.optedOut).map((p) => p.label || `+${p.phone}`)
+      : []),
+  ].join(", ");
+}
+
 function ReportCard({
   s,
   siteNames,
   onEdit,
   onTest,
+  onTestWhatsApp,
   onDelete,
   onToggle,
   testing,
@@ -166,13 +223,11 @@ function ReportCard({
   siteNames: string;
   onEdit: () => void;
   onTest: () => void;
+  onTestWhatsApp: () => void;
   onDelete: () => void;
   onToggle: () => void;
   testing: boolean;
 }) {
-  const active = s.recipients.filter((r) => !r.unsubscribed);
-  const optedOut = s.recipients.filter((r) => r.unsubscribed);
-
   return (
     <Box className="surface-card" p="lg" style={{ opacity: s.enabled ? 1 : 0.72 }}>
       <Group justify="space-between" align="flex-start" wrap="nowrap" mb="sm">
@@ -194,11 +249,13 @@ function ReportCard({
         </div>
 
         <Group gap={4} wrap="nowrap">
-          <Tooltip label="Send a copy to yourself now" withArrow>
-            <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest}>
-              <Send size={15} />
-            </ActionIcon>
-          </Tooltip>
+          {s.channels.email && (
+            <Tooltip label="Email a copy to yourself now" withArrow>
+              <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest}>
+                <Send size={15} />
+              </ActionIcon>
+            </Tooltip>
+          )}
           <Menu position="bottom-end" withArrow>
             <Menu.Target>
               <ActionIcon variant="subtle" size="lg" radius="md" color="gray">
@@ -207,6 +264,11 @@ function ReportCard({
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>Edit</Menu.Item>
+              {s.channels.whatsapp && (
+                <Menu.Item leftSection={<MessageCircle size={14} />} onClick={onTestWhatsApp}>
+                  Send WhatsApp test
+                </Menu.Item>
+              )}
               <Menu.Item
                 leftSection={s.enabled ? <Pause size={14} /> : <Play size={14} />}
                 onClick={onToggle}
@@ -222,7 +284,11 @@ function ReportCard({
         </Group>
       </Group>
 
-      <IncludeChips s={s} />
+      <Group gap={6} wrap="wrap">
+        <ChannelChips s={s} />
+        <Divider orientation="vertical" />
+        <IncludeChips s={s} />
+      </Group>
 
       <Divider my="md" />
 
@@ -231,14 +297,13 @@ function ReportCard({
           <Group gap={6} mb={4}>
             <Users size={13} style={{ opacity: 0.6 }} />
             <Text size="xs" c="dimmed" fw={500}>
-              {active.length} recipient{active.length === 1 ? "" : "s"}
-              {optedOut.length > 0 && ` · ${optedOut.length} unsubscribed`}
+              {recipientSummary(s)}
             </Text>
           </Group>
           {/* Addresses, not just a count: the owner needs to see at a glance
               that a report is going to the right client. */}
           <Text size="xs" c="dimmed" lineClamp={1} maw={340}>
-            {active.map((r) => r.email).join(", ") || "No active recipients"}
+            {destinations(s) || "No active recipients"}
           </Text>
         </div>
 
@@ -267,15 +332,24 @@ function ReportCard({
 
 export default function Reports() {
   const { active } = useWorkspace();
+  const { user } = useAuth();
   const workspaceId = active?._id ?? "";
+  // WhatsApp is delivered to the account owner's own number only, so the
+  // profile mobile is both the destination and the precondition.
+  const ownerMobile = (user?.mobile ?? "").replace(/[^\d]/g, "");
 
   const { data, isLoading } = useGetReportSchedulesQuery(workspaceId, { skip: !workspaceId });
   const { data: sites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId });
   const { data: share } = useGetShareQuery(workspaceId, { skip: !workspaceId });
+  const { data: wa } = useGetWhatsAppStatusQuery(workspaceId, { skip: !workspaceId });
+  // Offered only when the gateway is both configured and actually paired —
+  // enabling a channel that cannot send is a promise the product can't keep.
+  const waReady = Boolean(wa?.configured && wa.status === "connected");
 
   const [save, { isLoading: saving }] = useSaveReportScheduleMutation();
   const [remove] = useDeleteReportScheduleMutation();
   const [sendTest, { isLoading: testing }] = useTestReportScheduleMutation();
+  const [sendWaTest] = useTestReportWhatsAppMutation();
 
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -326,6 +400,7 @@ export default function Reports() {
       siteIds: d.siteIds,
       frequency: d.frequency,
       recipients: d.recipients,
+      channels: { email: d.emailChannel, whatsapp: d.whatsappChannel },
       include: { analytics: d.analytics, seo: d.seo, dashboardLink: d.dashboardLink },
       attachXlsx: d.attachXlsx,
       enabled: d.enabled,
@@ -339,6 +414,14 @@ export default function Reports() {
     }
     if (!draft.analytics && !draft.seo) {
       notify.error("Include analytics, SEO, or both — a report of neither is empty.");
+      return;
+    }
+    if (!draft.emailChannel && !draft.whatsappChannel) {
+      notify.error("Pick at least one delivery channel.");
+      return;
+    }
+    if (draft.whatsappChannel && !ownerMobile) {
+      notify.error("Add your mobile number in Settings before turning on WhatsApp delivery.");
       return;
     }
 
@@ -390,6 +473,23 @@ export default function Reports() {
         }
       },
     });
+  };
+
+  const runWhatsAppTest = async (s: ReportSchedule) => {
+    const first = s.phoneRecipients.find((p) => !p.optedOut);
+    if (!first) {
+      notify.error("This report has no active WhatsApp numbers.");
+      return;
+    }
+    setTestingId(s.id);
+    try {
+      await sendWaTest({ workspaceId, id: s.id, phone: first.phone }).unwrap();
+      notify.success(`Sent to +${first.phone}.`, "Test WhatsApp sent");
+    } catch (e) {
+      notify.error(errMessage(e, "Could not send the WhatsApp test."));
+    } finally {
+      setTestingId(null);
+    }
   };
 
   const addEmail = () => {
@@ -499,6 +599,7 @@ export default function Reports() {
                   testing={testing && testingId === s.id}
                   onEdit={() => openEdit(s)}
                   onTest={() => runTest(s)}
+                  onTestWhatsApp={() => runWhatsAppTest(s)}
                   onDelete={() => destroy(s)}
                   onToggle={() => toggleEnabled(s)}
                 />
@@ -543,6 +644,47 @@ export default function Reports() {
             searchable
             clearable
           />
+
+          <div>
+            <Text size="sm" fw={500} mb={4}>Deliver by</Text>
+            <Text size="xs" c="dimmed" mb={8}>
+              Email carries the spreadsheet. WhatsApp gets a short summary and the dashboard link.
+            </Text>
+            <Stack gap={8}>
+              <Checkbox
+                label="Email"
+                checked={draft.emailChannel}
+                onChange={(e) => setDraft({ ...draft, emailChannel: e.currentTarget.checked })}
+              />
+              <Checkbox
+                label="WhatsApp"
+                disabled={!waReady}
+                // The platform's own paired number is an implementation
+                // detail, not something a customer needs on screen — what
+                // matters is where the message lands, which the notice below
+                // states.
+                description={
+                  !wa?.configured
+                    ? "Not available on this deployment"
+                    : wa.status === "connected"
+                      ? "A copy on your own WhatsApp"
+                      : "Temporarily unavailable — try again shortly"
+                }
+                checked={draft.whatsappChannel}
+                onChange={(e) => setDraft({ ...draft, whatsappChannel: e.currentTarget.checked })}
+              />
+            </Stack>
+          </div>
+
+          {draft.whatsappChannel && (
+            <Alert color="teal" radius="md" p="xs" icon={<MessageCircle size={15} />}>
+              <Text size="xs">
+                {ownerMobile
+                  ? `This report will be sent to your own number, +${ownerMobile}. WhatsApp delivery goes to you only — to share with a client, add their email address below.`
+                  : "Add your mobile number in Settings first — WhatsApp reports are delivered to your own number."}
+              </Text>
+            </Alert>
+          )}
 
           <div>
             <Text size="sm" fw={500} mb={4}>Also send to</Text>

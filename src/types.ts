@@ -145,6 +145,26 @@ export type ReportRecipient = {
   unsubscribed: boolean;
 };
 
+/** A WhatsApp destination on a report. */
+export type ReportPhoneRecipient = {
+  /** Digits only, country code first — normalised server-side. */
+  phone: string;
+  label: string;
+  /** Removed from delivery by the owner, without deleting the row. */
+  optedOut: boolean;
+};
+
+/** Which channels a report goes out on. At least one is always true. */
+export type ReportChannels = { email: boolean; whatsapp: boolean };
+
+/** Whether WhatsApp delivery is available, and the paired session's live state. */
+export type WhatsAppStatus = {
+  configured: boolean;
+  status?: "connected" | "pairing" | "disconnected" | "error" | string;
+  phoneNumber?: string;
+  error?: string;
+};
+
 export type ReportSchedule = {
   id: string;
   name: string;
@@ -152,6 +172,8 @@ export type ReportSchedule = {
   siteIds: string[];
   frequency: ReportFrequency;
   recipients: ReportRecipient[];
+  phoneRecipients: ReportPhoneRecipient[];
+  channels: ReportChannels;
   include: { analytics: boolean; seo: boolean; dashboardLink: boolean };
   attachXlsx: boolean;
   enabled: boolean;
@@ -167,6 +189,11 @@ export type ReportScheduleInput = {
   frequency: ReportFrequency;
   /** Extra addresses only — the owner's own is always added server-side. */
   recipients: string[];
+  /**
+   * Not sent by the client: WhatsApp is delivered to the account owner's own
+   * mobile, which the server reads from their profile.
+   */
+  channels: ReportChannels;
   include: { analytics: boolean; seo: boolean; dashboardLink: boolean };
   attachXlsx: boolean;
   enabled?: boolean;

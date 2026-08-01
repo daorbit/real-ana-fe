@@ -17,7 +17,7 @@ import type {
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
   Plan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
-  ReportSchedule, ReportScheduleInput,
+  ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult,
 } from "../types";
@@ -712,6 +712,25 @@ export const api = createApi({
       }),
     }),
 
+    /** Live state of the paired WhatsApp session — checked per page load, never cached long. */
+    getWhatsAppStatus: build.query<WhatsAppStatus, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/reports/whatsapp/status`,
+      // A dropped pairing should surface on the next visit, not 5 minutes later.
+      keepUnusedDataFor: 30,
+    }),
+
+    /** Send this report over WhatsApp now, to one number already on it. */
+    testReportWhatsApp: build.mutation<
+      { ok: true; sentTo: string; messageId: string },
+      { workspaceId: string; id: string; phone: string }
+    >({
+      query: ({ workspaceId, id, phone }) => ({
+        url: `/api/workspaces/${workspaceId}/reports/${id}/test-whatsapp`,
+        method: "POST",
+        body: { phone },
+      }),
+    }),
+
     /* ---------------------------- admin billing ----------------------------- */
 
     getAdminPlans: build.query<Plan[], void>({
@@ -848,6 +867,8 @@ export const {
   useSaveReportScheduleMutation,
   useDeleteReportScheduleMutation,
   useTestReportScheduleMutation,
+  useGetWhatsAppStatusQuery,
+  useTestReportWhatsAppMutation,
   useGetAdminFxQuery,
   useSyncAdminPlanCurrencyMutation,
   useGetAdminAddonPacksQuery,
