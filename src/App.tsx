@@ -45,6 +45,9 @@ import "./polish.css";
  * that asks for it cannot be skipped, so an account without one either predates
  * that step or left before reaching it — and neither has anywhere else to
  * supply it short of finding the field in Settings.
+ *
+ * Demo and impersonation sessions are exempt from the guard entirely; see the
+ * note at the check.
  */
 function RequireSetup({ children }: { children: ReactNode }) {
   const { workspaces, loading } = useWorkspace();
@@ -57,12 +60,19 @@ function RequireSetup({ children }: { children: ReactNode }) {
   // Demo accounts are handed out pre-filled and are never a real person, so
   // asking one for a phone number would block a tour on a detail that has
   // nowhere to go.
-  if (!user?.mobile && !user?.demo) {
+  //
+  // Impersonation is exempt for a different reason: the gap belongs to the
+  // account being viewed, and an admin is here to look at it, not to fill in
+  // that person's mobile number or create workspaces on their behalf. Sending
+  // the admin to onboarding would offer exactly those two things.
+  const setupExempt = user?.demo || user?.impersonating;
+
+  if (!user?.mobile && !setupExempt) {
     return <Navigate to="/app/onboarding" replace />;
   }
 
   const skipped = localStorage.getItem("quantalog_onboarding_skipped") === "1";
-  if (!workspaces.length && !skipped) {
+  if (!workspaces.length && !skipped && !setupExempt) {
     return <Navigate to="/app/onboarding" replace />;
   }
   return <>{children}</>;

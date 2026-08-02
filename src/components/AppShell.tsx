@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
-  Box, useMantineColorScheme, useComputedColorScheme, Button, Alert, Menu,
+  Box, useMantineColorScheme, useComputedColorScheme, Button, Menu,
   UnstyledButton, Tooltip, Burger, Progress, Badge,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -250,6 +250,27 @@ export function AppShell({ children }: { children: ReactNode }) {
         </MantineShell.Section>
 
         <MantineShell.Section>
+          {/* Full access means an accidental delete lands on a real customer,
+              so the session stays flagged for as long as it lasts. It sits with
+              the demo card, directly above the account it is standing in for —
+              a banner over the page pushed every screen down to say something
+              that never changes. */}
+          {impersonating && (
+            <Box className="impersonation-card" mb="xs">
+              <Group gap={6} wrap="nowrap" mb={4}>
+                <Eye size={12} style={{ color: "var(--amber)", flexShrink: 0 }} />
+                <Text size="xs" fw={650}>{t("nav.viewingAs")}</Text>
+              </Group>
+              <Text size="xs" c="dimmed" lh={1.4} truncate title={user?.email}>
+                {user?.email}
+              </Text>
+              <UnstyledButton className="impersonation-exit" onClick={leave} disabled={leaving}>
+                <LogOut size={11} />
+                {t("nav.exit")}
+              </UnstyledButton>
+            </Box>
+          )}
+
           {!isDemo && <PlanCard />}
 
           {/* Read-only demo session. A persistent card, not a toast, because it
@@ -370,28 +391,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
 
         <div style={{ position: "relative", zIndex: 1 }}>
-          {/* Full access means an accidental delete lands on a real customer.
-              The banner is deliberately loud and always in reach. */}
-          {impersonating && (
-            <Alert color="orange" variant="filled" radius="md" mb="lg" icon={<Eye size={18} />}>
-              <Group justify="space-between" wrap="nowrap">
-                <Text size="sm" fw={500}>
-                  {t("nav.viewingAs")} <b>{user?.email}</b> {t("nav.viewingAsRest")}
-                </Text>
-                <Button
-                  size="xs"
-                  variant="white"
-                  color="orange"
-                  onClick={leave}
-                  loading={leaving}
-                  style={{ flexShrink: 0 }}
-                >
-                  {t("nav.exit")}
-                </Button>
-              </Group>
-            </Alert>
-          )}
-
           {/* Keyed on the path so the entrance animation replays on every
               navigation rather than only on first mount. */}
           <div key={loc.pathname} className="route-fade">
