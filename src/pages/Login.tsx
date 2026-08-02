@@ -146,17 +146,27 @@ export default function Login() {
               onBlur={blur("email")}
             />
 
-            <PasswordInput
-              label="Password"
-              placeholder="••••••••"
-              size="md"
-              withAsterisk
-              autoComplete="current-password"
-              value={password}
-              error={show("password")}
-              onChange={(e) => setPassword(e.currentTarget.value)}
-              onBlur={blur("password")}
-            />
+            <div>
+              <PasswordInput
+                label="Password"
+                placeholder="••••••••"
+                size="md"
+                withAsterisk
+                autoComplete="current-password"
+                value={password}
+                error={show("password")}
+                onChange={(e) => setPassword(e.currentTarget.value)}
+                onBlur={blur("password")}
+              />
+              {/* Under the field rather than on the label row: the label row
+                  fights the required asterisk, and this is where the eye
+                  already is once the password has been typed and rejected. */}
+              <Group justify="flex-end" mt={6}>
+                <Anchor component={Link} to="/forgot-password" size="xs" fw={500}>
+                  Forgot password?
+                </Anchor>
+              </Group>
+            </div>
 
             <Button type="submit" loading={busy} disabled={googleBusy} fullWidth size="md">
               Log in

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "./auth";
 import { WorkspaceProvider, useWorkspace } from "./workspace";
 import { DemoProvider } from "./demo";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import Analytics from "./pages/Analytics";
@@ -130,6 +131,7 @@ export default function App() {
             <Route path="/" element={<Root />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
             <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
+            <Route path="/forgot-password" element={<PublicOnly><ForgotPassword /></PublicOnly>} />
             {/* Shared dashboards: no auth, and deliberately not PublicOnly —
                 a signed-in user following a shared link should see the shared
                 view, not be bounced to their own dashboard. */}

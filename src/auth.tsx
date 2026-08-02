@@ -26,6 +26,11 @@ type AuthState = {
   /** Proves the code and creates the account, signing the user in. */
   verifySignup: (email: string, code: string) => Promise<void>;
   resendSignupCode: (email: string) => Promise<void>;
+  /** Emails a reset code. Resolves whether or not the address has an account. */
+  forgotPassword: (email: string) => Promise<void>;
+  /** Proves the code, sets the new password, and signs in. */
+  resetPassword: (email: string, code: string, password: string) => Promise<void>;
+  resendResetCode: (email: string) => Promise<void>;
   startDemo: () => Promise<void>;
   logout: () => void;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
@@ -125,6 +130,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api.post("/api/auth/signup/resend", { email });
   };
 
+  /**
+   * Start a password reset.
+   *
+   * Always resolves, even for an address with no account — the server answers
+   * identically either way on purpose, so that this flow cannot be used to
+   * find out who has an account here.
+   */
+  const forgotPassword = async (email: string) => {
+    await api.post("/api/auth/forgot-password", { email });
+  };
+
+  /** Prove the code and set the new password. Signs in on success. */
+  const resetPassword = async (email: string, code: string, password: string) => {
+    const r = await api.post<AuthResp>("/api/auth/reset-password", { email, code, password });
+    setToken(r.token);
+    dispatch(rtkApi.util.resetApiState());
+    setUser(r.user);
+  };
+
+  const resendResetCode = async (email: string) => {
+    await api.post("/api/auth/forgot-password/resend", { email });
+  };
+
   const updateProfile = async (patch: ProfileUpdate) => {
     const updated = await api.patch<User>("/api/auth/me", patch);
     // /api/auth/me does not echo `impersonating` on PATCH, and losing it would
@@ -198,7 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

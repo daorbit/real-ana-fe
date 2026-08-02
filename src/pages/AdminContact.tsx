@@ -7,7 +7,7 @@ import {
 } from "@mantine/core";
 import {
   Inbox, Search, ShieldAlert, Trash2, ExternalLink, Send, CornerUpLeft,
-  MailCheck, Ban,
+  MailCheck, Ban, RefreshCw,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
@@ -73,7 +73,7 @@ export default function AdminContact() {
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, isLoading, isFetching } = useGetContactMessagesQuery(
+  const { data, isLoading, isFetching, refetch } = useGetContactMessagesQuery(
     { status, source, q, page },
     { skip: !isAdmin }
   );
@@ -125,11 +125,28 @@ export default function AdminContact() {
         title="Contact messages"
         description="Enquiries from the marketing site, plus support requests, bug reports and feedback raised inside the app. Senders get an automatic receipt; replies you send here go out from Quantalog."
         actions={
-          data?.unread ? (
-            <Badge color="emerald" variant="light" size="lg">
-              {data.unread} unread
-            </Badge>
-          ) : undefined
+          <Group gap="sm">
+            {data?.unread ? (
+              <Badge color="emerald" variant="light" size="lg">
+                {data.unread} unread
+              </Badge>
+            ) : null}
+            {/* Messages arrive while the page is open and nothing polls for
+                them, so there has to be a way to ask without a full reload. */}
+            <Tooltip label="Check for new messages" withArrow>
+              <ActionIcon
+                variant="light"
+                color="gray"
+                size="lg"
+                radius="md"
+                loading={isFetching}
+                onClick={() => refetch()}
+                aria-label="Check for new messages"
+              >
+                <RefreshCw size={15} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
         }
       />
 
