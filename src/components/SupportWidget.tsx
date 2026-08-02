@@ -27,6 +27,9 @@ import { useAuth } from "../auth";
 
 type Kind = "support" | "bug" | "feedback";
 
+/** Shortest message worth sending. Matches the server's own check. */
+const MIN_MESSAGE = 10;
+
 const KINDS: Record<
   Kind,
   { title: string; blurb: string; placeholder: string; icon: typeof Bug }
@@ -113,11 +116,16 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
   const { user, isDemo } = useAuth();
   const loc = useLocation();
   const [message, setMessage] = useState("");
+  const [touched, setTouched] = useState(false);
   const [sent, setSent] = useState(false);
   const [send, { isLoading }] = useSendSupportMessageMutation();
 
   const config = kind ? KINDS[kind] : null;
-  const tooShort = message.trim().length < 10;
+  const typed = message.trim().length;
+  const tooShort = typed < MIN_MESSAGE;
+  // Hold the error back until they have started typing or tried to send —
+  // flagging an untouched empty box is scolding someone for nothing.
+  const showError = typed > 0 || touched;
 
   function close() {
     onClose();
@@ -125,12 +133,19 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
     // change while it is still fading out.
     setTimeout(() => {
       setMessage("");
+      setTouched(false);
       setSent(false);
     }, 200);
   }
 
   async function submit() {
-    if (!kind || tooShort) return;
+    if (!kind) return;
+    if (tooShort) {
+      // Reveal the field error even from an untouched empty box, where it is
+      // held back until typing starts.
+      setTouched(true);
+      return;
+    }
     try {
       await send({
         kind,
@@ -196,8 +211,17 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
                 maxLength={5000}
                 radius="md"
                 data-autofocus
+                // Fixed wording rather than a countdown: a message whose length
+                // changes on every keystroke draws the eye to the shifting text
+                // instead of to what it says.
+                error={showError && tooShort ? "Please write a little more" : undefined}
               />
 
+              {/* No running counter beside this text: an `x/10` that keeps
+                  counting past 10 is meaningless, and its changing width
+                  reflows the sentence next to it on every keystroke. The field
+                  error below the textarea already says what is missing, and it
+                  disappears once nothing is. */}
               <Text size="xs" c="dimmed">
                 Sent from your account, so we will reply to {user?.email}. The page
                 you&apos;re on is included automatically.
@@ -207,12 +231,10 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
                 <Button variant="subtle" color="gray" onClick={close}>
                   Cancel
                 </Button>
-                <Button
-                  color="emerald"
-                  onClick={submit}
-                  loading={isLoading}
-                  disabled={tooShort}
-                >
+                {/* Not disabled while too short: a dead button explains nothing.
+                    Clicking it surfaces the counter and the field error, which
+                    say exactly what is missing. */}
+                <Button color="emerald" onClick={submit} loading={isLoading}>
                   Send
                 </Button>
               </Group>

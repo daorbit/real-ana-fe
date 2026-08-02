@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import {
   Badge, Button, Card, Center, Group, Loader, Pagination, ScrollArea, SegmentedControl,
   Stack, Text, TextInput, Textarea, ThemeIcon, ActionIcon, Tooltip, Anchor,
-  UnstyledButton, Divider, Alert,
+  UnstyledButton, Divider,
 } from "@mantine/core";
 import {
   Inbox, Search, ShieldAlert, Trash2, ExternalLink, Send, CornerUpLeft,
-  MailCheck, AlertTriangle, Ban,
+  MailCheck, Ban,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
@@ -49,6 +49,9 @@ const SUBJECT_LABELS: Record<string, string> = {
   bug: "Bug report",
   feedback: "Feedback",
 };
+
+/** Shortest reply worth sending. Matches the server's own check. */
+const MIN_REPLY = 10;
 
 /** A bug report from a paying customer is not a cold sales enquiry — the two
  *  arrive in the same inbox and need telling apart at a glance. */
@@ -326,6 +329,13 @@ function Detail({ message }: { message: ContactMessage }) {
   const [replying, setReplying] = useState(false);
   const [subject, setSubject] = useState(`Re: ${SUBJECT_LABELS[message.subject] ?? "your message"}`);
   const [body, setBody] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  const typed = body.trim().length;
+  const tooShort = typed < MIN_REPLY;
+  // Hold the error back until they have started or tried to send — flagging an
+  // untouched empty box is scolding someone for nothing.
+  const showError = typed > 0 || touched;
 
   const [update] = useUpdateContactMessageMutation();
   const [remove] = useDeleteContactMessageMutation();
@@ -355,14 +365,21 @@ function Detail({ message }: { message: ContactMessage }) {
   }
 
   async function send() {
-    if (body.trim().length < 10) {
-      notify.error("Write a little more before sending");
+    // A toast for a length problem points at the wrong place — the error
+    // belongs on the field it is about, next to the counter.
+    if (tooShort) {
+      setTouched(true);
+      return;
+    }
+    if (!subject.trim()) {
+      setTouched(true);
       return;
     }
     try {
       await reply({ id: message._id, subject: subject.trim(), body: body.trim() }).unwrap();
       setBody("");
       setReplying(false);
+      setTouched(false);
       notify.success(`Reply sent to ${message.email}`);
     } catch (e) {
       notify.error(errMessage(e, "The reply could not be sent"));
@@ -440,23 +457,6 @@ function Detail({ message }: { message: ContactMessage }) {
         )}
       </Group>
 
-      {/* The sender is waiting on a receipt that never went. Worth surfacing:
-          silence looks the same to them as being ignored. */}
-      {!message.ackSentAt && (
-        <Alert
-          color="orange"
-          variant="light"
-          radius="md"
-          mt="md"
-          icon={<AlertTriangle size={15} />}
-        >
-          <Text size="sm">
-            The automatic &ldquo;we got your message&rdquo; receipt did not go out —
-            email may not be configured on the server. This person has heard nothing yet.
-          </Text>
-        </Alert>
-      )}
-
       <Divider my="md" />
 
       <Text size="sm" style={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
@@ -493,6 +493,7 @@ function Detail({ message }: { message: ContactMessage }) {
             onChange={(e) => setSubject(e.currentTarget.value)}
             maxLength={200}
             radius="md"
+            error={touched && !subject.trim() ? "A subject is required" : undefined}
           />
           <Textarea
             label="Your reply"
@@ -504,6 +505,11 @@ function Detail({ message }: { message: ContactMessage }) {
             maxLength={10000}
             radius="md"
             placeholder={`Hi ${message.name.split(" ")[0]},\n\n`}
+            // Fixed wording, and no running counter: an `x/10` that keeps
+            // counting past 10 says nothing, and text that changes width on
+            // every keystroke pulls the eye to the movement rather than the
+            // meaning. This clears itself the moment the reply is long enough.
+            error={showError && tooShort ? "Please write a little more" : undefined}
           />
           <Group gap="sm">
             <Button
@@ -514,7 +520,7 @@ function Detail({ message }: { message: ContactMessage }) {
             >
               Send reply
             </Button>
-            <Button variant="subtle" color="gray" onClick={() => setReplying(false)}>
+            <Button variant="subtle" color="gray" onClick={() => { setReplying(false); setTouched(false); }}>
               Cancel
             </Button>
           </Group>
@@ -524,7 +530,7 @@ function Detail({ message }: { message: ContactMessage }) {
           variant="light"
           color="emerald"
           leftSection={<CornerUpLeft size={15} />}
-          onClick={() => setReplying(true)}
+          onClick={() => { setReplying(true); setTouched(false); }}
         >
           {replies.length ? "Reply again" : "Reply"}
         </Button>
