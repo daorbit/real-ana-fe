@@ -292,6 +292,60 @@ export type AdminUserPage = {
   pages: number;
 };
 
+/* --------------------------- contact form inbox --------------------------- */
+
+export type ContactStatus = "new" | "read" | "replied" | "spam";
+
+export type ContactSubject =
+  | "general"
+  | "sales"
+  | "support"
+  | "platform-api"
+  | "privacy"
+  | "other";
+
+/**
+ * One message from the marketing site's contact form.
+ *
+ * The server never sends `ipHash` — it exists to rate-limit a flood, not to be
+ * looked at — so it is deliberately absent here too.
+ */
+export type ContactReply = {
+  subject: string;
+  body: string;
+  /** Email of the admin who sent it. */
+  sentBy: string;
+  sentAt: string;
+};
+
+export type ContactMessage = {
+  _id: string;
+  name: string;
+  email: string;
+  company: string;
+  subject: ContactSubject;
+  message: string;
+  pageUrl: string;
+  status: ContactStatus;
+  adminNote: string;
+  /** Optional: messages stored before replies existed come back without it. */
+  replies?: ContactReply[];
+  userAgent: string;
+  createdAt: string;
+  readAt: string | null;
+  /** When the automatic receipt went out; null means it never did. */
+  ackSentAt: string | null;
+};
+
+export type ContactMessagePage = {
+  messages: ContactMessage[];
+  total: number;
+  /** Count of messages still in "new", regardless of the current filter. */
+  unread: number;
+  page: number;
+  pages: number;
+};
+
 /** Full billing detail for one account, shown in the admin plan dialog. */
 export type AdminUserBilling =
   | { subscribed: false }

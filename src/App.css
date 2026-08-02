@@ -1612,3 +1612,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .impersonation-exit:hover { opacity: 0.75; text-decoration: underline; }
 .impersonation-exit:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .impersonation-exit:disabled { opacity: 0.5; cursor: default; text-decoration: none; }
+
+/* Contact inbox: list beside a reading pane, stacking below the width where
+   340px of list leaves the message itself unreadable. */
+@media (max-width: 62em) {
+  .contact-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

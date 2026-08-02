@@ -9,7 +9,7 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
-  CreditCard, ArrowUpRight, Mail,
+  CreditCard, ArrowUpRight, Mail, Inbox,
 } from "lucide-react";
 import { PlanIcon } from "./PlanIcons";
 import { Wordmark } from "./Brand";
@@ -61,6 +61,7 @@ const NAV_GROUPS = [
 const ADMIN_ITEMS = [
   { to: "/app/impersonate", labelKey: "nav.viewAsUser", label: "Impersonate", icon: Users },
   { to: "/app/admin/broadcast", labelKey: "nav.adminBroadcast", label: "Send a message", icon: Mail },
+  { to: "/app/admin/contact", labelKey: "nav.adminContact", label: "Contact messages", icon: Inbox },
   { to: "/app/demo-usage", labelKey: "nav.demoUsage", label: "Demo usage", icon: PlayCircle },
   { to: "/app/admin/billing", labelKey: "nav.adminBilling", label: "Plans & addons", icon: CreditCard },
 ];

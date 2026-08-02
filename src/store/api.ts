@@ -5,6 +5,7 @@ import { notify, errMessage } from "../notify";
 import { resolveDemoRequest } from "../utils/demoResolver";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace, Role,
+  ContactMessage, ContactMessagePage, ContactStatus,
   FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout,
@@ -108,7 +109,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -331,6 +332,58 @@ export const api = createApi({
 
     getAdminUserBilling: build.query<AdminUserBilling, string>({
       query: (userId) => `/api/admin/users/${userId}/billing`,
+    }),
+
+    /* --------------------------- contact inbox ---------------------------- */
+    getContactMessages: build.query<
+      ContactMessagePage,
+      { status?: string; q?: string; page?: number }
+    >({
+      query: ({ status, q, page }) => {
+        const p = new URLSearchParams();
+        if (status) p.set("status", status);
+        if (q) p.set("q", q);
+        if (page && page > 1) p.set("page", String(page));
+        const qs = p.toString();
+        return `/api/admin/contact${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: ["ContactMessage"],
+    }),
+
+    /** Just the badge count. The list query is far too heavy to poll for it. */
+    getContactUnread: build.query<{ unread: number }, void>({
+      query: () => "/api/admin/contact/unread",
+      providesTags: ["ContactMessage"],
+    }),
+
+    updateContactMessage: build.mutation<
+      ContactMessage,
+      { id: string; status?: ContactStatus; adminNote?: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/api/admin/contact/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["ContactMessage"],
+    }),
+
+    deleteContactMessage: build.mutation<void, string>({
+      query: (id) => ({ url: `/api/admin/contact/${id}`, method: "DELETE" }),
+      invalidatesTags: ["ContactMessage"],
+    }),
+
+    /** Send a reply from the dashboard. The server mails it, then records it. */
+    replyToContactMessage: build.mutation<
+      ContactMessage,
+      { id: string; subject: string; body: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/api/admin/contact/${id}/reply`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ContactMessage"],
     }),
 
     /* ---------------------------- admin email ----------------------------- */
@@ -824,6 +877,11 @@ export const {
   useDeleteAdminUserMutation,
   useSetAdminUserRoleMutation,
   useGetAdminUserBillingQuery,
+  useGetContactMessagesQuery,
+  useGetContactUnreadQuery,
+  useUpdateContactMessageMutation,
+  useDeleteContactMessageMutation,
+  useReplyToContactMessageMutation,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,
