@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert, Anchor, Badge, Box, Button, Card, Center, Group, Loader, Select, Stack,
+  Anchor, Badge, Box, Button, Card, Center, Group, Loader, Select, Stack,
   Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
   UnstyledButton,
 } from "@mantine/core";
 import {
-  Search, RefreshCw, Globe, History, Trash2, Info, Trophy,
+  Search, RefreshCw, Globe, History, Trash2, Trophy,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
   HelpCircle,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { RunningDialog } from "../components/RunningDialog";
 import { HelpDrawer } from "../components/HelpDrawer";
 import { SEO_HELP } from "../components/seo/help";
 import { PageHeader } from "../components/Page";
@@ -449,6 +450,26 @@ export default function Seo() {
 
   return (
     <AppShell>
+      <RunningDialog
+        opened={analyzing}
+        title="Running SEO audit"
+        description={
+          <>
+            {targetUrl || "This page"} — usually 20-60 seconds.
+          </>
+        }
+        icon={<Search size={20} />}
+        minimizedLabel="Running SEO audit…"
+        successMessage="SEO audit complete"
+        steps={[
+          "Fetching the page…",
+          "Parsing meta tags and headings…",
+          "Checking technical setup…",
+          "Running Lighthouse…",
+          "Scoring and building the report…",
+        ]}
+      />
+
       <PageHeader
         title="SEO"
         description="Audit a tracked site's meta tags, content, technical setup and Lighthouse scores."
@@ -468,7 +489,7 @@ export default function Seo() {
                 variant="light"
                 color="emerald"
                 leftSection={<RefreshCw size={15} />}
-                loading={analyzing}
+                disabled={analyzing}
                 onClick={() => run(true)}
               >
                 Re-run audit
@@ -523,7 +544,7 @@ export default function Seo() {
             <Button
               color="emerald"
               leftSection={<Search size={15} />}
-              loading={analyzing}
+              disabled={analyzing}
               onClick={() => run(false)}
               radius="md"
               w={{ base: "100%", sm: "auto" }}
@@ -545,12 +566,6 @@ export default function Seo() {
             </Group>
           )}
 
-          {analyzing && (
-            <Alert color="gray" variant="light" mt="md" radius="md" icon={<Info size={15} />}>
-              Running the Lighthouse audit through Google PageSpeed. This usually takes
-              20-60 seconds.
-            </Alert>
-          )}
         </Card>
 
         {!report && !loading && (
