@@ -122,7 +122,7 @@ export default function AdminContact() {
   return (
     <AppShell>
       <PageHeader
-        title="Contact messages"
+        title="Inbox"
         description="Enquiries from the marketing site, plus support requests, bug reports and feedback raised inside the app. Senders get an automatic receipt; replies you send here go out from Quantalog."
         actions={
           <Group gap="sm">

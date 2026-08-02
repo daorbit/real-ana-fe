@@ -57,11 +57,18 @@ const NAV_GROUPS = [
   },
 ];
 
-/** Only an admin sees these, and only when not already acting as someone else. */
+/**
+ * Only an admin sees these, and only when not already acting as someone else.
+ *
+ * "Send a message" and "Contact messages" were almost the same words for
+ * opposite directions — one mails every user, the other is where users' mail
+ * arrives. The labels now name the direction rather than the medium, and the
+ * inbox sits first because it is the one with unread work in it.
+ */
 const ADMIN_ITEMS = [
+  { to: "/app/admin/contact", labelKey: "nav.adminContact", label: "Inbox", icon: Inbox },
+  { to: "/app/admin/broadcast", labelKey: "nav.adminBroadcast", label: "Email users", icon: Mail },
   { to: "/app/impersonate", labelKey: "nav.viewAsUser", label: "Impersonate", icon: Users },
-  { to: "/app/admin/broadcast", labelKey: "nav.adminBroadcast", label: "Send a message", icon: Mail },
-  { to: "/app/admin/contact", labelKey: "nav.adminContact", label: "Contact messages", icon: Inbox },
   { to: "/app/demo-usage", labelKey: "nav.demoUsage", label: "Demo usage", icon: PlayCircle },
   { to: "/app/admin/billing", labelKey: "nav.adminBilling", label: "Plans & addons", icon: CreditCard },
 ];
