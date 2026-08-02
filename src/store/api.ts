@@ -334,14 +334,25 @@ export const api = createApi({
       query: (userId) => `/api/admin/users/${userId}/billing`,
     }),
 
+    /** Support request raised from inside the app. Identity comes from the
+     *  session server-side, so nothing about the sender is passed here. */
+    sendSupportMessage: build.mutation<
+      { ok: true },
+      { kind: "support" | "bug" | "feedback"; message: string; pageUrl: string }
+    >({
+      query: (body) => ({ url: "/api/support", method: "POST", body }),
+      invalidatesTags: ["ContactMessage"],
+    }),
+
     /* --------------------------- contact inbox ---------------------------- */
     getContactMessages: build.query<
       ContactMessagePage,
-      { status?: string; q?: string; page?: number }
+      { status?: string; q?: string; page?: number; source?: string }
     >({
-      query: ({ status, q, page }) => {
+      query: ({ status, q, page, source }) => {
         const p = new URLSearchParams();
         if (status) p.set("status", status);
+        if (source) p.set("source", source);
         if (q) p.set("q", q);
         if (page && page > 1) p.set("page", String(page));
         const qs = p.toString();
@@ -882,6 +893,7 @@ export const {
   useUpdateContactMessageMutation,
   useDeleteContactMessageMutation,
   useReplyToContactMessageMutation,
+  useSendSupportMessageMutation,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,

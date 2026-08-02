@@ -302,7 +302,13 @@ export type ContactSubject =
   | "support"
   | "platform-api"
   | "privacy"
-  | "other";
+  | "other"
+  // Raised from inside the dashboard rather than the marketing site.
+  | "bug"
+  | "feedback";
+
+/** Which surface a message came from. */
+export type ContactSource = "marketing" | "app";
 
 /**
  * One message from the marketing site's contact form.
@@ -326,6 +332,10 @@ export type ContactMessage = {
   subject: ContactSubject;
   message: string;
   pageUrl: string;
+  /** Optional: messages stored before the field existed default to marketing. */
+  source?: ContactSource;
+  /** The account that sent it, when it came from a signed-in user. */
+  userId?: string | null;
   status: ContactStatus;
   adminNote: string;
   /** Optional: messages stored before replies existed come back without it. */

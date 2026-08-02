@@ -46,6 +46,16 @@ const SUBJECT_LABELS: Record<string, string> = {
   "platform-api": "Platform API",
   privacy: "Privacy",
   other: "Other",
+  bug: "Bug report",
+  feedback: "Feedback",
+};
+
+/** A bug report from a paying customer is not a cold sales enquiry — the two
+ *  arrive in the same inbox and need telling apart at a glance. */
+const SUBJECT_COLORS: Record<string, string> = {
+  bug: "red",
+  feedback: "violet",
+  support: "orange",
 };
 
 export default function AdminContact() {
@@ -55,12 +65,13 @@ export default function AdminContact() {
     (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
 
   const [status, setStatus] = useState("");
+  const [source, setSource] = useState("");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data, isLoading, isFetching } = useGetContactMessagesQuery(
-    { status, q, page },
+    { status, source, q, page },
     { skip: !isAdmin }
   );
   const [update] = useUpdateContactMessageMutation();
@@ -109,7 +120,7 @@ export default function AdminContact() {
     <AppShell>
       <PageHeader
         title="Contact messages"
-        description="Enquiries from the contact form on the marketing site. Senders get an automatic receipt; replies you send here go out from Quantalog."
+        description="Enquiries from the marketing site, plus support requests, bug reports and feedback raised inside the app. Senders get an automatic receipt; replies you send here go out from Quantalog."
         actions={
           data?.unread ? (
             <Badge color="emerald" variant="light" size="lg">
@@ -146,6 +157,20 @@ export default function AdminContact() {
             { value: "spam", label: "Spam" },
           ]}
         />
+        <SegmentedControl
+          size="sm"
+          radius="md"
+          value={source}
+          onChange={(v) => {
+            setSource(v);
+            setPage(1);
+          }}
+          data={[
+            { value: "", label: "Everywhere" },
+            { value: "app", label: "In-app" },
+            { value: "marketing", label: "Website" },
+          ]}
+        />
       </Group>
 
       {isLoading ? (
@@ -159,9 +184,9 @@ export default function AdminContact() {
               </ThemeIcon>
               <Text fw={600}>{q || status ? "Nothing matches" : "No messages yet"}</Text>
               <Text size="sm" c="dimmed" ta="center">
-                {q || status
+                {q || status || source
                   ? "Try a different search or filter."
-                  : "Messages sent through the contact form on the landing page arrive here."}
+                  : "Contact enquiries from the marketing site, and support requests, bug reports and feedback raised inside the app, all arrive here."}
               </Text>
             </Stack>
           </Center>
@@ -272,9 +297,18 @@ function ListRow({
       </Text>
 
       <Group gap={5} mt={7}>
-        <Badge size="xs" variant="light" color="gray">
+        <Badge
+          size="xs"
+          variant="light"
+          color={SUBJECT_COLORS[message.subject] ?? "gray"}
+        >
           {SUBJECT_LABELS[message.subject] ?? message.subject}
         </Badge>
+        {message.source === "app" && (
+          <Badge size="xs" variant="outline" color="gray">
+            in-app
+          </Badge>
+        )}
         {message.status !== "new" && message.status !== "read" && (
           <Badge size="xs" variant="light" color={STATUS_COLORS[message.status]}>
             {message.status}
@@ -360,6 +394,13 @@ function Detail({ message }: { message: ContactMessage }) {
             <Badge size="sm" variant="light" color={STATUS_COLORS[message.status]}>
               {message.status}
             </Badge>
+            {/* Worth stating plainly: this address came from an authenticated
+                session, so it is verified in a way a form field never is. */}
+            {message.source === "app" && (
+              <Badge size="sm" variant="outline" color="gray">
+                Signed-in user
+              </Badge>
+            )}
           </Group>
           <Anchor href={`mailto:${message.email}`} size="sm" c="dimmed">
             {message.email}
@@ -383,7 +424,7 @@ function Detail({ message }: { message: ContactMessage }) {
       </Group>
 
       <Group gap="lg" mt="md" wrap="wrap">
-        <Field label="Subject" value={SUBJECT_LABELS[message.subject] ?? message.subject} />
+        <Field label="Type" value={SUBJECT_LABELS[message.subject] ?? message.subject} />
         {message.company && <Field label="Company" value={message.company} />}
         <Field label="Received" value={dateTime(message.createdAt)} />
         {message.pageUrl && (
