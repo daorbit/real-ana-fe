@@ -3,31 +3,18 @@ import {
   Menu, ActionIcon, Text, Modal, Stack, Textarea, Button, Group, ThemeIcon,
   Center, Alert,
 } from "@mantine/core";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
-  HelpCircle, BookOpen, Mail, Bug, MessageSquare, CheckCircle2, Info,
+  HelpCircle, Mail, Bug, MessageSquare, CheckCircle2, Info,
 } from "lucide-react";
 import { useSendSupportMessageMutation } from "../store";
 import { notify, errMessage } from "../notify";
 import { useAuth } from "../auth";
 
-/**
- * Floating help button, docked bottom-right across the whole app. Pages add
- * bottom padding so their content never scrolls under it.
- *
- * Support, bug reports and feedback used to be `mailto:` links, which assumed a
- * configured mail client and dropped whoever did not have one. They now open a
- * dialog that posts to the same inbox the marketing site's contact form feeds —
- * one place to read, one place to reply from.
- *
- * Nothing asks for a name or an address: the sender is signed in, so the server
- * takes both from the account. A support form that makes a logged-in customer
- * retype their own email is asking them to prove something we already know.
- */
+ 
 
 type Kind = "support" | "bug" | "feedback";
 
-/** Shortest message worth sending. Matches the server's own check. */
 const MIN_MESSAGE = 10;
 
 const KINDS: Record<
@@ -88,14 +75,6 @@ export function SupportWidget() {
             <Text size="xs" fw={600}>Need a hand?</Text>
           </Menu.Label>
 
-          <Menu.Item
-            component={Link}
-            to="/app/developers"
-            leftSection={<BookOpen size={15} />}
-          >
-            Documentation
-          </Menu.Item>
-
           {(Object.keys(KINDS) as Kind[]).map((k) => {
             const Icon = KINDS[k].icon;
             return (
@@ -123,14 +102,10 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
   const config = kind ? KINDS[kind] : null;
   const typed = message.trim().length;
   const tooShort = typed < MIN_MESSAGE;
-  // Hold the error back until they have started typing or tried to send —
-  // flagging an untouched empty box is scolding someone for nothing.
   const showError = typed > 0 || touched;
 
   function close() {
     onClose();
-    // Reset after the modal's exit transition, so the content does not visibly
-    // change while it is still fading out.
     setTimeout(() => {
       setMessage("");
       setTouched(false);
@@ -141,8 +116,6 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
   async function submit() {
     if (!kind) return;
     if (tooShort) {
-      // Reveal the field error even from an untouched empty box, where it is
-      // held back until typing starts.
       setTouched(true);
       return;
     }
@@ -150,9 +123,6 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
       await send({
         kind,
         message: message.trim(),
-        // The page they were on when they hit the problem is the single most
-        // useful thing on a bug report, and the only one they should not have
-        // to type.
         pageUrl: window.location.origin + loc.pathname,
       }).unwrap();
       setSent(true);
@@ -211,17 +181,9 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
                 maxLength={5000}
                 radius="md"
                 data-autofocus
-                // Fixed wording rather than a countdown: a message whose length
-                // changes on every keystroke draws the eye to the shifting text
-                // instead of to what it says.
                 error={showError && tooShort ? "Please write a little more" : undefined}
               />
 
-              {/* No running counter beside this text: an `x/10` that keeps
-                  counting past 10 is meaningless, and its changing width
-                  reflows the sentence next to it on every keystroke. The field
-                  error below the textarea already says what is missing, and it
-                  disappears once nothing is. */}
               <Text size="xs" c="dimmed">
                 Sent from your account, so we will reply to {user?.email}. The page
                 you&apos;re on is included automatically.
@@ -231,9 +193,6 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
                 <Button variant="subtle" color="gray" onClick={close}>
                   Cancel
                 </Button>
-                {/* Not disabled while too short: a dead button explains nothing.
-                    Clicking it surfaces the counter and the field error, which
-                    say exactly what is missing. */}
                 <Button color="emerald" onClick={submit} loading={isLoading}>
                   Send
                 </Button>
