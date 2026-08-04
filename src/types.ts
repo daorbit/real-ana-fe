@@ -305,10 +305,12 @@ export type ContactSubject =
   | "other"
   // Raised from inside the dashboard rather than the marketing site.
   | "bug"
-  | "feedback";
+  | "feedback"
+  // A newsletter signup rather than correspondence — no reply is expected.
+  | "newsletter";
 
 /** Which surface a message came from. */
-export type ContactSource = "marketing" | "app";
+export type ContactSource = "marketing" | "app" | "newsletter";
 
 /**
  * One message from the marketing site's contact form.

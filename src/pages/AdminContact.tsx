@@ -48,6 +48,7 @@ const SUBJECT_LABELS: Record<string, string> = {
   other: "Other",
   bug: "Bug report",
   feedback: "Feedback",
+  newsletter: "Newsletter",
 };
 
 /** Shortest reply worth sending. Matches the server's own check. */
@@ -59,6 +60,9 @@ const SUBJECT_COLORS: Record<string, string> = {
   bug: "red",
   feedback: "violet",
   support: "orange",
+  // Nobody is waiting on a reply to a newsletter signup, so it is deliberately
+  // the quietest badge in the list — it should not read as work.
+  newsletter: "teal",
 };
 
 export default function AdminContact() {
@@ -189,6 +193,7 @@ export default function AdminContact() {
             { value: "", label: "Everywhere" },
             { value: "app", label: "In-app" },
             { value: "marketing", label: "Website" },
+            { value: "newsletter", label: "Newsletter" },
           ]}
         />
       </Group>
