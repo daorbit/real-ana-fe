@@ -606,6 +606,38 @@ export type StatsFilter = Partial<{
   eventName: string;
 }>;
 
+/**
+ * A saved filter, so a view someone checks weekly doesn't have to be rebuilt
+ * by hand every time.
+ */
+export type Segment = {
+  id: string;
+  name: string;
+  filter: StatsFilter;
+  /** Pinned segments show as one-click chips; the rest live behind the menu. */
+  pinned: boolean;
+  createdAt: string;
+};
+
+/** What a marker represents. Drives its colour and icon on the chart. */
+export type MarkerKind = "deploy" | "campaign" | "incident" | "note";
+
+/**
+ * A moment drawn over the charts — a deploy, a campaign, an incident.
+ *
+ * Turns "traffic fell on Tuesday" into "traffic fell after Tuesday's release".
+ */
+export type Marker = {
+  id: string;
+  label: string;
+  description: string;
+  kind: MarkerKind;
+  /** When it happened, not when it was recorded. */
+  at: string;
+  /** Empty means every site in the workspace. */
+  siteIds: string[];
+};
+
 /** One step a user defines in the funnel builder. */
 export type FunnelStepInput = { type: "page" | "event"; value: string };
 

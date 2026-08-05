@@ -21,6 +21,7 @@ import type {
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult, Invoice,
+  Segment, Marker, MarkerKind, StatsFilter,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -109,7 +110,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -690,6 +691,109 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
     }),
 
+    /* -------------------------------- segments ------------------------------ */
+
+    getSegments: build.query<Segment[], string>({
+      query: (wid) => `/api/workspaces/${wid}/segments`,
+      providesTags: ["Segment"],
+    }),
+
+    saveSegment: build.mutation<
+      Segment,
+      { wid: string; name: string; filter: StatsFilter; pinned?: boolean }
+    >({
+      query: ({ wid, ...body }) => ({
+        url: `/api/workspaces/${wid}/segments`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Segment"],
+    }),
+
+    updateSegment: build.mutation<
+      Segment,
+      { wid: string; id: string; name?: string; filter?: StatsFilter; pinned?: boolean }
+    >({
+      query: ({ wid, id, ...body }) => ({
+        url: `/api/workspaces/${wid}/segments/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Segment"],
+    }),
+
+    deleteSegment: build.mutation<{ ok: true }, { wid: string; id: string }>({
+      query: ({ wid, id }) => ({
+        url: `/api/workspaces/${wid}/segments/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Segment"],
+    }),
+
+    /* -------------------------------- markers ------------------------------- */
+
+    /**
+     * Markers inside the visible window. Scoped by range so a workspace with
+     * years of deploys doesn't ship them all to draw a 24h chart.
+     */
+    getMarkers: build.query<Marker[], { wid: string; from?: string; to?: string }>({
+      query: ({ wid, from, to }) => {
+        const qs = new URLSearchParams();
+        if (from) qs.set("from", from);
+        if (to) qs.set("to", to);
+        const suffix = qs.toString() ? `?${qs}` : "";
+        return `/api/workspaces/${wid}/markers${suffix}`;
+      },
+      providesTags: ["Marker"],
+    }),
+
+    saveMarker: build.mutation<
+      Marker,
+      {
+        wid: string;
+        label: string;
+        description?: string;
+        kind?: MarkerKind;
+        at?: string;
+        siteIds?: string[];
+      }
+    >({
+      query: ({ wid, ...body }) => ({
+        url: `/api/workspaces/${wid}/markers`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Marker"],
+    }),
+
+    updateMarker: build.mutation<
+      Marker,
+      {
+        wid: string;
+        id: string;
+        label?: string;
+        description?: string;
+        kind?: MarkerKind;
+        at?: string;
+        siteIds?: string[];
+      }
+    >({
+      query: ({ wid, id, ...body }) => ({
+        url: `/api/workspaces/${wid}/markers/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Marker"],
+    }),
+
+    deleteMarker: build.mutation<{ ok: true }, { wid: string; id: string }>({
+      query: ({ wid, id }) => ({
+        url: `/api/workspaces/${wid}/markers/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Marker"],
+    }),
+
     /* -------------------------------- billing ------------------------------ */
 
     getPlans: build.query<Plan[], { currency: Currency }>({
@@ -966,6 +1070,14 @@ export const {
   useDeleteAdminAddonPackMutation,
   useCheckCouponMutation,
   useGetInvoicesQuery,
+  useGetSegmentsQuery,
+  useSaveSegmentMutation,
+  useUpdateSegmentMutation,
+  useDeleteSegmentMutation,
+  useGetMarkersQuery,
+  useSaveMarkerMutation,
+  useUpdateMarkerMutation,
+  useDeleteMarkerMutation,
   useGetAdminCouponsQuery,
   useSaveAdminCouponMutation,
   useDeleteAdminCouponMutation,

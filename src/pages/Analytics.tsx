@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -41,9 +41,18 @@ import { AnalyticsSkeleton } from "../components/Skeletons";
 import { HelpDrawer } from "../components/HelpDrawer";
 import { ANALYTICS_HELP } from "../components/analyticsHelp";
 import { useStats, useSites } from "../hooks";
+import {
+  useGetSegmentsQuery, useSaveSegmentMutation,
+  useUpdateSegmentMutation, useDeleteSegmentMutation,
+  useGetMarkersQuery, useSaveMarkerMutation, useDeleteMarkerMutation,
+} from "../store";
+import {
+  markerLines, MarkerLegend, MarkerDialog, MarkerButton,
+} from "../components/MarkerLayer";
+import { notify, errMessage } from "../notify";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
 import { useWorkspace } from "../workspace";
-import type { Stats, Bucket, StatsFilter } from "../types";
+import type { Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind } from "../types";
 import { serializeFilter } from "../types";
 
 const CHART = "#10b981";
@@ -257,6 +266,118 @@ export default function Analytics() {
     });
   const clearFilter = () => setFilter({});
 
+  // The visible window, as ISO bounds, so markers can be fetched for exactly
+  // what is on screen. A preset carries no explicit bounds, so its start is
+  // derived from its length; "custom" already has both.
+  // Memoised on the range alone: computing `Date.now()` inline would produce a
+  // new query argument on every render and refetch forever.
+  const markerWindow = useMemo(() => {
+    if (rangeState.preset === "custom" && rangeState.from && rangeState.to)
+      return { from: rangeState.from, to: rangeState.to };
+
+    const spans: Record<string, number> = {
+      "1h": 60 * 60 * 1000,
+      "24h": 24 * 60 * 60 * 1000,
+      "7d": 7 * 24 * 60 * 60 * 1000,
+      "30d": 30 * 24 * 60 * 60 * 1000,
+    };
+    const span = spans[rangeState.preset] ?? spans["24h"];
+    return {
+      from: new Date(Date.now() - span).toISOString(),
+      to: new Date().toISOString(),
+    };
+  }, [rangeState.preset, rangeState.from, rangeState.to]);
+
+  const { data: markers = [] } = useGetMarkersQuery(
+    { wid: active?._id ?? "", from: markerWindow.from, to: markerWindow.to },
+    { skip: !active?._id },
+  );
+
+  const [markersOpen, setMarkersOpen] = useState(false);
+  const [saveMarker, { isLoading: savingMarker }] = useSaveMarkerMutation();
+  const [deleteMarker] = useDeleteMarkerMutation();
+
+  const handleSaveMarker = async (input: {
+    label: string;
+    description: string;
+    kind: MarkerKind;
+    at: string;
+  }) => {
+    if (!active?._id) return;
+    try {
+      await saveMarker({ wid: active._id, ...input }).unwrap();
+      notify.success(`Marked "${input.label}"`);
+    } catch (e) {
+      notify.error(errMessage(e, "Could not add that marker."));
+    }
+  };
+
+  const [deletingMarker, setDeletingMarker] = useState<string | null>(null);
+
+  const handleDeleteMarker = async (marker: Marker) => {
+    if (!active?._id) return;
+    setDeletingMarker(marker.id);
+    try {
+      await deleteMarker({ wid: active._id, id: marker.id }).unwrap();
+    } catch (e) {
+      notify.error(errMessage(e, "Could not delete that marker."));
+    } finally {
+      setDeletingMarker(null);
+    }
+  };
+
+  // Saved segments for this workspace. Skipped until a workspace is known —
+  // the endpoint is workspace-scoped and there is nothing to ask for yet.
+  const { data: segments = [] } = useGetSegmentsQuery(active?._id ?? "", {
+    skip: !active?._id,
+  });
+  const [saveSegment, { isLoading: savingSegment }] = useSaveSegmentMutation();
+  const [updateSegment] = useUpdateSegmentMutation();
+  const [deleteSegment] = useDeleteSegmentMutation();
+
+  // Which segment row is mid-request. RTK Query's own `isLoading` is per hook,
+  // not per row, so it can't say which of several segments is being changed.
+  const [busySegment, setBusySegment] = useState<string | null>(null);
+
+  const handleSaveSegment = async (name: string, f: StatsFilter) => {
+    if (!active?._id) return;
+    try {
+      await saveSegment({ wid: active._id, name, filter: f }).unwrap();
+      notify.success(`Saved "${name}"`);
+    } catch (e) {
+      notify.error(errMessage(e, "Could not save that segment."));
+    }
+  };
+
+  const handleDeleteSegment = async (segment: Segment) => {
+    if (!active?._id) return;
+    setBusySegment(segment.id);
+    try {
+      await deleteSegment({ wid: active._id, id: segment.id }).unwrap();
+      notify.success(`Deleted "${segment.name}"`);
+    } catch (e) {
+      notify.error(errMessage(e, "Could not delete that segment."));
+    } finally {
+      setBusySegment(null);
+    }
+  };
+
+  const handleTogglePin = async (segment: Segment) => {
+    if (!active?._id) return;
+    setBusySegment(segment.id);
+    try {
+      await updateSegment({
+        wid: active._id,
+        id: segment.id,
+        pinned: !segment.pinned,
+      }).unwrap();
+    } catch (e) {
+      notify.error(errMessage(e, "Could not update that segment."));
+    } finally {
+      setBusySegment(null);
+    }
+  };
+
   // The last payload we successfully rendered. Switching range empties `stats`
   // until the new one arrives, and blanking the whole page to a skeleton each
   // time would tear the header and range switcher out from under the cursor —
@@ -386,6 +507,16 @@ export default function Analytics() {
         sections={ANALYTICS_HELP}
       />
 
+      <MarkerDialog
+        opened={markersOpen}
+        onClose={() => setMarkersOpen(false)}
+        markers={markers}
+        onSave={handleSaveMarker}
+        onDelete={handleDeleteMarker}
+        saving={savingMarker}
+        deletingId={deletingMarker}
+      />
+
       <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
         <div style={{ flex: "1 1 240px", minWidth: 0 }}>
           <Title order={1}>{t("analytics.title")}</Title>
@@ -461,7 +592,18 @@ export default function Analytics() {
 
       {/* Active segment. Clicking any breakdown row below adds a chip here and
           re-scopes every number to that segment. */}
-      <FilterBar filter={filter} onRemove={removeFilter} onClear={clearFilter} />
+      <FilterBar
+        filter={filter}
+        onRemove={removeFilter}
+        onClear={clearFilter}
+        segments={segments}
+        onApplySegment={(s) => setFilter(s.filter)}
+        onSaveSegment={handleSaveSegment}
+        onDeleteSegment={handleDeleteSegment}
+        onTogglePin={handleTogglePin}
+        saving={savingSegment}
+        busyId={busySegment}
+      />
 
       {/* The previous range stays on screen, dimmed, until the new one lands —
           so the numbers visibly go stale rather than the page going blank. */}
@@ -500,11 +642,15 @@ export default function Analytics() {
         <div className="grid-span-2">
           <Card withBorder radius="lg" padding="lg" h="100%">
             <Group justify="space-between" mb="md" wrap="nowrap">
-              <Text fw={600} c="dimmed" size="sm">{t("analytics.trafficOverTime")}</Text>
+              <Group gap={8} wrap="nowrap">
+                <Text fw={600} c="dimmed" size="sm">{t("analytics.trafficOverTime")}</Text>
+                <MarkerButton onClick={() => setMarkersOpen(true)} count={markers.length} />
+              </Group>
               {hasData && (
                 <Group gap="md" wrap="nowrap">
                   <LegendDot color="#10b981">Pageviews</LegendDot>
                   <LegendDot color="#22d3ee">Visitors</LegendDot>
+                  <MarkerLegend markers={markers} />
                 </Group>
               )}
             </Group>
@@ -527,6 +673,9 @@ export default function Analytics() {
                   <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
                   <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2.5} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#34d399" }} />
                   <Area type="monotone" dataKey="visitors" stroke="#22d3ee" strokeWidth={2} fill="url(#g2)" dot={false} />
+                  {/* Deploys and campaigns, drawn after the areas so the lines
+                      sit on top of the fills rather than under them. */}
+                  {markerLines(markers, series, range === "1h" || range === "24h")}
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
