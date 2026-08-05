@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
   SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
-  ActionIcon, Tooltip, Table,
+  ActionIcon, Tooltip, Table, NumberInput,
 } from "@mantine/core";
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
   FolderKanban, Layers, Star, Clock, PartyPopper, RefreshCw, Download, Receipt,
+  Plus, Minus,
 } from "lucide-react";
 import { PlanIcon } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
@@ -25,7 +26,10 @@ import { loadRazorpayCheckout, openRazorpayCheckout } from "../utils/razorpay";
 import {
   CURRENCIES, detectCurrency, formatMoney, priceIn, getStoredCurrency, setStoredCurrency,
 } from "../utils/currency";
-import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Currency, Invoice } from "../types";
+import type {
+  BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Currency, Invoice,
+  AddonSelection,
+} from "../types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -82,7 +86,9 @@ export default function Billing() {
   // What to celebrate once a purchase actually completes — set right before
   // the confetti burst, cleared when the dialog closes.
   const [celebration, setCelebration] = useState<
-    { kind: "plan"; planName: string } | { kind: "addon"; pack: AddonPack } | null
+    | { kind: "plan"; planName: string; credits: { type: string; credits: number }[] }
+    | { kind: "addon"; pack: AddonPack; packs: number }
+    | null
   >(null);
   // What was being bought when the Razorpay window was dismissed — nothing was
   // charged, but closing the modal silently leaves no trace of the attempt.
@@ -95,25 +101,38 @@ export default function Billing() {
     confetti({ particleCount: 60, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors, angle: 120, decay: 0.9 });
   };
 
-  const doSubscribe = async (plan: Plan) => {
+  const doSubscribe = async (plan: Plan, selection: AddonSelection = {}) => {
     setConfirmPlan(null);
     setSubscribing(plan.slug);
     try {
+      const chosen = Object.entries(selection)
+        .filter(([, packs]) => packs > 0)
+        .map(([slug, packs]) => ({ slug, packs }));
+
       const started = await startSubscription({
         planSlug: plan.slug,
         cycle,
         couponCode: planCoupon?.coupon?.code,
         currency,
+        ...(chosen.length ? { addons: chosen } : {}),
       }).unwrap();
 
       // A ₹0 plan (Free) is assigned directly server-side — no order, no
       // Razorpay modal to open.
       if ("free" in started && started.free) {
         await refreshUser();
-        setCelebration({ kind: "plan", planName: plan.name });
+        setCelebration({ kind: "plan", planName: plan.name, credits: [] });
         fireConfetti();
         return;
       }
+
+      // What the server confirmed was in the order, not what the dialog asked
+      // for — the two agree, but the celebration should report what was
+      // actually bought.
+      const boughtCredits = (started.addons ?? []).map((a) => ({
+        type: a.type,
+        credits: a.credits,
+      }));
 
       // Razorpay closes its modal after a successful payment too, so `ondismiss`
       // alone can't tell "walked away" from "just paid" — this records that the
@@ -140,7 +159,7 @@ export default function Billing() {
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
             await refreshUser();
-            setCelebration({ kind: "plan", planName: plan.name });
+            setCelebration({ kind: "plan", planName: plan.name, credits: boughtCredits });
             fireConfetti();
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
@@ -159,7 +178,7 @@ export default function Billing() {
     }
   };
 
-  const doBuyAddon = async (pack: AddonPack) => {
+  const doBuyAddon = async (pack: AddonPack, packs: number) => {
     setConfirmAddon(null);
     setBuying(pack._id);
     try {
@@ -167,6 +186,7 @@ export default function Billing() {
         slug: pack.slug,
         couponCode: addonCoupon?.coupon?.code,
         currency,
+        packs,
       }).unwrap();
 
       // Same success/dismiss ambiguity as the plan flow above.
@@ -179,7 +199,7 @@ export default function Billing() {
         currency: orderCurrency,
         order_id: orderId,
         name: "Quantalog",
-        description: pack.name,
+        description: packs > 1 ? `${pack.name} × ${packs}` : pack.name,
         image: CHECKOUT_LOGO,
         prefill: { name: user?.name, email: user?.email },
         theme: { color: "#059669" },
@@ -192,7 +212,7 @@ export default function Billing() {
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
             await refreshUser();
-            setCelebration({ kind: "addon", pack });
+            setCelebration({ kind: "addon", pack, packs });
             fireConfetti();
           } catch (e) {
             notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
@@ -432,109 +452,27 @@ export default function Billing() {
         </Stack>
       )}
 
-      <Modal
-        opened={!!confirmPlan}
+      <PlanCheckoutModal
+        plan={confirmPlan}
+        cycle={cycle}
+        currency={currency}
+        addons={addons}
+        coupon={planCoupon}
+        onCoupon={setPlanCoupon}
+        busy={!!confirmPlan && subscribing === confirmPlan.slug}
         onClose={() => setConfirmPlan(null)}
-        title="Confirm subscription"
-        centered
-        radius="lg"
-      >
-        {confirmPlan && (() => {
-          const listPrice = priceIn(cycle === "yearly" ? confirmPlan.priceYearly : confirmPlan.priceMonthly, currency);
-          const finalPrice = planCoupon?.coupon ? planCoupon.amount : listPrice;
-          const free = priceIn(confirmPlan.priceMonthly, currency) === 0 && priceIn(confirmPlan.priceYearly, currency) === 0;
-          return (
-            <Stack gap="md">
-              <Group justify="space-between">
-                <div>
-                  <Text fw={650}>{confirmPlan.name}</Text>
-                  <Text size="xs" c="dimmed">Billed {cycle}</Text>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  {planCoupon?.coupon && (
-                    <Text size="xs" c="dimmed" td="line-through">{money(listPrice)}</Text>
-                  )}
-                  <Text fz={22} fw={700}>{money(finalPrice)}</Text>
-                </div>
-              </Group>
+        onConfirm={doSubscribe}
+      />
 
-              {!free && (
-                <CouponField
-                  amount={listPrice}
-                  result={planCoupon}
-                  onChange={setPlanCoupon}
-                />
-              )}
-
-              <Text size="sm" c="dimmed">
-                {free
-                  ? "This plan is free — no payment needed."
-                  : `A one-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. It does not auto-renew — come back and buy again when the period ends.`}
-              </Text>
-              <Group justify="flex-end">
-                <Button variant="subtle" onClick={() => setConfirmPlan(null)}>Cancel</Button>
-                <Button
-                  color="emerald"
-                  leftSection={<CreditCard size={15} />}
-                  loading={subscribing === confirmPlan.slug}
-                  onClick={() => doSubscribe(confirmPlan)}
-                >
-                  {free || finalPrice === 0 ? "Confirm" : "Continue to payment"}
-                </Button>
-              </Group>
-            </Stack>
-          );
-        })()}
-      </Modal>
-
-      <Modal
-        opened={!!confirmAddon}
+      <AddonCheckoutModal
+        pack={confirmAddon}
+        currency={currency}
+        coupon={addonCoupon}
+        onCoupon={setAddonCoupon}
+        busy={!!confirmAddon && buying === confirmAddon._id}
         onClose={() => setConfirmAddon(null)}
-        title="Confirm purchase"
-        centered
-        radius="lg"
-      >
-        {confirmAddon && (
-          <Stack gap="md">
-            <Group justify="space-between">
-              <div>
-                <Text fw={650}>{confirmAddon.name}</Text>
-                <Text size="xs" c="dimmed">+{confirmAddon.quantity} {confirmAddon.type}s, one-time</Text>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                {addonCoupon?.coupon && (
-                  <Text size="xs" c="dimmed" td="line-through">{money(priceIn(confirmAddon.price, currency))}</Text>
-                )}
-                <Text fz={22} fw={700}>
-                  {money(addonCoupon?.coupon ? addonCoupon.amount : priceIn(confirmAddon.price, currency))}
-                </Text>
-              </div>
-            </Group>
-
-            <CouponField
-              amount={priceIn(confirmAddon.price, currency)}
-              result={addonCoupon}
-              onChange={setAddonCoupon}
-            />
-
-            <Text size="sm" c="dimmed">
-              A one-time charge via Razorpay. Credits are added to your account as soon as payment
-              is confirmed and never expire.
-            </Text>
-            <Group justify="flex-end">
-              <Button variant="subtle" onClick={() => setConfirmAddon(null)}>Cancel</Button>
-              <Button
-                color="emerald"
-                leftSection={<ShoppingCart size={15} />}
-                loading={buying === confirmAddon._id}
-                onClick={() => doBuyAddon(confirmAddon)}
-              >
-                Continue to payment
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
+        onConfirm={doBuyAddon}
+      />
 
       <Modal
         opened={!!cancelled}
@@ -579,9 +517,22 @@ export default function Billing() {
               {celebration.kind === "plan" ? "You're all set!" : "Credits added!"}
             </Title>
             <Text size="sm" c="dimmed" ta="center" maw={280}>
-              {celebration.kind === "plan"
-                ? `You're now on the ${celebration.planName} plan. Your new quota is ready to use.`
-                : `+${celebration.pack.quantity} ${celebration.pack.type}s added to your account — ready whenever you need them.`}
+              {celebration.kind === "plan" ? (
+                <>
+                  You&apos;re now on the {celebration.planName} plan. Your new quota is ready to use.
+                  {celebration.credits.length > 0 && (
+                    <>
+                      {" "}Plus{" "}
+                      {celebration.credits
+                        .map((c) => `${c.credits} ${c.type}${c.credits === 1 ? "" : "s"}`)
+                        .join(" and ")}{" "}
+                      on top.
+                    </>
+                  )}
+                </>
+              ) : (
+                `+${celebration.pack.quantity * celebration.packs} ${celebration.pack.type}s added to your account — ready whenever you need them.`
+              )}
             </Text>
             <Button color="emerald" radius="md" mt="sm" onClick={() => setCelebration(null)}>
               Let's go
@@ -590,6 +541,402 @@ export default function Billing() {
         )}
       </Modal>
     </AppShell>
+  );
+}
+
+/** How many of one pack a single checkout may include. Mirrors the server's cap. */
+const MAX_PACKS = 50;
+
+/**
+ * A quantity stepper.
+ *
+ * Buttons rather than a bare number input because the common moves are "one
+ * more" and "one fewer", and because a free-text field invites values the
+ * server will reject. Typing is still allowed for the person who wants ten.
+ */
+function PackStepper({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  disabled?: boolean;
+}) {
+  const clamp = (n: number) => Math.max(0, Math.min(MAX_PACKS, n));
+
+  return (
+    <Group gap={4} wrap="nowrap">
+      <ActionIcon
+        variant="default"
+        radius="md"
+        size="lg"
+        disabled={disabled || value <= 0}
+        onClick={() => onChange(clamp(value - 1))}
+        aria-label="One fewer"
+      >
+        <Minus size={14} />
+      </ActionIcon>
+      <NumberInput
+        value={value}
+        onChange={(v) => onChange(clamp(Number(v) || 0))}
+        min={0}
+        max={MAX_PACKS}
+        clampBehavior="strict"
+        hideControls
+        disabled={disabled}
+        styles={{ input: { width: 52, textAlign: "center", fontWeight: 650 } }}
+        size="sm"
+        radius="md"
+      />
+      <ActionIcon
+        variant="default"
+        radius="md"
+        size="lg"
+        disabled={disabled || value >= MAX_PACKS}
+        onClick={() => onChange(clamp(value + 1))}
+        aria-label="One more"
+      >
+        <Plus size={14} />
+      </ActionIcon>
+    </Group>
+  );
+}
+
+/**
+ * Plan checkout: the plan, any addon packs bought alongside it, a coupon, and
+ * one total.
+ *
+ * Addons live here rather than only in their own dialog because the moment
+ * someone has decided to pay is the moment topping up costs them nothing extra
+ * — one payment, one receipt, instead of a second trip through Razorpay. They
+ * are offered prominently and default to none: a required addon is just a
+ * higher price with more clicks, and it turns a working checkout into one
+ * people abandon.
+ *
+ * Every figure shown is computed from the catalogue the same way the server
+ * computes it. The client still sends only slugs and counts — the price it
+ * displays is a preview, never the amount charged.
+ */
+function PlanCheckoutModal({
+  plan,
+  cycle,
+  currency,
+  addons,
+  coupon,
+  onCoupon,
+  busy,
+  onClose,
+  onConfirm,
+}: {
+  plan: Plan | null;
+  cycle: BillingCycle;
+  currency: Currency;
+  addons: AddonPack[];
+  coupon: CouponCheckResult | null;
+  onCoupon: (result: CouponCheckResult | null) => void;
+  busy: boolean;
+  onClose: () => void;
+  onConfirm: (plan: Plan, selection: AddonSelection) => void;
+}) {
+  const [selection, setSelection] = useState<AddonSelection>({});
+
+  // Reset when a different plan is picked, so quantities chosen for one plan
+  // don't silently carry into the next dialog.
+  useEffect(() => {
+    if (plan) setSelection({});
+  }, [plan?.slug]);
+
+  if (!plan) return <Modal opened={false} onClose={onClose} children={null} />;
+
+  const money = (amountMinor: number) => formatMoney(amountMinor, currency);
+  const planPrice = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
+  const isFreePlan =
+    priceIn(plan.priceMonthly, currency) === 0 && priceIn(plan.priceYearly, currency) === 0;
+
+  const chosen = addons
+    .map((pack) => ({ pack, packs: selection[pack.slug] ?? 0 }))
+    .filter((row) => row.packs > 0);
+
+  const addonTotal = chosen.reduce(
+    (sum, { pack, packs }) => sum + priceIn(pack.price, currency) * packs,
+    0,
+  );
+
+  const subtotal = planPrice + addonTotal;
+  // The coupon is checked against the plan price alone (that is what the field
+  // was given), so its percentage is re-applied to the real subtotal here —
+  // otherwise adding a pack after entering a code would show a discount that
+  // covers only part of what is being bought.
+  const percentOff = coupon?.coupon?.percentOff ?? 0;
+  const total = percentOff ? Math.floor((subtotal * (100 - percentOff)) / 100) : subtotal;
+
+  // A free plan with no packs needs no payment. Add a pack and it becomes a
+  // real charge, which is why this tracks the total rather than the plan.
+  const noCharge = total === 0 && !chosen.length;
+
+  return (
+    <Modal
+      opened
+      onClose={onClose}
+      title={<Text fw={700}>Confirm subscription</Text>}
+      centered
+      radius="lg"
+      size="lg"
+    >
+      <Stack gap="lg">
+        <Group justify="space-between" wrap="nowrap">
+          <Group gap={10} wrap="nowrap">
+            <PlanIcon slug={plan.slug} size={32} uid={`checkout-${plan.slug}`} />
+            <div>
+              <Text fw={650}>{plan.name}</Text>
+              <Text size="xs" c="dimmed">
+                Billed {cycle} · {plan.monthlyAuditQuota} audits, {plan.monthlyCrawlQuota} crawls / month
+              </Text>
+            </div>
+          </Group>
+          <Text fz={20} fw={700} style={{ whiteSpace: "nowrap" }}>{money(planPrice)}</Text>
+        </Group>
+
+        {addons.length > 0 && (
+          <div>
+            <Group gap={8} mb={4}>
+              <Text size="sm" fw={650}>Add extra credits</Text>
+              <Badge size="xs" variant="light" color="gray" tt="none">Optional</Badge>
+            </Group>
+            <Text size="xs" c="dimmed" mb="sm">
+              Buy them now and they go on the same payment and the same receipt.
+              Credits never expire and carry across renewals.
+            </Text>
+
+            <Stack gap={8}>
+              {addons.map((pack) => {
+                const packs = selection[pack.slug] ?? 0;
+                const unit = priceIn(pack.price, currency);
+                return (
+                  <Card key={pack._id} withBorder radius="md" padding="sm">
+                    <Group justify="space-between" wrap="nowrap" gap="sm">
+                      <Group gap={10} wrap="nowrap" style={{ minWidth: 0 }}>
+                        <ThemeIcon size={32} radius="md" variant="light" color="emerald">
+                          {pack.type === "audit" ? <Search size={15} /> : <Globe2 size={15} />}
+                        </ThemeIcon>
+                        <div style={{ minWidth: 0 }}>
+                          <Text size="sm" fw={600} truncate>{pack.name}</Text>
+                          <Text size="xs" c="dimmed">
+                            +{pack.quantity} {pack.type}s · {money(unit)} each
+                          </Text>
+                        </div>
+                      </Group>
+
+                      <Group gap="sm" wrap="nowrap">
+                        {packs > 0 && (
+                          <Text size="sm" fw={650} style={{ whiteSpace: "nowrap" }}>
+                            {money(unit * packs)}
+                          </Text>
+                        )}
+                        <PackStepper
+                          value={packs}
+                          disabled={busy}
+                          onChange={(v) =>
+                            setSelection((prev) => ({ ...prev, [pack.slug]: v }))
+                          }
+                        />
+                      </Group>
+                    </Group>
+
+                    {packs > 0 && (
+                      <Text size="xs" c="emerald" mt={6} fw={600}>
+                        +{pack.quantity * packs} {pack.type}s added
+                      </Text>
+                    )}
+                  </Card>
+                );
+              })}
+            </Stack>
+          </div>
+        )}
+
+        {!isFreePlan && (
+          <CouponField amount={planPrice} result={coupon} onChange={onCoupon} />
+        )}
+
+        <Divider />
+
+        <Stack gap={6}>
+          <Group justify="space-between">
+            <Text size="sm" c="dimmed">{plan.name} plan</Text>
+            <Text size="sm">{money(planPrice)}</Text>
+          </Group>
+
+          {chosen.map(({ pack, packs }) => (
+            <Group key={pack._id} justify="space-between">
+              <Text size="sm" c="dimmed">
+                {pack.name} × {packs}
+              </Text>
+              <Text size="sm">{money(priceIn(pack.price, currency) * packs)}</Text>
+            </Group>
+          ))}
+
+          {percentOff > 0 && (
+            <Group justify="space-between">
+              <Group gap={6}>
+                <Tag size={12} />
+                <Text size="sm" c="dimmed">{coupon?.coupon?.code} — {percentOff}% off</Text>
+              </Group>
+              <Text size="sm" c="emerald">− {money(subtotal - total)}</Text>
+            </Group>
+          )}
+
+          <Divider my={4} />
+
+          <Group justify="space-between">
+            <Text fw={700}>Total</Text>
+            <Text fz={24} fw={800} style={{ letterSpacing: "-0.02em" }}>{money(total)}</Text>
+          </Group>
+        </Stack>
+
+        <Text size="xs" c="dimmed">
+          {noCharge
+            ? "This plan is free — no payment needed."
+            : `A one-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. It does not auto-renew — come back and buy again when the period ends.`}
+        </Text>
+
+        <Group justify="flex-end">
+          <Button variant="subtle" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button
+            color="emerald"
+            leftSection={<CreditCard size={15} />}
+            loading={busy}
+            onClick={() => onConfirm(plan, selection)}
+          >
+            {noCharge ? "Confirm" : `Pay ${money(total)}`}
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
+  );
+}
+
+/**
+ * Addon checkout, bought on its own rather than alongside a plan.
+ *
+ * Same quantity model as the plan dialog, so the two agree on what "× 3" means
+ * and on the cap.
+ */
+function AddonCheckoutModal({
+  pack,
+  currency,
+  coupon,
+  onCoupon,
+  busy,
+  onClose,
+  onConfirm,
+}: {
+  pack: AddonPack | null;
+  currency: Currency;
+  coupon: CouponCheckResult | null;
+  onCoupon: (result: CouponCheckResult | null) => void;
+  busy: boolean;
+  onClose: () => void;
+  onConfirm: (pack: AddonPack, packs: number) => void;
+}) {
+  const [packs, setPacks] = useState(1);
+
+  useEffect(() => {
+    if (pack) setPacks(1);
+  }, [pack?._id]);
+
+  if (!pack) return <Modal opened={false} onClose={onClose} children={null} />;
+
+  const money = (amountMinor: number) => formatMoney(amountMinor, currency);
+  const unit = priceIn(pack.price, currency);
+  const subtotal = unit * packs;
+  const percentOff = coupon?.coupon?.percentOff ?? 0;
+  const total = percentOff ? Math.floor((subtotal * (100 - percentOff)) / 100) : subtotal;
+
+  return (
+    <Modal
+      opened
+      onClose={onClose}
+      title={<Text fw={700}>Confirm purchase</Text>}
+      centered
+      radius="lg"
+    >
+      <Stack gap="lg">
+        <Group justify="space-between" wrap="nowrap">
+          <Group gap={10} wrap="nowrap">
+            <ThemeIcon size={38} radius="md" variant="light" color="emerald">
+              {pack.type === "audit" ? <Search size={17} /> : <Globe2 size={17} />}
+            </ThemeIcon>
+            <div>
+              <Text fw={650}>{pack.name}</Text>
+              <Text size="xs" c="dimmed">+{pack.quantity} {pack.type}s per pack · {money(unit)} each</Text>
+            </div>
+          </Group>
+        </Group>
+
+        <Group justify="space-between">
+          <div>
+            <Text size="sm" fw={600}>How many packs?</Text>
+            <Text size="xs" c="emerald" fw={600}>
+              {pack.quantity * packs} {pack.type}s total
+            </Text>
+          </div>
+          <PackStepper
+            value={packs}
+            disabled={busy}
+            // At least one — this dialog exists to buy something, and a zero
+            // here would leave the confirm button doing nothing.
+            onChange={(v) => setPacks(Math.max(1, v))}
+          />
+        </Group>
+
+        <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />
+
+        <Divider />
+
+        <Stack gap={6}>
+          <Group justify="space-between">
+            <Text size="sm" c="dimmed">{pack.name} × {packs}</Text>
+            <Text size="sm">{money(subtotal)}</Text>
+          </Group>
+
+          {percentOff > 0 && (
+            <Group justify="space-between">
+              <Group gap={6}>
+                <Tag size={12} />
+                <Text size="sm" c="dimmed">{coupon?.coupon?.code} — {percentOff}% off</Text>
+              </Group>
+              <Text size="sm" c="emerald">− {money(subtotal - total)}</Text>
+            </Group>
+          )}
+
+          <Divider my={4} />
+
+          <Group justify="space-between">
+            <Text fw={700}>Total</Text>
+            <Text fz={24} fw={800} style={{ letterSpacing: "-0.02em" }}>{money(total)}</Text>
+          </Group>
+        </Stack>
+
+        <Text size="xs" c="dimmed">
+          A one-time charge via Razorpay. Credits are added as soon as payment is
+          confirmed and never expire.
+        </Text>
+
+        <Group justify="flex-end">
+          <Button variant="subtle" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button
+            color="emerald"
+            leftSection={<ShoppingCart size={15} />}
+            loading={busy}
+            onClick={() => onConfirm(pack, packs)}
+          >
+            Pay {money(total)}
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
   );
 }
 

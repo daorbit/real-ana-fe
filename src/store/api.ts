@@ -704,7 +704,14 @@ export const api = createApi({
 
     startSubscription: build.mutation<
       StartSubscriptionResponse,
-      { planSlug: string; cycle: BillingCycle; couponCode?: string; currency: Currency }
+      {
+        planSlug: string;
+        cycle: BillingCycle;
+        couponCode?: string;
+        currency: Currency;
+        /** Packs to buy in the same checkout. Priced server-side from the catalogue. */
+        addons?: { slug: string; packs: number }[];
+      }
     >({
       query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
     }),
@@ -719,12 +726,12 @@ export const api = createApi({
 
     startAddonPurchase: build.mutation<
       StartAddonPurchaseResponse,
-      { slug: string; couponCode?: string; currency: Currency }
+      { slug: string; couponCode?: string; currency: Currency; packs?: number }
     >({
-      query: ({ slug, couponCode, currency }) => ({
+      query: ({ slug, couponCode, currency, packs }) => ({
         url: `/api/billing/addons/${slug}/purchase`,
         method: "POST",
-        body: { couponCode, currency },
+        body: { couponCode, currency, packs },
       }),
     }),
 

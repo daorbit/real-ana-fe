@@ -243,6 +243,8 @@ export type StartSubscriptionResponse =
       currency: string;
       razorpayKeyId: string;
       plan: { name: string; cycle: BillingCycle };
+      /** Packs bought in the same checkout, priced and confirmed server-side. */
+      addons?: { name: string; type: AddonType; packs: number; credits: number }[];
     };
 
 export type StartAddonPurchaseResponse = {
@@ -250,8 +252,11 @@ export type StartAddonPurchaseResponse = {
   amount: number;
   currency: string;
   razorpayKeyId: string;
-  addon: { name: string; type: AddonType; quantity: number };
+  addon: { name: string; type: AddonType; quantity: number; packs: number; credits: number };
 };
+
+/** How many of one pack the user has chosen, keyed by pack slug. */
+export type AddonSelection = Record<string, number>;
 
 /* --------------------------------- receipts ---------------------------------- */
 
