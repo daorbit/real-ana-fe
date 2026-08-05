@@ -20,7 +20,7 @@ import type {
   Plan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
-  Coupon, CouponCheckResult,
+  Coupon, CouponCheckResult, Invoice,
 } from "../types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -736,6 +736,19 @@ export const api = createApi({
       invalidatesTags: ["Billing"],
     }),
 
+    /**
+     * Paid receipts, newest first. Plans and addon packs arrive as one merged
+     * history — the server interleaves them, since that's how someone reading
+     * their own billing thinks about it.
+     *
+     * Tagged "Billing" so completing a purchase pulls the new receipt in
+     * without a manual refresh.
+     */
+    getInvoices: build.query<Invoice[], void>({
+      query: () => "/api/billing/invoices",
+      providesTags: ["Billing"],
+    }),
+
     /** Preview a coupon's discount against a known amount before checkout starts. */
     checkCoupon: build.mutation<CouponCheckResult, { amount: number; code: string }>({
       query: (body) => ({ url: "/api/billing/coupons/check", method: "POST", body }),
@@ -945,6 +958,7 @@ export const {
   useSaveAdminAddonPackMutation,
   useDeleteAdminAddonPackMutation,
   useCheckCouponMutation,
+  useGetInvoicesQuery,
   useGetAdminCouponsQuery,
   useSaveAdminCouponMutation,
   useDeleteAdminCouponMutation,

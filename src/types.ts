@@ -253,6 +253,28 @@ export type StartAddonPurchaseResponse = {
   addon: { name: string; type: AddonType; quantity: number };
 };
 
+/* --------------------------------- receipts ---------------------------------- */
+
+/**
+ * One paid purchase, as it appears in billing history.
+ *
+ * A receipt rather than a tax invoice — the business isn't GST registered, so
+ * there is no tax line to show and none is sent. `amount` is in the smallest
+ * currency unit, like every other price in the app.
+ */
+export type Invoice = {
+  id: string;
+  /** Which collection it came from — the download URL needs it. */
+  kind: "plan" | "addon";
+  /** `QTL-YYYYMM-NNNN`. */
+  number: string;
+  issuedAt: string;
+  description: string;
+  amount: number;
+  currency: Currency;
+  paymentId: string;
+};
+
 /* ---------------------------------- coupons ---------------------------------- */
 
 export type Coupon = {

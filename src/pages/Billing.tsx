@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
   SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
-  ActionIcon, Tooltip,
+  ActionIcon, Tooltip, Table,
 } from "@mantine/core";
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
-  FolderKanban, Layers, Star, Clock, PartyPopper, RefreshCw,
+  FolderKanban, Layers, Star, Clock, PartyPopper, RefreshCw, Download, Receipt,
 } from "lucide-react";
 import { PlanIcon } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
@@ -16,15 +16,18 @@ import {
   useGetPlansQuery, useGetAddonPacksQuery,
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
   useStartAddonPurchaseMutation, useVerifyAddonPurchaseMutation,
-  useCheckCouponMutation,
+  useCheckCouponMutation, useGetInvoicesQuery,
 } from "../store";
 import { notify, errMessage } from "../notify";
+import { getToken } from "../api";
 import { useAuth } from "../auth";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "../utils/razorpay";
 import {
   CURRENCIES, detectCurrency, formatMoney, priceIn, getStoredCurrency, setStoredCurrency,
 } from "../utils/currency";
-import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Currency } from "../types";
+import type { BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Currency, Invoice } from "../types";
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 /**
  * Subscription plans, addon credit packs, and the current usage against them.
@@ -422,6 +425,10 @@ export default function Billing() {
               )}
             </SimpleGrid>
           </div>
+
+          {/* A demo session has no purchases behind it, so there is no history
+              to show — and an empty table would imply one that failed to load. */}
+          {!isDemo && <Receipts />}
         </Stack>
       )}
 
@@ -583,6 +590,137 @@ export default function Billing() {
         )}
       </Modal>
     </AppShell>
+  );
+}
+
+/**
+ * Billing history: every completed purchase, with its receipt.
+ *
+ * The same PDF was already emailed when the payment landed, so this is the
+ * copy for six months later, when that email is buried — which is exactly when
+ * someone needs it for an expense claim. Nothing here can be acted on except
+ * downloading, so it sits at the bottom, below the things that cost money.
+ */
+function Receipts() {
+  const { data: invoices = [], isLoading } = useGetInvoicesQuery();
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  /**
+   * Fetched directly rather than through RTK Query: the response is a binary
+   * attachment, not JSON to cache, and it still needs the auth header — the
+   * same reason the events export bypasses the store.
+   */
+  const download = async (invoice: Invoice) => {
+    setDownloading(invoice.id);
+    try {
+      const token = getToken();
+      const res = await fetch(
+        `${API_BASE}/api/billing/invoices/${invoice.kind}/${invoice.id}/pdf`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
+      );
+      if (!res.ok) throw new Error(`Download failed (${res.status})`);
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${invoice.number}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      notify.error("Could not download that receipt. Try again in a moment.");
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  return (
+    <div>
+      <Group justify="space-between" align="center" mb="lg">
+        <div>
+          <Title order={3} style={{ letterSpacing: "-0.01em" }}>Billing history</Title>
+          <Text size="sm" c="dimmed" mt={2}>
+            Every payment you've made, with its receipt. A copy is emailed to you each time.
+          </Text>
+        </div>
+      </Group>
+
+      <Card withBorder radius="lg" padding={0} style={{ overflow: "hidden" }}>
+        {isLoading ? (
+          <Center py={40}><Loader size="sm" /></Center>
+        ) : !invoices.length ? (
+          <Stack align="center" gap={6} py={40} px="md">
+            <ThemeIcon size={42} radius="xl" variant="light" color="gray">
+              <Receipt size={20} />
+            </ThemeIcon>
+            <Text size="sm" c="dimmed" ta="center" maw={340}>
+              No payments yet. Once you buy a plan or an addon pack, the receipt
+              shows up here and lands in your inbox.
+            </Text>
+          </Stack>
+        ) : (
+          <Table.ScrollContainer minWidth={560}>
+            <Table verticalSpacing="sm" horizontalSpacing="lg">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Receipt</Table.Th>
+                  <Table.Th>Date</Table.Th>
+                  <Table.Th>Item</Table.Th>
+                  <Table.Th ta="right">Amount</Table.Th>
+                  <Table.Th />
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {invoices.map((inv) => (
+                  <Table.Tr key={`${inv.kind}-${inv.id}`}>
+                    <Table.Td>
+                      <Text size="sm" fw={600} ff="monospace">{inv.number}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
+                        {new Date(inv.issuedAt).toLocaleDateString(undefined, {
+                          day: "numeric", month: "short", year: "numeric",
+                        })}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={8} wrap="nowrap">
+                        <Badge size="sm" variant="light" color={inv.kind === "plan" ? "emerald" : "gray"} tt="none">
+                          {inv.kind === "plan" ? "Plan" : "Addon"}
+                        </Badge>
+                        <Text size="sm">{inv.description}</Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td ta="right">
+                      <Text size="sm" fw={650}>{formatMoney(inv.amount, inv.currency)}</Text>
+                    </Table.Td>
+                    <Table.Td ta="right">
+                      <Tooltip label="Download PDF">
+                        <ActionIcon
+                          variant="light"
+                          color="gray"
+                          radius="md"
+                          loading={downloading === inv.id}
+                          onClick={() => download(inv)}
+                        >
+                          <Download size={15} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        )}
+      </Card>
+
+      <Text size="xs" c="dimmed" mt="sm">
+        These are payment receipts, not tax invoices — no GST is charged or collected.
+      </Text>
+    </div>
   );
 }
 
