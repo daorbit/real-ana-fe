@@ -121,6 +121,30 @@ body { overflow-wrap: break-word; }
   .support-fab-spacer { height: 60px; }
 }
 
+/* iOS Safari zooms the page in when a focused input's font is under 16px, and
+   never zooms back out — so tapping any `size="sm"` field left the whole app
+   magnified and scrolling sideways. Only the rendered text is forced up; the
+   control keeps its compact height. */
+@media (max-width: 48em) {
+  .mantine-Input-input,
+  .mantine-TextInput-input,
+  .mantine-Textarea-input,
+  .mantine-Select-input,
+  .mantine-NumberInput-input,
+  .mantine-PasswordInput-innerInput,
+  select,
+  textarea,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"] {
+    font-size: 16px;
+  }
+}
+
 /* Opt-in horizontal scroller for content that is legitimately wide. */
 .scroll-x {
   overflow-x: auto;
@@ -1092,9 +1116,30 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 [data-mantine-color-scheme="light"] .ct-code { color: #334155; }
 
 /* ============ Auth (split-screen) ============ */
-.auth-split { display: grid; grid-template-columns: 1.05fr 1fr; min-height: 100vh; background: var(--bg); }
+/* `100vh` on a mobile browser is the height *without* the address bar, so a
+   centred form sat partly under the browser chrome and the sign-in button
+   could not be reached until the bar collapsed. `100dvh` tracks the height
+   that is actually visible; the `vh` line stays first as the fallback. */
+.auth-split {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+}
 .auth-panel { display: flex; align-items: center; justify-content: center; padding: 2rem; background: var(--bg); }
 .auth-form { width: 100%; max-width: 380px; }
+
+@media (max-width: 48em) {
+  /* The 2rem gutter left a 380px form only ~296px on a small phone, which
+     squeezed the inputs; and vertical centring in a short viewport pushed the
+     submit button below the fold once the keyboard opened. */
+  .auth-panel {
+    align-items: flex-start;
+    padding: 1.75rem 1.1rem calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+  .auth-form { max-width: 100%; }
+}
 
 /* Brand panel */
 .auth-brand {

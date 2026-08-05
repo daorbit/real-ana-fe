@@ -63,7 +63,7 @@ export default function PublicSeoReport() {
   }
 
   return (
-    <Box mih="100vh" style={{ background: "var(--bg)" }}>
+    <Box mih="100dvh" style={{ background: "var(--bg)" }}>
       {/* Branded header — the client sees who produced the report. */}
       <Box className="pub-bar">
         <Box className="pub-inner" style={{ maxWidth: 1080 }}>

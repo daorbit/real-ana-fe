@@ -190,7 +190,7 @@ export default function PublicDashboard() {
 
   if (state === "loading") {
     return (
-      <Center mih="100vh" style={{ background: "var(--bg)" }}>
+      <Center mih="100dvh" style={{ background: "var(--bg)" }}>
         <Loader size="sm" color="emerald" />
       </Center>
     );
@@ -200,7 +200,7 @@ export default function PublicDashboard() {
   // apart would confirm which tokens exist.
   if (state === "missing" || !data) {
     return (
-      <Center mih="100vh" style={{ background: "var(--bg)" }}>
+      <Center mih="100dvh" style={{ background: "var(--bg)" }}>
         <Stack align="center" gap="sm" maw={340}>
           <ThemeIcon variant="light" color="gray" size={56} radius="md">
             <EyeOff size={26} />
@@ -251,7 +251,7 @@ export default function PublicDashboard() {
   }[];
 
   return (
-    <Box mih="100vh" style={{ background: "var(--bg)" }}>
+    <Box mih="100dvh" style={{ background: "var(--bg)" }}>
       <Box className="pub-bar">
         <Group justify="space-between" wrap="wrap" gap="md" className="pub-inner">
           <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>

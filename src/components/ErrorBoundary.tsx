@@ -34,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!error) return this.props.children;
 
     return (
-      <Center mih="100vh" p="lg" style={{ background: "var(--bg, #0b0f14)" }}>
+      <Center mih="100dvh" p="lg" style={{ background: "var(--bg, #0b0f14)" }}>
         <Stack align="center" gap="md" maw={480}>
           <ThemeIcon size={64} radius="xl" variant="light" color="red">
             <AlertTriangle size={30} />
