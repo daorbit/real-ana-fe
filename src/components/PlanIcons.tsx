@@ -27,6 +27,54 @@ const STARTER_GRADIENT = ["#a855f7", "#6366f1"] as const;
 const PRO_GRADIENT = ["#b45309", "#fcd34d", "#d97706"] as const;
 
 /**
+ * One solid colour per tier, for anything that sits beside the icon — a
+ * ribbon, a border, a highlight.
+ *
+ * Exported so those never drift from the marks themselves. Deliberately not
+ * the app's emerald: emerald is the accent for *state* (active, current,
+ * yours), and reusing it for tier identity makes every plan look equally
+ * endorsed and leaves nothing to distinguish the recommended one.
+ */
+export const PLAN_ACCENTS: Record<string, string> = {
+  free: "#64748b", // slate
+  starter: "#8b5cf6", // violet, the midpoint of the Starter gradient
+  pro: "#d9a441", // gold
+};
+
+/**
+ * The same ramps as the icons, as CSS gradients.
+ *
+ * For surfaces beside the mark — a ribbon, a button — so a Pro flag catches the
+ * light the way the Pro diamond does instead of sitting next to it as a flat
+ * swatch. Angled at 135° to match the icons' top-left-to-bottom-right fill.
+ *
+ * Free has no entry: it is a flat slate by design, and a gradient on the
+ * free tier would give it emphasis the tier is meant not to have. Callers fall
+ * back to `PLAN_ACCENTS` when a slug is missing here.
+ */
+export const PLAN_GRADIENTS: Record<string, string> = {
+  starter: `linear-gradient(135deg, ${STARTER_GRADIENT[0]}, ${STARTER_GRADIENT[1]})`,
+  // Pro's surface ramp is lighter than the icon's. The icon carries no text, so
+  // it can run down to a deep amber; a ribbon has a label on top, and dark text
+  // on that same amber measures 2.88:1 — under the 3.0 floor for bold text.
+  // Starting at #d97706 keeps every point of the ramp above it.
+  pro: "linear-gradient(135deg, #d97706 0%, #fcd34d 50%, #e59819 100%)",
+};
+
+/**
+ * Text colour to put on top of each tier's fill.
+ *
+ * Not always white. Pro's ramp runs through a bright band (`#fcd34d`) that
+ * white text disappears into — legibility has to follow the fill rather than
+ * assume a dark one, so the gold tiers take near-black instead.
+ */
+export const PLAN_ON_ACCENT: Record<string, string> = {
+  free: "#ffffff",
+  starter: "#ffffff",
+  pro: "#3b2503",
+};
+
+/**
  * The diamond, as seven flat facets.
  *
  * Traced from public/proPlanIcon.svg on a 512 grid and carried here verbatim so

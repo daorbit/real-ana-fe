@@ -8,10 +8,10 @@ import { useSearchParams } from "react-router-dom";
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
-  FolderKanban, Layers, Star, Clock, PartyPopper, RefreshCw, Download, Receipt,
+  FolderKanban, Layers, Clock, PartyPopper, RefreshCw, Download, Receipt,
   Plus, Minus,
 } from "lucide-react";
-import { PlanIcon } from "../components/PlanIcons";
+import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import {
@@ -368,54 +368,71 @@ export default function Billing() {
                     withBorder
                     radius="lg"
                     padding="lg"
+                    className="static-card"
                     style={{
                       display: "flex",
                       flexDirection: "column",
-                      ...(featured
-                        ? {
-                            borderColor: "var(--violet-2)",
-                            boxShadow: "0 0 0 1px var(--violet-2)",
-                          }
-                        : {}),
+                      // The ribbon is positioned against this box and bleeds
+                      // past the rounded corner, so the card cannot clip it.
+                      position: "relative",
+                      overflow: "visible",
+                      // Only the recommended card takes a coloured border. The
+                      // current plan is marked by its ribbon and its button —
+                      // a third emerald marker was saying the same thing again
+                      // and made every card look equally emphasised.
+                      borderColor: featured
+                        ? PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK
+                        : undefined,
                     }}
                   >
-                    {featured && (
-                      <Badge
-                        size="sm"
-                        radius="xl"
-                        variant="filled"
-                        color="emerald"
-                        mb="sm"
-                        leftSection={<Star size={11} fill="currentColor" />}
-                        style={{ alignSelf: "flex-start" }}
-                      >
-                        Recommended
-                      </Badge>
+                    {/* Both flags render in the plan's own tier colour rather
+                        than the app's emerald: emerald is the accent for
+                        everything else on screen, so using it here left the
+                        ribbon indistinguishable from ordinary chrome. */}
+                    {(featured || current) && (
+                      <CornerRibbon
+                        label={current ? "Current" : "Recommended"}
+                        color={PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK}
+                        background={PLAN_GRADIENTS[plan.slug]}
+                        fg={PLAN_ON_ACCENT[plan.slug] ?? "#fff"}
+                      />
                     )}
 
-                    <Group justify="space-between" align="flex-start" wrap="nowrap">
-                      <Group gap={10} wrap="nowrap">
-                        <PlanIcon slug={plan.slug} size={30} uid={`card-${plan.slug}`} />
-                        <Text fw={700} size="lg">{plan.name}</Text>
-                      </Group>
-                      {current && (
-                        <Badge size="sm" variant="light" color="emerald">Current</Badge>
-                      )}
+                    <Group gap={12} wrap="nowrap" align="center">
+                      <PlanIcon slug={plan.slug} size={38} uid={`card-${plan.slug}`} />
+                      <div style={{ minWidth: 0 }}>
+                        <Text fw={700} fz={17} style={{ letterSpacing: "-0.01em" }}>
+                          {plan.name}
+                        </Text>
+                        {plan.description && (
+                          <Text size="xs" c="dimmed" lh={1.4} lineClamp={2}>
+                            {plan.description}
+                          </Text>
+                        )}
+                      </div>
                     </Group>
-                    {plan.description && (
-                      <Text size="sm" c="dimmed" mt={4} lh={1.4}>{plan.description}</Text>
-                    )}
 
-                    <Group gap={4} align="baseline" mt="lg">
-                      <Text fz={32} fw={800} style={{ letterSpacing: "-0.03em" }}>{money(price)}</Text>
+                    <Group gap={5} align="baseline" mt="lg">
+                      <Text fz={34} fw={800} style={{ letterSpacing: "-0.03em" }}>{money(price)}</Text>
                       {buyable && (
-                        <Text size="sm" c="dimmed">/ {cycle === "yearly" ? "year" : "month"}</Text>
+                        <Text size="sm" c="dimmed">/ {cycle === "yearly" ? "yr" : "mo"}</Text>
                       )}
                     </Group>
+
+                    {/* What yearly actually saves, in money rather than in
+                        "save 2 months" — the toggle already says that, and a
+                        figure is what makes the case. */}
+                    {buyable && cycle === "yearly" ? (
+                      <Text size="xs" c="emerald" fw={600} mt={2}>
+                        Saves {money(priceIn(plan.priceMonthly, currency) * 12 - price)} a year
+                      </Text>
+                    ) : (
+                      <Text size="xs" c="transparent" mt={2}>.</Text>
+                    )}
 
                     <Divider my="md" />
 
-                    <Stack gap={7} mb="lg" style={{ flex: 1 }}>
+                    <Stack gap={8} mb="lg" style={{ flex: 1 }}>
                       <FeatureLine text={`${plan.maxWorkspaces} workspace${plan.maxWorkspaces === 1 ? "" : "s"}`} />
                       <FeatureLine text={`${plan.maxSitesPerWorkspace} site${plan.maxSitesPerWorkspace === 1 ? "" : "s"} per workspace`} />
                       <FeatureLine text={`${plan.monthlyAuditQuota} SEO audit${plan.monthlyAuditQuota === 1 ? "" : "s"} / month`} />
@@ -432,6 +449,23 @@ export default function Billing() {
                       disabled={current || !buyable || isDemo}
                       loading={subscribing === plan.slug}
                       leftSection={<CreditCard size={15} />}
+                      // The recommended plan's button carries that plan's
+                      // colour rather than the shared accent, so the card the
+                      // page is steering toward is visually one thing.
+                      style={
+                        featured
+                          ? {
+                              background:
+                                PLAN_GRADIENTS[plan.slug] ??
+                                PLAN_ACCENTS[plan.slug] ??
+                                RIBBON_FALLBACK,
+                              // The gold ramp is too light for white text —
+                              // the label has to follow the fill.
+                              color: PLAN_ON_ACCENT[plan.slug] ?? "#fff",
+                              border: "none",
+                            }
+                          : undefined
+                      }
                       onClick={() => { setPlanCoupon(null); setConfirmPlan(plan); }}
                     >
                       {isDemo ? "Sign up to subscribe"
@@ -628,6 +662,79 @@ export default function Billing() {
         )}
       </Modal>
     </AppShell>
+  );
+}
+
+/** Ribbon colour for a plan slug the tier palette doesn't know about. */
+const RIBBON_FALLBACK = "#8b5cf6";
+
+/**
+ * A tab that sits on a card's top-right corner and folds behind it.
+ *
+ * A flag rather than a pill inside the card: a badge in the content area
+ * competes with the plan name for the top line, while a ribbon reads as
+ * annotation *about* the card and costs no layout inside it. The darker
+ * triangle under the tail is the fold — without it the tab looks pasted on
+ * rather than wrapped around.
+ */
+function CornerRibbon({
+  label,
+  color,
+  background,
+  fg = "#fff",
+}: {
+  label: string;
+  /** Flat colour, and the colour the fold is derived from. */
+  color: string;
+  /** Optional gradient, matching the tier's icon. Falls back to `color`. */
+  background?: string;
+  /** Text colour. Not always white — see `PLAN_ON_ACCENT`. */
+  fg?: string;
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 14,
+        right: -8,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          background: background ?? color,
+          color: fg,
+          fontSize: 10.5,
+          fontWeight: 700,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          padding: "5px 10px",
+          borderRadius: "4px 0 0 4px",
+          // A notch cut into the left edge gives the tab its flag shape.
+          clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%, 7px 50%)",
+          paddingLeft: 16,
+          whiteSpace: "nowrap",
+          lineHeight: 1.2,
+        }}
+      >
+        {label}
+      </div>
+      {/* The fold, tucked under the tail and darkened so it reads as shadow.
+          Always the flat colour, never the gradient — a gradient across 8px
+          reads as a colour mismatch rather than as a fold. */}
+      <div
+        style={{
+          width: 8,
+          height: 8,
+          background: color,
+          filter: "brightness(0.55)",
+          clipPath: "polygon(0 0, 100% 0, 100% 100%)",
+        }}
+      />
+    </div>
   );
 }
 
