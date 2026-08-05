@@ -75,6 +75,17 @@
   box-shadow: var(--shadow);
 }
 
+/* Opt-out for cards that are controls rather than panels.
+   A card holding a stepper or a form field is something the pointer has to
+   land on precisely; lifting it under the cursor fights the click it is
+   inviting. `.static-card` keeps the border and background without the
+   movement. */
+.static-card,
+.static-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* ---- Focus ----------------------------------------------------------------
    Keyboard focus gets a visible accent ring everywhere. Pointer focus does not,
    so clicking a control doesn't leave a ring behind. */

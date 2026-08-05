@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
   SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
-  ActionIcon, Tooltip, Table, NumberInput, Grid,
+  ActionIcon, Tooltip, Table, NumberInput, Grid, Tabs, UnstyledButton,
 } from "@mantine/core";
+import { useSearchParams } from "react-router-dom";
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
@@ -49,8 +50,28 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "";
  */
 const CHECKOUT_LOGO = `${window.location.origin}/favicon.png`;
 
+/** The page's three jobs, one per tab. */
+type BillingTab = "plans" | "addons" | "history";
+const BILLING_TABS: BillingTab[] = ["plans", "addons", "history"];
+
 export default function Billing() {
   const { user, refreshUser, isDemo } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // The tab lives in the URL so a reload, a bookmark, or a link from an email
+  // ("your receipt is in Billing") lands on the right one — and so the back
+  // button steps between tabs rather than leaving the page.
+  const tabParam = searchParams.get("tab");
+  const tab: BillingTab = BILLING_TABS.includes(tabParam as BillingTab)
+    ? (tabParam as BillingTab)
+    : "plans";
+
+  const setTab = (next: BillingTab) => {
+    // Replace rather than push: flicking between tabs shouldn't bury the page
+    // someone arrived from under a stack of history entries.
+    setSearchParams(next === "plans" ? {} : { tab: next }, { replace: true });
+  };
+
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [currency, setCurrency] = useState<Currency>(() => getStoredCurrency() ?? detectCurrency());
 
@@ -246,7 +267,7 @@ export default function Billing() {
 
   return (
     <AppShell>
-      <PageHeader title="Billing" description="Your plan, usage this cycle, and addon packs." />
+      <PageHeader title="Billing" description="Your plan, usage this cycle, and every payment you've made." />
 
       {loading ? (
         <Center py={64}><Loader size="sm" /></Center>
@@ -266,10 +287,33 @@ export default function Billing() {
             </Alert>
           ) : !usage && (
             <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
-              <Text size="sm">You don't have a plan yet — pick one below to unlock SEO audits and crawls.</Text>
+              <Text size="sm">
+                You don&apos;t have a plan yet — pick one under Plans to unlock SEO
+                audits and crawls.
+              </Text>
             </Alert>
           )}
 
+          {/* Three separate jobs — choosing a plan, topping up credits, and
+              looking up a past payment — split so the page answers one question
+              at a time. The usage panel stays above them because "what am I on"
+              is context for all three. */}
+          <Tabs
+            value={tab}
+            onChange={(v) => v && setTab(v as BillingTab)}
+            variant="pills"
+            color="emerald"
+            keepMounted={false}
+          >
+            <Tabs.List mb="xl">
+              <Tabs.Tab value="plans" leftSection={<Layers size={15} />}>Plans</Tabs.Tab>
+              <Tabs.Tab value="addons" leftSection={<ShoppingCart size={15} />}>Add-ons</Tabs.Tab>
+              <Tabs.Tab value="history" leftSection={<Receipt size={15} />}>
+                Billing history
+              </Tabs.Tab>
+            </Tabs.List>
+
+          <Tabs.Panel value="plans">
           <div>
             <Group justify="space-between" align="center" mb="lg" wrap="wrap">
               <div>
@@ -401,16 +445,46 @@ export default function Billing() {
               })}
             </SimpleGrid>
           </div>
+          </Tabs.Panel>
 
+          <Tabs.Panel value="addons">
           <div>
-            <Group justify="space-between" align="center" mb="lg">
+            <Group justify="space-between" align="center" mb="lg" wrap="wrap">
               <div>
-                <Title order={3} style={{ letterSpacing: "-0.01em" }}>Addon packs</Title>
+                <Title order={3} style={{ letterSpacing: "-0.01em" }}>Add-on packs</Title>
                 <Text size="sm" c="dimmed" mt={2}>
                   Used past your plan's monthly quota? Buy extra audits or crawls — credits never expire.
                 </Text>
               </div>
+              <SegmentedControl
+                size="sm"
+                radius="md"
+                value={currency}
+                onChange={(v) => changeCurrency(v as Currency)}
+                data={CURRENCIES.map((c) => ({ label: c, value: c }))}
+              />
             </Group>
+
+            {/* Credits on hand, shown here rather than only in the usage panel
+                above: on the tab where someone is deciding whether to buy more,
+                what they already have is the deciding number. */}
+            {usage && (
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="lg">
+                <CreditBalance
+                  icon={Search}
+                  label="Audit credits"
+                  planLeft={Math.max(0, usage.audits.planQuota - usage.audits.used)}
+                  addonCredits={usage.audits.addonCredits}
+                />
+                <CreditBalance
+                  icon={Globe2}
+                  label="Crawl credits"
+                  planLeft={Math.max(0, usage.crawls.planQuota - usage.crawls.used)}
+                  addonCredits={usage.crawls.addonCredits}
+                />
+              </SimpleGrid>
+            )}
+
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
               {addons.map((pack) => (
                 <Card key={pack._id} withBorder radius="lg" padding="lg">
@@ -441,14 +515,27 @@ export default function Billing() {
                 </Card>
               ))}
               {!addons.length && (
-                <Text size="sm" c="dimmed">No addon packs available right now.</Text>
+                <Text size="sm" c="dimmed">No add-on packs available right now.</Text>
               )}
             </SimpleGrid>
           </div>
+          </Tabs.Panel>
 
-          {/* A demo session has no purchases behind it, so there is no history
-              to show — and an empty table would imply one that failed to load. */}
-          {!isDemo && <Receipts />}
+          <Tabs.Panel value="history">
+            {/* A demo session has no purchases behind it, so there is no history
+                to show — and an empty table would imply one that failed to load. */}
+            {isDemo ? (
+              <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
+                <Text size="sm">
+                  The demo has no account behind it, so there are no payments to
+                  show. On a real account, every receipt lives here.
+                </Text>
+              </Alert>
+            ) : (
+              <Receipts />
+            )}
+          </Tabs.Panel>
+          </Tabs>
         </Stack>
       )}
 
@@ -544,6 +631,51 @@ export default function Billing() {
   );
 }
 
+/**
+ * What's left to spend, split by where it came from.
+ *
+ * Plan quota and addon credits are kept apart rather than summed because they
+ * behave differently: the plan's share resets at the end of the period and the
+ * bought credits don't. A single total would hide the only fact that matters
+ * when deciding whether to buy more.
+ */
+function CreditBalance({
+  icon: Icon,
+  label,
+  planLeft,
+  addonCredits,
+}: {
+  icon: typeof Search;
+  label: string;
+  planLeft: number;
+  addonCredits: number;
+}) {
+  const total = planLeft + addonCredits;
+  return (
+    <Card withBorder radius="md" padding="md" className="static-card">
+      <Group justify="space-between" align="flex-start" wrap="nowrap">
+        <div>
+          <Group gap={6} mb={4}>
+            <Icon size={13} style={{ color: "var(--muted, var(--mantine-color-dimmed))" }} />
+            <Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.02em" }}>
+              {label}
+            </Text>
+          </Group>
+          <Text fz={26} fw={800} style={{ letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+            {total}
+          </Text>
+          <Text size="xs" c="dimmed" mt={2}>
+            {planLeft} from plan{addonCredits > 0 ? ` · ${addonCredits} bought` : ""}
+          </Text>
+        </div>
+        {total === 0 && (
+          <Badge size="sm" variant="light" color="red" tt="none">Out</Badge>
+        )}
+      </Group>
+    </Card>
+  );
+}
+
 /** How many of one pack a single checkout may include. Mirrors the server's cap. */
 const MAX_PACKS = 50;
 
@@ -568,47 +700,83 @@ function PackStepper({
   value,
   onChange,
   disabled,
+  min = 0,
 }: {
   value: number;
   onChange: (value: number) => void;
   disabled?: boolean;
+  /** Floor. The plan dialog allows zero; the addon dialog needs at least one. */
+  min?: number;
 }) {
-  const clamp = (n: number) => Math.max(0, Math.min(MAX_PACKS, n));
+  const clamp = (n: number) => Math.max(min, Math.min(MAX_PACKS, n));
+
+  // One joined control rather than three spaced ones: a single 30px-tall
+  // segmented block reads as one widget and stops the buttons and the field
+  // from disagreeing about their heights.
+  const H = 30;
+
+  const step = (delta: number, label: string, disabledWhen: boolean) => (
+    <UnstyledButton
+      aria-label={label}
+      disabled={disabled || disabledWhen}
+      onClick={() => onChange(clamp(value + delta))}
+      style={{
+        width: H,
+        height: H,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: disabled || disabledWhen
+          ? "var(--mantine-color-dimmed)"
+          : "var(--mantine-color-text)",
+        cursor: disabled || disabledWhen ? "not-allowed" : "pointer",
+        opacity: disabled || disabledWhen ? 0.4 : 1,
+      }}
+    >
+      {delta < 0 ? <Minus size={13} /> : <Plus size={13} />}
+    </UnstyledButton>
+  );
 
   return (
-    <Group gap={4} wrap="nowrap">
-      <ActionIcon
-        variant="default"
-        radius="md"
-        size="lg"
-        disabled={disabled || value <= 0}
-        onClick={() => onChange(clamp(value - 1))}
-        aria-label="One fewer"
-      >
-        <Minus size={14} />
-      </ActionIcon>
+    <Group
+      gap={0}
+      wrap="nowrap"
+      style={{
+        border: "1px solid var(--mantine-color-default-border)",
+        borderRadius: 8,
+        overflow: "hidden",
+        height: H,
+      }}
+    >
+      {step(-1, "One fewer", value <= min)}
       <NumberInput
         value={value}
         onChange={(v) => onChange(clamp(Number(v) || 0))}
-        min={0}
+        min={min}
         max={MAX_PACKS}
         clampBehavior="strict"
         hideControls
         disabled={disabled}
-        styles={{ input: { width: 52, textAlign: "center", fontWeight: 650 } }}
-        size="sm"
-        radius="md"
+        size="xs"
+        styles={{
+          input: {
+            width: 34,
+            height: H,
+            minHeight: H,
+            textAlign: "center",
+            fontWeight: 650,
+            fontSize: 13,
+            // The border is on the wrapper; an inner one would double up.
+            border: "none",
+            borderLeft: "1px solid var(--mantine-color-default-border)",
+            borderRight: "1px solid var(--mantine-color-default-border)",
+            borderRadius: 0,
+            padding: 0,
+            background: "transparent",
+          },
+        }}
       />
-      <ActionIcon
-        variant="default"
-        radius="md"
-        size="lg"
-        disabled={disabled || value >= MAX_PACKS}
-        onClick={() => onChange(clamp(value + 1))}
-        aria-label="One more"
-      >
-        <Plus size={14} />
-      </ActionIcon>
+      {step(1, "One more", value >= MAX_PACKS)}
     </Group>
   );
 }
@@ -711,7 +879,7 @@ function PlanCheckoutModal({
         {/* Left: what's being bought and what can be added to it. */}
         <Grid.Col span={{ base: 12, sm: 7 }}>
           <Stack gap="md">
-            <Card withBorder radius="md" padding="md">
+            <Card withBorder radius="md" padding="md" className="static-card">
               <Group justify="space-between" wrap="nowrap">
                 <Group gap={12} wrap="nowrap">
                   <PlanIcon slug={plan.slug} size={36} uid={`checkout-${plan.slug}`} />
@@ -747,13 +915,13 @@ function PlanCheckoutModal({
                         withBorder
                         radius="md"
                         padding="md"
+                        className="static-card"
                         style={{
                           // A chosen card is outlined rather than merely
                           // annotated: with several packs on screen, "which
                           // ones did I pick" should be answerable at a glance.
                           borderColor: picked ? "var(--mantine-color-emerald-6)" : undefined,
-                          boxShadow: picked ? "0 0 0 1px var(--mantine-color-emerald-6)" : undefined,
-                          transition: "border-color 120ms ease, box-shadow 120ms ease",
+                          transition: "border-color 120ms ease",
                         }}
                       >
                         <Stack gap="sm">
@@ -805,7 +973,7 @@ function PlanCheckoutModal({
 
         {/* Right: coupon, the money, and the commit button. */}
         <Grid.Col span={{ base: 12, sm: 5 }}>
-          <Card withBorder radius="md" padding="md" bg="var(--mantine-color-body)">
+          <Card withBorder radius="md" padding="md" className="static-card" bg="var(--mantine-color-body)">
             <Stack gap="md">
               <Text size="sm" fw={700}>Order summary</Text>
 
@@ -873,7 +1041,7 @@ function PlanCheckoutModal({
               )}
 
               {Object.keys(creditTotals).length > 0 && (
-                <Card withBorder radius="sm" padding="xs" bg="var(--mantine-color-default-hover)">
+                <Card withBorder radius="sm" padding="xs" className="static-card" bg="var(--mantine-color-default-hover)">
                   <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
                     Credits included
                   </Text>
@@ -988,7 +1156,8 @@ function AddonCheckoutModal({
             disabled={busy}
             // At least one — this dialog exists to buy something, and a zero
             // here would leave the confirm button doing nothing.
-            onChange={(v) => setPacks(Math.max(1, v))}
+            min={1}
+            onChange={setPacks}
           />
         </Group>
 
@@ -1094,9 +1263,10 @@ function Receipts() {
     <div>
       <Group justify="space-between" align="center" mb="lg">
         <div>
-          <Title order={3} style={{ letterSpacing: "-0.01em" }}>Billing history</Title>
+          <Title order={3} style={{ letterSpacing: "-0.01em" }}>Receipts</Title>
           <Text size="sm" c="dimmed" mt={2}>
-            Every payment you've made, with its receipt. A copy is emailed to you each time.
+            Every payment you&apos;ve made. A copy is emailed to you each time, and
+            stays downloadable here.
           </Text>
         </div>
       </Group>
