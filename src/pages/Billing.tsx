@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
   SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
-  ActionIcon, Tooltip, Table, NumberInput,
+  ActionIcon, Tooltip, Table, NumberInput, Grid,
 } from "@mantine/core";
 import confetti from "canvas-confetti";
 import {
@@ -548,6 +548,16 @@ export default function Billing() {
 const MAX_PACKS = 50;
 
 /**
+ * The smallest order Razorpay will accept, in the currency's minor unit.
+ *
+ * Mirrored from the server, which floors every order at the same figure. Shown
+ * rather than silently applied: a 99% coupon that lands below this still gets
+ * charged this, and a total on screen that differs from the amount in the
+ * payment window reads as a bug.
+ */
+const MIN_CHARGE = 100;
+
+/**
  * A quantity stepper.
  *
  * Buttons rather than a bare number input because the common moves are "one
@@ -675,6 +685,19 @@ function PlanCheckoutModal({
   // real charge, which is why this tracks the total rather than the plan.
   const noCharge = total === 0 && !chosen.length;
 
+  // What Razorpay will actually be asked for. The server floors the order the
+  // same way, so showing the raw total here would understate the charge on a
+  // heavily discounted order.
+  const chargeable = noCharge ? 0 : Math.max(total, MIN_CHARGE);
+
+  // Total credits this checkout grants, per type — the thing the buyer is
+  // actually choosing, summarised once rather than left to be added up across
+  // rows.
+  const creditTotals = chosen.reduce<Record<string, number>>((acc, { pack, packs }) => {
+    acc[pack.type] = (acc[pack.type] ?? 0) + pack.quantity * packs;
+    return acc;
+  }, {});
+
   return (
     <Modal
       opened
@@ -682,137 +705,213 @@ function PlanCheckoutModal({
       title={<Text fw={700}>Confirm subscription</Text>}
       centered
       radius="lg"
-      size="lg"
+      size={980}
     >
-      <Stack gap="lg">
-        <Group justify="space-between" wrap="nowrap">
-          <Group gap={10} wrap="nowrap">
-            <PlanIcon slug={plan.slug} size={32} uid={`checkout-${plan.slug}`} />
-            <div>
-              <Text fw={650}>{plan.name}</Text>
-              <Text size="xs" c="dimmed">
-                Billed {cycle} · {plan.monthlyAuditQuota} audits, {plan.monthlyCrawlQuota} crawls / month
-              </Text>
-            </div>
-          </Group>
-          <Text fz={20} fw={700} style={{ whiteSpace: "nowrap" }}>{money(planPrice)}</Text>
-        </Group>
-
-        {addons.length > 0 && (
-          <div>
-            <Group gap={8} mb={4}>
-              <Text size="sm" fw={650}>Add extra credits</Text>
-              <Badge size="xs" variant="light" color="gray" tt="none">Optional</Badge>
-            </Group>
-            <Text size="xs" c="dimmed" mb="sm">
-              Buy them now and they go on the same payment and the same receipt.
-              Credits never expire and carry across renewals.
-            </Text>
-
-            <Stack gap={8}>
-              {addons.map((pack) => {
-                const packs = selection[pack.slug] ?? 0;
-                const unit = priceIn(pack.price, currency);
-                return (
-                  <Card key={pack._id} withBorder radius="md" padding="sm">
-                    <Group justify="space-between" wrap="nowrap" gap="sm">
-                      <Group gap={10} wrap="nowrap" style={{ minWidth: 0 }}>
-                        <ThemeIcon size={32} radius="md" variant="light" color="emerald">
-                          {pack.type === "audit" ? <Search size={15} /> : <Globe2 size={15} />}
-                        </ThemeIcon>
-                        <div style={{ minWidth: 0 }}>
-                          <Text size="sm" fw={600} truncate>{pack.name}</Text>
-                          <Text size="xs" c="dimmed">
-                            +{pack.quantity} {pack.type}s · {money(unit)} each
-                          </Text>
-                        </div>
-                      </Group>
-
-                      <Group gap="sm" wrap="nowrap">
-                        {packs > 0 && (
-                          <Text size="sm" fw={650} style={{ whiteSpace: "nowrap" }}>
-                            {money(unit * packs)}
-                          </Text>
-                        )}
-                        <PackStepper
-                          value={packs}
-                          disabled={busy}
-                          onChange={(v) =>
-                            setSelection((prev) => ({ ...prev, [pack.slug]: v }))
-                          }
-                        />
-                      </Group>
-                    </Group>
-
-                    {packs > 0 && (
-                      <Text size="xs" c="emerald" mt={6} fw={600}>
-                        +{pack.quantity * packs} {pack.type}s added
-                      </Text>
-                    )}
-                  </Card>
-                );
-              })}
-            </Stack>
-          </div>
-        )}
-
-        {!isFreePlan && (
-          <CouponField amount={planPrice} result={coupon} onChange={onCoupon} />
-        )}
-
-        <Divider />
-
-        <Stack gap={6}>
-          <Group justify="space-between">
-            <Text size="sm" c="dimmed">{plan.name} plan</Text>
-            <Text size="sm">{money(planPrice)}</Text>
-          </Group>
-
-          {chosen.map(({ pack, packs }) => (
-            <Group key={pack._id} justify="space-between">
-              <Text size="sm" c="dimmed">
-                {pack.name} × {packs}
-              </Text>
-              <Text size="sm">{money(priceIn(pack.price, currency) * packs)}</Text>
-            </Group>
-          ))}
-
-          {percentOff > 0 && (
-            <Group justify="space-between">
-              <Group gap={6}>
-                <Tag size={12} />
-                <Text size="sm" c="dimmed">{coupon?.coupon?.code} — {percentOff}% off</Text>
+      <Grid gutter="lg">
+        {/* Left: what's being bought and what can be added to it. */}
+        <Grid.Col span={{ base: 12, sm: 7 }}>
+          <Stack gap="md">
+            <Card withBorder radius="md" padding="md">
+              <Group justify="space-between" wrap="nowrap">
+                <Group gap={12} wrap="nowrap">
+                  <PlanIcon slug={plan.slug} size={36} uid={`checkout-${plan.slug}`} />
+                  <div>
+                    <Text fw={700}>{plan.name} plan</Text>
+                    <Text size="xs" c="dimmed">
+                      Billed {cycle} · {plan.monthlyAuditQuota} audits, {plan.monthlyCrawlQuota} crawls / month
+                    </Text>
+                  </div>
+                </Group>
+                <Text fz={20} fw={700} style={{ whiteSpace: "nowrap" }}>{money(planPrice)}</Text>
               </Group>
-              <Text size="sm" c="emerald">− {money(subtotal - total)}</Text>
-            </Group>
-          )}
+            </Card>
 
-          <Divider my={4} />
+            {addons.length > 0 && (
+              <div>
+                <Group gap={8} mb={2}>
+                  <Text size="sm" fw={650}>Add extra credits</Text>
+                  <Badge size="xs" variant="light" color="gray" tt="none">Optional</Badge>
+                </Group>
+                <Text size="xs" c="dimmed" mb="sm">
+                  Same payment, same receipt. Credits never expire and carry across renewals.
+                </Text>
 
-          <Group justify="space-between">
-            <Text fw={700}>Total</Text>
-            <Text fz={24} fw={800} style={{ letterSpacing: "-0.02em" }}>{money(total)}</Text>
-          </Group>
-        </Stack>
+                <SimpleGrid cols={{ base: 1, md: 2 }} spacing="sm">
+                  {addons.map((pack) => {
+                    const packs = selection[pack.slug] ?? 0;
+                    const unit = priceIn(pack.price, currency);
+                    const picked = packs > 0;
+                    return (
+                      <Card
+                        key={pack._id}
+                        withBorder
+                        radius="md"
+                        padding="md"
+                        style={{
+                          // A chosen card is outlined rather than merely
+                          // annotated: with several packs on screen, "which
+                          // ones did I pick" should be answerable at a glance.
+                          borderColor: picked ? "var(--mantine-color-emerald-6)" : undefined,
+                          boxShadow: picked ? "0 0 0 1px var(--mantine-color-emerald-6)" : undefined,
+                          transition: "border-color 120ms ease, box-shadow 120ms ease",
+                        }}
+                      >
+                        <Stack gap="sm">
+                          <Group gap={10} wrap="nowrap">
+                            <ThemeIcon size={34} radius="md" variant="light" color="emerald">
+                              {pack.type === "audit" ? <Search size={16} /> : <Globe2 size={16} />}
+                            </ThemeIcon>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <Text size="sm" fw={650} truncate>{pack.name}</Text>
+                              <Text size="xs" c="dimmed">
+                                +{pack.quantity} {pack.type}s · {money(unit)} each
+                              </Text>
+                            </div>
+                          </Group>
 
-        <Text size="xs" c="dimmed">
-          {noCharge
-            ? "This plan is free — no payment needed."
-            : `A one-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. It does not auto-renew — come back and buy again when the period ends.`}
-        </Text>
+                          <Group justify="space-between" wrap="nowrap">
+                            <PackStepper
+                              value={packs}
+                              disabled={busy}
+                              onChange={(v) =>
+                                setSelection((prev) => ({ ...prev, [pack.slug]: v }))
+                              }
+                            />
+                            <Text
+                              size="sm"
+                              fw={700}
+                              c={picked ? undefined : "dimmed"}
+                              style={{ whiteSpace: "nowrap" }}
+                            >
+                              {money(unit * packs)}
+                            </Text>
+                          </Group>
 
-        <Group justify="flex-end">
-          <Button variant="subtle" onClick={onClose} disabled={busy}>Cancel</Button>
-          <Button
-            color="emerald"
-            leftSection={<CreditCard size={15} />}
-            loading={busy}
-            onClick={() => onConfirm(plan, selection)}
-          >
-            {noCharge ? "Confirm" : `Pay ${money(total)}`}
-          </Button>
-        </Group>
-      </Stack>
+                          {/* Reserved height whether or not a pack is picked,
+                              so stepping up and down doesn't make the grid
+                              jump under the cursor. */}
+                          <Text size="xs" c={picked ? "emerald" : "transparent"} fw={600} mt={-4}>
+                            {picked ? `+${pack.quantity * packs} ${pack.type}s added` : " "}
+                          </Text>
+                        </Stack>
+                      </Card>
+                    );
+                  })}
+                </SimpleGrid>
+              </div>
+            )}
+          </Stack>
+        </Grid.Col>
+
+        {/* Right: coupon, the money, and the commit button. */}
+        <Grid.Col span={{ base: 12, sm: 5 }}>
+          <Card withBorder radius="md" padding="md" bg="var(--mantine-color-body)">
+            <Stack gap="md">
+              <Text size="sm" fw={700}>Order summary</Text>
+
+              {!isFreePlan && (
+                <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />
+              )}
+
+              <Divider />
+
+              <Stack gap={8}>
+                <Group justify="space-between" wrap="nowrap">
+                  <Text size="sm" c="dimmed">{plan.name} plan</Text>
+                  <Text size="sm" fw={600} style={{ whiteSpace: "nowrap" }}>{money(planPrice)}</Text>
+                </Group>
+
+                {chosen.map(({ pack, packs }) => (
+                  <Group key={pack._id} justify="space-between" wrap="nowrap">
+                    <Text size="sm" c="dimmed" truncate>
+                      {pack.name} × {packs}
+                    </Text>
+                    <Text size="sm" fw={600} style={{ whiteSpace: "nowrap" }}>
+                      {money(priceIn(pack.price, currency) * packs)}
+                    </Text>
+                  </Group>
+                ))}
+
+                {percentOff > 0 && (
+                  <>
+                    <Divider variant="dashed" my={2} />
+                    <Group justify="space-between" wrap="nowrap">
+                      <Text size="sm" c="dimmed">Subtotal</Text>
+                      <Text size="sm" style={{ whiteSpace: "nowrap" }}>{money(subtotal)}</Text>
+                    </Group>
+                    <Group justify="space-between" wrap="nowrap">
+                      <Group gap={6} wrap="nowrap">
+                        <Tag size={12} />
+                        <Text size="sm" c="dimmed" truncate>
+                          {coupon?.coupon?.code} — {percentOff}% off
+                        </Text>
+                      </Group>
+                      <Text size="sm" c="emerald" fw={600} style={{ whiteSpace: "nowrap" }}>
+                        − {money(subtotal - total)}
+                      </Text>
+                    </Group>
+                  </>
+                )}
+              </Stack>
+
+              <Divider />
+
+              <Group justify="space-between" align="flex-end" wrap="nowrap">
+                <Text fw={700}>Total</Text>
+                <Text fz={26} fw={800} style={{ letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
+                  {money(chargeable)}
+                </Text>
+              </Group>
+
+              {/* A coupon can discount below what Razorpay will accept as an
+                  order. Saying so here is the difference between a surprising
+                  charge and an explained one. */}
+              {chargeable > total && (
+                <Text size="xs" c="dimmed" mt={-6}>
+                  Minimum charge is {money(MIN_CHARGE)} — your discount covers the rest.
+                </Text>
+              )}
+
+              {Object.keys(creditTotals).length > 0 && (
+                <Card withBorder radius="sm" padding="xs" bg="var(--mantine-color-default-hover)">
+                  <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
+                    Credits included
+                  </Text>
+                  <Stack gap={2}>
+                    {Object.entries(creditTotals).map(([type, credits]) => (
+                      <Group key={type} justify="space-between" gap={6}>
+                        <Text size="xs" c="dimmed">{type}s</Text>
+                        <Text size="xs" fw={700} c="emerald">+{credits}</Text>
+                      </Group>
+                    ))}
+                  </Stack>
+                </Card>
+              )}
+
+              <Button
+                fullWidth
+                size="md"
+                color="emerald"
+                leftSection={<CreditCard size={16} />}
+                loading={busy}
+                onClick={() => onConfirm(plan, selection)}
+              >
+                {noCharge ? "Confirm" : `Pay ${money(chargeable)}`}
+              </Button>
+
+              <Button fullWidth variant="subtle" color="gray" onClick={onClose} disabled={busy}>
+                Cancel
+              </Button>
+
+              <Text size="xs" c="dimmed" ta="center">
+                {noCharge
+                  ? "This plan is free — no payment needed."
+                  : `One-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. Does not auto-renew.`}
+              </Text>
+            </Stack>
+          </Card>
+        </Grid.Col>
+      </Grid>
     </Modal>
   );
 }
@@ -853,6 +952,8 @@ function AddonCheckoutModal({
   const subtotal = unit * packs;
   const percentOff = coupon?.coupon?.percentOff ?? 0;
   const total = percentOff ? Math.floor((subtotal * (100 - percentOff)) / 100) : subtotal;
+  // Same Razorpay floor the server applies — see MIN_CHARGE.
+  const chargeable = Math.max(total, MIN_CHARGE);
 
   return (
     <Modal
@@ -915,8 +1016,14 @@ function AddonCheckoutModal({
 
           <Group justify="space-between">
             <Text fw={700}>Total</Text>
-            <Text fz={24} fw={800} style={{ letterSpacing: "-0.02em" }}>{money(total)}</Text>
+            <Text fz={24} fw={800} style={{ letterSpacing: "-0.02em" }}>{money(chargeable)}</Text>
           </Group>
+
+          {chargeable > total && (
+            <Text size="xs" c="dimmed">
+              Minimum charge is {money(MIN_CHARGE)} — your discount covers the rest.
+            </Text>
+          )}
         </Stack>
 
         <Text size="xs" c="dimmed">
@@ -932,7 +1039,7 @@ function AddonCheckoutModal({
             loading={busy}
             onClick={() => onConfirm(pack, packs)}
           >
-            Pay {money(total)}
+            Pay {money(chargeable)}
           </Button>
         </Group>
       </Stack>
