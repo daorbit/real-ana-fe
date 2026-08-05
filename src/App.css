@@ -64,6 +64,92 @@
 html, body, #root { height: 100%; }
 body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased; }
 
+/* ============ Mobile viewport containment ============
+   A single wide child (a data table, a chart, a long unbroken URL) used to
+   stretch the document past the viewport. Mobile browsers respond by zooming
+   the whole page out to fit — the "screen shrinks by itself" symptom, with
+   every control then too small to hit. The page itself must never scroll
+   sideways; anything genuinely wider than the screen scrolls inside its own
+   container instead (see `.scroll-x` and the table rule below). */
+html, body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+#root { overflow-x: clip; }
+
+/* Mantine's main column is a grid child, which defaults to min-width:auto —
+   it refuses to shrink below its widest child, so an oversized table pushes
+   the shell itself wide. This lets it shrink and clip instead. */
+.mantine-AppShell-main { min-width: 0; overflow-x: clip; }
+
+/* Long strings with no break opportunity (URLs, referrers, API keys, hashed
+   IDs) are the other common cause of a too-wide page. */
+body { overflow-wrap: break-word; }
+
+/* ============ Floating help button ============
+   Desktop keeps the generous 48px target in the corner. On a phone it shrank
+   the usable screen: a large opaque circle parked over the bottom-right of
+   every page, covering table cells and the last row of any list, and its menu
+   opened off-screen. It steps down in size, tucks into the corner, and sits
+   below Mantine's overlay layer so a modal or drawer is never fighting it. */
+.support-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  z-index: 190;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+@media (max-width: 48em) {
+  .support-fab {
+    right: 12px;
+    /* Clear of the iOS home indicator / Android gesture bar. */
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    opacity: 0.92;
+  }
+}
+/* Content clearance below the button — matches its footprint at each size. */
+.support-fab-spacer { height: 88px; }
+@media (max-width: 48em) {
+  .support-fab-spacer { height: 60px; }
+}
+
+/* Opt-in horizontal scroller for content that is legitimately wide. */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* The wide tables (SEO compare/crawl) already sit in a `ScrollArea` with an
+   explicit `miw`. A ScrollArea only clamps if its own box is allowed to shrink
+   below that content width — otherwise the table pushes the whole page wide
+   and the scroller never engages. */
+.mantine-ScrollArea-root { min-width: 0; max-width: 100%; }
+.mantine-ScrollArea-viewport { min-width: 0; }
+
+/* Tables not inside a scroller get their own one, so a wide one scrolls
+   itself instead of the document. */
+.mantine-TableScrollContainer-root,
+.mantine-Table-tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+@media (max-width: 48em) {
+  /* Recharts measures its container and can report a width wider than the
+     viewport during first layout, before the container has settled. */
+  .recharts-wrapper, .recharts-surface { max-width: 100% !important; }
+}
+
 /* The app shell pads content with `lg` (32px), which eats a phone's whole
    gutter. Tighten it below the navbar breakpoint so cards get real width. */
 @media (max-width: 48em) {

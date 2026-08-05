@@ -5,7 +5,7 @@ import {
   Box, useMantineColorScheme, useComputedColorScheme, Button, Menu,
   UnstyledButton, Tooltip, Burger, Progress, Badge,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
@@ -119,6 +119,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const dark = scheme === "dark";
 
   const [leaving, setLeaving] = useState(false);
+
+  // Matches the shell's `breakpoint: "sm"` — below this the navbar is a
+  // slide-over rather than a permanent rail, which changes where popovers
+  // anchored to it can open without falling off the screen.
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
   const impersonating = Boolean(user?.impersonating);
   // An impersonation session reports the target's role, so the admin nav would
@@ -330,7 +335,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             <DemoToggle />
           </Group>
 
-          <Menu position="right-end" withArrow radius="md" width={210}>
+          {/* On desktop the account menu opens beside the rail. On a phone the
+              rail is a full-height slide-over pinned to the left edge, so
+              `right-end` put the dropdown — and the Log out item in it —
+              partly off-screen with no way to reach it. Opening upward over
+              the rail keeps it on screen at any width, and `withinPortal`
+              stops the navbar's own scroll container from clipping it. */}
+          <Menu
+            position={mobile ? "top" : "right-end"}
+            withArrow
+            radius="md"
+            width={mobile ? "target" : 210}
+            withinPortal
+            zIndex={400}
+          >
             <Menu.Target>
               <UnstyledButton
                 className="tile"
@@ -405,8 +423,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             {children}
           </div>
         </div>
-        {/* Clear the floating help button so page content never sits under it. */}
-        <div style={{ height: 88 }} />
+        {/* Clear the floating help button so page content never sits under it.
+            The height tracks the button's size, which steps down on phones. */}
+        <div className="support-fab-spacer" />
         <SupportWidget />
       </MantineShell.Main>
     </MantineShell>

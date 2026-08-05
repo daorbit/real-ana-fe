@@ -49,22 +49,26 @@ export function SupportWidget() {
 
   return (
     <>
-      <Menu shadow="lg" width={230} position="top-end" radius="md" withArrow>
+      {/* `withinPortal` keeps the dropdown out of the fixed-position button's
+          stacking context, and the offset lifts it clear of the button on a
+          phone where there is no room beside it. */}
+      <Menu
+        shadow="lg"
+        width={230}
+        position="top-end"
+        radius="md"
+        withArrow
+        withinPortal
+        offset={10}
+      >
         <Menu.Target>
           <ActionIcon
-            size={48}
+            className="support-fab"
             radius="xl"
             variant="filled"
             color="emerald"
             title="Help & support"
             aria-label="Help and support"
-            style={{
-              position: "fixed",
-              right: 24,
-              bottom: 24,
-              zIndex: 300,
-              boxShadow: "0 8px 24px rgba(0,0,0,0.28)",
-            }}
           >
             <HelpCircle size={22} />
           </ActionIcon>
@@ -138,7 +142,9 @@ function SupportDialog({ kind, onClose }: { kind: Kind | null; onClose: () => vo
       title={config ? <Text fw={650}>{config.title}</Text> : undefined}
       centered
       radius="lg"
-      size={480}
+      // A fixed 480px dialog is wider than a phone, which drags the page
+      // sideways and triggers the browser's zoom-to-fit. Cap to the viewport.
+      size="min(480px, calc(100vw - 24px))"
       overlayProps={{ blur: 3, backgroundOpacity: 0.5 }}
     >
       {sent ? (
