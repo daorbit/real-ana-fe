@@ -707,7 +707,7 @@ function PlanCheckoutModal({
       radius="lg"
       size={980}
     >
-      <Grid gutter="lg">
+      <Grid gap="lg">
         {/* Left: what's being bought and what can be added to it. */}
         <Grid.Col span={{ base: 12, sm: 7 }}>
           <Stack gap="md">
