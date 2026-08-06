@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
 import { PageHeader, PageStack } from "../../components/Page";
+import { PageHelpButton } from "../../components/PageHelpButton";
 import { StatTile, ReportCard } from "./ReportCard";
 import { ReportDialog } from "./ReportDialog";
 import { useReportsPage, useReportDialog } from "./hooks";
@@ -48,9 +49,12 @@ export default function Reports() {
           title="Reports"
           description="Scheduled summaries of your traffic and SEO — delivered by email, with the detail attached."
           actions={
-            <Button leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
-              New report
-            </Button>
+            <>
+              <Button leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
+                New report
+              </Button>
+              <PageHelpButton />
+            </>
           }
         />
 

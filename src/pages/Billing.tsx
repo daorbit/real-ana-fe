@@ -14,6 +14,7 @@ import {
 import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../components/PlanIcons";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
+import { PageHelpButton } from "../components/PageHelpButton";
 import {
   useGetPlansQuery, useGetAddonPacksQuery,
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
@@ -267,7 +268,11 @@ export default function Billing() {
 
   return (
     <AppShell>
-      <PageHeader title="Billing" description="Your plan, usage this cycle, and every payment you've made." />
+      <PageHeader
+        title="Billing"
+        description="Your plan, usage this cycle, and every payment you've made."
+        actions={<PageHelpButton />}
+      />
 
       {loading ? (
         <Center py={64}><Loader size="sm" /></Center>

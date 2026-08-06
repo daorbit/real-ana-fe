@@ -29,6 +29,7 @@ import { AddSiteWizard } from "../components/AddSiteWizard";
 import { SiteFavicon } from "../components/SiteFavicon";
 import { BrandIcon } from "../components/BrandIcon";
 import { PageHeader } from "../components/Page";
+import { PageHelpButton } from "../components/PageHelpButton";
 import { getFramework } from "../utils/frameworks";
 import type { FrameworkId } from "../utils/frameworks";
 
@@ -303,9 +304,12 @@ export default function Workspaces() {
         title="Workspaces"
         description="Manage your workspaces and the sites they track."
         actions={
-          <Button variant="default" leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>
-            New workspace
-          </Button>
+          <>
+            <Button variant="default" leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>
+              New workspace
+            </Button>
+            <PageHelpButton />
+          </>
         }
       />
 

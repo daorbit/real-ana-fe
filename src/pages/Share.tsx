@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader, Section, Field, PageStack } from "../components/Page";
+import { PageHelpButton } from "../components/PageHelpButton";
 import {
   useGetShareQuery, useSetShareMutation, useGetSitesQuery, useGetSeoReportsQuery,
   useGetSeoShareQuery,
@@ -623,14 +624,17 @@ export default function Share() {
         title="Public sharing"
         description="Publish read-only views of this workspace — analytics and SEO audits — at links anyone can open."
         actions={
-          <Badge
-            variant="light"
-            color="gray"
-            radius="sm"
-            leftSection={<Share2 size={12} />}
-          >
-            {active?.name ?? "No workspace"}
-          </Badge>
+          <>
+            <Badge
+              variant="light"
+              color="gray"
+              radius="sm"
+              leftSection={<Share2 size={12} />}
+            >
+              {active?.name ?? "No workspace"}
+            </Badge>
+            <PageHelpButton />
+          </>
         }
       />
       {active ? (

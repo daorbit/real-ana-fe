@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Title, Text, Group, Button, Card, ActionIcon, Alert, Code, CopyButton, Modal,
+  Text, Group, Button, Card, ActionIcon, Alert, Code, CopyButton, Modal,
   TextInput, Stack, Center, ThemeIcon, SimpleGrid, Tooltip,
 } from "@mantine/core";
 import { motion } from "framer-motion";
@@ -12,6 +12,8 @@ import {
   useGetApiKeysQuery, useCreateApiKeyMutation, useRevokeApiKeyMutation,
 } from "../store";
 import { AppShell } from "../components/AppShell";
+import { PageHeader } from "../components/Page";
+import { PageHelpButton } from "../components/PageHelpButton";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { ApiKey } from "../types";
@@ -216,12 +218,11 @@ function DocsLink() {
 export default function Developers() {
   return (
     <AppShell>
-      <div style={{ marginBottom: 24 }}>
-        <Title order={1}>Developers</Title>
-        <Text c="dimmed" size="sm" mt={6}>
-          Manage your API keys and offer real-time analytics to your own users.
-        </Text>
-      </div>
+      <PageHeader
+        title="Developers"
+        description="Manage your API keys and offer real-time analytics to your own users."
+        actions={<PageHelpButton />}
+      />
 
       <DocsLink />
       <KeysTab />
