@@ -14,7 +14,8 @@
     "optional": "वैकल्पिक।",
     "comingSoon": "जल्द आ रहा है",
     "unsavedChanges": "असहेजे बदलाव",
-    "matchBrowser": "मेरे ब्राउज़र के अनुसार"
+    "matchBrowser": "मेरे ब्राउज़र के अनुसार",
+    "saveShort": "सहेजें"
   },
   "nav": {
     "groupAnalyze": "विश्लेषण करें",
@@ -50,7 +51,8 @@
     "exit": "बाहर निकलें",
     "backToAccount": "वापस अपने खाते में।",
     "exitImpersonationError": "प्रतिरूपण से बाहर नहीं निकल सके।",
-    "loggedOut": "आपको लॉग आउट कर दिया गया है।"
+    "loggedOut": "आपको लॉग आउट कर दिया गया है।",
+    "pageHelp": "इस पेज पर क्या है"
   },
   "settings": {
     "title": "सेटिंग्स",
@@ -240,5 +242,28 @@
     "haveAccount": "पहले से खाता है?",
     "loginCta": "लॉग इन",
     "signupCta": "खाता बनाएँ"
+  },
+  "help": {
+    "title": "सहायता",
+    "subtitle": "इस पेज का हर हिस्सा क्या करता है।",
+    "close": "सहायता बंद करें"
+  },
+  "validate": {
+    "required": "{{label}} आवश्यक है",
+    "minLength": "{{label}} में कम से कम {{n}} अक्षर होने चाहिए",
+    "maxLength": "{{label}} में {{n}} या उससे कम अक्षर होने चाहिए",
+    "emailRequired": "ईमेल आवश्यक है",
+    "emailInvalid": "एक मान्य ईमेल पता दर्ज करें",
+    "passwordRequired": "पासवर्ड आवश्यक है",
+    "passwordMin": "पासवर्ड में कम से कम 8 अक्षर होने चाहिए",
+    "passwordMax": "पासवर्ड में 72 या उससे कम अक्षर होने चाहिए",
+    "passwordLetter": "पासवर्ड में एक अक्षर होना चाहिए",
+    "passwordNumber": "पासवर्ड में एक अंक होना चाहिए",
+    "passwordReenter": "कृपया अपना पासवर्ड दोबारा दर्ज करें",
+    "passwordMismatch": "पासवर्ड मेल नहीं खाते",
+    "domainRequired": "डोमेन आवश्यक है",
+    "domainSpaces": "डोमेन में स्पेस नहीं हो सकते",
+    "domainInvalid": "example.com जैसा डोमेन दर्ज करें",
+    "domainTooLong": "यह डोमेन बहुत लंबा है"
   }
 }

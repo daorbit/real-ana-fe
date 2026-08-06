@@ -3,10 +3,11 @@ import {
   ActionIcon, Alert, Checkbox, MultiSelect, Divider, Tabs,
 } from "@mantine/core";
 import { CalendarClock, Send, BarChart3, MessageCircle, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { REPORT_FREQUENCIES } from "../../types";
 import type { ReportFrequency, Site, ShareState, WhatsAppStatus } from "../../types";
 import type { Draft } from "./types";
-import { FREQUENCY_HINTS, FREQUENCY_LABEL, TAB_ORDER } from "./utils";
+import { frequencyHint, frequencyLabel, TAB_ORDER } from "./utils";
 
 /**
  * The create/edit dialog.
@@ -61,11 +62,12 @@ export function ReportDialog({
   waEntitled: boolean;
   ownerMobile: string;
 }) {
+  const { t } = useTranslation();
   return (
       <Modal
         opened={opened}
         onClose={onClose}
-        title={editingId ? "Edit report" : "New report"}
+        title={editingId ? t("reports.dialogEditTitle") : t("reports.dialogNewTitle")}
         radius="lg"
         size="lg"
         centered
@@ -77,38 +79,38 @@ export function ReportDialog({
         <Tabs value={tab} onChange={(v) => setTab(v ?? TAB_ORDER[0])} keepMounted={false}>
           <Tabs.List mb="md">
             <Tabs.Tab value="schedule" leftSection={<CalendarClock size={14} />}>
-              Schedule
+              {t("reports.tabSchedule")}
             </Tabs.Tab>
             <Tabs.Tab value="delivery" leftSection={<Send size={14} />}>
-              Delivery
+              {t("reports.tabDelivery")}
             </Tabs.Tab>
             <Tabs.Tab value="content" leftSection={<BarChart3 size={14} />}>
-              Content
+              {t("reports.tabContent")}
             </Tabs.Tab>
           </Tabs.List>
 
         <Tabs.Panel value="schedule">
         <Stack gap="md">
           <TextInput
-            label="Name"
-            placeholder="Monthly client report"
+            label={t("reports.nameLabel")}
+            placeholder={t("reports.namePlaceholder")}
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.currentTarget.value })}
           />
 
           <Select
-            label="How often"
-            description={FREQUENCY_HINTS[draft.frequency]}
-            data={REPORT_FREQUENCIES.map((f) => ({ value: f, label: FREQUENCY_LABEL[f] }))}
+            label={t("reports.howOften")}
+            description={frequencyHint(draft.frequency)}
+            data={REPORT_FREQUENCIES.map((f) => ({ value: f, label: frequencyLabel(f) }))}
             value={draft.frequency}
             onChange={(v) => v && setDraft({ ...draft, frequency: v as ReportFrequency })}
             allowDeselect={false}
           />
 
           <MultiSelect
-            label="Sites"
-            description="Leave empty to include every site in this workspace, including ones you add later."
-            placeholder={draft.siteIds.length ? undefined : "All sites"}
+            label={t("reports.sitesLabel")}
+            description={t("reports.sitesDesc")}
+            placeholder={draft.siteIds.length ? undefined : t("reports.allSitesPlaceholder")}
             data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
             value={draft.siteIds}
             onChange={(v) => setDraft({ ...draft, siteIds: v })}
@@ -117,8 +119,8 @@ export function ReportDialog({
           />
 
           <Switch
-            label="Active"
-            description="Paused reports keep their settings but stop sending"
+            label={t("reports.activeLabel")}
+            description={t("reports.activeDesc")}
             checked={draft.enabled}
             onChange={(e) => setDraft({ ...draft, enabled: e.currentTarget.checked })}
           />
@@ -128,18 +130,18 @@ export function ReportDialog({
         <Tabs.Panel value="delivery">
         <Stack gap="md">
           <div>
-            <Text size="sm" fw={500} mb={4}>Deliver by</Text>
+            <Text size="sm" fw={500} mb={4}>{t("reports.deliverBy")}</Text>
             <Text size="xs" c="dimmed" mb={8}>
-              Email carries the spreadsheet. WhatsApp gets a short summary and the dashboard link.
+              {t("reports.deliverByDesc")}
             </Text>
             <Stack gap={8}>
               <Checkbox
-                label="Email"
+                label={t("reports.channelEmail")}
                 checked={draft.emailChannel}
                 onChange={(e) => setDraft({ ...draft, emailChannel: e.currentTarget.checked })}
               />
               <Checkbox
-                label="WhatsApp"
+                label={t("reports.channelWhatsApp")}
                 disabled={!waReady || !waEntitled}
                 // The platform's own paired number is an implementation
                 // detail, not something a customer needs on screen — what
@@ -151,12 +153,12 @@ export function ReportDialog({
                 // only way to get.
                 description={
                   !waEntitled
-                    ? "Available on Pro — upgrade to get your reports on WhatsApp"
+                    ? t("reports.waNotEntitled")
                     : !wa?.configured
-                      ? "Not available on this deployment"
+                      ? t("reports.waNotConfigured")
                       : wa.status === "connected"
-                        ? "A copy on your own WhatsApp"
-                        : "Temporarily unavailable — try again shortly"
+                        ? t("reports.waConnected")
+                        : t("reports.waUnavailable")
                 }
                 checked={draft.whatsappChannel}
                 onChange={(e) => setDraft({ ...draft, whatsappChannel: e.currentTarget.checked })}
@@ -168,22 +170,21 @@ export function ReportDialog({
             <Alert color="teal" radius="md" p="xs" icon={<MessageCircle size={15} />}>
               <Text size="xs">
                 {ownerMobile
-                  ? `This report will be sent to your own number, +${ownerMobile}. WhatsApp delivery goes to you only — to share with a client, add their email address below.`
-                  : "Add your mobile number in Settings first — WhatsApp reports are delivered to your own number."}
+                  ? t("reports.waNoticeWithNumber", { phone: ownerMobile })
+                  : t("reports.waNoticeNoNumber")}
               </Text>
             </Alert>
           )}
 
           <div>
-            <Text size="sm" fw={500} mb={4}>Also send to</Text>
+            <Text size="sm" fw={500} mb={4}>{t("reports.alsoSendTo")}</Text>
             <Text size="xs" c="dimmed" mb={8}>
-              You always receive this report. Add anyone else who should — they don&apos;t need an
-              account, and every email includes an unsubscribe link.
+              {t("reports.alsoSendToDesc")}
             </Text>
             <Group gap="xs" mb={draft.recipients.length ? "xs" : 0}>
               <TextInput
                 style={{ flex: 1 }}
-                placeholder="client@example.com"
+                placeholder={t("reports.emailPlaceholder")}
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.currentTarget.value)}
                 onKeyDown={(e) => {
@@ -193,7 +194,7 @@ export function ReportDialog({
                   }
                 }}
               />
-              <Button variant="light" onClick={addEmail}>Add</Button>
+              <Button variant="light" onClick={addEmail}>{t("reports.add")}</Button>
             </Group>
             <Group gap={6}>
               {draft.recipients.map((email) => (
@@ -222,32 +223,32 @@ export function ReportDialog({
         <Tabs.Panel value="content">
         <Stack gap="md">
           <div>
-            <Text size="sm" fw={500} mb={8}>What to include</Text>
+            <Text size="sm" fw={500} mb={8}>{t("reports.whatToInclude")}</Text>
             <Stack gap={8}>
               <Checkbox
-                label="Analytics summary"
-                description="Visitors, pageviews, sessions and bounce rate, with change vs. the previous period"
+                label={t("reports.includeAnalyticsLabel")}
+                description={t("reports.includeAnalyticsDesc")}
                 checked={draft.analytics}
                 onChange={(e) => setDraft({ ...draft, analytics: e.currentTarget.checked })}
               />
               <Checkbox
-                label="SEO scores"
-                description="Latest score per page, and how it moved since the last report"
+                label={t("reports.includeSeoLabel")}
+                description={t("reports.includeSeoDesc")}
                 checked={draft.seo}
                 onChange={(e) => setDraft({ ...draft, seo: e.currentTarget.checked })}
               />
               <Checkbox
-                label="Spreadsheet attachment"
-                description="The full breakdown as an .xlsx file"
+                label={t("reports.includeXlsxLabel")}
+                description={t("reports.includeXlsxDesc")}
                 checked={draft.attachXlsx}
                 onChange={(e) => setDraft({ ...draft, attachXlsx: e.currentTarget.checked })}
               />
               <Checkbox
-                label="Link to the live dashboard"
+                label={t("reports.includeLinkLabel")}
                 description={
                   share?.enabled
-                    ? "Recipients can open the public dashboard at any time"
-                    : "Requires the public dashboard to be turned on — until then, no link is included"
+                    ? t("reports.includeLinkOnDesc")
+                    : t("reports.includeLinkOffDesc")
                 }
                 checked={draft.dashboardLink}
                 onChange={(e) => setDraft({ ...draft, dashboardLink: e.currentTarget.checked })}
@@ -256,9 +257,7 @@ export function ReportDialog({
             {draft.dashboardLink && !share?.enabled && (
               <Alert color="yellow" mt="xs" radius="md" p="xs">
                 <Text size="xs">
-                  The public dashboard is currently off, so no link will be included. Turn it on
-                  under Public dashboard first — note that it makes this workspace&apos;s analytics
-                  readable by anyone with the link.
+                  {t("reports.dashboardOffWarning")}
                 </Text>
               </Alert>
             )}
@@ -277,14 +276,14 @@ export function ReportDialog({
             known field, so Save is available from wherever that field is. */}
         <Divider my="md" />
         <Group justify="flex-end">
-          <Button variant="subtle" onClick={onClose}>Cancel</Button>
+          <Button variant="subtle" onClick={onClose}>{t("common.cancel")}</Button>
           {isLastTab || editingId ? (
             <Button loading={saving} onClick={submit}>
-              {editingId ? "Save changes" : "Schedule report"}
+              {editingId ? t("common.save") : t("reports.scheduleReport")}
             </Button>
           ) : (
             <Button onClick={() => setTab(TAB_ORDER[tabIndex + 1])} rightSection={<ChevronRight size={15} />}>
-              Next
+              {t("common.next")}
             </Button>
           )}
         </Group>

@@ -5,6 +5,8 @@ import {
   ActionIcon, Tooltip, Table, NumberInput, Grid, Tabs, UnstyledButton,
 } from "@mantine/core";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
@@ -55,7 +57,16 @@ const CHECKOUT_LOGO = `${window.location.origin}/favicon.png`;
 type BillingTab = "plans" | "addons" | "history";
 const BILLING_TABS: BillingTab[] = ["plans", "addons", "history"];
 
+/**
+ * "audit"/"crawl" as the API spells them, in the user's language and correctly
+ * pluralised — the raw value is an identifier, not something to put on screen.
+ */
+function creditType(t: TFunction, type: string, count: number): string {
+  return t(type === "audit" ? "billing.typeAudit" : "billing.typeCrawl", { count });
+}
+
 export default function Billing() {
+  const { t } = useTranslation();
   const { user, refreshUser, isDemo } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -184,7 +195,7 @@ export default function Billing() {
             setCelebration({ kind: "plan", planName: plan.name, credits: boughtCredits });
             fireConfetti();
           } catch (e) {
-            notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
+            notify.error(errMessage(e, t("billing.verifyFailed")));
           }
         },
         modal: {
@@ -194,7 +205,7 @@ export default function Billing() {
         },
       });
     } catch (e) {
-      notify.error(errMessage(e, "Could not start checkout."));
+      notify.error(errMessage(e, t("billing.checkoutError")));
     } finally {
       setSubscribing(null);
     }
@@ -237,7 +248,7 @@ export default function Billing() {
             setCelebration({ kind: "addon", pack, packs });
             fireConfetti();
           } catch (e) {
-            notify.error(errMessage(e, "Payment succeeded but verification failed — contact support."));
+            notify.error(errMessage(e, t("billing.verifyFailed")));
           }
         },
         modal: {
@@ -247,7 +258,7 @@ export default function Billing() {
         },
       });
     } catch (e) {
-      notify.error(errMessage(e, "Could not start checkout."));
+      notify.error(errMessage(e, t("billing.checkoutError")));
     } finally {
       setBuying(null);
     }
@@ -269,8 +280,8 @@ export default function Billing() {
   return (
     <AppShell>
       <PageHeader
-        title="Billing"
-        description="Your plan, usage this cycle, and every payment you've made."
+        title={t("billing.title")}
+        description={t("billing.description")}
         actions={<PageHelpButton />}
       />
 
@@ -311,10 +322,10 @@ export default function Billing() {
             keepMounted={false}
           >
             <Tabs.List mb="xl">
-              <Tabs.Tab value="plans" leftSection={<Layers size={15} />}>Plans</Tabs.Tab>
-              <Tabs.Tab value="addons" leftSection={<ShoppingCart size={15} />}>Add-ons</Tabs.Tab>
+              <Tabs.Tab value="plans" leftSection={<Layers size={15} />}>{t("billing.tabPlans")}</Tabs.Tab>
+              <Tabs.Tab value="addons" leftSection={<ShoppingCart size={15} />}>{t("billing.tabAddons")}</Tabs.Tab>
               <Tabs.Tab value="history" leftSection={<Receipt size={15} />}>
-                Billing history
+                {t("billing.tabHistory")}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -322,8 +333,8 @@ export default function Billing() {
           <div>
             <Group justify="space-between" align="center" mb="lg" wrap="wrap">
               <div>
-                <Title order={3} style={{ letterSpacing: "-0.01em" }}>Plans</Title>
-                <Text size="sm" c="dimmed" mt={2}>Every plan includes SEO audits, crawls, and the full dashboard.</Text>
+                <Title order={3} style={{ letterSpacing: "-0.01em" }}>{t("billing.plansTitle")}</Title>
+                <Text size="sm" c="dimmed" mt={2}>{t("billing.plansSubtitle")}</Text>
               </div>
               <Group gap="sm" wrap="wrap">
                 <SegmentedControl
@@ -339,11 +350,11 @@ export default function Billing() {
                   value={cycle}
                   onChange={(v) => setCycle(v as BillingCycle)}
                   data={[
-                    { label: "Monthly", value: "monthly" },
-                    { label: "Yearly · save 2 months", value: "yearly" },
+                    { label: t("billing.cycleMonthly"), value: "monthly" },
+                    { label: t("billing.cycleYearly"), value: "yearly" },
                   ]}
                 />
-                <Tooltip label="Refetch prices">
+                <Tooltip label={t("billing.refetchPrices")}>
                   <ActionIcon
                     variant="light"
                     color="gray"
@@ -396,7 +407,7 @@ export default function Billing() {
                         ribbon indistinguishable from ordinary chrome. */}
                     {(featured || current) && (
                       <CornerRibbon
-                        label={current ? "Current" : "Recommended"}
+                        label={current ? t("billing.ribbonCurrent") : t("billing.ribbonRecommended")}
                         color={PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK}
                         background={PLAN_GRADIENTS[plan.slug]}
                         fg={PLAN_ON_ACCENT[plan.slug] ?? "#fff"}
@@ -420,7 +431,7 @@ export default function Billing() {
                     <Group gap={5} align="baseline" mt="lg">
                       <Text fz={34} fw={800} style={{ letterSpacing: "-0.03em" }}>{money(price)}</Text>
                       {buyable && (
-                        <Text size="sm" c="dimmed">/ {cycle === "yearly" ? "yr" : "mo"}</Text>
+                        <Text size="sm" c="dimmed">/ {cycle === "yearly" ? t("billing.perYear") : t("billing.perMonth")}</Text>
                       )}
                     </Group>
 
@@ -429,7 +440,9 @@ export default function Billing() {
                         figure is what makes the case. */}
                     {buyable && cycle === "yearly" ? (
                       <Text size="xs" c="emerald" fw={600} mt={2}>
-                        Saves {money(priceIn(plan.priceMonthly, currency) * 12 - price)} a year
+                        {t("billing.savesPerYear", {
+                          amount: money(priceIn(plan.priceMonthly, currency) * 12 - price),
+                        })}
                       </Text>
                     ) : (
                       <Text size="xs" c="transparent" mt={2}>.</Text>
@@ -438,10 +451,10 @@ export default function Billing() {
                     <Divider my="md" />
 
                     <Stack gap={8} mb="lg" style={{ flex: 1 }}>
-                      <FeatureLine text={`${plan.maxWorkspaces} workspace${plan.maxWorkspaces === 1 ? "" : "s"}`} />
-                      <FeatureLine text={`${plan.maxSitesPerWorkspace} site${plan.maxSitesPerWorkspace === 1 ? "" : "s"} per workspace`} />
-                      <FeatureLine text={`${plan.monthlyAuditQuota} SEO audit${plan.monthlyAuditQuota === 1 ? "" : "s"} / month`} />
-                      <FeatureLine text={`${plan.monthlyCrawlQuota} crawl${plan.monthlyCrawlQuota === 1 ? "" : "s"} / month`} />
+                      <FeatureLine text={t("billing.featureWorkspaces", { count: plan.maxWorkspaces })} />
+                      <FeatureLine text={t("billing.featureSites", { count: plan.maxSitesPerWorkspace })} />
+                      <FeatureLine text={t("billing.featureAudits", { count: plan.monthlyAuditQuota })} />
+                      <FeatureLine text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
                       {plan.features.map((f) => <FeatureLine key={f} text={f} />)}
                     </Stack>
 
@@ -473,11 +486,11 @@ export default function Billing() {
                       }
                       onClick={() => { setPlanCoupon(null); setConfirmPlan(plan); }}
                     >
-                      {isDemo ? "Sign up to subscribe"
-                        : current ? "Current plan"
-                        : !buyable ? "Included free"
-                        : usage?.plan.slug === plan.slug ? "Renew"
-                        : "Subscribe"}
+                      {isDemo ? t("billing.ctaSignUpSubscribe")
+                        : current ? t("billing.ctaCurrentPlan")
+                        : !buyable ? t("billing.ctaIncludedFree")
+                        : usage?.plan.slug === plan.slug ? t("billing.ctaRenew")
+                        : t("billing.ctaSubscribe")}
                     </Button>
                   </Card>
                 );
@@ -490,9 +503,9 @@ export default function Billing() {
           <div>
             <Group justify="space-between" align="center" mb="lg" wrap="wrap">
               <div>
-                <Title order={3} style={{ letterSpacing: "-0.01em" }}>Add-on packs</Title>
+                <Title order={3} style={{ letterSpacing: "-0.01em" }}>{t("billing.addonsTitle")}</Title>
                 <Text size="sm" c="dimmed" mt={2}>
-                  Used past your plan's monthly quota? Buy extra audits or crawls — credits never expire.
+                  {t("billing.addonsSubtitle")}
                 </Text>
               </div>
               <SegmentedControl
@@ -511,13 +524,13 @@ export default function Billing() {
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="lg">
                 <CreditBalance
                   icon={Search}
-                  label="Audit credits"
+                  label={t("billing.auditCredits")}
                   planLeft={Math.max(0, usage.audits.planQuota - usage.audits.used)}
                   addonCredits={usage.audits.addonCredits}
                 />
                 <CreditBalance
                   icon={Globe2}
-                  label="Crawl credits"
+                  label={t("billing.crawlCredits")}
                   planLeft={Math.max(0, usage.crawls.planQuota - usage.crawls.used)}
                   addonCredits={usage.crawls.addonCredits}
                 />
@@ -530,7 +543,12 @@ export default function Billing() {
                   <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <div>
                       <Text fw={650} size="md">{pack.name}</Text>
-                      <Text size="sm" c="dimmed" mt={2}>+{pack.quantity} {pack.type}s</Text>
+                      <Text size="sm" c="dimmed" mt={2}>
+                        {t("billing.packQuantity", {
+                          n: pack.quantity,
+                          type: creditType(t, pack.type, pack.quantity),
+                        })}
+                      </Text>
                     </div>
                     <ThemeIcon size={38} radius="md" variant="light" color="emerald">
                       {pack.type === "audit" ? <Search size={17} /> : <Globe2 size={17} />}
@@ -548,13 +566,13 @@ export default function Billing() {
                       loading={buying === pack._id}
                       onClick={() => { setAddonCoupon(null); setConfirmAddon(pack); }}
                     >
-                      {isDemo ? "Sign up to buy" : "Buy"}
+                      {isDemo ? t("billing.ctaSignUpBuy") : t("billing.ctaBuy")}
                     </Button>
                   </Group>
                 </Card>
               ))}
               {!addons.length && (
-                <Text size="sm" c="dimmed">No add-on packs available right now.</Text>
+                <Text size="sm" c="dimmed">{t("billing.noAddons")}</Text>
               )}
             </SimpleGrid>
           </div>
@@ -613,15 +631,15 @@ export default function Billing() {
             <X size={26} />
           </ThemeIcon>
           <Title order={3} ta="center" style={{ letterSpacing: "-0.01em" }}>
-            Payment cancelled
+            {t("billing.cancelledTitle")}
           </Title>
           <Text size="sm" c="dimmed" ta="center" maw={280}>
             {cancelled
-              ? `You closed the payment window before ${cancelled} was paid for. Nothing was charged.`
-              : "Nothing was charged."}
+              ? t("billing.cancelledBodyNamed", { what: cancelled })
+              : t("billing.cancelledBody")}
           </Text>
           <Button variant="light" color="gray" radius="md" mt="sm" onClick={() => setCancelled(null)}>
-            Close
+            {t("common.close")}
           </Button>
         </Stack>
       </Modal>
@@ -640,28 +658,34 @@ export default function Billing() {
               <PartyPopper size={26} />
             </ThemeIcon>
             <Title order={3} ta="center" style={{ letterSpacing: "-0.01em" }}>
-              {celebration.kind === "plan" ? "You're all set!" : "Credits added!"}
+              {celebration.kind === "plan"
+                ? t("billing.celebrationPlanTitle")
+                : t("billing.celebrationAddonTitle")}
             </Title>
             <Text size="sm" c="dimmed" ta="center" maw={280}>
               {celebration.kind === "plan" ? (
                 <>
-                  You&apos;re now on the {celebration.planName} plan. Your new quota is ready to use.
-                  {celebration.credits.length > 0 && (
-                    <>
-                      {" "}Plus{" "}
-                      {celebration.credits
-                        .map((c) => `${c.credits} ${c.type}${c.credits === 1 ? "" : "s"}`)
-                        .join(" and ")}{" "}
-                      on top.
-                    </>
-                  )}
+                  {t("billing.celebrationPlanBody", { plan: celebration.planName })}
+                  {celebration.credits.length > 0 &&
+                    t("billing.celebrationPlanExtra", {
+                      extras: celebration.credits
+                        .map((c) => `${c.credits} ${creditType(t, c.type, c.credits)}`)
+                        .join(t("billing.and")),
+                    })}
                 </>
               ) : (
-                `+${celebration.pack.quantity * celebration.packs} ${celebration.pack.type}s added to your account — ready whenever you need them.`
+                t("billing.celebrationAddonBody", {
+                  n: celebration.pack.quantity * celebration.packs,
+                  type: creditType(
+                    t,
+                    celebration.pack.type,
+                    celebration.pack.quantity * celebration.packs,
+                  ),
+                })
               )}
             </Text>
             <Button color="emerald" radius="md" mt="sm" onClick={() => setCelebration(null)}>
-              Let's go
+              {t("billing.letsGo")}
             </Button>
           </Stack>
         )}
@@ -762,6 +786,7 @@ function CreditBalance({
   planLeft: number;
   addonCredits: number;
 }) {
+  const { t } = useTranslation();
   const total = planLeft + addonCredits;
   return (
     <Card withBorder radius="md" padding="md" className="static-card">
@@ -777,11 +802,13 @@ function CreditBalance({
             {total}
           </Text>
           <Text size="xs" c="dimmed" mt={2}>
-            {planLeft} from plan{addonCredits > 0 ? ` · ${addonCredits} bought` : ""}
+            {addonCredits > 0
+              ? t("billing.creditsBought", { planLeft, addonCredits })
+              : t("billing.creditsFromPlan", { planLeft })}
           </Text>
         </div>
         {total === 0 && (
-          <Badge size="sm" variant="light" color="red" tt="none">Out</Badge>
+          <Badge size="sm" variant="light" color="red" tt="none">{t("billing.out")}</Badge>
         )}
       </Group>
     </Card>
@@ -820,6 +847,7 @@ function PackStepper({
   /** Floor. The plan dialog allows zero; the addon dialog needs at least one. */
   min?: number;
 }) {
+  const { t } = useTranslation();
   const clamp = (n: number) => Math.max(min, Math.min(MAX_PACKS, n));
 
   // One joined control rather than three spaced ones: a single 30px-tall
@@ -860,7 +888,7 @@ function PackStepper({
         height: H,
       }}
     >
-      {step(-1, "One fewer", value <= min)}
+      {step(-1, t("billing.oneFewer"), value <= min)}
       <NumberInput
         value={value}
         onChange={(v) => onChange(clamp(Number(v) || 0))}
@@ -888,7 +916,7 @@ function PackStepper({
           },
         }}
       />
-      {step(1, "One more", value >= MAX_PACKS)}
+      {step(1, t("billing.oneMore"), value >= MAX_PACKS)}
     </Group>
   );
 }
@@ -929,6 +957,7 @@ function PlanCheckoutModal({
   onClose: () => void;
   onConfirm: (plan: Plan, selection: AddonSelection) => void;
 }) {
+  const { t } = useTranslation();
   const [selection, setSelection] = useState<AddonSelection>({});
 
   // Reset when a different plan is picked, so quantities chosen for one plan
@@ -982,7 +1011,7 @@ function PlanCheckoutModal({
     <Modal
       opened
       onClose={onClose}
-      title={<Text fw={700}>Confirm subscription</Text>}
+      title={<Text fw={700}>{t("billing.confirmSubscription")}</Text>}
       centered
       radius="lg"
       size={980}
@@ -996,9 +1025,14 @@ function PlanCheckoutModal({
                 <Group gap={12} wrap="nowrap">
                   <PlanIcon slug={plan.slug} size={36} uid={`checkout-${plan.slug}`} />
                   <div>
-                    <Text fw={700}>{plan.name} plan</Text>
+                    <Text fw={700}>{t("billing.planNamed", { plan: plan.name })}</Text>
                     <Text size="xs" c="dimmed">
-                      Billed {cycle} · {plan.monthlyAuditQuota} audits, {plan.monthlyCrawlQuota} crawls / month
+                      {t(
+                        cycle === "yearly"
+                          ? "billing.billedCycleYearly"
+                          : "billing.billedCycleMonthly",
+                        { audits: plan.monthlyAuditQuota, crawls: plan.monthlyCrawlQuota },
+                      )}
                     </Text>
                   </div>
                 </Group>
@@ -1009,11 +1043,11 @@ function PlanCheckoutModal({
             {addons.length > 0 && (
               <div>
                 <Group gap={8} mb={2}>
-                  <Text size="sm" fw={650}>Add extra credits</Text>
-                  <Badge size="xs" variant="light" color="gray" tt="none">Optional</Badge>
+                  <Text size="sm" fw={650}>{t("billing.addExtraCredits")}</Text>
+                  <Badge size="xs" variant="light" color="gray" tt="none">{t("billing.optional")}</Badge>
                 </Group>
                 <Text size="xs" c="dimmed" mb="sm">
-                  Same payment, same receipt. Credits never expire and carry across renewals.
+                  {t("billing.addCreditsDesc")}
                 </Text>
 
                 <SimpleGrid cols={{ base: 1, md: 2 }} spacing="sm">
@@ -1044,7 +1078,11 @@ function PlanCheckoutModal({
                             <div style={{ minWidth: 0, flex: 1 }}>
                               <Text size="sm" fw={650} truncate>{pack.name}</Text>
                               <Text size="xs" c="dimmed">
-                                +{pack.quantity} {pack.type}s · {money(unit)} each
+                                {t("billing.packUnit", {
+                                  n: pack.quantity,
+                                  type: creditType(t, pack.type, pack.quantity),
+                                  price: money(unit),
+                                })}
                               </Text>
                             </div>
                           </Group>
@@ -1071,7 +1109,12 @@ function PlanCheckoutModal({
                               so stepping up and down doesn't make the grid
                               jump under the cursor. */}
                           <Text size="xs" c={picked ? "emerald" : "transparent"} fw={600} mt={-4}>
-                            {picked ? `+${pack.quantity * packs} ${pack.type}s added` : " "}
+                            {picked
+                              ? t("billing.packAdded", {
+                                  n: pack.quantity * packs,
+                                  type: creditType(t, pack.type, pack.quantity * packs),
+                                })
+                              : " "}
                           </Text>
                         </Stack>
                       </Card>
@@ -1087,7 +1130,7 @@ function PlanCheckoutModal({
         <Grid.Col span={{ base: 12, sm: 5 }}>
           <Card withBorder radius="md" padding="md" className="static-card" bg="var(--mantine-color-body)">
             <Stack gap="md">
-              <Text size="sm" fw={700}>Order summary</Text>
+              <Text size="sm" fw={700}>{t("billing.orderSummary")}</Text>
 
               {!isFreePlan && (
                 <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />
@@ -1097,14 +1140,14 @@ function PlanCheckoutModal({
 
               <Stack gap={8}>
                 <Group justify="space-between" wrap="nowrap">
-                  <Text size="sm" c="dimmed">{plan.name} plan</Text>
+                  <Text size="sm" c="dimmed">{t("billing.planNamed", { plan: plan.name })}</Text>
                   <Text size="sm" fw={600} style={{ whiteSpace: "nowrap" }}>{money(planPrice)}</Text>
                 </Group>
 
                 {chosen.map(({ pack, packs }) => (
                   <Group key={pack._id} justify="space-between" wrap="nowrap">
                     <Text size="sm" c="dimmed" truncate>
-                      {pack.name} × {packs}
+                      {t("billing.packTimes", { name: pack.name, packs })}
                     </Text>
                     <Text size="sm" fw={600} style={{ whiteSpace: "nowrap" }}>
                       {money(priceIn(pack.price, currency) * packs)}
@@ -1116,14 +1159,17 @@ function PlanCheckoutModal({
                   <>
                     <Divider variant="dashed" my={2} />
                     <Group justify="space-between" wrap="nowrap">
-                      <Text size="sm" c="dimmed">Subtotal</Text>
+                      <Text size="sm" c="dimmed">{t("billing.subtotal")}</Text>
                       <Text size="sm" style={{ whiteSpace: "nowrap" }}>{money(subtotal)}</Text>
                     </Group>
                     <Group justify="space-between" wrap="nowrap">
                       <Group gap={6} wrap="nowrap">
                         <Tag size={12} />
                         <Text size="sm" c="dimmed" truncate>
-                          {coupon?.coupon?.code} — {percentOff}% off
+                          {t("billing.couponOff", {
+                            code: coupon?.coupon?.code,
+                            percent: percentOff,
+                          })}
                         </Text>
                       </Group>
                       <Text size="sm" c="emerald" fw={600} style={{ whiteSpace: "nowrap" }}>
@@ -1137,7 +1183,7 @@ function PlanCheckoutModal({
               <Divider />
 
               <Group justify="space-between" align="flex-end" wrap="nowrap">
-                <Text fw={700}>Total</Text>
+                <Text fw={700}>{t("billing.total")}</Text>
                 <Text fz={26} fw={800} style={{ letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
                   {money(chargeable)}
                 </Text>
@@ -1148,19 +1194,19 @@ function PlanCheckoutModal({
                   charge and an explained one. */}
               {chargeable > total && (
                 <Text size="xs" c="dimmed" mt={-6}>
-                  Minimum charge is {money(MIN_CHARGE)} — your discount covers the rest.
+                  {t("billing.minimumCharge", { amount: money(MIN_CHARGE) })}
                 </Text>
               )}
 
               {Object.keys(creditTotals).length > 0 && (
                 <Card withBorder radius="sm" padding="xs" className="static-card" bg="var(--mantine-color-default-hover)">
                   <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={4}>
-                    Credits included
+                    {t("billing.creditsIncluded")}
                   </Text>
                   <Stack gap={2}>
                     {Object.entries(creditTotals).map(([type, credits]) => (
                       <Group key={type} justify="space-between" gap={6}>
-                        <Text size="xs" c="dimmed">{type}s</Text>
+                        <Text size="xs" c="dimmed">{creditType(t, type, credits)}</Text>
                         <Text size="xs" fw={700} c="emerald">+{credits}</Text>
                       </Group>
                     ))}
@@ -1176,17 +1222,21 @@ function PlanCheckoutModal({
                 loading={busy}
                 onClick={() => onConfirm(plan, selection)}
               >
-                {noCharge ? "Confirm" : `Pay ${money(chargeable)}`}
+                {noCharge ? t("billing.confirm") : t("billing.payAmount", { amount: money(chargeable) })}
               </Button>
 
               <Button fullWidth variant="subtle" color="gray" onClick={onClose} disabled={busy}>
-                Cancel
+                {t("common.cancel")}
               </Button>
 
               <Text size="xs" c="dimmed" ta="center">
                 {noCharge
-                  ? "This plan is free — no payment needed."
-                  : `One-time charge via Razorpay for one ${cycle === "yearly" ? "year" : "month"}. Does not auto-renew.`}
+                  ? t("billing.planIsFree")
+                  : t(
+                      cycle === "yearly"
+                        ? "billing.oneTimeChargeYear"
+                        : "billing.oneTimeChargeMonth",
+                    )}
               </Text>
             </Stack>
           </Card>
@@ -1219,6 +1269,7 @@ function AddonCheckoutModal({
   onClose: () => void;
   onConfirm: (pack: AddonPack, packs: number) => void;
 }) {
+  const { t } = useTranslation();
   const [packs, setPacks] = useState(1);
 
   useEffect(() => {
@@ -1239,7 +1290,7 @@ function AddonCheckoutModal({
     <Modal
       opened
       onClose={onClose}
-      title={<Text fw={700}>Confirm purchase</Text>}
+      title={<Text fw={700}>{t("billing.confirmPurchase")}</Text>}
       centered
       radius="lg"
     >
@@ -1251,16 +1302,25 @@ function AddonCheckoutModal({
             </ThemeIcon>
             <div>
               <Text fw={650}>{pack.name}</Text>
-              <Text size="xs" c="dimmed">+{pack.quantity} {pack.type}s per pack · {money(unit)} each</Text>
+              <Text size="xs" c="dimmed">
+                {t("billing.packUnitPerPack", {
+                  n: pack.quantity,
+                  type: creditType(t, pack.type, pack.quantity),
+                  price: money(unit),
+                })}
+              </Text>
             </div>
           </Group>
         </Group>
 
         <Group justify="space-between">
           <div>
-            <Text size="sm" fw={600}>How many packs?</Text>
+            <Text size="sm" fw={600}>{t("billing.howManyPacks")}</Text>
             <Text size="xs" c="emerald" fw={600}>
-              {pack.quantity * packs} {pack.type}s total
+              {t("billing.packTotal", {
+                n: pack.quantity * packs,
+                type: creditType(t, pack.type, pack.quantity * packs),
+              })}
             </Text>
           </div>
           <PackStepper
@@ -1279,7 +1339,7 @@ function AddonCheckoutModal({
 
         <Stack gap={6}>
           <Group justify="space-between">
-            <Text size="sm" c="dimmed">{pack.name} × {packs}</Text>
+            <Text size="sm" c="dimmed">{t("billing.packTimes", { name: pack.name, packs })}</Text>
             <Text size="sm">{money(subtotal)}</Text>
           </Group>
 
@@ -1287,7 +1347,9 @@ function AddonCheckoutModal({
             <Group justify="space-between">
               <Group gap={6}>
                 <Tag size={12} />
-                <Text size="sm" c="dimmed">{coupon?.coupon?.code} — {percentOff}% off</Text>
+                <Text size="sm" c="dimmed">
+                  {t("billing.couponOff", { code: coupon?.coupon?.code, percent: percentOff })}
+                </Text>
               </Group>
               <Text size="sm" c="emerald">− {money(subtotal - total)}</Text>
             </Group>
@@ -1302,25 +1364,24 @@ function AddonCheckoutModal({
 
           {chargeable > total && (
             <Text size="xs" c="dimmed">
-              Minimum charge is {money(MIN_CHARGE)} — your discount covers the rest.
+              {t("billing.minimumCharge", { amount: money(MIN_CHARGE) })}
             </Text>
           )}
         </Stack>
 
         <Text size="xs" c="dimmed">
-          A one-time charge via Razorpay. Credits are added as soon as payment is
-          confirmed and never expire.
+          {t("billing.addonOneTime")}
         </Text>
 
         <Group justify="flex-end">
-          <Button variant="subtle" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button variant="subtle" onClick={onClose} disabled={busy}>{t("common.cancel")}</Button>
           <Button
             color="emerald"
             leftSection={<ShoppingCart size={15} />}
             loading={busy}
             onClick={() => onConfirm(pack, packs)}
           >
-            Pay {money(chargeable)}
+            {t("billing.payAmount", { amount: money(chargeable) })}
           </Button>
         </Group>
       </Stack>
@@ -1337,6 +1398,7 @@ function AddonCheckoutModal({
  * downloading, so it sits at the bottom, below the things that cost money.
  */
 function Receipts() {
+  const { t } = useTranslation();
   const { data: invoices = [], isLoading } = useGetInvoicesQuery();
   const [downloading, setDownloading] = useState<string | null>(null);
 
@@ -1365,7 +1427,7 @@ function Receipts() {
       a.remove();
       URL.revokeObjectURL(url);
     } catch {
-      notify.error("Could not download that receipt. Try again in a moment.");
+      notify.error(t("billing.downloadError"));
     } finally {
       setDownloading(null);
     }
@@ -1375,10 +1437,9 @@ function Receipts() {
     <div>
       <Group justify="space-between" align="center" mb="lg">
         <div>
-          <Title order={3} style={{ letterSpacing: "-0.01em" }}>Receipts</Title>
+          <Title order={3} style={{ letterSpacing: "-0.01em" }}>{t("billing.receiptsTitle")}</Title>
           <Text size="sm" c="dimmed" mt={2}>
-            Every payment you&apos;ve made. A copy is emailed to you each time, and
-            stays downloadable here.
+            {t("billing.receiptsSubtitle")}
           </Text>
         </div>
       </Group>
@@ -1392,8 +1453,7 @@ function Receipts() {
               <Receipt size={20} />
             </ThemeIcon>
             <Text size="sm" c="dimmed" ta="center" maw={340}>
-              No payments yet. Once you buy a plan or an addon pack, the receipt
-              shows up here and lands in your inbox.
+              {t("billing.noReceipts")}
             </Text>
           </Stack>
         ) : (
@@ -1401,10 +1461,10 @@ function Receipts() {
             <Table verticalSpacing="sm" horizontalSpacing="lg">
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Receipt</Table.Th>
-                  <Table.Th>Date</Table.Th>
-                  <Table.Th>Item</Table.Th>
-                  <Table.Th ta="right">Amount</Table.Th>
+                  <Table.Th>{t("billing.colReceipt")}</Table.Th>
+                  <Table.Th>{t("billing.colDate")}</Table.Th>
+                  <Table.Th>{t("billing.colItem")}</Table.Th>
+                  <Table.Th ta="right">{t("billing.colAmount")}</Table.Th>
                   <Table.Th />
                 </Table.Tr>
               </Table.Thead>
@@ -1424,7 +1484,7 @@ function Receipts() {
                     <Table.Td>
                       <Group gap={8} wrap="nowrap">
                         <Badge size="sm" variant="light" color={inv.kind === "plan" ? "emerald" : "gray"} tt="none">
-                          {inv.kind === "plan" ? "Plan" : "Addon"}
+                          {inv.kind === "plan" ? t("billing.kindPlan") : t("billing.kindAddon")}
                         </Badge>
                         <Text size="sm">{inv.description}</Text>
                       </Group>
@@ -1433,7 +1493,7 @@ function Receipts() {
                       <Text size="sm" fw={650}>{formatMoney(inv.amount, inv.currency)}</Text>
                     </Table.Td>
                     <Table.Td ta="right">
-                      <Tooltip label="Download PDF">
+                      <Tooltip label={t("billing.downloadPdf")}>
                         <ActionIcon
                           variant="light"
                           color="gray"
@@ -1454,7 +1514,7 @@ function Receipts() {
       </Card>
 
       <Text size="xs" c="dimmed" mt="sm">
-        These are payment receipts, not tax invoices — no GST is charged or collected.
+        {t("billing.notTaxInvoices")}
       </Text>
     </div>
   );
@@ -1472,6 +1532,7 @@ function UsageSummary({
   usage: NonNullable<QuotaSummary>;
   expired: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <Card
       withBorder
@@ -1501,17 +1562,27 @@ function UsageSummary({
             </Box>
             <div>
               <Group gap={8}>
-                <Text fw={700} size="lg">{usage.plan.name} plan</Text>
+                <Text fw={700} size="lg">{t("billing.planNamed", { plan: usage.plan.name })}</Text>
                 <Badge size="sm" variant="light" color={expired ? "red" : "emerald"} tt="none">
-                  {expired ? "Expired" : "Active"}
+                  {expired ? t("billing.statusExpired") : t("billing.statusActive")}
                 </Badge>
               </Group>
               {usage.currentPeriodEnd && (
                 <Group gap={5} mt={2}>
                   <Clock size={12} style={{ color: "var(--muted, var(--mantine-color-dimmed))" }} />
                   <Text size="xs" c="dimmed">
-                    {expired ? "Expired" : "Renews"} {new Date(usage.currentPeriodEnd).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
-                    {" · billed "}{usage.cycle}
+                    {t(expired ? "billing.expiredOn" : "billing.renewsOn", {
+                      date: new Date(usage.currentPeriodEnd).toLocaleDateString(undefined, {
+                        day: "numeric", month: "short", year: "numeric",
+                      }),
+                    })}
+                    {t("billing.billedSuffix", {
+                      cycle: t(
+                        usage.cycle === "yearly"
+                          ? "billing.cycleYearlyWord"
+                          : "billing.cycleMonthlyWord",
+                      ),
+                    })}
                   </Text>
                 </Group>
               )}
@@ -1524,18 +1595,17 @@ function UsageSummary({
         <Box p="md" style={{ borderBottom: "1px solid var(--border)" }}>
           <Alert variant="light" color="red" icon={<Info size={16} />} radius="md" p="sm">
             <Text size="sm">
-              Your plan period has ended — audits and crawls are paused until you renew.
-              Any unused addon credits are untouched.
+              {t("billing.expiredNotice")}
             </Text>
           </Alert>
         </Box>
       )}
 
       <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing={0}>
-        <UsageCell icon={Search} label="SEO audits" used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
-        <UsageCell icon={Globe2} label="Crawls" used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
-        <UsageCell icon={FolderKanban} label="Workspaces" used={usage.workspaces.used} quota={usage.workspaces.quota} />
-        <UsageCell icon={Layers} label="Sites / workspace" used={null} quota={usage.maxSitesPerWorkspace} />
+        <UsageCell icon={Search} label={t("billing.usageAudits")} used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
+        <UsageCell icon={Globe2} label={t("billing.usageCrawls")} used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
+        <UsageCell icon={FolderKanban} label={t("billing.usageWorkspaces")} used={usage.workspaces.used} quota={usage.workspaces.quota} />
+        <UsageCell icon={Layers} label={t("billing.usageSitesPerWorkspace")} used={null} quota={usage.maxSitesPerWorkspace} />
       </SimpleGrid>
     </Card>
   );
@@ -1551,6 +1621,7 @@ function UsageCell({
   quota: number;
   credits?: number;
 }) {
+  const { t } = useTranslation();
   const total = quota + (credits ?? 0);
   const pct = used === null ? null : total > 0 ? Math.min(100, (used / total) * 100) : 100;
   const exhausted = pct !== null && pct >= 100;
@@ -1569,7 +1640,7 @@ function UsageCell({
             <Text size="sm" c="dimmed">/ {total}</Text>
           </Group>
           {credits ? (
-            <Text size="xs" c="dimmed" mt={2}>{quota} plan + {credits} addon</Text>
+            <Text size="xs" c="dimmed" mt={2}>{t("billing.planPlusAddon", { quota, credits })}</Text>
           ) : null}
           <Progress value={pct ?? 0} color={exhausted ? (credits ? "yellow" : "red") : "emerald"} size={4} radius="xl" mt={8} />
         </>
@@ -1604,6 +1675,7 @@ function CouponField({
   result: CouponCheckResult | null;
   onChange: (result: CouponCheckResult | null) => void;
 }) {
+  const { t } = useTranslation();
   const [code, setCode] = useState("");
   const [checkCoupon, { isLoading }] = useCheckCouponMutation();
 
@@ -1613,16 +1685,16 @@ function CouponField({
       onChange(null);
       return;
     }
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const res = await checkCoupon({ amount, code: trimmed }).unwrap();
         onChange(res);
       } catch (e) {
-        onChange({ amount, error: errMessage(e, "invalid coupon") });
+        onChange({ amount, error: errMessage(e, t("billing.invalidCoupon")) });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, 400);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, amount]);
 
@@ -1632,7 +1704,7 @@ function CouponField({
     return (
       <Group gap={6} wrap="nowrap">
         <Badge size="sm" variant="light" color="emerald" leftSection={<Tag size={11} />}>
-          {applied.code} — {applied.percentOff}% off
+          {t("billing.couponOff", { code: applied.code, percent: applied.percentOff })}
         </Badge>
         <Button
           size="compact-xs"
@@ -1648,7 +1720,7 @@ function CouponField({
 
   return (
     <TextInput
-      placeholder="Coupon code"
+      placeholder={t("billing.couponPlaceholder")}
       size="sm"
       value={code}
       onChange={(e) => setCode(e.currentTarget.value.toUpperCase())}

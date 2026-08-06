@@ -14,7 +14,8 @@
     "optional": "اختياري.",
     "comingSoon": "قريبًا",
     "unsavedChanges": "تغييرات غير محفوظة",
-    "matchBrowser": "حسب المتصفح"
+    "matchBrowser": "حسب المتصفح",
+    "saveShort": "حفظ"
   },
   "nav": {
     "groupAnalyze": "تحليل",
@@ -50,7 +51,8 @@
     "exit": "خروج",
     "backToAccount": "العودة إلى حسابك الخاص.",
     "exitImpersonationError": "تعذّر الخروج من انتحال الهوية.",
-    "loggedOut": "تم تسجيل خروجك."
+    "loggedOut": "تم تسجيل خروجك.",
+    "pageHelp": "ما في هذه الصفحة"
   },
   "settings": {
     "title": "الإعدادات",
@@ -240,5 +242,28 @@
     "haveAccount": "لديك حساب بالفعل؟",
     "loginCta": "تسجيل الدخول",
     "signupCta": "إنشاء حساب"
+  },
+  "help": {
+    "title": "المساعدة",
+    "subtitle": "وظيفة كل جزء من هذه الصفحة.",
+    "close": "إغلاق المساعدة"
+  },
+  "validate": {
+    "required": "{{label}} مطلوب",
+    "minLength": "يجب ألا يقل {{label}} عن {{n}} حرفًا",
+    "maxLength": "يجب ألا يزيد {{label}} عن {{n}} حرفًا",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "emailInvalid": "أدخل عنوان بريد إلكتروني صالحًا",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "passwordMin": "يجب ألا تقل كلمة المرور عن 8 أحرف",
+    "passwordMax": "يجب ألا تزيد كلمة المرور عن 72 حرفًا",
+    "passwordLetter": "يجب أن تحتوي كلمة المرور على حرف",
+    "passwordNumber": "يجب أن تحتوي كلمة المرور على رقم",
+    "passwordReenter": "يرجى إعادة إدخال كلمة المرور",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين",
+    "domainRequired": "النطاق مطلوب",
+    "domainSpaces": "لا يمكن أن يحتوي النطاق على مسافات",
+    "domainInvalid": "أدخل نطاقًا مثل example.com",
+    "domainTooLong": "هذا النطاق طويل جدًا"
   }
 }

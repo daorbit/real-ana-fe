@@ -14,7 +14,8 @@
     "optional": "任意。",
     "comingSoon": "近日公開",
     "unsavedChanges": "未保存の変更",
-    "matchBrowser": "ブラウザに合わせる"
+    "matchBrowser": "ブラウザに合わせる",
+    "saveShort": "保存"
   },
   "nav": {
     "groupAnalyze": "分析",
@@ -50,7 +51,8 @@
     "exit": "終了",
     "backToAccount": "自分のアカウントに戻りました。",
     "exitImpersonationError": "代理表示を終了できませんでした。",
-    "loggedOut": "ログアウトしました。"
+    "loggedOut": "ログアウトしました。",
+    "pageHelp": "このページの内容"
   },
   "settings": {
     "title": "設定",
@@ -240,5 +242,28 @@
     "haveAccount": "すでにアカウントをお持ちですか？",
     "loginCta": "ログイン",
     "signupCta": "アカウントを作成"
+  },
+  "help": {
+    "title": "ヘルプ",
+    "subtitle": "このページの各部分の役割です。",
+    "close": "ヘルプを閉じる"
+  },
+  "validate": {
+    "required": "{{label}}は必須です",
+    "minLength": "{{label}}は{{n}}文字以上で入力してください",
+    "maxLength": "{{label}}は{{n}}文字以内で入力してください",
+    "emailRequired": "メールアドレスは必須です",
+    "emailInvalid": "有効なメールアドレスを入力してください",
+    "passwordRequired": "パスワードは必須です",
+    "passwordMin": "パスワードは8文字以上で入力してください",
+    "passwordMax": "パスワードは72文字以内で入力してください",
+    "passwordLetter": "パスワードには英字を含めてください",
+    "passwordNumber": "パスワードには数字を含めてください",
+    "passwordReenter": "パスワードをもう一度入力してください",
+    "passwordMismatch": "パスワードが一致しません",
+    "domainRequired": "ドメインは必須です",
+    "domainSpaces": "ドメインにスペースは使用できません",
+    "domainInvalid": "example.com のような形式で入力してください",
+    "domainTooLong": "このドメインは長すぎます"
   }
 }

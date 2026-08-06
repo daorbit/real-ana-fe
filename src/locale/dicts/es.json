@@ -14,7 +14,8 @@
     "optional": "Opcional.",
     "comingSoon": "Próximamente",
     "unsavedChanges": "Cambios sin guardar",
-    "matchBrowser": "Según mi navegador"
+    "matchBrowser": "Según mi navegador",
+    "saveShort": "Guardar"
   },
   "nav": {
     "groupAnalyze": "Analizar",
@@ -50,7 +51,8 @@
     "exit": "Salir",
     "backToAccount": "De vuelta a tu propia cuenta.",
     "exitImpersonationError": "No se pudo salir de la suplantación.",
-    "loggedOut": "Se ha cerrado tu sesión."
+    "loggedOut": "Se ha cerrado tu sesión.",
+    "pageHelp": "Qué hay en esta página"
   },
   "settings": {
     "title": "Ajustes",
@@ -240,5 +242,28 @@
     "haveAccount": "¿Ya tienes una cuenta?",
     "loginCta": "Iniciar sesión",
     "signupCta": "Crear cuenta"
+  },
+  "help": {
+    "title": "Ayuda",
+    "subtitle": "Qué hace cada parte de esta página.",
+    "close": "Cerrar la ayuda"
+  },
+  "validate": {
+    "required": "{{label}} es obligatorio",
+    "minLength": "{{label}} debe tener al menos {{n}} caracteres",
+    "maxLength": "{{label}} debe tener {{n}} caracteres o menos",
+    "emailRequired": "El correo electrónico es obligatorio",
+    "emailInvalid": "Introduce una dirección de correo válida",
+    "passwordRequired": "La contraseña es obligatoria",
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+    "passwordMax": "La contraseña debe tener 72 caracteres o menos",
+    "passwordLetter": "La contraseña debe contener una letra",
+    "passwordNumber": "La contraseña debe contener un número",
+    "passwordReenter": "Vuelve a introducir tu contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "domainRequired": "El dominio es obligatorio",
+    "domainSpaces": "Un dominio no puede contener espacios",
+    "domainInvalid": "Introduce un dominio como example.com",
+    "domainTooLong": "Ese dominio es demasiado largo"
   }
 }

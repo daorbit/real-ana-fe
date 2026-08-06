@@ -6,9 +6,10 @@ import {
   FileSpreadsheet, Link2, MoreVertical, Pause, Play, Clock,
   Users, CheckCircle2, MessageCircle,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { timeAgo } from "../../utils";
 import type { ReportSchedule } from "../../types";
-import { FREQUENCY_LABEL, nextSendLabel, recipientSummary, destinations } from "./utils";
+import { frequencyLabel, nextSendLabel, recipientSummary, destinations } from "./utils";
 
 export function StatTile({
   icon: Icon,
@@ -37,18 +38,19 @@ export function StatTile({
 
 /** How a report goes out. Shown first, because it changes who sees it at all. */
 function ChannelChips({ s }: { s: ReportSchedule }) {
+  const { t } = useTranslation();
   return (
     <Group gap={6}>
       {s.channels.email && (
         <Badge size="sm" variant="light" color="blue" leftSection={<Mail size={11} />}
           styles={{ label: { fontWeight: 500 } }}>
-          Email
+          {t("reports.channelEmail")}
         </Badge>
       )}
       {s.channels.whatsapp && (
         <Badge size="sm" variant="light" color="teal" leftSection={<MessageCircle size={11} />}
           styles={{ label: { fontWeight: 500 } }}>
-          WhatsApp
+          {t("reports.channelWhatsApp")}
         </Badge>
       )}
     </Group>
@@ -57,18 +59,20 @@ function ChannelChips({ s }: { s: ReportSchedule }) {
 
 /** The contents of a report, as labelled chips — faster to scan than a sentence. */
 function IncludeChips({ s }: { s: ReportSchedule }) {
+  const { t } = useTranslation();
+  // `id` keys the list; the label is translated and so can't be a React key.
   const items = [
-    { on: s.include.analytics, icon: BarChart3, label: "Analytics" },
-    { on: s.include.seo, icon: Search, label: "SEO" },
-    { on: s.attachXlsx, icon: FileSpreadsheet, label: "Spreadsheet" },
-    { on: s.include.dashboardLink, icon: Link2, label: "Live link" },
+    { id: "analytics", on: s.include.analytics, icon: BarChart3, label: t("reports.includeAnalytics") },
+    { id: "seo", on: s.include.seo, icon: Search, label: t("reports.includeSeo") },
+    { id: "xlsx", on: s.attachXlsx, icon: FileSpreadsheet, label: t("reports.includeSpreadsheet") },
+    { id: "link", on: s.include.dashboardLink, icon: Link2, label: t("reports.includeLiveLink") },
   ].filter((i) => i.on);
 
   return (
     <Group gap={6}>
       {items.map((i) => (
         <Badge
-          key={i.label}
+          key={i.id}
           size="sm"
           variant="light"
           color="gray"
@@ -102,6 +106,7 @@ export function ReportCard({
   testing: boolean;
   waEntitled: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <Box className="surface-card" p="lg" style={{ opacity: s.enabled ? 1 : 0.72 }}>
       <Group justify="space-between" align="flex-start" wrap="nowrap" mb="sm">
@@ -109,9 +114,9 @@ export function ReportCard({
           <Group gap={8} wrap="nowrap">
             <Text fw={650} size="md" truncate>{s.name}</Text>
             {s.enabled ? (
-              <Badge size="sm" variant="light" color="emerald">{FREQUENCY_LABEL[s.frequency]}</Badge>
+              <Badge size="sm" variant="light" color="emerald">{frequencyLabel(s.frequency)}</Badge>
             ) : (
-              <Badge size="sm" variant="light" color="gray">Paused</Badge>
+              <Badge size="sm" variant="light" color="gray">{t("reports.paused")}</Badge>
             )}
             {s.lastError && (
               <Tooltip label={s.lastError} multiline w={280} withArrow>
@@ -124,7 +129,7 @@ export function ReportCard({
 
         <Group gap={4} wrap="nowrap">
           {s.channels.email && (
-            <Tooltip label="Email a copy to yourself now" withArrow>
+            <Tooltip label={t("reports.testEmailTooltip")} withArrow>
               <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest}>
                 <Send size={15} />
               </ActionIcon>
@@ -137,25 +142,25 @@ export function ReportCard({
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>Edit</Menu.Item>
+              <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>{t("reports.edit")}</Menu.Item>
               {/* A schedule keeps its WhatsApp channel through a downgrade, so
                   the entitlement is checked here rather than inferred from the
                   schedule — otherwise the test button stays live on a plan that
                   no longer includes it and only fails at the server. */}
               {s.channels.whatsapp && waEntitled && (
                 <Menu.Item leftSection={<MessageCircle size={14} />} onClick={onTestWhatsApp}>
-                  Send WhatsApp test
+                  {t("reports.sendWhatsAppTest")}
                 </Menu.Item>
               )}
               <Menu.Item
                 leftSection={s.enabled ? <Pause size={14} /> : <Play size={14} />}
                 onClick={onToggle}
               >
-                {s.enabled ? "Pause" : "Resume"}
+                {s.enabled ? t("reports.pause") : t("reports.resume")}
               </Menu.Item>
               <Menu.Divider />
               <Menu.Item color="red" leftSection={<Trash2 size={14} />} onClick={onDelete}>
-                Delete
+                {t("common.delete")}
               </Menu.Item>
             </Menu.Dropdown>
           </Menu>
@@ -181,7 +186,7 @@ export function ReportCard({
           {/* Addresses, not just a count: the owner needs to see at a glance
               that a report is going to the right client. */}
           <Text size="xs" c="dimmed" lineClamp={1} maw={340}>
-            {destinations(s) || "No active recipients"}
+            {destinations(s) || t("reports.noActiveRecipients")}
           </Text>
         </div>
 
@@ -189,17 +194,17 @@ export function ReportCard({
           <div>
             <Group gap={5}>
               <Clock size={12} style={{ opacity: 0.6 }} />
-              <Text size="xs" c="dimmed">Next</Text>
+              <Text size="xs" c="dimmed">{t("reports.next")}</Text>
             </Group>
             <Text size="sm" fw={600} mt={2}>{nextSendLabel(s)}</Text>
           </div>
           <div>
             <Group gap={5}>
               <CheckCircle2 size={12} style={{ opacity: 0.6 }} />
-              <Text size="xs" c="dimmed">Last sent</Text>
+              <Text size="xs" c="dimmed">{t("reports.lastSent")}</Text>
             </Group>
             <Text size="sm" fw={600} mt={2} c={s.lastSentAt ? undefined : "dimmed"}>
-              {s.lastSentAt ? timeAgo(s.lastSentAt) : "Never"}
+              {s.lastSentAt ? timeAgo(s.lastSentAt) : t("reports.never")}
             </Text>
           </div>
         </Group>

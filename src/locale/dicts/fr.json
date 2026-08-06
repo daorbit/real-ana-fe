@@ -14,7 +14,8 @@
     "optional": "Facultatif.",
     "comingSoon": "Bientôt disponible",
     "unsavedChanges": "Modifications non enregistrées",
-    "matchBrowser": "Selon mon navigateur"
+    "matchBrowser": "Selon mon navigateur",
+    "saveShort": "Enregistrer"
   },
   "nav": {
     "groupAnalyze": "Analyser",
@@ -50,7 +51,8 @@
     "exit": "Quitter",
     "backToAccount": "De retour sur votre propre compte.",
     "exitImpersonationError": "Impossible de quitter l'emprunt d'identité.",
-    "loggedOut": "Vous avez été déconnecté."
+    "loggedOut": "Vous avez été déconnecté.",
+    "pageHelp": "Ce que contient cette page"
   },
   "settings": {
     "title": "Paramètres",
@@ -240,5 +242,28 @@
     "haveAccount": "Vous avez déjà un compte ?",
     "loginCta": "Connexion",
     "signupCta": "Créer un compte"
+  },
+  "help": {
+    "title": "Aide",
+    "subtitle": "À quoi sert chaque partie de cette page.",
+    "close": "Fermer l'aide"
+  },
+  "validate": {
+    "required": "{{label}} est obligatoire",
+    "minLength": "{{label}} doit contenir au moins {{n}} caractères",
+    "maxLength": "{{label}} ne doit pas dépasser {{n}} caractères",
+    "emailRequired": "L'adresse e-mail est obligatoire",
+    "emailInvalid": "Saisissez une adresse e-mail valide",
+    "passwordRequired": "Le mot de passe est obligatoire",
+    "passwordMin": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwordMax": "Le mot de passe ne doit pas dépasser 72 caractères",
+    "passwordLetter": "Le mot de passe doit contenir une lettre",
+    "passwordNumber": "Le mot de passe doit contenir un chiffre",
+    "passwordReenter": "Veuillez ressaisir votre mot de passe",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "domainRequired": "Le domaine est obligatoire",
+    "domainSpaces": "Un domaine ne peut pas contenir d'espaces",
+    "domainInvalid": "Saisissez un domaine tel que example.com",
+    "domainTooLong": "Ce domaine est trop long"
   }
 }

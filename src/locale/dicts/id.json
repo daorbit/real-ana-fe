@@ -14,7 +14,8 @@
     "optional": "Opsional.",
     "comingSoon": "Segera hadir",
     "unsavedChanges": "Perubahan belum disimpan",
-    "matchBrowser": "Ikuti browser saya"
+    "matchBrowser": "Ikuti browser saya",
+    "saveShort": "Simpan"
   },
   "nav": {
     "groupAnalyze": "Analisis",
@@ -50,7 +51,8 @@
     "exit": "Keluar",
     "backToAccount": "Kembali ke akun Anda sendiri.",
     "exitImpersonationError": "Tidak dapat keluar dari peniruan.",
-    "loggedOut": "Anda telah keluar."
+    "loggedOut": "Anda telah keluar.",
+    "pageHelp": "Isi halaman ini"
   },
   "settings": {
     "title": "Pengaturan",
@@ -240,5 +242,28 @@
     "haveAccount": "Sudah punya akun?",
     "loginCta": "Masuk",
     "signupCta": "Buat akun"
+  },
+  "help": {
+    "title": "Bantuan",
+    "subtitle": "Fungsi setiap bagian halaman ini.",
+    "close": "Tutup bantuan"
+  },
+  "validate": {
+    "required": "{{label}} wajib diisi",
+    "minLength": "{{label}} minimal {{n}} karakter",
+    "maxLength": "{{label}} maksimal {{n}} karakter",
+    "emailRequired": "Email wajib diisi",
+    "emailInvalid": "Masukkan alamat email yang valid",
+    "passwordRequired": "Kata sandi wajib diisi",
+    "passwordMin": "Kata sandi minimal 8 karakter",
+    "passwordMax": "Kata sandi maksimal 72 karakter",
+    "passwordLetter": "Kata sandi harus memuat huruf",
+    "passwordNumber": "Kata sandi harus memuat angka",
+    "passwordReenter": "Masukkan ulang kata sandi Anda",
+    "passwordMismatch": "Kata sandi tidak cocok",
+    "domainRequired": "Domain wajib diisi",
+    "domainSpaces": "Domain tidak boleh mengandung spasi",
+    "domainInvalid": "Masukkan domain seperti example.com",
+    "domainTooLong": "Domain tersebut terlalu panjang"
   }
 }

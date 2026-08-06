@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useGetReportSchedulesQuery, useSaveReportScheduleMutation,
   useDeleteReportScheduleMutation, useTestReportScheduleMutation,
@@ -19,6 +20,7 @@ import { EMAIL_RE, TAB_ORDER, nextSendLabel } from "./utils";
  * this lives as long as the page, the draft only as long as the modal is open.
  */
 export function useReportsPage() {
+  const { t } = useTranslation();
   const { active } = useWorkspace();
   const { user } = useAuth();
   const workspaceId = active?._id ?? "";
@@ -61,11 +63,13 @@ export function useReportsPage() {
   ).size;
 
   const siteNameFor = (s: ReportSchedule): string => {
-    if (!s.siteIds.length) return `All sites in ${active?.name ?? "this workspace"}`;
+    if (!s.siteIds.length) {
+      return t("reports.allSitesIn", { workspace: active?.name ?? t("reports.thisWorkspace") });
+    }
     const names = s.siteIds
       .map((id) => sites.find((site) => site.siteId === id)?.name)
       .filter(Boolean);
-    return names.length ? names.join(", ") : `${s.siteIds.length} site(s)`;
+    return names.length ? names.join(", ") : t("reports.siteCount", { count: s.siteIds.length });
   };
 
   const persist = async (d: Draft, id: string | null) => {
@@ -86,9 +90,9 @@ export function useReportsPage() {
   const toggleEnabled = async (s: ReportSchedule) => {
     try {
       await persist({ ...fromSchedule(s), enabled: !s.enabled }, s.id);
-      notify.success(s.enabled ? "Report paused." : "Report resumed.");
+      notify.success(s.enabled ? t("reports.pausedToast") : t("reports.resumedToast"));
     } catch (e) {
-      notify.error(errMessage(e, "Could not update the report."));
+      notify.error(errMessage(e, t("reports.updateError")));
     }
   };
 
@@ -96,9 +100,12 @@ export function useReportsPage() {
     setTestingId(s.id);
     try {
       const result = await sendTest({ workspaceId, id: s.id }).unwrap();
-      notify.success(`Sent to ${result.sentTo.join(", ")}.`, "Test report sent");
+      notify.success(
+        t("reports.testSentBody", { recipients: result.sentTo.join(", ") }),
+        t("reports.testSentTitle"),
+      );
     } catch (e) {
-      notify.error(errMessage(e, "Could not send the test report."));
+      notify.error(errMessage(e, t("reports.testError")));
     } finally {
       setTestingId(null);
     }
@@ -107,15 +114,18 @@ export function useReportsPage() {
   const runWhatsAppTest = async (s: ReportSchedule) => {
     const first = s.phoneRecipients.find((p) => !p.optedOut);
     if (!first) {
-      notify.error("This report has no active WhatsApp numbers.");
+      notify.error(t("reports.noWhatsAppNumbers"));
       return;
     }
     setTestingId(s.id);
     try {
       await sendWaTest({ workspaceId, id: s.id, phone: first.phone }).unwrap();
-      notify.success(`Sent to +${first.phone}.`, "Test WhatsApp sent");
+      notify.success(
+        t("reports.waTestSentBody", { phone: first.phone }),
+        t("reports.waTestSentTitle"),
+      );
     } catch (e) {
-      notify.error(errMessage(e, "Could not send the WhatsApp test."));
+      notify.error(errMessage(e, t("reports.waTestError")));
     } finally {
       setTestingId(null);
     }
@@ -123,19 +133,14 @@ export function useReportsPage() {
 
   const destroy = (s: ReportSchedule) => {
     confirmDelete({
-      title: "Delete report",
-      body: (
-        <>
-          "{s.name}" will be deleted and no longer sent to its recipients. This
-          cannot be undone.
-        </>
-      ),
+      title: t("reports.deleteTitle"),
+      body: t("reports.deleteBody", { name: s.name }),
       onConfirm: async () => {
         try {
           await remove({ workspaceId, id: s.id }).unwrap();
-          notify.success("Report deleted.");
+          notify.success(t("reports.deletedToast"));
         } catch (e) {
-          notify.error(errMessage(e, "Could not delete the report."));
+          notify.error(errMessage(e, t("reports.deleteError")));
         }
       },
     });
@@ -161,6 +166,7 @@ export function useReportDialog(opts: {
   ownerMobile: string;
   persist: (d: Draft, id: string | null) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [opened, setOpened] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
@@ -190,7 +196,7 @@ export function useReportDialog(opts: {
     const email = emailInput.trim().toLowerCase();
     if (!email) return;
     if (!EMAIL_RE.test(email)) {
-      notify.error(`"${email}" is not a valid email address.`);
+      notify.error(t("reports.invalidEmail", { email }));
       return;
     }
     if (draft.recipients.includes(email)) {
@@ -214,32 +220,32 @@ export function useReportDialog(opts: {
     };
 
     if (!draft.name.trim()) {
-      fail("schedule", "Give the report a name so you can tell it apart from the others.");
+      fail("schedule", t("reports.needName"));
       return;
     }
     if (!draft.analytics && !draft.seo) {
-      fail("content", "Include analytics, SEO, or both — a report of neither is empty.");
+      fail("content", t("reports.needContent"));
       return;
     }
     if (!draft.emailChannel && !draft.whatsappChannel) {
-      fail("delivery", "Pick at least one delivery channel.");
+      fail("delivery", t("reports.needChannel"));
       return;
     }
     if (draft.whatsappChannel && !opts.waEntitled) {
-      fail("delivery", "WhatsApp delivery is a Pro feature — upgrade, or deliver this report by email.");
+      fail("delivery", t("reports.waIsPro"));
       return;
     }
     if (draft.whatsappChannel && !opts.ownerMobile) {
-      fail("delivery", "Add your mobile number in Settings before turning on WhatsApp delivery.");
+      fail("delivery", t("reports.waNeedsMobile"));
       return;
     }
 
     try {
       await opts.persist(draft, editingId);
-      notify.success(editingId ? "Report updated." : "Report scheduled.");
+      notify.success(editingId ? t("reports.updatedToast") : t("reports.scheduledToast"));
       setOpened(false);
     } catch (e) {
-      notify.error(errMessage(e, "Could not save the report."));
+      notify.error(errMessage(e, t("reports.saveError")));
     }
   };
 

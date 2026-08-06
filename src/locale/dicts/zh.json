@@ -14,7 +14,8 @@
     "optional": "可选。",
     "comingSoon": "即将推出",
     "unsavedChanges": "未保存的更改",
-    "matchBrowser": "跟随我的浏览器"
+    "matchBrowser": "跟随我的浏览器",
+    "saveShort": "保存"
   },
   "nav": {
     "groupAnalyze": "分析",
@@ -50,7 +51,8 @@
     "exit": "退出",
     "backToAccount": "已返回您自己的账户。",
     "exitImpersonationError": "无法退出模拟身份。",
-    "loggedOut": "您已退出登录。"
+    "loggedOut": "您已退出登录。",
+    "pageHelp": "本页内容说明"
   },
   "settings": {
     "title": "设置",
@@ -240,5 +242,28 @@
     "haveAccount": "已有账号？",
     "loginCta": "登录",
     "signupCta": "创建账号"
+  },
+  "help": {
+    "title": "帮助",
+    "subtitle": "本页各部分的作用。",
+    "close": "关闭帮助"
+  },
+  "validate": {
+    "required": "{{label}}为必填项",
+    "minLength": "{{label}}至少需要 {{n}} 个字符",
+    "maxLength": "{{label}}不能超过 {{n}} 个字符",
+    "emailRequired": "电子邮箱为必填项",
+    "emailInvalid": "请输入有效的电子邮箱地址",
+    "passwordRequired": "密码为必填项",
+    "passwordMin": "密码至少需要 8 个字符",
+    "passwordMax": "密码不能超过 72 个字符",
+    "passwordLetter": "密码必须包含字母",
+    "passwordNumber": "密码必须包含数字",
+    "passwordReenter": "请再次输入密码",
+    "passwordMismatch": "两次输入的密码不一致",
+    "domainRequired": "域名为必填项",
+    "domainSpaces": "域名不能包含空格",
+    "domainInvalid": "请输入类似 example.com 的域名",
+    "domainTooLong": "该域名过长"
   }
 }

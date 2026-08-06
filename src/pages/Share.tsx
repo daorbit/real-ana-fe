@@ -412,6 +412,7 @@ function AuditShareCard({
   /** The first card starts open so the controls are visible without a click. */
   defaultOpen?: boolean;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(defaultOpen);
   const { data } = useGetSeoShareQuery({ workspaceId, siteId, reportId });
   const live = Boolean(data?.enabled);
@@ -434,7 +435,7 @@ function AuditShareCard({
               {prettyUrl(url)}
             </Text>
             <Text size="xs" c="dimmed">
-              Audited {timeAgo(createdAt)}
+              {t("share.auditedAgo", { when: timeAgo(createdAt) })}
             </Text>
           </div>
         </Group>
@@ -446,14 +447,14 @@ function AuditShareCard({
             color={live ? "emerald" : "gray"}
             radius="sm"
           >
-            {live ? "Live" : "Off"}
+            {live ? t("share.live") : t("share.off")}
           </Badge>
           <Button
             size="compact-sm"
             variant={open ? "light" : "default"}
             onClick={() => setOpen((o) => !o)}
           >
-            {open ? "Close" : "Manage"}
+            {open ? t("share.closeCard") : t("share.manage")}
           </Button>
         </Group>
       </Group>
@@ -481,6 +482,7 @@ function AuditShareCard({
  * workspace's public links are managed in one place.
  */
 function SeoShareTab({ workspaceId }: { workspaceId: string }) {
+  const { t } = useTranslation();
   const { data: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
@@ -518,10 +520,9 @@ function SeoShareTab({ workspaceId }: { workspaceId: string }) {
             <ThemeIcon variant="light" color="gray" size={48} radius="md">
               <Globe size={22} />
             </ThemeIcon>
-            <Text fw={650} mt={4}>No sites yet</Text>
+            <Text fw={650} mt={4}>{t("share.seoNoSitesTitle")}</Text>
             <Text c="dimmed" size="sm" ta="center">
-              SEO audits run against a workspace's sites. Add one, run an audit,
-              and its public link controls will show up here.
+              {t("share.seoNoSitesBody")}
             </Text>
           </Stack>
         </Center>
@@ -532,8 +533,8 @@ function SeoShareTab({ workspaceId }: { workspaceId: string }) {
   return (
     <PageStack maxWidth={1080}>
       <Section
-        title="Shared audits"
-        description="Each audited page gets its own read-only public link. Turn a link on, then choose what it shows."
+        title={t("share.seoSectionTitle")}
+        description={t("share.seoSectionDesc")}
         actions={
           sites.length > 1 && (
             <Select
@@ -557,8 +558,7 @@ function SeoShareTab({ workspaceId }: { workspaceId: string }) {
         ) : latestPerUrl.length === 0 ? (
           <Box p="lg">
             <Text size="sm" c="dimmed">
-              No audits for this site yet. Run one on the SEO page and it will
-              appear here.
+              {t("share.seoNoAudits")}
             </Text>
           </Box>
         ) : (
@@ -583,11 +583,10 @@ function SeoShareTab({ workspaceId }: { workspaceId: string }) {
         variant="light"
         color="gray"
         icon={<ShieldCheck size={16} />}
-        title="What is never shared"
+        title={t("share.seoNeverTitle")}
       >
         <Text size="sm">
-          Your site key, other audits and workspace settings are never shared.
-          Each public page is read-only.
+          {t("share.seoNeverBody")}
         </Text>
       </Alert>
     </PageStack>
@@ -596,19 +595,19 @@ function SeoShareTab({ workspaceId }: { workspaceId: string }) {
 
 /** Shown when there is no workspace to configure sharing for. */
 function NoWorkspace() {
+  const { t } = useTranslation();
   return (
     <Center py={64}>
       <Stack align="center" gap={8} maw={380}>
         <ThemeIcon variant="light" color="gray" size={48} radius="md">
           <Link2Off size={22} />
         </ThemeIcon>
-        <Text fw={650} mt={4}>No workspace selected</Text>
+        <Text fw={650} mt={4}>{t("share.noWorkspaceTitle")}</Text>
         <Text c="dimmed" size="sm" ta="center">
-          Public dashboards are published per workspace. Create or pick one
-          first, then come back here to share it.
+          {t("share.noWorkspaceBody")}
         </Text>
         <Button component="a" href="/app/workspaces" variant="light" mt="sm">
-          Go to workspaces
+          {t("share.noWorkspaceCta")}
         </Button>
       </Stack>
     </Center>
@@ -616,23 +615,24 @@ function NoWorkspace() {
 }
 
 export default function Share() {
+  const { t } = useTranslation();
   const { active } = useWorkspace();
 
   return (
     <AppShell>
       <PageHeader
-        title="Public sharing"
-        description="Publish read-only views of this workspace — analytics and SEO audits — at links anyone can open."
+        title={t("share.pageTitle")}
+        description={t("share.pageDescription")}
         actions={<PageHelpButton />}
       />
       {active ? (
         <Tabs key={active._id} defaultValue="analytics" keepMounted={false}>
           <Tabs.List mb="xl">
             <Tabs.Tab value="analytics" leftSection={<BarChart3 size={15} />}>
-              Analytics
+              {t("share.tabAnalytics")}
             </Tabs.Tab>
             <Tabs.Tab value="seo" leftSection={<Search size={15} />}>
-              SEO
+              {t("share.tabSeo")}
             </Tabs.Tab>
           </Tabs.List>
 

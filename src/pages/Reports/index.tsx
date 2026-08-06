@@ -4,6 +4,7 @@ import {
 import {
   Plus, Mail, MailWarning, CalendarClock, BarChart3, FileSpreadsheet, Clock, Users,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AppShell } from "../../components/AppShell";
 import { PageHeader, PageStack } from "../../components/Page";
 import { PageHelpButton } from "../../components/PageHelpButton";
@@ -32,6 +33,7 @@ import { nextSendLabel } from "./utils";
  * and the dialog in their own files.
  */
 export default function Reports() {
+  const { t } = useTranslation();
   const page = useReportsPage();
   const dialog = useReportDialog({
     waEntitled: page.waEntitled,
@@ -46,12 +48,12 @@ export default function Reports() {
           them onto stacked lines that read as unrelated. */}
       <PageStack maxWidth="100%">
         <PageHeader
-          title="Reports"
-          description="Scheduled summaries of your traffic and SEO — delivered by email, with the detail attached."
+          title={t("reports.title")}
+          description={t("reports.description")}
           actions={
             <>
               <Button leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
-                New report
+                {t("reports.newReport")}
               </Button>
               <PageHelpButton />
             </>
@@ -60,8 +62,7 @@ export default function Reports() {
 
         {!page.mailReady && (
           <Alert color="orange" icon={<MailWarning size={16} />} radius="md">
-            Outbound email isn&apos;t configured on this deployment, so reports won&apos;t be
-            delivered. Schedules are saved and start sending once it is.
+            {t("reports.mailNotConfigured")}
           </Alert>
         )}
 
@@ -73,20 +74,18 @@ export default function Reports() {
               <ThemeIcon size={56} radius="xl" variant="light" color="emerald" mb="xs">
                 <CalendarClock size={26} />
               </ThemeIcon>
-              <Text fw={650} size="lg">No reports yet</Text>
+              <Text fw={650} size="lg">{t("reports.emptyTitle")}</Text>
               <Text size="sm" c="dimmed" ta="center" maw={460} lh={1.6}>
-                A report emails your headline numbers and SEO scores on a schedule, with the full
-                breakdown attached as a spreadsheet. Built for the people who want the numbers but
-                never log in — a client, a manager, whoever asked.
+                {t("reports.emptyBody")}
               </Text>
 
               <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mt="xl" w="100%" maw={620}>
                 {[
-                  { icon: BarChart3, title: "Traffic & SEO", body: "Headline metrics with change vs. the previous period" },
-                  { icon: FileSpreadsheet, title: "Spreadsheet", body: "Every breakdown on its own sheet, attached" },
-                  { icon: Users, title: "Anyone", body: "No account needed, unsubscribe in every email" },
+                  { id: "traffic", icon: BarChart3, title: t("reports.emptyFeatureTrafficTitle"), body: t("reports.emptyFeatureTrafficBody") },
+                  { id: "sheet", icon: FileSpreadsheet, title: t("reports.emptyFeatureSheetTitle"), body: t("reports.emptyFeatureSheetBody") },
+                  { id: "anyone", icon: Users, title: t("reports.emptyFeatureAnyoneTitle"), body: t("reports.emptyFeatureAnyoneBody") },
                 ].map((f) => (
-                  <Stack key={f.title} gap={4} align="center">
+                  <Stack key={f.id} gap={4} align="center">
                     <ThemeIcon size={34} radius="md" variant="default">
                       <f.icon size={16} />
                     </ThemeIcon>
@@ -97,7 +96,7 @@ export default function Reports() {
               </SimpleGrid>
 
               <Button mt="xl" leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
-                Create your first report
+                {t("reports.emptyCta")}
               </Button>
             </Stack>
           </Box>
@@ -106,25 +105,25 @@ export default function Reports() {
             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
               <StatTile
                 icon={CalendarClock}
-                label="Active reports"
+                label={t("reports.statActive")}
                 value={String(page.enabled.length)}
                 hint={
                   page.schedules.length > page.enabled.length
-                    ? `${page.schedules.length - page.enabled.length} paused`
-                    : "All running"
+                    ? t("reports.statActivePaused", { count: page.schedules.length - page.enabled.length })
+                    : t("reports.statActiveAllRunning")
                 }
               />
               <StatTile
                 icon={Clock}
-                label="Next delivery"
+                label={t("reports.statNext")}
                 value={page.nextUp ? nextSendLabel(page.nextUp) : "—"}
-                hint={page.nextUp ? page.nextUp.name : "Nothing scheduled"}
+                hint={page.nextUp ? page.nextUp.name : t("reports.statNextNone")}
               />
               <StatTile
                 icon={Mail}
-                label="People reached"
+                label={t("reports.statReach")}
                 value={String(page.reach)}
-                hint="Unique addresses across active reports"
+                hint={t("reports.statReachHint")}
               />
             </SimpleGrid>
 
