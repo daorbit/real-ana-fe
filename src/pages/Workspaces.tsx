@@ -6,6 +6,7 @@ import {
   Box, Collapse, UnstyledButton,
 } from "@mantine/core";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Plus, Trash2, Pencil, Check, X, FolderKanban, Globe, Copy, Radar, Search,
 } from "lucide-react";
@@ -35,12 +36,13 @@ import type { FrameworkId } from "../utils/frameworks";
 
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
+  const { t } = useTranslation();
   return (
     <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
       <Text size="xs" c="dimmed" truncate style={{ minWidth: 0 }}>{label}: {value}</Text>
       <CopyButton value={value}>
         {({ copied, copy }) => (
-          <Tooltip label={copied ? "Copied" : "Copy"} withArrow>
+          <Tooltip label={copied ? t("workspaces.copied") : t("workspaces.copy")} withArrow>
             <ActionIcon variant="subtle" color="gray" size="xs" onClick={copy}>
               {copied ? <Check size={12} /> : <Copy size={12} />}
             </ActionIcon>
@@ -55,6 +57,7 @@ function IdRow({ label, value }: { label: string; value: string }) {
 function SiteRow({
   site, workspaceId, onDelete,
 }: { site: Site; workspaceId: string; onDelete: () => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const installed = useSiteInstalled(workspaceId, site.siteId);
 
@@ -69,9 +72,9 @@ function SiteRow({
 
   const status =
     installed === true
-      ? { dot: "var(--mantine-color-teal-6)", label: "Receiving data", color: "dimmed" as const }
+      ? { dot: "var(--mantine-color-teal-6)", label: t("workspaces.receivingData"), color: "dimmed" as const }
       : installed === false
-      ? { dot: "var(--muted)", label: "Waiting for first pageview", color: "dimmed" as const }
+      ? { dot: "var(--muted)", label: t("workspaces.waitingFirstView"), color: "dimmed" as const }
       : { dot: "transparent", label: "", color: "dimmed" as const };
 
   return (
@@ -123,26 +126,26 @@ function SiteRow({
 
         {/* actions */}
         <Group gap={6} wrap="nowrap" className="site-row-actions">
-          <Tooltip label="Check if the script is reporting" withArrow>
+          <Tooltip label={t("workspaces.verifyTooltip")} withArrow>
             <Button
               size="xs"
               variant={open ? "light" : "default"}
               leftSection={<Radar size={13} />}
               onClick={() => setOpen((v) => !v)}
             >
-              Verify
+              {t("workspaces.verify")}
             </Button>
           </Tooltip>
           <CopyButton value={snippet}>
             {({ copied, copy }) => (
-              <Tooltip label={copied ? "Copied" : "Copy install snippet"} withArrow>
+              <Tooltip label={copied ? t("workspaces.copied") : t("workspaces.copySnippet")} withArrow>
                 <Button size="xs" variant="default" onClick={copy} leftSection={copied ? <Check size={13} /> : <Copy size={13} />}>
-                  Snippet
+                  {t("workspaces.snippet")}
                 </Button>
               </Tooltip>
             )}
           </CopyButton>
-          <Tooltip label="Delete site" withArrow>
+          <Tooltip label={t("workspaces.deleteSite")} withArrow>
             <ActionIcon variant="subtle" color="gray" size="lg" onClick={onDelete}>
               <Trash2 size={15} />
             </ActionIcon>
@@ -153,7 +156,7 @@ function SiteRow({
       <Collapse expanded={open}>
         <Box pt="md">
           <InstallCheck workspaceId={workspaceId} siteId={site.siteId} domain={site.domain} />
-          <Divider my="lg" label="Install snippet" labelPosition="center" />
+          <Divider my="lg" label={t("workspaces.installSnippet")} labelPosition="center" />
           <SnippetBuilder
             siteId={site.siteId}
             workspaceId={workspaceId}
@@ -167,6 +170,7 @@ function SiteRow({
 }
 
 export default function Workspaces() {
+  const { t } = useTranslation();
   const { workspaces, active, setActive, loading } = useWorkspace();
 
   // workspace create / rename
@@ -198,6 +202,14 @@ export default function Workspaces() {
   // a dead control taking up header width.
   const searchable = sites.length >= 3;
 
+  // The validators compose their message from the field label, so the label
+  // they're given has to be the translated one.
+  const validateName = (name: string) =>
+    v.all(
+      v.required(t("workspaces.nameLabel")),
+      v.maxLength(t("workspaces.nameLabel"), 60),
+    )(name);
+
   const [createWs, { isLoading: creatingWs }] = useCreateWorkspaceMutation();
   const [renameWs] = useRenameWorkspaceMutation();
   const [deleteWs] = useDeleteWorkspaceMutation();
@@ -205,7 +217,7 @@ export default function Workspaces() {
 
   const createWorkspace = async (e: FormEvent) => {
     e.preventDefault();
-    const err = v.all(v.required("Workspace name"), v.maxLength("Workspace name", 60))(wsName);
+    const err = validateName(wsName);
     setWsError(err);
     if (err) return;
 
@@ -213,16 +225,13 @@ export default function Workspaces() {
       const ws = await createWs({ name: wsName.trim() }).unwrap();
       setWsName(""); setWsOpen(false); setWsError(null);
       setActive(ws._id);
-      notify.success(`Workspace "${ws.name}" created and set as active.`);
+      notify.success(t("workspaces.createdToast", { name: ws.name }));
     } catch (err2) {
-      notifyError(err2, "Could not create the workspace.");
+      notifyError(err2, t("workspaces.createError"));
     }
   };
 
-  const renameError = v.all(
-    v.required("Workspace name"),
-    v.maxLength("Workspace name", 60)
-  )(editName);
+  const renameError = validateName(editName);
 
   const saveRename = async () => {
     if (!active) return;
@@ -237,9 +246,9 @@ export default function Workspaces() {
     try {
       await renameWs({ id: active._id, name: editName.trim() }).unwrap();
       setEditing(false);
-      notify.success("Workspace renamed.");
+      notify.success(t("workspaces.renamedToast"));
     } catch (err) {
-      notify.error(errMessage(err, "Could not rename the workspace."));
+      notify.error(errMessage(err, t("workspaces.renameError")));
     }
   };
 
@@ -249,24 +258,24 @@ export default function Workspaces() {
   const removeWorkspace = (w: Workspace) => {
     const count = w._id === active?._id ? sites.length : null;
     confirmDestroy({
-      title: `Delete workspace "${w.name}"?`,
+      title: t("workspaces.deleteWsTitle", { name: w.name }),
       phrase: w.name,
-      body: "Everything tracked under this workspace is removed from Quantalog.",
+      body: t("workspaces.deleteWsBody"),
       consequences: [
         count === null
-          ? "Every site in this workspace is deleted"
-          : `${count} ${count === 1 ? "site is" : "sites are"} deleted`,
-        "All collected analytics history is erased",
-        "Public dashboard links for these sites stop working",
-        "Any app still running the snippet stops reporting",
+          ? t("workspaces.deleteWsConsequenceAllSites")
+          : t("workspaces.deleteWsConsequenceSites", { count }),
+        t("workspaces.deleteWsConsequenceHistory"),
+        t("workspaces.deleteWsConsequenceLinks"),
+        t("workspaces.deleteWsConsequenceSnippet"),
       ],
-      confirmLabel: "Delete workspace",
+      confirmLabel: t("workspaces.deleteWorkspace"),
       onConfirm: async () => {
         try {
           await deleteWs(w._id).unwrap();
-          notify.success(`Workspace "${w.name}" deleted.`);
+          notify.success(t("workspaces.deletedWsToast", { name: w.name }));
         } catch (err) {
-          notify.error(errMessage(err, "Could not delete the workspace."));
+          notify.error(errMessage(err, t("workspaces.deleteWsError")));
         }
       },
     });
@@ -275,21 +284,21 @@ export default function Workspaces() {
   const delSite = (s: Site) => {
     if (!active) return;
     confirmDestroy({
-      title: `Delete site "${s.name}"?`,
+      title: t("workspaces.deleteSiteTitle", { name: s.name }),
       phrase: s.name,
-      body: `Removes ${s.domain} and everything Quantalog has recorded for it.`,
+      body: t("workspaces.deleteSiteBody", { domain: s.domain }),
       consequences: [
-        "All pageviews, events and goals for this site are erased",
-        "The site's public dashboard link stops working",
-        "Any app still running the snippet stops reporting",
+        t("workspaces.deleteSiteConsequenceData"),
+        t("workspaces.deleteSiteConsequenceLink"),
+        t("workspaces.deleteSiteConsequenceSnippet"),
       ],
-      confirmLabel: "Delete site",
+      confirmLabel: t("workspaces.deleteSite"),
       onConfirm: async () => {
         try {
           await deleteSiteMut({ workspaceId: active._id, siteId: s.siteId }).unwrap();
-          notify.success(`Site "${s.name}" deleted.`);
+          notify.success(t("workspaces.deletedSiteToast", { name: s.name }));
         } catch (err) {
-          notify.error(errMessage(err, "Could not delete the site."));
+          notify.error(errMessage(err, t("workspaces.deleteSiteError")));
         }
       },
     });
@@ -301,12 +310,12 @@ export default function Workspaces() {
   return (
     <AppShell>
       <PageHeader
-        title="Workspaces"
-        description="Manage your workspaces and the sites they track."
+        title={t("workspaces.title")}
+        description={t("workspaces.description")}
         actions={
           <>
             <Button variant="default" leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>
-              New workspace
+              {t("workspaces.newWorkspace")}
             </Button>
             <PageHelpButton />
           </>
@@ -317,26 +326,26 @@ export default function Workspaces() {
       <Modal
         opened={wsOpen}
         onClose={() => { setWsOpen(false); setWsError(null); }}
-        title="Create workspace"
+        title={t("workspaces.createTitle")}
         centered
         radius="lg"
       >
         <form onSubmit={createWorkspace} noValidate>
           <Stack gap="md">
             <TextInput
-              label="Workspace name"
-              placeholder="e.g. Acme Inc"
-              description="Groups the sites you want to track together."
+              label={t("workspaces.nameLabel")}
+              placeholder={t("workspaces.namePlaceholder")}
+              description={t("workspaces.nameDesc")}
               value={wsName}
               error={wsError}
               onChange={(e) => { setWsName(e.currentTarget.value); if (wsError) setWsError(null); }}
-              onBlur={() => setWsError(v.all(v.required("Workspace name"), v.maxLength("Workspace name", 60))(wsName))}
+              onBlur={() => setWsError(validateName(wsName))}
               withAsterisk
               data-autofocus
             />
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" disabled={creatingWs} onClick={() => { setWsOpen(false); setWsError(null); }}>Cancel</Button>
-              <Button type="submit" loading={creatingWs}>Create workspace</Button>
+              <Button variant="default" disabled={creatingWs} onClick={() => { setWsOpen(false); setWsError(null); }}>{t("common.cancel")}</Button>
+              <Button type="submit" loading={creatingWs}>{t("workspaces.createSubmit")}</Button>
             </Group>
           </Stack>
         </form>
@@ -358,13 +367,12 @@ export default function Workspaces() {
             <ThemeIcon variant="light" color="gray" size={56} radius="md">
               <FolderKanban size={26} />
             </ThemeIcon>
-            <Text fw={600} mt={4}>No workspaces yet</Text>
+            <Text fw={600} mt={4}>{t("workspaces.emptyTitle")}</Text>
             <Text c="dimmed" size="sm" ta="center">
-              A workspace groups the sites you track together - usually your
-              company, or one client.
+              {t("workspaces.emptyBody")}
             </Text>
             <Button mt="sm" leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>
-              Create your first
+              {t("workspaces.emptyCta")}
             </Button>
           </Stack>
         </Center>
@@ -374,7 +382,7 @@ export default function Workspaces() {
            a grid of cards at the bottom of the page. */
         <div className="ws-layout">
           <aside className="ws-sidebar">
-            <p className="nav-heading">Workspaces</p>
+            <p className="nav-heading">{t("workspaces.title")}</p>
             <Stack gap={4}>
               {workspaces.map((w) => {
                 const isActive = w._id === active._id;
@@ -416,7 +424,7 @@ export default function Workspaces() {
               leftSection={<Plus size={15} />}
               onClick={() => setWsOpen(true)}
             >
-              New workspace
+              {t("workspaces.newWorkspace")}
             </Button>
           </aside>
 
@@ -447,14 +455,14 @@ export default function Workspaces() {
                         }}
                         w={260}
                         autoFocus
-                        aria-label="Workspace name"
+                        aria-label={t("workspaces.nameLabel")}
                       />
                       <ActionIcon
                         variant="light"
                         color="emerald"
                         onClick={saveRename}
                         disabled={!!renameError}
-                        title="Save"
+                        title={t("common.saveShort")}
                       >
                         <Check size={15} />
                       </ActionIcon>
@@ -462,7 +470,7 @@ export default function Workspaces() {
                         variant="subtle"
                         color="gray"
                         onClick={() => setEditing(false)}
-                        title="Cancel"
+                        title={t("common.cancel")}
                       >
                         <X size={15} />
                       </ActionIcon>
@@ -489,27 +497,27 @@ export default function Workspaces() {
                           setEditing(true);
                           setEditName(active.name);
                         }}
-                        title="Rename workspace"
+                        title={t("workspaces.rename")}
                       >
                         <Pencil size={14} />
                       </ActionIcon>
                     </Group>
                   )}
                   <Box mt={6}>
-                    <IdRow label="Workspace ID" value={active._id} />
+                    <IdRow label={t("workspaces.workspaceId")} value={active._id} />
                   </Box>
                 </div>
 
                 <Group gap="xs" wrap="nowrap">
                   <Button leftSection={<Plus size={15} />} onClick={() => setSiteOpen(true)}>
-                    Add site
+                    {t("workspaces.addSite")}
                   </Button>
                   <ActionIcon
                     variant="subtle"
                     color="red"
                     size="lg"
                     onClick={() => removeWorkspace(active)}
-                    title="Delete workspace"
+                    title={t("workspaces.deleteWorkspace")}
                   >
                     <Trash2 size={16} />
                   </ActionIcon>
@@ -521,15 +529,15 @@ export default function Workspaces() {
                 workspace, and cheaper to read than counting rows. */}
             <SimpleGrid cols={3} spacing="sm" mb="lg">
               <Box className="ws-stat">
-                <Text className="ws-stat-label">Sites</Text>
+                <Text className="ws-stat-label">{t("workspaces.statSites")}</Text>
                 <Text className="ws-stat-value">{sites.length}</Text>
               </Box>
               <Box className="ws-stat">
-                <Text className="ws-stat-label">Created</Text>
+                <Text className="ws-stat-label">{t("workspaces.statCreated")}</Text>
                 <Text className="ws-stat-value sm">{shortDate(active.createdAt)}</Text>
               </Box>
               <Box className="ws-stat">
-                <Text className="ws-stat-label">Workspaces</Text>
+                <Text className="ws-stat-label">{t("workspaces.statWorkspaces")}</Text>
                 <Text className="ws-stat-value">{workspaces.length}</Text>
               </Box>
             </SimpleGrid>
@@ -537,11 +545,13 @@ export default function Workspaces() {
             <Group justify="space-between" mb="sm" wrap="nowrap">
               <Group gap={8}>
                 <Globe size={15} className="sect-ic" />
-                <Text fw={650} size="sm">Sites</Text>
+                <Text fw={650} size="sm">{t("workspaces.sites")}</Text>
                 <Badge variant="default" size="sm" radius="sm">
                   {/* While filtering, the count has to describe what's on
                       screen — otherwise it contradicts the list under it. */}
-                  {q ? `${shownSites.length} of ${sites.length}` : sites.length}
+                  {q
+                    ? t("workspaces.shownOf", { shown: shownSites.length, total: sites.length })
+                    : sites.length}
                 </Badge>
               </Group>
               <Group gap="xs" wrap="nowrap">
@@ -549,7 +559,7 @@ export default function Workspaces() {
                   <TextInput
                     size="xs"
                     w={200}
-                    placeholder="Filter sites…"
+                    placeholder={t("workspaces.filterPlaceholder")}
                     value={siteQuery}
                     onChange={(e) => setSiteQuery(e.currentTarget.value)}
                     leftSection={<Search size={13} />}
@@ -560,13 +570,13 @@ export default function Workspaces() {
                           color="gray"
                           size="sm"
                           onClick={() => setSiteQuery("")}
-                          aria-label="Clear filter"
+                          aria-label={t("workspaces.clearFilter")}
                         >
                           <X size={13} />
                         </ActionIcon>
                       ) : null
                     }
-                    aria-label="Filter sites by name or domain"
+                    aria-label={t("workspaces.filterAria")}
                   />
                 )}
                 <RefreshButton
@@ -584,10 +594,9 @@ export default function Workspaces() {
                   <ThemeIcon variant="light" color="gray" size={44} radius="md">
                     <Globe size={20} />
                   </ThemeIcon>
-                  <Text fw={600} size="sm" mt={4}>No sites yet</Text>
+                  <Text fw={600} size="sm" mt={4}>{t("workspaces.noSitesTitle")}</Text>
                   <Text c="dimmed" size="xs" ta="center" maw={340}>
-                    Add the site you want to track and we&apos;ll hand you the
-                    install snippet for your framework.
+                    {t("workspaces.noSitesBody")}
                   </Text>
                   <Button
                     size="xs"
@@ -595,7 +604,7 @@ export default function Workspaces() {
                     leftSection={<Plus size={14} />}
                     onClick={() => setSiteOpen(true)}
                   >
-                    Add your first site
+                    {t("workspaces.noSitesCta")}
                   </Button>
                 </Stack>
               </Box>
@@ -604,14 +613,14 @@ export default function Workspaces() {
                 {shownSites.length === 0 && (
                   <Box className="surface-card">
                     <Stack align="center" gap={6} py={36} px="lg">
-                      <Text fw={600} size="sm">No sites match “{siteQuery}”</Text>
+                      <Text fw={600} size="sm">{t("workspaces.noMatch", { query: siteQuery })}</Text>
                       <Button
                         size="xs"
                         variant="subtle"
                         color="gray"
                         onClick={() => setSiteQuery("")}
                       >
-                        Clear filter
+                        {t("workspaces.clearFilter")}
                       </Button>
                     </Stack>
                   </Box>
@@ -636,7 +645,7 @@ export default function Workspaces() {
                     leftSection={<Plus size={15} />}
                     onClick={() => setSiteOpen(true)}
                   >
-                    Add another site
+                    {t("workspaces.addAnother")}
                   </Button>
                 </Group>
               </Stack>

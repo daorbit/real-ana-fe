@@ -1,25 +1,39 @@
-/** Form validators. Each returns an error message, or null when valid. */
+/**
+ * Form validators. Each returns an error message, or null when valid.
+ *
+ * Messages resolve through i18n at call time rather than being built by string
+ * concatenation, so they follow the chosen language. The signatures are
+ * unchanged — a `label` passed in is interpolated into the message, so callers
+ * should hand these an already-translated field name.
+ *
+ * i18n is imported directly rather than taking a `t` parameter because these
+ * are called from event handlers and module scope as often as from components,
+ * where no hook is available.
+ */
+import i18n from "../locale/i18n";
 
 export function required(label: string) {
   return (v: string): string | null =>
-    v.trim() ? null : `${label} is required`;
+    v.trim() ? null : i18n.t("validate.required", { label });
 }
 
 export function minLength(label: string, n: number) {
   return (v: string): string | null =>
-    v.trim().length >= n ? null : `${label} must be at least ${n} characters`;
+    // `n`, not `count` — `count` would make i18next look for plural variants
+    // of the key that don't exist.
+    v.trim().length >= n ? null : i18n.t("validate.minLength", { label, n });
 }
 
 export function maxLength(label: string, n: number) {
   return (v: string): string | null =>
-    v.trim().length <= n ? null : `${label} must be ${n} characters or fewer`;
+    v.trim().length <= n ? null : i18n.t("validate.maxLength", { label, n });
 }
 
 export function email(v: string): string | null {
   const s = v.trim();
-  if (!s) return "Email is required";
+  if (!s) return i18n.t("validate.emailRequired");
   // Deliberately permissive: the only authority on a valid address is a delivered email.
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s)) return "Enter a valid email address";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s)) return i18n.t("validate.emailInvalid");
   return null;
 }
 
@@ -32,13 +46,13 @@ export function email(v: string): string | null {
  * someone's working password at the door would lock them out.
  */
 export function password(v: string): string | null {
-  if (!v) return "Password is required";
-  if (v.length < 8) return "Password must be at least 8 characters";
+  if (!v) return i18n.t("validate.passwordRequired");
+  if (v.length < 8) return i18n.t("validate.passwordMin");
   // bcrypt truncates at 72 bytes, so anything longer is a false sense of
   // strength rather than extra security.
-  if (v.length > 72) return "Password must be 72 characters or fewer";
-  if (!/[a-zA-Z]/.test(v)) return "Password must contain a letter";
-  if (!/[0-9]/.test(v)) return "Password must contain a number";
+  if (v.length > 72) return i18n.t("validate.passwordMax");
+  if (!/[a-zA-Z]/.test(v)) return i18n.t("validate.passwordLetter");
+  if (!/[0-9]/.test(v)) return i18n.t("validate.passwordNumber");
   return null;
 }
 
@@ -56,8 +70,8 @@ export function passwordScore(v: string): number {
 /** Confirmation must match exactly — whitespace included. */
 export function confirmPassword(pw: string) {
   return (v: string): string | null => {
-    if (!v) return "Please re-enter your password";
-    if (v !== pw) return "Passwords do not match";
+    if (!v) return i18n.t("validate.passwordReenter");
+    if (v !== pw) return i18n.t("validate.passwordMismatch");
     return null;
   };
 }
@@ -68,15 +82,15 @@ export function confirmPassword(pw: string) {
  */
 export function domain(v: string): string | null {
   const s = normalizeDomain(v);
-  if (!s) return "Domain is required";
-  if (s.includes(" ")) return "A domain cannot contain spaces";
+  if (!s) return i18n.t("validate.domainRequired");
+  if (s.includes(" ")) return i18n.t("validate.domainSpaces");
   if (s === "localhost" || /^\d{1,3}(\.\d{1,3}){3}$/.test(s)) {
     return null; // localhost and raw IPs are fine for testing
   }
   if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s)) {
-    return "Enter a domain like example.com";
+    return i18n.t("validate.domainInvalid");
   }
-  if (s.length > 253) return "That domain is too long";
+  if (s.length > 253) return i18n.t("validate.domainTooLong");
   return null;
 }
 
