@@ -4,6 +4,7 @@ import {
 } from "@mantine/core";
 import { LifeBuoy } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 /** One explained thing inside a section — the "tooltip", spelled out. */
 export type HelpItem = {
@@ -35,17 +36,19 @@ export type HelpSection = {
 export function HelpDrawer({
   opened,
   onClose,
-  title = "Help",
+  title,
   sections,
   initialId,
 }: {
   opened: boolean;
   onClose: () => void;
+  /** Already-translated heading — the caller knows which page this describes. */
   title?: string;
   sections: HelpSection[];
   /** Section to show first. Falls back to the first section. */
   initialId?: string;
 }) {
+  const { t } = useTranslation();
   const [activeId, setActiveId] = useState(initialId ?? sections[0]?.id);
   const paneRef = useRef<HTMLDivElement>(null);
 
@@ -82,11 +85,11 @@ export function HelpDrawer({
               <LifeBuoy size={17} />
             </ThemeIcon>
             <div>
-              <Text fw={650} size="sm">{title}</Text>
-              <Text size="xs" c="dimmed">What each part of this page does.</Text>
+              <Text fw={650} size="sm">{title ?? t("help.title")}</Text>
+              <Text size="xs" c="dimmed">{t("help.subtitle")}</Text>
             </div>
           </Group>
-          <UnstyledButton className="help-drawer-close" onClick={onClose} aria-label="Close help">
+          <UnstyledButton className="help-drawer-close" onClick={onClose} aria-label={t("help.close")}>
             ✕
           </UnstyledButton>
         </Group>

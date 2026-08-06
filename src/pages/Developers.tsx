@@ -4,6 +4,7 @@ import {
   TextInput, Stack, Center, ThemeIcon, SimpleGrid, Tooltip,
 } from "@mantine/core";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   KeyRound, Plus, Trash2, Copy, Check, BookOpen,
   ShieldCheck, ArrowRight, AlertTriangle,
@@ -21,6 +22,7 @@ import type { ApiKey } from "../types";
 /* ------------------------------- API keys ------------------------------- */
 
 function KeysTab() {
+  const { t } = useTranslation();
   const { active } = useWorkspace();
   const [modal, setModal] = useState(false);
   const [name, setName] = useState("");
@@ -38,29 +40,29 @@ function KeysTab() {
     try {
       const k = await createKey({
         workspaceId: active._id,
-        name: name || "Default key",
+        name: name || t("developers.defaultKeyName"),
       }).unwrap();
       setJustCreated(k);
       setName("");
       setModal(false);
-      notify.success("API key created. Copy it now — it won't be shown again.");
+      notify.success(t("developers.createdToast"));
     } catch (e2) {
-      notify.error(errMessage(e2, "Could not create the API key."));
+      notify.error(errMessage(e2, t("developers.createError")));
     }
   };
 
   const revoke = (k: ApiKey) => {
     if (!active) return;
     confirmDelete({
-      title: `Revoke "${k.name}"?`,
-      body: "Any integration still using this key will immediately start receiving 401 Unauthorized. This cannot be undone.",
-      confirmLabel: "Revoke key",
+      title: t("developers.revokeTitle", { name: k.name }),
+      body: t("developers.revokeBody"),
+      confirmLabel: t("developers.revokeConfirm"),
       onConfirm: async () => {
         try {
           await revokeKey({ workspaceId: active._id, keyId: k.id }).unwrap();
-          notify.success(`Key "${k.name}" revoked.`);
+          notify.success(t("developers.revokedToast", { name: k.name }));
         } catch (err) {
-          notify.error(errMessage(err, "Could not revoke the key."));
+          notify.error(errMessage(err, t("developers.revokeError")));
         }
       },
     });
@@ -68,23 +70,23 @@ function KeysTab() {
 
   return (
     <Stack gap="lg">
-      <Modal opened={modal} onClose={() => setModal(false)} title="Create API key" centered radius="lg">
+      <Modal opened={modal} onClose={() => setModal(false)} title={t("developers.createTitle")} centered radius="lg">
         <form onSubmit={create}>
           <Stack gap="md">
             <TextInput
-              label="Key name"
-              placeholder="e.g. Production backend"
-              description="A label so you can tell your keys apart. Only you see it."
+              label={t("developers.keyName")}
+              placeholder={t("developers.keyNamePlaceholder")}
+              description={t("developers.keyNameDesc")}
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
               data-autofocus
             />
             <Alert color="yellow" variant="light" p="xs" icon={<ShieldCheck size={14} />}>
-              <Text size="xs">The secret is shown once. Store it in an environment variable on your server.</Text>
+              <Text size="xs">{t("developers.createWarning")}</Text>
             </Alert>
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={() => setModal(false)}>Cancel</Button>
-              <Button type="submit" loading={creating}>Create key</Button>
+              <Button variant="default" onClick={() => setModal(false)}>{t("common.cancel")}</Button>
+              <Button type="submit" loading={creating}>{t("developers.createKey")}</Button>
             </Group>
           </Stack>
         </form>
@@ -94,7 +96,7 @@ function KeysTab() {
       <Modal
         opened={!!justCreated?.key}
         onClose={() => setJustCreated(null)}
-        title="Your new API key"
+        title={t("developers.newKeyTitle")}
         centered
         radius="lg"
         size="lg"
@@ -103,10 +105,7 @@ function KeysTab() {
         {justCreated?.key && (
           <Stack gap="md">
             <Alert color="yellow" variant="light" p="xs" icon={<AlertTriangle size={14} />}>
-              <Text size="xs">
-                This is the only time we show this secret. We store a hash, so we cannot recover it later.
-                Copy it into your server's environment variables now.
-              </Text>
+              <Text size="xs">{t("developers.newKeyWarning")}</Text>
             </Alert>
 
             <Card withBorder radius="md" padding="sm" bg="var(--surface-2)">
@@ -114,11 +113,11 @@ function KeysTab() {
             </Card>
 
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={() => setJustCreated(null)}>Done</Button>
+              <Button variant="default" onClick={() => setJustCreated(null)}>{t("developers.done")}</Button>
               <CopyButton value={justCreated.key}>
                 {({ copied, copy }) => (
                   <Button onClick={copy} leftSection={copied ? <Check size={15} /> : <Copy size={15} />}>
-                    {copied ? "Copied" : "Copy key"}
+                    {copied ? t("developers.copied") : t("developers.copyKey")}
                   </Button>
                 )}
               </CopyButton>
@@ -129,10 +128,10 @@ function KeysTab() {
 
       <Group justify="space-between" align="center">
         <div>
-          <Text fw={650}>Your API keys</Text>
-          <Text size="sm" c="dimmed">Server-side secrets scoped to this workspace.</Text>
+          <Text fw={650}>{t("developers.keysTitle")}</Text>
+          <Text size="sm" c="dimmed">{t("developers.keysDesc")}</Text>
         </div>
-        <Button leftSection={<Plus size={16} />} onClick={() => setModal(true)}>Create key</Button>
+        <Button leftSection={<Plus size={16} />} onClick={() => setModal(true)}>{t("developers.createKey")}</Button>
       </Group>
 
       {keys.length === 0 ? (
@@ -140,11 +139,11 @@ function KeysTab() {
           <Center>
             <Stack align="center" gap={8}>
               <ThemeIcon variant="light" color="emerald" size={52} radius="xl"><KeyRound size={24} /></ThemeIcon>
-              <Text fw={600} size="sm">No API keys yet</Text>
+              <Text fw={600} size="sm">{t("developers.emptyTitle")}</Text>
               <Text c="dimmed" size="xs" ta="center" maw={320}>
-                Create a key to start creating projects and sites for your users from your own backend.
+                {t("developers.emptyBody")}
               </Text>
-              <Button size="xs" variant="light" mt={4} leftSection={<Plus size={14} />} onClick={() => setModal(true)}>Create your first key</Button>
+              <Button size="xs" variant="light" mt={4} leftSection={<Plus size={14} />} onClick={() => setModal(true)}>{t("developers.emptyCta")}</Button>
             </Stack>
           </Center>
         </Card>
@@ -159,11 +158,13 @@ function KeysTab() {
                     <div>
                       <Text fw={650} size="sm">{k.name}</Text>
                       <Text size="xs" c="dimmed">
-                        {k.lastUsedAt ? `Last used ${new Date(k.lastUsedAt).toLocaleString()}` : "Never used"}
+                        {k.lastUsedAt
+                          ? t("developers.lastUsed", { when: new Date(k.lastUsedAt).toLocaleString() })
+                          : t("developers.neverUsed")}
                       </Text>
                     </div>
                   </Group>
-                  <Tooltip label="Revoke" withArrow>
+                  <Tooltip label={t("developers.revoke")} withArrow>
                     <ActionIcon variant="subtle" color="red" onClick={() => revoke(k)}><Trash2 size={15} /></ActionIcon>
                   </Tooltip>
                 </Group>
@@ -185,6 +186,7 @@ const DOCS_URL = "https://quantalog.daorbit.in/docs";
 
 /** Slim banner linking out to the full docs, which moved to the landing site. */
 function DocsLink() {
+  const { t } = useTranslation();
   return (
     <Card withBorder radius="lg" padding="lg" mb="lg" className="dev-hero">
       <Group justify="space-between" wrap="wrap" gap="md">
@@ -193,9 +195,9 @@ function DocsLink() {
             <BookOpen size={18} />
           </ThemeIcon>
           <div>
-            <Text fw={650}>Documentation</Text>
+            <Text fw={650}>{t("developers.docsTitle")}</Text>
             <Text size="sm" c="dimmed">
-              Install guides, custom events, and the full Platform API reference.
+              {t("developers.docsDesc")}
             </Text>
           </div>
         </Group>
@@ -208,7 +210,7 @@ function DocsLink() {
           rightSection={<ArrowRight size={15} />}
           style={{ flexShrink: 0 }}
         >
-          Read the docs
+          {t("developers.docsCta")}
         </Button>
       </Group>
     </Card>
@@ -216,11 +218,12 @@ function DocsLink() {
 }
 
 export default function Developers() {
+  const { t } = useTranslation();
   return (
     <AppShell>
       <PageHeader
-        title="Developers"
-        description="Manage your API keys and offer real-time analytics to your own users."
+        title={t("developers.title")}
+        description={t("developers.description")}
         actions={<PageHelpButton />}
       />
 

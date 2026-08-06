@@ -6,7 +6,7 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Share2, Copy, Check, RefreshCw, ExternalLink, Eye, ShieldCheck, Link2Off,
+  Copy, Check, RefreshCw, ExternalLink, Eye, ShieldCheck, Link2Off,
   BarChart3, Search, Globe,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
@@ -623,19 +623,7 @@ export default function Share() {
       <PageHeader
         title="Public sharing"
         description="Publish read-only views of this workspace — analytics and SEO audits — at links anyone can open."
-        actions={
-          <>
-            <Badge
-              variant="light"
-              color="gray"
-              radius="sm"
-              leftSection={<Share2 size={12} />}
-            >
-              {active?.name ?? "No workspace"}
-            </Badge>
-            <PageHelpButton />
-          </>
-        }
+        actions={<PageHelpButton />}
       />
       {active ? (
         <Tabs key={active._id} defaultValue="analytics" keepMounted={false}>

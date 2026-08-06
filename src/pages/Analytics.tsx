@@ -39,7 +39,7 @@ import { RangePicker, type RangeState } from "../components/RangePicker";
 import { ExportMenu } from "../components/ExportMenu";
 import { AnalyticsSkeleton } from "../components/Skeletons";
 import { HelpDrawer } from "../components/HelpDrawer";
-import { ANALYTICS_HELP } from "../components/analyticsHelp";
+import { getAnalyticsHelp } from "../components/analyticsHelp";
 import { useStats, useSites } from "../hooks";
 import {
   useGetSegmentsQuery, useSaveSegmentMutation,
@@ -504,7 +504,7 @@ export default function Analytics() {
         opened={helpOpen}
         onClose={() => setHelpOpen(false)}
         title={t("analytics.help")}
-        sections={ANALYTICS_HELP}
+        sections={getAnalyticsHelp(t)}
       />
 
       <MarkerDialog

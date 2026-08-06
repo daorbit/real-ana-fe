@@ -10,10 +10,11 @@ import {
   TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
   HelpCircle,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AppShell } from "../components/AppShell";
 import { RunningDialog } from "../components/RunningDialog";
 import { HelpDrawer } from "../components/HelpDrawer";
-import { SEO_HELP } from "../components/seo/help";
+import { getSeoHelp } from "../components/seo/help";
 import { PageHeader } from "../components/Page";
 import { useWorkspace } from "../workspace";
 import {
@@ -232,6 +233,7 @@ function HistoryPanel({
  * scanner pointed at arbitrary hosts. The server enforces the same rule.
  */
 export default function Seo() {
+  const { t } = useTranslation();
   const { active } = useWorkspace();
   const { refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
@@ -667,13 +669,13 @@ export default function Seo() {
               {/* Help for the current tab. Opens the shared drawer selected to
                   whatever tab you're on, so the relevant explanation is already
                   on screen. */}
-              <Tooltip label="What this tab shows" withArrow position="left">
+              <Tooltip label={t("help.seo.tabTooltip")} withArrow position="left">
                 <ActionIcon
                   className="seo-tab-help"
                   variant="subtle"
                   color="gray"
                   onClick={() => setHelpOpen(true)}
-                  aria-label="Help for this tab"
+                  aria-label={t("help.seo.tabAria")}
                 >
                   <HelpCircle size={17} />
                 </ActionIcon>
@@ -683,8 +685,8 @@ export default function Seo() {
             <HelpDrawer
               opened={helpOpen}
               onClose={() => setHelpOpen(false)}
-              title="SEO report help"
-              sections={SEO_HELP}
+              title={t("help.seo.title")}
+              sections={getSeoHelp(t)}
               initialId={tab}
             />
 
