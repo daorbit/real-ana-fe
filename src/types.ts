@@ -302,6 +302,8 @@ export type AdminUser = {
   email: string;
   name: string;
   role: Role;
+  /** Empty when the account never set a picture — the row falls back to initials. */
+  avatarUrl: string;
   createdAt: string;
   workspaceCount: number;
   siteCount: number;

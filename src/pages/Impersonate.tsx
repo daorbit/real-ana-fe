@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Title, Text, TextInput, Stack, Group, Badge, Card, Center, Loader, ThemeIcon,
   Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
+  HoverCard, Image,
 } from "@mantine/core";
 import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, ShieldPlus, ShieldMinus, RefreshCw } from "lucide-react";
 import { AppShell } from "../components/AppShell";
@@ -257,9 +258,36 @@ export default function Impersonate() {
                       <Table.Tr key={u.id}>
                         <Table.Td>
                           <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                            <Avatar color="emerald" radius="xl" size="md">
-                              {u.name.slice(0, 2).toUpperCase()}
-                            </Avatar>
+                            {u.avatarUrl ? (
+                              // Only accounts with a real picture get the hover
+                              // preview — a blown-up pair of initials is noise.
+                              <HoverCard width={220} shadow="md" withArrow openDelay={200} position="right">
+                                <HoverCard.Target>
+                                  <Avatar
+                                    src={u.avatarUrl}
+                                    color="emerald"
+                                    radius="xl"
+                                    size="md"
+                                    style={{ cursor: "zoom-in" }}
+                                  >
+                                    {u.name.slice(0, 2).toUpperCase()}
+                                  </Avatar>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown p="xs">
+                                  <Image
+                                    src={u.avatarUrl}
+                                    alt={u.name}
+                                    radius="md"
+                                    fit="contain"
+                                    h={200}
+                                  />
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            ) : (
+                              <Avatar color="emerald" radius="xl" size="md">
+                                {u.name.slice(0, 2).toUpperCase()}
+                              </Avatar>
+                            )}
                             <div style={{ minWidth: 0 }}>
                               <Text fw={600} size="sm" truncate>{u.name}</Text>
                               <Text size="xs" c="dimmed" truncate>{u.email}</Text>
