@@ -7,7 +7,7 @@ import { Users, AlertTriangle } from "lucide-react";
 import { useGetInviteQuery, useAcceptInviteMutation } from "../store";
 import { notify, errMessage } from "../notify";
 import { useAuth } from "../auth";
-import { useWorkspace } from "../workspace";
+import { ACTIVE_WORKSPACE_KEY } from "../workspace";
 
 /**
  * The landing page for a workspace invitation link.
@@ -19,12 +19,16 @@ import { useWorkspace } from "../workspace";
  *
  * Signed in, it accepts immediately on the button. Signed out, it sends you to
  * login or signup with the invite path remembered, so you land back here.
+ *
+ * Deliberately does *not* use `useWorkspace`: this route lives outside
+ * `WorkspaceProvider`, because a signed-out visitor has no workspace list to
+ * fetch. Reaching for the context here is what threw "useWorkspace outside
+ * provider" on the live page.
  */
 export default function AcceptInvite() {
   const { token = "" } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { refresh, setActive } = useWorkspace();
 
   const { data: invite, isLoading, error } = useGetInviteQuery(token, { skip: !token });
   const [accept, { isLoading: accepting }] = useAcceptInviteMutation();
@@ -44,10 +48,13 @@ export default function AcceptInvite() {
       const result = await accept(token).unwrap();
       sessionStorage.removeItem("pendingInvite");
       setDone(true);
+
       // Land them in the workspace they just joined rather than whichever one
-      // happened to be active before.
-      await refresh();
-      setActive(result.workspaceId);
+      // happened to be active before. Written straight to storage because the
+      // workspace context does not exist on this route — the provider reads
+      // this key when it mounts on the other side of the navigation.
+      localStorage.setItem(ACTIVE_WORKSPACE_KEY, result.workspaceId);
+
       notify.success(`You've joined ${result.workspaceName}.`);
       navigate("/app");
     } catch (err) {
