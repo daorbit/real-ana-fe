@@ -3,7 +3,16 @@ import type { ReactNode } from "react";
 import { useGetWorkspacesQuery } from "./store";
 import { ROLE_RANK, type Workspace, type QuotaSummary } from "./types";
 
-const ACTIVE_KEY = "rta_active_ws";
+/**
+ * Where the chosen workspace is remembered between visits.
+ *
+ * Exported because the invite-accept page has to set it from outside this
+ * provider — that route renders for signed-out visitors, so the context is not
+ * mounted there and the only way to hand off a selection is the storage key
+ * itself.
+ */
+export const ACTIVE_WORKSPACE_KEY = "rta_active_ws";
+const ACTIVE_KEY = ACTIVE_WORKSPACE_KEY;
 
 /** A stable empty array — `data ?? []` would mint a new reference on every
  *  render while `data` is undefined, which is a dependency-array trap: the
