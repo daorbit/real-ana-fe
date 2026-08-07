@@ -16,6 +16,13 @@ import { notify, errMessage, confirmDelete } from "../notify";
 import { num, timeAgo, shortDate } from "../utils";
 import type { AdminUser } from "../types";
 
+/**
+ * Accounts per page. Mirrors `USERS_PAGE_SIZE` in the admin route — the server
+ * decides the slice, this is only what the "showing 1–10 of 42" line counts
+ * with. If the two drift, that line lies; the table itself stays correct.
+ */
+const USERS_PER_PAGE = 10;
+
 const ROLE_FILTERS = [
   { label: "All", value: "" },
   { label: "Users", value: "user" },
@@ -439,17 +446,40 @@ export default function Impersonate() {
             </Table.ScrollContainer>
           </Card>
 
-          {data && data.pages > 1 && (
-            <Center mt="xl">
-              <Pagination
-                size="sm"
-                radius="md"
-                color="emerald"
-                value={page}
-                onChange={setPage}
-                total={data.pages}
-              />
-            </Center>
+          {/* A footer bar rather than a lone centred pager: "which rows am I
+              looking at, out of how many" is the question a paged table raises,
+              and the controls mean little without it. Shown whenever there are
+              results — the range is worth reading on a single page too. */}
+          {data && data.total > 0 && (
+            <Group justify="space-between" align="center" mt="md" wrap="wrap" gap="sm">
+              <Text size="sm" c="dimmed">
+                Showing{" "}
+                <Text span fw={600} c="var(--text)">
+                  {(page - 1) * USERS_PER_PAGE + 1}–
+                  {Math.min(page * USERS_PER_PAGE, data.total)}
+                </Text>{" "}
+                of{" "}
+                <Text span fw={600} c="var(--text)">
+                  {data.total.toLocaleString()}
+                </Text>{" "}
+                {data.total === 1 ? "account" : "accounts"}
+              </Text>
+
+              {data.pages > 1 && (
+                <Pagination
+                  size="md"
+                  radius="md"
+                  color="emerald"
+                  value={page}
+                  onChange={setPage}
+                  total={data.pages}
+                  withEdges
+                  // One neighbour each side keeps the control a fixed width as
+                  // the page moves, instead of growing and shifting the row.
+                  siblings={1}
+                />
+              )}
+            </Group>
           )}
         </>
       )}
