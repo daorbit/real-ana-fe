@@ -173,11 +173,8 @@ export default function Impersonate() {
           </Text>
         </div>
         <Group gap="sm">
-          {data && (
-            <Badge variant="light" color="emerald" size="lg">
-              {data.total} account{data.total === 1 ? "" : "s"}
-            </Badge>
-          )}
+          {/* The total lives in the table footer now, next to the range it
+              belongs with — two copies of the same number was one too many. */}
           <Tooltip label="Refetch">
             <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={isFetching} onClick={refetch}>
               <RefreshCw size={15} />

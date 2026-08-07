@@ -941,7 +941,6 @@
     "usageAudits": "SEO audits",
     "usageCrawls": "Crawls",
     "usageSites": "Sites",
-    "buyingForWorkspace": "Plans are bought per workspace. You're buying for {{name}} — switch workspace in the sidebar to bill a different one.",
     "planPlusAddon": "{{quota}} plan + {{credits}} addon",
     "renewsOn": "Renews {{date}}",
     "expiredOn": "Expired {{date}}",

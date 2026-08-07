@@ -10,7 +10,7 @@ import type { TFunction } from "i18next";
 import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
-  FolderKanban, Layers, Clock, PartyPopper, RefreshCw, Download, Receipt,
+  Layers, Clock, PartyPopper, RefreshCw, Download, Receipt,
   Plus, Minus,
 } from "lucide-react";
 import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../components/PlanIcons";
@@ -316,18 +316,9 @@ export default function Billing() {
         <Center py={64}><Loader size="sm" /></Center>
       ) : (
         <Stack gap={40}>
-          {/* Which workspace this page is buying for is the one selected in the
-              sidebar — there is no second switcher here. Two controls for one
-              choice is how someone ends up buying for a workspace they are not
-              looking at. */}
-          {!isDemo && active && (
-            <Alert variant="light" color="gray" icon={<FolderKanban size={16} />} radius="md">
-              <Text size="sm">
-                {t("billing.buyingForWorkspace", { name: active.name })}
-              </Text>
-            </Alert>
-          )}
-
+          {/* The workspace being bought for is the one selected in the sidebar.
+              Not restated here: the sidebar already shows it, and the usage
+              panel below is visibly about one workspace. */}
           {usage && <UsageSummary usage={usage} expired={expired} />}
 
           {/* The demo has no account behind it, so it has no plan either —
