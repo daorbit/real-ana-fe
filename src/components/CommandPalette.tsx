@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useWorkspace } from "../workspace";
-import { useAuth } from "../auth";
+import { useIsPlatformAdmin } from "../auth";
 
 type Command = {
   id: string;
@@ -35,12 +35,11 @@ export function CommandPalette() {
 
   const navigate = useNavigate();
   const { workspaces, active, setActive } = useWorkspace();
-  const { user } = useAuth();
   const { setColorScheme } = useMantineColorScheme();
   const scheme = useComputedColorScheme("light");
   const dark = scheme === "dark";
 
-  const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
+  const isAdmin = useIsPlatformAdmin();
 
   // Global hotkey. Bound on the window so it works from anywhere, including
   // while a field elsewhere on the page has focus.

@@ -238,3 +238,22 @@ export function useAuth(): AuthState {
   if (!ctx) throw new Error("useAuth outside provider");
   return ctx;
 }
+
+/**
+ * Whether the admin module is visible to this session.
+ *
+ * `super_admin` only. The platform `admin` role still exists and still passes
+ * the server's `requireAdmin` gate, but the console — impersonation, broadcast
+ * email, the plan catalogue — is not something it gets to see.
+ *
+ * Impersonation is excluded outright: acting as someone else must not carry the
+ * admin console along with it, or an impersonated session becomes a way to
+ * impersonate onward.
+ *
+ * One helper rather than the same two-way comparison in six files, so
+ * tightening it again later is one edit, not six.
+ */
+export function useIsPlatformAdmin(): boolean {
+  const { user } = useAuth();
+  return user?.role === "super_admin" && !user?.impersonating;
+}

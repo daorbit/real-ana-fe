@@ -18,7 +18,7 @@ import {
   useReplyToContactMessageMutation,
 } from "../store";
 import { notify, errMessage, confirmDelete } from "../notify";
-import { useAuth } from "../auth";
+import { useIsPlatformAdmin } from "../auth";
 import { dateTime, timeAgo } from "../utils";
 import type { ContactMessage, ContactStatus } from "../types";
 
@@ -66,10 +66,9 @@ const SUBJECT_COLORS: Record<string, string> = {
 };
 
 export default function AdminContact() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const isAdmin =
-    (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
+    useIsPlatformAdmin();
 
   const [status, setStatus] = useState("");
   const [source, setSource] = useState("");

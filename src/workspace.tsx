@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useGetWorkspacesQuery } from "./store";
-import type { Workspace, QuotaSummary } from "./types";
+import { ROLE_RANK, type Workspace, type QuotaSummary } from "./types";
 
 const ACTIVE_KEY = "rta_active_ws";
 
@@ -72,6 +72,31 @@ export function useWorkspace(): WsState {
  * out of a feature they pay for, and the server enforces every one of these
  * limits again anyway.
  */
+/**
+ * What the signed-in user may do in the active workspace.
+ *
+ * Every gate in the UI reads from here rather than comparing role strings at
+ * the call site, so "can this person edit" has one answer in one place. These
+ * only decide what is *shown* — the server checks the same thing again on every
+ * request, which is what actually enforces it.
+ */
+export function usePermissions() {
+  const { active } = useWorkspace();
+  const rank = active ? ROLE_RANK[active.role] : 0;
+
+  return {
+    role: active?.role ?? null,
+    /** Add sites, run audits, manage goals, segments, markers, reports. */
+    canEdit: rank >= ROLE_RANK.editor,
+    /** Invite and remove people, manage sharing, API keys, and the workspace name. */
+    canAdmin: rank >= ROLE_RANK.admin,
+    /** Delete the workspace. The creator only. */
+    canDelete: rank >= ROLE_RANK.owner,
+    /** True for a read-only seat, which is worth saying out loud in the UI. */
+    isViewer: active?.role === "viewer",
+  };
+}
+
 export function useActiveBilling(): QuotaSummary {
   const { active } = useWorkspace();
   // Read straight off the workspace — the list already carries each one's plan,

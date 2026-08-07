@@ -6,7 +6,7 @@ import { PageHeader } from "../components/Page";
 import { AudienceStep } from "../components/email/AudienceStep";
 import { WriteStep } from "../components/email/WriteStep";
 import { useEmailComposer } from "../hooks/useEmailComposer";
-import { useAuth } from "../auth";
+import { useIsPlatformAdmin } from "../auth";
 
 /**
  * Admin-only: send a message to a segment, a hand-typed list, or one account.
@@ -15,9 +15,8 @@ import { useAuth } from "../auth";
  * page itself, not a dialog stacked over the Users table.
  */
 export default function AdminBroadcast() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
+  const isAdmin = useIsPlatformAdmin();
 
   // Nothing to close back to on this page — a broadcast page has no "was
   // this open" state, so onClose just resets the draft.

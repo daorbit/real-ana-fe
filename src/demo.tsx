@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { useAuth } from "./auth";
+import { useIsPlatformAdmin } from "./auth";
 
 const KEY = "quantalog_demo_data";
 
@@ -25,8 +25,9 @@ const Ctx = createContext<DemoValue>({ demo: false, available: false, toggle: ()
  * have no way to tell them from real ones.
  */
 export function DemoProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  const available = user?.role === "admin" || user?.role === "super_admin";
+  // Same gate as the admin console: the demo toggle fabricates data over a
+  // real session, which is not something to hand to every platform admin.
+  const available = useIsPlatformAdmin();
 
   const [on, setOn] = useState(() => sessionStorage.getItem(KEY) === "1");
 

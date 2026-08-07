@@ -3,18 +3,18 @@ import { Link, useLocation } from "react-router-dom";
 import {
   AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Menu,
-  UnstyledButton, Tooltip, Burger, Progress, Badge,
+  UnstyledButton, Tooltip, Burger, Progress, Badge, ThemeIcon,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
-  CreditCard, ArrowUpRight, Mail, Inbox,
+  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus,
 } from "lucide-react";
 import { PlanIcon } from "./PlanIcons";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
-import { useAuth } from "../auth";
+import { useAuth, useIsPlatformAdmin } from "../auth";
 import { notify, confirmLogout, errMessage } from "../notify";
 import { useWorkspace, useActiveBilling } from "../workspace";
 import { DemoToggle } from "./DemoToggle";
@@ -49,6 +49,7 @@ const NAV_GROUPS = [
     heading: "Manage",
     items: [
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
+      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
@@ -126,9 +127,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
   const impersonating = Boolean(user?.impersonating);
-  // An impersonation session reports the target's role, so the admin nav would
-  // vanish mid-impersonation anyway — but be explicit about it.
-  const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !impersonating;
+  // Super-admin only, and never while impersonating — see `useIsPlatformAdmin`.
+  const isAdmin = useIsPlatformAdmin();
 
   const { demo } = useDemo();
 
@@ -245,7 +245,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </UnstyledButton>
         </MantineShell.Section>
 
-        <MantineShell.Section grow component={ScrollArea}>
+        {/* `type="never"` hides the scrollbar without disabling the scrolling —
+            the rail still scrolls by wheel and trackpad, it just stops drawing a
+            track down the middle of the navigation. */}
+        <MantineShell.Section grow component={ScrollArea} type="never">
           {groups.map((group) => (
             <Box key={group.heading} mb="md">
               <p className="nav-heading">{t(group.headingKey, group.heading)}</p>
@@ -284,6 +287,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Box>
           )}
 
+          {!isDemo && <PendingInviteCard />}
           {!isDemo && <PlanCard />}
 
           {/* Read-only demo session. A persistent card, not a toast, because it
@@ -441,6 +445,51 @@ export function AppShell({ children }: { children: ReactNode }) {
  * quota is actually close to biting, so it reads as useful information most
  * of the time and only becomes a prompt when there's something to act on.
  */
+/**
+ * "You've been invited to X" in the rail.
+ *
+ * An invitation that arrives while someone is already using the app would
+ * otherwise only exist in their inbox — and an email is easy to miss when the
+ * thing it grants access to is already open in a tab.
+ */
+function PendingInviteCard() {
+  const { user } = useAuth();
+  const invites = user?.pendingInvites ?? [];
+  if (!invites.length) return null;
+
+  // One at a time. Someone with three outstanding invitations still accepts
+  // them one by one, and a stack of cards would crowd out the navigation.
+  const [invite] = invites;
+
+  return (
+    <UnstyledButton
+      component={Link}
+      to={`/invite/${invite.token}`}
+      className="tile"
+      style={{ display: "block", width: "100%", padding: "10px 12px", marginBottom: 8 }}
+    >
+      <Group gap={8} wrap="nowrap" align="flex-start">
+        <ThemeIcon size={20} radius="xl" variant="light" color="emerald">
+          <UserPlus size={11} />
+        </ThemeIcon>
+        <div style={{ minWidth: 0 }}>
+          <Text size="xs" fw={600} lh={1.3}>
+            You&apos;ve been invited
+          </Text>
+          <Text size="xs" c="dimmed" lh={1.35} truncate>
+            {invite.workspaceName} · {invite.role}
+          </Text>
+          {invites.length > 1 && (
+            <Text size="xs" c="dimmed" lh={1.35}>
+              +{invites.length - 1} more
+            </Text>
+          )}
+        </div>
+      </Group>
+    </UnstyledButton>
+  );
+}
+
 function PlanCard() {
   // The active workspace's plan, not the account's — plans are bought per
   // workspace, so the rail reports whichever one is on screen.

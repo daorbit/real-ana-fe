@@ -28,6 +28,17 @@ export type User = {
   demo?: boolean;
   // No billing field: a plan belongs to a workspace, not to an account. See
   // `Workspace.billing`.
+  /**
+   * Which workspaces this account can open, and its role in each.
+   *
+   * Identity-shaped, so it belongs on the profile: it answers "what can I
+   * reach", not "what is this workspace". Deliberately thin — plans, usage,
+   * sites and everything else come from `GET /api/workspaces`, which is the one
+   * copy of that state.
+   */
+  workspaceAccess?: WorkspaceAccess[];
+  /** Invitations addressed to this account that have not been accepted yet. */
+  pendingInvites?: PendingInvite[];
 };
 
 /** Fields the settings form can change. Email and role are not among them. */
@@ -485,6 +496,12 @@ export type Workspace = {
   slug: string;
   createdAt: string;
   /**
+   * The caller's own role in this workspace, which decides what the client
+   * offers them. The server enforces the same limits again — this is what
+   * stops a viewer being shown buttons that would only fail.
+   */
+  role: WorkspaceRole;
+  /**
    * The plan this workspace is on, and its usage against it.
    *
    * Carried by the workspace rather than the profile because a plan is bought
@@ -495,6 +512,90 @@ export type Workspace = {
    * creating one assigns Free.
    */
   billing: QuotaSummary;
+};
+
+/**
+ * A person's role within one workspace, strongest first.
+ *
+ * Mirrors the server's `WORKSPACE_ROLES`. Cumulative: every editor power is
+ * also an admin power, so `canEdit`-style checks compare rank rather than
+ * enumerating roles.
+ */
+export const WORKSPACE_ROLES = ["owner", "admin", "editor", "viewer"] as const;
+export type WorkspaceRole = (typeof WORKSPACE_ROLES)[number];
+
+/** Role strength. Higher wins — mirrors the server's `ROLE_RANK`. */
+export const ROLE_RANK: Record<WorkspaceRole, number> = {
+  viewer: 1,
+  editor: 2,
+  admin: 3,
+  owner: 4,
+};
+
+/**
+ * A workspace this account can open, as the profile reports it.
+ *
+ * Just enough to know it exists and what may be done in it. The full object —
+ * plan, usage, share state — comes from the workspace API.
+ */
+export type WorkspaceAccess = {
+  workspaceId: string;
+  name: string;
+  slug: string;
+  role: WorkspaceRole;
+};
+
+/**
+ * An invitation waiting for this account.
+ *
+ * Kept apart from `workspaceAccess` because it is not access: nothing can be
+ * opened until it is accepted. `token` links straight to the accept page.
+ */
+export type PendingInvite = {
+  workspaceId: string;
+  workspaceName: string;
+  role: WorkspaceRole;
+  token: string;
+  expiresAt: string;
+};
+
+/** One person's access to a workspace, as the members list shows it. */
+export type WorkspaceMember = {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  role: WorkspaceRole;
+  joinedAt: string;
+  /** True for the signed-in user's own row — they can leave, but not remove themselves. */
+  isSelf: boolean;
+};
+
+/** An invitation that has been sent but not yet accepted. */
+export type WorkspaceInvite = {
+  id: string;
+  email: string;
+  role: WorkspaceRole;
+  invitedAt: string;
+  expiresAt: string;
+};
+
+export type MembersResponse = {
+  /** The caller's own role, so the page knows which controls to render. */
+  role: WorkspaceRole;
+  members: WorkspaceMember[];
+  invites: WorkspaceInvite[];
+};
+
+/** What an invite link is for, readable before signing in. */
+export type InvitePreview = {
+  workspaceName: string;
+  inviterName: string;
+  email: string;
+  role: WorkspaceRole;
+  /** False when the invited address has no account — the page offers signup. */
+  hasAccount: boolean;
 };
 
 export type Site = {

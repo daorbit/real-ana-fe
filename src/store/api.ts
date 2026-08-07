@@ -21,6 +21,7 @@ import type {
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult, Invoice,
+  MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
 } from "../types";
 
@@ -110,7 +111,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -797,6 +798,75 @@ export const api = createApi({
       invalidatesTags: ["Marker"],
     }),
 
+    /* -------------------------------- members ------------------------------ */
+
+    /** Everyone in a workspace, the pending invitations, and the caller's own role. */
+    getMembers: build.query<MembersResponse, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/members`,
+      providesTags: (_r, _e, workspaceId) => [{ type: "Members", id: workspaceId }],
+    }),
+
+    inviteMember: build.mutation<
+      WorkspaceInvite,
+      { workspaceId: string; email: string; role: WorkspaceRole }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/members/invites`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Members", id: workspaceId }],
+    }),
+
+    revokeInvite: build.mutation<void, { workspaceId: string; inviteId: string }>({
+      query: ({ workspaceId, inviteId }) => ({
+        url: `/api/workspaces/${workspaceId}/members/invites/${inviteId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Members", id: workspaceId }],
+    }),
+
+    updateMemberRole: build.mutation<
+      { id: string; role: WorkspaceRole },
+      { workspaceId: string; memberId: string; role: WorkspaceRole }
+    >({
+      query: ({ workspaceId, memberId, role }) => ({
+        url: `/api/workspaces/${workspaceId}/members/${memberId}`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Members", id: workspaceId }],
+    }),
+
+    /** Remove someone, or leave the workspace yourself. */
+    removeMember: build.mutation<void, { workspaceId: string; memberId: string }>({
+      query: ({ workspaceId, memberId }) => ({
+        url: `/api/workspaces/${workspaceId}/members/${memberId}`,
+        method: "DELETE",
+      }),
+      // Also "Workspace": leaving removes it from your own list entirely.
+      invalidatesTags: (_r, _e, { workspaceId }) => [
+        { type: "Members", id: workspaceId },
+        "Workspace",
+      ],
+    }),
+
+    /* -------------------------------- invites ------------------------------ */
+
+    /** What an invite link is for. Readable before the recipient signs in. */
+    getInvite: build.query<InvitePreview, string>({
+      query: (token) => `/api/invites/${token}`,
+    }),
+
+    acceptInvite: build.mutation<
+      { workspaceId: string; workspaceName: string; role: WorkspaceRole },
+      string
+    >({
+      query: (token) => ({ url: `/api/invites/${token}/accept`, method: "POST" }),
+      // The workspace list is what changes — they now have one more.
+      invalidatesTags: ["Workspace"],
+    }),
+
     /* -------------------------------- billing ------------------------------ */
 
     getPlans: build.query<Plan[], { currency: Currency }>({
@@ -1055,6 +1125,13 @@ export const {
   useGetFieldVitalsQuery,
   useRunCrawlMutation,
   useGetLatestCrawlQuery,
+  useGetMembersQuery,
+  useInviteMemberMutation,
+  useRevokeInviteMutation,
+  useUpdateMemberRoleMutation,
+  useRemoveMemberMutation,
+  useGetInviteQuery,
+  useAcceptInviteMutation,
   useGetPlansQuery,
   useGetAddonPacksQuery,
   useStartSubscriptionMutation,

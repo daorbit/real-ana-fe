@@ -32,6 +32,9 @@ export const demoWorkspaces: Workspace[] = [
     name: "Acme Inc.",
     slug: "acme-inc",
     createdAt: iso(120 * DAY),
+    // The demo visitor is looking at their "own" workspace, so every control is
+    // visible — the write guard, not the role, is what stops them changing it.
+    role: "owner",
     /**
      * On Pro, so the demo shows the product rather than the paywall: a Free
      * demo would hide 7d/30d ranges, funnels, and WhatsApp reports behind

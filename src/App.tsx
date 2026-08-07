@@ -13,6 +13,8 @@ import Seo from "./pages/Seo";
 import SeoReportPrint from "./pages/SeoReportPrint";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
+import Members from "./pages/Members";
+import AcceptInvite from "./pages/AcceptInvite";
 import Share from "./pages/Share";
 import Reports from "./pages/Reports";
 import Impersonate from "./pages/Impersonate";
@@ -103,7 +105,16 @@ function ProtectedRaw({ children }: { children: ReactNode }) {
 function PublicOnly({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <AppBootSkeleton />;
-  if (user) return <Navigate to="/app" replace />;
+  if (user) {
+    // Someone who arrived from an invitation link goes back to it rather than
+    // to their dashboard — otherwise signing in to accept an invite silently
+    // drops the invite, and the link has to be found in their inbox again.
+    // Handled here rather than in each form so it covers password sign-in,
+    // signup, and the Google round trip alike.
+    const pending = sessionStorage.getItem("pendingInvite");
+    if (pending) return <Navigate to={pending} replace />;
+    return <Navigate to="/app" replace />;
+  }
   return <>{children}</>;
 }
 
@@ -136,6 +147,10 @@ export default function App() {
                 a signed-in user following a shared link should see the shared
                 view, not be bounced to their own dashboard. */}
             <Route path="/share/:token" element={<PublicDashboard />} />
+            {/* Neither Protected nor PublicOnly: the page has to work for someone
+                already signed in (accept now) and for someone who isn't (see who
+                invited them, then sign in or sign up). */}
+            <Route path="/invite/:token" element={<AcceptInvite />} />
             {/* Public, read-only SEO audit shared per report. Same no-auth,
                 token-in-path model as the shared dashboard. */}
             <Route path="/seo-report/:token" element={<PublicSeoReport />} />
@@ -153,6 +168,7 @@ export default function App() {
               element={<ProtectedRaw><SeoReportPrint /></ProtectedRaw>}
             />
             <Route path="/app/workspaces" element={<Protected><Workspaces /></Protected>} />
+            <Route path="/app/members" element={<Protected><Members /></Protected>} />
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/reports" element={<Protected><Reports /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />

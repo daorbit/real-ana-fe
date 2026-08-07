@@ -10,7 +10,7 @@ import { AppShell } from "../components/AppShell";
 import { EmailComposer } from "../components/EmailComposer";
 import { AdminPlanDialog } from "../components/AdminPlanDialog";
 import { useGetAdminUsersQuery, useDeleteAdminUserMutation, useSetAdminUserRoleMutation } from "../store";
-import { useAuth } from "../auth";
+import { useAuth, useIsPlatformAdmin } from "../auth";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { num, timeAgo, shortDate } from "../utils";
 import type { AdminUser } from "../types";
@@ -56,7 +56,7 @@ export default function Impersonate() {
   // A narrower filter can leave you past the last page, showing nothing.
   useEffect(() => setPage(1), [search, role]);
 
-  const isAdmin = (user?.role === "admin" || user?.role === "super_admin") && !user?.impersonating;
+  const isAdmin = useIsPlatformAdmin();
 
   const { data, isLoading, isFetching, refetch } = useGetAdminUsersQuery(
     { q: search || undefined, role: role || undefined, page },
