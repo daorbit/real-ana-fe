@@ -16,6 +16,7 @@ import {
   useUpdateMemberRoleMutation, useRemoveMemberMutation,
 } from "../store";
 import { AppShell } from "../components/AppShell";
+import { MembersSkeleton } from "../components/Skeletons";
 import { UserAvatar } from "../components/UserAvatar";
 import { PageHeader } from "../components/Page";
 import { notify, errMessage, confirmDelete } from "../notify";
@@ -258,9 +259,7 @@ export default function Members() {
       />
 
       {isLoading ? (
-        <Center py={64}>
-          <Text c="dimmed" size="sm">Loading members…</Text>
-        </Center>
+        <MembersSkeleton />
       ) : (
         <motion.div
           key={active._id}

@@ -168,6 +168,53 @@ export function WorkspacesSkeleton() {
   );
 }
 
+/**
+ * The Members page while its list loads.
+ *
+ * Mirrors the real layout — two summary cards, then a row per person — so the
+ * page doesn't reflow when the data lands. Three rows because that is a
+ * plausible team; more would promise a crowd that usually isn't there.
+ */
+export function MembersSkeleton() {
+  return (
+    <Stack gap="xl">
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i} withBorder radius="md" padding="md">
+            <Group gap="sm" wrap="nowrap">
+              <Skeleton height={38} width={38} radius="md" />
+              <div style={{ flex: 1 }}>
+                <Skeleton height={18} width="35%" radius="sm" />
+                <Skeleton height={10} width="70%" mt={8} radius="sm" />
+              </div>
+            </Group>
+          </Card>
+        ))}
+      </SimpleGrid>
+
+      <div>
+        <Skeleton height={12} width={60} mb="sm" radius="sm" />
+        <Stack gap="xs">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} withBorder radius="md" padding="sm">
+              <Group justify="space-between" wrap="nowrap" gap="sm">
+                <Group gap="sm" wrap="nowrap" style={{ flex: 1 }}>
+                  <Skeleton height={40} width={40} radius="xl" />
+                  <div style={{ flex: 1 }}>
+                    <Skeleton height={12} width={`${45 - i * 6}%`} radius="sm" />
+                    <Skeleton height={10} width={`${65 - i * 6}%`} mt={8} radius="sm" />
+                  </div>
+                </Group>
+                <Skeleton height={22} width={74} radius="xl" />
+              </Group>
+            </Card>
+          ))}
+        </Stack>
+      </div>
+    </Stack>
+  );
+}
+
 /** Full-screen boot animation — used while the session is being restored. */
 export function AppBootSkeleton() {
   return <SwitchVisual sublabel="Restoring your session" loop />;
