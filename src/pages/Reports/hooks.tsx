@@ -7,7 +7,7 @@ import {
   useGetWhatsAppStatusQuery, useTestReportWhatsAppMutation,
 } from "../../store";
 import { notify, errMessage, confirmDelete } from "../../notify";
-import { useWorkspace } from "../../workspace";
+import { useWorkspace, useActiveBilling } from "../../workspace";
 import { useAuth } from "../../auth";
 import type { ReportSchedule } from "../../types";
 import { emptyDraft, fromSchedule, type Draft } from "./types";
@@ -23,6 +23,7 @@ export function useReportsPage() {
   const { t } = useTranslation();
   const { active } = useWorkspace();
   const { user } = useAuth();
+  const billing = useActiveBilling();
   const workspaceId = active?._id ?? "";
   // WhatsApp is delivered to the account owner's own number only, so the
   // profile mobile is both the destination and the precondition.
@@ -41,7 +42,7 @@ export function useReportsPage() {
    * they need different words: the gateway being down is temporary and no
    * fault of the user's, while the plan not including it is neither.
    */
-  const waEntitled = user?.billing?.whatsappReports ?? false;
+  const waEntitled = billing?.whatsappReports ?? false;
 
   const [save, { isLoading: saving }] = useSaveReportScheduleMutation();
   const [remove] = useDeleteReportScheduleMutation();

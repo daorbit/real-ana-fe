@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useGetWorkspacesQuery } from "./store";
-import type { Workspace } from "./types";
+import type { Workspace, QuotaSummary } from "./types";
 
 const ACTIVE_KEY = "rta_active_ws";
 
@@ -58,4 +58,23 @@ export function useWorkspace(): WsState {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useWorkspace outside provider");
   return ctx;
+}
+
+/**
+ * The plan and quota of the workspace currently being viewed.
+ *
+ * Plans are per workspace, so "what am I on" only has an answer relative to
+ * one — every gate in the app (date ranges, WhatsApp delivery, the rail's plan
+ * card) asks about the active workspace, not the account.
+ *
+ * Null while the list is loading, and for a workspace with no plan row. Callers
+ * treat null as "don't block": a transient loading gap must not lock someone
+ * out of a feature they pay for, and the server enforces every one of these
+ * limits again anyway.
+ */
+export function useActiveBilling(): QuotaSummary {
+  const { active } = useWorkspace();
+  // Read straight off the workspace — the list already carries each one's plan,
+  // so there is no second request and no way for the two to disagree.
+  return active?.billing ?? null;
 }

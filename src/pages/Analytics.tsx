@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PlanGate } from "../components/PlanGate";
-import { useAuth } from "../auth";
 import { AnalyticsArt } from "../components/Brand";
 import { StatCard } from "../components/StatCard";
 import { WorldMap } from "../components/WorldMap";
@@ -51,7 +50,7 @@ import {
 } from "../components/MarkerLayer";
 import { notify, errMessage } from "../notify";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
-import { useWorkspace } from "../workspace";
+import { useWorkspace, useActiveBilling } from "../workspace";
 import type { Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind } from "../types";
 import { serializeFilter } from "../types";
 
@@ -234,8 +233,9 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 
 export default function Analytics() {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const funnelLocked = (user?.billing?.plan?.slug ?? "free") === "free";
+  // Funnels are entitled per workspace, so this follows the active one.
+  const billing = useActiveBilling();
+  const funnelLocked = (billing?.plan?.slug ?? "free") === "free";
   const { active, loading } = useWorkspace();
   const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
   const range = rangeState.preset;

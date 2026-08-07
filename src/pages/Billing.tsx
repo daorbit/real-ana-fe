@@ -26,6 +26,7 @@ import {
 import { notify, errMessage } from "../notify";
 import { getToken } from "../api";
 import { useAuth } from "../auth";
+import { useWorkspace } from "../workspace";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "../utils/razorpay";
 import {
   CURRENCIES, detectCurrency, formatMoney, priceIn, getStoredCurrency, setStoredCurrency,
@@ -34,11 +35,17 @@ import type {
   BillingCycle, Plan, AddonPack, CouponCheckResult, QuotaSummary, Currency, Invoice,
   AddonSelection,
 } from "../types";
+import { MAX_SITES_PER_WORKSPACE } from "../types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 /**
  * Subscription plans, addon credit packs, and the current usage against them.
+ *
+ * Everything on this page is scoped to one workspace, chosen at the top:
+ * a plan is bought per workspace, so "your plan" is only meaningful once a
+ * workspace is named. Buying more capacity for an account means either
+ * upgrading a workspace here or creating another one on the Workspaces page.
  *
  * Every purchase — a plan period or an addon pack — is a one-time Razorpay
  * Order, not an auto-recurring subscription: nothing here ever charges a
@@ -101,9 +108,23 @@ export default function Billing() {
     data: addons = [], isLoading: addonsLoading, isFetching: addonsFetching, refetch: refetchAddons,
   } = useGetAddonPacksQuery({ currency }, { refetchOnMountOrArgChange: true });
   const refetching = plansFetching || addonsFetching;
-  // Plan/quota state travels on the user's own profile rather than a separate
-  // endpoint — every authenticated page already has it via `useAuth()`.
-  const usage = user?.billing ?? null;
+
+  /**
+   * The workspaces that can be bought for, each carrying the plan it is on.
+   * The same list every other page uses — a plan travels with its workspace,
+   * so there is nothing extra to fetch here.
+   */
+  const { workspaces, active, loading: billingLoading } = useWorkspace();
+
+  /**
+   * Which workspace is being bought for. Kept in the URL alongside the tab, so
+   * a "your Pro plan expires soon" email can link straight at the workspace it
+   * is about instead of landing on whichever one happens to sort first.
+   */
+  // Billing acts on whichever workspace the sidebar has selected, like every
+  // other page — switching there switches what this page is about.
+  const selectedWorkspaceId = active?._id ?? null;
+  const usage = active?.billing ?? null;
 
   const [startSubscription] = useStartSubscriptionMutation();
   const [verifySubscription] = useVerifySubscriptionMutation();
@@ -136,6 +157,9 @@ export default function Billing() {
 
   const doSubscribe = async (plan: Plan, selection: AddonSelection = {}) => {
     setConfirmPlan(null);
+    // Nothing to bill against. The buttons are disabled in this state, so this
+    // only guards against a stale click while the list was still loading.
+    if (!selectedWorkspaceId) return;
     setSubscribing(plan.slug);
     try {
       const chosen = Object.entries(selection)
@@ -143,6 +167,7 @@ export default function Billing() {
         .map(([slug, packs]) => ({ slug, packs }));
 
       const started = await startSubscription({
+        workspaceId: selectedWorkspaceId,
         planSlug: plan.slug,
         cycle,
         couponCode: planCoupon?.coupon?.code,
@@ -213,10 +238,12 @@ export default function Billing() {
 
   const doBuyAddon = async (pack: AddonPack, packs: number) => {
     setConfirmAddon(null);
+    if (!selectedWorkspaceId) return;
     setBuying(pack._id);
     try {
       const { orderId, amount, currency: orderCurrency, razorpayKeyId } = await startAddonPurchase({
         slug: pack.slug,
+        workspaceId: selectedWorkspaceId,
         couponCode: addonCoupon?.coupon?.code,
         currency,
         packs,
@@ -264,7 +291,7 @@ export default function Billing() {
     }
   };
 
-  const loading = plansLoading || addonsLoading;
+  const loading = plansLoading || addonsLoading || billingLoading;
   const expired = usage?.status === "expired";
   // The plan one tier above the current one is the one worth calling out —
   // sorted by monthly price, since that's the one axis every plan (including
@@ -289,6 +316,18 @@ export default function Billing() {
         <Center py={64}><Loader size="sm" /></Center>
       ) : (
         <Stack gap={40}>
+          {/* Which workspace this page is buying for is the one selected in the
+              sidebar — there is no second switcher here. Two controls for one
+              choice is how someone ends up buying for a workspace they are not
+              looking at. */}
+          {!isDemo && active && (
+            <Alert variant="light" color="gray" icon={<FolderKanban size={16} />} radius="md">
+              <Text size="sm">
+                {t("billing.buyingForWorkspace", { name: active.name })}
+              </Text>
+            </Alert>
+          )}
+
           {usage && <UsageSummary usage={usage} expired={expired} />}
 
           {/* The demo has no account behind it, so it has no plan either —
@@ -301,11 +340,21 @@ export default function Billing() {
                 the demo — it runs without an account. Sign up to subscribe.
               </Text>
             </Alert>
+          ) : workspaces.length === 0 ? (
+            /* Nothing to bill: plans attach to a workspace, so there is no
+               purchase to make until one exists. */
+            <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
+              <Text size="sm">
+                Plans are bought per workspace, and you don&apos;t have one yet.
+                Create a workspace first — it starts on Free, and you can upgrade
+                it here.
+              </Text>
+            </Alert>
           ) : !usage && (
             <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
               <Text size="sm">
-                You don&apos;t have a plan yet — pick one under Plans to unlock SEO
-                audits and crawls.
+                This workspace has no plan — pick one under Plans to unlock SEO
+                audits and crawls for it.
               </Text>
             </Alert>
           )}
@@ -451,8 +500,10 @@ export default function Billing() {
                     <Divider my="md" />
 
                     <Stack gap={8} mb="lg" style={{ flex: 1 }}>
-                      <FeatureLine text={t("billing.featureWorkspaces", { count: plan.maxWorkspaces })} />
-                      <FeatureLine text={t("billing.featureSites", { count: plan.maxSitesPerWorkspace })} />
+                      {/* Sites are capped the same on every tier — it is a
+                          property of a workspace, not of a plan — so it is
+                          stated once here rather than sold as a differentiator. */}
+                      <FeatureLine text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
                       <FeatureLine text={t("billing.featureAudits", { count: plan.monthlyAuditQuota })} />
                       <FeatureLine text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
                       {plan.features.map((f) => <FeatureLine key={f} text={f} />)}
@@ -464,7 +515,7 @@ export default function Billing() {
                       radius="md"
                       color="emerald"
                       variant={current ? "light" : featured ? "filled" : "outline"}
-                      disabled={current || !buyable || isDemo}
+                      disabled={current || !buyable || isDemo || !selectedWorkspaceId}
                       loading={subscribing === plan.slug}
                       leftSection={<CreditCard size={15} />}
                       // The recommended plan's button carries that plan's
@@ -562,7 +613,7 @@ export default function Billing() {
                       radius="md"
                       variant="outline"
                       color="emerald"
-                      disabled={isDemo}
+                      disabled={isDemo || !selectedWorkspaceId}
                       loading={buying === pack._id}
                       onClick={() => { setAddonCoupon(null); setConfirmAddon(pack); }}
                     >
@@ -1601,11 +1652,13 @@ function UsageSummary({
         </Box>
       )}
 
-      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing={0}>
+      {/* Three cells now, not four: workspaces are no longer an allowance to
+          spend — an account may have as many as it pays for — so the panel
+          reports this workspace's own audits, crawls, and sites. */}
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={0}>
         <UsageCell icon={Search} label={t("billing.usageAudits")} used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
         <UsageCell icon={Globe2} label={t("billing.usageCrawls")} used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
-        <UsageCell icon={FolderKanban} label={t("billing.usageWorkspaces")} used={usage.workspaces.used} quota={usage.workspaces.quota} />
-        <UsageCell icon={Layers} label={t("billing.usageSitesPerWorkspace")} used={null} quota={usage.maxSitesPerWorkspace} />
+        <UsageCell icon={Layers} label={t("billing.usageSites")} used={usage.sites.used} quota={usage.sites.quota} />
       </SimpleGrid>
     </Card>
   );

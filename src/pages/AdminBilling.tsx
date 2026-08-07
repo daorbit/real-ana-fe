@@ -215,8 +215,6 @@ function PlansTab() {
               <Table.Th>Name</Table.Th>
               <Table.Th>Monthly</Table.Th>
               <Table.Th>Yearly</Table.Th>
-              <Table.Th>Workspaces</Table.Th>
-              <Table.Th>Sites/ws</Table.Th>
               <Table.Th>Audits/mo</Table.Th>
               <Table.Th>Crawls/mo</Table.Th>
               <Table.Th />
@@ -228,8 +226,6 @@ function PlansTab() {
                 <Table.Td><Text size="sm" fw={600}>{p.name}</Text></Table.Td>
                 <Table.Td>{CURRENCIES.map((c) => money(p.priceMonthly[c], c)).join(" / ")}</Table.Td>
                 <Table.Td>{CURRENCIES.map((c) => money(p.priceYearly[c], c)).join(" / ")}</Table.Td>
-                <Table.Td>{p.maxWorkspaces}</Table.Td>
-                <Table.Td>{p.maxSitesPerWorkspace}</Table.Td>
                 <Table.Td>{p.monthlyAuditQuota}</Table.Td>
                 <Table.Td>{p.monthlyCrawlQuota}</Table.Td>
                 <Table.Td>
@@ -240,7 +236,7 @@ function PlansTab() {
               </Table.Tr>
             ))}
             {!plans.length && (
-              <Table.Tr><Table.Td colSpan={8}><Text size="sm" c="dimmed" py="md">No plans yet.</Text></Table.Td></Table.Tr>
+              <Table.Tr><Table.Td colSpan={6}><Text size="sm" c="dimmed" py="md">No plans yet.</Text></Table.Td></Table.Tr>
             )}
           </Table.Tbody>
         </Table>

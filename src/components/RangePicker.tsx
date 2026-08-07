@@ -3,7 +3,7 @@ import { Button, Group, Popover, Stack, Text, Tooltip, UnstyledButton } from "@m
 import { DatePicker } from "@mantine/dates";
 import { CalendarDays, Lock } from "lucide-react";
 import dayjs from "dayjs";
-import { useAuth } from "../auth";
+import { useActiveBilling } from "../workspace";
 import { notify } from "../notify";
 
 /** The preset windows, matching the backend's RANGES keys. */
@@ -41,7 +41,7 @@ export function RangePicker({
   onChange: (next: RangeState) => void;
   disabled?: boolean;
 }) {
-  const { user } = useAuth();
+  const billing = useActiveBilling();
   const [open, setOpen] = useState(false);
   // Local calendar selection, only pushed up on Apply. Mantine v9 dates are
   // "YYYY-MM-DD" strings, not Date objects.
@@ -50,9 +50,11 @@ export function RangePicker({
     value.to ? dayjs(value.to).format("YYYY-MM-DD") : null,
   ]);
 
-  // No `billing` (shouldn't happen post-signup) defaults to allowing
-  // everything rather than locking a user out over a transient loading gap.
-  const allowed = user?.billing?.allowedRanges;
+  // The active workspace's plan decides this — ranges are entitled per
+  // workspace. No billing yet (a loading gap, or a workspace with no plan row)
+  // defaults to allowing everything rather than locking someone out; the
+  // server refuses the range regardless.
+  const allowed = billing?.allowedRanges;
   const isLocked = (range: string) => Boolean(allowed && !allowed.includes(range as never));
 
   const isCustom = value.preset === "custom";
@@ -63,9 +65,9 @@ export function RangePicker({
   const customLocked = isLocked("custom");
 
   const promptUpgrade = () => {
-    const planName = user?.billing?.plan.name ?? "Your current";
+    const planName = billing?.plan.name ?? "This workspace's";
     notify.quotaLimit(
-      `${planName} plan only includes 1h and 24h ranges. Upgrade to unlock 7d, 30d, and custom date ranges.`
+      `${planName} plan only includes 1h and 24h ranges. Upgrade this workspace to unlock 7d, 30d, and custom date ranges.`
     );
   };
 

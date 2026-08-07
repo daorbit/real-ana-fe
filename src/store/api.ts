@@ -117,8 +117,11 @@ export const api = createApi({
     /* ----------------------------- workspaces ----------------------------- */
     getWorkspaces: build.query<Workspace[], void>({
       query: () => "/api/workspaces",
+      // Also tagged "Billing": each workspace carries the plan it is on, so a
+      // purchase has to refetch this list to show what was bought.
       providesTags: (result) => [
         "Workspace",
+        "Billing",
         ...(result ?? []).map((w) => ({ type: "Workspace" as const, id: w._id })),
       ],
     }),
@@ -809,6 +812,8 @@ export const api = createApi({
     startSubscription: build.mutation<
       StartSubscriptionResponse,
       {
+        /** Which workspace this plan period is for — plans are bought per workspace. */
+        workspaceId: string;
         planSlug: string;
         cycle: BillingCycle;
         couponCode?: string;
@@ -830,12 +835,13 @@ export const api = createApi({
 
     startAddonPurchase: build.mutation<
       StartAddonPurchaseResponse,
-      { slug: string; couponCode?: string; currency: Currency; packs?: number }
+      { slug: string; workspaceId: string; couponCode?: string; currency: Currency; packs?: number }
     >({
-      query: ({ slug, couponCode, currency, packs }) => ({
+      // Credits land on one workspace's subscription, so the purchase names it.
+      query: ({ slug, workspaceId, couponCode, currency, packs }) => ({
         url: `/api/billing/addons/${slug}/purchase`,
         method: "POST",
-        body: { couponCode, currency, packs },
+        body: { workspaceId, couponCode, currency, packs },
       }),
     }),
 

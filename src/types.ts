@@ -26,8 +26,8 @@ export type User = {
   impersonating?: boolean;
   /** True on the read-only public demo session. */
   demo?: boolean;
-  /** Plan and usage-quota state, bundled with the profile — null if never subscribed (shouldn't happen post-signup). */
-  billing?: QuotaSummary;
+  // No billing field: a plan belongs to a workspace, not to an account. See
+  // `Workspace.billing`.
 };
 
 /** Fields the settings form can change. Email and role are not among them. */
@@ -105,8 +105,6 @@ export type Plan = {
   description: string;
   priceMonthly: CurrencyPrices;
   priceYearly: CurrencyPrices;
-  maxWorkspaces: number;
-  maxSitesPerWorkspace: number;
   monthlyAuditQuota: number;
   monthlyCrawlQuota: number;
   features: string[];
@@ -214,20 +212,40 @@ export type AddonPack = {
   sortOrder: number;
 };
 
+/**
+ * Sites one workspace may hold, on every plan. Mirrors the server constant of
+ * the same name — the cap is flat across tiers because a workspace is the
+ * billable unit, so more sites means another workspace, not a bigger plan.
+ */
+export const MAX_SITES_PER_WORKSPACE = 2;
+
 export type QuotaSummary = {
+  workspaceId: string;
   plan: { slug: string; name: string };
   cycle: BillingCycle;
   status: "active" | "expired";
   currentPeriodEnd: string | null;
   audits: { planQuota: number; used: number; addonCredits: number };
   crawls: { planQuota: number; used: number; addonCredits: number };
-  workspaces: { quota: number; used: number };
+  sites: { quota: number; used: number };
   maxSitesPerWorkspace: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
   /** Whether reports may be delivered over WhatsApp. Pro only. */
   whatsappReports: boolean;
 } | null;
+
+/**
+ * One workspace and the plan it is on, as the admin console reads it for
+ * another account. The dashboard's own workspaces carry this inline — see
+ * `Workspace.billing`.
+ */
+export type WorkspaceBilling = {
+  workspaceId: string;
+  name: string;
+  slug: string;
+  billing: QuotaSummary;
+};
 
 /**
  * A ₹0 plan (Free) is assigned server-side with no order — `free: true` and
@@ -387,12 +405,17 @@ export type ContactMessagePage = {
   pages: number;
 };
 
-/** Full billing detail for one account, shown in the admin plan dialog. */
-export type AdminUserBilling =
-  | { subscribed: false }
-  | ({
-      subscribed: true;
-    } & QuotaSummary);
+/**
+ * Full billing detail for one account, shown in the admin plan dialog.
+ *
+ * A list, not a single plan: billing is per workspace, so an account can hold
+ * several plans at once. `subscribed` is false when none of its workspaces has
+ * a plan row at all (including an account that owns no workspaces).
+ */
+export type AdminUserBilling = {
+  subscribed: boolean;
+  workspaces: WorkspaceBilling[];
+};
 
 /** Which accounts a broadcast goes to. Mirrors the server's segment ids. */
 export type EmailSegmentId = "all" | "not-installed" | "no-sites" | "installed";
@@ -461,6 +484,17 @@ export type Workspace = {
   name: string;
   slug: string;
   createdAt: string;
+  /**
+   * The plan this workspace is on, and its usage against it.
+   *
+   * Carried by the workspace rather than the profile because a plan is bought
+   * per workspace — and because a workspace reachable by someone who does not
+   * own it still has a plan, which no account-level field could describe.
+   *
+   * Null for a workspace with no subscription row, which shouldn't happen since
+   * creating one assigns Free.
+   */
+  billing: QuotaSummary;
 };
 
 export type Site = {

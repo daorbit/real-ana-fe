@@ -32,6 +32,24 @@ export const demoWorkspaces: Workspace[] = [
     name: "Acme Inc.",
     slug: "acme-inc",
     createdAt: iso(120 * DAY),
+    /**
+     * On Pro, so the demo shows the product rather than the paywall: a Free
+     * demo would hide 7d/30d ranges, funnels, and WhatsApp reports behind
+     * upgrade prompts nobody can act on without an account.
+     */
+    billing: {
+      workspaceId: DEMO_WORKSPACE_ID,
+      plan: { slug: "pro", name: "Pro" },
+      cycle: "monthly",
+      status: "active",
+      currentPeriodEnd: iso(-25 * DAY),
+      audits: { planQuota: 50, used: 12, addonCredits: 0 },
+      crawls: { planQuota: 50, used: 8, addonCredits: 0 },
+      sites: { quota: 2, used: 2 },
+      maxSitesPerWorkspace: 2,
+      allowedRanges: ["1h", "24h", "7d", "30d", "custom"],
+      whatsappReports: true,
+    },
   },
 ];
 

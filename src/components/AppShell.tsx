@@ -16,7 +16,7 @@ import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
 import { useAuth } from "../auth";
 import { notify, confirmLogout, errMessage } from "../notify";
-import { useWorkspace } from "../workspace";
+import { useWorkspace, useActiveBilling } from "../workspace";
 import { DemoToggle } from "./DemoToggle";
 import { useDemo } from "../demo";
 import { SwitchOverlay, useSwitchOverlay } from "./SwitchOverlay";
@@ -442,8 +442,9 @@ export function AppShell({ children }: { children: ReactNode }) {
  * of the time and only becomes a prompt when there's something to act on.
  */
 function PlanCard() {
-  const { user } = useAuth();
-  const billing = user?.billing;
+  // The active workspace's plan, not the account's — plans are bought per
+  // workspace, so the rail reports whichever one is on screen.
+  const billing = useActiveBilling();
   if (!billing) return null;
 
   const expired = billing.status === "expired";
