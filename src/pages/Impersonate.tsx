@@ -11,6 +11,7 @@ import { EmailComposer } from "../components/EmailComposer";
 import { AdminPlanDialog } from "../components/AdminPlanDialog";
 import { useGetAdminUsersQuery, useDeleteAdminUserMutation, useSetAdminUserRoleMutation } from "../store";
 import { useAuth, useIsPlatformAdmin } from "../auth";
+import { UserAvatar } from "../components/UserAvatar";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { num, timeAgo, shortDate } from "../utils";
 import type { AdminUser } from "../types";
@@ -263,15 +264,14 @@ export default function Impersonate() {
                               // preview — a blown-up pair of initials is noise.
                               <HoverCard width={220} shadow="md" withArrow openDelay={200} position="right">
                                 <HoverCard.Target>
-                                  <Avatar
+                                  <UserAvatar
                                     src={u.avatarUrl}
+                                    name={u.name}
                                     color="emerald"
                                     radius="xl"
                                     size="md"
                                     style={{ cursor: "zoom-in" }}
-                                  >
-                                    {u.name.slice(0, 2).toUpperCase()}
-                                  </Avatar>
+                                  />
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown p="xs">
                                   <Image
@@ -280,6 +280,9 @@ export default function Impersonate() {
                                     radius="md"
                                     fit="contain"
                                     h={200}
+                                    // Same reason as UserAvatar — Google's CDN
+                                    // 403s a request carrying our referrer.
+                                    referrerPolicy="no-referrer"
                                   />
                                 </HoverCard.Dropdown>
                               </HoverCard>

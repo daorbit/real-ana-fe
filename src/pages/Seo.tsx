@@ -238,30 +238,44 @@ export default function Seo() {
   const { refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
 
-  const { data: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
+  // `currentData`, not `data`: the latter holds the previous workspace's sites
+  // across the switch, which would offer a site picker full of properties this
+  // workspace doesn't own.
+  const { currentData: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
 
-  const [siteId, setSiteId] = useState<string>("");
+  /**
+   * The site the user picked, if any. Not the source of truth — see `siteId`.
+   *
+   * Holding only the *choice* here, and resolving it against the current
+   * workspace's list below, is what keeps a workspace switch from firing
+   * requests at the previous workspace's site. Storing the resolved id in state
+   * instead meant a render happened with the stale value before any effect
+   * could clear it, and every query keyed on it went out and 404'd.
+   */
+  const [picked, setPicked] = useState<string>("");
   const [path, setPath] = useState("/");
   const [tab, setTab] = useState<TabValue>("overview");
   /** Set when the user opens an older report from history. */
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
 
-  const site = sites.find((s) => s.siteId === siteId) ?? null;
+  /**
+   * The site actually being audited, derived during render rather than stored.
+   *
+   * A pick only counts while it names a site in the workspace currently loaded;
+   * otherwise this falls back to the first site, or to empty while the list is
+   * still in flight. Because it is computed, the very first render after a
+   * switch already has the right value, and every query below either targets a
+   * real site or skips.
+   */
+  const site = sites.find((s) => s.siteId === picked) ?? sites[0] ?? null;
+  const siteId = site?.siteId ?? "";
 
-  // Settle on a site as soon as the list arrives, and follow the workspace if
-  // the user switches to one where the current site does not exist.
-  useEffect(() => {
-    if (!sites.length) {
-      setSiteId("");
-      return;
-    }
-    setSiteId((cur) => (cur && sites.some((s) => s.siteId === cur) ? cur : sites[0].siteId));
-  }, [sites]);
-
-  // A different site means a different report; nothing from the last one applies.
+  // A different site means a different report; nothing from the last one
+  // applies. Keyed on the resolved id, so it also fires when a workspace switch
+  // lands on a different site.
   useEffect(() => {
     setViewingId(null);
     setPath("/");
@@ -511,7 +525,7 @@ export default function Seo() {
               label="Site"
               data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
               value={siteId}
-              onChange={(v) => v && setSiteId(v)}
+              onChange={(v) => v && setPicked(v)}
               allowDeselect={false}
               w={{ base: "100%", sm: 240 }}
               leftSection={<Globe size={15} />}

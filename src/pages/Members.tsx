@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Text, Group, Button, Card, ActionIcon, Modal, TextInput, Select,
-  Stack, Center, Avatar, Badge, Tooltip, Box, ThemeIcon, SimpleGrid,
+  Stack, Center, Badge, Tooltip, Box, ThemeIcon, SimpleGrid,
   SegmentedControl, Divider,
 } from "@mantine/core";
 import { motion } from "framer-motion";
@@ -16,6 +16,7 @@ import {
   useUpdateMemberRoleMutation, useRemoveMemberMutation,
 } from "../store";
 import { AppShell } from "../components/AppShell";
+import { UserAvatar } from "../components/UserAvatar";
 import { PageHeader } from "../components/Page";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace, usePermissions } from "../workspace";
@@ -323,9 +324,12 @@ export default function Members() {
                     <Card withBorder radius="md" padding="sm">
                       <Group justify="space-between" wrap="nowrap" gap="sm">
                         <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                          <Avatar src={m.avatarUrl || undefined} radius="xl" size={40}>
-                            {(m.name || m.email).slice(0, 1).toUpperCase()}
-                          </Avatar>
+                          <UserAvatar
+                            src={m.avatarUrl}
+                            name={m.name || m.email}
+                            radius="xl"
+                            size={40}
+                          />
                           <div style={{ minWidth: 0 }}>
                             <Group gap={6} wrap="nowrap">
                               <Text size="sm" fw={600} truncate>

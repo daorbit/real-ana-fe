@@ -30,7 +30,9 @@ export function useReportsPage() {
   const ownerMobile = (user?.mobile ?? "").replace(/[^\d]/g, "");
 
   const { data, isLoading } = useGetReportSchedulesQuery(workspaceId, { skip: !workspaceId });
-  const { data: sites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId });
+  // `currentData` so a workspace switch empties the list rather than briefly
+  // offering the previous workspace's sites as report targets.
+  const { currentData: sites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId });
   const { data: share } = useGetShareQuery(workspaceId, { skip: !workspaceId });
   const { data: wa } = useGetWhatsAppStatusQuery(workspaceId, { skip: !workspaceId });
 

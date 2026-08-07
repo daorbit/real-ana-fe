@@ -483,7 +483,9 @@ function AuditShareCard({
  */
 function SeoShareTab({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
-  const { data: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
+  // `currentData` — see the note in Seo.tsx: `data` survives the workspace
+  // switch and would list sites this workspace does not own.
+  const { currentData: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
 

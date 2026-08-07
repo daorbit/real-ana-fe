@@ -11,10 +11,10 @@ import type { Site } from "../types";
  * automatically — callers no longer have to reload by hand.
  */
 export function useSites(workspaceId: string | undefined) {
-  const { data, refetch, fulfilledTimeStamp } = useGetSitesQuery(workspaceId!, {
-    skip: !workspaceId,
-    pollingInterval: POLL_MS,
-  });
+  const { data, currentData, refetch, fulfilledTimeStamp, originalArgs } = useGetSitesQuery(
+    workspaceId!,
+    { skip: !workspaceId, pollingInterval: POLL_MS },
+  );
 
   const [refreshing, setRefreshing] = useState(false);
   const refresh = useCallback(async () => {
@@ -28,7 +28,15 @@ export function useSites(workspaceId: string | undefined) {
     }
   }, [refetch]);
 
-  const sites: Site[] = data ?? [];
+  /**
+   * Never serve another workspace's sites while this one loads.
+   *
+   * `data` survives a cache-key change by design, so a plain `data ?? []` left
+   * the previous workspace's site list on screen for the length of the fetch —
+   * long enough to click into a site that isn't in the workspace you just
+   * opened. Empty is the honest answer until the right list arrives.
+   */
+  const sites: Site[] = (currentData ?? (originalArgs === workspaceId ? data : undefined)) ?? [];
 
   return {
     sites,

@@ -297,7 +297,7 @@ export default function Settings() {
                 color="emerald"
                 radius="md"
                 size={72}
-                imageProps={{ onError: () => setAvatarBroken(true) }}
+                imageProps={{ onError: () => setAvatarBroken(true), referrerPolicy: "no-referrer" }}
               >
                 {initials}
               </Avatar>

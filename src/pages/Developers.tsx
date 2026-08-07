@@ -30,7 +30,9 @@ function KeysTab() {
 
   // Cached; the mutations below invalidate the ApiKey tag, so the list
   // refreshes itself after a create or a revoke.
-  const { data: keys = [] } = useGetApiKeysQuery(active!._id, { skip: !active });
+  // `currentData`: API keys are credentials, and showing the previous
+  // workspace's while the new list loads is the worst kind of stale.
+  const { currentData: keys = [] } = useGetApiKeysQuery(active!._id, { skip: !active });
   const [createKey, { isLoading: creating }] = useCreateApiKeyMutation();
   const [revokeKey] = useRevokeApiKeyMutation();
 

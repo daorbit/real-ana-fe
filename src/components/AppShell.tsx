@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  AppShell as MantineShell, Select, Avatar, Group, Text, ActionIcon, ScrollArea,
+  AppShell as MantineShell, Select, Group, Text, ActionIcon, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Menu,
   UnstyledButton, Tooltip, Burger, Progress, Badge, ThemeIcon,
 } from "@mantine/core";
@@ -12,6 +12,7 @@ import {
   CreditCard, ArrowUpRight, Mail, Inbox, UserPlus,
 } from "lucide-react";
 import { PlanIcon } from "./PlanIcons";
+import { UserAvatar } from "./UserAvatar";
 import { Wordmark } from "./Brand";
 import { SupportWidget } from "./SupportWidget";
 import { useAuth, useIsPlatformAdmin } from "../auth";
@@ -359,9 +360,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 style={{ display: "block", width: "100%", padding: 8 }}
               >
                 <Group gap="sm" wrap="nowrap">
-                  <Avatar src={user?.avatarUrl || null} color="emerald" radius="md" size="md">
+                  <UserAvatar src={user?.avatarUrl} color="emerald" radius="md" size="md">
                     {initials}
-                  </Avatar>
+                  </UserAvatar>
                   <Box style={{ flex: 1, overflow: "hidden" }}>
                     <Text size="sm" fw={600} truncate>{user?.name}</Text>
                     <Text size="xs" c="dimmed" truncate>{user?.email}</Text>

@@ -22,15 +22,35 @@ export function useStats(
   to?: string
 ) {
   const {
-    data: stats,
+    data: settled,
+    currentData,
     error,
     refetch,
     fulfilledTimeStamp,
     isFetching,
+    originalArgs,
   } = useGetStatsQuery(
     { workspaceId: workspaceId!, range, filter, sites, from, to },
     { skip: !workspaceId, pollingInterval: POLL_MS }
   );
+
+  /**
+   * Hold the previous payload while a new one loads — but never across a
+   * workspace switch.
+   *
+   * `data` keeps the last settled result even when the cache key changes, which
+   * is what stops a filter or range click from blanking the page. Across
+   * workspaces that same behaviour is a bug with teeth: it leaves one tenant's
+   * numbers on screen under another tenant's name until the fetch lands, which
+   * reads as "this workspace has that traffic".
+   *
+   * So: fall back to the stale payload only while it belongs to the workspace
+   * being asked about. `currentData` is undefined during any in-flight key
+   * change, and `originalArgs` says which workspace the settled payload is
+   * actually for.
+   */
+  const staleIsSameWorkspace = originalArgs?.workspaceId === workspaceId;
+  const stats = currentData ?? (staleIsSameWorkspace ? settled : undefined);
 
   /**
    * Two distinct busy states:
@@ -41,10 +61,10 @@ export function useStats(
    *   switch, a filter change, or a background poll. The old numbers stay
    *   visible and readable; a small inline spinner is enough.
    *
-   * `stats` is RTK Query's `data`, which holds the last settled payload across
-   * cache-key changes. `currentData` was used before, but it goes undefined on
-   * *every* key change — including each filter click — so it made the whole
-   * page flash busy on any filter.
+   * `stats` is the last settled payload *for this workspace* — see above. It
+   * survives filter and range changes, so those don't flash the page busy, but
+   * goes undefined the moment the workspace changes, so a switch shows a load
+   * rather than the previous tenant's numbers.
    */
   const hasData = stats !== undefined;
   const loading = isFetching && !hasData;

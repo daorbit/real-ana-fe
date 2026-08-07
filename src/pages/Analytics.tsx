@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -244,15 +244,32 @@ export default function Analytics() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [section, setSection] = useState<string>("overview");
   const [tab, setTab] = useState<string>("pages");
-  // Empty = all sites. siteIds don't carry across workspaces, so reset on switch.
-  const [siteScope, setSiteScope] = useState<string[]>([]);
-  useEffect(() => setSiteScope([]), [active?._id]);
+  /**
+   * Empty = all sites.
+   *
+   * Only the raw selection is stored; the scope actually queried is derived
+   * below. Clearing this in an effect instead let one render go out with the
+   * previous workspace's site ids attached, which the server answers with a
+   * 404 — the request is asking this workspace about somebody else's sites.
+   */
+  const [pickedSites, setPickedSites] = useState<string[]>([]);
+
+  const { sites } = useSites(active?._id);
+
+  /**
+   * The selection, narrowed to sites that exist in the workspace currently
+   * loaded. Computed during render, so the very first render after a switch
+   * already carries a valid scope rather than a stale one.
+   */
+  const siteScope = useMemo(() => {
+    if (!pickedSites.length) return [];
+    const owned = new Set(sites.map((s) => s.siteId));
+    return pickedSites.filter((id) => owned.has(id));
+  }, [pickedSites, sites]);
 
   // Narrowing the site scope swaps every number on the page — cover the swap
   // with the same transition the workspace switcher uses.
   const scopeSwitch = useSwitchOverlay(siteScope.join(",") || "all");
-
-  const { sites } = useSites(active?._id);
   const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
     useStats(active?._id, range, serializeFilter(filter), siteScope, rangeState.from, rangeState.to);
 
@@ -288,10 +305,13 @@ export default function Analytics() {
     };
   }, [rangeState.preset, rangeState.from, rangeState.to]);
 
-  const { data: markers = [] } = useGetMarkersQuery(
+  const { data: markerData, originalArgs: markerArgs } = useGetMarkersQuery(
     { wid: active?._id ?? "", from: markerWindow.from, to: markerWindow.to },
     { skip: !active?._id },
   );
+  // Held across range changes (so the timeline doesn't flicker) but dropped on
+  // a workspace switch, where they would be another tenant's annotations.
+  const markers = (markerArgs?.wid === active?._id ? markerData : undefined) ?? [];
 
   const [markersOpen, setMarkersOpen] = useState(false);
   const [saveMarker, { isLoading: savingMarker }] = useSaveMarkerMutation();
@@ -328,7 +348,7 @@ export default function Analytics() {
 
   // Saved segments for this workspace. Skipped until a workspace is known —
   // the endpoint is workspace-scoped and there is nothing to ask for yet.
-  const { data: segments = [] } = useGetSegmentsQuery(active?._id ?? "", {
+  const { currentData: segments = [] } = useGetSegmentsQuery(active?._id ?? "", {
     skip: !active?._id,
   });
   const [saveSegment, { isLoading: savingSegment }] = useSaveSegmentMutation();
@@ -528,7 +548,7 @@ export default function Analytics() {
         <Group gap="sm" wrap="wrap" justify="flex-end" className="an-toolbar">
           <Group gap="sm" wrap="wrap" justify="flex-end" className="an-toolbar-btns">
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
-            <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
+            <SiteFilter sites={sites} selected={siteScope} onChange={setPickedSites} />
             <ExportMenu
               workspaceId={active?._id}
               range={range}
