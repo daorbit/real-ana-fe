@@ -17,6 +17,7 @@ export type Draft = {
   analytics: boolean;
   seo: boolean;
   dashboardLink: boolean;
+  aiSummary: boolean;
   attachXlsx: boolean;
   enabled: boolean;
 };
@@ -31,6 +32,7 @@ export const emptyDraft = (): Draft => ({
   analytics: true,
   seo: true,
   dashboardLink: false,
+  aiSummary: true,
   attachXlsx: true,
   enabled: true,
 });
@@ -47,6 +49,9 @@ export const fromSchedule = (s: ReportSchedule): Draft => ({
   analytics: s.include.analytics,
   seo: s.include.seo,
   dashboardLink: s.include.dashboardLink,
+  // Defaults on for schedules saved before the field existed, matching the
+  // server, so an older report does not appear to have opted out.
+  aiSummary: s.include.aiSummary !== false,
   attachXlsx: s.attachXlsx,
   enabled: s.enabled,
 });

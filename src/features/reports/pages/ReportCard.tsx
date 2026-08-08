@@ -4,7 +4,7 @@ import {
 import {
   Pencil, Trash2, Send, Mail, AlertTriangle, BarChart3, Search,
   FileSpreadsheet, Link2, MoreVertical, Pause, Play, Clock,
-  Users, CheckCircle2, MessageCircle,
+  Users, CheckCircle2, MessageCircle, MessageSquareText,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { timeAgo } from "@/shared/lib";
@@ -63,6 +63,15 @@ function IncludeChips({ s }: { s: ReportSchedule }) {
   // `id` keys the list; the label is translated and so can't be a React key.
   const items = [
     { id: "analytics", on: s.include.analytics, icon: BarChart3, label: t("reports.includeAnalytics") },
+    // Gated on analytics as well as its own flag: the summary is written from
+    // those figures, so a chip claiming one without them would be a promise the
+    // report cannot keep.
+    {
+      id: "ai",
+      on: s.include.aiSummary !== false && s.include.analytics,
+      icon: MessageSquareText,
+      label: t("reports.includeAiChip"),
+    },
     { id: "seo", on: s.include.seo, icon: Search, label: t("reports.includeSeo") },
     { id: "xlsx", on: s.attachXlsx, icon: FileSpreadsheet, label: t("reports.includeSpreadsheet") },
     { id: "link", on: s.include.dashboardLink, icon: Link2, label: t("reports.includeLiveLink") },

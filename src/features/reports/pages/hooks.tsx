@@ -87,7 +87,7 @@ export function useReportsPage() {
       frequency: d.frequency,
       recipients: d.recipients,
       channels: { email: d.emailChannel, whatsapp: d.whatsappChannel },
-      include: { analytics: d.analytics, seo: d.seo, dashboardLink: d.dashboardLink },
+      include: { analytics: d.analytics, seo: d.seo, dashboardLink: d.dashboardLink, aiSummary: d.aiSummary },
       attachXlsx: d.attachXlsx,
       enabled: d.enabled,
     }).unwrap();

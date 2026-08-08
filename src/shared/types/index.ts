@@ -203,7 +203,7 @@ export type ReportSchedule = {
   recipients: ReportRecipient[];
   phoneRecipients: ReportPhoneRecipient[];
   channels: ReportChannels;
-  include: { analytics: boolean; seo: boolean; dashboardLink: boolean };
+  include: { analytics: boolean; seo: boolean; dashboardLink: boolean; aiSummary?: boolean };
   attachXlsx: boolean;
   enabled: boolean;
   lastSentAt?: string;
@@ -223,7 +223,7 @@ export type ReportScheduleInput = {
    * mobile, which the server reads from their profile.
    */
   channels: ReportChannels;
-  include: { analytics: boolean; seo: boolean; dashboardLink: boolean };
+  include: { analytics: boolean; seo: boolean; dashboardLink: boolean; aiSummary?: boolean };
   attachXlsx: boolean;
   enabled?: boolean;
 };

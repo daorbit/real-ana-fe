@@ -237,6 +237,22 @@ export function ReportDialog({
                 checked={draft.seo}
                 onChange={(e) => setDraft({ ...draft, seo: e.currentTarget.checked })}
               />
+              {/* Directly under analytics, because it is written from those
+                  figures and cannot appear without them — which is also why it
+                  disables rather than hides when analytics is off: a control
+                  that vanishes reads as a bug, one that greys out explains
+                  itself. */}
+              <Checkbox
+                label={t("reports.includeAiLabel")}
+                description={
+                  draft.analytics
+                    ? t("reports.includeAiDesc")
+                    : t("reports.includeAiNeedsAnalytics")
+                }
+                disabled={!draft.analytics}
+                checked={draft.aiSummary && draft.analytics}
+                onChange={(e) => setDraft({ ...draft, aiSummary: e.currentTarget.checked })}
+              />
               <Checkbox
                 label={t("reports.includeXlsxLabel")}
                 description={t("reports.includeXlsxDesc")}
