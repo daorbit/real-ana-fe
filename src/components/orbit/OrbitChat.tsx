@@ -5,6 +5,7 @@ import {
 } from "@mantine/core";
 import { ArrowUp, AlertTriangle, Check } from "lucide-react";
 import { ModelIcon } from "./ModelIcon";
+import { OrbitMark } from "./OrbitMark";
 import { ORBIT_SUGGESTIONS, type OrbitMessage } from "../../hooks/useOrbitChat";
 import type { useOrbitChat } from "../../hooks/useOrbitChat";
 
@@ -30,13 +31,16 @@ function Bubble({ message }: { message: OrbitMessage }) {
   if (isUser) {
     return (
       <Group justify="flex-end" wrap="nowrap">
+        {/* A solid fill, not Mantine's `-light` tint. That tint is mostly
+            transparent, so the aurora behind the panel showed straight through
+            it and the user's own words came out muddy. */}
         <Box
+          className="orbit-bubble-user"
           style={{
             maxWidth: "85%",
             padding: "7px 12px",
             borderRadius: 14,
             borderBottomRightRadius: 4,
-            background: "var(--mantine-color-emerald-light)",
           }}
         >
           <Text size="sm" lh={1.55} style={{ whiteSpace: "pre-wrap" }}>
@@ -78,24 +82,7 @@ function Bubble({ message }: { message: OrbitMessage }) {
   );
 }
 
-/**
- * The three pieces of markdown a support answer actually uses.
- *
- * Links, `inline code`, and **bold**. Not a markdown renderer: a full one is a
- * dependency that would also start honouring headings, tables and images the
- * moment a model produced them, which is exactly the output the prompt tells it
- * not to write. This handles what Orbit really emits and leaves the rest as
- * plain text.
- *
- * Code matters most of the three. Half of these answers contain a tag to paste,
- * and without it a snippet arrives wrapped in visible backticks that get copied
- * along with the code.
- *
- * Numbered steps need no parsing — they arrive as literal "1." lines and read
- * correctly under `pre-wrap`.
- */
 
-/** One pattern, so the pieces are found in a single pass and cannot nest badly. */
 const INLINE = /(\[[^\]]+\]\(https?:\/\/[^\s)]+\))|(`[^`\n]+`)|(\*\*[^*\n]+\*\*)/g;
 
 function RichText({ text }: { text: string }) {
@@ -153,20 +140,35 @@ function RichText({ text }: { text: string }) {
 /**
  * The opening screen.
  *
- * Three suggestions, no icon, no paragraph explaining what an assistant is.
- * The previous version stacked a 44px icon, a heading, three lines of prose and
- * four boxes into a 340px column, which left the thing someone came to do — ask
- * something — below the fold on a short panel.
+ * A greeting, then three suggestions. The greeting is kept to a mark, one line
+ * of welcome and one line of scope — an earlier version stacked a 44px icon, a
+ * heading, three lines of prose and four boxes into a 340px column, which left
+ * the thing someone came to do — ask something — below the fold on a short
+ * panel. So this names the assistant and stops.
  *
- * What the prose was there to say ("Orbit can't see your analytics") is now one
- * line under the input, where it is read at the moment it matters.
+ * What the longer prose was there to say ("Orbit can't see your analytics") is
+ * still one line under the input, where it is read at the moment it matters.
  */
 function EmptyState({ onPick }: { onPick: (q: string) => void }) {
   return (
-    <Center h="100%">
-      <Stack gap={7} w="100%" px="xs">
-        <Text size="xs" c="dimmed" mb={2}>
-          Ask about anything in Quantalog
+    // Top-aligned rather than centred: the mark and heading want to sit at the
+    // start of the panel, and a centred block leaves the greeting floating in
+    // the middle of an otherwise empty column.
+    <Stack gap="lg" px="xs" pt={4}>
+      <Stack gap={6} align="center">
+        <OrbitMark size={50} />
+        <Text size="sm" fw={650} ta="center">
+          Chat with Orbit AI
+        </Text>
+        <Text size="xs" c="dimmed" ta="center" lh={1.5} maw={280}>
+          Ask about any metric, report or setting in Quantalog and get a
+          step-by-step answer.
+        </Text>
+      </Stack>
+
+      <Stack gap={7}>
+        <Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.05em" }}>
+          Try asking
         </Text>
         {ORBIT_SUGGESTIONS.map((q) => (
           <UnstyledButton key={q} className="orbit-suggestion" onClick={() => onPick(q)}>
@@ -174,7 +176,7 @@ function EmptyState({ onPick }: { onPick: (q: string) => void }) {
           </UnstyledButton>
         ))}
       </Stack>
-    </Center>
+    </Stack>
   );
 }
 
@@ -228,10 +230,15 @@ export function OrbitChat({
               <Bubble key={m.id} message={m} />
             ))}
 
+            {/* Emerald rather than grey: this is the one moment the panel is
+                working, and a grey dot on a dark surface read as disabled — the
+                answer looked stalled rather than on its way. */}
             {thinking && (
-              <Group gap={7} wrap="nowrap">
-                <Loader size={12} type="dots" color="gray" />
-                <Text size="xs" c="dimmed">Thinking</Text>
+              <Group gap={8} wrap="nowrap">
+                <Loader size={12} type="dots" color="var(--mantine-color-emerald-5)" />
+                <Text size="xs" c="emerald.4" fw={500} className="orbit-thinking">
+                  Thinking
+                </Text>
               </Group>
             )}
 

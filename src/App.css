@@ -227,6 +227,37 @@ body { overflow-wrap: break-word; }
   }
 }
 
+/* The user's own turn in the thread.
+
+   An opaque fill, because the aurora wash sits behind the whole panel and any
+   semi-transparent bubble picks up whatever the gradient is doing underneath —
+   which is what made this read as muddy green rather than as a bubble. */
+.orbit-bubble-user {
+  background: var(--mantine-color-emerald-9);
+  color: #fff;
+}
+[data-mantine-color-scheme="light"] .orbit-bubble-user {
+  /* Light theme wants the tint, not the deep fill: white text on emerald-9 is
+     right on a dark panel, but on a light one the bubble becomes a heavy block
+     in the middle of the thread. */
+  background: var(--mantine-color-emerald-1);
+  color: var(--mantine-color-emerald-9);
+}
+
+/* The "Thinking" label breathes while a reply is in flight. The dots animate on
+   their own, but they are 12px of movement in a 460px panel — the label fading
+   with them is what makes the wait read as progress. */
+.orbit-thinking {
+  animation: orbit-thinking-pulse 1.6s ease-in-out infinite;
+}
+@keyframes orbit-thinking-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-thinking { animation: none; }
+}
+
 /* An opening suggestion. Quiet by default — these are a prompt, not the point
    of the panel — and only the border warms on hover, so three of them stacked
    read as a list rather than three buttons demanding to be pressed. */
