@@ -1,21 +1,24 @@
-import { Modal, Text, Alert, Loader, Code, Center } from "@mantine/core";
+import { Modal, Text, Alert, Loader, Code, Center, Box } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useEmailComposer } from "../hooks/useEmailComposer";
-import { AudienceStep } from "./email/AudienceStep";
-import { WriteStep } from "./email/WriteStep";
+import { AudiencePicker } from "./email/AudiencePicker";
+import { MessagePane } from "./email/MessagePane";
 import type { AdminUser } from "../types";
 
 /**
  * Admin-only: compose and send a message, either to a segment, to a list of
  * addresses typed by hand, or to one account.
  *
- * Two steps rather than one long form. Choosing who to mail and writing what
- * they read are different decisions, and putting them on one screen meant the
- * audience — the part that is expensive to get wrong — competed for attention
- * with a textarea.
+ * One screen, two columns. This was a two-step wizard — audience, then write —
+ * which split the two decisions that inform each other: you choose a segment to
+ * work out what to say, and you change your mind about the segment once you
+ * have said it. Worse, the audience was invisible for the whole time you were
+ * writing, so the expensive thing to get wrong was the one thing not on screen.
  *
- * This file is only the shell: which step is showing, and the one case where no
- * step should show at all. The state lives in `useEmailComposer`, and each step
+ * Side by side, the recipient count is in view when Send is pressed, and
+ * switching segments does not mean leaving the draft.
+ *
+ * This file is only the shell. State lives in `useEmailComposer`; each column
  * renders itself.
  */
 export function EmailComposer({
@@ -29,24 +32,18 @@ export function EmailComposer({
   user?: AdminUser | null;
 }) {
   const state = useEmailComposer({ opened, onClose, user });
-  const { single, step, status, statusLoading, busy, close } = state;
-
-  const title = single
-    ? `Message ${user?.name}`
-    : step === "audience"
-      ? "Who gets this?"
-      : "Write your message";
+  const { single, status, statusLoading, busy, close } = state;
 
   return (
     <Modal
       opened={opened}
       onClose={close}
-      title={title}
+      title={single ? `Message ${user?.name}` : "New message"}
       centered
       radius="lg"
-      // The preview needs room to show the mail at something near its real
-      // width; the audience step does not.
-      size={step === "audience" ? "md" : "lg"}
+      // Wide enough for two columns and a preview at something near the mail's
+      // real width. A single-recipient send has no picker, so it stays narrow.
+      size={single ? "lg" : "80rem"}
       closeOnClickOutside={false}
       closeOnEscape={!busy}
       withCloseButton={!busy}
@@ -64,10 +61,25 @@ export function EmailComposer({
             password.
           </Text>
         </Alert>
-      ) : step === "audience" ? (
-        <AudienceStep state={state} />
+      ) : single ? (
+        // One recipient: no choice to make, so the message gets the full width.
+        <MessagePane state={state} />
       ) : (
-        <WriteStep state={state} user={user} />
+        // Grid rather than flex: the audience column holds a fixed width and the
+        // message takes the rest, and on a narrow screen the two stack with the
+        // picker on top — which is the order the decisions happen in.
+        <Box
+          style={{
+            display: "grid",
+            gap: 28,
+            gridTemplateColumns: "minmax(260px, 320px) minmax(0, 1fr)",
+            alignItems: "start",
+          }}
+          className="email-composer-grid"
+        >
+          <AudiencePicker state={state} user={user} />
+          <MessagePane state={state} />
+        </Box>
       )}
     </Modal>
   );

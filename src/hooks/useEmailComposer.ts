@@ -24,7 +24,6 @@ import type {
  * functions.
  */
 
-export type ComposerStep = "audience" | "write";
 /** A segment of existing accounts, or a list of addresses typed by hand. */
 export type ComposerAudience = "segment" | "custom";
 export type ComposerTab = "write" | "preview";
@@ -49,7 +48,6 @@ export function useEmailComposer({
   });
   const { data: templateData } = useGetEmailTemplatesQuery(undefined, { skip: !opened });
 
-  const [step, setStep] = useState<ComposerStep>("audience");
   const [segment, setSegment] = useState<EmailSegmentId>("not-installed");
   const [audience, setAudience] = useState<ComposerAudience>("segment");
   /** The raw textarea contents. Parsed for display; the server validates again. */
@@ -98,12 +96,10 @@ export function useEmailComposer({
     return recipientData?.recipients ?? [];
   }, [single, user, audience, customList, recipientData]);
 
-  // A single-user send has no audience step to return to. A stale custom list
-  // from a previous open is the kind of thing that mails the wrong people, so
-  // the audience resets with the modal.
+  // A stale custom list from a previous open is the kind of thing that mails
+  // the wrong people, so the audience resets with the modal.
   useEffect(() => {
     if (!opened) return;
-    setStep(single ? "write" : "audience");
     setTab("write");
     setAudience("segment");
     setCustomTo("");
@@ -138,17 +134,21 @@ export function useEmailComposer({
   const templates = templateData?.templates ?? [];
   const busy = sending || testing;
 
-  const canSend = Boolean(
-    status?.configured && subject.trim() && body.trim() && recipients.length,
-  );
-
   /**
-   * Whether the audience step will let you continue.
+   * Whether Send is allowed.
    *
-   * A malformed address is a bounce and a small hit to sender reputation, so it
-   * is fixed here rather than discovered on send.
+   * The malformed-address check used to gate the wizard's Next button. With the
+   * steps gone it moves here, because it was doing real work: a bounce is a
+   * small hit to sender reputation, and catching a typo before the send is the
+   * whole point of validating at all.
    */
-  const canAdvance = recipients.length > 0 && customList.invalid.length === 0;
+  const canSend = Boolean(
+    status?.configured &&
+      subject.trim() &&
+      body.trim() &&
+      recipients.length &&
+      customList.invalid.length === 0,
+  );
 
   /** Apply a template: its copy, its button, and its layout. */
   const applyTemplate = useCallback((t: MailTemplate) => {
@@ -246,7 +246,6 @@ export function useEmailComposer({
   return {
     // Mode
     single,
-    step, setStep,
     tab, setTab,
 
     // Configuration
@@ -261,7 +260,6 @@ export function useEmailComposer({
     recipients,
     loadingRecipients,
     showList, setShowList,
-    canAdvance,
 
     // Message
     templates,

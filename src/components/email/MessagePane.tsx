@@ -2,29 +2,19 @@ import {
   Stack, Group, Button, TextInput, Textarea, Text, Loader, Center, Box, Tabs,
   UnstyledButton,
 } from "@mantine/core";
-import {
-  Send, FlaskConical, ArrowLeft, Eye, PencilLine, Check,
-} from "lucide-react";
-import type { AdminUser } from "../../types";
+import { Send, FlaskConical, Eye, PencilLine, Check } from "lucide-react";
 import type { EmailComposerState } from "../../hooks/useEmailComposer";
-import { RecipientSummary } from "./RecipientSummary";
 
 /**
- * Step two: the message itself.
+ * The message: what it says, and what it will look like.
  *
- * Writing and previewing are tabs rather than side-by-side panes — at modal
- * width, two columns leaves neither wide enough to judge, and the preview is
- * something you check before sending rather than watch as you type.
+ * Writing and previewing stay tabs rather than side-by-side panes — this column
+ * is already sharing the modal with the audience, and splitting it again would
+ * leave the preview too narrow to judge anything by.
  */
-export function WriteStep({
-  state,
-  user,
-}: {
-  state: EmailComposerState;
-  user?: AdminUser | null;
-}) {
+export function MessagePane({ state }: { state: EmailComposerState }) {
   const {
-    single, setStep, audience,
+    single, audience,
     templates, applyTemplate, templateId,
     subject, setSubject,
     body, setBody,
@@ -37,20 +27,26 @@ export function WriteStep({
 
   return (
     <Stack gap="md">
-      <RecipientSummary state={state} user={user} />
-
       {templates.length > 0 && (
         <div>
-          <Text size="xs" fw={600} c="dimmed" mb={6} tt="uppercase">
+          <Text
+            size="xs"
+            fw={700}
+            c="dimmed"
+            mb={6}
+            tt="uppercase"
+            style={{ letterSpacing: "0.5px" }}
+          >
             Start from
           </Text>
-      
+
           {templateId === "invite" && audience !== "custom" && !single && (
             <Text size="xs" c="orange" mb={6}>
               This one introduces Quantalog to someone new — the recipients you
               picked already have accounts.
             </Text>
           )}
+
           <Group gap={6}>
             {templates.map((t) => {
               const active = templateId === t.id;
@@ -61,8 +57,6 @@ export function WriteStep({
                   onClick={() => applyTemplate(t)}
                   title={t.hint}
                   style={{
-                    // Selection reads as border plus fill, matching how the
-                    // audience step marks its chosen option.
                     border: `1px solid var(${active ? "--mantine-color-emerald-6" : "--mantine-color-default-border"})`,
                     background: active ? "var(--mantine-color-emerald-light)" : undefined,
                     borderRadius: 8,
@@ -109,9 +103,9 @@ export function WriteStep({
             placeholder="{{greeting}}, …"
             value={body}
             onChange={(e) => setBody(e.currentTarget.value)}
-            minRows={8}
+            minRows={9}
             autosize
-            maxRows={14}
+            maxRows={16}
             disabled={busy}
           />
         </Tabs.Panel>
@@ -139,7 +133,7 @@ export function WriteStep({
                   title="Email preview"
                   srcDoc={preview.html}
                   sandbox=""
-                  style={{ width: "100%", height: 420, border: 0, display: "block" }}
+                  style={{ width: "100%", height: 460, border: 0, display: "block" }}
                 />
               </Box>
             </Stack>
@@ -158,40 +152,29 @@ export function WriteStep({
         </Text>
       )}
 
-      <Group justify="space-between" mt="xs">
-        {single ? (
-          <div />
-        ) : (
-          <Button
-            variant="subtle"
-            color="gray"
-            leftSection={<ArrowLeft size={15} />}
-            disabled={busy}
-            onClick={() => setStep("audience")}
-          >
-            Back
-          </Button>
-        )}
-        <Group gap="xs">
-          <Button
-            variant="default"
-            radius="md"
-            leftSection={testing ? <Loader size={13} /> : <FlaskConical size={15} />}
-            disabled={!subject.trim() || !body.trim() || busy}
-            onClick={test}
-          >
-            Test to me
-          </Button>
-          <Button
-            color="emerald"
-            radius="md"
-            leftSection={sending ? <Loader size={13} color="white" /> : <Send size={15} />}
-            disabled={!canSend || busy}
-            onClick={send}
-          >
-            {sending ? "Sending…" : single ? "Send" : `Send to ${recipients.length}`}
-          </Button>
-        </Group>
+      <Group justify="flex-end" gap="xs" mt="xs">
+        <Button
+          variant="default"
+          radius="md"
+          leftSection={testing ? <Loader size={13} /> : <FlaskConical size={15} />}
+          disabled={!subject.trim() || !body.trim() || busy}
+          onClick={test}
+        >
+          Test to me
+        </Button>
+        <Button
+          color="emerald"
+          radius="md"
+          leftSection={sending ? <Loader size={13} color="white" /> : <Send size={15} />}
+          disabled={!canSend || busy}
+          onClick={send}
+        >
+          {sending
+            ? "Sending…"
+            : single
+              ? "Send"
+              : `Send to ${recipients.length} ${recipients.length === 1 ? "person" : "people"}`}
+        </Button>
       </Group>
     </Stack>
   );

@@ -583,6 +583,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .site-row-actions > :nth-child(2) { flex: 1; }
   .site-row-actions .mantine-Button-root { width: 100%; }
 }
+
+/* Email composer: audience beside the message. Below the breakpoint the two
+   stack with the picker on top, which is the order the decisions happen in —
+   you choose who before you know what to say to them. */
+@media (max-width: 62em) {
+  .email-composer-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
 .site-row {
   background: var(--surface-2) !important;
   transition: border-color 0.15s ease, transform 0.15s ease;

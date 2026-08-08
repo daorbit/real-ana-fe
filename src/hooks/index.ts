@@ -9,5 +9,5 @@ export { useHomeWidgets, WIDGETS, WIDGET_GROUPS, WIDGET_MAP } from "./useHomeWid
 export type { WidgetId, Widget, WidgetKind, Span, Placed } from "./useHomeWidgets";
 export { useEmailComposer } from "./useEmailComposer";
 export type {
-  EmailComposerState, ComposerStep, ComposerAudience, ComposerTab,
+  EmailComposerState, ComposerAudience, ComposerTab,
 } from "./useEmailComposer";

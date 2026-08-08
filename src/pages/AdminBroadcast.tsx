@@ -1,18 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Center, Stack, Text, ThemeIcon, Alert, Loader, Code } from "@mantine/core";
+import { Box, Button, Card, Center, Stack, Text, ThemeIcon, Alert, Loader, Code } from "@mantine/core";
 import { AlertTriangle, ShieldAlert } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
-import { AudienceStep } from "../components/email/AudienceStep";
-import { WriteStep } from "../components/email/WriteStep";
+import { AudiencePicker } from "../components/email/AudiencePicker";
+import { MessagePane } from "../components/email/MessagePane";
 import { useEmailComposer } from "../hooks/useEmailComposer";
 import { useIsPlatformAdmin } from "../auth";
 
 /**
  * Admin-only: send a message to a segment, a hand-typed list, or one account.
  *
- * Its own page rather than a modal — audience and write are steps on the
- * page itself, not a dialog stacked over the Users table.
+ * Its own page rather than a modal — a broadcast is not a dialog stacked over
+ * the Users table. Audience and message sit side by side, so the recipient
+ * count is on screen when Send is pressed rather than a screen behind it.
  */
 export default function AdminBroadcast() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function AdminBroadcast() {
   // Nothing to close back to on this page — a broadcast page has no "was
   // this open" state, so onClose just resets the draft.
   const state = useEmailComposer({ opened: isAdmin, onClose: () => {} });
-  const { step, status, statusLoading } = state;
+  const { status, statusLoading } = state;
 
   if (!isAdmin) {
     return (
@@ -43,8 +44,8 @@ export default function AdminBroadcast() {
   return (
     <AppShell>
       <PageHeader
-        title={step === "audience" ? "Who gets this?" : "Write your message"}
-        description="Email a segment, a hand-typed list, or one account."
+        title="New message"
+        description="Pick who it goes to, write it, then send."
       />
 
       <Card withBorder radius="lg" p="lg">
@@ -59,10 +60,22 @@ export default function AdminBroadcast() {
               password.
             </Text>
           </Alert>
-        ) : step === "audience" ? (
-          <AudienceStep state={state} />
         ) : (
-          <WriteStep state={state} />
+          // Grid rather than flex: the audience column holds a fixed width and
+          // the message takes the rest. Below the breakpoint they stack with
+          // the picker on top, which is the order the decisions happen in.
+          <Box
+            style={{
+              display: "grid",
+              gap: 32,
+              gridTemplateColumns: "minmax(260px, 320px) minmax(0, 1fr)",
+              alignItems: "start",
+            }}
+            className="email-composer-grid"
+          >
+            <AudiencePicker state={state} />
+            <MessagePane state={state} />
+          </Box>
         )}
       </Card>
     </AppShell>
