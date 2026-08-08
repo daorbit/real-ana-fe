@@ -49,3 +49,16 @@ export function useOrbit(): OrbitContext {
   if (!ctx) throw new Error("useOrbit must be used inside <OrbitProvider>");
   return ctx;
 }
+
+/**
+ * Orbit, if it is available here.
+ *
+ * Returns null outside the provider instead of throwing. That case is real:
+ * the SEO panels are shared with the public shared-report page and the print
+ * view, which render for someone with no account and therefore no assistant.
+ * Anything offering an "Ask Orbit" action uses this and renders nothing when
+ * it comes back null.
+ */
+export function useOrbitOptional(): OrbitContext | null {
+  return useContext(Ctx);
+}

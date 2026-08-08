@@ -4,6 +4,7 @@ import {
 import { Info, Gauge, ShieldCheck } from "lucide-react";
 import type { SeoPerformance } from "../../../types";
 import { scoreColor } from "../ScoreRing";
+import { AskOrbitButton } from "../../orbit/AskOrbitButton";
 
 export function SuggestionsPanel({ performance }: { performance: SeoPerformance }) {
   // No Lighthouse data at all — an older report, or a run Google could not
@@ -89,6 +90,15 @@ export function SuggestionsPanel({ performance }: { performance: SeoPerformance 
                 <Text size="sm" lh={1.6}>
                   {s.advice}
                 </Text>
+                {/* Lighthouse says what failed and roughly what it costs; it
+                    rarely says what to change in your code. That is the step
+                    people stall on, so the way to ask sits right under it. */}
+                <Box>
+                  <AskOrbitButton
+                    question={`My Lighthouse audit flagged: "${s.title}". ${s.advice} What exactly do I change to fix this?`}
+                    label="How do I fix this?"
+                  />
+                </Box>
                 {s.description && s.description !== s.advice && (
                   <Text size="xs" c="dimmed" lh={1.55}>
                     {s.description}

@@ -3,6 +3,7 @@ import { CircleCheck } from "lucide-react";
 import type { SeoIssue, SeoPerformance } from "../../../types";
 import { ScoreRing } from "../ScoreRing";
 import { SEVERITY } from "../shared/Panel";
+import { AskOrbitButton } from "../../orbit/AskOrbitButton";
 
 /** The full issue list — one severity-railed card per finding. */
 export function IssueList({ issues }: { issues: SeoIssue[] }) {
@@ -55,6 +56,14 @@ export function IssueList({ issues }: { issues: SeoIssue[] }) {
                 <Text size="xs" c="dimmed" lh={1.55}>
                   {issue.detail}
                 </Text>
+                {/* The detail line says what is wrong; this is how someone who
+                    does not already know gets from there to a fix. */}
+                <Box mt={8}>
+                  <AskOrbitButton
+                    question={`My SEO audit flagged: "${issue.title}". ${issue.detail} How do I fix this?`}
+                    label="How do I fix this?"
+                  />
+                </Box>
               </div>
             </Group>
           </Box>
