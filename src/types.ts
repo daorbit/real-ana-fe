@@ -1,19 +1,15 @@
 import type { TrackerOptions } from "./utils/tracker";
 
-/** `super_admin` is never returned by any role-change endpoint — only a direct DB write sets it. */
 export type Role = "super_admin" | "admin" | "user";
 
 export type User = {
   id: string;
   email: string;
-  /** Display name — derived from firstName/lastName by the server. */
   name: string;
   firstName: string;
   lastName: string;
   mobile: string;
-  /** Remote image URL. Empty falls back to initials. */
   avatarUrl: string;
-  /** BCP 47 tag, e.g. "en-GB". Empty means "follow the browser". */
   dateLocale: string;
   /** IANA zone, e.g. "Asia/Kolkata". Empty means "follow the browser". */
   timezone: string;
@@ -460,14 +456,8 @@ export type EmailStatus = {
   from: string;
 };
 
-/**
- * How the server renders a message body.
- *
- * "plain" turns the author's text into paragraphs and nothing more. "invite"
- * adds the designed feature list and closing note under it — for the one
- * template addressed at people who have never heard of Quantalog.
- */
-export type MailLayout = "plain" | "invite";
+ 
+export type MailLayout = "plain" | "invite" | "install" | "welcome" | "feature";
 
 /** A canned message. The copy lives server-side so it can be fixed without a build. */
 export type MailTemplate = {
