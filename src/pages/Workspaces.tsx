@@ -150,13 +150,13 @@ function SiteRow({
               </Tooltip>
             )}
           </CopyButton>
-          <Tooltip label={t("workspaces.deleteSite")} withArrow>
-            {onDelete && (
+          {onDelete && (
+            <Tooltip label={t("workspaces.deleteSite")} withArrow>
               <ActionIcon variant="subtle" color="gray" size="lg" onClick={onDelete}>
                 <Trash2 size={15} />
               </ActionIcon>
-            )}
-          </Tooltip>
+            </Tooltip>
+          )}
         </Group>
       </div>
 
