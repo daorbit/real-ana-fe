@@ -560,13 +560,30 @@ export default function Billing() {
                   {t("billing.addonsSubtitle")}
                 </Text>
               </div>
-              <SegmentedControl
-                size="sm"
-                radius="md"
-                value={currency}
-                onChange={(v) => changeCurrency(v as Currency)}
-                data={CURRENCIES.map((c) => ({ label: c, value: c }))}
-              />
+              <Group gap="sm" wrap="wrap">
+                <SegmentedControl
+                  size="sm"
+                  radius="md"
+                  value={currency}
+                  onChange={(v) => changeCurrency(v as Currency)}
+                  data={CURRENCIES.map((c) => ({ label: c, value: c }))}
+                />
+                {/* Refetches the packs *and* the usage behind the credit
+                    balances below — someone who just spent a credit in another
+                    tab expects this to move both numbers, not only the price. */}
+                <Tooltip label={t("billing.refetchPrices")}>
+                  <ActionIcon
+                    variant="light"
+                    color="gray"
+                    size="lg"
+                    radius="md"
+                    loading={addonsFetching}
+                    onClick={() => { refetchAddons(); refreshUser(); }}
+                  >
+                    <RefreshCw size={15} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
             </Group>
 
             {/* Credits on hand, shown here rather than only in the usage panel
@@ -649,7 +666,7 @@ export default function Billing() {
                 </Text>
               </Alert>
             ) : (
-              <Receipts />
+              <Receipts workspaceId={selectedWorkspaceId ?? ""} />
             )}
           </Tabs.Panel>
           </Tabs>
@@ -1459,16 +1476,23 @@ function AddonCheckoutModal({
 }
 
 /**
- * Billing history: every completed purchase, with its receipt.
+ * Billing history: this workspace's completed purchases, with their receipts.
+ *
+ * Scoped to the workspace being viewed, like everything else on this page —
+ * an account with several workspaces was otherwise shown the same combined
+ * list under each one, with no way to tell which purchase belonged where.
  *
  * The same PDF was already emailed when the payment landed, so this is the
  * copy for six months later, when that email is buried — which is exactly when
  * someone needs it for an expense claim. Nothing here can be acted on except
  * downloading, so it sits at the bottom, below the things that cost money.
  */
-function Receipts() {
+function Receipts({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
-  const { data: invoices = [], isLoading } = useGetInvoicesQuery();
+  const { data: invoices = [], isLoading, isFetching, refetch } = useGetInvoicesQuery(
+    { workspaceId },
+    { skip: !workspaceId },
+  );
   const [downloading, setDownloading] = useState<string | null>(null);
 
   /**
@@ -1511,6 +1535,21 @@ function Receipts() {
             {t("billing.receiptsSubtitle")}
           </Text>
         </div>
+        {/* A receipt appears only once the webhook has credited the payment,
+            which can land a moment after checkout closes — so the first thing
+            someone does when a just-bought receipt is missing is look for this. */}
+        <Tooltip label={t("billing.refetchReceipts")}>
+          <ActionIcon
+            variant="light"
+            color="gray"
+            size="lg"
+            radius="md"
+            loading={isFetching}
+            onClick={() => refetch()}
+          >
+            <RefreshCw size={15} />
+          </ActionIcon>
+        </Tooltip>
       </Group>
 
       <Card withBorder radius="lg" padding={0} style={{ overflow: "hidden" }}>

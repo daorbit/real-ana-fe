@@ -1010,8 +1010,15 @@ export const api = createApi({
      * Tagged "Billing" so completing a purchase pulls the new receipt in
      * without a manual refresh.
      */
-    getInvoices: build.query<Invoice[], void>({
-      query: () => "/api/billing/invoices",
+    /**
+     * Receipts for one workspace — everything else on the Billing page
+     * describes the workspace being viewed, so the history has to as well.
+     *
+     * Still only the caller's own purchases: a member of a shared workspace
+     * sees what they paid for, not their colleague's card statement.
+     */
+    getInvoices: build.query<Invoice[], { workspaceId: string }>({
+      query: ({ workspaceId }) => `/api/billing/invoices?workspaceId=${workspaceId}`,
       providesTags: ["Billing"],
     }),
 
