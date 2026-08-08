@@ -125,8 +125,13 @@ export function RangePicker({
         </Group>
 
         <Popover opened={open} onChange={setOpen} position="bottom-end" shadow="md" radius="md" withArrow>
-          <Popover.Target>
-            <Tooltip label={customLocked ? "Upgrade to unlock custom ranges" : undefined} disabled={!customLocked} withArrow>
+  
+          <Tooltip
+            label="Upgrade to unlock custom ranges"
+            disabled={!customLocked}
+            withArrow
+          >
+            <Popover.Target>
               <Button
                 size="sm"
                 variant={isCustom ? "filled" : "default"}
@@ -137,8 +142,8 @@ export function RangePicker({
               >
                 {customLabel}
               </Button>
-            </Tooltip>
-          </Popover.Target>
+            </Popover.Target>
+          </Tooltip>
           <Popover.Dropdown>
             <Stack gap="sm">
               <Text size="xs" fw={600} c="dimmed">Pick a start and end date</Text>
