@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import {
   Stack, Group, Text, Textarea, ActionIcon, ScrollArea, Center,
-  UnstyledButton, Loader, Box, Anchor, Menu, Tooltip,
+  UnstyledButton, Loader, Box, Anchor, Menu, Tooltip, Code,
 } from "@mantine/core";
 import { ArrowUp, AlertTriangle, Check } from "lucide-react";
 import { ModelIcon } from "./ModelIcon";
@@ -79,47 +79,75 @@ function Bubble({ message }: { message: OrbitMessage }) {
 }
 
 /**
- * Markdown links, and nothing else.
+ * The three pieces of markdown a support answer actually uses.
  *
- * Orbit is told to write plain sentences, so a full markdown renderer would be
- * a dependency for one syntax — and would also start honouring headings and
- * bold the moment the model ignored the instruction, which is exactly the
- * output we do not want.
+ * Links, `inline code`, and **bold**. Not a markdown renderer: a full one is a
+ * dependency that would also start honouring headings, tables and images the
+ * moment a model produced them, which is exactly the output the prompt tells it
+ * not to write. This handles what Orbit really emits and leaves the rest as
+ * plain text.
  *
- * So this handles `[label](url)` and leaves everything else as text. Numbered
- * steps arrive as literal "1." lines and read correctly under `pre-wrap`
- * without any parsing at all.
+ * Code matters most of the three. Half of these answers contain a tag to paste,
+ * and without it a snippet arrives wrapped in visible backticks that get copied
+ * along with the code.
+ *
+ * Numbered steps need no parsing — they arrive as literal "1." lines and read
+ * correctly under `pre-wrap`.
  */
-function RichText({ text }: { text: string }) {
-  // Split on the link syntax, keeping the captured label and href as separate
-  // array entries — so the pieces alternate text, label, href, text, …
-  const parts = text.split(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g);
 
-  return (
-    <>
-      {parts.map((part, i) => {
-        // Every third entry from index 1 is a label, and the one after it its
-        // href; the href itself is consumed here rather than rendered.
-        if (i % 3 === 1) {
-          return (
-            <Anchor
-              key={i}
-              href={parts[i + 1]}
-              target="_blank"
-              rel="noopener noreferrer"
-              c="emerald.5"
-              fw={500}
-              underline="always"
-            >
-              {part}
-            </Anchor>
-          );
-        }
-        if (i % 3 === 2) return null;
-        return part;
-      })}
-    </>
-  );
+/** One pattern, so the pieces are found in a single pass and cannot nest badly. */
+const INLINE = /(\[[^\]]+\]\(https?:\/\/[^\s)]+\))|(`[^`\n]+`)|(\*\*[^*\n]+\*\*)/g;
+
+function RichText({ text }: { text: string }) {
+  const out: React.ReactNode[] = [];
+  let cursor = 0;
+  let key = 0;
+
+  for (const match of text.matchAll(INLINE)) {
+    const at = match.index ?? 0;
+    if (at > cursor) out.push(text.slice(cursor, at));
+
+    const [token, link, code, bold] = match;
+
+    if (link) {
+      // Split rather than a second regex: the label can contain anything except
+      // a bracket, and the href anything except whitespace or a paren.
+      const close = link.indexOf("](");
+      const label = link.slice(1, close);
+      const href = link.slice(close + 2, -1);
+      out.push(
+        <Anchor
+          key={key++}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          c="emerald.5"
+          fw={500}
+          underline="always"
+        >
+          {label}
+        </Anchor>,
+      );
+    } else if (code) {
+      out.push(
+        <Code key={key++} style={{ fontSize: "0.85em", wordBreak: "break-all" }}>
+          {code.slice(1, -1)}
+        </Code>,
+      );
+    } else if (bold) {
+      out.push(
+        <Text key={key++} span fw={600} c="var(--mantine-color-text)" inherit>
+          {bold.slice(2, -2)}
+        </Text>,
+      );
+    }
+
+    cursor = at + token.length;
+  }
+
+  if (cursor < text.length) out.push(text.slice(cursor));
+
+  return <>{out}</>;
 }
 
 /**
@@ -236,8 +264,8 @@ export function OrbitChat({
               // left — beside the thing it affects rather than in the header,
               // where it was a setting nobody would look for.
               paddingLeft: 42,
-              paddingTop: 10,
-              paddingBottom: 10,
+              paddingTop: 5,
+              paddingBottom: 5,
               // A filled field rather than the panel's own colour: the composer
               // was reading as empty space with a placeholder floating in it,
               // which is what made it hard to see there was anything to type in.

@@ -82,6 +82,15 @@ function DeepSeek({ size }: { size: number }) {
   );
 }
 
+/** NVIDIA's eye mark, in its green. */
+function Nvidia({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="#76B900" aria-hidden="true">
+      <path d="M8.95 9.4v-1.4c.14-.01.28-.02.42-.02 3.87-.12 6.4 3.33 6.4 3.33s-2.74 3.8-5.68 3.8c-.4 0-.78-.06-1.14-.18v-4.25c1.5.18 1.81.85 2.71 2.36l2.01-1.7s-1.47-1.93-3.95-1.93c-.27 0-.53.02-.77.05zm0-4.62v2.09l.42-.03c5.38-.18 8.89 4.41 8.89 4.41s-4.03 4.9-8.22 4.9c-.38 0-.75-.04-1.09-.1v1.29c.29.04.6.06.91.06 3.9 0 6.72-1.99 9.45-4.35.45.36 2.3 1.24 2.68 1.62-2.6 2.17-8.65 3.93-12.07 3.93-.33 0-.64-.02-.96-.05v1.82H24V4.78H8.95zm0 10.08v1.1c-3.61-.64-4.61-4.39-4.61-4.39s1.73-1.92 4.61-2.23v1.21h-.01c-1.51-.18-2.7 1.24-2.7 1.24s.67 2.39 2.71 3.07zM2.59 11.41s2.14-3.16 6.37-3.48V6.79C4.28 7.17 0 11.13 0 11.13s2.42 7 8.95 7.62v-1.21c-4.79-.6-6.36-6.13-6.36-6.13z" />
+    </svg>
+  );
+}
+
 /** Cohere's mark. */
 function Cohere({ size }: { size: number }) {
   return (
@@ -108,6 +117,8 @@ export function ModelIcon({ id, size = 15 }: { id: string; size?: number }) {
       return <Google size={size} />;
     case "gpt-oss":
       return <OpenAI size={size} />;
+    case "nemotron":
+      return <Nvidia size={size} />;
     case "deepseek":
       return <DeepSeek size={size} />;
     case "north-mini":
