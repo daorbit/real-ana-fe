@@ -52,7 +52,8 @@
     "backToAccount": "自分のアカウントに戻りました。",
     "exitImpersonationError": "代理表示を終了できませんでした。",
     "loggedOut": "ログアウトしました。",
-    "pageHelp": "このページの内容"
+    "pageHelp": "このページの内容",
+    "help": "ヘルプとサポート"
   },
   "settings": {
     "title": "設定",

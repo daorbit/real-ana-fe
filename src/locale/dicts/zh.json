@@ -52,7 +52,8 @@
     "backToAccount": "已返回您自己的账户。",
     "exitImpersonationError": "无法退出模拟身份。",
     "loggedOut": "您已退出登录。",
-    "pageHelp": "本页内容说明"
+    "pageHelp": "本页内容说明",
+    "help": "帮助与支持"
   },
   "settings": {
     "title": "设置",

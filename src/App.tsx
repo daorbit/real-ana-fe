@@ -13,6 +13,8 @@ import Seo from "./pages/Seo";
 import SeoReportPrint from "./pages/SeoReportPrint";
 import Workspaces from "./pages/Workspaces";
 import Developers from "./pages/Developers";
+import Help from "./pages/Help";
+import { OrbitProvider } from "./components/orbit/OrbitProvider";
 import Members from "./pages/Members";
 import AcceptInvite from "./pages/AcceptInvite";
 import Share from "./pages/Share";
@@ -89,7 +91,12 @@ function Protected({ children }: { children: ReactNode }) {
   if (!user) return <Navigate to="/login" replace />;
   return (
     <WorkspaceProvider>
-      <RequireSetup>{children}</RequireSetup>
+      {/* Orbit's conversation is only ever in memory, so where the provider
+          sits decides how long it lives: here, it survives navigation between
+          pages and ends with the session. */}
+      <OrbitProvider>
+        <RequireSetup>{children}</RequireSetup>
+      </OrbitProvider>
     </WorkspaceProvider>
   );
 }
@@ -172,6 +179,7 @@ export default function App() {
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/reports" element={<Protected><Reports /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
+            <Route path="/app/help" element={<Protected><Help /></Protected>} />
             <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
             <Route path="/app/billing" element={<Protected><Billing /></Protected>} />
             {/* Admin-only, enforced by the page and by every /api/admin route. */}

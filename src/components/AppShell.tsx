@@ -9,12 +9,12 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
-  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus,
+  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy,
 } from "lucide-react";
 import { PlanIcon } from "./PlanIcons";
 import { UserAvatar } from "./UserAvatar";
 import { Wordmark } from "./Brand";
-import { SupportWidget } from "./SupportWidget";
+import { OrbitBubble } from "./orbit/OrbitBubble";
 import { useAuth, useIsPlatformAdmin } from "../auth";
 import { notify, confirmLogout, errMessage } from "../notify";
 import { useWorkspace, useActiveBilling } from "../workspace";
@@ -55,6 +55,10 @@ const NAV_GROUPS = [
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
+      // Last in Manage rather than in a group of its own: help is where you go
+      // when something else on this list did not work, so it belongs beside
+      // them rather than promoted above them.
+      { to: "/app/help", labelKey: "nav.help", label: "Help & support", icon: LifeBuoy },
     ],
   },
 ];
@@ -431,7 +435,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* Clear the floating help button so page content never sits under it.
             The height tracks the button's size, which steps down on phones. */}
         <div className="support-fab-spacer" />
-        <SupportWidget />
+        {/* One floating control, not two. The support "?" that used to sit here
+            offered the same three contact options the Help & support page now
+            holds in full, so it was a second door to a room you can already
+            walk into — and two stacked buttons in one corner read as clutter. */}
+        <OrbitBubble />
       </MantineShell.Main>
     </MantineShell>
     </>

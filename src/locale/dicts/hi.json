@@ -52,7 +52,8 @@
     "backToAccount": "वापस अपने खाते में।",
     "exitImpersonationError": "प्रतिरूपण से बाहर नहीं निकल सके।",
     "loggedOut": "आपको लॉग आउट कर दिया गया है।",
-    "pageHelp": "इस पेज पर क्या है"
+    "pageHelp": "इस पेज पर क्या है",
+    "help": "सहायता और समर्थन"
   },
   "settings": {
     "title": "सेटिंग्स",

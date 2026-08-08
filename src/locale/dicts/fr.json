@@ -52,7 +52,8 @@
     "backToAccount": "De retour sur votre propre compte.",
     "exitImpersonationError": "Impossible de quitter l'emprunt d'identité.",
     "loggedOut": "Vous avez été déconnecté.",
-    "pageHelp": "Ce que contient cette page"
+    "pageHelp": "Ce que contient cette page",
+    "help": "Aide et assistance"
   },
   "settings": {
     "title": "Paramètres",

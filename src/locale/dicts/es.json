@@ -52,7 +52,8 @@
     "backToAccount": "De vuelta a tu propia cuenta.",
     "exitImpersonationError": "No se pudo salir de la suplantación.",
     "loggedOut": "Se ha cerrado tu sesión.",
-    "pageHelp": "Qué hay en esta página"
+    "pageHelp": "Qué hay en esta página",
+    "help": "Ayuda y soporte"
   },
   "settings": {
     "title": "Ajustes",

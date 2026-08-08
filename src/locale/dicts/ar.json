@@ -52,7 +52,8 @@
     "backToAccount": "العودة إلى حسابك الخاص.",
     "exitImpersonationError": "تعذّر الخروج من انتحال الهوية.",
     "loggedOut": "تم تسجيل خروجك.",
-    "pageHelp": "ما في هذه الصفحة"
+    "pageHelp": "ما في هذه الصفحة",
+    "help": "الدعم والمساعدة"
   },
   "settings": {
     "title": "الإعدادات",

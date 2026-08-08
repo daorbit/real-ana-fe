@@ -349,6 +349,27 @@ export const api = createApi({
       invalidatesTags: ["ContactMessage"],
     }),
 
+    /* ------------------------------ Orbit AI ------------------------------ */
+
+    /** Whether the server has a model key, so the UI can say so before opening. */
+    getOrbitStatus: build.query<{ configured: boolean }, void>({
+      query: () => "/api/orbit/status",
+    }),
+
+    /**
+     * Ask Orbit a question.
+     *
+     * The transcript is sent with every question because the server keeps none
+     * — the conversation lives in the browser, so there is nothing stored to
+     * retain or hand over.
+     */
+    askOrbit: build.mutation<
+      { reply: string },
+      { question: string; history: { role: "user" | "assistant"; content: string }[] }
+    >({
+      query: (body) => ({ url: "/api/orbit/ask", method: "POST", body }),
+    }),
+
     /* --------------------------- contact inbox ---------------------------- */
     getContactMessages: build.query<
       ContactMessagePage,
@@ -1094,6 +1115,8 @@ export const {
   useDeleteContactMessageMutation,
   useReplyToContactMessageMutation,
   useSendSupportMessageMutation,
+  useGetOrbitStatusQuery,
+  useAskOrbitMutation,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,

@@ -92,7 +92,11 @@ body { overflow-wrap: break-word; }
    every page, covering table cells and the last row of any list, and its menu
    opened off-screen. It steps down in size, tucks into the corner, and sits
    below Mantine's overlay layer so a modal or drawer is never fighting it. */
-.support-fab {
+/* The one floating control: Orbit's launcher. `.support-fab` is kept as an
+   alias because the old help button used it and the two occupy the same
+   corner at the same size — there is only ever one of them on screen. */
+.support-fab,
+.orbit-fab {
   position: fixed;
   right: 24px;
   bottom: 24px;
@@ -104,7 +108,8 @@ body { overflow-wrap: break-word; }
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 @media (max-width: 48em) {
-  .support-fab {
+  .support-fab,
+  .orbit-fab {
     right: 12px;
     /* Clear of the iOS home indicator / Android gesture bar. */
     bottom: calc(12px + env(safe-area-inset-bottom, 0px));
@@ -113,6 +118,26 @@ body { overflow-wrap: break-word; }
     min-width: 40px;
     min-height: 40px;
     opacity: 0.92;
+  }
+}
+
+/* The chat panel sits directly above the launcher, and matches its insets so
+   the two read as one control on every screen size. */
+.orbit-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 84px;
+  width: min(400px, calc(100vw - 48px));
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 48em) {
+  .orbit-panel {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 }
 /* Content clearance below the button — matches its footprint at each size. */
