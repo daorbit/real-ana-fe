@@ -19,7 +19,7 @@ import { PageHeader } from "../components/Page";
 import { PageHelpButton } from "../components/PageHelpButton";
 import { OrbitMark } from "../components/orbit/OrbitMark";
 import {
-  useGetPlansQuery, useGetAddonPacksQuery,
+  useGetPlansQuery, useGetAddonPacksQuery, useGetWorkspaceUsageQuery,
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
   useStartAddonPurchaseMutation, useVerifyAddonPurchaseMutation,
   useCheckCouponMutation, useGetInvoicesQuery,
@@ -134,7 +134,21 @@ export default function Billing() {
   // Billing acts on whichever workspace the sidebar has selected, like every
   // other page — switching there switches what this page is about.
   const selectedWorkspaceId = active?._id ?? null;
-  const usage = active?.billing ?? null;
+
+  /**
+   * Usage from its own endpoint rather than from the workspace list.
+   *
+   * The list carries a `billing` object too, but nothing invalidates it when a
+   * credit is spent — so an Orbit question or an audit run elsewhere in the app
+   * left these counters showing the figures from whenever the list was last
+   * fetched. This query is tagged `Usage`, which every quota-spending mutation
+   * invalidates, and falls back to the list's copy while it loads so the panel
+   * never flashes empty.
+   */
+  const {
+    data: liveUsage, isFetching: usageFetching, refetch: refetchUsage,
+  } = useGetWorkspaceUsageQuery(selectedWorkspaceId ?? "", { skip: !selectedWorkspaceId });
+  const usage = liveUsage ?? active?.billing ?? null;
 
   const [startSubscription] = useStartSubscriptionMutation();
   const [verifySubscription] = useVerifySubscriptionMutation();
@@ -577,8 +591,8 @@ export default function Billing() {
                     color="gray"
                     size="lg"
                     radius="md"
-                    loading={addonsFetching}
-                    onClick={() => { refetchAddons(); refreshUser(); }}
+                    loading={addonsFetching || usageFetching}
+                    onClick={() => { refetchAddons(); refetchUsage(); }}
                   >
                     <RefreshCw size={15} />
                   </ActionIcon>

@@ -20,7 +20,7 @@ import type {
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
-  Coupon, CouponCheckResult, Invoice,
+  Coupon, CouponCheckResult, Invoice, QuotaSummary,
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
 } from "../types";
@@ -111,11 +111,23 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
     /* ----------------------------- workspaces ----------------------------- */
+    /**
+     * One workspace's plan and usage, without refetching the workspace list.
+     *
+     * Usage moves on every audit, crawl and Orbit question; the list around it
+     * does not. Anything that spends quota invalidates `Usage`, so the counters
+     * refresh themselves rather than going stale until the next full reload.
+     */
+    getWorkspaceUsage: build.query<QuotaSummary, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/usage`,
+      providesTags: ["Usage"],
+    }),
+
     getWorkspaces: build.query<Workspace[], void>({
       query: () => "/api/workspaces",
       // Also tagged "Billing": each workspace carries the plan it is on, so a
@@ -426,6 +438,10 @@ export const api = createApi({
         method: "POST",
         body,
       }),
+      // An answered question spends quota, so anything showing a remaining
+      // count is now wrong. Invalidating here is what keeps the Billing meters
+      // honest without the chat panel knowing they exist.
+      invalidatesTags: ["Usage"],
     }),
 
     /* --------------------------- contact inbox ---------------------------- */
@@ -622,7 +638,10 @@ export const api = createApi({
         method: "POST",
         body: { url },
       }),
-      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
+      // "Usage" because a fresh audit spends a credit — a cached one does not,
+      // but invalidating either way costs one cheap request and avoids the
+      // counter being right only sometimes.
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }, "Usage"],
     }),
 
     getSeoReports: build.query<
@@ -723,7 +742,7 @@ export const api = createApi({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/crawl`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: `crawl-${siteId}` }],
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: `crawl-${siteId}` }, "Usage"],
     }),
 
     getLatestCrawl: build.query<SeoCrawlReport, { workspaceId: string; siteId: string }>({
@@ -979,7 +998,7 @@ export const api = createApi({
       { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
     >({
       query: (body) => ({ url: "/api/billing/subscribe/verify", method: "POST", body }),
-      invalidatesTags: ["Billing"],
+      invalidatesTags: ["Billing", "Usage"],
     }),
 
     startAddonPurchase: build.mutation<
@@ -999,7 +1018,7 @@ export const api = createApi({
       { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
     >({
       query: (body) => ({ url: "/api/billing/addons/verify", method: "POST", body }),
-      invalidatesTags: ["Billing"],
+      invalidatesTags: ["Billing", "Usage"],
     }),
 
     /**
@@ -1176,6 +1195,7 @@ export const api = createApi({
 
 export const {
   useGetWorkspacesQuery,
+  useGetWorkspaceUsageQuery,
   useCreateWorkspaceMutation,
   useRenameWorkspaceMutation,
   useDeleteWorkspaceMutation,
