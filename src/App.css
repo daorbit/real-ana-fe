@@ -129,6 +129,9 @@ body { overflow-wrap: break-word; }
    the active control rather than leaving two ways in with no way to tell they
    are the same thing. */
 .orbit-fab[data-open] {
+  /* Above the scrim, which would otherwise blur the launcher and eat the click
+     that closes the panel. Only while open — closed, it belongs with the page. */
+  z-index: 320;
   box-shadow:
     0 0 0 2px var(--mantine-color-emerald-6),
     0 6px 18px rgba(16, 185, 129, 0.3),
@@ -155,6 +158,33 @@ body { overflow-wrap: break-word; }
   .orbit-fab:hover { transform: none; }
 }
 
+/* Softens the page while the panel is open, so the conversation is clearly the
+   thing in focus and the dashboard behind it stops competing for attention.
+
+   Deliberately light: this is a side panel, not a modal. The page stays legible
+   because the question is usually *about* what is behind the panel, and a heavy
+   scrim would hide the number someone is asking about. `backdrop-filter` is
+   unsupported on some older browsers, where this degrades to the tint alone. */
+.orbit-scrim {
+  position: fixed;
+  inset: 0;
+  /* Under the panel and its launcher, over everything else on the page. */
+  z-index: 250;
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: orbit-scrim-in 140ms ease-out;
+}
+
+@keyframes orbit-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-scrim { animation: none; }
+}
+
 /* The chat panel sits directly above the launcher, and matches its insets so
    the two read as one control on every screen size. */
 .orbit-panel {
@@ -170,7 +200,22 @@ body { overflow-wrap: break-word; }
   z-index: 300;
   display: flex;
   flex-direction: column;
+  /* Also what clips the aurora wash, which is inset well past these edges. */
   overflow: hidden;
+}
+
+/* The wash is a child of the panel, so it paints on top of the Paper's own
+   background but must stay under the conversation. An explicit stacking order
+   does that: wash at 0, every sibling above it.
+
+   The rows themselves keep no background of their own, which is what lets the
+   colour show through instead of being covered by a run of opaque strips. */
+.orbit-panel > .aurora-wash {
+  z-index: 0;
+}
+.orbit-panel > *:not(.aurora-wash) {
+  position: relative;
+  z-index: 1;
 }
 @media (max-width: 48em) {
   .orbit-panel {

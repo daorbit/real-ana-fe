@@ -3,6 +3,9 @@ import { X, RotateCcw } from "lucide-react";
 import { OrbitChat } from "./OrbitChat";
 import { OrbitMark } from "./OrbitMark";
 import { useOrbit } from "./OrbitProvider";
+// Where `.aurora-wash` lives. Imported here too because the running dialog that
+// also uses it is not mounted while the chat is open.
+import "../RunningDialog.css";
 
 /**
  * Orbit, floating over whatever the user is stuck on.
@@ -26,11 +29,23 @@ export function OrbitBubble() {
 
   return (
     <>
+      {/* Pushes the page back while the panel is up. Clicking it dismisses,
+          which is what people try first with a floating window — and without
+          that it would be a full-screen layer that silently swallows clicks on
+          the app behind it. */}
+      {opened && <div className="orbit-scrim" onClick={close} aria-hidden />}
+
       {opened && (
         // No padding on the Paper itself: the header, thread and composer each
         // own their insets, which is what lets the header rule run the full
         // width instead of floating inside a margin.
         <Paper withBorder radius="lg" shadow="xl" p={0} className="orbit-panel">
+          {/* Same drifting wash as the audit cover, so Orbit reads as part of
+              the same product rather than a plain grey box bolted on. Sits
+              behind everything: the panel clips it, and the rows above it carry
+              their own stacking so the text stays crisp. */}
+          <div className="aurora-wash" aria-hidden />
+
           <Group
             justify="space-between"
             wrap="nowrap"

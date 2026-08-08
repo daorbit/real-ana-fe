@@ -1,5 +1,5 @@
 import {
-  Accordion, Badge, Box, Card, Code, Divider, Group, Progress, ScrollArea,
+  Badge, Box, Card, Code, Divider, Group, Progress, ScrollArea,
   SimpleGrid, Stack, Table, Text, ThemeIcon,
 } from "@mantine/core";
 import { FileSearch, Type, Share2, Globe } from "lucide-react";
@@ -192,49 +192,42 @@ export function MetaPanel({ meta, url }: { meta: SeoMeta; url: string }) {
         </SimpleGrid>
       </Panel>
 
+      {/* The full tag list is the reason someone opens this tab, so it is laid
+          out plainly rather than behind a toggle. */}
       <Card withBorder radius="md" padding={0}>
-        {/* Open by default — the full tag list is the reason someone opens this
-            tab, so making them click once more to reach it is friction. */}
-        <Accordion variant="filled" radius="md" defaultValue="all">
-          <Accordion.Item value="all" style={{ border: 0 }}>
-            <Accordion.Control>
-              <Group gap="sm">
-                <ThemeIcon size={30} radius="md" variant="light" color="gray">
-                  <Code style={{ background: "transparent", fontSize: 12 }}>{"<>"}</Code>
-                </ThemeIcon>
-                <Text size="sm" fw={650}>
-                  All meta tags
-                  <Text span c="dimmed" fw={400}>
-                    {" "}
-                    · {meta.allMetaTags.length}
-                  </Text>
-                </Text>
-              </Group>
-            </Accordion.Control>
-            <Accordion.Panel>
-              <ScrollArea.Autosize mah={360}>
-                <Table striped highlightOnHover verticalSpacing="xs" fz="xs">
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th w={200}>Name</Table.Th>
-                      <Table.Th>Content</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {meta.allMetaTags.map((t, i) => (
-                      <Table.Tr key={`${t.name}-${i}`}>
-                        <Table.Td>
-                          <Code fz="xs">{t.name}</Code>
-                        </Table.Td>
-                        <Table.Td style={{ wordBreak: "break-word" }}>{t.content}</Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              </ScrollArea.Autosize>
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
+        <Group gap="sm" p="lg" pb="md">
+          <ThemeIcon size={30} radius="md" variant="light" color="gray">
+            <Code style={{ background: "transparent", fontSize: 12 }}>{"<>"}</Code>
+          </ThemeIcon>
+          <Text size="sm" fw={650}>
+            All meta tags
+            <Text span c="dimmed" fw={400}>
+              {" "}
+              · {meta.allMetaTags.length}
+            </Text>
+          </Text>
+        </Group>
+        <Divider />
+        <ScrollArea.Autosize mah={360}>
+          <Table striped highlightOnHover verticalSpacing="xs" fz="xs">
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th w={200}>Name</Table.Th>
+                <Table.Th>Content</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {meta.allMetaTags.map((t, i) => (
+                <Table.Tr key={`${t.name}-${i}`}>
+                  <Table.Td>
+                    <Code fz="xs">{t.name}</Code>
+                  </Table.Td>
+                  <Table.Td style={{ wordBreak: "break-word" }}>{t.content}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </ScrollArea.Autosize>
       </Card>
     </Stack>
   );

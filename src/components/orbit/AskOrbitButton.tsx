@@ -2,20 +2,7 @@ import { Button, Tooltip } from "@mantine/core";
 import { useOrbitOptional } from "./OrbitProvider";
 import { OrbitMark } from "./OrbitMark";
 
-/**
- * "Ask Orbit" beside something the user is stuck on.
- *
- * The gap this closes: an audit tells someone their page is missing a canonical
- * tag, and fixing it means opening the assistant and retyping the issue from
- * memory. Most people don't — they read the one-line advice, don't know what to
- * do with it, and move on. This carries the question across for them.
- *
- * What it deliberately does *not* carry is the page URL or anything else from
- * the account. Orbit is documented as unable to see your data, and quietly
- * posting a customer's URLs to a model the moment a button is convenient would
- * make that a lie. The issue title is enough: the knowledge base has the remedy
- * for each check by name, so the answer is specific without the context being.
- */
+ 
 export function AskOrbitButton({
   question,
   label = "Ask Orbit",

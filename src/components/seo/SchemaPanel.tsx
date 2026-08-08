@@ -1,5 +1,5 @@
 import {
-  Accordion, Alert, Badge, Box, Card, Center, Code, Group, ScrollArea, Stack,
+  Alert, Badge, Box, Card, Center, Code, Group, ScrollArea, Stack,
   Text, ThemeIcon, Divider,
 } from "@mantine/core";
 import {
@@ -184,39 +184,38 @@ function FindingGroup({
           </div>
         </Group>
       </Box>
-      <Divider />
-      <Accordion variant="filled" radius={0} multiple defaultValue={[...byType.keys()]}>
-        {[...byType.entries()].map(([type, list]) => (
-          <Accordion.Item key={type} value={type} style={{ border: 0 }}>
-            <Accordion.Control>
-              <Group gap={8}>
-                <Text size="sm" fw={600}>
-                  {type}
-                </Text>
-                <Badge size="xs" variant="light" color={color}>
-                  {list.length}
-                </Badge>
-              </Group>
-            </Accordion.Control>
-            <Accordion.Panel>
-              <Stack gap="xs">
-                {list.map((f, i) => (
-                  <Group key={i} gap="xs" align="flex-start" wrap="nowrap">
-                    {f.property && (
-                      <Code fz="xs" style={{ flexShrink: 0 }}>
-                        {f.property}
-                      </Code>
-                    )}
-                    <Text size="xs" c="dimmed" lh={1.55}>
-                      {f.message}
-                    </Text>
-                  </Group>
-                ))}
-              </Stack>
-            </Accordion.Panel>
-          </Accordion.Item>
-        ))}
-      </Accordion>
+      {/* One section per type, separated rather than collapsible: these are the
+          properties someone has to go and add, and hiding them behind a click
+          is what made the panel look empty. */}
+      {[...byType.entries()].map(([type, list]) => (
+        <Box key={type}>
+          <Divider />
+          <Box p="lg" py="md">
+            <Group gap={8} mb="xs">
+              <Text size="sm" fw={600}>
+                {type}
+              </Text>
+              <Badge size="xs" variant="light" color={color}>
+                {list.length}
+              </Badge>
+            </Group>
+            <Stack gap="xs">
+              {list.map((f, i) => (
+                <Group key={i} gap="xs" align="flex-start" wrap="nowrap">
+                  {f.property && (
+                    <Code fz="xs" style={{ flexShrink: 0 }}>
+                      {f.property}
+                    </Code>
+                  )}
+                  <Text size="xs" c="dimmed" lh={1.55}>
+                    {f.message}
+                  </Text>
+                </Group>
+              ))}
+            </Stack>
+          </Box>
+        </Box>
+      ))}
     </Card>
   );
 }
@@ -323,22 +322,23 @@ export function CrawlerFilesPanel({
         ) : null}
 
         {robots?.content && (
-          <Accordion variant="filled" radius="md" mt="md">
-            <Accordion.Item value="raw" style={{ border: 0 }}>
-              <Accordion.Control>
-                <Text size="xs" fw={600}>
+          <Box mt="md">
+            {/* The raw file stays behind a click — it is reference material, and
+                a 200-line robots.txt inlined here would bury the findings above
+                it. A plain summary/details does that without an accordion. */}
+            <details>
+              <summary style={{ cursor: "pointer" }}>
+                <Text span size="xs" fw={600}>
                   View file
                 </Text>
-              </Accordion.Control>
-              <Accordion.Panel>
-                <ScrollArea.Autosize mah={240}>
-                  <Code block fz="xs">
-                    {robots.content}
-                  </Code>
-                </ScrollArea.Autosize>
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion>
+              </summary>
+              <ScrollArea.Autosize mah={240} mt="xs">
+                <Code block fz="xs">
+                  {robots.content}
+                </Code>
+              </ScrollArea.Autosize>
+            </details>
+          </Box>
         )}
       </Card>
 

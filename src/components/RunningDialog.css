@@ -10,8 +10,14 @@
   position: relative;
 }
 
-/* Soft moving colour wash behind the dialog contents. */
-.running-dialog__aurora {
+/* Soft moving colour wash behind the dialog contents.
+
+   Shared with Orbit's chat panel via `.aurora-wash`, so the assistant and the
+   audit cover read as the same surface. Kept as one definition rather than a
+   copy: two drifting gradients that are meant to match will not stay matched
+   once someone tunes one of them. */
+.running-dialog__aurora,
+.aurora-wash {
   position: absolute;
   inset: -40%;
   background:
@@ -202,6 +208,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .running-dialog__aurora,
+  .aurora-wash,
   .running-dialog__ring,
   .running-dialog__core,
   .running-dialog__bar-fill,
