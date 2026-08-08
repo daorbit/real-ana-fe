@@ -1,5 +1,5 @@
-import { Paper, Group, Text, ActionIcon, Tooltip, Menu, UnstyledButton } from "@mantine/core";
-import { X, MoreHorizontal, RotateCcw } from "lucide-react";
+import { Paper, Group, Text, ActionIcon, Tooltip, UnstyledButton } from "@mantine/core";
+import { X, RotateCcw } from "lucide-react";
 import { OrbitChat } from "./OrbitChat";
 import { OrbitMark } from "./OrbitMark";
 import { useOrbit } from "./OrbitProvider";
@@ -44,19 +44,21 @@ export function OrbitBubble() {
             </Group>
 
             <Group gap={0} wrap="nowrap">
+              {/* Only "start over" here. The model picker moved down beside
+                  the input, where it sits next to the thing it affects — in the
+                  header it was a setting nobody would think to look for. */}
               {chat.started && (
-                <Menu position="bottom-end" withArrow shadow="md" radius="md" width={160}>
-                  <Menu.Target>
-                    <ActionIcon variant="subtle" color="gray" size="sm" aria-label="More">
-                      <MoreHorizontal size={15} />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item leftSection={<RotateCcw size={13} />} onClick={chat.reset}>
-                      Start over
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
+                <Tooltip label="Start over" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    onClick={chat.reset}
+                    aria-label="Start over"
+                  >
+                    <RotateCcw size={14} />
+                  </ActionIcon>
+                </Tooltip>
               )}
               <ActionIcon
                 variant="subtle"
@@ -70,7 +72,7 @@ export function OrbitBubble() {
             </Group>
           </Group>
 
-          <OrbitChat chat={chat} height={360} />
+          <OrbitChat chat={chat} height={400} />
         </Paper>
       )}
 

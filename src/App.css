@@ -148,7 +148,10 @@ body { overflow-wrap: break-word; }
   /* Clears the launcher, which stays on screen while the panel is open:
      24px inset + 52px mark + 12px gap. */
   bottom: 88px;
-  width: min(400px, calc(100vw - 48px));
+  /* Wider than the 400px it started at: an answer with numbered steps and a
+     code snippet in each was wrapping every second line, which is what made
+     the panel feel cramped rather than the chrome around it. */
+  width: min(460px, calc(100vw - 48px));
   z-index: 300;
   display: flex;
   flex-direction: column;

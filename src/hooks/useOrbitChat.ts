@@ -31,7 +31,25 @@ export type OrbitMessage = {
    * offered at each point. Only the last turn's are rendered.
    */
   suggestions?: string[];
+  /**
+   * Which model produced this turn.
+   *
+   * Shown only when it is not the one the user picked — a silent fallback would
+   * make the picker look broken to anyone who noticed the answer's style
+   * change.
+   */
+  modelLabel?: string;
 };
+
+/**
+ * Where the chosen model is remembered.
+ *
+ * The conversation itself is deliberately not persisted, but a preference is a
+ * different thing: it is a setting, not content, and re-picking a model on
+ * every page load is the kind of small friction that makes a feature feel
+ * unfinished.
+ */
+const MODEL_KEY = "orbit.model";
 
 /**
  * What Orbit opens with.
@@ -55,6 +73,30 @@ export function useOrbitChat() {
   const [input, setInput] = useState("");
   const [ask, { isLoading: thinking }] = useAskOrbitMutation();
   const { data: status } = useGetOrbitStatusQuery();
+
+  // Read once, lazily: `localStorage` is unavailable in some privacy modes, and
+  // a throw here would take the whole panel down over a remembered preference.
+  const [model, setModelState] = useState<string>(() => {
+    try {
+      return localStorage.getItem(MODEL_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
+
+  const models = status?.models ?? [];
+  // An empty or stale id means "no preference", which the server resolves to
+  // its own default — so a model retired since the last visit costs nothing.
+  const activeModel = models.some((m) => m.id === model) ? model : models[0]?.id ?? "";
+
+  const setModel = useCallback((id: string) => {
+    setModelState(id);
+    try {
+      localStorage.setItem(MODEL_KEY, id);
+    } catch {
+      // Preference is lost on reload; the chat still works.
+    }
+  }, []);
 
   /**
    * The transcript as the server wants it.
@@ -85,11 +127,22 @@ export function useOrbitChat() {
       setInput("");
 
       try {
-        const { reply, suggestions } = await ask({ question, history }).unwrap();
+        const answered = await ask({ question, history, model: activeModel }).unwrap();
         setMessages((prev) => {
           const next = [
             ...prev,
-            { id: nextId(), role: "assistant" as const, content: reply, suggestions },
+            {
+              id: nextId(),
+              role: "assistant" as const,
+              content: answered.reply,
+              suggestions: answered.suggestions,
+              // Only when it differs from what was asked for — labelling every
+              // answer with the model people already chose is noise.
+              modelLabel:
+                answered.model && answered.model !== activeModel
+                  ? answered.modelLabel
+                  : undefined,
+            },
           ];
           historyRef.current = next;
           return next;
@@ -113,7 +166,7 @@ export function useOrbitChat() {
         });
       }
     },
-    [ask, input, thinking],
+    [ask, input, thinking, activeModel],
   );
 
   const reset = useCallback(() => {
@@ -132,5 +185,10 @@ export function useOrbitChat() {
     /** False when the server has no model key — the UI says so instead of failing on send. */
     available: status?.configured ?? true,
     started: messages.length > 0,
+
+    /** The models that can answer, and which one is chosen. */
+    models,
+    model: activeModel,
+    setModel,
   };
 }

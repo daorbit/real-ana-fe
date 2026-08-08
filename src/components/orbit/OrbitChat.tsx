@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import {
   Stack, Group, Text, Textarea, ActionIcon, ScrollArea, Center,
-  UnstyledButton, Loader, Box,
+  UnstyledButton, Loader, Box, Anchor, Menu, Tooltip,
 } from "@mantine/core";
-import { ArrowUp, AlertTriangle } from "lucide-react";
+import { ArrowUp, AlertTriangle, Check } from "lucide-react";
+import { ModelIcon } from "./ModelIcon";
 import { ORBIT_SUGGESTIONS, type OrbitMessage } from "../../hooks/useOrbitChat";
 import type { useOrbitChat } from "../../hooks/useOrbitChat";
 
@@ -55,18 +56,69 @@ function Bubble({ message }: { message: OrbitMessage }) {
           style={{ flexShrink: 0, marginTop: 3 }}
         />
       )}
-      {/* `pre-wrap` so the model's own paragraph breaks survive without running
-          its output through a markdown renderer — the prompt asks for plain
-          sentences, and rendering markdown would reward ignoring that. */}
-      <Text
-        size="sm"
-        lh={1.6}
-        c={message.failed ? "dimmed" : undefined}
-        style={{ whiteSpace: "pre-wrap" }}
-      >
-        {message.content}
-      </Text>
+      <div style={{ minWidth: 0 }}>
+        <Text
+          size="sm"
+          lh={1.6}
+          c={message.failed ? "dimmed" : undefined}
+          style={{ whiteSpace: "pre-wrap" }}
+        >
+          <RichText text={message.content} />
+        </Text>
+        {/* Present only when the server fell through to a different model than
+            the one chosen — silence there would make the picker look broken to
+            anyone who noticed the answer's style change. */}
+        {message.modelLabel && (
+          <Text size="10px" c="dimmed" mt={4}>
+            Answered by {message.modelLabel}
+          </Text>
+        )}
+      </div>
     </Group>
+  );
+}
+
+/**
+ * Markdown links, and nothing else.
+ *
+ * Orbit is told to write plain sentences, so a full markdown renderer would be
+ * a dependency for one syntax — and would also start honouring headings and
+ * bold the moment the model ignored the instruction, which is exactly the
+ * output we do not want.
+ *
+ * So this handles `[label](url)` and leaves everything else as text. Numbered
+ * steps arrive as literal "1." lines and read correctly under `pre-wrap`
+ * without any parsing at all.
+ */
+function RichText({ text }: { text: string }) {
+  // Split on the link syntax, keeping the captured label and href as separate
+  // array entries — so the pieces alternate text, label, href, text, …
+  const parts = text.split(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g);
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        // Every third entry from index 1 is a label, and the one after it its
+        // href; the href itself is consumed here rather than rendered.
+        if (i % 3 === 1) {
+          return (
+            <Anchor
+              key={i}
+              href={parts[i + 1]}
+              target="_blank"
+              rel="noopener noreferrer"
+              c="emerald.5"
+              fw={500}
+              underline="always"
+            >
+              {part}
+            </Anchor>
+          );
+        }
+        if (i % 3 === 2) return null;
+        return part;
+      })}
+    </>
   );
 }
 
@@ -106,8 +158,13 @@ export function OrbitChat({
   /** The thread's scroll height. The composer and hint sit below it. */
   height: number | string;
 }) {
-  const { messages, input, setInput, send, thinking, available, started } = chat;
+  const {
+    messages, input, setInput, send, thinking, available, started,
+    models, model, setModel,
+  } = chat;
   const bottom = useRef<HTMLDivElement>(null);
+
+  const activeLabel = models.find((m) => m.id === model)?.label ?? "default";
 
   // The follow-ups belong to the last thing Orbit said. Anything earlier has
   // been answered past, and stacking every turn's would fill the panel with
@@ -173,6 +230,59 @@ export function OrbitChat({
           placeholder="Ask a question"
           value={input}
           onChange={(e) => setInput(e.currentTarget.value)}
+          styles={{
+            input: {
+              // Room for the model picker, which sits inside the field on the
+              // left — beside the thing it affects rather than in the header,
+              // where it was a setting nobody would look for.
+              paddingLeft: 42,
+              paddingTop: 10,
+              paddingBottom: 10,
+              // A filled field rather than the panel's own colour: the composer
+              // was reading as empty space with a placeholder floating in it,
+              // which is what made it hard to see there was anything to type in.
+              background: "var(--mantine-color-default)",
+              borderColor: "var(--mantine-color-default-border)",
+            },
+            section: { alignItems: "center" },
+          }}
+          leftSection={
+            models.length > 1 ? (
+              <Menu position="top-start" withArrow shadow="md" radius="md" width={262}>
+                <Menu.Target>
+                  <Tooltip label={`Model: ${activeLabel}`} withArrow position="top">
+                    <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Choose model">
+                      <ModelIcon id={model} size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Answer with</Menu.Label>
+                  {models.map((m) => (
+                    <Menu.Item
+                      key={m.id}
+                      onClick={() => setModel(m.id)}
+                      leftSection={<ModelIcon id={m.id} size={16} />}
+                      rightSection={m.id === model ? <Check size={13} /> : undefined}
+                      // Without a bounded width the label section grows to fit
+                      // its content and `truncate` never engages.
+                      styles={{ itemLabel: { minWidth: 0 } }}
+                    >
+                      {/* Both lines truncate rather than wrap. A menu where one
+                          row is twice the height of its neighbours stops being
+                          scannable, which is the only reason to have icons. */}
+                      <Text size="sm" fw={m.id === model ? 600 : 400} lh={1.3} truncate>
+                        {m.label}
+                      </Text>
+                      <Text size="xs" c="dimmed" lh={1.35} truncate>
+                        {m.hint}
+                      </Text>
+                    </Menu.Item>
+                  ))}
+                </Menu.Dropdown>
+              </Menu>
+            ) : undefined
+          }
           // Enter sends, shift+Enter breaks a line. The opposite trips everyone
           // who has ever used a chat, and support questions are short enough
           // that the line break is the rarer of the two.

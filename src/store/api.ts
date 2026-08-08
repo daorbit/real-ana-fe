@@ -351,8 +351,16 @@ export const api = createApi({
 
     /* ------------------------------ Orbit AI ------------------------------ */
 
-    /** Whether the server has a model key, so the UI can say so before opening. */
-    getOrbitStatus: build.query<{ configured: boolean }, void>({
+    /**
+     * Whether Orbit can run, and which models may answer.
+     *
+     * The list is already filtered server-side to providers that have a key, so
+     * the picker never offers something that would fail.
+     */
+    getOrbitStatus: build.query<
+      { configured: boolean; models: { id: string; label: string; hint: string }[] },
+      void
+    >({
       query: () => "/api/orbit/status",
     }),
 
@@ -364,9 +372,26 @@ export const api = createApi({
      * retain or hand over.
      */
     askOrbit: build.mutation<
-      /** `suggestions` is what to ask next, and is empty when nothing follows. */
-      { reply: string; suggestions: string[] },
-      { question: string; history: { role: "user" | "assistant"; content: string }[] }
+      {
+        reply: string;
+        /** What to ask next. Empty when nothing follows. */
+        suggestions: string[];
+        /**
+         * Which model actually answered.
+         *
+         * Not always the one requested: the server falls through to another
+         * when a model is rate-limited, and the UI says so rather than letting
+         * a picked model silently not be the one used.
+         */
+        model: string;
+        modelLabel: string;
+      },
+      {
+        question: string;
+        history: { role: "user" | "assistant"; content: string }[];
+        /** Preferred model. The server treats an unknown id as "no preference". */
+        model?: string;
+      }
     >({
       query: (body) => ({ url: "/api/orbit/ask", method: "POST", body }),
     }),
