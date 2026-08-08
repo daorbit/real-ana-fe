@@ -102,12 +102,24 @@ body { overflow-wrap: break-word; }
   z-index: 190;
   border-radius: 15px;
   line-height: 0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  /* An emerald bloom under the drop shadow, so the launcher reads as lit
+     rather than as a sticker sitting on the page. Two shadows rather than a
+     wrapper element: this keeps the button one box for layout and hit-testing,
+     and the glow scales with the same radius. */
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.22),
+    0 6px 18px rgba(16, 185, 129, 0.28),
+    0 10px 30px rgba(0, 0, 0, 0.34);
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 .orbit-fab:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+  /* The glow strengthens on hover instead of the button changing colour —
+     there is nothing to recolour, since the mark is the whole surface. */
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.42),
+    0 8px 26px rgba(16, 185, 129, 0.45),
+    0 14px 34px rgba(0, 0, 0, 0.4);
 }
 .orbit-fab:focus-visible {
   outline: 2px solid var(--mantine-color-emerald-6);
@@ -117,7 +129,10 @@ body { overflow-wrap: break-word; }
    the active control rather than leaving two ways in with no way to tell they
    are the same thing. */
 .orbit-fab[data-open] {
-  box-shadow: 0 0 0 2px var(--mantine-color-emerald-6), 0 8px 24px rgba(0, 0, 0, 0.32);
+  box-shadow:
+    0 0 0 2px var(--mantine-color-emerald-6),
+    0 6px 18px rgba(16, 185, 129, 0.3),
+    0 10px 30px rgba(0, 0, 0, 0.34);
 }
 .orbit-fab[data-open]:hover {
   transform: none;
