@@ -16,7 +16,7 @@ import { RunningDialog } from "../components/RunningDialog";
 import { HelpDrawer } from "../components/HelpDrawer";
 import { getSeoHelp } from "../components/seo/help";
 import { PageHeader } from "../components/Page";
-import { useWorkspace } from "../workspace";
+import { useWorkspace, usePermissions } from "../workspace";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
   useGetLatestSeoReportQuery, useGetSeoReportQuery, useDeleteSeoReportMutation,
@@ -74,7 +74,8 @@ function HistoryPanel({
   /** The report currently on screen, highlighted in the list. */
   openId: string;
   onOpen: (id: string) => void;
-  onDelete: (id: string) => void;
+  /** Null for a viewer, who keeps the full history but cannot remove a run. */
+  onDelete: ((id: string) => void) | null;
 }) {
   if (loading) {
     return (
@@ -117,7 +118,7 @@ function HistoryPanel({
               <Table.Th w={100}>Change</Table.Th>
               <Table.Th w={150}>Issues</Table.Th>
               <Table.Th w={150}>Run</Table.Th>
-              <Table.Th w={56} />
+              {onDelete && <Table.Th w={56} />}
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -202,19 +203,21 @@ function HistoryPanel({
                       </Text>
                     </Tooltip>
                   </Table.Td>
-                  <Table.Td>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(h._id);
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </ActionIcon>
-                  </Table.Td>
+                  {onDelete && (
+                    <Table.Td>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(h._id);
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </ActionIcon>
+                    </Table.Td>
+                  )}
                 </Table.Tr>
               );
             })}
@@ -235,6 +238,7 @@ function HistoryPanel({
 export default function Seo() {
   const { t } = useTranslation();
   const { active } = useWorkspace();
+  const { canEdit } = usePermissions();
   const { refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
 
@@ -501,15 +505,17 @@ export default function Seo() {
               >
                 Export report
               </Button>
-              <Button
-                variant="light"
-                color="emerald"
-                leftSection={<RefreshCw size={15} />}
-                disabled={analyzing}
-                onClick={() => run(true)}
-              >
-                Re-run audit
-              </Button>
+              {canEdit && (
+                <Button
+                  variant="light"
+                  color="emerald"
+                  leftSection={<RefreshCw size={15} />}
+                  disabled={analyzing}
+                  onClick={() => run(true)}
+                >
+                  Re-run audit
+                </Button>
+              )}
             </Group>
           )
         }
@@ -533,6 +539,7 @@ export default function Seo() {
               radius="md"
             />
 
+            {canEdit && (
             <Box style={{ flex: "1 1 320px", minWidth: 240 }}>
               <Text component="label" htmlFor="seo-path" size="sm" fw={500} display="block" mb={4}>
                 Page to audit
@@ -556,22 +563,25 @@ export default function Seo() {
                 styles={{ section: { justifyContent: "flex-start" } }}
               />
             </Box>
+            )}
 
-            <Button
-              color="emerald"
-              leftSection={<Search size={15} />}
-              disabled={analyzing}
-              onClick={() => run(false)}
-              radius="md"
-              w={{ base: "100%", sm: "auto" }}
-            >
-              Analyze
-            </Button>
+            {canEdit && (
+              <Button
+                color="emerald"
+                leftSection={<Search size={15} />}
+                disabled={analyzing}
+                onClick={() => run(false)}
+                radius="md"
+                w={{ base: "100%", sm: "auto" }}
+              >
+                Analyze
+              </Button>
+            )}
           </Group>
 
           {/* Spell out the URL that will actually be fetched, so a typo in the
               path is visible before spending a minute on the audit. */}
-          {targetUrl && !analyzing && (
+          {canEdit && targetUrl && !analyzing && (
             <Group gap={6} mt="sm" wrap="nowrap">
               <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                 Audits
@@ -593,8 +603,9 @@ export default function Seo() {
                 </ThemeIcon>
                 <Text fw={600}>No audit yet</Text>
                 <Text size="sm" c="dimmed" ta="center">
-                  Run an analysis to see meta tags, content quality, technical checks and
-                  Lighthouse scores for this page.
+                  {canEdit
+                    ? "Run an analysis to see meta tags, content quality, technical checks and Lighthouse scores for this page."
+                    : "Nobody has audited this site yet. An editor can run the first analysis."}
                 </Text>
               </Stack>
             </Center>
@@ -730,7 +741,11 @@ export default function Seo() {
             {tab === "links" && <LinksPanel links={data.links} />}
             {tab === "schema" && <SchemaPanel schema={data.schema} />}
             {tab === "crawl" && (
-              <CrawlPanel report={crawlReport} running={crawling} onCrawl={startCrawl} />
+              <CrawlPanel
+                report={crawlReport}
+                running={crawling}
+                onCrawl={canEdit ? startCrawl : null}
+              />
             )}
             {tab === "search" && (
               <SearchPanel traffic={searchTraffic} loading={searchLoading} />
@@ -745,6 +760,7 @@ export default function Seo() {
                 onAdd={addCompetitorUrl}
                 onRefresh={refreshOne}
                 onDelete={removeCompetitor}
+                canEdit={canEdit}
               />
             )}
             {tab === "suggestions" && <SuggestionsPanel performance={data.performance} />}
@@ -754,7 +770,7 @@ export default function Seo() {
                 loading={historyLoading}
                 openId={report._id}
                 onOpen={setViewingId}
-                onDelete={remove}
+                onDelete={canEdit ? remove : null}
               />
             )}
           </Stack>

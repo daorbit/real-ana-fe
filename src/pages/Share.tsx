@@ -12,6 +12,7 @@ import {
 import { AppShell } from "../components/AppShell";
 import { PageHeader, Section, Field, PageStack } from "../components/Page";
 import { PageHelpButton } from "../components/PageHelpButton";
+import { RoleGate } from "../components/RoleGate";
 import {
   useGetShareQuery, useSetShareMutation, useGetSitesQuery, useGetSeoReportsQuery,
   useGetSeoShareQuery,
@@ -628,27 +629,29 @@ export default function Share() {
         actions={<PageHelpButton />}
       />
       {active ? (
-        <Tabs key={active._id} defaultValue="analytics" keepMounted={false}>
-          <Tabs.List mb="xl">
-            <Tabs.Tab value="analytics" leftSection={<BarChart3 size={15} />}>
-              {t("share.tabAnalytics")}
-            </Tabs.Tab>
-            <Tabs.Tab value="seo" leftSection={<Search size={15} />}>
-              {t("share.tabSeo")}
-            </Tabs.Tab>
-          </Tabs.List>
+        <RoleGate minimum="admin" what="Only admins can manage public sharing.">
+          <Tabs key={active._id} defaultValue="analytics" keepMounted={false}>
+            <Tabs.List mb="xl">
+              <Tabs.Tab value="analytics" leftSection={<BarChart3 size={15} />}>
+                {t("share.tabAnalytics")}
+              </Tabs.Tab>
+              <Tabs.Tab value="seo" leftSection={<Search size={15} />}>
+                {t("share.tabSeo")}
+              </Tabs.Tab>
+            </Tabs.List>
 
-          <Tabs.Panel value="analytics">
-            <SaveBarProvider>
-              <ShareSettings workspaceId={active._id} />
-            </SaveBarProvider>
-          </Tabs.Panel>
-          <Tabs.Panel value="seo">
-            <SaveBarProvider>
-              <SeoShareTab workspaceId={active._id} />
-            </SaveBarProvider>
-          </Tabs.Panel>
-        </Tabs>
+            <Tabs.Panel value="analytics">
+              <SaveBarProvider>
+                <ShareSettings workspaceId={active._id} />
+              </SaveBarProvider>
+            </Tabs.Panel>
+            <Tabs.Panel value="seo">
+              <SaveBarProvider>
+                <SeoShareTab workspaceId={active._id} />
+              </SaveBarProvider>
+            </Tabs.Panel>
+          </Tabs>
+        </RoleGate>
       ) : (
         <NoWorkspace />
       )}

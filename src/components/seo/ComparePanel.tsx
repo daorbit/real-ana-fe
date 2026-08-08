@@ -27,6 +27,7 @@ export function ComparePanel({
   onAdd,
   onRefresh,
   onDelete,
+  canEdit,
 }: {
   data: SeoReportData;
   siteName: string;
@@ -36,6 +37,8 @@ export function ComparePanel({
   onAdd: (url: string) => void;
   onRefresh: (id: string) => void;
   onDelete: (id: string) => void;
+  /** False for a viewer: the comparison stays readable, the controls go away. */
+  canEdit: boolean;
 }) {
   const [url, setUrl] = useState("");
 
@@ -63,37 +66,39 @@ export function ComparePanel({
 
   return (
     <Stack gap="lg">
-      <Card withBorder radius="md" padding="lg">
-        <Group gap="sm" align="flex-end" wrap="wrap">
-          <Box style={{ flex: "1 1 320px", minWidth: 240 }}>
-            <Text component="label" htmlFor="competitor-url" size="sm" fw={500} display="block" mb={4}>
-              Competitor URL
-            </Text>
-            <TextInput
-              id="competitor-url"
-              placeholder="https://competitor.com/page"
-              value={url}
-              onChange={(e) => setUrl(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === "Enter" && !adding && submit()}
+      {canEdit && (
+        <Card withBorder radius="md" padding="lg">
+          <Group gap="sm" align="flex-end" wrap="wrap">
+            <Box style={{ flex: "1 1 320px", minWidth: 240 }}>
+              <Text component="label" htmlFor="competitor-url" size="sm" fw={500} display="block" mb={4}>
+                Competitor URL
+              </Text>
+              <TextInput
+                id="competitor-url"
+                placeholder="https://competitor.com/page"
+                value={url}
+                onChange={(e) => setUrl(e.currentTarget.value)}
+                onKeyDown={(e) => e.key === "Enter" && !adding && submit()}
+                radius="md"
+                disabled={competitors.length >= 3}
+              />
+            </Box>
+            <Button
+              color="emerald"
               radius="md"
+              leftSection={<Plus size={15} />}
+              loading={adding}
+              onClick={submit}
               disabled={competitors.length >= 3}
-            />
-          </Box>
-          <Button
-            color="emerald"
-            radius="md"
-            leftSection={<Plus size={15} />}
-            loading={adding}
-            onClick={submit}
-            disabled={competitors.length >= 3}
-          >
-            Compare
-          </Button>
-        </Group>
-        <Text size="xs" c="dimmed" mt="sm">
-          Up to 3 competitors per site. Only publicly reachable pages can be fetched.
-        </Text>
-      </Card>
+            >
+              Compare
+            </Button>
+          </Group>
+          <Text size="xs" c="dimmed" mt="sm">
+            Up to 3 competitors per site. Only publicly reachable pages can be fetched.
+          </Text>
+        </Card>
+      )}
 
       {competitors.length === 0 && !loading && (
         <Card withBorder radius="md" padding="xl">
@@ -104,8 +109,9 @@ export function ComparePanel({
               </ThemeIcon>
               <Text fw={650}>Nothing to compare yet</Text>
               <Text size="sm" c="dimmed" ta="center">
-                Add a competitor&apos;s page to see how your title, description, content
-                depth and structured data stack up against theirs.
+                {canEdit
+                  ? "Add a competitor's page to see how your title, description, content depth and structured data stack up against theirs."
+                  : "Nobody has added a competitor for this site yet. An editor can add one."}
               </Text>
             </Stack>
           </Center>
@@ -144,7 +150,7 @@ export function ComparePanel({
                               </Text>
                             )}
                           </Text>
-                          {!c.isSelf && (
+                          {!c.isSelf && canEdit && (
                             <Group gap={2} wrap="nowrap">
                               <Tooltip label="Re-fetch" withArrow>
                                 <ActionIcon

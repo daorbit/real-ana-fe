@@ -7,7 +7,7 @@ import {
   useGetWhatsAppStatusQuery, useTestReportWhatsAppMutation,
 } from "../../store";
 import { notify, errMessage, confirmDelete } from "../../notify";
-import { useWorkspace, useActiveBilling } from "../../workspace";
+import { useWorkspace, useActiveBilling, usePermissions } from "../../workspace";
 import { useAuth } from "../../auth";
 import type { ReportSchedule } from "../../types";
 import { emptyDraft, fromSchedule, type Draft } from "./types";
@@ -24,6 +24,9 @@ export function useReportsPage() {
   const { active } = useWorkspace();
   const { user } = useAuth();
   const billing = useActiveBilling();
+  // Schedules are `editor` server-side. A viewer keeps the list, the summary
+  // and the next-send times — only the controls that would 403 go away.
+  const { canEdit } = usePermissions();
   const workspaceId = active?._id ?? "";
   // WhatsApp is delivered to the account owner's own number only, so the
   // profile mobile is both the destination and the precondition.
@@ -152,7 +155,7 @@ export function useReportsPage() {
   return {
     workspaceId, isLoading, schedules, sites, share, wa, mailReady,
     enabled, nextUp, reach, siteNameFor, nextSendLabel,
-    waReady, waEntitled, ownerMobile,
+    waReady, waEntitled, ownerMobile, canEdit,
     saving, testing, testingId,
     persist, toggleEnabled, runTest, runWhatsAppTest, destroy,
   };

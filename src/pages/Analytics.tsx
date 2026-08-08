@@ -50,7 +50,7 @@ import {
 } from "../components/MarkerLayer";
 import { notify, errMessage } from "../notify";
 import { countryFlag, countryLabel, duration, share, num } from "../utils";
-import { useWorkspace, useActiveBilling } from "../workspace";
+import { useWorkspace, useActiveBilling, usePermissions } from "../workspace";
 import type { Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind } from "../types";
 import { serializeFilter } from "../types";
 
@@ -237,6 +237,7 @@ export default function Analytics() {
   const billing = useActiveBilling();
   const funnelLocked = (billing?.plan?.slug ?? "free") === "free";
   const { active, loading } = useWorkspace();
+  const { canEdit } = usePermissions();
   const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
   const range = rangeState.preset;
   const [filter, setFilter] = useState<StatsFilter>({});
@@ -531,8 +532,8 @@ export default function Analytics() {
         opened={markersOpen}
         onClose={() => setMarkersOpen(false)}
         markers={markers}
-        onSave={handleSaveMarker}
-        onDelete={handleDeleteMarker}
+        onSave={canEdit ? handleSaveMarker : null}
+        onDelete={canEdit ? handleDeleteMarker : null}
         saving={savingMarker}
         deletingId={deletingMarker}
       />
@@ -618,9 +619,9 @@ export default function Analytics() {
         onClear={clearFilter}
         segments={segments}
         onApplySegment={(s) => setFilter(s.filter)}
-        onSaveSegment={handleSaveSegment}
-        onDeleteSegment={handleDeleteSegment}
-        onTogglePin={handleTogglePin}
+        onSaveSegment={canEdit ? handleSaveSegment : undefined}
+        onDeleteSegment={canEdit ? handleDeleteSegment : undefined}
+        onTogglePin={canEdit ? handleTogglePin : undefined}
         saving={savingSegment}
         busyId={busySegment}
       />

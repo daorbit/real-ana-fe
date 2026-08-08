@@ -15,6 +15,7 @@ import {
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import { PageHelpButton } from "../components/PageHelpButton";
+import { RoleGate } from "../components/RoleGate";
 import { notify, errMessage, confirmDelete } from "../notify";
 import { useWorkspace } from "../workspace";
 import type { ApiKey } from "../types";
@@ -229,8 +230,10 @@ export default function Developers() {
         actions={<PageHelpButton />}
       />
 
-      <DocsLink />
-      <KeysTab />
+      <RoleGate minimum="admin" what="Only admins can manage API keys.">
+        <DocsLink />
+        <KeysTab />
+      </RoleGate>
     </AppShell>
   );
 }

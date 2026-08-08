@@ -52,9 +52,11 @@ export default function Reports() {
           description={t("reports.description")}
           actions={
             <>
-              <Button leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
-                {t("reports.newReport")}
-              </Button>
+              {page.canEdit && (
+                <Button leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
+                  {t("reports.newReport")}
+                </Button>
+              )}
               <PageHelpButton />
             </>
           }
@@ -95,9 +97,11 @@ export default function Reports() {
                 ))}
               </SimpleGrid>
 
-              <Button mt="xl" leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
-                {t("reports.emptyCta")}
-              </Button>
+              {page.canEdit && (
+                <Button mt="xl" leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
+                  {t("reports.emptyCta")}
+                </Button>
+              )}
             </Stack>
           </Box>
         ) : (
@@ -140,6 +144,7 @@ export default function Reports() {
                   onTestWhatsApp={() => page.runWhatsAppTest(s)}
                   onDelete={() => page.destroy(s)}
                   onToggle={() => page.toggleEnabled(s)}
+                  canEdit={page.canEdit}
                 />
               ))}
             </Stack>

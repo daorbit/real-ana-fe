@@ -31,7 +31,8 @@ export function CrawlPanel({
 }: {
   report?: SeoCrawlReport;
   running: boolean;
-  onCrawl: () => void;
+  /** Null for a viewer, who may read a crawl but not spend quota running one. */
+  onCrawl: (() => void) | null;
 }) {
   const [showAll, setShowAll] = useState(false);
 
@@ -49,20 +50,24 @@ export function CrawlPanel({
               problems a single-page audit cannot see — duplicate titles, thin pages, and
               URLs in your sitemap that no longer load.
             </Text>
-            <Button
-              color="emerald"
-              radius="md"
-              leftSection={<Play size={15} />}
-              loading={running}
-              onClick={onCrawl}
-              mt="xs"
-            >
-              Crawl this site
-            </Button>
-            <Text size="xs" c="dimmed" ta="center">
-              Takes a few seconds. Lighthouse is not run per page, so this costs no
-              PageSpeed quota.
-            </Text>
+            {onCrawl && (
+              <>
+                <Button
+                  color="emerald"
+                  radius="md"
+                  leftSection={<Play size={15} />}
+                  loading={running}
+                  onClick={onCrawl}
+                  mt="xs"
+                >
+                  Crawl this site
+                </Button>
+                <Text size="xs" c="dimmed" ta="center">
+                  Takes a few seconds. Lighthouse is not run per page, so this costs no
+                  PageSpeed quota.
+                </Text>
+              </>
+            )}
           </Stack>
         </Center>
       </Card>
@@ -78,17 +83,19 @@ export function CrawlPanel({
         <Text size="xs" c="dimmed">
           Crawled {timeAgo(report.createdAt)}
         </Text>
-        <Button
-          size="xs"
-          variant="light"
-          color="emerald"
-          radius="md"
-          leftSection={<Play size={13} />}
-          loading={running}
-          onClick={onCrawl}
-        >
-          Crawl again
-        </Button>
+        {onCrawl && (
+          <Button
+            size="xs"
+            variant="light"
+            color="emerald"
+            radius="md"
+            leftSection={<Play size={13} />}
+            loading={running}
+            onClick={onCrawl}
+          >
+            Crawl again
+          </Button>
+        )}
       </Group>
 
       <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">

@@ -23,7 +23,7 @@ import { useSites, useSiteInstalled } from "../hooks";
 import * as v from "../utils/validate";
 import { shortDate } from "../utils";
 import { notify, errMessage, notifyError, confirmDestroy } from "../notify";
-import { useWorkspace } from "../workspace";
+import { useWorkspace, usePermissions } from "../workspace";
 import type { Workspace, Site } from "../types";
 import { WorkspacesSkeleton } from "../components/Skeletons";
 import { AddSiteWizard } from "../components/AddSiteWizard";
@@ -56,7 +56,12 @@ function IdRow({ label, value }: { label: string; value: string }) {
 /* A site row with live install status + an expandable verifier */
 function SiteRow({
   site, workspaceId, onDelete,
-}: { site: Site; workspaceId: string; onDelete: () => void }) {
+}: {
+  site: Site;
+  workspaceId: string;
+  /** Null for a viewer, who sees the row but gets no delete control. */
+  onDelete: (() => void) | null;
+}) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const installed = useSiteInstalled(workspaceId, site.siteId);
@@ -146,9 +151,11 @@ function SiteRow({
             )}
           </CopyButton>
           <Tooltip label={t("workspaces.deleteSite")} withArrow>
-            <ActionIcon variant="subtle" color="gray" size="lg" onClick={onDelete}>
-              <Trash2 size={15} />
-            </ActionIcon>
+            {onDelete && (
+              <ActionIcon variant="subtle" color="gray" size="lg" onClick={onDelete}>
+                <Trash2 size={15} />
+              </ActionIcon>
+            )}
           </Tooltip>
         </Group>
       </div>
@@ -179,6 +186,10 @@ export default function Workspaces() {
   const [wsError, setWsError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
+
+  // What this account may do in the active workspace. The server enforces the
+  // same limits; hiding the controls just avoids offering a 403.
+  const { canEdit, canAdmin, canDelete } = usePermissions();
 
   // Add-site is a self-contained wizard; this page only opens and closes it.
   const [siteOpen, setSiteOpen] = useState(false);
@@ -488,19 +499,21 @@ export default function Workspaces() {
                       >
                         {active.name}
                       </Title>
-                      <ActionIcon
-                        className="ws-rename"
-                        variant="subtle"
-                        color="gray"
-                        size="sm"
-                        onClick={() => {
-                          setEditing(true);
-                          setEditName(active.name);
-                        }}
-                        title={t("workspaces.rename")}
-                      >
-                        <Pencil size={14} />
-                      </ActionIcon>
+                      {canAdmin && (
+                        <ActionIcon
+                          className="ws-rename"
+                          variant="subtle"
+                          color="gray"
+                          size="sm"
+                          onClick={() => {
+                            setEditing(true);
+                            setEditName(active.name);
+                          }}
+                          title={t("workspaces.rename")}
+                        >
+                          <Pencil size={14} />
+                        </ActionIcon>
+                      )}
                     </Group>
                   )}
                   <Box mt={6}>
@@ -509,18 +522,24 @@ export default function Workspaces() {
                 </div>
 
                 <Group gap="xs" wrap="nowrap">
-                  <Button leftSection={<Plus size={15} />} onClick={() => setSiteOpen(true)}>
-                    {t("workspaces.addSite")}
-                  </Button>
-                  <ActionIcon
-                    variant="subtle"
-                    color="red"
-                    size="lg"
-                    onClick={() => removeWorkspace(active)}
-                    title={t("workspaces.deleteWorkspace")}
-                  >
-                    <Trash2 size={16} />
-                  </ActionIcon>
+                  {canEdit && (
+                    <Button leftSection={<Plus size={15} />} onClick={() => setSiteOpen(true)}>
+                      {t("workspaces.addSite")}
+                    </Button>
+                  )}
+                  {/* Deleting takes every other member's work with it, so it
+                      stays with the one person who cannot be removed. */}
+                  {canDelete && (
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      size="lg"
+                      onClick={() => removeWorkspace(active)}
+                      title={t("workspaces.deleteWorkspace")}
+                    >
+                      <Trash2 size={16} />
+                    </ActionIcon>
+                  )}
                 </Group>
               </Group>
             </Box>
@@ -598,14 +617,16 @@ export default function Workspaces() {
                   <Text c="dimmed" size="xs" ta="center" maw={340}>
                     {t("workspaces.noSitesBody")}
                   </Text>
-                  <Button
-                    size="xs"
-                    mt="sm"
-                    leftSection={<Plus size={14} />}
-                    onClick={() => setSiteOpen(true)}
-                  >
-                    {t("workspaces.noSitesCta")}
-                  </Button>
+                  {canEdit && (
+                    <Button
+                      size="xs"
+                      mt="sm"
+                      leftSection={<Plus size={14} />}
+                      onClick={() => setSiteOpen(true)}
+                    >
+                      {t("workspaces.noSitesCta")}
+                    </Button>
+                  )}
                 </Stack>
               </Box>
             ) : (
@@ -632,22 +653,28 @@ export default function Workspaces() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i, 6) * 0.04, duration: 0.25 }}
                   >
-                    <SiteRow site={s} workspaceId={active._id} onDelete={() => delSite(s)} />
+                    <SiteRow
+                      site={s}
+                      workspaceId={active._id}
+                      onDelete={canEdit ? () => delSite(s) : null}
+                    />
                   </motion.div>
                 ))}
                 {/* Stack stretches its children, which turned this into a
                     full-width bar. Centre it at its natural width instead. */}
-                <Group justify="center" mt={4}>
-                  <Button
-                    variant="subtle"
-                    color="gray"
-                    size="sm"
-                    leftSection={<Plus size={15} />}
-                    onClick={() => setSiteOpen(true)}
-                  >
-                    {t("workspaces.addAnother")}
-                  </Button>
-                </Group>
+                {canEdit && (
+                  <Group justify="center" mt={4}>
+                    <Button
+                      variant="subtle"
+                      color="gray"
+                      size="sm"
+                      leftSection={<Plus size={15} />}
+                      onClick={() => setSiteOpen(true)}
+                    >
+                      {t("workspaces.addAnother")}
+                    </Button>
+                  </Group>
+                )}
               </Stack>
             )}
           </motion.div>

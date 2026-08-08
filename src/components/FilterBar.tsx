@@ -159,30 +159,34 @@ export function FilterBar({
                     onClick={() => onApplySegment?.(segment)}
                     rightSection={
                       <Group gap={2} wrap="nowrap" onClick={(e) => e.stopPropagation()}>
-                        <Tooltip label={segment.pinned ? "Unpin" : "Pin"}>
-                          <ActionIcon
-                            variant="subtle"
-                            color={segment.pinned ? "emerald" : "gray"}
-                            size="sm"
-                            loading={busyId === segment.id}
-                            disabled={Boolean(busyId) && busyId !== segment.id}
-                            onClick={() => onTogglePin?.(segment)}
-                          >
-                            <Pin size={12} />
-                          </ActionIcon>
-                        </Tooltip>
-                        <Tooltip label="Delete">
-                          <ActionIcon
-                            variant="subtle"
-                            color="gray"
-                            size="sm"
-                            loading={busyId === segment.id}
-                            disabled={Boolean(busyId) && busyId !== segment.id}
-                            onClick={() => onDeleteSegment?.(segment)}
-                          >
-                            <Trash2 size={12} />
-                          </ActionIcon>
-                        </Tooltip>
+                        {onTogglePin && (
+                          <Tooltip label={segment.pinned ? "Unpin" : "Pin"}>
+                            <ActionIcon
+                              variant="subtle"
+                              color={segment.pinned ? "emerald" : "gray"}
+                              size="sm"
+                              loading={busyId === segment.id}
+                              disabled={Boolean(busyId) && busyId !== segment.id}
+                              onClick={() => onTogglePin(segment)}
+                            >
+                              <Pin size={12} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                        {onDeleteSegment && (
+                          <Tooltip label="Delete">
+                            <ActionIcon
+                              variant="subtle"
+                              color="gray"
+                              size="sm"
+                              loading={busyId === segment.id}
+                              disabled={Boolean(busyId) && busyId !== segment.id}
+                              onClick={() => onDeleteSegment(segment)}
+                            >
+                              <Trash2 size={12} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
                       </Group>
                     }
                   >

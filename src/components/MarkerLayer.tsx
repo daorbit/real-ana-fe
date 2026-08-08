@@ -136,14 +136,22 @@ export function MarkerDialog({
   opened: boolean;
   onClose: () => void;
   markers: Marker[];
-  /** Awaited, so the form holds its input until the save resolves. */
-  onSave: (input: {
-    label: string;
-    description: string;
-    kind: MarkerKind;
-    at: string;
-  }) => void | Promise<void>;
-  onDelete: (marker: Marker) => void;
+  /**
+   * Awaited, so the form holds its input until the save resolves.
+   *
+   * Null for a viewer: the dialog becomes a read-only list of what is on the
+   * chart, with no add form.
+   */
+  onSave:
+    | ((input: {
+        label: string;
+        description: string;
+        kind: MarkerKind;
+        at: string;
+      }) => void | Promise<void>)
+    | null;
+  /** Null for a viewer, who may read markers but not remove them. */
+  onDelete: ((marker: Marker) => void) | null;
   saving?: boolean;
   /**
    * The marker currently being deleted, if any.
@@ -163,7 +171,7 @@ export function MarkerDialog({
 
   const submit = async () => {
     const trimmed = label.trim();
-    if (!trimmed || saving) return;
+    if (!trimmed || saving || !onSave) return;
 
     // Awaited so the form only clears once the marker is actually stored —
     // clearing first would discard what the user typed if the save failed.
@@ -190,61 +198,63 @@ export function MarkerDialog({
       size="lg"
     >
       <Stack gap="lg">
-        <Stack gap="sm">
-          <Group grow align="flex-start">
+        {onSave && (
+          <Stack gap="sm">
+            <Group grow align="flex-start">
+              <TextInput
+                label="Label"
+                placeholder="v2.4.0"
+                value={label}
+                onChange={(e) => setLabel(e.currentTarget.value)}
+                onKeyDown={(e) => e.key === "Enter" && submit()}
+                maxLength={80}
+                data-autofocus
+              />
+              <Select
+                label="Kind"
+                value={kind}
+                onChange={(v) => v && setKind(v as MarkerKind)}
+                data={[
+                  { value: "deploy", label: "Deploy" },
+                  { value: "campaign", label: "Campaign" },
+                  { value: "incident", label: "Incident" },
+                  { value: "note", label: "Note" },
+                ]}
+                allowDeselect={false}
+              />
+            </Group>
+
             <TextInput
-              label="Label"
-              placeholder="v2.4.0"
-              value={label}
-              onChange={(e) => setLabel(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === "Enter" && submit()}
-              maxLength={80}
-              data-autofocus
+              label="When"
+              type="datetime-local"
+              value={at}
+              onChange={(e) => setAt(e.currentTarget.value)}
             />
-            <Select
-              label="Kind"
-              value={kind}
-              onChange={(v) => v && setKind(v as MarkerKind)}
-              data={[
-                { value: "deploy", label: "Deploy" },
-                { value: "campaign", label: "Campaign" },
-                { value: "incident", label: "Incident" },
-                { value: "note", label: "Note" },
-              ]}
-              allowDeselect={false}
+
+            <Textarea
+              label="Notes"
+              placeholder="Commit sha, release notes, a link — anything that explains it later."
+              value={description}
+              onChange={(e) => setDescription(e.currentTarget.value)}
+              maxLength={500}
+              autosize
+              minRows={2}
+              maxRows={4}
             />
-          </Group>
 
-          <TextInput
-            label="When"
-            type="datetime-local"
-            value={at}
-            onChange={(e) => setAt(e.currentTarget.value)}
-          />
-
-          <Textarea
-            label="Notes"
-            placeholder="Commit sha, release notes, a link — anything that explains it later."
-            value={description}
-            onChange={(e) => setDescription(e.currentTarget.value)}
-            maxLength={500}
-            autosize
-            minRows={2}
-            maxRows={4}
-          />
-
-          <Group justify="flex-end">
-            <Button
-              color="emerald"
-              leftSection={<Plus size={15} />}
-              disabled={!label.trim()}
-              loading={saving}
-              onClick={submit}
-            >
-              Add marker
-            </Button>
-          </Group>
-        </Stack>
+            <Group justify="flex-end">
+              <Button
+                color="emerald"
+                leftSection={<Plus size={15} />}
+                disabled={!label.trim()}
+                loading={saving}
+                onClick={submit}
+              >
+                Add marker
+              </Button>
+            </Group>
+          </Stack>
+        )}
 
         {markers.length > 0 && (
           <div>
@@ -288,20 +298,22 @@ export function MarkerDialog({
                           </Text>
                         </div>
                       </Group>
-                      <Tooltip label="Delete">
-                        <ActionIcon
-                          variant="subtle"
-                          color="gray"
-                          loading={deletingId === marker.id}
-                          // Deleting one row disables the others: two
-                          // overlapping deletes would leave the list
-                          // reordering under the cursor.
-                          disabled={Boolean(deletingId) && deletingId !== marker.id}
-                          onClick={() => onDelete(marker)}
-                        >
-                          <Trash2 size={14} />
-                        </ActionIcon>
-                      </Tooltip>
+                      {onDelete && (
+                        <Tooltip label="Delete">
+                          <ActionIcon
+                            variant="subtle"
+                            color="gray"
+                            loading={deletingId === marker.id}
+                            // Deleting one row disables the others: two
+                            // overlapping deletes would leave the list
+                            // reordering under the cursor.
+                            disabled={Boolean(deletingId) && deletingId !== marker.id}
+                            onClick={() => onDelete(marker)}
+                          >
+                            <Trash2 size={14} />
+                          </ActionIcon>
+                        </Tooltip>
+                      )}
                     </Group>
                   );
                 })}

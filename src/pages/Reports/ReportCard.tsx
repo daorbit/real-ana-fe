@@ -95,6 +95,7 @@ export function ReportCard({
   onToggle,
   testing,
   waEntitled,
+  canEdit,
 }: {
   s: ReportSchedule;
   siteNames: string;
@@ -105,6 +106,8 @@ export function ReportCard({
   onToggle: () => void;
   testing: boolean;
   waEntitled: boolean;
+  /** False for a viewer: the card stays, every action on it goes. */
+  canEdit: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -127,44 +130,46 @@ export function ReportCard({
           <Text size="xs" c="dimmed" mt={3} truncate>{siteNames}</Text>
         </div>
 
-        <Group gap={4} wrap="nowrap">
-          {s.channels.email && (
-            <Tooltip label={t("reports.testEmailTooltip")} withArrow>
-              <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest}>
-                <Send size={15} />
-              </ActionIcon>
-            </Tooltip>
-          )}
-          <Menu position="bottom-end" withArrow>
-            <Menu.Target>
-              <ActionIcon variant="subtle" size="lg" radius="md" color="gray">
-                <MoreVertical size={16} />
-              </ActionIcon>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>{t("reports.edit")}</Menu.Item>
-              {/* A schedule keeps its WhatsApp channel through a downgrade, so
-                  the entitlement is checked here rather than inferred from the
-                  schedule — otherwise the test button stays live on a plan that
-                  no longer includes it and only fails at the server. */}
-              {s.channels.whatsapp && waEntitled && (
-                <Menu.Item leftSection={<MessageCircle size={14} />} onClick={onTestWhatsApp}>
-                  {t("reports.sendWhatsAppTest")}
+        {canEdit && (
+          <Group gap={4} wrap="nowrap">
+            {s.channels.email && (
+              <Tooltip label={t("reports.testEmailTooltip")} withArrow>
+                <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest}>
+                  <Send size={15} />
+                </ActionIcon>
+              </Tooltip>
+            )}
+            <Menu position="bottom-end" withArrow>
+              <Menu.Target>
+                <ActionIcon variant="subtle" size="lg" radius="md" color="gray">
+                  <MoreVertical size={16} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>{t("reports.edit")}</Menu.Item>
+                {/* A schedule keeps its WhatsApp channel through a downgrade, so
+                    the entitlement is checked here rather than inferred from the
+                    schedule — otherwise the test button stays live on a plan that
+                    no longer includes it and only fails at the server. */}
+                {s.channels.whatsapp && waEntitled && (
+                  <Menu.Item leftSection={<MessageCircle size={14} />} onClick={onTestWhatsApp}>
+                    {t("reports.sendWhatsAppTest")}
+                  </Menu.Item>
+                )}
+                <Menu.Item
+                  leftSection={s.enabled ? <Pause size={14} /> : <Play size={14} />}
+                  onClick={onToggle}
+                >
+                  {s.enabled ? t("reports.pause") : t("reports.resume")}
                 </Menu.Item>
-              )}
-              <Menu.Item
-                leftSection={s.enabled ? <Pause size={14} /> : <Play size={14} />}
-                onClick={onToggle}
-              >
-                {s.enabled ? t("reports.pause") : t("reports.resume")}
-              </Menu.Item>
-              <Menu.Divider />
-              <Menu.Item color="red" leftSection={<Trash2 size={14} />} onClick={onDelete}>
-                {t("common.delete")}
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Group>
+                <Menu.Divider />
+                <Menu.Item color="red" leftSection={<Trash2 size={14} />} onClick={onDelete}>
+                  {t("common.delete")}
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Group>
+        )}
       </Group>
 
       <Group gap={6} wrap="wrap">
