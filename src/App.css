@@ -92,33 +92,52 @@ body { overflow-wrap: break-word; }
    every page, covering table cells and the last row of any list, and its menu
    opened off-screen. It steps down in size, tucks into the corner, and sits
    below Mantine's overlay layer so a modal or drawer is never fighting it. */
-/* The one floating control: Orbit's launcher. `.support-fab` is kept as an
-   alias because the old help button used it and the two occupy the same
-   corner at the same size — there is only ever one of them on screen. */
-.support-fab,
+/* The one floating control: Orbit's launcher.
+   The mark is the whole button, so this only positions it and gives it the
+   lift that separates it from the page — no background of its own. */
 .orbit-fab {
   position: fixed;
   right: 24px;
   bottom: 24px;
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
   z-index: 190;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  border-radius: 15px;
+  line-height: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  transition: transform 160ms ease, box-shadow 160ms ease;
 }
+.orbit-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+}
+.orbit-fab:focus-visible {
+  outline: 2px solid var(--mantine-color-emerald-6);
+  outline-offset: 3px;
+}
+/* While the panel is up, the launcher is what closes it. A ring marks it as
+   the active control rather than leaving two ways in with no way to tell they
+   are the same thing. */
+.orbit-fab[data-open] {
+  box-shadow: 0 0 0 2px var(--mantine-color-emerald-6), 0 8px 24px rgba(0, 0, 0, 0.32);
+}
+.orbit-fab[data-open]:hover {
+  transform: none;
+}
+/* The mark is a raster image, so it scales with the button rather than the
+   button sizing an icon inside it. */
+.orbit-fab img { width: 52px; height: 52px; }
+
 @media (max-width: 48em) {
-  .support-fab,
   .orbit-fab {
     right: 12px;
     /* Clear of the iOS home indicator / Android gesture bar. */
     bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-    opacity: 0.92;
+    border-radius: 13px;
   }
+  .orbit-fab img { width: 44px; height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-fab { transition: none; }
+  .orbit-fab:hover { transform: none; }
 }
 
 /* The chat panel sits directly above the launcher, and matches its insets so
@@ -126,24 +145,47 @@ body { overflow-wrap: break-word; }
 .orbit-panel {
   position: fixed;
   right: 24px;
-  bottom: 84px;
+  /* Clears the launcher, which stays on screen while the panel is open:
+     24px inset + 52px mark + 12px gap. */
+  bottom: 88px;
   width: min(400px, calc(100vw - 48px));
   z-index: 300;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 @media (max-width: 48em) {
   .orbit-panel {
     right: 12px;
     left: 12px;
     width: auto;
-    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    /* 12px inset + 44px mark + 10px gap, above the gesture bar. */
+    bottom: calc(66px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* An opening suggestion. Quiet by default — these are a prompt, not the point
+   of the panel — and only the border warms on hover, so three of them stacked
+   read as a list rather than three buttons demanding to be pressed. */
+.orbit-suggestion {
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 8px;
+  padding: 8px 11px;
+  color: var(--mantine-color-dimmed);
+  transition: border-color 140ms ease, color 140ms ease;
+}
+.orbit-suggestion:hover {
+  border-color: var(--mantine-color-emerald-6);
+  color: var(--mantine-color-text);
+}
+.orbit-suggestion:focus-visible {
+  outline: 2px solid var(--mantine-color-emerald-6);
+  outline-offset: 2px;
+}
 /* Content clearance below the button — matches its footprint at each size. */
-.support-fab-spacer { height: 88px; }
+.orbit-fab-spacer { height: 88px; }
 @media (max-width: 48em) {
-  .support-fab-spacer { height: 60px; }
+  .orbit-fab-spacer { height: 60px; }
 }
 
 /* iOS Safari zooms the page in when a focused input's font is under 16px, and

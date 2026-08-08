@@ -23,14 +23,28 @@ export type OrbitMessage = {
   content: string;
   /** Set when a send failed, so the bubble can render as an error. */
   failed?: boolean;
+  /**
+   * What to ask next, from the model.
+   *
+   * Carried on the turn that produced them rather than held as one "current"
+   * list, so scrolling back up a conversation shows the follow-ups that were
+   * offered at each point. Only the last turn's are rendered.
+   */
+  suggestions?: string[];
 };
 
-/** What Orbit opens with. Questions it can actually answer, so the first try succeeds. */
+/**
+ * What Orbit opens with.
+ *
+ * Three, not four: the panel is short, and a fourth pushed the input below the
+ * fold on a laptop. Each is a question the knowledge base actually answers, so
+ * the first thing a new user tries succeeds rather than teaching them the
+ * assistant is useless.
+ */
 export const ORBIT_SUGGESTIONS = [
   "How do I install the tracker?",
-  "Why is my site not showing any data?",
-  "What's the difference between a viewer and an editor?",
-  "How do I schedule a weekly report?",
+  "Why is my site showing no data?",
+  "What can a viewer do?",
 ];
 
 let counter = 0;
@@ -71,9 +85,12 @@ export function useOrbitChat() {
       setInput("");
 
       try {
-        const { reply } = await ask({ question, history }).unwrap();
+        const { reply, suggestions } = await ask({ question, history }).unwrap();
         setMessages((prev) => {
-          const next = [...prev, { id: nextId(), role: "assistant" as const, content: reply }];
+          const next = [
+            ...prev,
+            { id: nextId(), role: "assistant" as const, content: reply, suggestions },
+          ];
           historyRef.current = next;
           return next;
         });

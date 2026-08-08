@@ -434,7 +434,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         {/* Clear the floating help button so page content never sits under it.
             The height tracks the button's size, which steps down on phones. */}
-        <div className="support-fab-spacer" />
+        <div className="orbit-fab-spacer" />
         {/* One floating control, not two. The support "?" that used to sit here
             offered the same three contact options the Help & support page now
             holds in full, so it was a second door to a room you can already

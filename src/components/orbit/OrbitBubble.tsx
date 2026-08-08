@@ -1,6 +1,7 @@
-import { Paper, Group, Text, ActionIcon, ThemeIcon, Tooltip, Box } from "@mantine/core";
-import { Sparkles, X, RotateCcw } from "lucide-react";
+import { Paper, Group, Text, ActionIcon, Tooltip, Menu, UnstyledButton } from "@mantine/core";
+import { X, MoreHorizontal, RotateCcw } from "lucide-react";
 import { OrbitChat } from "./OrbitChat";
+import { OrbitMark } from "./OrbitMark";
 import { useOrbit } from "./OrbitProvider";
 
 /**
@@ -11,6 +12,12 @@ import { useOrbit } from "./OrbitProvider";
  * the number. This is Orbit's only home; the Help & support page is for
  * reaching a person, which is a different thing entirely.
  *
+ * The chrome is deliberately thin. At 400px wide, every element in the header
+ * is competing with the conversation for the same few hundred pixels, so the
+ * header is one line: a mark, a name, and the two controls that matter. "Start
+ * over" moved into an overflow menu — it is used once a session at most, and it
+ * was costing a permanent slot beside the close button.
+ *
  * Rendered by the app shell, so it is available on every signed-in page and
  * keeps its conversation across navigation.
  */
@@ -20,60 +27,72 @@ export function OrbitBubble() {
   return (
     <>
       {opened && (
-        <Paper
-          withBorder
-          radius="lg"
-          shadow="lg"
-          p="md"
-          className="orbit-panel"
-        >
-          <Group justify="space-between" mb="sm" wrap="nowrap">
+        // No padding on the Paper itself: the header, thread and composer each
+        // own their insets, which is what lets the header rule run the full
+        // width instead of floating inside a margin.
+        <Paper withBorder radius="lg" shadow="xl" p={0} className="orbit-panel">
+          <Group
+            justify="space-between"
+            wrap="nowrap"
+            px="md"
+            py={10}
+            style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
+          >
             <Group gap={8} wrap="nowrap">
-              <ThemeIcon size={26} radius="xl" variant="light" color="emerald">
-                <Sparkles size={13} />
-              </ThemeIcon>
-              <div>
-                <Text size="sm" fw={650} lh={1.2}>Orbit AI</Text>
-                <Text size="xs" c="dimmed" lh={1.2}>Product help</Text>
-              </div>
+              <OrbitMark size={22} />
+              <Text size="sm" fw={600}>Orbit AI</Text>
             </Group>
-            <Group gap={2} wrap="nowrap">
+
+            <Group gap={0} wrap="nowrap">
               {chat.started && (
-                <Tooltip label="Start over" withArrow>
-                  <ActionIcon variant="subtle" color="gray" onClick={chat.reset}>
-                    <RotateCcw size={15} />
-                  </ActionIcon>
-                </Tooltip>
+                <Menu position="bottom-end" withArrow shadow="md" radius="md" width={160}>
+                  <Menu.Target>
+                    <ActionIcon variant="subtle" color="gray" size="sm" aria-label="More">
+                      <MoreHorizontal size={15} />
+                    </ActionIcon>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item leftSection={<RotateCcw size={13} />} onClick={chat.reset}>
+                      Start over
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
               )}
-              <ActionIcon variant="subtle" color="gray" onClick={close} aria-label="Close Orbit">
-                <X size={16} />
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                onClick={close}
+                aria-label="Close Orbit"
+              >
+                <X size={15} />
               </ActionIcon>
             </Group>
           </Group>
 
-          <Box style={{ height: 420 }}>
-            <OrbitChat chat={chat} height={340} />
-          </Box>
+          <OrbitChat chat={chat} height={360} />
         </Paper>
       )}
 
-      {/* Hidden while the panel is open — the panel has its own close button in
-          the corner it would otherwise sit behind. Reaching a person is on the
-          Help & support page, and Orbit points there when it cannot help. */}
-      {!opened && (
-        <Tooltip label="Ask Orbit AI" position="left" withArrow>
-          <ActionIcon
-            className="orbit-fab"
-            radius="xl"
-            color="emerald"
-            variant="filled"
-            onClick={toggle}
-            aria-label="Ask Orbit AI"
-          >
-            <Sparkles size={20} />
-          </ActionIcon>
-        </Tooltip>
-      )}
+      {/* Always on screen, open or closed. Hiding it while the panel was up
+          left the corner empty and made the panel look detached from the thing
+          that spawned it — and it is the control people reach for to dismiss a
+          floating window, whether or not there is also an X.
+
+          An unstyled button, not an ActionIcon: the mark is the whole surface,
+          so a filled emerald circle behind it would be a second green disc
+          around a green disc. */}
+      <Tooltip label={opened ? "Hide Orbit" : "Ask Orbit AI"} position="left" withArrow>
+        <UnstyledButton
+          className="orbit-fab"
+          data-open={opened || undefined}
+          onClick={toggle}
+          aria-label={opened ? "Hide Orbit" : "Ask Orbit AI"}
+          aria-expanded={opened}
+        >
+          <OrbitMark size={52} />
+        </UnstyledButton>
+      </Tooltip>
     </>
   );
 }

@@ -364,7 +364,8 @@ export const api = createApi({
      * retain or hand over.
      */
     askOrbit: build.mutation<
-      { reply: string },
+      /** `suggestions` is what to ask next, and is empty when nothing follows. */
+      { reply: string; suggestions: string[] },
       { question: string; history: { role: "user" | "assistant"; content: string }[] }
     >({
       query: (body) => ({ url: "/api/orbit/ask", method: "POST", body }),
