@@ -17,6 +17,7 @@ import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../compo
 import { AppShell } from "../components/AppShell";
 import { PageHeader } from "../components/Page";
 import { PageHelpButton } from "../components/PageHelpButton";
+import { OrbitMark } from "../components/orbit/OrbitMark";
 import {
   useGetPlansQuery, useGetAddonPacksQuery,
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
@@ -65,11 +66,20 @@ type BillingTab = "plans" | "addons" | "history";
 const BILLING_TABS: BillingTab[] = ["plans", "addons", "history"];
 
 /**
- * "audit"/"crawl" as the API spells them, in the user's language and correctly
+ * The API's credit-type identifiers, in the user's language and correctly
  * pluralised — the raw value is an identifier, not something to put on screen.
+ *
+ * A lookup rather than a ternary: with three types, an `audit ? … : …` would
+ * silently label Orbit question packs as crawls, including on receipts.
  */
+const CREDIT_TYPE_KEY: Record<string, string> = {
+  audit: "billing.typeAudit",
+  crawl: "billing.typeCrawl",
+  orbit: "billing.typeOrbit",
+};
+
 function creditType(t: TFunction, type: string, count: number): string {
-  return t(type === "audit" ? "billing.typeAudit" : "billing.typeCrawl", { count });
+  return t(CREDIT_TYPE_KEY[type] ?? "billing.typeCrawl", { count });
 }
 
 export default function Billing() {
@@ -563,7 +573,7 @@ export default function Billing() {
                 above: on the tab where someone is deciding whether to buy more,
                 what they already have is the deciding number. */}
             {usage && (
-              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="lg">
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md" mb="lg">
                 <CreditBalance
                   icon={Search}
                   label={t("billing.auditCredits")}
@@ -576,6 +586,14 @@ export default function Billing() {
                   planLeft={Math.max(0, usage.crawls.planQuota - usage.crawls.used)}
                   addonCredits={usage.crawls.addonCredits}
                 />
+                {usage.orbit && (
+                  <CreditBalance
+                    icon={OrbitMark}
+                    label={t("billing.orbitCredits")}
+                    planLeft={Math.max(0, usage.orbit.planQuota - usage.orbit.used)}
+                    addonCredits={usage.orbit.addonCredits}
+                  />
+                )}
               </SimpleGrid>
             )}
 
@@ -823,7 +841,11 @@ function CreditBalance({
   planLeft,
   addonCredits,
 }: {
-  icon: typeof Search;
+  /**
+   * A lucide icon, or the Orbit mark — which takes only `size`, so anything
+   * rendered here must not depend on the icon accepting `style`.
+   */
+  icon: React.ComponentType<{ size?: number }>;
   label: string;
   planLeft: number;
   addonCredits: number;
@@ -835,7 +857,12 @@ function CreditBalance({
       <Group justify="space-between" align="flex-start" wrap="nowrap">
         <div>
           <Group gap={6} mb={4}>
-            <Icon size={13} style={{ color: "var(--muted, var(--mantine-color-dimmed))" }} />
+            {/* Colour on the wrapper rather than the icon: a lucide glyph
+                inherits `currentColor`, and the Orbit mark — which is a logo,
+                not a glyph — correctly ignores it. */}
+            <Box component="span" c="dimmed" display="inline-flex">
+              <Icon size={13} />
+            </Box>
             <Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.02em" }}>
               {label}
             </Text>
@@ -1643,13 +1670,16 @@ function UsageSummary({
         </Box>
       )}
 
-      {/* Three cells now, not four: workspaces are no longer an allowance to
-          spend — an account may have as many as it pays for — so the panel
-          reports this workspace's own audits, crawls, and sites. */}
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={0}>
+      {/* Workspaces are no longer an allowance to spend — an account may have as
+          many as it pays for — so the panel reports this workspace's own audits,
+          crawls, sites, and the Orbit questions its plan includes. */}
+      <SimpleGrid cols={{ base: 1, sm: usage.orbit ? 4 : 3 }} spacing={0}>
         <UsageCell icon={Search} label={t("billing.usageAudits")} used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
         <UsageCell icon={Globe2} label={t("billing.usageCrawls")} used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
         <UsageCell icon={Layers} label={t("billing.usageSites")} used={usage.sites.used} quota={usage.sites.quota} />
+        {usage.orbit && (
+          <UsageCell icon={OrbitMark} label={t("billing.usageOrbit")} used={usage.orbit.used} quota={usage.orbit.planQuota} credits={usage.orbit.addonCredits} />
+        )}
       </SimpleGrid>
     </Card>
   );
@@ -1658,7 +1688,8 @@ function UsageSummary({
 function UsageCell({
   icon: Icon, label, used, quota, credits,
 }: {
-  icon: typeof Search;
+  /** A lucide icon, or the Orbit mark — so `size` is the only prop relied on. */
+  icon: React.ComponentType<{ size?: number }>;
   label: string;
   /** Null when the number is a flat limit rather than a used/quota pair (sites per workspace). */
   used: number | null;
@@ -1672,7 +1703,9 @@ function UsageCell({
   return (
     <Box p="lg" style={{ borderRight: "1px solid var(--border)", borderTop: "1px solid var(--border)" }}>
       <Group gap={6} mb={8}>
-        <Icon size={14} style={{ color: "var(--muted, var(--mantine-color-dimmed))" }} />
+        <Box component="span" c="dimmed" display="inline-flex">
+          <Icon size={14} />
+        </Box>
         <Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.02em" }}>{label}</Text>
       </Group>
       {used === null ? (

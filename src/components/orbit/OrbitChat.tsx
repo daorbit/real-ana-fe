@@ -297,8 +297,21 @@ export function OrbitChat({
                     <Menu.Item
                       key={m.id}
                       onClick={() => setModel(m.id)}
+                      // Shown but not selectable. Hiding a model the plan
+                      // cannot reach would make the menu tidier and the upgrade
+                      // invisible — this is where someone on the free tier
+                      // finds out a better model exists and what unlocks it.
+                      disabled={m.locked}
                       leftSection={<ModelIcon id={m.id} size={16} />}
-                      rightSection={m.id === model ? <Check size={13} /> : undefined}
+                      rightSection={
+                        m.locked ? (
+                          <Text size="xs" c="dimmed" tt="capitalize">
+                            {m.tier}
+                          </Text>
+                        ) : m.id === model ? (
+                          <Check size={13} />
+                        ) : undefined
+                      }
                       // Without a bounded width the label section grows to fit
                       // its content and `truncate` never engages.
                       styles={{ itemLabel: { minWidth: 0 } }}
@@ -310,7 +323,7 @@ export function OrbitChat({
                         {m.label}
                       </Text>
                       <Text size="xs" c="dimmed" lh={1.35} truncate>
-                        {m.hint}
+                        {m.locked ? `Orbit ${m.tier} and up` : m.hint}
                       </Text>
                     </Menu.Item>
                   ))}

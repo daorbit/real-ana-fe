@@ -118,6 +118,31 @@ export type Plan = {
 };
 
 /**
+ * An Orbit AI tier.
+ *
+ * A separate ladder from `Plan`: bought per workspace like a plan, but
+ * independently of one, so a workspace carries both at once. Everything except
+ * price is fixed in backend code (`src/orbit-plans.ts`).
+ */
+export type OrbitPlan = {
+  slug: string;
+  name: string;
+  description: string;
+  priceMonthly: CurrencyPrices;
+  priceYearly: CurrencyPrices;
+  /** Questions per billing cycle. */
+  monthlyQuota: number;
+  /** The highest model tier this plan may reach. */
+  modelTier: "basic" | "standard" | "advanced";
+  maxHistoryTurns: number;
+  maxQuestionChars: number;
+  hourlyBurst: number;
+  /** Whether answers may read the workspace's own analytics. */
+  dataAccess: boolean;
+  features: string[];
+};
+
+/**
  * The exchange rate the non-INR plan prices were last computed from.
  *
  * `rates` is quote-units per 1 INR, so a USD rate of 0.0115 means ₹1 ≈ $0.0115.
@@ -206,7 +231,7 @@ export type ReportScheduleInput = {
 
 export type BillingCycle = "monthly" | "yearly";
 
-export type AddonType = "audit" | "crawl";
+export type AddonType = "audit" | "crawl" | "orbit";
 
 export type AddonPack = {
   _id: string;
@@ -235,6 +260,23 @@ export type QuotaSummary = {
   audits: { planQuota: number; used: number; addonCredits: number };
   crawls: { planQuota: number; used: number; addonCredits: number };
   sites: { quota: number; used: number };
+  /**
+   * The Orbit AI tier this workspace is effectively on, and its question usage.
+   *
+   * The tier is whatever is strongest between what the analytics plan grants
+   * and anything bought on top, so this is not always the plan above — a
+   * workspace can be on analytics Starter and Orbit Pro. Optional because a
+   * subscription row written before Orbit existed has no figures to report.
+   */
+  orbit?: {
+    plan: { slug: string; name: string };
+    tier: "basic" | "standard" | "advanced";
+    planQuota: number;
+    used: number;
+    addonCredits: number;
+    periodEnd: string | null;
+    dataAccess: boolean;
+  };
   maxSitesPerWorkspace: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];

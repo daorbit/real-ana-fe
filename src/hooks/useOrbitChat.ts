@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useAskOrbitMutation, useGetOrbitStatusQuery } from "../store";
 import { errMessage } from "../notify";
+import { useWorkspace } from "../workspace";
 
 /**
  * The Orbit conversation.
@@ -72,7 +73,15 @@ export function useOrbitChat() {
   const [messages, setMessages] = useState<OrbitMessage[]>([]);
   const [input, setInput] = useState("");
   const [ask, { isLoading: thinking }] = useAskOrbitMutation();
-  const { data: status } = useGetOrbitStatusQuery();
+
+  // Orbit is metered per workspace, so both calls are scoped to the active one
+  // and there is nothing to ask until it is known.
+  const { active } = useWorkspace();
+  const workspaceId = active?._id ?? "";
+  const { data: status } = useGetOrbitStatusQuery(workspaceId, { skip: !workspaceId });
+
+  /** Questions left this cycle. Null until the first answer reports it. */
+  const [remaining, setRemaining] = useState<number | null>(null);
 
   // Read once, lazily: `localStorage` is unavailable in some privacy modes, and
   // a throw here would take the whole panel down over a remembered preference.
@@ -85,18 +94,27 @@ export function useOrbitChat() {
   });
 
   const models = status?.models ?? [];
+  // Locked models are listed so the picker can show what an upgrade buys, but
+  // they can never be the *selected* one: a remembered preference from a plan
+  // that has since lapsed would otherwise pick a model the server will refuse,
+  // and the answer would silently come from a different one.
+  const unlocked = models.filter((m) => !m.locked);
   // An empty or stale id means "no preference", which the server resolves to
   // its own default — so a model retired since the last visit costs nothing.
-  const activeModel = models.some((m) => m.id === model) ? model : models[0]?.id ?? "";
+  const activeModel = unlocked.some((m) => m.id === model) ? model : unlocked[0]?.id ?? "";
 
   const setModel = useCallback((id: string) => {
+    // A locked model is shown to advertise the tier, not to be chosen. Ignoring
+    // the click here keeps the "selected" state honest without the picker
+    // needing to know about plans.
+    if (models.some((m) => m.id === id && m.locked)) return;
     setModelState(id);
     try {
       localStorage.setItem(MODEL_KEY, id);
     } catch {
       // Preference is lost on reload; the chat still works.
     }
-  }, []);
+  }, [models]);
 
   /**
    * The transcript as the server wants it.
@@ -110,7 +128,7 @@ export function useOrbitChat() {
   const send = useCallback(
     async (raw?: string) => {
       const question = (raw ?? input).trim();
-      if (!question || thinking) return;
+      if (!question || thinking || !workspaceId) return;
 
       const history = historyRef.current
         // A failed turn was never answered, so sending it back would present the
@@ -127,7 +145,13 @@ export function useOrbitChat() {
       setInput("");
 
       try {
-        const answered = await ask({ question, history, model: activeModel }).unwrap();
+        const answered = await ask({
+          workspaceId,
+          question,
+          history,
+          model: activeModel,
+        }).unwrap();
+        setRemaining(answered.remaining);
         setMessages((prev) => {
           const next = [
             ...prev,
@@ -166,7 +190,7 @@ export function useOrbitChat() {
         });
       }
     },
-    [ask, input, thinking, activeModel],
+    [ask, input, thinking, activeModel, workspaceId],
   );
 
   const reset = useCallback(() => {
@@ -186,9 +210,18 @@ export function useOrbitChat() {
     available: status?.configured ?? true,
     started: messages.length > 0,
 
-    /** The models that can answer, and which one is chosen. */
+    /**
+     * Every model worth showing, including the ones this plan cannot reach —
+     * those carry `locked`, and the picker greys them with the tier that
+     * unlocks them rather than hiding the upgrade.
+     */
     models,
     model: activeModel,
     setModel,
+
+    /** The workspace's Orbit tier, for the quota line and the upgrade prompt. */
+    plan: status?.plan ?? null,
+    /** Questions left this cycle. Null until an answer reports it. */
+    remaining,
   };
 }

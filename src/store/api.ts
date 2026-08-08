@@ -17,7 +17,7 @@ import type {
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
-  Plan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
+  Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
   Coupon, CouponCheckResult, Invoice,
@@ -352,16 +352,36 @@ export const api = createApi({
     /* ------------------------------ Orbit AI ------------------------------ */
 
     /**
-     * Whether Orbit can run, and which models may answer.
+     * Whether Orbit can run, which models may answer, and the workspace's tier.
      *
      * The list is already filtered server-side to providers that have a key, so
-     * the picker never offers something that would fail.
+     * the picker never offers something that would fail. Models above the
+     * workspace's Orbit plan come back `locked` rather than missing — the picker
+     * shows them greyed, because a hidden upgrade sells nothing.
      */
     getOrbitStatus: build.query<
-      { configured: boolean; models: { id: string; label: string; hint: string }[] },
-      void
+      {
+        configured: boolean;
+        plan: {
+          slug: string;
+          name: string;
+          tier: "basic" | "standard" | "advanced";
+          monthlyQuota: number;
+          maxQuestionChars: number;
+        };
+        models: {
+          id: string;
+          label: string;
+          hint: string;
+          /** True when the workspace's Orbit plan cannot reach this model. */
+          locked: boolean;
+          /** The tier that unlocks it, for the upgrade hint. */
+          tier: "basic" | "standard" | "advanced";
+        }[];
+      },
+      string
     >({
-      query: () => "/api/orbit/status",
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/orbit/status`,
     }),
 
     /**
@@ -385,15 +405,27 @@ export const api = createApi({
          */
         model: string;
         modelLabel: string;
+        /**
+         * Questions left this cycle, plan remainder plus purchased credits.
+         *
+         * Returned with the answer so the panel can count down without a second
+         * round trip. Null when the workspace has no subscription row to read.
+         */
+        remaining: number | null;
       },
       {
+        workspaceId: string;
         question: string;
         history: { role: "user" | "assistant"; content: string }[];
         /** Preferred model. The server treats an unknown id as "no preference". */
         model?: string;
       }
     >({
-      query: (body) => ({ url: "/api/orbit/ask", method: "POST", body }),
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/ask`,
+        method: "POST",
+        body,
+      }),
     }),
 
     /* --------------------------- contact inbox ---------------------------- */
@@ -1059,6 +1091,28 @@ export const api = createApi({
       invalidatesTags: ["Plan"],
     }),
 
+    /**
+     * The Orbit AI tiers. Same story as the plans above — everything but price
+     * is fixed in backend code, and they share the `Plan` tag so a currency
+     * sync refreshes both ladders at once.
+     */
+    getAdminOrbitPlans: build.query<OrbitPlan[], void>({
+      query: () => "/api/admin/billing/orbit-plans",
+      providesTags: ["Plan"],
+    }),
+
+    saveAdminOrbitPlanPrice: build.mutation<
+      OrbitPlan,
+      { slug: string; priceMonthly: CurrencyPrices; priceYearly: CurrencyPrices }
+    >({
+      query: ({ slug, ...body }) => ({
+        url: `/api/admin/billing/orbit-plans/${slug}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Plan"],
+    }),
+
     /** The rate the USD column was last derived from — cached, never fetched live. */
     getAdminFx: build.query<FxStatus, void>({
       query: () => "/api/admin/billing/fx",
@@ -1189,6 +1243,8 @@ export const {
   useVerifyAddonPurchaseMutation,
   useGetAdminPlansQuery,
   useSaveAdminPlanPriceMutation,
+  useGetAdminOrbitPlansQuery,
+  useSaveAdminOrbitPlanPriceMutation,
   useGetReportSchedulesQuery,
   useSaveReportScheduleMutation,
   useDeleteReportScheduleMutation,
