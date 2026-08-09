@@ -15,6 +15,7 @@ const LABELS: Record<keyof StatsFilter, string> = {
   path: "Page",
   language: "Language",
   utmSource: "UTM source",
+  utmMedium: "UTM medium",
   utmCampaign: "UTM campaign",
   eventName: "Event",
 };

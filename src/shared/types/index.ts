@@ -710,6 +710,7 @@ export type Stats = {
   languages: Bucket[];
   screenSizes: Bucket[];
   utmSources: Bucket[];
+  utmMediums: Bucket[];
   utmCampaigns: Bucket[];
 
   // clicks
@@ -767,6 +768,7 @@ export type StatsFilter = Partial<{
   path: string;
   language: string;
   utmSource: string;
+  utmMedium: string;
   utmCampaign: string;
   eventName: string;
 }>;

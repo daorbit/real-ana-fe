@@ -44,6 +44,7 @@ const LANGUAGES = ["en-US", "en-GB", "de-DE", "fr-FR", "pt-BR", "ja-JP"];
 const SCREENS = ["1920×1080", "1440×900", "390×844", "2560×1440", "768×1024"];
 const CHANNELS = ["Organic Search", "Direct", "Referral", "Social", "Paid", "Email"];
 const UTM_SOURCES = ["newsletter", "producthunt", "twitter", "google", "partner"];
+const UTM_MEDIUMS = ["email", "social", "cpc", "referral", "organic"];
 const UTM_CAMPAIGNS = ["launch-week", "spring-sale", "docs-refresh", "webinar"];
 
 /** How many buckets a range is drawn with, and how each is labelled. */
@@ -146,6 +147,7 @@ export function demoStats(range: string): Stats {
     languages: ranked(LANGUAGES, visitors),
     screenSizes: ranked(SCREENS, visitors),
     utmSources: ranked(UTM_SOURCES, Math.round(sessions * 0.22)),
+    utmMediums: ranked(UTM_MEDIUMS, Math.round(sessions * 0.22)),
     utmCampaigns: ranked(UTM_CAMPAIGNS, Math.round(sessions * 0.18)),
     channels: ranked(CHANNELS, sessions, 0.7),
 
