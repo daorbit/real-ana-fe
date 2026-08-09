@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Anchor, Badge, Box, Button, Card, Center, Group, Loader, Select, Stack,
   Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
-  UnstyledButton,
+  UnstyledButton, Pagination,
 } from "@mantine/core";
 import {
   Search, RefreshCw, Globe, History, Trash2, Trophy,
@@ -57,6 +57,16 @@ const TABS = [
 type TabValue = (typeof TABS)[number]["value"];
 
 /**
+ * How many past audits to fetch, and how many to show per page.
+ *
+ * The history rows omit the report body, so 200 of them is a small payload —
+ * cheaper to fetch once and page through on the client than to round-trip per
+ * page, and it keeps the score-trend sparkline working off the full series.
+ */
+const HISTORY_LIMIT = 200;
+const HISTORY_PAGE_SIZE = 15;
+
+/**
  * Past audits for this site, newest first.
  *
  * The point of keeping history is to answer "did that fix work?", so each row
@@ -78,6 +88,13 @@ function HistoryPanel({
   /** Null for a viewer, who keeps the full history but cannot remove a run. */
   onDelete: ((id: string) => void) | null;
 }) {
+  const [page, setPage] = useState(1);
+
+  // A deleted run can leave the last page empty; step back rather than showing
+  // an empty table under a page number that no longer exists.
+  const pageCount = Math.max(1, Math.ceil(history.length / HISTORY_PAGE_SIZE));
+  const current = Math.min(page, pageCount);
+
   if (loading) {
     return (
       <Card withBorder radius="md" padding="xl">
@@ -123,7 +140,12 @@ function HistoryPanel({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {history.map((h, i) => {
+            {history
+              .slice((current - 1) * HISTORY_PAGE_SIZE, current * HISTORY_PAGE_SIZE)
+              .map((h, pageIndex) => {
+              // Indexed against the whole history, not the page slice, so the
+              // first row of page 2 still compares to the last row of page 1.
+              const i = (current - 1) * HISTORY_PAGE_SIZE + pageIndex;
               const isOpen = openId === h._id;
               // History is newest-first, so the run *before* this one is the
               // next index, not the previous.
@@ -225,6 +247,24 @@ function HistoryPanel({
           </Table.Tbody>
         </Table>
       </ScrollArea>
+
+      {/* Hidden on a single page: a pager that can only ever say "1 of 1" is
+          noise, not navigation. */}
+      {pageCount > 1 && (
+        <Group justify="space-between" px="md" py="sm" wrap="nowrap" className="seo-history-pager">
+          <Text size="xs" c="dimmed">
+            {(current - 1) * HISTORY_PAGE_SIZE + 1}–
+            {Math.min(current * HISTORY_PAGE_SIZE, history.length)} of {history.length}
+          </Text>
+          <Pagination
+            size="sm"
+            value={current}
+            onChange={setPage}
+            total={pageCount}
+            withEdges={pageCount > 5}
+          />
+        </Group>
+      )}
     </Card>
   );
 }
@@ -360,8 +400,10 @@ export default function Seo() {
     });
   }
 
+  // The default limit is 20, which silently truncated the History tab on any
+  // site audited regularly — the older runs existed but were unreachable.
   const { data: history = [], isLoading: historyLoading } = useGetSeoReportsQuery(
-    { workspaceId, siteId },
+    { workspaceId, siteId, limit: HISTORY_LIMIT },
     { skip: !workspaceId || !siteId }
   );
 
