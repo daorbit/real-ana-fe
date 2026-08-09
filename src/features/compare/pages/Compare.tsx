@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
-  Alert, Box, Button, Card, Center, Group, Loader, Select, SimpleGrid, Stack,
+  Box, Button, Card, Center, Group, Loader, Select, SimpleGrid, Stack,
   Text, TextInput, ThemeIcon, Tooltip, ActionIcon,
 } from "@mantine/core";
-import { Info, Plus, RefreshCw, Swords, Target, Trash2 } from "lucide-react";
+import { HelpCircle, Plus, RefreshCw, Swords, Target, Trash2 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { HelpDrawer } from "@/shared/ui/HelpDrawer";
+import { COMPARE_HELP } from "@/features/compare/components/help";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import {
   useGetSitesQuery, useGetCompetitorsQuery, useGetCompetitorAnalysisQuery,
@@ -50,6 +52,7 @@ export default function Compare() {
 
   const [picked, setPicked] = useState("");
   const [url, setUrl] = useState("");
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Derived during render rather than stored, so the first render after a
   // workspace switch already targets a real site instead of firing a request
@@ -141,6 +144,17 @@ export default function Compare() {
         description="How your pages stack up against your competitors', and what would close the gap."
         actions={
           <Group gap="sm" wrap="nowrap">
+            <Tooltip label="How comparison scoring works" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="lg"
+                onClick={() => setHelpOpen(true)}
+                aria-label="How comparison scoring works"
+              >
+                <HelpCircle size={18} />
+              </ActionIcon>
+            </Tooltip>
             {sites.length > 1 && (
               <Select
                 size="sm"
@@ -174,6 +188,13 @@ export default function Compare() {
         }
       />
 
+      <HelpDrawer
+        opened={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title="Compare"
+        sections={COMPARE_HELP}
+      />
+
       {sitesLoading ? (
         <Center py="xl">
           <Loader size="sm" />
@@ -195,14 +216,6 @@ export default function Compare() {
         </Card>
       ) : (
         <Stack gap="lg">
-          <Alert color="gray" variant="light" radius="md" icon={<Info size={15} />}>
-            Competitors are scored on on-page signals only — titles, headings, content
-            depth, structured data and response time. Lighthouse is deliberately not run
-            against them, so these numbers are not comparable to the Lighthouse-blended
-            score on the SEO Overview tab. Your own page is re-scored the same way here so
-            both sides mean the same thing.
-          </Alert>
-
           {canEdit && (
             <Card withBorder radius="md" padding="lg">
               <Group gap="sm" align="flex-end" wrap="wrap">
