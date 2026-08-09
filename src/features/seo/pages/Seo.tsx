@@ -8,7 +8,7 @@ import {
   Search, RefreshCw, Globe, History, Trash2, Trophy,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
-  HelpCircle,
+  HelpCircle, Bot,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
@@ -35,7 +35,7 @@ import { SearchPanel } from "@/features/seo/components/SearchPanel";
 import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
 import { CrawlPanel } from "@/features/seo/components/CrawlPanel";
 import {
-  OverviewPanel, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
+  OverviewPanel, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel, AiSearchPanel,
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
 
@@ -46,6 +46,7 @@ const TABS = [
   { value: "technical", label: "Technical", icon: Wrench },
   { value: "links", label: "Links", icon: Link2 },
   { value: "schema", label: "Schema", icon: Braces },
+  { value: "ai", label: "AI search", icon: Bot },
   { value: "crawl", label: "Crawl", icon: Layers },
   { value: "search", label: "Search", icon: Search },
   { value: "compare", label: "Compare", icon: Swords },
@@ -738,6 +739,7 @@ export default function Seo() {
             )}
             {tab === "links" && <LinksPanel links={data.links} />}
             {tab === "schema" && <SchemaPanel schema={data.schema} />}
+            {tab === "ai" && <AiSearchPanel aiSearch={data.aiSearch} />}
             {tab === "crawl" && (
               <CrawlPanel
                 report={crawlReport}

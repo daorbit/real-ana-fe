@@ -1,6 +1,6 @@
 import {
   ListChecks, Tags, FileText, Wrench, Link2, Braces, Layers, Search, Swords,
-  Lightbulb, History,
+  Lightbulb, History, Bot,
 } from "lucide-react";
 import type { TFunction } from "i18next";
 import type { HelpSection } from "@/shared/ui/HelpDrawer";
@@ -26,6 +26,7 @@ const SPEC = [
   { id: "technical", icon: Wrench, items: ["Checks", "Response", "CrawlerFiles", "Vitals"] },
   { id: "links", icon: Link2, items: ["Broken*", "Redirects", "Errors", "Scope"] },
   { id: "schema", icon: Braces, items: ["Blocks", "Errors*", "Recommended"] },
+  { id: "ai", icon: Bot, items: ["Access*", "Training", "Readiness", "LlmsTxt"] },
   { id: "crawl", icon: Layers, items: ["Pages", "Depth", "Issues"] },
   { id: "search", icon: Search, items: ["Clicks", "Queries", "Position"] },
   { id: "compare", icon: Swords, items: ["Add", "SideBySide", "Refresh"] },

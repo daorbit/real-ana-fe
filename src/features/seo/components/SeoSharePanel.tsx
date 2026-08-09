@@ -35,6 +35,7 @@ const PANEL_GROUPS: { heading: string; note?: string; panels: PanelDef[] }[] = [
       { key: "content", label: "Content", hint: "Word count, headings, images" },
       { key: "links", label: "Links", hint: "Full link-check results" },
       { key: "schema", label: "Structured data", hint: "JSON-LD validation" },
+      { key: "aiSearch", label: "AI search", hint: "Answer-engine access and readiness" },
     ],
   },
 ];
@@ -44,7 +45,7 @@ const ALL_PANELS = PANEL_GROUPS.flatMap((g) => g.panels);
 /** Server defaults for a report never configured — the summary group on, detail off. */
 const DEFAULT_PANELS: SeoSharePanels = {
   summary: true, issues: true, technical: true, performance: true,
-  meta: false, content: false, links: false, schema: false,
+  meta: false, content: false, links: false, schema: false, aiSearch: false,
 };
 
 /**

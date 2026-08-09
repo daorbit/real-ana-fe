@@ -2,6 +2,7 @@ import { Stack, Group, Text, Alert, Tooltip } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import {
   ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
+  AiSearchPanel,
 } from "@/features/seo/components/SeoPanels";
 import { LinksPanel } from "@/features/seo/components/LinksPanel";
 import { SchemaPanel } from "@/features/seo/components/SchemaPanel";
@@ -74,6 +75,7 @@ export function PublicSeoBody({
       )}
       {p.links && data.links && <LinksPanel links={data.links} />}
       {p.schema && data.schema && <SchemaPanel schema={data.schema} />}
+      {p.aiSearch && data.aiSearch && <AiSearchPanel aiSearch={data.aiSearch} />}
     </Stack>
   );
 }

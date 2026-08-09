@@ -1126,9 +1126,51 @@ export type SeoSiteFiles = {
 
 export type SeoIssue = {
   severity: "critical" | "warning" | "info";
-  area: "meta" | "content" | "technical" | "files";
+  area: "meta" | "content" | "technical" | "files" | "ai";
   title: string;
   detail: string;
+};
+
+/** How one AI crawler is treated by the site's robots.txt. */
+export type AiCrawlerAccess = {
+  label: string;
+  /** The literal User-agent token, e.g. "GPTBot". */
+  agent: string;
+  /**
+   * Training bots feed a model; answer bots fetch pages to cite live. Blocking
+   * the first is an editorial choice, blocking the second removes the page from
+   * AI answers — so the UI must not present them the same way.
+   */
+  purpose: "training" | "answers" | "both";
+  allowed: boolean;
+  /** True when robots.txt names this agent rather than it falling to `*`. */
+  explicit: boolean;
+};
+
+/** Whether answer engines can reach the page, and can quote what they find. */
+export type SeoAiSearch = {
+  score: number;
+  crawlers: AiCrawlerAccess[];
+  blockedCount: number;
+  llmsTxt: {
+    present: boolean;
+    url: string;
+    bytes: number;
+    title: string;
+    linkCount: number;
+  };
+  answerReadiness: {
+    quotableSchemaTypes: string[];
+    hasFaqSchema: boolean;
+    hasArticleSchema: boolean;
+    hasOrganizationSchema: boolean;
+    questionHeadings: number;
+    hasAuthor: boolean;
+    hasDate: boolean;
+    structuredBlocks: number;
+    wordCount: number;
+  };
+  findings: SeoFileFinding[];
 };
 
 /** The audit body itself, as produced by the server's SEO analyser. */
@@ -1145,6 +1187,8 @@ export type SeoReportData = {
   schema?: SeoSchemaValidation;
   /** Link check results. Absent on reports stored before the checker shipped. */
   links?: SeoLinkCheck;
+  /** AI search readiness. Absent on reports stored before the checker shipped. */
+  aiSearch?: SeoAiSearch;
   issues: SeoIssue[];
   score: number;
 };
@@ -1177,6 +1221,7 @@ export type SeoSharePanels = {
   content: boolean;
   links: boolean;
   schema: boolean;
+  aiSearch: boolean;
 };
 
 /** Per-report share state, returned by the owner-facing share endpoints. */
@@ -1208,6 +1253,7 @@ export type PublicSeoReport = {
   siteFiles: SeoSiteFiles | null;
   links: SeoLinkCheck | null;
   schema: SeoSchemaValidation | null;
+  aiSearch: SeoAiSearch | null;
 };
 
 /** A history row: the same document with the heavy body left out. */

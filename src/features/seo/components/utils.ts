@@ -35,6 +35,7 @@ export const AREA_LABEL: Record<SeoIssue["area"], string> = {
   content: "Content",
   technical: "Technical",
   files: "Crawler files",
+  ai: "AI search",
 };
 
 /** The server reports HTML bytes as a string; show it as something readable. */

@@ -12,3 +12,4 @@ export { MetaPanel } from "@/features/seo/components/panels/MetaPanel";
 export { ContentPanel } from "@/features/seo/components/panels/ContentPanel";
 export { TechnicalPanel } from "@/features/seo/components/panels/TechnicalPanel";
 export { SuggestionsPanel } from "@/features/seo/components/panels/SuggestionsPanel";
+export { AiSearchPanel } from "@/features/seo/components/panels/AiSearchPanel";
