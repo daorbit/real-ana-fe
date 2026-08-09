@@ -325,7 +325,7 @@ export const demoSeoShare: SeoShareState = {
   token: null,
   panels: {
     summary: true, issues: true, technical: true, performance: true,
-    meta: false, content: false, links: false, schema: false,
+    meta: false, content: false, links: false, schema: false, aiSearch: false,
   },
   views: 0,
   lastViewedAt: null,
