@@ -1,6 +1,7 @@
 import { Badge, Box, Card, Divider, Group, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import { ArrowDown, ArrowUp, Check, Minus, Target } from "lucide-react";
 import type { SeoCompetitorComparison } from "@/shared/types";
+import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 
 /**
  * One competitor, summarised as the answer rather than the data.
@@ -116,9 +117,18 @@ export function GapCard({
       <Stack gap="md">
         {gap.recommendations.length > 0 && (
           <Box>
-            <Text size="xs" fw={650} c="dimmed" mb={6}>
-              What would close the gap
-            </Text>
+            <Group justify="space-between" wrap="nowrap" mb={6}>
+              <Text size="xs" fw={650} c="dimmed">
+                What would close the gap
+              </Text>
+              {/* Orbit already receives these same gaps in its data digest, so
+                  it answers from the measured comparison rather than guessing.
+                  Naming the competitor is what lets it pick the right one. */}
+              <AskOrbitButton
+                question={`How do I close the SEO gap against ${label}? Walk me through the changes in order.`}
+                label="Ask Orbit"
+              />
+            </Group>
             <Stack gap={8}>
               {gap.recommendations.map((rec, i) => (
                 <Group key={i} gap={8} align="flex-start" wrap="nowrap">

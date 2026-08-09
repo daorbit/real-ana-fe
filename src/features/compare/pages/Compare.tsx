@@ -15,6 +15,7 @@ import {
 } from "@/app/store";
 import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
 import { timeAgo } from "@/shared/lib";
+import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 import { GapCard } from "@/features/compare/components/GapCard";
 import { MetricMatrix } from "@/features/compare/components/MetricMatrix";
 import { ScoreTrendChart } from "@/features/compare/components/ScoreTrendChart";
@@ -149,6 +150,13 @@ export default function Compare() {
                 onChange={(v) => setPicked(v ?? "")}
                 data={sites.map((s) => ({ value: s.siteId, label: s.domain }))}
                 allowDeselect={false}
+              />
+            )}
+            {analysis && analysis.competitors.length > 0 && (
+              <AskOrbitButton
+                size="sm"
+                label="Ask Orbit"
+                question={`Looking at all my tracked competitors for ${site?.domain ?? "my site"}, what should I fix first and why?`}
               />
             )}
             {canEdit && competitors.length > 0 && (
