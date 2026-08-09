@@ -14,6 +14,7 @@ import type { Placed } from "@/features/analytics/hooks/useHomeWidgets";
 import type { TrackerOptions } from "@/features/workspace/tracker";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
+  SeoCompetitorAnalysis, SeoCompetitorHistoryPoint,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage,
@@ -744,6 +745,30 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
     }),
 
+    /**
+     * Your latest audit against every competitor, with the gaps worked out.
+     *
+     * 404s until the site has an audit of its own — there is no baseline to
+     * compare against before then, and the page says so rather than retrying.
+     */
+    getCompetitorAnalysis: build.query<
+      SeoCompetitorAnalysis,
+      { workspaceId: string; siteId: string }
+    >({
+      query: ({ workspaceId, siteId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/analysis`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
+    }),
+
+    getCompetitorHistory: build.query<
+      SeoCompetitorHistoryPoint[],
+      { workspaceId: string; siteId: string }
+    >({
+      query: ({ workspaceId, siteId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/history`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
+    }),
+
     addCompetitor: build.mutation<
       SeoCompetitor,
       { workspaceId: string; siteId: string; url: string; label?: string }
@@ -762,6 +787,18 @@ export const api = createApi({
     >({
       query: ({ workspaceId, siteId, competitorId }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/${competitorId}/refresh`,
+        method: "POST",
+      }),
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
+    }),
+
+    /** Re-fetch every competitor on the site in one call. */
+    refreshAllCompetitors: build.mutation<
+      { competitors: SeoCompetitor[]; refreshed: number; failed: number },
+      { workspaceId: string; siteId: string }
+    >({
+      query: ({ workspaceId, siteId }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/refresh-all`,
         method: "POST",
       }),
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
@@ -1225,8 +1262,11 @@ export const {
   useGetDemoUsageQuery,
   useSetDemoLimitMutation,
   useGetCompetitorsQuery,
+  useGetCompetitorAnalysisQuery,
+  useGetCompetitorHistoryQuery,
   useAddCompetitorMutation,
   useRefreshCompetitorMutation,
+  useRefreshAllCompetitorsMutation,
   useDeleteCompetitorMutation,
   useGetSearchTrafficQuery,
   useGetFieldVitalsQuery,

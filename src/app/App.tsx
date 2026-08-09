@@ -10,6 +10,7 @@ import Signup from "@/features/auth/pages/Signup";
 import Home from "@/features/analytics/pages/Home";
 import Analytics from "@/features/analytics/pages/Analytics";
 import Seo from "@/features/seo/pages/Seo";
+import Compare from "@/features/compare/pages/Compare";
 import SeoReportPrint from "@/features/seo/pages/SeoReportPrint";
 import Workspaces from "@/features/workspace/pages/Workspaces";
 import Developers from "@/features/support/pages/Developers";
@@ -167,6 +168,7 @@ export default function App() {
             <Route path="/app" element={<Protected><Home /></Protected>} />
             <Route path="/app/analytics" element={<Protected><Analytics /></Protected>} />
             <Route path="/app/seo" element={<Protected><Seo /></Protected>} />
+            <Route path="/app/compare" element={<Protected><Compare /></Protected>} />
             {/* Print view: protected for the workspace context, but rendered
                 without the app shell — nothing in a client deliverable should
                 carry our navigation. */}

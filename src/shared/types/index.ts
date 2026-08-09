@@ -1289,7 +1289,81 @@ export type SeoCompareSnapshot = {
   schemaTypes: string[];
   schemaErrors: number;
 
+  /* --- richer fields; absent on snapshots taken before they shipped --- */
+
+  /** The H1-H3 outline in document order — how the page argues its case. */
+  headings?: { level: number; text: string }[];
+  /** The `robots` meta directive, lowercased. Empty when absent. */
+  metaRobots?: string;
+  /** True when the canonical points somewhere other than the fetched URL. */
+  canonicalMismatch?: boolean;
+  hreflangs?: string[];
+  /** Most frequent meaningful words, for overlap against your own page. */
+  keywords?: { word: string; count: number }[];
+  hasMobileViewport?: boolean;
+  /** Rendered text bytes over total HTML bytes, as a percentage. */
+  textRatio?: number;
+
   score: number;
+};
+
+/** Which side of a comparison a metric favours. */
+export type SeoCompareVerdict = "win" | "lose" | "tie";
+
+export type SeoMetricComparison = {
+  id: string;
+  label: string;
+  mine: string;
+  theirs: string;
+  verdict: SeoCompareVerdict;
+  /** Why the metric matters. Present only on rows you are losing. */
+  note?: string;
+};
+
+/** Everything the server worked out about one competitor versus your page. */
+export type SeoCompetitorGap = {
+  /** Positive means they are ahead of you. */
+  scoreGap: number;
+  metrics: SeoMetricComparison[];
+  missingKeywords: string[];
+  missingSchemaTypes: string[];
+  contentGaps: string[];
+  /** The highest-value changes, already ordered. */
+  recommendations: string[];
+};
+
+/** One competitor inside the analysis payload. */
+export type SeoCompetitorComparison = {
+  competitorId: string;
+  label: string;
+  url: string;
+  lastCheckedAt: string | null;
+  snapshot: SeoCompareSnapshot;
+  gap: SeoCompetitorGap;
+};
+
+/**
+ * Your latest audit against every tracked competitor.
+ *
+ * Computed server-side so the page and Orbit cannot disagree about who is
+ * winning.
+ */
+export type SeoCompetitorAnalysis = {
+  mine: SeoCompareSnapshot;
+  auditedAt: string;
+  competitors: SeoCompetitorComparison[];
+  /** Whoever leads by the most — the one worth reading first. */
+  toughest: string | null;
+};
+
+/** One recorded refresh, for plotting a competitor's score over time. */
+export type SeoCompetitorHistoryPoint = {
+  competitorId: string;
+  score: number;
+  wordCount: number;
+  responseTimeMs: number;
+  statusCode: number;
+  takenAt: string;
 };
 
 export type SeoCompetitor = {

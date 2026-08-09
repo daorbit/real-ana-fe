@@ -8,8 +8,9 @@ import {
   Search, RefreshCw, Globe, History, Trash2, Trophy,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
-  HelpCircle, Bot,
+  HelpCircle, Bot, ArrowRight,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { RunningDialog } from "@/shared/ui/RunningDialog";
@@ -20,8 +21,7 @@ import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
   useGetLatestSeoReportQuery, useGetSeoReportQuery, useDeleteSeoReportMutation,
-  useGetCompetitorsQuery, useAddCompetitorMutation, useRefreshCompetitorMutation,
-  useDeleteCompetitorMutation, useGetSearchTrafficQuery, useGetFieldVitalsQuery,
+  useGetSearchTrafficQuery, useGetFieldVitalsQuery,
   useRunCrawlMutation, useGetLatestCrawlQuery,
 } from "@/app/store";
 import { notify, errMessage, notifyError, confirmDelete } from "@/shared/lib/notify";
@@ -30,7 +30,6 @@ import { timeAgo, dateTime } from "@/shared/lib";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { SchemaPanel } from "@/features/seo/components/SchemaPanel";
 import { LinksPanel } from "@/features/seo/components/LinksPanel";
-import { ComparePanel } from "@/features/seo/components/ComparePanel";
 import { SearchPanel } from "@/features/seo/components/SearchPanel";
 import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
 import { CrawlPanel } from "@/features/seo/components/CrawlPanel";
@@ -329,10 +328,6 @@ export default function Seo() {
   const [analyze, { isLoading: analyzing }] = useAnalyzeSeoMutation();
   const [deleteReport] = useDeleteSeoReportMutation();
 
-  const { data: competitors = [], isLoading: competitorsLoading } = useGetCompetitorsQuery(
-    { workspaceId, siteId },
-    { skip: !workspaceId || !siteId }
-  );
   const { data: searchTraffic, isLoading: searchLoading } = useGetSearchTrafficQuery(
     { workspaceId, siteId },
     { skip: !workspaceId || !siteId }
@@ -360,44 +355,6 @@ export default function Seo() {
     } catch (e) {
       notifyError(e, "Crawl failed");
     }
-  }
-
-  const [addCompetitor, { isLoading: addingCompetitor }] = useAddCompetitorMutation();
-  const [refreshCompetitor] = useRefreshCompetitorMutation();
-  const [deleteCompetitor] = useDeleteCompetitorMutation();
-
-  async function addCompetitorUrl(url: string) {
-    try {
-      await addCompetitor({ workspaceId, siteId, url }).unwrap();
-      notify.success("Competitor added");
-    } catch (e) {
-      notify.error(errMessage(e, "Could not fetch that URL"));
-    }
-  }
-
-  async function refreshOne(competitorId: string) {
-    try {
-      await refreshCompetitor({ workspaceId, siteId, competitorId }).unwrap();
-      notify.success("Competitor refreshed");
-    } catch (e) {
-      notify.error(errMessage(e, "Could not refresh that competitor"));
-    }
-  }
-
-  function removeCompetitor(competitorId: string) {
-    confirmDelete({
-      title: "Remove this competitor?",
-      body: "The stored comparison is deleted. You can add the URL again later.",
-      confirmLabel: "Remove",
-      onConfirm: async () => {
-        try {
-          await deleteCompetitor({ workspaceId, siteId, competitorId }).unwrap();
-          notify.success("Competitor removed");
-        } catch (e) {
-          notify.error(errMessage(e, "Could not remove that competitor"));
-        }
-      },
-    });
   }
 
   // The default limit is 20, which silently truncated the History tab on any
@@ -793,17 +750,32 @@ export default function Seo() {
               <SearchPanel traffic={searchTraffic} loading={searchLoading} />
             )}
             {tab === "compare" && (
-              <ComparePanel
-                data={data}
-                siteName={site?.name ?? "This site"}
-                competitors={competitors}
-                loading={competitorsLoading}
-                adding={addingCompetitor}
-                onAdd={addCompetitorUrl}
-                onRefresh={refreshOne}
-                onDelete={removeCompetitor}
-                canEdit={canEdit}
-              />
+              <Card withBorder radius="md" padding="xl">
+                <Center>
+                  <Stack align="center" gap="xs" maw={440}>
+                    <ThemeIcon size={48} radius="xl" variant="light" color="emerald">
+                      <Swords size={24} />
+                    </ThemeIcon>
+                    <Text fw={650}>Compare has its own page</Text>
+                    <Text size="sm" c="dimmed" ta="center">
+                      Competitor tracking moved out of the audit: an audit is a
+                      snapshot of one URL, while a comparison is a set of rivals
+                      watched over time. You can now track up to 10, see what each
+                      covers that you do not, and follow their scores as they change.
+                    </Text>
+                    <Button
+                      component={Link}
+                      to="/app/compare"
+                      color="emerald"
+                      radius="md"
+                      mt="sm"
+                      rightSection={<ArrowRight size={15} />}
+                    >
+                      Open Compare
+                    </Button>
+                  </Stack>
+                </Center>
+              </Card>
             )}
             {tab === "suggestions" && <SuggestionsPanel performance={data.performance} />}
             {tab === "history" && (
