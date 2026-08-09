@@ -1,5 +1,5 @@
 import {
-  ListChecks, Tags, FileText, Wrench, Link2, Braces, Layers, Search, Swords,
+  ListChecks, Tags, FileText, Wrench, Link2, Braces, Layers, Search,
   Lightbulb, History, Bot,
 } from "lucide-react";
 import type { TFunction } from "i18next";
@@ -29,7 +29,6 @@ const SPEC = [
   { id: "ai", icon: Bot, items: ["Access*", "Training", "Readiness", "LlmsTxt"] },
   { id: "crawl", icon: Layers, items: ["Pages", "Depth", "Issues"] },
   { id: "search", icon: Search, items: ["Clicks", "Queries", "Position"] },
-  { id: "compare", icon: Swords, items: ["Add", "SideBySide", "Refresh"] },
   { id: "suggestions", icon: Lightbulb, items: ["Sorted", "Advice", "Saving"] },
   { id: "history", icon: History, items: ["Change", "Open", "Best"] },
 ] as const;

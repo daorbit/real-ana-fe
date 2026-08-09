@@ -1,7 +1,8 @@
-import { Badge, Box, Card, Divider, Group, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
-import { ArrowDown, ArrowUp, Check, Minus, Target } from "lucide-react";
+import { Badge, Box, Card, Divider, Group, Stack, Text, Tooltip } from "@mantine/core";
+import { ArrowDown, ArrowUp, Check, Minus } from "lucide-react";
 import type { SeoCompetitorComparison } from "@/shared/types";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
+import { SiteFavicon } from "@/shared/ui/SiteFavicon";
 
 /**
  * One competitor, summarised as the answer rather than the data.
@@ -85,9 +86,23 @@ export function GapCard({
     <Card withBorder radius="md" padding="lg">
       <Group justify="space-between" wrap="nowrap" mb="md">
         <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-          <ThemeIcon size={34} radius="md" variant="light" color={isToughest ? "orange" : "gray"}>
-            <Target size={17} />
-          </ThemeIcon>
+          {/* Their own favicon, fetched from their domain rather than through a
+              favicon service — the same rule the site list follows, and the
+              reason it carries `no-referrer`. Falls back to a neutral mark when
+              the site serves no /favicon.ico, which is common. */}
+          <Box
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              display: "grid",
+              placeItems: "center",
+              flexShrink: 0,
+              background: "var(--mantine-color-default-hover)",
+            }}
+          >
+            <SiteFavicon domain={comparison.url} size={18} />
+          </Box>
           <Box style={{ minWidth: 0 }}>
             <Group gap={6} wrap="nowrap">
               <Text fw={650} truncate>

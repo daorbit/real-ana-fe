@@ -9,9 +9,14 @@
 // Traced from public/proPlanIcon.svg. If that asset is replaced, re-trace
 // rather than hand-editing the paths below.
 
-const COLORS: Record<string, string> = {
-  free: "#64748b", // slate — plain, no charge
-};
+/**
+ * Free's gradient: deep red through a warm bright band and back.
+ *
+ * Built like Pro's — three stops with the highlight off-centre — so the free
+ * mark reads as the same family of object rather than a lesser one. The stops
+ * stay dark enough that the white glyph on top holds its contrast.
+ */
+const FREE_GRADIENT = ["#b91c1c", "#f87171", "#dc2626"] as const;
 
 /** Starter's gradient, violet through to indigo. */
 const STARTER_GRADIENT = ["#a855f7", "#6366f1"] as const;
@@ -36,7 +41,7 @@ const PRO_GRADIENT = ["#b45309", "#fcd34d", "#d97706"] as const;
  * endorsed and leaves nothing to distinguish the recommended one.
  */
 export const PLAN_ACCENTS: Record<string, string> = {
-  free: "#64748b", // slate
+  free: "#dc2626", // red, the midpoint of the Free gradient
   starter: "#8b5cf6", // violet, the midpoint of the Starter gradient
   pro: "#d9a441", // gold
 };
@@ -48,11 +53,14 @@ export const PLAN_ACCENTS: Record<string, string> = {
  * light the way the Pro diamond does instead of sitting next to it as a flat
  * swatch. Angled at 135° to match the icons' top-left-to-bottom-right fill.
  *
- * Free has no entry: it is a flat slate by design, and a gradient on the
- * free tier would give it emphasis the tier is meant not to have. Callers fall
- * back to `PLAN_ACCENTS` when a slug is missing here.
+ * Callers fall back to `PLAN_ACCENTS` when a slug is missing here.
  */
 export const PLAN_GRADIENTS: Record<string, string> = {
+  // Not the icon's ramp. Same trap Pro documents: the icon's highlight
+  // (#f87171) gives white text only 2.77:1, under the 3.0 floor for bold text.
+  // Every stop here clears it — 4.83, 3.76, 3.82 — so the label stays legible
+  // wherever it falls across the ribbon.
+  free: "linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #e05252 100%)",
   starter: `linear-gradient(135deg, ${STARTER_GRADIENT[0]}, ${STARTER_GRADIENT[1]})`,
   // Pro's surface ramp is lighter than the icon's. The icon carries no text, so
   // it can run down to a deep amber; a ribbon has a label on top, and dark text
@@ -165,9 +173,9 @@ function Diamond({
   );
 }
 
-/** Free — slate, the neutral end of the scale. */
-export function FreePlanIcon({ size = 24 }: { size?: number; uid?: string }) {
-  return <Diamond size={size} color={COLORS.free} />;
+/** Free — a red gradient with a highlight band, the entry tier. */
+export function FreePlanIcon({ size = 24, uid }: { size?: number; uid?: string }) {
+  return <Diamond size={size} gradient={FREE_GRADIENT} uid={uid ?? "free"} />;
 }
 
 /** Starter — a violet-to-indigo gradient, the first paid step. */

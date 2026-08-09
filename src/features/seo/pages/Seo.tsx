@@ -7,10 +7,9 @@ import {
 import {
   Search, RefreshCw, Globe, History, Trash2, Trophy,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
-  TrendingUp, TrendingDown, Minus, Braces, Link2, Swords, Layers, Printer,
-  HelpCircle, Bot, ArrowRight,
+  TrendingUp, TrendingDown, Minus, Braces, Link2, Layers, Printer,
+  HelpCircle, Bot,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { RunningDialog } from "@/shared/ui/RunningDialog";
@@ -48,7 +47,6 @@ const TABS = [
   { value: "ai", label: "AI search", icon: Bot },
   { value: "crawl", label: "Crawl", icon: Layers },
   { value: "search", label: "Search", icon: Search },
-  { value: "compare", label: "Compare", icon: Swords },
   { value: "suggestions", label: "Suggestions", icon: Lightbulb },
   { value: "history", label: "History", icon: History },
 ] as const;
@@ -748,34 +746,6 @@ export default function Seo() {
             )}
             {tab === "search" && (
               <SearchPanel traffic={searchTraffic} loading={searchLoading} />
-            )}
-            {tab === "compare" && (
-              <Card withBorder radius="md" padding="xl">
-                <Center>
-                  <Stack align="center" gap="xs" maw={440}>
-                    <ThemeIcon size={48} radius="xl" variant="light" color="emerald">
-                      <Swords size={24} />
-                    </ThemeIcon>
-                    <Text fw={650}>Compare has its own page</Text>
-                    <Text size="sm" c="dimmed" ta="center">
-                      Competitor tracking moved out of the audit: an audit is a
-                      snapshot of one URL, while a comparison is a set of rivals
-                      watched over time. You can now track up to 10, see what each
-                      covers that you do not, and follow their scores as they change.
-                    </Text>
-                    <Button
-                      component={Link}
-                      to="/app/compare"
-                      color="emerald"
-                      radius="md"
-                      mt="sm"
-                      rightSection={<ArrowRight size={15} />}
-                    >
-                      Open Compare
-                    </Button>
-                  </Stack>
-                </Center>
-              </Card>
             )}
             {tab === "suggestions" && <SuggestionsPanel performance={data.performance} />}
             {tab === "history" && (
