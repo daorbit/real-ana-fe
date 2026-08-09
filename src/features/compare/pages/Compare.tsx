@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import {
-  Box, Button, Card, Center, Group, Loader, Select, SimpleGrid, Stack,
+  Box, Button, Card, Center, Grid, Group, Loader, Select, Stack,
   Text, TextInput, ThemeIcon, Tooltip, ActionIcon,
 } from "@mantine/core";
-import { HelpCircle, Plus, RefreshCw, Swords, Target, Trash2 } from "lucide-react";
+import { HelpCircle, Plus, RefreshCw, Swords, Target } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
@@ -16,10 +16,9 @@ import {
   useDeleteCompetitorMutation,
 } from "@/app/store";
 import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
-import { timeAgo } from "@/shared/lib";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
-import { GapCard } from "@/features/compare/components/GapCard";
-import { MetricMatrix } from "@/features/compare/components/MetricMatrix";
+import { CompetitorRail } from "@/features/compare/components/CompetitorRail";
+import { CompetitorDetail } from "@/features/compare/components/CompetitorDetail";
 import { ScoreTrendChart } from "@/features/compare/components/ScoreTrendChart";
 
 /**
@@ -53,6 +52,9 @@ export default function Compare() {
   const [picked, setPicked] = useState("");
   const [url, setUrl] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
+  const [pickedCompetitor, setPickedCompetitor] = useState<string | null>(null);
+  /** Which competitor's re-fetch is in flight, so only its button spins. */
+  const [refreshingId, setRefreshingId] = useState<string | null>(null);
 
   // Derived during render rather than stored, so the first render after a
   // workspace switch already targets a real site instead of firing a request
@@ -60,8 +62,11 @@ export default function Compare() {
   const site = sites.find((s) => s.siteId === picked) ?? sites[0] ?? null;
   const siteId = site?.siteId ?? "";
 
+  // A different site means a different competitive set; nothing from the last
+  // one applies.
   useEffect(() => {
     setUrl("");
+    setPickedCompetitor(null);
   }, [siteId]);
 
   const skip = !workspaceId || !siteId;
@@ -84,6 +89,20 @@ export default function Compare() {
 
   const atLimit = competitors.length >= MAX_COMPETITORS;
 
+  /**
+   * The competitor on screen, derived rather than stored.
+   *
+   * A pick only counts while it names a competitor still in the list; removing
+   * the selected one, or switching site, falls back to whoever leads by the
+   * most. Storing the resolved id in state instead would render one frame with
+   * a competitor that no longer exists.
+   */
+  const selected =
+    analysis?.competitors.find((c) => c.competitorId === pickedCompetitor) ??
+    analysis?.competitors.find((c) => c.competitorId === analysis.toughest) ??
+    analysis?.competitors[0] ??
+    null;
+
   const add = async () => {
     const trimmed = url.trim();
     if (!trimmed) return;
@@ -97,10 +116,13 @@ export default function Compare() {
   };
 
   const refreshOne = async (competitorId: string) => {
+    setRefreshingId(competitorId);
     try {
       await refreshCompetitor({ workspaceId, siteId, competitorId }).unwrap();
     } catch (e) {
       notifyError(e, "Refresh failed");
+    } finally {
+      setRefreshingId(null);
     }
   };
 
@@ -294,77 +316,61 @@ export default function Compare() {
             </Card>
           )}
 
-          {analysis && analysis.competitors.length > 0 && (
-            <>
-              <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-                {analysis.competitors.map((c) => (
-                  <GapCard
-                    key={c.competitorId}
-                    comparison={c}
-                    isToughest={analysis.toughest === c.competitorId}
+          {analysis && analysis.competitors.length > 0 && selected && (
+            // Master-detail rather than four stacked blocks: showing every
+            // competitor's full comparison at once restated the same data four
+            // times over and left nothing leading the page.
+            <Grid gap="lg">
+              <Grid.Col span={{ base: 12, md: 4, lg: 3 }}>
+                {/* Sticky from the medium breakpoint up, where the two columns
+                    sit side by side: the detail pane is much taller than the
+                    rail, so scrolling it otherwise leaves the selector behind.
+                    Stacked on narrow screens the rail is above the detail, and
+                    pinning it there would eat the viewport. */}
+                <Box
+                  style={{
+                    position: "sticky",
+                    top: 16,
+                    // Its own scrollbar rather than the page's, so ten
+                    // competitors plus the trend cannot exceed the viewport and
+                    // strand the last row out of reach.
+                    maxHeight: "calc(100vh - 32px)",
+                    overflowY: "auto",
+                  }}
+                  className="compare-rail"
+                >
+                <Stack gap="lg">
+                  <CompetitorRail
+                    competitors={analysis.competitors}
+                    selectedId={selected.competitorId}
+                    onSelect={setPickedCompetitor}
+                    myScore={analysis.mine.score}
+                    myDomain={site.domain}
+                    myFramework={site.framework}
+                    toughestId={analysis.toughest}
                   />
-                ))}
-              </SimpleGrid>
-
-              <ScoreTrendChart
-                history={history}
-                competitors={analysis.competitors}
-                myScore={analysis.mine.score}
-              />
-
-              <MetricMatrix
-                competitors={analysis.competitors}
-                myLabel={site.domain}
-              />
-
-              <Card withBorder radius="md" padding="lg">
-                <Text fw={650} size="sm" mb="md">
-                  Tracked pages
-                </Text>
-                <Stack gap={0}>
-                  {competitors.map((c) => (
-                    <Group key={c._id} justify="space-between" wrap="nowrap" py={8}>
-                      <Box style={{ minWidth: 0 }}>
-                        <Text size="sm" fw={500} truncate>
-                          {c.label}
-                        </Text>
-                        <Text size="xs" c="dimmed" truncate>
-                          {c.lastError
-                            ? c.lastError
-                            : c.lastCheckedAt
-                            ? `Checked ${timeAgo(c.lastCheckedAt)}`
-                            : "Not checked yet"}
-                        </Text>
-                      </Box>
-                      {canEdit && (
-                        <Group gap={4} wrap="nowrap">
-                          <Tooltip label="Re-fetch" withArrow>
-                            <ActionIcon
-                              variant="subtle"
-                              color="gray"
-                              size="sm"
-                              onClick={() => refreshOne(c._id)}
-                            >
-                              <RefreshCw size={14} />
-                            </ActionIcon>
-                          </Tooltip>
-                          <Tooltip label="Stop tracking" withArrow>
-                            <ActionIcon
-                              variant="subtle"
-                              color="red"
-                              size="sm"
-                              onClick={() => remove(c._id, c.label)}
-                            >
-                              <Trash2 size={14} />
-                            </ActionIcon>
-                          </Tooltip>
-                        </Group>
-                      )}
-                    </Group>
-                  ))}
+                  {/* Under the rail rather than across the page: the trend is
+                      context for the set, and it reads fine narrow. */}
+                  <ScoreTrendChart
+                    history={history}
+                    competitors={analysis.competitors}
+                    myScore={analysis.mine.score}
+                  />
                 </Stack>
-              </Card>
-            </>
+                </Box>
+              </Grid.Col>
+
+              <Grid.Col span={{ base: 12, md: 8, lg: 9 }}>
+                <CompetitorDetail
+                  comparison={selected}
+                  myDomain={site.domain}
+                  canEdit={canEdit}
+                  refreshing={refreshingId === selected.competitorId}
+                  onRefresh={() => refreshOne(selected.competitorId)}
+                  onDelete={() => remove(selected.competitorId, selected.label)}
+                />
+              </Grid.Col>
+            </Grid>
           )}
         </Stack>
       )}

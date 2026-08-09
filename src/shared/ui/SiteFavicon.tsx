@@ -8,11 +8,28 @@ import type { FrameworkId } from "@/features/workspace/frameworks";
  *
  * Deliberately not routed through a favicon service: those see every domain a
  * customer tracks, which sits badly with a product whose pitch is that no
- * third party watches your visitors. The cost is a lower hit rate — sites that
- * only declare an icon via <link rel="icon"> and serve nothing at
- * /favicon.ico will miss — so the framework logo is the fallback rather than
- * an error state.
+ * third party watches your visitors.
+ *
+ * The cost is a lower hit rate, since the icon can only be guessed at by
+ * convention rather than read from the page's <link rel="icon">. Several
+ * conventional paths are tried in turn, and the framework logo is the fallback
+ * rather than an error state — a site with no icon at any of them is normal.
  */
+/**
+ * Where to look, in order.
+ *
+ * `/favicon.ico` alone missed a large share of sites: the convention has moved
+ * to PNG, and plenty of hosts — including this product's own — declare
+ * `<link rel="icon" href="/favicon.png">` and return 404 for the .ico. Trying
+ * the PNG paths after it costs one extra request only on the sites where the
+ * first already failed.
+ */
+const ICON_PATHS = [
+  "/favicon.ico",
+  "/favicon.png",
+  "/apple-touch-icon.png",
+] as const;
+
 export function SiteFavicon({
   domain,
   framework,
@@ -22,10 +39,19 @@ export function SiteFavicon({
   framework?: string;
   size?: number;
 }) {
-  const [failed, setFailed] = useState(false);
+  // Which candidate is being tried. Past the end means every path 404'd and the
+  // framework mark stands in.
+  const [attempt, setAttempt] = useState(0);
+  // Reset when the component is pointed at a different site, so one domain's
+  // failures do not carry over and hide an icon the next one does serve.
+  const [seen, setSeen] = useState(domain);
+  if (seen !== domain) {
+    setSeen(domain);
+    setAttempt(0);
+  }
 
   const clean = domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-  const showFallback = failed || !clean;
+  const showFallback = attempt >= ICON_PATHS.length || !clean;
 
   return (
     <Box
@@ -41,7 +67,11 @@ export function SiteFavicon({
         <BrandIcon framework={(framework as FrameworkId) ?? "other"} size={size} />
       ) : (
         <img
-          src={`https://${clean}/favicon.ico`}
+          // Keyed on the path so a failed attempt actually remounts the element
+          // and requests the next candidate — React would otherwise reuse the
+          // node and never re-run the load for a changed src alone.
+          key={ICON_PATHS[attempt]}
+          src={`https://${clean}${ICON_PATHS[attempt]}`}
           alt=""
           width={size}
           height={size}
@@ -49,7 +79,8 @@ export function SiteFavicon({
           aria-hidden="true"
           loading="lazy"
           // A missing favicon is the common case, not an error worth logging.
-          onError={() => setFailed(true)}
+          // Step to the next candidate; past the last one the fallback shows.
+          onError={() => setAttempt((n) => n + 1)}
           referrerPolicy="no-referrer"
           style={{ width: size, height: size, objectFit: "contain", borderRadius: 3 }}
         />

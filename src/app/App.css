@@ -1919,3 +1919,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Compare: the competitor rail pins beside the detail pane, which is much the
+   taller of the two. Below the width where the grid stacks, the rail sits
+   above the detail instead — pinning it there would hold a list in place over
+   the content it selects. */
+@media (max-width: 62em) {
+  .compare-rail {
+    position: static !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
