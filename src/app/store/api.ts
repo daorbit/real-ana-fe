@@ -24,6 +24,7 @@ import type {
   Coupon, CouponCheckResult, Invoice, QuotaSummary,
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
+  CompareMode, BreakdownComparisonRow,
 } from "@/shared/types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -239,9 +240,19 @@ export const api = createApi({
 
     getStats: build.query<
       Stats,
-      { workspaceId: string; range: string; filter?: string; sites?: string[]; from?: string; to?: string }
+      {
+        workspaceId: string;
+        range: string;
+        filter?: string;
+        sites?: string[];
+        from?: string;
+        to?: string;
+        compare?: CompareMode;
+        compareFrom?: string;
+        compareTo?: string;
+      }
     >({
-      query: ({ workspaceId, range, filter, sites, from, to }) => {
+      query: ({ workspaceId, range, filter, sites, from, to, compare, compareFrom, compareTo }) => {
         const qs = new URLSearchParams({ range });
         if (filter) qs.set("filter", filter);
         // Empty selection means "all sites" — the server defaults to that when
@@ -251,12 +262,57 @@ export const api = createApi({
           qs.set("from", from);
           qs.set("to", to);
         }
+        // "previous" is the server's default; sending it would only make the
+        // cache key noisier for the same response.
+        if (compare && compare !== "previous") qs.set("compare", compare);
+        if (compare === "custom" && compareFrom) {
+          qs.set("compareFrom", compareFrom);
+          if (compareTo) qs.set("compareTo", compareTo);
+        }
         return `/api/workspaces/${workspaceId}/stats?${qs.toString()}`;
       },
-      providesTags: (_r, _e, { workspaceId, range, filter, sites, from, to }) => [
+      providesTags: (_r, _e, a) => [
         {
           type: "Stats",
-          id: `${workspaceId}-${range}-${filter ?? ""}-${(sites ?? []).join(",")}-${from ?? ""}-${to ?? ""}`,
+          id: `${a.workspaceId}-${a.range}-${a.filter ?? ""}-${(a.sites ?? []).join(",")}-${a.from ?? ""}-${a.to ?? ""}-${a.compare ?? ""}-${a.compareFrom ?? ""}-${a.compareTo ?? ""}`,
+        },
+      ],
+    }),
+
+    getStatsCompare: build.query<
+      { dimension: string; compare: CompareMode; rows: BreakdownComparisonRow[] },
+      {
+        workspaceId: string;
+        dimension: string;
+        range: string;
+        filter?: string;
+        sites?: string[];
+        from?: string;
+        to?: string;
+        compare?: CompareMode;
+        compareFrom?: string;
+        compareTo?: string;
+      }
+    >({
+      query: ({ workspaceId, dimension, range, filter, sites, from, to, compare, compareFrom, compareTo }) => {
+        const qs = new URLSearchParams({ range, dimension });
+        if (filter) qs.set("filter", filter);
+        if (sites && sites.length) qs.set("sites", sites.join(","));
+        if (range === "custom" && from && to) {
+          qs.set("from", from);
+          qs.set("to", to);
+        }
+        if (compare && compare !== "previous") qs.set("compare", compare);
+        if (compare === "custom" && compareFrom) {
+          qs.set("compareFrom", compareFrom);
+          if (compareTo) qs.set("compareTo", compareTo);
+        }
+        return `/api/workspaces/${workspaceId}/stats/compare?${qs.toString()}`;
+      },
+      providesTags: (_r, _e, a) => [
+        {
+          type: "Stats",
+          id: `compare-${a.workspaceId}-${a.dimension}-${a.range}-${a.filter ?? ""}-${(a.sites ?? []).join(",")}-${a.from ?? ""}-${a.to ?? ""}-${a.compare ?? ""}`,
         },
       ],
     }),
@@ -1220,6 +1276,7 @@ export const {
   useUpdateSiteOptionsMutation,
   useDeleteSiteMutation,
   useGetStatsQuery,
+  useGetStatsCompareQuery,
   useComputeFunnelMutation,
   useGetRetentionQuery,
   useGetInstallStatusQuery,

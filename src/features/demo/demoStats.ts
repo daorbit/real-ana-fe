@@ -47,6 +47,18 @@ const UTM_SOURCES = ["newsletter", "producthunt", "twitter", "google", "partner"
 const UTM_MEDIUMS = ["email", "social", "cpc", "referral", "organic"];
 const UTM_CAMPAIGNS = ["launch-week", "spring-sale", "docs-refresh", "webinar"];
 
+/** Roughly how long a range covers, for dating the comparison window. */
+function spanMs(range: string): number {
+  const HOUR = 60 * 60 * 1000;
+  const spans: Record<string, number> = {
+    "1h": HOUR,
+    "24h": 24 * HOUR,
+    "7d": 7 * 24 * HOUR,
+    "30d": 30 * 24 * HOUR,
+  };
+  return spans[range] ?? spans["24h"];
+}
+
 /** How many buckets a range is drawn with, and how each is labelled. */
 function axis(range: string): { points: number; label: (i: number, n: number) => string } {
   if (range === "24h") {
@@ -134,6 +146,26 @@ export function demoStats(range: string): Stats {
       bounceRate: -3.2,
       avgSessionMs: 6.5,
       pagesPerSession: 2.1,
+    },
+
+    /**
+     * The baseline behind the deltas above, back-derived from them rather than
+     * invented, so a demo tile reading "+12.4% vs 8,190" is arithmetically true.
+     * No `timeseries`: the demo picker starts on "previous", which draws no
+     * overlay.
+     */
+    comparison: {
+      mode: "previous",
+      since: new Date(Date.now() - 2 * spanMs(range)).toISOString(),
+      until: new Date(Date.now() - spanMs(range)).toISOString(),
+      pageviews: Math.round(pageviews / 1.124),
+      visitors: Math.round(visitors / 1.091),
+      sessions: Math.round(sessions / 1.078),
+      bounceRate: 44,
+      avgSessionMs: Math.round(168_000 / 1.065),
+      avgTimeOnPageMs: Math.round(54_000 / 1.04),
+      pagesPerSession: 2.35,
+      timeseries: null,
     },
 
     topPages: ranked(PAGES, pageviews),

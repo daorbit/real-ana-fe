@@ -78,6 +78,9 @@ export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onC
                   <Text size="xs" c="dimmed">
                     ranges: {ws.billing.allowedRanges.join(", ")}
                   </Text>
+                  <Text size="xs" c="dimmed">
+                    comparisons: {ws.billing.compareModes.join(", ")}
+                  </Text>
                 </>
               )}
             </Stack>

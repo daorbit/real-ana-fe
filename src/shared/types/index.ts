@@ -279,6 +279,8 @@ export type QuotaSummary = {
   maxSitesPerWorkspace: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
+  /** Comparison baselines this plan may pick. Every tier keeps "previous". */
+  compareModes: CompareMode[];
   /** Whether reports may be delivered over WhatsApp. Pro only. */
   whatsappReports: boolean;
 } | null;
@@ -681,6 +683,38 @@ export type Deltas = {
   pagesPerSession: number | null;
 };
 
+/** Which period the current window's deltas are measured against. */
+export type CompareMode = "previous" | "yoy" | "custom";
+
+/**
+ * The baseline period behind `Stats.deltas`.
+ *
+ * Carries the raw counters as well as the bounds, so a tile can say what it is
+ * comparing to rather than only how far the number moved.
+ */
+export type Comparison = {
+  mode: CompareMode;
+  since: string;
+  until: string;
+  pageviews: number;
+  visitors: number;
+  sessions: number;
+  bounceRate: number;
+  avgSessionMs: number;
+  avgTimeOnPageMs: number;
+  pagesPerSession: number;
+  /** Only populated when a non-default baseline was requested. */
+  timeseries: Point[] | null;
+};
+
+/** One row of a breakdown compared across both periods. */
+export type BreakdownComparisonRow = {
+  key: string;
+  count: number;
+  previous: number;
+  delta: number | null;
+};
+
 export type Stats = {
   range: string;
 
@@ -697,6 +731,9 @@ export type Stats = {
   pagesPerSession: number;
 
   deltas: Deltas;
+
+  /** The baseline `deltas` were measured against. */
+  comparison: Comparison;
 
   // breakdowns
   topPages: Bucket[];

@@ -4,6 +4,7 @@ import { notifyError } from "@/shared/lib/notify";
 import { useDemo } from "@/features/demo/context";
 import { demoStats } from "@/features/demo/demoStats";
 import { POLL_MS } from "@/shared/hooks/usePolling";
+import type { CompareMode } from "@/shared/types";
 
 /**
  * Aggregated analytics for a workspace.
@@ -19,7 +20,10 @@ export function useStats(
   filter?: string,
   sites?: string[],
   from?: string,
-  to?: string
+  to?: string,
+  compare?: CompareMode,
+  compareFrom?: string,
+  compareTo?: string
 ) {
   const {
     data: settled,
@@ -30,7 +34,7 @@ export function useStats(
     isFetching,
     originalArgs,
   } = useGetStatsQuery(
-    { workspaceId: workspaceId!, range, filter, sites, from, to },
+    { workspaceId: workspaceId!, range, filter, sites, from, to, compare, compareFrom, compareTo },
     { skip: !workspaceId, pollingInterval: POLL_MS }
   );
 

@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import {
   Title, Text, Group, Button, SimpleGrid, Card, Progress,
@@ -14,7 +15,7 @@ import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
   ArrowDownWideNarrow, Zap, Filter, GitBranch, Repeat,
-  Split, Target, AlertTriangle, LayoutDashboard, HelpCircle,
+  Split, Target, AlertTriangle, LayoutDashboard, HelpCircle, GitCompareArrows,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PlanGate } from "@/features/billing/components/PlanGate";
@@ -35,6 +36,7 @@ import { RefreshButton } from "@/shared/ui/Refresh";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { RangePicker, type RangeState } from "@/features/analytics/components/RangePicker";
+import { ComparePicker, type CompareState } from "@/features/analytics/components/ComparePicker";
 import { ExportMenu } from "@/shared/ui/ExportMenu";
 import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
@@ -45,14 +47,18 @@ import {
   useGetSegmentsQuery, useSaveSegmentMutation,
   useUpdateSegmentMutation, useDeleteSegmentMutation,
   useGetMarkersQuery, useSaveMarkerMutation, useDeleteMarkerMutation,
+  useGetStatsCompareQuery,
 } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
 import {
   markerLines, MarkerLegend, MarkerDialog, MarkerButton,
 } from "@/features/analytics/components/MarkerLayer";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { countryFlag, countryLabel, duration, share, num } from "@/shared/lib";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
-import type { Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind } from "@/shared/types";
+import type {
+  Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind, BreakdownComparisonRow,
+} from "@/shared/types";
 import { serializeFilter } from "@/shared/types";
 
 const CHART = "#10b981";
@@ -87,6 +93,44 @@ function LegendDot({ color, children }: { color: string; children: React.ReactNo
   );
 }
 
+/**
+ * One breakdown row's movement against the baseline.
+ *
+ * Shows the previous count alongside the percentage, because a percentage
+ * without its base is unreadable at this scale — "+300%" on a row that went
+ * from 1 to 4 is noise, and the reader can only tell by seeing the 1.
+ */
+function BreakdownDelta({ row }: { row?: BreakdownComparisonRow }) {
+  if (!row) return null;
+  const { delta: pct, previous } = row;
+
+  // A row with no baseline is new, not up-by-infinity.
+  if (previous === 0) {
+    return <Text size="xs" c="emerald" fw={600}>new</Text>;
+  }
+  if (pct === null) return <Text size="xs" c="dimmed">—</Text>;
+
+  const up = pct > 0;
+  const flat = pct === 0;
+  return (
+    <MTooltip label={`${num(previous)} in the baseline period`} withArrow>
+      <Text size="xs" fw={600} c={flat ? "dimmed" : up ? "emerald" : "red"}>
+        {flat ? "±0%" : `${up ? "+" : ""}${pct}%`}
+      </Text>
+    </MTooltip>
+  );
+}
+
+/**
+ * Stand-in for the comparison hook on cards that were not given one.
+ *
+ * Module-level so it is the same function object on every render: a card either
+ * always has a real `useCompare` or always has this one, and the hook call
+ * inside `BarList` stays a single unconditional call either way. Calls no hooks
+ * itself, so substituting it adds nothing to the order.
+ */
+const NO_COMPARE = () => ({ rows: undefined, loading: false });
+
 function BarList({
   title,
   items,
@@ -97,6 +141,8 @@ function BarList({
   filterKey,
   onFilter,
   fill = true,
+  dimension,
+  useCompare,
 }: {
   title: string;
   items: Bucket[];
@@ -113,21 +159,70 @@ function BarList({
    * to be 100% tall collapses instead.
    */
   fill?: boolean;
+  /**
+   * The dimension name this list breaks down by, as the compare endpoint knows
+   * it. Supplying it puts a compare toggle on the card; omitting it leaves the
+   * card exactly as it was.
+   */
+  dimension?: string;
+  /** Fetches this dimension's rows across both periods, when the toggle is on. */
+  useCompare?: (dimension: string, enabled: boolean) => {
+    rows: BreakdownComparisonRow[] | undefined;
+    loading: boolean;
+  };
 }) {
   const { t } = useTranslation();
   const emptyText = empty ?? t("analytics.waitingForData");
-  const total = items.reduce((sum, i) => sum + i.count, 0);
-  const max = Math.max(1, ...items.map((i) => i.count));
   const clickable = Boolean(filterKey && onFilter);
+
+  // Off by default and per card: the comparison costs a request, and a user
+  // reading "top pages" usually wants the ranking, not the movement.
+  const [compareOn, setCompareOn] = useState(false);
+  const canCompare = Boolean(dimension && useCompare);
+  // `useCompare` is a hook, so it has to be called unconditionally and in the
+  // same order every render. Cards that were given one always have one; cards
+  // that weren't get this no-op, which calls nothing and always reports idle.
+  const compareHook = useCompare ?? NO_COMPARE;
+  const { rows: compareRows, loading: compareLoading } = compareHook(
+    dimension ?? "",
+    compareOn && canCompare,
+  );
+
+  // While the comparison loads, the plain ranking stays on screen rather than
+  // blanking the card — same reasoning as the page-level stale payload.
+  const showCompare = compareOn && canCompare && !!compareRows;
+  const shown: Bucket[] = showCompare
+    ? compareRows.map((r) => ({ key: r.key, count: r.count }))
+    : items;
+
+  const deltaByKey = new Map(compareRows?.map((r) => [r.key, r]) ?? []);
+  const total = shown.reduce((sum, i) => sum + i.count, 0);
+  const max = Math.max(1, ...shown.map((i) => i.count));
 
   return (
     <Card withBorder radius="lg" padding="lg" h={fill ? "100%" : undefined}>
-      <Group gap={8} mb="md">
-        {Icon && <Icon size={15} className="sect-ic" />}
-        <Text fw={600} c="dimmed" size="sm">{title}</Text>
+      <Group gap={8} mb="md" justify="space-between" wrap="nowrap">
+        <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
+          {Icon && <Icon size={15} className="sect-ic" />}
+          <Text fw={600} c="dimmed" size="sm" truncate>{title}</Text>
+        </Group>
+        {canCompare && (
+          <MTooltip label="Compare to the baseline period" withArrow>
+            <ActionIcon
+              variant={compareOn ? "filled" : "subtle"}
+              color={compareOn ? "emerald" : "gray"}
+              size="sm"
+              loading={compareLoading}
+              onClick={() => setCompareOn((v) => !v)}
+              aria-label="Compare to the baseline period"
+            >
+              <GitCompareArrows size={14} />
+            </ActionIcon>
+          </MTooltip>
+        )}
       </Group>
 
-      {items.length === 0 ? (
+      {shown.length === 0 ? (
         <Center py="lg" mih={120}>
           <Stack align="center" gap={4}>
             <ThemeIcon variant="light" color="gray" size="md" radius="md"><Inbox size={16} /></ThemeIcon>
@@ -136,7 +231,7 @@ function BarList({
         </Center>
       ) : (
         <Stack gap="sm">
-          {items.map((i) => (
+          {shown.map((i) => (
             <div
               key={i.key}
               role={clickable ? "button" : undefined}
@@ -166,7 +261,11 @@ function BarList({
                       Filter
                     </span>
                   )}
-                  <Text size="xs" c="dimmed">{share(i.count, total)}</Text>
+                  {showCompare ? (
+                    <BreakdownDelta row={deltaByKey.get(i.key)} />
+                  ) : (
+                    <Text size="xs" c="dimmed">{share(i.count, total)}</Text>
+                  )}
                   <Text size="sm" fw={700}>{num(i.count)}</Text>
                 </Group>
               </Group>
@@ -241,6 +340,10 @@ export default function Analytics() {
   const { canEdit } = usePermissions();
   const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
   const range = rangeState.preset;
+  const [compareState, setCompareState] = useState<CompareState>({ mode: "previous" });
+  // Demo sessions never hit the network, so the per-panel comparison — which
+  // has no fixture behind it — stays off there.
+  const { demo } = useDemo();
   const [filter, setFilter] = useState<StatsFilter>({});
   // Top-level section, and the active detail tab within a section.
   const [helpOpen, setHelpOpen] = useState(false);
@@ -273,7 +376,16 @@ export default function Analytics() {
   // with the same transition the workspace switcher uses.
   const scopeSwitch = useSwitchOverlay(siteScope.join(",") || "all");
   const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
-    useStats(active?._id, range, serializeFilter(filter), siteScope, rangeState.from, rangeState.to);
+    useStats(
+      active?._id,
+      range,
+      serializeFilter(filter),
+      siteScope,
+      rangeState.from,
+      rangeState.to,
+      compareState.mode,
+      compareState.from,
+    );
 
   const addFilter = (key: keyof StatsFilter, value: string) =>
     setFilter((f) => ({ ...f, [key]: value }));
@@ -408,6 +520,32 @@ export default function Analytics() {
   if (stats) shown.current = stats;
   const view = stats ?? shown.current;
 
+  /**
+   * The chart series, with the comparison period folded in as extra keys on the
+   * same points.
+   *
+   * Joined by position rather than by bucket label: the baseline's labels are
+   * its own dates ("03-14"), so matching on them would line nothing up. The
+   * server buckets both windows by the current window's rule, which makes the
+   * n-th baseline bucket the counterpart of the n-th current one.
+   *
+   * Sits above the early returns below, because a hook cannot be called
+   * conditionally.
+   */
+  const series = useMemo(() => {
+    const current = view?.timeseries ?? [];
+    const baseline = view?.comparison?.timeseries;
+    if (!baseline?.length) return current;
+    return current.map((p, i) => ({
+      ...p,
+      compareViews: baseline[i]?.views ?? 0,
+      compareVisitors: baseline[i]?.visitors ?? 0,
+      // Kept for the tooltip, which should name the date being compared to
+      // rather than just "previous".
+      compareBucket: baseline[i]?.bucket ?? "",
+    }));
+  }, [view?.timeseries, view?.comparison?.timeseries]);
+
   // Skeleton only on a true first load, when there is nothing to show at all.
   if (loading || (active && !view)) {
     return <AppShell><AnalyticsSkeleton /></AppShell>;
@@ -432,8 +570,37 @@ export default function Analytics() {
   // their empty states should say that rather than "waiting for data".
   const anyOutdated = (view?.outdatedSites?.length ?? 0) > 0;
   const d = view?.deltas;
-  const series = view?.timeseries ?? [];
   const hasData = (view?.pageviews ?? 0) > 0;
+
+  const comparing = Boolean(view?.comparison?.timeseries?.length);
+
+  /**
+   * Fetches one breakdown across both periods, for whichever cards have their
+   * compare toggle on.
+   *
+   * Passed down as a function rather than called here so each card owns its own
+   * request: the query is skipped until that card is toggled on, and RTK Query
+   * caches per dimension, so opening the same panel again is free. Every card
+   * gets today's range, filter and site scope automatically, which is what
+   * keeps the comparison describing the same slice as the page around it.
+   */
+  const useBreakdownCompare = (dimension: string, enabled: boolean) => {
+    const { data, isFetching } = useGetStatsCompareQuery(
+      {
+        workspaceId: active?._id ?? "",
+        dimension,
+        range,
+        filter: serializeFilter(filter),
+        sites: siteScope,
+        from: rangeState.from,
+        to: rangeState.to,
+        compare: compareState.mode,
+        compareFrom: compareState.from,
+      },
+      { skip: !enabled || !active?._id || demo },
+    );
+    return { rows: data?.rows, loading: isFetching };
+  };
 
   // Stat `label`s are translated; the long `hint` tooltips stay English for a
   // later pass — they fall back cleanly and aren't blocking to read.
@@ -544,7 +711,15 @@ export default function Analytics() {
           <Title order={1}>{t("analytics.title")}</Title>
           <Text c="dimmed" size="sm" mt={6}>
             Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
-            Changes compare to the previous {range}.
+            {/* Read off the payload rather than the picker: the server may have
+                fallen back to "previous" if the plan doesn't include the
+                baseline that was asked for, and the caption has to describe
+                what is actually on screen. */}
+            {view?.comparison?.mode === "yoy"
+              ? " Changes compare to the same period last year."
+              : view?.comparison?.mode === "custom"
+                ? ` Changes compare to the ${range} from ${dayjs(view.comparison.since).format("MMM D, YYYY")}.`
+                : ` Changes compare to the previous ${range}.`}
           </Text>
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end" className="an-toolbar">
@@ -581,6 +756,11 @@ export default function Analytics() {
             <RangePicker
               value={rangeState}
               onChange={setRangeState}
+              disabled={statsLoading || refetching}
+            />
+            <ComparePicker
+              value={compareState}
+              onChange={setCompareState}
               disabled={statsLoading || refetching}
             />
           </Group>
@@ -672,6 +852,7 @@ export default function Analytics() {
                 <Group gap="md" wrap="nowrap">
                   <LegendDot color="#10b981">Pageviews</LegendDot>
                   <LegendDot color="#22d3ee">Visitors</LegendDot>
+                  {comparing && <LegendDot color="var(--muted)">Baseline</LegendDot>}
                   <MarkerLegend markers={markers} />
                 </Group>
               )}
@@ -695,6 +876,21 @@ export default function Analytics() {
                   <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
                   <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2.5} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#34d399" }} />
                   <Area type="monotone" dataKey="visitors" stroke="#22d3ee" strokeWidth={2} fill="url(#g2)" dot={false} />
+                  {/* The baseline: a dashed unfilled line, drawn before the
+                      markers so it reads as background against the two filled
+                      areas rather than competing with them. */}
+                  {comparing && (
+                    <Area
+                      type="monotone"
+                      dataKey="compareViews"
+                      stroke="var(--muted)"
+                      strokeWidth={1.5}
+                      strokeDasharray="4 4"
+                      fill="none"
+                      dot={false}
+                      activeDot={false}
+                    />
+                  )}
                   {/* Deploys and campaigns, drawn after the areas so the lines
                       sit on top of the fills rather than under them. */}
                   {markerLines(markers, series, range === "1h" || range === "24h")}
@@ -751,7 +947,8 @@ export default function Analytics() {
         <Tabs.Panel value="pages">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
             <BarList title={t("analytics.list.topPages")} icon={Eye} items={view?.topPages ?? []} color="teal"
-                     filterKey="path" onFilter={addFilter} />
+                     filterKey="path" onFilter={addFilter}
+                     dimension="path" useCompare={useBreakdownCompare} />
             <BarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="emerald"
                      empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
             <BarList title={t("analytics.list.exitPages")} icon={LogOut} items={view?.exitPages ?? []} color="pink"
@@ -775,23 +972,29 @@ export default function Analytics() {
             <BarList title={t("analytics.list.channels")} icon={Split} items={view?.channels ?? []} color="emerald"
                      empty="No traffic yet" fill={false} />
             <BarList title={t("analytics.list.referrers")} icon={Tag} items={view?.topReferrers ?? []} color="cyan"
-                     filterKey="referrer" onFilter={addFilter} fill={false} />
+                     filterKey="referrer" onFilter={addFilter} fill={false}
+                     dimension="referrer" useCompare={useBreakdownCompare} />
             <VisitorSplitPanel split={view?.visitorSplit} />
             <BarList title={t("analytics.list.utmSources")} icon={Tag} items={view?.utmSources ?? []} color="teal"
-                     filterKey="utmSource" onFilter={addFilter} fill={false} />
+                     filterKey="utmSource" onFilter={addFilter} fill={false}
+                     dimension="utmSource" useCompare={useBreakdownCompare} />
             <BarList title={t("analytics.list.utmCampaigns")} icon={Tag} items={view?.utmCampaigns ?? []} color="grape"
-                     filterKey="utmCampaign" onFilter={addFilter} fill={false} />
+                     filterKey="utmCampaign" onFilter={addFilter} fill={false}
+                     dimension="utmCampaign" useCompare={useBreakdownCompare} />
           </div>
         </Tabs.Panel>
 
         <Tabs.Panel value="tech">
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
             <BarList title={t("analytics.list.browsers")} icon={AppWindow} items={view?.browsers ?? []} color="cyan"
-                     filterKey="browser" onFilter={addFilter} />
+                     filterKey="browser" onFilter={addFilter}
+                     dimension="browser" useCompare={useBreakdownCompare} />
             <BarList title={t("analytics.list.operatingSystems")} icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal"
-                     filterKey="os" onFilter={addFilter} />
+                     filterKey="os" onFilter={addFilter}
+                     dimension="os" useCompare={useBreakdownCompare} />
             <BarList title={t("analytics.list.devices")} icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald"
-                     filterKey="device" onFilter={addFilter} />
+                     filterKey="device" onFilter={addFilter}
+                     dimension="device" useCompare={useBreakdownCompare} />
             <BarList title={t("analytics.list.screenSizes")} icon={MonitorSmartphone} items={view?.screenSizes ?? []} color="grape" />
           </SimpleGrid>
         </Tabs.Panel>
@@ -817,7 +1020,8 @@ export default function Analytics() {
                 )}
               />
               <BarList title={t("analytics.list.languages")} icon={Languages} items={view?.languages ?? []} color="cyan"
-                       filterKey="language" onFilter={addFilter} />
+                       filterKey="language" onFilter={addFilter}
+                       dimension="language" useCompare={useBreakdownCompare} />
             </Stack>
           </SimpleGrid>
         </Tabs.Panel>

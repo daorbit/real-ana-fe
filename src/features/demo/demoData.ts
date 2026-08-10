@@ -50,6 +50,7 @@ export const demoWorkspaces: Workspace[] = [
       sites: { quota: 2, used: 2 },
       maxSitesPerWorkspace: 2,
       allowedRanges: ["1h", "24h", "7d", "30d", "custom"],
+      compareModes: ["previous", "yoy", "custom"],
       whatsappReports: true,
     },
   },

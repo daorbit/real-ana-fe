@@ -207,7 +207,17 @@
       "conversionRetentionT": "Retention",
       "conversionRetentionD": "Weekly cohorts and how many visitors come back over the following weeks — a read on whether the product holds people.",
       "conversionErrorsT": "Errors",
-      "conversionErrorsD": "Client-side errors the tracker forwarded, so a broken page shows up here rather than only in complaints."
+      "conversionErrorsD": "Client-side errors the tracker forwarded, so a broken page shows up here rather than only in complaints.",
+      "comparingLabel": "Comparing periods",
+      "comparingBlurb": "What every change figure on the page is measured against, and how to change it.",
+      "comparingBaselineT": "Baseline",
+      "comparingBaselineD": "The period your current numbers are compared to. By default it is the stretch immediately before the range you are viewing, so a 7-day view compares against the 7 days before it.",
+      "comparingYoyT": "Year over year",
+      "comparingYoyD": "Compares against the same dates one year earlier. Use it for anything seasonal, where last week is a worse guide than last year. Available on Pro.",
+      "comparingCustomT": "Custom baseline",
+      "comparingCustomD": "Pick any start date and the baseline runs from there for the same length as your current range, so both periods stay the same size. Available from Starter.",
+      "comparingBreakdownsT": "Comparing a breakdown",
+      "comparingBreakdownsD": "Each breakdown card has a compare toggle in its header. Turned on, every row shows its movement against the baseline instead of its share of the total. Rows that are new are marked as such, and rows that dropped to zero still appear."
     },
     "reports": {
       "title": "Reports help",

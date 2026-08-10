@@ -1,4 +1,4 @@
-import { Users, ArrowDownWideNarrow, Tag, Target } from "lucide-react";
+import { Users, ArrowDownWideNarrow, Tag, Target, GitCompareArrows } from "lucide-react";
 import type { TFunction } from "i18next";
 import type { HelpSection } from "@/shared/ui/HelpDrawer";
 
@@ -19,6 +19,7 @@ const SPEC = [
   { id: "behavior", icon: ArrowDownWideNarrow, items: ["Bounce", "AvgSession", "TimePage", "Pages", "Engagement"] },
   { id: "acquisition", icon: Tag, items: ["Channels", "Utm", "Geo", "Tech"] },
   { id: "conversion", icon: Target, items: ["Goals", "Events", "Funnel", "Retention", "Errors"] },
+  { id: "comparing", icon: GitCompareArrows, items: ["Baseline", "Yoy", "Custom", "Breakdowns"] },
 ] as const;
 
 /** Resolve the Analytics help into translated sections. */
