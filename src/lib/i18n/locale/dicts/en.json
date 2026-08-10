@@ -971,6 +971,7 @@
     "notTaxInvoices": "These are payment receipts, not tax invoices — no GST is charged or collected.",
     "expiredNotice": "This workspace's plan period has ended — audits and crawls are paused until you renew. Any unused addon credits are untouched.",
     "usageAudits": "SEO audits",
+    "usageEvents": "Events",
     "usageCrawls": "Crawls",
     "usageSites": "Sites",
     "planPlusAddon": "{{quota}} plan + {{credits}} addon",

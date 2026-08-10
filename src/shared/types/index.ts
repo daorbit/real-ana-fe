@@ -276,6 +276,11 @@ export type QuotaSummary = {
     periodEnd: string | null;
     dataAccess: boolean;
   };
+  /**
+   * Analytics events ingested this cycle. No addon credits — events are not
+   * sold as a top-up, so the only way past the line is a plan change.
+   */
+  events: { planQuota: number; used: number };
   maxSitesPerWorkspace: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];

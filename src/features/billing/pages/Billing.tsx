@@ -11,7 +11,7 @@ import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
   Layers, Clock, PartyPopper, RefreshCw, Download, Receipt,
-  Plus, Minus,
+  Plus, Minus, Activity,
 } from "lucide-react";
 import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "@/features/billing/components/PlanIcons";
 import { AppShell } from "@/app/AppShell";
@@ -1726,7 +1726,10 @@ function UsageSummary({
       {/* Workspaces are no longer an allowance to spend — an account may have as
           many as it pays for — so the panel reports this workspace's own audits,
           crawls, sites, and the Orbit questions its plan includes. */}
-      <SimpleGrid cols={{ base: 1, sm: usage.orbit ? 4 : 3 }} spacing={0}>
+      <SimpleGrid cols={{ base: 1, sm: 2, md: usage.orbit ? 5 : 4 }} spacing={0}>
+        {/* First: it is the meter that decides whether tracking keeps working,
+            where the rest cap features the customer opts into. */}
+        <UsageCell icon={Activity} label={t("billing.usageEvents")} used={usage.events.used} quota={usage.events.planQuota} />
         <UsageCell icon={Search} label={t("billing.usageAudits")} used={usage.audits.used} quota={usage.audits.planQuota} credits={usage.audits.addonCredits} />
         <UsageCell icon={Globe2} label={t("billing.usageCrawls")} used={usage.crawls.used} quota={usage.crawls.planQuota} credits={usage.crawls.addonCredits} />
         <UsageCell icon={Layers} label={t("billing.usageSites")} used={usage.sites.used} quota={usage.sites.quota} />

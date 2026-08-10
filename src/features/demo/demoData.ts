@@ -47,6 +47,7 @@ export const demoWorkspaces: Workspace[] = [
       currentPeriodEnd: iso(-25 * DAY),
       audits: { planQuota: 50, used: 12, addonCredits: 0 },
       crawls: { planQuota: 50, used: 8, addonCredits: 0 },
+      events: { planQuota: 2_000_000, used: 412_880 },
       sites: { quota: 2, used: 2 },
       maxSitesPerWorkspace: 2,
       allowedRanges: ["1h", "24h", "7d", "30d", "custom"],
