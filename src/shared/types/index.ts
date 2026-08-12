@@ -288,6 +288,25 @@ export type QuotaSummary = {
   compareModes: CompareMode[];
   /** Whether reports may be delivered over WhatsApp. Pro only. */
   whatsappReports: boolean;
+  /**
+   * Lead forms and what they have collected.
+   *
+   * `used` counts *published* forms, matching what the server caps — a draft
+   * costs nothing and is never refused. The submission figure can legitimately
+   * exceed its quota: that limit is soft, so over the line submissions are
+   * still captured and it is the email notifications that stop. Render
+   * `used > planQuota` as an upgrade prompt rather than clamping it.
+   *
+   * Optional because a subscription row written before forms shipped has no
+   * figures to report.
+   */
+  forms?: {
+    planQuota: number;
+    used: number;
+    submissions: { planQuota: number; used: number };
+    csvExport: boolean;
+    removeBranding: boolean;
+  };
 } | null;
 
 /**

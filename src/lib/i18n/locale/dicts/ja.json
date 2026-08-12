@@ -53,7 +53,8 @@
     "exitImpersonationError": "代理表示を終了できませんでした。",
     "loggedOut": "ログアウトしました。",
     "pageHelp": "このページの内容",
-    "help": "ヘルプとサポート"
+    "help": "ヘルプとサポート",
+    "forms": "フォーム"
   },
   "settings": {
     "title": "設定",

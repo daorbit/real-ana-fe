@@ -53,7 +53,8 @@
     "exitImpersonationError": "Impossible de quitter l'emprunt d'identité.",
     "loggedOut": "Vous avez été déconnecté.",
     "pageHelp": "Ce que contient cette page",
-    "help": "Aide et assistance"
+    "help": "Aide et assistance",
+    "forms": "Formulaires"
   },
   "settings": {
     "title": "Paramètres",

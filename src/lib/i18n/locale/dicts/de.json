@@ -53,7 +53,8 @@
     "exitImpersonationError": "Identitätswechsel konnte nicht beendet werden.",
     "loggedOut": "Sie wurden abgemeldet.",
     "pageHelp": "Was auf dieser Seite steht",
-    "help": "Hilfe & Support"
+    "help": "Hilfe & Support",
+    "forms": "Formulare"
   },
   "settings": {
     "title": "Einstellungen",

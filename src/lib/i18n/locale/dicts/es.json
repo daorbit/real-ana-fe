@@ -53,7 +53,8 @@
     "exitImpersonationError": "No se pudo salir de la suplantación.",
     "loggedOut": "Se ha cerrado tu sesión.",
     "pageHelp": "Qué hay en esta página",
-    "help": "Ayuda y soporte"
+    "help": "Ayuda y soporte",
+    "forms": "Formularios"
   },
   "settings": {
     "title": "Ajustes",

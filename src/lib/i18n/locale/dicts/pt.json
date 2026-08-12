@@ -53,7 +53,8 @@
     "exitImpersonationError": "Não foi possível sair da representação.",
     "loggedOut": "Você foi desconectado.",
     "pageHelp": "O que há nesta página",
-    "help": "Ajuda e suporte"
+    "help": "Ajuda e suporte",
+    "forms": "Formulários"
   },
   "settings": {
     "title": "Configurações",

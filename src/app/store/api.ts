@@ -11,6 +11,7 @@ import type {
   MailLayout,
 } from "@/shared/types";
 import type { Placed } from "@/features/analytics/hooks/useHomeWidgets";
+import type { Form, FormField, FormSettings, SubmissionPage } from "@/features/forms/lib/types";
 import type { TrackerOptions } from "@/features/workspace/tracker";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
@@ -113,7 +114,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission", "Retention"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -1260,6 +1261,91 @@ export const api = createApi({
       query: (id) => ({ url: `/api/admin/billing/coupons/${id}`, method: "DELETE" }),
       invalidatesTags: ["Coupon"],
     }),
+
+    /**
+     * Lead forms.
+     *
+     * Two shapes of path, matching the server: the list is workspace-scoped,
+     * while one form is addressed by its own id — a form id already resolves to
+     * its workspace, and repeating it only lets the two disagree.
+     */
+    getForms: build.query<Form[], string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/forms`,
+      providesTags: ["Form"],
+    }),
+
+    getForm: build.query<Form, string>({
+      query: (id) => `/api/forms/${id}`,
+      providesTags: (_r, _e, id) => [{ type: "Form" as const, id }],
+    }),
+
+    createForm: build.mutation<Form, { workspaceId: string; name: string }>({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/forms`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Form"],
+    }),
+
+    updateForm: build.mutation<
+      Form,
+      { id: string; name?: string; fields?: FormField[]; settings?: Partial<FormSettings>; siteId?: string | null }
+    >({
+      query: ({ id, ...body }) => ({ url: `/api/forms/${id}`, method: "PATCH", body }),
+      invalidatesTags: (_r, _e, { id }) => [{ type: "Form" as const, id }, "Form"],
+    }),
+
+    /**
+     * Publish, close, reopen.
+     *
+     * Three mutations rather than a `status` field on the update above, because
+     * the server does different work for each: publishing checks the plan cap
+     * and refuses an empty form, closing does neither.
+     *
+     * All three invalidate `Workspace` as well: publishing consumes a slot the
+     * rail's plan card is counting.
+     */
+    setFormStatus: build.mutation<Form, { id: string; action: "publish" | "close" | "reopen" }>({
+      query: ({ id, action }) => ({ url: `/api/forms/${id}/${action}`, method: "POST" }),
+      invalidatesTags: (_r, _e, { id }) => [{ type: "Form" as const, id }, "Form", "Workspace"],
+    }),
+
+    deleteForm: build.mutation<void, string>({
+      query: (id) => ({ url: `/api/forms/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Form", "Workspace"],
+    }),
+
+    getSubmissions: build.query<SubmissionPage, { id: string; page?: number; limit?: number }>({
+      query: ({ id, page = 1, limit = 50 }) =>
+        `/api/forms/${id}/submissions?page=${page}&limit=${limit}`,
+      providesTags: ["Submission"],
+    }),
+
+    deleteSubmission: build.mutation<void, { id: string; submissionId: string }>({
+      query: ({ id, submissionId }) => ({
+        url: `/api/forms/${id}/submissions/${submissionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Submission", "Form"],
+    }),
+
+    getSubmissionRetention: build.query<{ submissionRetentionDays: number }, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/forms/retention`,
+      providesTags: ["Retention"],
+    }),
+
+    setSubmissionRetention: build.mutation<
+      { submissionRetentionDays: number },
+      { workspaceId: string; submissionRetentionDays: number }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/forms/retention`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Retention"],
+    }),
   }),
 });
 
@@ -1370,4 +1456,14 @@ export const {
   useGetAdminCouponsQuery,
   useSaveAdminCouponMutation,
   useDeleteAdminCouponMutation,
+  useGetFormsQuery,
+  useGetFormQuery,
+  useCreateFormMutation,
+  useUpdateFormMutation,
+  useSetFormStatusMutation,
+  useDeleteFormMutation,
+  useGetSubmissionsQuery,
+  useDeleteSubmissionMutation,
+  useGetSubmissionRetentionQuery,
+  useSetSubmissionRetentionMutation,
 } = api;
