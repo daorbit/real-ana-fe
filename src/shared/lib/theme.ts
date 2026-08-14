@@ -316,12 +316,22 @@ export function applyTheme(prefs: ThemePrefs) {
   // and table cells sit closer together across every page at once.
   root.setAttribute("data-density", prefs.density);
 
-  // Font size: scales the base rem, which every Mantine size token (fz, fw
-  // spacing) is itself relative to, plus the app's own hand-set px values
-  // through --font-scale for the handful of literal px sizes in App.css.
+  // Font size: --mantine-scale is Mantine's own multiplier, but it scales
+  // *everything* — spacing, radii, avatar/badge sizes, border widths, not
+  // just type (665 uses across styles.css) — so touching it here would also
+  // resize buttons and inputs whenever someone just wants bigger text, and
+  // compound unpredictably with the separate Density control. Each font-size
+  // step is set directly instead: every Mantine Text/Title/Button/Badge
+  // resolves its size from these five vars (font-size-xs..xl), and this
+  // covers all of them so a size="sm"/"xs" call (most of the app's own UI
+  // text) scales along with the default "md" one.
   const fontStep = FONT_SIZES.find((f) => f.id === prefs.fontSize) ?? FONT_SIZES[1];
-  root.style.setProperty("--mantine-font-size-md", `${fontStep.px}px`);
-  root.style.setProperty("--font-scale", String(fontStep.px / 14));
+  const scaleFactor = fontStep.px / 14;
+  const FONT_BASE: Record<string, number> = { xs: 12, sm: 14, md: 16, lg: 18, xl: 20 };
+  for (const [step, basePx] of Object.entries(FONT_BASE)) {
+    root.style.setProperty(`--mantine-font-size-${step}`, `${Math.round(basePx * scaleFactor * 10) / 10}px`);
+  }
+  root.style.setProperty("--font-scale", String(scaleFactor));
 
   root.setAttribute("data-sidebar-style", prefs.sidebar);
   root.setAttribute("data-table-style", prefs.table);

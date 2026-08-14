@@ -237,7 +237,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             says it exists. Clicking dispatches the same shortcut. */}
         <MantineShell.Section mb="md">
           <UnstyledButton
-            className="tile"
+            className="tile nav-search-tile"
             style={{ display: "block", width: "100%", padding: "7px 10px" }}
             onClick={() =>
               window.dispatchEvent(
@@ -247,8 +247,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Group gap="xs" wrap="nowrap">
               <Search size={15} style={{ color: "var(--muted)", flexShrink: 0 }} />
-              <Text size="sm" c="dimmed">{t("nav.search")}</Text>
-              <kbd className="kbd" style={{ marginLeft: "auto" }}>Ctrl K</kbd>
+              <Text size="sm" c="dimmed" className="nav-search-label">{t("nav.search")}</Text>
+              <kbd className="kbd nav-search-kbd" style={{ marginLeft: "auto" }}>Ctrl K</kbd>
             </Group>
           </UnstyledButton>
         </MantineShell.Section>
