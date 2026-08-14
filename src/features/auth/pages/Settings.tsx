@@ -358,93 +358,93 @@ export default function Settings() {
           {/* Profile + dates on the left, Appearance on the right. */}
           <Box className="settings-cols">
             <Stack gap="xl">
-          <Section
-            title={t("settings.profile")}
-            description={t("settings.profileDesc")}
-          >
-            <Field label={t("settings.firstName")} hint={t("common.required")}>
-              <TextInput
-                value={firstName}
-                onChange={(e) => {
-                  const v = e.currentTarget.value;
-                  setFirstName(v);
-                  clearIfValid("firstName", (s) => (s.trim() ? null : "x"), v);
-                }}
-                error={errText(errors.firstName)}
-              />
-            </Field>
-            <Field label={t("settings.lastName")}>
-              <TextInput
-                value={lastName}
-                onChange={(e) => setLastName(e.currentTarget.value)}
-              />
-            </Field>
-            <Field
-              label={t("settings.email")}
-              hint={t("settings.emailHint")}
-            >
-              <TextInput value={user.email} disabled />
-            </Field>
-            <Field label={t("settings.mobile")} hint={t("common.optional")} last>
-              <TextInput
-                placeholder="+91 98765 43210"
-                value={mobile}
-                onChange={(e) => {
-                  const v = e.currentTarget.value;
-                  setMobile(v);
-                  clearIfValid("mobile", mobileError, v);
-                }}
-                error={errText(errors.mobile)}
-              />
-            </Field>
-          </Section>
-
-          <Section
-            title={t("settings.datesTitle")}
-            description={t("settings.datesDesc")}
-          >
-            <Field
-              label={t("settings.dateFormat")}
-              hint={
-                !dateLocale && BROWSER_LOCALE
-                  ? t("settings.dateFormatHintDetected", { value: BROWSER_LOCALE })
-                  : t("settings.dateFormatHint")
-              }
-            >
-              <Select
-                data={LOCALES}
-                value={dateLocale}
-                onChange={(v) => setDateLocale(v ?? "")}
-                allowDeselect={false}
-                comboboxProps={{ withinPortal: true, radius: "md" }}
-              />
-            </Field>
-            <Field
-              label={t("settings.timezone")}
-              hint={
-                !timezone && BROWSER_TZ
-                  ? t("settings.timezoneHintDetected", { value: BROWSER_TZ })
-                  : t("settings.timezoneHint")
-              }
-            >
-              <Select
-                data={TIMEZONES}
-                value={timezone}
-                onChange={(v) => setTimezone(v ?? "")}
-                allowDeselect={false}
-                searchable
-                comboboxProps={{ withinPortal: true, radius: "md" }}
-              />
-            </Field>
-            <Field label={t("settings.preview")} hint={t("settings.previewHint")} last>
-              <Code
-                block
-                style={{ fontSize: 13, padding: "10px 12px", background: "var(--surface-2)" }}
+              <Section
+                title={t("settings.profile")}
+                description={t("settings.profileDesc")}
               >
-                {preview}
-              </Code>
-            </Field>
-          </Section>
+                <Field label={t("settings.firstName")} hint={t("common.required")}>
+                  <TextInput
+                    value={firstName}
+                    onChange={(e) => {
+                      const v = e.currentTarget.value;
+                      setFirstName(v);
+                      clearIfValid("firstName", (s) => (s.trim() ? null : "x"), v);
+                    }}
+                    error={errText(errors.firstName)}
+                  />
+                </Field>
+                <Field label={t("settings.lastName")}>
+                  <TextInput
+                    value={lastName}
+                    onChange={(e) => setLastName(e.currentTarget.value)}
+                  />
+                </Field>
+                <Field
+                  label={t("settings.email")}
+                  hint={t("settings.emailHint")}
+                >
+                  <TextInput value={user.email} disabled />
+                </Field>
+                <Field label={t("settings.mobile")} hint={t("common.optional")} last>
+                  <TextInput
+                    placeholder="+91 98765 43210"
+                    value={mobile}
+                    onChange={(e) => {
+                      const v = e.currentTarget.value;
+                      setMobile(v);
+                      clearIfValid("mobile", mobileError, v);
+                    }}
+                    error={errText(errors.mobile)}
+                  />
+                </Field>
+              </Section>
+
+              <Section
+                title={t("settings.datesTitle")}
+                description={t("settings.datesDesc")}
+              >
+                <Field
+                  label={t("settings.dateFormat")}
+                  hint={
+                    !dateLocale && BROWSER_LOCALE
+                      ? t("settings.dateFormatHintDetected", { value: BROWSER_LOCALE })
+                      : t("settings.dateFormatHint")
+                  }
+                >
+                  <Select
+                    data={LOCALES}
+                    value={dateLocale}
+                    onChange={(v) => setDateLocale(v ?? "")}
+                    allowDeselect={false}
+                    comboboxProps={{ withinPortal: true, radius: "md" }}
+                  />
+                </Field>
+                <Field
+                  label={t("settings.timezone")}
+                  hint={
+                    !timezone && BROWSER_TZ
+                      ? t("settings.timezoneHintDetected", { value: BROWSER_TZ })
+                      : t("settings.timezoneHint")
+                  }
+                >
+                  <Select
+                    data={TIMEZONES}
+                    value={timezone}
+                    onChange={(v) => setTimezone(v ?? "")}
+                    allowDeselect={false}
+                    searchable
+                    comboboxProps={{ withinPortal: true, radius: "md" }}
+                  />
+                </Field>
+                <Field label={t("settings.preview")} hint={t("settings.previewHint")} last>
+                  <Code
+                    block
+                    style={{ fontSize: 13, padding: "10px 12px", background: "var(--surface-2)" }}
+                  >
+                    {preview}
+                  </Code>
+                </Field>
+              </Section>
             </Stack>
 
             <AppearanceSection />

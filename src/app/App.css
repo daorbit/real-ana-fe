@@ -111,12 +111,12 @@ html.theme-transitioning [class*="mantine-Badge"] {
 .settings-cols {
   display: grid;
   grid-template-columns: 1fr 1.35fr;
-  gap: 24px;
+  gap: 32px;
   align-items: start;
   max-width: 1400px;
 }
 @media (max-width: 62em) {
-  .settings-cols { grid-template-columns: 1fr; }
+  .settings-cols { grid-template-columns: 1fr; gap: 24px; }
 }
 
 /* ============ Background styles (Appearance settings) ============
