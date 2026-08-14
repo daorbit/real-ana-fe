@@ -618,6 +618,18 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   max-width: 520px;
 }
 
+/* The Appearance step breaks from the split entirely — see Onboarding.tsx —
+   so it gets its own full-width page shell instead of .onb-panel's centred
+   520px column. */
+.onb-appearance-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+}
+@media (max-width: 48em) {
+  .onb-appearance-page { padding: 1.5rem 1.1rem 3rem; }
+}
+
 /* Step list on the brand panel. */
 .onb-steps { display: flex; flex-direction: column; gap: 1.1rem; }
 .onb-step { display: flex; align-items: flex-start; gap: 0.8rem; }

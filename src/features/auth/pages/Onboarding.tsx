@@ -8,6 +8,7 @@ import {
 import { ArrowRight, ArrowLeft, Globe, Zap } from "lucide-react";
 import { OnboardingBrand } from "@/features/auth/components/OnboardingBrand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
+import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
 import { BrandIcon } from "@/shared/ui/BrandIcon";
 import { CodeBlock } from "@/shared/ui/CodeBlock";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
@@ -19,6 +20,10 @@ import * as v from "@/shared/lib/validate";
 import { notifyError } from "@/shared/lib/notify";
 import type { Site } from "@/shared/types";
 
+// Appearance is the last step and renders full-page with no brand panel
+// (see the `step === 4` branch below), so it deliberately has no entry
+// here — the "STEP N OF M" counter and step list only ever cover the steps
+// that share the split layout.
 const STEPS = [
   { label: "Your details", hint: "Name, mobile and photo" },
   { label: "Workspace", hint: "Where your sites live" },
@@ -26,9 +31,9 @@ const STEPS = [
   { label: "Install", hint: "One script tag" },
 ];
 
-// Same three steps, minus the profile one — used when an existing account
-// with a profile already filled in adds a second workspace. Keeping this as
-// its own array rather than STEPS.slice(1) so the brand panel's numbering
+// Same steps, minus the profile one — used when an existing account with a
+// profile already filled in adds a second workspace. Keeping this as its
+// own array rather than STEPS.slice(1) so the brand panel's numbering
 // ("Step 1 of 3") reads correctly instead of starting at "2 of 4".
 const WORKSPACE_ONLY_STEPS = [
   { label: "Workspace", hint: "Where your sites live" },
@@ -150,6 +155,43 @@ export default function Onboarding() {
   // rather than starting the count at "2 of 4".
   const displaySteps = workspaceOnly ? WORKSPACE_ONLY_STEPS : STEPS;
   const displayStep = workspaceOnly ? step - 1 : step;
+
+  // Appearance is the last step and deliberately breaks from the split
+  // layout every other step shares: it's a grid of swatches and preview
+  // tiles that wants the full page width, not the ~380px column the brand
+  // panel leaves it, and Continue/Back move to the top since there's no
+  // step counter/skip-link header to share the row with here.
+  if (step === 4) {
+    return (
+      <div className="onb-appearance-page">
+        <Group justify="space-between" mb="lg" wrap="wrap">
+          <div>
+            <Title order={2} style={{ letterSpacing: "-0.02em" }}>
+              Make it yours
+            </Title>
+            <Text c="dimmed" size="sm" mt={4}>
+              Pick a mode, an accent, and a background — you can change any of
+              it later from Settings.
+            </Text>
+          </div>
+          <Group gap="sm">
+            <Button
+              variant="default"
+              leftSection={<ArrowLeft size={15} />}
+              onClick={() => setStep(3)}
+            >
+              Back
+            </Button>
+            <Button onClick={done} rightSection={<ArrowRight size={16} />}>
+              Continue
+            </Button>
+          </Group>
+        </Group>
+
+        <AppearanceSection bare />
+      </div>
+    );
+  }
 
   return (
     <div className="auth-split onb-split">
@@ -349,10 +391,10 @@ export default function Onboarding() {
                   <Button
                     size="md"
                     fullWidth
-                    onClick={done}
+                    onClick={() => setStep(4)}
                     rightSection={<ArrowRight size={16} />}
                   >
-                    Go to dashboard
+                    Continue
                   </Button>
                 </Stack>
               )}
