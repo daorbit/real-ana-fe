@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Title, Text, Group, Button, Card, TextInput, ActionIcon, Badge, Stack,
-  SimpleGrid, ThemeIcon, Center, Modal, CopyButton, Tooltip, Divider,
+  SimpleGrid, ThemeIcon, Center, CopyButton, Tooltip, Divider,
   Box, Collapse, UnstyledButton,
 } from "@mantine/core";
 import { motion } from "framer-motion";
@@ -16,13 +16,13 @@ import { InstallCheck } from "@/features/workspace/components/InstallCheck";
 import { SnippetBuilder } from "@/features/workspace/components/SnippetBuilder";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import {
-  useCreateWorkspaceMutation, useRenameWorkspaceMutation, useDeleteWorkspaceMutation,
+  useRenameWorkspaceMutation, useDeleteWorkspaceMutation,
   useDeleteSiteMutation,
 } from "@/app/store";
 import { useSites, useSiteInstalled } from "@/features/workspace";
 import * as v from "@/shared/lib/validate";
 import { shortDate } from "@/shared/lib";
-import { notify, errMessage, notifyError, confirmDestroy } from "@/shared/lib/notify";
+import { notify, errMessage, confirmDestroy } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import type { Workspace, Site } from "@/shared/types";
 import { WorkspacesSkeleton } from "@/shared/ui/Skeletons";
@@ -178,12 +178,12 @@ function SiteRow({
 
 export default function Workspaces() {
   const { t } = useTranslation();
+  const nav = useNavigate();
   const { workspaces, active, setActive, loading } = useWorkspace();
 
-  // workspace create / rename
-  const [wsOpen, setWsOpen] = useState(false);
-  const [wsName, setWsName] = useState("");
-  const [wsError, setWsError] = useState<string | null>(null);
+  // workspace rename (create now lives in Onboarding — see "New workspace"
+  // below, which sends an existing account through the same workspace/site/
+  // install steps a brand-new signup gets, just without the profile step).
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
 
@@ -221,33 +221,9 @@ export default function Workspaces() {
       v.maxLength(t("workspaces.nameLabel"), 60),
     )(name);
 
-  const [createWs, { isLoading: creatingWs }] = useCreateWorkspaceMutation();
   const [renameWs] = useRenameWorkspaceMutation();
   const [deleteWs] = useDeleteWorkspaceMutation();
   const [deleteSiteMut] = useDeleteSiteMutation();
-
-  const createWorkspace = async (e: FormEvent) => {
-    e.preventDefault();
-    const err = validateName(wsName);
-    setWsError(err);
-    if (err) return;
-
-    try {
-      const ws = await createWs({ name: wsName.trim() }).unwrap();
-      setWsName(""); setWsOpen(false); setWsError(null);
-      setActive(ws._id);
-      notify.success(t("workspaces.createdToast", { name: ws.name }));
-      // Straight into "add a site" rather than leaving a brand-new,
-      // empty workspace for the next click to find — the whole point of
-      // creating one is to start tracking something. `siteOpen` reads
-      // `active` when the wizard actually renders, and `setActive` just
-      // above has already queued the new workspace as active in the same
-      // batch of state updates.
-      setSiteOpen(true);
-    } catch (err2) {
-      notifyError(err2, t("workspaces.createError"));
-    }
-  };
 
   const renameError = validateName(editName);
 
@@ -332,7 +308,7 @@ export default function Workspaces() {
         description={t("workspaces.description")}
         actions={
           <>
-            <Button variant="default" leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>
+            <Button variant="default" leftSection={<Plus size={16} />} onClick={() => nav("/app/onboarding?mode=workspace")}>
               {t("workspaces.newWorkspace")}
             </Button>
             <PageHelpButton />
@@ -340,34 +316,7 @@ export default function Workspaces() {
         }
       />
 
-      {/* Create workspace modal */}
-      <Modal
-        opened={wsOpen}
-        onClose={() => { setWsOpen(false); setWsError(null); }}
-        title={t("workspaces.createTitle")}
-        centered
-        radius="lg"
-      >
-        <form onSubmit={createWorkspace} noValidate>
-          <Stack gap="md">
-            <TextInput
-              label={t("workspaces.nameLabel")}
-              placeholder={t("workspaces.namePlaceholder")}
-              description={t("workspaces.nameDesc")}
-              value={wsName}
-              error={wsError}
-              onChange={(e) => { setWsName(e.currentTarget.value); if (wsError) setWsError(null); }}
-              onBlur={() => setWsError(validateName(wsName))}
-              withAsterisk
-              data-autofocus
-            />
-            <Group justify="flex-end" gap="sm">
-              <Button variant="default" disabled={creatingWs} onClick={() => { setWsOpen(false); setWsError(null); }}>{t("common.cancel")}</Button>
-              <Button type="submit" loading={creatingWs}>{t("workspaces.createSubmit")}</Button>
-            </Group>
-          </Stack>
-        </form>
-      </Modal>
+ 
 
       {/* Add site: details -> tracking options -> snippet */}
       {active && (
@@ -389,7 +338,7 @@ export default function Workspaces() {
             <Text c="dimmed" size="sm" ta="center">
               {t("workspaces.emptyBody")}
             </Text>
-            <Button mt="sm" leftSection={<Plus size={16} />} onClick={() => setWsOpen(true)}>
+            <Button mt="sm" leftSection={<Plus size={16} />} onClick={() => nav("/app/onboarding?mode=workspace")}>
               {t("workspaces.emptyCta")}
             </Button>
           </Stack>
@@ -440,7 +389,7 @@ export default function Workspaces() {
               fullWidth
               mt="sm"
               leftSection={<Plus size={15} />}
-              onClick={() => setWsOpen(true)}
+              onClick={() => nav("/app/onboarding?mode=workspace")}
             >
               {t("workspaces.newWorkspace")}
             </Button>

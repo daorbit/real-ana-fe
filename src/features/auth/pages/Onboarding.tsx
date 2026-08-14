@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Button, Group, Text, Title, TextInput, SimpleGrid, UnstyledButton,
@@ -21,6 +21,16 @@ import type { Site } from "@/shared/types";
 
 const STEPS = [
   { label: "Your details", hint: "Name, mobile and photo" },
+  { label: "Workspace", hint: "Where your sites live" },
+  { label: "Your site", hint: "What you want to track" },
+  { label: "Install", hint: "One script tag" },
+];
+
+// Same three steps, minus the profile one — used when an existing account
+// with a profile already filled in adds a second workspace. Keeping this as
+// its own array rather than STEPS.slice(1) so the brand panel's numbering
+// ("Step 1 of 3") reads correctly instead of starting at "2 of 4".
+const WORKSPACE_ONLY_STEPS = [
   { label: "Workspace", hint: "Where your sites live" },
   { label: "Your site", hint: "What you want to track" },
   { label: "Install", hint: "One script tag" },
@@ -50,8 +60,15 @@ const FIRST_SKIPPABLE_STEP = 1;
 export default function Onboarding() {
   const nav = useNavigate();
   const { setActive, workspaces } = useWorkspace();
+  const [params] = useSearchParams();
 
-  const [step, setStep] = useState(0);
+  // Triggered by "New workspace" for an account that already exists — the
+  // profile step is meaningless here (there's nothing to fill in that
+  // isn't already set), so this skips straight to naming the workspace and
+  // returns to the workspace list rather than the dashboard on completion.
+  const workspaceOnly = params.get("mode") === "workspace";
+
+  const [step, setStep] = useState(workspaceOnly ? 1 : 0);
   const [createWorkspace, { isLoading: creatingWs }] = useCreateWorkspaceMutation();
   const [createSite, { isLoading: creatingSite }] = useCreateSiteMutation();
 
@@ -79,13 +96,13 @@ export default function Onboarding() {
    */
   const skip = () => {
     localStorage.setItem("quantalog_onboarding_skipped", "1");
-    nav("/app");
+    nav(workspaceOnly ? "/app/workspaces" : "/app");
   };
 
   /** Finished properly — the account has a workspace, so the guard passes. */
   const done = () => {
     localStorage.removeItem("quantalog_onboarding_skipped");
-    nav("/app");
+    nav(workspaceOnly ? "/app/workspaces" : "/app");
   };
 
   const submitWorkspace = async () => {
@@ -127,15 +144,22 @@ export default function Onboarding() {
     }
   };
 
+  // The brand panel's step list and "Step N of M" counter both index into
+  // whichever array is showing — workspaceOnly drops the profile step
+  // entirely, so its indices need shifting down by one to stay correct
+  // rather than starting the count at "2 of 4".
+  const displaySteps = workspaceOnly ? WORKSPACE_ONLY_STEPS : STEPS;
+  const displayStep = workspaceOnly ? step - 1 : step;
+
   return (
     <div className="auth-split onb-split">
-      <OnboardingBrand step={step} steps={STEPS} />
+      <OnboardingBrand step={displayStep} steps={displaySteps} />
 
       <div className="onb-panel">
         <div className="onb-col">
           <Group justify="space-between" mb="xl" wrap="nowrap">
             <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
-              STEP {step + 1} OF {STEPS.length}
+              STEP {displayStep + 1} OF {displaySteps.length}
             </Text>
             {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
               <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
