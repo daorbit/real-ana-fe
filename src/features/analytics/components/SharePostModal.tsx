@@ -556,6 +556,7 @@ export function SharePostModal({
       setDraft(null);
       setPlatform("linkedin");
       setDevice("desktop");
+      setWritten(false);
       undoTo.current = null;
     }
     wasOpen.current = opened;
@@ -698,12 +699,15 @@ export function SharePostModal({
                     if (undoTo.current === null) return;
                     setCaption(undoTo.current, false);
                     undoTo.current = null;
+                    // Stepping back past a generated caption means what is on
+                    // screen is the user's own words again.
+                    setWritten(false);
                   }}
                   canUndo={undoTo.current !== null}
                 />
                 <CaptionEditor
                   value={caption}
-                  onChange={(next) => setCaption(next, false)}
+                  onChange={(next) => { setCaption(next, false); setWritten(false); }}
                   ariaLabel={t("sharePost.caption")}
                 />
               </Box>
@@ -721,12 +725,22 @@ export function SharePostModal({
                 )}
               </Group>
 
+              {/* Said plainly, and only while it is true: a caption posted
+                  under someone's own name should not quietly be a machine's
+                  words. It clears the moment they edit or reset. */}
+              {written && (
+                <Group gap={6} mt={8} wrap="nowrap">
+                  <PenLine size={13} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
+                  <Text size="xs" c="dimmed">{t("sharePost.writtenNote")}</Text>
+                </Group>
+              )}
+
               <Group grow mt="md" gap="sm">
                 <Button
                   variant="default"
                   leftSection={<RotateCcw size={15} />}
                   disabled={caption === defaultCaption}
-                  onClick={() => { setDraft(null); undoTo.current = null; }}
+                  onClick={() => { setDraft(null); setWritten(false); undoTo.current = null; }}
                 >
                   {t("sharePost.reset")}
                 </Button>

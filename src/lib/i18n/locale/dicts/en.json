@@ -631,6 +631,7 @@
     "write": "Write with Orbit AI",
     "writeAgain": "Rewrite with Orbit AI",
     "writeTooltip": "Orbit AI writes a caption for {{platform}} from this dashboard's own numbers. Uses one Orbit question.",
+    "writtenNote": "Written by Orbit AI from your dashboard's numbers. Read it over before posting.",
     "writeError": "Could not write a caption. Try again in a moment.",
     "postImage": "Post Image",
     "hashtags": "{{count}} / {{limit}} hashtags",
