@@ -429,6 +429,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
           workspaceId={workspaceId}
           workspace={active?.name ?? ""}
           url={url}
+          shareUrl={`${PUBLIC_API_BASE || window.location.origin}/api/share/${token}/preview`}
           rangeLabel={t("share.cardRange")}
           stats={{
             visitors: headline.visitors,

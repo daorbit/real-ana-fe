@@ -662,6 +662,8 @@
     "pasteHint": "{{platform}} builds the post from the link itself. We'll copy your caption so you can paste it in.",
     "pasteTitle": "Caption copied",
     "pasteBody": "Paste it into the composer that just opened.",
+    "pasteFailedTitle": "Could not copy the caption",
+    "pasteFailed": "Copy it with the Copy caption button, then paste it into the composer.",
     "later": "I'll do it later",
     "shareOn": "Share on {{platform}}",
     "cardVisitors": "Visitors",

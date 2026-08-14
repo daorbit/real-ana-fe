@@ -104,6 +104,39 @@ function PlatformGlyph({ icon, size = 16 }: { icon: { path: string; hex: string 
   );
 }
 
+/**
+ * Copy synchronously, inside the click that asked for it.
+ *
+ * `navigator.clipboard.writeText` returns a promise, and awaiting it before
+ * opening the share window broke both: the write outlived its user gesture and
+ * the popup was blocked. `execCommand("copy")` is deprecated but synchronous,
+ * which is the property that matters here — the async API is still fired
+ * alongside it for browsers that have dropped the old one.
+ */
+function copyText(text: string): boolean {
+  try {
+    navigator.clipboard?.writeText(text).catch(() => {});
+  } catch {
+    // Ignored — the synchronous path below is the one being relied on.
+  }
+
+  const area = document.createElement("textarea");
+  area.value = text;
+  // Off-screen rather than hidden: a `display:none` element cannot be selected,
+  // and the copy silently does nothing.
+  area.style.cssText = "position:fixed;top:-9999px;opacity:0";
+  document.body.appendChild(area);
+  area.select();
+
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  } finally {
+    area.remove();
+  }
+}
+
 const HASHTAG = /#[\p{L}\p{N}_]+/gu;
 const URL_IN_TEXT = /https?:\/\/\S+/g;
 
@@ -486,6 +519,7 @@ export function SharePostModal({
   workspaceId,
   workspace,
   url,
+  shareUrl,
   stats,
   rangeLabel,
 }: {
@@ -495,6 +529,15 @@ export function SharePostModal({
   workspace: string;
   /** The public dashboard link. Always present — the modal only opens when live. */
   url: string;
+  /**
+   * The link handed to the networks.
+   *
+   * Points at the API's preview route rather than the dashboard itself: a
+   * scraper does not run our JavaScript, so only a server-rendered page can
+   * give it tags for *this* workspace. Anyone who clicks is redirected on to
+   * `url`, so the two are the same destination by different doors.
+   */
+  shareUrl: string;
   /** Figures for the card. A null tile is simply left off. */
   stats: ShareCardStats;
   rangeLabel: string;
@@ -593,19 +636,24 @@ export function SharePostModal({
     }
   };
 
-  const share = async () => {
+  const share = () => {
     // Platforms that drop the caption get it on the clipboard first, so the
     // paste is one keystroke away in the composer that is about to open.
+    //
+    // Both halves run synchronously inside the click. Awaiting the clipboard
+    // before opening the window cost us both: the write outlived the user
+    // gesture that authorised it, and the popup blocker took the window
+    // because it no longer looked like a click had opened it.
     if (active.needsPaste) {
-      try {
-        await navigator.clipboard.writeText(caption);
-        notify.success(t("sharePost.pasteBody"), t("sharePost.pasteTitle"));
-      } catch {
-        // Clipboard denied — the composer still opens and the caption is right
-        // here to copy by hand.
-      }
+      const copied = copyText(caption);
+      notify[copied ? "success" : "error"](
+        copied ? t("sharePost.pasteBody") : t("sharePost.pasteFailed"),
+        copied ? t("sharePost.pasteTitle") : t("sharePost.pasteFailedTitle"),
+      );
     }
-    window.open(active.intent(caption, url), "_blank", "noopener,noreferrer");
+    // The intent carries the preview URL so the network scrapes tags for this
+    // workspace; the caption keeps the readable dashboard link.
+    window.open(active.intent(caption, shareUrl), "_blank", "noopener,noreferrer");
   };
 
   return (
