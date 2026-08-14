@@ -352,21 +352,30 @@ export function getLoaderVariant(): LoaderVariant {
 }
 
 let transitionTimer: ReturnType<typeof setTimeout> | null = null;
+let pulseTimer: ReturnType<typeof setTimeout> | null = null;
 
 /**
  * Briefly enables a CSS transition on colour/background properties so a
- * mode, accent, or background change crossfades instead of snapping. Scoped
- * to a class toggled on <html> for ~350ms rather than left on permanently —
- * see the `.theme-transitioning` rule in App.css for why.
+ * mode, accent, or background change crossfades instead of snapping, and
+ * fires a one-shot accent-tinted pulse across the whole viewport (see
+ * `.theme-pulse` in App.css) so the change reads as a single visible event
+ * rather than just a quiet colour drift — a crossfade alone can pass
+ * unnoticed if the visible viewport doesn't touch much of what changed.
+ * Both are scoped to classes toggled on <html> for the animation's own
+ * duration rather than left on permanently.
  */
 export function withThemeTransition(apply: () => void) {
   const root = document.documentElement;
-  root.classList.add("theme-transitioning");
+  root.classList.add("theme-transitioning", "theme-pulse");
   apply();
   if (transitionTimer) clearTimeout(transitionTimer);
   transitionTimer = setTimeout(() => {
     root.classList.remove("theme-transitioning");
   }, 360);
+  if (pulseTimer) clearTimeout(pulseTimer);
+  pulseTimer = setTimeout(() => {
+    root.classList.remove("theme-pulse");
+  }, 700);
 }
 
 export type { ThemePrefs };
