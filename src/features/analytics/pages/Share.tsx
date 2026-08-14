@@ -426,6 +426,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
         <SharePostModal
           opened={composerOpen}
           onClose={() => setComposerOpen(false)}
+          workspaceId={workspaceId}
           workspace={active?.name ?? ""}
           url={url}
           rangeLabel={t("share.cardRange")}

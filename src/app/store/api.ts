@@ -184,6 +184,20 @@ export const api = createApi({
       ],
     }),
 
+    // A written share caption. A mutation rather than a query: it spends Orbit
+    // quota, so it must only run when the user asks for it — never re-fetched
+    // on remount or refocus.
+    writeShareCaption: build.mutation<
+      { caption: string },
+      { workspaceId: string; platform: string }
+    >({
+      query: ({ workspaceId, platform }) => ({
+        url: `/api/workspaces/${workspaceId}/share/caption`,
+        method: "POST",
+        body: { platform },
+      }),
+    }),
+
     getSites: build.query<Site[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/sites`,
       providesTags: (result, _e, workspaceId) => [
@@ -1271,6 +1285,7 @@ export const {
   useDeleteWorkspaceMutation,
   useGetShareQuery,
   useSetShareMutation,
+  useWriteShareCaptionMutation,
   useGetSitesQuery,
   useCreateSiteMutation,
   useUpdateSiteOptionsMutation,

@@ -7,9 +7,10 @@ import {
 import { siX, siWhatsapp, siFacebook, siTelegram } from "simple-icons";
 import {
   Copy, Check, Download, X, Smile, List, ListOrdered, AtSign, RotateCcw, Link2,
-  Monitor, Smartphone, Link as LinkIcon,
+  Monitor, Smartphone, Link as LinkIcon, PenLine,
 } from "lucide-react";
-import { notify } from "@/shared/lib/notify";
+import { notify, errMessage } from "@/shared/lib/notify";
+import { useWriteShareCaptionMutation } from "@/app/store";
 import {
   renderShareCard, downloadShareCard, CARD_WIDTH, CARD_HEIGHT,
   type ShareCardStats,
@@ -482,6 +483,7 @@ function FeedPreview({
 export function SharePostModal({
   opened,
   onClose,
+  workspaceId,
   workspace,
   url,
   stats,
@@ -489,6 +491,7 @@ export function SharePostModal({
 }: {
   opened: boolean;
   onClose: () => void;
+  workspaceId: string;
   workspace: string;
   /** The public dashboard link. Always present — the modal only opens when live. */
   url: string;
@@ -499,6 +502,10 @@ export function SharePostModal({
   const { t } = useTranslation();
   const [platform, setPlatform] = useState<PlatformId>("linkedin");
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
+  // Whether the caption on screen came from Orbit. Drives the button's label,
+  // and the note under the editor that says so plainly.
+  const [written, setWritten] = useState(false);
 
   const active = PLATFORMS.find((p) => p.id === platform) ?? PLATFORMS[0];
 
@@ -565,6 +572,24 @@ export function SharePostModal({
   const insert = (fragment: string, opts?: { line?: boolean }) => {
     const base = caption.replace(/\s+$/, "");
     setCaption(opts?.line ? `${base}\n${fragment}` : `${base} ${fragment}`);
+  };
+
+  /**
+   * Replace the caption with one written for the selected platform.
+   *
+   * The previous caption goes on the undo step, so a generated one someone
+   * dislikes is a single click away from being taken back — this overwrites
+   * work, unlike every other toolbar action.
+   */
+  const generate = async () => {
+    try {
+      const res = await writeCaption({ workspaceId, platform }).unwrap();
+      undoTo.current = caption;
+      setDraft(res.caption);
+      setWritten(true);
+    } catch (e) {
+      notify.error(errMessage(e, t("sharePost.writeError")));
+    }
   };
 
   const share = async () => {
@@ -634,7 +659,31 @@ export function SharePostModal({
 
           <ScrollArea style={{ flex: 1 }} type="auto">
             <Box className="share-post-body">
-              <Text size="sm" fw={600} mb={8}>{t("sharePost.caption")}</Text>
+              <Group justify="space-between" align="center" mb={8} wrap="nowrap">
+                <Text size="sm" fw={600}>{t("sharePost.caption")}</Text>
+                {/* Named rather than a bare "Write for me": the caption goes out
+                    under the user's own name, so who wrote it — and that it
+                    costs an Orbit question — should be legible before the
+                    click, not discovered after it. */}
+                <Tooltip
+                  label={t("sharePost.writeTooltip", { platform: active.label })}
+                  withArrow
+                  multiline
+                  w={260}
+                  openDelay={300}
+                >
+                  <Button
+                    size="compact-sm"
+                    variant="light"
+                    color="emerald"
+                    loading={writing}
+                    onClick={generate}
+                    leftSection={<PenLine size={14} />}
+                  >
+                    {written ? t("sharePost.writeAgain") : t("sharePost.write")}
+                  </Button>
+                </Tooltip>
+              </Group>
 
               <Box
                 style={{
