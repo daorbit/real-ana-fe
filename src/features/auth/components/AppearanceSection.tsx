@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Box, Group, SimpleGrid, Text, UnstyledButton, useMantineColorScheme } from "@mantine/core";
+import { Box, Group, SimpleGrid, Text, UnstyledButton, useMantineColorScheme, Switch } from "@mantine/core";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 import {
   ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES, LOADER_VARIANTS,
+  FONT_SIZES, SIDEBAR_STYLES, TABLE_STYLES,
   applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
 } from "@/shared/lib/theme";
 import type { ThemeMode } from "@/shared/lib/theme";
@@ -39,7 +40,14 @@ function GroupBlock({ children }: { children: React.ReactNode }) {
  * settings page for how the app looks should show the result instantly
  * rather than waiting on a Save button.
  */
-export function AppearanceSection() {
+export function AppearanceSection({
+  /** Skip the Section card chrome (title + surface) — used on its own full
+   *  page/tab, where the page header already carries the title and boxing
+   *  the content again would waste the width it's meant to spread across. */
+  bare = false,
+}: {
+  bare?: boolean;
+} = {}) {
   const { t } = useTranslation();
   const [prefs, setPrefs] = useState(readThemePrefs);
   const { setColorScheme } = useMantineColorScheme();
@@ -56,12 +64,8 @@ export function AppearanceSection() {
     });
   };
 
-  return (
-    <Section
-      title={t("settings.appearance", "Appearance")}
-      description={t("settings.appearanceDesc", "Choose how Quantalog looks on this device.")}
-    >
-      <Box px="lg" py="lg">
+  const body = (
+      <Box px={bare ? 0 : "lg"} py={bare ? 0 : "lg"}>
         <GroupBlock>
           <GroupLabel>{t("settings.mode", "Mode")}</GroupLabel>
           <Group gap="sm">
@@ -83,7 +87,7 @@ export function AppearanceSection() {
 
         <GroupBlock>
           <GroupLabel>{t("settings.accentColor", "Accent color")}</GroupLabel>
-          <SimpleGrid cols={{ base: 5, xs: 7, sm: 8 }} spacing={12}>
+          <SimpleGrid cols={{ base: 5, xs: 8, sm: 10, md: 12, lg: 14 }} spacing={14}>
             {ACCENT_PRESETS.map((preset) => {
               const active = prefs.accent === preset.id;
               return (
@@ -114,7 +118,7 @@ export function AppearanceSection() {
 
         <GroupBlock>
           <GroupLabel>{t("settings.background", "Background")}</GroupLabel>
-          <SimpleGrid cols={{ base: 2, xs: 3, sm: 4 }} spacing={12}>
+          <SimpleGrid cols={{ base: 2, xs: 3, sm: 4, md: 5, lg: 6 }} spacing={14}>
             {BG_STYLES.map((bg) => {
               const active = prefs.bg === bg.id;
               return (
@@ -199,11 +203,78 @@ export function AppearanceSection() {
               ))}
             </Group>
           </div>
+
+          <div>
+            <GroupLabel>{t("settings.fontSize", "Font size")}</GroupLabel>
+            <Group gap="sm">
+              {FONT_SIZES.map((f) => (
+                <UnstyledButton
+                  key={f.id}
+                  className="tile"
+                  data-selected={prefs.fontSize === f.id}
+                  onClick={() => update({ fontSize: f.id })}
+                  px="lg"
+                  py={10}
+                  style={{ fontSize: 13.5, fontWeight: 550 }}
+                >
+                  {f.label}
+                </UnstyledButton>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <GroupLabel>{t("settings.sidebarStyle", "Sidebar")}</GroupLabel>
+            <Group gap="sm">
+              {SIDEBAR_STYLES.map((s) => (
+                <UnstyledButton
+                  key={s.id}
+                  className="tile"
+                  data-selected={prefs.sidebar === s.id}
+                  onClick={() => update({ sidebar: s.id })}
+                  px="lg"
+                  py={10}
+                  style={{ fontSize: 13.5, fontWeight: 550 }}
+                >
+                  {s.label}
+                </UnstyledButton>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <GroupLabel>{t("settings.tableStyle", "Table rows")}</GroupLabel>
+            <Group gap="sm">
+              {TABLE_STYLES.map((tb) => (
+                <UnstyledButton
+                  key={tb.id}
+                  className="tile"
+                  data-selected={prefs.table === tb.id}
+                  onClick={() => update({ table: tb.id })}
+                  px="lg"
+                  py={10}
+                  style={{ fontSize: 13.5, fontWeight: 550 }}
+                >
+                  {tb.label}
+                </UnstyledButton>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <GroupLabel>{t("settings.motion", "Motion")}</GroupLabel>
+            <Switch
+              checked={prefs.motion}
+              onChange={(e) => update({ motion: e.currentTarget.checked })}
+              label={prefs.motion ? t("settings.motionOn", "Animations on") : t("settings.motionOff", "Animations off")}
+              size="md"
+            />
+          </div>
         </Group>
 
         <Box>
           <GroupLabel>{t("settings.loadingScreen", "Loading screen")}</GroupLabel>
-          <SimpleGrid cols={{ base: 2, xs: 3, sm: 5 }} spacing={12}>
+          <SimpleGrid cols={{ base: 2, xs: 3, sm: 5 }} spacing={14}>
             {LOADER_VARIANTS.map((v) => {
               const active = prefs.loader === v.id;
               return (
@@ -251,6 +322,16 @@ export function AppearanceSection() {
           </SimpleGrid>
         </Box>
       </Box>
+  );
+
+  if (bare) return body;
+
+  return (
+    <Section
+      title={t("settings.appearance", "Appearance")}
+      description={t("settings.appearanceDesc", "Choose how Quantalog looks on this device.")}
+    >
+      {body}
     </Section>
   );
 }

@@ -9,6 +9,9 @@
 export type ThemeMode = "system" | "light" | "dark";
 export type RadiusStyle = "rounded" | "soft" | "sharp";
 export type Density = "comfortable" | "compact";
+export type FontSize = "small" | "default" | "large";
+export type SidebarStyle = "expanded" | "compact";
+export type TableStyle = "plain" | "striped";
 
 export type AccentPreset = {
   id: string;
@@ -85,6 +88,22 @@ export const DENSITIES: { id: Density; label: string }[] = [
   { id: "compact", label: "Compact" },
 ];
 
+export const FONT_SIZES: { id: FontSize; label: string; px: number }[] = [
+  { id: "small", label: "Small", px: 13 },
+  { id: "default", label: "Default", px: 14 },
+  { id: "large", label: "Large", px: 15.5 },
+];
+
+export const SIDEBAR_STYLES: { id: SidebarStyle; label: string }[] = [
+  { id: "expanded", label: "Expanded" },
+  { id: "compact", label: "Compact" },
+];
+
+export const TABLE_STYLES: { id: TableStyle; label: string }[] = [
+  { id: "plain", label: "Plain" },
+  { id: "striped", label: "Striped" },
+];
+
 /** Canonical home for the loader variant list — SwitchOverlay.tsx (the
  *  component that renders them) imports the type and id list from here
  *  rather than theme.ts importing from a component file. */
@@ -107,11 +126,18 @@ type ThemePrefs = {
   radius: RadiusStyle;
   density: Density;
   loader: LoaderVariant;
+  fontSize: FontSize;
+  sidebar: SidebarStyle;
+  table: TableStyle;
+  /** Motion off disables the app's own decorative transitions/hover motion
+   *  on top of whatever the OS-level prefers-reduced-motion already covers —
+   *  some users want it off regardless of their system setting. */
+  motion: boolean;
 };
 
 const DEFAULT_PREFS: ThemePrefs = {
   mode: "system", accent: "blue", bg: "flat", radius: "rounded", density: "comfortable",
-  loader: "bars",
+  loader: "bars", fontSize: "default", sidebar: "expanded", table: "plain", motion: true,
 };
 
 export function readThemePrefs(): ThemePrefs {
@@ -126,6 +152,10 @@ export function readThemePrefs(): ThemePrefs {
       radius: parsed.radius ?? DEFAULT_PREFS.radius,
       density: parsed.density ?? DEFAULT_PREFS.density,
       loader: parsed.loader ?? DEFAULT_PREFS.loader,
+      fontSize: parsed.fontSize ?? DEFAULT_PREFS.fontSize,
+      sidebar: parsed.sidebar ?? DEFAULT_PREFS.sidebar,
+      table: parsed.table ?? DEFAULT_PREFS.table,
+      motion: parsed.motion ?? DEFAULT_PREFS.motion,
     };
   } catch {
     return DEFAULT_PREFS;
@@ -285,6 +315,17 @@ export function applyTheme(prefs: ThemePrefs) {
   // Density: compact trims Mantine's own spacing scale so lists, form rows,
   // and table cells sit closer together across every page at once.
   root.setAttribute("data-density", prefs.density);
+
+  // Font size: scales the base rem, which every Mantine size token (fz, fw
+  // spacing) is itself relative to, plus the app's own hand-set px values
+  // through --font-scale for the handful of literal px sizes in App.css.
+  const fontStep = FONT_SIZES.find((f) => f.id === prefs.fontSize) ?? FONT_SIZES[1];
+  root.style.setProperty("--mantine-font-size-md", `${fontStep.px}px`);
+  root.style.setProperty("--font-scale", String(fontStep.px / 14));
+
+  root.setAttribute("data-sidebar-style", prefs.sidebar);
+  root.setAttribute("data-table-style", prefs.table);
+  root.setAttribute("data-motion", prefs.motion ? "on" : "off");
 }
 
 export function loadAndApplyTheme(): ThemePrefs {

@@ -103,20 +103,50 @@ html.theme-transitioning [class*="mantine-Badge"] {
 [data-density="compact"] .mantine-Card-root { padding: 12px !important; }
 [data-density="compact"] .surface-card { padding-block: 10px; }
 
-/* ============ Settings two-column layout ============
-   Appearance (wide: colour swatches, background previews) sits beside
-   profile + dates (narrow form rows) so the page uses its full width
-   instead of every section stacking in one narrow column regardless of
-   how much horizontal room each one actually needs. */
-.settings-cols {
-  display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 32px;
-  align-items: start;
-  max-width: 1400px;
+/* ============ Sidebar style (Appearance settings) ============
+   Compact shrinks the navbar to an icon rail. Mantine's AppShell reads its
+   navbar width from this var (set via the `navbar={{ width }}` prop at
+   mount), so overriding it here resizes the real layout column, not just a
+   visual copy of it. Labels hide with the same rule rather than a JSX
+   branch, since every nav link already renders unconditionally. */
+[data-sidebar-style="compact"] {
+  --app-shell-navbar-width: 68px;
 }
-@media (max-width: 62em) {
-  .settings-cols { grid-template-columns: 1fr; gap: 24px; }
+[data-sidebar-style="compact"] .nav-link {
+  justify-content: center;
+  padding-inline: 0 !important;
+}
+[data-sidebar-style="compact"] .nav-link .mantine-Text-root,
+[data-sidebar-style="compact"] .nav-heading {
+  display: none;
+}
+
+/* ============ Table style (Appearance settings) ============
+   Striped applies to every Mantine Table at once — the alternating tint
+   makes a wide row easier to track back to its first column without
+   touching each table's own markup. */
+[data-table-style="striped"] table tbody tr:nth-child(even) {
+  background: var(--surface-2);
+}
+
+/* ============ Motion (Appearance settings) ============
+   An app-level opt-out layered on top of the OS-level prefers-reduced-motion
+   media query — some people want QuantaLog's own decorative motion off
+   regardless of their system setting. Targets the same surface as that media
+   query plus the app's bespoke chrome (nav, tiles, cards) rather than
+   reaching for `* { transition: none }`, which would also kill functional
+   motion like drawer/modal open animations that need to keep working. */
+[data-motion="off"] .nav-link,
+[data-motion="off"] .tile,
+[data-motion="off"] .stat-card,
+[data-motion="off"] .surface-card,
+[data-motion="off"] .btn-primary,
+[data-motion="off"] .btn-ghost,
+[data-motion="off"] .status-dot,
+[data-motion="off"] .pulse-dot,
+[data-motion="off"] .dot-live {
+  transition: none !important;
+  animation: none !important;
 }
 
 /* ============ Background styles (Appearance settings) ============

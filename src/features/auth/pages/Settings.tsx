@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code, Stack,
+  Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code, Tabs,
 } from "@mantine/core";
-import { Save, Trash2, Undo2, Upload } from "lucide-react";
+import { Save, Trash2, Undo2, Upload, UserRound, Palette } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader, PageStack, Section, Field } from "@/shared/ui/Page";
@@ -285,79 +285,86 @@ export default function Settings() {
           }
         />
 
-        <PageStack maxWidth="100%">
-          {/* Identity card — the avatar and name read as a profile rather than
-              as two more text inputs. Capped independently: only the
-              two-column block below needs the full page width. */}
-          <Box className="surface-card" p="lg" maw={1400}>
-            <Group gap="lg" wrap="nowrap">
-              <Avatar
-                // No URL validation: the value comes from our own Cloudinary
-                // upload or from Google, not from anything typed. `avatarBroken`
-                // still covers a link that stops resolving.
-                src={avatarBroken ? null : avatarUrl || null}
-                color="emerald"
-                radius="md"
-                size={72}
-                imageProps={{ onError: () => setAvatarBroken(true), referrerPolicy: "no-referrer" }}
-              >
-                {initials}
-              </Avatar>
-              <Box style={{ minWidth: 0 }}>
-                <Group gap="xs">
-                  <Text fw={700} size="lg" truncate style={{ letterSpacing: "-0.01em" }}>
-                    {`${firstName} ${lastName}`.trim() || user.name}
-                  </Text>
-                  <Badge
-                    size="sm"
-                    variant="light"
-                    color={user.role === "admin" || user.role === "super_admin" ? "grape" : "gray"}
-                  >
-                    {user.role}
-                  </Badge>
-                </Group>
-                <Text size="sm" c="dimmed" truncate>{user.email}</Text>
+        <Tabs defaultValue="info" keepMounted={false}>
+          <Tabs.List mb="xl">
+            <Tabs.Tab value="info" leftSection={<UserRound size={15} />}>
+              {t("settings.tabInfo", "Info")}
+            </Tabs.Tab>
+            <Tabs.Tab value="appearance" leftSection={<Palette size={15} />}>
+              {t("settings.tabAppearance", "Appearance")}
+            </Tabs.Tab>
+          </Tabs.List>
 
-                {/* The file input is hidden and driven by the button: a bare
-                    input styles inconsistently across browsers and cannot be
-                    made to match the rest of the page. */}
-                <input
-                  ref={fileInput}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp,image/gif"
-                  hidden
-                  onChange={(e) => pickAvatar(e.currentTarget.files?.[0] ?? null)}
-                />
-                <Group gap="xs" mt="sm">
-                  <Button
-                    size="xs"
-                    variant="light"
-                    leftSection={<Upload size={14} />}
-                    loading={avatarBusy}
-                    onClick={() => fileInput.current?.click()}
+          <Tabs.Panel value="info">
+            <PageStack>
+              {/* Identity card — the avatar and name read as a profile rather
+                  than as two more text inputs. */}
+              <Box className="surface-card" p="lg">
+                <Group gap="lg" wrap="nowrap">
+                  <Avatar
+                    // No URL validation: the value comes from our own Cloudinary
+                    // upload or from Google, not from anything typed. `avatarBroken`
+                    // still covers a link that stops resolving.
+                    src={avatarBroken ? null : avatarUrl || null}
+                    color="emerald"
+                    radius="md"
+                    size={72}
+                    imageProps={{ onError: () => setAvatarBroken(true), referrerPolicy: "no-referrer" }}
                   >
-                    {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
-                  </Button>
-                  {avatarUrl && (
-                    <Button
-                      size="xs"
-                      variant="subtle"
-                      color="red"
-                      leftSection={<Trash2 size={14} />}
-                      disabled={avatarBusy}
-                      onClick={() => void clearAvatar()}
-                    >
-                      {t("settings.avatarRemove")}
-                    </Button>
-                  )}
+                    {initials}
+                  </Avatar>
+                  <Box style={{ minWidth: 0 }}>
+                    <Group gap="xs">
+                      <Text fw={700} size="lg" truncate style={{ letterSpacing: "-0.01em" }}>
+                        {`${firstName} ${lastName}`.trim() || user.name}
+                      </Text>
+                      <Badge
+                        size="sm"
+                        variant="light"
+                        color={user.role === "admin" || user.role === "super_admin" ? "grape" : "gray"}
+                      >
+                        {user.role}
+                      </Badge>
+                    </Group>
+                    <Text size="sm" c="dimmed" truncate>{user.email}</Text>
+
+                    {/* The file input is hidden and driven by the button: a bare
+                        input styles inconsistently across browsers and cannot be
+                        made to match the rest of the page. */}
+                    <input
+                      ref={fileInput}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      hidden
+                      onChange={(e) => pickAvatar(e.currentTarget.files?.[0] ?? null)}
+                    />
+                    <Group gap="xs" mt="sm">
+                      <Button
+                        size="xs"
+                        variant="light"
+                        leftSection={<Upload size={14} />}
+                        loading={avatarBusy}
+                        onClick={() => fileInput.current?.click()}
+                      >
+                        {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
+                      </Button>
+                      {avatarUrl && (
+                        <Button
+                          size="xs"
+                          variant="subtle"
+                          color="red"
+                          leftSection={<Trash2 size={14} />}
+                          disabled={avatarBusy}
+                          onClick={() => void clearAvatar()}
+                        >
+                          {t("settings.avatarRemove")}
+                        </Button>
+                      )}
+                    </Group>
+                  </Box>
                 </Group>
               </Box>
-            </Group>
-          </Box>
 
-          {/* Profile + dates on the left, Appearance on the right. */}
-          <Box className="settings-cols">
-            <Stack gap="xl">
               <Section
                 title={t("settings.profile")}
                 description={t("settings.profileDesc")}
@@ -445,18 +452,23 @@ export default function Settings() {
                   </Code>
                 </Field>
               </Section>
-            </Stack>
 
-            <AppearanceSection />
-          </Box>
+              {/* Interface language moved to the sidebar — it's a client-only,
+                  app-wide switch, not a saved-profile field, so it belongs with
+                  the other global controls rather than behind a Save button here. */}
 
-          {/* Interface language moved to the sidebar — it's a client-only,
-              app-wide switch, not a saved-profile field, so it belongs with the
-              other global controls rather than behind a Save button here. */}
+              {/* Clears the sticky bar below, so it never covers the last field. */}
+              {dirty && <Box h={64} aria-hidden />}
+            </PageStack>
+          </Tabs.Panel>
 
-          {/* Clears the sticky bar below, so it never covers the last field. */}
-          {dirty && <Box h={64} aria-hidden />}
-        </PageStack>
+          {/* No PageStack wrapper: Appearance has no narrow-form content to
+              cap, and the whole point of its own tab is to use the page's
+              full width for the swatch and preview grids. */}
+          <Tabs.Panel value="appearance">
+            <AppearanceSection bare />
+          </Tabs.Panel>
+        </Tabs>
 
         {/* Save follows you down a long form rather than sitting at the top out
             of sight. It only appears once there is something to save, so the
