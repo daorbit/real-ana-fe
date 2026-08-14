@@ -1931,3 +1931,139 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     overflow-y: visible !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Share Post composer
+
+   A full-screen split: the composer on a plain surface at a fixed comfortable
+   reading width, and the preview on a darker gridded ground so the mock reads
+   as a rendering of the post rather than as more of the page.
+--------------------------------------------------------------------------- */
+.share-post-shell {
+  overflow: hidden;
+}
+
+.share-post-composer {
+  display: flex;
+  flex-direction: column;
+  /* The composer needs only enough width to read a caption comfortably; the
+     preview is the thing being judged, so it takes the larger share. */
+  width: 40%;
+  min-width: 400px;
+  height: 100%;
+  background: var(--surface);
+
+  /* One inset for every row in the panel — header, tabs, body and action bar
+     all measure from this, so the left edge stays a single line down the whole
+     composer. It relaxes as the panel narrows; at 80px a 400px-wide panel would
+     have more margin than content. */
+  --share-post-inset: 80px;
+}
+@media (max-width: 100em) {
+  .share-post-composer { --share-post-inset: 52px; }
+}
+@media (max-width: 82em) {
+  .share-post-composer { --share-post-inset: 32px; }
+}
+@media (max-width: 48em) {
+  .share-post-composer { --share-post-inset: 20px; }
+}
+
+.share-post-row {
+  padding-left: var(--share-post-inset);
+  padding-right: var(--share-post-inset);
+}
+
+.share-post-preview {
+  width: 60%;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  /* Centred vertically, so the mock sits in the pane rather than hanging from
+     its top edge on a tall screen. */
+  display: flex;
+  flex-direction: column;
+  padding: 24px 28px 32px;
+  background:
+    linear-gradient(to right, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
+    var(--bg);
+  /* The grid is scaffolding, not content — it should read as texture behind
+     the preview rather than competing with it. */
+  background-blend-mode: normal;
+}
+[data-mantine-color-scheme="light"] .share-post-preview {
+  background:
+    linear-gradient(to right, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
+    var(--bg-2);
+}
+
+/* The composer's scrolling content. Generous vertical rhythm and a matching
+   inset either side — the panel is narrow, and content run to its edges is what
+   makes a split like this feel cramped. */
+.share-post-body {
+  padding: 26px var(--share-post-inset) 44px;
+}
+
+/* The tab strip scrolls when the platforms outrun the panel, but a scrollbar
+   across a five-item row reads as a broken control rather than an affordance —
+   the tabs are all still reachable by dragging or by keyboard. */
+.share-post-tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.share-post-tabs::-webkit-scrollbar { display: none; }
+
+.share-post-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 14px;
+  font-size: 14px;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.share-post-tab:hover { color: var(--text) !important; }
+.share-post-tab:focus-visible { outline: 2px solid var(--accent, #10b981); outline-offset: -2px; }
+
+.caption-editor {
+  min-height: 210px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  outline: none;
+}
+/* Styling applied to the caption's own URLs and hashtags. Presentation only —
+   the value read back out of the editor is always plain text. */
+.caption-link {
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: #2563eb;
+  background: color-mix(in srgb, #2563eb 12%, transparent);
+}
+.caption-tag { color: #2563eb; font-weight: 500; }
+
+/* Below this width the two panes cannot both hold their content, so the
+   composer takes the screen and the preview drops away rather than shrinking
+   into something that misrepresents the post. */
+@media (max-width: 68em) {
+  .share-post-composer {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    border-right: none;
+  }
+  .share-post-preview { display: none; }
+}

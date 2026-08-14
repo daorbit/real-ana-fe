@@ -1,14 +1,16 @@
 import {
-  Text, Group, Button, Switch, TextInput, CopyButton, Tooltip, ActionIcon,
+  Text, Group, Button, Switch, TextInput, Tooltip, ActionIcon,
   Badge, Checkbox, SimpleGrid, Stack, Box, Center, ThemeIcon, Alert, Skeleton,
   Divider, Tabs, Select,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Copy, Check, RefreshCw, ExternalLink, Eye, ShieldCheck, Link2Off,
-  BarChart3, Search, Globe,
+  RefreshCw, ExternalLink, Eye, ShieldCheck, Link2Off,
+  BarChart3, Search, Globe, Share2,
 } from "lucide-react";
+import { SharePostModal } from "@/features/analytics/components/SharePostModal";
+import type { ShareCardStats } from "@/features/analytics/components/shareCard";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader, Section, Field, PageStack } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
@@ -83,9 +85,57 @@ const DEFAULT_PANELS: SharePanels = {
  * copy says that plainly rather than burying it, and rotating is treated as
  * destructive because it silently breaks links already sent to other people.
  */
+const PUBLIC_API_BASE = import.meta.env.VITE_API_BASE ?? "";
+
+/**
+ * The headline numbers for the share card, read from the public endpoint using
+ * the workspace's own token.
+ *
+ * Deliberately the public response rather than the owner's stats: what goes on
+ * a card about to be posted publicly should be exactly what the link already
+ * publishes. If the owner turned totals off, this returns zeros and the card
+ * shows no figures — which is the correct outcome, not a bug.
+ *
+ * `count=1` is omitted so previewing a post does not inflate the open counter.
+ */
+function usePublicHeadline(token: string | null, enabled: boolean) {
+  const [stats, setStats] = useState<ShareCardStats & { totals: boolean }>({
+    visitors: 0, pageviews: 0, live: null, totals: false,
+  });
+
+  useEffect(() => {
+    if (!token || !enabled) return;
+    let cancelled = false;
+
+    fetch(`${PUBLIC_API_BASE}/api/share/${token}?range=30d`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d) return;
+        const totals = Boolean(d.panels?.totals);
+        setStats({
+          visitors: d.visitors ?? 0,
+          pageviews: d.pageviews ?? 0,
+          // The live figure only earns a tile when there is someone on the site
+          // — a card reading "0 online" undersells a dashboard.
+          live: totals && d.live > 0 ? d.live : null,
+          totals,
+        });
+      })
+      // A failed fetch leaves the zeros: the card still renders, just without
+      // figures. Nothing here is worth interrupting the page for.
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [token, enabled]);
+
+  return stats;
+}
+
 function ShareSettings({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
   const { data, isLoading } = useGetShareQuery(workspaceId);
+  const { active } = useWorkspace();
+  const [composerOpen, setComposerOpen] = useState(false);
   const [setShare] = useSetShareMutation();
   // The mutation's shared `isLoading` would light up the link toggle and
   // New-link spinners during a panel-save, so the instant link actions
@@ -96,6 +146,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
   const token = data?.token ?? null;
   const views = data?.views ?? 0;
   const url = token ? `${window.location.origin}/share/${token}` : "";
+  const headline = usePublicHeadline(token, enabled);
 
   // Server-side panels, with the launch defaults filled in.
   const serverPanels = { ...DEFAULT_PANELS, ...(data?.panels ?? {}) };
@@ -221,20 +272,18 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                   onFocus={(e) => e.currentTarget.select()}
                   aria-label={t("share.linkAria")}
                 />
-                <CopyButton value={url}>
-                  {({ copied, copy }) => (
-                    <Button
-                      size="sm"
-                      variant={copied ? "light" : "default"}
-                      color={copied ? "emerald" : undefined}
-                      onClick={copy}
-                      leftSection={copied ? <Check size={14} /> : <Copy size={14} />}
-                      style={{ flexShrink: 0 }}
-                    >
-                      {copied ? t("share.copied") : t("share.copy")}
-                    </Button>
-                  )}
-                </CopyButton>
+                {/* Share, not Copy: copying is still one click away inside the
+                    composer, and the thing an owner does with a fresh public
+                    link is post it somewhere. */}
+                <Button
+                  size="sm"
+                  color="emerald"
+                  onClick={() => setComposerOpen(true)}
+                  leftSection={<Share2 size={14} />}
+                  style={{ flexShrink: 0 }}
+                >
+                  {t("share.share")}
+                </Button>
                 <Tooltip label={t("share.openNewTab")} withArrow>
                   <ActionIcon
                     component="a"
@@ -372,6 +421,21 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
           {t("share.neverSharedBody")}
         </Text>
       </Alert>
+
+      {token && (
+        <SharePostModal
+          opened={composerOpen}
+          onClose={() => setComposerOpen(false)}
+          workspace={active?.name ?? ""}
+          url={url}
+          rangeLabel={t("share.cardRange")}
+          stats={{
+            visitors: headline.visitors,
+            pageviews: headline.pageviews,
+            live: headline.live,
+          }}
+        />
+      )}
     </PageStack>
   );
 }
