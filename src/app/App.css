@@ -64,63 +64,98 @@
 html, body, #root { height: 100%; }
 body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased; background: var(--bg); }
 
+/* ============ Theme-change transition ============
+   Applied only for the brief window right after a mode/accent/background
+   change (see useThemeTransition), not left on permanently — a global
+   transition on every colour and background property would also fire on
+   ordinary hover/focus states and make the whole app feel laggy. */
+html.theme-transitioning,
+html.theme-transitioning body,
+html.theme-transitioning body::before,
+html.theme-transitioning .mantine-Card-root,
+html.theme-transitioning .surface-card,
+html.theme-transitioning .tile,
+html.theme-transitioning .btn-primary,
+html.theme-transitioning .btn-ghost,
+html.theme-transitioning [class*="mantine-Button"],
+html.theme-transitioning [class*="mantine-Badge"] {
+  transition: background-color 320ms ease, background 320ms ease,
+    border-color 320ms ease, color 320ms ease, box-shadow 320ms ease !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning,
+  html.theme-transitioning * {
+    transition: none !important;
+  }
+}
+
+/* ============ Density (Appearance settings) ============
+   Compact scales Mantine's own spacing tokens down app-wide, so every
+   Stack/Group gap, Card padding, and table cell tightens together instead of
+   one page needing its own overrides. Comfortable is the default (unset). */
+[data-density="compact"] {
+  --mantine-spacing-xs: 6px;
+  --mantine-spacing-sm: 9px;
+  --mantine-spacing-md: 13px;
+  --mantine-spacing-lg: 17px;
+  --mantine-spacing-xl: 24px;
+}
+[data-density="compact"] .mantine-Card-root { padding: 12px !important; }
+[data-density="compact"] .surface-card { padding-block: 10px; }
+
+/* ============ Settings two-column layout ============
+   Appearance (wide: colour swatches, background previews) sits beside
+   profile + dates (narrow form rows) so the page uses its full width
+   instead of every section stacking in one narrow column regardless of
+   how much horizontal room each one actually needs. */
+.settings-cols {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 24px;
+  align-items: start;
+  max-width: 1400px;
+}
+@media (max-width: 62em) {
+  .settings-cols { grid-template-columns: 1fr; }
+}
+
 /* ============ Background styles (Appearance settings) ============
-   Painted on body rather than a wrapper, so every route gets it for free.
-   The mesh variants use the live accent so they stay in sync with whichever
-   preset the user picked - swapping accent re-tints the wash automatically. */
-/* Mantine's own base stylesheet paints `body` from --mantine-color-body,
-   which loads after this file and otherwise covers the mesh/grid washes
-   below with a flat surface. Every bg style therefore sets both: the real
-   `background` (for the gradient/pattern) and --mantine-color-body (so
-   Mantine's own rule resolves to the same flat colour as a fallback and
-   AppShell panels that read the var directly stay in sync). */
-/* `background-attachment: fixed` on html/body is unreliable the moment any
+   The actual gradient/pattern is computed in JS (theme.ts:buildBgValue) into
+   --bg-wash, one CSS value per preset id — 20 presets is a data-array entry
+   each, not 20 hand-written blocks here. This file only decides *where*
+   that value paints.
+
+   `background-attachment: fixed` on html/body is unreliable the moment any
    ancestor in the render tree has a transform, filter, or will-change on it
    (framer-motion adds these on every animated element) — Chrome and Safari
-   both silently fall back to scroll-attachment, which is what produced the
-   hard seam where the wash simply stopped partway down a tall page. A
-   `position: fixed` pseudo-element sized to the viewport is not subject to
-   that: it paints once, stays put regardless of scroll, and everything else
-   scrolls over it. */
-html[data-bg-style="aurora"] body::before,
-html[data-bg-style="meadow"] body::before,
-html[data-bg-style="grid"] body::before {
+   both silently fall back to scroll-attachment, which produces a hard seam
+   where the wash stops partway down a tall page. A `position: fixed`
+   pseudo-element sized to the viewport is not subject to that: it paints
+   once, stays put regardless of scroll, and everything else scrolls over it. */
+html[data-bg-style="textured"] body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-}
-[data-bg-style="aurora"] body::before {
-  background:
-    radial-gradient(at 20% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 55%),
-    radial-gradient(at 80% 0%, color-mix(in srgb, var(--violet) 16%, transparent), transparent 50%),
-    radial-gradient(at 90% 90%, rgba(236, 72, 153, 0.14), transparent 55%),
-    var(--bg);
-}
-[data-bg-style="meadow"] body::before {
-  background:
-    radial-gradient(at 15% 10%, rgba(34, 197, 94, 0.18), transparent 55%),
-    radial-gradient(at 85% 30%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 50%),
-    var(--bg);
-}
-[data-bg-style="grid"] body::before {
-  background:
-    linear-gradient(90deg, var(--border) 1px, transparent 1px) 0 0 / 28px 28px,
-    linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 28px 28px,
-    var(--bg);
+  background: var(--bg-wash);
 }
 /* body and the app shell's own main panel each paint an opaque
    --mantine-color-body fill; make every layer between the pseudo-layer and
    the content transparent so the wash actually shows through instead of
    being hidden behind flat layers stacked on top of it. */
-[data-bg-style="aurora"] body,
-[data-bg-style="meadow"] body,
-[data-bg-style="grid"] body,
-[data-bg-style="aurora"] .mantine-AppShell-main,
-[data-bg-style="meadow"] .mantine-AppShell-main,
-[data-bg-style="grid"] .mantine-AppShell-main {
+[data-bg-style="textured"] body,
+[data-bg-style="textured"] .mantine-AppShell-main {
   background: transparent !important;
+}
+
+/* Orbit's chat panel shares the same wash — its own `.aurora-wash` element
+   (see RunningDialog.css) is repainted from the identical --bg-wash value so
+   picking a background in Appearance carries into the assistant panel too.
+   Only for a textured preset: RunningDialog.css's own accent-tinted wash is
+   the better default for "Flat", so this leaves that alone. */
+[data-bg-style="textured"] .orbit-panel .aurora-wash {
+  background: var(--bg-wash);
 }
 
 /* ============ Mobile viewport containment ============

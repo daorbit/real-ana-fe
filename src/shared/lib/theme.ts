@@ -1,13 +1,14 @@
 /**
- * Runtime theme: mode (light/dark/system), accent preset, and background
- * style. Applied by writing CSS custom properties onto <html> and a data
- * attribute Mantine already reads for color scheme, so no component needs
- * to know the theme system exists — everything already renders off
- * var(--accent) / var(--violet) / [data-mantine-color-scheme].
+ * Runtime theme: mode (light/dark/system), accent preset, background style,
+ * corner radius, and density. Applied by writing CSS custom properties onto
+ * <html> and a data attribute Mantine already reads for color scheme, so no
+ * component needs to know the theme system exists — everything already
+ * renders off var(--accent) / var(--violet) / [data-mantine-color-scheme].
  */
 
 export type ThemeMode = "system" | "light" | "dark";
-export type BgStyle = "flat" | "aurora" | "meadow" | "grid";
+export type RadiusStyle = "rounded" | "soft" | "sharp";
+export type Density = "comfortable" | "compact";
 
 export type AccentPreset = {
   id: string;
@@ -18,20 +19,70 @@ export type AccentPreset = {
 
 export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "blue", label: "Blue", hex: "#3b82f6" },
-  { id: "forest", label: "Forest", hex: "#4f7563" },
-  { id: "violet", label: "Violet", hex: "#7c3aed" },
-  { id: "amber", label: "Amber", hex: "#ea580c" },
+  { id: "indigo", label: "Indigo", hex: "#4f46e5" },
+  { id: "cornflower", label: "Cornflower", hex: "#6366f1" },
+  { id: "sky", label: "Sky", hex: "#0284c7" },
   { id: "cyan", label: "Cyan", hex: "#0891b2" },
-  { id: "rose", label: "Rose", hex: "#e11d48" },
-  { id: "slate", label: "Slate", hex: "#475569" },
+  { id: "teal", label: "Teal", hex: "#0d9488" },
+  { id: "forest", label: "Forest", hex: "#4f7563" },
+  { id: "emerald", label: "Emerald", hex: "#059669" },
   { id: "lime", label: "Lime", hex: "#65a30d" },
+  { id: "olive", label: "Olive", hex: "#65733f" },
+  { id: "gold", label: "Gold", hex: "#b45309" },
+  { id: "amber", label: "Amber", hex: "#ea580c" },
+  { id: "terracotta", label: "Terracotta", hex: "#c2410c" },
+  { id: "red", label: "Red", hex: "#dc2626" },
+  { id: "rose", label: "Rose", hex: "#e11d48" },
+  { id: "pink", label: "Pink", hex: "#db2777" },
+  { id: "fuchsia", label: "Fuchsia", hex: "#c026d3" },
+  { id: "violet", label: "Violet", hex: "#7c3aed" },
+  { id: "slate", label: "Slate", hex: "#475569" },
+  { id: "graphite", label: "Graphite", hex: "#27272a" },
 ];
 
-export const BG_STYLES: { id: BgStyle; label: string }[] = [
-  { id: "flat", label: "Flat" },
-  { id: "aurora", label: "Mesh — Aurora" },
-  { id: "meadow", label: "Mesh — Meadow" },
-  { id: "grid", label: "Dot grid" },
+export type BgKind = "flat" | "mesh" | "dots" | "lines" | "diagonal";
+
+export type BgPreset = {
+  id: string;
+  label: string;
+  kind: BgKind;
+  /** Fixed wash colours (mesh) or line colour source (grid/lines). Never the
+   *  live accent — background and accent are independent choices. */
+  hues?: string[];
+};
+
+export const BG_STYLES: BgPreset[] = [
+  { id: "flat", label: "Flat", kind: "flat" },
+  { id: "aurora", label: "Mesh — Aurora", kind: "mesh", hues: ["#3b82f6", "#8b5cf6", "#ec4899"] },
+  { id: "meadow", label: "Mesh — Meadow", kind: "mesh", hues: ["#22c55e", "#06b6d4"] },
+  { id: "sunset", label: "Mesh — Sunset", kind: "mesh", hues: ["#fb923c", "#f43f5e", "#d946ef"] },
+  { id: "ocean", label: "Mesh — Ocean", kind: "mesh", hues: ["#0ea5e9", "#2dd4bf", "#6366f1"] },
+  { id: "candy", label: "Mesh — Candy", kind: "mesh", hues: ["#f472b6", "#a78bfa", "#38bdf8"] },
+  { id: "citrus", label: "Mesh — Citrus", kind: "mesh", hues: ["#facc15", "#fb923c", "#84cc16"] },
+  { id: "lagoon", label: "Mesh — Lagoon", kind: "mesh", hues: ["#14b8a6", "#3b82f6"] },
+  { id: "berry", label: "Mesh — Berry", kind: "mesh", hues: ["#a855f7", "#e11d48"] },
+  { id: "ember", label: "Mesh — Ember", kind: "mesh", hues: ["#f97316", "#dc2626", "#7c2d12"] },
+  { id: "glacier", label: "Mesh — Glacier", kind: "mesh", hues: ["#93c5fd", "#a5f3fc"] },
+  { id: "orchid", label: "Mesh — Orchid", kind: "mesh", hues: ["#c084fc", "#f0abfc"] },
+  { id: "forest-mesh", label: "Mesh — Forest", kind: "mesh", hues: ["#16a34a", "#65a30d"] },
+  { id: "dusk", label: "Mesh — Dusk", kind: "mesh", hues: ["#6366f1", "#4c1d95", "#ec4899"] },
+  { id: "solar", label: "Mesh — Solar", kind: "mesh", hues: ["#fbbf24", "#f97316"] },
+  { id: "mono", label: "Mesh — Mono", kind: "mesh", hues: ["#94a3b8", "#64748b"] },
+  { id: "grid", label: "Dot grid", kind: "dots" },
+  { id: "lines", label: "Line grid", kind: "lines" },
+  { id: "graph", label: "Graph paper", kind: "diagonal" },
+  { id: "grid-fine", label: "Fine grid", kind: "dots" },
+];
+
+export const RADIUS_STYLES: { id: RadiusStyle; label: string; px: number }[] = [
+  { id: "sharp", label: "Sharp", px: 6 },
+  { id: "soft", label: "Soft", px: 11 },
+  { id: "rounded", label: "Rounded", px: 16 },
+];
+
+export const DENSITIES: { id: Density; label: string }[] = [
+  { id: "comfortable", label: "Comfortable" },
+  { id: "compact", label: "Compact" },
 ];
 
 const STORAGE_KEY = "quantalog.theme";
@@ -39,10 +90,14 @@ const STORAGE_KEY = "quantalog.theme";
 type ThemePrefs = {
   mode: ThemeMode;
   accent: string; // preset id
-  bg: BgStyle;
+  bg: string; // preset id
+  radius: RadiusStyle;
+  density: Density;
 };
 
-const DEFAULT_PREFS: ThemePrefs = { mode: "system", accent: "blue", bg: "flat" };
+const DEFAULT_PREFS: ThemePrefs = {
+  mode: "system", accent: "blue", bg: "flat", radius: "rounded", density: "comfortable",
+};
 
 export function readThemePrefs(): ThemePrefs {
   try {
@@ -53,6 +108,8 @@ export function readThemePrefs(): ThemePrefs {
       mode: parsed.mode ?? DEFAULT_PREFS.mode,
       accent: parsed.accent ?? DEFAULT_PREFS.accent,
       bg: parsed.bg ?? DEFAULT_PREFS.bg,
+      radius: parsed.radius ?? DEFAULT_PREFS.radius,
+      density: parsed.density ?? DEFAULT_PREFS.density,
     };
   } catch {
     return DEFAULT_PREFS;
@@ -93,10 +150,48 @@ function buildScale(hex: string): string[] {
   ];
 }
 
+/** Fixed anchor points so every mesh preset has the same composition
+ *  regardless of how many hues it carries — 1 hue reuses the first anchor,
+ *  3+ ignores the rest. Kept separate from colour so hue and layout vary
+ *  independently across the 20 presets. */
+const MESH_ANCHORS = [
+  { pos: "20% 20%", alpha: 0.22, size: 55 },
+  { pos: "80% 0%", alpha: 0.18, size: 50 },
+  { pos: "90% 90%", alpha: 0.14, size: 55 },
+];
+
+/** Builds the CSS `background` value for a preset, resolved against `bg`
+ *  (the current theme's base colour) and `border` (for grid line presets) —
+ *  both passed in rather than read from CSS so this stays a pure function. */
+export function buildBgValue(preset: BgPreset, bg: string, border: string): string {
+  if (preset.kind === "flat") return bg;
+
+  if (preset.kind === "mesh") {
+    const hues = preset.hues && preset.hues.length > 0 ? preset.hues : ["#3b82f6"];
+    const layers = MESH_ANCHORS.map((anchor, i) => {
+      const hue = hues[i % hues.length];
+      return `radial-gradient(at ${anchor.pos}, color-mix(in srgb, ${hue} ${anchor.alpha * 100}%, transparent), transparent ${anchor.size}%)`;
+    });
+    return `${layers.join(", ")}, ${bg}`;
+  }
+
+  if (preset.kind === "dots") {
+    const gap = preset.id === "grid-fine" ? 18 : 28;
+    return `linear-gradient(90deg, ${border} 1px, transparent 1px) 0 0 / ${gap}px ${gap}px, linear-gradient(${border} 1px, transparent 1px) 0 0 / ${gap}px ${gap}px, ${bg}`;
+  }
+
+  if (preset.kind === "lines") {
+    return `linear-gradient(${border} 1px, transparent 1px) 0 0 / 100% 36px, ${bg}`;
+  }
+
+  // diagonal ("graph paper")
+  return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
+}
+
 /**
- * Applies mode + accent + background to the document root. Call once on
- * boot and again whenever a preference changes — cheap enough to run on
- * every change without debouncing.
+ * Applies mode + accent + background + radius + density to the document
+ * root. Call once on boot and again whenever a preference changes — cheap
+ * enough to run on every change without debouncing.
  */
 export function applyTheme(prefs: ThemePrefs) {
   const root = document.documentElement;
@@ -159,13 +254,53 @@ export function applyTheme(prefs: ThemePrefs) {
     root.style.setProperty(`--mantine-primary-color-${i}`, scale[i]);
   }
 
-  root.setAttribute("data-bg-style", prefs.bg);
+  // Background: computed to a CSS value here rather than toggled through
+  // per-preset selectors in App.css, so adding a 21st preset is a data-array
+  // change, not a new CSS block. --bg-wash is read by the fixed pseudo-layer
+  // (body::before) and by Orbit's own panel, so both stay in sync.
+  const bgPreset = BG_STYLES.find((b) => b.id === prefs.bg) ?? BG_STYLES[0];
+  const bgColor = dark ? "#0b0c0f" : "#f8f9fa";
+  const borderColor = dark ? "#2b2f38" : "#e5e7eb";
+  const bgValue = buildBgValue(bgPreset, bgColor, borderColor);
+  root.style.setProperty("--bg-wash", bgValue);
+  root.setAttribute("data-bg-style", bgPreset.kind === "flat" ? "flat" : "textured");
+
+  // Radius: scales the app's three corner tokens together so a card, its
+  // inputs, and its inner tiles all step in unison rather than one style
+  // changing shape relative to the others.
+  const radiusPx = RADIUS_STYLES.find((r) => r.id === prefs.radius)?.px ?? 16;
+  root.style.setProperty("--radius", `${radiusPx}px`);
+  root.style.setProperty("--radius-sm", `${Math.round(radiusPx * 0.7)}px`);
+  root.style.setProperty("--radius-lg", `${Math.round(radiusPx * 1.25)}px`);
+  root.style.setProperty("--mantine-radius-md", `${radiusPx}px`);
+
+  // Density: compact trims Mantine's own spacing scale so lists, form rows,
+  // and table cells sit closer together across every page at once.
+  root.setAttribute("data-density", prefs.density);
 }
 
 export function loadAndApplyTheme(): ThemePrefs {
   const prefs = readThemePrefs();
   applyTheme(prefs);
   return prefs;
+}
+
+let transitionTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Briefly enables a CSS transition on colour/background properties so a
+ * mode, accent, or background change crossfades instead of snapping. Scoped
+ * to a class toggled on <html> for ~350ms rather than left on permanently —
+ * see the `.theme-transitioning` rule in App.css for why.
+ */
+export function withThemeTransition(apply: () => void) {
+  const root = document.documentElement;
+  root.classList.add("theme-transitioning");
+  apply();
+  if (transitionTimer) clearTimeout(transitionTimer);
+  transitionTimer = setTimeout(() => {
+    root.classList.remove("theme-transitioning");
+  }, 360);
 }
 
 export type { ThemePrefs };

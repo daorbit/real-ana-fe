@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code,
+  Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code, Stack,
 } from "@mantine/core";
 import { Save, Trash2, Undo2, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -285,10 +285,11 @@ export default function Settings() {
           }
         />
 
-        <PageStack>
+        <PageStack maxWidth="100%">
           {/* Identity card — the avatar and name read as a profile rather than
-              as two more text inputs. */}
-          <Box className="surface-card" p="lg">
+              as two more text inputs. Capped independently: only the
+              two-column block below needs the full page width. */}
+          <Box className="surface-card" p="lg" maw={1400}>
             <Group gap="lg" wrap="nowrap">
               <Avatar
                 // No URL validation: the value comes from our own Cloudinary
@@ -354,8 +355,9 @@ export default function Settings() {
             </Group>
           </Box>
 
-          <AppearanceSection />
-
+          {/* Profile + dates on the left, Appearance on the right. */}
+          <Box className="settings-cols">
+            <Stack gap="xl">
           <Section
             title={t("settings.profile")}
             description={t("settings.profileDesc")}
@@ -443,6 +445,10 @@ export default function Settings() {
               </Code>
             </Field>
           </Section>
+            </Stack>
+
+            <AppearanceSection />
+          </Box>
 
           {/* Interface language moved to the sidebar — it's a client-only,
               app-wide switch, not a saved-profile field, so it belongs with the
