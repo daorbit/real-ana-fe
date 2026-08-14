@@ -1953,10 +1953,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   height: 100%;
   background: var(--surface);
 
-  /* One inset for every row in the panel — header, tabs, body and action bar
-     all measure from this, so the left edge stays a single line down the whole
-     composer. It relaxes as the panel narrows; at 80px a 400px-wide panel would
-     have more margin than content. */
+  /* The inset shared by the tab strip and the composer body, so the content and
+     the tab that labels it line up on one edge. The window chrome either side
+     of them — the title bar and the action bar — sits tighter deliberately:
+     those are frame, not content, and indenting them to match would push the
+     close button oddly far from the corner it belongs in.
+
+     It relaxes as the panel narrows; at 80px a 400px-wide panel would carry
+     more margin than content. */
   --share-post-inset: 80px;
 }
 @media (max-width: 100em) {

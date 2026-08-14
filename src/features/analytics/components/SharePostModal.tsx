@@ -598,7 +598,7 @@ export function SharePostModal({
       <Group h="100%" gap={0} align="stretch" wrap="nowrap" className="share-post-shell">
         {/* ---- Composer ---- */}
         <Box className="share-post-composer">
-          <Group className="share-post-row" gap="sm" py="md" wrap="nowrap" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
+          <Group gap="sm" px={20} py="md" wrap="nowrap" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
             <ActionIcon variant="subtle" color="gray" size="lg" onClick={onClose} aria-label={t("sharePost.close")}>
               <X size={18} />
             </ActionIcon>
@@ -729,8 +729,8 @@ export function SharePostModal({
 
           {/* Action bar, pinned so it stays reachable however long the caption. */}
           <Group
-            className="share-post-row"
             justify="space-between"
+            px={20}
             py="md"
             wrap="nowrap"
             style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
