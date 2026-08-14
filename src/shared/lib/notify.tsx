@@ -17,6 +17,25 @@ export const notify = {
     notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
 
   /**
+   * A quiet bottom-centre confirmation for Appearance changes — theme.ts
+   * fires one on every mode/accent/background/etc click. Deliberately its
+   * own position rather than the app's usual top-right stack: those are for
+   * something that happened elsewhere (a save, an error); this is
+   * acknowledging something the reader is looking straight at right now, so
+   * it surfaces near their attention instead of pulling their eye away.
+   */
+  theme: (message: ReactNode) =>
+    notifications.show({
+      message,
+      color: "emerald",
+      autoClose: 1600,
+      position: "bottom-center",
+      withCloseButton: false,
+      radius: "xl",
+      styles: { root: { width: "auto", padding: "8px 16px" } },
+    }),
+
+  /**
    * A plan/quota limit was hit (workspace, site, audit, crawl, or analytics
    * range caps). A centered dialog, not a toast — this is a decision the
    * reader needs to actually stop and consider ("upgrade?"), not a fire-and-
