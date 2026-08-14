@@ -13,8 +13,8 @@ import { useCountUp } from "@/shared/hooks/useCountUp";
  * already give.
  */
 const ACCENT: Record<string, string> = {
-  emerald: "#10b981",
-  violet: "#10b981",
+  emerald: "var(--accent)",
+  violet: "var(--accent)",
   green: "#34d399",
   cyan: "#22d3ee",
   amber: "#f59e0b",

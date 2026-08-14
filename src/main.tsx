@@ -22,13 +22,21 @@ import { ErrorBoundary } from '@/app/ErrorBoundary'
 // Initialise i18next before the first render so `t()` resolves on first paint,
 // and set the document language/direction to match the saved preference.
 import { i18n, applyDocumentLang, readLanguage } from '@/lib/i18n/locale'
+import { loadAndApplyTheme } from '@/shared/lib/theme'
 void i18n
 applyDocumentLang(readLanguage())
+
+// Accent + background are applied directly to <html> before first paint, so
+// there's no flash of the default blue/flat theme. Mode ("system" | "light"
+// | "dark") is read here and handed to Mantine below as its own source of
+// truth for color scheme.
+const initialPrefs = loadAndApplyTheme()
+const mantineScheme = initialPrefs.mode === 'system' ? 'auto' : initialPrefs.mode
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <MantineProvider theme={theme} defaultColorScheme="dark">
+      <MantineProvider theme={theme} defaultColorScheme={mantineScheme}>
         <Notifications position="top-right" />
         <ModalsProvider>
           <ErrorBoundary>

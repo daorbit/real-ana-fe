@@ -5,9 +5,9 @@ import type { WidgetKind } from "@/features/analytics";
  * what a widget looks like before enabling it. Pure SVG + CSS/SMIL — no assets.
  */
 export function WidgetPreview({ kind, active }: { kind: WidgetKind; active: boolean }) {
-  const stroke = active ? "#34d399" : "var(--muted)";
+  const stroke = active ? "var(--accent)" : "var(--muted)";
   const fill = active ? "rgba(16,185,129,0.18)" : "var(--border)";
-  const solid = active ? "#10b981" : "var(--border-strong)";
+  const solid = active ? "var(--accent)" : "var(--border-strong)";
 
   return (
     <div className={active ? "wp active" : "wp"}>

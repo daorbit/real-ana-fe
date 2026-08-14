@@ -15,10 +15,10 @@
      text and icons use a mid tone that stays legible on dark. */
   --violet: #047857;
   --violet-2: #10b981;
-  --violet-soft: rgba(16, 185, 129, 0.10);
+  --violet-soft: color-mix(in srgb, var(--accent) 10%, transparent);
   --accent: #047857;
   --accent-2: #059669;
-  --accent-soft: rgba(16, 185, 129, 0.10);
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
 
   /* gradients: charts + auth panel only */
   --grad-chart: linear-gradient(180deg, rgba(16,185,129,0.45) 0%, rgba(16,185,129,0) 100%);
@@ -62,7 +62,66 @@
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
-body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased; }
+body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased; background: var(--bg); }
+
+/* ============ Background styles (Appearance settings) ============
+   Painted on body rather than a wrapper, so every route gets it for free.
+   The mesh variants use the live accent so they stay in sync with whichever
+   preset the user picked - swapping accent re-tints the wash automatically. */
+/* Mantine's own base stylesheet paints `body` from --mantine-color-body,
+   which loads after this file and otherwise covers the mesh/grid washes
+   below with a flat surface. Every bg style therefore sets both: the real
+   `background` (for the gradient/pattern) and --mantine-color-body (so
+   Mantine's own rule resolves to the same flat colour as a fallback and
+   AppShell panels that read the var directly stay in sync). */
+/* `background-attachment: fixed` on html/body is unreliable the moment any
+   ancestor in the render tree has a transform, filter, or will-change on it
+   (framer-motion adds these on every animated element) — Chrome and Safari
+   both silently fall back to scroll-attachment, which is what produced the
+   hard seam where the wash simply stopped partway down a tall page. A
+   `position: fixed` pseudo-element sized to the viewport is not subject to
+   that: it paints once, stays put regardless of scroll, and everything else
+   scrolls over it. */
+html[data-bg-style="aurora"] body::before,
+html[data-bg-style="meadow"] body::before,
+html[data-bg-style="grid"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+[data-bg-style="aurora"] body::before {
+  background:
+    radial-gradient(at 20% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 55%),
+    radial-gradient(at 80% 0%, color-mix(in srgb, var(--violet) 16%, transparent), transparent 50%),
+    radial-gradient(at 90% 90%, rgba(236, 72, 153, 0.14), transparent 55%),
+    var(--bg);
+}
+[data-bg-style="meadow"] body::before {
+  background:
+    radial-gradient(at 15% 10%, rgba(34, 197, 94, 0.18), transparent 55%),
+    radial-gradient(at 85% 30%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 50%),
+    var(--bg);
+}
+[data-bg-style="grid"] body::before {
+  background:
+    linear-gradient(90deg, var(--border) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--bg);
+}
+/* body and the app shell's own main panel each paint an opaque
+   --mantine-color-body fill; make every layer between the pseudo-layer and
+   the content transparent so the wash actually shows through instead of
+   being hidden behind flat layers stacked on top of it. */
+[data-bg-style="aurora"] body,
+[data-bg-style="meadow"] body,
+[data-bg-style="grid"] body,
+[data-bg-style="aurora"] .mantine-AppShell-main,
+[data-bg-style="meadow"] .mantine-AppShell-main,
+[data-bg-style="grid"] .mantine-AppShell-main {
+  background: transparent !important;
+}
 
 /* ============ Mobile viewport containment ============
    A single wide child (a data table, a chart, a long unbroken URL) used to
@@ -102,13 +161,13 @@ body { overflow-wrap: break-word; }
   z-index: 190;
   border-radius: 15px;
   line-height: 0;
-  /* An emerald bloom under the drop shadow, so the launcher reads as lit
+  /* An accent-tinted bloom under the drop shadow, so the launcher reads as lit
      rather than as a sticker sitting on the page. Two shadows rather than a
      wrapper element: this keeps the button one box for layout and hit-testing,
-     and the glow scales with the same radius. */
+     and the glow scales with the same radius. Tracks the live theme accent. */
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.22),
-    0 6px 18px rgba(16, 185, 129, 0.28),
+    0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent),
     0 10px 30px rgba(0, 0, 0, 0.34);
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
@@ -117,12 +176,12 @@ body { overflow-wrap: break-word; }
   /* The glow strengthens on hover instead of the button changing colour —
      there is nothing to recolour, since the mark is the whole surface. */
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.42),
-    0 8px 26px rgba(16, 185, 129, 0.45),
+    0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent),
+    0 8px 26px color-mix(in srgb, var(--accent) 45%, transparent),
     0 14px 34px rgba(0, 0, 0, 0.4);
 }
 .orbit-fab:focus-visible {
-  outline: 2px solid var(--mantine-color-emerald-6);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 .orbit-fab[data-open] {
@@ -130,11 +189,11 @@ body { overflow-wrap: break-word; }
      that closes the panel. Only while open — closed, it belongs with the page. */
   z-index: 320;
   /* No active ring: the open panel sits directly above the launcher and already
-     says which control it belongs to, so the ring only drew a hard green edge
-     around the mark. The resting glow is kept so the button stays lit. */
+     says which control it belongs to, so the ring only drew a hard edge around
+     the mark. The resting glow is kept so the button stays lit. */
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.22),
-    0 6px 18px rgba(16, 185, 129, 0.28),
+    0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent),
     0 10px 30px rgba(0, 0, 0, 0.34);
 }
 .orbit-fab[data-open]:hover {
@@ -488,14 +547,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 .onb-step[data-state="current"] .onb-step-ic {
-  background: #34d399;
-  border-color: #34d399;
+  background: var(--accent);
+  border-color: var(--accent);
   color: #04150e;
 }
 .onb-step[data-state="done"] .onb-step-ic {
-  background: rgba(52, 211, 153, 0.22);
-  border-color: rgba(52, 211, 153, 0.5);
-  color: #34d399;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--accent);
 }
 .onb-step-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .onb-step-label {
@@ -571,7 +630,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   overflow: hidden;
   border-radius: var(--radius);
   background:
-    linear-gradient(135deg, rgba(16, 185, 129, 0.10), rgba(16, 185, 129, 0.02) 55%),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--accent) 2%, transparent) 55%),
     var(--surface);
   box-shadow:
     inset 0 0 0 1px var(--border),
@@ -725,7 +784,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 /* ============ Workspaces ============ */
-.ws-active { border-color: rgba(16, 185, 129, 0.35) !important; }
+.ws-active { border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important; }
 
 /* Site row: identity beside actions on desktop. On a phone the actions wrap to
    their own line under the name and stretch to fill, so Verify/Snippet stay
@@ -997,7 +1056,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 /* The slot the pointer is currently over. */
 .sw.is-over .sw-frame {
   border-color: var(--accent-2) !important;
-  background: rgba(16, 185, 129, 0.06) !important;
+  background: color-mix(in srgb, var(--accent) 6%, transparent) !important;
 }
 
 /* Keep the real widget visible but non-interactive while arranging. */
@@ -1019,8 +1078,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .widget-pick:hover { border-color: var(--border-strong) !important; }
 .widget-pick.active {
-  border-color: rgba(16, 185, 129, 0.45) !important;
-  background: rgba(16, 185, 129, 0.05) !important;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+  background: color-mix(in srgb, var(--accent) 5%, transparent) !important;
 }
 
 .wp {
@@ -1033,8 +1092,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transition: border-color 0.12s ease, background 0.12s ease;
 }
 .wp.active {
-  border-color: rgba(16, 185, 129, 0.35);
-  background: rgba(16, 185, 129, 0.06);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
 }
 .wp-svg { width: 100%; height: 100%; display: block; }
 
@@ -1140,7 +1199,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .world-map { display: block; width: 100%; height: auto; }
 .world-map .country { transition: fill 0.12s ease; }
 .world-map .country.has-data { cursor: pointer; }
-.world-map .country.has-data:hover { fill: #065f46; }
+.world-map .country.has-data:hover { fill: var(--accent-2); }
 .legend-swatch {
   width: 16px; height: 8px; border-radius: 2px; display: inline-block;
 }
@@ -1155,13 +1214,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   display: inline-block; flex-shrink: 0;
 }
 .status-dot.live {
-  box-shadow: 0 0 0 0 rgba(20, 184, 138, 0.5);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
   animation: dot-pulse 2s infinite;
 }
 @keyframes dot-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(20, 184, 138, 0.5); }
-  70%  { box-shadow: 0 0 0 5px rgba(20, 184, 138, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(20, 184, 138, 0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent); }
+  70%  { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); }
 }
 
 /* ============ Install check ============ */
@@ -1172,7 +1231,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   position: absolute;
   width: 34px; height: 34px;
   border-radius: 50%;
-  border: 2px solid rgba(16, 185, 129, 0.5);
+  border: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
   animation: radar 1.8s ease-out infinite;
 }
 .radar-ring.d2 { animation-delay: 0.9s; }
@@ -1188,7 +1247,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .scan-bar {
   height: 100%; border-radius: 999px;
-  background: linear-gradient(90deg, #059669, #34d399);
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
 }
 
 /* ============ Developers ============ */
@@ -1204,7 +1263,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   font-size: 0.82rem; font-weight: 700;
   color: var(--accent-2);
   background: var(--accent-soft);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 /* ============ Code block (editor style) ============ */
@@ -1313,7 +1372,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-brand {
   position: relative; overflow: hidden; padding: 3.5rem;
   display: flex; align-items: center;
-  background: linear-gradient(165deg, #0d1512 0%, #0f2a20 50%, #064e3b 100%);
+  /* A near-black base tinted by the live accent rather than a fixed hue, so
+     the login panel matches whichever preset is active instead of always
+     reading green. */
+  background: linear-gradient(165deg, #0a0c0d 0%,
+    color-mix(in srgb, var(--accent) 26%, #0a0c0d) 50%,
+    color-mix(in srgb, var(--accent) 55%, #0a0c0d) 100%);
   color: #fff;
 }
 .ab-grid {
@@ -1344,7 +1408,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .ab-feature { display: flex; align-items: center; gap: 0.7rem; font-size: 0.92rem; color: rgba(255,255,255,0.95); font-weight: 500; }
 .ab-feature-ic { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.15); display: grid; place-items: center; flex-shrink: 0; }
 .auth-brand .wordmark-text { color: #fff; }
-.auth-brand .wordmark-dot { color: #34d399; }
+.auth-brand .wordmark-dot { color: var(--accent); }
 
 @media (max-width: 900px) {
   .auth-split { grid-template-columns: 1fr; }
@@ -1492,7 +1556,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
      a near-flat surface, not a saturated gradient. Premium reads as confident,
      not loud. */
   background:
-    radial-gradient(120% 140% at 0% 0%, rgba(16, 185, 129, 0.10), transparent 46%),
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 46%),
     linear-gradient(180deg, color-mix(in srgb, var(--surface) 100%, transparent), var(--surface)),
     var(--surface);
   box-shadow: inset 0 0 0 1px var(--seo-hairline, var(--border)), var(--seo-elev, var(--shadow-sm));
@@ -1517,7 +1581,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   width: 340px;
   height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.12), transparent 68%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 12%, transparent), transparent 68%);
   pointer-events: none;
 }
 .seo-hero-inner { position: relative; z-index: 1; }

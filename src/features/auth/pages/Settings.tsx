@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader, PageStack, Section, Field } from "@/shared/ui/Page";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
+import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
 import { useAuth } from "@/features/auth/context";
 import { useUnsavedGuard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -352,6 +353,8 @@ export default function Settings() {
               </Box>
             </Group>
           </Box>
+
+          <AppearanceSection />
 
           <Section
             title={t("settings.profile")}

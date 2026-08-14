@@ -364,7 +364,7 @@ function FeedPreview({
         <Box
           style={{
             width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
-            background: "linear-gradient(135deg, #34d399, #059669)",
+            background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
             display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, fontSize: 15,
           }}
         >

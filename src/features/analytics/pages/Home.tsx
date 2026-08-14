@@ -98,8 +98,8 @@ function TrafficCard({ stats }: { stats: Stats | null }) {
           <AreaChart data={series} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="#059669" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.45} />
+                <stop offset="100%" stopColor="var(--accent-2)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -108,7 +108,7 @@ function TrafficCard({ stats }: { stats: Stats | null }) {
               contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
               labelStyle={{ color: "var(--muted)" }}
             />
-            <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2.5} fill="url(#hg)" dot={false} />
+            <Area type="monotone" dataKey="views" stroke="var(--accent)" strokeWidth={2.5} fill="url(#hg)" dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       ) : (

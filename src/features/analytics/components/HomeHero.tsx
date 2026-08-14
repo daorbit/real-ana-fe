@@ -38,14 +38,14 @@ export function HomeHero({
             <AreaChart data={series} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.2} />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <Area
                 type="monotone"
                 dataKey="views"
-                stroke="#10b981"
+                stroke="var(--accent)"
                 strokeWidth={2}
                 strokeOpacity={0.5}
                 fill="url(#heroSpark)"
@@ -61,7 +61,7 @@ export function HomeHero({
         <Group justify="space-between" align="flex-start" wrap="wrap" gap="xl">
           <div style={{ minWidth: 0 }}>
             <Group gap={8} mb={10} wrap="nowrap">
-              <span className="status-dot live" style={{ background: "#34d399" }} />
+              <span className="status-dot live" style={{ background: "var(--accent)" }} />
               <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
                 ONLINE NOW
               </Text>

@@ -61,7 +61,7 @@ import type {
 } from "@/shared/types";
 import { serializeFilter } from "@/shared/types";
 
-const CHART = "#10b981";
+const CHART = "var(--accent)";
 
 /** Small uppercase heading that groups a band of cards under one label. */
 function SectionLabel({
@@ -850,7 +850,7 @@ export default function Analytics() {
               </Group>
               {hasData && (
                 <Group gap="md" wrap="nowrap">
-                  <LegendDot color="#10b981">Pageviews</LegendDot>
+                  <LegendDot color="var(--accent)">Pageviews</LegendDot>
                   <LegendDot color="#22d3ee">Visitors</LegendDot>
                   {comparing && <LegendDot color="var(--muted)">Baseline</LegendDot>}
                   <MarkerLegend markers={markers} />
@@ -862,8 +862,8 @@ export default function Analytics() {
                 <AreaChart data={series} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                   <defs>
                     <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.45} />
-                      <stop offset="100%" stopColor="#059669" stopOpacity={0} />
+                      <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="var(--accent-2)" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.25} />
@@ -874,7 +874,7 @@ export default function Analytics() {
                   <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} allowDecimals={false} tickLine={false} axisLine={false} />
                   <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
-                  <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2.5} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "#34d399" }} />
+                  <Area type="monotone" dataKey="views" stroke="var(--accent)" strokeWidth={2.5} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "var(--accent)" }} />
                   <Area type="monotone" dataKey="visitors" stroke="#22d3ee" strokeWidth={2} fill="url(#g2)" dot={false} />
                   {/* The baseline: a dashed unfilled line, drawn before the
                       markers so it reads as background against the two filled

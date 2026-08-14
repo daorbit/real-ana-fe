@@ -7,8 +7,12 @@ import topo from "world-atlas/countries-110m.json";
 import { countryName } from "@/shared/lib";
 import type { Bucket } from "@/shared/types";
 
-// Emerald ramp: light (few visitors) -> dark (many). One hue, monotonic lightness.
-const RAMP = ["#d1fae5", "#a7f3d0", "#6ee7b7", "#34d399", "#10b981", "#059669", "#047857"];
+// Accent ramp: light (few visitors) -> dark (many), mixed live from the
+// active theme accent rather than a fixed hue, so switching accent presets
+// re-tints the map along with everything else.
+const RAMP = [10, 25, 40, 55, 70, 85, 100].map(
+  (pct) => `color-mix(in srgb, var(--accent) ${pct}%, var(--surface-2))`
+);
 
 const WIDTH = 800;
 const HEIGHT = 380;
