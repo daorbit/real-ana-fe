@@ -4,10 +4,9 @@ import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
-import { notify } from "@/shared/lib/notify";
 import {
   ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES, LOADER_VARIANTS,
-  FONT_SIZES, SIDEBAR_STYLES, TABLE_STYLES,
+  FONT_SIZES, TABLE_STYLES,
   applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
 } from "@/shared/lib/theme";
 import type { ThemeMode, ThemePrefs } from "@/shared/lib/theme";
@@ -35,23 +34,7 @@ function GroupBlock({ children }: { children: React.ReactNode }) {
   return <Box mb={32}>{children}</Box>;
 }
 
-/** Turns a single-key preference patch into a human confirmation — "Accent:
- *  Violet" rather than a raw id — for the bottom-centre toast. `update` is
- *  only ever called with one changed key at a time (each control click sets
- *  exactly one field), so the first truthy entry is always the whole patch. */
-function describeChange(patch: Partial<ThemePrefs>): string {
-  if (patch.mode) return `Mode: ${MODES.find((m) => m.id === patch.mode)?.label}`;
-  if (patch.accent) return `Accent: ${ACCENT_PRESETS.find((a) => a.id === patch.accent)?.label}`;
-  if (patch.bg) return `Background: ${BG_STYLES.find((b) => b.id === patch.bg)?.label}`;
-  if (patch.radius) return `Corner radius: ${RADIUS_STYLES.find((r) => r.id === patch.radius)?.label}`;
-  if (patch.density) return `Density: ${DENSITIES.find((d) => d.id === patch.density)?.label}`;
-  if (patch.fontSize) return `Font size: ${FONT_SIZES.find((f) => f.id === patch.fontSize)?.label}`;
-  if (patch.sidebar) return `Sidebar: ${SIDEBAR_STYLES.find((s) => s.id === patch.sidebar)?.label}`;
-  if (patch.table) return `Table rows: ${TABLE_STYLES.find((tb) => tb.id === patch.table)?.label}`;
-  if (patch.loader) return `Loading screen: ${LOADER_VARIANTS.find((l) => l.id === patch.loader)?.label}`;
-  if (typeof patch.motion === "boolean") return `Animations ${patch.motion ? "on" : "off"}`;
-  return "Appearance updated";
-}
+ 
 
 /**
  * Mode, accent, background, radius, density, and loading-screen animation
@@ -81,7 +64,7 @@ export function AppearanceSection({
         setColorScheme(patch.mode === "system" ? "auto" : patch.mode);
       }
     });
-    notify.theme(describeChange(patch));
+    // notify.theme(describeChange(patch));
   };
 
   const body = (
@@ -243,7 +226,7 @@ export function AppearanceSection({
             </Group>
           </div>
 
-          <div>
+          {/* <div>
             <GroupLabel>{t("settings.sidebarStyle", "Sidebar")}</GroupLabel>
             <Group gap="sm">
               {SIDEBAR_STYLES.map((s) => (
@@ -260,7 +243,7 @@ export function AppearanceSection({
                 </UnstyledButton>
               ))}
             </Group>
-          </div>
+          </div> */}
 
           <div>
             <GroupLabel>{t("settings.tableStyle", "Table rows")}</GroupLabel>
