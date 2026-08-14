@@ -254,20 +254,12 @@ export function applyTheme(prefs: ThemePrefs) {
     root.style.setProperty(`--mantine-primary-color-${i}`, scale[i]);
   }
 
-  // Background: computed to a CSS value here rather than toggled through
-  // per-preset selectors in App.css, so adding a 21st preset is a data-array
-  // change, not a new CSS block. --bg-wash is read by the fixed pseudo-layer
-  // (body::before) and by Orbit's own panel, so both stay in sync.
+
   const bgPreset = BG_STYLES.find((b) => b.id === prefs.bg) ?? BG_STYLES[0];
-  const bgColor = dark ? "#0b0c0f" : "#f8f9fa";
-  const borderColor = dark ? "#2b2f38" : "#e5e7eb";
-  const bgValue = buildBgValue(bgPreset, bgColor, borderColor);
+  const bgValue = buildBgValue(bgPreset, "var(--bg)", "var(--border)");
   root.style.setProperty("--bg-wash", bgValue);
   root.setAttribute("data-bg-style", bgPreset.kind === "flat" ? "flat" : "textured");
 
-  // Radius: scales the app's three corner tokens together so a card, its
-  // inputs, and its inner tiles all step in unison rather than one style
-  // changing shape relative to the others.
   const radiusPx = RADIUS_STYLES.find((r) => r.id === prefs.radius)?.px ?? 16;
   root.style.setProperty("--radius", `${radiusPx}px`);
   root.style.setProperty("--radius-sm", `${Math.round(radiusPx * 0.7)}px`);
