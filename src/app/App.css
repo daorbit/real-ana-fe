@@ -153,9 +153,18 @@ html[data-bg-style="textured"] body::before {
    (see RunningDialog.css) is repainted from the identical --bg-wash value so
    picking a background in Appearance carries into the assistant panel too.
    Only for a textured preset: RunningDialog.css's own accent-tinted wash is
-   the better default for "Flat", so this leaves that alone. */
+   the better default for "Flat", so this leaves that alone.
+
+   RunningDialog.css's base rule sets opacity:0.16 for its own subtle accent
+   wash; the same alpha makes a full mesh/grid pattern here nearly invisible,
+   so this bumps opacity and drops the blur that was smearing dot/line
+   patterns into mush. !important because the base rule shares specificity
+   (one class each) and would otherwise win on source order alone. */
 [data-bg-style="textured"] .orbit-panel .aurora-wash {
-  background: var(--bg-wash);
+  background: var(--bg-wash) !important;
+  opacity: 0.9 !important;
+  filter: none !important;
+  animation: none !important;
 }
 
 /* ============ Mobile viewport containment ============
