@@ -113,7 +113,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -383,6 +383,30 @@ export const api = createApi({
       }),
       invalidatesTags: (_r, _e, { workspaceId }) => [
         { type: "Layout", id: workspaceId },
+      ],
+    }),
+
+    // `theme: null` means this workspace has never saved an Appearance
+    // choice — the client falls back to localStorage, then its own built-in
+    // defaults. Shape is untyped (Record<string, unknown>) on purpose: the
+    // FE's ThemePrefs is the source of truth for what the keys mean, and the
+    // server stores whatever object it's given without validating fields.
+    getWorkspaceTheme: build.query<{ theme: Record<string, unknown> | null }, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/theme`,
+      providesTags: (_r, _e, workspaceId) => [{ type: "Theme", id: workspaceId }],
+    }),
+
+    saveWorkspaceTheme: build.mutation<
+      { theme: Record<string, unknown> },
+      { workspaceId: string; theme: Record<string, unknown> }
+    >({
+      query: ({ workspaceId, theme }) => ({
+        url: `/api/workspaces/${workspaceId}/theme`,
+        method: "PUT",
+        body: theme,
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [
+        { type: "Theme", id: workspaceId },
       ],
     }),
 
@@ -1298,6 +1322,8 @@ export const {
   useLazyGetInstallStatusQuery,
   useGetLayoutQuery,
   useSaveLayoutMutation,
+  useGetWorkspaceThemeQuery,
+  useSaveWorkspaceThemeMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
   useSetAdminUserRoleMutation,

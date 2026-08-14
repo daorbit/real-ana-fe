@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, Group, SimpleGrid, Text, UnstyledButton, useMantineColorScheme, Switch } from "@mantine/core";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
+import { useWorkspace } from "@/features/workspace/context";
+import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
   ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES, LOADER_VARIANTS,
   FONT_SIZES, TABLE_STYLES,
+  // no SIDEBAR_STYLES: the sidebar-compact control was pulled back out of
+  // Appearance, see theme.ts.
   applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
 } from "@/shared/lib/theme";
 import type { ThemeMode, ThemePrefs } from "@/shared/lib/theme";
@@ -53,6 +57,18 @@ export function AppearanceSection({
   const { t } = useTranslation();
   const [prefs, setPrefs] = useState(readThemePrefs);
   const { setColorScheme } = useMantineColorScheme();
+  const { active } = useWorkspace();
+  const [saveWorkspaceTheme] = useSaveWorkspaceThemeMutation();
+
+  // Debounced rather than fired on every click: dragging through a swatch
+  // grid or clicking several controls in a row would otherwise send one PUT
+  // per click. The local apply (below) is instant either way — this only
+  // delays the network write, never the visible change.
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+  }, []);
 
   const update = (patch: Partial<ThemePrefs>) => {
     const next = { ...prefs, ...patch };
@@ -65,6 +81,14 @@ export function AppearanceSection({
       }
     });
     // notify.theme(describeChange(patch));
+
+    if (active?._id) {
+      const workspaceId = active._id;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        void saveWorkspaceTheme({ workspaceId, theme: next });
+      }, 600);
+    }
   };
 
   const body = (
@@ -225,25 +249,6 @@ export function AppearanceSection({
               ))}
             </Group>
           </div>
-
-          {/* <div>
-            <GroupLabel>{t("settings.sidebarStyle", "Sidebar")}</GroupLabel>
-            <Group gap="sm">
-              {SIDEBAR_STYLES.map((s) => (
-                <UnstyledButton
-                  key={s.id}
-                  className="tile"
-                  data-selected={prefs.sidebar === s.id}
-                  onClick={() => update({ sidebar: s.id })}
-                  px="lg"
-                  py={10}
-                  style={{ fontSize: 13.5, fontWeight: 550 }}
-                >
-                  {s.label}
-                </UnstyledButton>
-              ))}
-            </Group>
-          </div> */}
 
           <div>
             <GroupLabel>{t("settings.tableStyle", "Table rows")}</GroupLabel>

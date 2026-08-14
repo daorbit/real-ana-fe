@@ -10,7 +10,6 @@ export type ThemeMode = "system" | "light" | "dark";
 export type RadiusStyle = "rounded" | "soft" | "sharp";
 export type Density = "comfortable" | "compact";
 export type FontSize = "small" | "default" | "large";
-export type SidebarStyle = "expanded" | "compact";
 export type TableStyle = "plain" | "striped";
 
 export type AccentPreset = {
@@ -94,11 +93,6 @@ export const FONT_SIZES: { id: FontSize; label: string; px: number }[] = [
   { id: "large", label: "Large", px: 15.5 },
 ];
 
-export const SIDEBAR_STYLES: { id: SidebarStyle; label: string }[] = [
-  { id: "expanded", label: "Expanded" },
-  { id: "compact", label: "Compact" },
-];
-
 export const TABLE_STYLES: { id: TableStyle; label: string }[] = [
   { id: "plain", label: "Plain" },
   { id: "striped", label: "Striped" },
@@ -127,7 +121,6 @@ type ThemePrefs = {
   density: Density;
   loader: LoaderVariant;
   fontSize: FontSize;
-  sidebar: SidebarStyle;
   table: TableStyle;
   /** Motion off disables the app's own decorative transitions/hover motion
    *  on top of whatever the OS-level prefers-reduced-motion already covers —
@@ -137,7 +130,7 @@ type ThemePrefs = {
 
 const DEFAULT_PREFS: ThemePrefs = {
   mode: "system", accent: "blue", bg: "flat", radius: "rounded", density: "comfortable",
-  loader: "bars", fontSize: "default", sidebar: "expanded", table: "plain", motion: true,
+  loader: "bars", fontSize: "default", table: "plain", motion: true,
 };
 
 export function readThemePrefs(): ThemePrefs {
@@ -153,7 +146,6 @@ export function readThemePrefs(): ThemePrefs {
       density: parsed.density ?? DEFAULT_PREFS.density,
       loader: parsed.loader ?? DEFAULT_PREFS.loader,
       fontSize: parsed.fontSize ?? DEFAULT_PREFS.fontSize,
-      sidebar: parsed.sidebar ?? DEFAULT_PREFS.sidebar,
       table: parsed.table ?? DEFAULT_PREFS.table,
       motion: parsed.motion ?? DEFAULT_PREFS.motion,
     };
@@ -333,7 +325,6 @@ export function applyTheme(prefs: ThemePrefs) {
   }
   root.style.setProperty("--font-scale", String(scaleFactor));
 
-  root.setAttribute("data-sidebar-style", prefs.sidebar);
   root.setAttribute("data-table-style", prefs.table);
   root.setAttribute("data-motion", prefs.motion ? "on" : "off");
 }

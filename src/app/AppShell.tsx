@@ -21,6 +21,7 @@ import { useWorkspace, useActiveBilling } from "@/features/workspace/context";
 import { DemoToggle } from "@/features/demo/DemoToggle";
 import { useDemo } from "@/features/demo/context";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
+import { useSyncWorkspaceTheme } from "@/features/auth/components/useSyncWorkspaceTheme";
 import { CommandPalette } from "@/shared/ui/CommandPalette";
 import { LanguagePicker } from "@/lib/i18n/LanguagePicker";
 import { useTranslation } from "react-i18next";
@@ -144,6 +145,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   // once. The overlay covers that swap; it never gates the fetch.
   const wsSwitch = useSwitchOverlay(active?._id ?? null);
 
+  // Pulls the active workspace's saved Appearance and applies it — see the
+  // hook for why this is additive to localStorage rather than the only
+  // source of truth.
+  useSyncWorkspaceTheme(active?._id);
+
   // Mobile nav drawer. The navbar is a permanent rail on desktop and a
   // slide-over on phones — close it on every navigation so a tap on a link
   // doesn't leave the overlay covering the page it just opened.
@@ -237,7 +243,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             says it exists. Clicking dispatches the same shortcut. */}
         <MantineShell.Section mb="md">
           <UnstyledButton
-            className="tile nav-search-tile"
+            className="tile"
             style={{ display: "block", width: "100%", padding: "7px 10px" }}
             onClick={() =>
               window.dispatchEvent(
@@ -247,8 +253,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Group gap="xs" wrap="nowrap">
               <Search size={15} style={{ color: "var(--muted)", flexShrink: 0 }} />
-              <Text size="sm" c="dimmed" className="nav-search-label">{t("nav.search")}</Text>
-              <kbd className="kbd nav-search-kbd" style={{ marginLeft: "auto" }}>Ctrl K</kbd>
+              <Text size="sm" c="dimmed">{t("nav.search")}</Text>
+              <kbd className="kbd" style={{ marginLeft: "auto" }}>Ctrl K</kbd>
             </Group>
           </UnstyledButton>
         </MantineShell.Section>

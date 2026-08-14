@@ -131,61 +131,6 @@ html.theme-pulse body::after {
 [data-density="compact"] .mantine-Card-root { padding: 12px !important; }
 [data-density="compact"] .surface-card { padding-block: 10px; }
 
-/* ============ Sidebar style (Appearance settings) ============
-   Compact shrinks the navbar to an icon rail. Mantine's AppShell reads its
-   navbar width from this var (set via the `navbar={{ width }}` prop at
-   mount), so overriding it here resizes the real layout column, not just a
-   visual copy of it.
-
-   Every other section in the navbar (wordmark, workspace switcher, search
-   tile) is designed for the full 252px rail and overflows a 68px one if left
-   alone — hiding the nav-link labels was the easy 10% of the job, so this
-   covers the rest of the navbar's own content too rather than leaving it to
-   overflow visibly. */
-[data-sidebar-style="compact"] {
-  --app-shell-navbar-width: 68px;
-}
-[data-sidebar-style="compact"] .mantine-AppShell-navbar {
-  padding-inline: 8px !important;
-}
-[data-sidebar-style="compact"] .nav-link {
-  justify-content: center;
-  padding-inline: 0 !important;
-}
-[data-sidebar-style="compact"] .nav-link .mantine-Text-root,
-[data-sidebar-style="compact"] .nav-heading {
-  display: none;
-}
-/* Wordmark: the "Quantalog." text and its trailing dot both go, leaving the
-   square mark alone as a centred icon-rail brand. */
-[data-sidebar-style="compact"] .wordmark-text {
-  display: none;
-}
-/* Workspace switcher: Mantine's Select can't be told to render icon-only, so
-   this hides its label/chevron and leaves a bare square the width of the
-   rail — clicking it still opens the full dropdown. */
-[data-sidebar-style="compact"] .mantine-Select-input {
-  padding-inline: 0 !important;
-  text-align: center;
-}
-[data-sidebar-style="compact"] .mantine-Select-section {
-  display: none;
-}
-[data-sidebar-style="compact"] .mantine-Select-input::placeholder,
-[data-sidebar-style="compact"] .mantine-Select-input {
-  color: transparent;
-}
-/* Search tile: keep the icon, drop the label and the Ctrl K hint — both
-   need real width the rail no longer has. */
-[data-sidebar-style="compact"] .nav-search-label,
-[data-sidebar-style="compact"] .nav-search-kbd {
-  display: none;
-}
-[data-sidebar-style="compact"] .nav-search-tile {
-  justify-content: center;
-  padding-inline: 0 !important;
-}
-
 /* ============ Table style (Appearance settings) ============
    Striped applies to every Mantine Table at once — the alternating tint
    makes a wide row easier to track back to its first column without

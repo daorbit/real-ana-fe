@@ -237,6 +237,13 @@ export default function Workspaces() {
       setWsName(""); setWsOpen(false); setWsError(null);
       setActive(ws._id);
       notify.success(t("workspaces.createdToast", { name: ws.name }));
+      // Straight into "add a site" rather than leaving a brand-new,
+      // empty workspace for the next click to find — the whole point of
+      // creating one is to start tracking something. `siteOpen` reads
+      // `active` when the wizard actually renders, and `setActive` just
+      // above has already queued the new workspace as active in the same
+      // batch of state updates.
+      setSiteOpen(true);
     } catch (err2) {
       notifyError(err2, t("workspaces.createError"));
     }
