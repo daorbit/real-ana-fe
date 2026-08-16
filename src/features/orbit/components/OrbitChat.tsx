@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   Stack, Group, Text, Textarea, ActionIcon, ScrollArea, Center,
   UnstyledButton, Loader, Box, Anchor, Menu, Tooltip, Code,
 } from "@mantine/core";
-import { ArrowUp, AlertTriangle, Check, Lock } from "lucide-react";
+import { ArrowUp, AlertTriangle, Check, Lock, Mic, Square } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { ModelIcon } from "@/features/orbit/components/ModelIcon";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
@@ -208,6 +209,45 @@ export function OrbitChat({
 
   const activeLabel = models.find((m) => m.id === model)?.label ?? "default";
 
+  /**
+   * What was already in the field when dictation started.
+   *
+   * The recogniser revises an interim phrase as it hears more of it, so each
+   * update replaces the last one rather than appending — without a fixed base
+   * to rebuild from, "how do I install" would grow into "how how do how do I".
+   * A final result is committed to the base and the next phrase starts after
+   * it, which is what lets someone dictate several sentences in one session.
+   */
+  const dictationBase = useRef("");
+
+  const onTranscript = useCallback(
+    (text: string, final: boolean) => {
+      const base = dictationBase.current;
+      const joined = base && !base.endsWith(" ") ? `${base} ${text}` : base + text;
+      if (final) dictationBase.current = joined;
+      setInput(joined);
+    },
+    [setInput],
+  );
+
+  const speech = useSpeechInput({ onTranscript });
+
+  const toggleDictation = () => {
+    // Start from whatever is in the field, so dictation adds to a half-typed
+    // question rather than throwing it away.
+    if (!speech.listening) dictationBase.current = input;
+    speech.toggle();
+  };
+
+  // Sending mid-sentence would leave the recogniser running against a field
+  // that has just been cleared, and the next phrase would arrive appended to
+  // the question already in flight.
+  const sendAndStop = (q?: string) => {
+    if (speech.listening) speech.stop();
+    dictationBase.current = "";
+    send(q);
+  };
+
   // The follow-ups belong to the last thing Orbit said. Anything earlier has
   // been answered past, and stacking every turn's would fill the panel with
   // questions nobody asked.
@@ -235,7 +275,7 @@ export function OrbitChat({
     <>
       <ScrollArea h={height} type="hover" scrollbarSize={6} px="md" py="md">
         {!started ? (
-          <EmptyState onPick={(q) => send(q)} />
+          <EmptyState onPick={(q) => sendAndStop(q)} />
         ) : (
           <Stack gap="lg">
             {messages.map((m) => (
@@ -261,7 +301,7 @@ export function OrbitChat({
             {!thinking && followUps.length > 0 && (
               <Stack gap={6}>
                 {followUps.map((q) => (
-                  <UnstyledButton key={q} className="orbit-suggestion" onClick={() => send(q)}>
+                  <UnstyledButton key={q} className="orbit-suggestion" onClick={() => sendAndStop(q)}>
                     <Text size="xs" lh={1.45}>{q}</Text>
                   </UnstyledButton>
                 ))}
@@ -274,9 +314,17 @@ export function OrbitChat({
 
       <Box px="md" pb="sm" pt={4}>
         <Textarea
-          placeholder="Ask a question"
+          // While the mic is on the field is being filled for them, and the
+          // usual prompt to type reads as though nothing is happening.
+          placeholder={speech.listening ? "Listening — speak your question" : "Ask a question"}
           value={input}
-          onChange={(e) => setInput(e.currentTarget.value)}
+          onChange={(e) => {
+            setInput(e.currentTarget.value);
+            // Typing over a dictated phrase makes the field the truth; the base
+            // has to follow it or the next spoken words would rebuild from the
+            // text that was just edited away.
+            if (speech.listening) dictationBase.current = e.currentTarget.value;
+          }}
           styles={{
             input: {
               // Room for the model picker, which sits inside the field on the
@@ -375,7 +423,7 @@ export function OrbitChat({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              send();
+              sendAndStop();
             }
           }}
           autosize
@@ -383,26 +431,67 @@ export function OrbitChat({
           maxRows={4}
           radius="md"
           disabled={thinking}
+          // Two controls where Mantine sizes for one, so the mic would sit
+          // under the send button at the default width.
+          rightSectionWidth={speech.supported ? 62 : undefined}
           rightSection={
-            <ActionIcon
-              variant={input.trim() ? "filled" : "subtle"}
-              color={input.trim() ? "emerald" : "gray"}
-              radius="xl"
-              size="sm"
-              disabled={!input.trim() || thinking}
-              onClick={() => send()}
-              aria-label="Send"
-            >
-              <ArrowUp size={13} />
-            </ActionIcon>
+            <Group gap={2} wrap="nowrap" justify="flex-end" pr={2}>
+              {/* Absent rather than disabled on a browser without a recogniser.
+                  A greyed mic invites a click that can never do anything, and
+                  there is nothing the user could change to fix it. */}
+              {speech.supported && (
+                <Tooltip
+                  label={speech.listening ? "Stop dictating" : "Dictate your question"}
+                  withArrow
+                  position="top"
+                >
+                  <ActionIcon
+                    variant={speech.listening ? "filled" : "subtle"}
+                    color={speech.listening ? "red" : "gray"}
+                    radius="xl"
+                    size="sm"
+                    disabled={thinking}
+                    onClick={toggleDictation}
+                    aria-label={speech.listening ? "Stop dictating" : "Dictate your question"}
+                    aria-pressed={speech.listening}
+                  >
+                    {/* A stop square while live, not a second mic. The mic is
+                        what turns it on, so leaving it there gives no sign that
+                        pressing again is what turns it off. */}
+                    {speech.listening ? <Square size={11} /> : <Mic size={13} />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+              <ActionIcon
+                variant={input.trim() ? "filled" : "subtle"}
+                color={input.trim() ? "emerald" : "gray"}
+                radius="xl"
+                size="sm"
+                disabled={!input.trim() || thinking}
+                onClick={() => sendAndStop()}
+                aria-label="Send"
+              >
+                <ArrowUp size={13} />
+              </ActionIcon>
+            </Group>
           }
         />
 
         {/* One line, and it carries both caveats: what Orbit cannot see, and
             that it can be wrong. Two separate notices were two things to read
             before typing. */}
-        <Text size="10px" c="dimmed" ta="center" mt={6} lh={1.4}>
-          Orbit can&apos;t see your data and can be wrong.
+        {/* The microphone failure takes this line rather than adding one. It is
+            about the thing just attempted, so it is what someone needs at that
+            moment — and a blocked mic is fixed in browser settings, which is
+            worth saying where it will be read. */}
+        <Text
+          size="10px"
+          c={speech.error ? "orange.5" : "dimmed"}
+          ta="center"
+          mt={6}
+          lh={1.4}
+        >
+          {speech.error ?? "Orbit can't see your data and can be wrong."}
         </Text>
       </Box>
     </>
