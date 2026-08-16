@@ -9,7 +9,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
-  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords,
+  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords, FileText,
 } from "lucide-react";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
@@ -47,6 +47,7 @@ const NAV_GROUPS = [
       // Beside SEO rather than inside it: an audit is a snapshot of one URL,
       // while a comparison is a set of rivals watched over time.
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords },
+      // { to: "/app/forms", labelKey: "nav.forms", label: "Lead forms", icon: FileText },
     ],
   },
   {

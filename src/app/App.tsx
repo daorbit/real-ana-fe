@@ -20,6 +20,9 @@ import Members from "@/features/workspace/pages/Members";
 import AcceptInvite from "@/features/workspace/pages/AcceptInvite";
 import Share from "@/features/analytics/pages/Share";
 import Reports from "@/features/reports/pages";
+import FormsListPage from "@/features/forms/pages/FormsListPage";
+import FormBuilderPage from "@/features/forms/pages/FormBuilderPage";
+import SubmissionsPage from "@/features/forms/pages/SubmissionsPage";
 import Impersonate from "@/features/admin/pages/Impersonate";
 import DemoUsage from "@/features/admin/pages/DemoUsage";
 import Settings from "@/features/auth/pages/Settings";
@@ -180,6 +183,9 @@ export default function App() {
             <Route path="/app/members" element={<Protected><Members /></Protected>} />
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/reports" element={<Protected><Reports /></Protected>} />
+            <Route path="/app/forms" element={<Protected><FormsListPage /></Protected>} />
+            <Route path="/app/forms/:id/edit" element={<Protected><FormBuilderPage /></Protected>} />
+            <Route path="/app/forms/:id/submissions" element={<Protected><SubmissionsPage /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
             <Route path="/app/help" element={<Protected><Help /></Protected>} />
             <Route path="/app/settings" element={<Protected><Settings /></Protected>} />

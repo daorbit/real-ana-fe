@@ -1167,6 +1167,73 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   box-shadow: var(--shadow);
 }
 
+/* ============ Lead form builder ============ */
+@media (max-width: 1200px) {
+  .form-builder-grid { grid-template-columns: minmax(0, 1fr) minmax(340px, 420px) !important; }
+}
+@media (max-width: 900px) {
+  .form-builder-grid { grid-template-columns: 1fr !important; }
+}
+
+.field-palette-item {
+  cursor: grab;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.field-palette-item:hover {
+  border-color: var(--border-strong) !important;
+  background: var(--surface-2) !important;
+}
+.field-palette-item:active { cursor: grabbing; }
+
+.field-card { transition: opacity 0.12s ease, box-shadow 0.12s ease; }
+.field-card.is-dragging { opacity: 0.35; }
+
+/* A thin line drawn just above a card when it's the drop target, so the
+   insertion point reads at a glance instead of the whole card jumping. */
+.field-drop-indicator {
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent-2);
+  margin: 2px 0;
+}
+
+.page-break-row { display: flex; align-items: center; gap: 8px; }
+.page-break-line {
+  flex: 1;
+  border: none;
+  border-top: 1px dashed var(--border-strong);
+}
+.page-break-toggle {
+  width: 22px; height: 22px;
+  border-radius: 999px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+.page-break-toggle:hover {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+.page-break-row.active .page-break-toggle {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.theme-card {
+  cursor: pointer;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+.theme-card:hover { border-color: var(--border-strong) !important; }
+.theme-card.active {
+  border-color: var(--accent-2) !important;
+  box-shadow: 0 0 0 1px var(--accent-2);
+}
+
 /* ============ Customize picker ============ */
 .widget-pick {
   cursor: pointer;
