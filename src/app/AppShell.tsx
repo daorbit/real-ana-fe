@@ -9,7 +9,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
-  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords, FileText,
+  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords,
 } from "lucide-react";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
