@@ -9,7 +9,6 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import {
   useGetAdminPlansQuery, useSaveAdminPlanPriceMutation,
-  useGetAdminOrbitPlansQuery, useSaveAdminOrbitPlanPriceMutation,
   useGetAdminFxQuery, useSyncAdminPlanCurrencyMutation,
   useGetAdminAddonPacksQuery, useSaveAdminAddonPackMutation, useDeleteAdminAddonPackMutation,
   useGetAdminCouponsQuery, useSaveAdminCouponMutation, useDeleteAdminCouponMutation,
@@ -17,7 +16,7 @@ import {
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { CURRENCIES, CURRENCY_SYMBOLS } from "@/shared/types";
-import type { Plan, OrbitPlan, AddonPack, AddonType, Coupon, Currency, CurrencyPrices } from "@/shared/types";
+import type { Plan, AddonPack, AddonType, Coupon, Currency, CurrencyPrices } from "@/shared/types";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
 
 function money(amountMinor: number, currency: Currency = "INR"): string {
@@ -85,12 +84,10 @@ export default function AdminBilling() {
       <Tabs defaultValue="plans" keepMounted={false}>
         <Tabs.List mb="lg">
           <Tabs.Tab value="plans">Plans</Tabs.Tab>
-          <Tabs.Tab value="orbit">Orbit AI</Tabs.Tab>
           <Tabs.Tab value="addons">Addon packs</Tabs.Tab>
           <Tabs.Tab value="coupons">Coupons</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="plans"><PlansTab /></Tabs.Panel>
-        <Tabs.Panel value="orbit"><OrbitPlansTab /></Tabs.Panel>
         <Tabs.Panel value="addons"><AddonsTab /></Tabs.Panel>
         <Tabs.Panel value="coupons"><CouponsTab /></Tabs.Panel>
       </Tabs>
@@ -252,120 +249,6 @@ function PlansTab() {
               Only price can be changed here. Quotas, workspace and site limits, and Razorpay ids
               are fixed in code. A USD price typed here holds until the next "Sync USD prices",
               which recomputes it from the INR price.
-            </Text>
-            <CurrencyPriceInputs label="Price / month" values={priceMonthlyRupees} onChange={setPriceMonthlyRupees} />
-            <CurrencyPriceInputs label="Price / year" values={priceYearlyRupees} onChange={setPriceYearlyRupees} />
-            <Group justify="flex-end" mt="sm">
-              <Button variant="subtle" onClick={() => setModal(false)}>Cancel</Button>
-              <Button color="emerald" loading={saving} onClick={submit}>Save</Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
-    </Stack>
-  );
-}
-
-
-/**
- * The Orbit AI tiers. Same rules as `PlansTab` — price is the only editable
- * field, everything else is fixed in `src/orbit-plans.ts` — but a separate
- * ladder, sold independently of the plans above, so it gets its own tab rather
- * than extra columns there.
- *
- * The quota and model-tier columns are read-only on purpose: they are what the
- * price is *for*, and showing them next to the price is how an admin sanity-
- * checks that the two still make sense together.
- */
-function OrbitPlansTab() {
-  const { data: plans = [], isLoading, isFetching, refetch } = useGetAdminOrbitPlansQuery();
-  const [save, { isLoading: saving }] = useSaveAdminOrbitPlanPriceMutation();
-
-  const [modal, setModal] = useState(false);
-  const [draft, setDraft] = useState<OrbitPlan | null>(null);
-  const [priceMonthlyRupees, setPriceMonthlyRupees] = useState<CurrencyPrices>(emptyPrices);
-  const [priceYearlyRupees, setPriceYearlyRupees] = useState<CurrencyPrices>(emptyPrices);
-
-  const openEdit = (p: OrbitPlan) => {
-    setDraft(p);
-    setPriceMonthlyRupees(toRupees(p.priceMonthly));
-    setPriceYearlyRupees(toRupees(p.priceYearly));
-    setModal(true);
-  };
-
-  const submit = async () => {
-    if (!draft) return;
-    try {
-      await save({
-        slug: draft.slug,
-        priceMonthly: toMinor(priceMonthlyRupees),
-        priceYearly: toMinor(priceYearlyRupees),
-      }).unwrap();
-      notify.success(`${draft.name} price updated.`, "Orbit plan updated");
-      setModal(false);
-    } catch (e) {
-      notify.error(errMessage(e, "Could not save the price."));
-    }
-  };
-
-  if (isLoading) return <Center py={64}><Loader size="sm" /></Center>;
-
-  return (
-    <Stack gap="md">
-      <Group justify="space-between">
-        <Text size="sm" c="dimmed">
-          Sold per workspace, separately from the plans tab. A workspace carries
-          one of each.
-        </Text>
-        <RefetchButton onClick={refetch} loading={isFetching} />
-      </Group>
-      <Card withBorder radius="md" padding={0}>
-        <Table verticalSpacing="sm" horizontalSpacing="md">
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>Monthly</Table.Th>
-              <Table.Th>Yearly</Table.Th>
-              <Table.Th>Questions/mo</Table.Th>
-              <Table.Th>Models</Table.Th>
-              <Table.Th>Own data</Table.Th>
-              <Table.Th />
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {plans.map((p) => (
-              <Table.Tr key={p.slug}>
-                <Table.Td><Text size="sm" fw={600}>{p.name}</Text></Table.Td>
-                <Table.Td>{CURRENCIES.map((c) => money(p.priceMonthly[c], c)).join(" / ")}</Table.Td>
-                <Table.Td>{CURRENCIES.map((c) => money(p.priceYearly[c], c)).join(" / ")}</Table.Td>
-                <Table.Td>{p.monthlyQuota.toLocaleString()}</Table.Td>
-                <Table.Td><Badge variant="light" size="sm" tt="capitalize">{p.modelTier}</Badge></Table.Td>
-                <Table.Td>
-                  {p.dataAccess
-                    ? <Badge variant="light" color="emerald" size="sm">Yes</Badge>
-                    : <Text size="sm" c="dimmed">No</Text>}
-                </Table.Td>
-                <Table.Td>
-                  <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(p)}>
-                    <Pencil size={14} />
-                  </ActionIcon>
-                </Table.Td>
-              </Table.Tr>
-            ))}
-            {!plans.length && (
-              <Table.Tr><Table.Td colSpan={7}><Text size="sm" c="dimmed" py="md">No Orbit plans yet.</Text></Table.Td></Table.Tr>
-            )}
-          </Table.Tbody>
-        </Table>
-      </Card>
-
-      <Modal opened={modal} onClose={() => setModal(false)} title={draft ? `Edit ${draft.name} price` : ""} radius="lg" centered>
-        {draft && (
-          <Stack gap="sm">
-            <Text size="sm" c="dimmed">
-              Only price can be changed here. The question quota, model tier and
-              data access are fixed in code. A tier priced at 0 is activated
-              immediately without going through checkout.
             </Text>
             <CurrencyPriceInputs label="Price / month" values={priceMonthlyRupees} onChange={setPriceMonthlyRupees} />
             <CurrencyPriceInputs label="Price / year" values={priceYearlyRupees} onChange={setPriceYearlyRupees} />
