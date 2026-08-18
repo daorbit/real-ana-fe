@@ -15,6 +15,7 @@ import {
   useCreateScheduledPostMutation,
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,
+  useDisconnectLinkedInMutation,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import type { PostFrequency, ScheduledPost } from "@/shared/types";
@@ -111,6 +112,25 @@ export default function SocialPosts() {
   // Connecting happens in a popup, so this page — and any half-written draft —
   // survives the round trip. `refetch` picks up the new connection state.
   const { connect, connecting } = useLinkedInConnect(refetch);
+  const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
+
+  /**
+   * Drop the connection.
+   *
+   * Existing schedules are deliberately left in place rather than deleted: the
+   * posts someone wrote are still theirs, and reconnecting should resume them
+   * rather than make them start over. They simply stop publishing until there
+   * is an account to publish as.
+   */
+  const disconnectLinkedIn = async () => {
+    try {
+      await disconnect().unwrap();
+      notify.success("LinkedIn disconnected. Your schedules are paused until you reconnect.");
+      refetch();
+    } catch (e) {
+      notify.error(errMessage(e, "Could not disconnect LinkedIn."));
+    }
+  };
 
   // The zone the schedule is written in. Taken from the browser so "9am" means
   // 9am where the author is, which is what the server stores and honours.
@@ -249,11 +269,31 @@ export default function SocialPosts() {
         </Alert>
       )}
 
+      {/* Connected: say who these posts go out as, and keep the account
+          reachable. Without this the connection is only changeable from the
+          Share panel, which is a strange place to have to go to disconnect
+          something this page depends on. */}
       {ready && (
-        <Text size="sm" c="dimmed" mb="lg">
-          Publishing as <strong>{linkedin?.name}</strong> · times shown in {timezone}
-        </Text>
+        <Group justify="space-between" align="center" wrap="nowrap" mb="lg" gap="md">
+          <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
+            <CheckCircle2 size={15} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
+            <Text size="sm" c="dimmed" truncate>
+              Publishing as <strong>{linkedin?.name}</strong> · times shown in {timezone}
+            </Text>
+          </Group>
+          <Button
+            variant="subtle"
+            color="gray"
+            size="compact-sm"
+            loading={disconnecting}
+            onClick={disconnectLinkedIn}
+            style={{ flexShrink: 0 }}
+          >
+            Disconnect
+          </Button>
+        </Group>
       )}
+
 
       {isLoading ? (
         <Group justify="center" py="xl"><Loader /></Group>
