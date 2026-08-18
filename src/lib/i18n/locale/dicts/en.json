@@ -673,6 +673,7 @@
     "cardBadge": "Live dashboard",
     "linkedinConnect": "Connect LinkedIn",
     "linkedinConnectHint": "Connect your LinkedIn profile to publish this post directly, without copying and pasting.",
+    "linkedinScopeNote": "LinkedIn will ask you to allow creating, modifying and deleting posts — that is the wording of the single permission it offers for publishing. Quantalog only ever creates the posts you write here. It never edits or deletes anything on your profile, and never posts without you scheduling it.",
     "linkedinConnectedAs": "Connected as {{name}}",
     "linkedinDisconnect": "Disconnect",
     "linkedinDisconnected": "LinkedIn disconnected",

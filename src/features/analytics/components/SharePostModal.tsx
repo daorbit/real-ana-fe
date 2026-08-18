@@ -708,6 +708,18 @@ function LinkedInConnection({
                 ? t("sharePost.linkedinExpired")
                 : t("sharePost.linkedinConnectHint")}
           </Text>
+
+          {/* Said before the consent screen, not after it.
+              LinkedIn describes `w_member_social` as create/modify/delete —
+              the full reach of the only permission it offers for publishing,
+              not what this app does with it. Someone who reads that wording
+              cold is right to hesitate, so what we actually do is stated here
+              first, while they can still decide. */}
+          {status?.configured !== false && !needsReconnect && (
+            <Text size="xs" c="dimmed" mb={10} style={{ lineHeight: 1.5 }}>
+              {t("sharePost.linkedinScopeNote")}
+            </Text>
+          )}
           <Button
             size="sm"
             // Offering the button when the server has no credentials would only

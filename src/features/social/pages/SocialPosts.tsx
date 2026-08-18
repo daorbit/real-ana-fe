@@ -16,6 +16,7 @@ import {
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,
 } from "@/app/store";
+import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import type { PostFrequency, ScheduledPost } from "@/shared/types";
 
 /**
@@ -99,7 +100,7 @@ function describe(post: Pick<ScheduledPost, "frequency" | "hour" | "minute" | "w
 
 export default function SocialPosts() {
   const { active } = useWorkspace();
-  const { data, isLoading } = useGetScheduledPostsQuery();
+  const { data, isLoading, refetch } = useGetScheduledPostsQuery();
   const [create, { isLoading: creating }] = useCreateScheduledPostMutation();
   const [update] = useUpdateScheduledPostMutation();
   const [remove] = useDeleteScheduledPostMutation();
@@ -107,6 +108,9 @@ export default function SocialPosts() {
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const resetImage = useRef<() => void>(null);
+  // Connecting happens in a popup, so this page — and any half-written draft —
+  // survives the round trip. `refetch` picks up the new connection state.
+  const { connect, connecting } = useLinkedInConnect(refetch);
 
   // The zone the schedule is written in. Taken from the browser so "9am" means
   // 9am where the author is, which is what the server stores and honours.
@@ -205,7 +209,9 @@ export default function SocialPosts() {
       </Group>
 
       {/* The connection is the precondition for everything on this page, so its
-          state is stated once at the top rather than repeated on each row. */}
+          state is stated once at the top rather than repeated on each row — and
+          it carries the button that fixes it. Sending someone to another page to
+          connect makes the thing they came here to do a two-stop errand. */}
       {!isLoading && !ready && (
         <Alert
           color={linkedin?.expired ? "orange" : "blue"}
@@ -213,9 +219,33 @@ export default function SocialPosts() {
           icon={<TriangleAlert size={18} />}
           mb="lg"
         >
-          {linkedin?.expired
-            ? "Your LinkedIn connection has expired. Reconnect it from the Share panel to resume publishing."
-            : "Connect your LinkedIn account from the Share panel to start scheduling posts."}
+          <Group justify="space-between" align="center" wrap="nowrap" gap="md">
+            <Text size="sm">
+              {linkedin?.expired
+                ? "Your LinkedIn connection has expired. Reconnect it to resume publishing."
+                : "Connect your LinkedIn account to start scheduling posts."}
+            </Text>
+            <Button
+              size="compact-sm"
+              loading={connecting}
+              onClick={connect}
+              style={{ background: "#0A66C2", color: "#fff", flexShrink: 0 }}
+            >
+              {linkedin?.expired ? "Reconnect LinkedIn" : "Connect LinkedIn"}
+            </Button>
+          </Group>
+
+          {/* LinkedIn's consent screen asks for create/modify/delete — the reach
+              of the one permission it offers for publishing, not what this app
+              does. Better heard from us beforehand than read cold there. */}
+          {!linkedin?.expired && (
+            <Text size="xs" c="dimmed" mt={8} style={{ lineHeight: 1.5 }}>
+              LinkedIn will ask you to allow creating, modifying and deleting posts — that is
+              the wording of the single permission it offers for publishing. Quantalog only
+              ever creates the posts you schedule here. It never edits or deletes anything on
+              your profile.
+            </Text>
+          )}
         </Alert>
       )}
 
