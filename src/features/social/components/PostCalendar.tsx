@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ActionIcon, Box, Group, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Button, Group, Text, Tooltip } from "@mantine/core";
 import { ChevronLeft, ChevronRight, Plus, Repeat } from "lucide-react";
 import { toDateInput } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
@@ -69,11 +69,14 @@ export function PostCalendar({
   posts,
   onOpen,
   onCreateOn,
+  viewControl,
 }: {
   posts: ScheduledPost[];
   onOpen: (post: ScheduledPost) => void;
   /** Compose a new post already dated to this day. */
   onCreateOn: (date: string) => void;
+  /** The calendar/list switch, which lives in this toolbar. */
+  viewControl?: React.ReactNode;
 }) {
   const [cursor, setCursor] = useState(() => new Date());
   const cells = useMemo(() => monthCells(cursor), [cursor]);
@@ -110,24 +113,38 @@ export function PostCalendar({
 
   return (
     <Box>
-      <Group justify="space-between" align="center" mb="sm" wrap="nowrap">
-        <Text fw={700} size="lg">{monthLabel}</Text>
-        <Group gap={6} wrap="nowrap">
-          <ActionIcon variant="default" size="md" onClick={() => step(-1)} aria-label="Previous month">
-            <ChevronLeft size={16} />
-          </ActionIcon>
-          <ActionIcon variant="default" size="md" onClick={() => setCursor(new Date())} aria-label="This month">
-            <Text size="xs" fw={600}>Today</Text>
-          </ActionIcon>
-          <ActionIcon variant="default" size="md" onClick={() => step(1)} aria-label="Next month">
-            <ChevronRight size={16} />
-          </ActionIcon>
+      {/* Month, navigation and the view switch on one line: they are all
+          "which posts am I looking at" controls and belong together. */}
+      <Group justify="space-between" align="center" mb="sm" wrap="nowrap" gap="sm">
+        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+          <Text fw={700} size="lg" style={{ whiteSpace: "nowrap" }}>{monthLabel}</Text>
+          <Group gap={4} wrap="nowrap">
+            <ActionIcon variant="default" size="sm" onClick={() => step(-1)} aria-label="Previous month">
+              <ChevronLeft size={15} />
+            </ActionIcon>
+            <ActionIcon variant="default" size="sm" onClick={() => step(1)} aria-label="Next month">
+              <ChevronRight size={15} />
+            </ActionIcon>
+          </Group>
+          <Button
+            variant="default"
+            size="compact-xs"
+            onClick={() => setCursor(new Date())}
+            // Nothing to go back to when the current month is already open.
+            disabled={
+              cursor.getMonth() === new Date().getMonth()
+              && cursor.getFullYear() === new Date().getFullYear()
+            }
+          >
+            Today
+          </Button>
         </Group>
+        {viewControl}
       </Group>
 
       <Box className="post-calendar">
         {DAY_NAMES.map((d) => (
-          <Text key={d} size="xs" fw={600} c="dimmed" ta="center" py={6}>{d}</Text>
+          <div key={d} className="post-calendar-head">{d}</div>
         ))}
 
         {cells.map((cell) => {
@@ -138,9 +155,16 @@ export function PostCalendar({
               className="post-calendar-day"
               data-outside={!cell.inMonth || undefined}
               data-today={cell.isToday || undefined}
+              data-weekend={cell.date.getDay() % 6 === 0 || undefined}
+              data-empty={entries.length === 0 || undefined}
             >
               <Group justify="space-between" align="center" wrap="nowrap" mb={4}>
-                <Text size="xs" fw={cell.isToday ? 700 : 500} c={cell.inMonth ? undefined : "dimmed"}>
+                <Text
+                  size="xs"
+                  fw={cell.isToday ? 700 : 500}
+                  c={cell.inMonth ? undefined : "dimmed"}
+                  className={cell.isToday ? "post-calendar-today" : undefined}
+                >
                   {cell.date.getDate()}
                 </Text>
                 {/* Scheduling into the past is not a thing, so those days offer

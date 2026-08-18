@@ -2312,25 +2312,60 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border: 1px solid var(--border);
   border-radius: var(--mantine-radius-md);
   overflow: hidden;
-  min-width: 720px;
+  min-width: 700px;
+}
+
+/* The weekday strip reads as part of the grid's frame rather than a row of
+   floating labels, which is what separates a calendar from a table of numbers. */
+.post-calendar-head {
+  background: var(--bg-2);
+  padding: 7px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
 }
 
 .post-calendar-day {
   background: var(--surface);
-  min-height: 104px;
+  /* Two chips fit without scrolling, which covers nearly every real day. Taller
+     than that is empty space on a month where little is scheduled. */
+  min-height: 88px;
   padding: 6px 7px;
 }
 
 /* Days from the neighbouring months keep the grid rectangular but recede, so
    the month being read is the one that reads as solid. */
-.post-calendar-day[data-outside] { background: var(--bg); opacity: 0.55; }
-.post-calendar-day[data-today] { box-shadow: inset 0 0 0 1px var(--accent); }
+.post-calendar-day[data-outside] { background: var(--bg); opacity: 0.5; }
+/* Weekends sit back a shade: most posting happens on weekdays, and the block of
+   five is what someone is planning across. */
+.post-calendar-day[data-weekend]:not([data-outside]) { background: var(--bg-2); }
+
+.post-calendar-day[data-today] { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+
+/* Today's number is marked on the number itself rather than by outlining the
+   whole cell, which would compete with the chips inside it. */
+.post-calendar-today {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+}
 
 /* The add button only appears on hover or keyboard focus: forty-two of them
    drawn at once would be louder than the posts they sit beside. */
 .post-calendar-add { opacity: 0; transition: opacity 120ms ease; }
 .post-calendar-day:hover .post-calendar-add,
 .post-calendar-add:focus-visible { opacity: 1; }
+
+/* An empty future day is a gap in the plan, so the whole cell invites a post
+   rather than only the small button in its corner. */
+.post-calendar-day[data-empty]:hover { background: var(--bg-3, var(--bg-2)); }
 
 .post-calendar-chip {
   display: flex;
@@ -2340,21 +2375,21 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding: 3px 5px;
   border: none;
   border-radius: 4px;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--text);
   font-size: 11px;
-  line-height: 1.3;
+  line-height: 1.35;
   text-align: left;
   cursor: pointer;
 }
-.post-calendar-chip:hover { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.post-calendar-chip:hover { background: color-mix(in srgb, var(--accent) 30%, transparent); }
 .post-calendar-chip[data-sent] { background: var(--bg-2); color: var(--text-dim); }
 .post-calendar-chip[data-failed] {
-  background: color-mix(in srgb, var(--mantine-color-orange-6) 20%, transparent);
+  background: color-mix(in srgb, var(--mantine-color-orange-6) 22%, transparent);
 }
 
-.post-calendar-time { font-variant-numeric: tabular-nums; opacity: 0.75; flex-shrink: 0; }
-.post-calendar-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post-calendar-time { font-variant-numeric: tabular-nums; opacity: 0.7; flex-shrink: 0; }
+.post-calendar-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 
 /* The grid keeps its width and scrolls rather than squashing. */
-.post-calendar-scroll { overflow-x: auto; }
+.post-calendar-scroll { overflow-x: auto; padding-bottom: 4px; }
