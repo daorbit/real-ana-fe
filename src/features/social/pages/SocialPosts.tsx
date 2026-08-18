@@ -5,7 +5,7 @@ import {
 import { CalendarClock, CheckCircle2, Plus, TriangleAlert } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
-import { notify, errMessage } from "@/shared/lib/notify";
+import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
 import {
   useGetScheduledPostsQuery,
   useCreateScheduledPostMutation,
@@ -63,14 +63,26 @@ export default function SocialPosts() {
    * rather than make them start over. They simply stop publishing until there
    * is an account to publish as.
    */
-  const disconnectLinkedIn = async () => {
-    try {
-      await disconnect().unwrap();
-      notify.success("LinkedIn disconnected. Your schedules are paused until you reconnect.");
-      refetch();
-    } catch (e) {
-      notify.error(errMessage(e, "Could not disconnect LinkedIn."));
-    }
+  const disconnectLinkedIn = () => {
+    confirmDelete({
+      title: "Disconnect LinkedIn?",
+      body: (
+        <>
+          Nothing scheduled will publish until you reconnect. Your posts are kept,
+          not deleted.
+        </>
+      ),
+      confirmLabel: "Disconnect",
+      onConfirm: async () => {
+        try {
+          await disconnect().unwrap();
+          notify.success("LinkedIn disconnected. Your posts are paused until you reconnect.");
+          refetch();
+        } catch (e) {
+          notify.error(errMessage(e, "Could not disconnect LinkedIn."));
+        }
+      },
+    });
   };
 
   // The zone the schedule is written in. Taken from the browser so "9am" means
@@ -174,14 +186,52 @@ export default function SocialPosts() {
     }
   };
 
-  const destroy = async (post: ScheduledPost) => {
-    try {
-      await remove(post.id).unwrap();
-      notify.success("Schedule deleted.");
-    } catch (e) {
-      notify.error(errMessage(e, "Could not delete that schedule."));
-    }
+  /**
+   * Delete, behind a confirmation.
+   *
+   * Asked rather than done: the post's text and its uploaded image both go, and
+   * neither comes back. The dialog names the post so a misclick on the wrong
+   * row is visible before it is acted on.
+   */
+  const destroy = (post: ScheduledPost) => {
+    confirmDelete({
+      title: "Delete this post?",
+      body: (
+        <>
+          <strong>{post.name}</strong> and its image will be permanently deleted.
+          {post.status !== "sent" && " It will not publish."}
+          {" This cannot be undone."}
+        </>
+      ),
+      onConfirm: async () => {
+        try {
+          await remove(post.id).unwrap();
+          notify.success("Post deleted.");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not delete that post."));
+        }
+      },
+    });
   };
+
+  /**
+   * The calendar/list switch, built once and handed to whichever view is on.
+   *
+   * Both views own their own header row, and a control that jumped between two
+   * different corners depending on the view would be a control people have to
+   * look for.
+   */
+  const viewControl = (
+    <SegmentedControl
+      size="xs"
+      data={[
+        { value: "calendar", label: "Calendar" },
+        { value: "list", label: "List" },
+      ]}
+      value={view}
+      onChange={(v) => setView(v as "calendar" | "list")}
+    />
+  );
 
   return (
     <AppShell>
@@ -295,29 +345,30 @@ export default function SocialPosts() {
         </Card>
       ) : (
         <>
-          <Group justify="flex-end" mb="md">
-            <SegmentedControl
-              size="sm"
-              data={[
-                { value: "calendar", label: "Calendar" },
-                { value: "list", label: "List" },
-              ]}
-              value={view}
-              onChange={(v) => setView(v as "calendar" | "list")}
-            />
-          </Group>
-
+          {/* One toolbar for both views, so the month controls and the switch
+              between them read as one bar rather than three stacked corners. */}
           {view === "calendar" ? (
             <Box className="post-calendar-scroll">
-              <PostCalendar posts={posts} onOpen={openEdit} onCreateOn={openNew} />
+              <PostCalendar
+                posts={posts}
+                onOpen={openEdit}
+                onCreateOn={openNew}
+                viewControl={viewControl}
+              />
             </Box>
           ) : (
-            <PostQueue
-              posts={posts}
-              onEdit={openEdit}
-              onToggle={toggle}
-              onDelete={destroy}
-            />
+            <>
+              <Group justify="space-between" align="center" mb="md" wrap="nowrap">
+                <Text fw={700} size="lg">Everything scheduled</Text>
+                {viewControl}
+              </Group>
+              <PostQueue
+                posts={posts}
+                onEdit={openEdit}
+                onToggle={toggle}
+                onDelete={destroy}
+              />
+            </>
           )}
         </>
       )}
