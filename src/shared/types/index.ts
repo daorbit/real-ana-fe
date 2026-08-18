@@ -79,6 +79,12 @@ export type ShareState = {
 export type LinkedInStatus = {
   connected: boolean;
   /**
+   * Whether the server has LinkedIn credentials at all. False on a deployment
+   * where the client id/secret are unset — the panel says so rather than
+   * offering a button whose only effect is to bounce the page back.
+   */
+  configured?: boolean;
+  /**
    * The stored token has passed its expiry, or LinkedIn rejected it on the last
    * attempt. Still "connected", but the panel must offer Reconnect rather than
    * Post — the connection exists and cannot be used.

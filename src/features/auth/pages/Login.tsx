@@ -10,6 +10,7 @@ import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
+import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
@@ -114,22 +115,28 @@ export default function Login() {
               </Alert>
             )}
 
-            {/* Google first: it's one click against two fields and a password,
-                and putting it under the form makes the slower path look like the
-                intended one. */}
-            <GoogleSignInButton
-              label="Continue with Google"
-              text="signin_with"
-              onBusyChange={setGoogleBusy}
-              onSuccess={(created) => {
-                notify.success(
-                  created ? "Your account is ready." : "Welcome back!",
-                  created ? "Signed up with Google" : "Logged in"
-                );
-                nav("/app");
-              }}
-              onError={setError}
-            />
+            {/* The two providers share a row, above the form: both are one
+                click against two fields and a password, and putting them under
+                the form would make the slower path look like the intended one.
+                `grow` splits the width evenly, which also gives the Google
+                button a measured box to size its invisible GIS overlay to. */}
+            <Group grow align="stretch" gap="sm" wrap="nowrap">
+              <GoogleSignInButton
+                label="Google"
+                text="signin_with"
+                onBusyChange={setGoogleBusy}
+                onSuccess={(created) => {
+                  notify.success(
+                    created ? "Your account is ready." : "Welcome back!",
+                    created ? "Signed up with Google" : "Logged in"
+                  );
+                  nav("/app");
+                }}
+                onError={setError}
+              />
+
+              <LinkedInSignInButton label="LinkedIn" onError={setError} />
+            </Group>
 
             <Divider label="or use your email" labelPosition="center" />
 

@@ -21,6 +21,13 @@ type AuthState = {
    * new users to onboarding.
    */
   googleSignIn: (credential: string) => Promise<{ created: boolean }>;
+  /**
+   * Adopt a session from a token the server issued during a redirect flow.
+   *
+   * Used by LinkedIn sign-in, where the token comes back in the URL rather than
+   * in a response body — there is no credential left to exchange by then.
+   */
+  adoptToken: (token: string) => Promise<void>;
   /** Starts a signup and emails a code. No account exists until `verifySignup`. */
   signup: (email: string, password: string, name: string) => Promise<void>;
   /** Proves the code and creates the account, signing the user in. */
@@ -99,6 +106,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(r.user);
     return { created: Boolean(r.created) };
+  };
+
+  /**
+   * Adopt a session from a token the server already issued.
+   *
+   * LinkedIn sign-in is a redirect flow, not a request/response one: by the
+   * time the browser is back here the server has verified the profile and
+   * signed a token, and it arrives in the URL rather than in a response body.
+   * So there is no credential left to post — the work is to store the token and
+   * load the account it belongs to.
+   */
+  const adoptToken = async (token: string) => {
+    setToken(token);
+    dispatch(rtkApi.util.resetApiState());
+    const me = await api.get<AuthResp["user"]>("/api/auth/me");
+    setUser(me);
   };
 
   const startDemo = async () => {
@@ -226,7 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

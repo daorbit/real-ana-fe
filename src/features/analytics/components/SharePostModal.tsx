@@ -523,17 +523,29 @@ function FeedPreview({
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 /**
- * Begin the OAuth flow by navigating the whole page to the start endpoint.
+ * Begin the OAuth flow in a popup.
  *
- * A full navigation rather than a fetch, because the endpoint answers with a
- * redirect to linkedin.com and the consent screen has to render in the address
- * bar. That also means no `Authorization` header can be attached, so the app's
- * own token rides in the query string; the server verifies it, mints the signed
- * state, and immediately redirects away from the URL it appeared in.
+ * A separate window rather than a full-page navigation, because this modal
+ * holds unsaved work: a composed caption and a rendered card. Navigating away
+ * and coming back through a redirect would discard both, which reads as the app
+ * reloading and losing the post. The popup leaves this page — and everything
+ * typed into it — exactly where it was.
+ *
+ * It has to be a real navigation of *some* window rather than a fetch, since
+ * the endpoint answers with a redirect to linkedin.com and the consent screen
+ * must render in an address bar. That is also why the app's own token rides in
+ * the query string: a navigation cannot carry an `Authorization` header. The
+ * server verifies it, mints the signed state, and redirects away immediately.
+ *
+ * Falls back to a full navigation if the popup is blocked, so a blocker turns
+ * the flow clumsy rather than broken.
  */
-function startLinkedInConnect() {
+function startLinkedInConnect(): Window | null {
   const token = getToken() ?? "";
-  window.location.href = `${API_BASE}/api/auth/linkedin?token=${encodeURIComponent(token)}`;
+  const url = `${API_BASE}/api/auth/linkedin?token=${encodeURIComponent(token)}`;
+  const popup = window.open(url, "linkedin-oauth", "width=600,height=720,menubar=no,toolbar=no");
+  if (!popup) window.location.href = url;
+  return popup;
 }
 
 /**
@@ -554,9 +566,34 @@ function LinkedInConnection({
   disabled: boolean;
 }) {
   const { t } = useTranslation();
-  const { data: status, isLoading } = useGetLinkedInStatusQuery();
+  const { data: status, isLoading, refetch } = useGetLinkedInStatusQuery();
   const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
   const [post, { isLoading: posting }] = usePostToLinkedInMutation();
+  // True between opening the popup and hearing back from it, so the button can
+  // show that something is in flight in another window.
+  const [connecting, setConnecting] = useState(false);
+
+  // The popup reports its outcome here and closes itself; see the return hook.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      // Same-origin only, and only our own message shape: any page can post to
+      // a window it has a handle on.
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.source !== "quantalog-linkedin") return;
+
+      setConnecting(false);
+      if (e.data.status === "connected") {
+        notify.success(t("sharePost.linkedinConnected"));
+        refetch();
+      } else if (e.data.status === "cancelled") {
+        notify.info(t("sharePost.linkedinConnectCancelled"));
+      } else {
+        notify.error(t("sharePost.linkedinConnectError"));
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [t, refetch]);
   // The permalink of the post just published, so the success state can offer a
   // link to it. Cleared whenever a new post starts.
   const [postedUrl, setPostedUrl] = useState<string | null>(null);
@@ -659,13 +696,42 @@ function LinkedInConnection({
       ) : (
         <>
           <Text size="xs" c="dimmed" mb={10}>
-            {needsReconnect ? t("sharePost.linkedinExpired") : t("sharePost.linkedinConnectHint")}
+            {status?.configured === false
+              ? t("sharePost.linkedinNotConfigured")
+              : needsReconnect
+                ? t("sharePost.linkedinExpired")
+                : t("sharePost.linkedinConnectHint")}
           </Text>
           <Button
             size="sm"
-            onClick={startLinkedInConnect}
+            // Offering the button when the server has no credentials would only
+            // bounce the user back with an error.
+            disabled={status?.configured === false}
+            loading={connecting}
+            onClick={() => {
+              setConnecting(true);
+              const popup = startLinkedInConnect();
+              // A blocked popup falls back to a full navigation, so there is
+              // nothing left to wait for in this window.
+              if (!popup) return setConnecting(false);
+
+              // Someone can also close the window by hand, which sends no
+              // message at all. Without this the button would spin forever.
+              const timer = window.setInterval(() => {
+                if (!popup.closed) return;
+                window.clearInterval(timer);
+                setConnecting(false);
+                // It may have closed *because* it succeeded, a moment before
+                // its message arrived; re-reading the status settles which.
+                refetch();
+              }, 700);
+            }}
             leftSection={<PlatformGlyph icon={LINKEDIN_ICON} />}
-            style={{ background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }}
+            style={
+              status?.configured === false
+                ? undefined
+                : { background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }
+            }
           >
             {needsReconnect ? t("sharePost.linkedinReconnect") : t("sharePost.linkedinConnect")}
           </Button>
@@ -708,6 +774,9 @@ export function SharePostModal({
   const [platform, setPlatform] = useState<PlatformId>("linkedin");
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
+  // Read here as well as inside the connection panel: RTK Query serves both
+  // from one cache entry, so this is the same request, not a second one.
+  const { data: linkedInStatus } = useGetLinkedInStatusQuery();
   // Whether the caption on screen came from Orbit. Drives the button's label,
   // and the note under the editor that says so plainly.
   const [written, setWritten] = useState(false);
@@ -772,6 +841,17 @@ export function SharePostModal({
   const overLimit = active.limit !== null && chars > active.limit;
 
   /**
+   * LinkedIn is usable only once an account is connected and its token is
+   * still good.
+   *
+   * Scoped to the LinkedIn tab on purpose: the other four networks share
+   * through a public intent URL, need no account of ours, and keep working
+   * exactly as they did.
+   */
+  const linkedInReady = Boolean(linkedInStatus?.connected && !linkedInStatus.expired);
+  const blockedOnLinkedIn = platform === "linkedin" && !linkedInReady;
+
+  /**
    * Append a fragment. `line` puts it at the start of its own line, which is
    * what a list marker needs; everything else lands at the end of the caption.
    */
@@ -799,6 +879,10 @@ export function SharePostModal({
   };
 
   const share = () => {
+    // Belt and braces with the disabled button above: LinkedIn now publishes
+    // through our own connection, so the intent fallback must not run for it
+    // while that connection is missing.
+    if (blockedOnLinkedIn) return;
     // Platforms that drop the caption get it on the clipboard first, so the
     // paste is one keystroke away in the composer that is about to open.
     //
@@ -1031,15 +1115,26 @@ export function SharePostModal({
               <Button variant="default" onClick={onClose}>
                 {t("sharePost.later")}
               </Button>
-              <Button
-                onClick={share}
-                disabled={overLimit}
-                radius="xl"
-                leftSection={<PlatformGlyph icon={active.icon} />}
-                style={{ background: `#${active.icon.hex}`, color: "#fff" }}
+              {/* Wrapped so the tooltip still shows while the button is
+                  disabled — a disabled button fires no pointer events of its
+                  own, and "why can't I click this?" is the whole question. */}
+              <Tooltip
+                label={t("sharePost.linkedinConnectFirst")}
+                withArrow
+                disabled={!blockedOnLinkedIn}
               >
-                {t("sharePost.shareOn", { platform: active.label })}
-              </Button>
+                <Box>
+                  <Button
+                    onClick={share}
+                    disabled={overLimit || blockedOnLinkedIn}
+                    radius="xl"
+                    leftSection={<PlatformGlyph icon={active.icon} />}
+                    style={{ background: `#${active.icon.hex}`, color: "#fff" }}
+                  >
+                    {t("sharePost.shareOn", { platform: active.label })}
+                  </Button>
+                </Box>
+              </Tooltip>
             </Group>
           </Group>
         </Box>

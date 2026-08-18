@@ -685,7 +685,9 @@
     "linkedinView": "View on LinkedIn",
     "linkedinConnected": "LinkedIn connected",
     "linkedinConnectCancelled": "LinkedIn connection cancelled",
-    "linkedinConnectError": "Could not connect LinkedIn. Please try again."
+    "linkedinConnectError": "Could not connect LinkedIn. Please try again.",
+    "linkedinNotConfigured": "LinkedIn posting isn't set up on this deployment yet. Ask an administrator to add the LinkedIn credentials.",
+    "linkedinConnectFirst": "Connect your LinkedIn account first."
   },
   "auth": {
     "login": "Log in",
