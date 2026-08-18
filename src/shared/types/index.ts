@@ -16,8 +16,17 @@ export type User = {
   role: Role;
   /** True once the account has signed in with Google at least once. */
   googleLinked?: boolean;
-  /** False on Google-only accounts, which have never set a password. */
+  /** True once the account has signed in with LinkedIn at least once. */
+  linkedinLinked?: boolean;
+  /** False on social-only accounts, which have never set a password. */
   hasPassword?: boolean;
+  /**
+   * How this account signs in: a password, or the provider it was created with.
+   *
+   * Derived on the server from what is actually linked, so it stays right for
+   * accounts that predate the field.
+   */
+  signupSource?: "email" | "google" | "linkedin";
   /** True when this session is an admin acting as someone else. */
   impersonating?: boolean;
   /** True on the read-only public demo session. */
