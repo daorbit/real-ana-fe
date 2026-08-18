@@ -847,12 +847,13 @@ export function SharePostModal({
   const overLimit = active.limit !== null && chars > active.limit;
 
   /**
-   * LinkedIn is usable only once an account is connected and its token is
-   * still good.
+   * Whether the intent-URL share path must not run.
    *
-   * Scoped to the LinkedIn tab on purpose: the other four networks share
-   * through a public intent URL, need no account of ours, and keep working
-   * exactly as they did.
+   * True only on the LinkedIn tab without a usable connection. LinkedIn no
+   * longer offers that button at all — it publishes through the panel above —
+   * so this is the guard that keeps the handler honest if it is ever reached
+   * another way. The other four networks share through a public intent URL,
+   * need no account of ours, and are unaffected.
    */
   const linkedInReady = Boolean(linkedInStatus?.connected && !linkedInStatus.expired);
   const blockedOnLinkedIn = platform === "linkedin" && !linkedInReady;
