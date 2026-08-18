@@ -670,7 +670,13 @@ function LinkedInConnection({
               disabled={disabled || !caption.trim()}
               onClick={runPost}
               leftSection={<PlatformGlyph icon={LINKEDIN_ICON} />}
-              style={{ background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }}
+              // Dropped while disabled: the brand colour would otherwise paint
+              // over the dimming that shows the button cannot be pressed.
+              style={
+                disabled || !caption.trim()
+                  ? undefined
+                  : { background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }
+              }
             >
               {posting ? t("sharePost.linkedinPosting") : t("sharePost.linkedinPost")}
             </Button>
