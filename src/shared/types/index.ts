@@ -85,6 +85,11 @@ export type LinkedInStatus = {
    */
   configured?: boolean;
   /**
+   * Names of the server-side variables that are absent, when `configured` is
+   * false. Names only — never values, and omitted once set up correctly.
+   */
+  missing?: string[];
+  /**
    * The stored token has passed its expiry, or LinkedIn rejected it on the last
    * attempt. Still "connected", but the panel must offer Reconnect rather than
    * Post — the connection exists and cannot be used.
