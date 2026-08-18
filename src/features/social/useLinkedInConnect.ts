@@ -22,6 +22,26 @@ import { getToken } from "@/shared/lib/http";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
+/**
+ * The reasons the server reports, in words.
+ *
+ * Kept in step with `REASON_TEXT` on the server, which renders the same wording
+ * inside the popup — the two are shown in different places and both are needed:
+ * the popup for someone watching it, the toast for someone whose attention went
+ * back to the app.
+ */
+const REASON_TEXT: Record<string, string> = {
+  not_signed_in:
+    "Your session could not be verified. Sign in again, then retry connecting LinkedIn.",
+  not_configured:
+    "LinkedIn is not set up on this deployment yet. Ask an administrator to add the credentials.",
+  demo: "LinkedIn cannot be connected from a demo session.",
+  invalid_state: "That connection attempt expired. Please try again.",
+  missing_code: "LinkedIn did not return an authorisation code. Please try again.",
+  linkedin_failed: "LinkedIn could not complete the connection. Please try again.",
+  save_failed: "The connection could not be saved. Please try again.",
+};
+
 export function useLinkedInConnect(onConnected?: () => void) {
   const [connecting, setConnecting] = useState(false);
   // Held so the "did they just close it?" poll can be cleared on unmount.
@@ -50,7 +70,10 @@ export function useLinkedInConnect(onConnected?: () => void) {
       } else if (e.data.status === "cancelled") {
         notify.info("LinkedIn connection cancelled");
       } else {
-        notify.error("Could not connect LinkedIn. Please try again.");
+        // The server names the cause; showing it beats a generic retry
+        // message, because most of these need a different action rather than
+        // another attempt — signing in again, or an admin adding credentials.
+        notify.error(REASON_TEXT[e.data.reason] ?? "Could not connect LinkedIn. Please try again.");
       }
     };
 
