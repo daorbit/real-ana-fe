@@ -17,7 +17,7 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage, LinkedInStatus,
+  DemoUsage, LinkedInStatus, ScheduledPost, ScheduledPostsResponse, PostFrequency,
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
@@ -114,7 +114,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission", "LinkedIn"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission", "LinkedIn", "ScheduledPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -237,6 +237,52 @@ export const api = createApi({
     >({
       query: (body) => ({ url: "/api/auth/linkedin/post", method: "POST", body }),
       invalidatesTags: ["LinkedIn"],
+    }),
+
+    /**
+     * Scheduled LinkedIn posts belonging to the signed-in user.
+     *
+     * Not workspace-scoped in the URL: a schedule publishes with the user's own
+     * LinkedIn token, so the whole set is theirs regardless of which workspace
+     * each post is about.
+     */
+    getScheduledPosts: build.query<ScheduledPostsResponse, void>({
+      query: () => "/api/social/posts",
+      providesTags: ["ScheduledPost"],
+    }),
+
+    /**
+     * Create a schedule. `image` is a base64 data URL, uploaded to Cloudinary
+     * server-side — the same path avatars take.
+     */
+    createScheduledPost: build.mutation<
+      ScheduledPost,
+      {
+        workspaceId: string; name: string; caption: string; image?: string;
+        frequency: PostFrequency; hour: number; minute: number;
+        timezone: string; weekday?: number; dayOfMonth?: number;
+      }
+    >({
+      query: (body) => ({ url: "/api/social/posts", method: "POST", body }),
+      invalidatesTags: ["ScheduledPost"],
+    }),
+
+    /** Edit a schedule, including pausing and resuming it. */
+    updateScheduledPost: build.mutation<
+      ScheduledPost,
+      { id: string } & Partial<{
+        name: string; caption: string; image: string; status: "active" | "paused";
+        frequency: PostFrequency; hour: number; minute: number;
+        timezone: string; weekday: number; dayOfMonth: number;
+      }>
+    >({
+      query: ({ id, ...body }) => ({ url: `/api/social/posts/${id}`, method: "PATCH", body }),
+      invalidatesTags: ["ScheduledPost"],
+    }),
+
+    deleteScheduledPost: build.mutation<{ deleted: true }, string>({
+      query: (id) => ({ url: `/api/social/posts/${id}`, method: "DELETE" }),
+      invalidatesTags: ["ScheduledPost"],
     }),
 
     getSites: build.query<Site[], string>({
@@ -1422,6 +1468,10 @@ export const {
   useGetLinkedInStatusQuery,
   useDisconnectLinkedInMutation,
   usePostToLinkedInMutation,
+  useGetScheduledPostsQuery,
+  useCreateScheduledPostMutation,
+  useUpdateScheduledPostMutation,
+  useDeleteScheduledPostMutation,
   useGetSitesQuery,
   useCreateSiteMutation,
   useUpdateSiteOptionsMutation,

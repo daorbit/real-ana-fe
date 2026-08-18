@@ -9,6 +9,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
+  Send,
   CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords,
 } from "lucide-react";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
@@ -58,6 +59,8 @@ const NAV_GROUPS = [
       { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
+      // Beside Reports: both are "write it once, it goes out on a schedule".
+      { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
       // Last in Manage rather than in a group of its own: help is where you go

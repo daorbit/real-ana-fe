@@ -102,6 +102,54 @@ export type LinkedInStatus = {
   };
 };
 
+/** How often a scheduled post repeats. */
+export type PostFrequency = "daily" | "weekly" | "monthly";
+
+/**
+ * A LinkedIn post written once and published on a repeating schedule.
+ *
+ * The content is authored here and stored whole — the caption as text, the
+ * image already uploaded to Cloudinary. The server publishes it unchanged, so
+ * what is composed on this page is exactly what goes out.
+ */
+export type ScheduledPost = {
+  id: string;
+  workspaceId: string;
+  /** The user's own label for the schedule. Not published. */
+  name: string;
+  caption: string;
+  /** Empty for a caption-only post, which is valid. */
+  imageUrl: string;
+  frequency: PostFrequency;
+  hour: number;
+  minute: number;
+  timezone: string;
+  /** 0-6, Sunday first. Weekly only. */
+  weekday: number;
+  /** 1-28. Monthly only. */
+  dayOfMonth: number;
+  status: "active" | "paused";
+  nextRunAt: string;
+  lastRunAt: string | null;
+  lastStatus: "ok" | "failed" | "";
+  /** Already written for display — never a raw LinkedIn error. */
+  lastError: string;
+  lastPostUrl: string;
+  postCount: number;
+  createdAt: string;
+};
+
+/**
+ * The schedule list, with the connection state it depends on.
+ *
+ * The two travel together because a list of schedules is misleading alone:
+ * without a live connection none of them can publish.
+ */
+export type ScheduledPostsResponse = {
+  posts: ScheduledPost[];
+  linkedin: { connected: boolean; expired: boolean; name: string };
+};
+
 /**
  * Admin view of how the public demo is being used.
  *
