@@ -1,11 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  Alert, Badge, Box, Button, Card, FileButton, Group, Loader, Modal, NumberInput,
-  Select, Stack, Text, Textarea, TextInput, Title, Tooltip,
+  Alert, Badge, Box, Button, Card, Group, Loader, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
 import {
-  CalendarClock, CheckCircle2, ExternalLink, Image as ImageIcon, Pause,
-  Play, Plus, Trash2, TriangleAlert, X,
+  CalendarClock, CheckCircle2, ExternalLink, Pause,
+  Pencil, Play, Plus, Trash2, TriangleAlert,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
@@ -18,7 +17,10 @@ import {
   useDisconnectLinkedInMutation,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
-import type { PostFrequency, ScheduledPost } from "@/shared/types";
+import {
+  PostComposer, describe, draftFromPost, emptyDraft, type Draft,
+} from "@/features/social/components/PostComposer";
+import type { ScheduledPost } from "@/shared/types";
 
 /**
  * Scheduled LinkedIn posts.
@@ -32,83 +34,19 @@ import type { PostFrequency, ScheduledPost } from "@/shared/types";
  * same path avatars already take.
  */
 
-const WEEKDAYS = [
-  { value: "1", label: "Monday" },
-  { value: "2", label: "Tuesday" },
-  { value: "3", label: "Wednesday" },
-  { value: "4", label: "Thursday" },
-  { value: "5", label: "Friday" },
-  { value: "6", label: "Saturday" },
-  { value: "0", label: "Sunday" },
-];
-
-const FREQUENCIES = [
-  { value: "daily", label: "Every day" },
-  { value: "weekly", label: "Every week" },
-  { value: "monthly", label: "Every month" },
-];
-
-/** LinkedIn's commentary cap. */
-const MAX_CAPTION = 3000;
-const MAX_IMAGE_MB = 8;
-
-/** A draft in the composer. Mirrors the create payload. */
-type Draft = {
-  name: string;
-  caption: string;
-  /** A data URL for a new upload, an https URL for one already stored, or "". */
-  image: string;
-  frequency: PostFrequency;
-  hour: number;
-  minute: number;
-  weekday: number;
-  dayOfMonth: number;
-};
-
-function emptyDraft(): Draft {
-  return {
-    name: "",
-    caption: "",
-    image: "",
-    frequency: "weekly",
-    hour: 9,
-    minute: 0,
-    weekday: 1,
-    dayOfMonth: 1,
-  };
-}
-
-/** Read a picked file as the base64 data URL the API expects. */
-function readAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("could not read that file"));
-    reader.readAsDataURL(file);
-  });
-}
-
-/** "Every week on Monday at 09:00" — the cadence as a sentence. */
-function describe(post: Pick<ScheduledPost, "frequency" | "hour" | "minute" | "weekday" | "dayOfMonth">) {
-  const time = `${String(post.hour).padStart(2, "0")}:${String(post.minute).padStart(2, "0")}`;
-  if (post.frequency === "daily") return `Every day at ${time}`;
-  if (post.frequency === "weekly") {
-    const day = WEEKDAYS.find((d) => d.value === String(post.weekday))?.label ?? "Monday";
-    return `Every week on ${day} at ${time}`;
-  }
-  return `Every month on day ${post.dayOfMonth} at ${time}`;
-}
-
 export default function SocialPosts() {
   const { active } = useWorkspace();
   const { data, isLoading, refetch } = useGetScheduledPostsQuery();
   const [create, { isLoading: creating }] = useCreateScheduledPostMutation();
-  const [update] = useUpdateScheduledPostMutation();
+  const [update, { isLoading: updating }] = useUpdateScheduledPostMutation();
   const [remove] = useDeleteScheduledPostMutation();
 
   const [composing, setComposing] = useState(false);
-  const [draft, setDraft] = useState<Draft>(emptyDraft);
-  const resetImage = useRef<() => void>(null);
+  // The post the composer is editing, or null when it is writing a new one.
+  const [editing, setEditing] = useState<ScheduledPost | null>(null);
+  // What the composer opens with. Held here rather than derived inside it, so
+  // "Save & add another" can keep the cadence while the content clears.
+  const [initial, setInitial] = useState<Draft>(emptyDraft);
   // Connecting happens in a popup, so this page — and any half-written draft —
   // survives the round trip. `refetch` picks up the new connection state.
   const { connect, connecting } = useLinkedInConnect(refetch);
@@ -152,45 +90,64 @@ export default function SocialPosts() {
     linkedin?.connected && !linkedin.expired && linkedin.canPublish === false,
   );
 
-  const pickImage = async (file: File | null) => {
-    if (!file) return;
-    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
-      notify.error(`Image must be ${MAX_IMAGE_MB}MB or smaller.`);
-      resetImage.current?.();
-      return;
-    }
-    try {
-      // Read first, then set: the updater passed to `setDraft` is synchronous.
-      const dataUrl = await readAsDataUrl(file);
-      setDraft((d) => ({ ...d, image: dataUrl }));
-    } catch {
-      notify.error("Could not read that image.");
-    }
+  const openNew = () => {
+    setEditing(null);
+    setInitial(emptyDraft());
+    setComposing(true);
   };
 
-  const submit = async () => {
-    if (!active?._id) return notify.error("Pick a workspace first.");
-    if (!draft.caption.trim()) return notify.error("Caption cannot be empty.");
+  const openEdit = (post: ScheduledPost) => {
+    setEditing(post);
+    setInitial(draftFromPost(post));
+    setComposing(true);
+  };
+
+  /**
+   * Create or update, depending on what the composer was opened with.
+   *
+   * Returns whether it saved: the composer clears for the next post on true and
+   * keeps the draft on screen on false, so a failure never loses what was
+   * written.
+   */
+  const save = async (draft: Draft): Promise<boolean> => {
+    if (!active?._id) {
+      notify.error("Pick a workspace first.");
+      return false;
+    }
+    if (!draft.caption.trim()) {
+      notify.error("The post cannot be empty.");
+      return false;
+    }
+
+    const fields = {
+      name: draft.name.trim() || "Scheduled post",
+      caption: draft.caption,
+      frequency: draft.frequency,
+      hour: draft.hour,
+      minute: draft.minute,
+      timezone,
+      weekday: draft.weekday,
+      dayOfMonth: draft.dayOfMonth,
+    };
 
     try {
-      await create({
-        workspaceId: active._id,
-        name: draft.name.trim() || "Scheduled post",
-        caption: draft.caption,
-        image: draft.image || undefined,
-        frequency: draft.frequency,
-        hour: draft.hour,
-        minute: draft.minute,
-        timezone,
-        weekday: draft.weekday,
-        dayOfMonth: draft.dayOfMonth,
-      }).unwrap();
-
-      notify.success("Schedule created.");
-      setComposing(false);
-      setDraft(emptyDraft());
+      if (editing) {
+        // An unchanged image is sent back as the https URL it already is, which
+        // the server takes as "leave it alone" — only a data URL is re-uploaded.
+        await update({ id: editing.id, image: draft.image, ...fields }).unwrap();
+        notify.success("Schedule updated.");
+      } else {
+        await create({
+          workspaceId: active._id,
+          image: draft.image || undefined,
+          ...fields,
+        }).unwrap();
+        notify.success("Schedule created.");
+      }
+      return true;
     } catch (e) {
       notify.error(errMessage(e, "Could not save that schedule."));
+      return false;
     }
   };
 
@@ -227,7 +184,7 @@ export default function SocialPosts() {
             <Button
               leftSection={<Plus size={16} />}
               disabled={!ready}
-              onClick={() => setComposing(true)}
+              onClick={openNew}
             >
               New schedule
             </Button>
@@ -390,6 +347,11 @@ export default function SocialPosts() {
                 </Group>
 
                 <Group gap={6} wrap="nowrap">
+                  <Tooltip label="Edit" withArrow>
+                    <Button variant="default" size="compact-sm" onClick={() => openEdit(post)}>
+                      <Pencil size={14} />
+                    </Button>
+                  </Tooltip>
                   <Tooltip label={post.status === "active" ? "Pause" : "Resume"} withArrow>
                     <Button variant="default" size="compact-sm" onClick={() => toggle(post)}>
                       {post.status === "active" ? <Pause size={14} /> : <Play size={14} />}
@@ -407,130 +369,17 @@ export default function SocialPosts() {
         </Stack>
       )}
 
-      <Modal
+      <PostComposer
         opened={composing}
         onClose={() => setComposing(false)}
-        title="New scheduled post"
-        size="lg"
-      >
-        <Stack gap="md">
-          <TextInput
-            label="Name"
-            description="For your own list. Not published."
-            placeholder="Weekly analytics update"
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.currentTarget.value })}
-          />
+        initial={initial}
+        editing={editing}
+        author={linkedin?.name ?? ""}
+        timezone={timezone}
+        saving={creating || updating}
+        onSave={save}
+      />
 
-          <Textarea
-            label="Caption"
-            placeholder="What should this post say?"
-            autosize
-            minRows={5}
-            maxRows={14}
-            required
-            maxLength={MAX_CAPTION}
-            value={draft.caption}
-            onChange={(e) => setDraft({ ...draft, caption: e.currentTarget.value })}
-            description={`${draft.caption.length} / ${MAX_CAPTION}`}
-          />
-
-          <div>
-            <Text size="sm" fw={500} mb={6}>Image <Text span c="dimmed" fw={400}>(optional)</Text></Text>
-            {draft.image ? (
-              <Group gap="sm" wrap="nowrap">
-                <img
-                  src={draft.image}
-                  alt=""
-                  style={{ width: 140, height: 79, objectFit: "cover", borderRadius: 6 }}
-                />
-                <Button
-                  variant="subtle"
-                  size="compact-sm"
-                  leftSection={<X size={14} />}
-                  onClick={() => {
-                    setDraft({ ...draft, image: "" });
-                    resetImage.current?.();
-                  }}
-                >
-                  Remove
-                </Button>
-              </Group>
-            ) : (
-              <FileButton
-                resetRef={resetImage}
-                accept="image/png,image/jpeg,image/webp"
-                onChange={pickImage}
-              >
-                {(props) => (
-                  <Button {...props} variant="default" leftSection={<ImageIcon size={15} />}>
-                    Upload image
-                  </Button>
-                )}
-              </FileButton>
-            )}
-          </div>
-
-          <Select
-            label="Repeat"
-            data={FREQUENCIES}
-            value={draft.frequency}
-            allowDeselect={false}
-            onChange={(v) => setDraft({ ...draft, frequency: (v as PostFrequency) ?? "weekly" })}
-          />
-
-          {/* Only the field the chosen cadence actually uses is shown — a day
-              picker beside a daily schedule is a control that does nothing. */}
-          {draft.frequency === "weekly" && (
-            <Select
-              label="Day of week"
-              data={WEEKDAYS}
-              value={String(draft.weekday)}
-              allowDeselect={false}
-              onChange={(v) => setDraft({ ...draft, weekday: Number(v ?? 1) })}
-            />
-          )}
-
-          {draft.frequency === "monthly" && (
-            <NumberInput
-              label="Day of month"
-              description="1–28, so every month has the day."
-              min={1}
-              max={28}
-              value={draft.dayOfMonth}
-              onChange={(v) => setDraft({ ...draft, dayOfMonth: Number(v) || 1 })}
-            />
-          )}
-
-          <Group grow>
-            <NumberInput
-              label="Hour"
-              min={0}
-              max={23}
-              value={draft.hour}
-              onChange={(v) => setDraft({ ...draft, hour: Number(v) || 0 })}
-            />
-            <NumberInput
-              label="Minute"
-              min={0}
-              max={59}
-              value={draft.minute}
-              onChange={(v) => setDraft({ ...draft, minute: Number(v) || 0 })}
-            />
-          </Group>
-
-          <Text size="xs" c="dimmed">
-            {describe(draft)} · {timezone}
-          </Text>
-
-          <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={() => setComposing(false)}>Cancel</Button>
-            <Button loading={creating} onClick={submit} disabled={!draft.caption.trim()}>
-              Create schedule
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
     </AppShell>
   );
 }

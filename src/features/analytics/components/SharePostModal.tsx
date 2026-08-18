@@ -6,7 +6,7 @@ import {
 } from "@mantine/core";
 import { siX, siWhatsapp, siFacebook, siTelegram } from "simple-icons";
 import {
-  Copy, Check, Download, X, Smile, List, ListOrdered, AtSign, RotateCcw, Link2,
+  Copy, Check, Download, X, RotateCcw,
   Monitor, Smartphone, Link as LinkIcon, PenLine,
 } from "lucide-react";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -21,6 +21,10 @@ import {
   renderShareCard, downloadShareCard, CARD_WIDTH, CARD_HEIGHT,
   type ShareCardStats,
 } from "./shareCard";
+import {
+  CaptionEditor, CaptionToolbar, countHashtags,
+  type CaptionEditorHandle,
+} from "@/shared/components/CaptionEditor";
 
 /**
  * LinkedIn's mark, inline.
@@ -141,146 +145,6 @@ function copyText(text: string): boolean {
   } finally {
     area.remove();
   }
-}
-
-const HASHTAG = /#[\p{L}\p{N}_]+/gu;
-const URL_IN_TEXT = /https?:\/\/\S+/g;
-
-function countHashtags(text: string): number {
-  return (text.match(HASHTAG) ?? []).length;
-}
-
-/**
- * The caption editor.
- *
- * A `contentEditable` surface rather than a textarea, because the design calls
- * for the link and hashtags to be styled inside the field as they are typed —
- * something a textarea cannot do at all.
- *
- * The value stays plain text throughout: `innerText` in, highlighted spans out.
- * Nothing but text is ever read back, so a paste carrying markup contributes
- * only its words, and what is posted is exactly what is displayed.
- */
-function CaptionEditor({
-  value,
-  onChange,
-  ariaLabel,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  ariaLabel: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  // The editor owns the DOM while it has focus. Writing highlighted HTML back
-  // into it on every keystroke would collapse the caret to the start on each
-  // character, so re-rendering is limited to changes that came from elsewhere —
-  // a reset, or the modal reopening.
-  const lastRendered = useRef<string>("");
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || value === lastRendered.current) return;
-    if (document.activeElement === el) return;
-    el.innerHTML = highlight(value);
-    lastRendered.current = value;
-  }, [value]);
-
-  /** Escape, then wrap URLs and hashtags. Order matters — escape first. */
-  function highlight(text: string): string {
-    const escaped = text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    return escaped
-      .replace(URL_IN_TEXT, (m) => `<span class="caption-link">${m}</span>`)
-      .replace(HASHTAG, (m) => `<span class="caption-tag">${m}</span>`);
-  }
-
-  const read = () => {
-    const el = ref.current;
-    if (!el) return;
-    // `innerText` rather than `textContent`: it honours the line breaks the
-    // browser inserted as <div>/<br>, which is what the user sees and what the
-    // post should carry.
-    const text = el.innerText.replace(/ /g, " ");
-    lastRendered.current = text;
-    onChange(text);
-  };
-
-  return (
-    <div
-      ref={ref}
-      role="textbox"
-      aria-multiline="true"
-      aria-label={ariaLabel}
-      contentEditable
-      suppressContentEditableWarning
-      onInput={read}
-      // Re-highlight once the caret leaves, so a URL typed mid-session picks up
-      // its styling without fighting the cursor while it is being typed.
-      onBlur={() => {
-        const el = ref.current;
-        if (!el) return;
-        el.innerHTML = highlight(el.innerText.replace(/ /g, " "));
-      }}
-      onPaste={(e) => {
-        // Plain text only. A caption pasted from a rich source would otherwise
-        // arrive with fonts and colours that no network will honour.
-        e.preventDefault();
-        const text = e.clipboardData.getData("text/plain");
-        document.execCommand("insertText", false, text);
-      }}
-      className="caption-editor"
-    />
-  );
-}
-
-/**
- * Formatting actions for the caption.
- *
- * Every one of these is a plain-text edit — networks do not accept markup, so
- * "bullet list" means the `•` character, not a `<ul>`. They act on the value
- * rather than the selection, which keeps the editor's plain-text contract
- * intact.
- */
-function CaptionToolbar({
-  onInsert,
-  onUndo,
-  canUndo,
-}: {
-  onInsert: (fragment: string, opts?: { line?: boolean }) => void;
-  onUndo: () => void;
-  canUndo: boolean;
-}) {
-  const { t } = useTranslation();
-
-  const items: { icon: typeof Smile; label: string; run: () => void; disabled?: boolean }[] = [
-    { icon: Smile, label: t("sharePost.tool.emoji"), run: () => onInsert("🚀") },
-    { icon: List, label: t("sharePost.tool.bullets"), run: () => onInsert("• ", { line: true }) },
-    { icon: ListOrdered, label: t("sharePost.tool.numbers"), run: () => onInsert("1. ", { line: true }) },
-    { icon: AtSign, label: t("sharePost.tool.mention"), run: () => onInsert("@") },
-    { icon: RotateCcw, label: t("sharePost.tool.undo"), run: onUndo, disabled: !canUndo },
-    { icon: Link2, label: t("sharePost.tool.link"), run: () => onInsert("#Quantalog") },
-  ];
-
-  return (
-    <Group gap={2} px={6} py={4} style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
-      {items.map((item) => (
-        <Tooltip key={item.label} label={item.label} withArrow openDelay={400}>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="md"
-            onClick={item.run}
-            disabled={item.disabled}
-            aria-label={item.label}
-          >
-            <item.icon size={16} />
-          </ActionIcon>
-        </Tooltip>
-      ))}
-    </Group>
-  );
 }
 
 /**
@@ -829,6 +693,9 @@ export function SharePostModal({
   // stack is the browser's job in a real editor; here every action is a small
   // insertion and stepping back once covers the mistake people actually make.
   const undoTo = useRef<string | null>(null);
+  // The editor's imperative actions, which the toolbar drives — inserting at
+  // the caret rather than appending, now that the two panels share one editor.
+  const editorRef = useRef<CaptionEditorHandle | null>(null);
 
   const setCaption = (next: string, remember = true) => {
     if (remember) undoTo.current = caption;
@@ -885,15 +752,6 @@ export function SharePostModal({
     linkedInStatus?.connected && !linkedInStatus.expired && linkedInStatus.canPublish !== false,
   );
   const blockedOnLinkedIn = platform === "linkedin" && !linkedInReady;
-
-  /**
-   * Append a fragment. `line` puts it at the start of its own line, which is
-   * what a list marker needs; everything else lands at the end of the caption.
-   */
-  const insert = (fragment: string, opts?: { line?: boolean }) => {
-    const base = caption.replace(/\s+$/, "");
-    setCaption(opts?.line ? `${base}\n${fragment}` : `${base} ${fragment}`);
-  };
 
   /**
    * Replace the caption with one written for the selected platform.
@@ -1023,7 +881,7 @@ export function SharePostModal({
                 }}
               >
                 <CaptionToolbar
-                  onInsert={insert}
+                  editor={editorRef}
                   onUndo={() => {
                     if (undoTo.current === null) return;
                     setCaption(undoTo.current, false);
@@ -1037,7 +895,9 @@ export function SharePostModal({
                 <CaptionEditor
                   value={caption}
                   onChange={(next) => { setCaption(next, false); setWritten(false); }}
+                  handleRef={editorRef}
                   ariaLabel={t("sharePost.caption")}
+                  className="caption-editor"
                 />
               </Box>
 
