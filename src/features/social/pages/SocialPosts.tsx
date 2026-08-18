@@ -141,9 +141,16 @@ export default function SocialPosts() {
 
   const linkedin = data?.linkedin;
   const posts = data?.posts ?? [];
-  // A schedule cannot publish without a live connection, so the composer is
-  // held shut rather than letting someone write a post that will only fail.
-  const ready = Boolean(linkedin?.connected && !linkedin.expired);
+  // A schedule cannot publish without a live connection that is allowed to
+  // post, so the composer is held shut rather than letting someone write a post
+  // that will only fail. `canPublish` is false for an account that signed in
+  // with LinkedIn but never granted publishing — sign-in no longer asks for it.
+  const ready = Boolean(linkedin?.connected && !linkedin.expired && linkedin.canPublish !== false);
+  // Connected, but only for identity. Needs the publishing consent, not a whole
+  // new connection — worth saying differently from "not connected at all".
+  const needsPostingPermission = Boolean(
+    linkedin?.connected && !linkedin.expired && linkedin.canPublish === false,
+  );
 
   const pickImage = async (file: File | null) => {
     if (!file) return;
@@ -243,7 +250,9 @@ export default function SocialPosts() {
             <Text size="sm">
               {linkedin?.expired
                 ? "Your LinkedIn connection has expired. Reconnect it to resume publishing."
-                : "Connect your LinkedIn account to start scheduling posts."}
+                : needsPostingPermission
+                  ? "Your LinkedIn account is connected for sign-in. Allow posting to schedule posts from here."
+                  : "Connect your LinkedIn account to start scheduling posts."}
             </Text>
             <Button
               size="compact-sm"
@@ -251,7 +260,11 @@ export default function SocialPosts() {
               onClick={connect}
               style={{ background: "#0A66C2", color: "#fff", flexShrink: 0 }}
             >
-              {linkedin?.expired ? "Reconnect LinkedIn" : "Connect LinkedIn"}
+              {linkedin?.expired
+                ? "Reconnect LinkedIn"
+                : needsPostingPermission
+                  ? "Allow posting"
+                  : "Connect LinkedIn"}
             </Button>
           </Group>
 

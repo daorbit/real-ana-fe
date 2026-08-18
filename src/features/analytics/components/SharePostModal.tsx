@@ -601,7 +601,15 @@ function LinkedInConnection({
 
   // A connection that exists but cannot be used reads as disconnected for the
   // purpose of the primary action: the user must go back through consent.
-  const needsReconnect = Boolean(status?.connected && status.expired);
+  // Expired, or connected for sign-in only: both need another trip through
+  // consent before this panel can publish. Sign-in no longer requests the
+  // publishing scope, so the second case is normal rather than a fault.
+  const needsReconnect = Boolean(
+    status?.connected && (status.expired || status.canPublish === false),
+  );
+  const needsPostingPermission = Boolean(
+    status?.connected && !status.expired && status.canPublish === false,
+  );
 
   const runPost = async () => {
     setJustPosted(false);
@@ -704,9 +712,11 @@ function LinkedInConnection({
           <Text size="xs" c="dimmed" mb={10}>
             {status?.configured === false
               ? t("sharePost.linkedinNotConfigured")
-              : needsReconnect
-                ? t("sharePost.linkedinExpired")
-                : t("sharePost.linkedinConnectHint")}
+              : needsPostingPermission
+                ? t("sharePost.linkedinNeedsPosting")
+                : needsReconnect
+                  ? t("sharePost.linkedinExpired")
+                  : t("sharePost.linkedinConnectHint")}
           </Text>
 
           {/* Said before the consent screen, not after it.
@@ -751,7 +761,11 @@ function LinkedInConnection({
                 : { background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }
             }
           >
-            {needsReconnect ? t("sharePost.linkedinReconnect") : t("sharePost.linkedinConnect")}
+            {needsPostingPermission
+              ? t("sharePost.linkedinEnablePosting")
+              : needsReconnect
+                ? t("sharePost.linkedinReconnect")
+                : t("sharePost.linkedinConnect")}
           </Button>
         </>
       )}
@@ -867,7 +881,9 @@ export function SharePostModal({
    * another way. The other four networks share through a public intent URL,
    * need no account of ours, and are unaffected.
    */
-  const linkedInReady = Boolean(linkedInStatus?.connected && !linkedInStatus.expired);
+  const linkedInReady = Boolean(
+    linkedInStatus?.connected && !linkedInStatus.expired && linkedInStatus.canPublish !== false,
+  );
   const blockedOnLinkedIn = platform === "linkedin" && !linkedInReady;
 
   /**

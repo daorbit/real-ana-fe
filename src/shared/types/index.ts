@@ -104,6 +104,14 @@ export type LinkedInStatus = {
    * Post — the connection exists and cannot be used.
    */
   expired?: boolean;
+  /**
+   * Whether the granted token may publish.
+   *
+   * False for an account that signed in with LinkedIn but never granted the
+   * publishing permission — signing in no longer asks for it, so this is a
+   * normal state rather than an error.
+   */
+  canPublish?: boolean;
   profile?: {
     name: string;
     email: string;
@@ -156,7 +164,13 @@ export type ScheduledPost = {
  */
 export type ScheduledPostsResponse = {
   posts: ScheduledPost[];
-  linkedin: { connected: boolean; expired: boolean; name: string };
+  linkedin: {
+    connected: boolean;
+    expired: boolean;
+    name: string;
+    /** False when the connection was made by signing in, without posting rights. */
+    canPublish?: boolean;
+  };
 };
 
 /**
