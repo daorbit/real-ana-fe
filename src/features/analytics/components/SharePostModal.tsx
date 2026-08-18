@@ -1115,26 +1115,27 @@ export function SharePostModal({
               <Button variant="default" onClick={onClose}>
                 {t("sharePost.later")}
               </Button>
-              {/* Wrapped so the tooltip still shows while the button is
-                  disabled — a disabled button fires no pointer events of its
-                  own, and "why can't I click this?" is the whole question. */}
-              <Tooltip
-                label={t("sharePost.linkedinConnectFirst")}
-                withArrow
-                disabled={!blockedOnLinkedIn}
-              >
-                <Box>
-                  <Button
-                    onClick={share}
-                    disabled={overLimit || blockedOnLinkedIn}
-                    radius="xl"
-                    leftSection={<PlatformGlyph icon={active.icon} />}
-                    style={{ background: `#${active.icon.hex}`, color: "#fff" }}
-                  >
-                    {t("sharePost.shareOn", { platform: active.label })}
-                  </Button>
-                </Box>
-              </Tooltip>
+              {/* LinkedIn publishes through our own connection now, and that
+                  action lives in the panel above with the account it will post
+                  as. Repeating a "Share on LinkedIn" button down here would put
+                  two different primary actions on screen at once — one of them
+                  the old copy-and-paste intent, which is exactly what the
+                  integration replaced. The other four networks are unchanged. */}
+              {platform !== "linkedin" && (
+                <Button
+                  onClick={share}
+                  disabled={overLimit}
+                  radius="xl"
+                  leftSection={<PlatformGlyph icon={active.icon} />}
+                  // Only painted while it is actually clickable: a brand colour
+                  // on a disabled button overrides the dimming that says so.
+                  style={
+                    overLimit ? undefined : { background: `#${active.icon.hex}`, color: "#fff" }
+                  }
+                >
+                  {t("sharePost.shareOn", { platform: active.label })}
+                </Button>
+              )}
             </Group>
           </Group>
         </Box>
