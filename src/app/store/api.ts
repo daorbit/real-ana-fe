@@ -17,7 +17,7 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage,
+  DemoUsage, LinkedInStatus,
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
@@ -114,7 +114,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission", "LinkedIn"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -197,6 +197,46 @@ export const api = createApi({
         method: "POST",
         body: { platform },
       }),
+    }),
+
+    /**
+     * Whether this account has LinkedIn connected, and as whom.
+     *
+     * Never carries the access token — the server projects a small profile
+     * subset by hand, and the token column is excluded at the model level.
+     */
+    getLinkedInStatus: build.query<LinkedInStatus, void>({
+      query: () => "/api/auth/linkedin/status",
+      providesTags: ["LinkedIn"],
+    }),
+
+    /**
+     * Drop the stored connection. Invalidating the tag is what flips the Share
+     * Panel back to "Connect LinkedIn" without a reload.
+     */
+    disconnectLinkedIn: build.mutation<{ connected: false }, void>({
+      query: () => ({ url: "/api/auth/linkedin", method: "DELETE" }),
+      invalidatesTags: ["LinkedIn"],
+    }),
+
+    /**
+     * Publish the composed post to the user's own LinkedIn feed.
+     *
+     * The image travels as the same PNG data URL the panel already renders and
+     * previews: the card is drawn on a canvas in the browser and never uploaded
+     * anywhere, so there is no URL to send instead — and LinkedIn wants the
+     * bytes either way. The access token stays on the server; nothing about it
+     * is sent from here.
+     *
+     * Invalidates `LinkedIn` because a rejected token makes the server mark the
+     * connection expired, and the panel should pick that up.
+     */
+    postToLinkedIn: build.mutation<
+      { posted: true; postUrl: string | null },
+      { caption: string; image: string }
+    >({
+      query: (body) => ({ url: "/api/auth/linkedin/post", method: "POST", body }),
+      invalidatesTags: ["LinkedIn"],
     }),
 
     getSites: build.query<Site[], string>({
@@ -1379,6 +1419,9 @@ export const {
   useGetShareQuery,
   useSetShareMutation,
   useWriteShareCaptionMutation,
+  useGetLinkedInStatusQuery,
+  useDisconnectLinkedInMutation,
+  usePostToLinkedInMutation,
   useGetSitesQuery,
   useCreateSiteMutation,
   useUpdateSiteOptionsMutation,

@@ -33,7 +33,7 @@ import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { SeoScoreCard } from "@/features/seo/components/SeoScoreCard";
 import { SortableWidget, WidgetDragPreview } from "@/shared/ui/SortableWidget";
 import { Onboarding } from "@/features/auth/components/Onboarding";
-import { useStats, useHomeWidgets, WIDGET_MAP } from "@/features/analytics";
+import { useStats, useHomeWidgets, WIDGET_MAP, useLinkedInReturn } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
 import { useDemo } from "@/features/demo/context";
 import type { WidgetId, Span } from "@/features/analytics";
@@ -159,6 +159,9 @@ function LivePagesCard({ stats }: { stats: Stats | null }) {
 
 export default function Home() {
   const { active, loading } = useWorkspace();
+  // The LinkedIn OAuth callback lands back here with its outcome in the query
+  // string; this raises the toast and cleans the URL.
+  useLinkedInReturn();
   // Empty = all sites in the workspace. Reset when the workspace changes, since
   // siteIds don't carry across workspaces.
   const [siteScope, setSiteScope] = useState<string[]>([]);

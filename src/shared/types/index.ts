@@ -71,6 +71,27 @@ export type ShareState = {
 };
 
 /**
+ * Whether the signed-in account has a LinkedIn profile connected.
+ *
+ * Carries only what the Share Panel displays. The access token lives on the
+ * server and is never part of this shape — see the status route.
+ */
+export type LinkedInStatus = {
+  connected: boolean;
+  /**
+   * The stored token has passed its expiry, or LinkedIn rejected it on the last
+   * attempt. Still "connected", but the panel must offer Reconnect rather than
+   * Post — the connection exists and cannot be used.
+   */
+  expired?: boolean;
+  profile?: {
+    name: string;
+    email: string;
+    picture: string;
+  };
+};
+
+/**
  * Admin view of how the public demo is being used.
  *
  * A rolling 24-hour window, which is all the throttle keeps — no visitor

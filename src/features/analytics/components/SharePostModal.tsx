@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Modal, Group, Button, Text, Box, Stack, CopyButton, ActionIcon, Tooltip,
-  ScrollArea, Divider,
+  ScrollArea, Divider, Loader, Anchor,
 } from "@mantine/core";
 import { siX, siWhatsapp, siFacebook, siTelegram } from "simple-icons";
 import {
@@ -10,7 +10,13 @@ import {
   Monitor, Smartphone, Link as LinkIcon, PenLine,
 } from "lucide-react";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { useWriteShareCaptionMutation } from "@/app/store";
+import { getToken } from "@/shared/lib/http";
+import {
+  useWriteShareCaptionMutation,
+  useGetLinkedInStatusQuery,
+  useDisconnectLinkedInMutation,
+  usePostToLinkedInMutation,
+} from "@/app/store";
 import {
   renderShareCard, downloadShareCard, CARD_WIDTH, CARD_HEIGHT,
   type ShareCardStats,
@@ -513,6 +519,162 @@ function FeedPreview({
   );
 }
 
+/** The API origin the OAuth redirect has to leave from. Same base RTK Query uses. */
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+
+/**
+ * Begin the OAuth flow by navigating the whole page to the start endpoint.
+ *
+ * A full navigation rather than a fetch, because the endpoint answers with a
+ * redirect to linkedin.com and the consent screen has to render in the address
+ * bar. That also means no `Authorization` header can be attached, so the app's
+ * own token rides in the query string; the server verifies it, mints the signed
+ * state, and immediately redirects away from the URL it appeared in.
+ */
+function startLinkedInConnect() {
+  const token = getToken() ?? "";
+  window.location.href = `${API_BASE}/api/auth/linkedin?token=${encodeURIComponent(token)}`;
+}
+
+/**
+ * The LinkedIn connection strip, shown only on the LinkedIn tab.
+ *
+ * Deliberately additive: the other four networks keep the copy-and-open
+ * behaviour they have always had, and nothing here runs for them. The panel's
+ * layout, components and styling are the existing ones.
+ */
+function LinkedInConnection({
+  caption,
+  image,
+  disabled,
+}: {
+  caption: string;
+  image: string;
+  /** True while the caption is over the platform's limit — posting is refused. */
+  disabled: boolean;
+}) {
+  const { t } = useTranslation();
+  const { data: status, isLoading } = useGetLinkedInStatusQuery();
+  const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
+  const [post, { isLoading: posting }] = usePostToLinkedInMutation();
+  // The permalink of the post just published, so the success state can offer a
+  // link to it. Cleared whenever a new post starts.
+  const [postedUrl, setPostedUrl] = useState<string | null>(null);
+  const [justPosted, setJustPosted] = useState(false);
+
+  // A connection that exists but cannot be used reads as disconnected for the
+  // purpose of the primary action: the user must go back through consent.
+  const needsReconnect = Boolean(status?.connected && status.expired);
+
+  const runPost = async () => {
+    setJustPosted(false);
+    setPostedUrl(null);
+    try {
+      const res = await post({ caption, image }).unwrap();
+      setPostedUrl(res.postUrl);
+      setJustPosted(true);
+      notify.success(t("sharePost.linkedinPosted"));
+    } catch (e) {
+      notify.error(errMessage(e, t("sharePost.linkedinPostError")));
+    }
+  };
+
+  const runDisconnect = async () => {
+    try {
+      await disconnect().unwrap();
+      setJustPosted(false);
+      setPostedUrl(null);
+      notify.success(t("sharePost.linkedinDisconnected"));
+    } catch (e) {
+      notify.error(errMessage(e, t("sharePost.linkedinDisconnectError")));
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Group gap={8} mt="md">
+        <Loader size="xs" />
+        <Text size="sm" c="dimmed">LinkedIn</Text>
+      </Group>
+    );
+  }
+
+  return (
+    <Box
+      mt="md"
+      p="sm"
+      style={{
+        border: "1px solid var(--mantine-color-default-border)",
+        borderRadius: "var(--mantine-radius-md)",
+      }}
+    >
+      <Group gap={8} mb={8} wrap="nowrap">
+        <Box style={{ color: `#${LINKEDIN_ICON.hex}`, display: "flex" }}>
+          <PlatformGlyph icon={LINKEDIN_ICON} size={15} />
+        </Box>
+        <Text size="sm" fw={600}>LinkedIn</Text>
+      </Group>
+
+      {status?.connected && !needsReconnect ? (
+        <>
+          <Group gap={6} mb={10} wrap="nowrap">
+            <Check size={14} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
+            <Text size="sm" truncate>
+              {t("sharePost.linkedinConnectedAs", { name: status.profile?.name ?? "" })}
+            </Text>
+          </Group>
+
+          <Group gap="sm" wrap="nowrap">
+            {/* `loading` disables the button as well as showing the spinner,
+                which is what stops a double click publishing twice. */}
+            <Button
+              size="sm"
+              loading={posting}
+              disabled={disabled || !caption.trim()}
+              onClick={runPost}
+              leftSection={<PlatformGlyph icon={LINKEDIN_ICON} />}
+              style={{ background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }}
+            >
+              {posting ? t("sharePost.linkedinPosting") : t("sharePost.linkedinPost")}
+            </Button>
+            <Button size="sm" variant="default" loading={disconnecting} onClick={runDisconnect}>
+              {t("sharePost.linkedinDisconnect")}
+            </Button>
+          </Group>
+
+          {justPosted && (
+            <Group gap={6} mt={10} wrap="nowrap">
+              <Check size={13} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
+              <Text size="xs" c="dimmed">{t("sharePost.linkedinPosted")}</Text>
+              {/* Only when LinkedIn returned a URN we can address — never a
+                  guessed URL. */}
+              {postedUrl && (
+                <Anchor href={postedUrl} target="_blank" rel="noopener noreferrer" size="xs">
+                  {t("sharePost.linkedinView")}
+                </Anchor>
+              )}
+            </Group>
+          )}
+        </>
+      ) : (
+        <>
+          <Text size="xs" c="dimmed" mb={10}>
+            {needsReconnect ? t("sharePost.linkedinExpired") : t("sharePost.linkedinConnectHint")}
+          </Text>
+          <Button
+            size="sm"
+            onClick={startLinkedInConnect}
+            leftSection={<PlatformGlyph icon={LINKEDIN_ICON} />}
+            style={{ background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }}
+          >
+            {needsReconnect ? t("sharePost.linkedinReconnect") : t("sharePost.linkedinConnect")}
+          </Button>
+        </>
+      )}
+    </Box>
+  );
+}
+
 export function SharePostModal({
   opened,
   onClose,
@@ -830,10 +992,17 @@ export function SharePostModal({
                 {t("sharePost.downloadImage")}
               </Button>
 
-              {active.needsPaste && (
-                <Text size="xs" c="dimmed" mt="md">
-                  {t("sharePost.pasteHint", { platform: active.label })}
-                </Text>
+              {/* LinkedIn can publish directly now, so it gets the connection
+                  panel instead of the copy-and-paste hint. Every other network
+                  keeps that hint and its existing behaviour untouched. */}
+              {platform === "linkedin" ? (
+                <LinkedInConnection caption={caption} image={image} disabled={overLimit} />
+              ) : (
+                active.needsPaste && (
+                  <Text size="xs" c="dimmed" mt="md">
+                    {t("sharePost.pasteHint", { platform: active.label })}
+                  </Text>
+                )
               )}
             </Box>
           </ScrollArea>
