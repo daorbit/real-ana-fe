@@ -89,6 +89,11 @@ export function PostComposer({
   const tags = countHashtags(draft.caption);
   const overLimit = chars > MAX_CAPTION;
   const empty = !draft.caption.trim();
+  // A one-off in the past would be refused by the server anyway; catching it
+  // here keeps the message beside the field that caused it.
+  const past = draft.mode === "once"
+    && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
+  const blocked = empty || overLimit || past;
 
   const save = async (andAnother: boolean) => {
     const ok = await onSave(draft);
@@ -212,13 +217,13 @@ export function PostComposer({
                 <Button
                   variant="default"
                   loading={saving}
-                  disabled={empty || overLimit}
+                  disabled={blocked}
                   onClick={() => save(true)}
                 >
                   Save & add another
                 </Button>
               )}
-              <Button loading={saving} disabled={empty || overLimit} onClick={() => save(false)}>
+              <Button loading={saving} disabled={blocked} onClick={() => save(false)}>
                 {editing ? "Save changes" : "Create schedule"}
               </Button>
             </Group>
@@ -257,7 +262,7 @@ export function PostComposer({
                 headline="Publishing through Quantalog"
                 caption={draft.caption}
                 image={draft.image}
-                when={describe(draft)}
+                when={draft.mode === "once" ? describe(draft) : `${describe(draft)} · scheduled`}
                 device={device}
               />
             </Box>

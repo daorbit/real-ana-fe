@@ -17,7 +17,7 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage, LinkedInStatus, ScheduledPost, ScheduledPostsResponse, PostFrequency,
+  DemoUsage, LinkedInStatus, ScheduledPost, ScheduledPostsResponse, PostFrequency, PostMode,
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
@@ -259,7 +259,10 @@ export const api = createApi({
       ScheduledPost,
       {
         workspaceId: string; name: string; caption: string; image?: string;
-        frequency: PostFrequency; hour: number; minute: number;
+        mode: PostMode;
+        /** ISO instant. Required for a one-off, ignored for a repeat. */
+        runAt?: string;
+        frequency?: PostFrequency; hour?: number; minute?: number;
         timezone: string; weekday?: number; dayOfMonth?: number;
       }
     >({
@@ -272,6 +275,7 @@ export const api = createApi({
       ScheduledPost,
       { id: string } & Partial<{
         name: string; caption: string; image: string; status: "active" | "paused";
+        mode: PostMode; runAt: string;
         frequency: PostFrequency; hour: number; minute: number;
         timezone: string; weekday: number; dayOfMonth: number;
       }>

@@ -1,16 +1,39 @@
-import { Button, Group, NumberInput, SegmentedControl, Text } from "@mantine/core";
-import { CalendarClock } from "lucide-react";
-import { FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, type Draft } from "./draft";
-import type { PostFrequency } from "@/shared/types";
+import { Alert, Button, Group, NumberInput, SegmentedControl, Text, TextInput } from "@mantine/core";
+import { CalendarClock, TriangleAlert } from "lucide-react";
+import {
+  FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, toDateInput, type Draft,
+} from "./draft";
+import type { PostFrequency, PostMode } from "@/shared/types";
 
 /**
- * The cadence controls: how often, which day, what time.
+ * When the post goes out.
  *
- * Only the field the chosen frequency uses is shown — a day picker beside a
- * daily schedule is a control that does nothing. The sentence at the bottom is
- * the whole schedule read back, which is the one thing worth checking before
- * something publishes unattended.
+ * Two modes, and the default is the one people actually want: a single post at
+ * a date and time they pick. Every scheduling tool works this way because a
+ * queue of distinct posts is what a content calendar is — the same words
+ * republished on a cadence reads as spam, and LinkedIn deprioritises duplicate
+ * commentary.
+ *
+ * Repeating is kept for genuinely evergreen content, behind the second tab and
+ * under a warning that says what it will do.
  */
+
+/** Nothing can be scheduled into the past, so the picker starts today. */
+const TODAY = toDateInput(new Date());
+
+/** Relative jumps, which is how people actually pick a near date. */
+const QUICK_DAYS = [
+  { label: "Today", days: 0 },
+  { label: "Tomorrow", days: 1 },
+  { label: "In a week", days: 7 },
+];
+
+function dateIn(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return toDateInput(d);
+}
+
 export function ScheduleFields({
   draft,
   onChange,
@@ -20,75 +43,160 @@ export function ScheduleFields({
   onChange: (patch: Partial<Draft>) => void;
   timezone: string;
 }) {
+  const past = draft.mode === "once" && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
+
   return (
     <>
       <SegmentedControl
         fullWidth
-        data={FREQUENCIES}
-        value={draft.frequency}
-        onChange={(v) => onChange({ frequency: v as PostFrequency })}
+        data={[
+          { value: "once", label: "Post once" },
+          { value: "repeat", label: "Repeat" },
+        ]}
+        value={draft.mode}
+        onChange={(v) => onChange({ mode: v as PostMode })}
       />
 
-      {draft.frequency === "weekly" && (
-        <Group gap={6} mt="sm" wrap="wrap">
-          {WEEKDAYS.map((d) => (
-            <Button
-              key={d.value}
-              size="compact-sm"
-              radius="xl"
-              variant={String(draft.weekday) === d.value ? "filled" : "default"}
-              onClick={() => onChange({ weekday: Number(d.value) })}
-            >
-              {d.label.slice(0, 3)}
-            </Button>
-          ))}
-        </Group>
-      )}
+      {draft.mode === "once" ? (
+        <>
+          <Group mt="sm" gap="sm" align="flex-end" wrap="nowrap">
+            <TextInput
+              type="date"
+              label="Date"
+              min={TODAY}
+              value={draft.date}
+              onChange={(e) => onChange({ date: e.currentTarget.value })}
+              style={{ flex: 1 }}
+            />
+            <TextInput
+              type="time"
+              label="Time"
+              value={draft.time}
+              onChange={(e) => onChange({ time: e.currentTarget.value })}
+              w={130}
+            />
+          </Group>
 
-      {draft.frequency === "monthly" && (
-        <NumberInput
-          mt="sm"
-          label="Day of month"
-          description="1–28, so every month has the day."
-          min={1}
-          max={28}
-          value={draft.dayOfMonth}
-          onChange={(v) => onChange({ dayOfMonth: Number(v) || 1 })}
-        />
-      )}
+          <Group gap={6} mt="sm" wrap="wrap">
+            {QUICK_DAYS.map((q) => {
+              const value = dateIn(q.days);
+              return (
+                <Button
+                  key={q.label}
+                  size="compact-sm"
+                  radius="xl"
+                  variant={draft.date === value ? "filled" : "default"}
+                  onClick={() => onChange({ date: value })}
+                >
+                  {q.label}
+                </Button>
+              );
+            })}
+            {QUICK_TIMES.map((q) => {
+              const value = `${String(q.hour).padStart(2, "0")}:${String(q.minute).padStart(2, "0")}`;
+              return (
+                <Button
+                  key={q.label}
+                  size="compact-sm"
+                  radius="xl"
+                  variant={draft.time === value ? "filled" : "default"}
+                  onClick={() => onChange({ time: value })}
+                >
+                  {q.label}
+                </Button>
+              );
+            })}
+          </Group>
 
-      <Group mt="sm" gap="sm" align="flex-end" wrap="nowrap">
-        <NumberInput
-          label="Hour"
-          min={0}
-          max={23}
-          w={90}
-          value={draft.hour}
-          onChange={(v) => onChange({ hour: Math.min(23, Math.max(0, Number(v) || 0)) })}
-        />
-        <NumberInput
-          label="Minute"
-          min={0}
-          max={59}
-          step={5}
-          w={90}
-          value={draft.minute}
-          onChange={(v) => onChange({ minute: Math.min(59, Math.max(0, Number(v) || 0)) })}
-        />
-        <Group gap={6} wrap="nowrap" pb={2}>
-          {QUICK_TIMES.map((q) => (
-            <Button
-              key={q.label}
-              size="compact-sm"
-              radius="xl"
-              variant={draft.hour === q.hour && draft.minute === q.minute ? "filled" : "default"}
-              onClick={() => onChange({ hour: q.hour, minute: q.minute })}
-            >
-              {q.label}
-            </Button>
-          ))}
-        </Group>
-      </Group>
+          {past && (
+            <Text size="xs" c="orange" mt={8}>
+              That time has already passed. Pick a later one.
+            </Text>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Said before it is saved, not discovered afterwards: this publishes
+              identical text on every run, which is the one thing a reader of
+              someone's feed notices immediately. */}
+          <Alert color="orange" variant="light" icon={<TriangleAlert size={16} />} mt="sm">
+            <Text size="xs" style={{ lineHeight: 1.5 }}>
+              A repeating post publishes <strong>the same text and image every time</strong>.
+              Use it for evergreen content only — LinkedIn deprioritises duplicate posts, and
+              readers see them as spam. For a content calendar, schedule separate posts instead.
+            </Text>
+          </Alert>
+
+          <SegmentedControl
+            fullWidth
+            mt="sm"
+            data={FREQUENCIES}
+            value={draft.frequency}
+            onChange={(v) => onChange({ frequency: v as PostFrequency })}
+          />
+
+          {draft.frequency === "weekly" && (
+            <Group gap={6} mt="sm" wrap="wrap">
+              {WEEKDAYS.map((d) => (
+                <Button
+                  key={d.value}
+                  size="compact-sm"
+                  radius="xl"
+                  variant={String(draft.weekday) === d.value ? "filled" : "default"}
+                  onClick={() => onChange({ weekday: Number(d.value) })}
+                >
+                  {d.label.slice(0, 3)}
+                </Button>
+              ))}
+            </Group>
+          )}
+
+          {draft.frequency === "monthly" && (
+            <NumberInput
+              mt="sm"
+              label="Day of month"
+              description="1–28, so every month has the day."
+              min={1}
+              max={28}
+              value={draft.dayOfMonth}
+              onChange={(v) => onChange({ dayOfMonth: Number(v) || 1 })}
+            />
+          )}
+
+          <Group mt="sm" gap="sm" align="flex-end" wrap="nowrap">
+            <NumberInput
+              label="Hour"
+              min={0}
+              max={23}
+              w={90}
+              value={draft.hour}
+              onChange={(v) => onChange({ hour: Math.min(23, Math.max(0, Number(v) || 0)) })}
+            />
+            <NumberInput
+              label="Minute"
+              min={0}
+              max={59}
+              step={5}
+              w={90}
+              value={draft.minute}
+              onChange={(v) => onChange({ minute: Math.min(59, Math.max(0, Number(v) || 0)) })}
+            />
+            <Group gap={6} wrap="nowrap" pb={2}>
+              {QUICK_TIMES.map((q) => (
+                <Button
+                  key={q.label}
+                  size="compact-sm"
+                  radius="xl"
+                  variant={draft.hour === q.hour && draft.minute === q.minute ? "filled" : "default"}
+                  onClick={() => onChange({ hour: q.hour, minute: q.minute })}
+                >
+                  {q.label}
+                </Button>
+              ))}
+            </Group>
+          </Group>
+        </>
+      )}
 
       <Group gap={7} mt="sm" wrap="nowrap">
         <CalendarClock size={14} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />

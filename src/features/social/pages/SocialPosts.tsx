@@ -1,11 +1,8 @@
 import { useMemo, useState } from "react";
 import {
-  Alert, Badge, Box, Button, Card, Group, Loader, Stack, Text, Title, Tooltip,
+  Alert, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
-import {
-  CalendarClock, CheckCircle2, ExternalLink, Pause,
-  Pencil, Play, Plus, Trash2, TriangleAlert,
-} from "lucide-react";
+import { CalendarClock, CheckCircle2, Plus, TriangleAlert } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -18,8 +15,10 @@ import {
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { PostComposer } from "@/features/social/components/PostComposer";
+import { PostCalendar } from "@/features/social/components/PostCalendar";
+import { PostQueue } from "@/features/social/components/PostQueue";
 import {
-  describe, draftFromPost, emptyDraft, type Draft,
+  draftFromPost, emptyDraft, runAtISO, type Draft,
 } from "@/features/social/components/draft";
 import type { ScheduledPost } from "@/shared/types";
 
@@ -48,6 +47,9 @@ export default function SocialPosts() {
   // What the composer opens with. Held here rather than derived inside it, so
   // "Save & add another" can keep the cadence while the content clears.
   const [initial, setInitial] = useState<Draft>(emptyDraft);
+  // The calendar answers "what is going out and where are the gaps"; the list
+  // answers "what exactly does each one say". Both are the same posts.
+  const [view, setView] = useState<"calendar" | "list">("calendar");
   // Connecting happens in a popup, so this page — and any half-written draft —
   // survives the round trip. `refetch` picks up the new connection state.
   const { connect, connecting } = useLinkedInConnect(refetch);
@@ -91,9 +93,11 @@ export default function SocialPosts() {
     linkedin?.connected && !linkedin.expired && linkedin.canPublish === false,
   );
 
-  const openNew = () => {
+  const openNew = (date?: string) => {
     setEditing(null);
-    setInitial(emptyDraft());
+    // Clicking a day on the calendar is already half the scheduling decision,
+    // so the composer opens on that date rather than making it be picked twice.
+    setInitial(date ? { ...emptyDraft(), date } : emptyDraft());
     setComposing(true);
   };
 
@@ -120,15 +124,23 @@ export default function SocialPosts() {
       return false;
     }
 
+    // Only the fields the chosen mode uses are sent. A one-off carries an
+    // instant; a repeat carries a cadence, and the server keeps whichever it
+    // was given rather than mixing the two.
     const fields = {
       name: draft.name.trim() || "Scheduled post",
       caption: draft.caption,
-      frequency: draft.frequency,
-      hour: draft.hour,
-      minute: draft.minute,
+      mode: draft.mode,
       timezone,
-      weekday: draft.weekday,
-      dayOfMonth: draft.dayOfMonth,
+      ...(draft.mode === "once"
+        ? { runAt: runAtISO(draft) }
+        : {
+            frequency: draft.frequency,
+            hour: draft.hour,
+            minute: draft.minute,
+            weekday: draft.weekday,
+            dayOfMonth: draft.dayOfMonth,
+          }),
     };
 
     try {
@@ -136,14 +148,14 @@ export default function SocialPosts() {
         // An unchanged image is sent back as the https URL it already is, which
         // the server takes as "leave it alone" — only a data URL is re-uploaded.
         await update({ id: editing.id, image: draft.image, ...fields }).unwrap();
-        notify.success("Schedule updated.");
+        notify.success("Post updated.");
       } else {
         await create({
           workspaceId: active._id,
           image: draft.image || undefined,
           ...fields,
         }).unwrap();
-        notify.success("Schedule created.");
+        notify.success(draft.mode === "once" ? "Post scheduled." : "Repeating post created.");
       }
       return true;
     } catch (e) {
@@ -177,7 +189,7 @@ export default function SocialPosts() {
         <div>
           <Title order={2}>Scheduled posts</Title>
           <Text c="dimmed" size="sm" mt={4}>
-            Write a post once and have it published to your LinkedIn profile on a repeating schedule.
+            Plan your LinkedIn posts ahead. Each one publishes by itself, at the time you pick.
           </Text>
         </div>
         <Tooltip label="Connect LinkedIn first" disabled={ready} withArrow>
@@ -185,9 +197,9 @@ export default function SocialPosts() {
             <Button
               leftSection={<Plus size={16} />}
               disabled={!ready}
-              onClick={openNew}
+              onClick={() => openNew()}
             >
-              New schedule
+              New post
             </Button>
           </Box>
         </Tooltip>
@@ -272,102 +284,42 @@ export default function SocialPosts() {
         <Card withBorder padding="xl" radius="md">
           <Stack align="center" gap="xs">
             <CalendarClock size={28} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text fw={600}>No scheduled posts yet</Text>
+            <Text fw={600}>Nothing scheduled yet</Text>
             <Text size="sm" c="dimmed" ta="center">
-              Create one and it will publish automatically on the cadence you choose.
+              Write a post, pick a date and time, and it publishes without you.
             </Text>
+            <Button mt="sm" leftSection={<Plus size={16} />} disabled={!ready} onClick={() => openNew()}>
+              Schedule your first post
+            </Button>
           </Stack>
         </Card>
       ) : (
-        <Stack gap="md">
-          {posts.map((post) => (
-            <Card key={post.id} withBorder padding="md" radius="md">
-              <Group justify="space-between" align="flex-start" wrap="nowrap">
-                <Group align="flex-start" gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
-                  {post.imageUrl && (
-                    <img
-                      src={post.imageUrl}
-                      alt=""
-                      style={{ width: 96, height: 54, objectFit: "cover", borderRadius: 6, flexShrink: 0 }}
-                    />
-                  )}
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <Group gap={8} wrap="nowrap" mb={4}>
-                      <Text fw={600} truncate>{post.name}</Text>
-                      <Badge
-                        size="sm"
-                        variant="light"
-                        color={post.status === "active" ? "teal" : "gray"}
-                      >
-                        {post.status === "active" ? "Active" : "Paused"}
-                      </Badge>
-                    </Group>
+        <>
+          <Group justify="flex-end" mb="md">
+            <SegmentedControl
+              size="sm"
+              data={[
+                { value: "calendar", label: "Calendar" },
+                { value: "list", label: "List" },
+              ]}
+              value={view}
+              onChange={(v) => setView(v as "calendar" | "list")}
+            />
+          </Group>
 
-                    <Text size="sm" c="dimmed" lineClamp={2} mb={6}>
-                      {post.caption}
-                    </Text>
-
-                    <Text size="xs" c="dimmed">
-                      {describe(post)}
-                      {post.status === "active" && (
-                        <> · next {new Date(post.nextRunAt).toLocaleString()}</>
-                      )}
-                      {post.postCount > 0 && <> · {post.postCount} published</>}
-                    </Text>
-
-                    {/* The last outcome, when there was one. A failure carries
-                        the reason the server already wrote for display. */}
-                    {post.lastStatus === "failed" && post.lastError && (
-                      <Group gap={6} mt={6} wrap="nowrap">
-                        <TriangleAlert size={13} style={{ color: "var(--mantine-color-orange-6)", flexShrink: 0 }} />
-                        <Text size="xs" c="orange">{post.lastError}</Text>
-                      </Group>
-                    )}
-                    {post.lastStatus === "ok" && (
-                      <Group gap={6} mt={6} wrap="nowrap">
-                        <CheckCircle2 size={13} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
-                        <Text size="xs" c="dimmed">
-                          Last published {post.lastRunAt ? new Date(post.lastRunAt).toLocaleString() : ""}
-                        </Text>
-                        {post.lastPostUrl && (
-                          <Button
-                            component="a"
-                            href={post.lastPostUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            variant="subtle"
-                            size="compact-xs"
-                            rightSection={<ExternalLink size={12} />}
-                          >
-                            View
-                          </Button>
-                        )}
-                      </Group>
-                    )}
-                  </div>
-                </Group>
-
-                <Group gap={6} wrap="nowrap">
-                  <Tooltip label="Edit" withArrow>
-                    <Button variant="default" size="compact-sm" onClick={() => openEdit(post)}>
-                      <Pencil size={14} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label={post.status === "active" ? "Pause" : "Resume"} withArrow>
-                    <Button variant="default" size="compact-sm" onClick={() => toggle(post)}>
-                      {post.status === "active" ? <Pause size={14} /> : <Play size={14} />}
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Delete" withArrow>
-                    <Button variant="default" size="compact-sm" onClick={() => destroy(post)}>
-                      <Trash2 size={14} />
-                    </Button>
-                  </Tooltip>
-                </Group>
-              </Group>
-            </Card>
-          ))}
-        </Stack>
+          {view === "calendar" ? (
+            <Box className="post-calendar-scroll">
+              <PostCalendar posts={posts} onOpen={openEdit} onCreateOn={openNew} />
+            </Box>
+          ) : (
+            <PostQueue
+              posts={posts}
+              onEdit={openEdit}
+              onToggle={toggle}
+              onDelete={destroy}
+            />
+          )}
+        </>
       )}
 
       <PostComposer

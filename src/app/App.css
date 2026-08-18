@@ -2298,3 +2298,63 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   }
   .share-post-preview { display: none; }
 }
+
+/* ---- Scheduled posts calendar ----------------------------------------- */
+
+/* A month grid, Monday first. Fixed seven columns rather than auto-fit: a
+   calendar that reflows to five columns on a narrow screen is no longer a
+   calendar, so it scrolls instead. */
+.post-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+  min-width: 720px;
+}
+
+.post-calendar-day {
+  background: var(--surface);
+  min-height: 104px;
+  padding: 6px 7px;
+}
+
+/* Days from the neighbouring months keep the grid rectangular but recede, so
+   the month being read is the one that reads as solid. */
+.post-calendar-day[data-outside] { background: var(--bg); opacity: 0.55; }
+.post-calendar-day[data-today] { box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* The add button only appears on hover or keyboard focus: forty-two of them
+   drawn at once would be louder than the posts they sit beside. */
+.post-calendar-add { opacity: 0; transition: opacity 120ms ease; }
+.post-calendar-day:hover .post-calendar-add,
+.post-calendar-add:focus-visible { opacity: 1; }
+
+.post-calendar-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 3px 5px;
+  border: none;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+.post-calendar-chip:hover { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.post-calendar-chip[data-sent] { background: var(--bg-2); color: var(--text-dim); }
+.post-calendar-chip[data-failed] {
+  background: color-mix(in srgb, var(--mantine-color-orange-6) 20%, transparent);
+}
+
+.post-calendar-time { font-variant-numeric: tabular-nums; opacity: 0.75; flex-shrink: 0; }
+.post-calendar-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The grid keeps its width and scrolls rather than squashing. */
+.post-calendar-scroll { overflow-x: auto; }

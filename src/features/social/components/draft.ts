@@ -1,4 +1,4 @@
-import type { PostFrequency, ScheduledPost } from "@/shared/types";
+import type { PostFrequency, PostMode, ScheduledPost } from "@/shared/types";
 
 /**
  * The shape a scheduled post is edited in, and the small pure helpers around
@@ -39,6 +39,11 @@ export const QUICK_TIMES = [
 export type Draft = {
   name: string;
   caption: string;
+  mode: PostMode;
+  /** "2026-08-24" — the day a one-off publishes, in the author's own zone. */
+  date: string;
+  /** "14:20" — the time of day it publishes, same zone. */
+  time: string;
   /** A data URL for a new upload, an https URL for one already stored, or "". */
   image: string;
   frequency: PostFrequency;
@@ -48,10 +53,38 @@ export type Draft = {
   dayOfMonth: number;
 };
 
+/** Tomorrow at 09:00 — a sane default that is never already in the past. */
+function defaultSlot() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return { date: toDateInput(d), time: "09:00" };
+}
+
+/** A Date as the "YYYY-MM-DD" a date input wants, in local time. */
+export function toDateInput(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/**
+ * The draft's date and time as a UTC instant.
+ *
+ * Built through the `Date` constructor's local-time parse, which is correct
+ * here: the picker's clock is the browser's, and the browser's zone is the one
+ * the composer states it is scheduling in.
+ */
+export function runAtISO(draft: Pick<Draft, "date" | "time">): string {
+  const [y, m, d] = draft.date.split("-").map(Number);
+  const [hh, mm] = draft.time.split(":").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0, 0, 0).toISOString();
+}
+
 export function emptyDraft(): Draft {
   return {
     name: "",
     caption: "",
+    mode: "once",
+    ...defaultSlot(),
     image: "",
     frequency: "weekly",
     hour: 9,
@@ -62,9 +95,15 @@ export function emptyDraft(): Draft {
 }
 
 export function draftFromPost(post: ScheduledPost): Draft {
+  const at = post.runAt ? new Date(post.runAt) : null;
+  const pad = (n: number) => String(n).padStart(2, "0");
   return {
     name: post.name,
     caption: post.caption,
+    mode: post.mode ?? "once",
+    // Read back in the browser's zone, which is where it was picked.
+    date: at ? toDateInput(at) : defaultSlot().date,
+    time: at ? `${pad(at.getHours())}:${pad(at.getMinutes())}` : defaultSlot().time,
     image: post.imageUrl,
     frequency: post.frequency,
     hour: post.hour,
@@ -74,10 +113,18 @@ export function draftFromPost(post: ScheduledPost): Draft {
   };
 }
 
-/** "Every week on Monday at 09:00" — the cadence as a sentence. */
+/** "Tue 24 Feb at 14:20", or the cadence, as a sentence. */
 export function describe(
-  post: Pick<Draft, "frequency" | "hour" | "minute" | "weekday" | "dayOfMonth">,
+  post: Pick<Draft, "mode" | "date" | "time" | "frequency" | "hour" | "minute" | "weekday" | "dayOfMonth">,
 ) {
+  if (post.mode === "once") {
+    const at = new Date(runAtISO(post));
+    if (Number.isNaN(at.getTime())) return "Pick a date and time";
+    return at.toLocaleString(undefined, {
+      weekday: "short", day: "numeric", month: "short",
+      hour: "2-digit", minute: "2-digit",
+    });
+  }
   const time = `${String(post.hour).padStart(2, "0")}:${String(post.minute).padStart(2, "0")}`;
   if (post.frequency === "daily") return `Every day at ${time}`;
   if (post.frequency === "weekly") {

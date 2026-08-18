@@ -123,6 +123,15 @@ export type LinkedInStatus = {
 export type PostFrequency = "daily" | "weekly" | "monthly";
 
 /**
+ * How a post is timed.
+ *
+ * `once` is the ordinary case: a distinct post published at a moment the author
+ * picked. `repeat` is for evergreen content and is the exception — the same
+ * words republished on a cadence is what an audience reads as spam.
+ */
+export type PostMode = "once" | "repeat";
+
+/**
  * A LinkedIn post written once and published on a repeating schedule.
  *
  * The content is authored here and stored whole — the caption as text, the
@@ -137,6 +146,9 @@ export type ScheduledPost = {
   caption: string;
   /** Empty for a caption-only post, which is valid. */
   imageUrl: string;
+  mode: PostMode;
+  /** The instant a one-off publishes. Null for a repeating post. */
+  runAt: string | null;
   frequency: PostFrequency;
   hour: number;
   minute: number;
@@ -145,7 +157,8 @@ export type ScheduledPost = {
   weekday: number;
   /** 1-28. Monthly only. */
   dayOfMonth: number;
-  status: "active" | "paused";
+  /** `sent` is terminal, and only a one-off reaches it. */
+  status: "active" | "paused" | "sent";
   nextRunAt: string;
   lastRunAt: string | null;
   lastStatus: "ok" | "failed" | "";
