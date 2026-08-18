@@ -17,9 +17,10 @@ import {
   useDisconnectLinkedInMutation,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
+import { PostComposer } from "@/features/social/components/PostComposer";
 import {
-  PostComposer, describe, draftFromPost, emptyDraft, type Draft,
-} from "@/features/social/components/PostComposer";
+  describe, draftFromPost, emptyDraft, type Draft,
+} from "@/features/social/components/draft";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
