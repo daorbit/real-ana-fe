@@ -9,6 +9,7 @@ import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
+import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { VerifyEmailStep } from "@/features/auth/components/VerifyEmailStep";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -168,26 +169,30 @@ export default function Signup() {
               </Alert>
             )}
 
-            {/* Google first, and by a wider margin than on login: it skips five
-                fields *and* the emailed code, because the address is already
-                verified. */}
-            <GoogleSignInButton
-              label="Sign up with Google"
-              text="signup_with"
-              onBusyChange={setGoogleBusy}
-              onSuccess={(created) => {
-                if (created) {
-                  notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
-                  nav("/app/onboarding");
-                } else {
-                  // The email already had an account — this was a login, and a
-                  // returning user does not need the setup wizard.
-                  notify.success("Welcome back!", "Logged in");
-                  nav("/app");
-                }
-              }}
-              onError={setError}
-            />
+            {/* The providers come first, and by a wider margin than on login:
+                they skip five fields *and* the emailed code, because the
+                address is already verified. Paired in a row, as on login. */}
+            <Group grow align="stretch" gap="sm" wrap="nowrap">
+              <GoogleSignInButton
+                label="Google"
+                text="signup_with"
+                onBusyChange={setGoogleBusy}
+                onSuccess={(created) => {
+                  if (created) {
+                    notify.success("Account created. Let's get you tracking.", "Welcome to Quantalog");
+                    nav("/app/onboarding");
+                  } else {
+                    // The email already had an account — this was a login, and a
+                    // returning user does not need the setup wizard.
+                    notify.success("Welcome back!", "Logged in");
+                    nav("/app");
+                  }
+                }}
+                onError={setError}
+              />
+
+              <LinkedInSignInButton label="LinkedIn" onError={setError} />
+            </Group>
 
             <Divider label="or sign up with email" labelPosition="center" />
 
