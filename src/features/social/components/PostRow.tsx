@@ -74,41 +74,46 @@ export function PostRow({
       </Box>
 
       {/* Time and status are the two columns someone scans, so they keep their
-          own fixed widths rather than being pushed around by caption length. */}
+          own fixed widths rather than being pushed around by caption length.
+          Both stay on a single line: a row that grows because it happens to
+          carry an error or a publish count breaks the even rhythm that makes
+          the column scannable in the first place. */}
       <Box className="post-row__when">
         <Tooltip
           label={`Publishes within ${DELIVERY_WINDOW_MINUTES} minutes of this time`}
           withArrow
           disabled={sent}
         >
-          <Text size="xs" style={{ cursor: sent ? "default" : "help" }}>
+          <Text size="xs" truncate style={{ cursor: sent ? "default" : "help" }}>
             {whenLabel(post)}
+            {post.postCount > 0 && (post.mode === "repeat" || post.postCount > 1) && (
+              <Text component="span" size="xs" c="dimmed"> · {post.postCount} sent</Text>
+            )}
           </Text>
         </Tooltip>
-        {post.postCount > 0 && (post.mode === "repeat" || post.postCount > 1) && (
-          <Text size="xs" c="dimmed">{post.postCount} published</Text>
-        )}
       </Box>
 
-      <Box className="post-row__status">
-        <Group gap={6} wrap="nowrap" justify="flex-end">
-          {post.mode === "repeat" && (
-            <Tooltip label="Repeats on a cadence" withArrow>
-              <Repeat size={13} style={{ color: "var(--mantine-color-dimmed)" }} />
-            </Tooltip>
-          )}
+      {/* The failure reason rides on the badge's tooltip rather than a second
+          line of its own — the text the server wrote is often longer than this
+          column, so it was truncated to uselessness anyway. */}
+      <Group className="post-row__status" gap={6} wrap="nowrap" justify="flex-end">
+        {post.mode === "repeat" && (
+          <Tooltip label="Repeats on a cadence" withArrow>
+            <Repeat size={13} style={{ color: "var(--mantine-color-dimmed)" }} />
+          </Tooltip>
+        )}
+        <Tooltip
+          label={post.lastError}
+          withArrow
+          multiline
+          w={260}
+          disabled={stage !== "failed" || !post.lastError}
+        >
           <Badge size="sm" variant="light" color={STAGE_COLOR[stage]}>
             {STAGE_LABEL[stage]}
           </Badge>
-        </Group>
-        {/* The reason, when there is one. A failure carries the text the
-            server already wrote for display. */}
-        {stage === "failed" && post.lastError && (
-          <Text size="xs" c="orange" truncate title={post.lastError}>
-            {post.lastError}
-          </Text>
-        )}
-      </Box>
+        </Tooltip>
+      </Group>
 
       <Group gap={4} wrap="nowrap">
         {post.lastPostUrl && (

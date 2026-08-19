@@ -2417,7 +2417,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    the times or the statuses without re-finding them on every item — which is
    the whole reason this is a list and not a grid of cards. */
 .post-row {
-  padding: 10px 12px;
+  /* A fixed height, not a minimum: every row carries the same content in the
+     same columns, so one that grew because it happened to hold an error or a
+     publish count broke the even rhythm the whole list depends on. */
+  height: 66px;
+  padding: 0 12px;
   border: 1px solid var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-md);
   background: var(--mantine-color-body);
@@ -2464,6 +2468,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .post-row { flex-wrap: wrap; }
   .post-row__when,
   .post-row__status { width: auto; }
+  /* The fixed height only holds while everything fits on one line. */
+  .post-row { height: auto; padding: 10px 12px; }
 }
 
 /* ============ Scheduled post summary ============
@@ -2473,17 +2479,56 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .post-stats {
   border: 1px solid var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-body);
   overflow: hidden;
 }
 
 .post-stats__item {
-  flex: 1 1 120px;
+  flex: 1 1 150px;
   min-width: 0;
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-right: 1px solid var(--mantine-color-default-border);
 }
 
 .post-stats__item:last-child { border-right: none; }
+
+/* The same mark and colour the matching rows carry below, so the strip reads
+   as a key to the list rather than four unrelated figures. */
+.post-stats__icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+/* ============ Post filter bar ============
+   The rule under the tabs runs the full width of the page rather than stopping
+   after the last tab — a line that ends mid-air reads as a broken edge, where
+   one reaching both margins reads as the boundary between the controls and the
+   list they filter. */
+.post-filters .mantine-Tabs-list {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+/* Pushed to the far end of the same bar: it filters the list the tabs filter,
+   and sitting outside made it read as a page-wide search. */
+.post-filters__search {
+  margin-left: auto;
+  width: 240px;
+  flex-shrink: 0;
+  align-self: center;
+  padding-bottom: 6px;
+}
+
+@media (max-width: 48em) {
+  .post-filters .mantine-Tabs-list { flex-wrap: wrap; }
+  .post-filters__search { width: 100%; margin-left: 0; }
+}
 
 /* Connection cards share the width evenly and wrap once they run out of room,
    so a third network joining later needs no layout change. */
