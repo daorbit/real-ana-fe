@@ -3,9 +3,11 @@ import {
   Badge, Box, Button, Card, CloseButton, Group, SimpleGrid, Stack, Tabs, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import {
-  CheckCircle2, ExternalLink, Pause, Pencil, Play, Repeat, Search, Send, Trash2, TriangleAlert,
+  CheckCircle2, ExternalLink, ImageOff, Pause, Pencil, Play, Repeat, Search, Send, Trash2,
+  TriangleAlert,
 } from "lucide-react";
 import { DELIVERY_WINDOW_MINUTES, WEEKDAYS } from "./draft";
+import { LINKEDIN_BLUE, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -90,165 +92,220 @@ function PostRow({
   const sent = post.status === "sent";
   const moved = recentlyMovedId === post.id;
 
+  // Draft is a UI reading of "paused with a time already set" rather than a
+  // separate status the server knows about -- see draft.ts. Everywhere this
+  // page used to say "Paused" now says "Draft" instead.
+  const draft = post.status === "paused";
+
   return (
     <Card
       withBorder
-      padding="md"
+      padding={0}
       radius="md"
       style={{
         opacity: sent ? 0.75 : 1,
-        // The row is the thing that moved, so the row is what is marked. An
-        // accent border rather than a filled background: it has to be findable
-        // after the queue reorders without turning the card into an alert.
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        // The card is the thing that moved, so the card is what is marked. An
+        // accent border rather than a filled background: findable after the
+        // grid reorders, without turning the card into an alert.
         borderColor: moved ? "var(--accent)" : undefined,
         transition: "border-color 200ms ease",
+        overflow: "hidden",
       }}
     >
-      <Group justify="space-between" align="flex-start" wrap="nowrap">
-        <Group align="flex-start" gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
-          {/* Square rather than letterbox: posts carry portrait and square
-              images as often as wide ones, and a 16:9 crop cuts the middle out
-              of everything that is not already that shape. `contain` on a
-              neutral tile shows the whole image, which is what makes a row
-              identifiable at a glance. */}
-          {post.imageUrl && (
-            <Box
-              style={{
-                width: 64,
-                height: 64,
-                flexShrink: 0,
-                borderRadius: 8,
-                overflow: "hidden",
-                background: "var(--mantine-color-default)",
-                border: "1px solid var(--mantine-color-default-border)",
-              }}
-            >
-              <img
-                src={post.imageUrl}
-                alt=""
-                style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
-              />
-            </Box>
+      {/* Image fills the top of the card at a fixed aspect ratio, `cover`
+          rather than `contain`: side by side in a grid, cards at uneven
+          heights read as a broken layout, and a feed post is already framed
+          for a fixed box on the network it is going to. A post with no image
+          gets a plain tile carrying its status colour, so the grid keeps its
+          rhythm either way. */}
+      <Box
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "4 / 3",
+          flexShrink: 0,
+          background: "var(--mantine-color-default)",
+          borderBottom: "1px solid var(--mantine-color-default-border)",
+        }}
+      >
+        {post.imageUrl ? (
+          <img
+            src={post.imageUrl}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
+        ) : (
+          <Box
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "grid",
+              placeItems: "center",
+              color: "var(--mantine-color-dimmed)",
+            }}
+          >
+            <ImageOff size={26} strokeWidth={1.5} />
+          </Box>
+        )}
+
+        {/* Status reads on the image, the way a feed post shows a badge over
+            its thumbnail, so it is visible without reading a word of text. */}
+        <Group gap={6} style={{ position: "absolute", top: 8, left: 8 }} wrap="wrap">
+          {sent ? (
+            <Badge size="sm" variant="filled" color="gray">Published</Badge>
+          ) : draft ? (
+            <Badge size="sm" variant="filled" color="gray">Draft</Badge>
+          ) : (
+            <Badge size="sm" variant="filled" color="teal">Scheduled</Badge>
           )}
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <Group gap={8} wrap="nowrap" mb={4}>
-              <Text fw={600} truncate>{post.name}</Text>
-              {sent ? (
-                <Badge size="sm" variant="light" color="gray">Published</Badge>
-              ) : post.status === "paused" ? (
-                <Badge size="sm" variant="light" color="gray">Paused</Badge>
-              ) : (
-                <Badge size="sm" variant="light" color="teal">Scheduled</Badge>
-              )}
-              {/* Names what the accent border means, so the mark does not rely
-                  on someone remembering which row they just edited. */}
-              {moved && (
-                <Badge size="sm" variant="filled">Moved here</Badge>
-              )}
-              {repeating && (
-                <Badge
-                  size="sm"
-                  variant="light"
-                  color="orange"
-                  leftSection={<Repeat size={11} />}
-                >
-                  Repeats
-                </Badge>
-              )}
-            </Group>
-
-            <Text size="sm" c="dimmed" lineClamp={2} mb={6}>
-              {post.caption}
-            </Text>
-
-            {/* The scheduled time reads as exact, so the row carries the window
-                on hover rather than in the line itself -- repeated down a long
-                queue it would be noise, and the schedule footnote states it
-                once for anyone who does not hover. Only for posts still
-                waiting: a published post has a real time, not an estimate. */}
-            <Text size="xs" c="dimmed">
-              <Tooltip
-                label={`Publishes within ${DELIVERY_WINDOW_MINUTES} minutes of this time`}
-                withArrow
-                disabled={sent}
-              >
-                <Text component="span" style={{ cursor: sent ? "default" : "help" }}>
-                  {repeating ? cadence(post) : timeLabel(post.nextRunAt)}
-                </Text>
-              </Tooltip>
-              {repeating && post.status === "active" && (
-                <> · next {new Date(post.nextRunAt).toLocaleString()}</>
-              )}
-              {post.postCount > 0 && <> · {post.postCount} published</>}
-            </Text>
-
-            {/* The last outcome, when there was one. A failure carries the
-                reason the server already wrote for display. */}
-            {post.lastStatus === "failed" && post.lastError && (
-              <Group gap={6} mt={6} wrap="nowrap">
-                <TriangleAlert size={13} style={{ color: "var(--mantine-color-orange-6)", flexShrink: 0 }} />
-                <Text size="xs" c="orange">{post.lastError}</Text>
-              </Group>
-            )}
-            {post.lastStatus === "ok" && (
-              <Group gap={6} mt={6} wrap="nowrap">
-                <CheckCircle2 size={13} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
-                <Text size="xs" c="dimmed">
-                  Published {post.lastRunAt ? new Date(post.lastRunAt).toLocaleString() : ""}
-                </Text>
-                {post.lastPostUrl && (
-                  <Button
-                    component="a"
-                    href={post.lastPostUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="subtle"
-                    size="compact-xs"
-                    rightSection={<ExternalLink size={12} />}
-                  >
-                    View
-                  </Button>
-                )}
-              </Group>
-            )}
-          </div>
+          {repeating && (
+            <Badge size="sm" variant="filled" color="orange" leftSection={<Repeat size={11} />}>
+              Repeats
+            </Badge>
+          )}
         </Group>
 
-        <Group gap={6} wrap="nowrap">
-          {/* An extra send, not a reschedule: the cadence is untouched, so a
-              weekly post sent now still goes out on its usual day. Offered on
-              sent posts too — republishing an evergreen one by hand is the
-              case this exists for. */}
-          <Tooltip label="Post now" withArrow>
+        {moved && (
+          <Badge
+            size="sm"
+            variant="filled"
+            style={{ position: "absolute", top: 8, right: 8 }}
+          >
+            Moved here
+          </Badge>
+        )}
+
+        {/* The network this card publishes to. One mark today; a second
+            network will sit beside it here rather than needing a new place
+            to live. */}
+        <Box
+          style={{
+            position: "absolute",
+            bottom: 8,
+            right: 8,
+            width: 24,
+            height: 24,
+            borderRadius: 6,
+            background: LINKEDIN_BLUE,
+            display: "grid",
+            placeItems: "center",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+          }}
+        >
+          <LinkedInMark size={13} color="#fff" />
+        </Box>
+      </Box>
+
+      {/* Text block grows to fill the space between the image and the pinned
+          action bar, so a short caption does not leave the buttons floating
+          partway up a tall card. */}
+      <Stack gap={6} p="md" style={{ flex: 1, minWidth: 0 }}>
+        <Text fw={600} truncate>{post.name}</Text>
+        <Text size="sm" c="dimmed" lineClamp={3} style={{ flex: 1 }}>
+          {post.caption}
+        </Text>
+
+        {/* The scheduled time reads as exact, so the card carries the window
+            on hover rather than in the line itself -- the queue footnote
+            states it once for anyone who does not hover. Only for posts still
+            waiting: a published post has a real time, not an estimate. */}
+        <Text size="xs" c="dimmed">
+          <Tooltip
+            label={`Publishes within ${DELIVERY_WINDOW_MINUTES} minutes of this time`}
+            withArrow
+            disabled={sent}
+          >
+            <Text component="span" style={{ cursor: sent ? "default" : "help" }}>
+              {repeating ? cadence(post) : timeLabel(post.nextRunAt)}
+            </Text>
+          </Tooltip>
+          {repeating && post.status === "active" && (
+            <> · next {new Date(post.nextRunAt).toLocaleString()}</>
+          )}
+          {post.postCount > 0 && <> · {post.postCount} published</>}
+        </Text>
+
+        {/* The last outcome, when there was one. A failure carries the reason
+            the server already wrote for display. */}
+        {post.lastStatus === "failed" && post.lastError && (
+          <Group gap={6} wrap="nowrap" align="flex-start">
+            <TriangleAlert size={13} style={{ color: "var(--mantine-color-orange-6)", flexShrink: 0, marginTop: 2 }} />
+            <Text size="xs" c="orange">{post.lastError}</Text>
+          </Group>
+        )}
+        {post.lastStatus === "ok" && (
+          <Group gap={6} wrap="wrap" align="center">
+            <CheckCircle2 size={13} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
+            <Text size="xs" c="dimmed">
+              Published {post.lastRunAt ? new Date(post.lastRunAt).toLocaleString() : ""}
+            </Text>
+            {post.lastPostUrl && (
+              <Button
+                component="a"
+                href={post.lastPostUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="subtle"
+                size="compact-xs"
+                rightSection={<ExternalLink size={12} />}
+              >
+                View
+              </Button>
+            )}
+          </Group>
+        )}
+      </Stack>
+
+      {/* Actions pinned to the foot of the card, always in the same place
+          whatever the caption length above them. */}
+      <Group
+        gap={6}
+        wrap="nowrap"
+        justify="flex-end"
+        p="sm"
+        style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
+      >
+        {/* An extra send, not a reschedule: the cadence is untouched, so a
+            weekly post sent now still goes out on its usual day. Offered on
+            sent posts too — republishing an evergreen one by hand is the case
+            this exists for. */}
+        <Tooltip label="Post now" withArrow>
+          <Button
+            variant="default"
+            size="compact-sm"
+            loading={publishing}
+            onClick={() => onPublish(post)}
+            aria-label="Post now"
+          >
+            <Send size={14} />
+          </Button>
+        </Tooltip>
+        <Tooltip label={sent ? "Reschedule" : "Edit"} withArrow>
+          <Button variant="default" size="compact-sm" onClick={() => onEdit(post)} aria-label="Edit">
+            <Pencil size={14} />
+          </Button>
+        </Tooltip>
+        {/* Nothing to pause on a post that has already gone out. */}
+        {!sent && (
+          <Tooltip label={draft ? "Resume" : "Save as draft"} withArrow>
             <Button
               variant="default"
               size="compact-sm"
-              loading={publishing}
-              onClick={() => onPublish(post)}
-              aria-label="Post now"
+              onClick={() => onToggle(post)}
+              aria-label={draft ? "Resume" : "Save as draft"}
             >
-              <Send size={14} />
+              {draft ? <Play size={14} /> : <Pause size={14} />}
             </Button>
           </Tooltip>
-          <Tooltip label={sent ? "Reschedule" : "Edit"} withArrow>
-            <Button variant="default" size="compact-sm" onClick={() => onEdit(post)}>
-              <Pencil size={14} />
-            </Button>
-          </Tooltip>
-          {/* Nothing to pause on a post that has already gone out. */}
-          {!sent && (
-            <Tooltip label={post.status === "active" ? "Pause" : "Resume"} withArrow>
-              <Button variant="default" size="compact-sm" onClick={() => onToggle(post)}>
-                {post.status === "active" ? <Pause size={14} /> : <Play size={14} />}
-              </Button>
-            </Tooltip>
-          )}
-          <Tooltip label="Delete" withArrow>
-            <Button variant="default" size="compact-sm" onClick={() => onDelete(post)}>
-              <Trash2 size={14} />
-            </Button>
-          </Tooltip>
-        </Group>
+        )}
+        <Tooltip label="Delete" withArrow>
+          <Button variant="default" size="compact-sm" onClick={() => onDelete(post)} aria-label="Delete">
+            <Trash2 size={14} />
+          </Button>
+        </Tooltip>
       </Group>
     </Card>
   );
@@ -260,20 +317,26 @@ const FILTERS = [
   { value: "scheduled", label: "Scheduled" },
   { value: "repeating", label: "Repeating" },
   { value: "published", label: "Published" },
-  { value: "paused", label: "Paused" },
+  { value: "draft", label: "Drafts" },
   { value: "failed", label: "Failed" },
 ] as const;
 
 type Filter = (typeof FILTERS)[number]["value"];
 
-/** Which shelves a post belongs on. A post can sit on more than one. */
+/**
+ * Which shelves a post belongs on. A post can sit on more than one.
+ *
+ * "Draft" is a UI reading of the server's `paused` status, not a status of its
+ * own — see draft.ts. A draft still carries a real date and time; it is
+ * writing put on hold, not writing with no time chosen yet.
+ */
 function matches(post: ScheduledPost, filter: Filter): boolean {
   switch (filter) {
     case "all": return true;
     case "scheduled": return post.mode !== "repeat" && post.status === "active";
     case "repeating": return post.mode === "repeat";
     case "published": return post.status === "sent" || post.postCount > 0;
-    case "paused": return post.status === "paused";
+    case "draft": return post.status === "paused";
     case "failed": return post.lastStatus === "failed";
   }
 }
@@ -459,9 +522,9 @@ export function PostQueue({
           {days.map((day) => (
             <div key={day.label}>
               <Text size="sm" fw={700} mb="sm">{day.label}</Text>
-              <Stack gap="sm">
+              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, xl: 4 }} spacing="md">
                 {day.posts.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-              </Stack>
+              </SimpleGrid>
             </div>
           ))}
 
@@ -473,23 +536,23 @@ export function PostQueue({
                   <Text size="sm" fw={700}>Repeating</Text>
                 </Group>
               )}
-              <Stack gap="sm">
+              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, xl: 4 }} spacing="md">
                 {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-              </Stack>
+              </SimpleGrid>
             </div>
           )}
 
           {/* The heading is dropped when the active filter already says the same
-              word: "Published" above a list of published posts, on the
+              word: "Published" above a grid of published posts, on the
               Published tab, is the label repeated three times. */}
           {sent.length > 0 && (
             <div>
               {filter !== "published" && (
                 <Text size="sm" fw={700} mb="sm" c="dimmed">Published</Text>
               )}
-              <Stack gap="sm">
+              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, xl: 4 }} spacing="md">
                 {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-              </Stack>
+              </SimpleGrid>
             </div>
           )}
         </Stack>

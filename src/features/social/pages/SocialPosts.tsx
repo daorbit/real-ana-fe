@@ -3,8 +3,8 @@ import {
   Alert, Avatar, Badge, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title,
   Tooltip,
 } from "@mantine/core";
-import { CalendarClock, CheckCircle2, Plus, TriangleAlert } from "lucide-react";
-import { LINKEDIN_BLUE, LINKEDIN_GLOW, LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { CalendarClock, Plus, Rocket, TriangleAlert } from "lucide-react";
+import { LINKEDIN_BLUE, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
@@ -302,10 +302,12 @@ export default function SocialPosts() {
 
   return (
     <AppShell>
-      {/* The mark says what this page publishes to before a word is read. It
-          carries LinkedIn's own blue and a soft glow of the same colour, so it
-          reads as a badge for the connected network rather than one more toolbar
-          button -- nothing else on the page is that colour or lit that way. */}
+      {/* This page is framed as social scheduling, not a LinkedIn-only tool: the
+          tile is a neutral "outgoing post" mark rather than LinkedIn's own
+          colour, and the strip beneath it names every network this composer
+          will eventually reach. Facebook and Instagram sit there dimmed and
+          unclickable now -- a promise of where this grows, not a toggle that
+          does nothing when pressed. */}
       <Group justify="space-between" align="flex-start" mb="lg" wrap="wrap" gap="md">
         <Group align="flex-start" gap="md" wrap="nowrap" style={{ minWidth: 0 }}>
           <Box
@@ -317,34 +319,44 @@ export default function SocialPosts() {
               display: "grid",
               placeItems: "center",
               borderRadius: 12,
-              background: LINKEDIN_BLUE,
-              // The glow is the brand colour at low alpha, so it reads as light
-              // coming off the mark rather than a generic drop shadow.
-              boxShadow: `0 0 0 4px ${LINKEDIN_GLOW}, 0 6px 18px -4px ${LINKEDIN_GLOW}`,
+              background: "var(--mantine-color-emerald-6)",
+              boxShadow: "0 0 0 4px var(--mantine-color-emerald-light), 0 6px 18px -4px var(--mantine-color-emerald-light)",
             }}
           >
-            <LinkedInMark size={24} color="#fff" />
+            <Rocket size={22} color="#fff" />
           </Box>
           <div style={{ minWidth: 0 }}>
             <Group gap={10} wrap="wrap" align="center">
-              <Title order={2}>Scheduled posts</Title>
-              {/* State next to the name, not buried in a row further down: the
-                  first thing someone checks is whether this is live. */}
-              {ready && (
-                <Badge
-                  size="sm"
-                  variant="light"
-                  color="teal"
-                  leftSection={<CheckCircle2 size={11} />}
-                >
-                  Connected
-                </Badge>
-              )}
+              <Title order={2}>Social posts</Title>
             </Group>
             <Text c="dimmed" size="sm" mt={4} style={{ maxWidth: "58ch" }}>
-              Write a LinkedIn post now, pick when it should go out, and Quantalog publishes it
-              for you — once, or on a repeating schedule.
+              Write a post, pick when it should go out, and Quantalog publishes it for you —
+              once, or on a repeating schedule.
             </Text>
+            {/* One row: which networks exist, which is live, which is on hold.
+                LinkedIn carries the Connected state itself rather than the page
+                header, because that state belongs to the account, not the
+                feature -- a second network will have its own. */}
+            <Group gap={8} mt={10} wrap="wrap">
+              <Badge
+                size="sm"
+                variant={ready ? "light" : "outline"}
+                color={ready ? "teal" : "gray"}
+                leftSection={<LinkedInMark size={11} color={ready ? undefined : "var(--mantine-color-dimmed)"} />}
+              >
+                LinkedIn{ready ? " · Connected" : ""}
+              </Badge>
+              <Tooltip label="Facebook support is planned, not available yet" withArrow>
+                <Badge size="sm" variant="outline" color="gray" style={{ opacity: 0.55, cursor: "default" }}>
+                  Facebook · Soon
+                </Badge>
+              </Tooltip>
+              <Tooltip label="Instagram support is planned, not available yet" withArrow>
+                <Badge size="sm" variant="outline" color="gray" style={{ opacity: 0.55, cursor: "default" }}>
+                  Instagram · Soon
+                </Badge>
+              </Tooltip>
+            </Group>
           </div>
         </Group>
         <Tooltip label="Connect LinkedIn first" disabled={ready} withArrow>
