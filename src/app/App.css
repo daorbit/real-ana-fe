@@ -2385,12 +2385,19 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .post-calendar {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
+  /* One header row, then six week rows sharing whatever height is left. The
+     rows are `1fr` rather than auto so the month fills the panel evenly — a
+     calendar whose rows are sized by their busiest cell reads as a table. */
+  grid-template-rows: auto repeat(6, minmax(88px, 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
   border-radius: var(--mantine-radius-md);
   overflow: hidden;
   min-width: 700px;
+  /* Fills the panel down to its foot rather than stopping wherever the content
+     happens to end, which is what makes it read as the page's own grid. */
+  min-height: min(760px, calc(100dvh - 190px));
 }
 
 /* The weekday strip reads as part of the grid's frame rather than a row of
@@ -2407,10 +2414,24 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .post-calendar-day {
   background: var(--surface);
-  /* Two chips fit without scrolling, which covers nearly every real day. Taller
-     than that is empty space on a month where little is scheduled. */
   min-height: 88px;
   padding: 6px 7px;
+  /* A day with more posts than fit scrolls inside its own cell rather than
+     stretching its whole week row — one busy Thursday should not make every
+     other day that week taller. */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The chip stack is the part that scrolls; the date and its add button stay. */
+.post-calendar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 /* Days from the neighbouring months keep the grid rectangular but recede, so

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActionIcon, Box, Button, Group, SegmentedControl, Text, Tooltip } from "@mantine/core";
-import { ChevronLeft, ChevronRight, Plus, Repeat } from "lucide-react";
+import { ActionIcon, Box, Button, Group, Menu, Text, Tooltip } from "@mantine/core";
+import { ChevronDown, ChevronLeft, ChevronRight, Plus, Repeat } from "lucide-react";
 import { toDateInput } from "./draft";
 import { STAGE_COLOR, stageOf } from "../postStatus";
 import type { ScheduledPost } from "@/shared/types";
@@ -116,7 +116,10 @@ export function PostCalendar({
   viewControl?: React.ReactNode;
 }) {
   const [cursor, setCursor] = useState(() => new Date());
-  const [scope, setScope] = useState<Scope>("week");
+  // The month leads. Someone opening a calendar is asking "what does my month
+  // look like" far more often than "is 3pm Tuesday free" — the week answers a
+  // question you only have once you already know where the gaps are.
+  const [scope, setScope] = useState<Scope>("month");
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   const cells = useMemo(
@@ -200,35 +203,51 @@ export function PostCalendar({
       {/* Navigation, scope and the view switch on one line: they are all "which
           posts am I looking at" controls and belong together. */}
       <Group justify="space-between" align="center" mb="sm" wrap="wrap" gap="sm">
-        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-          <Group gap={4} wrap="nowrap">
-            <ActionIcon variant="default" size="md" onClick={() => step(-1)} aria-label="Previous">
-              <ChevronLeft size={16} />
+        <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
+          {/* Stepping arrows sit flush against each other and ahead of the
+              label they move, so the period reads as the thing being paged. */}
+          <Group gap={2} wrap="nowrap">
+            <ActionIcon variant="subtle" color="gray" size="md" onClick={() => step(-1)} aria-label="Previous">
+              <ChevronLeft size={17} />
             </ActionIcon>
-            <ActionIcon variant="default" size="md" onClick={() => step(1)} aria-label="Next">
-              <ChevronRight size={16} />
+            <ActionIcon variant="subtle" color="gray" size="md" onClick={() => step(1)} aria-label="Next">
+              <ChevronRight size={17} />
             </ActionIcon>
           </Group>
-          <Text fw={700} size="md" style={{ whiteSpace: "nowrap" }}>{label}</Text>
+
+          <Text fw={700} size="lg" style={{ whiteSpace: "nowrap" }}>{label}</Text>
+
           <Button
             variant="default"
-            size="xs"
+            size="compact-sm"
             onClick={() => setCursor(new Date())}
             // Nothing to go back to when the current period is already open.
             disabled={showingNow}
           >
             Today
           </Button>
-          <SegmentedControl
-            size="xs"
-            data={[
-              { value: "week", label: "Week" },
-              { value: "month", label: "Month" },
-            ]}
-            value={scope}
-            onChange={(v) => setScope(v as Scope)}
-          />
+
+          {/* A menu rather than a segmented pair: there are only two scopes
+              today, but the control names the one you are in rather than
+              showing both at equal weight, which is what a calendar's period
+              picker does everywhere else people have used one. */}
+          <Menu position="bottom-start" withArrow radius="md" width={140}>
+            <Menu.Target>
+              <Button
+                variant="default"
+                size="compact-sm"
+                rightSection={<ChevronDown size={13} />}
+              >
+                {scope === "week" ? "Week" : "Month"}
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item onClick={() => setScope("month")}>Month</Menu.Item>
+              <Menu.Item onClick={() => setScope("week")}>Week</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Group>
+
         {viewControl}
       </Group>
 
@@ -413,7 +432,7 @@ function MonthGrid({
               )}
             </Group>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <div className="post-calendar-stack">
               {entries.map(({ post, time }) => (
                 <Box
                   key={`${post.id}-${cell.key}`}
