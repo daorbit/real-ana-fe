@@ -1,4 +1,5 @@
-import { Box, Button, Divider, Group, NumberInput, SegmentedControl, Text, TextInput } from "@mantine/core";
+import { Box, Button, Divider, Group, NumberInput, SegmentedControl, Text } from "@mantine/core";
+import { DatePickerInput, TimePicker } from "@mantine/dates";
 import { CalendarClock, TriangleAlert } from "lucide-react";
 import {
   FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, toDateInput, type Draft,
@@ -89,25 +90,35 @@ export function ScheduleFields({
 
       {draft.mode === "once" ? (
         <>
-          <Group mt="sm" gap="sm" align="flex-end" wrap="nowrap">
-            <TextInput
-              type="date"
+          {/* Mantine's own pickers rather than `type="date"`/`type="time"`: the
+              native widgets are drawn by the browser, so they ignore the app's
+              theme entirely and render a light popover over a dark page. Both
+              still speak the same "YYYY-MM-DD" / "HH:mm" strings the draft
+              stores, so nothing downstream changes. */}
+          <Group mt="md" gap="sm" align="flex-end" wrap="nowrap">
+            <DatePickerInput
               label="Date"
-              min={TODAY}
-              value={draft.date}
-              onChange={(e) => onChange({ date: e.currentTarget.value })}
+              placeholder="Pick a date"
+              minDate={TODAY}
+              valueFormat="ddd, D MMM YYYY"
+              value={draft.date || null}
+              onChange={(value) => onChange({ date: value ?? "" })}
               style={{ flex: 1 }}
             />
-            <TextInput
-              type="time"
+            <TimePicker
               label="Time"
+              format="12h"
+              withDropdown
               value={draft.time}
-              onChange={(e) => onChange({ time: e.currentTarget.value })}
-              w={130}
+              onChange={(value) => onChange({ time: value })}
+              w={150}
             />
           </Group>
 
-          <Group gap={6} mt="sm" wrap="wrap">
+          {/* `rowGap` as well as `gap`: these wrap onto a second line on a
+              narrow composer, and without it the rows sit flush against each
+              other while the columns are spaced. */}
+          <Group gap={8} mt="md" wrap="wrap" style={{ rowGap: 8 }}>
             {QUICK_DAYS.map((q) => {
               const value = dateIn(q.days);
               return (
@@ -178,7 +189,7 @@ export function ScheduleFields({
           <Box mt="sm" p="md" style={PANEL}>
             {draft.frequency === "weekly" && (
               <SubField label="Repeat on">
-                <Group gap={6} wrap="wrap">
+                <Group gap={8} wrap="wrap" style={{ rowGap: 8 }}>
                   {WEEKDAYS.map((d) => (
                     <Button
                       key={d.value}
@@ -210,7 +221,7 @@ export function ScheduleFields({
                 hatch, so the presets lead and the exact fields sit behind a
                 divider rather than competing with them side by side. */}
             <SubField label="Time of day">
-              <Group gap={6} wrap="wrap">
+              <Group gap={8} wrap="wrap" style={{ rowGap: 8 }}>
                 {QUICK_TIMES.map((q) => (
                   <Button
                     key={q.label}
