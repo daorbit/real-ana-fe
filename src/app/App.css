@@ -2559,6 +2559,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .post-day { margin-left: 0; }
 }
 
+/* ============ Account menu ============
+   The identity block at the head of the dropdown. Padded to the menu's own
+   edges rather than inset like an item, so it reads as the menu's header
+   rather than as the first thing in the list. */
+.account-menu__header {
+  padding: 10px 12px 12px;
+}
+
 /* ============ Post filter bar ============
    One rule under the whole bar, drawn by the list itself, with each tab's own
    bottom border removed. Mantine gives every tab a transparent border that the

@@ -10,7 +10,7 @@ import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
   Send,
-  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords,
+  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords, Zap,
 } from "lucide-react";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
@@ -380,7 +380,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             position={mobile ? "top" : "right-end"}
             withArrow
             radius="md"
-            width={mobile ? "target" : 210}
+            width={mobile ? "target" : 250}
             withinPortal
             zIndex={400}
           >
@@ -402,43 +402,19 @@ export function AppShell({ children }: { children: ReactNode }) {
               </UnstyledButton>
             </Menu.Target>
 
-            <Menu.Dropdown>
-              {ACCOUNT_ITEMS.map((item) => (
-                <Menu.Item
-                  key={item.to}
-                  component={Link}
-                  to={item.to}
-                  leftSection={<item.icon size={15} />}
-                >
-                  {t(item.labelKey, item.label)}
-                </Menu.Item>
-              ))}
-              <Menu.Divider />
-              <Menu.Item
-                component={Link}
-                to="/app/settings"
-                leftSection={<SettingsIcon size={15} />}
-              >
-                {t("nav.settings")}
-              </Menu.Item>
-              <Menu.Divider />
-              {/* Mantine fills a coloured menu item solid on hover, which for a
-                  destructive-red item reads as an alert rather than a hover
-                  state. `danger-item` tints it instead — see polish.css. */}
-              <Menu.Item
-                color="red"
-                className="danger-item"
-                leftSection={<LogOut size={15} />}
-                onClick={() =>
-                  confirmLogout(() => {
-                    logout();
-                    notify.info(t("nav.loggedOut"));
-                  })
-                }
-              >
-                {t("nav.logout")}
-              </Menu.Item>
-            </Menu.Dropdown>
+            <AccountMenuDropdown
+              email={user?.email ?? ""}
+              name={user?.name ?? ""}
+              avatarUrl={user?.avatarUrl}
+              initials={initials}
+              workspace={active?.name ?? ""}
+              onLogout={() =>
+                confirmLogout(() => {
+                  logout();
+                  notify.info(t("nav.loggedOut"));
+                })
+              }
+            />
           </Menu>
         </MantineShell.Section>
       </MantineShell.Navbar>
@@ -533,6 +509,138 @@ function PendingInviteCard() {
         </div>
       </Group>
     </UnstyledButton>
+  );
+}
+
+/**
+ * The account menu: who you are signed in as, which workspace is active, and
+ * everything that is about the account rather than about the data.
+ *
+ * The header is the identity block — email above, workspace and its plan below
+ * — because the first question this menu answers is "which account am I acting
+ * as?", and that has to be readable before any of the items are. The plan line
+ * doubles as the upgrade path so there is one place that both states the limit
+ * and offers the way past it.
+ *
+ * Items are grouped by how often they are reached rather than by subject: the
+ * team and the workspace's own settings first, the developer-facing pages next,
+ * and the way out last with air around it so it is never a mis-click.
+ */
+function AccountMenuDropdown({
+  email,
+  name,
+  avatarUrl,
+  initials,
+  workspace,
+  onLogout,
+}: {
+  email: string;
+  name: string;
+  avatarUrl?: string;
+  initials: string;
+  workspace: string;
+  onLogout: () => void;
+}) {
+  const { t } = useTranslation();
+  const billing = useActiveBilling();
+
+  // Pro is the top plan, so there is nothing above it to sell. Offering an
+  // upgrade to someone already on the best plan reads as the app not knowing
+  // what they pay for — the button becomes plan management instead, which is
+  // what a paying customer actually comes here for.
+  const topPlan = billing?.plan.slug === "pro";
+  const expired = billing?.status === "expired";
+
+  return (
+    <Menu.Dropdown>
+      <Box className="account-menu__header">
+        {/* The face as well as the address: this menu is opened to check which
+            account is active, and on a shared machine the avatar answers that
+            faster than an email string does. */}
+        <Group gap="sm" wrap="nowrap">
+          <UserAvatar src={avatarUrl} color="emerald" radius="md" size="md">
+            {initials}
+          </UserAvatar>
+          <Box style={{ flex: 1, minWidth: 0 }}>
+            <Text size="sm" fw={600} truncate title={name}>{name}</Text>
+            <Text size="xs" c="dimmed" truncate title={email}>{email}</Text>
+          </Box>
+        </Group>
+
+        {workspace && (
+          <Text size="sm" fw={700} mt={10} truncate title={workspace}>{workspace}</Text>
+        )}
+        {billing && (
+          <Group gap={6} wrap="nowrap" mt={2}>
+            <PlanIcon slug={billing.plan.slug} size={13} uid="menu" />
+            <Text size="xs" c="dimmed" truncate>
+              {billing.plan.name} plan · {billing.cycle}
+            </Text>
+          </Group>
+        )}
+
+        {/* Offered from the plan line rather than as a menu item: it is the one
+            thing here that changes what the account can do, and a row in the
+            list would have read as another page to visit. */}
+        <Button
+          component={Link}
+          to="/app/billing"
+          variant="default"
+          size="compact-sm"
+          fullWidth
+          mt={10}
+          leftSection={topPlan && !expired ? <CreditCard size={13} /> : <Zap size={13} />}
+        >
+          {expired
+            ? t("nav.renewPlan", "Renew plan")
+            : topPlan
+              ? t("nav.managePlan", "Manage plan")
+              : t("nav.upgradePlan", "Upgrade plan")}
+        </Button>
+      </Box>
+
+      <Menu.Divider />
+
+      <Menu.Item component={Link} to="/app/settings" leftSection={<SettingsIcon size={15} />}>
+        {t("nav.settings")}
+      </Menu.Item>
+      {ACCOUNT_ITEMS.map((item) => (
+        <Menu.Item
+          key={item.to}
+          component={Link}
+          to={item.to}
+          leftSection={<item.icon size={15} />}
+        >
+          {t(item.labelKey, item.label)}
+        </Menu.Item>
+      ))}
+
+      <Menu.Divider />
+
+      <Menu.Item
+        component="a"
+        href="https://quantalog.daorbit.in/docs"
+        target="_blank"
+        rel="noreferrer"
+        leftSection={<BookOpen size={15} />}
+      >
+        {t("nav.documentation")}
+      </Menu.Item>
+
+      <Menu.Divider />
+
+      {/* Mantine fills a coloured menu item solid on hover, which for a
+          destructive-red item reads as an alert rather than a hover state.
+          `danger-item` tints it instead — see polish.css. */}
+      <Menu.Item
+        color="red"
+        className="danger-item"
+        leftSection={<LogOut size={15} />}
+        onClick={onLogout}
+      >
+        {t("nav.logout")}
+      </Menu.Item>
+    </Menu.Dropdown>
   );
 }
 
