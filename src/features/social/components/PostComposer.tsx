@@ -101,6 +101,8 @@ export function PostComposer({
   // What the post is about, in the author's own words. Kept out of the draft:
   // it is the instruction that produced the caption, not part of the post.
   const [topic, setTopic] = useState("");
+  /** Which footer button is mid-save, so only that one shows a spinner. */
+  const [pending, setPending] = useState<"draft" | "another" | "save" | null>(null);
   const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
   // Content first, always: nobody arrives at this modal already knowing when
   // they want to post before they have written what they are posting.
@@ -144,7 +146,12 @@ export function PostComposer({
   };
 
   const save = async (andAnother: boolean, asDraft = false) => {
+    // Which button was pressed, so only that one spins. `saving` is true for
+    // any save in flight, so keying the spinner off it alone put a spinner in
+    // all three at once.
+    setPending(asDraft ? "draft" : andAnother ? "another" : "save");
     const ok = await onSave(draft, asDraft);
+    setPending(null);
     if (!ok) return;
     if (andAnother) {
       // The cadence is the part people keep across a batch — only the content
@@ -382,8 +389,8 @@ export function PostComposer({
                     <Tooltip label="Saves the post and its time, but publishes nothing until you resume it" withArrow>
                       <Button
                         variant="default"
-                        loading={saving}
-                        disabled={blocked}
+                        loading={pending === "draft"}
+                        disabled={blocked || saving}
                         onClick={() => save(false, true)}
                       >
                         Save as draft
@@ -396,14 +403,18 @@ export function PostComposer({
                   {!editing && (
                     <Button
                       variant="default"
-                      loading={saving}
-                      disabled={blocked}
+                      loading={pending === "another"}
+                      disabled={blocked || saving}
                       onClick={() => save(true)}
                     >
                       Save & add another
                     </Button>
                   )}
-                  <Button loading={saving} disabled={blocked} onClick={() => save(false)}>
+                  <Button
+                    loading={pending === "save"}
+                    disabled={blocked || saving}
+                    onClick={() => save(false)}
+                  >
                     {editing ? "Save changes" : "Create schedule"}
                   </Button>
                 </Group>

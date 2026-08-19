@@ -144,33 +144,6 @@ function PostRow({
           </Box>
         )}
 
-        {/* Status reads on the image, the way a feed post shows a badge over
-            its thumbnail, so it is visible without reading a word of text. */}
-        <Group gap={6} style={{ position: "absolute", top: 8, left: 8 }} wrap="wrap">
-          {sent ? (
-            <Badge size="sm" variant="filled" color="gray">Published</Badge>
-          ) : draft ? (
-            <Badge size="sm" variant="filled" color="gray">Draft</Badge>
-          ) : (
-            <Badge size="sm" variant="filled" color="teal">Scheduled</Badge>
-          )}
-          {repeating && (
-            <Badge size="sm" variant="filled" color="orange" leftSection={<Repeat size={11} />}>
-              Repeats
-            </Badge>
-          )}
-        </Group>
-
-        {moved && (
-          <Badge
-            size="sm"
-            variant="filled"
-            style={{ position: "absolute", top: 8, right: 8 }}
-          >
-            Moved here
-          </Badge>
-        )}
-
         {/* The network this card publishes to. One mark today; a second
             network will sit beside it here rather than needing a new place
             to live. */}
@@ -196,6 +169,26 @@ function PostRow({
           action bar, so a short caption does not leave the buttons floating
           partway up a tall card. */}
       <Stack gap={6} p="md" style={{ flex: 1, minWidth: 0 }}>
+        {/* Under the image rather than floating on it: a badge over artwork is
+            legible only until someone attaches a light image, and a status
+            that disappears on certain posts is worse than one that never
+            moved. Here it reads against the card's own surface every time. */}
+        <Group gap={6} wrap="wrap">
+          {sent ? (
+            <Badge size="sm" variant="light" color="gray">Published</Badge>
+          ) : draft ? (
+            <Badge size="sm" variant="light" color="yellow">Draft</Badge>
+          ) : (
+            <Badge size="sm" variant="light" color="teal">Scheduled</Badge>
+          )}
+          {repeating && (
+            <Badge size="sm" variant="light" color="orange" leftSection={<Repeat size={11} />}>
+              Repeats
+            </Badge>
+          )}
+          {moved && <Badge size="sm" variant="filled">Moved here</Badge>}
+        </Group>
+
         <Text fw={600} truncate>{post.name}</Text>
         <Text size="sm" c="dimmed" lineClamp={3} style={{ flex: 1 }}>
           {post.caption}
