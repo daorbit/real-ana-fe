@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title, Tooltip,
+  Alert, Avatar, Badge, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title,
+  Tooltip,
 } from "@mantine/core";
 import { CalendarClock, CheckCircle2, Plus, TriangleAlert } from "lucide-react";
+import { LINKEDIN_BLUE, LINKEDIN_GLOW, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
@@ -300,13 +302,51 @@ export default function SocialPosts() {
 
   return (
     <AppShell>
-      <Group justify="space-between" align="flex-start" mb="lg" wrap="nowrap">
-        <div>
-          <Title order={2}>Scheduled posts</Title>
-          <Text c="dimmed" size="sm" mt={4}>
-            Plan your LinkedIn posts ahead. Each one publishes by itself, at the time you pick.
-          </Text>
-        </div>
+      {/* The mark says what this page publishes to before a word is read. It
+          carries LinkedIn's own blue and a soft glow of the same colour, so it
+          reads as a badge for the connected network rather than one more toolbar
+          button -- nothing else on the page is that colour or lit that way. */}
+      <Group justify="space-between" align="flex-start" mb="lg" wrap="wrap" gap="md">
+        <Group align="flex-start" gap="md" wrap="nowrap" style={{ minWidth: 0 }}>
+          <Box
+            aria-hidden
+            style={{
+              width: 46,
+              height: 46,
+              flexShrink: 0,
+              display: "grid",
+              placeItems: "center",
+              borderRadius: 12,
+              background: LINKEDIN_BLUE,
+              // The glow is the brand colour at low alpha, so it reads as light
+              // coming off the mark rather than a generic drop shadow.
+              boxShadow: `0 0 0 4px ${LINKEDIN_GLOW}, 0 6px 18px -4px ${LINKEDIN_GLOW}`,
+            }}
+          >
+            <LinkedInMark size={24} color="#fff" />
+          </Box>
+          <div style={{ minWidth: 0 }}>
+            <Group gap={10} wrap="wrap" align="center">
+              <Title order={2}>Scheduled posts</Title>
+              {/* State next to the name, not buried in a row further down: the
+                  first thing someone checks is whether this is live. */}
+              {ready && (
+                <Badge
+                  size="sm"
+                  variant="light"
+                  color="teal"
+                  leftSection={<CheckCircle2 size={11} />}
+                >
+                  Connected
+                </Badge>
+              )}
+            </Group>
+            <Text c="dimmed" size="sm" mt={4} style={{ maxWidth: "58ch" }}>
+              Write a LinkedIn post now, pick when it should go out, and Quantalog publishes it
+              for you — once, or on a repeating schedule.
+            </Text>
+          </div>
+        </Group>
         <Tooltip label="Connect LinkedIn first" disabled={ready} withArrow>
           <Box>
             <Button
@@ -343,7 +383,7 @@ export default function SocialPosts() {
               size="compact-sm"
               loading={connecting}
               onClick={connect}
-              style={{ background: "#0A66C2", color: "#fff", flexShrink: 0 }}
+              style={{ background: LINKEDIN_BLUE, color: "#fff", flexShrink: 0 }}
             >
               {linkedin?.expired
                 ? "Reconnect LinkedIn"
@@ -372,24 +412,36 @@ export default function SocialPosts() {
           Share panel, which is a strange place to have to go to disconnect
           something this page depends on. */}
       {ready && (
-        <Group justify="space-between" align="center" wrap="nowrap" mb="lg" gap="md">
-          <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
-            <CheckCircle2 size={15} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
-            <Text size="sm" c="dimmed" truncate>
-              Publishing as <strong>{linkedin?.name}</strong> · times shown in {timezone}
-            </Text>
+        <Card withBorder radius="md" padding="sm" mb="lg">
+          <Group justify="space-between" align="center" wrap="nowrap" gap="md">
+            <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+              <Avatar radius="xl" size={34} color="blue" style={{ flexShrink: 0 }}>
+                {linkedin?.name?.trim().charAt(0).toUpperCase() || "?"}
+              </Avatar>
+              <div style={{ minWidth: 0 }}>
+                <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+                  <Text size="sm" fw={600} truncate>{linkedin?.name}</Text>
+                  <LinkedInMark size={13} />
+                </Group>
+                {/* The account and the clock are the two facts that decide what
+                    lands in the feed and when, so they are stated together. */}
+                <Text size="xs" c="dimmed" truncate>
+                  Posts publish to this profile · times in {timezone}
+                </Text>
+              </div>
+            </Group>
+            <Button
+              variant="subtle"
+              color="gray"
+              size="compact-sm"
+              loading={disconnecting}
+              onClick={disconnectLinkedIn}
+              style={{ flexShrink: 0 }}
+            >
+              Disconnect
+            </Button>
           </Group>
-          <Button
-            variant="subtle"
-            color="gray"
-            size="compact-sm"
-            loading={disconnecting}
-            onClick={disconnectLinkedIn}
-            style={{ flexShrink: 0 }}
-          >
-            Disconnect
-          </Button>
-        </Group>
+        </Card>
       )}
 
 
@@ -423,8 +475,10 @@ export default function SocialPosts() {
             </Box>
           ) : (
             <>
-              <Group justify="space-between" align="center" mb="md" wrap="nowrap">
-                <Text fw={700} size="lg">Everything scheduled</Text>
+              {/* No heading beside the switch: the page title already says
+                  "Scheduled posts" and the filter tabs below name whichever
+                  shelf is showing, so a third label in between says nothing. */}
+              <Group justify="flex-end" align="center" mb="md" wrap="nowrap">
                 {viewControl}
               </Group>
               <PostQueue

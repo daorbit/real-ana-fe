@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  Badge, Button, Card, CloseButton, Group, Stack, Tabs, Text, TextInput, Tooltip,
+  Badge, Box, Button, Card, CloseButton, Group, SimpleGrid, Stack, Tabs, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import {
   CheckCircle2, ExternalLink, Pause, Pencil, Play, Repeat, Search, Send, Trash2, TriangleAlert,
@@ -106,12 +106,29 @@ function PostRow({
     >
       <Group justify="space-between" align="flex-start" wrap="nowrap">
         <Group align="flex-start" gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+          {/* Square rather than letterbox: posts carry portrait and square
+              images as often as wide ones, and a 16:9 crop cuts the middle out
+              of everything that is not already that shape. `contain` on a
+              neutral tile shows the whole image, which is what makes a row
+              identifiable at a glance. */}
           {post.imageUrl && (
-            <img
-              src={post.imageUrl}
-              alt=""
-              style={{ width: 96, height: 54, objectFit: "cover", borderRadius: 6, flexShrink: 0 }}
-            />
+            <Box
+              style={{
+                width: 64,
+                height: 64,
+                flexShrink: 0,
+                borderRadius: 8,
+                overflow: "hidden",
+                background: "var(--mantine-color-default)",
+                border: "1px solid var(--mantine-color-default-border)",
+              }}
+            >
+              <img
+                src={post.imageUrl}
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+              />
+            </Box>
           )}
           <div style={{ minWidth: 0, flex: 1 }}>
             <Group gap={8} wrap="nowrap" mb={4}>
@@ -274,7 +291,7 @@ function StatTile({
   tone?: string;
 }) {
   return (
-    <Card withBorder padding="md" radius="md" style={{ flex: "1 1 150px", minWidth: 0 }}>
+    <Card withBorder padding="md" radius="md" style={{ minWidth: 0 }}>
       <Text fw={700} fz={28} lh={1.1} c={tone} style={{ fontVariantNumeric: "tabular-nums" }}>
         {value}
       </Text>
@@ -346,7 +363,10 @@ export function PostQueue({
 
   return (
     <Stack gap="lg">
-      <Group gap="sm" wrap="wrap" align="stretch">
+      {/* A fixed grid rather than flex: tiles that grow to fill the row leave a
+          gap wherever the count is odd, and a stat tile stretched to half the
+          viewport reads as an empty panel rather than a number. */}
+      <SimpleGrid cols={{ base: 2, sm: stats.failed > 0 ? 4 : 3 }} spacing="sm">
         <StatTile
           value={stats.scheduled}
           label="Scheduled"
@@ -373,7 +393,7 @@ export function PostQueue({
             tone="orange"
           />
         )}
-      </Group>
+      </SimpleGrid>
 
       {/* Filter and search sit together above the list, because they answer the
           same question -- "show me a subset" -- and separating them makes the
@@ -447,19 +467,26 @@ export function PostQueue({
 
           {repeating.length > 0 && (
             <div>
-              <Group gap={7} mb="sm" wrap="nowrap">
-                <Repeat size={14} style={{ color: "var(--mantine-color-dimmed)" }} />
-                <Text size="sm" fw={700}>Repeating</Text>
-              </Group>
+              {filter !== "repeating" && (
+                <Group gap={7} mb="sm" wrap="nowrap">
+                  <Repeat size={14} style={{ color: "var(--mantine-color-dimmed)" }} />
+                  <Text size="sm" fw={700}>Repeating</Text>
+                </Group>
+              )}
               <Stack gap="sm">
                 {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
               </Stack>
             </div>
           )}
 
+          {/* The heading is dropped when the active filter already says the same
+              word: "Published" above a list of published posts, on the
+              Published tab, is the label repeated three times. */}
           {sent.length > 0 && (
             <div>
-              <Text size="sm" fw={700} mb="sm" c="dimmed">Published</Text>
+              {filter !== "published" && (
+                <Text size="sm" fw={700} mb="sm" c="dimmed">Published</Text>
+              )}
               <Stack gap="sm">
                 {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
               </Stack>
