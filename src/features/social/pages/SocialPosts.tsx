@@ -13,6 +13,7 @@ import {
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,
   usePublishScheduledPostMutation,
+  useGetWorkspaceUsageQuery,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { PostComposer } from "@/features/social/components/PostComposer";
@@ -38,6 +39,14 @@ import type { ScheduledPost } from "@/shared/types";
 export default function SocialPosts() {
   const { active } = useWorkspace();
   const { data, isLoading, refetch } = useGetScheduledPostsQuery();
+  // The plan's own limits, so this page can say what is left before someone
+  // writes a post rather than after. Refetched alongside the posts, since
+  // creating or deleting one changes what is left.
+  const { data: usage } = useGetWorkspaceUsageQuery(active?._id ?? "", {
+    skip: !active?._id,
+  });
+  const scheduledPosts = usage?.scheduledPosts;
+  const postsFull = !!scheduledPosts && scheduledPosts.used >= scheduledPosts.quota;
   const [create, { isLoading: creating }] = useCreateScheduledPostMutation();
   const [update, { isLoading: updating }] = useUpdateScheduledPostMutation();
   const [remove] = useDeleteScheduledPostMutation();
@@ -97,6 +106,15 @@ export default function SocialPosts() {
   );
 
   const openNew = (date?: string) => {
+    // Refused before the composer opens, not after a post is written: the
+    // server would reject the save either way, but being told at the point of
+    // saving reads as the app losing the work rather than as a plan boundary.
+    if (postsFull) {
+      notify.error(
+        `This workspace can hold ${scheduledPosts?.quota} scheduled post${scheduledPosts?.quota === 1 ? "" : "s"} at once. Publish, delete or upgrade to add another.`,
+      );
+      return;
+    }
     setEditing(null);
     // Clicking a day on the calendar is already half the scheduling decision,
     // so the composer opens on that date rather than making it be picked twice.
@@ -289,17 +307,32 @@ export default function SocialPosts() {
             once, or on a repeating schedule.
           </Text>
         </div>
-        <Tooltip label="Connect LinkedIn first" disabled={ready} withArrow>
-          <Box>
-            <Button
-              leftSection={<Plus size={16} />}
-              disabled={!ready}
-              onClick={() => openNew()}
-            >
-              New post
-            </Button>
-          </Box>
-        </Tooltip>
+        <Group gap="sm" wrap="nowrap" align="center">
+          {/* Only once the queue is close to full: a slot counter shown from
+              the first post turns a limit nobody is near into a permanent
+              nag, where the same line at the boundary is the one useful
+              moment to say it. */}
+          {scheduledPosts && scheduledPosts.used >= scheduledPosts.quota - 1 && (
+            <Text size="xs" c={postsFull ? "orange" : "dimmed"} ta="right">
+              {scheduledPosts.used} of {scheduledPosts.quota} scheduled
+            </Text>
+          )}
+          <Tooltip
+            label={!ready ? "Connect LinkedIn first" : "This workspace's scheduled posts are full"}
+            disabled={ready && !postsFull}
+            withArrow
+          >
+            <Box>
+              <Button
+                leftSection={<Plus size={16} />}
+                disabled={!ready || postsFull}
+                onClick={() => openNew()}
+              >
+                New post
+              </Button>
+            </Box>
+          </Tooltip>
+        </Group>
       </Group>
 
       {/* The connection is the precondition for everything on this page, so its
@@ -432,6 +465,7 @@ export default function SocialPosts() {
         timezone={timezone}
         saving={creating || updating}
         workspaceId={active?._id}
+        repeatingAllowed={scheduledPosts?.repeatingAllowed ?? true}
         onSave={save}
       />
 

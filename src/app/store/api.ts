@@ -272,7 +272,10 @@ export const api = createApi({
       }
     >({
       query: (body) => ({ url: "/api/social/posts", method: "POST", body }),
-      invalidatesTags: ["ScheduledPost"],
+      // `Usage` too: creating, deleting or publishing a post changes how many
+      // slots are left, and a stale counter would let someone start writing a
+      // post the server is about to refuse.
+      invalidatesTags: ["ScheduledPost", "Usage"],
     }),
 
     /** Edit a schedule, including pausing and resuming it. */
@@ -286,12 +289,18 @@ export const api = createApi({
       }>
     >({
       query: ({ id, ...body }) => ({ url: `/api/social/posts/${id}`, method: "PATCH", body }),
-      invalidatesTags: ["ScheduledPost"],
+      // `Usage` too: creating, deleting or publishing a post changes how many
+      // slots are left, and a stale counter would let someone start writing a
+      // post the server is about to refuse.
+      invalidatesTags: ["ScheduledPost", "Usage"],
     }),
 
     deleteScheduledPost: build.mutation<{ deleted: true }, string>({
       query: (id) => ({ url: `/api/social/posts/${id}`, method: "DELETE" }),
-      invalidatesTags: ["ScheduledPost"],
+      // `Usage` too: creating, deleting or publishing a post changes how many
+      // slots are left, and a stale counter would let someone start writing a
+      // post the server is about to refuse.
+      invalidatesTags: ["ScheduledPost", "Usage"],
     }),
 
     /**
@@ -303,7 +312,10 @@ export const api = createApi({
      */
     publishScheduledPost: build.mutation<ScheduledPost & { postUrl: string | null }, string>({
       query: (id) => ({ url: `/api/social/posts/${id}/publish`, method: "POST" }),
-      invalidatesTags: ["ScheduledPost"],
+      // `Usage` too: creating, deleting or publishing a post changes how many
+      // slots are left, and a stale counter would let someone start writing a
+      // post the server is about to refuse.
+      invalidatesTags: ["ScheduledPost", "Usage"],
     }),
 
     getSites: build.query<Site[], string>({

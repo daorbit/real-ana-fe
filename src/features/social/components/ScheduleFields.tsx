@@ -69,20 +69,31 @@ export function ScheduleFields({
   draft,
   onChange,
   timezone,
+  repeatingAllowed = true,
 }: {
   draft: Draft;
   onChange: (patch: Partial<Draft>) => void;
   timezone: string;
+  /** Whether this workspace's plan includes repeating posts. */
+  repeatingAllowed?: boolean;
 }) {
   const past = draft.mode === "once" && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
 
   return (
     <>
+      {/* Repeating is a paid feature, so the tab says so and refuses rather
+          than letting someone set up a cadence the server will reject on
+          save. Disabled in place instead of hidden: a feature nobody can see
+          is one nobody upgrades for. */}
       <SegmentedControl
         fullWidth
         data={[
           { value: "once", label: "Post once" },
-          { value: "repeat", label: "Repeat" },
+          {
+            value: "repeat",
+            label: repeatingAllowed ? "Repeat" : "Repeat · Upgrade",
+            disabled: !repeatingAllowed,
+          },
         ]}
         value={draft.mode}
         onChange={(v) => onChange({ mode: v as PostMode })}

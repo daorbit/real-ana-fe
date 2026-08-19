@@ -76,6 +76,7 @@ export function PostComposer({
   timezone,
   saving,
   workspaceId,
+  repeatingAllowed,
   onSave,
 }: {
   opened: boolean;
@@ -87,6 +88,8 @@ export function PostComposer({
   saving: boolean;
   /** Whose Orbit allowance a generated post is billed against. */
   workspaceId: string | undefined;
+  /** Whether this workspace's plan includes repeating posts. */
+  repeatingAllowed?: boolean;
   /**
    * Persist the draft. Resolves true when it saved, which is what decides
    * whether the composer closes or clears for the next post.
@@ -346,7 +349,12 @@ export function PostComposer({
                 </>
               ) : (
                 <Field label="Schedule" hint={timezone}>
-                  <ScheduleFields draft={draft} onChange={patch} timezone={timezone} />
+                  <ScheduleFields
+                    draft={draft}
+                    onChange={patch}
+                    timezone={timezone}
+                    repeatingAllowed={repeatingAllowed}
+                  />
                 </Field>
               )}
             </Box>

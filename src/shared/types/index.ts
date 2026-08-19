@@ -397,6 +397,14 @@ export type QuotaSummary = {
    * sold as a top-up, so the only way past the line is a plan change.
    */
   events: { planQuota: number; used: number };
+  /**
+   * Scheduled social posts still queued, and how many this workspace may hold.
+   *
+   * `quota` already includes any slots bought as an add-on, so the composer
+   * compares two numbers and needs to know nothing about packs. Optional
+   * because a subscription row written before this existed reports no figures.
+   */
+  scheduledPosts?: { quota: number; used: number; repeatingAllowed: boolean };
   maxSitesPerWorkspace: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
