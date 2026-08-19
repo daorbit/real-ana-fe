@@ -3,7 +3,9 @@ import {
   ActionIcon, Box, Button, Divider, Group, Modal, RingProgress, ScrollArea,
   Text, TextInput, Tooltip,
 } from "@mantine/core";
-import { ArrowLeft, ArrowRight, Check, Monitor, Smartphone, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Monitor, PenLine, Smartphone, X } from "lucide-react";
+import { useWriteShareCaptionMutation } from "@/app/store";
+import { notify, errMessage } from "@/shared/lib/notify";
 import {
   CaptionEditor, CaptionToolbar, countHashtags,
   type CaptionEditorHandle,
@@ -73,6 +75,7 @@ export function PostComposer({
   author,
   timezone,
   saving,
+  workspaceId,
   onSave,
 }: {
   opened: boolean;
@@ -82,6 +85,8 @@ export function PostComposer({
   author: string;
   timezone: string;
   saving: boolean;
+  /** Whose Orbit allowance a generated post is billed against. */
+  workspaceId: string | undefined;
   /**
    * Persist the draft. Resolves true when it saved, which is what decides
    * whether the composer closes or clears for the next post.
@@ -108,6 +113,7 @@ export function PostComposer({
     if (opened) {
       setDraft(initial);
       setStep("content");
+      setTopic("");
     }
   }, [opened, initial]);
 

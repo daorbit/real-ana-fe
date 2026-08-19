@@ -407,6 +407,7 @@ export default function SocialPosts() {
         author={linkedin?.name ?? ""}
         timezone={timezone}
         saving={creating || updating}
+        workspaceId={active?._id}
         onSave={save}
       />
 
