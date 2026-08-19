@@ -655,6 +655,8 @@
     "copyCaption": "Copy caption",
     "copyLink": "Copy link",
     "openLink": "Open dashboard",
+    "publicLink": "Public dashboard link",
+    "publicLinkHint": "Anyone with this link can see your live dashboard. No account needed.",
     "copied": "Copied",
     "downloadImage": "Download image",
     "preview": "Preview",

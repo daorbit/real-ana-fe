@@ -120,8 +120,12 @@ export const PLATFORMS: Platform[] = [
     hashtagLimit: null,
     intent: (c, url) =>
       `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(c)}`,
+    hidden: true,
   },
 ];
+
+/** The tabs the panel shows, in order. */
+export const VISIBLE_PLATFORMS = PLATFORMS.filter((p) => !p.hidden);
 
 export function PlatformGlyph({ icon, size = 16 }: { icon: { path: string; hex: string }; size?: number }) {
   return (

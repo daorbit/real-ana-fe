@@ -7,7 +7,6 @@ import { getToken } from "@/shared/lib/http";
 import {
   useGetLinkedInStatusQuery,
   useDisconnectLinkedInMutation,
-  usePostToLinkedInMutation,
 } from "@/app/store";
 import { LINKEDIN_ICON, PlatformGlyph } from "./sharePlatforms";
 
@@ -47,20 +46,16 @@ function startLinkedInConnect(): Window | null {
  * behaviour they have always had, and nothing here runs for them. The panel's
  * layout, components and styling are the existing ones.
  */
-export function LinkedInConnection({
-  caption,
-  image,
-  disabled,
-}: {
-  caption: string;
-  image: string;
-  /** True while the caption is over the platform's limit — posting is refused. */
-  disabled: boolean;
-}) {
+/**
+ * The LinkedIn connection strip.
+ *
+ * Getting connected only — publishing lives in the panel footer, next to every
+ * other action, so this component no longer holds a post button or its state.
+ */
+export function LinkedInConnection() {
   const { t } = useTranslation();
   const { data: status, isLoading, refetch } = useGetLinkedInStatusQuery();
   const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
-  const [post, { isLoading: posting }] = usePostToLinkedInMutation();
   // True between opening the popup and hearing back from it, so the button can
   // show that something is in flight in another window.
   const [connecting, setConnecting] = useState(false);
@@ -86,11 +81,6 @@ export function LinkedInConnection({
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [t, refetch]);
-  // The permalink of the post just published, so the success state can offer a
-  // link to it. Cleared whenever a new post starts.
-  const [postedUrl, setPostedUrl] = useState<string | null>(null);
-  const [justPosted, setJustPosted] = useState(false);
-
   // A connection that exists but cannot be used reads as disconnected for the
   // purpose of the primary action: the user must go back through consent.
   // Expired, or connected for sign-in only: both need another trip through
@@ -103,24 +93,9 @@ export function LinkedInConnection({
     status?.connected && !status.expired && status.canPublish === false,
   );
 
-  const runPost = async () => {
-    setJustPosted(false);
-    setPostedUrl(null);
-    try {
-      const res = await post({ caption, image }).unwrap();
-      setPostedUrl(res.postUrl);
-      setJustPosted(true);
-      notify.success(t("sharePost.linkedinPosted"));
-    } catch (e) {
-      notify.error(errMessage(e, t("sharePost.linkedinPostError")));
-    }
-  };
-
   const runDisconnect = async () => {
     try {
       await disconnect().unwrap();
-      setJustPosted(false);
-      setPostedUrl(null);
       notify.success(t("sharePost.linkedinDisconnected"));
     } catch (e) {
       notify.error(errMessage(e, t("sharePost.linkedinDisconnectError")));
@@ -132,6 +107,39 @@ export function LinkedInConnection({
       <Group gap={8} mt="md">
         <Loader size="xs" />
         <Text size="sm" c="dimmed">LinkedIn</Text>
+      </Group>
+    );
+  }
+
+  /**
+   * A working connection is not news, so it stops being a card.
+   *
+   * The bordered panel exists to get someone *connected*; once they are, it was
+   * repeating what the tab already says and holding a second primary button a
+   * few hundred pixels above the footer's. What remains is one quiet line
+   * naming the account the post will go out as — the one fact that still
+   * matters at the moment of publishing — with disconnect as a text link.
+   * Publishing itself moved to the footer, beside every other panel's action.
+   */
+  if (status?.connected && !needsReconnect) {
+    return (
+      <Group gap={8} mt="md" wrap="nowrap">
+        <Check size={14} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
+        <Text size="xs" c="dimmed" truncate>
+          {t("sharePost.linkedinConnectedAs", { name: status.profile?.name ?? "" })}
+        </Text>
+        <Anchor
+          component="button"
+          type="button"
+          size="xs"
+          c="dimmed"
+          underline="always"
+          disabled={disconnecting}
+          onClick={runDisconnect}
+          style={{ flexShrink: 0 }}
+        >
+          {t("sharePost.linkedinDisconnect")}
+        </Anchor>
       </Group>
     );
   }
@@ -152,54 +160,7 @@ export function LinkedInConnection({
         <Text size="sm" fw={600}>LinkedIn</Text>
       </Group>
 
-      {status?.connected && !needsReconnect ? (
-        <>
-          <Group gap={6} mb={10} wrap="nowrap">
-            <Check size={14} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
-            <Text size="sm" truncate>
-              {t("sharePost.linkedinConnectedAs", { name: status.profile?.name ?? "" })}
-            </Text>
-          </Group>
-
-          <Group gap="sm" wrap="nowrap">
-            {/* `loading` disables the button as well as showing the spinner,
-                which is what stops a double click publishing twice. */}
-            <Button
-              size="sm"
-              loading={posting}
-              disabled={disabled || !caption.trim()}
-              onClick={runPost}
-              leftSection={<PlatformGlyph icon={LINKEDIN_ICON} />}
-              // Dropped while disabled: the brand colour would otherwise paint
-              // over the dimming that shows the button cannot be pressed.
-              style={
-                disabled || !caption.trim()
-                  ? undefined
-                  : { background: `#${LINKEDIN_ICON.hex}`, color: "#fff" }
-              }
-            >
-              {posting ? t("sharePost.linkedinPosting") : t("sharePost.linkedinPost")}
-            </Button>
-            <Button size="sm" variant="default" loading={disconnecting} onClick={runDisconnect}>
-              {t("sharePost.linkedinDisconnect")}
-            </Button>
-          </Group>
-
-          {justPosted && (
-            <Group gap={6} mt={10} wrap="nowrap">
-              <Check size={13} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
-              <Text size="xs" c="dimmed">{t("sharePost.linkedinPosted")}</Text>
-              {/* Only when LinkedIn returned a URN we can address — never a
-                  guessed URL. */}
-              {postedUrl && (
-                <Anchor href={postedUrl} target="_blank" rel="noopener noreferrer" size="xs">
-                  {t("sharePost.linkedinView")}
-                </Anchor>
-              )}
-            </Group>
-          )}
-        </>
-      ) : (
+      {(
         <>
           <Text size="xs" c="dimmed" mb={10}>
             {status?.configured === false

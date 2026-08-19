@@ -2,16 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Modal, Group, Button, Text, Box, CopyButton, ActionIcon, Tooltip,
-  ScrollArea, Divider,
+  ScrollArea, Divider, Anchor,
 } from "@mantine/core";
 import {
-  Copy, Check, Download, X, RotateCcw,
+  Copy, Check, Download, X, RotateCcw, ExternalLink,
   Monitor, Smartphone, Link as LinkIcon, PenLine,
 } from "lucide-react";
 import { notify, errMessage } from "@/shared/lib/notify";
 import {
   useWriteShareCaptionMutation,
   useGetLinkedInStatusQuery,
+  usePostToLinkedInMutation,
 } from "@/app/store";
 import {
   renderShareCard, downloadShareCard,
@@ -21,7 +22,7 @@ import {
   CaptionEditor, CaptionToolbar, countHashtags,
   type CaptionEditorHandle,
 } from "@/shared/components/CaptionEditor";
-import { PLATFORMS, PlatformGlyph, copyText, type PlatformId } from "./sharePlatforms";
+import { PLATFORMS, VISIBLE_PLATFORMS, PlatformGlyph, copyText, type PlatformId } from "./sharePlatforms";
 import { FeedPreview } from "./FeedPreview";
 import { LinkedInConnection } from "./LinkedInConnection";
 
@@ -58,6 +59,10 @@ export function SharePostModal({
   const [platform, setPlatform] = useState<PlatformId>("linkedin");
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
+  const [postToLinkedIn, { isLoading: posting }] = usePostToLinkedInMutation();
+  // The permalink of the post just published, so the panel can link to it.
+  const [postedUrl, setPostedUrl] = useState<string | null>(null);
+  const [justPosted, setJustPosted] = useState(false);
   // Read here as well as inside the connection panel: RTK Query serves both
   // from one cache entry, so this is the same request, not a second one.
   const { data: linkedInStatus } = useGetLinkedInStatusQuery();
@@ -159,6 +164,20 @@ export function SharePostModal({
     }
   };
 
+  /** Publish through our own LinkedIn connection. */
+  const runLinkedInPost = async () => {
+    setJustPosted(false);
+    setPostedUrl(null);
+    try {
+      const res = await postToLinkedIn({ caption, image }).unwrap();
+      setPostedUrl(res.postUrl);
+      setJustPosted(true);
+      notify.success(t("sharePost.linkedinPosted"));
+    } catch (e) {
+      notify.error(errMessage(e, t("sharePost.linkedinPostError")));
+    }
+  };
+
   const share = () => {
     // Belt and braces with the disabled button above: LinkedIn now publishes
     // through our own connection, so the intent fallback must not run for it
@@ -210,7 +229,7 @@ export function SharePostModal({
           {/* Platform tabs — hand-rolled rather than Mantine's, so the active
               underline can carry the network's own brand colour. */}
           <Group className="share-post-row share-post-tabs" gap={0} wrap="nowrap" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
-            {PLATFORMS.map((p) => {
+            {VISIBLE_PLATFORMS.map((p) => {
               const on = p.id === platform;
               return (
                 <Box
@@ -234,6 +253,55 @@ export function SharePostModal({
           </Group>
 
           <ScrollArea style={{ flex: 1 }} type="auto">
+            {/* The link tab shares a URL, not a post: no caption, no card, no
+                network. Giving it the composer would put an editor on screen
+                whose text nothing would ever publish. */}
+            {platform === "link" ? (
+              <Box className="share-post-body">
+                <Text size="sm" fw={600} mb={8}>{t("sharePost.publicLink")}</Text>
+                <Text size="xs" c="dimmed" mb="md" style={{ lineHeight: 1.5 }}>
+                  {t("sharePost.publicLinkHint")}
+                </Text>
+
+                <Box
+                  p="sm"
+                  style={{
+                    border: "1px solid var(--mantine-color-default-border)",
+                    borderRadius: "var(--mantine-radius-md)",
+                    background: "var(--mantine-color-default)",
+                  }}
+                >
+                  <Text
+                    size="sm"
+                    style={{ wordBreak: "break-all", fontFamily: "var(--mantine-font-family-monospace)" }}
+                  >
+                    {url}
+                  </Text>
+                </Box>
+
+                <Group mt="sm" gap="sm">
+                  <CopyButton value={url}>
+                    {({ copied, copy }) => (
+                      <Button
+                        variant={copied ? "light" : "filled"}
+                        color={copied ? "teal" : undefined}
+                        onClick={copy}
+                        leftSection={copied ? <Check size={15} /> : <Copy size={15} />}
+                      >
+                        {copied ? t("sharePost.copied") : t("sharePost.copyLink")}
+                      </Button>
+                    )}
+                  </CopyButton>
+                  <Button
+                    variant="default"
+                    leftSection={<ExternalLink size={15} />}
+                    onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
+                  >
+                    {t("sharePost.openLink")}
+                  </Button>
+                </Group>
+              </Box>
+            ) : (
             <Box className="share-post-body">
               <Group justify="space-between" align="center" mb={8} wrap="nowrap">
                 <Text size="sm" fw={600}>{t("sharePost.caption")}</Text>
@@ -363,7 +431,7 @@ export function SharePostModal({
                   panel instead of the copy-and-paste hint. Every other network
                   keeps that hint and its existing behaviour untouched. */}
               {platform === "linkedin" ? (
-                <LinkedInConnection caption={caption} image={image} disabled={overLimit} />
+                <LinkedInConnection />
               ) : (
                 active.needsPaste && (
                   <Text size="xs" c="dimmed" mt="md">
@@ -371,7 +439,22 @@ export function SharePostModal({
                   </Text>
                 )
               )}
+
+              {justPosted && (
+                <Group gap={6} mt="md" wrap="nowrap">
+                  <Check size={13} style={{ color: "var(--mantine-color-teal-6)", flexShrink: 0 }} />
+                  <Text size="xs" c="dimmed">{t("sharePost.linkedinPosted")}</Text>
+                  {/* Only when LinkedIn returned a URN we can address — never a
+                      guessed URL. */}
+                  {postedUrl && (
+                    <Anchor href={postedUrl} target="_blank" rel="noopener noreferrer" size="xs">
+                      {t("sharePost.linkedinView")}
+                    </Anchor>
+                  )}
+                </Group>
+              )}
             </Box>
+            )}
           </ScrollArea>
 
           {/* Action bar, pinned so it stays reachable however long the caption. */}
@@ -404,7 +487,29 @@ export function SharePostModal({
                   two different primary actions on screen at once — one of them
                   the old copy-and-paste intent, which is exactly what the
                   integration replaced. The other four networks are unchanged. */}
-              {platform !== "linkedin" && (
+              {/* LinkedIn publishes through our own connection, so its primary
+                  action is a real post rather than the intent hand-off — but it
+                  sits here, with every other panel's primary action, instead of
+                  halfway up the body. The Link tab has no composer to publish,
+                  so it carries no action beyond the copy button opposite. */}
+              {platform === "linkedin" ? (
+                linkedInReady && (
+                  <Button
+                    onClick={runLinkedInPost}
+                    loading={posting}
+                    disabled={overLimit || !caption.trim()}
+                    radius="xl"
+                    leftSection={<PlatformGlyph icon={active.icon} />}
+                    style={
+                      overLimit || !caption.trim()
+                        ? undefined
+                        : { background: `#${active.icon.hex}`, color: "#fff" }
+                    }
+                  >
+                    {posting ? t("sharePost.linkedinPosting") : t("sharePost.linkedinPost")}
+                  </Button>
+                )
+              ) : platform !== "link" ? (
                 <Button
                   onClick={share}
                   disabled={overLimit}
@@ -418,7 +523,7 @@ export function SharePostModal({
                 >
                   {t("sharePost.shareOn", { platform: active.label })}
                 </Button>
-              )}
+              ) : null}
             </Group>
           </Group>
         </Box>
@@ -450,6 +555,21 @@ export function SharePostModal({
 
           <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
             <Box w="100%">
+              {/* Nothing is being composed on the link tab, so the feed mock
+                  would be previewing a post that will never exist. The card
+                  itself is still what a scraper renders for the link, which is
+                  the honest thing to show instead. */}
+              {platform === "link" ? (
+                <Box
+                  style={{
+                    borderRadius: "var(--mantine-radius-md)",
+                    overflow: "hidden",
+                    border: "1px solid var(--mantine-color-default-border)",
+                  }}
+                >
+                  <img src={image} alt="" style={{ display: "block", width: "100%" }} />
+                </Box>
+              ) : (
               <FeedPreview
                 workspace={workspace}
                 caption={caption}
@@ -458,6 +578,7 @@ export function SharePostModal({
                 platform={active}
                 device={device}
               />
+              )}
             </Box>
           </Box>
         </Box>
