@@ -30,7 +30,7 @@ export function PostSlotEmpty({
   return (
     <Group className="post-slot" align="flex-start" wrap="nowrap" gap={0}>
       <Box className="post-slot__time post-slot__time--empty">
-        <Text size="sm" fw={500} c="dimmed">{time}</Text>
+        <Text fw={500} c="dimmed">{time}</Text>
       </Box>
 
       <UnstyledButton

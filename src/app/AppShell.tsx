@@ -653,16 +653,9 @@ function PlanCard() {
           <Badge size="xs" variant="light" color="gray" tt="none">{billing.cycle}</Badge>
         </Group>
 
-        {/* The bar is here even when there is nothing to warn about: a quota
-            you can only see once it is nearly spent is one you cannot plan
-            against, and a flat grey line costs nothing while there is room. */}
-        <Progress
-          value={worstPct * 100}
-          size={4}
-          radius="xl"
-          color="gray"
-          mt={8}
-        />
+        {/* No usage bar while there is room: unlabelled, it reads as a stray
+            rule under the plan name rather than as a quota, and the card that
+            replaces this one the moment a limit is close says it in words. */}
       </UnstyledButton>
     );
   }

@@ -2507,7 +2507,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    The width is set once here and the day heading is aligned to the same box,
    so the time gutter and the date above it cannot drift apart. */
 .post-timeline {
-  --post-gutter: 104px;
+  --post-gutter: 92px;
   width: 100%;
   max-width: 860px;
   margin-inline: auto;
@@ -2520,9 +2520,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .post-slot { width: 100%; }
 
-/* Centred under the cards rather than filling the column: it ends the list, so
-   it should read as a full stop rather than as one more slot. */
-.post-timeline-more { align-self: center; margin-top: 4px; }
+/* The trigger for loading the next stretch of days. It has height so it can be
+   scrolled *to* — a zero-height sentinel inside a container that is already
+   taller than its content never intersects. */
+.post-timeline-sentinel {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  opacity: 0.5;
+}
 
 /* The footnote belongs to the column, not to the page, so it lines up with the
    cards above it instead of starting at the shell's own left edge. */
@@ -2536,11 +2542,19 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 .post-slot__time {
-  width: var(--post-gutter, 104px);
+  width: var(--post-gutter, 92px);
   flex-shrink: 0;
   padding-top: 14px;
   text-align: right;
   padding-right: 16px;
+  /* Fixed-width digits: without them the column shifts as the hour changes
+     width, and a row of times that will not sit still is hard to scan down. */
+  font-variant-numeric: tabular-nums;
+  /* Below the day heading in weight and colour. The date organises the page;
+     the times are labels on the rows under it, and at equal emphasis the two
+     competed and neither read as the heading. */
+  font-size: 0.8125rem;
+  color: var(--text-2);
 }
 
 .post-slot__card {
@@ -2591,7 +2605,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .post-slot__empty {
   flex: 1;
   min-width: 0;
-  padding: 14px 16px;
+  padding: 15px 16px;
   border: 1px solid transparent;
   border-radius: var(--mantine-radius-md);
   background: var(--surface);
@@ -2609,7 +2623,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* The empty slot's own gutter carries no second line, so it aligns to the bar
    rather than to the taller card above it. */
-.post-slot__time--empty { padding-top: 15px; }
+.post-slot__time--empty { padding-top: 16px; }
 
 /* The day heading lines up with the cards rather than the page edge, so the
    date and the posts under it share one margin. */
@@ -2617,9 +2631,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    organises everything else, and at row-size it read as another line of text
    rather than as the heading its slots hang off. */
 .post-day {
-  margin-left: var(--post-gutter, 104px);
-  margin-bottom: 12px;
-  font-size: 1.0625rem;
+  margin-left: var(--post-gutter, 92px);
+  margin-bottom: 14px;
+  font-size: 0.9375rem;
 }
 .post-day strong { font-weight: 700; }
 .post-day span { color: var(--mantine-color-dimmed); }
@@ -2716,6 +2730,53 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding: 10px 12px 12px;
 }
 
+/* ============ Sticky page header ============
+   The title block and the tab bar stay put while the list moves under them, so
+   the page always says what it is and which shelf is open. Both stick to the
+   panel's scroll container rather than the window — the panel is what scrolls.
+
+   The negative inline margin and matching padding bleed the header to the
+   panel's inner edges: without it, rows would scroll through the gap either
+   side of a header that stops at the content's own margin. The background is
+   opaque for the same reason — a translucent sticky bar shows the list sliding
+   through it. */
+/* One element, holding both the title and the tab bar. Sticking them
+   separately meant two offsets — the lower one had to know the upper one's
+   measured height — and any disagreement between them showed as a strip of
+   scrolling rows between the two, or as the pair jittering as the measurement
+   settled. As a single block there is no seam and nothing to measure.
+
+   The negative inline margin and matching padding bleed it to the panel's inner
+   edges: without that, rows scroll through the gap either side of a header that
+   stops at the content's own margin. */
+.page-header--sticky {
+  position: sticky;
+  top: calc(var(--mantine-spacing-md) * -1);
+  z-index: 20;
+  background: var(--shell);
+  margin-inline: calc(var(--mantine-spacing-md) * -1);
+  margin-top: calc(var(--mantine-spacing-md) * -1);
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-md) 0;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+/* Under a textured background the panel is transparent, so an opaque bar would
+   punch a flat rectangle through the wash. Frosted instead: the mesh still
+   shows, but the rows behind it are blurred rather than legible. */
+[data-bg-style="textured"] .page-header--sticky {
+  background: color-mix(in srgb, var(--shell) 82%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 48em) {
+  .page-header--sticky {
+    top: calc(var(--mantine-spacing-sm) * -1);
+    margin-inline: calc(var(--mantine-spacing-sm) * -1);
+    margin-top: calc(var(--mantine-spacing-sm) * -1);
+    padding: var(--mantine-spacing-sm) var(--mantine-spacing-sm) 0;
+  }
+}
+
 /* ============ Post filter bar ============
    One rule under the whole bar, drawn by the list itself, with each tab's own
    bottom border removed. Mantine gives every tab a transparent border that the
@@ -2724,9 +2785,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    misaligned with the rule it was supposed to sit on. The active mark is drawn
    here instead, on the same pixel row as the rule, so it reads as a segment of
    that line being lit rather than as a second line above it. */
-/* Air above the bar so the tabs belong to the list below rather than crowding
-   the page title above them. */
-.post-filters { margin-top: 8px; }
+/* No margin above the bar: it sticks flush under the header, and a gap there
+   would be a strip of nothing that the list scrolls through. The air that used
+   to be here is the header's own bottom padding instead. */
 
 .post-filters .mantine-Tabs-list {
   flex-wrap: nowrap;
@@ -2738,8 +2799,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .post-filters .mantine-Tabs-tab {
   border-bottom: none;
   position: relative;
-  padding: 10px 14px;
+  padding: 11px 14px;
   background: transparent;
+  font-size: 0.9375rem;
 }
 
 /* The lit segment. Pulled down one pixel so it covers the list's rule rather
@@ -2759,6 +2821,18 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .post-filters .mantine-Tabs-tab[data-active]::after { background: var(--text); }
 
 .post-filters .mantine-Tabs-tab[data-active] { color: var(--text); font-weight: 600; }
+
+/* The count is a footnote to the label, not a second label: same size for every
+   tab regardless of how many digits it holds, so a shelf with 50 posts does not
+   sit wider than one with 1. */
+.post-filters .mantine-Tabs-tab .mantine-Badge-root {
+  min-width: 22px;
+  height: 20px;
+  padding-inline: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
 
 .post-filters .mantine-Tabs-tab:not([data-active]) { color: var(--text-2); }
 

@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
-import { Box, Button, Card, Stack, Text } from "@mantine/core";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Box, Card, Stack, Text } from "@mantine/core";
 import { Inbox } from "lucide-react";
 import { DELIVERY_WINDOW_MINUTES } from "./draft";
-import { PostFilters } from "./PostFilters";
 import { PostRow } from "./PostRow";
 import { PostSlotEmpty } from "./PostSlotEmpty";
 import { usePostFilters } from "../hooks/usePostFilters";
@@ -11,7 +10,6 @@ import type { ScheduledPost } from "@/shared/types";
 
 
 export function PostQueue({
-  posts,
   author,
   onEdit,
   onToggle,
@@ -20,8 +18,8 @@ export function PostQueue({
   onCreate,
   publishingId,
   recentlyMovedId,
+  filters,
 }: {
-  posts: ScheduledPost[];
   author: string;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
@@ -30,9 +28,11 @@ export function PostQueue({
   onCreate?: (at: string) => void;
   publishingId: string | null;
   recentlyMovedId?: string | null;
+ 
+  filters: ReturnType<typeof usePostFilters>;
 }) {
   const handlers = { author, onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
-  const { filter, setFilter, counts, visible } = usePostFilters(posts);
+  const { filter, visible } = filters;
 
 
   const upcoming = visible
@@ -79,6 +79,22 @@ export function PostQueue({
   const canExtend = horizon < 365;
 
  
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !canExtend) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setHorizon((d) => d + HORIZON_STEP);
+      },
+      { root: el.closest(".app-panel__scroll"), rootMargin: "600px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [canExtend, horizon]);
+
+ 
   const entriesFor = (day: { posts: ScheduledPost[]; date: string }) => {
     const taken = day.posts.map((p) => +new Date(p.nextRunAt));
     const free = daySlots(day.date).filter((slot) => {
@@ -96,25 +112,24 @@ export function PostQueue({
     <Stack gap="lg">
    
 
-      <PostFilters filter={filter} onFilter={setFilter} counts={counts} />
+ 
 
       {visible.length === 0 && filter !== "queue" ? (
 
-        <Card withBorder padding="xl" radius="md">
+        <Card className="post-timeline" withBorder padding="xl" radius="md">
           <Stack gap={6} align="center">
             <Inbox size={26} strokeWidth={1.5} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text fw={600} mt={4}>
-              {filter === "approvals" ? "Approvals are not set up yet" : "No posts here"}
-            </Text>
+            <Text fw={600} mt={4}>No posts here</Text>
             <Text size="sm" c="dimmed" ta="center">
-              {filter === "approvals"
-                ? "Posts sent for review will wait here before they publish."
-                : "Nothing on this shelf yet. Pick another tab to see the rest of your posts."}
+              Nothing on this shelf yet. Pick another tab to see the rest of your posts.
             </Text>
           </Stack>
         </Card>
       ) : (
-        <Stack className="post-timeline" gap="lg">
+        {/* Days are separated by clearly more air than the rows inside them —
+            that difference is the only thing grouping a day's slots together,
+            since the headings themselves are quiet. */}
+        <Stack className="post-timeline" gap={34}>
    
           {days.map((day) => {
             const entries = filter === "queue"
@@ -142,21 +157,14 @@ export function PostQueue({
             );
           })}
 
-       
+ 
           {filter === "queue" && canExtend && (
-            <Button
-              className="post-timeline-more"
-              variant="default"
-              size="compact-sm"
-              onClick={() => setHorizon((d) => d + HORIZON_STEP)}
-            >
-              Show {HORIZON_STEP} more days
-            </Button>
+        
+            <Box ref={sentinelRef} className="post-timeline-sentinel" aria-hidden />
           )}
 
           {repeating.length > 0 && (
-            /* The heading is dropped when the active filter already says the
-               same word — the label repeated twice tells nobody anything. */
+        
             <Section title="Repeating">
               {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
             </Section>
@@ -190,8 +198,7 @@ function Section({
   dim?: boolean;
   children: React.ReactNode;
 }) {
-  // The day sits above its own slots and lines up with the card column rather
-  // than the page edge, so the eye follows one left margin down the schedule.
+ 
   const [lead, ...rest] = title?.split(", ") ?? [];
 
   return (
@@ -202,7 +209,9 @@ function Section({
           {rest.length > 0 && <span>, {rest.join(", ")}</span>}
         </Text>
       )}
-      <Stack gap="xs">{children}</Stack>
+      {/* Rows within a day sit closer to each other than days do to each other,
+          so the day is read as the group and the slots as its members. */}
+      <Stack gap={10}>{children}</Stack>
     </Box>
   );
 }

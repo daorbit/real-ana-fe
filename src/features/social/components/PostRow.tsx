@@ -54,7 +54,7 @@ export function PostRow({
       {/* The gutter. Repeating posts have no single clock time, so they say
           their cadence here instead. */}
       <Box className="post-slot__time">
-        <Text size="sm" fw={500}>
+        <Text fw={500}>
           {post.mode === "repeat" ? "Repeats" : clock(post.nextRunAt)}
         </Text>
         {/* What put the post at this time. A repeating post says its cadence;

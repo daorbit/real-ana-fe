@@ -1,5 +1,4 @@
 import { Badge, Tabs } from "@mantine/core";
-import { Zap } from "lucide-react";
 import { FILTERS, type Filter } from "../hooks/usePostFilters";
 
 /**
@@ -36,18 +35,9 @@ export function PostFilters({
               key={f.value}
               value={f.value}
               rightSection={
-                // Approvals carries a mark rather than a number: the shelf has
-                // no count to give yet, and a permanent "0" reads as a feature
-                // that is broken rather than one that is coming.
-                f.value === "approvals" ? (
-                  <Badge size="xs" variant="filled" color="violet" circle>
-                    <Zap size={9} fill="currentColor" strokeWidth={0} />
-                  </Badge>
-                ) : (
-                  <Badge size="xs" variant="light" color={count === 0 ? "gray" : undefined} circle>
-                    {count}
-                  </Badge>
-                )
+                <Badge size="sm" variant="light" color={count === 0 ? "gray" : undefined} circle>
+                  {count}
+                </Badge>
               }
             >
               {f.label}
