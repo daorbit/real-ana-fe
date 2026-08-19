@@ -117,18 +117,21 @@ export function PostCalendar({
           "which posts am I looking at" controls and belong together. */}
       <Group justify="space-between" align="center" mb="sm" wrap="nowrap" gap="sm">
         <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-          <Text fw={700} size="lg" style={{ whiteSpace: "nowrap" }}>{monthLabel}</Text>
+          <Text fw={700} size="md" style={{ whiteSpace: "nowrap" }}>{monthLabel}</Text>
+          {/* Arrows, "Today" and the view switch are all `size="sm"` and
+              `variant="default"`: one row of controls that do the same kind of
+              job should read as one set, not three weights competing. */}
           <Group gap={4} wrap="nowrap">
-            <ActionIcon variant="default" size="sm" onClick={() => step(-1)} aria-label="Previous month">
-              <ChevronLeft size={15} />
+            <ActionIcon variant="default" size="md" onClick={() => step(-1)} aria-label="Previous month">
+              <ChevronLeft size={16} />
             </ActionIcon>
-            <ActionIcon variant="default" size="sm" onClick={() => step(1)} aria-label="Next month">
-              <ChevronRight size={15} />
+            <ActionIcon variant="default" size="md" onClick={() => step(1)} aria-label="Next month">
+              <ChevronRight size={16} />
             </ActionIcon>
           </Group>
           <Button
             variant="default"
-            size="compact-xs"
+            size="xs"
             onClick={() => setCursor(new Date())}
             // Nothing to go back to when the current month is already open.
             disabled={

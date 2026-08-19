@@ -223,7 +223,7 @@ export default function SocialPosts() {
    */
   const viewControl = (
     <SegmentedControl
-      size="xs"
+      size="sm"
       data={[
         { value: "calendar", label: "Calendar" },
         { value: "list", label: "List" },
