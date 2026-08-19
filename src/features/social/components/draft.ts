@@ -29,6 +29,17 @@ export const MAX_CAPTION = 3000;
 export const MAX_HASHTAGS = 30;
 export const MAX_IMAGE_MB = 8;
 
+/**
+ * How late a post can reasonably be, in minutes.
+ *
+ * Publishing is driven by a scheduler that ticks on a fixed interval and sends
+ * whatever is due, so a post never goes out early and is at most one tick late.
+ * Keep this in step with that interval -- it is the number the composer and the
+ * queue quote to set expectations, and quoting a tighter one than the scheduler
+ * can keep is how "it published four minutes late" becomes a bug report.
+ */
+export const DELIVERY_WINDOW_MINUTES = 5;
+
 /** Times people actually publish at, one click away from the number inputs. */
 export const QUICK_TIMES = [
   { label: "09:00", hour: 9, minute: 0 },

@@ -43,21 +43,42 @@ export function PostImageField({
   };
 
   if (value) {
+    // A thumbnail rather than a full-width preview: this field confirms which
+    // image is attached, and the composer is for writing. The post preview
+    // beside it already shows the image at the size it will actually appear,
+    // so a second large copy pushes the schedule controls off the screen for
+    // no information gained. Controls sit beside the thumbnail instead of
+    // floating over it -- at this size an overlay would cover the picture.
     return (
-      <Box
+      <Group
+        gap="sm"
+        wrap="nowrap"
+        p={6}
         style={{
-          position: "relative",
-          borderRadius: "var(--mantine-radius-md)",
-          overflow: "hidden",
           border: "1px solid var(--mantine-color-default-border)",
+          borderRadius: "var(--mantine-radius-md)",
         }}
       >
-        <img src={value} alt="" style={{ display: "block", width: "100%", maxHeight: 220, objectFit: "cover" }} />
-        <Group gap={6} style={{ position: "absolute", top: 8, right: 8 }}>
+        <img
+          src={value}
+          alt=""
+          style={{
+            display: "block",
+            width: 56,
+            height: 56,
+            flexShrink: 0,
+            objectFit: "cover",
+            borderRadius: "var(--mantine-radius-sm)",
+          }}
+        />
+        <Text size="sm" c="dimmed" style={{ flex: 1, minWidth: 0 }}>
+          Image attached
+        </Text>
+        <Group gap={6} wrap="nowrap">
           <FileButton resetRef={resetRef} accept={ACCEPT} onChange={pick}>
             {(props) => (
               <Tooltip label="Replace" withArrow>
-                <ActionIcon {...props} variant="filled" color="dark" size="md" aria-label="Replace image">
+                <ActionIcon {...props} variant="default" size="md" aria-label="Replace image">
                   <Upload size={14} />
                 </ActionIcon>
               </Tooltip>
@@ -65,8 +86,7 @@ export function PostImageField({
           </FileButton>
           <Tooltip label="Remove" withArrow>
             <ActionIcon
-              variant="filled"
-              color="dark"
+              variant="default"
               size="md"
               aria-label="Remove image"
               onClick={() => {
@@ -78,7 +98,7 @@ export function PostImageField({
             </ActionIcon>
           </Tooltip>
         </Group>
-      </Box>
+      </Group>
     );
   }
 

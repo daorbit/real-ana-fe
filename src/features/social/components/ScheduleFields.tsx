@@ -2,7 +2,7 @@ import { Box, Button, Divider, Group, NumberInput, SegmentedControl, Text } from
 import { DatePickerInput, TimePicker } from "@mantine/dates";
 import { CalendarClock, TriangleAlert } from "lucide-react";
 import {
-  FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, toDateInput, type Draft,
+  DELIVERY_WINDOW_MINUTES, FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, toDateInput, type Draft,
 } from "./draft";
 import type { PostFrequency, PostMode } from "@/shared/types";
 
@@ -260,10 +260,34 @@ export function ScheduleFields({
         </>
       )}
 
-      <Group gap={7} mt="sm" wrap="nowrap">
-        <CalendarClock size={14} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
-        <Text size="sm" c="dimmed">{describe(draft)} · {timezone}</Text>
-      </Group>
+      {/* The summary is what someone reads back before saving, so the delivery
+          window belongs here rather than in a help page nobody opens. Publishing
+          runs on a fixed interval, so a post goes out at the picked time or in
+          the few minutes after it — never before. Said plainly and once: a
+          person who knows to expect 12:04 is not surprised by it, and the same
+          person meeting it for the first time in their own feed files a bug. */}
+      <Box
+        mt="sm"
+        p="sm"
+        style={{
+          background: "var(--mantine-color-default)",
+          border: "1px solid var(--mantine-color-default-border)",
+          borderRadius: "var(--mantine-radius-md)",
+        }}
+      >
+        <Group gap={8} wrap="nowrap" align="flex-start">
+          <CalendarClock
+            size={15}
+            style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0, marginTop: 2 }}
+          />
+          <Box style={{ minWidth: 0 }}>
+            <Text size="sm" fw={500}>{describe(draft)}</Text>
+            <Text size="xs" c="dimmed" mt={2}>
+              {timezone} · usually publishes within {DELIVERY_WINDOW_MINUTES} minutes of this time
+            </Text>
+          </Box>
+        </Group>
+      </Box>
     </>
   );
 }

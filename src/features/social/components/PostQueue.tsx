@@ -2,7 +2,7 @@ import { Badge, Button, Card, Group, Stack, Text, Tooltip } from "@mantine/core"
 import {
   CheckCircle2, ExternalLink, Pause, Pencil, Play, Repeat, Send, Trash2, TriangleAlert,
 } from "lucide-react";
-import { WEEKDAYS } from "./draft";
+import { DELIVERY_WINDOW_MINUTES, WEEKDAYS } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -102,8 +102,21 @@ function PostRow({
               {post.caption}
             </Text>
 
+            {/* The scheduled time reads as exact, so the row carries the window
+                on hover rather than in the line itself -- repeated down a long
+                queue it would be noise, and the schedule footnote states it
+                once for anyone who does not hover. Only for posts still
+                waiting: a published post has a real time, not an estimate. */}
             <Text size="xs" c="dimmed">
-              {repeating ? cadence(post) : timeLabel(post.nextRunAt)}
+              <Tooltip
+                label={`Publishes within ${DELIVERY_WINDOW_MINUTES} minutes of this time`}
+                withArrow
+                disabled={sent}
+              >
+                <Text component="span" style={{ cursor: sent ? "default" : "help" }}>
+                  {repeating ? cadence(post) : timeLabel(post.nextRunAt)}
+                </Text>
+              </Tooltip>
               {repeating && post.status === "active" && (
                 <> · next {new Date(post.nextRunAt).toLocaleString()}</>
               )}
@@ -248,6 +261,17 @@ export function PostQueue({
             {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
           </Stack>
         </div>
+      )}
+
+      {/* Stated once at the foot of the queue rather than on every row: someone
+          reading a list of exact-looking times needs this, but reading it a
+          dozen times over is how a caveat starts being skipped. Only when
+          something is actually waiting -- it is irrelevant next to history. */}
+      {(upcoming.length > 0 || repeating.length > 0) && (
+        <Text size="xs" c="dimmed" mt={4}>
+          Scheduled posts publish within {DELIVERY_WINDOW_MINUTES} minutes of their time, never
+          before it.
+        </Text>
       )}
     </Stack>
   );

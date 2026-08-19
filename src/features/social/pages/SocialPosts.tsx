@@ -19,7 +19,7 @@ import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
 import {
-  draftFromPost, emptyDraft, runAtISO, type Draft,
+  DELIVERY_WINDOW_MINUTES, draftFromPost, emptyDraft, runAtISO, type Draft,
 } from "@/features/social/components/draft";
 import type { ScheduledPost } from "@/shared/types";
 
@@ -171,7 +171,14 @@ export default function SocialPosts() {
           image: draft.image || undefined,
           ...fields,
         }).unwrap();
-        notify.success(draft.mode === "once" ? "Post scheduled." : "Repeating post created.");
+        // The confirmation is the last thing read before the composer closes,
+        // so it repeats the delivery window rather than claiming a punctuality
+        // the scheduler does not promise.
+        notify.success(
+          draft.mode === "once"
+            ? `Post scheduled. It publishes within ${DELIVERY_WINDOW_MINUTES} minutes of the time you picked.`
+            : "Repeating post created.",
+        );
       }
       return true;
     } catch (e) {
