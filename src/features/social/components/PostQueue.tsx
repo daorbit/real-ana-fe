@@ -1,6 +1,9 @@
-import { Badge, Button, Card, Group, Stack, Text, Tooltip } from "@mantine/core";
+import { useMemo, useState } from "react";
 import {
-  CheckCircle2, ExternalLink, Pause, Pencil, Play, Repeat, Send, Trash2, TriangleAlert,
+  Badge, Button, Card, CloseButton, Group, Stack, Tabs, Text, TextInput, Tooltip,
+} from "@mantine/core";
+import {
+  CheckCircle2, ExternalLink, Pause, Pencil, Play, Repeat, Search, Send, Trash2, TriangleAlert,
 } from "lucide-react";
 import { DELIVERY_WINDOW_MINUTES, WEEKDAYS } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
@@ -41,8 +44,26 @@ function dayLabel(iso: string): string {
   });
 }
 
+/**
+ * "Tomorrow, 09:00" — the day as well as the time.
+ *
+ * The day heading above a row is not enough on its own: editing a post
+ * reorders the queue, and a row showing only "09:00" looks identical wherever
+ * it lands, so a post that moved to another day reads as unchanged. Carrying
+ * the day on the row itself is what makes the move visible.
+ */
 function timeLabel(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  const at = new Date(iso);
+  const time = at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  const days = Math.round(
+    (new Date(at).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000,
+  );
+  // Short form, because the heading above already carries the long one; this
+  // is here so the row still reads correctly on its own.
+  if (days === 0) return `Today, ${time}`;
+  if (days === 1) return `Tomorrow, ${time}`;
+  const date = at.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  return `${date}, ${time}`;
 }
 
 function PostRow({
@@ -52,6 +73,7 @@ function PostRow({
   onDelete,
   onPublish,
   publishingId,
+  recentlyMovedId,
 }: {
   post: ScheduledPost;
   onEdit: (post: ScheduledPost) => void;
@@ -60,13 +82,28 @@ function PostRow({
   onPublish: (post: ScheduledPost) => void;
   /** The row currently publishing, so only its own button spins. */
   publishingId: string | null;
+  /** The post whose time just changed, so its row can say where it went. */
+  recentlyMovedId?: string | null;
 }) {
   const publishing = publishingId === post.id;
   const repeating = post.mode === "repeat";
   const sent = post.status === "sent";
+  const moved = recentlyMovedId === post.id;
 
   return (
-    <Card withBorder padding="md" radius="md" style={{ opacity: sent ? 0.75 : 1 }}>
+    <Card
+      withBorder
+      padding="md"
+      radius="md"
+      style={{
+        opacity: sent ? 0.75 : 1,
+        // The row is the thing that moved, so the row is what is marked. An
+        // accent border rather than a filled background: it has to be findable
+        // after the queue reorders without turning the card into an alert.
+        borderColor: moved ? "var(--accent)" : undefined,
+        transition: "border-color 200ms ease",
+      }}
+    >
       <Group justify="space-between" align="flex-start" wrap="nowrap">
         <Group align="flex-start" gap="md" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
           {post.imageUrl && (
@@ -85,6 +122,11 @@ function PostRow({
                 <Badge size="sm" variant="light" color="gray">Paused</Badge>
               ) : (
                 <Badge size="sm" variant="light" color="teal">Scheduled</Badge>
+              )}
+              {/* Names what the accent border means, so the mark does not rely
+                  on someone remembering which row they just edited. */}
+              {moved && (
+                <Badge size="sm" variant="filled">Moved here</Badge>
               )}
               {repeating && (
                 <Badge
@@ -195,6 +237,53 @@ function PostRow({
   );
 }
 
+/** The shelves someone actually asks for, in the order they ask. */
+const FILTERS = [
+  { value: "all", label: "All posts" },
+  { value: "scheduled", label: "Scheduled" },
+  { value: "repeating", label: "Repeating" },
+  { value: "published", label: "Published" },
+  { value: "paused", label: "Paused" },
+  { value: "failed", label: "Failed" },
+] as const;
+
+type Filter = (typeof FILTERS)[number]["value"];
+
+/** Which shelves a post belongs on. A post can sit on more than one. */
+function matches(post: ScheduledPost, filter: Filter): boolean {
+  switch (filter) {
+    case "all": return true;
+    case "scheduled": return post.mode !== "repeat" && post.status === "active";
+    case "repeating": return post.mode === "repeat";
+    case "published": return post.status === "sent" || post.postCount > 0;
+    case "paused": return post.status === "paused";
+    case "failed": return post.lastStatus === "failed";
+  }
+}
+
+/** A headline number with its label. Reads at a glance, above the detail. */
+function StatTile({
+  value,
+  label,
+  hint,
+  tone,
+}: {
+  value: number;
+  label: string;
+  hint: string;
+  tone?: string;
+}) {
+  return (
+    <Card withBorder padding="md" radius="md" style={{ flex: "1 1 150px", minWidth: 0 }}>
+      <Text fw={700} fz={28} lh={1.1} c={tone} style={{ fontVariantNumeric: "tabular-nums" }}>
+        {value}
+      </Text>
+      <Text size="sm" fw={600} mt={6}>{label}</Text>
+      <Text size="xs" c="dimmed">{hint}</Text>
+    </Card>
+  );
+}
+
 export function PostQueue({
   posts,
   onEdit,
@@ -202,6 +291,7 @@ export function PostQueue({
   onDelete,
   onPublish,
   publishingId,
+  recentlyMovedId,
 }: {
   posts: ScheduledPost[];
   onEdit: (post: ScheduledPost) => void;
@@ -209,17 +299,38 @@ export function PostQueue({
   onDelete: (post: ScheduledPost) => void;
   onPublish: (post: ScheduledPost) => void;
   publishingId: string | null;
+  recentlyMovedId?: string | null;
 }) {
-  const handlers = { onEdit, onToggle, onDelete, onPublish, publishingId };
+  const handlers = { onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
 
-  // Three shelves: what happens on a given day, what happens on a cadence, and
-  // what already happened. Repeating posts sit apart because they belong to no
-  // single day and would otherwise reappear under whichever one is next.
-  const upcoming = posts
+  const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+
+  // Counts come from every post, not the filtered set: a tab showing "0" is
+  // information, and a count that changed because of the current filter would
+  // be a number that means nothing.
+  const stats = useMemo(() => ({
+    scheduled: posts.filter((p) => matches(p, "scheduled")).length,
+    repeating: posts.filter((p) => matches(p, "repeating")).length,
+    published: posts.reduce((n, p) => n + p.postCount, 0),
+    failed: posts.filter((p) => matches(p, "failed")).length,
+  }), [posts]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return posts.filter(
+      (p) => matches(p, filter)
+        && (!q || p.name.toLowerCase().includes(q) || p.caption.toLowerCase().includes(q)),
+    );
+  }, [posts, filter, query]);
+
+  // Within a shelf the question is still "what happens next", so waiting posts
+  // lead in the order they will run and history follows, most recent first.
+  const upcoming = visible
     .filter((p) => p.mode !== "repeat" && p.status !== "sent")
     .sort((a, b) => +new Date(a.nextRunAt) - +new Date(b.nextRunAt));
-  const repeating = posts.filter((p) => p.mode === "repeat");
-  const sent = posts
+  const repeating = visible.filter((p) => p.mode === "repeat");
+  const sent = visible
     .filter((p) => p.mode !== "repeat" && p.status === "sent")
     .sort((a, b) => +new Date(b.lastRunAt ?? 0) - +new Date(a.lastRunAt ?? 0));
 
@@ -231,36 +342,130 @@ export function PostQueue({
     else days.push({ label, posts: [post] });
   }
 
+  const empty = visible.length === 0;
+
   return (
-    <Stack gap="xl">
-      {days.map((day) => (
-        <div key={day.label}>
-          <Text size="sm" fw={700} mb="sm">{day.label}</Text>
-          <Stack gap="sm">
-            {day.posts.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-          </Stack>
-        </div>
-      ))}
+    <Stack gap="lg">
+      <Group gap="sm" wrap="wrap" align="stretch">
+        <StatTile
+          value={stats.scheduled}
+          label="Scheduled"
+          hint="waiting to publish"
+        />
+        <StatTile
+          value={stats.repeating}
+          label="Repeating"
+          hint="on a cadence"
+        />
+        <StatTile
+          value={stats.published}
+          label="Published"
+          hint="posts sent so far"
+          tone="teal"
+        />
+        {/* Only when there is something wrong: a permanent "0 failed" tile
+            spends a quarter of the row on the absence of a problem. */}
+        {stats.failed > 0 && (
+          <StatTile
+            value={stats.failed}
+            label="Failed"
+            hint="need attention"
+            tone="orange"
+          />
+        )}
+      </Group>
 
-      {repeating.length > 0 && (
-        <div>
-          <Group gap={7} mb="sm" wrap="nowrap">
-            <Repeat size={14} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text size="sm" fw={700}>Repeating</Text>
-          </Group>
-          <Stack gap="sm">
-            {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-          </Stack>
-        </div>
-      )}
+      {/* Filter and search sit together above the list, because they answer the
+          same question -- "show me a subset" -- and separating them makes the
+          second one look like a page-wide search. */}
+      <Group justify="space-between" align="flex-end" wrap="wrap" gap="sm">
+        <Tabs value={filter} onChange={(v) => setFilter((v as Filter) ?? "all")} variant="default">
+          <Tabs.List>
+            {FILTERS.map((f) => {
+              const count = f.value === "all"
+                ? posts.length
+                : posts.filter((p) => matches(p, f.value)).length;
+              // An empty shelf that is not the current one is not worth a tab.
+              if (count === 0 && f.value !== filter && f.value !== "all") return null;
+              return (
+                <Tabs.Tab
+                  key={f.value}
+                  value={f.value}
+                  rightSection={
+                    <Badge size="xs" variant="light" circle>{count}</Badge>
+                  }
+                >
+                  {f.label}
+                </Tabs.Tab>
+              );
+            })}
+          </Tabs.List>
+        </Tabs>
 
-      {sent.length > 0 && (
-        <div>
-          <Text size="sm" fw={700} mb="sm" c="dimmed">Published</Text>
-          <Stack gap="sm">
-            {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
+        <TextInput
+          placeholder="Search posts"
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+          leftSection={<Search size={15} />}
+          rightSection={
+            query ? (
+              <CloseButton size="sm" onClick={() => setQuery("")} aria-label="Clear search" />
+            ) : null
+          }
+          w={240}
+        />
+      </Group>
+
+      {empty ? (
+        <Card withBorder padding="xl" radius="md">
+          <Stack gap={6} align="center">
+            <Text fw={600}>
+              {query ? "No posts match that search" : "Nothing on this shelf"}
+            </Text>
+            <Text size="sm" c="dimmed" ta="center">
+              {query
+                ? "Try a shorter search, or clear it to see everything."
+                : "Switch to another filter to see the rest of your posts."}
+            </Text>
+            {query && (
+              <Button variant="default" size="compact-sm" mt={4} onClick={() => setQuery("")}>
+                Clear search
+              </Button>
+            )}
           </Stack>
-        </div>
+        </Card>
+      ) : (
+        <Stack gap="xl">
+          {days.map((day) => (
+            <div key={day.label}>
+              <Text size="sm" fw={700} mb="sm">{day.label}</Text>
+              <Stack gap="sm">
+                {day.posts.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
+              </Stack>
+            </div>
+          ))}
+
+          {repeating.length > 0 && (
+            <div>
+              <Group gap={7} mb="sm" wrap="nowrap">
+                <Repeat size={14} style={{ color: "var(--mantine-color-dimmed)" }} />
+                <Text size="sm" fw={700}>Repeating</Text>
+              </Group>
+              <Stack gap="sm">
+                {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
+              </Stack>
+            </div>
+          )}
+
+          {sent.length > 0 && (
+            <div>
+              <Text size="sm" fw={700} mb="sm" c="dimmed">Published</Text>
+              <Stack gap="sm">
+                {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
+              </Stack>
+            </div>
+          )}
+        </Stack>
       )}
 
       {/* Stated once at the foot of the queue rather than on every row: someone
@@ -268,7 +473,7 @@ export function PostQueue({
           dozen times over is how a caveat starts being skipped. Only when
           something is actually waiting -- it is irrelevant next to history. */}
       {(upcoming.length > 0 || repeating.length > 0) && (
-        <Text size="xs" c="dimmed" mt={4}>
+        <Text size="xs" c="dimmed">
           Scheduled posts publish within {DELIVERY_WINDOW_MINUTES} minutes of their time, never
           before it.
         </Text>

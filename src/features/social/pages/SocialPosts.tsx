@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
@@ -19,7 +19,7 @@ import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
 import {
-  DELIVERY_WINDOW_MINUTES, draftFromPost, emptyDraft, runAtISO, type Draft,
+  DELIVERY_WINDOW_MINUTES, describe, draftFromPost, emptyDraft, runAtISO, type Draft,
 } from "@/features/social/components/draft";
 import type { ScheduledPost } from "@/shared/types";
 
@@ -45,19 +45,34 @@ export default function SocialPosts() {
   // Which row is publishing, so only its own button shows the spinner.
   const [publishingId, setPublishingId] = useState<string | null>(null);
 
+  // A post that just changed time, so its row can say so where the person is
+  // actually looking. Cleared on a timer rather than left standing: it marks an
+  // edit that just happened, and a highlight that never fades stops meaning
+  // "this moved" and starts meaning nothing at all.
+  const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
+
   const [composing, setComposing] = useState(false);
   // The post the composer is editing, or null when it is writing a new one.
   const [editing, setEditing] = useState<ScheduledPost | null>(null);
   // What the composer opens with. Held here rather than derived inside it, so
   // "Save & add another" can keep the cadence while the content clears.
   const [initial, setInitial] = useState<Draft>(emptyDraft);
-  // The calendar answers "what is going out and where are the gaps"; the list
-  // answers "what exactly does each one say". Both are the same posts.
-  const [view, setView] = useState<"calendar" | "list">("calendar");
+  // The list leads: it answers "what did I schedule, and what happened to it",
+  // which is the question this page is opened with. The calendar answers a
+  // second one -- "where are the gaps in my week" -- and is a click away.
+  const [view, setView] = useState<"calendar" | "list">("list");
   // Connecting happens in a popup, so this page — and any half-written draft —
   // survives the round trip. `refetch` picks up the new connection state.
   const { connect, connecting } = useLinkedInConnect(refetch);
   const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
+
+  // Long enough to find the row after the queue reorders under you, short
+  // enough that the mark is gone before the next edit.
+  useEffect(() => {
+    if (!recentlyMovedId) return;
+    const timer = setTimeout(() => setRecentlyMovedId(null), 8000);
+    return () => clearTimeout(timer);
+  }, [recentlyMovedId]);
 
   /**
    * Drop the connection.
@@ -163,8 +178,13 @@ export default function SocialPosts() {
       if (editing) {
         // An unchanged image is sent back as the https URL it already is, which
         // the server takes as "leave it alone" — only a data URL is re-uploaded.
-        await update({ id: editing.id, image: draft.image, ...fields }).unwrap();
-        notify.success("Post updated.");
+        const saved = await update({ id: editing.id, image: draft.image, ...fields }).unwrap();
+        // Rescheduling reorders the queue, and a row shows only a time, so a
+        // post that moved to another day looks untouched in the place someone
+        // is still looking at. Say where it went, and mark the row itself.
+        const moved = editing.nextRunAt !== saved.nextRunAt;
+        notify.success(moved ? `Post moved to ${describe(draft)}.` : "Post updated.");
+        if (moved) setRecentlyMovedId(saved.id);
       } else {
         await create({
           workspaceId: active._id,
@@ -414,6 +434,7 @@ export default function SocialPosts() {
                 onDelete={destroy}
                 onPublish={publishNow}
                 publishingId={publishingId}
+                recentlyMovedId={recentlyMovedId}
               />
             </>
           )}
