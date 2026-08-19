@@ -1,19 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  ActionIcon, Box, Button, Divider, Group, Modal, RingProgress, ScrollArea,
-  Text, TextInput, Tooltip,
+  ActionIcon, Box, Divider, Group, Modal, ScrollArea, Text,
 } from "@mantine/core";
-import { ArrowLeft, ArrowRight, Check, Monitor, PenLine, Smartphone, X } from "lucide-react";
-import { useWriteShareCaptionMutation } from "@/app/store";
-import { notify, errMessage } from "@/shared/lib/notify";
-import {
-  CaptionEditor, CaptionToolbar, countHashtags,
-  type CaptionEditorHandle,
-} from "@/shared/components/CaptionEditor";
+import { Monitor, Smartphone, X } from "lucide-react";
+import { countHashtags, type CaptionEditorHandle } from "@/shared/components/CaptionEditor";
 import { LinkedInPreview } from "./LinkedInPreview";
-import { PostImageField } from "./PostImageField";
+import { ComposerContentStep } from "./ComposerContentStep";
+import { ComposerField } from "./ComposerField";
+import { ComposerFooter } from "./ComposerFooter";
+import { ComposerSteps, type Step } from "./ComposerSteps";
 import { ScheduleFields } from "./ScheduleFields";
-import { MAX_CAPTION, MAX_HASHTAGS, describe, type Draft } from "./draft";
+import { useOrbitCaption } from "../hooks/useOrbitCaption";
+import { MAX_CAPTION, describe, type Draft } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -22,50 +20,13 @@ import type { ScheduledPost } from "@/shared/types";
  * A full-screen split rather than a dialog, for the same reason the share panel
  * is one: someone writing a post that will go out under their own name, on
  * repeat, unattended, needs to see it as LinkedIn will render it — where the
- * caption folds, how the image crops — while they write. A stack of form fields
- * in a 600px box shows none of that, and the schedule is the one place where
- * nobody is watching when it publishes.
+ * caption folds, how the image crops — while they write.
  *
- * The same component creates and edits: the fields are identical, and one
- * surface means an existing post is corrected where it was written.
+ * Two steps, because writing a post and deciding when it goes out are separate
+ * decisions and nobody makes the second one first. The same component creates
+ * and edits: the fields are identical, and one surface means an existing post
+ * is corrected where it was written.
  */
-
-/**
- * A labelled block in the composer column.
- *
- * `mb={10}` between label and field, `mb="xl"` between one field and the next:
- * a label sitting almost flush against its own input read as cramped, and with
- * too little space below a field the label underneath it looked like it
- * belonged to the field above.
- */
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Box mb="xl">
-      <Group justify="space-between" align="baseline" mb={10} wrap="nowrap">
-        <Text size="sm" fw={600}>{label}</Text>
-        {hint && <Text size="xs" c="dimmed">{hint}</Text>}
-      </Group>
-      {children}
-    </Box>
-  );
-}
-
-/** The two-stage split: what gets written, then when it goes out. */
-const STEPS = [
-  { id: "content" as const, label: "Write" },
-  { id: "schedule" as const, label: "Schedule" },
-];
-
-type Step = (typeof STEPS)[number]["id"];
-
 export function PostComposer({
   opened,
   onClose,
@@ -91,26 +52,27 @@ export function PostComposer({
   /** Whether this workspace's plan includes repeating posts. */
   repeatingAllowed?: boolean;
   /**
-   * Persist the draft. Resolves true when it saved, which is what decides
-   * whether the composer closes or clears for the next post.
-   *
-   * `asDraft` saves it paused, so it keeps its date and time but publishes
-   * nothing until it is resumed.
+   * Persist the draft. Resolves true when it saved, which decides whether the
+   * composer closes or clears for the next post. `asDraft` saves it paused, so
+   * it keeps its date and time but publishes nothing until it is scheduled.
    */
   onSave: (draft: Draft, asDraft?: boolean) => Promise<boolean>;
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
-  // What the post is about, in the author's own words. Kept out of the draft:
-  // it is the instruction that produced the caption, not part of the post.
-  const [topic, setTopic] = useState("");
+  // Content first, always: nobody arrives already knowing when they want to
+  // post before they have written what they are posting.
+  const [step, setStep] = useState<Step>("content");
   /** Which footer button is mid-save, so only that one shows a spinner. */
   const [pending, setPending] = useState<"draft" | "another" | "save" | null>(null);
-  const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
-  // Content first, always: nobody arrives at this modal already knowing when
-  // they want to post before they have written what they are posting.
-  const [step, setStep] = useState<Step>("content");
   const editor = useRef<CaptionEditorHandle | null>(null);
+
+  const patch = (next: Partial<Draft>) => setDraft((d) => ({ ...d, ...next }));
+
+  const { topic, setTopic, generate, writing } = useOrbitCaption({
+    workspaceId,
+    onCaption: (caption) => patch({ caption }),
+  });
 
   // Seed from `initial` on open, so editing an existing post loads it and a new
   // one starts blank — without wiping what is being typed on every re-render.
@@ -120,9 +82,9 @@ export function PostComposer({
       setStep("content");
       setTopic("");
     }
+    // `setTopic` is stable; re-running on it would reset the field mid-edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opened, initial]);
-
-  const patch = (next: Partial<Draft>) => setDraft((d) => ({ ...d, ...next }));
 
   const chars = draft.caption.length;
   const tags = countHashtags(draft.caption);
@@ -134,26 +96,12 @@ export function PostComposer({
     && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
   const blocked = empty || overLimit || past;
 
-  const generate = async () => {
-    if (!topic.trim() || !workspaceId) return;
-    try {
-      const res = await writeCaption({
-        workspaceId,
-        platform: "linkedin",
-        topic: topic.trim(),
-      }).unwrap();
-      patch({ caption: res.caption });
-    } catch (e) {
-      notify.error(errMessage(e, "Orbit could not write that post."));
-    }
-  };
-
   const save = async (andAnother: boolean, asDraft = false) => {
-    // Which button was pressed, so only that one spins. `saving` is true for
-    // any save in flight, so keying the spinner off it alone put a spinner in
-    // all three at once.
+    // Which button was pressed, so only that one spins.
     setPending(asDraft ? "draft" : andAnother ? "another" : "save");
     const ok = await onSave(draft, asDraft);
+    // Cleared on the way out either way: a failed save leaves the composer
+    // open, and a button that kept spinning could never be pressed again.
     setPending(null);
     if (!ok) return;
     if (andAnother) {
@@ -183,252 +131,54 @@ export function PostComposer({
       <Group h="100%" gap={0} align="stretch" wrap="nowrap" className="share-post-shell">
         {/* ---- Composer ---- */}
         <Box className="share-post-composer">
-          <Group gap="sm" px={20} py="md" wrap="nowrap" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
+          <Group gap="sm" px={20} py="md" wrap="nowrap" className="composer-header">
             <ActionIcon variant="subtle" color="gray" size="lg" onClick={onClose} aria-label="Close">
               <X size={18} />
             </ActionIcon>
             <Divider orientation="vertical" my={6} />
             <Text fw={600}>{editing ? "Edit scheduled post" : "New scheduled post"}</Text>
-
-            {/* The stepper doubles as a status: which stage is active, and
-                that Write is a completed fact once Schedule is showing — a
-                person landing back on this screen after switching tabs should
-                not have to re-read the form to know where they left off. */}
-            <Group gap={6} wrap="nowrap" ml="auto">
-              {STEPS.map((s, i) => {
-                const active = step === s.id;
-                const done = STEPS.findIndex((x) => x.id === step) > i;
-                return (
-                  <Group key={s.id} gap={6} wrap="nowrap">
-                    {i > 0 && (
-                      <Box style={{ width: 20, height: 1, background: "var(--mantine-color-default-border)" }} />
-                    )}
-                    <Group
-                      gap={6}
-                      wrap="nowrap"
-                      onClick={() => {
-                        // Only Write is reachable by clicking back to it; a step
-                        // ahead cannot be jumped to before the content behind it
-                        // is valid, same as the Continue button enforces.
-                        if (s.id === "content") setStep("content");
-                      }}
-                      style={{ cursor: s.id === "content" ? "pointer" : "default" }}
-                    >
-                      <Box
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderRadius: "50%",
-                          display: "grid",
-                          placeItems: "center",
-                          fontSize: 11,
-                          fontWeight: 700,
-                          flexShrink: 0,
-                          background: active || done ? "var(--accent)" : "var(--mantine-color-default)",
-                          color: active || done ? "#fff" : "var(--mantine-color-dimmed)",
-                          border: active || done ? "none" : "1px solid var(--mantine-color-default-border)",
-                        }}
-                      >
-                        {done ? <Check size={12} /> : i + 1}
-                      </Box>
-                      <Text size="sm" fw={active ? 600 : 500} c={active ? undefined : "dimmed"}>
-                        {s.label}
-                      </Text>
-                    </Group>
-                  </Group>
-                );
-              })}
-            </Group>
+            <ComposerSteps step={step} onStep={setStep} />
           </Group>
 
           <ScrollArea style={{ flex: 1 }} type="auto">
             <Box className="share-post-body">
               {step === "content" ? (
-                <>
-                  <Field label="Name" hint="For your own list. Not published.">
-                    <TextInput
-                      placeholder="Weekly analytics update"
-                      value={draft.name}
-                      onChange={(e) => patch({ name: e.currentTarget.value })}
-                    />
-                  </Field>
-
-                  <Field label="Post" hint={`${tags}/${MAX_HASHTAGS} hashtags`}>
-                    {/* Say what the post is about and Orbit drafts it. A topic
-                        box rather than a bare "write for me" button: the post
-                        goes out under the author's own name, so the model is
-                        given their subject rather than left to guess one from
-                        a workspace it cannot see. Writing over an existing
-                        caption is deliberate — the button says "Rewrite" once
-                        there is something to lose. */}
-                    <Group gap="sm" mb="sm" wrap="nowrap" align="flex-end">
-                      <TextInput
-                        placeholder="What is this post about?"
-                        value={topic}
-                        onChange={(e) => setTopic(e.currentTarget.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && topic.trim() && !writing) {
-                            e.preventDefault();
-                            generate();
-                          }
-                        }}
-                        style={{ flex: 1 }}
-                      />
-                      <Tooltip
-                        label={
-                          topic.trim()
-                            ? "Orbit writes the post from this. Costs one Orbit question."
-                            : "Say what the post is about first"
-                        }
-                        withArrow
-                      >
-                        <Box>
-                          <Button
-                            variant="light"
-                            color="emerald"
-                            loading={writing}
-                            disabled={!topic.trim()}
-                            onClick={generate}
-                            leftSection={<PenLine size={15} />}
-                          >
-                            {draft.caption.trim() ? "Rewrite" : "Write with Orbit"}
-                          </Button>
-                        </Box>
-                      </Tooltip>
-                    </Group>
-
-                    <Box
-                      style={{
-                        border: `1px solid ${overLimit ? "var(--mantine-color-red-5)" : "var(--mantine-color-default-border)"}`,
-                        borderRadius: "var(--mantine-radius-md)",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <CaptionToolbar editor={editor} />
-                      <CaptionEditor
-                        value={draft.caption}
-                        onChange={(caption) => patch({ caption })}
-                        handleRef={editor}
-                        ariaLabel="Post text"
-                      />
-                      {/* The counter sits inside the field rather than under it:
-                          at 3000 characters the limit is far away most of the
-                          time, and a ring shows how far without reading a
-                          number. */}
-                      <Group
-                        justify="space-between"
-                        align="center"
-                        px={12}
-                        py={6}
-                        wrap="nowrap"
-                        style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
-                      >
-                        <Text size="xs" c="dimmed">
-                          Bold and italic are unicode characters — LinkedIn accepts no formatting.
-                        </Text>
-                        <Group gap={7} wrap="nowrap">
-                          <Text size="xs" c={overLimit ? "red" : "dimmed"}>
-                            {chars.toLocaleString()} / {MAX_CAPTION.toLocaleString()}
-                          </Text>
-                          <RingProgress
-                            size={22}
-                            thickness={3}
-                            sections={[{
-                              value: Math.min(100, (chars / MAX_CAPTION) * 100),
-                              color: overLimit ? "red" : chars > MAX_CAPTION * 0.9 ? "orange" : "emerald",
-                            }]}
-                          />
-                        </Group>
-                      </Group>
-                    </Box>
-                  </Field>
-
-                  <Field label="Image" hint="Optional">
-                    <PostImageField value={draft.image} onChange={(image) => patch({ image })} />
-                  </Field>
-                </>
+                <ComposerContentStep
+                  draft={draft}
+                  patch={patch}
+                  editor={editor}
+                  topic={topic}
+                  onTopic={setTopic}
+                  onGenerate={generate}
+                  writing={writing}
+                  chars={chars}
+                  tags={tags}
+                  overLimit={overLimit}
+                />
               ) : (
-                <Field label="Schedule" hint={timezone}>
+                <ComposerField label="Schedule" hint={timezone}>
                   <ScheduleFields
                     draft={draft}
                     onChange={patch}
                     timezone={timezone}
                     repeatingAllowed={repeatingAllowed}
                   />
-                </Field>
+                </ComposerField>
               )}
             </Box>
           </ScrollArea>
 
-          {/* Action bar, pinned so it stays reachable however long the post.
-              Write moves forward only — the content has to exist before there
-              is anything to schedule. Schedule can step back without losing
-              what was written, since the draft lives above both steps. */}
-          <Group
-            justify="space-between"
-            px={20}
-            py="md"
-            wrap="nowrap"
-            style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
-          >
-            {step === "content" ? (
-              <>
-                <Button variant="subtle" color="gray" onClick={onClose}>Cancel</Button>
-                <Button rightSection={<ArrowRight size={15} />} disabled={empty || overLimit} onClick={() => setStep("schedule")}>
-                  Continue to schedule
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="subtle"
-                  color="gray"
-                  leftSection={<ArrowLeft size={15} />}
-                  onClick={() => setStep("content")}
-                >
-                  Back
-                </Button>
-                <Group gap="sm" wrap="nowrap">
-                  {/* Keeps the work without committing to publish it. The date
-                      and time are still saved — a draft is a post on hold, not
-                      a post with no schedule — so resuming it later needs one
-                      click rather than picking a time again. */}
-                  {!editing && (
-                    <Tooltip label="Saves the post and its time, but publishes nothing until you resume it" withArrow>
-                      <Button
-                        variant="default"
-                        loading={pending === "draft"}
-                        disabled={blocked || saving}
-                        onClick={() => save(false, true)}
-                      >
-                        Save as draft
-                      </Button>
-                    </Tooltip>
-                  )}
-                  {/* Composing a batch is the normal case here — someone sits
-                      down and queues a month of posts. Closing after each one
-                      would make that a dozen round trips through the list. */}
-                  {!editing && (
-                    <Button
-                      variant="default"
-                      loading={pending === "another"}
-                      disabled={blocked || saving}
-                      onClick={() => save(true)}
-                    >
-                      Save & add another
-                    </Button>
-                  )}
-                  <Button
-                    loading={pending === "save"}
-                    disabled={blocked || saving}
-                    onClick={() => save(false)}
-                  >
-                    {editing ? "Save changes" : "Create schedule"}
-                  </Button>
-                </Group>
-              </>
-            )}
-          </Group>
+          <ComposerFooter
+            step={step}
+            editing={!!editing}
+            blocked={blocked}
+            canContinue={!empty && !overLimit}
+            pending={pending}
+            saving={saving}
+            onClose={onClose}
+            onStep={setStep}
+            onSave={save}
+          />
         </Box>
 
         {/* ---- Preview ---- */}

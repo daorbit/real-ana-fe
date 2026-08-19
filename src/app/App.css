@@ -2412,23 +2412,78 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 /* The grid keeps its width and scrolls rather than squashing. */
 .post-calendar-scroll { overflow-x: auto; padding-bottom: 4px; }
 
-/* ============ Scheduled post cards ============
-   The image is the top of the card and has to reach its own border, so this
-   card opts out of the global Card padding — which is set with `!important`
-   for the ordinary text-and-button cards and would otherwise inset the image
-   on every side. Padding lives on the inner text block instead. */
-/* Selector deliberately heavier than `[data-density=compact] .mantine-Card-root`,
-   which sets its padding with `!important` and would otherwise win. */
-html body .post-card.mantine-Card-root { padding: 0 !important; }
-
-/* A responsive card row: cards grow to share the space rather than sitting at
-   one fixed width, so a shelf of one is not a narrow sliver beside empty
-   space and a shelf of many still wraps tidily. */
-.post-card-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: var(--mantine-spacing-md);
+/* ============ Scheduled post rows ============
+   One post, as a row. The columns keep fixed widths so a reader can run down
+   the times or the statuses without re-finding them on every item — which is
+   the whole reason this is a list and not a grid of cards. */
+.post-row {
+  padding: 10px 12px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-body);
+  transition: border-color 150ms ease, background 150ms ease;
 }
+
+.post-row:hover { background: var(--mantine-color-default-hover); }
+
+.post-row__thumb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.post-row__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* The network mark, tucked into the thumbnail's corner rather than taking a
+   column of its own — it is the same for every row today. */
+.post-row__network {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px 0 0 0;
+  background: #0a66c2;
+}
+
+.post-row__when { width: 168px; flex-shrink: 0; }
+.post-row__status { width: 132px; flex-shrink: 0; }
+
+/* Below this the fixed columns leave nothing for the caption, so the row wraps
+   into a block: thumbnail and text on one line, meta and actions beneath. */
+@media (max-width: 62em) {
+  .post-row { flex-wrap: wrap; }
+  .post-row__when,
+  .post-row__status { width: auto; }
+}
+
+/* ============ Scheduled post summary ============
+   One strip, not three cards: these numbers describe the list directly below
+   them, and boxing each separately gave a row of mostly-empty panels more
+   weight than the posts themselves. */
+.post-stats {
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+}
+
+.post-stats__item {
+  flex: 1 1 120px;
+  min-width: 0;
+  padding: 12px 16px;
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+.post-stats__item:last-child { border-right: none; }
 
 /* Connection cards share the width evenly and wrap once they run out of room,
    so a third network joining later needs no layout change. */
@@ -2457,4 +2512,14 @@ html body .post-card.mantine-Card-root { padding: 0 !important; }
   display: grid;
   place-items: center;
   border-radius: 12px;
+}
+
+/* ============ Post composer ============
+   Header and action bar frame the scrolling middle, so neither runs into the
+   content when a long post scrolls under them. */
+.composer-header { border-bottom: 1px solid var(--mantine-color-default-border); }
+
+.composer-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--mantine-color-default-border);
 }
