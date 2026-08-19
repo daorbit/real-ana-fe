@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Avatar, Box, Button, Group, Loader, SegmentedControl, Text, Title, Tooltip,
+  Box, Button, Group, Loader, SegmentedControl, Text, Title, Tooltip,
 } from "@mantine/core";
-import { Plus } from "lucide-react";
-import { LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { CalendarDays, List as ListIcon, Plus } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
@@ -15,21 +14,10 @@ import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
 import { PostsEmptyState } from "@/features/social/components/PostsEmptyState";
-import { draftFromPost, emptyDraft, type Draft } from "@/features/social/components/draft";
+import { draftFromPost, emptyDraft, toDateInput, type Draft } from "@/features/social/components/draft";
 import type { ScheduledPost } from "@/shared/types";
 
-/**
- * Scheduled social posts.
- *
- * The post is written here in full — caption and image both — and stored as
- * finished content. The server publishes it unchanged on the cadence chosen,
- * which is the property that makes this predictable: what is composed here is
- * exactly what appears in the feed, with nothing generated in between.
- *
- * This file is the page: what is on screen, and in which state. The operations
- * behind the buttons live in `usePostActions`, the list and its filtering in
- * `PostQueue`, and everything either of those needs in its own module.
- */
+ 
 export default function SocialPosts() {
   const { active } = useWorkspace();
   const { data, isLoading, refetch } = useGetScheduledPostsQuery();
@@ -102,6 +90,23 @@ export default function SocialPosts() {
     setComposing(true);
   };
 
+  
+  const openAt = (at: string) => {
+    if (postsFull) {
+      openNew();
+      return;
+    }
+    const slot = new Date(at);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    setEditing(null);
+    setInitial({
+      ...emptyDraft(),
+      date: toDateInput(slot),
+      time: `${pad(slot.getHours())}:${pad(slot.getMinutes())}`,
+    });
+    setComposing(true);
+  };
+
   const openEdit = (post: ScheduledPost) => {
     setEditing(post);
     setInitial(draftFromPost(post));
@@ -118,8 +123,24 @@ export default function SocialPosts() {
     <SegmentedControl
       size="sm"
       data={[
-        { value: "calendar", label: "Calendar" },
-        { value: "list", label: "List" },
+        {
+          value: "list",
+          label: (
+            <Group gap={6} wrap="nowrap" justify="center">
+              <ListIcon size={15} />
+              <span>List</span>
+            </Group>
+          ),
+        },
+        {
+          value: "calendar",
+          label: (
+            <Group gap={6} wrap="nowrap" justify="center">
+              <CalendarDays size={15} />
+              <span>Calendar</span>
+            </Group>
+          ),
+        },
       ]}
       value={view}
       onChange={(v) => setView(v as "calendar" | "list")}
@@ -128,26 +149,17 @@ export default function SocialPosts() {
 
   return (
     <AppShell>
-      {/* The account, not the feature. This page is one profile's queue, so the
-          profile is what names it — the same thing the posts will go out as,
-          shown the way they will carry it. */}
+      {/* The feature, not the account. A profile name and face as the page
+          title works while there is one network to publish to and breaks the
+          moment there are three — the queue spans every connected account, so
+          it is named for what it does rather than for whose it is. */}
       <Group justify="space-between" align="center" mb="lg" wrap="wrap" gap="md">
-        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-          <Box style={{ position: "relative", flexShrink: 0 }}>
-            <Avatar size={44} radius="xl" color="blue">
-              {linkedin?.name?.trim().charAt(0).toUpperCase() || "?"}
-            </Avatar>
-            <Box className="post-slot__network" aria-hidden>
-              <LinkedInMark size={9} color="#fff" />
-            </Box>
-          </Box>
-          <div style={{ minWidth: 0 }}>
-            <Title order={3} lh={1.2}>{linkedin?.name || "Social posts"}</Title>
-            <Text size="xs" c="dimmed" mt={2}>
-              {ready ? `Publishing to LinkedIn · ${timezone}` : "No account connected yet"}
-            </Text>
-          </div>
-        </Group>
+        <div style={{ minWidth: 0 }}>
+          <Title order={2} lh={1.2}>Social posts</Title>
+          <Text size="sm" c="dimmed" mt={4}>
+            {ready ? `Publishing to LinkedIn · ${timezone}` : "No account connected yet"}
+          </Text>
+        </div>
 
         <Group gap="sm" wrap="nowrap" align="center">
           {/* Only once the queue is nearly full: a slot counter shown from the
@@ -157,12 +169,22 @@ export default function SocialPosts() {
               {scheduledPosts.used} of {scheduledPosts.quota} scheduled
             </Text>
           )}
+
+          {/* The view switch sits with New post rather than above the list:
+              both answer "what do I do with this page", and splitting them put
+              one control in a corner of its own. */}
+          {viewControl}
+
           <Tooltip
             label={!ready ? "Connect LinkedIn first" : "This workspace's scheduled posts are full"}
             disabled={ready && !postsFull}
             withArrow
           >
             <Box>
+              {/* The page's one primary action, so it carries the accent
+                  rather than sitting in the same grey as the view switch
+                  beside it — on this page writing a post is the thing, and a
+                  default button made it read as one option among several. */}
               <Button
                 leftSection={<Plus size={16} />}
                 disabled={!ready || postsFull}
@@ -190,31 +212,24 @@ export default function SocialPosts() {
         <PostsEmptyState disabled={!ready} onCreate={() => openNew()} />
       ) : view === "calendar" ? (
         <Box className="post-calendar-scroll">
-          <PostCalendar
-            posts={posts}
-            onOpen={openEdit}
-            onCreateOn={openNew}
-            viewControl={viewControl}
-          />
+          <PostCalendar posts={posts} onOpen={openEdit} onCreateOn={openNew} />
         </Box>
       ) : (
-        <>
-          {/* No heading beside the switch: the page title already names the
-              page and the filter tabs below name whichever shelf is showing. */}
-          <Group justify="flex-end" align="center" mb="md" wrap="nowrap">
-            {viewControl}
-          </Group>
-          <PostQueue
-            posts={posts}
-            author={linkedin?.name ?? ""}
-            onEdit={openEdit}
-            onToggle={toggle}
-            onDelete={destroy}
-            onPublish={publishNow}
-            publishingId={publishingId}
-            recentlyMovedId={recentlyMovedId}
-          />
-        </>
+        <PostQueue
+          posts={posts}
+          author={linkedin?.name ?? ""}
+          onEdit={openEdit}
+          onToggle={toggle}
+          onDelete={destroy}
+          onPublish={publishNow}
+          /* Clicking a free slot is already the whole scheduling decision, so
+             the composer opens on that instant rather than asking for it
+             again. Withheld entirely when nothing can be scheduled — a row of
+             live "New" buttons that all refuse is worse than none. */
+          onCreate={ready && !postsFull ? openAt : undefined}
+          publishingId={publishingId}
+          recentlyMovedId={recentlyMovedId}
+        />
       )}
 
       <PostComposer

@@ -55,3 +55,41 @@ export function timeLabel(iso: string): string {
 export function whenLabel(post: ScheduledPost): string {
   return post.mode === "repeat" ? cadence(post) : timeLabel(post.nextRunAt);
 }
+
+/**
+ * "1 hour ago" — how long since `iso`, in the coarsest unit that still says
+ * something. A card footer wants the shape of the gap, not its precision:
+ * "2 days ago" is what someone actually reads off "created 51 hours ago".
+ */
+export function relativeTime(iso: string): string {
+  const seconds = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ["year", 31536000], ["month", 2592000], ["week", 604800],
+    ["day", 86400], ["hour", 3600], ["minute", 60],
+  ];
+  const format = new Intl.RelativeTimeFormat(undefined, { numeric: "always" });
+  for (const [unit, size] of units) {
+    if (seconds >= size) return format.format(-Math.floor(seconds / size), unit);
+  }
+  return "just now";
+}
+
+/**
+ * The clock times a day offers to publish at, as ISO instants on `date`.
+ *
+ * The queue shows these as empty slots so a day reads as a plan with gaps in
+ * it rather than as however many posts happen to exist. They are suggestions
+ * only — nothing is stored until a post is written into one.
+ */
+export const SLOT_HOURS = [7, 12, 17, 21] as const;
+
+export function daySlots(iso: string): string[] {
+  const day = new Date(iso);
+  return SLOT_HOURS.map((hour) => {
+    const at = new Date(day);
+    at.setHours(hour, 0, 0, 0);
+    return at.toISOString();
+  });
+}

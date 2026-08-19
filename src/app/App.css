@@ -1,11 +1,16 @@
 :root {
-  /* dark-first base — neutral greys, emerald accent */
-  --bg: #0b0c0f;
-  --bg-2: #131519;
-  --surface: #1a1c22;
-  --surface-2: #22252c;
-  --border: #2b2f38;
-  --border-strong: #3a3f4a;
+  /* dark-first base — neutral greys, emerald accent.
+     Truly neutral rather than blue-tinted: the accent is the only colour on
+     the page that should read as a hue, and a base that leans blue makes the
+     emerald look like it is fighting the background instead of sitting on it.
+     The page and the sidebar share one ground; the steps above it are lifts
+     off that ground rather than a second palette. */
+  --bg: #171717;
+  --bg-2: #1e1e1e;
+  --surface: #232323;
+  --surface-2: #2b2b2b;
+  --border: #303030;
+  --border-strong: #3d3d3d;
   --text: #f2f4f6;
   --text-2: #b4bac4;
   --muted: #7c828e;
@@ -2417,10 +2422,45 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    it, which is what makes the page read as a schedule running down the day
    instead of a table of rows that happen to carry times. Both the gutter and
    the cards share one left margin, so the eye follows a single line down. */
-.post-slot { max-width: 760px; }
+/* The timeline is a fixed-width column centred in whatever space the page has,
+   rather than one pinned to the left margin: a schedule capped at 760px inside
+   a 1600px shell leaves a field of empty space down the right that makes the
+   day look half-loaded. Centring it puts the gutter, the cards and the day
+   headings on one axis with even air either side.
+
+   The width is set once here and the day heading is aligned to the same box,
+   so the time gutter and the date above it cannot drift apart. */
+.post-timeline {
+  --post-gutter: 104px;
+  width: 100%;
+  max-width: 860px;
+  margin-inline: auto;
+  padding-inline: var(--mantine-spacing-md);
+  /* The cap has to hold against a flex parent that would otherwise stretch it,
+     and the padding has to sit inside the cap rather than widening it. */
+  box-sizing: border-box;
+  align-self: center;
+}
+
+.post-slot { width: 100%; }
+
+/* Centred under the cards rather than filling the column: it ends the list, so
+   it should read as a full stop rather than as one more slot. */
+.post-timeline-more { align-self: center; margin-top: 4px; }
+
+/* The footnote belongs to the column, not to the page, so it lines up with the
+   cards above it instead of starting at the shell's own left edge. */
+.post-timeline-note {
+  width: 100%;
+  max-width: 860px;
+  margin-inline: auto;
+  padding-inline: var(--mantine-spacing-md);
+  box-sizing: border-box;
+  align-self: center;
+}
 
 .post-slot__time {
-  width: 104px;
+  width: var(--post-gutter, 104px);
   flex-shrink: 0;
   padding-top: 14px;
   text-align: right;
@@ -2467,9 +2507,44 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
+/* An hour with nothing in it. A filled bar rather than a dashed outline: the
+   empty slots outnumber the posts on most days, and a page of dashed rectangles
+   reads as a broken layout where a flat surface reads as a row of open seats.
+   It sits lower than a card and lifts on hover, so it invites without competing
+   with the posts either side of it. */
+.post-slot__empty {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--mantine-radius-md);
+  background: var(--bg-2, var(--mantine-color-default));
+  color: var(--mantine-color-dimmed);
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.post-slot__empty:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-2, var(--mantine-color-default)));
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--mantine-color-text);
+}
+
+.post-slot__empty:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* The empty slot's own gutter carries no second line, so it aligns to the bar
+   rather than to the taller card above it. */
+.post-slot__time--empty { padding-top: 15px; }
+
 /* The day heading lines up with the cards rather than the page edge, so the
    date and the posts under it share one margin. */
-.post-day { margin-left: 104px; margin-bottom: 10px; }
+/* Bigger than the rows beneath it: the date is the one thing on the page that
+   organises everything else, and at row-size it read as another line of text
+   rather than as the heading its slots hang off. */
+.post-day {
+  margin-left: var(--post-gutter, 104px);
+  margin-bottom: 12px;
+  font-size: 1.0625rem;
+}
 .post-day strong { font-weight: 700; }
 .post-day span { color: var(--mantine-color-dimmed); }
 
@@ -2485,30 +2560,58 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 /* ============ Post filter bar ============
-   The rule under the tabs runs the full width of the page rather than stopping
-   after the last tab — a line that ends mid-air reads as a broken edge, where
-   one reaching both margins reads as the boundary between the controls and the
-   list they filter. */
+   One rule under the whole bar, drawn by the list itself, with each tab's own
+   bottom border removed. Mantine gives every tab a transparent border that the
+   active one colours in, which on top of a border on the list renders as two
+   lines a pixel apart — the "double underline" that made the active tab look
+   misaligned with the rule it was supposed to sit on. The active mark is drawn
+   here instead, on the same pixel row as the rule, so it reads as a segment of
+   that line being lit rather than as a second line above it. */
+/* Air above the bar so the tabs belong to the list below rather than crowding
+   the page title above them. */
+.post-filters { margin-top: 8px; }
+
 .post-filters .mantine-Tabs-list {
   flex-wrap: nowrap;
-  align-items: center;
+  align-items: stretch;
   gap: 4px;
-  border-bottom: 1px solid var(--mantine-color-default-border);
+  border-bottom: 1px solid var(--border);
 }
 
-/* Pushed to the far end of the same bar: it filters the list the tabs filter,
-   and sitting outside made it read as a page-wide search. */
-.post-filters__search {
-  margin-left: auto;
-  width: 240px;
-  flex-shrink: 0;
-  align-self: center;
-  padding-bottom: 6px;
+.post-filters .mantine-Tabs-tab {
+  border-bottom: none;
+  position: relative;
+  padding: 10px 14px;
+  background: transparent;
+}
+
+/* The lit segment. Pulled down one pixel so it covers the list's rule rather
+   than stacking on top of it. */
+.post-filters .mantine-Tabs-tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+  transition: background 150ms ease;
+}
+
+.post-filters .mantine-Tabs-tab[data-active]::after { background: var(--text); }
+
+.post-filters .mantine-Tabs-tab[data-active] { color: var(--text); font-weight: 600; }
+
+.post-filters .mantine-Tabs-tab:not([data-active]) { color: var(--text-2); }
+
+.post-filters .mantine-Tabs-tab:not([data-active]):hover {
+  background: transparent;
+  color: var(--text);
 }
 
 @media (max-width: 48em) {
   .post-filters .mantine-Tabs-list { flex-wrap: wrap; }
-  .post-filters__search { width: 100%; margin-left: 0; }
 }
 
 /* Connection cards share the width evenly and wrap once they run out of room,
@@ -2548,4 +2651,162 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .composer-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--mantine-color-default-border);
+}
+
+/* ============ Week calendar ============
+   Days across, hours down, each post drawn at the time it publishes. Posts are
+   placed absolutely against a fixed hour height rather than stacked in rows:
+   two posts an hour apart have to look an hour apart, which is the only reason
+   to draw a time axis in the first place. */
+.cal-week {
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+  background: var(--mantine-color-body);
+}
+
+/* Day names stay put while the hours scroll under them. */
+.cal-week__head {
+  display: grid;
+  grid-template-columns: 62px repeat(7, 1fr);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.cal-week__gutter-head { border-right: 1px solid var(--mantine-color-default-border); }
+
+.cal-week__day-head {
+  padding: 8px 10px;
+  text-align: center;
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+.cal-week__day-head:last-child { border-right: none; }
+
+/* Today is marked on the header rather than by tinting the whole column, which
+   would fight every post drawn on top of it. */
+.cal-week__day-head[data-today] { box-shadow: inset 0 -2px 0 var(--accent); }
+.cal-week__day-head[data-today] * { color: var(--accent); }
+
+.cal-week__body { max-height: 620px; overflow-y: auto; }
+
+.cal-week__grid {
+  display: grid;
+  grid-template-columns: 62px repeat(7, 1fr);
+  position: relative;
+}
+
+.cal-week__gutter { border-right: 1px solid var(--mantine-color-default-border); }
+
+/* The label sits on the line it names, not inside the hour below it. */
+.cal-week__hour-label {
+  height: var(--hour);
+  position: relative;
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+}
+
+.cal-week__hour-label span {
+  position: absolute;
+  top: -7px;
+  right: 8px;
+  white-space: nowrap;
+}
+
+.cal-week__col {
+  position: relative;
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+.cal-week__col:last-child { border-right: none; }
+.cal-week__col[data-past] { background: color-mix(in srgb, var(--mantine-color-dimmed) 5%, transparent); }
+
+/* One hour. The add affordance only appears on hover, so an empty week is calm
+   rather than a grid of 168 plus signs. */
+.cal-week__slot {
+  height: var(--hour);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.cal-week__col[data-past] .cal-week__slot { cursor: default; }
+
+.cal-week__slot-add { opacity: 0; color: var(--mantine-color-dimmed); transition: opacity 120ms ease; }
+.cal-week__slot:hover .cal-week__slot-add { opacity: 1; }
+.cal-week__col[data-past] .cal-week__slot:hover .cal-week__slot-add { opacity: 0; }
+
+/* Now, across today only. */
+.cal-week__now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.cal-week__now::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* A post, pinned to its minute. Tinted by the same stage colour its row uses
+   in the list, so the two views agree about what a post's state looks like. */
+.cal-week__post {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 7px;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-left-width: 3px;
+  border-radius: 5px;
+  background: var(--mantine-color-default);
+  color: inherit;
+  font: inherit;
+  overflow: hidden;
+}
+
+.cal-week__post:hover { background: var(--mantine-color-default-hover); }
+
+.cal-week__post[data-tone="teal"] { border-left-color: var(--mantine-color-teal-6); }
+.cal-week__post[data-tone="yellow"] { border-left-color: var(--mantine-color-yellow-6); }
+.cal-week__post[data-tone="gray"] { border-left-color: var(--mantine-color-gray-6); }
+.cal-week__post[data-tone="orange"] { border-left-color: var(--mantine-color-orange-6); }
+
+.cal-week__post-time {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--mantine-color-dimmed);
+}
+
+.cal-week__post-name {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Narrow: the week scrolls sideways rather than crushing seven columns. */
+@media (max-width: 62em) {
+  .cal-week__head,
+  .cal-week__grid { grid-template-columns: 52px repeat(7, minmax(110px, 1fr)); }
+  .cal-week { overflow-x: auto; }
 }

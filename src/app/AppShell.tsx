@@ -56,19 +56,28 @@ const NAV_GROUPS = [
     heading: "Manage",
     items: [
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
-      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       // Beside Reports: both are "write it once, it goes out on a schedule".
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
-      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
-      // Last in Manage rather than in a group of its own: help is where you go
-      // when something else on this list did not work, so it belongs beside
-      // them rather than promoted above them.
-      { to: "/app/help", labelKey: "nav.help", label: "Help & support", icon: LifeBuoy },
     ],
   },
+];
+
+/**
+ * The account menu's own items, above Settings.
+ *
+ * These three are reached from the account rather than from the rail because
+ * none of them is a place you work — who is on the team, the keys for the API,
+ * and where to ask for help are all things you go to once and leave again. The
+ * rail is for the pages someone returns to, and mixing the two made a list of
+ * daily destinations end in three that are visited monthly.
+ */
+const ACCOUNT_ITEMS = [
+  { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
+  { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
+  { to: "/app/help", labelKey: "nav.help", label: "Help & support", icon: LifeBuoy },
 ];
 
 /**
@@ -204,7 +213,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <MantineShell.Header
         px="md"
         hiddenFrom="sm"
-        style={{ background: "var(--bg-2)", borderBottom: "1px solid var(--border)" }}
+        style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)" }}
       >
         <Group h="100%" gap="sm">
           <Burger opened={navOpen} onClick={toggleNav} size="sm" aria-label={t("nav.toggleNav")} />
@@ -214,9 +223,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Group>
       </MantineShell.Header>
 
+      {/* The rail shares the page's own ground rather than sitting a step
+          above it: the border is what separates them, and a second surface
+          colour on top of that border made the shell read as two documents
+          side by side rather than one with a rail down the edge. */}
       <MantineShell.Navbar
         p="sm"
-        style={{ background: "var(--bg-2)", borderRight: "1px solid var(--border)" }}
+        style={{ background: "var(--bg)", borderRight: "1px solid var(--border)" }}
       >
         {/* On mobile the wordmark already sits in the top bar, so the one here
             would double up inside the open drawer — desktop-only. */}
@@ -390,6 +403,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Menu.Target>
 
             <Menu.Dropdown>
+              {ACCOUNT_ITEMS.map((item) => (
+                <Menu.Item
+                  key={item.to}
+                  component={Link}
+                  to={item.to}
+                  leftSection={<item.icon size={15} />}
+                >
+                  {t(item.labelKey, item.label)}
+                </Menu.Item>
+              ))}
+              <Menu.Divider />
               <Menu.Item
                 component={Link}
                 to="/app/settings"

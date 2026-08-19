@@ -1,8 +1,9 @@
-import { ActionIcon, Avatar, Badge, Box, Group, Menu, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Group, Menu, Text, Tooltip } from "@mantine/core";
 import {
-  ExternalLink, MoreHorizontal, Pause, Pencil, Play, Repeat, Send, Trash2,
+  ExternalLink, MoreVertical, Pause, Pencil, Pin, Play, Repeat, Send, Trash2,
 } from "lucide-react";
 import { STAGE_COLOR, STAGE_LABEL, stageOf } from "../postStatus";
+import { relativeTime } from "../postTime";
 import { LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { ScheduledPost } from "@/shared/types";
 
@@ -56,12 +57,23 @@ export function PostRow({
         <Text size="sm" fw={500}>
           {post.mode === "repeat" ? "Repeats" : clock(post.nextRunAt)}
         </Text>
-        {post.mode === "repeat" && (
-          <Group gap={4} wrap="nowrap" mt={2}>
-            <Repeat size={11} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text size="xs" c="dimmed">{post.frequency}</Text>
-          </Group>
-        )}
+        {/* What put the post at this time. A repeating post says its cadence;
+            a one-off says the time was chosen rather than taken from a slot,
+            which is the difference between "this is my 9am" and "I meant
+            exactly 1:24". */}
+        <Group gap={4} wrap="nowrap" mt={2} justify="flex-end">
+          {post.mode === "repeat" ? (
+            <>
+              <Repeat size={11} style={{ color: "var(--mantine-color-dimmed)" }} />
+              <Text size="xs" c="dimmed">{post.frequency}</Text>
+            </>
+          ) : (
+            <>
+              <Pin size={11} style={{ color: "var(--mantine-color-dimmed)" }} />
+              <Text size="xs" c="dimmed">Custom</Text>
+            </>
+          )}
+        </Group>
       </Box>
 
       <Box
@@ -101,30 +113,34 @@ export function PostRow({
 
         {/* The foot: what happened to it, and what can be done about it. */}
         <Group className="post-slot__foot" justify="space-between" wrap="nowrap" gap="sm">
+          {/* Provenance rather than status: the badge above already says what
+              stage the post is in, so the foot answers the other question —
+              where this came from and how long it has been sitting here. */}
           <Text size="xs" c={stage === "failed" ? "orange" : "dimmed"} truncate>
             {stage === "failed" && post.lastError
               ? post.lastError
               : sent && post.lastRunAt
-                ? `Published ${new Date(post.lastRunAt).toLocaleString()}`
+                ? `Published ${relativeTime(post.lastRunAt)}`
                 : post.postCount > 0
                   ? `${post.postCount} published so far`
                   : draft
                     ? "Saved as a draft — publishes nothing until you schedule it"
-                    : "Waiting to publish"}
+                    : `You created this ${relativeTime(post.createdAt)}`}
           </Text>
 
           <Group gap={6} wrap="nowrap">
-            <Tooltip label="Post now" withArrow>
-              <ActionIcon
-                variant="default"
-                size="md"
-                loading={publishing}
-                onClick={() => onPublish(post)}
-                aria-label="Post now"
-              >
-                <Send size={14} />
-              </ActionIcon>
-            </Tooltip>
+            {/* Named rather than an icon: this is the one button on the card
+                that publishes immediately, and an unlabelled paper plane is a
+                guess someone only makes once. */}
+            <Button
+              variant="default"
+              size="compact-sm"
+              leftSection={<Send size={13} />}
+              loading={publishing}
+              onClick={() => onPublish(post)}
+            >
+              Publish Now
+            </Button>
             <Tooltip label={sent ? "Reschedule" : "Edit"} withArrow>
               <ActionIcon variant="default" size="md" onClick={() => onEdit(post)} aria-label="Edit">
                 <Pencil size={14} />
@@ -136,7 +152,7 @@ export function PostRow({
             <Menu position="bottom-end" withArrow>
               <Menu.Target>
                 <ActionIcon variant="default" size="md" aria-label="More actions">
-                  <MoreHorizontal size={14} />
+                  <MoreVertical size={14} />
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
