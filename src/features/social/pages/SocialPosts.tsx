@@ -117,7 +117,7 @@ export default function SocialPosts() {
    * keeps the draft on screen on false, so a failure never loses what was
    * written.
    */
-  const save = async (draft: Draft): Promise<boolean> => {
+  const save = async (draft: Draft, asDraft = false): Promise<boolean> => {
     if (!active?._id) {
       notify.error("Pick a workspace first.");
       return false;
@@ -158,19 +158,28 @@ export default function SocialPosts() {
         notify.success(moved ? `Post moved to ${describe(draft)}.` : "Post updated.");
         if (moved) setRecentlyMovedId(saved.id);
       } else {
-        await create({
+        const created = await create({
           workspaceId: active._id,
           image: draft.image || undefined,
           ...fields,
         }).unwrap();
-        // The confirmation is the last thing read before the composer closes,
-        // so it repeats the delivery window rather than claiming a punctuality
-        // the scheduler does not promise.
-        notify.success(
-          draft.mode === "once"
-            ? `Post scheduled. It publishes within ${DELIVERY_WINDOW_MINUTES} minutes of the time you picked.`
-            : "Repeating post created.",
-        );
+
+        // Create always makes an active post, so a draft is paused straight
+        // after. Two calls rather than one, but it keeps drafts entirely a
+        // matter of status — nothing new for the server to understand.
+        if (asDraft) {
+          await update({ id: created.id, status: "paused" }).unwrap();
+          notify.success("Saved as a draft. It publishes nothing until you resume it.");
+        } else {
+          // The confirmation is the last thing read before the composer closes,
+          // so it repeats the delivery window rather than claiming a punctuality
+          // the scheduler does not promise.
+          notify.success(
+            draft.mode === "once"
+              ? `Post scheduled. It publishes within ${DELIVERY_WINDOW_MINUTES} minutes of the time you picked.`
+              : "Repeating post created.",
+          );
+        }
       }
       return true;
     } catch (e) {
