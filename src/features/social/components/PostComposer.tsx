@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ActionIcon, Box, Button, Divider, Group, Modal, RingProgress, ScrollArea,
-  Text, TextInput,
+  Text, TextInput, Tooltip,
 } from "@mantine/core";
 import { ArrowLeft, ArrowRight, Check, Monitor, Smartphone, X } from "lucide-react";
 import {
@@ -85,8 +85,11 @@ export function PostComposer({
   /**
    * Persist the draft. Resolves true when it saved, which is what decides
    * whether the composer closes or clears for the next post.
+   *
+   * `asDraft` saves it paused, so it keeps its date and time but publishes
+   * nothing until it is resumed.
    */
-  onSave: (draft: Draft) => Promise<boolean>;
+  onSave: (draft: Draft, asDraft?: boolean) => Promise<boolean>;
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
@@ -116,8 +119,8 @@ export function PostComposer({
     && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
   const blocked = empty || overLimit || past;
 
-  const save = async (andAnother: boolean) => {
-    const ok = await onSave(draft);
+  const save = async (andAnother: boolean, asDraft = false) => {
+    const ok = await onSave(draft, asDraft);
     if (!ok) return;
     if (andAnother) {
       // The cadence is the part people keep across a batch — only the content
@@ -304,6 +307,22 @@ export function PostComposer({
                   Back
                 </Button>
                 <Group gap="sm" wrap="nowrap">
+                  {/* Keeps the work without committing to publish it. The date
+                      and time are still saved — a draft is a post on hold, not
+                      a post with no schedule — so resuming it later needs one
+                      click rather than picking a time again. */}
+                  {!editing && (
+                    <Tooltip label="Saves the post and its time, but publishes nothing until you resume it" withArrow>
+                      <Button
+                        variant="default"
+                        loading={saving}
+                        disabled={blocked}
+                        onClick={() => save(false, true)}
+                      >
+                        Save as draft
+                      </Button>
+                    </Tooltip>
+                  )}
                   {/* Composing a batch is the normal case here — someone sits
                       down and queues a month of posts. Closing after each one
                       would make that a dozen round trips through the list. */}

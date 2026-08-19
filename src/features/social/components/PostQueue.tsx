@@ -100,16 +100,14 @@ function PostRow({
       withBorder
       padding={0}
       radius="md"
+      // The app sets a fixed Card padding globally with `!important`, which
+      // both the `padding` prop and an inline style lose to. This card's image
+      // has to reach its own border, so it opts out through a class of its own.
+      className="post-card"
       style={{
-        padding: 0,
         opacity: sent ? 0.75 : 1,
         display: "flex",
         flexDirection: "column",
-        // A fixed width, not a grid-cell share: the card now sits in a
-        // wrapping row rather than a grid, so it needs to state its own size
-        // instead of being told one by a column track.
-        width: 280,
-        flexShrink: 0,
         borderColor: moved ? "var(--accent)" : undefined,
         transition: "border-color 200ms ease",
         overflow: "hidden",
@@ -345,23 +343,15 @@ function matches(post: ScheduledPost, filter: Filter): boolean {
 }
 
 /**
- * A card row sized to what it actually holds.
+ * A card row that fills the width it is given.
  *
- * `SimpleGrid` divides its full width into equal columns regardless of how
- * many cards exist, so a shelf with one card gets a full-width column and the
- * card stretched to fill it -- overflowing its own image and text into
- * something unreadable. `Group` with `wrap="wrap"` and a fixed card width does
- * not have that failure mode: each card is exactly as wide as it asks to be,
- * cards wrap onto new lines once the row runs out of room, and a shelf of one
- * simply shows one card at its natural size instead of one stretched to fill
- * a row built for four.
+ * `auto-fill` with a `minmax(280px, 1fr)` track rather than a fixed column
+ * count: the row fits as many cards as the viewport allows and lets them share
+ * the leftover space, so nothing is stretched across a row built for four and
+ * nothing is pinned to a narrow sliver beside empty space. See `.post-card-row`.
  */
 function ShelfGrid({ children }: { children: React.ReactNode }) {
-  return (
-    <Group gap="md" align="stretch" wrap="wrap">
-      {children}
-    </Group>
-  );
+  return <div className="post-card-row">{children}</div>;
 }
 
 /** A headline number with its label. Reads at a glance, above the detail. */

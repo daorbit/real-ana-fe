@@ -2411,3 +2411,29 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* The grid keeps its width and scrolls rather than squashing. */
 .post-calendar-scroll { overflow-x: auto; padding-bottom: 4px; }
+
+/* ============ Scheduled post cards ============
+   The image is the top of the card and has to reach its own border, so this
+   card opts out of the global Card padding — which is set with `!important`
+   for the ordinary text-and-button cards and would otherwise inset the image
+   on every side. Padding lives on the inner text block instead. */
+/* Selector deliberately heavier than `[data-density=compact] .mantine-Card-root`,
+   which sets its padding with `!important` and would otherwise win. */
+html body .post-card.mantine-Card-root { padding: 0 !important; }
+
+/* A responsive card row: cards grow to share the space rather than sitting at
+   one fixed width, so a shelf of one is not a narrow sliver beside empty
+   space and a shelf of many still wraps tidily. */
+.post-card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--mantine-spacing-md);
+}
+
+/* Connection cards share the width evenly and wrap once they run out of room,
+   so a third network joining later needs no layout change. */
+.connection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--mantine-spacing-md);
+}

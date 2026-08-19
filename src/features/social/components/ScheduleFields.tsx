@@ -95,7 +95,7 @@ export function ScheduleFields({
               theme entirely and render a light popover over a dark page. Both
               still speak the same "YYYY-MM-DD" / "HH:mm" strings the draft
               stores, so nothing downstream changes. */}
-          <Group mt="md" gap="sm" align="flex-end" wrap="nowrap">
+          <Group mt="lg" gap="md" align="flex-end" wrap="nowrap">
             <DatePickerInput
               label="Date"
               placeholder="Pick a date"
@@ -267,8 +267,8 @@ export function ScheduleFields({
           person who knows to expect 12:04 is not surprised by it, and the same
           person meeting it for the first time in their own feed files a bug. */}
       <Box
-        mt="sm"
-        p="sm"
+        mt="lg"
+        p="md"
         style={{
           background: "var(--mantine-color-default)",
           border: "1px solid var(--mantine-color-default-border)",

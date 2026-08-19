@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert, Badge, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title, Tooltip,
+  Alert, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
 import { CalendarClock, Plus, TriangleAlert } from "lucide-react";
-import { FacebookMark, InstagramMark, LINKEDIN_BLUE, LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { LINKEDIN_BLUE } from "@/shared/ui/LinkedInMark";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
@@ -279,36 +279,6 @@ export default function SocialPosts() {
             Write a post, pick when it should go out, and Quantalog publishes it for you —
             once, or on a repeating schedule.
           </Text>
-          {/* Which networks this composer reaches, and which are still on the
-              way. No icon tile, no status word here -- account state belongs to
-              Settings now, this is only naming what exists. */}
-          <Group gap={8} mt={10} wrap="wrap">
-            <Badge size="sm" variant="light" color="blue" leftSection={<LinkedInMark size={11} />}>
-              LinkedIn
-            </Badge>
-            <Tooltip label="Facebook support is planned, not available yet" withArrow>
-              <Badge
-                size="sm"
-                variant="outline"
-                color="gray"
-                leftSection={<FacebookMark size={11} />}
-                style={{ opacity: 0.55, cursor: "default" }}
-              >
-                Facebook · Coming soon
-              </Badge>
-            </Tooltip>
-            <Tooltip label="Instagram support is planned, not available yet" withArrow>
-              <Badge
-                size="sm"
-                variant="outline"
-                color="gray"
-                leftSection={<InstagramMark size={11} />}
-                style={{ opacity: 0.55, cursor: "default" }}
-              >
-                Instagram · Coming soon
-              </Badge>
-            </Tooltip>
-          </Group>
         </div>
         <Tooltip label="Connect LinkedIn first" disabled={ready} withArrow>
           <Box>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import {
   Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code, Tabs,
 } from "@mantine/core";
@@ -10,6 +10,9 @@ import { PageHeader, PageStack, Section, Field } from "@/shared/ui/Page";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
 import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
+import {
+  FACEBOOK_BLUE, FacebookMark, INSTAGRAM_PINK, InstagramMark, LINKEDIN_BLUE, LinkedInMark,
+} from "@/shared/ui/LinkedInMark";
 import { useAuth } from "@/features/auth/context";
 import { useUnsavedGuard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -60,6 +63,61 @@ const BROWSER_TZ = (() => {
     return null;
   }
 })();
+
+/**
+ * One network's card in the Connections tab.
+ *
+ * The same frame whether the network is live or still on the way: mark, name,
+ * what it does, then either its own connection controls or a plain note that
+ * it is coming. A network that is not ready yet is dimmed rather than hidden,
+ * so the set reads as a roadmap instead of a gap.
+ */
+function ConnectionCard({
+  mark,
+  tint,
+  name,
+  hint,
+  soon,
+  children,
+}: {
+  mark: ReactNode;
+  tint: string;
+  name: string;
+  hint: string;
+  soon?: boolean;
+  children?: ReactNode;
+}) {
+  return (
+    <Box className="surface-card" p="lg" style={{ opacity: soon ? 0.6 : 1 }}>
+      <Group gap="sm" wrap="nowrap" align="flex-start">
+        <Box
+          aria-hidden
+          style={{
+            width: 38,
+            height: 38,
+            flexShrink: 0,
+            display: "grid",
+            placeItems: "center",
+            borderRadius: 10,
+            // The network's own colour at low alpha, so the mark sits on a
+            // tint of itself rather than on one shared grey for all of them.
+            background: `color-mix(in srgb, ${tint} 14%, transparent)`,
+          }}
+        >
+          {mark}
+        </Box>
+        <Box style={{ minWidth: 0, flex: 1 }}>
+          <Group gap={8} wrap="nowrap" align="center">
+            <Text fw={600} size="sm">{name}</Text>
+            {soon && <Badge size="xs" variant="light" color="gray">Coming soon</Badge>}
+          </Group>
+          <Text size="xs" c="dimmed" mt={2}>{hint}</Text>
+          {children && <Box mt="sm">{children}</Box>}
+        </Box>
+      </Group>
+    </Box>
+  );
+}
 
 /**
  * Validators return an i18n key (or null), not a finished message, so the error
@@ -475,17 +533,45 @@ export default function Settings() {
 
           {/* Where an account gets connected and disconnected now lives: one
               place, reachable without going through the composer that merely
-              depends on it. `LinkedInConnection` already knows its own status,
-              connect flow and disconnect action — reused as-is rather than
-              rebuilt for this tab. */}
+              depends on it. Every network gets the same card — its own mark,
+              what it is for, and either its connection or the reason it has
+              none yet — so the ones still coming read as part of the same set
+              rather than a footnote. */}
           <Tabs.Panel value="connections">
-            <PageStack>
-              <Section title="LinkedIn" description="Publishing account for scheduled social posts.">
-                <Box className="surface-card" p="lg">
+            <Section
+              title={t("settings.connectionsTitle", "Connected accounts")}
+              description={t(
+                "settings.connectionsHint",
+                "Networks Quantalog can publish your scheduled posts to.",
+              )}
+            >
+              <div className="connection-grid">
+                <ConnectionCard
+                  mark={<LinkedInMark size={20} />}
+                  tint={LINKEDIN_BLUE}
+                  name="LinkedIn"
+                  hint="Publishing account for scheduled social posts."
+                >
                   <LinkedInConnection />
-                </Box>
-              </Section>
-            </PageStack>
+                </ConnectionCard>
+
+                <ConnectionCard
+                  mark={<FacebookMark size={20} />}
+                  tint={FACEBOOK_BLUE}
+                  name="Facebook"
+                  hint="Pages and profile posting."
+                  soon
+                />
+
+                <ConnectionCard
+                  mark={<InstagramMark size={20} />}
+                  tint={INSTAGRAM_PINK}
+                  name="Instagram"
+                  hint="Feed posts from the same composer."
+                  soon
+                />
+              </div>
+            </Section>
           </Tabs.Panel>
         </Tabs>
 
