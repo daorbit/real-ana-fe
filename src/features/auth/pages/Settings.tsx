@@ -3,12 +3,13 @@ import type { FormEvent } from "react";
 import {
   Text, Group, TextInput, Button, Avatar, Badge, Select, Box, Code, Tabs,
 } from "@mantine/core";
-import { Save, Trash2, Undo2, Upload, UserRound, Palette } from "lucide-react";
+import { Save, Trash2, Undo2, Upload, UserRound, Palette, Link2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader, PageStack, Section, Field } from "@/shared/ui/Page";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
+import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
 import { useAuth } from "@/features/auth/context";
 import { useUnsavedGuard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -293,6 +294,9 @@ export default function Settings() {
             <Tabs.Tab value="appearance" leftSection={<Palette size={15} />}>
               {t("settings.tabAppearance", "Appearance")}
             </Tabs.Tab>
+            <Tabs.Tab value="connections" leftSection={<Link2 size={15} />}>
+              {t("settings.tabConnections", "Connections")}
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="info">
@@ -467,6 +471,21 @@ export default function Settings() {
               full width for the swatch and preview grids. */}
           <Tabs.Panel value="appearance">
             <AppearanceSection bare />
+          </Tabs.Panel>
+
+          {/* Where an account gets connected and disconnected now lives: one
+              place, reachable without going through the composer that merely
+              depends on it. `LinkedInConnection` already knows its own status,
+              connect flow and disconnect action — reused as-is rather than
+              rebuilt for this tab. */}
+          <Tabs.Panel value="connections">
+            <PageStack>
+              <Section title="LinkedIn" description="Publishing account for scheduled social posts.">
+                <Box className="surface-card" p="lg">
+                  <LinkedInConnection />
+                </Box>
+              </Section>
+            </PageStack>
           </Tabs.Panel>
         </Tabs>
 
