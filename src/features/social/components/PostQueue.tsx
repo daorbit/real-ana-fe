@@ -105,8 +105,11 @@ function PostRow({
         opacity: sent ? 0.75 : 1,
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-
+        // A fixed width, not a grid-cell share: the card now sits in a
+        // wrapping row rather than a grid, so it needs to state its own size
+        // instead of being told one by a column track.
+        width: 280,
+        flexShrink: 0,
         borderColor: moved ? "var(--accent)" : undefined,
         transition: "border-color 200ms ease",
         overflow: "hidden",
@@ -342,25 +345,22 @@ function matches(post: ScheduledPost, filter: Filter): boolean {
 }
 
 /**
- * A card grid sized to what it actually holds.
+ * A card row sized to what it actually holds.
  *
- * `SimpleGrid` always reserves its full column count, so a shelf with one or
- * two posts pins a single card to the top-left corner of a row built for
- * four — most of the page reading as empty space rather than "nothing here
- * yet". Capping the row's width to roughly what the cards need, only while
- * there are fewer of them than the grid's widest breakpoint, keeps a small
- * shelf sized to its own content and lets a full one still spread edge to
- * edge.
+ * `SimpleGrid` divides its full width into equal columns regardless of how
+ * many cards exist, so a shelf with one card gets a full-width column and the
+ * card stretched to fill it -- overflowing its own image and text into
+ * something unreadable. `Group` with `wrap="wrap"` and a fixed card width does
+ * not have that failure mode: each card is exactly as wide as it asks to be,
+ * cards wrap onto new lines once the row runs out of room, and a shelf of one
+ * simply shows one card at its natural size instead of one stretched to fill
+ * a row built for four.
  */
-function ShelfGrid({ count, children }: { count: number; children: React.ReactNode }) {
+function ShelfGrid({ children }: { children: React.ReactNode }) {
   return (
-    <SimpleGrid
-      cols={{ base: 1, xs: 2, md: 3, xl: 4 }}
-      spacing="md"
-      style={count < 4 ? { maxWidth: count * 280 } : undefined}
-    >
+    <Group gap="md" align="stretch" wrap="wrap">
       {children}
-    </SimpleGrid>
+    </Group>
   );
 }
 
@@ -545,7 +545,7 @@ export function PostQueue({
           {days.map((day) => (
             <div key={day.label}>
               <Text size="sm" fw={700} mb="sm">{day.label}</Text>
-              <ShelfGrid count={day.posts.length}>
+              <ShelfGrid>
                 {day.posts.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
               </ShelfGrid>
             </div>
@@ -559,7 +559,7 @@ export function PostQueue({
                   <Text size="sm" fw={700}>Repeating</Text>
                 </Group>
               )}
-              <ShelfGrid count={repeating.length}>
+              <ShelfGrid>
                 {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
               </ShelfGrid>
             </div>
@@ -573,7 +573,7 @@ export function PostQueue({
               {filter !== "published" && (
                 <Text size="sm" fw={700} mb="sm" c="dimmed">Published</Text>
               )}
-              <ShelfGrid count={sent.length}>
+              <ShelfGrid>
                 {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
               </ShelfGrid>
             </div>
