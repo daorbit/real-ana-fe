@@ -19,8 +19,21 @@ export const LINKEDIN_ICON = {
   path: "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z",
 };
 
-/** The networks the composer can hand a post to. */
-export type PlatformId = "linkedin" | "facebook" | "twitter" | "whatsapp" | "telegram";
+/**
+ * A plain link, styled as a platform so it can share the tab strip.
+ *
+ * Not a network: the "Link" tab copies the public dashboard URL rather than
+ * opening anyone's composer. It carries a neutral hex so the active tab's
+ * underline has a colour like every other tab, and no `intent` is ever called
+ * for it — the panel handles that tab before it reaches the share path.
+ */
+export const LINK_ICON = {
+  hex: "6B7280",
+  path: "M10.59 13.41a1 1 0 0 1 0-1.41l2.83-2.83a1 1 0 0 1 1.41 1.41l-2.83 2.83a1 1 0 0 1-1.41 0zM7.05 16.95a4 4 0 0 1 0-5.66l2.83-2.83a1 1 0 0 1 1.41 1.42l-2.82 2.82a2 2 0 0 0 2.83 2.83l2.82-2.82a1 1 0 0 1 1.42 1.41l-2.83 2.83a4 4 0 0 1-5.66 0zm9.9-9.9a4 4 0 0 1 0 5.66l-2.83 2.83a1 1 0 0 1-1.41-1.42l2.82-2.82a2 2 0 0 0-2.83-2.83L9.88 11.29a1 1 0 0 1-1.42-1.41l2.83-2.83a4 4 0 0 1 5.66 0z",
+};
+
+/** The networks the composer can hand a post to, plus the plain-link tab. */
+export type PlatformId = "linkedin" | "link" | "facebook" | "twitter" | "whatsapp" | "telegram";
 
 export type Platform = {
   id: PlatformId;
@@ -39,6 +52,15 @@ export type Platform = {
    */
   intent: (caption: string, url: string) => string;
   needsPaste?: boolean;
+  /**
+   * Kept in the table but off the tab strip.
+   *
+   * The four intent-URL networks are hidden rather than deleted: the panel is
+   * currently LinkedIn-plus-link, but nothing about them broke, and a removed
+   * entry would take its limits, hashtag budget and preview mock with it.
+   * Clearing this flag is all it takes to bring one back.
+   */
+  hidden?: boolean;
 };
 
 export const PLATFORMS: Platform[] = [
@@ -52,6 +74,16 @@ export const PLATFORMS: Platform[] = [
     needsPaste: true,
   },
   {
+    id: "link",
+    label: "Link",
+    icon: LINK_ICON,
+    // No composer and no network, so no caption budget applies.
+    limit: null,
+    hashtagLimit: null,
+    // Never called: the panel gives this tab its own body and action.
+    intent: (_c, url) => url,
+  },
+  {
     id: "facebook",
     label: "Facebook",
     icon: siFacebook,
@@ -59,6 +91,7 @@ export const PLATFORMS: Platform[] = [
     hashtagLimit: null,
     intent: (_c, url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
     needsPaste: true,
+    hidden: true,
   },
   {
     id: "twitter",
@@ -68,6 +101,7 @@ export const PLATFORMS: Platform[] = [
     hashtagLimit: null,
     intent: (c, url) =>
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(c)}&url=${encodeURIComponent(url)}`,
+    hidden: true,
   },
   {
     id: "whatsapp",
@@ -76,6 +110,7 @@ export const PLATFORMS: Platform[] = [
     limit: null,
     hashtagLimit: null,
     intent: (c, url) => `https://wa.me/?text=${encodeURIComponent(`${c}\n\n${url}`)}`,
+    hidden: true,
   },
   {
     id: "telegram",

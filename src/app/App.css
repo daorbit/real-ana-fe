@@ -2286,6 +2286,24 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .caption-tag { color: #2563eb; font-weight: 500; }
 
+/* An empty contentEditable renders nothing at all, so it reads as a dead box
+   rather than a field waiting for text. `:empty` misses the stray <br> browsers
+   leave behind after the last character is deleted, hence the data attribute the
+   editor keeps in sync. */
+.caption-editor[data-empty="true"]::before {
+  content: attr(data-placeholder);
+  color: var(--mantine-color-dimmed);
+  pointer-events: none;
+  /* Out of the flow: in it, the caret would sit after the placeholder. */
+  position: absolute;
+}
+.caption-editor { position: relative; }
+
+/* Rows inside the repeat-cadence panel. The panel owns the bottom padding, so
+   the final row must not add another gap under itself. */
+.schedule-subfield { margin-bottom: var(--mantine-spacing-md); }
+.schedule-subfield:last-child { margin-bottom: 0; }
+
 /* Below this width the two panes cannot both hold their content, so the
    composer takes the screen and the preview drops away rather than shrinking
    into something that misrepresents the post. */

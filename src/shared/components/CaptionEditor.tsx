@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ActionIcon, Group, Tooltip } from "@mantine/core";
+import { ActionIcon, Divider, Group, Tooltip } from "@mantine/core";
 import {
   AtSign, Bold, Hash, Italic, List, ListOrdered, RotateCcw, Smile,
 } from "lucide-react";
@@ -63,6 +63,7 @@ export function CaptionEditor({
   onChange,
   ariaLabel,
   handleRef,
+  placeholder = "Write your post…",
   className = "caption-editor",
 }: {
   value: string;
@@ -70,6 +71,7 @@ export function CaptionEditor({
   ariaLabel: string;
   /** Filled with the imperative actions the toolbar drives. */
   handleRef?: { current: CaptionEditorHandle | null };
+  placeholder?: string;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -109,29 +111,31 @@ export function CaptionEditor({
     onChange(text);
   };
 
-  if (handleRef) {
-    handleRef.current = {
-      focus: () => ref.current?.focus(),
-      insert: (fragment, opts) => {
-        const el = ref.current;
-        if (!el) return;
-        el.focus();
-        // `insertText` goes in at the caret and keeps the browser's own undo
-        // stack intact, which appending to the value would throw away.
-        document.execCommand("insertText", false, opts?.line ? `\n${fragment}` : fragment);
-        read();
-      },
-      transform: (kind) => {
-        const el = ref.current;
-        if (!el) return;
-        el.focus();
-        const selected = window.getSelection()?.toString() ?? "";
-        if (!selected) return;
-        document.execCommand("insertText", false, toMathAlphabet(selected, kind));
-        read();
-      },
-    };
-  }
+  // Built once per render and shared: the toolbar drives it through the ref, and
+  // the keyboard shortcuts below call it directly.
+  const handle: CaptionEditorHandle = {
+    focus: () => ref.current?.focus(),
+    insert: (fragment, opts) => {
+      const el = ref.current;
+      if (!el) return;
+      el.focus();
+      // `insertText` goes in at the caret and keeps the browser's own undo
+      // stack intact, which appending to the value would throw away.
+      document.execCommand("insertText", false, opts?.line ? `\n${fragment}` : fragment);
+      read();
+    },
+    transform: (kind) => {
+      const el = ref.current;
+      if (!el) return;
+      el.focus();
+      const selected = window.getSelection()?.toString() ?? "";
+      if (!selected) return;
+      document.execCommand("insertText", false, toMathAlphabet(selected, kind));
+      read();
+    },
+  };
+
+  if (handleRef) handleRef.current = handle;
 
   return (
     <div
@@ -141,7 +145,22 @@ export function CaptionEditor({
       aria-label={ariaLabel}
       contentEditable
       suppressContentEditableWarning
+      data-placeholder={placeholder}
+      // Drives the CSS placeholder. Derived from the value rather than `:empty`,
+      // which a leftover <br> defeats.
+      data-empty={value.length === 0 || undefined}
       onInput={read}
+      // The shortcuts people press without thinking. Without these the browser
+      // runs its own bold on a contentEditable, inserting a <b> that `innerText`
+      // then silently drops — the text would look formatted until it was read
+      // back, which is worse than no shortcut at all.
+      onKeyDown={(e) => {
+        if (!(e.ctrlKey || e.metaKey)) return;
+        const key = e.key.toLowerCase();
+        if (key !== "b" && key !== "i") return;
+        e.preventDefault();
+        handle.transform(key === "b" ? "bold" : "italic");
+      }}
       // Re-highlight once the caret leaves, so a URL typed mid-session picks up
       // its styling without fighting the cursor while it is being typed.
       onBlur={() => {
@@ -185,36 +204,58 @@ export function CaptionToolbar({
     ...labels,
   };
 
-  const items: { icon: typeof Smile; label: string; run: () => void; disabled?: boolean }[] = [
-    { icon: Bold, label: l.bold, run: () => editor.current?.transform("bold") },
-    { icon: Italic, label: l.italic, run: () => editor.current?.transform("italic") },
+  /** `null` is a separator. Grouped by what the action does to the text. */
+  type Item = { icon: typeof Smile; label: string; hint?: string; run: () => void; disabled?: boolean };
+  const items: (Item | null)[] = [
+    { icon: Bold, label: l.bold, hint: "Ctrl+B", run: () => editor.current?.transform("bold") },
+    { icon: Italic, label: l.italic, hint: "Ctrl+I", run: () => editor.current?.transform("italic") },
+    null,
     { icon: List, label: l.bullets, run: () => editor.current?.insert("• ", { line: true }) },
     { icon: ListOrdered, label: l.numbers, run: () => editor.current?.insert("1. ", { line: true }) },
+    null,
     { icon: Smile, label: l.emoji, run: () => editor.current?.insert("🚀") },
     { icon: AtSign, label: l.mention, run: () => editor.current?.insert("@") },
     { icon: Hash, label: l.hashtag, run: () => editor.current?.insert("#") },
-    ...(onUndo ? [{ icon: RotateCcw, label: l.undo, run: onUndo, disabled: !canUndo }] : []),
+    ...(onUndo ? [null, { icon: RotateCcw, label: l.undo, run: onUndo, disabled: !canUndo }] : []),
   ];
 
   return (
-    <Group gap={2} px={6} py={4} style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
-      {items.map((item) => (
-        <Tooltip key={item.label} label={item.label} withArrow openDelay={400}>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="md"
-            // The selection has to survive the click, or "bold" would act on
-            // nothing: focusing the button clears it first.
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={item.run}
-            disabled={item.disabled}
-            aria-label={item.label}
+    <Group
+      gap={2}
+      px={8}
+      py={6}
+      wrap="nowrap"
+      style={{
+        borderBottom: "1px solid var(--mantine-color-default-border)",
+        background: "var(--mantine-color-default)",
+      }}
+    >
+      {items.map((item, i) =>
+        item === null ? (
+          <Divider key={`sep-${i}`} orientation="vertical" mx={5} my={3} />
+        ) : (
+          <Tooltip
+            key={item.label}
+            label={item.hint ? `${item.label} · ${item.hint}` : item.label}
+            withArrow
+            openDelay={400}
           >
-            <item.icon size={16} />
-          </ActionIcon>
-        </Tooltip>
-      ))}
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="md"
+              // The selection has to survive the click, or "bold" would act on
+              // nothing: focusing the button clears it first.
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={item.run}
+              disabled={item.disabled}
+              aria-label={item.label}
+            >
+              <item.icon size={16} />
+            </ActionIcon>
+          </Tooltip>
+        ),
+      )}
     </Group>
   );
 }

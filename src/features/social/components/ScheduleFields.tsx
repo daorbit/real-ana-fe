@@ -1,4 +1,4 @@
-import { Alert, Button, Group, NumberInput, SegmentedControl, Text, TextInput } from "@mantine/core";
+import { Box, Button, Divider, Group, NumberInput, SegmentedControl, Text, TextInput } from "@mantine/core";
 import { CalendarClock, TriangleAlert } from "lucide-react";
 import {
   FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, toDateInput, type Draft,
@@ -32,6 +32,36 @@ function dateIn(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
   return toDateInput(d);
+}
+
+/** Groups the cadence controls so they read as one setting, not loose rows. */
+const PANEL = {
+  background: "var(--mantine-color-default)",
+  border: "1px solid var(--mantine-color-default-border)",
+  borderRadius: "var(--mantine-radius-md)",
+};
+
+/** A labelled row inside the cadence panel. */
+function SubField({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Box className="schedule-subfield">
+      <Group gap={6} align="baseline" mb={8} wrap="nowrap">
+        <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.04em" }}>
+          {label}
+        </Text>
+        {hint && <Text size="xs" c="dimmed">{hint}</Text>}
+      </Group>
+      {children}
+    </Box>
+  );
 }
 
 export function ScheduleFields({
@@ -119,82 +149,103 @@ export function ScheduleFields({
           {/* Said before it is saved, not discovered afterwards: this publishes
               identical text on every run, which is the one thing a reader of
               someone's feed notices immediately. */}
-          <Alert color="orange" variant="light" icon={<TriangleAlert size={16} />} mt="sm">
-            <Text size="xs" style={{ lineHeight: 1.5 }}>
-              A repeating post publishes <strong>the same text and image every time</strong>.
-              Use it for evergreen content only — LinkedIn deprioritises duplicate posts, and
-              readers see them as spam. For a content calendar, schedule separate posts instead.
+          {/* A caution, not a failure: quiet enough that it does not dominate
+              the panel it introduces, explicit enough that nobody meets the
+              behaviour for the first time in their own feed. */}
+          <Group gap={8} mt="sm" align="flex-start" wrap="nowrap">
+            <TriangleAlert
+              size={14}
+              style={{ color: "var(--mantine-color-orange-5)", flexShrink: 0, marginTop: 2 }}
+            />
+            <Text size="xs" c="dimmed" style={{ lineHeight: 1.5 }}>
+              Publishes <strong>the same text and image every time</strong>. Evergreen content
+              only — LinkedIn deprioritises duplicates. For a content calendar, schedule
+              separate posts.
             </Text>
-          </Alert>
+          </Group>
 
           <SegmentedControl
             fullWidth
-            mt="sm"
+            mt="md"
             data={FREQUENCIES}
             value={draft.frequency}
             onChange={(v) => onChange({ frequency: v as PostFrequency })}
           />
 
-          {draft.frequency === "weekly" && (
-            <Group gap={6} mt="sm" wrap="wrap">
-              {WEEKDAYS.map((d) => (
-                <Button
-                  key={d.value}
-                  size="compact-sm"
-                  radius="xl"
-                  variant={String(draft.weekday) === d.value ? "filled" : "default"}
-                  onClick={() => onChange({ weekday: Number(d.value) })}
-                >
-                  {d.label.slice(0, 3)}
-                </Button>
-              ))}
-            </Group>
-          )}
+          {/* Cadence detail and time-of-day are one decision — "which Wednesday,
+              and when" — so they share a panel instead of stacking as loose rows
+              at the same rhythm as everything above them. */}
+          <Box mt="sm" p="md" style={PANEL}>
+            {draft.frequency === "weekly" && (
+              <SubField label="Repeat on">
+                <Group gap={6} wrap="wrap">
+                  {WEEKDAYS.map((d) => (
+                    <Button
+                      key={d.value}
+                      size="compact-sm"
+                      radius="xl"
+                      variant={String(draft.weekday) === d.value ? "filled" : "default"}
+                      onClick={() => onChange({ weekday: Number(d.value) })}
+                    >
+                      {d.label.slice(0, 3)}
+                    </Button>
+                  ))}
+                </Group>
+              </SubField>
+            )}
 
-          {draft.frequency === "monthly" && (
-            <NumberInput
-              mt="sm"
-              label="Day of month"
-              description="1–28, so every month has the day."
-              min={1}
-              max={28}
-              value={draft.dayOfMonth}
-              onChange={(v) => onChange({ dayOfMonth: Number(v) || 1 })}
-            />
-          )}
+            {draft.frequency === "monthly" && (
+              <SubField label="Day of month" hint="1–28, so every month has the day">
+                <NumberInput
+                  min={1}
+                  max={28}
+                  w={110}
+                  value={draft.dayOfMonth}
+                  onChange={(v) => onChange({ dayOfMonth: Number(v) || 1 })}
+                />
+              </SubField>
+            )}
 
-          <Group mt="sm" gap="sm" align="flex-end" wrap="nowrap">
-            <NumberInput
-              label="Hour"
-              min={0}
-              max={23}
-              w={90}
-              value={draft.hour}
-              onChange={(v) => onChange({ hour: Math.min(23, Math.max(0, Number(v) || 0)) })}
-            />
-            <NumberInput
-              label="Minute"
-              min={0}
-              max={59}
-              step={5}
-              w={90}
-              value={draft.minute}
-              onChange={(v) => onChange({ minute: Math.min(59, Math.max(0, Number(v) || 0)) })}
-            />
-            <Group gap={6} wrap="nowrap" pb={2}>
-              {QUICK_TIMES.map((q) => (
-                <Button
-                  key={q.label}
-                  size="compact-sm"
-                  radius="xl"
-                  variant={draft.hour === q.hour && draft.minute === q.minute ? "filled" : "default"}
-                  onClick={() => onChange({ hour: q.hour, minute: q.minute })}
-                >
-                  {q.label}
-                </Button>
-              ))}
-            </Group>
-          </Group>
+            {/* The presets are the fast path and the spinners are the escape
+                hatch, so the presets lead and the exact fields sit behind a
+                divider rather than competing with them side by side. */}
+            <SubField label="Time of day">
+              <Group gap={6} wrap="wrap">
+                {QUICK_TIMES.map((q) => (
+                  <Button
+                    key={q.label}
+                    size="compact-sm"
+                    radius="xl"
+                    variant={draft.hour === q.hour && draft.minute === q.minute ? "filled" : "default"}
+                    onClick={() => onChange({ hour: q.hour, minute: q.minute })}
+                  >
+                    {q.label}
+                  </Button>
+                ))}
+                <Divider orientation="vertical" mx={4} my={2} />
+                <Group gap={6} wrap="nowrap">
+                  <NumberInput
+                    aria-label="Hour"
+                    min={0}
+                    max={23}
+                    w={72}
+                    value={draft.hour}
+                    onChange={(v) => onChange({ hour: Math.min(23, Math.max(0, Number(v) || 0)) })}
+                  />
+                  <Text size="sm" c="dimmed">:</Text>
+                  <NumberInput
+                    aria-label="Minute"
+                    min={0}
+                    max={59}
+                    step={5}
+                    w={72}
+                    value={draft.minute}
+                    onChange={(v) => onChange({ minute: Math.min(59, Math.max(0, Number(v) || 0)) })}
+                  />
+                </Group>
+              </Group>
+            </SubField>
+          </Box>
         </>
       )}
 
