@@ -29,7 +29,10 @@ export const LINKEDIN_ICON = {
  */
 export const LINK_ICON = {
   hex: "6B7280",
-  path: "M10.59 13.41a1 1 0 0 1 0-1.41l2.83-2.83a1 1 0 0 1 1.41 1.41l-2.83 2.83a1 1 0 0 1-1.41 0zM7.05 16.95a4 4 0 0 1 0-5.66l2.83-2.83a1 1 0 0 1 1.41 1.42l-2.82 2.82a2 2 0 0 0 2.83 2.83l2.82-2.82a1 1 0 0 1 1.42 1.41l-2.83 2.83a4 4 0 0 1-5.66 0zm9.9-9.9a4 4 0 0 1 0 5.66l-2.83 2.83a1 1 0 0 1-1.41-1.42l2.82-2.82a2 2 0 0 0-2.83-2.83L9.88 11.29a1 1 0 0 1-1.42-1.41l2.83-2.83a4 4 0 0 1 5.66 0z",
+  // Drawn to fill the 24x24 box, like the brand marks it sits beside. The
+  // previous path floated in the middle of its viewBox, so at the same `size`
+  // as LinkedIn's mark it rendered visibly smaller than every other tab's icon.
+  path: "M3.9 12a5.1 5.1 0 0 1 5.1-5.1h4.2v2.4H9A2.7 2.7 0 0 0 9 14.7h4.2v2.4H9A5.1 5.1 0 0 1 3.9 12zm6.9-1.2h6.6v2.4h-6.6v-2.4zM15 6.9h4.2a5.1 5.1 0 0 1 0 10.2H15v-2.4h4.2a2.7 2.7 0 0 0 0-5.4H15V6.9z",
 };
 
 /** The networks the composer can hand a post to, plus the plain-link tab. */

@@ -69,6 +69,9 @@ export function SharePostModal({
   // Whether the caption on screen came from Orbit. Drives the button's label,
   // and the note under the editor that says so plainly.
   const [written, setWritten] = useState(false);
+  // An optional steer for Orbit. Empty means "write about this dashboard",
+  // which is what this panel is for; filled, it writes to that angle instead.
+  const [angle, setAngle] = useState("");
 
   const active = PLATFORMS.find((p) => p.id === platform) ?? PLATFORMS[0];
 
@@ -158,7 +161,15 @@ export function SharePostModal({
    */
   const generate = async () => {
     try {
-      const res = await writeCaption({ workspaceId, platform }).unwrap();
+      // An empty angle keeps the original behaviour: a caption about this
+      // workspace's own dashboard, built from figures the server reads itself.
+      // Given one, Orbit writes about that instead — the link and image on this
+      // panel are unchanged either way.
+      const res = await writeCaption({
+        workspaceId,
+        platform,
+        ...(angle.trim() ? { topic: angle.trim() } : {}),
+      }).unwrap();
       undoTo.current = caption;
       setDraft(res.caption);
       setWritten(true);
@@ -331,6 +342,27 @@ export function SharePostModal({
                   </Button>
                 </Tooltip>
               </Group>
+
+              {/* Optional, and says so: left empty this panel writes about the
+                  dashboard it is sharing, which is the normal case. Filling it
+                  in is for the times someone wants the post to lead on a
+                  particular angle rather than the numbers. */}
+              <TextInput
+                mb={8}
+                size="sm"
+                placeholder={t(
+                  "sharePost.anglePlaceholder",
+                  "Optional: an angle for Orbit to write to",
+                )}
+                value={angle}
+                onChange={(e) => setAngle(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !writing) {
+                    e.preventDefault();
+                    generate();
+                  }
+                }}
+              />
 
               <Box
                 style={{
