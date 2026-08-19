@@ -123,6 +123,9 @@ export function SharePostModal({
       setPlatform("linkedin");
       setDevice("desktop");
       setWritten(false);
+      // Or reopening would report the previous post as just published.
+      setJustPosted(false);
+      setPostedUrl(null);
       undoTo.current = null;
     }
     wasOpen.current = opened;
