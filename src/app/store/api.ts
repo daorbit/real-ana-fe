@@ -289,6 +289,18 @@ export const api = createApi({
       invalidatesTags: ["ScheduledPost"],
     }),
 
+    /**
+     * Publish a schedule now, without disturbing its cadence.
+     *
+     * Returns the updated schedule plus the permalink, so the row can show its
+     * new outcome without a refetch — though the tag is invalidated anyway,
+     * since `lastRunAt` and the error line are read from the list.
+     */
+    publishScheduledPost: build.mutation<ScheduledPost & { postUrl: string | null }, string>({
+      query: (id) => ({ url: `/api/social/posts/${id}/publish`, method: "POST" }),
+      invalidatesTags: ["ScheduledPost"],
+    }),
+
     getSites: build.query<Site[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/sites`,
       providesTags: (result, _e, workspaceId) => [
@@ -1476,6 +1488,7 @@ export const {
   useCreateScheduledPostMutation,
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,
+  usePublishScheduledPostMutation,
   useGetSitesQuery,
   useCreateSiteMutation,
   useUpdateSiteOptionsMutation,

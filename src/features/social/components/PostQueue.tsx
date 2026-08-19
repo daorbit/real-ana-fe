@@ -1,6 +1,6 @@
 import { Badge, Button, Card, Group, Stack, Text, Tooltip } from "@mantine/core";
 import {
-  CheckCircle2, ExternalLink, Pause, Pencil, Play, Repeat, Trash2, TriangleAlert,
+  CheckCircle2, ExternalLink, Pause, Pencil, Play, Repeat, Send, Trash2, TriangleAlert,
 } from "lucide-react";
 import { WEEKDAYS } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
@@ -50,12 +50,18 @@ function PostRow({
   onEdit,
   onToggle,
   onDelete,
+  onPublish,
+  publishingId,
 }: {
   post: ScheduledPost;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
+  onPublish: (post: ScheduledPost) => void;
+  /** The row currently publishing, so only its own button spins. */
+  publishingId: string | null;
 }) {
+  const publishing = publishingId === post.id;
   const repeating = post.mode === "repeat";
   const sent = post.status === "sent";
 
@@ -137,6 +143,21 @@ function PostRow({
         </Group>
 
         <Group gap={6} wrap="nowrap">
+          {/* An extra send, not a reschedule: the cadence is untouched, so a
+              weekly post sent now still goes out on its usual day. Offered on
+              sent posts too — republishing an evergreen one by hand is the
+              case this exists for. */}
+          <Tooltip label="Post now" withArrow>
+            <Button
+              variant="default"
+              size="compact-sm"
+              loading={publishing}
+              onClick={() => onPublish(post)}
+              aria-label="Post now"
+            >
+              <Send size={14} />
+            </Button>
+          </Tooltip>
           <Tooltip label={sent ? "Reschedule" : "Edit"} withArrow>
             <Button variant="default" size="compact-sm" onClick={() => onEdit(post)}>
               <Pencil size={14} />
@@ -166,13 +187,17 @@ export function PostQueue({
   onEdit,
   onToggle,
   onDelete,
+  onPublish,
+  publishingId,
 }: {
   posts: ScheduledPost[];
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
+  onPublish: (post: ScheduledPost) => void;
+  publishingId: string | null;
 }) {
-  const handlers = { onEdit, onToggle, onDelete };
+  const handlers = { onEdit, onToggle, onDelete, onPublish, publishingId };
 
   // Three shelves: what happens on a given day, what happens on a cadence, and
   // what already happened. Repeating posts sit apart because they belong to no

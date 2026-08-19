@@ -148,6 +148,12 @@ export function confirmDelete(opts: {
   title: string;
   body: ReactNode;
   confirmLabel?: string;
+  /**
+   * Confirm button colour. Red by default, since deleting is what this mostly
+   * guards — but it also covers actions that are merely irreversible rather
+   * than destructive, and painting "Post now" red would misstate what it does.
+   */
+  confirmColor?: string;
   onConfirm: () => void | Promise<void>;
 }) {
   const id = `confirm-delete-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -165,7 +171,7 @@ export function confirmDelete(opts: {
       withCloseButton: !busy,
       children: <Text size="sm" c="dimmed">{opts.body}</Text>,
       labels: { confirm: opts.confirmLabel ?? "Delete", cancel: "Cancel" },
-      confirmProps: { color: "red", loading: busy },
+      confirmProps: { color: opts.confirmColor ?? "red", loading: busy },
       cancelProps: { disabled: busy },
       onConfirm: () => {
         const result = opts.onConfirm();

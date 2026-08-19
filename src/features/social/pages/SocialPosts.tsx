@@ -11,6 +11,7 @@ import {
   useCreateScheduledPostMutation,
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,
+  usePublishScheduledPostMutation,
   useDisconnectLinkedInMutation,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
@@ -40,6 +41,9 @@ export default function SocialPosts() {
   const [create, { isLoading: creating }] = useCreateScheduledPostMutation();
   const [update, { isLoading: updating }] = useUpdateScheduledPostMutation();
   const [remove] = useDeleteScheduledPostMutation();
+  const [publish] = usePublishScheduledPostMutation();
+  // Which row is publishing, so only its own button shows the spinner.
+  const [publishingId, setPublishingId] = useState<string | null>(null);
 
   const [composing, setComposing] = useState(false);
   // The post the composer is editing, or null when it is writing a new one.
@@ -184,6 +188,40 @@ export default function SocialPosts() {
     } catch (e) {
       notify.error(errMessage(e, "Could not update that schedule."));
     }
+  };
+
+  /**
+   * Publish now, behind a confirmation.
+   *
+   * Asked rather than done: this posts publicly, under the user's own name, and
+   * nothing here can take it back. The dialog names the post because the button
+   * sits on a row among others, and says plainly that the schedule survives —
+   * otherwise "post now" reads like it might consume the next run.
+   */
+  const publishNow = (post: ScheduledPost) => {
+    confirmDelete({
+      title: "Post this now?",
+      confirmLabel: "Post now",
+      confirmColor: "teal",
+      body: (
+        <>
+          <strong>{post.name}</strong> will be published to LinkedIn immediately.
+          {post.mode === "repeat" && " Its schedule is unchanged — it will still run as usual."}
+          {" A published post cannot be unpublished from here."}
+        </>
+      ),
+      onConfirm: async () => {
+        setPublishingId(post.id);
+        try {
+          const res = await publish(post.id).unwrap();
+          notify.success(res.postUrl ? "Posted to LinkedIn." : "Posted.");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not publish that post."));
+        } finally {
+          setPublishingId(null);
+        }
+      },
+    });
   };
 
   /**
@@ -367,6 +405,8 @@ export default function SocialPosts() {
                 onEdit={openEdit}
                 onToggle={toggle}
                 onDelete={destroy}
+                onPublish={publishNow}
+                publishingId={publishingId}
               />
             </>
           )}
