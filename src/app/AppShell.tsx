@@ -203,10 +203,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       </MantineShell.Header>
 
  
-      <MantineShell.Navbar
-        p="sm"
-        style={{ background: "var(--bg-2)", border: "none" }}
-      >
+      {/* The same surface as the content panel, so the two read as one app
+          divided by a hairline rather than as two different greys. Flat all the
+          same — no radius, border or shadow of its own; the panel beside it is
+          what carries the frame. */}
+      <MantineShell.Navbar p="sm" style={{ background: "var(--shell)", border: "none" }}>
         {/* On mobile the wordmark already sits in the top bar, so the one here
             would double up inside the open drawer — desktop-only. */}
         <MantineShell.Section visibleFrom="sm">

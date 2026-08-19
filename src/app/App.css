@@ -5,13 +5,21 @@
      emerald look like it is fighting the background instead of sitting on it.
      The page and the sidebar share one ground; the steps above it are lifts
      off that ground rather than a second palette. */
-  /* The ground the shell sits on is pure black, so the rail and the content
-     panel both read as surfaces lifted off it rather than as regions of it.
-     Everything the eye actually lands on is `--bg-2` and up. */
-  --bg: #000000;
-  --bg-2: #171717;
-  --surface: #232323;
-  --surface-2: #2b2b2b;
+  --bg: #171717;
+  --bg-2: #1e1e1e;
+  /* The shell's own surface: the rail, the content panel, and the strip of
+     ground between them are all this one colour, so the app reads as a single
+     surface and the panel's border — not a change of tone — is what marks
+     where the content starts. Kept apart from `--bg-2`, which is the step-above
+     tone that cards, tiles and empty slots use to lift off the page; collapsing
+     the two would flatten every one of those. */
+  --shell: #171717;
+  /* Cards sit a step *above* the shell. Going darker than the page made every
+     card read as a hole punched in it — especially against a textured
+     background, where the wash surrounds a flat near-black rectangle and the
+     contrast is read as absence rather than as a surface. */
+  --surface: #212121;
+  --surface-2: #2a2a2a;
   --border: #303030;
   --border-strong: #3d3d3d;
   --text: #f2f4f6;
@@ -49,10 +57,9 @@
 }
 
 [data-mantine-color-scheme="light"] {
-  /* Mirrors dark: the ground is the plain end of the scale and the rail and
-     panel are the lifted surface on it. */
-  --bg: #eceef1;
+  --bg: #f4f5f7;
   --bg-2: #ffffff;
+  --shell: #f4f5f7;
   --surface: #ffffff;
   --surface-2: #f1f3f5;
   --border: #e5e7eb;
@@ -232,6 +239,13 @@ html[data-bg-style="textured"]:has(.app-panel) body::before { display: none; }
 
 /* Above the wash, and transparent so it shows through. */
 .app-panel__scroll { position: relative; z-index: 1; }
+
+/* The rail takes the same wash as the panel. Sharing a flat colour but not the
+   background made the two diverge the moment a textured preset was picked —
+   the rail stayed grey while the page beside it went green. */
+[data-bg-style="textured"] .mantine-AppShell-navbar {
+  background-image: var(--bg-wash);
+}
 
 /* Orbit's chat panel shares the same wash — its own `.aurora-wash` element
    (see RunningDialog.css) is repainted from the identical --bg-wash value so
@@ -544,19 +558,28 @@ body { overflow-wrap: break-word; }
   .mantine-SimpleGrid-root { gap: 10px !important; }
 }
 
-/* Mantine dark surfaces — neutral greys, no purple cast */
+/* Mantine dark surfaces — neutral greys, no blue cast */
 [data-mantine-color-scheme="dark"] {
-  --mantine-color-body: #131519;
-  --mantine-color-default: #1a1c22;
-  --mantine-color-default-hover: #22252c;
-  --mantine-color-default-border: #2b2f38;
+  --mantine-color-body: var(--shell);
+  --mantine-color-default: #212121;
+  --mantine-color-default-hover: #2a2a2a;
+  --mantine-color-default-border: #303030;
 }
-/* Cards sit a step *above* the page, not below it: a raised near-black surface
-   on the darker body reads as an elevated panel, the way the reference dark
-   dashboard layers its cards. Pure black made every card a hole in the page. */
+/* Cards are a step above the page, defined by a lift rather than by darkness. */
 [data-mantine-color-scheme="dark"] .mantine-Card-root {
-  background: #16181d;
-  border-color: #262a32;
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Segmented switches: a recessed track with the selected option raised out of
+   it, so the choice is legible without relying on colour alone. */
+[data-mantine-color-scheme="dark"] .mantine-SegmentedControl-root {
+  background: var(--shell);
+  border: 1px solid var(--border);
+}
+[data-mantine-color-scheme="dark"] .mantine-SegmentedControl-indicator {
+  background: var(--surface-2);
   box-shadow: var(--shadow-sm);
 }
 
@@ -887,8 +910,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   cursor: pointer;
 }
 
-/* Sidebar nav: a resting state with no border, an accent rail when active.
-   The rail reads faster than a filled pill and survives long labels. */
+/* Sidebar nav: no border at rest, a tinted pill when active. */
 .nav-link {
   position: relative;
   border-radius: var(--radius-sm);
@@ -897,22 +919,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .nav-link:hover {
   background: var(--surface-2);
 }
-/* Active item is a soft filled pill with a whisper of elevation — the reference
-   dashboard's selected-nav treatment, quieter than a hard accent bar. */
+/* Active item is a soft filled pill and nothing else. The accent bar that used
+   to sit down its left edge said the same thing the fill already says, and two
+   markers on one row is one more than the eye needs to find it. */
 .nav-link[data-active="true"] {
   background: var(--accent-soft);
   color: var(--text);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 22%, transparent);
-}
-.nav-link[data-active="true"]::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 26%;
-  bottom: 26%;
-  width: 3px;
-  border-radius: 3px;
-  background: var(--violet-2);
 }
 
 /* Section label above a group of nav links. */
@@ -2560,13 +2573,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding: 14px 16px;
   border: 1px solid transparent;
   border-radius: var(--mantine-radius-md);
-  background: var(--bg-2, var(--mantine-color-default));
+  background: var(--surface);
   color: var(--mantine-color-dimmed);
   transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
 }
 
 .post-slot__empty:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-2, var(--mantine-color-default)));
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
   color: var(--mantine-color-text);
 }
@@ -2608,7 +2621,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    read as an application rather than as a long document with navigation glued
    to the side of it. */
 .app-main {
-  background: var(--bg);
+  background: var(--shell);
   /* The main region is exactly the viewport minus the mobile header, so the
      panel inside it has a real height to fill. Without this the region grows
      with its content and the inner scroll never engages. */
@@ -2623,33 +2636,21 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .app-panel {
   position: relative;
   height: 100%;
-  background: var(--bg-2);
+  background: var(--shell);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-/* The rail is the same surface as the panel and is inset from the window on the
-   same margin, so it takes the same corners — a square-edged rail beside a
-   rounded panel reads as one of the two having been forgotten. */
+/* The rail is not a card. It sits directly on the app's own ground with no
+   radius, border or shadow — the content panel is the one raised surface here,
+   and giving the rail the same treatment made the shell read as two floating
+   cards rather than as a page with navigation beside it. */
 .mantine-AppShell-navbar {
-  border-radius: var(--radius);
-  margin: var(--mantine-spacing-xs) 0 var(--mantine-spacing-xs) var(--mantine-spacing-xs);
-  height: auto !important;
-  top: var(--mantine-spacing-xs) !important;
-  bottom: var(--mantine-spacing-xs);
-}
-
-/* On phones the rail is a full-height slide-over pinned to the edge, where an
-   inset and rounded corners would leave it floating with a gap behind it. */
-@media (max-width: 48em) {
-  .mantine-AppShell-navbar {
-    border-radius: 0;
-    margin: 0;
-    top: 0 !important;
-    bottom: 0;
-    height: 100% !important;
-  }
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background: var(--shell);
 }
 
 /* The scrolling surface. Padding sits here rather than on the panel so the
