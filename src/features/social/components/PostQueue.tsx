@@ -217,7 +217,15 @@ function PostRow({
           {repeating && post.status === "active" && (
             <> · next {new Date(post.nextRunAt).toLocaleString()}</>
           )}
-          {post.postCount > 0 && <> · {post.postCount} published</>}
+          {/* Only where the count adds information. A one-off card already
+              says "Published <date>" below, so a bare "1 published" next to it
+              reads as if one post became two. It only earns its place on a
+              repeating post, where it is the cadence's running total, or on a
+              one-off sent more than once — which only happens by hand, via
+              "Post now" on a post already sent, and is worth flagging. */}
+          {post.postCount > 0 && (repeating || post.postCount > 1) && (
+            <> · {post.postCount} published</>
+          )}
         </Text>
 
         {/* The last outcome, when there was one. A failure carries the reason
@@ -331,6 +339,29 @@ function matches(post: ScheduledPost, filter: Filter): boolean {
     case "draft": return post.status === "paused";
     case "failed": return post.lastStatus === "failed";
   }
+}
+
+/**
+ * A card grid sized to what it actually holds.
+ *
+ * `SimpleGrid` always reserves its full column count, so a shelf with one or
+ * two posts pins a single card to the top-left corner of a row built for
+ * four — most of the page reading as empty space rather than "nothing here
+ * yet". Capping the row's width to roughly what the cards need, only while
+ * there are fewer of them than the grid's widest breakpoint, keeps a small
+ * shelf sized to its own content and lets a full one still spread edge to
+ * edge.
+ */
+function ShelfGrid({ count, children }: { count: number; children: React.ReactNode }) {
+  return (
+    <SimpleGrid
+      cols={{ base: 1, xs: 2, md: 3, xl: 4 }}
+      spacing="md"
+      style={count < 4 ? { maxWidth: count * 280 } : undefined}
+    >
+      {children}
+    </SimpleGrid>
+  );
 }
 
 /** A headline number with its label. Reads at a glance, above the detail. */
@@ -514,9 +545,9 @@ export function PostQueue({
           {days.map((day) => (
             <div key={day.label}>
               <Text size="sm" fw={700} mb="sm">{day.label}</Text>
-              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, xl: 4 }} spacing="md">
+              <ShelfGrid count={day.posts.length}>
                 {day.posts.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-              </SimpleGrid>
+              </ShelfGrid>
             </div>
           ))}
 
@@ -528,9 +559,9 @@ export function PostQueue({
                   <Text size="sm" fw={700}>Repeating</Text>
                 </Group>
               )}
-              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, xl: 4 }} spacing="md">
+              <ShelfGrid count={repeating.length}>
                 {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-              </SimpleGrid>
+              </ShelfGrid>
             </div>
           )}
 
@@ -542,9 +573,9 @@ export function PostQueue({
               {filter !== "published" && (
                 <Text size="sm" fw={700} mb="sm" c="dimmed">Published</Text>
               )}
-              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, xl: 4 }} spacing="md">
+              <ShelfGrid count={sent.length}>
                 {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-              </SimpleGrid>
+              </ShelfGrid>
             </div>
           )}
         </Stack>
