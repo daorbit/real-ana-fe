@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Modal, Group, Button, Text, Box, CopyButton, ActionIcon, Tooltip,
-  ScrollArea, Divider, Anchor,
+  ScrollArea, Divider, Anchor, TextInput,
 } from "@mantine/core";
 import {
   Copy, Check, Download, X, RotateCcw, ExternalLink,

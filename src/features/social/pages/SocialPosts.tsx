@@ -352,14 +352,38 @@ export default function SocialPosts() {
       {isLoading ? (
         <Group justify="center" py="xl"><Loader /></Group>
       ) : posts.length === 0 ? (
-        <Card withBorder padding="xl" radius="md">
-          <Stack align="center" gap="xs">
-            <CalendarClock size={28} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text fw={600}>Nothing scheduled yet</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              Write a post, pick a date and time, and it publishes without you.
+        /* Given room to breathe rather than squeezed into a short band across
+           the whole page: this is the only thing on screen, so it is the page
+           until there is a post, and the icon is sized to lead it. */
+        <Card withBorder radius="md" py={64} px="xl">
+          <Stack align="center" gap={0} style={{ maxWidth: "42ch", margin: "0 auto" }}>
+            <Box
+              aria-hidden
+              style={{
+                width: 64,
+                height: 64,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: 16,
+                marginBottom: 20,
+                background: "var(--mantine-color-default)",
+                border: "1px solid var(--mantine-color-default-border)",
+              }}
+            >
+              <CalendarClock size={28} style={{ color: "var(--mantine-color-dimmed)" }} />
+            </Box>
+            <Text fw={650} fz="lg">Nothing scheduled yet</Text>
+            <Text size="sm" c="dimmed" ta="center" mt={6} style={{ lineHeight: 1.6 }}>
+              Write a post, pick a date and time, and Quantalog publishes it for you — once,
+              or on a repeating schedule.
             </Text>
-            <Button mt="sm" leftSection={<Plus size={16} />} disabled={!ready} onClick={() => openNew()}>
+            <Button
+              mt="xl"
+              size="md"
+              leftSection={<Plus size={16} />}
+              disabled={!ready}
+              onClick={() => openNew()}
+            >
               Schedule your first post
             </Button>
           </Stack>
