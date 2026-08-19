@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert, Avatar, Badge, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title,
-  Tooltip,
+  Alert, Box, Button, Card, Group, Loader, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
-import { CalendarClock, Plus, Rocket, TriangleAlert } from "lucide-react";
-import { LINKEDIN_BLUE, LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { CalendarClock, Plus, TriangleAlert } from "lucide-react";
+import { LINKEDIN_BLUE } from "@/shared/ui/LinkedInMark";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
@@ -14,7 +13,6 @@ import {
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,
   usePublishScheduledPostMutation,
-  useDisconnectLinkedInMutation,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { PostComposer } from "@/features/social/components/PostComposer";
@@ -65,8 +63,10 @@ export default function SocialPosts() {
   const [view, setView] = useState<"calendar" | "list">("list");
   // Connecting happens in a popup, so this page — and any half-written draft —
   // survives the round trip. `refetch` picks up the new connection state.
+  // Disconnecting is not offered here: it lives with the rest of the LinkedIn
+  // connection's own settings, not duplicated on the page that merely depends
+  // on it.
   const { connect, connecting } = useLinkedInConnect(refetch);
-  const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
 
   // Long enough to find the row after the queue reorders under you, short
   // enough that the mark is gone before the next edit.
@@ -75,36 +75,6 @@ export default function SocialPosts() {
     const timer = setTimeout(() => setRecentlyMovedId(null), 8000);
     return () => clearTimeout(timer);
   }, [recentlyMovedId]);
-
-  /**
-   * Drop the connection.
-   *
-   * Existing schedules are deliberately left in place rather than deleted: the
-   * posts someone wrote are still theirs, and reconnecting should resume them
-   * rather than make them start over. They simply stop publishing until there
-   * is an account to publish as.
-   */
-  const disconnectLinkedIn = () => {
-    confirmDelete({
-      title: "Disconnect LinkedIn?",
-      body: (
-        <>
-          Nothing scheduled will publish until you reconnect. Your posts are kept,
-          not deleted.
-        </>
-      ),
-      confirmLabel: "Disconnect",
-      onConfirm: async () => {
-        try {
-          await disconnect().unwrap();
-          notify.success("LinkedIn disconnected. Your posts are paused until you reconnect.");
-          refetch();
-        } catch (e) {
-          notify.error(errMessage(e, "Could not disconnect LinkedIn."));
-        }
-      },
-    });
-  };
 
   // The zone the schedule is written in. Taken from the browser so "9am" means
   // 9am where the author is, which is what the server stores and honours.
@@ -302,63 +272,14 @@ export default function SocialPosts() {
 
   return (
     <AppShell>
-      {/* This page is framed as social scheduling, not a LinkedIn-only tool: the
-          tile is a neutral "outgoing post" mark rather than LinkedIn's own
-          colour, and the strip beneath it names every network this composer
-          will eventually reach. Facebook and Instagram sit there dimmed and
-          unclickable now -- a promise of where this grows, not a toggle that
-          does nothing when pressed. */}
       <Group justify="space-between" align="flex-start" mb="lg" wrap="wrap" gap="md">
-        <Group align="flex-start" gap="md" wrap="nowrap" style={{ minWidth: 0 }}>
-          <Box
-            aria-hidden
-            style={{
-              width: 46,
-              height: 46,
-              flexShrink: 0,
-              display: "grid",
-              placeItems: "center",
-              borderRadius: 12,
-              background: "var(--mantine-color-emerald-6)",
-              boxShadow: "0 0 0 4px var(--mantine-color-emerald-light), 0 6px 18px -4px var(--mantine-color-emerald-light)",
-            }}
-          >
-            <Rocket size={22} color="#fff" />
-          </Box>
-          <div style={{ minWidth: 0 }}>
-            <Group gap={10} wrap="wrap" align="center">
-              <Title order={2}>Social posts</Title>
-            </Group>
-            <Text c="dimmed" size="sm" mt={4} style={{ maxWidth: "58ch" }}>
-              Write a post, pick when it should go out, and Quantalog publishes it for you —
-              once, or on a repeating schedule.
-            </Text>
-            {/* One row: which networks exist, which is live, which is on hold.
-                LinkedIn carries the Connected state itself rather than the page
-                header, because that state belongs to the account, not the
-                feature -- a second network will have its own. */}
-            <Group gap={8} mt={10} wrap="wrap">
-              <Badge
-                size="sm"
-                variant={ready ? "light" : "outline"}
-                color={ready ? "teal" : "gray"}
-                leftSection={<LinkedInMark size={11} color={ready ? undefined : "var(--mantine-color-dimmed)"} />}
-              >
-                LinkedIn{ready ? " · Connected" : ""}
-              </Badge>
-              <Tooltip label="Facebook support is planned, not available yet" withArrow>
-                <Badge size="sm" variant="outline" color="gray" style={{ opacity: 0.55, cursor: "default" }}>
-                  Facebook · Soon
-                </Badge>
-              </Tooltip>
-              <Tooltip label="Instagram support is planned, not available yet" withArrow>
-                <Badge size="sm" variant="outline" color="gray" style={{ opacity: 0.55, cursor: "default" }}>
-                  Instagram · Soon
-                </Badge>
-              </Tooltip>
-            </Group>
-          </div>
-        </Group>
+        <div style={{ minWidth: 0 }}>
+          <Title order={2}>Social posts</Title>
+          <Text c="dimmed" size="sm" mt={4} style={{ maxWidth: "58ch" }}>
+            Write a post, pick when it should go out, and Quantalog publishes it for you —
+            once, or on a repeating schedule.
+          </Text>
+        </div>
         <Tooltip label="Connect LinkedIn first" disabled={ready} withArrow>
           <Box>
             <Button
@@ -418,44 +339,6 @@ export default function SocialPosts() {
           )}
         </Alert>
       )}
-
-      {/* Connected: say who these posts go out as, and keep the account
-          reachable. Without this the connection is only changeable from the
-          Share panel, which is a strange place to have to go to disconnect
-          something this page depends on. */}
-      {ready && (
-        <Card withBorder radius="md" padding="sm" mb="lg">
-          <Group justify="space-between" align="center" wrap="nowrap" gap="md">
-            <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-              <Avatar radius="xl" size={34} color="blue" style={{ flexShrink: 0 }}>
-                {linkedin?.name?.trim().charAt(0).toUpperCase() || "?"}
-              </Avatar>
-              <div style={{ minWidth: 0 }}>
-                <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-                  <Text size="sm" fw={600} truncate>{linkedin?.name}</Text>
-                  <LinkedInMark size={13} />
-                </Group>
-                {/* The account and the clock are the two facts that decide what
-                    lands in the feed and when, so they are stated together. */}
-                <Text size="xs" c="dimmed" truncate>
-                  Posts publish to this profile · times in {timezone}
-                </Text>
-              </div>
-            </Group>
-            <Button
-              variant="subtle"
-              color="gray"
-              size="compact-sm"
-              loading={disconnecting}
-              onClick={disconnectLinkedIn}
-              style={{ flexShrink: 0 }}
-            >
-              Disconnect
-            </Button>
-          </Group>
-        </Card>
-      )}
-
 
       {isLoading ? (
         <Group justify="center" py="xl"><Loader /></Group>

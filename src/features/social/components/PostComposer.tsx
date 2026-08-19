@@ -3,7 +3,7 @@ import {
   ActionIcon, Box, Button, Divider, Group, Modal, RingProgress, ScrollArea,
   Text, TextInput,
 } from "@mantine/core";
-import { Monitor, Smartphone, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Monitor, Smartphone, X } from "lucide-react";
 import {
   CaptionEditor, CaptionToolbar, countHashtags,
   type CaptionEditorHandle,
@@ -28,7 +28,14 @@ import type { ScheduledPost } from "@/shared/types";
  * surface means an existing post is corrected where it was written.
  */
 
-/** A labelled block in the composer column. */
+/**
+ * A labelled block in the composer column.
+ *
+ * `mb={10}` between label and field, `mb="xl"` between one field and the next:
+ * a label sitting almost flush against its own input read as cramped, and with
+ * too little space below a field the label underneath it looked like it
+ * belonged to the field above.
+ */
 function Field({
   label,
   hint,
@@ -39,8 +46,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <Box mb="lg">
-      <Group justify="space-between" align="baseline" mb={7} wrap="nowrap">
+    <Box mb="xl">
+      <Group justify="space-between" align="baseline" mb={10} wrap="nowrap">
         <Text size="sm" fw={600}>{label}</Text>
         {hint && <Text size="xs" c="dimmed">{hint}</Text>}
       </Group>
@@ -48,6 +55,14 @@ function Field({
     </Box>
   );
 }
+
+/** The two-stage split: what gets written, then when it goes out. */
+const STEPS = [
+  { id: "content" as const, label: "Write" },
+  { id: "schedule" as const, label: "Schedule" },
+];
+
+type Step = (typeof STEPS)[number]["id"];
 
 export function PostComposer({
   opened,
@@ -75,12 +90,18 @@ export function PostComposer({
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  // Content first, always: nobody arrives at this modal already knowing when
+  // they want to post before they have written what they are posting.
+  const [step, setStep] = useState<Step>("content");
   const editor = useRef<CaptionEditorHandle | null>(null);
 
   // Seed from `initial` on open, so editing an existing post loads it and a new
   // one starts blank — without wiping what is being typed on every re-render.
   useEffect(() => {
-    if (opened) setDraft(initial);
+    if (opened) {
+      setDraft(initial);
+      setStep("content");
+    }
   }, [opened, initial]);
 
   const patch = (next: Partial<Draft>) => setDraft((d) => ({ ...d, ...next }));
@@ -102,6 +123,7 @@ export function PostComposer({
       // The cadence is the part people keep across a batch — only the content
       // changes from one post to the next.
       patch({ name: "", caption: "", image: "" });
+      setStep("content");
       editor.current?.focus();
     } else {
       onClose();
@@ -130,77 +152,133 @@ export function PostComposer({
             </ActionIcon>
             <Divider orientation="vertical" my={6} />
             <Text fw={600}>{editing ? "Edit scheduled post" : "New scheduled post"}</Text>
+
+            {/* The stepper doubles as a status: which stage is active, and
+                that Write is a completed fact once Schedule is showing — a
+                person landing back on this screen after switching tabs should
+                not have to re-read the form to know where they left off. */}
+            <Group gap={6} wrap="nowrap" ml="auto">
+              {STEPS.map((s, i) => {
+                const active = step === s.id;
+                const done = STEPS.findIndex((x) => x.id === step) > i;
+                return (
+                  <Group key={s.id} gap={6} wrap="nowrap">
+                    {i > 0 && (
+                      <Box style={{ width: 20, height: 1, background: "var(--mantine-color-default-border)" }} />
+                    )}
+                    <Group
+                      gap={6}
+                      wrap="nowrap"
+                      onClick={() => {
+                        // Only Write is reachable by clicking back to it; a step
+                        // ahead cannot be jumped to before the content behind it
+                        // is valid, same as the Continue button enforces.
+                        if (s.id === "content") setStep("content");
+                      }}
+                      style={{ cursor: s.id === "content" ? "pointer" : "default" }}
+                    >
+                      <Box
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "50%",
+                          display: "grid",
+                          placeItems: "center",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          background: active || done ? "var(--accent)" : "var(--mantine-color-default)",
+                          color: active || done ? "#fff" : "var(--mantine-color-dimmed)",
+                          border: active || done ? "none" : "1px solid var(--mantine-color-default-border)",
+                        }}
+                      >
+                        {done ? <Check size={12} /> : i + 1}
+                      </Box>
+                      <Text size="sm" fw={active ? 600 : 500} c={active ? undefined : "dimmed"}>
+                        {s.label}
+                      </Text>
+                    </Group>
+                  </Group>
+                );
+              })}
+            </Group>
           </Group>
 
           <ScrollArea style={{ flex: 1 }} type="auto">
             <Box className="share-post-body">
-              <Field label="Name" hint="For your own list. Not published.">
-                <TextInput
-                  placeholder="Weekly analytics update"
-                  value={draft.name}
-                  onChange={(e) => patch({ name: e.currentTarget.value })}
-                />
-              </Field>
+              {step === "content" ? (
+                <>
+                  <Field label="Name" hint="For your own list. Not published.">
+                    <TextInput
+                      placeholder="Weekly analytics update"
+                      value={draft.name}
+                      onChange={(e) => patch({ name: e.currentTarget.value })}
+                    />
+                  </Field>
 
-              <Field label="Post" hint={`${tags}/${MAX_HASHTAGS} hashtags`}>
-                <Box
-                  style={{
-                    border: `1px solid ${overLimit ? "var(--mantine-color-red-5)" : "var(--mantine-color-default-border)"}`,
-                    borderRadius: "var(--mantine-radius-md)",
-                    overflow: "hidden",
-                  }}
-                >
-                  <CaptionToolbar editor={editor} />
-                  <CaptionEditor
-                    value={draft.caption}
-                    onChange={(caption) => patch({ caption })}
-                    handleRef={editor}
-                    ariaLabel="Post text"
-                  />
-                  {/* The counter sits inside the field rather than under it: at
-                      3000 characters the limit is far away most of the time,
-                      and a ring shows how far without reading a number. */}
-                  <Group
-                    justify="space-between"
-                    align="center"
-                    px={12}
-                    py={6}
-                    wrap="nowrap"
-                    style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
-                  >
-                    <Text size="xs" c="dimmed">
-                      Bold and italic are unicode characters — LinkedIn accepts no formatting.
-                    </Text>
-                    <Group gap={7} wrap="nowrap">
-                      <Text size="xs" c={overLimit ? "red" : "dimmed"}>
-                        {chars.toLocaleString()} / {MAX_CAPTION.toLocaleString()}
-                      </Text>
-                      <RingProgress
-                        size={22}
-                        thickness={3}
-                        sections={[{
-                          value: Math.min(100, (chars / MAX_CAPTION) * 100),
-                          color: overLimit ? "red" : chars > MAX_CAPTION * 0.9 ? "orange" : "emerald",
-                        }]}
+                  <Field label="Post" hint={`${tags}/${MAX_HASHTAGS} hashtags`}>
+                    <Box
+                      style={{
+                        border: `1px solid ${overLimit ? "var(--mantine-color-red-5)" : "var(--mantine-color-default-border)"}`,
+                        borderRadius: "var(--mantine-radius-md)",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <CaptionToolbar editor={editor} />
+                      <CaptionEditor
+                        value={draft.caption}
+                        onChange={(caption) => patch({ caption })}
+                        handleRef={editor}
+                        ariaLabel="Post text"
                       />
-                    </Group>
-                  </Group>
-                </Box>
-              </Field>
+                      {/* The counter sits inside the field rather than under it:
+                          at 3000 characters the limit is far away most of the
+                          time, and a ring shows how far without reading a
+                          number. */}
+                      <Group
+                        justify="space-between"
+                        align="center"
+                        px={12}
+                        py={6}
+                        wrap="nowrap"
+                        style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
+                      >
+                        <Text size="xs" c="dimmed">
+                          Bold and italic are unicode characters — LinkedIn accepts no formatting.
+                        </Text>
+                        <Group gap={7} wrap="nowrap">
+                          <Text size="xs" c={overLimit ? "red" : "dimmed"}>
+                            {chars.toLocaleString()} / {MAX_CAPTION.toLocaleString()}
+                          </Text>
+                          <RingProgress
+                            size={22}
+                            thickness={3}
+                            sections={[{
+                              value: Math.min(100, (chars / MAX_CAPTION) * 100),
+                              color: overLimit ? "red" : chars > MAX_CAPTION * 0.9 ? "orange" : "emerald",
+                            }]}
+                          />
+                        </Group>
+                      </Group>
+                    </Box>
+                  </Field>
 
-              <Field label="Image" hint="Optional">
-                <PostImageField value={draft.image} onChange={(image) => patch({ image })} />
-              </Field>
-
-              <Divider my="lg" />
-
-              <Field label="Schedule" hint={timezone}>
-                <ScheduleFields draft={draft} onChange={patch} timezone={timezone} />
-              </Field>
+                  <Field label="Image" hint="Optional">
+                    <PostImageField value={draft.image} onChange={(image) => patch({ image })} />
+                  </Field>
+                </>
+              ) : (
+                <Field label="Schedule" hint={timezone}>
+                  <ScheduleFields draft={draft} onChange={patch} timezone={timezone} />
+                </Field>
+              )}
             </Box>
           </ScrollArea>
 
-          {/* Action bar, pinned so it stays reachable however long the post. */}
+          {/* Action bar, pinned so it stays reachable however long the post.
+              Write moves forward only — the content has to exist before there
+              is anything to schedule. Schedule can step back without losing
+              what was written, since the draft lives above both steps. */}
           <Group
             justify="space-between"
             px={20}
@@ -208,25 +286,43 @@ export function PostComposer({
             wrap="nowrap"
             style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
           >
-            <Button variant="subtle" color="gray" onClick={onClose}>Cancel</Button>
-            <Group gap="sm" wrap="nowrap">
-              {/* Composing a batch is the normal case here — someone sits down
-                  and queues a month of posts. Closing after each one would make
-                  that a dozen round trips through the list. */}
-              {!editing && (
-                <Button
-                  variant="default"
-                  loading={saving}
-                  disabled={blocked}
-                  onClick={() => save(true)}
-                >
-                  Save & add another
+            {step === "content" ? (
+              <>
+                <Button variant="subtle" color="gray" onClick={onClose}>Cancel</Button>
+                <Button rightSection={<ArrowRight size={15} />} disabled={empty || overLimit} onClick={() => setStep("schedule")}>
+                  Continue to schedule
                 </Button>
-              )}
-              <Button loading={saving} disabled={blocked} onClick={() => save(false)}>
-                {editing ? "Save changes" : "Create schedule"}
-              </Button>
-            </Group>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="subtle"
+                  color="gray"
+                  leftSection={<ArrowLeft size={15} />}
+                  onClick={() => setStep("content")}
+                >
+                  Back
+                </Button>
+                <Group gap="sm" wrap="nowrap">
+                  {/* Composing a batch is the normal case here — someone sits
+                      down and queues a month of posts. Closing after each one
+                      would make that a dozen round trips through the list. */}
+                  {!editing && (
+                    <Button
+                      variant="default"
+                      loading={saving}
+                      disabled={blocked}
+                      onClick={() => save(true)}
+                    >
+                      Save & add another
+                    </Button>
+                  )}
+                  <Button loading={saving} disabled={blocked} onClick={() => save(false)}>
+                    {editing ? "Save changes" : "Create schedule"}
+                  </Button>
+                </Group>
+              </>
+            )}
           </Group>
         </Box>
 

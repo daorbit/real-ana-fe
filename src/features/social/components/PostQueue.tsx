@@ -92,9 +92,7 @@ function PostRow({
   const sent = post.status === "sent";
   const moved = recentlyMovedId === post.id;
 
-  // Draft is a UI reading of "paused with a time already set" rather than a
-  // separate status the server knows about -- see draft.ts. Everywhere this
-  // page used to say "Paused" now says "Draft" instead.
+
   const draft = post.status === "paused";
 
   return (
@@ -103,24 +101,18 @@ function PostRow({
       padding={0}
       radius="md"
       style={{
+        padding: 0,
         opacity: sent ? 0.75 : 1,
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        // The card is the thing that moved, so the card is what is marked. An
-        // accent border rather than a filled background: findable after the
-        // grid reorders, without turning the card into an alert.
+
         borderColor: moved ? "var(--accent)" : undefined,
         transition: "border-color 200ms ease",
         overflow: "hidden",
       }}
     >
-      {/* Image fills the top of the card at a fixed aspect ratio, `cover`
-          rather than `contain`: side by side in a grid, cards at uneven
-          heights read as a broken layout, and a feed post is already framed
-          for a fixed box on the network it is going to. A post with no image
-          gets a plain tile carrying its status colour, so the grid keeps its
-          rhythm either way. */}
+
       <Box
         style={{
           position: "relative",
