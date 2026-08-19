@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Box, Button, Group, Loader, SegmentedControl, Text, Title, Tooltip,
+  Avatar, Box, Button, Group, Loader, SegmentedControl, Text, Title, Tooltip,
 } from "@mantine/core";
 import { Plus } from "lucide-react";
+import { LinkedInMark } from "@/shared/ui/LinkedInMark";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
@@ -127,14 +128,26 @@ export default function SocialPosts() {
 
   return (
     <AppShell>
-      <Group justify="space-between" align="flex-start" mb="lg" wrap="wrap" gap="md">
-        <div style={{ minWidth: 0 }}>
-          <Title order={2}>Social posts</Title>
-          <Text c="dimmed" size="sm" mt={4} style={{ maxWidth: "58ch" }}>
-            Write a post, pick when it should go out, and Quantalog publishes it for you —
-            once, or on a repeating schedule.
-          </Text>
-        </div>
+      {/* The account, not the feature. This page is one profile's queue, so the
+          profile is what names it — the same thing the posts will go out as,
+          shown the way they will carry it. */}
+      <Group justify="space-between" align="center" mb="lg" wrap="wrap" gap="md">
+        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+          <Box style={{ position: "relative", flexShrink: 0 }}>
+            <Avatar size={44} radius="xl" color="blue">
+              {linkedin?.name?.trim().charAt(0).toUpperCase() || "?"}
+            </Avatar>
+            <Box className="post-slot__network" aria-hidden>
+              <LinkedInMark size={9} color="#fff" />
+            </Box>
+          </Box>
+          <div style={{ minWidth: 0 }}>
+            <Title order={3} lh={1.2}>{linkedin?.name || "Social posts"}</Title>
+            <Text size="xs" c="dimmed" mt={2}>
+              {ready ? `Publishing to LinkedIn · ${timezone}` : "No account connected yet"}
+            </Text>
+          </div>
+        </Group>
 
         <Group gap="sm" wrap="nowrap" align="center">
           {/* Only once the queue is nearly full: a slot counter shown from the
@@ -193,6 +206,7 @@ export default function SocialPosts() {
           </Group>
           <PostQueue
             posts={posts}
+            author={linkedin?.name ?? ""}
             onEdit={openEdit}
             onToggle={toggle}
             onDelete={destroy}

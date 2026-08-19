@@ -3,7 +3,6 @@ import { Inbox } from "lucide-react";
 import { DELIVERY_WINDOW_MINUTES } from "./draft";
 import { PostFilters } from "./PostFilters";
 import { PostRow } from "./PostRow";
-import { PostStats } from "./PostStats";
 import { usePostFilters } from "../hooks/usePostFilters";
 import { dayLabel } from "../postTime";
 import type { ScheduledPost } from "@/shared/types";
@@ -21,6 +20,7 @@ import type { ScheduledPost } from "@/shared/types";
  */
 export function PostQueue({
   posts,
+  author,
   onEdit,
   onToggle,
   onDelete,
@@ -29,6 +29,8 @@ export function PostQueue({
   recentlyMovedId,
 }: {
   posts: ScheduledPost[];
+  /** The connected account these publish as, shown on each card. */
+  author: string;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
@@ -36,7 +38,7 @@ export function PostQueue({
   publishingId: string | null;
   recentlyMovedId?: string | null;
 }) {
-  const handlers = { onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
+  const handlers = { author, onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
   const { filter, setFilter, query, setQuery, counts, visible } = usePostFilters(posts);
 
   // Waiting posts lead, in the order they will run; history follows, most
@@ -60,7 +62,9 @@ export function PostQueue({
 
   return (
     <Stack gap="lg">
-      <PostStats posts={posts} />
+      {/* No summary strip above the tabs: the tab counts already are the
+          summary, and stating the same four numbers twice on one screen made
+          the page busier without telling anyone anything new. */}
 
       <PostFilters
         filter={filter}
@@ -138,14 +142,19 @@ function Section({
   dim?: boolean;
   children: React.ReactNode;
 }) {
+  // The day sits above its own slots and lines up with the card column rather
+  // than the page edge, so the eye follows one left margin down the schedule.
+  const [lead, ...rest] = title?.split(", ") ?? [];
+
   return (
     <Box>
       {title && (
-        <Text size="sm" fw={700} mb={8} c={dim ? "dimmed" : undefined}>
-          {title}
+        <Text className="post-day" size="sm" c={dim ? "dimmed" : undefined}>
+          <strong>{lead}</strong>
+          {rest.length > 0 && <span>, {rest.join(", ")}</span>}
         </Text>
       )}
-      <Stack gap={8}>{children}</Stack>
+      <Stack gap="xs">{children}</Stack>
     </Box>
   );
 }
