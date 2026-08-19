@@ -5,8 +5,11 @@
      emerald look like it is fighting the background instead of sitting on it.
      The page and the sidebar share one ground; the steps above it are lifts
      off that ground rather than a second palette. */
-  --bg: #171717;
-  --bg-2: #1e1e1e;
+  /* The ground the shell sits on is pure black, so the rail and the content
+     panel both read as surfaces lifted off it rather than as regions of it.
+     Everything the eye actually lands on is `--bg-2` and up. */
+  --bg: #000000;
+  --bg-2: #171717;
   --surface: #232323;
   --surface-2: #2b2b2b;
   --border: #303030;
@@ -46,7 +49,9 @@
 }
 
 [data-mantine-color-scheme="light"] {
-  --bg: #f8f9fa;
+  /* Mirrors dark: the ground is the plain end of the scale and the rail and
+     panel are the lifted surface on it. */
+  --bg: #eceef1;
   --bg-2: #ffffff;
   --surface: #ffffff;
   --surface-2: #f1f3f5;
@@ -176,7 +181,12 @@ html.theme-pulse body::after {
    both silently fall back to scroll-attachment, which produces a hard seam
    where the wash stops partway down a tall page. A `position: fixed`
    pseudo-element sized to the viewport is not subject to that: it paints
-   once, stays put regardless of scroll, and everything else scrolls over it. */
+   once, stays put regardless of scroll, and everything else scrolls over it.
+
+   Inside the app shell the wash paints on the content panel instead (see
+   `.app-panel::before` below) — there it is bounded by the panel's border and
+   radius rather than running under the rail. This body layer stays for the
+   pages that have no shell around them: auth, share links, print views. */
 html[data-bg-style="textured"] body::before {
   content: "";
   position: fixed;
@@ -185,14 +195,43 @@ html[data-bg-style="textured"] body::before {
   pointer-events: none;
   background: var(--bg-wash);
 }
+
+/* The shell covers the body layer entirely, so it would only ever show through
+   the gap around the panel — a frame of mesh around a flat page. Suppressed so
+   the panel is the one place the background appears. */
+html[data-bg-style="textured"]:has(.app-panel) body::before { display: none; }
 /* body and the app shell's own main panel each paint an opaque
    --mantine-color-body fill; make every layer between the pseudo-layer and
    the content transparent so the wash actually shows through instead of
    being hidden behind flat layers stacked on top of it. */
 [data-bg-style="textured"] body,
-[data-bg-style="textured"] .mantine-AppShell-main {
+[data-bg-style="textured"] .mantine-AppShell-main,
+[data-bg-style="textured"] .app-main {
   background: transparent !important;
 }
+
+/* The chosen background belongs to the content panel, not to the window behind
+   it. The panel is the page now — painting the wash on the body put it under
+   the rail and out past the panel's rounded corners, where the only part of it
+   still visible was a strip around the edges. Painted here it is bounded by the
+   panel's own border and clipped to its radius, which is what makes the choice
+   read as "the page has this background".
+
+   Its own layer rather than a background on the panel: the wash must not scroll
+   with the content, and it sits under the scrolling surface so the rows above
+   it keep their contrast. */
+[data-bg-style="textured"] .app-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--bg-wash);
+}
+
+/* Above the wash, and transparent so it shows through. */
+.app-panel__scroll { position: relative; z-index: 1; }
 
 /* Orbit's chat panel shares the same wash — its own `.aurora-wash` element
    (see RunningDialog.css) is repainted from the identical --bg-wash value so
@@ -243,8 +282,11 @@ body { overflow-wrap: break-word; }
 /* The one floating control: Orbit's launcher.
    The mark is the whole button, so this only positions it and gives it the
    lift that separates it from the page — no background of its own. */
+/* Anchored to the content panel's own corner rather than to the viewport: the
+   panel is the page now, so a viewport-fixed button would hang over its border
+   and sit on the shell's ground instead of on the content it belongs to. */
 .orbit-fab {
-  position: fixed;
+  position: absolute;
   right: 24px;
   bottom: 24px;
   z-index: 190;
@@ -2557,6 +2599,91 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     padding: 0 0 6px;
   }
   .post-day { margin-left: 0; }
+}
+
+/* ============ Content panel ============
+   The page is a panel inset from the shell's edges, and the scroll lives inside
+   it rather than on the window. The frame — rail, panel border, rounded corners
+   — then stays fixed while only the content moves, which is what makes the app
+   read as an application rather than as a long document with navigation glued
+   to the side of it. */
+.app-main {
+  background: var(--bg);
+  /* The main region is exactly the viewport minus the mobile header, so the
+     panel inside it has a real height to fill. Without this the region grows
+     with its content and the inner scroll never engages. */
+  height: 100dvh;
+  overflow: hidden;
+}
+
+@media (max-width: 48em) {
+  .app-main { height: calc(100dvh - 56px); }
+}
+
+.app-panel {
+  position: relative;
+  height: 100%;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* The rail is the same surface as the panel and is inset from the window on the
+   same margin, so it takes the same corners — a square-edged rail beside a
+   rounded panel reads as one of the two having been forgotten. */
+.mantine-AppShell-navbar {
+  border-radius: var(--radius);
+  margin: var(--mantine-spacing-xs) 0 var(--mantine-spacing-xs) var(--mantine-spacing-xs);
+  height: auto !important;
+  top: var(--mantine-spacing-xs) !important;
+  bottom: var(--mantine-spacing-xs);
+}
+
+/* On phones the rail is a full-height slide-over pinned to the edge, where an
+   inset and rounded corners would leave it floating with a gap behind it. */
+@media (max-width: 48em) {
+  .mantine-AppShell-navbar {
+    border-radius: 0;
+    margin: 0;
+    top: 0 !important;
+    bottom: 0;
+    height: 100% !important;
+  }
+}
+
+/* The scrolling surface. Padding sits here rather than on the panel so the
+   scrollbar runs down the panel's inner edge instead of floating in a gutter
+   outside the content. */
+.app-panel__scroll {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--mantine-spacing-md);
+  overscroll-behavior: contain;
+}
+
+/* A slim track that matches the panel rather than the OS default, which on
+   Windows draws a wide light-grey bar straight through a dark surface. */
+.app-panel__scroll::-webkit-scrollbar { width: 10px; }
+.app-panel__scroll::-webkit-scrollbar-track { background: transparent; }
+/* The thumb is inset by a transparent border rather than one painted in the
+   panel's colour, so it does not draw a flat stripe over a textured
+   background. */
+.app-panel__scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.app-panel__scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.app-panel__scroll { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+/* Phones give the panel the full width — a rounded card inset on a 390px
+   screen spends its narrowest dimension on decoration. */
+@media (max-width: 48em) {
+  .app-panel { border-radius: var(--radius-sm); }
+  .app-panel__scroll { padding: var(--mantine-spacing-sm); }
 }
 
 /* ============ Account menu ============

@@ -1,9 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  AppShell as MantineShell, Select, Group, Text, ActionIcon, ScrollArea,
+  AppShell as MantineShell, Select, Group, Text, ScrollArea,
   Box, useMantineColorScheme, useComputedColorScheme, Button, Menu,
-  UnstyledButton, Tooltip, Burger, Progress, Badge, ThemeIcon,
+  UnstyledButton, Burger, Progress, Badge, ThemeIcon,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
@@ -11,6 +11,7 @@ import {
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
   Send,
   CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords, Zap,
+  Languages, FlaskConical,
 } from "lucide-react";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
@@ -19,24 +20,14 @@ import { OrbitBubble } from "@/features/orbit/components/OrbitBubble";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { notify, confirmLogout, errMessage } from "@/shared/lib/notify";
 import { useWorkspace, useActiveBilling } from "@/features/workspace/context";
-import { DemoToggle } from "@/features/demo/DemoToggle";
 import { useDemo } from "@/features/demo/context";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { useSyncWorkspaceTheme } from "@/features/auth/components/useSyncWorkspaceTheme";
 import { CommandPalette } from "@/shared/ui/CommandPalette";
-import { LanguagePicker } from "@/lib/i18n/LanguagePicker";
+import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { useTranslation } from "react-i18next";
 
-/**
- * Grouped navigation.
- *
- * A flat list of five items gives no sense of which are daily tools and which
- * are occasional setup — grouping costs one line of chrome and makes the shape
- * of the product visible.
- */
-// `labelKey` is an i18n key resolved at render, so the rail follows the chosen
-// language. `headingKey` likewise. Items without a shipped key (Public
-// dashboard, admin-only) fall back to their English label via a plain string.
+ 
 const NAV_GROUPS = [
   {
     headingKey: "nav.groupAnalyze",
@@ -65,29 +56,14 @@ const NAV_GROUPS = [
   },
 ];
 
-/**
- * The account menu's own items, above Settings.
- *
- * These three are reached from the account rather than from the rail because
- * none of them is a place you work — who is on the team, the keys for the API,
- * and where to ask for help are all things you go to once and leave again. The
- * rail is for the pages someone returns to, and mixing the two made a list of
- * daily destinations end in three that are visited monthly.
- */
+ 
 const ACCOUNT_ITEMS = [
   { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
   { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
   { to: "/app/help", labelKey: "nav.help", label: "Help & support", icon: LifeBuoy },
 ];
 
-/**
- * Only an admin sees these, and only when not already acting as someone else.
- *
- * "Send a message" and "Contact messages" were almost the same words for
- * opposite directions — one mails every user, the other is where users' mail
- * arrives. The labels now name the direction rather than the medium, and the
- * inbox sits first because it is the one with unread work in it.
- */
+ 
 const ADMIN_ITEMS = [
   { to: "/app/admin/contact", labelKey: "nav.adminContact", label: "Inbox", icon: Inbox },
   { to: "/app/admin/broadcast", labelKey: "nav.adminBroadcast", label: "Email users", icon: Mail },
@@ -152,7 +128,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Super-admin only, and never while impersonating — see `useIsPlatformAdmin`.
   const isAdmin = useIsPlatformAdmin();
 
-  const { demo } = useDemo();
+  const { demo, available: demoAvailable, toggle: toggleDemo } = useDemo();
 
   // Switching workspace re-renders every panel with a different dataset at
   // once. The overlay covers that swap; it never gates the fetch.
@@ -206,7 +182,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         breakpoint: "sm",
         collapsed: { mobile: !navOpen },
       }}
-      padding="lg"
+      /* The gap between the rail and the panel, and the panel's inset from the
+         window edge. Kept tight — this is a frame, not a margin, and every
+         pixel here is taken from the content the panel exists to show. */
+      padding="xs"
     >
       {/* Mobile-only top bar. Hidden on desktop (header collapsed there), it
           carries the burger and brand so the navbar can slide away on phones. */}
@@ -223,13 +202,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Group>
       </MantineShell.Header>
 
-      {/* The rail shares the page's own ground rather than sitting a step
-          above it: the border is what separates them, and a second surface
-          colour on top of that border made the shell read as two documents
-          side by side rather than one with a rail down the edge. */}
+ 
       <MantineShell.Navbar
         p="sm"
-        style={{ background: "var(--bg)", borderRight: "1px solid var(--border)" }}
+        style={{ background: "var(--bg-2)", border: "none" }}
       >
         {/* On mobile the wordmark already sits in the top bar, so the one here
             would double up inside the open drawer — desktop-only. */}
@@ -342,40 +318,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Box>
           )}
 
-          <Group gap={4} mb="xs" px={2}>
-            <Tooltip label={t("nav.documentation")} withArrow>
-              <ActionIcon
-                component="a"
-                href="https://quantalog.daorbit.in/docs"
-                target="_blank"
-                rel="noreferrer"
-                variant="subtle"
-                color="gray"
-                aria-label={t("nav.documentation")}
-              >
-                <BookOpen size={16} />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip label={dark ? t("nav.lightMode") : t("nav.darkMode")} withArrow>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                onClick={() => setColorScheme(dark ? "light" : "dark")}
-                aria-label={dark ? t("nav.switchToLight") : t("nav.switchToDark")}
-              >
-                {dark ? <Sun size={16} /> : <Moon size={16} />}
-              </ActionIcon>
-            </Tooltip>
-            <LanguagePicker />
-            <DemoToggle />
-          </Group>
-
-          {/* On desktop the account menu opens beside the rail. On a phone the
-              rail is a full-height slide-over pinned to the left edge, so
-              `right-end` put the dropdown — and the Log out item in it —
-              partly off-screen with no way to reach it. Opening upward over
-              the rail keeps it on screen at any width, and `withinPortal`
-              stops the navbar's own scroll container from clipping it. */}
+ 
           <Menu
             position={mobile ? "top" : "right-end"}
             withArrow
@@ -408,6 +351,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               avatarUrl={user?.avatarUrl}
               initials={initials}
               workspace={active?.name ?? ""}
+              dark={dark}
+              onToggleScheme={() => setColorScheme(dark ? "light" : "dark")}
+              demo={demo}
+              demoAvailable={demoAvailable}
+              onToggleDemo={toggleDemo}
               onLogout={() =>
                 confirmLogout(() => {
                   logout();
@@ -419,11 +367,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </MantineShell.Section>
       </MantineShell.Navbar>
 
-      <MantineShell.Main style={{ background: "var(--bg)", position: "relative" }}>
-        {/* A hairline along the top of the content while demo mode is on.
-            Every number below it is fabricated, and the sidebar switch is easy
-            to forget once scrolled away from — this costs no layout space and
-            is visible from anywhere on the page. */}
+ 
+      <MantineShell.Main className="app-main" style={{ position: "relative" }}>
+     
         {demo && (
           <Box
             aria-hidden
@@ -438,42 +384,31 @@ export function AppShell({ children }: { children: ReactNode }) {
           />
         )}
 
-        <div style={{ position: "relative", zIndex: 1 }}>
-          {/* Keyed on the path so the entrance animation replays on every
-              navigation rather than only on first mount. */}
-          <div key={loc.pathname} className="route-fade">
-            {children}
+        <div className="app-panel">
+          <div className="app-panel__scroll">
+            {/* Keyed on the path so the entrance animation replays on every
+                navigation rather than only on first mount. */}
+            <div key={loc.pathname} className="route-fade">
+              {children}
+            </div>
+            {/* Clear the floating help button so page content never sits under
+                it. The height tracks the button's size, which steps down on
+                phones. */}
+            <div className="orbit-fab-spacer" />
           </div>
+
+          {/* Inside the panel rather than the viewport: it is anchored to the
+              content's own bottom-right corner, and pinned to the window it
+              would have floated over the panel's edge. */}
+          <OrbitBubble />
         </div>
-        {/* Clear the floating help button so page content never sits under it.
-            The height tracks the button's size, which steps down on phones. */}
-        <div className="orbit-fab-spacer" />
-        {/* One floating control, not two. The support "?" that used to sit here
-            offered the same three contact options the Help & support page now
-            holds in full, so it was a second door to a room you can already
-            walk into — and two stacked buttons in one corner read as clutter. */}
-        <OrbitBubble />
       </MantineShell.Main>
     </MantineShell>
     </>
   );
 }
 
-/**
- * Which plan the account is on, and how close it is to the plan's limits —
- * always visible in the rail rather than something you find only by opening
- * Billing. The nudge to upgrade is deliberately quiet on Free/plenty-of-room
- * (a plain badge) and gets louder (a card with a bar and a button) once a
- * quota is actually close to biting, so it reads as useful information most
- * of the time and only becomes a prompt when there's something to act on.
- */
-/**
- * "You've been invited to X" in the rail.
- *
- * An invitation that arrives while someone is already using the app would
- * otherwise only exist in their inbox — and an email is easy to miss when the
- * thing it grants access to is already open in a tab.
- */
+ 
 function PendingInviteCard() {
   const { user } = useAuth();
   const invites = user?.pendingInvites ?? [];
@@ -511,27 +446,18 @@ function PendingInviteCard() {
     </UnstyledButton>
   );
 }
-
-/**
- * The account menu: who you are signed in as, which workspace is active, and
- * everything that is about the account rather than about the data.
- *
- * The header is the identity block — email above, workspace and its plan below
- * — because the first question this menu answers is "which account am I acting
- * as?", and that has to be readable before any of the items are. The plan line
- * doubles as the upgrade path so there is one place that both states the limit
- * and offers the way past it.
- *
- * Items are grouped by how often they are reached rather than by subject: the
- * team and the workspace's own settings first, the developer-facing pages next,
- * and the way out last with air around it so it is never a mis-click.
- */
+ 
 function AccountMenuDropdown({
   email,
   name,
   avatarUrl,
   initials,
   workspace,
+  dark,
+  onToggleScheme,
+  demo,
+  demoAvailable,
+  onToggleDemo,
   onLogout,
 }: {
   email: string;
@@ -539,6 +465,12 @@ function AccountMenuDropdown({
   avatarUrl?: string;
   initials: string;
   workspace: string;
+  dark: boolean;
+  onToggleScheme: () => void;
+  demo: boolean;
+  /** Admin-only — the demo row is absent entirely for everyone else. */
+  demoAvailable: boolean;
+  onToggleDemo: (next: boolean) => void;
   onLogout: () => void;
 }) {
   const { t } = useTranslation();
@@ -617,6 +549,44 @@ function AccountMenuDropdown({
 
       <Menu.Divider />
 
+      {/* Named rather than a glyph, and stating what it will switch *to* —
+          a moon captioned only by its own icon leaves you guessing whether it
+          shows the current mode or the one it moves to. */}
+      <Menu.Item
+        leftSection={dark ? <Sun size={15} /> : <Moon size={15} />}
+        onClick={onToggleScheme}
+        closeMenuOnClick={false}
+      >
+        {dark ? t("nav.lightMode") : t("nav.darkMode")}
+      </Menu.Item>
+
+      {/* A submenu, because the language list is long enough that inlining it
+          would bury everything below it. */}
+      <Menu.Sub>
+        <Menu.Sub.Target>
+          <Menu.Sub.Item leftSection={<Languages size={15} />}>
+            {t("nav.language")}
+          </Menu.Sub.Item>
+        </Menu.Sub.Target>
+        <Menu.Sub.Dropdown>
+          <LanguageItems />
+        </Menu.Sub.Dropdown>
+      </Menu.Sub>
+
+      {/* Admin-only: renders nothing when demo data is not available. */}
+      {demoAvailable && (
+        <Menu.Item
+          leftSection={<FlaskConical size={15} />}
+          rightSection={
+            demo ? <Badge size="xs" variant="light" color="violet" tt="none">on</Badge> : null
+          }
+          onClick={() => onToggleDemo(!demo)}
+          closeMenuOnClick={false}
+        >
+          {t("nav.demoData", "Demo data")}
+        </Menu.Item>
+      )}
+
       <Menu.Item
         component="a"
         href="https://quantalog.daorbit.in/docs"
@@ -681,6 +651,17 @@ function PlanCard() {
           </Group>
           <Badge size="xs" variant="light" color="gray" tt="none">{billing.cycle}</Badge>
         </Group>
+
+        {/* The bar is here even when there is nothing to warn about: a quota
+            you can only see once it is nearly spent is one you cannot plan
+            against, and a flat grey line costs nothing while there is room. */}
+        <Progress
+          value={worstPct * 100}
+          size={4}
+          radius="xl"
+          color="gray"
+          mt={8}
+        />
       </UnstyledButton>
     );
   }
