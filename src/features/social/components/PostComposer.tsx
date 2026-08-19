@@ -93,6 +93,10 @@ export function PostComposer({
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  // What the post is about, in the author's own words. Kept out of the draft:
+  // it is the instruction that produced the caption, not part of the post.
+  const [topic, setTopic] = useState("");
+  const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
   // Content first, always: nobody arrives at this modal already knowing when
   // they want to post before they have written what they are posting.
   const [step, setStep] = useState<Step>("content");
@@ -118,6 +122,20 @@ export function PostComposer({
   const past = draft.mode === "once"
     && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
   const blocked = empty || overLimit || past;
+
+  const generate = async () => {
+    if (!topic.trim() || !workspaceId) return;
+    try {
+      const res = await writeCaption({
+        workspaceId,
+        platform: "linkedin",
+        topic: topic.trim(),
+      }).unwrap();
+      patch({ caption: res.caption });
+    } catch (e) {
+      notify.error(errMessage(e, "Orbit could not write that post."));
+    }
+  };
 
   const save = async (andAnother: boolean, asDraft = false) => {
     const ok = await onSave(draft, asDraft);
@@ -220,6 +238,49 @@ export function PostComposer({
                   </Field>
 
                   <Field label="Post" hint={`${tags}/${MAX_HASHTAGS} hashtags`}>
+                    {/* Say what the post is about and Orbit drafts it. A topic
+                        box rather than a bare "write for me" button: the post
+                        goes out under the author's own name, so the model is
+                        given their subject rather than left to guess one from
+                        a workspace it cannot see. Writing over an existing
+                        caption is deliberate — the button says "Rewrite" once
+                        there is something to lose. */}
+                    <Group gap="sm" mb="sm" wrap="nowrap" align="flex-end">
+                      <TextInput
+                        placeholder="What is this post about?"
+                        value={topic}
+                        onChange={(e) => setTopic(e.currentTarget.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && topic.trim() && !writing) {
+                            e.preventDefault();
+                            generate();
+                          }
+                        }}
+                        style={{ flex: 1 }}
+                      />
+                      <Tooltip
+                        label={
+                          topic.trim()
+                            ? "Orbit writes the post from this. Costs one Orbit question."
+                            : "Say what the post is about first"
+                        }
+                        withArrow
+                      >
+                        <Box>
+                          <Button
+                            variant="light"
+                            color="emerald"
+                            loading={writing}
+                            disabled={!topic.trim()}
+                            onClick={generate}
+                            leftSection={<PenLine size={15} />}
+                          >
+                            {draft.caption.trim() ? "Rewrite" : "Write with Orbit"}
+                          </Button>
+                        </Box>
+                      </Tooltip>
+                    </Group>
+
                     <Box
                       style={{
                         border: `1px solid ${overLimit ? "var(--mantine-color-red-5)" : "var(--mantine-color-default-border)"}`,

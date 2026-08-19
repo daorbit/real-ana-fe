@@ -64,14 +64,7 @@ const BROWSER_TZ = (() => {
   }
 })();
 
-/**
- * One network's card in the Connections tab.
- *
- * The same frame whether the network is live or still on the way: mark, name,
- * what it does, then either its own connection controls or a plain note that
- * it is coming. A network that is not ready yet is dimmed rather than hidden,
- * so the set reads as a roadmap instead of a gap.
- */
+ 
 function ConnectionCard({
   mark,
   tint,
@@ -88,33 +81,29 @@ function ConnectionCard({
   children?: ReactNode;
 }) {
   return (
-    <Box className="surface-card" p="lg" style={{ opacity: soon ? 0.6 : 1 }}>
-      <Group gap="sm" wrap="nowrap" align="flex-start">
-        <Box
-          aria-hidden
-          style={{
-            width: 38,
-            height: 38,
-            flexShrink: 0,
-            display: "grid",
-            placeItems: "center",
-            borderRadius: 10,
-            // The network's own colour at low alpha, so the mark sits on a
-            // tint of itself rather than on one shared grey for all of them.
-            background: `color-mix(in srgb, ${tint} 14%, transparent)`,
-          }}
-        >
-          {mark}
-        </Box>
-        <Box style={{ minWidth: 0, flex: 1 }}>
-          <Group gap={8} wrap="nowrap" align="center">
-            <Text fw={600} size="sm">{name}</Text>
-            {soon && <Badge size="xs" variant="light" color="gray">Coming soon</Badge>}
-          </Group>
-          <Text size="xs" c="dimmed" mt={2}>{hint}</Text>
-          {children && <Box mt="sm">{children}</Box>}
-        </Box>
+    <Box className="connection-card" style={{ opacity: soon ? 0.55 : 1 }}>
+      <Box
+        aria-hidden
+        className="connection-card__mark"
+        style={{
+          // The network's own colour at low alpha, so the mark sits on a tint
+          // of itself rather than on one shared grey for all of them.
+          background: `color-mix(in srgb, ${tint} 16%, transparent)`,
+        }}
+      >
+        {mark}
+      </Box>
+
+      <Group gap={8} wrap="nowrap" align="center" mt="md">
+        <Text fw={600}>{name}</Text>
+        {soon && <Badge size="xs" variant="light" color="gray">Coming soon</Badge>}
       </Group>
+      <Text size="sm" c="dimmed" mt={4} style={{ flex: 1 }}>{hint}</Text>
+
+      {/* The action sits at the foot of every card at the same height, so the
+          row reads as a set of equivalent choices rather than three blocks of
+          text with a control somewhere inside each. */}
+      <Box mt="md">{children}</Box>
     </Box>
   );
 }
@@ -524,54 +513,51 @@ export default function Settings() {
             </PageStack>
           </Tabs.Panel>
 
-          {/* No PageStack wrapper: Appearance has no narrow-form content to
-              cap, and the whole point of its own tab is to use the page's
-              full width for the swatch and preview grids. */}
           <Tabs.Panel value="appearance">
             <AppearanceSection bare />
           </Tabs.Panel>
 
-          {/* Where an account gets connected and disconnected now lives: one
-              place, reachable without going through the composer that merely
-              depends on it. Every network gets the same card — its own mark,
-              what it is for, and either its connection or the reason it has
-              none yet — so the ones still coming read as part of the same set
-              rather than a footnote. */}
+
           <Tabs.Panel value="connections">
-            <Section
-              title={t("settings.connectionsTitle", "Connected accounts")}
-              description={t(
-                "settings.connectionsHint",
-                "Networks Quantalog can publish your scheduled posts to.",
-              )}
-            >
-              <div className="connection-grid">
-                <ConnectionCard
-                  mark={<LinkedInMark size={20} />}
-                  tint={LINKEDIN_BLUE}
-                  name="LinkedIn"
-                  hint="Publishing account for scheduled social posts."
-                >
-                  <LinkedInConnection />
-                </ConnectionCard>
+       
+            <Box mb="lg">
+              <Text fw={650} size="sm" style={{ letterSpacing: "-0.01em" }}>
+                {t("settings.connectionsTitle", "Connected accounts")}
+              </Text>
+              <Text c="dimmed" size="xs" mt={2}>
+                {t(
+                  "settings.connectionsHint",
+                  "Networks Quantalog can publish your scheduled posts to.",
+                )}
+              </Text>
+            </Box>
 
-                <ConnectionCard
-                  mark={<FacebookMark size={20} />}
-                  tint={FACEBOOK_BLUE}
-                  name="Facebook"
-                  hint="Pages and profile posting."
-                  soon
-                />
+            <div className="connection-grid">
+              <ConnectionCard
+                mark={<LinkedInMark size={26} />}
+                tint={LINKEDIN_BLUE}
+                name="LinkedIn"
+                hint="Publishing account for scheduled social posts."
+              >
+                <LinkedInConnection />
+              </ConnectionCard>
 
-                <ConnectionCard
-                  mark={<InstagramMark size={20} />}
-                  tint={INSTAGRAM_PINK}
-                  name="Instagram"
-                  hint="Feed posts from the same composer."
-                  soon
-                />
-              </div>
-            </Section>
+              <ConnectionCard
+                mark={<FacebookMark size={26} />}
+                tint={FACEBOOK_BLUE}
+                name="Facebook"
+                hint="Pages and profile posting."
+                soon
+              />
+
+              <ConnectionCard
+                mark={<InstagramMark size={26} />}
+                tint={INSTAGRAM_PINK}
+                name="Instagram"
+                hint="Feed posts from the same composer."
+                soon
+              />
+            </div>
           </Tabs.Panel>
         </Tabs>
 

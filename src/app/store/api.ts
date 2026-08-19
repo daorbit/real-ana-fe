@@ -190,12 +190,17 @@ export const api = createApi({
     // on remount or refocus.
     writeShareCaption: build.mutation<
       { caption: string },
-      { workspaceId: string; platform: string }
+      /**
+       * `topic` writes about whatever the author names instead of about their
+       * public dashboard — the scheduled-post composer sends it, the share
+       * panel does not.
+       */
+      { workspaceId: string; platform: string; topic?: string }
     >({
-      query: ({ workspaceId, platform }) => ({
+      query: ({ workspaceId, platform, topic }) => ({
         url: `/api/workspaces/${workspaceId}/share/caption`,
         method: "POST",
-        body: { platform },
+        body: { platform, ...(topic ? { topic } : {}) },
       }),
     }),
 

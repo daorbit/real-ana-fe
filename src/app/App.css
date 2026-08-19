@@ -2437,3 +2437,24 @@ html body .post-card.mantine-Card-root { padding: 0 !important; }
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: var(--mantine-spacing-md);
 }
+
+/* One network's card. Its own frame — the tab draws no card around the grid,
+   so these are the only surface, and the action sits at the foot of each at a
+   shared height rather than wherever its text happens to end. */
+.connection-card {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-body);
+}
+
+.connection-card__mark {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+}
