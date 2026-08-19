@@ -126,9 +126,9 @@ export function PostQueue({
           </Stack>
         </Card>
       ) : (
-        {/* Days are separated by clearly more air than the rows inside them —
-            that difference is the only thing grouping a day's slots together,
-            since the headings themselves are quiet. */}
+        /* Days are separated by clearly more air than the rows inside them —
+           that difference is the only thing grouping a day's slots together,
+           since the headings themselves are quiet. */
         <Stack className="post-timeline" gap={34}>
    
           {days.map((day) => {
