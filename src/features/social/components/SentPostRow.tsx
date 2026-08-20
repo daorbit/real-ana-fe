@@ -1,6 +1,6 @@
 import { Avatar, Badge, Box, Button, Group, Text, Tooltip } from "@mantine/core";
 import {
-  Activity, BarChart3, ExternalLink, Eye, MessageSquare, ThumbsUp, TrendingUp,
+  Activity, BarChart3, CalendarPlus, ExternalLink, Eye, MessageSquare, ThumbsUp, TrendingUp,
 } from "lucide-react";
 import { LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { SentPost } from "@/shared/types";
@@ -79,10 +79,19 @@ export function SentPostRow({
   author,
   authorPicture,
   statsAvailable,
+  onScheduleAgain,
 }: {
   post: SentPost;
   author: string;
   authorPicture?: string;
+  /**
+   * Send this one's content again, as a new post.
+   *
+   * Offered on failures, where it is the only way forward: a run cannot be
+   * retried in place — it records a moment that has passed, and the schedule
+   * that produced it may have moved on or been deleted since.
+   */
+  onScheduleAgain?: (post: SentPost) => void;
   /**
    * Whether engagement can be measured at all on this deployment.
    *
@@ -203,19 +212,34 @@ export function SentPostRow({
             </Text>
           </Group>
 
-          {post.postUrl && (
-            <Button
-              component="a"
-              href={post.postUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="default"
-              size="compact-sm"
-              leftSection={<ExternalLink size={13} />}
-            >
-              Go to post
-            </Button>
-          )}
+          <Group gap={6} wrap="nowrap">
+            {/* On a failure this is the only action there is, so it is named
+                rather than tucked behind an icon. */}
+            {failed && onScheduleAgain && (
+              <Button
+                variant="default"
+                size="compact-sm"
+                leftSection={<CalendarPlus size={13} />}
+                onClick={() => onScheduleAgain(post)}
+              >
+                Schedule again
+              </Button>
+            )}
+
+            {post.postUrl && (
+              <Button
+                component="a"
+                href={post.postUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="default"
+                size="compact-sm"
+                leftSection={<ExternalLink size={13} />}
+              >
+                Go to post
+              </Button>
+            )}
+          </Group>
         </Group>
       </Box>
     </Group>

@@ -26,6 +26,7 @@ export function SentTimeline({
   hasMore,
   onLoadMore,
   emptyState = "sent",
+  onScheduleAgain,
 }: {
   posts: SentPost[];
   author: string;
@@ -43,6 +44,8 @@ export function SentTimeline({
    * `"none"` is for where something else on the page already speaks.
    */
   emptyState?: "sent" | "failed" | "none";
+  /** Send a failed post's content again, as a new one-off. */
+  onScheduleAgain?: (post: SentPost) => void;
 }) {
   // Newest first. The server already sorts, but grouping has to preserve it and
   // an explicit sort here means a reordered response cannot scramble the days.
@@ -106,6 +109,7 @@ export function SentTimeline({
                   author={author}
                   authorPicture={authorPicture}
                   statsAvailable={statsAvailable}
+                  onScheduleAgain={onScheduleAgain}
                 />
               ))}
             </Stack>

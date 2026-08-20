@@ -20,8 +20,10 @@ import { PostQueue } from "@/features/social/components/PostQueue";
 import { PostsEmptyState } from "@/features/social/components/PostsEmptyState";
 import { SocialPostsSkeleton } from "@/shared/ui/Skeletons";
 import { SentTimeline } from "@/features/social/components/SentTimeline";
-import { draftFromPost, emptyDraft, toDateInput, type Draft } from "@/features/social/components/draft";
-import type { ScheduledPost } from "@/shared/types";
+import {
+  draftFromPost, draftFromRun, emptyDraft, toDateInput, type Draft,
+} from "@/features/social/components/draft";
+import type { ScheduledPost, SentPost } from "@/shared/types";
 
  
 export default function SocialPosts() {
@@ -138,6 +140,26 @@ export default function SocialPosts() {
       date: toDateInput(slot),
       time: `${pad(slot.getHours())}:${pad(slot.getMinutes())}`,
     });
+    setComposing(true);
+  };
+
+  /**
+   * Send a past run's content again, as a new post.
+   *
+   * A new schedule rather than a revived one: the run is history, and the post
+   * that produced it may have been deleted or moved on since. The composer
+   * opens with the words and image already in it, at the next free slot, so the
+   * only thing left to decide is when.
+   */
+  const scheduleAgain = (run: SentPost) => {
+    if (postsFull) {
+      notify.error(
+        `This workspace can hold ${scheduledPosts?.quota} scheduled post${scheduledPosts?.quota === 1 ? "" : "s"} at once. Publish, delete or upgrade to add another.`,
+      );
+      return;
+    }
+    setEditing(null);
+    setInitial(draftFromRun(run));
     setComposing(true);
   };
 
@@ -345,6 +367,7 @@ export default function SocialPosts() {
             // shelf is not empty, and "nothing has failed" beneath a post that
             // plainly did contradicts it.
             emptyState={filters.visible.length > 0 ? "none" : "failed"}
+            onScheduleAgain={ready ? scheduleAgain : undefined}
           />
         </Stack>
       ) : isLoading ? (

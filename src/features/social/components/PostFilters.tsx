@@ -30,10 +30,12 @@ export function PostFilters({
           // Failures carry the app's warning orange, but only when there are
           // any: an orange nought is an alarm for nothing having gone wrong.
           const color = count === 0 ? "gray" : f.value === "failed" ? "orange" : undefined;
-          // Sent carries no badge. Its posts are fetched only once the shelf is
-          // opened, so any number here would read "0 published" until the
-          // moment someone proves otherwise by clicking it.
-          const badge = f.value !== "sent";
+          // Neither Sent nor Failed carries a badge. Both are backed by run
+          // history, fetched only once the shelf is opened, and Failed draws
+          // from the schedule list as well — so any number shown here would be
+          // a count of one of its two halves, reading "0 failed" directly above
+          // a post that plainly did.
+          const badge = f.value !== "sent" && f.value !== "failed";
           // Every shelf, always, including the empty ones: a tab that comes and
           // goes as posts change moves the others under the pointer, and an
           // empty shelf is worth being able to see is empty.

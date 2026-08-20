@@ -124,6 +124,24 @@ export function draftFromPost(post: ScheduledPost): Draft {
   };
 }
 
+/**
+ * A new draft carrying a past run's content.
+ *
+ * For sending again what did not go out. A run is a record of one moment — it
+ * has no schedule to move, and the schedule behind it may be long gone — so
+ * this deliberately produces a *new* one-off at the next free slot rather than
+ * pretending the old time can be recovered. What carries over is the work:
+ * the title, the words and the image.
+ */
+export function draftFromRun(run: { name: string; caption: string; imageUrl: string }): Draft {
+  return {
+    ...emptyDraft(),
+    name: run.name,
+    caption: run.caption,
+    image: run.imageUrl,
+  };
+}
+
 /** "Tue 24 Feb at 14:20", or the cadence, as a sentence. */
 export function describe(
   post: Pick<Draft, "mode" | "date" | "time" | "frequency" | "hour" | "minute" | "weekday" | "dayOfMonth">,
