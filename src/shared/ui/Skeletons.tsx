@@ -215,6 +215,44 @@ export function MembersSkeleton() {
   );
 }
 
+/**
+ * The Scheduled posts page while its list loads.
+ *
+ * Mirrors a day of the queue — a heading, then a couple of post-row-shaped
+ * cards — so the page doesn't jump once real rows replace it.
+ */
+export function SocialPostsSkeleton() {
+  return (
+    <Stack gap={34}>
+      <Group justify="space-between" align="flex-start">
+        <div>
+          <Skeleton height={28} width={200} radius="sm" />
+          <Skeleton height={12} width={280} mt={10} radius="sm" />
+        </div>
+        <Skeleton height={36} width={130} radius="md" />
+      </Group>
+
+      {Array.from({ length: 2 }).map((_, day) => (
+        <div key={day}>
+          <Skeleton height={12} width={90} mb="md" radius="sm" />
+          <Stack gap={10}>
+            {Array.from({ length: day === 0 ? 2 : 1 }).map((_, i) => (
+              <Card key={i} withBorder radius="md" padding="md">
+                <Group gap={8} wrap="nowrap" mb={10}>
+                  <Skeleton height={28} width={28} radius="xl" />
+                  <Skeleton height={12} width={120} radius="sm" />
+                </Group>
+                <Skeleton height={12} width="60%" mb={8} radius="sm" />
+                <Skeleton height={10} width="90%" radius="sm" />
+              </Card>
+            ))}
+          </Stack>
+        </div>
+      ))}
+    </Stack>
+  );
+}
+
 /** Full-screen boot animation — used while the session is being restored. */
 export function AppBootSkeleton() {
   return <SwitchVisual sublabel="Restoring your session" loop />;

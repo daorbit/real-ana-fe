@@ -560,13 +560,25 @@ body { overflow-wrap: break-word; }
   .mantine-SimpleGrid-root { gap: 10px !important; }
 }
 
-/* Mantine dark surfaces — neutral greys, no blue cast */
+/* Mantine dark surfaces — follow the app's own soft-charcoal scale rather
+   than a separately hardcoded set, so a palette change here doesn't need a
+   second edit to stay in sync. */
 [data-mantine-color-scheme="dark"] {
   --mantine-color-body: var(--shell);
-  --mantine-color-default: #212121;
-  --mantine-color-default-hover: #2a2a2a;
-  --mantine-color-default-border: #303030;
+  --mantine-color-default: var(--surface);
+  --mantine-color-default-hover: var(--surface-2);
+  --mantine-color-default-border: var(--border-strong);
 }
+/* Input borders (TextInput/Textarea/Select/NumberInput/PasswordInput/etc)
+   went to `--mantine-color-dark-4` internally, which the runtime remap in
+   theme.ts already points at --border-strong — but stated directly here too,
+   so a field's edge stays visible against --surface regardless of how that
+   chain resolves. */
+[data-mantine-color-scheme="dark"] .mantine-Input-input {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
 /* Cards are a step above the page, defined by a lift rather than by darkness. */
 [data-mantine-color-scheme="dark"] .mantine-Card-root {
   background: var(--surface);

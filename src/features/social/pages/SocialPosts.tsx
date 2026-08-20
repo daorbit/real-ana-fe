@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Box, Button, Group, Loader, SegmentedControl, Text, Title, Tooltip,
+  Box, Button, Group, SegmentedControl, Text, Title, Tooltip,
 } from "@mantine/core";
 import { CalendarDays, List as ListIcon, Plus, Send } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
@@ -18,6 +18,7 @@ import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
 import { PostsEmptyState } from "@/features/social/components/PostsEmptyState";
+import { SocialPostsSkeleton } from "@/shared/ui/Skeletons";
 import { SentTimeline } from "@/features/social/components/SentTimeline";
 import { draftFromPost, emptyDraft, toDateInput, type Draft } from "@/features/social/components/draft";
 import type { ScheduledPost } from "@/shared/types";
@@ -266,7 +267,7 @@ export default function SocialPosts() {
           onLoadMore={() => setSentCursor(sent?.nextCursor ?? undefined)}
         />
       ) : isLoading ? (
-        <Group justify="center" py="xl"><Loader /></Group>
+        <SocialPostsSkeleton />
       ) : posts.length === 0 ? (
         <PostsEmptyState disabled={!ready} onCreate={() => openNew()} />
       ) : view === "calendar" ? (
