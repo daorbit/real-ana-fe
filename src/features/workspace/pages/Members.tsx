@@ -19,6 +19,7 @@ import { AppShell } from "@/app/AppShell";
 import { MembersSkeleton } from "@/shared/ui/Skeletons";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { PageHeader } from "@/shared/ui/Page";
+import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { shortDate } from "@/shared/lib";
@@ -250,11 +251,14 @@ export default function Members() {
         title="Members"
         description={`Who can reach ${active.name}, and what they can do.`}
         actions={
-          canAdmin && (
-            <Button leftSection={<UserPlus size={15} />} onClick={() => setModal(true)}>
-              Invite someone
-            </Button>
-          )
+          <Group gap="xs" wrap="nowrap">
+            {canAdmin && (
+              <Button leftSection={<UserPlus size={15} />} onClick={() => setModal(true)}>
+                Invite someone
+              </Button>
+            )}
+            <PageHelpButton />
+          </Group>
         }
       />
 

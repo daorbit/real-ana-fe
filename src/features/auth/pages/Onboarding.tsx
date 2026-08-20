@@ -14,8 +14,9 @@ import { CodeBlock } from "@/shared/ui/CodeBlock";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
 import { useCreateWorkspaceMutation, useCreateSiteMutation } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
-import { FRAMEWORKS, getFramework, frameworkLanguage } from "@/features/workspace/frameworks";
+import { getFramework, frameworkLanguage } from "@/features/workspace/frameworks";
 import type { FrameworkId } from "@/features/workspace/frameworks";
+import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker";
 import * as v from "@/shared/lib/validate";
 import { notifyError } from "@/shared/lib/notify";
 import type { Site } from "@/shared/types";
@@ -308,22 +309,7 @@ export default function Onboarding() {
                     <Text size="xs" c="dimmed" mb="sm">
                       Only changes the install snippet you get next.
                     </Text>
-                    <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-                      {FRAMEWORKS.map((f) => (
-                        <UnstyledButton
-                          key={f.id}
-                          className="onb-fw tile"
-                          data-selected={framework === f.id}
-                          aria-pressed={framework === f.id}
-                          onClick={() => setFramework(f.id)}
-                        >
-                          <BrandIcon framework={f.id} size={24} />
-                          <Text size="sm" fw={framework === f.id ? 600 : 500}>
-                            {f.label}
-                          </Text>
-                        </UnstyledButton>
-                      ))}
-                    </SimpleGrid>
+                    <FrameworkPicker value={framework} onChange={setFramework} />
                   </div>
 
                   <Group grow>

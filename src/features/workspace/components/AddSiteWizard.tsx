@@ -10,8 +10,9 @@ import { BrandIcon } from "@/shared/ui/BrandIcon";
 import { useCreateSiteMutation } from "@/app/store";
 import { type TrackerOptions } from "@/features/workspace";
 import {
-  FRAMEWORKS, getFramework, frameworkLanguage, type FrameworkId,
+  getFramework, frameworkLanguage, type FrameworkId,
 } from "@/features/workspace/frameworks";
+import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker";
 import * as v from "@/shared/lib/validate";
 import { notify, notifyError } from "@/shared/lib/notify";
 import type { Site } from "@/shared/types";
@@ -184,22 +185,7 @@ export function AddSiteWizard({
               Only changes the install instructions you get at the end — the
               tracker itself is the same everywhere.
             </Text>
-            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="xs">
-              {FRAMEWORKS.map((f) => (
-                <UnstyledButton
-                  key={f.id}
-                  className="onb-fw tile"
-                  data-selected={framework === f.id}
-                  aria-pressed={framework === f.id}
-                  onClick={() => setFramework(f.id)}
-                >
-                  <BrandIcon framework={f.id} size={22} />
-                  <Text size="sm" fw={framework === f.id ? 600 : 500}>
-                    {f.label}
-                  </Text>
-                </UnstyledButton>
-              ))}
-            </SimpleGrid>
+            <FrameworkPicker value={framework} onChange={setFramework} />
           </div>
         </Stack>
       )}

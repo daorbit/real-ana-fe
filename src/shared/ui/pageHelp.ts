@@ -4,6 +4,8 @@ import {
   KeyRound, BookOpen, ShieldCheck,
   Share2, BarChart3, Search, EyeOff,
   FolderKanban, Globe, Code2,
+  LayoutGrid, SlidersHorizontal, Users, UserPlus,
+  PenLine, Clock, AlertTriangle, Link2,
 } from "lucide-react";
 import type { TFunction } from "i18next";
 import type { HelpSection } from "@/shared/ui/HelpDrawer";
@@ -65,6 +67,32 @@ const WORKSPACES_SPEC: SectionSpec[] = [
   { id: "install", icon: Code2, items: ["Where", "Spa", "Blockers"] },
 ];
 
+const HOME_SPEC: SectionSpec[] = [
+  { id: "widgets", icon: LayoutGrid, items: ["What", "Sources", "Range", "Empty"] },
+  { id: "customize", icon: SlidersHorizontal, items: ["Add", "Reorder", "Save", "Discard"] },
+  { id: "scope", icon: FolderKanban, items: ["Workspace", "AllSites", "Deeper"] },
+];
+
+const MEMBERS_SPEC: SectionSpec[] = [
+  { id: "roles", icon: Users, items: ["Owner", "Admin", "Member", "Change"] },
+  { id: "invites", icon: UserPlus, items: ["Send", "Pending", "Expiry", "Revoke"] },
+  { id: "scope", icon: FolderKanban, items: ["PerWorkspace", "Billing", "Remove"] },
+];
+
+const SOCIAL_SPEC: SectionSpec[] = [
+  { id: "compose", icon: PenLine, items: ["Draft", "Accounts", "Preview", "Quota"] },
+  { id: "schedule", icon: Clock, items: ["When", "Timezone", "Calendar", "Edit"] },
+  { id: "delivery", icon: Send, items: ["Sent", "Failed", "Retry"] },
+  { id: "accounts", icon: Link2, items: ["Connect", "Expired", "Disconnect"] },
+];
+
+const FORMS_SPEC: SectionSpec[] = [
+  { id: "builder", icon: LayoutGrid, items: ["Fields", "Required", "Options", "Reorder"] },
+  { id: "publish", icon: Share2, items: ["Draft", "Link", "Embed", "Close"] },
+  { id: "submissions", icon: FileSpreadsheet, items: ["Where", "Export", "Notify", "Retention"] },
+  { id: "locked", icon: AlertTriangle, items: ["Keys", "Rename", "Removed"] },
+];
+
 /**
  * Route path to the help it opens.
  *
@@ -78,6 +106,10 @@ const PAGE_SPECS: Record<string, { ns: string; spec: SectionSpec[] }> = {
   "/app/developers": { ns: "developers", spec: DEVELOPERS_SPEC },
   "/app/share": { ns: "share", spec: SHARE_SPEC },
   "/app/workspaces": { ns: "workspaces", spec: WORKSPACES_SPEC },
+  "/app": { ns: "home", spec: HOME_SPEC },
+  "/app/members": { ns: "members", spec: MEMBERS_SPEC },
+  "/app/social": { ns: "social", spec: SOCIAL_SPEC },
+  "/app/forms": { ns: "forms", spec: FORMS_SPEC },
 };
 
 /** Whether a route has help at all — cheap enough to call during render. */

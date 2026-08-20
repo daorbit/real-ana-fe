@@ -1,5 +1,7 @@
 import {
   siNextdotjs, siReact, siVuedotjs, siWordpress, siShopify, siWebflow, siHtml5,
+  siNuxt, siSvelte, siAngular, siAstro, siRemix, siGatsby,
+  siSquarespace, siWix, siFramer, siGhost, siGoogletagmanager,
 } from "simple-icons";
 import { Globe } from "lucide-react";
 import type { FrameworkId } from "@/features/workspace/frameworks";
@@ -19,6 +21,17 @@ const ICONS: Partial<Record<FrameworkId, { path: string; hex: string; title: str
   shopify: siShopify,
   webflow: siWebflow,
   html: siHtml5,
+  nuxt: siNuxt,
+  svelte: siSvelte,
+  angular: siAngular,
+  astro: siAstro,
+  remix: siRemix,
+  gatsby: siGatsby,
+  squarespace: siSquarespace,
+  wix: siWix,
+  framer: siFramer,
+  ghost: siGhost,
+  gtm: siGoogletagmanager,
 };
 
 /**
@@ -26,7 +39,9 @@ const ICONS: Partial<Record<FrameworkId, { path: string; hex: string; title: str
  * surfaces. They render in the current text colour instead, so the mark stays
  * legible in both themes.
  */
-const MONOCHROME = new Set<FrameworkId>(["nextjs"]);
+const MONOCHROME = new Set<FrameworkId>([
+  "nextjs", "angular", "remix", "squarespace", "ghost",
+]);
 
 export function BrandIcon({
   framework,
