@@ -1,32 +1,31 @@
 :root {
-  /* dark-first base — soft charcoal, emerald accent.
-     A faint blue-grey undertone (not flat neutral grey) rather than a
-     literal black — the Notion/Stripe reference point. Pure #171717-style
-     grey reads flat and slightly cheap; a couple of degrees of blue in the
-     same lightness steps reads as considered without competing with the
-     emerald accent, since the shift is in hue, not saturation.
+  /* dark-first base — near-black with a faint cool undertone, emerald accent.
+     Reference: Coinstax-style dark UI — the page itself reads almost pure
+     black, and surfaces lift off it in small, tight steps rather than a
+     wide charcoal jump. A slight blue-grey tint (not warm/neutral grey)
+     keeps it from reading flat under the emerald accent.
      The page and the sidebar share one ground; the steps above it are lifts
      off that ground rather than a second palette. */
-  --bg: #17191c;
-  --bg-2: #1e2125;
+  --bg: #0b0c0e;
+  --bg-2: #101214;
   /* The shell's own surface: the rail, the content panel, and the strip of
      ground between them are all this one colour, so the app reads as a single
      surface and the panel's border — not a change of tone — is what marks
      where the content starts. Kept apart from `--bg-2`, which is the step-above
      tone that cards, tiles and empty slots use to lift off the page; collapsing
      the two would flatten every one of those. */
-  --shell: #17191c;
+  --shell: #0b0c0e;
   /* Cards sit a step *above* the shell. Going darker than the page made every
      card read as a hole punched in it — especially against a textured
      background, where the wash surrounds a flat near-black rectangle and the
      contrast is read as absence rather than as a surface. */
-  --surface: #23262b;
-  --surface-2: #2c3036;
-  --border: #33373d;
-  --border-strong: #42474e;
+  --surface: #16181b;
+  --surface-2: #1c1f23;
+  --border: #26292e;
+  --border-strong: #34383e;
   --text: #f2f4f6;
-  --text-2: #b3b9c4;
-  --muted: #7d838f;
+  --text-2: #a9afba;
+  --muted: #6d737e;
 
   /* accent (var names kept for compatibility — now emerald).
      Dark mode fills use a deeper shade so they never read neon;
