@@ -133,16 +133,59 @@ export function confirmLogout(onConfirm: () => void) {
   });
 }
 
+/** The body of `confirmDelete`, split out so it can own the busy state. */
+function ConfirmForm({
+  body,
+  confirmLabel,
+  confirmColor,
+  onConfirm,
+  onCancel,
+}: {
+  body: ReactNode;
+  confirmLabel: string;
+  confirmColor: string;
+  onConfirm: () => void | Promise<void>;
+  onCancel: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  const run = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await onConfirm();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Stack gap="md">
+      <Text size="sm" c="dimmed">{body}</Text>
+      <Group justify="flex-end" gap="sm">
+        <Button variant="default" onClick={onCancel} disabled={busy}>
+          Cancel
+        </Button>
+        <Button color={confirmColor} onClick={run} loading={busy}>
+          {confirmLabel}
+        </Button>
+      </Group>
+    </Stack>
+  );
+}
+
 /**
  * Destructive confirmation dialog.
  *
- * `openConfirmModal` closes as soon as confirm is clicked and ignores whatever
- * `onConfirm` returns, so an async handler would run invisibly: the dialog
- * disappears while the request is still in flight and the row only changes
- * some time later. Instead the modal is opened with an explicit id, held open
- * on confirm, and closed once the promise settles — with the confirm button
- * showing a loading state in between, and both buttons disabled so the request
- * cannot be fired twice.
+ * Built on `modals.open` rather than `openConfirmModal`: the latter closes the
+ * moment confirm is clicked and ignores whatever `onConfirm` returns, so an
+ * async handler ran invisibly — the dialog vanished while the request was
+ * still in flight and the row changed some time later, with nothing on screen
+ * saying anything was happening.
+ *
+ * Here the body owns the busy state, so the dialog stays put with the confirm
+ * button spinning until the promise settles, and both buttons are disabled in
+ * between so the request cannot be fired twice.
  */
 export function confirmDelete(opts: {
   title: string;
@@ -158,37 +201,29 @@ export function confirmDelete(opts: {
 }) {
   const id = `confirm-delete-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-  const open = (busy: boolean) =>
-    modals.openConfirmModal({
-      modalId: id,
-      title: opts.title,
-      centered: true,
-      radius: "lg",
-      // While the request is in flight the outcome is not decided yet, so the
-      // dialog must not be dismissable by escape, overlay click or the X.
-      closeOnClickOutside: !busy,
-      closeOnEscape: !busy,
-      withCloseButton: !busy,
-      children: <Text size="sm" c="dimmed">{opts.body}</Text>,
-      labels: { confirm: opts.confirmLabel ?? "Delete", cancel: "Cancel" },
-      confirmProps: { color: opts.confirmColor ?? "red", loading: busy },
-      cancelProps: { disabled: busy },
-      onConfirm: () => {
-        const result = opts.onConfirm();
-
-        // Synchronous handler: nothing to wait for, let it close normally.
-        if (!(result instanceof Promise)) return;
-
-        // Re-open with the same id to swap in the loading state. Mantine
-        // replaces the existing modal rather than stacking a second one.
-        open(true);
-        // The call sites report their own errors; this only has to make sure
-        // the dialog closes either way rather than hanging open on rejection.
-        result.catch(() => undefined).finally(() => modals.close(id));
-      },
-    });
-
-  open(false);
+  modals.open({
+    modalId: id,
+    title: opts.title,
+    centered: true,
+    radius: "lg",
+    children: (
+      <ConfirmForm
+        body={opts.body}
+        confirmLabel={opts.confirmLabel ?? "Delete"}
+        confirmColor={opts.confirmColor ?? "red"}
+        onCancel={() => modals.close(id)}
+        onConfirm={async () => {
+          // Call sites report their own errors; this only has to close the
+          // dialog once the request settles either way.
+          try {
+            await opts.onConfirm();
+          } finally {
+            modals.close(id);
+          }
+        }}
+      />
+    ),
+  });
 }
 
 /** The body of `confirmDestroy`, split out so it can hold the typed input. */
