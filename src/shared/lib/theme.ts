@@ -327,6 +327,25 @@ export function applyTheme(prefs: ThemePrefs) {
 
   root.setAttribute("data-table-style", prefs.table);
   root.setAttribute("data-motion", prefs.motion ? "on" : "off");
+
+  // Mantine's own dark[6]/dark[7] are its default surface colours for
+  // Menu/Modal/Popover/Card/etc — a fixed grey unrelated to the app's own
+  // --surface/--bg scale, so a themed dark background sat next to a
+  // Mantine-grey dropdown. Remapped to the app's real dark tones so every
+  // built-in surface matches instead of standing out as "the Mantine one".
+  if (dark) {
+    root.style.setProperty("--mantine-color-dark-4", "var(--border-strong)");
+    root.style.setProperty("--mantine-color-dark-5", "var(--surface-2)");
+    root.style.setProperty("--mantine-color-dark-6", "var(--surface)");
+    root.style.setProperty("--mantine-color-dark-7", "var(--bg-2)");
+    root.style.setProperty("--mantine-color-dark-8", "var(--bg)");
+  } else {
+    root.style.removeProperty("--mantine-color-dark-4");
+    root.style.removeProperty("--mantine-color-dark-5");
+    root.style.removeProperty("--mantine-color-dark-6");
+    root.style.removeProperty("--mantine-color-dark-7");
+    root.style.removeProperty("--mantine-color-dark-8");
+  }
 }
 
 export function loadAndApplyTheme(): ThemePrefs {
