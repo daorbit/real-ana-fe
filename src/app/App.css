@@ -578,6 +578,17 @@ body { overflow-wrap: break-word; }
   background: var(--surface);
 }
 
+/* Mantine's Input label ships with no bottom margin of its own — every field
+   across the app sits with its label touching the box unless the call site
+   passes an explicit `mb` on the label, which almost none do. Set once,
+   globally, rather than adding `mb` to every TextInput/Select/Textarea in the
+   app one at a time. */
+.mantine-InputWrapper-label,
+.mantine-Input-label {
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
 /* Cards are a step above the page, defined by a lift rather than by darkness. */
 [data-mantine-color-scheme="dark"] .mantine-Card-root {
   background: var(--surface);
