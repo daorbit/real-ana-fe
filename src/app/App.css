@@ -2753,7 +2753,19 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    edges rather than inset like an item, so it reads as the menu's header
    rather than as the first thing in the list. */
 .account-menu__header {
-  padding: 10px 12px 12px;
+  padding: 12px;
+  /* Tinted a step off the dropdown so the identity block reads as a header
+     rather than as the first row of the list. `--surface-2` rather than a
+     literal colour: it is the app's existing raised-surface token and is
+     already defined for both themes, so this follows a light/dark switch
+     instead of needing its own override. */
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  /* The block sits flush against the dropdown's top edge, so a square corner
+     would show through the rounded one. Negative margins bleed it to the
+     dropdown's inner edges, which its own padding then puts back. */
+  margin: calc(var(--mantine-spacing-xs) * -1) calc(var(--mantine-spacing-xs) * -1) 0;
+  border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
 }
 
 /* ============ Sticky page header ============

@@ -10,7 +10,7 @@ import {
   Home, BarChart3, FolderKanban, LogOut, Moon, Sun, Code2, Users, Eye,
   Settings as SettingsIcon, ChevronsUpDown, BookOpen, Share2, Search, PlayCircle, CalendarClock,
   Send,
-  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords, Zap,
+  CreditCard, ArrowUpRight, Mail, Inbox, UserPlus, LifeBuoy, Swords,
   Languages, FlaskConical,
 } from "lucide-react";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
@@ -351,7 +351,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               name={user?.name ?? ""}
               avatarUrl={user?.avatarUrl}
               initials={initials}
-              workspace={active?.name ?? ""}
               dark={dark}
               onToggleScheme={() => setColorScheme(dark ? "light" : "dark")}
               demo={demo}
@@ -453,7 +452,6 @@ function AccountMenuDropdown({
   name,
   avatarUrl,
   initials,
-  workspace,
   dark,
   onToggleScheme,
   demo,
@@ -465,7 +463,6 @@ function AccountMenuDropdown({
   name: string;
   avatarUrl?: string;
   initials: string;
-  workspace: string;
   dark: boolean;
   onToggleScheme: () => void;
   demo: boolean;
@@ -475,14 +472,6 @@ function AccountMenuDropdown({
   onLogout: () => void;
 }) {
   const { t } = useTranslation();
-  const billing = useActiveBilling();
-
-  // Pro is the top plan, so there is nothing above it to sell. Offering an
-  // upgrade to someone already on the best plan reads as the app not knowing
-  // what they pay for — the button becomes plan management instead, which is
-  // what a paying customer actually comes here for.
-  const topPlan = billing?.plan.slug === "pro";
-  const expired = billing?.status === "expired";
 
   return (
     <Menu.Dropdown>
@@ -500,40 +489,14 @@ function AccountMenuDropdown({
           </Box>
         </Group>
 
-        {workspace && (
-          <Text size="sm" fw={700} mt={10} truncate title={workspace}>{workspace}</Text>
-        )}
-        {billing && (
-          <Group gap={6} wrap="nowrap" mt={2}>
-            <PlanIcon slug={billing.plan.slug} size={13} uid="menu" />
-            <Text size="xs" c="dimmed" truncate>
-              {billing.plan.name} plan · {billing.cycle}
-            </Text>
-          </Group>
-        )}
-
-        {/* Offered from the plan line rather than as a menu item: it is the one
-            thing here that changes what the account can do, and a row in the
-            list would have read as another page to visit. */}
-        <Button
-          component={Link}
-          to="/app/billing"
-          variant="default"
-          size="compact-sm"
-          fullWidth
-          mt={10}
-          leftSection={topPlan && !expired ? <CreditCard size={13} /> : <Zap size={13} />}
-        >
-          {expired
-            ? t("nav.renewPlan", "Renew plan")
-            : topPlan
-              ? t("nav.managePlan", "Manage plan")
-              : t("nav.upgradePlan", "Upgrade plan")}
-        </Button>
+        {/* Workspace, plan and the billing button used to sit here. They are
+            gone deliberately: the sidebar already carries a persistent plan
+            card, so this menu was saying the same thing twice, and the header
+            reads as an account identity block rather than a billing panel. */}
       </Box>
 
-      <Menu.Divider />
-
+      {/* No divider here: the header carries its own bottom border now, and
+          the two together read as a double rule. */}
       <Menu.Item component={Link} to="/app/settings" leftSection={<SettingsIcon size={15} />}>
         {t("nav.settings")}
       </Menu.Item>
