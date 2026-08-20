@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Divider,
-  Group,
+  Group, Modal,
 } from "@mantine/core";
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
@@ -17,9 +17,6 @@ import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
 
-/** Named so the widget's success handler can retract exactly this message. */
-const TURNSTILE_REQUIRED = "Please complete the security check";
-
 export default function Login() {
   const { login, startDemo } = useAuth();
   const nav = useNavigate();
@@ -29,9 +26,10 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
-  // Held only for the length of one submit. Turnstile tokens are single-use, so
-  // this is cleared on expiry, on error, and after every attempt.
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // Whether the challenge modal is open. The token itself is never held in
+  // state: it goes straight from the widget's callback into the login call,
+  // and the widget unmounts with the modal, so each attempt gets a fresh one.
+  const [verifying, setVerifying] = useState(false);
 
   const enterDemo = async () => {
     setDemoBusy(true);
@@ -69,12 +67,6 @@ export default function Login() {
     // created before those rules have shorter passwords, and refusing them at
     // login would lock people out of working accounts.
     password: password ? null : "Password is required",
-    // Only a rule where a sitekey is configured — otherwise no widget renders
-    // and there is no token to be had, which must not block the form.
-    turnstile:
-      !turnstileConfigured() || turnstileToken
-        ? null
-        : TURNSTILE_REQUIRED,
   };
 
   const show = (field: keyof typeof errors) =>
@@ -83,34 +75,45 @@ export default function Login() {
   const blur = (field: string) => () =>
     setTouched((t) => ({ ...t, [field]: true }));
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    setTouched({ email: true, password: true });
-    // The challenge has no field of its own to hang an error on, so it goes to
-    // the same Alert the server's failures use.
-    if (errors.turnstile) {
-      setError(errors.turnstile);
-      return;
-    }
-    if (Object.values(errors).some(Boolean)) return;
-
+  /**
+   * Log in with a token the modal has just produced.
+   *
+   * Split out from `submit` because the challenge now sits between the two:
+   * the click validates the form and opens the modal, and this runs once
+   * Cloudflare has answered. The token is passed in rather than read from
+   * state — it arrives in the widget's callback, and state set in that same
+   * tick would not be visible here yet.
+   */
+  const finishLogin = async (token?: string) => {
+    setVerifying(false);
     setBusy(true);
     setError(null);
     try {
-      await login(email.trim(), password, turnstileToken ?? undefined);
+      await login(email.trim(), password, token);
       notify.success("Welcome back!", "Logged in");
       nav("/app");
     } catch (err) {
       setError(errMessage(err, "Login failed. Check your email and password."));
-      // The token has now been spent, whatever the outcome — Cloudflare refuses
-      // a second use. Dropping it and resetting the widget is what makes a
-      // retry after a wrong password work instead of failing the check.
-      setTurnstileToken(null);
-      window.turnstile?.reset();
+      // The token is spent either way — Cloudflare refuses a second use — and
+      // the widget is unmounted with the modal, so the next attempt opens a
+      // fresh one. Nothing to reset here.
     } finally {
       setBusy(false);
     }
+  };
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+
+    setTouched({ email: true, password: true });
+    if (Object.values(errors).some(Boolean)) return;
+
+    setError(null);
+    if (!turnstileConfigured()) {
+      void finishLogin();
+      return;
+    }
+    setVerifying(true);
   };
 
   return (
@@ -199,21 +202,13 @@ export default function Login() {
               </Group>
             </div>
 
-            {/* Directly above the submit button: the last thing to clear before
-                logging in, and close enough to the button that a failed check
-                is visible when the click doesn't work. */}
-            <TurnstileWidget
-              onVerify={(token) => {
-                setTurnstileToken(token);
-                // Clear the "complete the security check" message the moment it
-                // stops being true, rather than leaving it up until the next
-                // submit.
-                setError((e) => (e === TURNSTILE_REQUIRED ? null : e));
-              }}
-              onExpire={() => setTurnstileToken(null)}
-            />
-
-            <Button type="submit" loading={busy} disabled={googleBusy} fullWidth size="md">
+            <Button
+              type="submit"
+              loading={busy || verifying}
+              disabled={googleBusy}
+              fullWidth
+              size="md"
+            >
               Log in
             </Button>
 
@@ -246,6 +241,29 @@ export default function Login() {
           </Stack>
         </motion.form>
       </div>
+ 
+      <Modal
+        opened={verifying}
+        onClose={() => setVerifying(false)}
+        title="Verify it's you"
+        radius="md"
+        size="sm"
+        centered
+      >
+        <Stack gap="md">
+          <Text c="dimmed" size="sm">
+            One quick check that you're not a bot, then we'll sign you in.
+          </Text>
+
+          <TurnstileWidget
+            onVerify={(token) => void finishLogin(token)}
+            // Expiry and errors both mean there is no usable token. The modal
+            // stays open — the widget re-challenges itself, and closing it
+            // would look like the login had been cancelled.
+            onExpire={() => {}}
+          />
+        </Stack>
+      </Modal>
     </div>
   );
 }
