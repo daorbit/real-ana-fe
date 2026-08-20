@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Text, Group, Button, Card, ActionIcon, Alert, Code, CopyButton, Modal,
-  TextInput, Stack, Center, ThemeIcon, SimpleGrid, Tooltip,
+  TextInput, Stack, ThemeIcon, SimpleGrid, Tooltip,
 } from "@mantine/core";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";

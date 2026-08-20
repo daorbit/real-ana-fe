@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Alert, Badge, Box, Button, Card, Center, Code, Group, ScrollArea, SimpleGrid,
+  Alert, Badge, Box, Button, Card, Code, Group, ScrollArea, SimpleGrid,
   Stack, Table, Text, ThemeIcon, Tooltip,
 } from "@mantine/core";
 import {
