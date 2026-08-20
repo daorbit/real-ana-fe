@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Center, Loader,
+  Title, Text, Group, Button, Card, Badge, SimpleGrid, Stack, Loader,
   SegmentedControl, Progress, ThemeIcon, Alert, Modal, TextInput, Box, Divider,
   ActionIcon, Tooltip, Table, NumberInput, Grid, Tabs, UnstyledButton,
 } from "@mantine/core";
@@ -17,6 +17,7 @@ import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "@/featur
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import { BillingSkeleton, InvoiceTableSkeleton } from "@/shared/ui/Skeletons";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import {
   useGetPlansQuery, useGetAddonPacksQuery, useGetWorkspaceUsageQuery,
@@ -337,7 +338,7 @@ export default function Billing() {
       />
 
       {loading ? (
-        <Center py={64}><Loader size="sm" /></Center>
+        <BillingSkeleton />
       ) : (
         <Stack gap={40}>
           {/* The workspace being bought for is the one selected in the sidebar.
@@ -1568,7 +1569,7 @@ function Receipts({ workspaceId }: { workspaceId: string }) {
 
       <Card withBorder radius="lg" padding={0} style={{ overflow: "hidden" }}>
         {isLoading ? (
-          <Center py={40}><Loader size="sm" /></Center>
+          <InvoiceTableSkeleton />
         ) : !invoices.length ? (
           <Stack align="center" gap={6} py={40} px="md">
             <ThemeIcon size={42} radius="xl" variant="light" color="gray">

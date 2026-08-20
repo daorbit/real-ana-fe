@@ -1,4 +1,4 @@
-import { Box, Card, Group, Skeleton, SimpleGrid, Stack } from "@mantine/core";
+import { Box, Card, Grid, Group, Skeleton, SimpleGrid, Stack } from "@mantine/core";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 
 /** A stat card placeholder — icon, big number, label. */
@@ -279,6 +279,187 @@ export function SocialPostsSkeleton() {
         </div>
       ))}
     </Stack>
+  );
+}
+
+/**
+ * The Reports page while its schedules load.
+ *
+ * Three stat tiles over a stack of schedule cards, which is what lands. The
+ * page header and the mail warning render above this and are already real, so
+ * neither is ghosted here.
+ */
+export function ReportsSkeleton() {
+  return (
+    <Stack gap="lg">
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} withBorder radius="lg" padding="lg">
+            <Group gap="sm" wrap="nowrap" mb="md">
+              <Skeleton height={34} width={34} radius="md" />
+              <Skeleton height={10} width={90} radius="sm" />
+            </Group>
+            <Skeleton height={26} width="45%" radius="sm" />
+            <Skeleton height={10} width="70%" mt={10} radius="sm" />
+          </Card>
+        ))}
+      </SimpleGrid>
+
+      <Stack gap="md">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} withBorder radius="lg" padding="lg">
+            <Group justify="space-between" wrap="nowrap" align="flex-start" gap="md">
+              <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+                <Skeleton height={38} width={38} radius="md" />
+                <div style={{ flex: 1 }}>
+                  <Skeleton height={13} width={`${42 - i * 6}%`} radius="sm" />
+                  <Skeleton height={10} width={`${68 - i * 6}%`} mt={8} radius="sm" />
+                </div>
+              </Group>
+              <Group gap={8} wrap="nowrap">
+                <Skeleton height={22} width={68} radius="xl" />
+                <Skeleton height={28} width={28} radius="sm" />
+              </Group>
+            </Group>
+            <Skeleton height={10} width="55%" mt="md" radius="sm" />
+          </Card>
+        ))}
+      </Stack>
+    </Stack>
+  );
+}
+
+/**
+ * The Billing page while usage and the plan catalogue load.
+ *
+ * The usage panel is one wide card of side-by-side meters rather than separate
+ * cards, so it is ghosted as a single bordered block — splitting it into tiles
+ * would settle into a different layout the moment the real one arrives.
+ */
+export function BillingSkeleton() {
+  return (
+    <Stack gap={40}>
+      <Card withBorder radius="lg" padding="lg">
+        <Group justify="space-between" wrap="nowrap" mb="lg">
+          <Skeleton height={13} width={150} radius="sm" />
+          <Skeleton height={22} width={90} radius="xl" />
+        </Group>
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i}>
+              <Skeleton height={10} width="60%" radius="sm" />
+              <Skeleton height={22} width="45%" mt={10} radius="sm" />
+              <Skeleton height={6} mt={12} radius="xl" />
+            </div>
+          ))}
+        </SimpleGrid>
+      </Card>
+
+      <div>
+        <Skeleton height={13} width={120} mb="lg" radius="sm" />
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} withBorder radius="lg" padding="lg">
+              <Skeleton height={12} width="45%" radius="sm" />
+              <Skeleton height={30} width="60%" mt="md" radius="sm" />
+              <Skeleton height={10} width="40%" mt={8} radius="sm" />
+              <Stack gap={10} mt="lg">
+                {Array.from({ length: 4 }).map((__, r) => (
+                  <Skeleton key={r} height={10} width={`${85 - r * 9}%`} radius="sm" />
+                ))}
+              </Stack>
+              <Skeleton height={36} mt="lg" radius="md" />
+            </Card>
+          ))}
+        </SimpleGrid>
+      </div>
+    </Stack>
+  );
+}
+
+/**
+ * Rows for the receipts table while it loads.
+ *
+ * Drawn as plain rows rather than cards: this sits inside a bordered card that
+ * is already on screen, and a second border inside it reads as a nested panel.
+ */
+export function InvoiceTableSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <Stack gap={0} p="lg">
+      {Array.from({ length: rows }).map((_, i) => (
+        <Group
+          key={i}
+          justify="space-between"
+          wrap="nowrap"
+          gap="lg"
+          py="sm"
+          style={{
+            borderTop: i === 0 ? undefined : "1px solid var(--mantine-color-default-border)",
+          }}
+        >
+          <Skeleton height={11} width={110} radius="sm" />
+          <Skeleton height={11} width={90} radius="sm" />
+          <Skeleton height={11} width={`${130 - i * 10}px`} radius="sm" />
+          <Skeleton height={11} width={64} radius="sm" />
+          <Skeleton height={24} width={24} radius="sm" />
+        </Group>
+      ))}
+    </Stack>
+  );
+}
+
+/**
+ * The Compare page while its competitor set loads.
+ *
+ * Mirrors the master-detail the page settles into — a narrow rail of tracked
+ * competitors beside the detail panel — rather than a centred block that the
+ * real layout immediately replaces with two columns.
+ */
+export function CompareSkeleton() {
+  return (
+    <Grid gap="lg">
+      <Grid.Col span={{ base: 12, md: 4, lg: 3 }}>
+        <Stack gap="xs">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} withBorder radius="md" padding="sm">
+              <Group gap="sm" wrap="nowrap">
+                <Skeleton height={32} width={32} radius="md" />
+                <div style={{ flex: 1 }}>
+                  <Skeleton height={11} width={`${70 - i * 8}%`} radius="sm" />
+                  <Skeleton height={9} width="50%" mt={7} radius="sm" />
+                </div>
+                <Skeleton height={26} width={34} radius="sm" />
+              </Group>
+            </Card>
+          ))}
+        </Stack>
+      </Grid.Col>
+
+      <Grid.Col span={{ base: 12, md: 8, lg: 9 }}>
+        <Stack gap="lg">
+          <Card withBorder radius="lg" padding="lg">
+            <Group justify="space-between" wrap="nowrap" mb="lg">
+              <div style={{ flex: 1 }}>
+                <Skeleton height={14} width="35%" radius="sm" />
+                <Skeleton height={10} width="55%" mt={8} radius="sm" />
+              </div>
+              <Skeleton height={54} width={54} radius="xl" />
+            </Group>
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i}>
+                  <Skeleton height={10} width="55%" radius="sm" />
+                  <Skeleton height={20} width="40%" mt={8} radius="sm" />
+                </div>
+              ))}
+            </SimpleGrid>
+          </Card>
+
+          <ChartSkeleton height={200} />
+          <ListSkeleton rows={4} />
+        </Stack>
+      </Grid.Col>
+    </Grid>
   );
 }
 

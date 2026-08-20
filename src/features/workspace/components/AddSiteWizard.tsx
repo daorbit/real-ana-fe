@@ -1,12 +1,11 @@
 import { useState } from "react";
 import {
   Modal, Stepper, Stack, Group, Button, TextInput, Switch, Divider, Text,
-  Code, ThemeIcon, Box, SimpleGrid, UnstyledButton,
+  Code, ThemeIcon, Box,
 } from "@mantine/core";
 import { ArrowLeft, ArrowRight, Check, Globe, PartyPopper } from "lucide-react";
 import { CodeBlock } from "@/shared/ui/CodeBlock";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
-import { BrandIcon } from "@/shared/ui/BrandIcon";
 import { useCreateSiteMutation } from "@/app/store";
 import { type TrackerOptions } from "@/features/workspace";
 import {

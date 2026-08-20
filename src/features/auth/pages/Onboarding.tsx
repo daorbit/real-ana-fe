@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Button, Group, Text, Title, TextInput, SimpleGrid, UnstyledButton,
+  Button, Group, Text, Title, TextInput,
   Stack, Anchor, Badge,
 } from "@mantine/core";
 import { ArrowRight, ArrowLeft, Globe, Zap } from "lucide-react";

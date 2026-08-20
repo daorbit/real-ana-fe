@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Box, Button, Card, Center, Grid, Group, Loader, Select, Stack,
+  Box, Button, Card, Grid, Group, Select, Stack,
   Text, TextInput, Tooltip, ActionIcon,
 } from "@mantine/core";
 import { HelpCircle, Plus, RefreshCw, Swords, Target } from "lucide-react";
@@ -21,6 +21,7 @@ import { CompetitorRail } from "@/features/compare/components/CompetitorRail";
 import { CompetitorDetail } from "@/features/compare/components/CompetitorDetail";
 import { ScoreTrendChart } from "@/features/compare/components/ScoreTrendChart";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { CompareSkeleton } from "@/shared/ui/Skeletons";
 
 /**
  * How your pages compare to your competitors'.
@@ -219,9 +220,7 @@ export default function Compare() {
       />
 
       {sitesLoading ? (
-        <Center py="xl">
-          <Loader size="sm" />
-        </Center>
+        <CompareSkeleton />
       ) : !site ? (
         <EmptyState
           icon={Swords}
@@ -266,11 +265,7 @@ export default function Compare() {
             </Card>
           )}
 
-          {(listLoading || analysisLoading) && (
-            <Center py="xl">
-              <Loader size="sm" />
-            </Center>
-          )}
+          {(listLoading || analysisLoading) && <CompareSkeleton />}
 
           {needsOwnAudit && (
             <EmptyState

@@ -1,5 +1,5 @@
 import {
-  Text, Button, Stack, Center, Loader, Alert, Box, ThemeIcon, SimpleGrid,
+  Text, Button, Stack, Alert, Box, ThemeIcon, SimpleGrid,
 } from "@mantine/core";
 import {
   Plus, Mail, MailWarning, CalendarClock, BarChart3, FileSpreadsheet, Clock, Users,
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader, PageStack } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import { ReportsSkeleton } from "@/shared/ui/Skeletons";
 import { StatTile, ReportCard } from "@/features/reports/pages/ReportCard";
 import { ReportDialog } from "@/features/reports/pages/ReportDialog";
 import { useReportsPage, useReportDialog } from "@/features/reports/pages/hooks";
@@ -69,7 +70,7 @@ export default function Reports() {
         )}
 
         {page.isLoading ? (
-          <Center py={64}><Loader size="sm" /></Center>
+          <ReportsSkeleton />
         ) : !page.schedules.length ? (
           <Box className="surface-card" py={64} px="xl">
             <Stack align="center" gap={6}>
