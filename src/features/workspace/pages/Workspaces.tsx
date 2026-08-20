@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Title, Text, Group, Button, Card, TextInput, ActionIcon, Badge, Stack,
-  SimpleGrid, ThemeIcon, Center, CopyButton, Tooltip, Divider,
+  ThemeIcon, Center, CopyButton, Tooltip, Divider,
   Box, Collapse, UnstyledButton,
 } from "@mantine/core";
 import { motion } from "framer-motion";
@@ -472,9 +472,17 @@ export default function Workspaces() {
                       )}
                     </Group>
                   )}
-                  <Box mt={6}>
+                  {/* Created date and id on one quiet line. Both are reference
+                      facts you look up occasionally — as tiles they carried the
+                      same visual weight as the site count, which is the number
+                      the page is actually about. */}
+                  <Group gap={10} wrap="nowrap" mt={6} style={{ minWidth: 0 }}>
+                    <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+                      {t("workspaces.statCreated")} {shortDate(active.createdAt)}
+                    </Text>
+                    <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>·</Text>
                     <IdRow label={t("workspaces.workspaceId")} value={active._id} />
-                  </Box>
+                  </Group>
                 </div>
 
                 <Group gap="xs" wrap="nowrap">
@@ -499,23 +507,6 @@ export default function Workspaces() {
                 </Group>
               </Group>
             </Box>
-
-            {/* At-a-glance counts - the first thing you check on opening a
-                workspace, and cheaper to read than counting rows. */}
-            <SimpleGrid cols={3} spacing="sm" mb="lg">
-              <Box className="ws-stat">
-                <Text className="ws-stat-label">{t("workspaces.statSites")}</Text>
-                <Text className="ws-stat-value">{sites.length}</Text>
-              </Box>
-              <Box className="ws-stat">
-                <Text className="ws-stat-label">{t("workspaces.statCreated")}</Text>
-                <Text className="ws-stat-value sm">{shortDate(active.createdAt)}</Text>
-              </Box>
-              <Box className="ws-stat">
-                <Text className="ws-stat-label">{t("workspaces.statWorkspaces")}</Text>
-                <Text className="ws-stat-value">{workspaces.length}</Text>
-              </Box>
-            </SimpleGrid>
 
             <Group justify="space-between" mb="sm" wrap="nowrap">
               <Group gap={8}>
@@ -616,9 +607,10 @@ export default function Workspaces() {
                     />
                   </motion.div>
                 ))}
-                {/* Stack stretches its children, which turned this into a
-                    full-width bar. Centre it at its natural width instead. */}
-                {canEdit && (
+                {/* A second add button only once the list is long enough that
+                    the one in the header has scrolled away. Below that it is
+                    the same control twice on one screen. */}
+                {canEdit && shownSites.length >= 4 && (
                   <Group justify="center" mt={4}>
                     <Button
                       variant="subtle"

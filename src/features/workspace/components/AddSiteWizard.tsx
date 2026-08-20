@@ -1,9 +1,11 @@
 import { useState } from "react";
 import {
-  Modal, Stepper, Stack, Group, Button, TextInput, Switch, Divider, Text,
-  Code, ThemeIcon, Box,
+  Modal, Stack, Group, Button, TextInput, Switch, Divider, Text,
+  Code, ThemeIcon, Box, ActionIcon, ScrollArea,
 } from "@mantine/core";
-import { ArrowLeft, ArrowRight, Check, Globe, PartyPopper } from "lucide-react";
+import {
+  ArrowLeft, ArrowRight, Check, Globe, PartyPopper, X, Settings2, Code2,
+} from "lucide-react";
 import { CodeBlock } from "@/shared/ui/CodeBlock";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
 import { useCreateSiteMutation } from "@/app/store";
@@ -15,6 +17,13 @@ import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker
 import * as v from "@/shared/lib/validate";
 import { notify, notifyError } from "@/shared/lib/notify";
 import type { Site } from "@/shared/types";
+
+/** The three stops, in order, as the rail draws them. */
+const STEPS = [
+  { label: "Site", description: "Name and domain", icon: Globe },
+  { label: "Tracking", description: "How it collects", icon: Settings2 },
+  { label: "Install", description: "Copy the snippet", icon: Code2 },
+];
 
 /** Split a comma-separated field into clean entries. */
 function list(s: string): string[] {
@@ -143,50 +152,105 @@ export function AddSiteWizard({
     <Modal
       opened={opened}
       onClose={close}
-      title="Add a site"
-      centered
-      radius="lg"
-      size="lg"
+      fullScreen
+      withCloseButton={false}
+      padding={0}
+      transitionProps={{ transition: "fade", duration: 150 }}
       // Closing mid-flow after the site exists would strand the snippet, so the
       // last step must be dismissed deliberately.
       closeOnClickOutside={step < 2}
+      styles={{
+        content: { display: "flex", flexDirection: "column", border: "none" },
+        body: { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" },
+      }}
     >
-      <Stepper active={step} size="sm" color="emerald" iconSize={30} mb="xl">
-        <Stepper.Step label="Site" description="Name and domain" />
-        <Stepper.Step label="Tracking" description="How it collects" />
-        <Stepper.Step label="Install" description="Copy the snippet" />
-      </Stepper>
+      {/* Header: the close control and the title, on one bar across the top —
+          the same shape the share composer opens with. */}
+      <Group
+        gap="sm"
+        px={20}
+        py="md"
+        wrap="nowrap"
+        style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
+      >
+        <ActionIcon variant="subtle" color="gray" size="lg" onClick={close} aria-label="Close">
+          <X size={18} />
+        </ActionIcon>
+        <Divider orientation="vertical" my={6} />
+        <Text fw={600}>Add a site</Text>
+      </Group>
 
+      <Group gap={0} align="stretch" wrap="nowrap" style={{ flex: 1, minHeight: 0 }}>
+        {/* The steps as a rail rather than a strip across the top. At full
+            width a horizontal stepper leaves the form floating in the middle
+            of a very wide page; down the side it frames the column instead. */}
+        <Box className="wizard-rail" visibleFrom="sm">
+          <Stack gap={4}>
+            {STEPS.map((s, i) => {
+              const state = i === step ? "current" : i < step ? "done" : "todo";
+              const Icon = s.icon;
+              return (
+                <Box key={s.label} className="wizard-step" data-state={state}>
+                  <ThemeIcon
+                    size={30}
+                    radius="md"
+                    variant={state === "todo" ? "default" : "light"}
+                    color={state === "todo" ? "gray" : "emerald"}
+                  >
+                    {state === "done" ? <Check size={15} /> : <Icon size={15} />}
+                  </ThemeIcon>
+                  <div style={{ minWidth: 0 }}>
+                    <Text size="sm" fw={state === "current" ? 650 : 500}>{s.label}</Text>
+                    <Text size="xs" c="dimmed">{s.description}</Text>
+                  </div>
+                </Box>
+              );
+            })}
+          </Stack>
+        </Box>
+
+        <Box style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+          <ScrollArea style={{ flex: 1 }} type="auto">
+            {/* The last step is a snippet to read, which wants a single narrow
+                column; the two before it are forms laid out in two. */}
+            <Box className="wizard-body" data-wide={step < 2}>
+
+      {/* Two columns: the two text fields on the left, the framework grid on
+          the right. Stacked, the grid pushed the fields off the top of a wide
+          window and left the space either side of them empty — side by side
+          the whole step fits without scrolling. */}
       {step === 0 && (
-        <Stack gap="md">
-          <TextInput
-            label="Site name"
-            placeholder="e.g. Marketing site"
-            description="Only used to identify this site in your dashboard."
-            value={name}
-            onChange={(e) => { setName(e.currentTarget.value); setNameError(null); }}
-            error={nameError}
-            data-autofocus
-          />
-          <TextInput
-            label="Domain"
-            placeholder="example.com"
-            description="The site you'll install the tracker on. Paste a full URL if it's easier."
-            leftSection={<Globe size={15} />}
-            value={domain}
-            onChange={(e) => { setDomain(e.currentTarget.value); setDomainError(null); }}
-            error={domainError}
-          />
+        <div className="wizard-split">
+          <Stack gap="md">
+            <TextInput
+              label="Site name"
+              placeholder="e.g. Marketing site"
+              description="Only used to identify this site in your dashboard."
+              value={name}
+              onChange={(e) => { setName(e.currentTarget.value); setNameError(null); }}
+              error={nameError}
+              data-autofocus
+            />
+            <TextInput
+              label="Domain"
+              placeholder="example.com"
+              description="The site you'll install the tracker on. Paste a full URL if it's easier."
+              leftSection={<Globe size={15} />}
+              value={domain}
+              onChange={(e) => { setDomain(e.currentTarget.value); setDomainError(null); }}
+              error={domainError}
+            />
+          </Stack>
 
           <div>
             <Text size="sm" fw={500} mb={4}>What is it built with?</Text>
-            <Text size="xs" c="dimmed" mb="xs">
+            <Text size="xs" c="dimmed" mb="sm">
               Only changes the install instructions you get at the end — the
               tracker itself is the same everywhere.
             </Text>
             <FrameworkPicker value={framework} onChange={setFramework} />
           </div>
-        </Stack>
+        </div>
       )}
 
       {step === 1 && (
@@ -196,6 +260,10 @@ export function AddSiteWizard({
             the defaults are what most sites want.
           </Text>
 
+          {/* The toggles are one question each and read as a set; the text
+              fields below them all take a list. Two groups, two columns. */}
+          <div className="wizard-split">
+          <Stack gap="md">
           <Switch
             checked={dnt}
             onChange={(e) => setDnt(e.currentTarget.checked)}
@@ -224,9 +292,9 @@ export function AddSiteWizard({
             label="Track JavaScript errors"
             description="Surfaces uncaught errors and failed promises by page."
           />
+          </Stack>
 
-          <Divider />
-
+          <Stack gap="md">
           <TextInput
             label="Ignore pages"
             placeholder="/admin/*, /preview"
@@ -248,6 +316,8 @@ export function AddSiteWizard({
             value={reportDomain}
             onChange={(e) => setReportDomain(e.currentTarget.value)}
           />
+          </Stack>
+          </div>
         </Stack>
       )}
 
@@ -293,34 +363,43 @@ export function AddSiteWizard({
         </Stack>
       )}
 
-      <Group justify="space-between" mt="xl">
-        {step > 0 && step < 2 ? (
-          <Button
-            variant="subtle"
-            color="gray"
-            leftSection={<ArrowLeft size={15} />}
-            onClick={() => setStep((s) => s - 1)}
-            disabled={creating}
-          >
-            Back
-          </Button>
-        ) : (
-          <span />
-        )}
+            </Box>
+          </ScrollArea>
 
-        {step < 2 ? (
-          <Button
-            onClick={next}
-            loading={creating}
-            rightSection={<ArrowRight size={15} />}
-          >
-            {step === 1 ? "Create site" : "Continue"}
-          </Button>
-        ) : (
-          <Button leftSection={<Check size={15} />} onClick={close}>
-            Done
-          </Button>
-        )}
+          {/* The footer stays put while the body scrolls, so the way forward is
+              never something you have to scroll to find. */}
+          <Box className="wizard-foot">
+            <Group justify="space-between" wrap="nowrap">
+              {step > 0 && step < 2 ? (
+                <Button
+                  variant="subtle"
+                  color="gray"
+                  leftSection={<ArrowLeft size={15} />}
+                  onClick={() => setStep((s) => s - 1)}
+                  disabled={creating}
+                >
+                  Back
+                </Button>
+              ) : (
+                <span />
+              )}
+
+              {step < 2 ? (
+                <Button
+                  onClick={next}
+                  loading={creating}
+                  rightSection={<ArrowRight size={15} />}
+                >
+                  {step === 1 ? "Create site" : "Continue"}
+                </Button>
+              ) : (
+                <Button leftSection={<Check size={15} />} onClick={close}>
+                  Done
+                </Button>
+              )}
+            </Group>
+          </Box>
+        </Box>
       </Group>
     </Modal>
   );
