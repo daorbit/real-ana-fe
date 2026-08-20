@@ -1662,6 +1662,12 @@ function UsageSummary({
       padding={0}
       style={{ overflow: "hidden" }}
     >
+      {/* The header carries the card's own top radius rather than leaning on
+          the parent's `overflow: hidden` to cut it. Clipping happens at the
+          border box, so a square fill under a rounded border shaves the border
+          itself at each top corner — the curve ends up a shade of the fill
+          instead of the border colour. Rounding the fill leaves the border
+          intact and the two curves concentric. */}
       <Box
         p="lg"
         style={{
@@ -1669,6 +1675,8 @@ function UsageSummary({
             ? "color-mix(in srgb, var(--mantine-color-red-6) 8%, transparent)"
             : "linear-gradient(135deg, color-mix(in srgb, var(--violet-2) 10%, transparent), transparent)",
           borderBottom: "1px solid var(--border)",
+          borderStartStartRadius: "var(--mantine-radius-lg)",
+          borderStartEndRadius: "var(--mantine-radius-lg)",
         }}
       >
         <Group justify="space-between" align="flex-start" wrap="wrap">
