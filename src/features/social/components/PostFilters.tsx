@@ -30,6 +30,10 @@ export function PostFilters({
           // Failures carry the app's warning orange, but only when there are
           // any: an orange nought is an alarm for nothing having gone wrong.
           const color = count === 0 ? "gray" : f.value === "failed" ? "orange" : undefined;
+          // Sent carries no badge. Its posts are fetched only once the shelf is
+          // opened, so any number here would read "0 published" until the
+          // moment someone proves otherwise by clicking it.
+          const badge = f.value !== "sent";
           // Every shelf, always, including the empty ones: a tab that comes and
           // goes as posts change moves the others under the pointer, and an
           // empty shelf is worth being able to see is empty.
@@ -38,9 +42,11 @@ export function PostFilters({
               key={f.value}
               value={f.value}
               rightSection={
-                <Badge size="sm" variant="light" color={color} circle>
-                  {count}
-                </Badge>
+                badge ? (
+                  <Badge size="sm" variant="light" color={color} circle>
+                    {count}
+                  </Badge>
+                ) : undefined
               }
             >
               {f.label}

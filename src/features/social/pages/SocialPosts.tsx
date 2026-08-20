@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActionIcon, Box, Button, Group, SegmentedControl, Text, Title, Tooltip,
 } from "@mantine/core";
-import { CalendarDays, List as ListIcon, Plus, RefreshCw, Send } from "lucide-react";
+import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
@@ -38,7 +38,14 @@ export default function SocialPosts() {
  
   const [initial, setInitial] = useState<Draft>(emptyDraft);
  
-  const [view, setView] = useState<"calendar" | "list" | "sent">("list");
+  // How the posts are laid out, which is a separate question from which posts
+  // are being shown — that is the shelf, below.
+  const [view, setView] = useState<"calendar" | "list">("list");
+
+  // Which shelf of the queue is showing. Owned here rather than inside the list
+  // because the tab bar renders in the sticky header above it.
+  const filters = usePostFilters(data?.posts ?? []);
+  const onSent = filters.filter === "sent";
 
   /**
    * The cursor for the published history, and nothing more.
@@ -55,16 +62,12 @@ export default function SocialPosts() {
     isFetching: sentFetching,
     refetch: refetchSent,
   } = useGetSentPostsQuery(sentCursor ? { cursor: sentCursor } : undefined, {
-    // Not fetched until the tab is opened: most visits never look at history,
+    // Not fetched until the shelf is opened: most visits never look at history,
     // and the query is a second round trip on a page that already made one.
-    skip: view !== "sent",
+    skip: !onSent,
   });
   /** A post that just changed time, so its row can say so where someone is looking. */
   const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
-
-  // Which shelf of the queue is showing. Owned here rather than inside the list
-  // because the tab bar renders in the sticky header above it.
-  const filters = usePostFilters(data?.posts ?? []);
 
   // Connecting happens in a popup, so this page — and any half-written draft —
   // survives the round trip. Disconnecting is not offered here: it lives with
@@ -164,26 +167,18 @@ export default function SocialPosts() {
             </Group>
           ),
         },
-        {
-          value: "sent",
-          label: (
-            <Group gap={6} wrap="nowrap" justify="center">
-              <Send size={15} />
-              <span>Sent</span>
-            </Group>
-          ),
-        },
       ]}
       value={view}
-      onChange={(v) => {
-        const next = v as "calendar" | "list" | "sent";
-        // Opening the tab starts from the newest page. Keeping a cursor from a
-        // previous visit would silently skip everything published since.
-        if (next === "sent") setSentCursor(undefined);
-        setView(next);
-      }}
+      onChange={(v) => setView(v as "calendar" | "list")}
     />
   );
+
+  // Opening the shelf starts from the newest page. Keeping a cursor from a
+  // previous visit would silently skip everything published since.
+  const onFilter = (next: typeof filters.filter) => {
+    if (next === "sent") setSentCursor(undefined);
+    filters.setFilter(next);
+  };
 
   return (
     <AppShell>
@@ -193,7 +188,7 @@ export default function SocialPosts() {
         <div style={{ minWidth: 0 }}>
           <Title order={2} lh={1.2}>Social posts</Title>
           <Text size="sm" c="dimmed" mt={4}>
-            {view === "sent"
+            {onSent
               ? "Everything you've published from here"
               : ready
                 ? `Publishing to LinkedIn · ${timezone}`
@@ -210,21 +205,24 @@ export default function SocialPosts() {
           )}
 
 
-          {viewControl}
+          {/* Hidden on Sent: history has no empty slots to lay out on a
+              calendar, so the switch there would offer a view that cannot be
+              drawn. */}
+          {!onSent && viewControl}
 
-          {/* Whatever the current view reads, re-read. Worth its own control
+          {/* Whatever is currently on screen, re-read. Worth its own control
               because the two things most likely to be stale here happen
               elsewhere: a scheduled post publishes on the server's clock, and
               a reconnected LinkedIn account clears a failure — neither of
               which this page hears about while it sits open. */}
-          <Tooltip label={view === "sent" ? "Refresh published posts" : "Refresh"} withArrow>
+          <Tooltip label={onSent ? "Refresh published posts" : "Refresh"} withArrow>
             <ActionIcon
               variant="default"
               size="lg"
               aria-label="Refresh"
-              loading={view === "sent" ? sentFetching : isFetching}
+              loading={onSent ? sentFetching : isFetching}
               onClick={() => {
-                if (view === "sent") {
+                if (onSent) {
                   // From the newest page: a refresh that kept a cursor from a
                   // previous "load older" would re-read the middle of history
                   // and leave the newest posts exactly as stale as before.
@@ -262,19 +260,19 @@ export default function SocialPosts() {
           every shelf. A tab bar that appears only once the list lands pushes
           the whole timeline down at the moment it arrives, which is the jump
           the skeleton exists to prevent. */}
-      {(isLoading || posts.length > 0) && view === "list" && (
+      {(isLoading || posts.length > 0 || onSent) && view === "list" && (
         <PostFilters
           filter={filters.filter}
-          onFilter={filters.setFilter}
+          onFilter={onFilter}
           counts={filters.counts}
         />
       )}
       </Box>
 
-      {/* Not on the Sent tab: it reads history, which stands whether or not the
-          connection is currently live, and a prompt to reconnect above a list
-          of posts that plainly went out reads as though they had not. */}
-      {!isLoading && !ready && view !== "sent" && (
+      {/* Not on the Sent shelf: it reads history, which stands whether or not
+          the connection is currently live, and a prompt to reconnect above a
+          list of posts that plainly went out reads as though they had not. */}
+      {!isLoading && !ready && !onSent && (
         <ConnectPrompt
           linkedin={linkedin}
           needsPostingPermission={needsPostingPermission}
@@ -286,7 +284,7 @@ export default function SocialPosts() {
       {/* Checked before the loader and the empty state, both of which speak for
           the schedule list: history is its own collection, and an account with
           no schedules left can still have published a great deal. */}
-      {view === "sent" ? (
+      {onSent ? (
         <SentTimeline
           posts={sent?.posts ?? []}
           author={sent?.author?.name || linkedin?.name || ""}
