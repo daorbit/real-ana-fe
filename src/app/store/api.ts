@@ -271,14 +271,26 @@ export const api = createApi({
      * cache key, and `merge` concatenates. Without that, every page would
      * evict the one before it and the list would flicker back to twenty rows.
      */
-    getSentPosts: build.query<SentPostsResponse, { cursor?: string } | void>({
+    getSentPosts: build.query<
+      SentPostsResponse,
+      { cursor?: string; status?: "failed" } | void
+    >({
       query: (args) => {
         const cursor = args && "cursor" in args ? args.cursor : undefined;
-        return cursor
-          ? `/api/social/posts/sent?cursor=${encodeURIComponent(cursor)}`
-          : "/api/social/posts/sent";
+        const status = args && "status" in args ? args.status : undefined;
+        const params = new URLSearchParams();
+        if (cursor) params.set("cursor", cursor);
+        if (status) params.set("status", status);
+        const qs = params.toString();
+        return qs ? `/api/social/posts/sent?${qs}` : "/api/social/posts/sent";
       },
-      serializeQueryArgs: () => "sent",
+      // Keyed by the subset being read, not by the page within it: pages merge
+      // into one list, but "everything published" and "only what failed" are
+      // two lists and must not merge into each other.
+      serializeQueryArgs: ({ queryArgs }) => {
+        const status = queryArgs && "status" in queryArgs ? queryArgs.status : undefined;
+        return status ? `sent:${status}` : "sent";
+      },
       merge: (existing, incoming, { arg }) => {
         // A fetch with no cursor is a refresh of the first page, not a
         // continuation — it replaces the list. Appending it instead would

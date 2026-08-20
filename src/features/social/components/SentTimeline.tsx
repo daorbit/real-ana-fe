@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Box, Button, Group, Stack, Text } from "@mantine/core";
-import { Send } from "lucide-react";
+import { CheckCircle2, Send } from "lucide-react";
 import { SentPostRow } from "./SentPostRow";
 import { dayLabel } from "../postTime";
 import { SocialPostsSkeleton } from "@/shared/ui/Skeletons";
@@ -25,6 +25,7 @@ export function SentTimeline({
   loadingMore,
   hasMore,
   onLoadMore,
+  emptyState = "sent",
 }: {
   posts: SentPost[];
   author: string;
@@ -34,6 +35,14 @@ export function SentTimeline({
   loadingMore: boolean;
   hasMore: boolean;
   onLoadMore: () => void;
+  /**
+   * What an empty list means here.
+   *
+   * The same list of runs serves two shelves, and nothing is not the same news
+   * on both: no published posts is a beginning, no failed ones is a relief, and
+   * `"none"` is for where something else on the page already speaks.
+   */
+  emptyState?: "sent" | "failed" | "none";
 }) {
   // Newest first. The server already sorts, but grouping has to preserve it and
   // an explicit sort here means a reordered response cannot scramble the days.
@@ -57,7 +66,14 @@ export function SentTimeline({
   }
 
   if (posts.length === 0) {
-    return (
+    if (emptyState === "none") return null;
+    return emptyState === "failed" ? (
+      <EmptyState
+        icon={CheckCircle2}
+        title="Nothing has failed"
+        description="Every post has gone out as scheduled. Any that don't will appear here with the reason it stopped."
+      />
+    ) : (
       <EmptyState
         icon={Send}
         title="Nothing published yet"

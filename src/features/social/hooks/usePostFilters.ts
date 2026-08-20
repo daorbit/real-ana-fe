@@ -17,10 +17,14 @@ export function matches(post: ScheduledPost, filter: Filter): boolean {
   const stage = stageOf(post);
   if (filter === "draft") return stage === "draft";
   if (filter === "failed") return stage === "failed";
-
+  // Published history is fetched separately, so nothing from the schedule
+  // collection belongs on that shelf.
   if (filter === "sent") return false;
-
-  return stage !== "draft";
+  // Queue is what is still due to go out, and nothing else. A post that has
+  // already published is history and a post that failed has its own shelf —
+  // both sat here once, and both made the one list someone checks for "what is
+  // coming" answer a question they did not ask.
+  return stage === "scheduled";
 }
 
 

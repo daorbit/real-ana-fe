@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActionIcon, Box, Button, Group, SegmentedControl, Text, Title, Tooltip,
+  ActionIcon, Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
 import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
@@ -46,6 +46,7 @@ export default function SocialPosts() {
   // because the tab bar renders in the sticky header above it.
   const filters = usePostFilters(data?.posts ?? []);
   const onSent = filters.filter === "sent";
+  const onFailed = filters.filter === "failed";
 
   /**
    * The cursor for the published history, and nothing more.
@@ -61,11 +62,18 @@ export default function SocialPosts() {
     isLoading: sentLoading,
     isFetching: sentFetching,
     refetch: refetchSent,
-  } = useGetSentPostsQuery(sentCursor ? { cursor: sentCursor } : undefined, {
-    // Not fetched until the shelf is opened: most visits never look at history,
-    // and the query is a second round trip on a page that already made one.
-    skip: !onSent,
-  });
+  } = useGetSentPostsQuery(
+    {
+      ...(sentCursor ? { cursor: sentCursor } : {}),
+      ...(onFailed ? { status: "failed" as const } : {}),
+    },
+    {
+      // Not fetched until one of the two shelves that read runs is opened:
+      // most visits never look at history, and the query is a second round
+      // trip on a page that already made one.
+      skip: !onSent && !onFailed,
+    },
+  );
   /** A post that just changed time, so its row can say so where someone is looking. */
   const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
 
@@ -173,10 +181,11 @@ export default function SocialPosts() {
     />
   );
 
-  // Opening the shelf starts from the newest page. Keeping a cursor from a
-  // previous visit would silently skip everything published since.
+  // Opening a shelf starts from the newest page. A cursor left over from a
+  // previous visit — or from the other run-backed shelf, which pages through a
+  // different list — would silently skip everything since.
   const onFilter = (next: typeof filters.filter) => {
-    if (next === "sent") setSentCursor(undefined);
+    setSentCursor(undefined);
     filters.setFilter(next);
   };
 
@@ -205,10 +214,10 @@ export default function SocialPosts() {
           )}
 
 
-          {/* Hidden on Sent: history has no empty slots to lay out on a
-              calendar, so the switch there would offer a view that cannot be
-              drawn. */}
-          {!onSent && viewControl}
+          {/* Hidden on the two shelves that read runs: neither has empty slots
+              to lay out on a calendar, so the switch there would offer a view
+              that cannot be drawn. */}
+          {!onSent && !onFailed && viewControl}
 
           {/* Whatever is currently on screen, re-read. Worth its own control
               because the two things most likely to be stale here happen
@@ -220,16 +229,18 @@ export default function SocialPosts() {
               variant="default"
               size="lg"
               aria-label="Refresh"
-              loading={onSent ? sentFetching : isFetching}
+              loading={onSent || onFailed ? sentFetching : isFetching}
               onClick={() => {
-                if (onSent) {
+                // The Failed shelf reads both collections at once, so it
+                // refreshes both — refreshing only the half someone happens to
+                // be looking at leaves the other stale under the same button.
+                if (!onSent) refetch();
+                if (onSent || onFailed) {
                   // From the newest page: a refresh that kept a cursor from a
                   // previous "load older" would re-read the middle of history
                   // and leave the newest posts exactly as stale as before.
                   if (sentCursor) setSentCursor(undefined);
                   else refetchSent();
-                } else {
-                  refetch();
                 }
               }}
             >
@@ -260,7 +271,7 @@ export default function SocialPosts() {
           every shelf. A tab bar that appears only once the list lands pushes
           the whole timeline down at the moment it arrives, which is the jump
           the skeleton exists to prevent. */}
-      {(isLoading || posts.length > 0 || onSent) && view === "list" && (
+      {(isLoading || posts.length > 0 || onSent || onFailed) && view === "list" && (
         <PostFilters
           filter={filters.filter}
           onFilter={onFilter}
@@ -295,6 +306,47 @@ export default function SocialPosts() {
           hasMore={Boolean(sent?.nextCursor)}
           onLoadMore={() => setSentCursor(sent?.nextCursor ?? undefined)}
         />
+      ) : onFailed ? (
+        /*
+         * Two collections, one shelf.
+         *
+         * A post can fail in two ways that are stored quite differently: a
+         * *schedule* whose last attempt failed still sits in the queue awaiting
+         * another, while an attempt that failed outright is a run — a record of
+         * one moment, with no future. Someone asking "what went wrong?" means
+         * both, and would not think to look in two places for them.
+         *
+         * Schedules come first: they are the ones still fixable.
+         */
+        <Stack gap="xl">
+          {filters.visible.length > 0 && (
+            <PostQueue
+              author={linkedin?.name ?? ""}
+              authorPicture={linkedin?.picture}
+              onEdit={openEdit}
+              onToggle={toggle}
+              onDelete={destroy}
+              onPublish={publishNow}
+              publishingId={publishingId}
+              recentlyMovedId={recentlyMovedId}
+              filters={filters}
+            />
+          )}
+          <SentTimeline
+            posts={sent?.posts ?? []}
+            author={sent?.author?.name || linkedin?.name || ""}
+            authorPicture={sent?.author?.picture}
+            statsAvailable={sent?.statsAvailable ?? false}
+            loading={sentLoading}
+            loadingMore={sentFetching && !sentLoading}
+            hasMore={Boolean(sent?.nextCursor)}
+            onLoadMore={() => setSentCursor(sent?.nextCursor ?? undefined)}
+            // Suppressed where a schedule above already reports a failure: the
+            // shelf is not empty, and "nothing has failed" beneath a post that
+            // plainly did contradicts it.
+            emptyState={filters.visible.length > 0 ? "none" : "failed"}
+          />
+        </Stack>
       ) : isLoading ? (
         <SocialPostsSkeleton />
       ) : posts.length === 0 ? (

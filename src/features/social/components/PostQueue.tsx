@@ -38,13 +38,12 @@ export function PostQueue({
   const { filter, visible } = filters;
 
 
+  // No published section: every shelf this renders is work still ahead, and a
+  // post that has already gone out is read on Sent, from the run history.
   const upcoming = visible
-    .filter((p) => p.mode !== "repeat" && p.status !== "sent")
+    .filter((p) => p.mode !== "repeat")
     .sort((a, b) => +new Date(a.nextRunAt) - +new Date(b.nextRunAt));
   const repeating = visible.filter((p) => p.mode === "repeat");
-  const sent = visible
-    .filter((p) => p.mode !== "repeat" && p.status === "sent")
-    .sort((a, b) => +new Date(b.lastRunAt ?? 0) - +new Date(a.lastRunAt ?? 0));
 
  
   const HORIZON_STEP = 14;
@@ -179,12 +178,6 @@ export function PostQueue({
             </Section>
           )}
 
-          {sent.length > 0 && (
-            
-            <Section title="Published" dim>
-              {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
-            </Section>
-          )}
         </Stack>
       )}
 
