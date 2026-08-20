@@ -1,0 +1,127 @@
+import { useMemo } from "react";
+import { Alert, Box, Button, Card, Group, Loader, Stack, Text } from "@mantine/core";
+import { Info, Send } from "lucide-react";
+import { SentPostRow } from "./SentPostRow";
+import { dayLabel } from "../postTime";
+import type { SentPost } from "@/shared/types";
+
+/**
+ * Published posts, newest first, grouped by the day they went out.
+ *
+ * Grouped the same way the queue groups upcoming posts, and with the same
+ * headings, because it is the same timeline read in the other direction: what
+ * has happened rather than what is about to. The one structural difference is
+ * that this list has no empty slots — a day with no posts simply is not there,
+ * since there is nothing to schedule into the past.
+ */
+export function SentTimeline({
+  posts,
+  author,
+  authorPicture,
+  statsAvailable,
+  loading,
+  loadingMore,
+  hasMore,
+  onLoadMore,
+}: {
+  posts: SentPost[];
+  author: string;
+  authorPicture?: string;
+  statsAvailable: boolean;
+  loading: boolean;
+  loadingMore: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
+}) {
+  // Newest first. The server already sorts, but grouping has to preserve it and
+  // an explicit sort here means a reordered response cannot scramble the days.
+  const days = useMemo(() => {
+    const byDay = new Map<string, SentPost[]>();
+    for (const post of [...posts].sort(
+      (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt),
+    )) {
+      const key = new Date(post.publishedAt).toDateString();
+      byDay.set(key, [...(byDay.get(key) ?? []), post]);
+    }
+    return [...byDay.entries()].map(([key, dayPosts]) => ({
+      key,
+      label: dayLabel(new Date(key).toISOString()),
+      posts: dayPosts,
+    }));
+  }, [posts]);
+
+  if (loading) {
+    return <Group justify="center" py="xl"><Loader /></Group>;
+  }
+
+  if (posts.length === 0) {
+    return (
+      <Card className="post-timeline" withBorder padding="xl" radius="md">
+        <Stack gap={6} align="center">
+          <Send size={26} strokeWidth={1.5} style={{ color: "var(--mantine-color-dimmed)" }} />
+          <Text fw={600} mt={4}>Nothing published yet</Text>
+          <Text size="sm" c="dimmed" ta="center" maw={420}>
+            Posts you publish from here — on a schedule or by hand — appear in this list once
+            they go out.
+          </Text>
+        </Stack>
+      </Card>
+    );
+  }
+
+  return (
+    <Stack gap="lg">
+      {/*
+        Said once, at the top, rather than five times per row.
+        Without this the dashes read as a bug — the numbers look like they are
+        merely late, and someone waits for figures that are never coming. The
+        reason is a LinkedIn permission, not a fault here, and saying so is the
+        difference between "broken" and "not offered".
+      */}
+      {!statsAvailable && (
+        <Alert
+          icon={<Info size={16} />}
+          color="gray"
+          variant="light"
+          title="Engagement figures aren't available"
+        >
+          LinkedIn shares post analytics only with approved partner apps, so reactions,
+          impressions and reach can't be shown here. Open a post on LinkedIn to see how it did.
+        </Alert>
+      )}
+
+      <Stack className="post-timeline" gap={34}>
+        {days.map((day) => (
+          <Box key={day.key}>
+            <Text className="post-day">
+              <strong>{day.label.split(", ")[0]}</strong>
+              {day.label.includes(", ") && <span>, {day.label.split(", ").slice(1).join(", ")}</span>}
+            </Text>
+            <Stack gap={10}>
+              {day.posts.map((post) => (
+                <SentPostRow
+                  key={post.id}
+                  post={post}
+                  author={author}
+                  authorPicture={authorPicture}
+                  statsAvailable={statsAvailable}
+                />
+              ))}
+            </Stack>
+          </Box>
+        ))}
+      </Stack>
+
+      {/* Explicit rather than an infinite scroll: history has no end worth
+          racing to, and a button that says how to see more beats a list that
+          silently grows while someone is reading it. */}
+      {hasMore && (
+        <Group justify="center" pb="md">
+          <Button variant="default" loading={loadingMore} onClick={onLoadMore}>
+            Load older posts
+          </Button>
+        </Group>
+      )}
+    </Stack>
+  );
+}

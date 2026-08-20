@@ -2597,6 +2597,32 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
+/* The engagement strip on a published post.
+
+   An even grid rather than a flex row, so the five figures line up down the
+   page across every card regardless of how wide each number happens to be —
+   a column of measurements is read by scanning downward, and ragged columns
+   defeat that. It wraps to three-up on narrow screens rather than shrinking
+   the numbers to the point of illegibility. */
+.sent-post__stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--mantine-color-default-border);
+}
+
+@media (max-width: 560px) {
+  .sent-post__stats {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 12px;
+  }
+}
+
+.sent-post__stat {
+  min-width: 0;
+}
+
 /* An hour with nothing in it. A filled bar rather than a dashed outline: the
    empty slots outnumber the posts on most days, and a page of dashed rectangles
    reads as a broken layout where a flat surface reads as a row of open seats.

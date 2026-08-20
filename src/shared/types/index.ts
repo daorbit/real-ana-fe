@@ -187,6 +187,85 @@ export type ScheduledPostsResponse = {
 };
 
 /**
+ * Engagement on a published post.
+ *
+ * Every figure is nullable, and that is the point rather than an oversight. A
+ * post published minutes ago has no impressions *yet*; a post this application
+ * has no permission to measure never will. Both are "not known", which the UI
+ * renders as a dash — showing 0 would state that nobody saw it, which is a
+ * different and usually false claim.
+ */
+export type PostStats = {
+  impressions: number | null;
+  /** Distinct members reached, which LinkedIn counts separately from impressions. */
+  uniqueImpressions: number | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+  clicks: number | null;
+  /** A fraction: 0.05 renders as "5%". LinkedIn's own figure, not recomputed. */
+  engagement: number | null;
+  fetchedAt: string | null;
+  /**
+   * Why there are no figures, when there are none.
+   *
+   * `scope` — this deployment has no analytics permission, so LinkedIn was
+   * never asked. `pending` — asked, and it had nothing yet, which is normal for
+   * the first hour after publishing. Empty means the numbers above are real.
+   */
+  unavailable: "" | "scope" | "pending" | "error";
+};
+
+/**
+ * One post, as actually published.
+ *
+ * Distinct from `ScheduledPost`, which is the *instruction* to publish and
+ * carries only its most recent outcome. This is history: a row per publish,
+ * with the caption and image as they went out rather than as the schedule reads
+ * today, so editing a schedule cannot rewrite what it already posted.
+ */
+export type SentPost = {
+  id: string;
+  /** The schedule behind it, when there was one. Null for a Share Panel post. */
+  scheduledPostId: string | null;
+  workspaceId: string | null;
+  name: string;
+  caption: string;
+  imageUrl: string;
+  /** How it came to be published: on its schedule, by hand, or from the panel. */
+  source: "schedule" | "manual" | "share";
+  status: "published" | "failed";
+  /** Already written for display — never a raw LinkedIn error. */
+  error: string;
+  postUrl: string;
+  publishedAt: string;
+  stats: PostStats;
+};
+
+/**
+ * A page of published history, newest first.
+ *
+ * Cursor-paginated rather than by page number: rows are appended continuously,
+ * and an offset would skip or repeat a post whenever one published between two
+ * requests.
+ */
+export type SentPostsResponse = {
+  posts: SentPost[];
+  /** Pass back as `cursor` for the next page. Null when there are no more. */
+  nextCursor: string | null;
+  /** The connected account every row published as. */
+  author: { name: string; picture: string } | null;
+  /**
+   * Whether the stats columns can ever hold a number.
+   *
+   * False wherever the LinkedIn app has no product granting post analytics —
+   * which is everywhere, today. The UI reads this to show dashes and say why,
+   * rather than five zeroes that read as a post nobody saw.
+   */
+  statsAvailable: boolean;
+};
+
+/**
  * Admin view of how the public demo is being used.
  *
  * A rolling 24-hour window, which is all the throttle keeps — no visitor

@@ -17,7 +17,8 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage, LinkedInStatus, ScheduledPost, ScheduledPostsResponse, PostFrequency, PostMode,
+  DemoUsage, LinkedInStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
+  PostFrequency, PostMode,
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
@@ -114,7 +115,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission", "LinkedIn", "ScheduledPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission", "LinkedIn", "ScheduledPost", "SentPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -241,7 +242,9 @@ export const api = createApi({
       { caption: string; image: string }
     >({
       query: (body) => ({ url: "/api/auth/linkedin/post", method: "POST", body }),
-      invalidatesTags: ["LinkedIn"],
+      // `SentPost` too: a share is a publish like any other and is recorded as
+      // one, so the Sent tab gains a row the moment this succeeds.
+      invalidatesTags: ["LinkedIn", "SentPost"],
     }),
 
     /**
@@ -254,6 +257,46 @@ export const api = createApi({
     getScheduledPosts: build.query<ScheduledPostsResponse, void>({
       query: () => "/api/social/posts",
       providesTags: ["ScheduledPost"],
+    }),
+
+    /**
+     * Posts that have actually been published, newest first.
+     *
+     * A separate collection from the schedules above, not a filter over them:
+     * a repeating schedule is one row that has published many times, and the
+     * Sent tab is a list of those publishes. See `SentPost`.
+     *
+     * Pages are merged into a single cache entry so "load more" appends rather
+     * than replacing the list — `serializeQueryArgs` drops the cursor from the
+     * cache key, and `merge` concatenates. Without that, every page would
+     * evict the one before it and the list would flicker back to twenty rows.
+     */
+    getSentPosts: build.query<SentPostsResponse, { cursor?: string } | void>({
+      query: (args) => {
+        const cursor = args && "cursor" in args ? args.cursor : undefined;
+        return cursor
+          ? `/api/social/posts/sent?cursor=${encodeURIComponent(cursor)}`
+          : "/api/social/posts/sent";
+      },
+      serializeQueryArgs: () => "sent",
+      merge: (existing, incoming, { arg }) => {
+        // A fetch with no cursor is a refresh of the first page, not a
+        // continuation — it replaces the list. Appending it instead would
+        // duplicate every row each time a publish invalidated the cache.
+        const cursor = arg && "cursor" in arg ? arg.cursor : undefined;
+        if (!cursor) return incoming;
+
+        // Deduplicated on id because the cursor is a timestamp: two posts
+        // published in the same millisecond would otherwise straddle the page
+        // boundary and appear twice.
+        const seen = new Set(existing.posts.map((p) => p.id));
+        return {
+          ...incoming,
+          posts: [...existing.posts, ...incoming.posts.filter((p) => !seen.has(p.id))],
+        };
+      },
+      forceRefetch: ({ currentArg, previousArg }) => currentArg !== previousArg,
+      providesTags: ["SentPost"],
     }),
 
     /**
@@ -315,7 +358,9 @@ export const api = createApi({
       // `Usage` too: creating, deleting or publishing a post changes how many
       // slots are left, and a stale counter would let someone start writing a
       // post the server is about to refuse.
-      invalidatesTags: ["ScheduledPost", "Usage"],
+      // `SentPost` because publishing is exactly what adds a row to the Sent
+      // tab — without this it would still be showing the previous publish.
+      invalidatesTags: ["ScheduledPost", "Usage", "SentPost"],
     }),
 
     getSites: build.query<Site[], string>({
@@ -1502,6 +1547,7 @@ export const {
   useDisconnectLinkedInMutation,
   usePostToLinkedInMutation,
   useGetScheduledPostsQuery,
+  useGetSentPostsQuery,
   useCreateScheduledPostMutation,
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,

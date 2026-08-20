@@ -2,13 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Box, Button, Group, Loader, SegmentedControl, Text, Title, Tooltip,
 } from "@mantine/core";
-import { CalendarDays, List as ListIcon, Plus } from "lucide-react";
+import { CalendarDays, List as ListIcon, Plus, Send } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
 import { usePostFilters } from "@/features/social/hooks/usePostFilters";
 import { PostFilters } from "@/features/social/components/PostFilters";
-import { useGetScheduledPostsQuery, useGetWorkspaceUsageQuery } from "@/app/store";
+import {
+  useGetScheduledPostsQuery, useGetSentPostsQuery, useGetWorkspaceUsageQuery,
+} from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
 import { ConnectPrompt } from "@/features/social/components/ConnectPrompt";
@@ -16,6 +18,7 @@ import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
 import { PostsEmptyState } from "@/features/social/components/PostsEmptyState";
+import { SentTimeline } from "@/features/social/components/SentTimeline";
 import { draftFromPost, emptyDraft, toDateInput, type Draft } from "@/features/social/components/draft";
 import type { ScheduledPost } from "@/shared/types";
 
@@ -34,7 +37,26 @@ export default function SocialPosts() {
  
   const [initial, setInitial] = useState<Draft>(emptyDraft);
  
-  const [view, setView] = useState<"calendar" | "list">("list");
+  const [view, setView] = useState<"calendar" | "list" | "sent">("list");
+
+  /**
+   * The cursor for the published history, and nothing more.
+   *
+   * Pages are merged inside the cache — see `getSentPosts` — so this holds only
+   * the position, not the accumulated list. Reset to undefined whenever the tab
+   * is opened afresh so a stale cursor cannot skip the newest posts.
+   */
+  const [sentCursor, setSentCursor] = useState<string | undefined>(undefined);
+
+  const {
+    data: sent,
+    isLoading: sentLoading,
+    isFetching: sentFetching,
+  } = useGetSentPostsQuery(sentCursor ? { cursor: sentCursor } : undefined, {
+    // Not fetched until the tab is opened: most visits never look at history,
+    // and the query is a second round trip on a page that already made one.
+    skip: view !== "sent",
+  });
   /** A post that just changed time, so its row can say so where someone is looking. */
   const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
 
@@ -140,9 +162,24 @@ export default function SocialPosts() {
             </Group>
           ),
         },
+        {
+          value: "sent",
+          label: (
+            <Group gap={6} wrap="nowrap" justify="center">
+              <Send size={15} />
+              <span>Sent</span>
+            </Group>
+          ),
+        },
       ]}
       value={view}
-      onChange={(v) => setView(v as "calendar" | "list")}
+      onChange={(v) => {
+        const next = v as "calendar" | "list" | "sent";
+        // Opening the tab starts from the newest page. Keeping a cursor from a
+        // previous visit would silently skip everything published since.
+        if (next === "sent") setSentCursor(undefined);
+        setView(next);
+      }}
     />
   );
 
@@ -154,7 +191,11 @@ export default function SocialPosts() {
         <div style={{ minWidth: 0 }}>
           <Title order={2} lh={1.2}>Social posts</Title>
           <Text size="sm" c="dimmed" mt={4}>
-            {ready ? `Publishing to LinkedIn · ${timezone}` : "No account connected yet"}
+            {view === "sent"
+              ? "Everything you've published from here"
+              : ready
+                ? `Publishing to LinkedIn · ${timezone}`
+                : "No account connected yet"}
           </Text>
         </div>
 
@@ -198,7 +239,10 @@ export default function SocialPosts() {
       )}
       </Box>
 
-      {!isLoading && !ready && (
+      {/* Not on the Sent tab: it reads history, which stands whether or not the
+          connection is currently live, and a prompt to reconnect above a list
+          of posts that plainly went out reads as though they had not. */}
+      {!isLoading && !ready && view !== "sent" && (
         <ConnectPrompt
           linkedin={linkedin}
           needsPostingPermission={needsPostingPermission}
@@ -207,7 +251,21 @@ export default function SocialPosts() {
         />
       )}
 
-      {isLoading ? (
+      {/* Checked before the loader and the empty state, both of which speak for
+          the schedule list: history is its own collection, and an account with
+          no schedules left can still have published a great deal. */}
+      {view === "sent" ? (
+        <SentTimeline
+          posts={sent?.posts ?? []}
+          author={sent?.author?.name || linkedin?.name || ""}
+          authorPicture={sent?.author?.picture}
+          statsAvailable={sent?.statsAvailable ?? false}
+          loading={sentLoading}
+          loadingMore={sentFetching && !sentLoading}
+          hasMore={Boolean(sent?.nextCursor)}
+          onLoadMore={() => setSentCursor(sent?.nextCursor ?? undefined)}
+        />
+      ) : isLoading ? (
         <Group justify="center" py="xl"><Loader /></Group>
       ) : posts.length === 0 ? (
         <PostsEmptyState disabled={!ready} onCreate={() => openNew()} />
