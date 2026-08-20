@@ -963,6 +963,41 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   margin-bottom: 0.4rem;
 }
 
+/* The same label as `.nav-heading`, made operable. Laid out as a full-width row
+   so the chevron sits at the far edge rather than trailing the word — the
+   affordance is the row, and a chevron tucked against the text reads as
+   punctuation. */
+.nav-heading--button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+/* Colour only, no fill. A filled bar here sat heavier than the links beneath
+   it, so the group label read as the selected row — the loudest thing in the
+   rail being the one thing you cannot navigate to. */
+.nav-heading--button:hover {
+  color: var(--text-2);
+}
+
+/* What separates one group from the next once the headings are gone. Inset so
+   it reads as a divider inside the rail rather than a border on it. */
+.nav-rule {
+  height: 1px;
+  margin-inline: 10px;
+  background: var(--border);
+}
+
+/* Collapsed, the row is a square target around a centred icon: the label is in
+   a tooltip, so the padding that made room for text would only make the hit
+   area lopsided. */
+.nav-link[data-collapsed] {
+  padding-inline: 0 !important;
+}
+
 /* ============ Workspaces ============ */
 .ws-active { border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important; }
 
