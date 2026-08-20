@@ -24,6 +24,7 @@ function clock(iso: string): string {
 export function PostRow({
   post,
   author,
+  authorPicture,
   onEdit,
   onToggle,
   onDelete,
@@ -34,6 +35,7 @@ export function PostRow({
   post: ScheduledPost;
   /** The connected account these publish as. */
   author: string;
+  authorPicture?: string;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
@@ -84,7 +86,7 @@ export function PostRow({
             feed, so the card previews the thing rather than describing it. */}
         <Group gap={8} wrap="nowrap" align="center" p="md" pb={8}>
           <Box style={{ position: "relative", flexShrink: 0 }}>
-            <Avatar size={28} radius="xl" color="blue">
+            <Avatar size={28} radius="xl" color="blue" src={authorPicture || undefined}>
               {author.trim().charAt(0).toUpperCase() || "?"}
             </Avatar>
             <Box className="post-slot__network" aria-hidden>

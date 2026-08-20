@@ -276,6 +276,7 @@ export default function SocialPosts() {
       ) : (
         <PostQueue
           author={linkedin?.name ?? ""}
+          authorPicture={linkedin?.picture}
           onEdit={openEdit}
           onToggle={toggle}
           onDelete={destroy}

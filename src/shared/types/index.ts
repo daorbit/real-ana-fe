@@ -181,6 +181,7 @@ export type ScheduledPostsResponse = {
     connected: boolean;
     expired: boolean;
     name: string;
+    picture?: string;
     /** False when the connection was made by signing in, without posting rights. */
     canPublish?: boolean;
   };

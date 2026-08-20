@@ -11,6 +11,7 @@ import type { ScheduledPost } from "@/shared/types";
 
 export function PostQueue({
   author,
+  authorPicture,
   onEdit,
   onToggle,
   onDelete,
@@ -21,6 +22,7 @@ export function PostQueue({
   filters,
 }: {
   author: string;
+  authorPicture?: string;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
@@ -28,10 +30,10 @@ export function PostQueue({
   onCreate?: (at: string) => void;
   publishingId: string | null;
   recentlyMovedId?: string | null;
- 
+
   filters: ReturnType<typeof usePostFilters>;
 }) {
-  const handlers = { author, onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
+  const handlers = { author, authorPicture, onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
   const { filter, visible } = filters;
 
 
