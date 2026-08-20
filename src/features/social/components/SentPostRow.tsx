@@ -96,16 +96,15 @@ export function SentPostRow({
   const { stats } = post;
 
   /**
-   * Why the figures are missing, said once and reused across all five.
+   * Why a figure is missing, said once and reused across all five.
    *
-   * Kept as a sentence a person can act on — or, in the first case, understand
-   * as "nothing is broken and there is nothing to wait for".
+   * Only ever reached where analytics exist at all — a deployment without them
+   * shows no figures to explain — so this covers the one remaining case: the
+   * post is too new for LinkedIn to have reported anything.
    */
-  const hint = !statsAvailable
-    ? "LinkedIn only shares post analytics with approved partner apps, so these cannot be measured here."
-    : stats.unavailable === "pending"
-      ? "LinkedIn has not reported figures for this post yet. They usually appear within a few hours."
-      : undefined;
+  const hint = stats.unavailable === "pending"
+    ? "LinkedIn has not reported figures for this post yet. They usually appear within a few hours."
+    : undefined;
 
   return (
     <Group className="post-slot" align="flex-start" wrap="nowrap" gap={0}>
@@ -148,14 +147,20 @@ export function SentPostRow({
 
         {/* A post that never went out has nothing to measure, so the failure
             takes the place of the figures rather than sitting above a row of
-            dashes that would imply it published to silence. */}
+            dashes that would imply it published to silence.
+
+            Where analytics are not available at all, the figures are dropped
+            rather than shown as five dashes: a row of blanks under labels like
+            "Impressions" reads as a number that failed to load, and no amount
+            of explaining beside it undoes that first impression. Nothing is
+            shown because there is nothing to show. */}
         {failed ? (
           <Box className="post-slot__foot">
             <Text size="xs" c="orange">
               {post.error || "This post could not be published."}
             </Text>
           </Box>
-        ) : (
+        ) : statsAvailable ? (
           <Box className="sent-post__stats">
             <Stat
               icon={<ThumbsUp size={13} />}
@@ -188,7 +193,7 @@ export function SentPostRow({
               hint={hint}
             />
           </Box>
-        )}
+        ) : null}
 
         <Group className="post-slot__foot" justify="space-between" wrap="nowrap" gap="sm">
           <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>

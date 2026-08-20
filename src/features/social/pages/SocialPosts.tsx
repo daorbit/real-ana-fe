@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Box, Button, Group, SegmentedControl, Text, Title, Tooltip,
+  ActionIcon, Box, Button, Group, SegmentedControl, Text, Title, Tooltip,
 } from "@mantine/core";
-import { CalendarDays, List as ListIcon, Plus, Send } from "lucide-react";
+import { CalendarDays, List as ListIcon, Plus, RefreshCw, Send } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
@@ -26,7 +26,7 @@ import type { ScheduledPost } from "@/shared/types";
  
 export default function SocialPosts() {
   const { active } = useWorkspace();
-  const { data, isLoading, refetch } = useGetScheduledPostsQuery();
+  const { data, isLoading, isFetching, refetch } = useGetScheduledPostsQuery();
  
   const { data: usage } = useGetWorkspaceUsageQuery(active?._id ?? "", { skip: !active?._id });
   const scheduledPosts = usage?.scheduledPosts;
@@ -53,6 +53,7 @@ export default function SocialPosts() {
     data: sent,
     isLoading: sentLoading,
     isFetching: sentFetching,
+    refetch: refetchSent,
   } = useGetSentPostsQuery(sentCursor ? { cursor: sentCursor } : undefined, {
     // Not fetched until the tab is opened: most visits never look at history,
     // and the query is a second round trip on a page that already made one.
@@ -211,6 +212,33 @@ export default function SocialPosts() {
 
           {viewControl}
 
+          {/* Whatever the current view reads, re-read. Worth its own control
+              because the two things most likely to be stale here happen
+              elsewhere: a scheduled post publishes on the server's clock, and
+              a reconnected LinkedIn account clears a failure — neither of
+              which this page hears about while it sits open. */}
+          <Tooltip label={view === "sent" ? "Refresh published posts" : "Refresh"} withArrow>
+            <ActionIcon
+              variant="default"
+              size="lg"
+              aria-label="Refresh"
+              loading={view === "sent" ? sentFetching : isFetching}
+              onClick={() => {
+                if (view === "sent") {
+                  // From the newest page: a refresh that kept a cursor from a
+                  // previous "load older" would re-read the middle of history
+                  // and leave the newest posts exactly as stale as before.
+                  if (sentCursor) setSentCursor(undefined);
+                  else refetchSent();
+                } else {
+                  refetch();
+                }
+              }}
+            >
+              <RefreshCw size={16} />
+            </ActionIcon>
+          </Tooltip>
+
           <Tooltip
             label={!ready ? "Connect LinkedIn first" : "This workspace's scheduled posts are full"}
             disabled={ready && !postsFull}
@@ -230,8 +258,11 @@ export default function SocialPosts() {
         </Group>
       </Group>
 
- 
-      {!isLoading && posts.length > 0 && view === "list" && (
+      {/* Shown while loading too, with the counts it already has — zero for
+          every shelf. A tab bar that appears only once the list lands pushes
+          the whole timeline down at the moment it arrives, which is the jump
+          the skeleton exists to prevent. */}
+      {(isLoading || posts.length > 0) && view === "list" && (
         <PostFilters
           filter={filters.filter}
           onFilter={filters.setFilter}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Box, Stack, Text } from "@mantine/core";
-import { Inbox } from "lucide-react";
+import { CheckCircle2, Inbox } from "lucide-react";
 import { DELIVERY_WINDOW_MINUTES } from "./draft";
 import { PostRow } from "./PostRow";
 import { PostSlotEmpty } from "./PostSlotEmpty";
@@ -118,11 +118,22 @@ export function PostQueue({
  
 
       {visible.length === 0 && filter !== "queue" ? (
-        <EmptyState
-          icon={Inbox}
-          title="No posts here"
-          description="Nothing on this shelf yet. Pick another tab to see the rest of your posts."
-        />
+        /* An empty Failed shelf is the good outcome, so it is not phrased as a
+           shelf that happens to be bare — "nothing here yet" invites the reader
+           to go looking elsewhere for failures that do not exist. */
+        filter === "failed" ? (
+          <EmptyState
+            icon={CheckCircle2}
+            title="Nothing has failed"
+            description="Every post has gone out as scheduled. Any that don't will appear here with the reason."
+          />
+        ) : (
+          <EmptyState
+            icon={Inbox}
+            title="No posts here"
+            description="Nothing on this shelf yet. Pick another tab to see the rest of your posts."
+          />
+        )
       ) : (
         /* Days are separated by clearly more air than the rows inside them —
            that difference is the only thing grouping a day's slots together,

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { Alert, Box, Button, Group, Stack, Text } from "@mantine/core";
-import { Info, Send } from "lucide-react";
+import { Box, Button, Group, Stack, Text } from "@mantine/core";
+import { Send } from "lucide-react";
 import { SentPostRow } from "./SentPostRow";
 import { dayLabel } from "../postTime";
 import { SocialPostsSkeleton } from "@/shared/ui/Skeletons";
@@ -68,24 +68,12 @@ export function SentTimeline({
 
   return (
     <Stack gap="lg">
-      {/*
-        Said once, at the top, rather than five times per row.
-        Without this the dashes read as a bug — the numbers look like they are
-        merely late, and someone waits for figures that are never coming. The
-        reason is a LinkedIn permission, not a fault here, and saying so is the
-        difference between "broken" and "not offered".
-      */}
-      {!statsAvailable && (
-        <Alert
-          icon={<Info size={16} />}
-          color="gray"
-          variant="light"
-          title="Engagement figures aren't available"
-        >
-          LinkedIn shares post analytics only with approved partner apps, so reactions,
-          impressions and reach can't be shown here. Open a post on LinkedIn to see how it did.
-        </Alert>
-      )}
+      {/* Nothing is said about missing engagement figures, because nothing
+          claims to show them: where analytics are unavailable the rows omit
+          the statistics entirely, and a banner explaining the absence of
+          something the reader cannot see is an apology for a gap they were
+          never shown. `statsAvailable` still travels to the rows, which use it
+          to decide whether to render figures at all. */}
 
       <Stack className="post-timeline" gap={34}>
         {days.map((day) => (

@@ -1,4 +1,4 @@
-import { Card, Group, Skeleton, SimpleGrid, Stack } from "@mantine/core";
+import { Box, Card, Group, Skeleton, SimpleGrid, Stack } from "@mantine/core";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 
 /** A stat card placeholder — icon, big number, label. */
@@ -218,33 +218,62 @@ export function MembersSkeleton() {
 /**
  * The Scheduled posts page while its list loads.
  *
- * Mirrors a day of the queue — a heading, then a couple of post-row-shaped
- * cards — so the page doesn't jump once real rows replace it.
+ * Built from the timeline's own classes rather than from plain stacked cards,
+ * because the thing that makes this page recognisable is its shape: a fixed
+ * gutter of times down the left, a centred column of cards beside it, capped
+ * well short of the window. A full-width skeleton is not a quieter version of
+ * that layout — it is a different one, and the page visibly rearranges itself
+ * the moment real rows arrive.
+ *
+ * The page header is not drawn here. It renders above this, already real, and
+ * a second ghost of it underneath reads as two headers.
  */
 export function SocialPostsSkeleton() {
   return (
-    <Stack gap={34}>
-      <Group justify="space-between" align="flex-start">
-        <div>
-          <Skeleton height={28} width={200} radius="sm" />
-          <Skeleton height={12} width={280} mt={10} radius="sm" />
-        </div>
-        <Skeleton height={36} width={130} radius="md" />
-      </Group>
-
+    <Stack className="post-timeline" gap={34}>
       {Array.from({ length: 2 }).map((_, day) => (
         <div key={day}>
-          <Skeleton height={12} width={90} mb="md" radius="sm" />
+          {/* The day heading sits over the card column, not over the gutter,
+              so it lines up with the real headings it replaces. */}
+          <Skeleton
+            height={13}
+            width={110}
+            mb="md"
+            radius="sm"
+            ml="var(--post-gutter, 92px)"
+          />
           <Stack gap={10}>
             {Array.from({ length: day === 0 ? 2 : 1 }).map((_, i) => (
-              <Card key={i} withBorder radius="md" padding="md">
-                <Group gap={8} wrap="nowrap" mb={10}>
-                  <Skeleton height={28} width={28} radius="xl" />
-                  <Skeleton height={12} width={120} radius="sm" />
-                </Group>
-                <Skeleton height={12} width="60%" mb={8} radius="sm" />
-                <Skeleton height={10} width="90%" radius="sm" />
-              </Card>
+              <Group key={i} className="post-slot" align="flex-start" wrap="nowrap" gap={0}>
+                {/* The gutter, kept even though it holds only a ghost of the
+                    clock: it is what sets the card column's left edge. */}
+                <Box className="post-slot__time">
+                  <Skeleton height={13} width={58} radius="sm" ml="auto" />
+                  <Skeleton height={10} width={42} radius="sm" ml="auto" mt={6} />
+                </Box>
+
+                <Box className="post-slot__card">
+                  <Group gap={8} wrap="nowrap" align="center" p="md" pb={8}>
+                    <Skeleton height={28} width={28} radius="xl" />
+                    <Skeleton height={12} width={120} radius="sm" />
+                  </Group>
+                  <Box px="md" pb={12}>
+                    <Skeleton height={12} width="45%" mb={8} radius="sm" />
+                    <Skeleton height={10} width="90%" radius="sm" />
+                  </Box>
+                  {/* The foot: the row of actions every real card carries, so
+                      the card keeps its full height and nothing below it
+                      shifts when the list lands. */}
+                  <Group className="post-slot__foot" justify="space-between" wrap="nowrap" gap="sm">
+                    <Skeleton height={10} width={140} radius="sm" />
+                    <Group gap={6} wrap="nowrap">
+                      <Skeleton height={26} width={104} radius="sm" />
+                      <Skeleton height={26} width={26} radius="sm" />
+                      <Skeleton height={26} width={26} radius="sm" />
+                    </Group>
+                  </Group>
+                </Box>
+              </Group>
             ))}
           </Stack>
         </div>

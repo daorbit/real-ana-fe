@@ -27,6 +27,9 @@ export function PostFilters({
       <Tabs.List>
         {FILTERS.map((f) => {
           const count = counts[f.value];
+          // Failures carry the app's warning orange, but only when there are
+          // any: an orange nought is an alarm for nothing having gone wrong.
+          const color = count === 0 ? "gray" : f.value === "failed" ? "orange" : undefined;
           // Every shelf, always, including the empty ones: a tab that comes and
           // goes as posts change moves the others under the pointer, and an
           // empty shelf is worth being able to see is empty.
@@ -35,7 +38,7 @@ export function PostFilters({
               key={f.value}
               value={f.value}
               rightSection={
-                <Badge size="sm" variant="light" color={count === 0 ? "gray" : undefined} circle>
+                <Badge size="sm" variant="light" color={color} circle>
                   {count}
                 </Badge>
               }
