@@ -4,6 +4,7 @@ import { Info, Send } from "lucide-react";
 import { SentPostRow } from "./SentPostRow";
 import { dayLabel } from "../postTime";
 import { SocialPostsSkeleton } from "@/shared/ui/Skeletons";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import type { SentPost } from "@/shared/types";
 
 /**
@@ -57,16 +58,11 @@ export function SentTimeline({
 
   if (posts.length === 0) {
     return (
-      <Card className="post-timeline" withBorder padding="xl" radius="md">
-        <Stack gap={6} align="center">
-          <Send size={26} strokeWidth={1.5} style={{ color: "var(--mantine-color-dimmed)" }} />
-          <Text fw={600} mt={4}>Nothing published yet</Text>
-          <Text size="sm" c="dimmed" ta="center" maw={420}>
-            Posts you publish from here — on a schedule or by hand — appear in this list once
-            they go out.
-          </Text>
-        </Stack>
-      </Card>
+      <EmptyState
+        icon={Send}
+        title="Nothing published yet"
+        description="Posts you publish from here — on a schedule or by hand — appear in this list once they go out."
+      />
     );
   }
 

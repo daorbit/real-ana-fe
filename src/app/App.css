@@ -2762,6 +2762,27 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .app-panel__scroll { padding: var(--mantine-spacing-sm); }
 }
 
+/* ============ Empty state ============
+   Floats directly on the page — no card, no border — so an empty list reads
+   as "nothing here yet" rather than as a box drawn around nothing. The icon
+   sits in a soft tinted circle, one step off the page, and drifts slowly so
+   the state reads as alive rather than as a stalled load. */
+.empty-state__icon {
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+  animation: empty-state-float 5s ease-in-out infinite;
+}
+@keyframes empty-state-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+[data-motion="off"] .empty-state__icon { animation: none; }
+
 /* ============ Account menu ============
    The identity block at the head of the dropdown. Padded to the menu's own
    edges rather than inset like an item, so it reads as the menu's header

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Card, Stack, Text } from "@mantine/core";
+import { Box, Stack, Text } from "@mantine/core";
 import { Inbox } from "lucide-react";
 import { DELIVERY_WINDOW_MINUTES } from "./draft";
 import { PostRow } from "./PostRow";
 import { PostSlotEmpty } from "./PostSlotEmpty";
 import { usePostFilters } from "../hooks/usePostFilters";
 import { dayLabel, daySlots } from "../postTime";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import type { ScheduledPost } from "@/shared/types";
 
 
@@ -117,16 +118,11 @@ export function PostQueue({
  
 
       {visible.length === 0 && filter !== "queue" ? (
-
-        <Card className="post-timeline" withBorder padding="xl" radius="md">
-          <Stack gap={6} align="center">
-            <Inbox size={26} strokeWidth={1.5} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text fw={600} mt={4}>No posts here</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              Nothing on this shelf yet. Pick another tab to see the rest of your posts.
-            </Text>
-          </Stack>
-        </Card>
+        <EmptyState
+          icon={Inbox}
+          title="No posts here"
+          description="Nothing on this shelf yet. Pick another tab to see the rest of your posts."
+        />
       ) : (
         /* Days are separated by clearly more air than the rows inside them —
            that difference is the only thing grouping a day's slots together,
