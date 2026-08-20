@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Group, Popover, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
+import { Button, Divider, Group, Popover, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { GitCompareArrows, Lock } from "lucide-react";
 import dayjs from "dayjs";
@@ -81,13 +81,27 @@ export function ComparePicker({
     setOpen(false);
   };
 
+  /**
+   * What the custom button says.
+   *
+   * "Custom" alone sat two controls away from the range picker's own Custom
+   * button, so the row read as the same option twice. Unset it now names what
+   * it picks — a baseline to compare against — and once set it shows the date,
+   * which answers the question the label was standing in for.
+   */
   const customLabel =
     value.mode === "custom" && value.from
       ? `vs ${dayjs(value.from).format("MMM D, YYYY")}`
-      : "Custom";
+      : "Custom baseline";
 
   return (
     <Group gap="xs" wrap="nowrap">
+      {/* A rule between the two pickers. They are adjacent, similarly sized and
+          both end in a button that opens a calendar — without a boundary the
+          row reads as one control with five parts rather than "what am I
+          looking at" beside "what am I measuring it against". */}
+      <Divider orientation="vertical" my={6} />
+
       <Group gap={2} wrap="nowrap" className="range-segmented">
         {(["previous", "yoy"] as CompareMode[]).map((mode) => {
           const locked = isLocked(mode);
@@ -134,28 +148,27 @@ export function ComparePicker({
             </Button>
           </Popover.Target>
         </Tooltip>
-        {/* Sized to the calendar itself. Left to its own devices the dropdown
-            pads out to the width of the help text below it, which makes a
-            single-month picker read as a dialog. */}
-        <Popover.Dropdown p="xs">
-          <Stack gap={8} style={{ maxWidth: 260 }}>
+       
+      
+        <Popover.Dropdown>
+          <Stack gap="sm" style={{ width: "fit-content" }}>
             <Text size="xs" fw={600} c="dimmed">
               Compare against the period starting
             </Text>
             <DatePicker
-              size="xs"
               value={draft}
               onChange={setDraft}
               maxDate={dayjs().format("YYYY-MM-DD")}
             />
-            <Text size="10px" c="dimmed" lh={1.35}>
+
+            <Text size="xs" c="dimmed" lh={1.4} style={{ width: 0, minWidth: "100%" }}>
               Runs for the same length as the range you&apos;re viewing.
             </Text>
-            <Group justify="flex-end" gap={6}>
-              <Button size="compact-xs" variant="subtle" color="gray" onClick={() => setOpen(false)}>
+            <Group justify="flex-end" gap="xs">
+              <Button size="xs" variant="subtle" color="gray" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button size="compact-xs" color="emerald" onClick={apply} disabled={!draft}>
+              <Button size="xs" color="emerald" onClick={apply} disabled={!draft}>
                 Apply
               </Button>
             </Group>
