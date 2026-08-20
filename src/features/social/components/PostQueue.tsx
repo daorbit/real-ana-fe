@@ -170,7 +170,7 @@ export function PostQueue({
 
           {sent.length > 0 && (
             
-            <Section title={filter === "sent" ? null : "Published"} dim>
+            <Section title="Published" dim>
               {sent.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
             </Section>
           )}

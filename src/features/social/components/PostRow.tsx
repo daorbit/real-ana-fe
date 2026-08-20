@@ -143,11 +143,25 @@ export function PostRow({
             >
               Publish Now
             </Button>
-            <Tooltip label={sent ? "Reschedule" : "Edit"} withArrow>
-              <ActionIcon variant="default" size="md" onClick={() => onEdit(post)} aria-label="Edit">
-                <Pencil size={14} />
-              </ActionIcon>
-            </Tooltip>
+            {/* Named on a failed post rather than left as a pencil: the failure
+                text beside it says what went wrong but not what to do, and
+                picking a new time is the thing that clears it. */}
+            {stage === "failed" ? (
+              <Button
+                variant="default"
+                size="compact-sm"
+                leftSection={<Pencil size={13} />}
+                onClick={() => onEdit(post)}
+              >
+                Reschedule
+              </Button>
+            ) : (
+              <Tooltip label={sent ? "Reschedule" : "Edit"} withArrow>
+                <ActionIcon variant="default" size="md" onClick={() => onEdit(post)} aria-label="Edit">
+                  <Pencil size={14} />
+                </ActionIcon>
+              </Tooltip>
+            )}
 
             {/* The rest behind a menu: three icons is a row of actions, six is
                 a puzzle, and only these two are reached often. */}
