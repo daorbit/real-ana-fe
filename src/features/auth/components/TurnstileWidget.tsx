@@ -130,8 +130,20 @@ export default function TurnstileWidget({ onVerify, onExpire }: Props) {
         if (!cancelled) expire.current();
       });
 
+    // A sitekey that is set but wrong, or a hostname Cloudflare does not have
+    // on its allow-list, makes `render` succeed and then quietly draw nothing —
+    // leaving a form that can never be submitted and no clue why. Say so in the
+    // console rather than letting it look like the widget simply isn't there.
+    const warnTimer = setTimeout(() => {
+      if (!cancelled && ref.current && ref.current.childElementCount === 0)
+        console.warn(
+          "[turnstile] widget did not render — check that CLOUDFLARE_SITE_KEY is correct and this hostname is allowed on the Turnstile site"
+        );
+    }, 5000);
+
     return () => {
       cancelled = true;
+      clearTimeout(warnTimer);
       if (widgetId.current && window.turnstile) {
         window.turnstile.remove(widgetId.current);
         widgetId.current = null;
@@ -144,7 +156,16 @@ export default function TurnstileWidget({ onVerify, onExpire }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!SITE_KEY) return null;
+  if (!SITE_KEY) {
+    // Deliberately loud in the console: without a sitekey the form renders no
+    // challenge, and if the *server* has its secret set the login will then be
+    // refused with no visible cause. Silence here reads as "Turnstile is off"
+    // when it actually means "the frontend was built without the key".
+    console.warn(
+      "[turnstile] CLOUDFLARE_SITE_KEY is not set — no challenge will be shown. If the backend has CLOUDFLARE_SECRET_KEY set, logins will be rejected. Restart the dev server after editing .env."
+    );
+    return null;
+  }
 
   return <Box ref={ref} mih={65} />;
 }
