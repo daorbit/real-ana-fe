@@ -14,13 +14,24 @@ export function EmptyState({
   title,
   description,
   action,
-  minHeight = 360,
+  actionNote,
+  minHeight = "60vh",
+  compact = false,
 }: {
   icon: LucideIcon;
   title: string;
   description?: string;
-  action?: { label: string; onClick: () => void; disabled?: boolean; icon?: LucideIcon };
-  minHeight?: number;
+  action?: {
+    label: string; onClick: () => void; disabled?: boolean; icon?: LucideIcon; loading?: boolean;
+  };
+  /** A line under the button — a caveat about the action rather than the
+   *  empty state itself, e.g. "Takes a few seconds, costs no quota." */
+  actionNote?: string;
+  minHeight?: number | string;
+  /** Smaller icon and no forced min-height, for a panel nested inside a page
+   *  that already has plenty else on it — the SEO/Compare panels use this so
+   *  the empty state doesn't push the rest of the page far down the screen. */
+  compact?: boolean;
 }) {
   return (
     <Stack
@@ -28,10 +39,10 @@ export function EmptyState({
       justify="center"
       gap={0}
       className="empty-state"
-      style={{ minHeight, textAlign: "center" }}
+      style={{ minHeight: compact ? undefined : minHeight, textAlign: "center", padding: compact ? "40px 20px" : undefined }}
     >
-      <div className="empty-state__icon" aria-hidden>
-        <Icon size={40} strokeWidth={1.25} />
+      <div className="empty-state__icon" data-size={compact ? "sm" : "md"} aria-hidden>
+        <Icon size={compact ? 26 : 40} strokeWidth={1.25} />
       </div>
       <Text fw={650} fz="lg" mt="lg">{title}</Text>
       {description && (
@@ -45,10 +56,14 @@ export function EmptyState({
           size="md"
           leftSection={action.icon ? <action.icon size={16} /> : undefined}
           disabled={action.disabled}
+          loading={action.loading}
           onClick={action.onClick}
         >
           {action.label}
         </Button>
+      )}
+      {actionNote && (
+        <Text size="xs" c="dimmed" mt="sm">{actionNote}</Text>
       )}
     </Stack>
   );

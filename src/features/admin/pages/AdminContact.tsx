@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import {
   useGetContactMessagesQuery,
   useUpdateContactMessageMutation,
@@ -200,21 +201,15 @@ export default function AdminContact() {
       {isLoading ? (
         <Center py="xl"><Loader size="sm" /></Center>
       ) : !messages.length ? (
-        <Card withBorder radius="md" padding="xl">
-          <Center>
-            <Stack align="center" gap="sm" maw={420}>
-              <ThemeIcon size={44} radius="xl" variant="light" color="emerald">
-                <Inbox size={22} />
-              </ThemeIcon>
-              <Text fw={600}>{q || status ? "Nothing matches" : "No messages yet"}</Text>
-              <Text size="sm" c="dimmed" ta="center">
-                {q || status || source
-                  ? "Try a different search or filter."
-                  : "Contact enquiries from the marketing site, and support requests, bug reports and feedback raised inside the app, all arrive here."}
-              </Text>
-            </Stack>
-          </Center>
-        </Card>
+        <EmptyState
+          icon={Inbox}
+          title={q || status ? "Nothing matches" : "No messages yet"}
+          description={
+            q || status || source
+              ? "Try a different search or filter."
+              : "Contact enquiries from the marketing site, and support requests, bug reports and feedback raised inside the app, all arrive here."
+          }
+        />
       ) : (
         <div
           style={{

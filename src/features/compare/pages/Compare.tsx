@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Box, Button, Card, Center, Grid, Group, Loader, Select, Stack,
-  Text, TextInput, ThemeIcon, Tooltip, ActionIcon,
+  Text, TextInput, Tooltip, ActionIcon,
 } from "@mantine/core";
 import { HelpCircle, Plus, RefreshCw, Swords, Target } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
@@ -20,6 +20,7 @@ import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 import { CompetitorRail } from "@/features/compare/components/CompetitorRail";
 import { CompetitorDetail } from "@/features/compare/components/CompetitorDetail";
 import { ScoreTrendChart } from "@/features/compare/components/ScoreTrendChart";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 /**
  * How your pages compare to your competitors'.
@@ -222,20 +223,11 @@ export default function Compare() {
           <Loader size="sm" />
         </Center>
       ) : !site ? (
-        <Card withBorder radius="md" padding="xl">
-          <Center>
-            <Stack align="center" gap="xs" maw={420}>
-              <ThemeIcon size={48} radius="xl" variant="light" color="gray">
-                <Swords size={24} />
-              </ThemeIcon>
-              <Text fw={650}>No sites yet</Text>
-              <Text size="sm" c="dimmed" ta="center">
-                Add a site and run an audit on it first — a comparison needs a
-                baseline of your own to measure against.
-              </Text>
-            </Stack>
-          </Center>
-        </Card>
+        <EmptyState
+          icon={Swords}
+          title="No sites yet"
+          description="Add a site and run an audit on it first — a comparison needs a baseline of your own to measure against."
+        />
       ) : (
         <Stack gap="lg">
           {canEdit && (
@@ -281,39 +273,23 @@ export default function Compare() {
           )}
 
           {needsOwnAudit && (
-            <Card withBorder radius="md" padding="xl">
-              <Center>
-                <Stack align="center" gap="xs" maw={440}>
-                  <ThemeIcon size={48} radius="xl" variant="light" color="yellow">
-                    <Target size={24} />
-                  </ThemeIcon>
-                  <Text fw={650}>Run an audit on your own site first</Text>
-                  <Text size="sm" c="dimmed" ta="center">
-                    A comparison measures competitors against your page. Until{" "}
-                    {site.domain} has been audited there is no baseline to compare them
-                    to — open the SEO page and run one.
-                  </Text>
-                </Stack>
-              </Center>
-            </Card>
+            <EmptyState
+              icon={Target}
+              title="Run an audit on your own site first"
+              description={`A comparison measures competitors against your page. Until ${site.domain} has been audited there is no baseline to compare them to — open the SEO page and run one.`}
+            />
           )}
 
           {!listLoading && !needsOwnAudit && competitors.length === 0 && (
-            <Card withBorder radius="md" padding="xl">
-              <Center>
-                <Stack align="center" gap="xs" maw={440}>
-                  <ThemeIcon size={48} radius="xl" variant="light" color="emerald">
-                    <Swords size={24} />
-                  </ThemeIcon>
-                  <Text fw={650}>Nothing to compare yet</Text>
-                  <Text size="sm" c="dimmed" ta="center">
-                    {canEdit
-                      ? "Track a competitor's page to see where they beat you — the sections they cover, the schema they mark up, and the terms they rank for that your page never mentions."
-                      : "Nobody has tracked a competitor for this site yet. An editor can add one."}
-                  </Text>
-                </Stack>
-              </Center>
-            </Card>
+            <EmptyState
+              icon={Swords}
+              title="Nothing to compare yet"
+              description={
+                canEdit
+                  ? "Track a competitor's page to see where they beat you — the sections they cover, the schema they mark up, and the terms they rank for that your page never mentions."
+                  : "Nobody has tracked a competitor for this site yet. An editor can add one."
+              }
+            />
           )}
 
           {analysis && analysis.competitors.length > 0 && selected && (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   ActionIcon, Alert, Badge, Box, Button, Card, Center, Group, Loader, ScrollArea,
-  Stack, Table, Text, TextInput, ThemeIcon, Tooltip,
+  Stack, Table, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import {
   AlertTriangle, CheckCircle2, Plus, RefreshCw, Swords, Trash2, XCircle, Info, Minus,
@@ -9,6 +9,7 @@ import {
 import type { SeoCompetitor, SeoCompareSnapshot, SeoReportData } from "@/shared/types";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { timeAgo } from "@/shared/lib";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 /**
  * Your page beside your competitors'.
@@ -101,21 +102,16 @@ export function ComparePanel({
       )}
 
       {competitors.length === 0 && !loading && (
-        <Card withBorder radius="md" padding="xl">
-          <Center>
-            <Stack align="center" gap="xs" maw={420}>
-              <ThemeIcon size={48} radius="xl" variant="light" color="emerald">
-                <Swords size={24} />
-              </ThemeIcon>
-              <Text fw={650}>Nothing to compare yet</Text>
-              <Text size="sm" c="dimmed" ta="center">
-                {canEdit
-                  ? "Add a competitor's page to see how your title, description, content depth and structured data stack up against theirs."
-                  : "Nobody has added a competitor for this site yet. An editor can add one."}
-              </Text>
-            </Stack>
-          </Center>
-        </Card>
+        <EmptyState
+          compact
+          icon={Swords}
+          title="Nothing to compare yet"
+          description={
+            canEdit
+              ? "Add a competitor's page to see how your title, description, content depth and structured data stack up against theirs."
+              : "Nobody has added a competitor for this site yet. An editor can add one."
+          }
+        />
       )}
 
       {loading && (

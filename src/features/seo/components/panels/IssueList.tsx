@@ -1,27 +1,21 @@
-import { Badge, Box, Card, Center, Group, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Badge, Box, Group, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
 import { CircleCheck } from "lucide-react";
 import type { SeoIssue, SeoPerformance } from "@/shared/types";
 import { ScoreRing } from "@/features/seo/components/ScoreRing";
 import { SEVERITY } from "@/features/seo/components/shared/Panel";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 /** The full issue list — one severity-railed card per finding. */
 export function IssueList({ issues }: { issues: SeoIssue[] }) {
   if (!issues.length) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="xs" maw={380}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="teal">
-              <CircleCheck size={24} />
-            </ThemeIcon>
-            <Text fw={650}>Nothing to fix</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              Every on-page check this audit runs came back clean. Nice work.
-            </Text>
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        compact
+        icon={CircleCheck}
+        title="Nothing to fix"
+        description="Every on-page check this audit runs came back clean. Nice work."
+      />
     );
   }
 

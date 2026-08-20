@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SeoLinkCheck, SeoLinkResult, SeoLinkStatus } from "@/shared/types";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 const STATUS: Record<
   SeoLinkStatus,
@@ -66,20 +67,12 @@ export function LinksPanel({ links }: { links?: SeoLinkCheck }) {
 
   if (!links) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="xs" maw={400}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="gray">
-              <Link2 size={24} />
-            </ThemeIcon>
-            <Text fw={650}>Not checked on this report</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              This audit ran before link checking was added. Re-run it to test every link
-              on the page.
-            </Text>
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        compact
+        icon={Link2}
+        title="Not checked on this report"
+        description="This audit ran before link checking was added. Re-run it to test every link on the page."
+      />
     );
   }
 

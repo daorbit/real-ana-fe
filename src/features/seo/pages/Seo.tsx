@@ -28,6 +28,7 @@ import { useAuth } from "@/features/auth/context";
 import { timeAgo, dateTime } from "@/shared/lib";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { SchemaPanel } from "@/features/seo/components/SchemaPanel";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { LinksPanel } from "@/features/seo/components/LinksPanel";
 import { SearchPanel } from "@/features/seo/components/SearchPanel";
 import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
@@ -104,19 +105,12 @@ function HistoryPanel({
 
   if (!history.length) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="xs" maw={380}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="gray">
-              <History size={24} />
-            </ThemeIcon>
-            <Text fw={650}>No past audits</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              Every audit you run is kept here, so you can confirm a fix moved the score.
-            </Text>
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        compact
+        icon={History}
+        title="No past audits"
+        description="Every audit you run is kept here, so you can confirm a fix moved the score."
+      />
     );
   }
 
@@ -442,23 +436,12 @@ export default function Seo() {
     return (
       <AppShell>
         <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." />
-        <Card withBorder radius="md" padding="xl">
-          <Center>
-            <Stack align="center" gap="sm" maw={420}>
-              <ThemeIcon size={44} radius="xl" variant="light" color="emerald">
-                <Globe size={22} />
-              </ThemeIcon>
-              <Text fw={600}>No sites yet</Text>
-              <Text size="sm" c="dimmed" ta="center">
-                SEO audits run against the sites in this workspace. Add one first and it
-                will show up here.
-              </Text>
-              <Button component="a" href="/app/workspaces" variant="light" color="emerald">
-                Add a site
-              </Button>
-            </Stack>
-          </Center>
-        </Card>
+        <EmptyState
+          icon={Globe}
+          title="No sites yet"
+          description="SEO audits run against the sites in this workspace. Add one first and it will show up here."
+          action={{ label: "Add a site", onClick: () => { window.location.href = "/app/workspaces"; } }}
+        />
       </AppShell>
     );
   }
@@ -591,21 +574,15 @@ export default function Seo() {
         </Card>
 
         {!report && !loading && (
-          <Card withBorder radius="md" padding="xl">
-            <Center>
-              <Stack align="center" gap="sm" maw={420}>
-                <ThemeIcon size={44} radius="xl" variant="light" color="emerald">
-                  <Search size={22} />
-                </ThemeIcon>
-                <Text fw={600}>No audit yet</Text>
-                <Text size="sm" c="dimmed" ta="center">
-                  {canEdit
-                    ? "Run an analysis to see meta tags, content quality, technical checks and Lighthouse scores for this page."
-                    : "Nobody has audited this site yet. An editor can run the first analysis."}
-                </Text>
-              </Stack>
-            </Center>
-          </Card>
+          <EmptyState
+            icon={Search}
+            title="No audit yet"
+            description={
+              canEdit
+                ? "Run an analysis to see meta tags, content quality, technical checks and Lighthouse scores for this page."
+                : "Nobody has audited this site yet. An editor can run the first analysis."
+            }
+          />
         )}
 
         {loading && !data && (

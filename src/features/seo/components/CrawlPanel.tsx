@@ -10,6 +10,7 @@ import type { LucideIcon } from "lucide-react";
 import type { SeoCrawlReport, SeoCrawlPage } from "@/shared/types";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { num, timeAgo } from "@/shared/lib";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 const SEVERITY = {
   critical: { color: "red", icon: XCircle },
@@ -38,39 +39,13 @@ export function CrawlPanel({
 
   if (!report) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="sm" maw={460}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="emerald">
-              <Layers size={24} />
-            </ThemeIcon>
-            <Text fw={650}>No crawl yet</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              A crawl reads your sitemap and checks up to 30 pages at once, finding the
-              problems a single-page audit cannot see — duplicate titles, thin pages, and
-              URLs in your sitemap that no longer load.
-            </Text>
-            {onCrawl && (
-              <>
-                <Button
-                  color="emerald"
-                  radius="md"
-                  leftSection={<Play size={15} />}
-                  loading={running}
-                  onClick={onCrawl}
-                  mt="xs"
-                >
-                  Crawl this site
-                </Button>
-                <Text size="xs" c="dimmed" ta="center">
-                  Takes a few seconds. Lighthouse is not run per page, so this costs no
-                  PageSpeed quota.
-                </Text>
-              </>
-            )}
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        icon={Layers}
+        title="No crawl yet"
+        description="A crawl reads your sitemap and checks up to 30 pages at once, finding the problems a single-page audit cannot see — duplicate titles, thin pages, and URLs in your sitemap that no longer load."
+        action={onCrawl ? { label: "Crawl this site", icon: Play, loading: running, onClick: onCrawl } : undefined}
+        actionNote={onCrawl ? "Takes a few seconds. Lighthouse is not run per page, so this costs no PageSpeed quota." : undefined}
+      />
     );
   }
 

@@ -15,6 +15,7 @@ import {
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { RoleGate } from "@/features/billing/components/RoleGate";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace } from "@/features/workspace/context";
@@ -137,18 +138,13 @@ function KeysTab() {
       </Group>
 
       {keys.length === 0 ? (
-        <Card withBorder radius="lg" padding="xl">
-          <Center>
-            <Stack align="center" gap={8}>
-              <ThemeIcon variant="light" color="emerald" size={52} radius="xl"><KeyRound size={24} /></ThemeIcon>
-              <Text fw={600} size="sm">{t("developers.emptyTitle")}</Text>
-              <Text c="dimmed" size="xs" ta="center" maw={320}>
-                {t("developers.emptyBody")}
-              </Text>
-              <Button size="xs" variant="light" mt={4} leftSection={<Plus size={14} />} onClick={() => setModal(true)}>{t("developers.emptyCta")}</Button>
-            </Stack>
-          </Center>
-        </Card>
+        <EmptyState
+          compact
+          icon={KeyRound}
+          title={t("developers.emptyTitle")}
+          description={t("developers.emptyBody")}
+          action={{ label: t("developers.emptyCta"), icon: Plus, onClick: () => setModal(true) }}
+        />
       ) : (
         <SimpleGrid cols={{ base: 1, md: 2 }}>
           {keys.map((k, i) => (

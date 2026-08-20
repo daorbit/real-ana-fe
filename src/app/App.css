@@ -2777,6 +2777,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--muted);
   animation: empty-state-float 5s ease-in-out infinite;
 }
+.empty-state__icon[data-size="sm"] {
+  width: 56px;
+  height: 56px;
+}
 @keyframes empty-state-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }

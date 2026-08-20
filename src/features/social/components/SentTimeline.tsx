@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Alert, Box, Button, Card, Group, Stack, Text } from "@mantine/core";
+import { Alert, Box, Button, Group, Stack, Text } from "@mantine/core";
 import { Info, Send } from "lucide-react";
 import { SentPostRow } from "./SentPostRow";
 import { dayLabel } from "../postTime";

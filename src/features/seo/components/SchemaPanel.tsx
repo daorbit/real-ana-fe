@@ -1,11 +1,12 @@
 import {
-  Alert, Badge, Box, Card, Center, Code, Group, ScrollArea, Stack,
+  Alert, Badge, Box, Card, Code, Group, ScrollArea, Stack,
   Text, ThemeIcon, Divider,
 } from "@mantine/core";
 import {
   AlertTriangle, Braces, CheckCircle2, FileWarning, Info, XCircle,
 } from "lucide-react";
 import type { SeoSchemaValidation, SeoSchemaFinding } from "@/shared/types";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 /**
  * Structured-data validation results.
@@ -19,40 +20,23 @@ export function SchemaPanel({ schema }: { schema?: SeoSchemaValidation }) {
   // which is not the same as a page having no structured data.
   if (!schema) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="xs" maw={400}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="gray">
-              <Braces size={24} />
-            </ThemeIcon>
-            <Text fw={650}>Not checked on this report</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              This audit ran before structured-data validation was added. Re-run it to
-              check the page&apos;s JSON-LD.
-            </Text>
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        compact
+        icon={Braces}
+        title="Not checked on this report"
+        description="This audit ran before structured-data validation was added. Re-run it to check the page's JSON-LD."
+      />
     );
   }
 
   if (!schema.blocks.length) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="xs" maw={420}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="yellow">
-              <FileWarning size={24} />
-            </ThemeIcon>
-            <Text fw={650}>No structured data</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              This page has no JSON-LD. Adding schema lets search engines show rich
-              results — star ratings, breadcrumbs, FAQ accordions — instead of a plain
-              blue link.
-            </Text>
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        compact
+        icon={FileWarning}
+        title="No structured data"
+        description="This page has no JSON-LD. Adding schema lets search engines show rich results — star ratings, breadcrumbs, FAQ accordions — instead of a plain blue link."
+      />
     );
   }
 

@@ -6,6 +6,7 @@ import { Info, Search, TrendingUp, Users, FileText, Globe } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SeoSearchTraffic } from "@/shared/types";
 import { num } from "@/shared/lib";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 /**
  * Organic search arrivals, from referrers already in the analytics database.
@@ -48,21 +49,12 @@ export function SearchPanel({
   if (traffic.visits === 0) {
     return (
       <Stack gap="lg">
-        <Card withBorder radius="md" padding="xl">
-          <Center>
-            <Stack align="center" gap="xs" maw={440}>
-              <ThemeIcon size={48} radius="xl" variant="light" color="gray">
-                <Search size={24} />
-              </ThemeIcon>
-              <Text fw={650}>No organic search traffic yet</Text>
-              <Text size="sm" c="dimmed" ta="center">
-                Nobody has arrived from a search engine in the last {traffic.days} days. If
-                the site is new, indexing usually takes a few weeks after a sitemap is
-                submitted.
-              </Text>
-            </Stack>
-          </Center>
-        </Card>
+        <EmptyState
+          compact
+          icon={Search}
+          title="No organic search traffic yet"
+          description={`Nobody has arrived from a search engine in the last ${traffic.days} days. If the site is new, indexing usually takes a few weeks after a sitemap is submitted.`}
+        />
         <NotProvidedNote />
       </Stack>
     );

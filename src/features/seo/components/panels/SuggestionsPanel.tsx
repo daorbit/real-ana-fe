@@ -1,10 +1,11 @@
 import {
-  Alert, Badge, Box, Card, Center, Group, RingProgress, Stack, Text, ThemeIcon,
+  Alert, Badge, Box, Card, Group, RingProgress, Stack, Text,
 } from "@mantine/core";
 import { Info, Gauge, ShieldCheck } from "lucide-react";
 import type { SeoPerformance, SeoSuggestion } from "@/shared/types";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
+import { EmptyState } from "@/shared/ui/EmptyState";
 
 /**
  * Category order, worst-consequence first.
@@ -42,38 +43,23 @@ export function SuggestionsPanel({ performance }: { performance: SeoPerformance 
   // complete. Either way the fix is the same: run it again.
   if (!performance.available) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="xs" maw={400}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="gray">
-              <Gauge size={24} />
-            </ThemeIcon>
-            <Text fw={650}>No Lighthouse data</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              This report has no Lighthouse audit attached. Re-run it to pull fresh
-              performance, accessibility and SEO scores.
-            </Text>
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        compact
+        icon={Gauge}
+        title="No Lighthouse data"
+        description="This report has no Lighthouse audit attached. Re-run it to pull fresh performance, accessibility and SEO scores."
+      />
     );
   }
 
   if (!performance.suggestions.length) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Stack align="center" gap="xs" maw={380}>
-            <ThemeIcon size={48} radius="xl" variant="light" color="teal">
-              <ShieldCheck size={24} />
-            </ThemeIcon>
-            <Text fw={650}>Clean sweep</Text>
-            <Text size="sm" c="dimmed" ta="center">
-              Lighthouse found nothing to fix on this page.
-            </Text>
-          </Stack>
-        </Center>
-      </Card>
+      <EmptyState
+        compact
+        icon={ShieldCheck}
+        title="Clean sweep"
+        description="Lighthouse found nothing to fix on this page."
+      />
     );
   }
 
