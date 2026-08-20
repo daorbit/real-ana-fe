@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Card, Stack, Group, Text, ThemeIcon, SimpleGrid, UnstyledButton, Textarea,
+  Box, Card, Stack, Group, Text, ThemeIcon, SegmentedControl, Textarea,
   Button, Center, Alert, Anchor, TextInput,
 } from "@mantine/core";
 import { useLocation } from "react-router-dom";
@@ -84,10 +84,24 @@ export default function Help() {
     <AppShell>
       <PageHeader
         title="Help & support"
-        description="Write to us, or read the docs. A person replies within a working day."
+        description="Tell us what you need. A person reads every message and replies within a working day."
+        actions={
+          <Anchor href={DOCS_URL} target="_blank" rel="noopener noreferrer" size="sm" fw={600}>
+            <Group gap={4} wrap="nowrap">
+              <BookOpen size={14} />
+              Read the docs
+              <ArrowUpRight size={14} />
+            </Group>
+          </Anchor>
+        }
       />
 
-      <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
+      {/* One column, capped and centred, rather than a form beside a column of
+          static prose. The three cards that used to sit on the right said
+          things that did not change and were never read twice — the docs are
+          now one link in the header, and what to expect is said where it
+          matters: under the field it is about. */}
+      <Box className="support-page">
         <Card withBorder radius="lg" padding="lg">
           {sent ? (
             <Center py={48}>
@@ -107,47 +121,29 @@ export default function Help() {
             </Center>
           ) : (
             <Stack gap="md">
-              <div>
-                <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb={8} style={{ letterSpacing: "0.5px" }}>
-                  What is this about?
-                </Text>
-                <Stack gap={6}>
-                  {(Object.keys(SUPPORT_KINDS) as Kind[]).map((k) => {
-                    const { title, blurb, icon: Icon } = SUPPORT_KINDS[k];
-                    const active = kind === k;
-                    return (
-                      <UnstyledButton
-                        key={k}
-                        onClick={() => setKind(k)}
-                        disabled={isDemo}
-                        style={{
-                          border: `1px solid var(${active ? "--mantine-color-emerald-6" : "--mantine-color-default-border"})`,
-                          background: active ? "var(--mantine-color-emerald-light)" : undefined,
-                          borderRadius: 10,
-                          padding: "10px 12px",
-                          opacity: isDemo ? 0.55 : 1,
-                        }}
-                      >
-                        <Group gap={10} wrap="nowrap" align="flex-start">
-                          <ThemeIcon
-                            size={26}
-                            radius="md"
-                            variant="light"
-                            color={active ? "emerald" : "gray"}
-                            mt={1}
-                          >
-                            <Icon size={13} />
-                          </ThemeIcon>
-                          <div style={{ minWidth: 0 }}>
-                            <Text size="sm" fw={600} lh={1.3}>{title}</Text>
-                            <Text size="xs" c="dimmed" lh={1.45} mt={2}>{blurb}</Text>
-                          </div>
-                        </Group>
-                      </UnstyledButton>
-                    );
-                  })}
-                </Stack>
-              </div>
+              {/* A segmented control rather than a row of cards. This picks a
+                  label for the message — it is not the task, and given tiles
+                  with icons and borders it was the loudest thing on a page
+                  whose actual job is the box underneath. */}
+              <SegmentedControl
+                fullWidth
+                radius="md"
+                value={kind}
+                onChange={(v) => setKind(v as Kind)}
+                disabled={isDemo}
+                data={(Object.keys(SUPPORT_KINDS) as Kind[]).map((k) => {
+                  const { title, icon: Icon } = SUPPORT_KINDS[k];
+                  return {
+                    value: k,
+                    label: (
+                      <Group gap={7} wrap="nowrap" justify="center">
+                        <Icon size={14} />
+                        <span>{title}</span>
+                      </Group>
+                    ),
+                  };
+                })}
+              />
 
               {isDemo ? (
                 <Alert color="gray" variant="light" radius="md" icon={<Info size={15} />}>
@@ -175,18 +171,24 @@ export default function Help() {
                     onBlur={() => setTouched(true)}
                     placeholder={config.placeholder}
                     autosize
-                    minRows={7}
-                    maxRows={16}
+                    minRows={8}
+                    maxRows={18}
                     maxLength={5000}
                     radius="md"
                     error={showError ? "Please write a little more" : undefined}
                   />
 
-                  <Group justify="space-between" wrap="nowrap" gap="md">
-                    <Text size="xs" c="dimmed" lh={1.5}>
-                      Sent from your account, so we reply to {user?.email}. The page
-                      you came from is included automatically.
-                    </Text>
+                  <Group justify="space-between" wrap="nowrap" gap="md" align="center">
+                    {/* Where the reply will land, said once, next to the button
+                        that sends it — the one fact about what happens next
+                        that someone might actually need, at the moment it is
+                        relevant. */}
+                    <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+                      <Mail size={13} style={{ flexShrink: 0, color: "var(--muted)" }} />
+                      <Text size="xs" c="dimmed" lh={1.5} truncate>
+                        We&apos;ll reply to {user?.email}
+                      </Text>
+                    </Group>
                     <Button
                       color="emerald"
                       radius="md"
@@ -204,55 +206,17 @@ export default function Help() {
           )}
         </Card>
 
-        <Stack gap="lg">
-          <Card withBorder radius="lg" padding="lg">
-            <Group gap={10} wrap="nowrap" mb="xs">
-              <ThemeIcon size={32} radius="xl" variant="light" color="gray">
-                <BookOpen size={16} />
-              </ThemeIcon>
-              <div>
-                <Text fw={650} lh={1.25}>Documentation</Text>
-                <Text size="xs" c="dimmed" lh={1.4} mt={2}>
-                  Install guides, the API reference, and every setting explained
-                </Text>
-              </div>
-            </Group>
-            <Anchor href={DOCS_URL} target="_blank" rel="noopener noreferrer" size="sm" fw={600}>
-              <Group gap={4} wrap="nowrap">
-                Open the docs
-                <ArrowUpRight size={14} />
-              </Group>
-            </Anchor>
-          </Card>
-
-          <Card withBorder radius="lg" padding="lg">
-            <Group gap={10} wrap="nowrap" mb="xs">
-              <ThemeIcon size={32} radius="xl" variant="light" color="gray">
-                <Mail size={16} />
-              </ThemeIcon>
-              <div>
-                <Text fw={650} lh={1.25}>What to expect</Text>
-              </div>
-            </Group>
-            <Stack gap={10} mt="xs">
-              <Text size="sm" c="dimmed" lh={1.6}>
-                Every message reaches a person, not a queue. Replies go to{" "}
-                <Text span fw={600} c="var(--mantine-color-text)">{user?.email}</Text> —
-                the address on your account — usually within one working day.
-              </Text>
-              <Text size="sm" c="dimmed" lh={1.6}>
-                For a bug, the fastest thing you can include is what you did, what you
-                expected, and what happened instead. For anything about a specific
-                site, its domain.
-              </Text>
-              <Text size="sm" c="dimmed" lh={1.6}>
-                In a hurry? Orbit AI — the button in the bottom corner — answers
-                product questions instantly, though it can&apos;t see your account.
-              </Text>
-            </Stack>
-          </Card>
-        </Stack>
-      </SimpleGrid>
+        {/* Orbit gets one line rather than a card. It is already on screen —
+            the floating button in the corner — so this only has to point at
+            it, and a card to say "there is a button over there" was the least
+            earned of the three that used to sit here. */}
+        {!isDemo && !sent && (
+          <Text size="xs" c="dimmed" ta="center" mt="md" lh={1.6}>
+            In a hurry? Orbit AI, in the bottom corner, answers product questions
+            instantly — though it can&apos;t see your account.
+          </Text>
+        )}
+      </Box>
     </AppShell>
   );
 }

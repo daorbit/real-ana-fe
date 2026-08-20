@@ -997,6 +997,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding-inline: 0 !important;
 }
 
+/* ============ Help & support ============
+   One column, capped and centred. A contact form is a single task, and stretched
+   across a wide window its fields become lines too long to scan back along. */
+.support-page {
+  width: 100%;
+  max-width: 680px;
+  margin-inline: auto;
+}
+
 /* ============ Workspaces ============ */
 .ws-active { border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important; }
 
