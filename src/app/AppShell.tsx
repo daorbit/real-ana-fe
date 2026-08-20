@@ -474,7 +474,7 @@ function AccountMenuDropdown({
   const { t } = useTranslation();
 
   return (
-    <Menu.Dropdown>
+    <Menu.Dropdown className="account-menu">
       <Box className="account-menu__header">
         {/* The face as well as the address: this menu is opened to check which
             account is active, and on a shared machine the avatar answers that

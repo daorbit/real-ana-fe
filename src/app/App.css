@@ -2768,6 +2768,23 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
 }
 
+/* Mantine's default Menu.Item padding (10px vertical) reads as loose,
+   uneven air once several rows are stacked — each row's label sits nowhere
+   near its icon and the gaps between rows look bigger than the gaps inside
+   a row. Tightened and made uniform for this dropdown specifically, rather
+   than globally, since other menus in the app are shorter and unaffected. */
+.account-menu .mantine-Menu-item {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  gap: 10px;
+}
+.account-menu .mantine-Menu-itemLabel {
+  font-size: var(--mantine-font-size-sm);
+}
+.account-menu .mantine-Menu-divider {
+  margin: 4px 0;
+}
+
 /* ============ Sticky page header ============
    The title block and the tab bar stay put while the list moves under them, so
    the page always says what it is and which shelf is open. Both stick to the
