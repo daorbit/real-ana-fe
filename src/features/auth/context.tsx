@@ -13,7 +13,12 @@ type AuthState = {
   user: User | null;
   loading: boolean;
   isDemo: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  /**
+   * `turnstileToken` is the Cloudflare challenge token the login form collected.
+   * Optional so a deployment with no sitekey configured still calls this the
+   * same way — the server decides whether a token was required.
+   */
+  login: (email: string, password: string, turnstileToken?: string) => Promise<void>;
   /**
    * Exchange a Google credential for a session. Serves signup and login both —
    * Google has already proved the address, so a first-time user is created here.
@@ -82,8 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const r = await api.post<AuthResp>("/api/auth/login", { email, password });
+  const login = async (email: string, password: string, turnstileToken?: string) => {
+    const r = await api.post<AuthResp>("/api/auth/login", {
+      email,
+      password,
+      // Omitted rather than sent as undefined when there is none, so the payload
+      // is unchanged on a build with Turnstile switched off.
+      ...(turnstileToken ? { turnstileToken } : {}),
+    });
     setToken(r.token);
     // Start from a clean cache so nothing from a previous session leaks through.
     dispatch(rtkApi.util.resetApiState());

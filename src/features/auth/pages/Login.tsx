@@ -11,10 +11,14 @@ import { useAuth } from "@/features/auth/context";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
+import TurnstileWidget, { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
+
+/** Named so the widget's success handler can retract exactly this message. */
+const TURNSTILE_REQUIRED = "Please complete the security check";
 
 export default function Login() {
   const { login, startDemo } = useAuth();
@@ -25,6 +29,9 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  // Held only for the length of one submit. Turnstile tokens are single-use, so
+  // this is cleared on expiry, on error, and after every attempt.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const enterDemo = async () => {
     setDemoBusy(true);
@@ -62,6 +69,12 @@ export default function Login() {
     // created before those rules have shorter passwords, and refusing them at
     // login would lock people out of working accounts.
     password: password ? null : "Password is required",
+    // Only a rule where a sitekey is configured — otherwise no widget renders
+    // and there is no token to be had, which must not block the form.
+    turnstile:
+      !turnstileConfigured() || turnstileToken
+        ? null
+        : TURNSTILE_REQUIRED,
   };
 
   const show = (field: keyof typeof errors) =>
@@ -74,16 +87,27 @@ export default function Login() {
     e.preventDefault();
 
     setTouched({ email: true, password: true });
+    // The challenge has no field of its own to hang an error on, so it goes to
+    // the same Alert the server's failures use.
+    if (errors.turnstile) {
+      setError(errors.turnstile);
+      return;
+    }
     if (Object.values(errors).some(Boolean)) return;
 
     setBusy(true);
     setError(null);
     try {
-      await login(email.trim(), password);
+      await login(email.trim(), password, turnstileToken ?? undefined);
       notify.success("Welcome back!", "Logged in");
       nav("/app");
     } catch (err) {
       setError(errMessage(err, "Login failed. Check your email and password."));
+      // The token has now been spent, whatever the outcome — Cloudflare refuses
+      // a second use. Dropping it and resetting the widget is what makes a
+      // retry after a wrong password work instead of failing the check.
+      setTurnstileToken(null);
+      window.turnstile?.reset();
     } finally {
       setBusy(false);
     }
@@ -174,6 +198,20 @@ export default function Login() {
                 </Anchor>
               </Group>
             </div>
+
+            {/* Directly above the submit button: the last thing to clear before
+                logging in, and close enough to the button that a failed check
+                is visible when the click doesn't work. */}
+            <TurnstileWidget
+              onVerify={(token) => {
+                setTurnstileToken(token);
+                // Clear the "complete the security check" message the moment it
+                // stops being true, rather than leaving it up until the next
+                // submit.
+                setError((e) => (e === TURNSTILE_REQUIRED ? null : e));
+              }}
+              onExpire={() => setTurnstileToken(null)}
+            />
 
             <Button type="submit" loading={busy} disabled={googleBusy} fullWidth size="md">
               Log in
