@@ -528,6 +528,26 @@ body { overflow-wrap: break-word; }
   cursor: not-allowed;
 }
 
+/* The stray dot in the plan-error mark stops moving, and parks on its orbit. */
+@media (prefers-reduced-motion: reduce) {
+  .plan-error-dot animateMotion,
+  .plan-error-dot animate { display: none; }
+  .plan-error-dot { transform: translate(52px, 19px); }
+}
+
+/* One emoji in the picker grid. */
+.emoji-cell {
+  transition: background-color 100ms ease, transform 100ms ease;
+}
+.emoji-cell:hover {
+  background: var(--mantine-color-default-hover);
+  transform: scale(1.15);
+}
+.emoji-cell:focus-visible {
+  outline: 2px solid var(--mantine-color-emerald-6);
+  outline-offset: 1px;
+}
+
 /* Content clearance below the button — matches its footprint at each size. */
 .orbit-fab-spacer { height: 88px; }
 @media (max-width: 48em) {

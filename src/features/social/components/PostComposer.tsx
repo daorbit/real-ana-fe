@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  ActionIcon, Box, Divider, Group, Modal, ScrollArea, Text,
+  ActionIcon, Box, Divider, Group, Modal, Text,
 } from "@mantine/core";
 import { X } from "lucide-react";
 import { countHashtags, type CaptionEditorHandle } from "@/shared/components/CaptionEditor";
@@ -32,6 +32,8 @@ import type { ScheduledPost } from "@/shared/types";
 export function PostComposer({
   opened,
   onClose,
+  pane,
+  onPane,
   initial,
   /** The post being edited, or null when composing a new one. */
   editing,
@@ -44,6 +46,9 @@ export function PostComposer({
 }: {
   opened: boolean;
   onClose: () => void;
+  /** Which side of the right pane is showing. Held in the URL by the page. */
+  pane: PaneTab;
+  onPane: (next: PaneTab) => void;
   initial: Draft;
   editing: ScheduledPost | null;
   author: string;
@@ -61,8 +66,6 @@ export function PostComposer({
   onSave: (draft: Draft, asDraft?: boolean) => Promise<boolean>;
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
-  /** Which half of the right pane is showing: the post, or Orbit planning it. */
-  const [tab, setTab] = useState<PaneTab>("preview");
   // Content first, always: nobody arrives already knowing when they want to
   // post before they have written what they are posting.
   const [step, setStep] = useState<Step>("content");
@@ -89,7 +92,7 @@ export function PostComposer({
       setDraft(initial);
       setStep("content");
       setTopic("");
-      setTab("preview");
+      onPane("preview");
       // A new post starts a new conversation — carrying the last one over would
       // have Orbit answering about a post that is no longer on screen.
       planner.reset();
@@ -158,7 +161,9 @@ export function PostComposer({
             <ComposerSteps step={step} onStep={setStep} />
           </Group>
 
-          <ScrollArea style={{ flex: 1 }} type="auto">
+          {/* Native overflow, so this column carries the app's own thin
+              scrollbar rather than Mantine's overlay one. */}
+          <Box style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
             <Box className="share-post-body">
               {step === "content" ? (
                 <ComposerContentStep
@@ -190,7 +195,7 @@ export function PostComposer({
                 </ComposerField>
               )}
             </Box>
-          </ScrollArea>
+          </Box>
 
           <ComposerFooter
             step={step}
@@ -208,8 +213,8 @@ export function PostComposer({
         <ComposerPreviewPane
           draft={draft}
           author={author}
-          tab={tab}
-          onTab={setTab}
+          tab={pane}
+          onTab={onPane}
           orbit={
             <OrbitPlanPane
               draft={draft}
@@ -218,6 +223,7 @@ export function PostComposer({
               input={planner.input}
               onInput={planner.setInput}
               onSend={planner.send}
+              onRetry={planner.retry}
               thinking={planner.thinking}
               ready={planner.ready}
               awaitingImage={planner.awaitingImage}
@@ -225,7 +231,7 @@ export function PostComposer({
               onReset={planner.reset}
               // "Edit first" leaves the filled fields behind and returns to the
               // post, which is the point of filling them.
-              onEdit={() => setTab("preview")}
+              onEdit={() => onPane("preview")}
               // Same save path as the footer, so one place decides what a valid
               // scheduled post is.
               onSchedule={() => void save(false)}

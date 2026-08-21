@@ -3,6 +3,7 @@ import { ActionIcon, Divider, Group, Tooltip } from "@mantine/core";
 import {
   AtSign, Bold, Hash, Italic, List, ListOrdered, RotateCcw, Smile,
 } from "lucide-react";
+import { EmojiPicker } from "./emoji/EmojiPicker";
 
 /**
  * The caption surface shared by the share panel and the post scheduler.
@@ -205,7 +206,15 @@ export function CaptionToolbar({
   };
 
   /** `null` is a separator. Grouped by what the action does to the text. */
-  type Item = { icon: typeof Smile; label: string; hint?: string; run: () => void; disabled?: boolean };
+  type Item = {
+    icon: typeof Smile;
+    label: string;
+    hint?: string;
+    run: () => void;
+    disabled?: boolean;
+    /** Opens the emoji picker instead of running `run` on click. */
+    picker?: boolean;
+  };
   const items: (Item | null)[] = [
     { icon: Bold, label: l.bold, hint: "Ctrl+B", run: () => editor.current?.transform("bold") },
     { icon: Italic, label: l.italic, hint: "Ctrl+I", run: () => editor.current?.transform("italic") },
@@ -213,7 +222,7 @@ export function CaptionToolbar({
     { icon: List, label: l.bullets, run: () => editor.current?.insert("• ", { line: true }) },
     { icon: ListOrdered, label: l.numbers, run: () => editor.current?.insert("1. ", { line: true }) },
     null,
-    { icon: Smile, label: l.emoji, run: () => editor.current?.insert("🚀") },
+    { icon: Smile, label: l.emoji, run: () => {}, picker: true },
     { icon: AtSign, label: l.mention, run: () => editor.current?.insert("@") },
     { icon: Hash, label: l.hashtag, run: () => editor.current?.insert("#") },
     ...(onUndo ? [null, { icon: RotateCcw, label: l.undo, run: onUndo, disabled: !canUndo }] : []),
@@ -230,32 +239,44 @@ export function CaptionToolbar({
         background: "var(--mantine-color-default)",
       }}
     >
-      {items.map((item, i) =>
-        item === null ? (
-          <Divider key={`sep-${i}`} orientation="vertical" mx={5} my={3} />
-        ) : (
+      {items.map((item, i) => {
+        if (item === null) return <Divider key={`sep-${i}`} orientation="vertical" mx={5} my={3} />;
+
+        const button = (
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="md"
+            // The selection has to survive the click, or "bold" would act on
+            // nothing: focusing the button clears it first.
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={item.picker ? undefined : item.run}
+            disabled={item.disabled}
+            aria-label={item.label}
+          >
+            <item.icon size={16} />
+          </ActionIcon>
+        );
+
+        if (item.picker) {
+          return (
+            <EmojiPicker key={item.label} onPick={(emoji) => editor.current?.insert(emoji)}>
+              {button}
+            </EmojiPicker>
+          );
+        }
+
+        return (
           <Tooltip
             key={item.label}
             label={item.hint ? `${item.label} · ${item.hint}` : item.label}
             withArrow
             openDelay={400}
           >
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="md"
-              // The selection has to survive the click, or "bold" would act on
-              // nothing: focusing the button clears it first.
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={item.run}
-              disabled={item.disabled}
-              aria-label={item.label}
-            >
-              <item.icon size={16} />
-            </ActionIcon>
+            {button}
           </Tooltip>
-        ),
-      )}
+        );
+      })}
     </Group>
   );
 }

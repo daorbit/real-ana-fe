@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
-import { Box, Button, Group, Loader, ScrollArea, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Box, Button, Group, Loader, Stack, Text, UnstyledButton } from "@mantine/core";
 import { RotateCcw } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { PlanMessage } from "./PlanMessage";
 import { PlanConfirm } from "./PlanConfirm";
 import { PlanImagePrompt } from "./PlanImagePrompt";
+import { PlanError } from "./PlanError";
 import { PlanInput } from "./PlanInput";
 import { startersFor } from "./starters";
 import type { Draft } from "../draft";
@@ -24,6 +25,7 @@ export function OrbitPlanPane({
   input,
   onInput,
   onSend,
+  onRetry,
   thinking,
   ready,
   awaitingImage,
@@ -40,6 +42,7 @@ export function OrbitPlanPane({
   input: string;
   onInput: (value: string) => void;
   onSend: (text?: string) => void;
+  onRetry: () => void;
   thinking: boolean;
   ready: boolean;
   awaitingImage: boolean;
@@ -89,7 +92,10 @@ export function OrbitPlanPane({
         )}
       </Group>
 
-      <ScrollArea style={{ flex: 1, minHeight: 0 }} viewportRef={thread} type="auto">
+      {/* Native overflow rather than a ScrollArea: the app's own thin scrollbar
+          is styled globally, and Mantine's overlay bar reads as a different
+          control sitting on top of the panel. */}
+      <Box ref={thread} style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         <Stack gap={14} px={16} py={18}>
           {!started && <Intro provider={draft.provider} onSend={onSend} thinking={thinking} />}
 
@@ -102,7 +108,9 @@ export function OrbitPlanPane({
             </Group>
           )}
 
-          {error && <Text size="xs" c="red">{error}</Text>}
+          {error && !thinking && (
+            <PlanError message={error} onRetry={onRetry} retrying={thinking} />
+          )}
 
           {awaitingImage && !thinking && (
             <PlanImagePrompt
@@ -123,7 +131,7 @@ export function OrbitPlanPane({
             />
           )}
         </Stack>
-      </ScrollArea>
+      </Box>
 
       <Box px={16} pt={12} pb={14} style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}>
         <PlanInput

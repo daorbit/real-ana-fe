@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { usePlanScheduledPostMutation } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { toDateInput, type Draft } from "../components/draft";
@@ -31,6 +31,8 @@ export function useOrbitPlan({
   const [turns, setTurns] = useState<PlanTurn[]>([]);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
+  /** The message the last failed turn carried, for the retry button. */
+  const failed = useRef("");
   const [plan, { isLoading: thinking }] = usePlanScheduledPostMutation();
 
   const last = turns.at(-1);
@@ -92,19 +94,29 @@ export function useOrbitPlan({
       }
       onPlan(patch);
     } catch (e) {
-      setError(errMessage(e, "Orbit could not follow that. Try rewording it."));
+      setError(errMessage(e, "Orbit could not finish that reply."));
+      // The thread rolls back to before the attempt and the words return to the
+      // box, so "try again" is one press and rewording is one edit.
       setTurns(turns);
       setInput(message);
+      failed.current = message;
     }
+  };
+
+  /** Send the message that failed again, unchanged. */
+  const retry = () => {
+    const message = failed.current;
+    if (message) void send(message);
   };
 
   const reset = () => {
     setTurns([]);
     setInput("");
     setError("");
+    failed.current = "";
   };
 
-  return { turns, input, setInput, send, thinking, ready, awaitingImage, error, reset };
+  return { turns, input, setInput, send, retry, thinking, ready, awaitingImage, error, reset };
 }
 
 /** The local wall clock — "tomorrow at 9" means the author's tomorrow. */
