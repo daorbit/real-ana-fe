@@ -11,7 +11,7 @@ import { ComposerFooter } from "./ComposerFooter";
 import { ComposerSteps, type Step } from "./ComposerSteps";
 import { ScheduleFields } from "./ScheduleFields";
 import { useOrbitCaption } from "../hooks/useOrbitCaption";
-import { MAX_CAPTION, describe, type Draft } from "./draft";
+import { captionLimit, describe, type Draft } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -88,13 +88,19 @@ export function PostComposer({
 
   const chars = draft.caption.length;
   const tags = countHashtags(draft.caption);
-  const overLimit = chars > MAX_CAPTION;
+  // The cap follows the network: Instagram's is 2200, LinkedIn's 3000.
+  const limit = captionLimit(draft.provider);
+  const overLimit = chars > limit;
   const empty = !draft.caption.trim();
+  // Instagram builds its post around a media container, so there is no
+  // text-only post to publish. Blocked here rather than at save, so the reason
+  // sits beside the image field instead of arriving as a toast.
+  const needsImage = draft.provider === "instagram" && !draft.image;
   // A one-off in the past would be refused by the server anyway; catching it
   // here keeps the message beside the field that caused it.
   const past = draft.mode === "once"
     && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
-  const blocked = empty || overLimit || past;
+  const blocked = empty || overLimit || past || needsImage;
 
   const save = async (andAnother: boolean, asDraft = false) => {
     // Which button was pressed, so only that one spins.
@@ -154,6 +160,12 @@ export function PostComposer({
                   chars={chars}
                   tags={tags}
                   overLimit={overLimit}
+                  limit={limit}
+                  needsImage={needsImage}
+                  // The network is fixed once a post exists: its caption and
+                  // image were written against one set of rules, and switching
+                  // would silently invalidate them.
+                  lockProvider={!!editing}
                 />
               ) : (
                 <ComposerField label="Schedule" hint={timezone}>

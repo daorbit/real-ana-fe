@@ -1,4 +1,4 @@
-import type { PostFrequency, PostMode, ScheduledPost } from "@/shared/types";
+import type { PostFrequency, PostMode, PostProvider, ScheduledPost } from "@/shared/types";
 
 /**
  * The shape a scheduled post is edited in, and the small pure helpers around
@@ -29,6 +29,14 @@ export const MAX_CAPTION = 3000;
 export const MAX_HASHTAGS = 30;
 export const MAX_IMAGE_MB = 8;
 
+/** Instagram's caption cap, which is the lower of the two. */
+export const MAX_CAPTION_INSTAGRAM = 2200;
+
+/** The cap that applies to the network a draft targets. */
+export function captionLimit(provider: PostProvider): number {
+  return provider === "instagram" ? MAX_CAPTION_INSTAGRAM : MAX_CAPTION;
+}
+
 /**
  * How late a post can reasonably be, in minutes.
  *
@@ -48,6 +56,14 @@ export const QUICK_TIMES = [
 ];
 
 export type Draft = {
+  /**
+   * Which network the post goes to.
+   *
+   * Chosen once, when the draft is new: the caption limit and the image rule
+   * differ between the two, so the composer disables the picker when editing an
+   * existing post rather than silently invalidating what is already written.
+   */
+  provider: PostProvider;
   name: string;
   caption: string;
   mode: PostMode;
@@ -92,6 +108,7 @@ export function runAtISO(draft: Pick<Draft, "date" | "time">): string {
 
 export function emptyDraft(): Draft {
   return {
+    provider: "linkedin",
     name: "",
     caption: "",
     mode: "once",
@@ -109,6 +126,7 @@ export function draftFromPost(post: ScheduledPost): Draft {
   const at = post.runAt ? new Date(post.runAt) : null;
   const pad = (n: number) => String(n).padStart(2, "0");
   return {
+    provider: post.provider ?? "linkedin",
     name: post.name,
     caption: post.caption,
     mode: post.mode ?? "once",
@@ -133,9 +151,15 @@ export function draftFromPost(post: ScheduledPost): Draft {
  * pretending the old time can be recovered. What carries over is the work:
  * the title, the words and the image.
  */
-export function draftFromRun(run: { name: string; caption: string; imageUrl: string }): Draft {
+export function draftFromRun(
+  run: { name: string; caption: string; imageUrl: string; provider?: PostProvider },
+): Draft {
   return {
     ...emptyDraft(),
+    // The network carries over with the content: a post written for Instagram
+    // is written to Instagram's rules, and sending it again means sending it
+    // to the same place. Older runs predate the field and are LinkedIn's.
+    provider: run.provider ?? "linkedin",
     name: run.name,
     caption: run.caption,
     image: run.imageUrl,

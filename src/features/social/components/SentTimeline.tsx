@@ -20,6 +20,8 @@ export function SentTimeline({
   posts,
   author,
   authorPicture,
+  instagramAuthor,
+  instagramPicture,
   statsAvailable,
   loading,
   loadingMore,
@@ -29,8 +31,12 @@ export function SentTimeline({
   onScheduleAgain,
 }: {
   posts: SentPost[];
+  /** The LinkedIn account, shown on LinkedIn rows. */
   author: string;
   authorPicture?: string;
+  /** The Instagram account, shown on Instagram rows. History mixes the two. */
+  instagramAuthor?: string;
+  instagramPicture?: string;
   statsAvailable: boolean;
   loading: boolean;
   loadingMore: boolean;
@@ -106,8 +112,8 @@ export function SentTimeline({
                 <SentPostRow
                   key={post.id}
                   post={post}
-                  author={author}
-                  authorPicture={authorPicture}
+                  author={post.provider === "instagram" ? (instagramAuthor ?? "") : author}
+                  authorPicture={post.provider === "instagram" ? instagramPicture : authorPicture}
                   statsAvailable={statsAvailable}
                   onScheduleAgain={onScheduleAgain}
                 />

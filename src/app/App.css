@@ -2722,6 +2722,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border: 2px solid var(--mantine-color-body);
 }
 
+/* Instagram's mark on its own brand colour, so a mixed queue is readable at a
+   glance rather than every row looking like a LinkedIn post. */
+.post-slot__network--instagram {
+  background: #e4405f;
+}
+
 .post-slot__foot {
   padding: 10px 16px;
   border-top: 1px solid var(--mantine-color-default-border);

@@ -13,6 +13,8 @@ import type { ScheduledPost } from "@/shared/types";
 export function PostQueue({
   author,
   authorPicture,
+  instagramAuthor,
+  instagramPicture,
   onEdit,
   onToggle,
   onDelete,
@@ -22,8 +24,17 @@ export function PostQueue({
   recentlyMovedId,
   filters,
 }: {
+  /** The LinkedIn account, shown on LinkedIn rows. */
   author: string;
   authorPicture?: string;
+  /**
+   * The Instagram account, shown on Instagram rows.
+   *
+   * Passed alongside rather than instead: one queue holds posts for both
+   * networks, so the row picks the account matching its own provider.
+   */
+  instagramAuthor?: string;
+  instagramPicture?: string;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
@@ -34,7 +45,13 @@ export function PostQueue({
 
   filters: ReturnType<typeof usePostFilters>;
 }) {
-  const handlers = { author, authorPicture, onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
+  const handlers = { onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
+
+  /** The account a given post publishes as, by its network. */
+  const authorFor = (post: ScheduledPost) =>
+    post.provider === "instagram"
+      ? { author: instagramAuthor ?? "", authorPicture: instagramPicture }
+      : { author, authorPicture };
   const { filter, visible } = filters;
 
 
@@ -153,7 +170,7 @@ export function PostQueue({
               <Section key={day.date} title={day.label}>
                 {entries.map((entry) => (
                   entry.post
-                    ? <PostRow key={entry.post.id} post={entry.post} {...handlers} />
+                    ? <PostRow key={entry.post.id} post={entry.post} {...authorFor(entry.post)} {...handlers} />
                     : <PostSlotEmpty
                         key={entry.slot}
                         at={entry.slot!}
@@ -174,7 +191,7 @@ export function PostQueue({
           {repeating.length > 0 && (
         
             <Section title="Repeating">
-              {repeating.map((post) => <PostRow key={post.id} post={post} {...handlers} />)}
+              {repeating.map((post) => <PostRow key={post.id} post={post} {...authorFor(post)} {...handlers} />)}
             </Section>
           )}
 

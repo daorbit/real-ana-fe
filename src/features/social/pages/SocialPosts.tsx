@@ -23,7 +23,7 @@ import { SentTimeline } from "@/features/social/components/SentTimeline";
 import {
   draftFromPost, draftFromRun, emptyDraft, toDateInput, type Draft,
 } from "@/features/social/components/draft";
-import type { ScheduledPost, SentPost } from "@/shared/types";
+import type { PostAccount, ScheduledPost, SentPost } from "@/shared/types";
 
  
 export default function SocialPosts() {
@@ -108,10 +108,29 @@ export default function SocialPosts() {
 
   const posts = data?.posts ?? [];
   const linkedin = data?.linkedin;
+  const instagram = data?.instagram;
   const needsPostingPermission = Boolean(
     linkedin?.connected && !linkedin.expired && linkedin.canPublish === false,
   );
-  const ready = Boolean(linkedin?.connected && !linkedin.expired && !needsPostingPermission);
+  /** Whether an account can actually publish: connected, live, and granted. */
+  const usable = (account?: PostAccount) =>
+    Boolean(account?.connected && !account.expired && account.canPublish !== false);
+  // Either network is enough to start composing — the picker in the composer
+  // chooses between them. Gating on LinkedIn alone would lock out someone who
+  // connected only Instagram.
+  const ready = usable(linkedin) || usable(instagram);
+
+  /**
+   * A blank draft, aimed at a network the user can actually publish to.
+   *
+   * LinkedIn stays the default where both are connected — it is the older
+   * integration and the one most schedules target — but someone who connected
+   * only Instagram should not have to change the picker on every new post.
+   */
+  const newDraft = (): Draft => ({
+    ...emptyDraft(),
+    provider: !usable(linkedin) && usable(instagram) ? "instagram" : "linkedin",
+  });
 
   const openNew = (date?: string) => {
  
@@ -122,7 +141,7 @@ export default function SocialPosts() {
       return;
     }
     setEditing(null);
-    setInitial(date ? { ...emptyDraft(), date } : emptyDraft());
+    setInitial({ ...newDraft(), ...(date ? { date } : {}) });
     setComposing(true);
   };
 
@@ -136,7 +155,7 @@ export default function SocialPosts() {
     const pad = (n: number) => String(n).padStart(2, "0");
     setEditing(null);
     setInitial({
-      ...emptyDraft(),
+      ...newDraft(),
       date: toDateInput(slot),
       time: `${pad(slot.getHours())}:${pad(slot.getMinutes())}`,
     });
@@ -345,6 +364,8 @@ export default function SocialPosts() {
             <PostQueue
               author={linkedin?.name ?? ""}
               authorPicture={linkedin?.picture}
+              instagramAuthor={instagram?.name ? `@${instagram.name}` : ""}
+              instagramPicture={instagram?.picture}
               onEdit={openEdit}
               onToggle={toggle}
               onDelete={destroy}
@@ -382,6 +403,8 @@ export default function SocialPosts() {
         <PostQueue
           author={linkedin?.name ?? ""}
           authorPicture={linkedin?.picture}
+          instagramAuthor={instagram?.name ? `@${instagram.name}` : ""}
+          instagramPicture={instagram?.picture}
           onEdit={openEdit}
           onToggle={toggle}
           onDelete={destroy}

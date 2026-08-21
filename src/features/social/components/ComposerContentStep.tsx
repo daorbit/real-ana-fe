@@ -1,12 +1,15 @@
 import type { RefObject } from "react";
-import { Box, Button, Group, RingProgress, Text, TextInput, Tooltip } from "@mantine/core";
+import {
+  Box, Button, Group, RingProgress, SegmentedControl, Text, TextInput, Tooltip,
+} from "@mantine/core";
 import { PenLine } from "lucide-react";
 import {
   CaptionEditor, CaptionToolbar, type CaptionEditorHandle,
 } from "@/shared/components/CaptionEditor";
 import { PostImageField } from "./PostImageField";
 import { ComposerField } from "./ComposerField";
-import { MAX_CAPTION, MAX_HASHTAGS, type Draft } from "./draft";
+import { MAX_HASHTAGS, type Draft } from "./draft";
+import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 
 /**
  * Step one: what the post says.
@@ -26,6 +29,9 @@ export function ComposerContentStep({
   chars,
   tags,
   overLimit,
+  limit,
+  needsImage,
+  lockProvider,
 }: {
   draft: Draft;
   patch: (next: Partial<Draft>) => void;
@@ -38,9 +44,49 @@ export function ComposerContentStep({
   chars: number;
   tags: number;
   overLimit: boolean;
+  /** The caption cap for the chosen network. */
+  limit: number;
+  /** An Instagram post with no image, which cannot be published. */
+  needsImage: boolean;
+  /** True when editing: the network is fixed for the life of a post. */
+  lockProvider?: boolean;
 }) {
   return (
     <>
+      {/* First, because it decides the rules everything below is written
+          against — the caption cap and whether an image is required. */}
+      <ComposerField
+        label="Publish to"
+        hint={lockProvider ? "Fixed after creating" : undefined}
+      >
+        <SegmentedControl
+          fullWidth
+          disabled={lockProvider}
+          value={draft.provider}
+          onChange={(value) => patch({ provider: value as Draft["provider"] })}
+          data={[
+            {
+              value: "linkedin",
+              label: (
+                <Group gap={6} justify="center" wrap="nowrap">
+                  <LinkedInMark size={14} />
+                  <span>LinkedIn</span>
+                </Group>
+              ),
+            },
+            {
+              value: "instagram",
+              label: (
+                <Group gap={6} justify="center" wrap="nowrap">
+                  <InstagramMark size={14} />
+                  <span>Instagram</span>
+                </Group>
+              ),
+            },
+          ]}
+        />
+      </ComposerField>
+
       <ComposerField label="Name" hint="For your own list. Not published.">
         <TextInput
           placeholder="Weekly analytics update"
@@ -117,18 +163,20 @@ export function ComposerContentStep({
             style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
           >
             <Text size="xs" c="dimmed">
-              Bold and italic are unicode characters — LinkedIn accepts no formatting.
+              Bold and italic are unicode characters — {draft.provider === "instagram"
+                ? "Instagram"
+                : "LinkedIn"} accepts no formatting.
             </Text>
             <Group gap={7} wrap="nowrap">
               <Text size="xs" c={overLimit ? "red" : "dimmed"}>
-                {chars.toLocaleString()} / {MAX_CAPTION.toLocaleString()}
+                {chars.toLocaleString()} / {limit.toLocaleString()}
               </Text>
               <RingProgress
                 size={22}
                 thickness={3}
                 sections={[{
-                  value: Math.min(100, (chars / MAX_CAPTION) * 100),
-                  color: overLimit ? "red" : chars > MAX_CAPTION * 0.9 ? "orange" : "emerald",
+                  value: Math.min(100, (chars / limit) * 100),
+                  color: overLimit ? "red" : chars > limit * 0.9 ? "orange" : "emerald",
                 }]}
               />
             </Group>
@@ -136,8 +184,19 @@ export function ComposerContentStep({
         </Box>
       </ComposerField>
 
-      <ComposerField label="Image" hint="Optional">
+      <ComposerField
+        label="Image"
+        hint={draft.provider === "instagram" ? "Required" : "Optional"}
+      >
         <PostImageField value={draft.image} onChange={(image) => patch({ image })} />
+        {/* Instagram builds every post around a media container, so there is no
+            text-only post to fall back to. Said beside the field rather than
+            discovered when the save button will not respond. */}
+        {needsImage && (
+          <Text size="xs" c="red" mt={6}>
+            Instagram posts need an image.
+          </Text>
+        )}
       </ComposerField>
     </>
   );

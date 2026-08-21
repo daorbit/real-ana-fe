@@ -17,8 +17,8 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage, LinkedInStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
-  PostFrequency, PostMode,
+  DemoUsage, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
+  PostFrequency, PostMode, PostProvider,
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse,
@@ -114,7 +114,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "ScheduledPost", "SentPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -225,6 +225,29 @@ export const api = createApi({
     }),
 
     /**
+     * Whether this account has Instagram connected, and as whom.
+     *
+     * Same contract as the LinkedIn status above: the access token is excluded
+     * at the model level and never reaches this response.
+     */
+    getInstagramStatus: build.query<InstagramStatus, void>({
+      query: () => "/api/auth/instagram/status",
+      providesTags: ["Instagram"],
+    }),
+
+    /**
+     * Drop the stored connection.
+     *
+     * Also invalidates `ScheduledPost`: the server pauses any Instagram schedule
+     * on disconnect, and the list must show that rather than rows still claiming
+     * to be active.
+     */
+    disconnectInstagram: build.mutation<{ connected: false }, void>({
+      query: () => ({ url: "/api/auth/instagram", method: "DELETE" }),
+      invalidatesTags: ["Instagram", "ScheduledPost"],
+    }),
+
+    /**
      * Publish the composed post to the user's own LinkedIn feed.
      *
      * The image travels as the same PNG data URL the panel already renders and
@@ -318,6 +341,11 @@ export const api = createApi({
       ScheduledPost,
       {
         workspaceId: string; name: string; caption: string; image?: string;
+        /**
+         * Which network to publish to. Optional, defaulting to LinkedIn on the
+         * server, so a caller that predates Instagram keeps working.
+         */
+        provider?: PostProvider;
         mode: PostMode;
         /** ISO instant. Required for a one-off, ignored for a repeat. */
         runAt?: string;
@@ -1486,6 +1514,8 @@ export const {
   useSetShareMutation,
   useWriteShareCaptionMutation,
   useGetLinkedInStatusQuery,
+  useGetInstagramStatusQuery,
+  useDisconnectInstagramMutation,
   useDisconnectLinkedInMutation,
   usePostToLinkedInMutation,
   useGetScheduledPostsQuery,

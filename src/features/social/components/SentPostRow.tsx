@@ -2,7 +2,7 @@ import { Avatar, Badge, Box, Button, Group, Text, Tooltip } from "@mantine/core"
 import {
   Activity, BarChart3, CalendarPlus, ExternalLink, Eye, MessageSquare, ThumbsUp, TrendingUp,
 } from "lucide-react";
-import { LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { SentPost } from "@/shared/types";
 
 /** "7:09 PM" — the clock alone, since the day is the heading above. */
@@ -98,11 +98,19 @@ export function SentPostRow({
    * False today — the LinkedIn app has no product granting post analytics — and
    * the row explains that once, in a tooltip on the figures, rather than
    * pretending the numbers are merely late.
+   *
+   * A LinkedIn answer only. Instagram insights are a separate API and a
+   * permission this app does not request, so an Instagram row shows no figures
+   * regardless of what this says.
    */
   statsAvailable: boolean;
 }) {
   const failed = post.status === "failed";
   const { stats } = post;
+  // Which network published it. History is mixed once both are connected, and
+  // a LinkedIn mark on an Instagram post misstates where it went.
+  const isInstagram = post.provider === "instagram";
+  const networkName = isInstagram ? "Instagram" : "LinkedIn";
 
   /**
    * Why a figure is missing, said once and reused across all five.
@@ -132,12 +140,17 @@ export function SentPostRow({
             <Avatar size={28} radius="xl" color="blue" src={authorPicture || undefined}>
               {author.trim().charAt(0).toUpperCase() || "?"}
             </Avatar>
-            <Box className="post-slot__network" aria-hidden>
-              <LinkedInMark size={8} color="#fff" />
+            <Box
+              className={`post-slot__network${isInstagram ? " post-slot__network--instagram" : ""}`}
+              aria-hidden
+            >
+              {isInstagram
+                ? <InstagramMark size={8} color="#fff" />
+                : <LinkedInMark size={8} color="#fff" />}
             </Box>
           </Box>
           <Text size="sm" fw={600} truncate style={{ flex: 1, minWidth: 0 }}>
-            {author || "LinkedIn"}
+            {author || networkName}
           </Text>
           {failed && <Badge size="sm" variant="light" color="orange">Failed</Badge>}
         </Group>
@@ -169,7 +182,7 @@ export function SentPostRow({
               {post.error || "This post could not be published."}
             </Text>
           </Box>
-        ) : statsAvailable ? (
+        ) : statsAvailable && !isInstagram ? (
           <Box className="sent-post__stats">
             <Stat
               icon={<ThumbsUp size={13} />}
@@ -206,9 +219,9 @@ export function SentPostRow({
 
         <Group className="post-slot__foot" justify="space-between" wrap="nowrap" gap="sm">
           <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-            <LinkedInMark size={12} />
+            {isInstagram ? <InstagramMark size={12} /> : <LinkedInMark size={12} />}
             <Text size="xs" c="dimmed" truncate>
-              {failed ? "Not published" : "Published via LinkedIn"}
+              {failed ? "Not published" : `Published via ${networkName}`}
             </Text>
           </Group>
 

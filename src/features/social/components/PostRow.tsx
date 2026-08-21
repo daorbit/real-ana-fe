@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { STAGE_COLOR, STAGE_LABEL, stageOf } from "../postStatus";
 import { relativeTime } from "../postTime";
-import { LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { ScheduledPost } from "@/shared/types";
 
 /** "1:24 PM" — just the clock, since the day is the heading above. */
@@ -33,7 +33,13 @@ export function PostRow({
   recentlyMovedId,
 }: {
   post: ScheduledPost;
-  /** The connected account these publish as. */
+  /**
+   * The connected account this row publishes as.
+   *
+   * Resolved per row rather than once for the page: a queue can hold LinkedIn
+   * and Instagram posts side by side, and labelling an Instagram post with the
+   * LinkedIn member name states something untrue about where it is going.
+   */
   author: string;
   authorPicture?: string;
   onEdit: (post: ScheduledPost) => void;
@@ -46,6 +52,10 @@ export function PostRow({
   recentlyMovedId?: string | null;
 }) {
   const publishing = publishingId === post.id;
+  // Which network this row belongs to, which decides its mark, its accent and
+  // the wording of the link out to the published post.
+  const isInstagram = post.provider === "instagram";
+  const networkName = isInstagram ? "Instagram" : "LinkedIn";
   const stage = stageOf(post);
   const sent = post.status === "sent";
   const draft = post.status === "paused";
@@ -89,12 +99,17 @@ export function PostRow({
             <Avatar size={28} radius="xl" color="blue" src={authorPicture || undefined}>
               {author.trim().charAt(0).toUpperCase() || "?"}
             </Avatar>
-            <Box className="post-slot__network" aria-hidden>
-              <LinkedInMark size={8} color="#fff" />
+            <Box
+              className={`post-slot__network${isInstagram ? " post-slot__network--instagram" : ""}`}
+              aria-hidden
+            >
+              {isInstagram
+                ? <InstagramMark size={8} color="#fff" />
+                : <LinkedInMark size={8} color="#fff" />}
             </Box>
           </Box>
           <Text size="sm" fw={600} truncate style={{ flex: 1, minWidth: 0 }}>
-            {author || "LinkedIn"}
+            {author || networkName}
           </Text>
           {moved && <Badge size="xs" variant="filled">Moved</Badge>}
           <Badge size="sm" variant="light" color={STAGE_COLOR[stage]}>
@@ -180,7 +195,7 @@ export function PostRow({
                     rel="noopener noreferrer"
                     leftSection={<ExternalLink size={14} />}
                   >
-                    View on LinkedIn
+                    View on {networkName}
                   </Menu.Item>
                 )}
                 {/* Nothing to hold back on a post that has already gone out. */}

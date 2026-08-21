@@ -119,6 +119,39 @@ export type LinkedInStatus = {
   };
 };
 
+/**
+ * Whether this account has Instagram connected, and as whom.
+ *
+ * The same shape as `LinkedInStatus` above, minus the email: Instagram Login's
+ * `instagram_business_basic` scope carries no address, so the profile is the
+ * `@username` and the avatar and nothing else.
+ */
+export type InstagramStatus = {
+  connected: boolean;
+  /** Whether the server has Instagram credentials at all. */
+  configured?: boolean;
+  /** Names of absent server-side variables. Never values. */
+  missing?: string[];
+  /** The stored token has passed its 60-day life, or Instagram rejected it. */
+  expired?: boolean;
+  /**
+   * Whether the granted token may publish.
+   *
+   * False when someone completed the consent screen but declined the publishing
+   * permission on it — a real state, and one the card must offer to fix rather
+   * than showing a working connection that cannot post.
+   */
+  canPublish?: boolean;
+  profile?: {
+    /** The handle, without the leading `@`. */
+    username: string;
+    picture: string;
+  };
+};
+
+/** Which network a scheduled post publishes to. */
+export type PostProvider = "linkedin" | "instagram";
+
 /** How often a scheduled post repeats. */
 export type PostFrequency = "daily" | "weekly" | "monthly";
 
@@ -132,7 +165,7 @@ export type PostFrequency = "daily" | "weekly" | "monthly";
 export type PostMode = "once" | "repeat";
 
 /**
- * A LinkedIn post written once and published on a repeating schedule.
+ * A post written once and published on a schedule, to LinkedIn or Instagram.
  *
  * The content is authored here and stored whole — the caption as text, the
  * image already uploaded to Cloudinary. The server publishes it unchanged, so
@@ -140,6 +173,12 @@ export type PostMode = "once" | "repeat";
  */
 export type ScheduledPost = {
   id: string;
+  /**
+   * The network this publishes to. Fixed at creation: the caption limit and the
+   * image requirement differ between the two, so moving a post across is a
+   * rewrite rather than a toggle.
+   */
+  provider: PostProvider;
   workspaceId: string;
   /** The user's own label for the schedule. Not published. */
   name: string;
@@ -175,16 +214,26 @@ export type ScheduledPost = {
  * The two travel together because a list of schedules is misleading alone:
  * without a live connection none of them can publish.
  */
+/**
+ * A connected publishing account, as the schedules list reports it.
+ *
+ * One shape for both networks so the composer's picker can read either without
+ * special-casing. `name` is the member's name on LinkedIn and the `@username`
+ * on Instagram — in both cases, what to show as "posting as".
+ */
+export type PostAccount = {
+  connected: boolean;
+  expired: boolean;
+  name: string;
+  picture?: string;
+  /** False when the connection exists but was never granted posting rights. */
+  canPublish?: boolean;
+};
+
 export type ScheduledPostsResponse = {
   posts: ScheduledPost[];
-  linkedin: {
-    connected: boolean;
-    expired: boolean;
-    name: string;
-    picture?: string;
-    /** False when the connection was made by signing in, without posting rights. */
-    canPublish?: boolean;
-  };
+  linkedin: PostAccount;
+  instagram: PostAccount;
 };
 
 /**
@@ -227,6 +276,8 @@ export type PostStats = {
  */
 export type SentPost = {
   id: string;
+  /** Which network it went out on. */
+  provider: PostProvider;
   /** The schedule behind it, when there was one. Null for a Share Panel post. */
   scheduledPostId: string | null;
   workspaceId: string | null;

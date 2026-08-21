@@ -46,6 +46,13 @@ export function usePostActions({
       notify.error("The post cannot be empty.");
       return false;
     }
+    // Instagram has no text-only post — a media container is created around an
+    // image — so this is refused here rather than by the server, where it would
+    // cost a round trip to say the same thing.
+    if (draft.provider === "instagram" && !draft.image) {
+      notify.error("Instagram posts need an image.");
+      return false;
+    }
 
     // Only the fields the chosen mode uses are sent. A one-off carries an
     // instant; a repeat carries a cadence, and the server keeps whichever it
@@ -77,8 +84,13 @@ export function usePostActions({
         notify.success(moved ? `Post moved to ${describe(draft)}.` : "Post updated.");
         if (moved) onMoved(saved.id);
       } else {
+        // `provider` is sent on create only. It is fixed for the life of a post
+        // — the server refuses a change rather than revalidating the caption and
+        // image against a different network's rules — so the edit call above
+        // deliberately leaves it out.
         const created = await create({
           workspaceId,
+          provider: draft.provider,
           image: draft.image || undefined,
           ...fields,
         }).unwrap();

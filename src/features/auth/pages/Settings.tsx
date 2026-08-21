@@ -10,6 +10,7 @@ import { PageHeader, PageStack, Section, Field } from "@/shared/ui/Page";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
 import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
+import { InstagramConnection } from "@/features/social/components/InstagramConnection";
 import {
   FACEBOOK_BLUE, FacebookMark, INSTAGRAM_PINK, InstagramMark, LINKEDIN_BLUE, LinkedInMark,
 } from "@/shared/ui/LinkedInMark";
@@ -542,19 +543,23 @@ export default function Settings() {
                 <LinkedInConnection />
               </ConnectionCard>
 
-              <ConnectionCard
-                mark={<FacebookMark size={26} />}
-                tint={FACEBOOK_BLUE}
-                name="Facebook"
-                hint="Pages and profile posting."
-                soon
-              />
-
+              {/* Instagram sits beside LinkedIn rather than after Facebook:
+                  the two connectable networks belong together, and a live card
+                  below a "soon" one reads as being unavailable too. */}
               <ConnectionCard
                 mark={<InstagramMark size={26} />}
                 tint={INSTAGRAM_PINK}
                 name="Instagram"
                 hint="Feed posts from the same composer."
+              >
+                <InstagramConnection />
+              </ConnectionCard>
+
+              <ConnectionCard
+                mark={<FacebookMark size={26} />}
+                tint={FACEBOOK_BLUE}
+                name="Facebook"
+                hint="Pages and profile posting."
                 soon
               />
             </div>
