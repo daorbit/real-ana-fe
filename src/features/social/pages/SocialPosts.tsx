@@ -341,6 +341,8 @@ export default function SocialPosts() {
           posts={sent?.posts ?? []}
           author={sent?.author?.name || linkedin?.name || ""}
           authorPicture={sent?.author?.picture}
+          instagramAuthor={instagram?.name ? `@${instagram.name}` : ""}
+          instagramPicture={instagram?.picture}
           statsAvailable={sent?.statsAvailable ?? false}
           loading={sentLoading}
           loadingMore={sentFetching && !sentLoading}
@@ -379,6 +381,8 @@ export default function SocialPosts() {
             posts={sent?.posts ?? []}
             author={sent?.author?.name || linkedin?.name || ""}
             authorPicture={sent?.author?.picture}
+            instagramAuthor={instagram?.name ? `@${instagram.name}` : ""}
+            instagramPicture={instagram?.picture}
             statsAvailable={sent?.statsAvailable ?? false}
             loading={sentLoading}
             loadingMore={sentFetching && !sentLoading}
