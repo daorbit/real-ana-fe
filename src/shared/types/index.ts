@@ -152,6 +152,12 @@ export type InstagramStatus = {
 /** Which network a scheduled post publishes to. */
 export type PostProvider = "linkedin" | "instagram";
 
+/**
+ * Where on the network a post lands. `story` is Instagram's alone — no
+ * caption, one 9:16 image, and gone after 24 hours.
+ */
+export type PostFormat = "feed" | "story";
+
 /** How often a scheduled post repeats. */
 export type PostFrequency = "daily" | "weekly" | "monthly";
 
@@ -179,6 +185,8 @@ export type ScheduledPost = {
    * rewrite rather than a toggle.
    */
   provider: PostProvider;
+  /** Optional: rows written before stories existed carry only feed posts. */
+  format?: PostFormat;
   workspaceId: string;
   /** The user's own label for the schedule. Not published. */
   name: string;
@@ -284,6 +292,8 @@ export type SentPost = {
   id: string;
   /** Which network it went out on. */
   provider: PostProvider;
+  /** Optional: rows written before stories existed carry only feed posts. */
+  format?: PostFormat;
   /** The schedule behind it, when there was one. Null for a Share Panel post. */
   scheduledPostId: string | null;
   workspaceId: string | null;

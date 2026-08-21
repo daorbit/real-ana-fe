@@ -7,6 +7,7 @@ import {
   CaptionEditor, CaptionToolbar, type CaptionEditorHandle,
 } from "@/shared/components/CaptionEditor";
 import { PostImagesField } from "./images/PostImagesField";
+import { FormatPicker } from "./FormatPicker";
 import { ComposerField } from "./ComposerField";
 import { MAX_HASHTAGS, type Draft } from "./draft";
 import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
@@ -87,6 +88,21 @@ export function ComposerContentStep({
         />
       </ComposerField>
 
+      {/* Instagram only: LinkedIn has no story, and a picker with one option
+          is a control that teaches nothing. */}
+      {draft.provider === "instagram" && (
+        <ComposerField
+          label="Format"
+          hint={lockProvider ? "Fixed after creating" : undefined}
+        >
+          <FormatPicker
+            value={draft.format}
+            onChange={(format) => patch({ format })}
+            locked={lockProvider}
+          />
+        </ComposerField>
+      )}
+
       <ComposerField label="Name" hint="For your own list. Not published.">
         <TextInput
           placeholder="Weekly analytics update"
@@ -95,6 +111,11 @@ export function ComposerContentStep({
         />
       </ComposerField>
 
+      {/* A story publishes no text, so the whole caption block goes with it —
+          editor, hashtag count, character limit and Orbit's writing. Leaving a
+          disabled editor there would invite someone to write a caption that
+          was never going to be published. */}
+      {draft.format !== "story" && (
       <ComposerField label="Post" hint={`${tags}/${MAX_HASHTAGS} hashtags`}>
         {/* Say what the post is about and Orbit drafts it. A topic box rather
             than a bare "write for me" button: the post goes out under the
@@ -183,13 +204,16 @@ export function ComposerContentStep({
           </Group>
         </Box>
       </ComposerField>
+      )}
 
       <ComposerField
-        label={draft.images.length > 1 ? "Images" : "Image"}
+        label={draft.format === "story" || draft.images.length <= 1 ? "Image" : "Images"}
         hint={draft.provider === "instagram" ? "Required" : "Optional"}
       >
         <PostImagesField
           value={draft.images}
+          // One image per story: Instagram publishes them individually.
+          max={draft.format === "story" ? 1 : undefined}
           onChange={(images) => patch({ images })}
           provider={draft.provider}
         />

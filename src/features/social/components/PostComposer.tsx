@@ -111,7 +111,9 @@ export function PostComposer({
   // The cap follows the network: Instagram's is 2200, LinkedIn's 3000.
   const limit = captionLimit(draft.provider);
   const overLimit = chars > limit;
-  const empty = !draft.caption.trim();
+  // A story publishes no text, so an empty caption is correct rather than
+  // unfinished — what it cannot go out without is the image.
+  const empty = draft.format !== "story" && !draft.caption.trim();
   // Instagram builds its post around a media container, so there is no
   // text-only post to publish. Blocked here rather than at save, so the reason
   // sits beside the image field instead of arriving as a toast.

@@ -112,6 +112,9 @@ export function SentPostRow({
   const isInstagram = post.provider === "instagram";
   const networkName = isInstagram ? "Instagram" : "LinkedIn";
 
+  /** A story is gone 24 hours after it published, and so is its link. */
+  const expired = Date.now() - new Date(post.publishedAt).getTime() > 24 * 60 * 60 * 1000;
+
   /**
    * Why a figure is missing, said once and reused across all five.
    *
@@ -239,7 +242,13 @@ export function SentPostRow({
               </Button>
             )}
 
-            {post.postUrl && (
+            {/* A story's link stops working 24 hours after it went out. Said
+                in place of the link rather than beside it: offering a button
+                that 404s reads as the link being broken rather than the story
+                having expired. */}
+            {post.format === "story" && expired ? (
+              <Text size="xs" c="dimmed">Story expired</Text>
+            ) : post.postUrl ? (
               <Button
                 component="a"
                 href={post.postUrl}
@@ -249,9 +258,9 @@ export function SentPostRow({
                 size="compact-sm"
                 leftSection={<ExternalLink size={13} />}
               >
-                Go to post
+                {post.format === "story" ? "View story" : "Go to post"}
               </Button>
-            )}
+            ) : null}
           </Group>
         </Group>
       </Box>

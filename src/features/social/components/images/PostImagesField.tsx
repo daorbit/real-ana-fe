@@ -18,18 +18,21 @@ export function PostImagesField({
   onChange,
   /** Instagram publishes a carousel; LinkedIn a multi-image post. */
   provider,
+  /** Lower ceiling than the network's own — a story takes exactly one. */
+  max = MAX_IMAGES,
 }: {
   value: string[];
   onChange: (next: string[]) => void;
   provider: "linkedin" | "instagram";
+  max?: number;
 }) {
   const [dragging, setDragging] = useState(false);
   const resetRef = useRef<() => void>(null);
 
-  const room = MAX_IMAGES - value.length;
+  const room = max - value.length;
 
   const add = async (files: File[]) => {
-    const read = await readImageFiles(files, room);
+    const read = await readImageFiles(files, room, max);
     if (read.length) onChange([...value, ...read]);
     resetRef.current?.();
   };
@@ -69,9 +72,12 @@ export function PostImagesField({
             }}
           >
             <ImageIcon size={20} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text size="sm" mt={8}>Drop images, or click to choose</Text>
+            <Text size="sm" mt={8}>
+              {max === 1 ? "Drop an image, or click to choose" : "Drop images, or click to choose"}
+            </Text>
             <Text size="xs" c="dimmed" mt={4}>
-              PNG, JPEG or WebP · up to {MAX_IMAGE_MB}MB each · {MAX_IMAGES} max
+              PNG, JPEG or WebP · up to {MAX_IMAGE_MB}MB
+              {max > 1 ? ` each · ${max} max` : ""}
             </Text>
           </Box>
         )}
@@ -127,7 +133,9 @@ export function PostImagesField({
               ? `Carousel of ${value.length}. Swipe order is left to right.`
               : `Multi-image post of ${value.length}.`}
         </Text>
-        <Text size="xs" c="dimmed">{value.length} / {MAX_IMAGES}</Text>
+        {/* No counter when only one is allowed — "1 / 1" states a limit that
+            was never in question. */}
+        {max > 1 && <Text size="xs" c="dimmed">{value.length} / {max}</Text>}
       </Group>
     </div>
   );

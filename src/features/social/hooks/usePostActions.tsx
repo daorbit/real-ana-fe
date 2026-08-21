@@ -92,6 +92,9 @@ export function usePostActions({
         const created = await create({
           workspaceId,
           provider: draft.provider,
+          // Fixed for the life of a post, like the network — sent on create
+          // only, and deliberately absent from the edit call.
+          format: draft.format,
           images: draft.images.length ? draft.images : undefined,
           ...fields,
         }).unwrap();

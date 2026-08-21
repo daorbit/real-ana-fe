@@ -1,6 +1,7 @@
 import { Box, Group, Text } from "@mantine/core";
 import { LinkedInPreview } from "./LinkedInPreview";
 import { InstagramPreview } from "./InstagramPreview";
+import { StoryPreview } from "./StoryPreview";
 import { describe, type Draft } from "./draft";
 import type { PreviewDevice } from "./ComposerPaneControls";
 
@@ -45,9 +46,15 @@ export function ComposerPreviewPane({
         <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
           <Box w="100%">
             <Text size="xs" c="dimmed" ta="center" mb={10}>
-              approximate — {draft.provider === "instagram" ? "Instagram" : "LinkedIn"} feed
+              approximate — {draft.format === "story"
+                ? "Instagram story"
+                : draft.provider === "instagram"
+                  ? "Instagram feed"
+                  : "LinkedIn feed"}
             </Text>
-            {draft.provider === "instagram" ? (
+            {draft.format === "story" ? (
+              <StoryPreview author={author} image={draft.images[0] ?? ""} when={when} />
+            ) : draft.provider === "instagram" ? (
               <InstagramPreview
                 author={author}
                 caption={draft.caption}

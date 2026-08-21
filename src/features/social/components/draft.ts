@@ -1,4 +1,6 @@
-import type { PostFrequency, PostMode, PostProvider, ScheduledPost } from "@/shared/types";
+import type {
+  PostFormat, PostFrequency, PostMode, PostProvider, ScheduledPost,
+} from "@/shared/types";
 
 /**
  * The shape a scheduled post is edited in, and the small pure helpers around
@@ -67,6 +69,14 @@ export type Draft = {
    * existing post rather than silently invalidating what is already written.
    */
   provider: PostProvider;
+  /**
+   * Feed post or story.
+   *
+   * Instagram only, and a different kind of post rather than an option on one:
+   * a story publishes no caption, takes a single 9:16 image, and disappears
+   * after 24 hours.
+   */
+  format: PostFormat;
   name: string;
   caption: string;
   mode: PostMode;
@@ -118,6 +128,7 @@ export function runAtISO(draft: Pick<Draft, "date" | "time">): string {
 export function emptyDraft(): Draft {
   return {
     provider: "linkedin",
+    format: "feed",
     name: "",
     caption: "",
     mode: "once",
@@ -136,6 +147,7 @@ export function draftFromPost(post: ScheduledPost): Draft {
   const pad = (n: number) => String(n).padStart(2, "0");
   return {
     provider: post.provider ?? "linkedin",
+    format: post.format ?? "feed",
     name: post.name,
     caption: post.caption,
     mode: post.mode ?? "once",

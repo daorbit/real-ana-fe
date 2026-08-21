@@ -389,6 +389,7 @@ export const api = createApi({
       ScheduledPost,
       {
         workspaceId: string; name: string; caption: string; image?: string; images?: string[];
+        format?: "feed" | "story";
         /**
          * Which network to publish to. Optional, defaulting to LinkedIn on the
          * server, so a caller that predates Instagram keeps working.

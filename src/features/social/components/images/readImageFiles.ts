@@ -12,9 +12,18 @@ export const ACCEPT_ATTR = "image/png,image/jpeg,image/webp";
  * images, three of them oversized, should say so once instead of raising three
  * identical toasts.
  */
-export async function readImageFiles(files: File[], room: number): Promise<string[]> {
+export async function readImageFiles(
+  files: File[],
+  room: number,
+  /** The post's ceiling, for the message when there is no room left. */
+  max: number = MAX_IMAGES,
+): Promise<string[]> {
   if (room <= 0) {
-    notify.error(`A post can carry at most ${MAX_IMAGES} images.`);
+    notify.error(
+      max === 1
+        ? "This post carries one image. Remove it to choose another."
+        : `A post can carry at most ${max} images.`,
+    );
     return [];
   }
 
