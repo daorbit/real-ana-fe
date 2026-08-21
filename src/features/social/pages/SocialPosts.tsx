@@ -5,11 +5,13 @@ import {
 import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
-import { notify } from "@/shared/lib/notify";
+import { modals } from "@mantine/modals";
+import { notify, notifyError } from "@/shared/lib/notify";
 import { usePostFilters } from "@/features/social/hooks/usePostFilters";
 import { PostFilters } from "@/features/social/components/PostFilters";
 import {
-  useGetScheduledPostsQuery, useGetSentPostsQuery, useGetWorkspaceUsageQuery,
+  useDeleteSentPostMutation, useGetScheduledPostsQuery, useGetSentPostsQuery,
+  useGetWorkspaceUsageQuery,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { useInstagramConnect } from "@/features/social/useInstagramConnect";
@@ -35,6 +37,10 @@ export default function SocialPosts() {
   const { data: usage } = useGetWorkspaceUsageQuery(active?._id ?? "", { skip: !active?._id });
   const scheduledPosts = usage?.scheduledPosts;
   const postsFull = !!scheduledPosts && scheduledPosts.used >= scheduledPosts.quota;
+
+  const [deleteSent] = useDeleteSentPostMutation();
+  /** Which Sent row is being removed, so only that one spins. */
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const [composing, setComposing] = useState(false);
   /** Which half of the composer's right pane is showing. */
@@ -194,6 +200,42 @@ export default function SocialPosts() {
     setEditing(null);
     setInitial(draftFromRun(run));
     setComposing(true);
+  };
+
+  /**
+   * Remove a row from the Sent history.
+   *
+   * Confirmed first, and the dialog is explicit about the half people assume:
+   * the post stays up on the network. Someone reaching for a delete button in
+   * a list of published posts may well mean "take it down", and finding out
+   * afterwards that it is still live is the worse of the two surprises.
+   */
+  const removeSent = (post: SentPost) => {
+    modals.openConfirmModal({
+      title: "Remove from this list?",
+      centered: true,
+      radius: "lg",
+      children: (
+        <Text size="sm" c="dimmed">
+          This removes the record from Quantalog. The post itself stays on{" "}
+          {post.provider === "instagram" ? "Instagram" : "LinkedIn"} — delete it
+          there if you want it taken down.
+        </Text>
+      ),
+      labels: { confirm: "Remove", cancel: "Keep" },
+      confirmProps: { color: "red" },
+      onConfirm: async () => {
+        setRemovingId(post.id);
+        try {
+          await deleteSent(post.id).unwrap();
+          notify.success("Removed from your history.");
+        } catch (e) {
+          notifyError(e, "Could not remove that post.");
+        } finally {
+          setRemovingId(null);
+        }
+      },
+    });
   };
 
   const openEdit = (post: ScheduledPost) => {
@@ -363,6 +405,8 @@ export default function SocialPosts() {
           loadingMore={sentFetching && !sentLoading}
           hasMore={Boolean(sent?.nextCursor)}
           onLoadMore={() => setSentCursor(sent?.nextCursor ?? undefined)}
+          onDelete={removeSent}
+          deletingId={removingId}
         />
       ) : onFailed ? (
         /*
@@ -403,6 +447,8 @@ export default function SocialPosts() {
             loadingMore={sentFetching && !sentLoading}
             hasMore={Boolean(sent?.nextCursor)}
             onLoadMore={() => setSentCursor(sent?.nextCursor ?? undefined)}
+          onDelete={removeSent}
+          deletingId={removingId}
             // Suppressed where a schedule above already reports a failure: the
             // shelf is not empty, and "nothing has failed" beneath a post that
             // plainly did contradicts it.

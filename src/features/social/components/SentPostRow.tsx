@@ -1,6 +1,7 @@
-import { Avatar, Badge, Box, Button, Group, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Avatar, Badge, Box, Button, Group, Text, Tooltip } from "@mantine/core";
 import {
-  Activity, BarChart3, CalendarPlus, ExternalLink, Eye, MessageSquare, ThumbsUp, TrendingUp,
+  Activity, BarChart3, CalendarPlus, ExternalLink, Eye, MessageSquare, ThumbsUp, Trash2,
+  TrendingUp,
 } from "lucide-react";
 import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { SentPost } from "@/shared/types";
@@ -80,6 +81,8 @@ export function SentPostRow({
   authorPicture,
   statsAvailable,
   onScheduleAgain,
+  onDelete,
+  deleting,
 }: {
   post: SentPost;
   author: string;
@@ -92,6 +95,10 @@ export function SentPostRow({
    * that produced it may have moved on or been deleted since.
    */
   onScheduleAgain?: (post: SentPost) => void;
+  /** Remove this row from the history. The post itself stays on the network. */
+  onDelete?: (post: SentPost) => void;
+  /** True while this row's own removal is in flight. */
+  deleting?: boolean;
   /**
    * Whether engagement can be measured at all on this deployment.
    *
@@ -229,6 +236,24 @@ export function SentPostRow({
           </Group>
 
           <Group gap={6} wrap="nowrap">
+            {/* An icon, not a named button: removing a row is a tidy-up, and
+                giving it the same weight as "Go to post" would put a
+                destructive action beside the one people actually came for. */}
+            {onDelete && (
+              <Tooltip label="Remove from this list" withArrow>
+                <ActionIcon
+                  variant="subtle"
+                  color="red"
+                  size="lg"
+                  loading={deleting}
+                  onClick={() => onDelete(post)}
+                  aria-label="Remove from this list"
+                >
+                  <Trash2 size={14} />
+                </ActionIcon>
+              </Tooltip>
+            )}
+
             {/* On a failure this is the only action there is, so it is named
                 rather than tucked behind an icon. */}
             {failed && onScheduleAgain && (

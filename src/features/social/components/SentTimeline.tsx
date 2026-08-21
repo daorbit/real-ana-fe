@@ -29,6 +29,8 @@ export function SentTimeline({
   onLoadMore,
   emptyState = "sent",
   onScheduleAgain,
+  onDelete,
+  deletingId,
 }: {
   posts: SentPost[];
   /** The LinkedIn account, shown on LinkedIn rows. */
@@ -52,6 +54,9 @@ export function SentTimeline({
   emptyState?: "sent" | "failed" | "none";
   /** Send a failed post's content again, as a new one-off. */
   onScheduleAgain?: (post: SentPost) => void;
+  onDelete?: (post: SentPost) => void;
+  /** The row currently being removed, so only that one shows a spinner. */
+  deletingId?: string | null;
 }) {
   // Newest first. The server already sorts, but grouping has to preserve it and
   // an explicit sort here means a reordered response cannot scramble the days.
@@ -116,6 +121,8 @@ export function SentTimeline({
                   authorPicture={post.provider === "instagram" ? instagramPicture : authorPicture}
                   statsAvailable={statsAvailable}
                   onScheduleAgain={onScheduleAgain}
+                  onDelete={onDelete}
+                  deleting={deletingId === post.id}
                 />
               ))}
             </Stack>

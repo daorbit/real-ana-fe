@@ -382,6 +382,19 @@ export const api = createApi({
     }),
 
     /**
+     * Remove one row from the Sent history.
+     *
+     * The record only — the post stays live on the network. Invalidating
+     * `SentPost` refetches the first page rather than splicing the row out
+     * locally: the list is paginated and merged, so a local removal would leave
+     * the page boundaries wrong until the next fetch anyway.
+     */
+    deleteSentPost: build.mutation<{ deleted: boolean }, string>({
+      query: (id) => ({ url: `/api/social/posts/runs/${id}`, method: "DELETE" }),
+      invalidatesTags: ["SentPost"],
+    }),
+
+    /**
      * Create a schedule. `image` is a base64 data URL, uploaded to Cloudinary
      * server-side — the same path avatars take.
      */
@@ -1570,6 +1583,7 @@ export const {
   usePostToLinkedInMutation,
   useGetScheduledPostsQuery,
   useGetSentPostsQuery,
+  useDeleteSentPostMutation,
   useCreateScheduledPostMutation,
   useUpdateScheduledPostMutation,
   useDeleteScheduledPostMutation,
