@@ -42,7 +42,10 @@ export function usePostActions({
       notify.error("Pick a workspace first.");
       return false;
     }
-    if (!draft.caption.trim()) {
+    // A story publishes no text at all, so an empty caption is correct there
+    // rather than unfinished — what it cannot go out without is the image,
+    // which the check below covers.
+    if (draft.format !== "story" && !draft.caption.trim()) {
       notify.error("The post cannot be empty.");
       return false;
     }
