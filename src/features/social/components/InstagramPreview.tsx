@@ -1,6 +1,6 @@
 import { Box, Group, Stack, Text } from "@mantine/core";
 import { Bookmark, Heart, MessageCircle, Send } from "lucide-react";
-import { PLACEHOLDER_IMAGE } from "./placeholder";
+import { InstagramCarousel } from "./InstagramCarousel";
 
 /**
  * The scheduled post as it will appear on Instagram.
@@ -47,14 +47,14 @@ function Suggestion({ w }: { w: number }) {
 export function InstagramPreview({
   author,
   caption,
-  image,
+  images,
   when,
   device,
 }: {
   author: string;
   caption: string;
-  /** A data URL for a new upload, an https URL for one already stored, or "". */
-  image: string;
+  /** Every slide, in order. More than one renders as a carousel. */
+  images: string[];
   /** "Monday at 09:00" — when this will publish, in place of "2h". */
   when: string;
   device: "desktop" | "mobile";
@@ -94,11 +94,7 @@ export function InstagramPreview({
 
       {/* The image is the post on Instagram — square by default, and required,
           so an empty slot shows as a frame rather than being skipped. */}
-      <img
-        src={image || PLACEHOLDER_IMAGE}
-        alt=""
-        style={{ display: "block", width: "100%", aspectRatio: "1 / 1", objectFit: "cover" }}
-      />
+      <InstagramCarousel images={images} />
 
       <Group justify="space-between" px={12} pt={10} wrap="nowrap">
         <Group gap={14} wrap="nowrap">

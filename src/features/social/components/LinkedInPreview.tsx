@@ -1,6 +1,6 @@
 import { Box, Group, Stack, Text } from "@mantine/core";
 import { Globe, MessageSquare, Repeat2, Send, ThumbsUp } from "lucide-react";
-import { PLACEHOLDER_IMAGE } from "./placeholder";
+import { LinkedInImages } from "./LinkedInImages";
 
 /**
  * The scheduled post as it will appear on LinkedIn.
@@ -39,7 +39,7 @@ export function LinkedInPreview({
   author,
   headline,
   caption,
-  image,
+  images,
   when,
   device,
 }: {
@@ -47,8 +47,8 @@ export function LinkedInPreview({
   /** The line under the name. The connection's own, when there is one. */
   headline: string;
   caption: string;
-  /** A data URL for a new upload, an https URL for one already stored, or "". */
-  image: string;
+  /** Every image, in order. More than one renders as LinkedIn's tiled post. */
+  images: string[];
   /** "Monday at 09:00" — when this will publish, in place of "now". */
   when: string;
   device: "desktop" | "mobile";
@@ -91,13 +91,7 @@ export function LinkedInPreview({
         </Text>
       </Box>
 
-      {/* A stand-in until there is a real one: the card collapses to three lines
-          without an image, which is not what a post with a picture looks like. */}
-      <img
-        src={image || PLACEHOLDER_IMAGE}
-        alt=""
-        style={{ display: "block", width: "100%", maxHeight: 420, objectFit: "cover" }}
-      />
+      <LinkedInImages images={images} />
 
       {/* Reaction counts, so the card ends the way a real post does. */}
       <Group justify="space-between" px={12} pt={8} wrap="nowrap">

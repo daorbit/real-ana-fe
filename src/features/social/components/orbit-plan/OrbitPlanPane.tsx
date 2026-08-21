@@ -20,7 +20,7 @@ import type { PlanTurn } from "../../hooks/useOrbitPlan";
  */
 export function OrbitPlanPane({
   draft,
-  onImage,
+  onImages,
   turns,
   input,
   onInput,
@@ -37,7 +37,7 @@ export function OrbitPlanPane({
   blockedReason,
 }: {
   draft: Draft;
-  onImage: (next: string) => void;
+  onImages: (next: string[]) => void;
   turns: PlanTurn[];
   input: string;
   onInput: (value: string) => void;
@@ -114,8 +114,9 @@ export function OrbitPlanPane({
 
           {awaitingImage && !thinking && (
             <PlanImagePrompt
-              image={draft.image}
-              onImage={onImage}
+              images={draft.images}
+              onImages={onImages}
+              provider={draft.provider}
               optional={draft.provider !== "instagram"}
               onSkip={() => onSend("No image for this one.")}
             />

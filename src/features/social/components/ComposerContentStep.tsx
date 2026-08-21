@@ -6,7 +6,7 @@ import { PenLine } from "lucide-react";
 import {
   CaptionEditor, CaptionToolbar, type CaptionEditorHandle,
 } from "@/shared/components/CaptionEditor";
-import { PostImageField } from "./PostImageField";
+import { PostImagesField } from "./images/PostImagesField";
 import { ComposerField } from "./ComposerField";
 import { MAX_HASHTAGS, type Draft } from "./draft";
 import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
@@ -185,10 +185,14 @@ export function ComposerContentStep({
       </ComposerField>
 
       <ComposerField
-        label="Image"
+        label={draft.images.length > 1 ? "Images" : "Image"}
         hint={draft.provider === "instagram" ? "Required" : "Optional"}
       >
-        <PostImageField value={draft.image} onChange={(image) => patch({ image })} />
+        <PostImagesField
+          value={draft.images}
+          onChange={(images) => patch({ images })}
+          provider={draft.provider}
+        />
         {/* Instagram builds every post around a media container, so there is no
             text-only post to fall back to. Said beside the field rather than
             discovered when the save button will not respond. */}

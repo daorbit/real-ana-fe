@@ -29,6 +29,9 @@ export const MAX_CAPTION = 3000;
 export const MAX_HASHTAGS = 30;
 export const MAX_IMAGE_MB = 8;
 
+/** Instagram's carousel ceiling, which LinkedIn's multi-image post shares. */
+export const MAX_IMAGES = 10;
+
 /** Instagram's caption cap, which is the lower of the two. */
 export const MAX_CAPTION_INSTAGRAM = 2200;
 
@@ -71,8 +74,14 @@ export type Draft = {
   date: string;
   /** "14:20" — the time of day it publishes, same zone. */
   time: string;
-  /** A data URL for a new upload, an https URL for one already stored, or "". */
-  image: string;
+  /**
+   * The post's images, in publish order.
+   *
+   * Each is a data URL for a new upload or an https URL for one already stored.
+   * Empty for a caption-only LinkedIn post; more than one is a carousel on
+   * Instagram and a multi-image post on LinkedIn. Both networks cap it at ten.
+   */
+  images: string[];
   frequency: PostFrequency;
   hour: number;
   minute: number;
@@ -113,7 +122,7 @@ export function emptyDraft(): Draft {
     caption: "",
     mode: "once",
     ...defaultSlot(),
-    image: "",
+    images: [],
     frequency: "weekly",
     hour: 9,
     minute: 0,
@@ -133,7 +142,9 @@ export function draftFromPost(post: ScheduledPost): Draft {
     // Read back in the browser's zone, which is where it was picked.
     date: at ? toDateInput(at) : defaultSlot().date,
     time: at ? `${pad(at.getHours())}:${pad(at.getMinutes())}` : defaultSlot().time,
-    image: post.imageUrl,
+    // `images` is the current shape; `imageUrl` is what rows written before
+    // carousels carry, and what an older API build still returns alone.
+    images: post.images?.length ? post.images : [post.imageUrl].filter(Boolean),
     frequency: post.frequency,
     hour: post.hour,
     minute: post.minute,
@@ -162,7 +173,7 @@ export function draftFromRun(
     provider: run.provider ?? "linkedin",
     name: run.name,
     caption: run.caption,
-    image: run.imageUrl,
+    images: [run.imageUrl].filter(Boolean),
   };
 }
 
@@ -195,7 +206,16 @@ export function describe(
  * reorders the type.
  */
 export function isDirty(draft: Draft, initial: Draft): boolean {
-  return (Object.keys(initial) as (keyof Draft)[]).some((key) => draft[key] !== initial[key]);
+  return (Object.keys(initial) as (keyof Draft)[]).some((key) => {
+    const a = draft[key];
+    const b = initial[key];
+    // `images` is the one array on the draft, and comparing it by reference
+    // would report every untouched form as dirty.
+    if (Array.isArray(a) && Array.isArray(b)) {
+      return a.length !== b.length || a.some((v, i) => v !== b[i]);
+    }
+    return a !== b;
+  });
 }
 
 /** Read a picked file as the base64 data URL the API expects. */

@@ -49,7 +49,7 @@ export function usePostActions({
     // Instagram has no text-only post — a media container is created around an
     // image — so this is refused here rather than by the server, where it would
     // cost a round trip to say the same thing.
-    if (draft.provider === "instagram" && !draft.image) {
+    if (draft.provider === "instagram" && draft.images.length === 0) {
       notify.error("Instagram posts need an image.");
       return false;
     }
@@ -75,9 +75,10 @@ export function usePostActions({
 
     try {
       if (editing) {
-        // An unchanged image is sent back as the https URL it already is, which
-        // the server takes as "leave it alone" — only a data URL is re-uploaded.
-        const saved = await update({ id: editing.id, image: draft.image, ...fields }).unwrap();
+        // Unchanged images are sent back as the https URLs they already are,
+        // which the server takes as "leave those alone" — only a data URL is
+        // uploaded again.
+        const saved = await update({ id: editing.id, images: draft.images, ...fields }).unwrap();
         // Rescheduling reorders the queue, so a post that moved to another day
         // would otherwise look untouched where someone is still looking.
         const moved = editing.nextRunAt !== saved.nextRunAt;
@@ -91,7 +92,7 @@ export function usePostActions({
         const created = await create({
           workspaceId,
           provider: draft.provider,
-          image: draft.image || undefined,
+          images: draft.images.length ? draft.images : undefined,
           ...fields,
         }).unwrap();
 

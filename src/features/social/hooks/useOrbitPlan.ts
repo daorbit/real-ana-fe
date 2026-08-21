@@ -38,7 +38,7 @@ export function useOrbitPlan({
 
   const last = turns.at(-1);
   const ready = last?.done === true;
-  const awaitingImage = last?.needsImage === true && !draft.image;
+  const awaitingImage = last?.needsImage === true && draft.images.length === 0;
 
   const send = async (text?: string) => {
     const message = (text ?? input).trim();
@@ -59,7 +59,11 @@ export function useOrbitPlan({
           provider: draft.provider,
           name: draft.name,
           caption: draft.caption,
-          image: draft.image ? "attached" : "",
+          // Only whether pictures exist, and how many — the data URLs
+          // themselves are megabytes and mean nothing to the model.
+          image: draft.images.length
+            ? `${draft.images.length} attached`
+            : "",
           mode: draft.mode,
           date: draft.date,
           time: draft.time,

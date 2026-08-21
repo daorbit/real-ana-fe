@@ -388,7 +388,7 @@ export const api = createApi({
     createScheduledPost: build.mutation<
       ScheduledPost,
       {
-        workspaceId: string; name: string; caption: string; image?: string;
+        workspaceId: string; name: string; caption: string; image?: string; images?: string[];
         /**
          * Which network to publish to. Optional, defaulting to LinkedIn on the
          * server, so a caller that predates Instagram keeps working.
@@ -412,7 +412,7 @@ export const api = createApi({
     updateScheduledPost: build.mutation<
       ScheduledPost,
       { id: string } & Partial<{
-        name: string; caption: string; image: string; status: "active" | "paused";
+        name: string; caption: string; image: string; images: string[]; status: "active" | "paused";
         mode: PostMode; runAt: string;
         frequency: PostFrequency; hour: number; minute: number;
         timezone: string; weekday: number; dayOfMonth: number;

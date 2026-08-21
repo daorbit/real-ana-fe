@@ -183,8 +183,14 @@ export type ScheduledPost = {
   /** The user's own label for the schedule. Not published. */
   name: string;
   caption: string;
-  /** Empty for a caption-only post, which is valid. */
+  /** The first image, or empty for a caption-only post. See `images`. */
   imageUrl: string;
+  /**
+   * Every image, in publish order — a carousel on Instagram, a multi-image
+   * post on LinkedIn. Optional because rows written before carousels existed
+   * carry only `imageUrl`.
+   */
+  images?: string[];
   mode: PostMode;
   /** The instant a one-off publishes. Null for a repeating post. */
   runAt: string | null;

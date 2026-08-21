@@ -115,7 +115,7 @@ export function PostComposer({
   // Instagram builds its post around a media container, so there is no
   // text-only post to publish. Blocked here rather than at save, so the reason
   // sits beside the image field instead of arriving as a toast.
-  const needsImage = draft.provider === "instagram" && !draft.image;
+  const needsImage = draft.provider === "instagram" && draft.images.length === 0;
   // A one-off in the past would be refused by the server anyway; catching it
   // here keeps the message beside the field that caused it.
   const past = draft.mode === "once"
@@ -142,7 +142,7 @@ export function PostComposer({
     if (andAnother) {
       // The cadence is the part people keep across a batch — only the content
       // changes from one post to the next.
-      patch({ name: "", caption: "", image: "" });
+      patch({ name: "", caption: "", images: [] });
       setStep("content");
       editor.current?.focus();
     } else {
@@ -240,7 +240,7 @@ export function PostComposer({
           orbit={
             <OrbitPlanPane
               draft={draft}
-              onImage={(image) => patch({ image })}
+              onImages={(images) => patch({ images })}
               turns={planner.turns}
               input={planner.input}
               onInput={planner.setInput}

@@ -1,21 +1,24 @@
 import { Box, Button, Group, Text } from "@mantine/core";
-import { PostImageField } from "../PostImageField";
+import { PostImagesField } from "../images/PostImagesField";
+import type { Draft } from "../draft";
 
 /**
  * The upload, offered where Orbit asked for it.
  *
- * Same field as the form's, so a picture attached here is the post's picture —
+ * Same field as the form's, so pictures attached here are the post's pictures —
  * the author does not have to go find the Image section to answer a question
  * that was asked in the thread.
  */
 export function PlanImagePrompt({
-  image,
-  onImage,
+  images,
+  onImages,
+  provider,
   optional,
   onSkip,
 }: {
-  image: string;
-  onImage: (next: string) => void;
+  images: string[];
+  onImages: (next: string[]) => void;
+  provider: Draft["provider"];
   /** LinkedIn posts publish fine without one. */
   optional: boolean;
   onSkip: () => void;
@@ -29,15 +32,15 @@ export function PlanImagePrompt({
         background: "var(--surface)",
       }}
     >
-      <PostImageField value={image} onChange={onImage} />
-      {optional && !image && (
+      <PostImagesField value={images} onChange={onImages} provider={provider} />
+      {optional && images.length === 0 && (
         <Group justify="flex-end" mt={10}>
           <Button size="compact-xs" variant="subtle" color="gray" onClick={onSkip}>
             Post without an image
           </Button>
         </Group>
       )}
-      {!optional && !image && (
+      {!optional && images.length === 0 && (
         <Text size="xs" c="dimmed" mt={8}>
           Instagram posts need an image before they can be scheduled.
         </Text>

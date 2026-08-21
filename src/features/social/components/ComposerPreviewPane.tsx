@@ -51,7 +51,7 @@ export function ComposerPreviewPane({
               <InstagramPreview
                 author={author}
                 caption={draft.caption}
-                image={draft.image}
+                images={draft.images}
                 when={when}
                 device={device}
               />
@@ -60,7 +60,7 @@ export function ComposerPreviewPane({
                 author={author}
                 headline="Publishing through Quantalog"
                 caption={draft.caption}
-                image={draft.image}
+                images={draft.images}
                 when={when}
                 device={device}
               />
