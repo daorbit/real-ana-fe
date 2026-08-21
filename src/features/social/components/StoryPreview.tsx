@@ -59,10 +59,14 @@ export function StoryPreview({
         }}
       />
 
-      {/* `contain`, not `cover`. Instagram does not crop a story to fit — it
-          fits the whole image and pads what is left, so cropping here would
-          show the author a frame they are not going to get, and hide exactly
-          the edges they need to check. */}
+      {/* `contain`, matching what is actually published.
+       *
+       * Instagram itself crops a story to fill 9:16, which is what was cutting
+       * the edges off a wider image. Rather than let it, the upload fits the
+       * picture onto a 1080x1920 canvas server-side — see `STORY_TRANSFORM` —
+       * so the file Graph fetches is already the right shape and nothing is
+       * lost. Fitting here too means the preview shows that same whole image
+       * rather than a crop nobody is going to see. */}
       <img
         src={image || PLACEHOLDER_IMAGE}
         alt=""

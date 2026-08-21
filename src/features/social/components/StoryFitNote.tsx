@@ -44,9 +44,9 @@ export function StoryFitNote({ image }: { image: string }) {
   return (
     <Text size="xs" c="dimmed" mt={6} lh={1.5}>
       {ratio > STORY_RATIO
-        ? "Wider than a story, so it will publish with bars above and below."
-        : "Taller than a story, so it will publish with bars either side."}{" "}
-      Crop it to 1080×1920 to fill the screen.
+        ? "Wider than a story, so it will be fitted with a matching surround above and below."
+        : "Taller than a story, so it will be fitted with a matching surround either side."}{" "}
+      Use 1080×1920 to fill the screen edge to edge.
     </Text>
   );
 }
