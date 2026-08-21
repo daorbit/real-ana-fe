@@ -5,7 +5,7 @@ import {
   Share2, BarChart3, Search, EyeOff,
   FolderKanban, Globe, Code2,
   LayoutGrid, SlidersHorizontal, Users, UserPlus,
-  PenLine, Clock, AlertTriangle, Link2,
+  PenLine, Clock, Link2,
 } from "lucide-react";
 import type { TFunction } from "i18next";
 import type { HelpSection } from "@/shared/ui/HelpDrawer";
@@ -86,13 +86,6 @@ const SOCIAL_SPEC: SectionSpec[] = [
   { id: "accounts", icon: Link2, items: ["Connect", "Expired", "Disconnect"] },
 ];
 
-const FORMS_SPEC: SectionSpec[] = [
-  { id: "builder", icon: LayoutGrid, items: ["Fields", "Required", "Options", "Reorder"] },
-  { id: "publish", icon: Share2, items: ["Draft", "Link", "Embed", "Close"] },
-  { id: "submissions", icon: FileSpreadsheet, items: ["Where", "Export", "Notify", "Retention"] },
-  { id: "locked", icon: AlertTriangle, items: ["Keys", "Rename", "Removed"] },
-];
-
 /**
  * Route path to the help it opens.
  *
@@ -109,7 +102,6 @@ const PAGE_SPECS: Record<string, { ns: string; spec: SectionSpec[] }> = {
   "/app": { ns: "home", spec: HOME_SPEC },
   "/app/members": { ns: "members", spec: MEMBERS_SPEC },
   "/app/social": { ns: "social", spec: SOCIAL_SPEC },
-  "/app/forms": { ns: "forms", spec: FORMS_SPEC },
 };
 
 /** Whether a route has help at all — cheap enough to call during render. */

@@ -26,7 +26,6 @@ import type {
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
-  LeadForm, FormField, FormSettings, FormSubmissionsPage, ThemePreset,
 } from "@/shared/types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -115,7 +114,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "Form", "Submission", "LinkedIn", "ScheduledPost", "SentPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "ScheduledPost", "SentPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -1187,75 +1186,6 @@ export const api = createApi({
       invalidatesTags: ["Marker"],
     }),
 
-    // ---- Lead forms ----
-
-    getForms: build.query<LeadForm[], { wid: string }>({
-      query: ({ wid }) => `/api/workspaces/${wid}/forms`,
-      providesTags: ["Form"],
-    }),
-
-    getForm: build.query<LeadForm, { id: string }>({
-      query: ({ id }) => `/api/forms/${id}`,
-      providesTags: ["Form"],
-    }),
-
-    createForm: build.mutation<
-      LeadForm,
-      { wid: string; name: string; fields?: Partial<FormField>[]; settings?: Partial<FormSettings>; siteId?: string }
-    >({
-      query: ({ wid, ...body }) => ({
-        url: `/api/workspaces/${wid}/forms`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Form"],
-    }),
-
-    updateForm: build.mutation<
-      LeadForm,
-      { id: string; name?: string; fields?: Partial<FormField>[]; settings?: Partial<FormSettings>; siteId?: string | null }
-    >({
-      query: ({ id, ...body }) => ({
-        url: `/api/forms/${id}`,
-        method: "PATCH",
-        body,
-      }),
-      invalidatesTags: ["Form"],
-    }),
-
-    publishForm: build.mutation<LeadForm, { id: string }>({
-      query: ({ id }) => ({ url: `/api/forms/${id}/publish`, method: "POST" }),
-      invalidatesTags: ["Form"],
-    }),
-
-    closeForm: build.mutation<LeadForm, { id: string }>({
-      query: ({ id }) => ({ url: `/api/forms/${id}/close`, method: "POST" }),
-      invalidatesTags: ["Form"],
-    }),
-
-    deleteForm: build.mutation<{ ok: true }, { id: string }>({
-      query: ({ id }) => ({ url: `/api/forms/${id}`, method: "DELETE" }),
-      invalidatesTags: ["Form"],
-    }),
-
-    // Unauthenticated — same catalogue quantalog-lp reads to resolve a hosted
-    // form's theme, so both apps stay in sync on one source of truth.
-    getFormThemes: build.query<ThemePreset[], void>({
-      query: () => "/api/public/forms/themes",
-    }),
-
-    getFormSubmissions: build.query<FormSubmissionsPage, { id: string; page?: number; limit?: number }>({
-      query: ({ id, page = 1, limit = 25 }) =>
-        `/api/forms/${id}/submissions?page=${page}&limit=${limit}`,
-      providesTags: ["Submission"],
-    }),
-
-    deleteFormSubmission: build.mutation<{ ok: true }, { id: string; sid: string }>({
-      query: ({ id, sid }) => ({ url: `/api/forms/${id}/submissions/${sid}`, method: "DELETE" }),
-      invalidatesTags: ["Submission"],
-    }),
-
-
     /** Everyone in a workspace, the pending invitations, and the caller's own role. */
     getMembers: build.query<MembersResponse, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/members`,
@@ -1665,14 +1595,4 @@ export const {
   useGetAdminCouponsQuery,
   useSaveAdminCouponMutation,
   useDeleteAdminCouponMutation,
-  useGetFormsQuery,
-  useGetFormQuery,
-  useCreateFormMutation,
-  useUpdateFormMutation,
-  usePublishFormMutation,
-  useCloseFormMutation,
-  useDeleteFormMutation,
-  useGetFormSubmissionsQuery,
-  useDeleteFormSubmissionMutation,
-  useGetFormThemesQuery,
 } = api;
