@@ -24,6 +24,7 @@ import SocialPosts from "@/features/social/pages/SocialPosts";
 import Impersonate from "@/features/admin/pages/Impersonate";
 import DemoUsage from "@/features/admin/pages/DemoUsage";
 import Settings from "@/features/auth/pages/Settings";
+import DataDeletion from "@/features/auth/pages/DataDeletion";
 import Billing from "@/features/billing/pages/Billing";
 import AdminBilling from "@/features/admin/pages/AdminBilling";
 import AdminBroadcast from "@/features/admin/pages/AdminBroadcast";
@@ -163,6 +164,11 @@ export default function App() {
             {/* Public, read-only SEO audit shared per report. Same no-auth,
                 token-in-path model as the shared dashboard. */}
             <Route path="/seo-report/:token" element={<PublicSeoReport />} />
+            {/* Where Meta's data-deletion callback sends someone to check what
+                happened to their request. Public by necessity: whoever deleted
+                their Instagram connection may have no account here at all, and
+                a sign-in wall in front of a deletion receipt is the wrong ask. */}
+            <Route path="/data-deletion" element={<DataDeletion />} />
             {/* First-run setup. Protected for the workspace context, but renders
                 without the app shell — a new account has nothing to navigate. */}
             <Route path="/app/onboarding" element={<ProtectedRaw><Onboarding /></ProtectedRaw>} />

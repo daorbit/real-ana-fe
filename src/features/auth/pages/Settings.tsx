@@ -11,6 +11,7 @@ import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
 import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
 import { InstagramConnection } from "@/features/social/components/InstagramConnection";
+import { useInstagramReturn } from "@/features/social/useInstagramReturn";
 import {
   FACEBOOK_BLUE, FacebookMark, INSTAGRAM_PINK, InstagramMark, LINKEDIN_BLUE, LinkedInMark,
 } from "@/shared/ui/LinkedInMark";
@@ -125,6 +126,9 @@ function mobileError(v: string): string | null {
 
 export default function Settings() {
   const { t } = useTranslation();
+  // Where a popup-blocked Instagram flow lands, with its outcome in the query
+  // string. Reads it once, raises the toast, and clears the parameters.
+  useInstagramReturn();
   const { user, updateProfile, uploadAvatar, removeAvatar } = useAuth();
   const fileInput = useRef<HTMLInputElement | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);

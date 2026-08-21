@@ -3090,6 +3090,34 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: 12px;
 }
 
+/* ============ Connect chooser ============
+   Shown on the social page while nothing can publish. Two equal cards rather
+   than an alert bar: which network to connect is the user's choice, and a
+   banner naming one of them presents that one as the only way through. */
+.connect-choice {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--mantine-spacing-md);
+}
+
+.connect-choice__card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-body);
+}
+
+.connect-choice__mark {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+
 /* ============ Post composer ============
    Header and action bar frame the scrolling middle, so neither runs into the
    content when a long post scrolls under them. */

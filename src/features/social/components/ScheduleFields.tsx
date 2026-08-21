@@ -181,7 +181,7 @@ export function ScheduleFields({
             />
             <Text size="xs" c="dimmed" style={{ lineHeight: 1.5 }}>
               Publishes <strong>the same text and image every time</strong>. Evergreen content
-              only — LinkedIn deprioritises duplicates. For a content calendar, schedule
+              only — both networks deprioritise duplicates. For a content calendar, schedule
               separate posts.
             </Text>
           </Group>

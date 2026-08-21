@@ -12,6 +12,7 @@ import {
   useGetScheduledPostsQuery, useGetSentPostsQuery, useGetWorkspaceUsageQuery,
 } from "@/app/store";
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
+import { useInstagramConnect } from "@/features/social/useInstagramConnect";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
 import { ConnectPrompt } from "@/features/social/components/ConnectPrompt";
 import { PostComposer } from "@/features/social/components/PostComposer";
@@ -83,6 +84,8 @@ export default function SocialPosts() {
   // survives the round trip. Disconnecting is not offered here: it lives with
   // the connection's own settings rather than on the page that depends on it.
   const { connect, connecting } = useLinkedInConnect(refetch);
+  const { connect: connectInstagram, connecting: connectingInstagram } =
+    useInstagramConnect(refetch);
 
   // The zone the schedule is written in. Taken from the browser so "9am" means
   // 9am where the author is, which is what the server stores and honours.
@@ -109,9 +112,6 @@ export default function SocialPosts() {
   const posts = data?.posts ?? [];
   const linkedin = data?.linkedin;
   const instagram = data?.instagram;
-  const needsPostingPermission = Boolean(
-    linkedin?.connected && !linkedin.expired && linkedin.canPublish === false,
-  );
   /** Whether an account can actually publish: connected, live, and granted. */
   const usable = (account?: PostAccount) =>
     Boolean(account?.connected && !account.expired && account.canPublish !== false);
@@ -127,6 +127,17 @@ export default function SocialPosts() {
    * integration and the one most schedules target — but someone who connected
    * only Instagram should not have to change the picker on every new post.
    */
+  /**
+   * The networks that can publish right now, named for the page subtitle.
+   *
+   * Reads from what is actually usable rather than saying "LinkedIn" outright:
+   * with only Instagram connected, naming LinkedIn is simply wrong.
+   */
+  const connectedNames = [
+    usable(linkedin) ? "LinkedIn" : "",
+    usable(instagram) ? "Instagram" : "",
+  ].filter(Boolean).join(" and ");
+
   const newDraft = (): Draft => ({
     ...emptyDraft(),
     provider: !usable(linkedin) && usable(instagram) ? "instagram" : "linkedin",
@@ -241,7 +252,7 @@ export default function SocialPosts() {
             {onSent
               ? "Everything you've published from here"
               : ready
-                ? `Publishing to LinkedIn · ${timezone}`
+                ? `Publishing to ${connectedNames} · ${timezone}`
                 : "No account connected yet"}
           </Text>
         </div>
@@ -290,7 +301,7 @@ export default function SocialPosts() {
           </Tooltip>
 
           <Tooltip
-            label={!ready ? "Connect LinkedIn first" : "This workspace's scheduled posts are full"}
+            label={!ready ? "Connect an account first" : "This workspace's scheduled posts are full"}
             disabled={ready && !postsFull}
             withArrow
           >
@@ -327,9 +338,10 @@ export default function SocialPosts() {
       {!isLoading && !ready && !onSent && (
         <ConnectPrompt
           linkedin={linkedin}
-          needsPostingPermission={needsPostingPermission}
-          connecting={connecting}
+          instagram={instagram}
+          connecting={connecting || connectingInstagram}
           onConnect={connect}
+          onConnectInstagram={connectInstagram}
         />
       )}
 

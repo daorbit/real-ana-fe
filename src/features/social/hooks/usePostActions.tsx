@@ -138,13 +138,17 @@ export function usePostActions({
    * otherwise "post now" reads like it might consume the next run.
    */
   const publishNow = (post: ScheduledPost) => {
+    // Named from the post rather than fixed: this dialog is the last thing read
+    // before something goes out publicly, and naming the wrong network there is
+    // the one place a mistake cannot be taken back.
+    const network = post.provider === "instagram" ? "Instagram" : "LinkedIn";
     confirmDelete({
       title: "Post this now?",
       confirmLabel: "Post now",
       confirmColor: "teal",
       body: (
         <>
-          <strong>{post.name}</strong> will be published to LinkedIn immediately.
+          <strong>{post.name}</strong> will be published to {network} immediately.
           {post.mode === "repeat" && " Its schedule is unchanged — it will still run as usual."}
           {" A published post cannot be unpublished from here."}
         </>
@@ -153,7 +157,7 @@ export function usePostActions({
         setPublishingId(post.id);
         try {
           const res = await publish(post.id).unwrap();
-          notify.success(res.postUrl ? "Posted to LinkedIn." : "Posted.");
+          notify.success(res.postUrl ? `Posted to ${network}.` : "Posted.");
         } catch (e) {
           notify.error(errMessage(e, "Could not publish that post."));
         } finally {

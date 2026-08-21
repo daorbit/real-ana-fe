@@ -196,7 +196,16 @@ export function PostComposer({
         {/* ---- Preview ---- */}
         <Box className="share-post-preview">
           <Group justify="space-between" align="center" mb="xl" wrap="nowrap">
-            <Text fw={700} size="lg">Preview</Text>
+            {/* Named, because the preview chrome below is LinkedIn's feed. On
+                an Instagram post it stands in for the real thing — the caption
+                fold and the image crop differ — so the label says so rather
+                than presenting a LinkedIn mock as an Instagram one. */}
+            <Group gap={8} align="baseline" wrap="nowrap">
+              <Text fw={700} size="lg">Preview</Text>
+              {draft.provider === "instagram" && (
+                <Text size="xs" c="dimmed">approximate — shown as a feed post</Text>
+              )}
+            </Group>
             <Group gap={4} p={4} style={{ background: "var(--mantine-color-default)", borderRadius: "var(--mantine-radius-md)" }}>
               {([
                 { id: "desktop" as const, Icon: Monitor },
