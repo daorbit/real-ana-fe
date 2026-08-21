@@ -144,6 +144,28 @@ export function ScheduleFields({
                 </Button>
               );
             })}
+            {/* Sets the day as well as the clock, which the fixed times below
+                deliberately do not — "now" is a moment, not a time of day, and
+                leaving the date on tomorrow would schedule it for tomorrow at
+                the current hour. A couple of minutes ahead of the real clock so
+                it lands inside the delivery window rather than a breath behind
+                it, which the picker would immediately mark as past. */}
+            <Button
+              size="compact-sm"
+              radius="xl"
+              variant="default"
+              onClick={() => {
+                const soon = new Date(Date.now() + 2 * 60 * 1000);
+                const pad = (n: number) => String(n).padStart(2, "0");
+                onChange({
+                  date: toDateInput(soon),
+                  time: `${pad(soon.getHours())}:${pad(soon.getMinutes())}`,
+                });
+              }}
+            >
+              Now
+            </Button>
+
             {QUICK_TIMES.map((q) => {
               const value = `${String(q.hour).padStart(2, "0")}:${String(q.minute).padStart(2, "0")}`;
               return (

@@ -7,8 +7,13 @@ import { navigateTo } from "@/app/navigation";
 import type { ReactNode } from "react";
 
 export const notify = {
+  /**
+   * `emerald` rather than a literal colour: that is the alias the theme
+   * remaps onto whichever accent the user picked, so a success toast is their
+   * colour. A fixed `teal` here left a green bar on a crimson theme.
+   */
   success: (message: ReactNode, title = "Success") =>
-    notifications.show({ title, message, color: "teal", autoClose: 3000 }),
+    notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
 
   error: (message: ReactNode, title = "Something went wrong") =>
     notifications.show({ title, message, color: "red", autoClose: 5000 }),
