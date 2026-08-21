@@ -194,7 +194,9 @@ export function InstagramPreview({
           // Instagram's web feed is a centred column with a suggestions rail on
           // the right and nothing on the left — not LinkedIn's three columns.
           <Group align="flex-start" gap={24} justify="center" wrap="nowrap">
-            <Box style={{ flex: "0 1 470px", minWidth: 0 }}>{post}</Box>
+            {/* Shrinks before the rail does — a feed column that will not give
+                way is what pushed the suggestions off a narrow pane. */}
+            <Box style={{ flex: "1 1 470px", maxWidth: 470, minWidth: 0 }}>{post}</Box>
 
             <Stack gap={14} style={{ flex: "0 0 30%", minWidth: 0, paddingTop: 4 }}>
               <Group gap={10} wrap="nowrap">

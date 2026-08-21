@@ -5,6 +5,7 @@ import {
 import { X } from "lucide-react";
 import { countHashtags, type CaptionEditorHandle } from "@/shared/components/CaptionEditor";
 import { ComposerPreviewPane, type PaneTab } from "./ComposerPreviewPane";
+import { ComposerPaneControls, type PreviewDevice } from "./ComposerPaneControls";
 import { ComposerContentStep } from "./ComposerContentStep";
 import { ComposerField } from "./ComposerField";
 import { ComposerFooter } from "./ComposerFooter";
@@ -66,6 +67,7 @@ export function PostComposer({
   onSave: (draft: Draft, asDraft?: boolean) => Promise<boolean>;
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
+  const [device, setDevice] = useState<PreviewDevice>("desktop");
   // Content first, always: nobody arrives already knowing when they want to
   // post before they have written what they are posting.
   const [step, setStep] = useState<Step>("content");
@@ -214,7 +216,15 @@ export function PostComposer({
           draft={draft}
           author={author}
           tab={pane}
-          onTab={onPane}
+          device={device}
+          controls={
+            <ComposerPaneControls
+              tab={pane}
+              onTab={onPane}
+              device={device}
+              onDevice={setDevice}
+            />
+          }
           orbit={
             <OrbitPlanPane
               draft={draft}
