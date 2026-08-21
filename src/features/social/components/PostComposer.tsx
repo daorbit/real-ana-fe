@@ -11,7 +11,9 @@ import { ComposerField } from "./ComposerField";
 import { ComposerFooter } from "./ComposerFooter";
 import { ComposerSteps, type Step } from "./ComposerSteps";
 import { ScheduleFields } from "./ScheduleFields";
+import { OrbitPlanPanel } from "./OrbitPlanPanel";
 import { useOrbitCaption } from "../hooks/useOrbitCaption";
+import { useOrbitPlan } from "../hooks/useOrbitPlan";
 import { captionLimit, describe, type Draft } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
 
@@ -75,6 +77,11 @@ export function PostComposer({
     onCaption: (caption) => patch({ caption }),
   });
 
+  // Orbit asking for the post rather than being told it. Its answers land in
+  // the same fields the author types into, so nothing it settles is hidden
+  // from them — and nothing it settles is saved until a Schedule press.
+  const planner = useOrbitPlan({ workspaceId, draft, onPlan: patch });
+
   // Seed from `initial` on open, so editing an existing post loads it and a new
   // one starts blank — without wiping what is being typed on every re-render.
   useEffect(() => {
@@ -82,6 +89,9 @@ export function PostComposer({
       setDraft(initial);
       setStep("content");
       setTopic("");
+      // A new post starts a new conversation. Carrying the last one over would
+      // have Orbit answering about a post that is no longer on screen.
+      planner.reset();
     }
     // `setTopic` is stable; re-running on it would reset the field mid-edit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -167,6 +177,34 @@ export function PostComposer({
                   // image were written against one set of rules, and switching
                   // would silently invalidate them.
                   lockProvider={!!editing}
+                  planner={
+                    <OrbitPlanPanel
+                      draft={draft}
+                      turns={planner.turns}
+                      input={planner.input}
+                      onInput={planner.setInput}
+                      onSend={planner.send}
+                      thinking={planner.thinking}
+                      ready={planner.ready}
+                      error={planner.error}
+                      onReset={planner.reset}
+                      // "Edit first" closes the conversation and leaves the
+                      // filled fields behind — the point of filling them.
+                      onAccept={planner.reset}
+                      // Orbit may schedule it outright when the author says so,
+                      // but through the same save path as the button below:
+                      // one place decides what a valid scheduled post is.
+                      onSchedule={() => void save(false)}
+                      scheduling={pending === "save"}
+                      blockedReason={
+                        needsImage ? "Add an image before scheduling — Instagram posts need one."
+                          : overLimit ? "The caption is over the limit for this network."
+                            : past ? "That time has already passed. Pick a later one."
+                              : empty ? "There is no post to schedule yet."
+                                : ""
+                      }
+                    />
+                  }
                 />
               ) : (
                 <ComposerField label="Schedule" hint={timezone}>

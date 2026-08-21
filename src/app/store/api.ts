@@ -205,6 +205,50 @@ export const api = createApi({
     }),
 
     /**
+     * One turn of a scheduling conversation: Orbit asks what it still needs,
+     * and returns the whole plan each time so the composer's fields track the
+     * conversation as it happens.
+     *
+     * `now` is the author's own wall clock, sent because "tomorrow" means their
+     * tomorrow. A mutation for the same reason `writeShareCaption` is one: it
+     * spends Orbit quota and must run only when asked.
+     */
+    planScheduledPost: build.mutation<
+      {
+        /** What Orbit says back — a question, or its summary of the finished post. */
+        message: string;
+        /** Orbit has everything and is showing the post for confirmation. */
+        done: boolean;
+        caption: string;
+        name: string;
+        mode: "once" | "repeat";
+        date: string;
+        time: string;
+        frequency: "daily" | "weekly" | "monthly";
+        hour: number;
+        minute: number;
+        weekday: number;
+        dayOfMonth: number;
+      },
+      {
+        workspaceId: string;
+        platform: string;
+        message: string;
+        /** The conversation so far, oldest first, excluding `message`. */
+        turns: { role: "user" | "assistant"; content: string }[];
+        /** The composer's fields as they stand, so Orbit builds on them. */
+        draft: Record<string, unknown>;
+        now: string;
+      }
+    >({
+      query: ({ workspaceId, platform, message, turns, draft, now }) => ({
+        url: `/api/workspaces/${workspaceId}/share/plan`,
+        method: "POST",
+        body: { platform, message, turns, draft, now },
+      }),
+    }),
+
+    /**
      * Whether this account has LinkedIn connected, and as whom.
      *
      * Never carries the access token — the server projects a small profile
@@ -1513,6 +1557,7 @@ export const {
   useGetShareQuery,
   useSetShareMutation,
   useWriteShareCaptionMutation,
+  usePlanScheduledPostMutation,
   useGetLinkedInStatusQuery,
   useGetInstagramStatusQuery,
   useDisconnectInstagramMutation,
