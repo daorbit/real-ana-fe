@@ -2,8 +2,10 @@ import { Box, Button, Divider, Group, NumberInput, SegmentedControl, Text } from
 import { DatePickerInput, TimePicker } from "@mantine/dates";
 import { CalendarClock, TriangleAlert } from "lucide-react";
 import {
-  DELIVERY_WINDOW_MINUTES, FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, toDateInput, type Draft,
+  DELIVERY_WINDOW_MINUTES, FREQUENCIES, QUICK_TIMES, WEEKDAYS, describe, nowIn,
+  toDateInput, type Draft,
 } from "./draft";
+import { useNowLabel } from "../hooks/useNowLabel";
 import type { PostFrequency, PostMode } from "@/shared/types";
 
 /**
@@ -78,6 +80,7 @@ export function ScheduleFields({
   repeatingAllowed?: boolean;
 }) {
   const past = draft.mode === "once" && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
+  const clockNow = useNowLabel(timezone);
 
   return (
     <>
@@ -147,23 +150,19 @@ export function ScheduleFields({
             {/* Sets the day as well as the clock, which the fixed times below
                 deliberately do not — "now" is a moment, not a time of day, and
                 leaving the date on tomorrow would schedule it for tomorrow at
-                the current hour. A couple of minutes ahead of the real clock so
-                it lands inside the delivery window rather than a breath behind
-                it, which the picker would immediately mark as past. */}
+                the current hour.
+
+                Read in the post's own zone rather than the browser's: the
+                schedule is stated in `timezone`, and someone travelling would
+                otherwise get their laptop's idea of now written into a field
+                labelled Asia/Calcutta. */}
             <Button
               size="compact-sm"
               radius="xl"
               variant="default"
-              onClick={() => {
-                const soon = new Date(Date.now() + 2 * 60 * 1000);
-                const pad = (n: number) => String(n).padStart(2, "0");
-                onChange({
-                  date: toDateInput(soon),
-                  time: `${pad(soon.getHours())}:${pad(soon.getMinutes())}`,
-                });
-              }}
+              onClick={() => onChange(nowIn(timezone))}
             >
-              Now
+              Now · {clockNow}
             </Button>
 
             {QUICK_TIMES.map((q) => {

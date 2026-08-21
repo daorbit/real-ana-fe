@@ -55,9 +55,12 @@ export const DELIVERY_WINDOW_MINUTES = 5;
 
 /** Times people actually publish at, one click away from the number inputs. */
 export const QUICK_TIMES = [
-  { label: "09:00", hour: 9, minute: 0 },
-  { label: "12:00", hour: 12, minute: 0 },
-  { label: "17:30", hour: 17, minute: 30 },
+  // Labelled in 12-hour, to match the time field above them — the chips read
+  // as a shortcut for that field, and a row of 24-hour labels under a 12-hour
+  // input asks the reader to convert between the two.
+  { label: "9:00 AM", hour: 9, minute: 0 },
+  { label: "12:00 PM", hour: 12, minute: 0 },
+  { label: "5:30 PM", hour: 17, minute: 30 },
 ];
 
 export type Draft = {
@@ -228,6 +231,49 @@ export function isDirty(draft: Draft, initial: Draft): boolean {
     }
     return a !== b;
   });
+}
+
+/**
+ * The current date and time in a named zone, as the picker's own fields.
+ *
+ * `Intl` rather than arithmetic on an offset: an offset is wrong twice a year
+ * in any zone that observes daylight saving, and the formatter knows the rules
+ * for the actual date. `en-CA` is used only because it formats as YYYY-MM-DD,
+ * which is the shape the date input wants.
+ *
+ * Nudged a couple of minutes ahead of the real clock, so the slot lands inside
+ * the delivery window rather than a breath behind it — a "now" that the form
+ * immediately marks as already past would be a strange thing to offer.
+ */
+export function nowIn(timezone: string): { date: string; time: string } {
+  const soon = new Date(Date.now() + 2 * 60 * 1000);
+  const zone = timezone || undefined;
+
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: zone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(soon);
+
+  const time = new Intl.DateTimeFormat("en-GB", {
+    timeZone: zone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(soon);
+
+  return { date, time };
+}
+
+/** The same moment as a 12-hour label — "7:53 PM" — for the chip itself. */
+export function nowLabel(timezone: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    timeZone: timezone || undefined,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date());
 }
 
 /** Read a picked file as the base64 data URL the API expects. */

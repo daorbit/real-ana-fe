@@ -25,10 +25,13 @@ export function StoryPreview({
   return (
     <Box
       style={{
-        width: "100%",
-        maxWidth: 300,
-        margin: "0 auto",
+        // Sized from the pane's height rather than its width: a story is tall,
+        // and a width-driven box either overflows a short pane or leaves most
+        // of a tall one empty. The width follows from the 9:16 ratio.
+        height: "min(72vh, 620px)",
+        maxWidth: "100%",
         aspectRatio: "9 / 16",
+        margin: "0 auto",
         position: "relative",
         borderRadius: 22,
         overflow: "hidden",
@@ -37,10 +40,39 @@ export function StoryPreview({
         boxShadow: "0 30px 70px rgba(0,0,0,0.45)",
       }}
     >
+      {/* A blurred copy of the image fills the frame behind the real one, which
+          is what Instagram itself puts behind a story that is not exactly 9:16.
+          Without it the letterboxed bars are flat black and the preview looks
+          broken rather than looking like the post. */}
       <img
         src={image || PLACEHOLDER_IMAGE}
         alt=""
-        style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          filter: "blur(22px) saturate(1.3)",
+          transform: "scale(1.15)",
+        }}
+      />
+
+      {/* `contain`, not `cover`. Instagram does not crop a story to fit — it
+          fits the whole image and pads what is left, so cropping here would
+          show the author a frame they are not going to get, and hide exactly
+          the edges they need to check. */}
+      <img
+        src={image || PLACEHOLDER_IMAGE}
+        alt=""
+        style={{
+          position: "relative",
+          display: "block",
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+        }}
       />
 
       {/* Instagram darkens the top and bottom of a story so its own chrome

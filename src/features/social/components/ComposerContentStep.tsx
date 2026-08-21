@@ -8,6 +8,7 @@ import {
 } from "@/shared/components/CaptionEditor";
 import { PostImagesField } from "./images/PostImagesField";
 import { FormatPicker } from "./FormatPicker";
+import { StoryFitNote } from "./StoryFitNote";
 import { ComposerField } from "./ComposerField";
 import { MAX_HASHTAGS, type Draft } from "./draft";
 import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
@@ -224,6 +225,11 @@ export function ComposerContentStep({
           <Text size="xs" c="red" mt={6}>
             Instagram posts need an image.
           </Text>
+        )}
+        {/* Stories are the one format where the image's own shape changes what
+            gets published, so it is worth measuring and saying. */}
+        {draft.format === "story" && draft.images[0] && (
+          <StoryFitNote image={draft.images[0]} />
         )}
       </ComposerField>
     </>
