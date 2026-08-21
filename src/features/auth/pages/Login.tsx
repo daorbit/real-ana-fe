@@ -4,14 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Divider,
-  Group, Modal,
+  Group,
 } from "@mantine/core";
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
-import TurnstileWidget, { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
+import { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
+import { VerifyDialog } from "@/features/auth/components/VerifyDialog";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
@@ -242,28 +243,11 @@ export default function Login() {
         </motion.form>
       </div>
  
-      <Modal
+      <VerifyDialog
         opened={verifying}
-        onClose={() => setVerifying(false)}
-        title="Verify it's you"
-        radius="md"
-        size="sm"
-        centered
-      >
-        <Stack gap="md">
-          <Text c="dimmed" size="sm">
-            One quick check that you're not a bot, then we'll sign you in.
-          </Text>
-
-          <TurnstileWidget
-            onVerify={(token) => void finishLogin(token)}
-            // Expiry and errors both mean there is no usable token. The modal
-            // stays open — the widget re-challenges itself, and closing it
-            // would look like the login had been cancelled.
-            onExpire={() => {}}
-          />
-        </Stack>
-      </Modal>
+        onCancel={() => setVerifying(false)}
+        onVerify={(token) => void finishLogin(token)}
+      />
     </div>
   );
 }

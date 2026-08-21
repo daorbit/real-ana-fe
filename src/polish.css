@@ -189,10 +189,38 @@
    alert firing rather than a pointer resting — and nothing else destructive in
    the app behaves that way. Tint the background and keep the label red, so it
    matches the subtle/light treatment used by every other delete control. */
+/* Destructive actions — "Log out", "Delete", "Remove".
+ *
+ * Mantine's own `-light` red is close to a solid fill in dark mode, so a
+ * coloured menu item flooded maroon on hover and read as an alert firing rather
+ * than as the pointer moving over a row. A mixed tint is used instead: enough
+ * to show the row is live, far enough from solid that it stays a hover state.
+ *
+ * `color-mix` against the item's own red keeps it correct in both themes and
+ * follows the palette if red is ever retuned. */
 .danger-item {
-  --menu-item-hover: var(--mantine-color-red-light);
+  --menu-item-hover: color-mix(in srgb, var(--mantine-color-red-6) 12%, transparent);
 }
 
 .danger-item:where(:hover, :focus, [data-menu-active]) {
+  background: color-mix(in srgb, var(--mantine-color-red-6) 12%, transparent);
   color: var(--mantine-color-red-4);
+}
+[data-mantine-color-scheme="light"] .danger-item:where(:hover, :focus, [data-menu-active]) {
+  background: color-mix(in srgb, var(--mantine-color-red-6) 9%, transparent);
+  color: var(--mantine-color-red-7);
+}
+
+/* The same restraint for icon-button deletes.
+ *
+ * Mantine's subtle ActionIcon hovers to `--mantine-color-red-light`, the same
+ * near-solid fill the menu item used. Redefining that one variable on the dark
+ * scheme fixes every red subtle control at once — the delete icons on members,
+ * goals, funnels, reports and the rest — without tagging each call site, and
+ * without touching the filled red buttons, which read from `-filled`.
+ *
+ * Light mode already lands on a genuine tint, so it is left alone. */
+[data-mantine-color-scheme="dark"] {
+  --mantine-color-red-light: color-mix(in srgb, var(--mantine-color-red-6) 14%, transparent);
+  --mantine-color-red-light-hover: color-mix(in srgb, var(--mantine-color-red-6) 20%, transparent);
 }

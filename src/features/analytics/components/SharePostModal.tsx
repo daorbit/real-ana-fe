@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Modal, Group, Button, Text, Box, CopyButton, ActionIcon, Tooltip,
-  ScrollArea, Divider, Anchor, TextInput,
+  Divider, Anchor, TextInput,
 } from "@mantine/core";
 import {
   Copy, Check, Download, X, RotateCcw, ExternalLink,
@@ -266,7 +266,9 @@ export function SharePostModal({
             })}
           </Group>
 
-          <ScrollArea style={{ flex: 1 }} type="auto">
+          {/* Native overflow, so this column carries the app's own thin
+              scrollbar rather than Mantine's overlay one. */}
+          <Box style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
             {/* The link tab shares a URL, not a post: no caption, no card, no
                 network. Giving it the composer would put an editor on screen
                 whose text nothing would ever publish. */}
@@ -490,7 +492,7 @@ export function SharePostModal({
               )}
             </Box>
             )}
-          </ScrollArea>
+          </Box>
 
           {/* Action bar, pinned so it stays reachable however long the caption. */}
           <Group

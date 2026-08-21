@@ -548,6 +548,57 @@ body { overflow-wrap: break-word; }
   outline-offset: 1px;
 }
 
+/* ---- The sign-in bot check -------------------------------------------- */
+
+/* The shield at the top of the verify dialog. It breathes while the check runs
+   — a dialog that appears and then sits perfectly still reads as hung, and this
+   one is shown to someone waiting to be let in. */
+.verify-shield {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* A ring that expands out of the shield and fades, on a slow loop. Drawn as a
+   sibling rather than a box-shadow so it can scale past its own bounds without
+   pushing the layout around. */
+.verify-shield__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  opacity: 0;
+  animation: verify-pulse 2.4s ease-out infinite;
+}
+@keyframes verify-pulse {
+  0%   { transform: scale(1);    opacity: 0.5; }
+  70%  { transform: scale(1.55); opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+.verify-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--mantine-radius-sm);
+  transition: color 140ms ease;
+}
+.verify-cancel:hover { color: var(--mantine-color-text); }
+.verify-cancel:focus-visible {
+  outline: 2px solid var(--mantine-color-emerald-6);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verify-shield__pulse { animation: none; }
+}
+
 /* Content clearance below the button — matches its footprint at each size. */
 .orbit-fab-spacer { height: 88px; }
 @media (max-width: 48em) {
@@ -680,6 +731,23 @@ body { overflow-wrap: break-word; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 *::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Mantine's ScrollArea draws its own bar instead of the native one above, and
+   its default is a wide pill on a visible track — which reads as a different
+   control from every other scroller in the app. Matched to the native rule
+   here rather than per component, so the two are indistinguishable wherever a
+   ScrollArea happens to be used. */
+.mantine-ScrollArea-scrollbar {
+  background: transparent !important;
+  padding: 0;
+}
+.mantine-ScrollArea-scrollbar[data-orientation="vertical"] { width: 6px; }
+.mantine-ScrollArea-scrollbar[data-orientation="horizontal"] { height: 6px; }
+.mantine-ScrollArea-thumb {
+  background: var(--border-strong);
+  border-radius: 6px;
+}
+.mantine-ScrollArea-thumb:hover { background: var(--muted); }
 
 h1,h2,h3,h4 { margin: 0; letter-spacing: -0.02em; }
 a { color: inherit; text-decoration: none; }
