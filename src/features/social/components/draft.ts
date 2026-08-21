@@ -187,6 +187,17 @@ export function describe(
   return `Every month on day ${post.dayOfMonth} at ${time}`;
 }
 
+/**
+ * Whether a draft still matches what the composer opened with.
+ *
+ * Field-by-field rather than a JSON compare: the draft is flat, and a compare
+ * that depends on key order would report a clean form as dirty the day someone
+ * reorders the type.
+ */
+export function isDirty(draft: Draft, initial: Draft): boolean {
+  return (Object.keys(initial) as (keyof Draft)[]).some((key) => draft[key] !== initial[key]);
+}
+
 /** Read a picked file as the base64 data URL the API expects. */
 export function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

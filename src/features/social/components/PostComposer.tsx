@@ -14,7 +14,8 @@ import { ScheduleFields } from "./ScheduleFields";
 import { OrbitPlanPane } from "./orbit-plan/OrbitPlanPane";
 import { useOrbitCaption } from "../hooks/useOrbitCaption";
 import { useOrbitPlan } from "../hooks/useOrbitPlan";
-import { captionLimit, type Draft } from "./draft";
+import { DiscardDialog } from "./DiscardDialog";
+import { captionLimit, isDirty, type Draft } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -68,6 +69,7 @@ export function PostComposer({
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<PreviewDevice>("desktop");
+  const [confirmingClose, setConfirmingClose] = useState(false);
   // Content first, always: nobody arrives already knowing when they want to
   // post before they have written what they are posting.
   const [step, setStep] = useState<Step>("content");
@@ -98,6 +100,7 @@ export function PostComposer({
       // A new post starts a new conversation — carrying the last one over would
       // have Orbit answering about a post that is no longer on screen.
       planner.reset();
+      setConfirmingClose(false);
     }
     // `setTopic` is stable; re-running on it would reset the field mid-edit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,6 +121,15 @@ export function PostComposer({
   const past = draft.mode === "once"
     && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
   const blocked = empty || overLimit || past || needsImage;
+
+  // Closing is guarded only when something would actually be lost — a confirm
+  // on an untouched form is one people learn to click through.
+  const dirty = isDirty(draft, initial);
+  const requestClose = () => (dirty ? setConfirmingClose(true) : onClose());
+  const discard = () => {
+    setConfirmingClose(false);
+    onClose();
+  };
 
   const save = async (andAnother: boolean, asDraft = false) => {
     // Which button was pressed, so only that one spins.
@@ -141,7 +153,7 @@ export function PostComposer({
   return (
     <Modal
       opened={opened}
-      onClose={onClose}
+      onClose={requestClose}
       fullScreen
       withCloseButton={false}
       padding={0}
@@ -155,7 +167,7 @@ export function PostComposer({
         {/* ---- Composer ---- */}
         <Box className="share-post-composer">
           <Group gap="sm" px={20} py="md" wrap="nowrap" className="composer-header">
-            <ActionIcon variant="subtle" color="gray" size="lg" onClick={onClose} aria-label="Close">
+            <ActionIcon variant="subtle" color="gray" size="lg" onClick={requestClose} aria-label="Close">
               <X size={18} />
             </ActionIcon>
             <Divider orientation="vertical" my={6} />
@@ -206,7 +218,7 @@ export function PostComposer({
             canContinue={!empty && !overLimit}
             pending={pending}
             saving={saving}
-            onClose={onClose}
+            onClose={requestClose}
             onStep={setStep}
             onSave={save}
           />
@@ -257,6 +269,13 @@ export function PostComposer({
           }
         />
       </Group>
+
+      <DiscardDialog
+        opened={confirmingClose}
+        onKeep={() => setConfirmingClose(false)}
+        onDiscard={discard}
+        editing={!!editing}
+      />
     </Modal>
   );
 }

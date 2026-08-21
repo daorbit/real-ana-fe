@@ -14,7 +14,7 @@ import {
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { useInstagramConnect } from "@/features/social/useInstagramConnect";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
-import { useComposerUrl } from "@/features/social/hooks/useComposerUrl";
+import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
 import { ConnectPrompt } from "@/features/social/components/ConnectPrompt";
 import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
@@ -36,10 +36,9 @@ export default function SocialPosts() {
   const scheduledPosts = usage?.scheduledPosts;
   const postsFull = !!scheduledPosts && scheduledPosts.used >= scheduledPosts.quota;
 
-  // The composer lives in the URL, so a reload or a shared link lands back on
-  // the post being written rather than on the list.
-  const url = useComposerUrl();
-  const composing = !!url.compose;
+  const [composing, setComposing] = useState(false);
+  /** Which half of the composer's right pane is showing. */
+  const [pane, setPane] = useState<PaneTab>("preview");
 
   const [editing, setEditing] = useState<ScheduledPost | null>(null);
  
@@ -157,7 +156,7 @@ export default function SocialPosts() {
     }
     setEditing(null);
     setInitial({ ...newDraft(), ...(date ? { date } : {}) });
-    url.openNew();
+    setComposing(true);
   };
 
   
@@ -174,7 +173,7 @@ export default function SocialPosts() {
       date: toDateInput(slot),
       time: `${pad(slot.getHours())}:${pad(slot.getMinutes())}`,
     });
-    url.openNew();
+    setComposing(true);
   };
 
   /**
@@ -194,13 +193,13 @@ export default function SocialPosts() {
     }
     setEditing(null);
     setInitial(draftFromRun(run));
-    url.openNew();
+    setComposing(true);
   };
 
   const openEdit = (post: ScheduledPost) => {
     setEditing(post);
     setInitial(draftFromPost(post));
-    url.openEdit(post.id);
+    setComposing(true);
   };
 
   /**
@@ -439,9 +438,9 @@ export default function SocialPosts() {
 
       <PostComposer
         opened={composing}
-        onClose={url.close}
-        pane={url.pane}
-        onPane={url.setPane}
+        onClose={() => setComposing(false)}
+        pane={pane}
+        onPane={setPane}
         initial={initial}
         editing={editing}
         author={linkedin?.name ?? ""}
