@@ -32,7 +32,6 @@ export function ComposerContentStep({
   limit,
   needsImage,
   lockProvider,
-  planner,
 }: {
   draft: Draft;
   patch: (next: Partial<Draft>) => void;
@@ -51,18 +50,11 @@ export function ComposerContentStep({
   needsImage: boolean;
   /** True when editing: the network is fixed for the life of a post. */
   lockProvider?: boolean;
-  /** Orbit's scheduling conversation, rendered above the form it fills in. */
-  planner?: React.ReactNode;
 }) {
   return (
     <>
-      {/* Above everything, because it is the shortcut past everything: whatever
-          Orbit settles here lands in the fields below, where it is reviewed and
-          corrected like anything typed by hand. */}
-      {planner && <Box mb="lg">{planner}</Box>}
-
-      {/* First of the fields, because it decides the rules everything below is
-          written against — the caption cap and whether an image is required. */}
+      {/* First, because it decides the rules everything below is written
+          against — the caption cap and whether an image is required. */}
       <ComposerField
         label="Publish to"
         hint={lockProvider ? "Fixed after creating" : undefined}

@@ -2,19 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActionIcon, Box, Divider, Group, Modal, ScrollArea, Text,
 } from "@mantine/core";
-import { Monitor, Smartphone, X } from "lucide-react";
+import { X } from "lucide-react";
 import { countHashtags, type CaptionEditorHandle } from "@/shared/components/CaptionEditor";
-import { LinkedInPreview } from "./LinkedInPreview";
-import { InstagramPreview } from "./InstagramPreview";
+import { ComposerPreviewPane, type PaneTab } from "./ComposerPreviewPane";
 import { ComposerContentStep } from "./ComposerContentStep";
 import { ComposerField } from "./ComposerField";
 import { ComposerFooter } from "./ComposerFooter";
 import { ComposerSteps, type Step } from "./ComposerSteps";
 import { ScheduleFields } from "./ScheduleFields";
-import { OrbitPlanPanel } from "./OrbitPlanPanel";
+import { OrbitPlanPane } from "./orbit-plan/OrbitPlanPane";
 import { useOrbitCaption } from "../hooks/useOrbitCaption";
 import { useOrbitPlan } from "../hooks/useOrbitPlan";
-import { captionLimit, describe, type Draft } from "./draft";
+import { captionLimit, type Draft } from "./draft";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -62,7 +61,8 @@ export function PostComposer({
   onSave: (draft: Draft, asDraft?: boolean) => Promise<boolean>;
 }) {
   const [draft, setDraft] = useState<Draft>(initial);
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  /** Which half of the right pane is showing: the post, or Orbit planning it. */
+  const [tab, setTab] = useState<PaneTab>("preview");
   // Content first, always: nobody arrives already knowing when they want to
   // post before they have written what they are posting.
   const [step, setStep] = useState<Step>("content");
@@ -89,7 +89,8 @@ export function PostComposer({
       setDraft(initial);
       setStep("content");
       setTopic("");
-      // A new post starts a new conversation. Carrying the last one over would
+      setTab("preview");
+      // A new post starts a new conversation — carrying the last one over would
       // have Orbit answering about a post that is no longer on screen.
       planner.reset();
     }
@@ -177,34 +178,6 @@ export function PostComposer({
                   // image were written against one set of rules, and switching
                   // would silently invalidate them.
                   lockProvider={!!editing}
-                  planner={
-                    <OrbitPlanPanel
-                      draft={draft}
-                      turns={planner.turns}
-                      input={planner.input}
-                      onInput={planner.setInput}
-                      onSend={planner.send}
-                      thinking={planner.thinking}
-                      ready={planner.ready}
-                      error={planner.error}
-                      onReset={planner.reset}
-                      // "Edit first" closes the conversation and leaves the
-                      // filled fields behind — the point of filling them.
-                      onAccept={planner.reset}
-                      // Orbit may schedule it outright when the author says so,
-                      // but through the same save path as the button below:
-                      // one place decides what a valid scheduled post is.
-                      onSchedule={() => void save(false)}
-                      scheduling={pending === "save"}
-                      blockedReason={
-                        needsImage ? "Add an image before scheduling — Instagram posts need one."
-                          : overLimit ? "The caption is over the limit for this network."
-                            : past ? "That time has already passed. Pick a later one."
-                              : empty ? "There is no post to schedule yet."
-                                : ""
-                      }
-                    />
-                  }
                 />
               ) : (
                 <ComposerField label="Schedule" hint={timezone}>
@@ -232,62 +205,41 @@ export function PostComposer({
           />
         </Box>
 
-        {/* ---- Preview ---- */}
-        <Box className="share-post-preview">
-          <Group justify="space-between" align="center" mb="xl" wrap="nowrap">
-            {/* Each network gets its own mock — the folds, the crop and the
-                chrome differ enough that one standing in for the other would
-                mislead. Still approximate: fonts and counts are ours. */}
-            <Group gap={8} align="baseline" wrap="nowrap">
-              <Text fw={700} size="lg">Preview</Text>
-              <Text size="xs" c="dimmed">
-                approximate — {draft.provider === "instagram" ? "Instagram" : "LinkedIn"} feed
-              </Text>
-            </Group>
-            <Group gap={4} p={4} style={{ background: "var(--mantine-color-default)", borderRadius: "var(--mantine-radius-md)" }}>
-              {([
-                { id: "desktop" as const, Icon: Monitor },
-                { id: "mobile" as const, Icon: Smartphone },
-              ]).map(({ id, Icon }) => (
-                <ActionIcon
-                  key={id}
-                  variant={device === id ? "white" : "subtle"}
-                  color={device === id ? "dark" : "gray"}
-                  size="lg"
-                  radius="sm"
-                  onClick={() => setDevice(id)}
-                  aria-label={id}
-                  aria-pressed={device === id}
-                >
-                  <Icon size={17} />
-                </ActionIcon>
-              ))}
-            </Group>
-          </Group>
-
-          <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
-            <Box w="100%">
-              {draft.provider === "instagram" ? (
-                <InstagramPreview
-                  author={author}
-                  caption={draft.caption}
-                  image={draft.image}
-                  when={draft.mode === "once" ? describe(draft) : `${describe(draft)} · scheduled`}
-                  device={device}
-                />
-              ) : (
-                <LinkedInPreview
-                  author={author}
-                  headline="Publishing through Quantalog"
-                  caption={draft.caption}
-                  image={draft.image}
-                  when={draft.mode === "once" ? describe(draft) : `${describe(draft)} · scheduled`}
-                  device={device}
-                />
-              )}
-            </Box>
-          </Box>
-        </Box>
+        <ComposerPreviewPane
+          draft={draft}
+          author={author}
+          tab={tab}
+          onTab={setTab}
+          orbit={
+            <OrbitPlanPane
+              draft={draft}
+              onImage={(image) => patch({ image })}
+              turns={planner.turns}
+              input={planner.input}
+              onInput={planner.setInput}
+              onSend={planner.send}
+              thinking={planner.thinking}
+              ready={planner.ready}
+              awaitingImage={planner.awaitingImage}
+              error={planner.error}
+              onReset={planner.reset}
+              // "Edit first" leaves the filled fields behind and returns to the
+              // post, which is the point of filling them.
+              onEdit={() => setTab("preview")}
+              // Same save path as the footer, so one place decides what a valid
+              // scheduled post is.
+              onSchedule={() => void save(false)}
+              scheduling={pending === "save"}
+              blockedReason={
+                needsImage ? "Add an image before scheduling — Instagram posts need one."
+                  : overLimit ? "The caption is over the limit for this network."
+                    : past ? "That time has already passed. Pick a later one."
+                      : empty ? "There is no post to schedule yet."
+                        : ""
+              }
+            />
+          }
+        />
       </Group>
     </Modal>
   );

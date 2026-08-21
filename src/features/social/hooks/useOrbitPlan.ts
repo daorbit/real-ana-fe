@@ -6,23 +6,18 @@ import { toDateInput, type Draft } from "../components/draft";
 export type PlanTurn = {
   role: "user" | "assistant";
   content: string;
-  /** Set on the turn where Orbit says it has everything, so the transcript can
-   *  show the confirm card under that message rather than under the last one. */
+  /** Orbit has everything and is showing the post for confirmation. */
   done?: boolean;
+  /** Orbit is waiting on an image; the transcript offers an upload here. */
+  needsImage?: boolean;
 };
 
 /**
  * Plan a scheduled post by talking to Orbit.
  *
- * A scheduled post needs two decisions — what it says and when it goes out —
- * and someone who arrives with only the first shouldn't have to work the rest
- * of the form out alone. Orbit asks for what is missing, one question at a
- * time, and every answer fills the real composer fields: the author watches
- * the form build rather than being handed a result at the end.
- *
- * The transcript lives here, not on the draft. It is the conversation that
- * produced the post, not part of the post, and saving it would store a chat
- * log nobody asked to keep.
+ * Every answer fills the composer's real fields, so the author watches the form
+ * build rather than being handed a result at the end. The transcript stays here
+ * and is never saved with the post.
  */
 export function useOrbitPlan({
   workspaceId,
@@ -30,7 +25,6 @@ export function useOrbitPlan({
   onPlan,
 }: {
   workspaceId: string | undefined;
-  /** The live draft — sent each turn so Orbit builds on what is already there. */
   draft: Draft;
   onPlan: (patch: Partial<Draft>) => void;
 }) {
@@ -39,15 +33,14 @@ export function useOrbitPlan({
   const [error, setError] = useState("");
   const [plan, { isLoading: thinking }] = usePlanScheduledPostMutation();
 
-  /** True once Orbit has said it has everything and is waiting to be confirmed. */
-  const ready = turns.at(-1)?.done === true;
+  const last = turns.at(-1);
+  const ready = last?.done === true;
+  const awaitingImage = last?.needsImage === true && !draft.image;
 
   const send = async (text?: string) => {
     const message = (text ?? input).trim();
     if (!message || !workspaceId || thinking) return;
 
-    // Optimistic: the author's own words appear the moment they send them,
-    // rather than after a model call they are waiting on.
     const sent: PlanTurn[] = [...turns, { role: "user", content: message }];
     setTurns(sent);
     setInput("");
@@ -63,6 +56,7 @@ export function useOrbitPlan({
           provider: draft.provider,
           name: draft.name,
           caption: draft.caption,
+          image: draft.image ? "attached" : "",
           mode: draft.mode,
           date: draft.date,
           time: draft.time,
@@ -72,16 +66,16 @@ export function useOrbitPlan({
           weekday: draft.weekday,
           dayOfMonth: draft.dayOfMonth,
         },
-        // The author's own wall clock. "Tomorrow at 9" means their tomorrow,
-        // and the server has no way to know which zone that is.
         now: localStamp(),
       }).unwrap();
 
-      setTurns([...sent, { role: "assistant", content: res.message, done: res.done }]);
+      setTurns([
+        ...sent,
+        { role: "assistant", content: res.message, done: res.done, needsImage: res.needsImage },
+      ]);
 
-      // Only what Orbit actually settled. Empty strings are "not decided yet",
-      // not "clear this" — writing them back would blank fields the author has
-      // already filled by hand.
+      // Empty means "not decided yet", never "clear this" — writing blanks back
+      // would wipe fields the author filled by hand.
       const patch: Partial<Draft> = {
         mode: res.mode,
         frequency: res.frequency,
@@ -98,8 +92,6 @@ export function useOrbitPlan({
       }
       onPlan(patch);
     } catch (e) {
-      // Shown in the thread rather than as a toast: the conversation is where
-      // the author is looking, and a failed turn is part of it.
       setError(errMessage(e, "Orbit could not follow that. Try rewording it."));
       setTurns(turns);
       setInput(message);
@@ -112,10 +104,10 @@ export function useOrbitPlan({
     setError("");
   };
 
-  return { turns, input, setInput, send, thinking, ready, error, reset };
+  return { turns, input, setInput, send, thinking, ready, awaitingImage, error, reset };
 }
 
-/** "2026-08-21T14:30" — the local wall clock, without pretending to be UTC. */
+/** The local wall clock — "tomorrow at 9" means the author's tomorrow. */
 function localStamp(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");

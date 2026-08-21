@@ -1,5 +1,6 @@
 import { Box, Group, Stack, Text } from "@mantine/core";
 import { Globe, MessageSquare, Repeat2, Send, ThumbsUp } from "lucide-react";
+import { PLACEHOLDER_IMAGE } from "./placeholder";
 
 /**
  * The scheduled post as it will appear on LinkedIn.
@@ -83,16 +84,20 @@ export function LinkedInPreview({
         <Text size="sm" c={MOCK.dim} style={{ letterSpacing: 1 }}>•••</Text>
       </Group>
 
-      <Box px={12} pb={image ? 10 : 4}>
+      <Box px={12} pb={10}>
         <Text size="14px" c={MOCK.text} style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", lineHeight: 1.45 }}>
           {shown || <Text span c={MOCK.dim}>Your post will appear here.</Text>}
           {folded && <Text span size="14px" c={MOCK.dim}>…see more</Text>}
         </Text>
       </Box>
 
-      {image && (
-        <img src={image} alt="" style={{ display: "block", width: "100%", maxHeight: 420, objectFit: "cover" }} />
-      )}
+      {/* A stand-in until there is a real one: the card collapses to three lines
+          without an image, which is not what a post with a picture looks like. */}
+      <img
+        src={image || PLACEHOLDER_IMAGE}
+        alt=""
+        style={{ display: "block", width: "100%", maxHeight: 420, objectFit: "cover" }}
+      />
 
       {/* Reaction counts, so the card ends the way a real post does. */}
       <Group justify="space-between" px={12} pt={8} wrap="nowrap">

@@ -481,6 +481,53 @@ body { overflow-wrap: break-word; }
   outline: 2px solid var(--mantine-color-emerald-6);
   outline-offset: 2px;
 }
+/* Orbit planning the scheduled post, in the composer's right-hand pane.
+
+   Same surface as the floating assistant so the two read as one Orbit: the
+   shared aurora wash behind the thread, and the same suggestion and bubble
+   styles above it. Full height of the pane — the conversation is the pane's
+   whole content while it is open, and a short box floating in a tall column
+   was what made it look bolted on. */
+/* The pane scrolls its own thread, so the column around it must not also
+   scroll — two scrollbars on one conversation, and the input floats away from
+   the bottom of the screen. */
+.share-post-preview:has(.orbit-plan-pane) {
+  overflow-y: hidden;
+}
+
+.orbit-plan-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+/* Wash under the conversation, never over it — same stacking split the chat
+   panel uses. */
+.orbit-plan-pane > .aurora-wash { z-index: 0; }
+.orbit-plan-pane > *:not(.aurora-wash) { position: relative; z-index: 1; }
+
+/* A starter is a two-line card here rather than the chat's one-line prompt —
+   the label is the idea, the hint is the slot it lands in. */
+.orbit-plan-pane .orbit-suggestion {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--surface-2);
+}
+.orbit-plan-pane .orbit-suggestion:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Content clearance below the button — matches its footprint at each size. */
 .orbit-fab-spacer { height: 88px; }
 @media (max-width: 48em) {

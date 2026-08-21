@@ -1,5 +1,6 @@
 import { Box, Group, Stack, Text } from "@mantine/core";
 import { Bookmark, Heart, MessageCircle, Send } from "lucide-react";
+import { PLACEHOLDER_IMAGE } from "./placeholder";
 
 /**
  * The scheduled post as it will appear on Instagram.
@@ -93,23 +94,11 @@ export function InstagramPreview({
 
       {/* The image is the post on Instagram — square by default, and required,
           so an empty slot shows as a frame rather than being skipped. */}
-      {image ? (
-        <img
-          src={image}
-          alt=""
-          style={{ display: "block", width: "100%", aspectRatio: "1 / 1", objectFit: "cover" }}
-        />
-      ) : (
-        <Box
-          style={{
-            width: "100%", aspectRatio: "1 / 1", background: "#0e0e0e",
-            borderTop: `1px solid ${IG.line}`, borderBottom: `1px solid ${IG.line}`,
-            display: "grid", placeItems: "center",
-          }}
-        >
-          <Text size="12px" c={IG.dim}>Your image will appear here</Text>
-        </Box>
-      )}
+      <img
+        src={image || PLACEHOLDER_IMAGE}
+        alt=""
+        style={{ display: "block", width: "100%", aspectRatio: "1 / 1", objectFit: "cover" }}
+      />
 
       <Group justify="space-between" px={12} pt={10} wrap="nowrap">
         <Group gap={14} wrap="nowrap">

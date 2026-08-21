@@ -219,6 +219,8 @@ export const api = createApi({
         message: string;
         /** Orbit has everything and is showing the post for confirmation. */
         done: boolean;
+        /** Orbit is waiting on an image before it can finish. */
+        needsImage: boolean;
         caption: string;
         name: string;
         mode: "once" | "repeat";
