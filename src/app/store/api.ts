@@ -241,12 +241,14 @@ export const api = createApi({
         /** The composer's fields as they stand, so Orbit builds on them. */
         draft: Record<string, unknown>;
         now: string;
+        /** The model picked in the chat panel, when there is one. */
+        modelId?: string;
       }
     >({
-      query: ({ workspaceId, platform, message, turns, draft, now }) => ({
+      query: ({ workspaceId, platform, message, turns, draft, now, modelId }) => ({
         url: `/api/workspaces/${workspaceId}/share/plan`,
         method: "POST",
-        body: { platform, message, turns, draft, now },
+        body: { platform, message, turns, draft, now, ...(modelId ? { modelId } : {}) },
       }),
     }),
 

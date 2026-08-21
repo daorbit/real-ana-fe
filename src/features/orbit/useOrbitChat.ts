@@ -50,7 +50,16 @@ export type OrbitMessage = {
  * every page load is the kind of small friction that makes a feature feel
  * unfinished.
  */
-const MODEL_KEY = "orbit.model";
+export const MODEL_KEY = "orbit.model";
+
+/** The model this browser picked, for callers outside the chat panel. */
+export function readPreferredModel(): string | undefined {
+  try {
+    return localStorage.getItem(MODEL_KEY) || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * What Orbit opens with.

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { usePlanScheduledPostMutation } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { readPreferredModel } from "@/features/orbit/useOrbitChat";
 import { toDateInput, type Draft } from "../components/draft";
 
 export type PlanTurn = {
@@ -69,6 +70,7 @@ export function useOrbitPlan({
           dayOfMonth: draft.dayOfMonth,
         },
         now: localStamp(),
+        modelId: readPreferredModel(),
       }).unwrap();
 
       setTurns([
