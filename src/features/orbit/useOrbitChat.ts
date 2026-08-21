@@ -80,9 +80,6 @@ export function useOrbitChat() {
   const workspaceId = active?._id ?? "";
   const { data: status } = useGetOrbitStatusQuery(workspaceId, { skip: !workspaceId });
 
-  /** Questions left this cycle. Null until the first answer reports it. */
-  const [remaining, setRemaining] = useState<number | null>(null);
-
   // Read once, lazily: `localStorage` is unavailable in some privacy modes, and
   // a throw here would take the whole panel down over a remembered preference.
   const [model, setModelState] = useState<string>(() => {
@@ -93,28 +90,29 @@ export function useOrbitChat() {
     }
   });
 
-  const models = status?.models ?? [];
-  // Locked models are listed so the picker can show what an upgrade buys, but
-  // they can never be the *selected* one: a remembered preference from a plan
-  // that has since lapsed would otherwise pick a model the server will refuse,
-  // and the answer would silently come from a different one.
-  const unlocked = models.filter((m) => !m.locked);
-  // An empty or stale id means "no preference", which the server resolves to
-  // its own default — so a model retired since the last visit costs nothing.
-  const activeModel = unlocked.some((m) => m.id === model) ? model : unlocked[0]?.id ?? "";
+  /** Questions left this cycle. Null until the first answer reports it. */
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  // Every model is reachable on every plan now — the only thing that locks the
+  // picker is running out of questions for the period, which is a workspace
+  // fact, not a per-model one. `locked` here means "quota is exhausted", shown
+  // on every row alike, rather than the old "this model needs a higher tier".
+  const outOfQuota = remaining === 0;
+  const models = (status?.models ?? []).map((m) => ({ ...m, locked: outOfQuota }));
+  const activeModel = model && models.some((m) => m.id === model) ? model : models[0]?.id ?? "";
 
   const setModel = useCallback((id: string) => {
-    // A locked model is shown to advertise the tier, not to be chosen. Ignoring
-    // the click here keeps the "selected" state honest without the picker
-    // needing to know about plans.
-    if (models.some((m) => m.id === id && m.locked)) return;
+    // Out of quota: nothing is selectable until the period resets or the plan
+    // is upgraded, so ignore the click the same way a locked model used to be
+    // ignored.
+    if (outOfQuota) return;
     setModelState(id);
     try {
       localStorage.setItem(MODEL_KEY, id);
     } catch {
       // Preference is lost on reload; the chat still works.
     }
-  }, [models]);
+  }, [outOfQuota]);
 
   /**
    * The transcript as the server wants it.
@@ -211,15 +209,16 @@ export function useOrbitChat() {
     started: messages.length > 0,
 
     /**
-     * Every model worth showing, including the ones this plan cannot reach —
-     * those carry `locked`, and the picker greys them with the tier that
-     * unlocks them rather than hiding the upgrade.
+     * Every model, on every plan. `locked` is true on all of them together,
+     * only once the workspace is out of questions for the period — the picker
+     * greys the whole menu and points at Billing rather than singling out any
+     * one model.
      */
     models,
     model: activeModel,
     setModel,
 
-    /** The workspace's Orbit tier, for the quota line and the upgrade prompt. */
+    /** The workspace's Orbit plan, for the quota line and the upgrade prompt. */
     plan: status?.plan ?? null,
     /** Questions left this cycle. Null until an answer reports it. */
     remaining,

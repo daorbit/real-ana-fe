@@ -140,23 +140,10 @@ function RichText({ text }: { text: string }) {
   return <>{out}</>;
 }
 
-/**
- * The opening screen.
- *
- * A greeting, then three suggestions. The greeting is kept to a mark, one line
- * of welcome and one line of scope — an earlier version stacked a 44px icon, a
- * heading, three lines of prose and four boxes into a 340px column, which left
- * the thing someone came to do — ask something — below the fold on a short
- * panel. So this names the assistant and stops.
- *
- * What the longer prose was there to say ("Orbit can't see your analytics") is
- * still one line under the input, where it is read at the moment it matters.
- */
+ 
 function EmptyState({ onPick }: { onPick: (q: string) => void }) {
   return (
-    // Top-aligned rather than centred: the mark and heading want to sit at the
-    // start of the panel, and a centred block leaves the greeting floating in
-    // the middle of an otherwise empty column.
+   
     <Stack gap="lg" px="xs" pt={4}>
       <Stack gap={6} align="center">
         <OrbitMark size={50} />
@@ -209,15 +196,7 @@ export function OrbitChat({
 
   const activeLabel = models.find((m) => m.id === model)?.label ?? "default";
 
-  /**
-   * What was already in the field when dictation started.
-   *
-   * The recogniser revises an interim phrase as it hears more of it, so each
-   * update replaces the last one rather than appending — without a fixed base
-   * to rebuild from, "how do I install" would grow into "how how do how do I".
-   * A final result is committed to the base and the next phrase starts after
-   * it, which is what lets someone dictate several sentences in one session.
-   */
+ 
   const dictationBase = useRef("");
 
   const onTranscript = useCallback(
@@ -282,9 +261,7 @@ export function OrbitChat({
               <Bubble key={m.id} message={m} />
             ))}
 
-            {/* Emerald rather than grey: this is the one moment the panel is
-                working, and a grey dot on a dark surface read as disabled — the
-                answer looked stalled rather than on its way. */}
+          
             {thinking && (
               <Group gap={8} wrap="nowrap">
                 <Loader size={12} type="dots" color="var(--mantine-color-emerald-5)" />
@@ -294,10 +271,7 @@ export function OrbitChat({
               </Group>
             )}
 
-            {/* Only the newest turn's follow-ups, and never while a reply is in
-                flight — offering the last answer's next steps under a question
-                that is still being answered invites a second question nobody
-                waits for the answer to. */}
+      
             {!thinking && followUps.length > 0 && (
               <Stack gap={6}>
                 {followUps.map((q) => (
@@ -314,28 +288,21 @@ export function OrbitChat({
 
       <Box px="md" pb="sm" pt={4}>
         <Textarea
-          // While the mic is on the field is being filled for them, and the
-          // usual prompt to type reads as though nothing is happening.
+      
           placeholder={speech.listening ? "Listening — speak your question" : "Ask a question"}
           value={input}
           onChange={(e) => {
             setInput(e.currentTarget.value);
-            // Typing over a dictated phrase makes the field the truth; the base
-            // has to follow it or the next spoken words would rebuild from the
-            // text that was just edited away.
+          
             if (speech.listening) dictationBase.current = e.currentTarget.value;
           }}
           styles={{
             input: {
-              // Room for the model picker, which sits inside the field on the
-              // left — beside the thing it affects rather than in the header,
-              // where it was a setting nobody would look for.
+             
               paddingLeft: 42,
               paddingTop: 5,
               paddingBottom: 5,
-              // A filled field rather than the panel's own colour: the composer
-              // was reading as empty space with a placeholder floating in it,
-              // which is what made it hard to see there was anything to type in.
+            
               background: "var(--mantine-color-default)",
               borderColor: "var(--mantine-color-default-border)",
             },
@@ -356,11 +323,7 @@ export function OrbitChat({
                   {models.map((m) => (
                     <Menu.Item
                       key={m.id}
-                      // A locked row navigates to Billing rather than doing
-                      // nothing. Shown but unselectable is the whole point of
-                      // listing it — hiding it would make the menu tidier and
-                      // the upgrade invisible — but a dead click teaches people
-                      // the menu is broken, not that a plan exists.
+                  
                       onClick={() => (m.locked ? goToBilling() : setModel(m.id))}
                       leftSection={
                         <span style={{ opacity: m.locked ? 0.4 : 1, display: "inline-flex" }}>
@@ -391,14 +354,13 @@ export function OrbitChat({
                         {m.label}
                       </Text>
                       <Text size="xs" c={m.locked ? "emerald.5" : "dimmed"} lh={1.35} truncate>
-                        {m.locked ? `Upgrade to unlock` : m.hint}
+                        {m.locked ? "Out of questions" : m.hint}
                       </Text>
                     </Menu.Item>
                   ))}
 
-                  {/* One line naming the tier that unlocks the rest. The rows
-                      say "upgrade"; this says what to upgrade *to*, which is the
-                      part someone needs before they will click anything. */}
+                  {/* Every row locks together, so this only needs to say what
+                      to do about it, not which model it unlocks. */}
                   {models.some((m) => m.locked) && (
                     <>
                       <Menu.Divider />
@@ -407,8 +369,8 @@ export function OrbitChat({
                         onClick={() => goToBilling()}
                       >
                         <Text size="xs" c="dimmed" lh={1.35}>
-                          {plan?.name ?? "Your plan"} reaches {plan?.tier ?? "basic"} models.
-                          See plans
+                          {plan?.name ?? "Your plan"} is out of questions this period. Upgrade
+                          or buy a pack
                         </Text>
                       </Menu.Item>
                     </>
