@@ -5,6 +5,7 @@ import {
 import { Monitor, Smartphone, X } from "lucide-react";
 import { countHashtags, type CaptionEditorHandle } from "@/shared/components/CaptionEditor";
 import { LinkedInPreview } from "./LinkedInPreview";
+import { InstagramPreview } from "./InstagramPreview";
 import { ComposerContentStep } from "./ComposerContentStep";
 import { ComposerField } from "./ComposerField";
 import { ComposerFooter } from "./ComposerFooter";
@@ -196,15 +197,14 @@ export function PostComposer({
         {/* ---- Preview ---- */}
         <Box className="share-post-preview">
           <Group justify="space-between" align="center" mb="xl" wrap="nowrap">
-            {/* Named, because the preview chrome below is LinkedIn's feed. On
-                an Instagram post it stands in for the real thing — the caption
-                fold and the image crop differ — so the label says so rather
-                than presenting a LinkedIn mock as an Instagram one. */}
+            {/* Each network gets its own mock — the folds, the crop and the
+                chrome differ enough that one standing in for the other would
+                mislead. Still approximate: fonts and counts are ours. */}
             <Group gap={8} align="baseline" wrap="nowrap">
               <Text fw={700} size="lg">Preview</Text>
-              {draft.provider === "instagram" && (
-                <Text size="xs" c="dimmed">approximate — shown as a feed post</Text>
-              )}
+              <Text size="xs" c="dimmed">
+                approximate — {draft.provider === "instagram" ? "Instagram" : "LinkedIn"} feed
+              </Text>
             </Group>
             <Group gap={4} p={4} style={{ background: "var(--mantine-color-default)", borderRadius: "var(--mantine-radius-md)" }}>
               {([
@@ -229,14 +229,24 @@ export function PostComposer({
 
           <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
             <Box w="100%">
-              <LinkedInPreview
-                author={author}
-                headline="Publishing through Quantalog"
-                caption={draft.caption}
-                image={draft.image}
-                when={draft.mode === "once" ? describe(draft) : `${describe(draft)} · scheduled`}
-                device={device}
-              />
+              {draft.provider === "instagram" ? (
+                <InstagramPreview
+                  author={author}
+                  caption={draft.caption}
+                  image={draft.image}
+                  when={draft.mode === "once" ? describe(draft) : `${describe(draft)} · scheduled`}
+                  device={device}
+                />
+              ) : (
+                <LinkedInPreview
+                  author={author}
+                  headline="Publishing through Quantalog"
+                  caption={draft.caption}
+                  image={draft.image}
+                  when={draft.mode === "once" ? describe(draft) : `${describe(draft)} · scheduled`}
+                  device={device}
+                />
+              )}
             </Box>
           </Box>
         </Box>

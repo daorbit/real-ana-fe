@@ -138,6 +138,10 @@ export function LinkedInPreview({
         margin: "0 auto",
         borderRadius: 12,
         overflow: "hidden",
+        // The ring keeps the rounded corners from fringing against the pane —
+        // without it the light card edge anti-aliases to a pale hairline that
+        // reads as a stray white border on a dark background.
+        border: "1px solid rgba(0,0,0,0.35)",
         background: MOCK.page,
         boxShadow: "0 30px 70px rgba(0,0,0,0.45)",
       }}

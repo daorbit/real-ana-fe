@@ -175,23 +175,22 @@ function shade(hex: string, amount: number) {
   return rgbToHex(r + (target - r) * t, g + (target - g) * t, b + (target - b) * t);
 }
 
-/**
- * A 10-step Mantine-shaped scale (0 = near-white tint, 9 = near-black shade)
- * built from one mid-tone hex, so a single preset color drives every place
- * Mantine itself paints — buttons, badges, filled icons, focus rings.
- */
-function buildScale(hex: string): string[] {
-  return [
-    shade(hex, 0.92), shade(hex, 0.8), shade(hex, 0.64), shade(hex, 0.44), shade(hex, 0.22),
-    hex,
-    shade(hex, -0.14), shade(hex, -0.3), shade(hex, -0.46), shade(hex, -0.6),
-  ];
+ 
+function buildScale(hex: string, anchor: number): string[] {
+ 
+  const steps = [0.92, 0.8, 0.64, 0.44, 0.22, 0.08, -0.14, -0.3, -0.46, -0.6];
+  const at = steps[anchor];
+  return steps.map((s, i) => {
+    if (i === anchor) return hex;
+    // Re-space the remaining stops around the anchor so the ramp stays smooth:
+    // lighter stops keep their distance above it, darker ones below.
+    const rel = s > at
+      ? (s - at) / (steps[0] - at)   // 0..1 towards white
+      : (s - at) / (at - steps[9]);  // 0..-1 towards black
+    return shade(hex, rel * (s > at ? 0.92 : 0.72));
+  });
 }
-
-/** Fixed anchor points so every mesh preset has the same composition
- *  regardless of how many hues it carries — 1 hue reuses the first anchor,
- *  3+ ignores the rest. Kept separate from colour so hue and layout vary
- *  independently across the 20 presets. */
+ 
 const MESH_ANCHORS = [
   { pos: "20% 20%", alpha: 0.22, size: 55 },
   { pos: "80% 0%", alpha: 0.18, size: 50 },
@@ -244,10 +243,11 @@ export function applyTheme(prefs: ThemePrefs) {
   const dark = prefs.mode === "dark" ||
     (prefs.mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-  // A deeper shade in dark mode so filled surfaces don't glare neon; a
-  // slightly lighter one in light mode for hover states.
-  const accent = dark ? shade(preset.hex, -0.12) : preset.hex;
-  const accent2 = dark ? shade(preset.hex, 0.1) : shade(preset.hex, -0.15);
+  // The picked colour, exactly as the swatch shows it, in both modes — a
+  // preset that paints a darker shade of itself reads as the wrong colour.
+  // Only --accent-2 (gradient partner, hover) moves off it.
+  const accent = preset.hex;
+  const accent2 = dark ? shade(preset.hex, 0.12) : shade(preset.hex, -0.15);
   const accentSoft = dark
     ? `color-mix(in srgb, ${preset.hex} 18%, transparent)`
     : `color-mix(in srgb, ${preset.hex} 10%, transparent)`;
@@ -263,12 +263,12 @@ export function applyTheme(prefs: ThemePrefs) {
   // Mantine's own components (Button, Badge, ThemeIcon, focus rings, every
   // color="emerald" call site) resolve colour through these CSS vars, not
   // through the custom --accent ones above.
-  const scale = buildScale(preset.hex);
+ 
+  const primaryShadeIdx = dark ? 7 : 6;
+  const scale = buildScale(preset.hex, primaryShadeIdx);
   scale.forEach((c, i) => {
     root.style.setProperty(`--mantine-color-emerald-${i}`, c);
   });
-  // primaryShade is { light: 6, dark: 7 } in theme.ts.
-  const primaryShadeIdx = dark ? 7 : 6;
   const filled = scale[primaryShadeIdx];
   const filledHover = scale[Math.min(primaryShadeIdx + 1, 9)];
   // Mantine bakes -light / -light-hover / -text as literal computed colours
