@@ -860,9 +860,25 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 /* Step list on the brand panel. */
-.onb-steps { display: flex; flex-direction: column; gap: 1.1rem; }
-.onb-step { display: flex; align-items: flex-start; gap: 0.8rem; }
+/* Horizontal, sat under the header: progress reads left-to-right like the flow
+   it describes, and it frees the panel below for the visual. Each step is an
+   equal track so the connectors line up regardless of label length. */
+.onb-steps { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0; margin-bottom: 2.5rem; }
+/* The connector runs from this marker to the next one. Drawn per step and
+   suppressed on the last, so it stays correct for any number of steps, and
+   tinted once the step is done — the rail doubles as the progress bar. */
+.onb-step { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0.55rem; padding-right: 1rem; }
+.onb-step::before {
+  content: ""; position: absolute; left: 28px; top: 13px;
+  height: 2px; right: 0;
+  background: rgba(255, 255, 255, 0.12);
+}
+.onb-step:last-child::before { display: none; }
+.onb-step[data-state="done"]::before {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
 .onb-step-ic {
+  position: relative; z-index: 1;
   width: 28px; height: 28px; border-radius: 50%;
   display: grid; place-items: center; flex-shrink: 0;
   font-size: 0.78rem; font-weight: 700;
@@ -875,21 +891,78 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--accent);
   border-color: var(--accent);
   color: #04150e;
+  /* Halo so the active step is findable without reading the numbers. */
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 .onb-step[data-state="done"] .onb-step-ic {
   background: color-mix(in srgb, var(--accent) 22%, transparent);
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   color: var(--accent);
 }
-.onb-step-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.onb-step-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-right: 0.5rem; }
 .onb-step-label {
-  font-size: 0.92rem; font-weight: 600;
+  font-size: 0.88rem; font-weight: 600;
   color: rgba(255, 255, 255, 0.55);
   transition: color 0.25s ease;
 }
 .onb-step[data-state="current"] .onb-step-label { color: #fff; }
 .onb-step[data-state="done"] .onb-step-label { color: rgba(255, 255, 255, 0.8); }
-.onb-step-hint { font-size: 0.76rem; color: rgba(255, 255, 255, 0.45); }
+.onb-step-hint { font-size: 0.74rem; color: rgba(255, 255, 255, 0.45); }
+
+/* Radar visual. Sits between the step rail and the proof strip, filling what
+   was empty panel below a three-item list. */
+.onb-visual { display: flex; justify-content: center; margin: 0.5rem 0 2.25rem; }
+.onb-radar {
+  position: relative; width: 100%; max-width: 320px; aspect-ratio: 1;
+}
+.onb-ring {
+  position: absolute; inset: 0; margin: auto; border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.onb-ring-1 { width: 100%; height: 100%; }
+.onb-ring-2 { width: 66%; height: 66%; }
+.onb-ring-3 {
+  width: 33%; height: 33%;
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+/* The sweep is a single accent wedge rotated forever — a conic gradient keeps
+   it to one element with no JS driving it. */
+.onb-sweep {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--accent) 34%, transparent) 0deg,
+    transparent 55deg,
+    transparent 360deg
+  );
+  mask-image: radial-gradient(circle, #000 62%, transparent 71%);
+  -webkit-mask-image: radial-gradient(circle, #000 62%, transparent 71%);
+  animation: onb-sweep 6s linear infinite;
+}
+@keyframes onb-sweep { to { transform: rotate(360deg); } }
+
+.onb-ping {
+  position: absolute; width: 8px; height: 8px; border-radius: 50%;
+  margin: -4px 0 0 -4px;
+  background: var(--accent);
+  animation: onb-ping 4s ease-out infinite;
+}
+@keyframes onb-ping {
+  0%, 100% { opacity: 0.25; box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+  12% { opacity: 1; }
+  60% { box-shadow: 0 0 0 14px transparent; }
+}
+
+/* The sweep and pings are ambient, not informative — anyone who has asked for
+   less motion loses nothing by holding them still. */
+@media (prefers-reduced-motion: reduce) {
+  .onb-sweep, .onb-ping { animation: none; }
+  .onb-ping { opacity: 0.85; }
+}
+
+@media (max-width: 1100px) {
+  .onb-radar { max-width: 230px; }
+}
 
 /* Framework picker tile — logo above label, so the mark is what you scan. */
 .onb-fw {

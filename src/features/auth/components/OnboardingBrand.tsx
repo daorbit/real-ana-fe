@@ -2,6 +2,51 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Wordmark } from "@/shared/ui/Brand";
 
+// Not the signup strip's claims — "No credit card" is answering a question this
+// person already got past. These are about the setup itself.
+const PROOF = ["Takes two minutes", "Skip and return later", "One script tag"];
+
+/** Where the pings sit on the radar, as percentages of the box. */
+const PINGS = [
+  { x: 30, y: 32, d: 0 },
+  { x: 68, y: 24, d: 1.1 },
+  { x: 78, y: 58, d: 2.2 },
+  { x: 24, y: 66, d: 0.6 },
+  { x: 52, y: 78, d: 1.7 },
+  { x: 46, y: 46, d: 2.8 },
+];
+
+/**
+ * A radar sweeping over visitor pings — the product's own idea (traffic
+ * arriving live from everywhere) rather than a decorative shape, and it gives
+ * the panel something to look at while the form is being filled in.
+ *
+ * Pure CSS/SVG animation: no state, so it costs nothing per frame in React.
+ */
+function OnboardingVisual() {
+  return (
+    <div className="onb-visual" aria-hidden="true">
+      <div className="onb-radar">
+        <span className="onb-ring onb-ring-1" />
+        <span className="onb-ring onb-ring-2" />
+        <span className="onb-ring onb-ring-3" />
+        <span className="onb-sweep" />
+        {PINGS.map((p) => (
+          <span
+            key={`${p.x}-${p.y}`}
+            className="onb-ping"
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              animationDelay: `${p.d}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /**
  * The left panel during first-run setup.
  *
@@ -47,9 +92,7 @@ export function OnboardingBrand({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          Let&apos;s get you
-          <br />
-          tracking.
+          Let&apos;s get you tracking.
         </motion.h2>
 
         <motion.p
@@ -61,6 +104,8 @@ export function OnboardingBrand({
           any of it and come back later.
         </motion.p>
 
+        {/* Above the visual, directly under the copy — progress is the thing
+            someone checks most often here, so it sits highest. */}
         <div className="onb-steps">
           {steps.map((s, i) => {
             const done = i < step;
@@ -85,6 +130,24 @@ export function OnboardingBrand({
             );
           })}
         </div>
+
+        <OnboardingVisual />
+
+        {/* Same strip as the auth panel — keeps the two screens feeling like
+            one flow, and fills the space left under a three-item list. */}
+        <motion.div
+          className="ab-proof"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.7 }}
+        >
+          {PROOF.map((p) => (
+            <span key={p} className="ab-proof-item">
+              <Check size={13} />
+              {p}
+            </span>
+          ))}
+        </motion.div>
       </div>
     </div>
   );
