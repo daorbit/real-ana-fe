@@ -2337,17 +2337,28 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    you can jump tabs without scrolling back up. */
 .seo-tabbar {
   position: sticky;
-  top: 0;
+  /* The scroll container is `.app-panel__scroll`, which has its own padding.
+     Sticking at `top: 0` pins the bar at the *padding* edge, so a strip of
+     whatever is scrolling past stayed visible above it — the score card bled
+     through the gap. Pulled up and out by that padding, then given it back as
+     its own, the bar meets the top of the scroll box exactly and covers the
+     full width of it. */
+  top: calc(var(--seo-tabbar-inset) * -1);
   z-index: 5;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 calc(var(--radius) * -1);
-  padding: 0 var(--radius);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: saturate(1.4) blur(8px);
-  -webkit-backdrop-filter: saturate(1.4) blur(8px);
+  margin: calc(var(--seo-tabbar-inset) * -1) calc(var(--seo-tabbar-inset) * -1) 0;
+  padding: var(--seo-tabbar-inset) var(--seo-tabbar-inset) 0;
+  /* Opaque. A translucent bar over a blur still ghosted the tiles passing
+     underneath, which on a dense report reads as a rendering fault rather
+     than as depth. */
+  background: var(--shell);
   border-bottom: 1px solid var(--border);
+}
+.seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-md); }
+@media (max-width: 48em) {
+  .seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-sm); }
 }
 .seo-tabbar-track {
   display: flex;
