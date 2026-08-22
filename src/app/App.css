@@ -1779,8 +1779,21 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   min-height: 100dvh;
   background: var(--bg);
 }
-.auth-panel { display: flex; align-items: center; justify-content: center; padding: 2rem; background: var(--bg); }
-.auth-form { width: 100%; max-width: 380px; }
+/* The panel was flat, which left the form floating in dead space with nothing
+   tying it to the brand side. A faint accent wash bleeding in from the seam
+   carries the gradient across without competing with the inputs. */
+.auth-panel {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem; background: var(--bg);
+}
+.auth-panel::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 0% 30%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+    radial-gradient(50% 40% at 100% 100%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%);
+}
+.auth-form { position: relative; z-index: 1; width: 100%; max-width: 380px; }
 
 @media (max-width: 48em) {
   /* The 2rem gutter left a 380px form only ~296px on a small phone, which
@@ -1795,16 +1808,29 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Brand panel */
 .auth-brand {
-  position: relative; overflow: hidden; padding: 3.5rem;
+  position: relative; overflow: hidden;
+  /* The card makes this column taller than it was, so it scrolls rather than
+     clipping the proof strip on a short laptop viewport. */
+  /* Scroll stays for short viewports, but the bar itself is hidden — it sat on
+     the seam between the two panels and read as a page-level scrollbar. */
+  padding: 3.25rem 3.5rem; overflow-y: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
   display: flex; align-items: center;
   /* A near-black base tinted by the live accent rather than a fixed hue, so
      the login panel matches whichever preset is active instead of always
-     reading green. */
-  background: linear-gradient(165deg, #0a0c0d 0%,
-    color-mix(in srgb, var(--accent) 26%, #0a0c0d) 50%,
-    color-mix(in srgb, var(--accent) 55%, #0a0c0d) 100%);
+     reading green. The accent is held well below half strength and pushed to
+     one corner: at 55% it flooded the bottom of the panel, which muddied the
+     white text and left no dark ground for the card to sit against. */
+  background:
+    radial-gradient(90% 70% at 12% 108%,
+      color-mix(in srgb, var(--accent) 42%, transparent) 0%, transparent 62%),
+    radial-gradient(70% 55% at 96% -8%,
+      color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 60%),
+    linear-gradient(160deg, #0b0d0f 0%, #0a0c0d 55%, #090a0c 100%);
   color: #fff;
 }
+.auth-brand::-webkit-scrollbar { width: 0; height: 0; }
+
 .ab-grid {
   position: absolute; inset: 0;
   background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
@@ -1813,25 +1839,109 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 30%, transparent 75%);
 }
 .ab-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
-.ab-orb-1 { width: 320px; height: 320px; background: rgba(16,185,129,0.30); top: -80px; right: -60px; }
-.ab-orb-2 { width: 260px; height: 260px; background: rgba(52,211,153,0.16); bottom: -60px; left: -40px; }
+/* Were hardcoded emerald, so they stayed green on every other accent preset. */
+.ab-orb-1 { width: 320px; height: 320px; background: color-mix(in srgb, var(--accent) 30%, transparent); top: -80px; right: -60px; }
+.ab-orb-2 { width: 260px; height: 260px; background: color-mix(in srgb, var(--accent) 16%, transparent); bottom: -60px; left: -40px; }
 
-.ab-chip {
-  position: absolute; z-index: 2;
-  background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;
-  padding: 0.6rem 0.9rem; display: flex; flex-direction: column; gap: 2px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+/* Live dashboard miniature. Replaces the three floating chips: one focal
+   point, and it shows the product instead of describing it. */
+.ab-card {
+  position: relative; z-index: 3;
+  margin: 0 0 1.9rem;
+  padding: 1.2rem 1.35rem 1.15rem;
+  border-radius: 18px;
+  /* A flat translucent white box read as a generic glass panel. A faint accent
+     tint plus a lit top edge gives it a light source and ties it to the
+     gradient behind it. */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035)),
+    color-mix(in srgb, var(--accent) 7%, rgba(10,12,13,0.55));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.13);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    0 20px 50px rgba(0,0,0,0.42);
 }
-.ab-chip-val { font-weight: 800; font-size: 1.15rem; line-height: 1; }
-.ab-chip-label { font-size: 0.68rem; opacity: 0.85; }
+/* Badge pushed to the far edge so the head reads as a real panel header rather
+   than two labels stuck together. */
+.ab-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.6rem; margin-bottom: 0.7rem;
+}
+.ab-card-title {
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: rgba(255,255,255,0.55);
+}
+.ab-live {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.12); border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+}
+.ab-live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent);
+  animation: ab-pulse 2s ease-out infinite;
+}
+@keyframes ab-pulse {
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
 
-.ab-content { position: relative; z-index: 3; max-width: 400px; }
-.ab-content h2 { color: #fff; font-size: 2rem; line-height: 1.18; margin: 2rem 0 1rem; letter-spacing: -0.02em; }
-.ab-content > p { color: rgba(255,255,255,0.88); line-height: 1.6; font-size: 1.02rem; margin: 0 0 2rem; }
+.ab-card-figure { display: flex; align-items: baseline; gap: 0.5rem; }
+.ab-card-value {
+  font-size: 2.1rem; font-weight: 800; line-height: 1; color: #fff;
+  letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+}
+.ab-card-delta {
+  display: inline-flex; align-items: center; gap: 0.2rem;
+  font-size: 0.75rem; font-weight: 600;
+  color: color-mix(in srgb, var(--accent) 70%, #fff);
+}
+
+/* Bars became an area sparkline: a continuous trend line says "traffic over
+   time" at a glance, where twelve identical bars just read as decoration. */
+.ab-spark {
+  display: block; width: 100%; height: 58px;
+  margin: 0.85rem 0 0.15rem; overflow: visible;
+}
+
+.ab-card-foot {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+  padding-top: 0.85rem; border-top: 1px solid rgba(255,255,255,0.12);
+}
+.ab-stat { display: flex; flex-direction: column; gap: 2px; }
+.ab-stat-val {
+  font-size: 1rem; font-weight: 700; color: #fff; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ab-stat-label { font-size: 0.66rem; color: rgba(255,255,255,0.6); }
+
+/* Its own row under the stats. Absolute-positioning it into the corner would
+   have overlapped the third stat's label at narrow widths. */
+.ab-card-note {
+  display: block; margin-top: 0.9rem; text-align: right;
+  font-size: 0.62rem; color: rgba(255,255,255,0.34); letter-spacing: 0.02em;
+}
+
+.ab-content { position: relative; z-index: 3; max-width: 430px; width: 100%; margin: auto 0; }
+.ab-content h2 { color: #fff; font-size: 2.05rem; line-height: 1.16; margin: 1.75rem 0 0.9rem; letter-spacing: -0.025em; }
+.ab-content > p { color: rgba(255,255,255,0.82); line-height: 1.6; font-size: 1rem; margin: 0 0 1.75rem; }
 .ab-features { display: flex; flex-direction: column; gap: 0.85rem; }
 .ab-feature { display: flex; align-items: center; gap: 0.7rem; font-size: 0.92rem; color: rgba(255,255,255,0.95); font-weight: 500; }
 .ab-feature-ic { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.15); display: grid; place-items: center; flex-shrink: 0; }
+.ab-proof {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem;
+  margin-top: 2.25rem; padding-top: 1.35rem;
+  border-top: 1px solid rgba(255,255,255,0.14);
+}
+.ab-proof-item {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.72);
+}
+.ab-proof-item svg { color: var(--accent); flex-shrink: 0; }
+
 .auth-brand .wordmark-text { color: #fff; }
 .auth-brand .wordmark-dot { color: var(--accent); }
 

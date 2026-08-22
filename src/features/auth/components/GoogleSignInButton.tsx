@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Button } from "@mantine/core";
+import { Box, Button, Tooltip } from "@mantine/core";
 import { useAuth } from "@/features/auth/context";
 
 
@@ -157,11 +157,20 @@ export default function GoogleSignInButton({
     document.body.appendChild(script);
   }, [render]);
 
+  // The button shares a `Group grow` row with LinkedIn, so it only gets half the
+  // form width — the old copy overflowed and truncated mid-word. The reason
+  // moves to the tooltip, which has room for it.
   if (!CLIENT_ID) {
     return (
-      <Button variant="default" fullWidth size="md" disabled leftSection={<GoogleIcon />}>
-        Google sign-in unavailable
-      </Button>
+      <Tooltip label="Google sign-in is not configured" withArrow>
+        {/* A disabled button fires no pointer events, so the tooltip would
+            never open without a wrapper to listen on. */}
+        <Box>
+          <Button variant="default" fullWidth size="md" disabled leftSection={<GoogleIcon />}>
+            Google
+          </Button>
+        </Box>
+      </Tooltip>
     );
   }
 
