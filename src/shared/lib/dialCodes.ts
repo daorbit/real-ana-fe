@@ -83,19 +83,10 @@ export const DIAL_CODES: DialCode[] = [
 
 /** The default selection, guessed from the browser rather than assumed. */
 export function guessCountry(): DialCode {
-  const fallback = DIAL_CODES[0];
-  try {
-    // "en-IN" / "en-GB" — the region subtag is the only part that helps here.
-    const region = new Intl.Locale(navigator.language).region;
-    if (region) {
-      const hit = DIAL_CODES.find((c) => c.iso === region.toUpperCase());
-      if (hit) return hit;
-    }
-  } catch {
-    // Old browser, or a language tag Intl.Locale won't parse — the default is
-    // a fine answer, and the user can change it.
-  }
-  return fallback;
+  // India, regardless of browser locale — most of the base is Indian, and
+  // `navigator.language`'s region subtag was guessing US/GB for the rest
+  // often enough that the default stopped being a useful guess.
+  return DIAL_CODES[0];
 }
 
 /**
