@@ -378,5 +378,13 @@
     "deleteSiteConsequenceSnippet": "Aplikasi apa pun yang masih menjalankan cuplikan akan berhenti mengirim data",
     "deletedSiteToast": "Situs \"{{name}}\" dihapus.",
     "deleteSiteError": "Tidak dapat menghapus situs."
+  },
+  "reports": {
+    "previewTitle": "Pratinjau",
+    "previewBadge": "Langsung",
+    "previewHint": "Diperbarui saat Anda mengubah formulir. Ini struktur laporan, bukan angka sebenarnya.",
+    "previewEmpty": "Belum ada yang dipilih — laporan ini akan tiba kosong.",
+    "previewNoChannel": "Tanpa saluran pengiriman",
+    "previewPaused": "Dijeda"
   }
 }

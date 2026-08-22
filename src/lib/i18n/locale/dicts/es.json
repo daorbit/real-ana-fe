@@ -379,5 +379,13 @@
     "deleteSiteConsequenceSnippet": "Cualquier aplicación que aún ejecute el fragmento deja de enviar datos",
     "deletedSiteToast": "Sitio «{{name}}» eliminado.",
     "deleteSiteError": "No se pudo eliminar el sitio."
+  },
+  "reports": {
+    "previewTitle": "Vista previa",
+    "previewBadge": "En vivo",
+    "previewHint": "Se actualiza al cambiar el formulario. Es la estructura del informe, no datos reales.",
+    "previewEmpty": "Nada seleccionado todavía: este informe llegaría vacío.",
+    "previewNoChannel": "Sin canal de envío",
+    "previewPaused": "En pausa"
   }
 }

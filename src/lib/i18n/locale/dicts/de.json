@@ -379,5 +379,13 @@
     "deleteSiteConsequenceSnippet": "Jede App, die das Snippet noch ausführt, sendet keine Daten mehr",
     "deletedSiteToast": "Website „{{name}}“ gelöscht.",
     "deleteSiteError": "Die Website konnte nicht gelöscht werden."
+  },
+  "reports": {
+    "previewTitle": "Vorschau",
+    "previewBadge": "Live",
+    "previewHint": "Aktualisiert sich beim Ändern des Formulars. Dies ist die Struktur des Berichts, keine echten Zahlen.",
+    "previewEmpty": "Noch nichts ausgewählt — dieser Bericht käme leer an.",
+    "previewNoChannel": "Kein Versandkanal",
+    "previewPaused": "Pausiert"
   }
 }

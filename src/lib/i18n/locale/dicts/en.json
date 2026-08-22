@@ -1037,7 +1037,13 @@
     "includeLinkLabel": "Link to the live dashboard",
     "includeLinkOnDesc": "Recipients can open the public dashboard at any time",
     "includeLinkOffDesc": "Requires the public dashboard to be turned on — until then, no link is included",
-    "dashboardOffWarning": "The public dashboard is currently off, so no link will be included. Turn it on under Public dashboard first — note that it makes this workspace's analytics readable by anyone with the link."
+    "dashboardOffWarning": "The public dashboard is currently off, so no link will be included. Turn it on under Public dashboard first — note that it makes this workspace's analytics readable by anyone with the link.",
+    "previewTitle": "Preview",
+    "previewBadge": "Live",
+    "previewHint": "Updates as you change the form. This is the shape of the report, not real figures.",
+    "previewEmpty": "Nothing selected yet — this report would arrive empty.",
+    "previewNoChannel": "No delivery channel",
+    "previewPaused": "Paused"
   },
   "billing": {
     "title": "Billing",

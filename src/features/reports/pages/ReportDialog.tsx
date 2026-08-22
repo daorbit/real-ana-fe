@@ -1,13 +1,16 @@
 import {
-  Text, Group, Button, Stack, Badge, Modal, TextInput, Select, Switch,
-  ActionIcon, Alert, Checkbox, MultiSelect, Divider, Tabs,
+  Text, Group, Button, Modal, ActionIcon, Divider, Box, Badge, Tooltip,
 } from "@mantine/core";
-import { CalendarClock, Send, BarChart3, MessageCircle, ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronLeft, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { REPORT_FREQUENCIES } from "@/shared/types";
-import type { ReportFrequency, Site, ShareState, WhatsAppStatus } from "@/shared/types";
+import type { Site, ShareState, WhatsAppStatus } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
-import { frequencyHint, frequencyLabel, TAB_ORDER } from "@/features/reports/pages/utils";
+import { TAB_ORDER } from "@/features/reports/pages/utils";
+import { ReportSteps } from "@/features/reports/components/ReportSteps";
+import { ReportPreview } from "@/features/reports/components/ReportPreview";
+import { ScheduleStep } from "@/features/reports/components/ScheduleStep";
+import { DeliveryStep } from "@/features/reports/components/DeliveryStep";
+import { ContentStep } from "@/features/reports/components/ContentStep";
 
 /**
  * The create/edit dialog.
@@ -16,6 +19,12 @@ import { frequencyHint, frequencyLabel, TAB_ORDER } from "@/features/reports/pag
  * page owns the draft and this file only decides how it looks. That keeps the
  * validation (which needs to move tabs) in one place rather than split across
  * the boundary.
+ *
+ * Full-screen with a live preview, matching the share composer — the form is
+ * long enough that a centred `size="lg"` box scrolled its own save button out
+ * of reach, and none of the choices showed their effect until the first report
+ * actually arrived. This file is the shell only; each step and the preview live
+ * in `../components`.
  */
 export function ReportDialog({
   opened,
@@ -63,246 +72,135 @@ export function ReportDialog({
   ownerMobile: string;
 }) {
   const { t } = useTranslation();
+
   return (
-      <Modal
-        opened={opened}
-        onClose={onClose}
-        title={editingId ? t("reports.dialogEditTitle") : t("reports.dialogNewTitle")}
-        radius="lg"
-        size="lg"
-        centered
-      >
-        {/* Three tabs rather than one column: the form is long enough that the
-            save button used to sit below the fold, and the groups are read at
-            different times — schedule once, delivery when a client changes,
-            content when the report looks wrong. */}
-        <Tabs value={tab} onChange={(v) => setTab(v ?? TAB_ORDER[0])} keepMounted={false}>
-          <Tabs.List mb="md">
-            <Tabs.Tab value="schedule" leftSection={<CalendarClock size={14} />}>
-              {t("reports.tabSchedule")}
-            </Tabs.Tab>
-            <Tabs.Tab value="delivery" leftSection={<Send size={14} />}>
-              {t("reports.tabDelivery")}
-            </Tabs.Tab>
-            <Tabs.Tab value="content" leftSection={<BarChart3 size={14} />}>
-              {t("reports.tabContent")}
-            </Tabs.Tab>
-          </Tabs.List>
-
-        <Tabs.Panel value="schedule">
-        <Stack gap="md">
-          <TextInput
-            label={t("reports.nameLabel")}
-            placeholder={t("reports.namePlaceholder")}
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.currentTarget.value })}
-          />
-
-          <Select
-            label={t("reports.howOften")}
-            description={frequencyHint(draft.frequency)}
-            data={REPORT_FREQUENCIES.map((f) => ({ value: f, label: frequencyLabel(f) }))}
-            value={draft.frequency}
-            onChange={(v) => v && setDraft({ ...draft, frequency: v as ReportFrequency })}
-            allowDeselect={false}
-          />
-
-          <MultiSelect
-            label={t("reports.sitesLabel")}
-            description={t("reports.sitesDesc")}
-            placeholder={draft.siteIds.length ? undefined : t("reports.allSitesPlaceholder")}
-            data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-            value={draft.siteIds}
-            onChange={(v) => setDraft({ ...draft, siteIds: v })}
-            searchable
-            clearable
-          />
-
-          <Switch
-            label={t("reports.activeLabel")}
-            description={t("reports.activeDesc")}
-            checked={draft.enabled}
-            onChange={(e) => setDraft({ ...draft, enabled: e.currentTarget.checked })}
-          />
-        </Stack>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="delivery">
-        <Stack gap="md">
-          <div>
-            <Text size="sm" fw={500} mb={4}>{t("reports.deliverBy")}</Text>
-            <Text size="xs" c="dimmed" mb={8}>
-              {t("reports.deliverByDesc")}
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      fullScreen
+      withCloseButton={false}
+      padding={0}
+      transitionProps={{ transition: "fade", duration: 150 }}
+      styles={{
+        content: { display: "flex", flexDirection: "column", border: "none" },
+        body: { flex: 1, minHeight: 0, overflow: "hidden" },
+      }}
+    >
+      <Group h="100%" gap={0} align="stretch" wrap="nowrap" className="share-post-shell">
+        {/* ---- Form ---- */}
+        <Box className="share-post-composer">
+          <Group
+            gap="sm"
+            px={20}
+            py="md"
+            wrap="nowrap"
+            style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
+          >
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="lg"
+              onClick={onClose}
+              aria-label={t("common.cancel")}
+            >
+              <X size={18} />
+            </ActionIcon>
+            <Divider orientation="vertical" my={6} />
+            <Text fw={600}>
+              {editingId ? t("reports.dialogEditTitle") : t("reports.dialogNewTitle")}
             </Text>
-            <Stack gap={8}>
-              <Checkbox
-                label={t("reports.channelEmail")}
-                checked={draft.emailChannel}
-                onChange={(e) => setDraft({ ...draft, emailChannel: e.currentTarget.checked })}
-              />
-              <Checkbox
-                label={t("reports.channelWhatsApp")}
-                disabled={!waReady || !waEntitled}
-                // The platform's own paired number is an implementation
-                // detail, not something a customer needs on screen — what
-                // matters is where the message lands, which the notice below
-                // states.
-                //
-                // The plan check comes first: to someone on Free, "temporarily
-                // unavailable" would promise a channel that upgrading is the
-                // only way to get.
-                description={
-                  !waEntitled
-                    ? t("reports.waNotEntitled")
-                    : !wa?.configured
-                      ? t("reports.waNotConfigured")
-                      : wa.status === "connected"
-                        ? t("reports.waConnected")
-                        : t("reports.waUnavailable")
-                }
-                checked={draft.whatsappChannel}
-                onChange={(e) => setDraft({ ...draft, whatsappChannel: e.currentTarget.checked })}
-              />
-            </Stack>
-          </div>
+          </Group>
 
-          {draft.whatsappChannel && (
-            <Alert color="teal" radius="md" p="xs" icon={<MessageCircle size={15} />}>
-              <Text size="xs">
-                {ownerMobile
-                  ? t("reports.waNoticeWithNumber", { phone: ownerMobile })
-                  : t("reports.waNoticeNoNumber")}
-              </Text>
-            </Alert>
-          )}
+          <ReportSteps tab={tab} tabIndex={tabIndex} setTab={setTab} />
 
-          <div>
-            <Text size="sm" fw={500} mb={4}>{t("reports.alsoSendTo")}</Text>
-            <Text size="xs" c="dimmed" mb={8}>
-              {t("reports.alsoSendToDesc")}
-            </Text>
-            <Group gap="xs" mb={draft.recipients.length ? "xs" : 0}>
-              <TextInput
-                style={{ flex: 1 }}
-                placeholder={t("reports.emailPlaceholder")}
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.currentTarget.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addEmail();
-                  }
-                }}
-              />
-              <Button variant="light" onClick={addEmail}>{t("reports.add")}</Button>
-            </Group>
-            <Group gap={6}>
-              {draft.recipients.map((email) => (
-                <Badge
-                  key={email}
-                  variant="light"
-                  rightSection={
-                    <ActionIcon
-                      size="xs"
-                      variant="transparent"
-                      color="gray"
-                      onClick={() => removeEmail(email)}
-                    >
-                      ×
-                    </ActionIcon>
-                  }
-                >
-                  {email}
-                </Badge>
-              ))}
-            </Group>
-          </div>
-        </Stack>
-        </Tabs.Panel>
+          <Box style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+            <Box className="share-post-body">
+              {tab === "schedule" && (
+                <ScheduleStep draft={draft} setDraft={setDraft} sites={sites} />
+              )}
+              {tab === "delivery" && (
+                <DeliveryStep
+                  draft={draft}
+                  setDraft={setDraft}
+                  emailInput={emailInput}
+                  setEmailInput={setEmailInput}
+                  addEmail={addEmail}
+                  removeEmail={removeEmail}
+                  wa={wa}
+                  waReady={waReady}
+                  waEntitled={waEntitled}
+                  ownerMobile={ownerMobile}
+                />
+              )}
+              {tab === "content" && (
+                <ContentStep draft={draft} setDraft={setDraft} share={share} />
+              )}
+            </Box>
+          </Box>
 
-        <Tabs.Panel value="content">
-        <Stack gap="md">
-          <div>
-            <Text size="sm" fw={500} mb={8}>{t("reports.whatToInclude")}</Text>
-            <Stack gap={8}>
-              <Checkbox
-                label={t("reports.includeAnalyticsLabel")}
-                description={t("reports.includeAnalyticsDesc")}
-                checked={draft.analytics}
-                onChange={(e) => setDraft({ ...draft, analytics: e.currentTarget.checked })}
-              />
-              <Checkbox
-                label={t("reports.includeSeoLabel")}
-                description={t("reports.includeSeoDesc")}
-                checked={draft.seo}
-                onChange={(e) => setDraft({ ...draft, seo: e.currentTarget.checked })}
-              />
-              {/* Directly under analytics, because it is written from those
-                  figures and cannot appear without them — which is also why it
-                  disables rather than hides when analytics is off: a control
-                  that vanishes reads as a bug, one that greys out explains
-                  itself. */}
-              <Checkbox
-                label={t("reports.includeAiLabel")}
-                description={
-                  draft.analytics
-                    ? t("reports.includeAiDesc")
-                    : t("reports.includeAiNeedsAnalytics")
-                }
-                disabled={!draft.analytics}
-                checked={draft.aiSummary && draft.analytics}
-                onChange={(e) => setDraft({ ...draft, aiSummary: e.currentTarget.checked })}
-              />
-              <Checkbox
-                label={t("reports.includeXlsxLabel")}
-                description={t("reports.includeXlsxDesc")}
-                checked={draft.attachXlsx}
-                onChange={(e) => setDraft({ ...draft, attachXlsx: e.currentTarget.checked })}
-              />
-              <Checkbox
-                label={t("reports.includeLinkLabel")}
-                description={
-                  share?.enabled
-                    ? t("reports.includeLinkOnDesc")
-                    : t("reports.includeLinkOffDesc")
-                }
-                checked={draft.dashboardLink}
-                onChange={(e) => setDraft({ ...draft, dashboardLink: e.currentTarget.checked })}
-              />
-            </Stack>
-            {draft.dashboardLink && !share?.enabled && (
-              <Alert color="yellow" mt="xs" radius="md" p="xs">
-                <Text size="xs">
-                  {t("reports.dashboardOffWarning")}
-                </Text>
-              </Alert>
+          {/* Action bar, pinned so Save stays reachable however long the form.
+              Next rather than Save on the first two steps, so a new report walks
+              through all three — a Save offered on step one invites submitting a
+              half-filled form. Editing skips the walkthrough: the reason for
+              opening is usually one known field, so Save is available from
+              wherever that field is. */}
+          <Group
+            justify="space-between"
+            px={20}
+            py="md"
+            wrap="nowrap"
+            style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
+          >
+            {tabIndex > 0 ? (
+              <Button
+                variant="subtle"
+                color="gray"
+                onClick={() => setTab(TAB_ORDER[tabIndex - 1])}
+                leftSection={<ChevronLeft size={15} />}
+              >
+                {t("common.back")}
+              </Button>
+            ) : (
+              <Button variant="subtle" color="gray" onClick={onClose}>
+                {t("common.cancel")}
+              </Button>
             )}
-          </div>
-        </Stack>
-        </Tabs.Panel>
-        </Tabs>
 
-        {/* Outside the panels: saving is not a step of any one tab, and a
-            button that moves with the tab reads as saving only that tab.
+            {isLastTab || editingId ? (
+              <Button loading={saving} onClick={submit}>
+                {editingId ? t("common.save") : t("reports.scheduleReport")}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setTab(TAB_ORDER[tabIndex + 1])}
+                rightSection={<ChevronRight size={15} />}
+              >
+                {t("common.next")}
+              </Button>
+            )}
+          </Group>
+        </Box>
 
-            Next rather than Save on the first two tabs, so a new report walks
-            through all three — the tabs alone don't say there is more to see,
-            and a Save offered on tab one invites submitting a half-filled form.
-            Editing skips the walkthrough: the reason for opening is usually one
-            known field, so Save is available from wherever that field is. */}
-        <Divider my="md" />
-        <Group justify="flex-end">
-          <Button variant="subtle" onClick={onClose}>{t("common.cancel")}</Button>
-          {isLastTab || editingId ? (
-            <Button loading={saving} onClick={submit}>
-              {editingId ? t("common.save") : t("reports.scheduleReport")}
-            </Button>
-          ) : (
-            <Button onClick={() => setTab(TAB_ORDER[tabIndex + 1])} rightSection={<ChevronRight size={15} />}>
-              {t("common.next")}
-            </Button>
-          )}
-        </Group>
-      </Modal>
+        {/* ---- Preview ---- */}
+        <Box className="share-post-preview">
+          <Group justify="space-between" align="center" mb="xl" wrap="nowrap">
+            <Text fw={700} size="lg">{t("reports.previewTitle")}</Text>
+            <Tooltip label={t("reports.previewHint")} withArrow multiline w={240}>
+              <Badge variant="light" color="gray">{t("reports.previewBadge")}</Badge>
+            </Tooltip>
+          </Group>
+
+          <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
+            <Box w="100%">
+              <ReportPreview
+                draft={draft}
+                sites={sites}
+                shareEnabled={Boolean(share?.enabled)}
+              />
+            </Box>
+          </Box>
+        </Box>
+      </Group>
+    </Modal>
   );
 }

@@ -379,5 +379,13 @@
     "deleteSiteConsequenceSnippet": "Qualquer aplicação que ainda execute o snippet para de enviar dados",
     "deletedSiteToast": "Site \"{{name}}\" excluído.",
     "deleteSiteError": "Não foi possível excluir o site."
+  },
+  "reports": {
+    "previewTitle": "Pré-visualização",
+    "previewBadge": "Ao vivo",
+    "previewHint": "Atualiza conforme você altera o formulário. Esta é a estrutura do relatório, não dados reais.",
+    "previewEmpty": "Nada selecionado ainda — este relatório chegaria vazio.",
+    "previewNoChannel": "Sem canal de envio",
+    "previewPaused": "Pausado"
   }
 }

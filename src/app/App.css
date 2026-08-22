@@ -2845,6 +2845,73 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .share-post-tab:hover { color: var(--text) !important; }
 .share-post-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
+/* ---- Report dialog: numbered step strip ---- */
+.report-steps { overflow-x: auto; scrollbar-width: none; }
+.report-steps::-webkit-scrollbar { display: none; }
+.report-step {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.1rem 0.8rem 0;
+  margin-right: 1.1rem;
+  background: none; border: none; cursor: pointer;
+  font-size: 0.86rem; font-weight: 500; white-space: nowrap;
+  color: var(--mantine-color-dimmed);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.report-step[data-state="current"] {
+  color: var(--text); font-weight: 600; border-bottom-color: var(--accent);
+}
+.report-step[data-state="done"] { color: var(--text); }
+.report-step:hover { color: var(--text); }
+.report-step:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.report-step-num {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center;
+  font-size: 0.68rem; font-weight: 700;
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+  color: var(--mantine-color-dimmed);
+}
+.report-step[data-state="current"] .report-step-num {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+.report-step[data-state="done"] .report-step-num {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent);
+}
+
+/* ---- Report dialog: preview document ---- */
+/* Paper-like, so it reads as the thing that will arrive rather than another
+   panel of the app's own chrome. */
+.report-preview-doc {
+  max-width: 520px; margin: 0 auto; padding: 1.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--mantine-radius-lg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+.report-preview-head { padding-bottom: 1.1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.1rem; }
+.report-preview-kicker {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.35rem;
+}
+.report-preview-title {
+  font-size: 1.3rem; font-weight: 700; line-height: 1.25;
+  letter-spacing: -0.01em; color: var(--text);
+}
+.report-preview-scope { font-size: 0.8rem; color: var(--mantine-color-dimmed); margin-top: 0.3rem; }
+.report-preview-section-ic {
+  width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.report-preview-empty {
+  padding: 1.5rem; text-align: center;
+  border: 1px dashed var(--border); border-radius: var(--mantine-radius-md);
+}
+
 .caption-editor {
   min-height: 210px;
   max-height: 380px;

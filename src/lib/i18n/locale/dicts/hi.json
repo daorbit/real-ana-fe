@@ -379,5 +379,13 @@
     "deleteSiteConsequenceSnippet": "स्निपेट चला रहा कोई भी ऐप डेटा भेजना बंद कर देगा",
     "deletedSiteToast": "साइट “{{name}}” हटा दी गई।",
     "deleteSiteError": "साइट नहीं हटाई जा सकी।"
+  },
+  "reports": {
+    "previewTitle": "पूर्वावलोकन",
+    "previewBadge": "लाइव",
+    "previewHint": "फ़ॉर्म बदलने पर अपडेट होता है। यह रिपोर्ट की संरचना है, वास्तविक आंकड़े नहीं।",
+    "previewEmpty": "अभी कुछ चयनित नहीं — यह रिपोर्ट खाली पहुंचेगी।",
+    "previewNoChannel": "कोई डिलीवरी चैनल नहीं",
+    "previewPaused": "रोका गया"
   }
 }

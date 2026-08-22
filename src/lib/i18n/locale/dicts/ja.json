@@ -379,5 +379,13 @@
     "deleteSiteConsequenceSnippet": "スニペットを実行中のアプリからのデータ送信が停止します",
     "deletedSiteToast": "サイト「{{name}}」を削除しました。",
     "deleteSiteError": "サイトを削除できませんでした。"
+  },
+  "reports": {
+    "previewTitle": "プレビュー",
+    "previewBadge": "ライブ",
+    "previewHint": "フォームの変更に合わせて更新されます。実際の数値ではなくレポートの構成です。",
+    "previewEmpty": "まだ何も選択されていません — このレポートは空で届きます。",
+    "previewNoChannel": "配信チャネルなし",
+    "previewPaused": "一時停止中"
   }
 }

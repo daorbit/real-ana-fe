@@ -383,5 +383,13 @@
     "deleteSiteConsequenceSnippet": "أي تطبيق لا يزال يشغّل المقتطف سيتوقف عن إرسال البيانات",
     "deletedSiteToast": "تم حذف الموقع \"{{name}}\".",
     "deleteSiteError": "تعذّر حذف الموقع."
+  },
+  "reports": {
+    "previewTitle": "معاينة",
+    "previewBadge": "مباشر",
+    "previewHint": "يتحدّث أثناء تغيير النموذج. هذه بنية التقرير وليست أرقامًا حقيقية.",
+    "previewEmpty": "لم يتم تحديد أي شيء بعد — سيصل هذا التقرير فارغًا.",
+    "previewNoChannel": "لا توجد قناة إرسال",
+    "previewPaused": "متوقف مؤقتًا"
   }
 }

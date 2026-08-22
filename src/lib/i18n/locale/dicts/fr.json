@@ -379,5 +379,13 @@
     "deleteSiteConsequenceSnippet": "Toute application exécutant encore le snippet cesse d'envoyer des données",
     "deletedSiteToast": "Site « {{name}} » supprimé.",
     "deleteSiteError": "Impossible de supprimer le site."
+  },
+  "reports": {
+    "previewTitle": "Aperçu",
+    "previewBadge": "En direct",
+    "previewHint": "Se met à jour quand vous modifiez le formulaire. C'est la structure du rapport, pas de vrais chiffres.",
+    "previewEmpty": "Rien de sélectionné pour l'instant — ce rapport arriverait vide.",
+    "previewNoChannel": "Aucun canal d'envoi",
+    "previewPaused": "En pause"
   }
 }
