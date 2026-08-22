@@ -21,6 +21,7 @@ import { AppShell } from "@/app/AppShell";
 import { PlanGate } from "@/features/billing/components/PlanGate";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { StatCard } from "@/shared/ui/StatCard";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { WorldMap } from "@/shared/ui/WorldMap";
 import { ClicksPanel } from "@/features/analytics/components/ClicksPanel";
 import { Heatmap } from "@/shared/ui/Heatmap";
@@ -554,13 +555,12 @@ export default function Analytics() {
   if (!active) {
     return (
       <AppShell>
-        <Center mih="60vh">
-          <Stack align="center" gap="sm">
-            <ThemeIcon variant="light" size={56} radius="md"><FolderKanban size={28} /></ThemeIcon>
-            <Text c="dimmed">No workspace selected.</Text>
-            <Button component={Link} to="/app/workspaces">Go to Workspaces</Button>
-          </Stack>
-        </Center>
+        <EmptyState
+          icon={FolderKanban}
+          title="No workspace selected"
+          description="Analytics reports on the sites inside a workspace. Pick one — or create your first — and the numbers land here."
+          action={{ label: "Go to Workspaces", to: "/app/workspaces" }}
+        />
       </AppShell>
     );
   }

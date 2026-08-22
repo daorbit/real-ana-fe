@@ -1,4 +1,5 @@
 import { Button, Stack, Text } from "@mantine/core";
+import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 
 /**
@@ -21,8 +22,16 @@ export function EmptyState({
   icon: LucideIcon;
   title: string;
   description?: string;
+  /** Either a handler or a route — an empty state's action is as often "go
+   *  somewhere to create the missing thing" as it is "do something here", and
+   *  a router link keeps that a real anchor rather than a scripted push. */
   action?: {
-    label: string; onClick: () => void; disabled?: boolean; icon?: LucideIcon; loading?: boolean;
+    label: string;
+    onClick?: () => void;
+    to?: string;
+    disabled?: boolean;
+    icon?: LucideIcon;
+    loading?: boolean;
   };
   /** A line under the button — a caveat about the action rather than the
    *  empty state itself, e.g. "Takes a few seconds, costs no quota." */
@@ -58,6 +67,7 @@ export function EmptyState({
           disabled={action.disabled}
           loading={action.loading}
           onClick={action.onClick}
+          {...(action.to ? { component: Link, to: action.to } : {})}
         >
           {action.label}
         </Button>

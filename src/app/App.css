@@ -3359,14 +3359,45 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    sits in a soft tinted circle, one step off the page, and drifts slowly so
    the state reads as alive rather than as a stalled load. */
 .empty-state__icon {
+  position: relative;
   width: 88px;
   height: 88px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--surface-2);
-  color: var(--muted);
+  /* Tinted toward the brand rather than left flat grey. On a full-page empty
+     state the disc is the only thing on screen, and a grey circle on a grey
+     page read as a failed load rather than as a state. */
+  background: radial-gradient(
+    circle at 50% 35%,
+    color-mix(in srgb, var(--mantine-color-violet-5) 22%, transparent),
+    color-mix(in srgb, var(--mantine-color-violet-5) 8%, transparent) 70%
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mantine-color-violet-5) 26%, transparent);
+  color: var(--mantine-color-violet-4);
   animation: empty-state-float 5s ease-in-out infinite;
+}
+
+/* A slow halo behind the disc. Sized past the icon and blurred, so it reads as
+   light coming off it rather than as a second ring. */
+.empty-state__icon::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--mantine-color-violet-5) 18%, transparent),
+    transparent 65%
+  );
+  animation: empty-state-halo 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes empty-state-halo {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.12); }
 }
 .empty-state__icon[data-size="sm"] {
   width: 56px;
@@ -3376,7 +3407,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
-[data-motion="off"] .empty-state__icon { animation: none; }
+[data-motion="off"] .empty-state__icon,
+[data-motion="off"] .empty-state__icon::before { animation: none; }
 
 /* ============ Account menu ============
    The identity block at the head of the dropdown. Padded to the menu's own

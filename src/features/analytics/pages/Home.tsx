@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { StatCard } from "@/shared/ui/StatCard";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { HomeHero } from "@/features/analytics/components/HomeHero";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { RefreshButton } from "@/shared/ui/Refresh";
@@ -236,13 +237,13 @@ export default function Home() {
   if (!active) {
     return (
       <AppShell>
-        <Center mih="60vh">
-          <Stack align="center" gap="sm">
-            <ThemeIcon variant="light" size={56} radius="md"><FolderKanban size={28} /></ThemeIcon>
-            <Text c="dimmed">No workspace yet. Create one to get started.</Text>
-            <Button component={Link} to="/app/workspaces">Go to Workspaces</Button>
-          </Stack>
-        </Center>
+        <EmptyState
+          icon={FolderKanban}
+          title="No workspace yet"
+          description="A workspace holds your sites and everything measured on them. Create one and the tracker snippet is a minute away."
+          action={{ label: "Create a workspace", to: "/app/workspaces", icon: Plus }}
+          actionNote="Free to start — no card needed."
+        />
       </AppShell>
     );
   }
