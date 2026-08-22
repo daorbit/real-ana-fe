@@ -119,7 +119,7 @@ export default function Login() {
 
   return (
     <div className="auth-split">
-      <AuthBrand />
+      <AuthBrand onDemo={enterDemo} demoBusy={demoBusy} />
       <div className="auth-panel">
         <motion.form
           className="auth-form"
@@ -213,14 +213,10 @@ export default function Login() {
               Log in
             </Button>
 
-            {/* Sign-up is the primary thing to offer someone who can't log in, so
-                it gets the emphasis. The demo sits beside it as a quieter
-                alternative — it was a full-width button competing with Google,
-                which is far more weight than "have a look around" deserves. */}
-            {/* A real button so the demo is actually findable, but subtle and
-                not full width — it should read as a third option, not as a peer
-                of Google and the password form. */}
-            <Group justify="center" mt={2}>
+            {/* The demo's real home is the brand panel now. That panel is
+                hidden below 900px, so this stays as the mobile-only fallback —
+                without it the demo would be unreachable on a phone. */}
+            <Group justify="center" mt={2} className="auth-demo-fallback">
               <Button
                 variant="subtle"
                 color="gray"

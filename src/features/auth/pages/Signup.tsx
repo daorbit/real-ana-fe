@@ -145,7 +145,7 @@ export default function Signup() {
 
   return (
     <div className="auth-split">
-      <AuthBrand />
+      <AuthBrand onDemo={enterDemo} demoBusy={demoBusy} />
       <div className="auth-panel">
         <motion.form
           className="auth-form"
@@ -264,16 +264,10 @@ export default function Signup() {
               Create account
             </Button>
 
-            {/* Logging in is the primary thing to offer someone who already has
-                an account. The demo sits under it as a quieter alternative for
-                people who want to see the product before handing over an email —
-                worth offering, but not worth a full-width button competing with
-                the two real sign-up paths. */}
-            {/* Some people want to see the product before handing over an email.
-                A real button so it's findable, but subtle and not full width —
-                it should read as a third option, not as a peer of the two real
-                sign-up paths. */}
-            <Group justify="center" mt={2}>
+            {/* The demo's real home is the brand panel now. That panel is
+                hidden below 900px, so this stays as the mobile-only fallback —
+                without it the demo would be unreachable on a phone. */}
+            <Group justify="center" mt={2} className="auth-demo-fallback">
               <Button
                 variant="subtle"
                 color="gray"

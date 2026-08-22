@@ -1815,7 +1815,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
      the seam between the two panels and read as a page-level scrollbar. */
   padding: 3.25rem 3.5rem; overflow-y: auto;
   scrollbar-width: none; -ms-overflow-style: none;
-  display: flex; align-items: center;
+  display: flex; align-items: center; justify-content: flex-start;
   /* A near-black base tinted by the live accent rather than a fixed hue, so
      the login panel matches whichever preset is active instead of always
      reading green. The accent is held well below half strength and pushed to
@@ -1860,7 +1860,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border: 1px solid rgba(255,255,255,0.13);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.16),
-    0 20px 50px rgba(0,0,0,0.42);
+    0 1px 2px rgba(0,0,0,0.4),
+    0 8px 16px rgba(0,0,0,0.3),
+    0 24px 60px rgba(0,0,0,0.5);
 }
 /* Badge pushed to the far edge so the head reads as a real panel header rather
    than two labels stuck together. */
@@ -1907,9 +1909,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   margin: 0.85rem 0 0.15rem; overflow: visible;
 }
 
+/* Three stats plus the sample-data caption on the same baseline. `auto` on the
+   last track lets the caption keep its natural width so the stats stay even. */
 .ab-card-foot {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
-  padding-top: 0.85rem; border-top: 1px solid rgba(255,255,255,0.12);
+  display: grid; grid-template-columns: repeat(3, 1fr) auto;
+  align-items: end; gap: 0.5rem;
+  padding-top: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1);
 }
 .ab-stat { display: flex; flex-direction: column; gap: 2px; }
 .ab-stat-val {
@@ -1920,17 +1925,80 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Its own row under the stats. Absolute-positioning it into the corner would
    have overlapped the third stat's label at narrow widths. */
+/* Sits on the footer's own baseline rather than a row of its own — as a
+   separate right-aligned line it collided with the third stat's label. */
 .ab-card-note {
-  display: block; margin-top: 0.9rem; text-align: right;
   font-size: 0.62rem; color: rgba(255,255,255,0.34); letter-spacing: 0.02em;
+  align-self: end; text-align: right; white-space: nowrap;
 }
 
-.ab-content { position: relative; z-index: 3; max-width: 430px; width: 100%; margin: auto 0; }
-.ab-content h2 { color: #fff; font-size: 2.05rem; line-height: 1.16; margin: 1.75rem 0 0.9rem; letter-spacing: -0.025em; }
-.ab-content > p { color: rgba(255,255,255,0.82); line-height: 1.6; font-size: 1rem; margin: 0 0 1.75rem; }
-.ab-features { display: flex; flex-direction: column; gap: 0.85rem; }
-.ab-feature { display: flex; align-items: center; gap: 0.7rem; font-size: 0.92rem; color: rgba(255,255,255,0.95); font-weight: 500; }
+/* Was capped at 430px, which left the right half of a wide panel empty while
+   the copy stayed squeezed into a narrow column. The cap now scales with the
+   panel and only the prose keeps a measure limit, so the card, demo CTA and
+   feature grid can use the full width. */
+/* Left-aligned in the panel, vertically centred. The column stays capped so
+   the prose keeps a readable measure instead of stretching the full width. */
+.ab-content {
+  position: relative; z-index: 3;
+  max-width: 620px; width: 100%; margin: auto 0;
+}
+/* The hardcoded <br /> is gone — it fought this measure and orphaned "for" on
+   its own line. `balance` keeps the two lines close to even at any width. */
+.ab-content h2 {
+  color: #fff; font-size: 2.35rem; line-height: 1.14;
+  margin: 1.75rem 0 0.9rem; letter-spacing: -0.025em;
+  max-width: 20ch; text-wrap: balance;
+}
+.ab-content > p { color: rgba(255,255,255,0.82); line-height: 1.6; font-size: 1.02rem; margin: 0 0 1.9rem; max-width: 46ch; }
+/* Two columns filled down rather than across: three items in the left column,
+   two in the right. `grid-auto-flow: column` with three explicit rows is what
+   splits them 3/2 — the default row flow would put 1-2 on the first row and
+   strand the fifth. */
+.ab-features {
+  display: grid;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.9rem 1.5rem;
+}
+.ab-feature { display: flex; align-items: center; gap: 0.7rem; font-size: 0.9rem; color: rgba(255,255,255,0.92); font-weight: 500; }
 .ab-feature-ic { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.15); display: grid; place-items: center; flex-shrink: 0; }
+/* Stacked, both full width. Side by side, the card got too narrow for its own
+   stat labels and the CTA read as a stranded box floating beside it. */
+.ab-showcase {
+  display: flex; flex-direction: column; gap: 0.9rem; margin: 0 0 2.25rem;
+}
+
+.ab-demo {
+  display: flex; align-items: center; gap: 0.8rem; width: 100%;
+  margin: 0; padding: 0.8rem 0.95rem;
+  border-radius: 14px; cursor: pointer; text-align: left;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #fff; font: inherit;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.ab-demo:hover:not(:disabled) {
+  background: rgba(255,255,255,0.09);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  transform: translateY(-1px);
+}
+.ab-demo:disabled { opacity: 0.6; cursor: default; }
+.ab-demo-ic {
+  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: color-mix(in srgb, var(--accent) 60%, #fff);
+}
+.ab-demo-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ab-demo-title { font-size: 0.9rem; font-weight: 600; }
+.ab-demo-sub { font-size: 0.73rem; color: rgba(255,255,255,0.58); }
+.ab-demo-arrow {
+  margin-left: auto; flex-shrink: 0; color: rgba(255,255,255,0.5);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.ab-demo:hover:not(:disabled) .ab-demo-arrow { transform: translateX(3px); color: #fff; }
+
 .ab-proof {
   display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem;
   margin-top: 2.25rem; padding-top: 1.35rem;
@@ -1945,9 +2013,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-brand .wordmark-text { color: #fff; }
 .auth-brand .wordmark-dot { color: var(--accent); }
 
+/* The demo CTA lives on the brand panel; this fallback only appears at the
+   same breakpoint that hides the panel, so the two are never both visible. */
+.auth-demo-fallback { display: none; }
+
 @media (max-width: 900px) {
   .auth-split { grid-template-columns: 1fr; }
   .auth-brand { display: none; }
+  .auth-demo-fallback { display: flex; }
 }
 
 /* Mantine leaves the text beside a checkbox, switch or radio with the default
