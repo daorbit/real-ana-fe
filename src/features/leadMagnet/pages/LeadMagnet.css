@@ -1,15 +1,24 @@
-
-.lead-magnet {
-  margin: calc(var(--mantine-spacing-md) * -1);
-  height: calc(100dvh - var(--mantine-spacing-md) * 2);
-  border-radius: inherit;
+/*
+ * The forms service scrolls internally, so the panel around it must not —
+ * otherwise the page carries two scrollbars for one scrolling surface. The flag
+ * goes on <body> because what has to stop scrolling is the panel above this
+ * component, not the component itself.
+ */
+body[data-page="lead-magnet"] .app-panel__scroll {
   overflow: hidden;
+  /* The frame is the page here, so it meets the panel's edges rather than
+     sitting inside its inset. */
+  padding: 0;
 }
 
-@media (max-width: 48em) {
-  .lead-magnet {
-    height: calc(100dvh - 56px - var(--mantine-spacing-md) * 2);
-  }
+/* The route wrapper sits between the panel and the frame, so it has to carry
+   the height through or `height: 100%` below resolves against nothing. */
+body[data-page="lead-magnet"] .app-panel__scroll > .route-fade {
+  height: 100%;
+}
+
+body[data-page="lead-magnet"] .orbit-fab-spacer {
+  display: none;
 }
 
 .lead-magnet__frame {
@@ -17,5 +26,4 @@
   width: 100%;
   height: 100%;
   border: 0;
-  background: var(--mantine-color-body);
 }
