@@ -59,7 +59,20 @@ export function EmptyState({
           {description}
         </Text>
       )}
-      {action && (
+      {action && action.to && (
+        <Button
+          mt="xl"
+          size="md"
+          leftSection={action.icon ? <action.icon size={16} /> : undefined}
+          disabled={action.disabled}
+          loading={action.loading}
+          component={Link}
+          to={action.to}
+        >
+          {action.label}
+        </Button>
+      )}
+      {action && !action.to && (
         <Button
           mt="xl"
           size="md"
@@ -67,7 +80,6 @@ export function EmptyState({
           disabled={action.disabled}
           loading={action.loading}
           onClick={action.onClick}
-          {...(action.to ? { component: Link, to: action.to } : {})}
         >
           {action.label}
         </Button>
