@@ -41,38 +41,13 @@ import { MAX_SITES_PER_WORKSPACE } from "@/shared/types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
-/**
- * Subscription plans, addon credit packs, and the current usage against them.
- *
- * Everything on this page is scoped to one workspace, chosen at the top:
- * a plan is bought per workspace, so "your plan" is only meaningful once a
- * workspace is named. Buying more capacity for an account means either
- * upgrading a workspace here or creating another one on the Workspaces page.
- *
- * Every purchase — a plan period or an addon pack — is a one-time Razorpay
- * Order, not an auto-recurring subscription: nothing here ever charges a
- * card again on its own. A plan period simply ends at `currentPeriodEnd`, and
- * "renewing" is just buying the same plan again, same as switching to a
- * different one.
- */
-/**
- * Logo shown in Razorpay Checkout. Razorpay needs an absolute URL and only
- * renders raster images — without it Checkout falls back to drawing the first
- * letter of the merchant name.
- */
+ 
 const CHECKOUT_LOGO = `${window.location.origin}/favicon.png`;
 
-/** The page's three jobs, one per tab. */
 type BillingTab = "plans" | "addons" | "history";
 const BILLING_TABS: BillingTab[] = ["plans", "addons", "history"];
 
-/**
- * The API's credit-type identifiers, in the user's language and correctly
- * pluralised — the raw value is an identifier, not something to put on screen.
- *
- * A lookup rather than a ternary: with three types, an `audit ? … : …` would
- * silently label Orbit question packs as crawls, including on receipts.
- */
+ 
 const CREDIT_TYPE_KEY: Record<string, string> = {
   audit: "billing.typeAudit",
   crawl: "billing.typeCrawl",
@@ -88,17 +63,12 @@ export default function Billing() {
   const { user, refreshUser, isDemo } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // The tab lives in the URL so a reload, a bookmark, or a link from an email
-  // ("your receipt is in Billing") lands on the right one — and so the back
-  // button steps between tabs rather than leaving the page.
   const tabParam = searchParams.get("tab");
   const tab: BillingTab = BILLING_TABS.includes(tabParam as BillingTab)
     ? (tabParam as BillingTab)
     : "plans";
 
   const setTab = (next: BillingTab) => {
-    // Replace rather than push: flicking between tabs shouldn't bury the page
-    // someone arrived from under a stack of history entries.
     setSearchParams(next === "plans" ? {} : { tab: next }, { replace: true });
   };
 
@@ -120,32 +90,12 @@ export default function Billing() {
   } = useGetAddonPacksQuery({ currency }, { refetchOnMountOrArgChange: true });
   const refetching = plansFetching || addonsFetching;
 
-  /**
-   * The workspaces that can be bought for, each carrying the plan it is on.
-   * The same list every other page uses — a plan travels with its workspace,
-   * so there is nothing extra to fetch here.
-   */
+ 
   const { workspaces, active, loading: billingLoading } = useWorkspace();
 
-  /**
-   * Which workspace is being bought for. Kept in the URL alongside the tab, so
-   * a "your Pro plan expires soon" email can link straight at the workspace it
-   * is about instead of landing on whichever one happens to sort first.
-   */
-  // Billing acts on whichever workspace the sidebar has selected, like every
-  // other page — switching there switches what this page is about.
+ 
   const selectedWorkspaceId = active?._id ?? null;
-
-  /**
-   * Usage from its own endpoint rather than from the workspace list.
-   *
-   * The list carries a `billing` object too, but nothing invalidates it when a
-   * credit is spent — so an Orbit question or an audit run elsewhere in the app
-   * left these counters showing the figures from whenever the list was last
-   * fetched. This query is tagged `Usage`, which every quota-spending mutation
-   * invalidates, and falls back to the list's copy while it loads so the panel
-   * never flashes empty.
-   */
+ 
   const {
     data: liveUsage, isFetching: usageFetching, refetch: refetchUsage,
   } = useGetWorkspaceUsageQuery(selectedWorkspaceId ?? "", { skip: !selectedWorkspaceId });
@@ -162,15 +112,13 @@ export default function Billing() {
   const [confirmAddon, setConfirmAddon] = useState<AddonPack | null>(null);
   const [planCoupon, setPlanCoupon] = useState<CouponCheckResult | null>(null);
   const [addonCoupon, setAddonCoupon] = useState<CouponCheckResult | null>(null);
-  // What to celebrate once a purchase actually completes — set right before
-  // the confetti burst, cleared when the dialog closes.
+ 
   const [celebration, setCelebration] = useState<
     | { kind: "plan"; planName: string; credits: { type: string; credits: number }[] }
     | { kind: "addon"; pack: AddonPack; packs: number }
     | null
   >(null);
-  // What was being bought when the Razorpay window was dismissed — nothing was
-  // charged, but closing the modal silently leaves no trace of the attempt.
+ 
   const [cancelled, setCancelled] = useState<string | null>(null);
 
   const fireConfetti = () => {
@@ -182,8 +130,7 @@ export default function Billing() {
 
   const doSubscribe = async (plan: Plan, selection: AddonSelection = {}) => {
     setConfirmPlan(null);
-    // Nothing to bill against. The buttons are disabled in this state, so this
-    // only guards against a stale click while the list was still loading.
+ 
     if (!selectedWorkspaceId) return;
     setSubscribing(plan.slug);
     try {
@@ -199,27 +146,19 @@ export default function Billing() {
         currency,
         ...(chosen.length ? { addons: chosen } : {}),
       }).unwrap();
-
-      // A ₹0 plan (Free) is assigned directly server-side — no order, no
-      // Razorpay modal to open.
+ 
       if ("free" in started && started.free) {
         await refreshUser();
         setCelebration({ kind: "plan", planName: plan.name, credits: [] });
         fireConfetti();
         return;
       }
-
-      // What the server confirmed was in the order, not what the dialog asked
-      // for — the two agree, but the celebration should report what was
-      // actually bought.
+ 
       const boughtCredits = (started.addons ?? []).map((a) => ({
         type: a.type,
         credits: a.credits,
       }));
-
-      // Razorpay closes its modal after a successful payment too, so `ondismiss`
-      // alone can't tell "walked away" from "just paid" — this records that the
-      // handler ran first.
+ 
       let paid = false;
 
       await loadRazorpayCheckout();
@@ -453,23 +392,16 @@ export default function Billing() {
                     style={{
                       display: "flex",
                       flexDirection: "column",
-                      // The ribbon is positioned against this box and bleeds
-                      // past the rounded corner, so the card cannot clip it.
+ 
                       position: "relative",
                       overflow: "visible",
-                      // Only the recommended card takes a coloured border. The
-                      // current plan is marked by its ribbon and its button —
-                      // a third emerald marker was saying the same thing again
-                      // and made every card look equally emphasised.
+ 
                       borderColor: featured
                         ? PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK
                         : undefined,
                     }}
                   >
-                    {/* Both flags render in the plan's own tier colour rather
-                        than the app's emerald: emerald is the accent for
-                        everything else on screen, so using it here left the
-                        ribbon indistinguishable from ordinary chrome. */}
+ 
                     {(featured || current) && (
                       <CornerRibbon
                         label={current ? t("billing.ribbonCurrent") : t("billing.ribbonRecommended")}
@@ -786,18 +718,8 @@ export default function Billing() {
   );
 }
 
-/** Ribbon colour for a plan slug the tier palette doesn't know about. */
 const RIBBON_FALLBACK = "#8b5cf6";
-
-/**
- * A tab that sits on a card's top-right corner and folds behind it.
- *
- * A flag rather than a pill inside the card: a badge in the content area
- * competes with the plan name for the top line, while a ribbon reads as
- * annotation *about* the card and costs no layout inside it. The darker
- * triangle under the tail is the fold — without it the tab looks pasted on
- * rather than wrapped around.
- */
+ 
 function CornerRibbon({
   label,
   color,
@@ -805,11 +727,8 @@ function CornerRibbon({
   fg = "#fff",
 }: {
   label: string;
-  /** Flat colour, and the colour the fold is derived from. */
   color: string;
-  /** Optional gradient, matching the tier's icon. Falls back to `color`. */
   background?: string;
-  /** Text colour. Not always white — see `PLAN_ON_ACCENT`. */
   fg?: string;
 }) {
   return (
@@ -919,23 +838,10 @@ function CreditBalance({
 /** How many of one pack a single checkout may include. Mirrors the server's cap. */
 const MAX_PACKS = 50;
 
-/**
- * The smallest order Razorpay will accept, in the currency's minor unit.
- *
- * Mirrored from the server, which floors every order at the same figure. Shown
- * rather than silently applied: a 99% coupon that lands below this still gets
- * charged this, and a total on screen that differs from the amount in the
- * payment window reads as a bug.
- */
+ 
 const MIN_CHARGE = 100;
 
-/**
- * A quantity stepper.
- *
- * Buttons rather than a bare number input because the common moves are "one
- * more" and "one fewer", and because a free-text field invites values the
- * server will reject. Typing is still allowed for the person who wants ten.
- */
+ 
 function PackStepper({
   value,
   onChange,
@@ -1022,21 +928,7 @@ function PackStepper({
   );
 }
 
-/**
- * Plan checkout: the plan, any addon packs bought alongside it, a coupon, and
- * one total.
- *
- * Addons live here rather than only in their own dialog because the moment
- * someone has decided to pay is the moment topping up costs them nothing extra
- * — one payment, one receipt, instead of a second trip through Razorpay. They
- * are offered prominently and default to none: a required addon is just a
- * higher price with more clicks, and it turns a working checkout into one
- * people abandon.
- *
- * Every figure shown is computed from the catalogue the same way the server
- * computes it. The client still sends only slugs and counts — the price it
- * displays is a preview, never the amount charged.
- */
+ 
 function PlanCheckoutModal({
   plan,
   cycle,
@@ -1164,9 +1056,6 @@ function PlanCheckoutModal({
                         padding="md"
                         className="static-card"
                         style={{
-                          // A chosen card is outlined rather than merely
-                          // annotated: with several packs on screen, "which
-                          // ones did I pick" should be answerable at a glance.
                           borderColor: picked ? "var(--mantine-color-emerald-6)" : undefined,
                           transition: "border-color 120ms ease",
                         }}
@@ -1489,19 +1378,7 @@ function AddonCheckoutModal({
     </Modal>
   );
 }
-
-/**
- * Billing history: this workspace's completed purchases, with their receipts.
- *
- * Scoped to the workspace being viewed, like everything else on this page —
- * an account with several workspaces was otherwise shown the same combined
- * list under each one, with no way to tell which purchase belonged where.
- *
- * The same PDF was already emailed when the payment landed, so this is the
- * copy for six months later, when that email is buried — which is exactly when
- * someone needs it for an expense claim. Nothing here can be acted on except
- * downloading, so it sits at the bottom, below the things that cost money.
- */
+ 
 function Receipts({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
   const { data: invoices = [], isLoading, isFetching, refetch } = useGetInvoicesQuery(
@@ -1509,12 +1386,7 @@ function Receipts({ workspaceId }: { workspaceId: string }) {
     { skip: !workspaceId },
   );
   const [downloading, setDownloading] = useState<string | null>(null);
-
-  /**
-   * Fetched directly rather than through RTK Query: the response is a binary
-   * attachment, not JSON to cache, and it still needs the auth header — the
-   * same reason the events export bypasses the store.
-   */
+ 
   const download = async (invoice: Invoice) => {
     setDownloading(invoice.id);
     try {
@@ -1753,10 +1625,8 @@ function UsageSummary({
 function UsageCell({
   icon: Icon, label, used, quota, credits,
 }: {
-  /** A lucide icon, or the Orbit mark — so `size` is the only prop relied on. */
   icon: React.ComponentType<{ size?: number }>;
   label: string;
-  /** Null when the number is a flat limit rather than a used/quota pair (sites per workspace). */
   used: number | null;
   quota: number;
   credits?: number;
@@ -1802,12 +1672,7 @@ function FeatureLine({ text }: { text: string }) {
   );
 }
 
-/**
- * A coupon code field that checks itself against the server as the user types
- * (debounced) and reports the result up — the parent modal owns the applied
- * result so it survives the field being edited again without losing the
- * price shown, and so checkout can read the final coupon code from one place.
- */
+ 
 function CouponField({
   amount,
   result,
