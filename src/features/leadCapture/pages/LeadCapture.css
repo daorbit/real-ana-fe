@@ -4,7 +4,7 @@
  * goes on <body> because what has to stop scrolling is the panel above this
  * component, not the component itself.
  */
-body[data-page="lead-magnet"] .app-panel__scroll {
+body[data-page="lead-capture"] .app-panel__scroll {
   overflow: hidden;
   /* The frame is the page here, so it meets the panel's edges rather than
      sitting inside its inset. */
@@ -13,15 +13,15 @@ body[data-page="lead-magnet"] .app-panel__scroll {
 
 /* The route wrapper sits between the panel and the frame, so it has to carry
    the height through or `height: 100%` below resolves against nothing. */
-body[data-page="lead-magnet"] .app-panel__scroll > .route-fade {
+body[data-page="lead-capture"] .app-panel__scroll > .route-fade {
   height: 100%;
 }
 
-body[data-page="lead-magnet"] .orbit-fab-spacer {
+body[data-page="lead-capture"] .orbit-fab-spacer {
   display: none;
 }
 
-.lead-magnet__frame {
+.lead-capture__frame {
   display: block;
   width: 100%;
   height: 100%;

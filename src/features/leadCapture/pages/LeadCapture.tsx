@@ -3,12 +3,12 @@ import { Center, Text } from "@mantine/core";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { leadFormsUrl } from "../themeParams";
-import "./LeadMagnet.css";
+import "./LeadCapture.css";
 
-export default function LeadMagnet() {
+export default function LeadCapture() {
   const { active } = useWorkspace();
   useEffect(() => {
-    document.body.dataset.page = "lead-magnet";
+    document.body.dataset.page = "lead-capture";
     return () => {
       delete document.body.dataset.page;
     };
@@ -36,7 +36,7 @@ export default function LeadMagnet() {
       <iframe
         src={src}
         title="Lead forms"
-        className="lead-magnet__frame"
+        className="lead-capture__frame"
         allow="clipboard-write"
       />
     </AppShell>

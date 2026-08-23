@@ -21,7 +21,7 @@ import AcceptInvite from "@/features/workspace/pages/AcceptInvite";
 import Share from "@/features/analytics/pages/Share";
 import Reports from "@/features/reports/pages";
 import SocialPosts from "@/features/social/pages/SocialPosts";
-import LeadMagnet from "@/features/leadMagnet/pages/LeadMagnet";
+import LeadCapture from "@/features/leadCapture/pages/LeadCapture";
 import Impersonate from "@/features/admin/pages/Impersonate";
 import DemoUsage from "@/features/admin/pages/DemoUsage";
 import Settings from "@/features/auth/pages/Settings";
@@ -189,7 +189,7 @@ export default function App() {
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/reports" element={<Protected><Reports /></Protected>} />
             <Route path="/app/social" element={<Protected><SocialPosts /></Protected>} />
-            <Route path="/app/lead-magnet" element={<Protected><LeadMagnet /></Protected>} />
+            <Route path="/app/lead-capture" element={<Protected><LeadCapture /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
             <Route path="/app/help" element={<Protected><Help /></Protected>} />
             <Route path="/app/settings" element={<Protected><Settings /></Protected>} />
