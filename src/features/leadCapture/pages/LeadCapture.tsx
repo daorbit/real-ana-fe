@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Center, Text } from "@mantine/core";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
@@ -7,6 +7,7 @@ import "./LeadCapture.css";
 
 export default function LeadCapture() {
   const { active } = useWorkspace();
+  const [themeVersion, setThemeVersion] = useState(0);
   useEffect(() => {
     document.body.dataset.page = "lead-capture";
     return () => {
@@ -14,11 +15,17 @@ export default function LeadCapture() {
     };
   }, []);
 
+  useEffect(() => {
+    const refresh = () => setThemeVersion((version) => version + 1);
+    window.addEventListener("quantalog-theme-change", refresh);
+    return () => window.removeEventListener("quantalog-theme-change", refresh);
+  }, []);
+
   // Rebuilt only when the workspace changes: a new src reloads the frame, and
   // doing that on every render would throw away whatever was being edited.
   const src = useMemo(
     () => (active ? leadFormsUrl(`/${active._id}/forms`) : null),
-    [active],
+    [active, themeVersion],
   );
 
   if (!src) {

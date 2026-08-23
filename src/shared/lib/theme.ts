@@ -328,6 +328,8 @@ export function applyTheme(prefs: ThemePrefs) {
   root.setAttribute("data-table-style", prefs.table);
   root.setAttribute("data-motion", prefs.motion ? "on" : "off");
 
+  window.dispatchEvent(new CustomEvent("quantalog-theme-change"));
+
   // Mantine's own dark[6]/dark[7] are its default surface colours for
   // Menu/Modal/Popover/Card/etc — a fixed grey unrelated to the app's own
   // --surface/--bg scale, so a themed dark background sat next to a
