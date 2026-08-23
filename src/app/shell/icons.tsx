@@ -2,11 +2,14 @@ import { forwardRef } from "react";
 import type { LucideProps } from "lucide-react";
 
 export const LeadMagnetIcon = forwardRef<SVGSVGElement, LucideProps>(
-  ({ color = "currentColor", size = 24, strokeWidth = 1.8, ...props }, ref) => (
+  ({ color = "currentColor", size = 24, strokeWidth = 1.8, ...props }, ref) => {
+    const iconSize = typeof size === "number" && size === 17 ? 20 : size;
+
+    return (
     <svg
       ref={ref}
-      width={size}
-      height={size}
+      width={iconSize}
+      height={iconSize}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +23,8 @@ export const LeadMagnetIcon = forwardRef<SVGSVGElement, LucideProps>(
       <circle cx="17.5" cy="10" r="3.5" stroke="currentColor" strokeWidth={strokeWidth} />
       <circle cx="17.5" cy="10" r="1" fill="currentColor" />
     </svg>
-  ),
+    );
+  },
 );
 
 LeadMagnetIcon.displayName = "LeadMagnetIcon";
