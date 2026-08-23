@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Center, Text } from "@mantine/core";
+import { Center, Text, useComputedColorScheme } from "@mantine/core";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
 import { leadFormsUrl } from "../themeParams";
@@ -8,6 +8,7 @@ import "./LeadCapture.css";
 export default function LeadCapture() {
   const { active } = useWorkspace();
   const [themeVersion, setThemeVersion] = useState(0);
+  const colorScheme = useComputedColorScheme("light");
   useEffect(() => {
     document.body.dataset.page = "lead-capture";
     return () => {
@@ -24,8 +25,12 @@ export default function LeadCapture() {
   // Rebuilt only when the workspace changes: a new src reloads the frame, and
   // doing that on every render would throw away whatever was being edited.
   const src = useMemo(
-    () => (active ? leadFormsUrl(`/${active._id}/forms`) : null),
-    [active, themeVersion],
+    () => {
+      if (!active) return null;
+      const url = leadFormsUrl(`/${active._id}/forms`, colorScheme);
+      return `${url}&themeRevision=${themeVersion}`;
+    },
+    [active, colorScheme, themeVersion],
   );
 
   if (!src) {
@@ -41,6 +46,7 @@ export default function LeadCapture() {
   return (
     <AppShell>
       <iframe
+        key={src}
         src={src}
         title="Lead forms"
         className="lead-capture__frame"

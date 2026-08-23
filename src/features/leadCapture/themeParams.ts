@@ -3,12 +3,18 @@ import { ACCENT_PRESETS, readThemePrefs } from "@/shared/lib/theme";
 export const LEAD_FORMS_BASE =
   import.meta.env.VITE_LEAD_FORMS_URL ?? "https://da-forms-ochre.vercel.app";
 
-export function leadFormsUrl(path: string): string {
+export function leadFormsUrl(path: string, currentMode?: "light" | "dark"): string {
   const prefs = readThemePrefs();
   const accent = ACCENT_PRESETS.find((preset) => preset.id === prefs.accent);
+  const documentMode = document.documentElement.getAttribute("data-mantine-color-scheme");
+  const mode = currentMode ?? (prefs.mode === "system"
+    ? (documentMode === "dark" || documentMode === "light"
+        ? documentMode
+        : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : prefs.mode);
 
   const params = new URLSearchParams({
-    mode: prefs.mode === "system" ? "auto" : prefs.mode,
+    mode,
     radius: prefs.radius,
     density: prefs.density,
     embedded: "1",
