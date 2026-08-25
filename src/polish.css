@@ -231,3 +231,146 @@
 .funnel-step-row:hover {
   background: var(--mantine-color-default-hover);
 }
+
+/* ---- User-flow graph -------------------------------------------------------
+   The nodes are pages and the edges are transitions between them, so the two
+   have to stay visually separable: nodes are solid surfaces with a leading
+   accent rail, edges are thin lines whose counts sit in their own pill rather
+   than as bare text over the canvas grid, where they were unreadable. */
+.flow-node {
+  position: relative;
+  width: 208px;
+  padding: 10px 12px 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+/* The accent rail marks the node's leading edge, which is also the side its
+   incoming edge lands on — it reads as flow direction, not decoration. */
+.flow-node::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--accent-2);
+}
+
+.flow-node:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+}
+
+.flow-node[data-selected] {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 1px var(--accent-2), var(--shadow);
+}
+
+.flow-node-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* One line with an ellipsis rather than a wrap: a wrapped path made every node
+   a different height and the columns stopped lining up. The full path is in
+   the title attribute. */
+.flow-node-path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.flow-node-tag {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.flow-node-tag[data-kind="entry"] {
+  background: color-mix(in srgb, var(--green) 16%, transparent);
+  color: var(--green);
+}
+
+.flow-node-tag[data-kind="exit"] {
+  background: color-mix(in srgb, var(--pink) 16%, transparent);
+  color: var(--pink);
+}
+
+.flow-node-metrics {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.flow-node-count {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.flow-node-unit {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.flow-node-bar {
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.flow-node-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent-2);
+}
+
+/* Handles are anchors for the edges, not controls — the graph is read-only, so
+   they are kept invisible rather than drawn as connectable dots. */
+.flow-node-handle {
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  border: none;
+  background: transparent;
+  opacity: 0;
+}
+
+/* Edge counts: a pill on the canvas ground, so the number is legible wherever
+   the line happens to cross the grid. */
+.flow-edge-label {
+  fill: var(--text-2);
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.react-flow__edge-textbg {
+  fill: var(--surface);
+}
