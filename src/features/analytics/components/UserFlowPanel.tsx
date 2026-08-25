@@ -54,11 +54,16 @@ function layout(nodeIds: string[], edges: { source: string; target: string }[]) 
   }
 
   const positions = new Map<string, { x: number; y: number }>();
-  const COL_W = 260;
-  const ROW_H = 90;
+  const COL_W = 280;
+  const ROW_H = 130;
   for (const [d, ids] of columns) {
+    // Center each column vertically around the tallest one, so a page with
+    // many branches doesn't push everything to one side.
+    const colCount = ids.length;
+    const maxCount = Math.max(...[...columns.values()].map((c) => c.length));
+    const offset = ((maxCount - colCount) * ROW_H) / 2;
     ids.forEach((id, i) => {
-      positions.set(id, { x: d * COL_W, y: i * ROW_H });
+      positions.set(id, { x: d * COL_W, y: offset + i * ROW_H });
     });
   }
   return positions;
@@ -83,16 +88,22 @@ export function UserFlowPanel({
     const maxCount = Math.max(1, ...rawNodes.map((n) => n.count));
     const positions = layout(rawNodes.map((n) => n.id), rawEdges);
 
+    const NODE_W = 200;
+    const NODE_H = 54;
+
     const nodes: Node[] = rawNodes.map((n) => ({
       id: n.id,
       position: positions.get(n.id) ?? { x: 0, y: 0 },
+      width: NODE_W,
+      height: NODE_H,
       data: { label: `${n.id}\n${num(n.count)} visits` },
       style: {
         borderRadius: 10,
         border: "1px solid var(--mantine-color-emerald-6, #12b886)",
         padding: 8,
         fontSize: 12,
-        width: 200,
+        width: NODE_W,
+        height: NODE_H,
         background: `color-mix(in srgb, var(--mantine-color-emerald-6, #12b886) ${Math.round(
           15 + (n.count / maxCount) * 35,
         )}%, var(--mantine-color-body, #fff))`,
@@ -106,6 +117,7 @@ export function UserFlowPanel({
       id: `e${i}-${e.source}-${e.target}`,
       source: e.source,
       target: e.target,
+      type: "smoothstep",
       label: num(e.count),
       animated: e.count / maxEdgeCount > 0.5,
       style: { strokeWidth: 1 + (e.count / maxEdgeCount) * 4 },
@@ -136,11 +148,14 @@ export function UserFlowPanel({
           </Stack>
         </Center>
       ) : (
-        <div style={{ height: 520 }}>
+        <div style={{ height: 600, width: "100%", position: "relative" }}>
           <ReactFlow
             nodes={nodes}
             edges={edges}
             fitView
+            fitViewOptions={{ padding: 0.2 }}
+            minZoom={0.2}
+            maxZoom={1.5}
             nodesDraggable
             nodesConnectable={false}
             edgesFocusable={false}
