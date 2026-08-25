@@ -99,12 +99,9 @@ export function UserFlowPanel({
       style: {
         borderRadius: 10,
         border: "1.5px solid transparent",
-        backgroundImage:
-          "linear-gradient(rgba(255,255,255,0.04), rgba(255,255,255,0.04)), " +
-          "linear-gradient(135deg, var(--mantine-color-emerald-6, #12b886), color-mix(in srgb, var(--mantine-color-emerald-6, #12b886) 30%, transparent))",
-        backgroundOrigin: "border-box",
-        backgroundClip: "padding-box, border-box",
-        backgroundColor: "transparent",
+        borderImage:
+          "linear-gradient(135deg, var(--mantine-color-emerald-6, #12b886), color-mix(in srgb, var(--mantine-color-emerald-6, #12b886) 30%, transparent)) 1",
+        background: "transparent",
         backdropFilter: "blur(6px)",
         padding: "6px 10px",
         fontSize: 12,

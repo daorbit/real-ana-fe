@@ -18,11 +18,11 @@ function stepColor(dropFromPrev: number): string {
   return "var(--mantine-color-pink-6, #e64980)";
 }
 
-/** Gradient border via layered backgrounds: a transparent glass fill on top
- * of a linear-gradient edge, clipped to a ring by padding-box/border-box. */
+/** CSS border-image gradient — a true ring, unlike the background-clip trick
+ * which some engines paint edge-to-edge instead of clipping to the border. */
 function stepBorderImage(dropFromPrev: number): string {
   const c = stepColor(dropFromPrev);
-  return `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 30%, transparent))`;
+  return `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 30%, transparent)) 1`;
 }
 
 /** The funnel's steps drawn as a left-to-right node chain, sized by who's left. */
@@ -39,10 +39,8 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
       style: {
         borderRadius: 10,
         border: "1.5px solid transparent",
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.04), rgba(255,255,255,0.04)), ${stepBorderImage(s.dropFromPrev)}`,
-        backgroundOrigin: "border-box",
-        backgroundClip: "padding-box, border-box",
-        backgroundColor: "transparent",
+        borderImage: stepBorderImage(s.dropFromPrev),
+        background: "transparent",
         backdropFilter: "blur(6px)",
         padding: "6px 10px",
         fontSize: 12,

@@ -32,7 +32,7 @@ export function FunnelBuilder({
     { type: "page", value: "" },
   ]);
   const [result, setResult] = useState<FunnelResultStep[] | null>(null);
-  const [view, setView] = useState<"list" | "flow" | "shape">("list");
+  const [view, setView] = useState<"list" | "flow" | "shape">("flow");
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saveOpen, setSaveOpen] = useState(false);

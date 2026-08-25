@@ -32,9 +32,9 @@ export function FunnelResults({
             value={view}
             onChange={(v) => onViewChange(v as "list" | "flow" | "shape")}
             data={[
+              { value: "flow", label: <Center><Waypoints size={13} /></Center> },
               { value: "list", label: <Center><List size={13} /></Center> },
               { value: "shape", label: <Center><TriangleRight size={13} /></Center> },
-              { value: "flow", label: <Center><Waypoints size={13} /></Center> },
             ]}
           />
         </Group>
