@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
-  ReactFlow, Background, Controls, MarkerType,
+  ReactFlow, Background, Controls, MarkerType, useNodesState,
   type Node, type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -27,7 +27,7 @@ function stepBorderImage(dropFromPrev: number): string {
 
 /** The funnel's steps drawn as a left-to-right node chain, sized by who's left. */
 export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
-  const { nodes, edges } = useMemo(() => {
+  const { nodes: initialNodes, edges } = useMemo(() => {
     const nodes: Node[] = steps.map((s, i) => ({
       id: `step-${i}`,
       position: { x: i * COL_W, y: 0 },
@@ -72,10 +72,16 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
     return { nodes, edges };
   }, [steps]);
 
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+
+  // New funnel result -> replace the node set (new positions, new steps).
+  useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
+
   return (
     <div style={{ height: 220, width: "100%", position: "relative" }}>
       <ReactFlow
         nodes={nodes}
+        onNodesChange={onNodesChange}
         edges={edges}
         fitView
         fitViewOptions={{ padding: 0.3 }}
