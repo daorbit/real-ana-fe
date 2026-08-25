@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Group, Stack, Modal, TextInput, Button } from "@mantine/core";
+import { Group, Stack, Modal, TextInput, Button, Card, Skeleton } from "@mantine/core";
 import {
   useComputeFunnelMutation, useGetFunnelsQuery, useCreateFunnelMutation,
   useUpdateFunnelMutation, useDeleteFunnelMutation,
@@ -8,6 +8,7 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import { FunnelSidebar } from "@/features/analytics/components/FunnelSidebar";
 import { FunnelStepEditor, type Draft } from "@/features/analytics/components/FunnelStepEditor";
 import { FunnelResults } from "@/features/analytics/components/FunnelResults";
+import { FlowGraphSkeleton } from "@/shared/ui/Skeletons";
 import type { Stats, FunnelStepInput, FunnelResultStep } from "@/shared/types";
 
 /**
@@ -239,9 +240,19 @@ export function FunnelBuilder({
           </Stack>
         </Modal>
 
-        {result && result.length > 0 && (
+        {/* A recompute replaces the whole result, so the panel is a skeleton
+            rather than stale numbers under a spinner. */}
+        {isLoading ? (
+          <Card withBorder radius="lg" padding="lg">
+            <Group justify="space-between" mb="md">
+              <Skeleton height={12} width={70} radius="sm" />
+              <Skeleton height={26} width={140} radius="xl" />
+            </Group>
+            <FlowGraphSkeleton height={220} columns={[1, 1, 1, 1]} />
+          </Card>
+        ) : result && result.length > 0 ? (
           <FunnelResults result={result} view={view} onViewChange={setView} />
-        )}
+        ) : null}
       </Stack>
     </Group>
   );

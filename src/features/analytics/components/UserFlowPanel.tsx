@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { Card, Group, Text, Center, Loader, Stack, ThemeIcon } from "@mantine/core";
+import { Card, Group, Text, Center, Stack, ThemeIcon } from "@mantine/core";
 import { Inbox, Waypoints } from "lucide-react";
 import {
   ReactFlow, Background, BackgroundVariant, Controls, MarkerType, useNodesState,
@@ -7,6 +7,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useGetUserFlowQuery } from "@/app/store";
+import { FlowGraphSkeleton } from "@/shared/ui/Skeletons";
 import { FlowPageNode, type FlowPageNodeData } from "./FlowPageNode";
 
 const NODE_W = 208;
@@ -154,7 +155,7 @@ export function UserFlowPanel({
       </Group>
 
       {isFetching ? (
-        <Center py="xl"><Loader size="sm" /></Center>
+        <FlowGraphSkeleton height={600} />
       ) : nodes.length === 0 ? (
         <Center py="lg">
           <Stack align="center" gap="xs" maw={380}>

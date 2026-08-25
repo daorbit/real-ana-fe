@@ -48,6 +48,56 @@ export function ChartSkeleton({ height = 220 }: { height?: number }) {
   );
 }
 
+/**
+ * A node-graph placeholder — columns of page cards joined by connector stubs,
+ * so the loading state has the shape of the graph that replaces it rather than
+ * a bare spinner in an empty panel.
+ */
+export function FlowGraphSkeleton({
+  height = 600,
+  columns = [1, 2, 2, 1],
+}: {
+  height?: number;
+  columns?: number[];
+}) {
+  return (
+    <Box
+      style={{
+        height,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 22,
+        overflow: "hidden",
+      }}
+    >
+      {columns.map((rows, col) => (
+        <Group key={col} gap={22} wrap="nowrap" align="center">
+          <Stack gap={28}>
+            {Array.from({ length: rows }).map((_, row) => (
+              <Box
+                key={row}
+                style={{
+                  width: 208,
+                  padding: "10px 12px",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-sm)",
+                  background: "var(--surface)",
+                }}
+              >
+                <Skeleton height={10} width={`${60 + row * 10}%`} radius="sm" />
+                <Skeleton height={18} width={56} mt={8} radius="sm" />
+                <Skeleton height={3} mt={10} radius="xl" />
+              </Box>
+            ))}
+          </Stack>
+          {col < columns.length - 1 && <Skeleton height={2} width={40} radius="xl" />}
+        </Group>
+      ))}
+    </Box>
+  );
+}
+
 /** The Home page while its data loads. */
 export function HomeSkeleton() {
   return (

@@ -1,64 +1,63 @@
 import { useEffect, useMemo } from "react";
 import {
-  ReactFlow, Background, Controls, MarkerType, useNodesState,
+  ReactFlow, Background, BackgroundVariant, Controls, MarkerType, useNodesState,
   type Node, type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { num } from "@/shared/lib";
 import type { FunnelResultStep } from "@/shared/types";
+import { FunnelStepNode, type FunnelStepNodeData } from "./FunnelStepNode";
 
-const NODE_W = 200;
-const NODE_H = 60;
-const COL_W = 260;
+const NODE_W = 208;
+const NODE_H = 84;
+const COL_W = 300;
 
-/** Color a step green-to-pink by how much it dropped from the previous one. */
+const nodeTypes = { step: FunnelStepNode };
+
+/** Green while the step holds its traffic, amber then pink as it sheds it. */
 function stepColor(dropFromPrev: number): string {
-  if (dropFromPrev < 30) return "var(--mantine-color-emerald-6, #12b886)";
-  if (dropFromPrev < 60) return "var(--mantine-color-amber-6, #f59f00)";
-  return "var(--mantine-color-pink-6, #e64980)";
+  if (dropFromPrev < 30) return "var(--green)";
+  if (dropFromPrev < 60) return "var(--amber)";
+  return "var(--pink)";
 }
 
 /** The funnel's steps drawn as a left-to-right node chain, sized by who's left. */
 export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
   const { nodes: initialNodes, edges } = useMemo(() => {
-    const nodes: Node[] = steps.map((s, i) => {
-      const c = stepColor(s.dropFromPrev);
+    const nodes: Node[] = steps.map((s, i) => ({
+      id: `step-${i}`,
+      type: "step",
+      position: { x: i * COL_W, y: 0 },
+      width: NODE_W,
+      height: NODE_H,
+      data: {
+        index: i,
+        label: s.label,
+        count: s.count,
+        rate: s.rate,
+        dropFromPrev: s.dropFromPrev,
+      } satisfies FunnelStepNodeData,
+    }));
+
+    const edges: Edge[] = steps.slice(1).map((s, i) => {
+      // The edge carries the loss, so it is coloured by the drop it represents
+      // rather than by the step it lands on.
+      const stroke = s.dropFromPrev > 0 ? stepColor(s.dropFromPrev) : "var(--border-strong)";
       return {
-        id: `step-${i}`,
-        position: { x: i * COL_W, y: 0 },
-        width: NODE_W,
-        data: {
-          label: `${i + 1}. ${s.label}\n${num(s.count)} · ${s.rate}%`,
-        },
-        style: {
-          borderRadius: 10,
-          border: `1px solid ${c}`,
-          background: `color-mix(in srgb, ${c} 12%, var(--mantine-color-body, #1a1b1e))`,
-          padding: "8px 12px",
-          fontSize: 12,
-          lineHeight: 1.5,
-          width: NODE_W,
-          minHeight: NODE_H,
-          whiteSpace: "pre-line",
-          textAlign: "left" as const,
-          color: "var(--mantine-color-text, #e9ecef)",
-        },
+        id: `e${i}`,
+        source: `step-${i}`,
+        target: `step-${i + 1}`,
+        type: "smoothstep",
+        pathOptions: { borderRadius: 14 },
+        label: s.dropFromPrev > 0 ? `-${s.dropFromPrev}%` : undefined,
+        labelShowBg: true,
+        labelBgPadding: [6, 3] as [number, number],
+        labelBgBorderRadius: 999,
+        labelBgStyle: { fill: "var(--surface)", stroke: "var(--border)" },
+        labelStyle: { fill: stroke, fontSize: 10, fontWeight: 600 },
+        style: { stroke, strokeWidth: 1.4 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 14, height: 14 },
       };
     });
-
-    const edges: Edge[] = steps.slice(1).map((s, i) => ({
-      id: `e${i}`,
-      source: `step-${i}`,
-      target: `step-${i + 1}`,
-      type: "smoothstep",
-      label: s.dropFromPrev > 0 ? `-${s.dropFromPrev}%` : undefined,
-      labelStyle: { fill: "var(--mantine-color-pink-6, #e64980)", fontSize: 11, fontWeight: 600 },
-      style: {
-        stroke: "var(--border-strong, #5c5f66)",
-        strokeWidth: 1.5,
-      },
-      markerEnd: { type: MarkerType.ArrowClosed, color: "var(--border-strong, #5c5f66)", width: 16, height: 16 },
-    }));
 
     return { nodes, edges };
   }, [steps]);
@@ -72,6 +71,7 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
     <div style={{ height: 220, width: "100%", position: "relative" }}>
       <ReactFlow
         nodes={nodes}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         edges={edges}
         fitView
@@ -83,7 +83,7 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
         edgesFocusable={false}
         proOptions={{ hideAttribution: true }}
       >
-        <Background gap={16} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--border)" />
         <Controls showInteractive={false} position="bottom-right" />
       </ReactFlow>
     </div>
