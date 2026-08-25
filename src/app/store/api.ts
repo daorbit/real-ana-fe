@@ -6,7 +6,7 @@ import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace, Role,
   ContactMessage, ContactMessagePage, ContactStatus,
-  FunnelStepInput, FunnelResultStep, RetentionCohort, Goal,
+  FunnelStepInput, FunnelResultStep, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout,
 } from "@/shared/types";
@@ -615,6 +615,22 @@ export const api = createApi({
         method: "POST",
         body: { steps, range, ...(sites && sites.length ? { sites } : {}) },
       }),
+    }),
+
+    getUserFlow: build.query<
+      { nodes: FlowNode[]; edges: FlowEdge[] },
+      { workspaceId: string; range: string; sites?: string[]; from?: string; to?: string }
+    >({
+      query: ({ workspaceId, range, sites, from, to }) => {
+        const qs = new URLSearchParams({ range });
+        if (sites && sites.length) qs.set("sites", sites.join(","));
+        if (from) qs.set("from", from);
+        if (to) qs.set("to", to);
+        return `/api/workspaces/${workspaceId}/user-flow?${qs.toString()}`;
+      },
+      providesTags: (_r, _e, { workspaceId, range, sites }) => [
+        { type: "Stats", id: `user-flow-${workspaceId}-${range}-${(sites ?? []).join(",")}` },
+      ],
     }),
 
     getRetention: build.query<
@@ -1595,6 +1611,7 @@ export const {
   useGetStatsQuery,
   useGetStatsCompareQuery,
   useComputeFunnelMutation,
+  useGetUserFlowQuery,
   useGetRetentionQuery,
   useGetInstallStatusQuery,
   useLazyGetInstallStatusQuery,

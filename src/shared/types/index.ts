@@ -1133,6 +1133,11 @@ export type FunnelResultStep = {
   dropFromPrev: number;
 };
 
+/** One page in the navigation graph, with how many sessions visited it. */
+export type FlowNode = { id: string; count: number };
+/** One A -> B transition in the navigation graph, with how many sessions took it. */
+export type FlowEdge = { source: string; target: string; count: number };
+
 /** One weekly retention cohort: how many started, and their return curve. */
 export type RetentionCohort = {
   /** Week index from the start of the observed window. */

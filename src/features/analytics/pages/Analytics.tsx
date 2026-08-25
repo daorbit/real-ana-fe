@@ -15,7 +15,7 @@ import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
   ArrowDownWideNarrow, Zap, Filter, GitBranch, Repeat,
-  Split, Target, AlertTriangle, LayoutDashboard, HelpCircle, GitCompareArrows,
+  Split, Target, AlertTriangle, LayoutDashboard, HelpCircle, GitCompareArrows, Waypoints,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PlanGate } from "@/features/billing/components/PlanGate";
@@ -28,6 +28,7 @@ import { Heatmap } from "@/shared/ui/Heatmap";
 import { ScrollPanel, LandingPanel } from "@/features/analytics/components/EngagementPanels";
 import { CustomEventsPanel } from "@/features/analytics/components/CustomEventsPanel";
 import { FunnelBuilder } from "@/features/analytics/components/FunnelBuilder";
+import { UserFlowPanel } from "@/features/analytics/components/UserFlowPanel";
 import { RetentionGrid } from "@/features/analytics/components/RetentionGrid";
 import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
@@ -658,6 +659,7 @@ export default function Analytics() {
       tabs: [
         { value: "goals", label: t("analytics.tab.goals"), icon: Target },
         { value: "events", label: t("analytics.tab.events"), icon: Zap },
+        { value: "flow", label: t("analytics.tab.flow"), icon: Waypoints },
         { value: "funnel", label: t("analytics.tab.funnel"), icon: GitBranch },
         { value: "retention", label: t("analytics.tab.retention"), icon: Repeat },
         { value: "errors", label: t("analytics.tab.errors"), icon: AlertTriangle },
@@ -1104,6 +1106,10 @@ export default function Analytics() {
               </Stack>
             </Card>
           </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="flow">
+          <UserFlowPanel workspaceId={active._id} range={range} sites={siteScope} />
         </Tabs.Panel>
 
         <Tabs.Panel value="funnel">
