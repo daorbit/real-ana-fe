@@ -1,12 +1,13 @@
 import { useState } from "react";
 import {
   Card, Group, Text, Stack, Button, Select, ActionIcon, Progress, Badge,
-  Center, ThemeIcon, Loader,
+  Center, ThemeIcon, Loader, SegmentedControl,
 } from "@mantine/core";
-import { Plus, Trash2, Filter, Play, TrendingDown } from "lucide-react";
+import { Plus, Trash2, Filter, Play, TrendingDown, List, Waypoints } from "lucide-react";
 import { useComputeFunnelMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { num } from "@/shared/lib";
+import { FunnelFlowView } from "@/features/analytics/components/FunnelFlowView";
 import type { Stats, FunnelStepInput, FunnelResultStep } from "@/shared/types";
 
 type Draft = { type: "page" | "event"; value: string };
@@ -33,6 +34,7 @@ export function FunnelBuilder({
     { type: "page", value: "" },
   ]);
   const [result, setResult] = useState<FunnelResultStep[] | null>(null);
+  const [view, setView] = useState<"list" | "flow">("list");
   const [run, { isLoading }] = useComputeFunnelMutation();
 
   // Options come from what the dashboard already surfaced, so the picker only
@@ -134,15 +136,28 @@ export function FunnelBuilder({
         <Card withBorder radius="lg" padding="lg">
           <Group justify="space-between" mb="md">
             <Text fw={600} c="dimmed" size="sm">Results</Text>
-            <Badge variant="light" color="emerald" size="lg">
-              {result[result.length - 1]?.rate ?? 0}% end-to-end
-            </Badge>
+            <Group gap="sm">
+              <Badge variant="light" color="emerald" size="lg">
+                {result[result.length - 1]?.rate ?? 0}% end-to-end
+              </Badge>
+              <SegmentedControl
+                size="xs"
+                value={view}
+                onChange={(v) => setView(v as "list" | "flow")}
+                data={[
+                  { value: "list", label: <List size={13} /> },
+                  { value: "flow", label: <Waypoints size={13} /> },
+                ]}
+              />
+            </Group>
           </Group>
 
           {top === 0 ? (
             <Center py="lg">
               <Text c="dimmed" size="sm">No sessions entered this funnel in the selected range.</Text>
             </Center>
+          ) : view === "flow" ? (
+            <FunnelFlowView steps={result} />
           ) : (
             <Stack gap="lg">
               {result.map((step, i) => (
