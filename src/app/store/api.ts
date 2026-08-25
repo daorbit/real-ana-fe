@@ -6,7 +6,7 @@ import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace, Role,
   ContactMessage, ContactMessagePage, ContactStatus,
-  FunnelStepInput, FunnelResultStep, RetentionCohort, Goal, FlowNode, FlowEdge,
+  FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout,
 } from "@/shared/types";
@@ -114,7 +114,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -615,6 +615,43 @@ export const api = createApi({
         method: "POST",
         body: { steps, range, ...(sites && sites.length ? { sites } : {}) },
       }),
+    }),
+
+    getFunnels: build.query<SavedFunnel[], string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/funnels`,
+      providesTags: ["Funnel"],
+    }),
+
+    createFunnel: build.mutation<
+      SavedFunnel,
+      { workspaceId: string; name: string; steps: FunnelStepInput[] }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/funnels`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Funnel"],
+    }),
+
+    updateFunnel: build.mutation<
+      SavedFunnel,
+      { workspaceId: string; funnelId: string; name: string; steps: FunnelStepInput[] }
+    >({
+      query: ({ workspaceId, funnelId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/funnels/${funnelId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Funnel"],
+    }),
+
+    deleteFunnel: build.mutation<void, { workspaceId: string; funnelId: string }>({
+      query: ({ workspaceId, funnelId }) => ({
+        url: `/api/workspaces/${workspaceId}/funnels/${funnelId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Funnel"],
     }),
 
     getUserFlow: build.query<
@@ -1611,6 +1648,10 @@ export const {
   useGetStatsQuery,
   useGetStatsCompareQuery,
   useComputeFunnelMutation,
+  useGetFunnelsQuery,
+  useCreateFunnelMutation,
+  useUpdateFunnelMutation,
+  useDeleteFunnelMutation,
   useGetUserFlowQuery,
   useGetRetentionQuery,
   useGetInstallStatusQuery,

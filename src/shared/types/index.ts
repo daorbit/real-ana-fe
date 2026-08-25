@@ -1121,6 +1121,9 @@ export type Marker = {
 /** One step a user defines in the funnel builder. */
 export type FunnelStepInput = { type: "page" | "event"; value: string };
 
+/** A named funnel definition saved for reuse. */
+export type SavedFunnel = { id: string; name: string; steps: FunnelStepInput[] };
+
 /** One computed step of a funnel — how many sessions reached it. */
 export type FunnelResultStep = {
   label: string;

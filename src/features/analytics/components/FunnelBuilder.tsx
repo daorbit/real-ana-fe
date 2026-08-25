@@ -1,13 +1,20 @@
 import { useMemo, useState } from "react";
 import {
   Card, Group, Text, Stack, Button, Select, ActionIcon, Progress, Badge,
-  Center, ThemeIcon, Loader, SegmentedControl, Chip,
+  Center, ThemeIcon, Loader, SegmentedControl, Chip, Modal, TextInput, Menu,
 } from "@mantine/core";
-import { Plus, Trash2, Filter, Play, TrendingDown, List, Waypoints, ListChecks } from "lucide-react";
-import { useComputeFunnelMutation } from "@/app/store";
+import {
+  Plus, Trash2, Filter, Play, TrendingDown, List, Waypoints, ListChecks,
+  TriangleRight, Save, Bookmark, Pencil, MoreVertical,
+} from "lucide-react";
+import {
+  useComputeFunnelMutation, useGetFunnelsQuery, useCreateFunnelMutation,
+  useUpdateFunnelMutation, useDeleteFunnelMutation,
+} from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { num } from "@/shared/lib";
 import { FunnelFlowView } from "@/features/analytics/components/FunnelFlowView";
+import { FunnelShapeView } from "@/features/analytics/components/FunnelShapeView";
 import type { Stats, FunnelStepInput, FunnelResultStep } from "@/shared/types";
 
 type Draft = { type: "page" | "event"; value: string };
@@ -34,9 +41,17 @@ export function FunnelBuilder({
     { type: "page", value: "" },
   ]);
   const [result, setResult] = useState<FunnelResultStep[] | null>(null);
-  const [view, setView] = useState<"list" | "flow">("list");
+  const [view, setView] = useState<"list" | "flow" | "shape">("list");
   const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
   const [run, { isLoading }] = useComputeFunnelMutation();
+
+  const { data: savedFunnels = [] } = useGetFunnelsQuery(workspaceId);
+  const [createFunnel, { isLoading: isSaving }] = useCreateFunnelMutation();
+  const [updateFunnel, { isLoading: isUpdating }] = useUpdateFunnelMutation();
+  const [deleteFunnel] = useDeleteFunnelMutation();
 
   // Options come from what the dashboard already surfaced, so the picker only
   // offers steps that actually have data behind them.
@@ -108,14 +123,17 @@ export function FunnelBuilder({
 
   const setStep = (i: number, patch: Partial<Draft>) => {
     setActivePreset(null);
+    setEditingId(null);
     setSteps((s) => s.map((st, idx) => (idx === i ? { ...st, ...patch } : st)));
   };
   const addStep = () => {
     setActivePreset(null);
+    setEditingId(null);
     setSteps((s) => [...s, { type: "page", value: "" }]);
   };
   const removeStep = (i: number) => {
     setActivePreset(null);
+    setEditingId(null);
     setSteps((s) => s.filter((_, idx) => idx !== i));
   };
 
@@ -134,19 +152,106 @@ export function FunnelBuilder({
 
   const runPreset = (preset: (typeof presets)[number]) => {
     setActivePreset(preset.key);
+    setEditingId(null);
     setSteps(preset.steps);
     compute(preset.steps);
+  };
+
+  const loadSaved = (funnel: (typeof savedFunnels)[number]) => {
+    setActivePreset(null);
+    setEditingId(funnel.id);
+    setSteps(funnel.steps);
+    compute(funnel.steps);
+  };
+
+  const openSave = () => {
+    setSaveName(editingId ? savedFunnels.find((f) => f.id === editingId)?.name ?? "" : "");
+    setSaveOpen(true);
+  };
+
+  const confirmSave = async () => {
+    const name = saveName.trim();
+    if (!name) return;
+    const payload: FunnelStepInput[] = steps.filter((s) => s.value);
+    if (payload.length < 2) return;
+    try {
+      if (editingId) {
+        await updateFunnel({ workspaceId, funnelId: editingId, name, steps: payload }).unwrap();
+        notify.success("Funnel updated.");
+      } else {
+        const created = await createFunnel({ workspaceId, name, steps: payload }).unwrap();
+        setEditingId(created.id);
+        notify.success("Funnel saved.");
+      }
+      setSaveOpen(false);
+    } catch (e) {
+      notify.error(errMessage(e, "Could not save the funnel."));
+    }
+  };
+
+  const removeSaved = async (funnelId: string) => {
+    try {
+      await deleteFunnel({ workspaceId, funnelId }).unwrap();
+      if (editingId === funnelId) setEditingId(null);
+    } catch (e) {
+      notify.error(errMessage(e, "Could not delete the funnel."));
+    }
   };
 
   const top = result?.[0]?.count ?? 0;
 
   return (
     <Stack gap="lg">
+      {savedFunnels.length > 0 && (
+        <Card withBorder radius="lg" padding="lg">
+          <Group gap={8} mb="sm">
+            <Bookmark size={15} className="sect-ic" />
+            <Text fw={600} c="dimmed" size="sm">Saved funnels</Text>
+          </Group>
+          <Group gap="xs">
+            {savedFunnels.map((f) => (
+              <Chip.Group key={f.id}>
+                <Group gap={0} wrap="nowrap">
+                  <Chip
+                    checked={editingId === f.id}
+                    onChange={() => loadSaved(f)}
+                    variant="light"
+                    color="grape"
+                    disabled={isLoading}
+                  >
+                    {f.name}
+                  </Chip>
+                  <Menu withinPortal position="bottom-end">
+                    <Menu.Target>
+                      <ActionIcon variant="subtle" color="gray" size="sm" ml={-4}>
+                        <MoreVertical size={13} />
+                      </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item leftSection={<Pencil size={13} />} onClick={() => loadSaved(f)}>
+                        Load &amp; edit
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<Trash2 size={13} />}
+                        color="red"
+                        onClick={() => removeSaved(f.id)}
+                      >
+                        Delete
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                </Group>
+              </Chip.Group>
+            ))}
+          </Group>
+        </Card>
+      )}
+
       {presets.length > 0 && (
         <Card withBorder radius="lg" padding="lg">
           <Group gap={8} mb="sm">
             <ListChecks size={15} className="sect-ic" />
-            <Text fw={600} c="dimmed" size="sm">Quick funnels</Text>
+            <Text fw={600} c="dimmed" size="sm">Templates</Text>
           </Group>
           <Group gap="xs">
             {presets.map((p) => (
@@ -222,16 +327,49 @@ export function FunnelBuilder({
           >
             Add step
           </Button>
-          <Button
-            size="sm"
-            leftSection={isLoading ? <Loader size={14} color="white" /> : <Play size={15} />}
-            onClick={() => compute()}
-            disabled={!valid || isLoading}
-          >
-            Compute funnel
-          </Button>
+          <Group gap="xs">
+            <Button
+              variant="default"
+              size="sm"
+              leftSection={<Save size={14} />}
+              onClick={openSave}
+              disabled={!valid}
+            >
+              {editingId ? "Update" : "Save"}
+            </Button>
+            <Button
+              size="sm"
+              leftSection={isLoading ? <Loader size={14} color="white" /> : <Play size={15} />}
+              onClick={() => compute()}
+              disabled={!valid || isLoading}
+            >
+              Compute funnel
+            </Button>
+          </Group>
         </Group>
       </Card>
+
+      <Modal opened={saveOpen} onClose={() => setSaveOpen(false)} title={editingId ? "Update funnel" : "Save funnel"} size="sm">
+        <Stack gap="sm">
+          <TextInput
+            label="Name"
+            placeholder="e.g. Signup funnel"
+            value={saveName}
+            onChange={(e) => setSaveName(e.currentTarget.value)}
+            data-autofocus
+          />
+          <Group justify="flex-end">
+            <Button variant="subtle" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button
+              onClick={confirmSave}
+              loading={isSaving || isUpdating}
+              disabled={!saveName.trim()}
+            >
+              {editingId ? "Update" : "Save"}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
 
       {result && result.length > 0 && (
         <Card withBorder radius="lg" padding="lg">
@@ -244,9 +382,10 @@ export function FunnelBuilder({
               <SegmentedControl
                 size="xs"
                 value={view}
-                onChange={(v) => setView(v as "list" | "flow")}
+                onChange={(v) => setView(v as "list" | "flow" | "shape")}
                 data={[
                   { value: "list", label: <List size={13} /> },
+                  { value: "shape", label: <TriangleRight size={13} /> },
                   { value: "flow", label: <Waypoints size={13} /> },
                 ]}
               />
@@ -259,6 +398,8 @@ export function FunnelBuilder({
             </Center>
           ) : view === "flow" ? (
             <FunnelFlowView steps={result} />
+          ) : view === "shape" ? (
+            <FunnelShapeView steps={result} />
           ) : (
             <Stack gap="lg">
               {result.map((step, i) => (
