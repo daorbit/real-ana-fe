@@ -85,7 +85,6 @@ export function UserFlowPanel({
     const rawEdges = data?.edges ?? [];
     if (rawNodes.length === 0) return { nodes: [] as Node[], edges: [] as Edge[] };
 
-    const maxCount = Math.max(1, ...rawNodes.map((n) => n.count));
     const positions = layout(rawNodes.map((n) => n.id), rawEdges);
 
     const NODE_W = 200;
@@ -98,15 +97,15 @@ export function UserFlowPanel({
       height: NODE_H,
       data: { label: `${n.id}\n${num(n.count)} visits` },
       style: {
-        borderRadius: 10,
-        border: "1px solid var(--mantine-color-emerald-6, #12b886)",
-        padding: 8,
+        borderRadius: 8,
+        border: "1px solid var(--border-strong, #373a40)",
+        borderLeft: "3px solid var(--mantine-color-emerald-6, #12b886)",
+        padding: "6px 10px",
         fontSize: 12,
+        lineHeight: 1.4,
         width: NODE_W,
         height: NODE_H,
-        background: `color-mix(in srgb, var(--mantine-color-emerald-6, #12b886) ${Math.round(
-          15 + (n.count / maxCount) * 35,
-        )}%, var(--mantine-color-body, #fff))`,
+        background: "var(--surface, var(--mantine-color-body, #1a1b1e))",
         whiteSpace: "pre-line",
         textAlign: "left" as const,
       },
@@ -119,9 +118,13 @@ export function UserFlowPanel({
       target: e.target,
       type: "smoothstep",
       label: num(e.count),
+      labelStyle: { fontSize: 11, fontWeight: 600 },
       animated: e.count / maxEdgeCount > 0.5,
-      style: { strokeWidth: 1 + (e.count / maxEdgeCount) * 4 },
-      markerEnd: { type: MarkerType.ArrowClosed },
+      style: {
+        stroke: "var(--border-strong, #5c5f66)",
+        strokeWidth: 1.5,
+      },
+      markerEnd: { type: MarkerType.ArrowClosed, color: "var(--border-strong, #5c5f66)", width: 16, height: 16 },
     }));
 
     return { nodes, edges };
@@ -161,8 +164,8 @@ export function UserFlowPanel({
             edgesFocusable={false}
             proOptions={{ hideAttribution: true }}
           >
-            <Background />
-            <Controls showInteractive={false} />
+            <Background gap={16} size={1} />
+            <Controls showInteractive={false} position="bottom-right" />
           </ReactFlow>
         </div>
       )}

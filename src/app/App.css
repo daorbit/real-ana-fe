@@ -720,6 +720,43 @@ body { overflow-wrap: break-word; }
   background: var(--shell);
   border: 1px solid var(--border);
 }
+
+/* React Flow ships light-mode chrome by default (white control bar, black
+   attribution) with no dark-mode awareness of its own, so it's themed here
+   against the app's surface tokens rather than left to look like a
+   third-party widget dropped on the page. */
+.react-flow {
+  background: transparent;
+}
+.react-flow__controls {
+  box-shadow: var(--shadow-sm);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.react-flow__controls-button {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary, #868e96);
+}
+.react-flow__controls-button:hover {
+  background: var(--surface-2, var(--surface));
+}
+.react-flow__controls-button svg {
+  fill: currentColor;
+}
+.react-flow__attribution {
+  background: transparent;
+}
+.react-flow__node {
+  font-family: inherit;
+}
+.react-flow__edge-textbg {
+  fill: var(--surface);
+}
+.react-flow__edge-text {
+  font-weight: 600;
+}
 [data-mantine-color-scheme="dark"] .mantine-SegmentedControl-indicator {
   background: var(--surface-2);
   box-shadow: var(--shadow-sm);
