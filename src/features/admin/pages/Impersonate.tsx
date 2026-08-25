@@ -5,11 +5,11 @@ import {
   Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
   HoverCard, Image,
 } from "@mantine/core";
-import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, ShieldPlus, ShieldMinus, RefreshCw } from "lucide-react";
+import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmailComposer } from "@/features/admin/components/EmailComposer";
 import { AdminPlanDialog } from "@/features/admin/components/AdminPlanDialog";
-import { useGetAdminUsersQuery, useDeleteAdminUserMutation, useSetAdminUserRoleMutation } from "@/app/store";
+import { useGetAdminUsersQuery, useDeleteAdminUserMutation } from "@/app/store";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
@@ -49,7 +49,6 @@ export default function Impersonate() {
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [settingRole, setSettingRole] = useState<string | null>(null);
   // The one account being messaged, when the mail button in a row is used.
   const [messaging, setMessaging] = useState<AdminUser | null>(null);
   // The one account whose plan dialog is open.
@@ -71,7 +70,6 @@ export default function Impersonate() {
     { skip: !isAdmin }
   );
   const [deleteUser] = useDeleteAdminUserMutation();
-  const [setUserRole] = useSetAdminUserRoleMutation();
   const isSuperAdmin = user?.role === "super_admin" && !user?.impersonating;
 
   const enter = async (u: AdminUser) => {
@@ -85,36 +83,6 @@ export default function Impersonate() {
     } finally {
       setBusy(null);
     }
-  };
-
-  const changeRole = (u: AdminUser, role: "admin" | "user") => {
-    const grant = role === "admin";
-    confirmDelete({
-      title: grant ? "Make this account an admin?" : "Revoke admin access?",
-      confirmLabel: grant ? "Make admin" : "Revoke admin",
-      body: grant ? (
-        <>
-          <b>{u.name}</b> ({u.email}) will get full admin access — every account,
-          impersonation, and billing control on this page.
-        </>
-      ) : (
-        <>
-          <b>{u.name}</b> ({u.email}) will lose admin access and go back to a
-          regular account.
-        </>
-      ),
-      onConfirm: async () => {
-        setSettingRole(u.id);
-        try {
-          await setUserRole({ userId: u.id, role }).unwrap();
-          notify.success(`${u.email} is now ${role === "admin" ? "an admin" : "a regular user"}.`, "Role updated");
-        } catch (e) {
-          notify.error(errMessage(e, "Could not change that account's role."));
-        } finally {
-          setSettingRole(null);
-        }
-      },
-    });
   };
 
   const remove = (u: AdminUser) => {
@@ -252,7 +220,7 @@ export default function Impersonate() {
                   {users.map((u) => {
                     const admin = u.role === "admin" || u.role === "super_admin";
                     const isSelf = u.id === user?.id;
-                    const rowBusy = busy === u.id || deleting === u.id || settingRole === u.id;
+                    const rowBusy = busy === u.id || deleting === u.id;
                     // The superadmin can open a regular admin's dashboard for
                     // oversight — everyone else is blocked from any admin row,
                     // and nobody (including the superadmin) opens another
@@ -390,26 +358,6 @@ export default function Impersonate() {
                                 <Mail size={16} />
                               </ActionIcon>
                             </Tooltip>
-                            {isSuperAdmin && (
-                              <Tooltip label={admin ? "Revoke admin" : "Make admin"} withArrow>
-                                <ActionIcon
-                                  variant="light"
-                                  color={admin ? "orange" : "grape"}
-                                  size="lg"
-                                  radius="md"
-                                  disabled={isSelf || rowBusy}
-                                  onClick={() => changeRole(u, admin ? "user" : "admin")}
-                                >
-                                  {settingRole === u.id ? (
-                                    <Loader size={14} color={admin ? "orange" : "grape"} />
-                                  ) : admin ? (
-                                    <ShieldMinus size={16} />
-                                  ) : (
-                                    <ShieldPlus size={16} />
-                                  )}
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
                             <Tooltip
                               label={
                                 !isSuperAdmin

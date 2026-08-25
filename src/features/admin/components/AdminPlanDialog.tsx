@@ -1,9 +1,10 @@
 import {
-  Modal, Center, Loader, Stack, ThemeIcon, Text, Group, Badge, Divider, Progress,
+  Modal, Center, Loader, Stack, ThemeIcon, Text, Group, Badge, Divider, Progress, ActionIcon, Tooltip,
 } from "@mantine/core";
-import { CreditCard } from "lucide-react";
-import { useGetAdminUserBillingQuery } from "@/app/store";
+import { CreditCard, Plus } from "lucide-react";
+import { useGetAdminUserBillingQuery, useGrantAdminSiteSlotMutation } from "@/app/store";
 import { shortDate } from "@/shared/lib";
+import { notify, errMessage } from "@/shared/lib/notify";
 import type { AdminUser } from "@/shared/types";
 
 /**
@@ -15,6 +16,16 @@ import type { AdminUser } from "@/shared/types";
  */
 export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onClose: () => void }) {
   const { data, isLoading } = useGetAdminUserBillingQuery(user?.id ?? "", { skip: !user });
+  const [grantSiteSlot, { isLoading: isGranting }] = useGrantAdminSiteSlotMutation();
+
+  const grantSlot = async (workspaceId: string) => {
+    try {
+      await grantSiteSlot(workspaceId).unwrap();
+      notify.success("One extra site slot granted.");
+    } catch (e) {
+      notify.error(errMessage(e, "Could not grant a site slot."));
+    }
+  };
 
   return (
     <Modal
@@ -73,7 +84,28 @@ export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onC
 
                   <UsageRow label="SEO audits" used={ws.billing.audits.used} quota={ws.billing.audits.planQuota} credits={ws.billing.audits.addonCredits} />
                   <UsageRow label="Crawls" used={ws.billing.crawls.used} quota={ws.billing.crawls.planQuota} credits={ws.billing.crawls.addonCredits} />
-                  <UsageRow label="Sites" used={ws.billing.sites.used} quota={ws.billing.sites.quota} />
+                  <Group justify="space-between" gap="xs" wrap="nowrap">
+                    <div style={{ flex: 1 }}>
+                      <UsageRow label="Sites" used={ws.billing.sites.used} quota={ws.billing.sites.quota} />
+                    </div>
+                    <Tooltip label="Grant one extra site slot" withArrow>
+                      <ActionIcon
+                        variant="light"
+                        color="emerald"
+                        size="md"
+                        radius="md"
+                        loading={isGranting}
+                        onClick={() => grantSlot(ws.workspaceId)}
+                      >
+                        <Plus size={14} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Group>
+                  {(ws.billing.sites.addonSlots ?? 0) > 0 && (
+                    <Text size="xs" c="dimmed" mt={-8}>
+                      includes {ws.billing.sites.addonSlots} granted slot{ws.billing.sites.addonSlots === 1 ? "" : "s"}
+                    </Text>
+                  )}
 
                   <Text size="xs" c="dimmed">
                     ranges: {ws.billing.allowedRanges.join(", ")}

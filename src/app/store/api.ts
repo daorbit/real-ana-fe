@@ -4,7 +4,7 @@ import { getToken, isDemoToken } from "@/shared/lib/http";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import type {
-  AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace, Role,
+  AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace,
   ContactMessage, ContactMessagePage, ContactStatus,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
@@ -114,7 +114,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -749,14 +749,16 @@ export const api = createApi({
       invalidatesTags: ["AdminUser"],
     }),
 
-    /** Grant or revoke admin on another account. Superadmin-only server-side. */
-    setAdminUserRole: build.mutation<{ id: string; email: string; role: Role }, { userId: string; role: Role }>({
-      query: ({ userId, role }) => ({ url: `/api/admin/users/${userId}/role`, method: "PUT", body: { role } }),
-      invalidatesTags: ["AdminUser"],
-    }),
-
     getAdminUserBilling: build.query<AdminUserBilling, string>({
       query: (userId) => `/api/admin/users/${userId}/billing`,
+      providesTags: ["AdminUserBilling"],
+    }),
+
+    /** Grant one extra site slot to a workspace. Superadmin-only, support-only
+     *  exception — not a customer purchase. */
+    grantAdminSiteSlot: build.mutation<{ workspaceId: string; addonSiteSlots: number }, string>({
+      query: (workspaceId) => ({ url: `/api/admin/workspaces/${workspaceId}/site-slots`, method: "POST" }),
+      invalidatesTags: ["AdminUserBilling"],
     }),
 
     /** Support request raised from inside the app. Identity comes from the
@@ -1662,8 +1664,8 @@ export const {
   useSaveWorkspaceThemeMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
-  useSetAdminUserRoleMutation,
   useGetAdminUserBillingQuery,
+  useGrantAdminSiteSlotMutation,
   useGetContactMessagesQuery,
   useGetContactUnreadQuery,
   useUpdateContactMessageMutation,

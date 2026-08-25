@@ -521,7 +521,7 @@ export type QuotaSummary = {
   currentPeriodEnd: string | null;
   audits: { planQuota: number; used: number; addonCredits: number };
   crawls: { planQuota: number; used: number; addonCredits: number };
-  sites: { quota: number; used: number };
+  sites: { quota: number; used: number; addonSlots?: number };
   /**
    * The Orbit AI tier this workspace is effectively on, and its question usage.
    *
