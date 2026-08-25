@@ -1,23 +1,14 @@
 import { useMemo, useState } from "react";
-import {
-  Card, Group, Text, Stack, Button, Select, ActionIcon, Progress, Badge,
-  Center, ThemeIcon, Loader, SegmentedControl, Chip, Modal, TextInput, Menu,
-} from "@mantine/core";
-import {
-  Plus, Trash2, Filter, Play, TrendingDown, List, Waypoints, ListChecks,
-  TriangleRight, Save, Bookmark, Pencil, MoreVertical,
-} from "lucide-react";
+import { Group, Stack, Modal, TextInput, Button } from "@mantine/core";
 import {
   useComputeFunnelMutation, useGetFunnelsQuery, useCreateFunnelMutation,
   useUpdateFunnelMutation, useDeleteFunnelMutation,
 } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { num } from "@/shared/lib";
-import { FunnelFlowView } from "@/features/analytics/components/FunnelFlowView";
-import { FunnelShapeView } from "@/features/analytics/components/FunnelShapeView";
+import { FunnelSidebar } from "@/features/analytics/components/FunnelSidebar";
+import { FunnelStepEditor, type Draft } from "@/features/analytics/components/FunnelStepEditor";
+import { FunnelResults } from "@/features/analytics/components/FunnelResults";
 import type { Stats, FunnelStepInput, FunnelResultStep } from "@/shared/types";
-
-type Draft = { type: "page" | "event"; value: string };
 
 /**
  * Ad-hoc funnel builder. The user picks an ordered list of steps — pages or
@@ -198,237 +189,60 @@ export function FunnelBuilder({
     }
   };
 
-  const top = result?.[0]?.count ?? 0;
-
   return (
-    <Stack gap="lg">
-      {savedFunnels.length > 0 && (
-        <Card withBorder radius="lg" padding="lg">
-          <Group gap={8} mb="sm">
-            <Bookmark size={15} className="sect-ic" />
-            <Text fw={600} c="dimmed" size="sm">Saved funnels</Text>
-          </Group>
-          <Group gap="xs">
-            {savedFunnels.map((f) => (
-              <Chip.Group key={f.id}>
-                <Group gap={0} wrap="nowrap">
-                  <Chip
-                    checked={editingId === f.id}
-                    onChange={() => loadSaved(f)}
-                    variant="light"
-                    color="grape"
-                    disabled={isLoading}
-                  >
-                    {f.name}
-                  </Chip>
-                  <Menu withinPortal position="bottom-end">
-                    <Menu.Target>
-                      <ActionIcon variant="subtle" color="gray" size="sm" ml={-4}>
-                        <MoreVertical size={13} />
-                      </ActionIcon>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                      <Menu.Item leftSection={<Pencil size={13} />} onClick={() => loadSaved(f)}>
-                        Load &amp; edit
-                      </Menu.Item>
-                      <Menu.Item
-                        leftSection={<Trash2 size={13} />}
-                        color="red"
-                        onClick={() => removeSaved(f.id)}
-                      >
-                        Delete
-                      </Menu.Item>
-                    </Menu.Dropdown>
-                  </Menu>
-                </Group>
-              </Chip.Group>
-            ))}
-          </Group>
-        </Card>
-      )}
+    <Group align="flex-start" wrap="nowrap" gap="lg">
+      <FunnelSidebar
+        savedFunnels={savedFunnels}
+        presets={presets}
+        editingId={editingId}
+        activePreset={activePreset}
+        disabled={isLoading}
+        onLoadSaved={loadSaved}
+        onRemoveSaved={removeSaved}
+        onRunPreset={runPreset}
+      />
 
-      {presets.length > 0 && (
-        <Card withBorder radius="lg" padding="lg">
-          <Group gap={8} mb="sm">
-            <ListChecks size={15} className="sect-ic" />
-            <Text fw={600} c="dimmed" size="sm">Templates</Text>
-          </Group>
-          <Group gap="xs">
-            {presets.map((p) => (
-              <Chip
-                key={p.key}
-                checked={activePreset === p.key}
-                onChange={() => runPreset(p)}
-                variant="light"
-                color="emerald"
-                disabled={isLoading}
+      <Stack style={{ flex: 1, minWidth: 0 }} gap="lg">
+        <FunnelStepEditor
+          steps={steps}
+          pageOptions={pageOptions}
+          eventOptions={eventOptions}
+          valid={valid}
+          isLoading={isLoading}
+          editingId={editingId}
+          onStepChange={setStep}
+          onAddStep={addStep}
+          onRemoveStep={removeStep}
+          onSave={openSave}
+          onCompute={() => compute()}
+        />
+
+        <Modal opened={saveOpen} onClose={() => setSaveOpen(false)} title={editingId ? "Update funnel" : "Save funnel"} size="sm">
+          <Stack gap="sm">
+            <TextInput
+              label="Name"
+              placeholder="e.g. Signup funnel"
+              value={saveName}
+              onChange={(e) => setSaveName(e.currentTarget.value)}
+              data-autofocus
+            />
+            <Group justify="flex-end">
+              <Button variant="subtle" onClick={() => setSaveOpen(false)}>Cancel</Button>
+              <Button
+                onClick={confirmSave}
+                loading={isSaving || isUpdating}
+                disabled={!saveName.trim()}
               >
-                {p.label}
-              </Chip>
-            ))}
-          </Group>
-        </Card>
-      )}
-
-      <Card withBorder radius="lg" padding="lg">
-        <Group gap={8} mb="md">
-          <Filter size={15} className="sect-ic" />
-          <Text fw={600} c="dimmed" size="sm">Build a funnel</Text>
-        </Group>
-
-        <Stack gap="sm">
-          {steps.map((s, i) => (
-            <Group key={i} gap="sm" wrap="nowrap">
-              <ThemeIcon variant="light" color="gray" radius="xl" size="sm">
-                <Text size="xs" fw={700}>{i + 1}</Text>
-              </ThemeIcon>
-              <Select
-                w={110}
-                size="sm"
-                data={[
-                  { value: "page", label: "Page" },
-                  { value: "event", label: "Event" },
-                ]}
-                value={s.type}
-                onChange={(v) => setStep(i, { type: (v as "page" | "event") ?? "page", value: "" })}
-                allowDeselect={false}
-              />
-              <Select
-                flex={1}
-                size="sm"
-                placeholder={s.type === "page" ? "Choose a page…" : "Choose an event…"}
-                data={s.type === "page" ? pageOptions : eventOptions}
-                value={s.value || null}
-                onChange={(v) => setStep(i, { value: v ?? "" })}
-                searchable
-                nothingFoundMessage="No data for this dimension yet"
-                comboboxProps={{ withinPortal: true }}
-              />
-              <ActionIcon
-                variant="subtle"
-                color="red"
-                onClick={() => removeStep(i)}
-                disabled={steps.length <= 2}
-                title="Remove step"
-              >
-                <Trash2 size={15} />
-              </ActionIcon>
+                {editingId ? "Update" : "Save"}
+              </Button>
             </Group>
-          ))}
-        </Stack>
+          </Stack>
+        </Modal>
 
-        <Group justify="space-between" mt="md">
-          <Button
-            variant="subtle"
-            size="xs"
-            leftSection={<Plus size={14} />}
-            onClick={addStep}
-            disabled={steps.length >= 8}
-          >
-            Add step
-          </Button>
-          <Group gap="xs">
-            <Button
-              variant="default"
-              size="sm"
-              leftSection={<Save size={14} />}
-              onClick={openSave}
-              disabled={!valid}
-            >
-              {editingId ? "Update" : "Save"}
-            </Button>
-            <Button
-              size="sm"
-              leftSection={isLoading ? <Loader size={14} color="white" /> : <Play size={15} />}
-              onClick={() => compute()}
-              disabled={!valid || isLoading}
-            >
-              Compute funnel
-            </Button>
-          </Group>
-        </Group>
-      </Card>
-
-      <Modal opened={saveOpen} onClose={() => setSaveOpen(false)} title={editingId ? "Update funnel" : "Save funnel"} size="sm">
-        <Stack gap="sm">
-          <TextInput
-            label="Name"
-            placeholder="e.g. Signup funnel"
-            value={saveName}
-            onChange={(e) => setSaveName(e.currentTarget.value)}
-            data-autofocus
-          />
-          <Group justify="flex-end">
-            <Button variant="subtle" onClick={() => setSaveOpen(false)}>Cancel</Button>
-            <Button
-              onClick={confirmSave}
-              loading={isSaving || isUpdating}
-              disabled={!saveName.trim()}
-            >
-              {editingId ? "Update" : "Save"}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
-
-      {result && result.length > 0 && (
-        <Card withBorder radius="lg" padding="lg">
-          <Group justify="space-between" mb="md">
-            <Text fw={600} c="dimmed" size="sm">Results</Text>
-            <Group gap="sm">
-              <Badge variant="light" color="emerald" size="lg">
-                {result[result.length - 1]?.rate ?? 0}% end-to-end
-              </Badge>
-              <SegmentedControl
-                size="xs"
-                value={view}
-                onChange={(v) => setView(v as "list" | "flow" | "shape")}
-                data={[
-                  { value: "list", label: <Center><List size={13} /></Center> },
-                  { value: "shape", label: <Center><TriangleRight size={13} /></Center> },
-                  { value: "flow", label: <Center><Waypoints size={13} /></Center> },
-                ]}
-              />
-            </Group>
-          </Group>
-
-          {top === 0 ? (
-            <Center py="lg">
-              <Text c="dimmed" size="sm">No sessions entered this funnel in the selected range.</Text>
-            </Center>
-          ) : view === "flow" ? (
-            <FunnelFlowView steps={result} />
-          ) : view === "shape" ? (
-            <FunnelShapeView steps={result} />
-          ) : (
-            <Stack gap="lg">
-              {result.map((step, i) => (
-                <div key={i}>
-                  <Group justify="space-between" gap="xs" mb={5} wrap="nowrap">
-                    <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
-                      <ThemeIcon variant="light" color="emerald" radius="xl" size="sm">
-                        <Text size="xs" fw={700}>{i + 1}</Text>
-                      </ThemeIcon>
-                      <Text size="sm" truncate>{step.label}</Text>
-                      <Badge variant="light" color="gray" size="xs">{step.type}</Badge>
-                    </Group>
-                    <Group gap={10} wrap="nowrap">
-                      {i > 0 && step.dropFromPrev > 0 && (
-                        <Text size="xs" c="pink" style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                          <TrendingDown size={12} /> {step.dropFromPrev}%
-                        </Text>
-                      )}
-                      <Text size="xs" c="dimmed">{step.rate}%</Text>
-                      <Text size="sm" fw={700}>{num(step.count)}</Text>
-                    </Group>
-                  </Group>
-                  <Progress value={step.rate} size="lg" radius="sm" color="emerald" />
-                </div>
-              ))}
-            </Stack>
-          )}
-        </Card>
-      )}
-    </Stack>
+        {result && result.length > 0 && (
+          <FunnelResults result={result} view={view} onViewChange={setView} />
+        )}
+      </Stack>
+    </Group>
   );
 }

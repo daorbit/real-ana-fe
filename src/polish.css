@@ -224,3 +224,10 @@
   --mantine-color-red-light: color-mix(in srgb, var(--mantine-color-red-6) 14%, transparent);
   --mantine-color-red-light-hover: color-mix(in srgb, var(--mantine-color-red-6) 20%, transparent);
 }
+
+/* ---- Funnel step rows ------------------------------------------------------
+   A step row is a bordered container rather than a bare line, so it reads as
+   one editable unit; the hover tint confirms which row the pointer is over. */
+.funnel-step-row:hover {
+  background: var(--mantine-color-default-hover);
+}

@@ -1,8 +1,8 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Card, Group, Text, Center, Loader, Stack, ThemeIcon } from "@mantine/core";
 import { Inbox, Waypoints } from "lucide-react";
 import {
-  ReactFlow, Background, Controls, MarkerType,
+  ReactFlow, Background, Controls, MarkerType, useNodesState,
   type Node, type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -80,7 +80,7 @@ export function UserFlowPanel({
 }) {
   const { data, isFetching } = useGetUserFlowQuery({ workspaceId, range, sites });
 
-  const { nodes, edges } = useMemo(() => {
+  const { nodes: initialNodes, edges } = useMemo(() => {
     const rawNodes = data?.nodes ?? [];
     const rawEdges = data?.edges ?? [];
     if (rawNodes.length === 0) return { nodes: [] as Node[], edges: [] as Edge[] };
@@ -97,17 +97,23 @@ export function UserFlowPanel({
       height: NODE_H,
       data: { label: `${n.id}\n${num(n.count)} visits` },
       style: {
-        borderRadius: 8,
-        border: "1px solid var(--border-strong, #373a40)",
-        borderLeft: "3px solid var(--mantine-color-emerald-6, #12b886)",
+        borderRadius: 10,
+        border: "1.5px solid transparent",
+        backgroundImage:
+          "linear-gradient(rgba(255,255,255,0.04), rgba(255,255,255,0.04)), " +
+          "linear-gradient(135deg, var(--mantine-color-emerald-6, #12b886), color-mix(in srgb, var(--mantine-color-emerald-6, #12b886) 30%, transparent))",
+        backgroundOrigin: "border-box",
+        backgroundClip: "padding-box, border-box",
+        backgroundColor: "transparent",
+        backdropFilter: "blur(6px)",
         padding: "6px 10px",
         fontSize: 12,
         lineHeight: 1.4,
         width: NODE_W,
         height: NODE_H,
-        background: "var(--surface, var(--mantine-color-body, #1a1b1e))",
         whiteSpace: "pre-line",
         textAlign: "left" as const,
+        color: "var(--mantine-color-text, #e9ecef)",
       },
     }));
 
@@ -129,6 +135,11 @@ export function UserFlowPanel({
 
     return { nodes, edges };
   }, [data]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+
+  // New flow data (range/site change) -> replace the node set with its layout.
+  useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
 
   return (
     <Card withBorder radius="lg" padding="lg">
@@ -154,6 +165,7 @@ export function UserFlowPanel({
         <div style={{ height: 600, width: "100%", position: "relative" }}>
           <ReactFlow
             nodes={nodes}
+            onNodesChange={onNodesChange}
             edges={edges}
             fitView
             fitViewOptions={{ padding: 0.2 }}
