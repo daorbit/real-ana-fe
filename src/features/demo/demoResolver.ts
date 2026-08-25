@@ -1,7 +1,7 @@
 import {
   demoWorkspaces, demoSites, demoGoals, demoApiKeys, demoShare, demoSeoReport,
   demoSeoHistory, demoSeoShare, demoCrawl, demoSearchTraffic, demoVitals,
-  demoCompetitors, demoInstallStatus, demoStats, DEMO_WORKSPACE_ID,
+  demoCompetitors, demoInstallStatus, demoStats, demoUserFlow, DEMO_WORKSPACE_ID,
 } from "@/features/demo/demoData";
 
 /**
@@ -30,6 +30,7 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   if (/\/stats$/.test(path)) return demoStats(params.get("range") ?? "24h");
   if (/\/retention$/.test(path)) return [];
   if (/\/funnel$/.test(path)) return { steps: [] };
+  if (/\/user-flow$/.test(path)) return demoUserFlow();
 
   // goals, keys, sharing
   if (/\/goals$/.test(path)) return demoGoals;

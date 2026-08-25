@@ -1,4 +1,4 @@
-import type { Stats } from "@/shared/types";
+import type { Stats, FlowNode, FlowEdge } from "@/shared/types";
 
 /**
  * A believable populated dashboard, generated rather than hand-written.
@@ -247,4 +247,47 @@ export function demoStats(range: string): Stats {
 
     siteCount: 3,
   };
+}
+
+/**
+ * A believable page-to-page navigation graph, in the same spirit as
+ * `demoStats`: deterministic, display-only, shaped like what `computeUserFlow`
+ * on the backend would return for a real site.
+ */
+export function demoUserFlow(): { nodes: FlowNode[]; edges: FlowEdge[] } {
+  const rand = rng(0xf10);
+
+  const nodeCounts = ranked(PAGES, 3400, 0.68);
+  const nodes: FlowNode[] = nodeCounts.map((n) => ({ id: n.key, count: n.count }));
+  const countOf = new Map(nodes.map((n) => [n.id, n.count]));
+
+  // A handful of plausible paths visitors actually take, each with a rough
+  // share of the sessions that pass through the first page in the chain.
+  const journeys: string[][] = [
+    ["/", "/pricing", "/docs"],
+    ["/", "/features", "/pricing"],
+    ["/", "/blog/launch", "/"],
+    ["/features", "/docs", "/docs/api"],
+    ["/", "/about"],
+    ["/pricing", "/docs/api"],
+    ["/blog/launch", "/features"],
+    ["/", "/changelog"],
+  ];
+
+  const edgeCounts = new Map<string, number>();
+  for (const journey of journeys) {
+    const base = (countOf.get(journey[0]) ?? 400) * (0.12 + rand() * 0.18);
+    for (let i = 1; i < journey.length; i++) {
+      const key = `${journey[i - 1]} ${journey[i]}`;
+      const decayed = Math.max(8, Math.round(base * Math.pow(0.72, i - 1)));
+      edgeCounts.set(key, (edgeCounts.get(key) ?? 0) + decayed);
+    }
+  }
+
+  const edges: FlowEdge[] = [...edgeCounts.entries()].map(([key, count]) => {
+    const [source, target] = key.split(" ");
+    return { source, target, count };
+  });
+
+  return { nodes, edges };
 }

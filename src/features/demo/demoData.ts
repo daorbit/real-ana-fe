@@ -3,7 +3,7 @@ import type {
   SeoReportSummary, SeoCrawlReport, SeoCrawlPage, SeoSearchTraffic, SeoFieldVitals,
   SeoCompetitor, SeoShareState,
 } from "@/shared/types";
-import { demoStats } from "@/features/demo/demoStats";
+import { demoStats, demoUserFlow } from "@/features/demo/demoStats";
 
 /**
  * Everything the demo session shows, generated in the browser.
@@ -504,4 +504,4 @@ export const demoInstallStatus = {
 };
 
 /** Stats come from the existing generator, which already produces a full payload. */
-export { demoStats };
+export { demoStats, demoUserFlow };
