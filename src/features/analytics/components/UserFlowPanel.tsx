@@ -9,6 +9,20 @@ import "@xyflow/react/dist/style.css";
 import { useGetUserFlowQuery } from "@/app/store";
 import { num } from "@/shared/lib";
 
+const NODE_W = 200;
+// Rough chars-per-line at the node's font size/padding, for estimating wrap.
+const CHARS_PER_LINE = 26;
+const LINE_H = 17;
+const NODE_PAD_V = 16;
+const NODE_MIN_H = 64;
+
+/** Estimated rendered height for a node whose label may wrap onto several
+ * lines — a long path must not overflow its box or overlap the row below. */
+function nodeHeight(id: string): number {
+  const lines = 1 + Math.ceil(id.length / CHARS_PER_LINE); // +1 for the visits line
+  return Math.max(NODE_MIN_H, lines * LINE_H + NODE_PAD_V);
+}
+
 /**
  * Lays nodes out left-to-right by BFS depth from whichever pages have no
  * incoming edge (the graph's entry points), so the picture reads the way a
@@ -55,16 +69,15 @@ function layout(nodeIds: string[], edges: { source: string; target: string }[]) 
 
   const positions = new Map<string, { x: number; y: number }>();
   const COL_W = 280;
-  const ROW_H = 130;
+  const ROW_GAP = 30;
   for (const [d, ids] of columns) {
-    // Center each column vertically around the tallest one, so a page with
-    // many branches doesn't push everything to one side.
-    const colCount = ids.length;
-    const maxCount = Math.max(...[...columns.values()].map((c) => c.length));
-    const offset = ((maxCount - colCount) * ROW_H) / 2;
-    ids.forEach((id, i) => {
-      positions.set(id, { x: d * COL_W, y: offset + i * ROW_H });
-    });
+    // Each row is as tall as its own node, so a wrapped label pushes the
+    // next row down instead of overlapping it.
+    let y = 0;
+    for (const id of ids) {
+      positions.set(id, { x: d * COL_W, y });
+      y += nodeHeight(id) + ROW_GAP;
+    }
   }
   return positions;
 }
@@ -87,9 +100,6 @@ export function UserFlowPanel({
 
     const positions = layout(rawNodes.map((n) => n.id), rawEdges);
 
-    const NODE_W = 200;
-    const NODE_H = 64;
-
     const nodes: Node[] = rawNodes.map((n) => ({
       id: n.id,
       position: positions.get(n.id) ?? { x: 0, y: 0 },
@@ -103,7 +113,7 @@ export function UserFlowPanel({
         fontSize: 12,
         lineHeight: 1.5,
         width: NODE_W,
-        minHeight: NODE_H,
+        minHeight: nodeHeight(n.id),
         whiteSpace: "pre-line",
         textAlign: "left" as const,
         color: "var(--mantine-color-text, #e9ecef)",
