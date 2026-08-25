@@ -384,9 +384,9 @@ export function FunnelBuilder({
                 value={view}
                 onChange={(v) => setView(v as "list" | "flow" | "shape")}
                 data={[
-                  { value: "list", label: <List size={13} /> },
-                  { value: "shape", label: <TriangleRight size={13} /> },
-                  { value: "flow", label: <Waypoints size={13} /> },
+                  { value: "list", label: <Center><List size={13} /></Center> },
+                  { value: "shape", label: <Center><TriangleRight size={13} /></Center> },
+                  { value: "flow", label: <Center><Waypoints size={13} /></Center> },
                 ]}
               />
             </Group>

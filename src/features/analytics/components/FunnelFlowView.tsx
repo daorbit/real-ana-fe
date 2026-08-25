@@ -18,6 +18,13 @@ function stepColor(dropFromPrev: number): string {
   return "var(--mantine-color-pink-6, #e64980)";
 }
 
+/** Gradient border via layered backgrounds: a transparent glass fill on top
+ * of a linear-gradient edge, clipped to a ring by padding-box/border-box. */
+function stepBorderImage(dropFromPrev: number): string {
+  const c = stepColor(dropFromPrev);
+  return `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 30%, transparent))`;
+}
+
 /** The funnel's steps drawn as a left-to-right node chain, sized by who's left. */
 export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
   const { nodes, edges } = useMemo(() => {
@@ -30,17 +37,21 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
         label: `${i + 1}. ${s.label}\n${num(s.count)} · ${s.rate}%`,
       },
       style: {
-        borderRadius: 8,
-        border: "1px solid var(--border-strong, #373a40)",
-        borderLeft: `3px solid ${stepColor(s.dropFromPrev)}`,
+        borderRadius: 10,
+        border: "1.5px solid transparent",
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.04), rgba(255,255,255,0.04)), ${stepBorderImage(s.dropFromPrev)}`,
+        backgroundOrigin: "border-box",
+        backgroundClip: "padding-box, border-box",
+        backgroundColor: "transparent",
+        backdropFilter: "blur(6px)",
         padding: "6px 10px",
         fontSize: 12,
         lineHeight: 1.4,
         width: NODE_W,
         height: NODE_H,
-        background: "var(--surface, var(--mantine-color-body, #1a1b1e))",
         whiteSpace: "pre-line",
         textAlign: "left" as const,
+        color: "var(--mantine-color-text, #e9ecef)",
       },
     }));
 
