@@ -88,26 +88,22 @@ export function UserFlowPanel({
     const positions = layout(rawNodes.map((n) => n.id), rawEdges);
 
     const NODE_W = 200;
-    const NODE_H = 54;
+    const NODE_H = 64;
 
     const nodes: Node[] = rawNodes.map((n) => ({
       id: n.id,
       position: positions.get(n.id) ?? { x: 0, y: 0 },
       width: NODE_W,
-      height: NODE_H,
       data: { label: `${n.id}\n${num(n.count)} visits` },
       style: {
         borderRadius: 10,
-        border: "1.5px solid transparent",
-        borderImage:
-          "linear-gradient(135deg, var(--mantine-color-emerald-6, #12b886), color-mix(in srgb, var(--mantine-color-emerald-6, #12b886) 30%, transparent)) 1",
-        background: "transparent",
-        backdropFilter: "blur(6px)",
-        padding: "6px 10px",
+        border: "1px solid var(--mantine-color-emerald-6, #12b886)",
+        background: "color-mix(in srgb, var(--mantine-color-emerald-6, #12b886) 12%, var(--mantine-color-body, #1a1b1e))",
+        padding: "8px 12px",
         fontSize: 12,
-        lineHeight: 1.4,
+        lineHeight: 1.5,
         width: NODE_W,
-        height: NODE_H,
+        minHeight: NODE_H,
         whiteSpace: "pre-line",
         textAlign: "left" as const,
         color: "var(--mantine-color-text, #e9ecef)",

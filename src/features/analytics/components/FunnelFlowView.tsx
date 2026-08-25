@@ -18,40 +18,33 @@ function stepColor(dropFromPrev: number): string {
   return "var(--mantine-color-pink-6, #e64980)";
 }
 
-/** CSS border-image gradient — a true ring, unlike the background-clip trick
- * which some engines paint edge-to-edge instead of clipping to the border. */
-function stepBorderImage(dropFromPrev: number): string {
-  const c = stepColor(dropFromPrev);
-  return `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 30%, transparent)) 1`;
-}
-
 /** The funnel's steps drawn as a left-to-right node chain, sized by who's left. */
 export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
   const { nodes: initialNodes, edges } = useMemo(() => {
-    const nodes: Node[] = steps.map((s, i) => ({
-      id: `step-${i}`,
-      position: { x: i * COL_W, y: 0 },
-      width: NODE_W,
-      height: NODE_H,
-      data: {
-        label: `${i + 1}. ${s.label}\n${num(s.count)} · ${s.rate}%`,
-      },
-      style: {
-        borderRadius: 10,
-        border: "1.5px solid transparent",
-        borderImage: stepBorderImage(s.dropFromPrev),
-        background: "transparent",
-        backdropFilter: "blur(6px)",
-        padding: "6px 10px",
-        fontSize: 12,
-        lineHeight: 1.4,
+    const nodes: Node[] = steps.map((s, i) => {
+      const c = stepColor(s.dropFromPrev);
+      return {
+        id: `step-${i}`,
+        position: { x: i * COL_W, y: 0 },
         width: NODE_W,
-        height: NODE_H,
-        whiteSpace: "pre-line",
-        textAlign: "left" as const,
-        color: "var(--mantine-color-text, #e9ecef)",
-      },
-    }));
+        data: {
+          label: `${i + 1}. ${s.label}\n${num(s.count)} · ${s.rate}%`,
+        },
+        style: {
+          borderRadius: 10,
+          border: `1px solid ${c}`,
+          background: `color-mix(in srgb, ${c} 12%, var(--mantine-color-body, #1a1b1e))`,
+          padding: "8px 12px",
+          fontSize: 12,
+          lineHeight: 1.5,
+          width: NODE_W,
+          minHeight: NODE_H,
+          whiteSpace: "pre-line",
+          textAlign: "left" as const,
+          color: "var(--mantine-color-text, #e9ecef)",
+        },
+      };
+    });
 
     const edges: Edge[] = steps.slice(1).map((s, i) => ({
       id: `e${i}`,
