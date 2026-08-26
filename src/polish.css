@@ -388,3 +388,14 @@
 .react-flow__edge-textbg {
   fill: var(--surface);
 }
+
+/* User journeys list: a row card that lifts slightly on hover, signalling
+   it's a click-through rather than a static line. */
+.journey-row {
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.journey-row:hover {
+  border-color: var(--mantine-color-gray-4);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+}

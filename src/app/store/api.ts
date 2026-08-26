@@ -1277,11 +1277,15 @@ export const api = createApi({
      * years of deploys doesn't ship them all to draw a 24h chart.
      */
     /** Recently active identified users — the entry point into their journey. */
-    getJourneyUsers: build.query<{ users: JourneyUser[] }, { wid: string; q?: string; sites?: string[] }>({
-      query: ({ wid, q, sites }) => {
+    getJourneyUsers: build.query<
+      { users: JourneyUser[]; total: number; page: number; pageSize: number },
+      { wid: string; q?: string; sites?: string[]; page?: number }
+    >({
+      query: ({ wid, q, sites, page }) => {
         const qs = new URLSearchParams();
         if (q) qs.set("q", q);
         if (sites?.length) qs.set("sites", sites.join(","));
+        if (page) qs.set("page", String(page));
         const suffix = qs.toString() ? `?${qs}` : "";
         return `/api/workspaces/${wid}/users${suffix}`;
       },
