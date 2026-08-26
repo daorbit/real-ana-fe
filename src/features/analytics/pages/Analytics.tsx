@@ -45,7 +45,7 @@ import { ExportMenu } from "@/shared/ui/ExportMenu";
 import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { getAnalyticsHelp } from "@/features/analytics/components/analyticsHelp";
-import { useStats } from "@/features/analytics";
+import { useStats, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
 import {
   useGetSegmentsQuery, useSaveSegmentMutation,
@@ -362,7 +362,7 @@ export default function Analytics() {
    * previous workspace's site ids attached, which the server answers with a
    * 404 — the request is asking this workspace about somebody else's sites.
    */
-  const [pickedSites, setPickedSites] = useState<string[]>([]);
+  const [pickedSites, setPickedSites] = useSiteScope(active?._id);
 
   const { sites } = useSites(active?._id);
 

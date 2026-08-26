@@ -21,12 +21,19 @@ export function SiteFilter({
   const allSelected = selected.length === 0;
 
   const toggle = (siteId: string) => {
-    const next = new Set(set);
-    if (next.has(siteId)) next.delete(siteId);
-    else next.add(siteId);
+    // "All" is stored as an empty list, but every row renders checked in that
+    // state — so a click there means "deselect this one from all of them",
+    // which has to start from the full list rather than from the empty one
+    // it is actually stored as. Without this, the first click on a checked
+    // row deleted from an empty set and silently did nothing.
+    const base = allSelected ? new Set(sites.map((s) => s.siteId)) : new Set(set);
+
+    if (base.has(siteId)) base.delete(siteId);
+    else base.add(siteId);
+
     // Selecting every site collapses back to the "all" default, so the two
     // states never disagree.
-    onChange(next.size === sites.length ? [] : [...next]);
+    onChange(base.size === sites.length ? [] : [...base]);
   };
 
   const label = allSelected

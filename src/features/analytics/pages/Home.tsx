@@ -36,7 +36,7 @@ import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { SeoScoreCard } from "@/features/seo/components/SeoScoreCard";
 import { SortableWidget, WidgetDragPreview } from "@/shared/ui/SortableWidget";
 import { Onboarding } from "@/features/auth/components/Onboarding";
-import { useStats, useHomeWidgets, WIDGET_MAP, useLinkedInReturn } from "@/features/analytics";
+import { useStats, useHomeWidgets, WIDGET_MAP, useLinkedInReturn, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
 import { useDemo } from "@/features/demo/context";
 import type { WidgetId, Span } from "@/features/analytics";
@@ -166,10 +166,9 @@ export default function Home() {
   // The LinkedIn OAuth callback lands back here with its outcome in the query
   // string; this raises the toast and cleans the URL.
   useLinkedInReturn();
-  // Empty = all sites in the workspace. Reset when the workspace changes, since
-  // siteIds don't carry across workspaces.
-  const [siteScope, setSiteScope] = useState<string[]>([]);
-  useEffect(() => setSiteScope([]), [active?._id]);
+  // Empty = all sites in the workspace. Remembered per workspace, so the
+  // scope survives a reload and matches what Analytics is showing.
+  const [siteScope, setSiteScope] = useSiteScope(active?._id);
 
   // Narrowing the site scope swaps every number on the page, same as a
   // workspace switch — cover it with the same transition.
