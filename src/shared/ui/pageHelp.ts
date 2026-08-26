@@ -51,7 +51,7 @@ const BILLING_SPEC: SectionSpec[] = [
 const DEVELOPERS_SPEC: SectionSpec[] = [
   { id: "keys", icon: KeyRound, items: ["Scope", "Name", "Prefix", "LastUsed"] },
   { id: "security", icon: ShieldCheck, items: ["Once", "ServerOnly", "Revoke", "Leak"] },
-  { id: "docs", icon: BookOpen, items: ["Install", "Events", "Api"] },
+  { id: "docs", icon: BookOpen, items: ["Install", "Events", "Mobile", "Api"] },
 ];
 
 const SHARE_SPEC: SectionSpec[] = [
