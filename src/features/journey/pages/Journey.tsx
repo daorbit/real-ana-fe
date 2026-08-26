@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Text, Group, Card, TextInput, Center, Badge, ThemeIcon, Stack, Pagination,
-  Skeleton, Box,
+  Text, Group, Card, TextInput, Badge, ThemeIcon, Stack, Pagination,
+  Skeleton, Box, ActionIcon, Tooltip,
 } from "@mantine/core";
-import { Search, Users, ArrowRight, Fingerprint } from "lucide-react";
+import { Search, Users, ArrowRight, Fingerprint, RotateCw } from "lucide-react";
 import { useGetJourneyUsersQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -31,7 +31,7 @@ export default function Journey() {
   // than landing on a page that may no longer exist.
   useEffect(() => setPage(1), [q]);
 
-  const { data, isFetching } = useGetJourneyUsersQuery(
+  const { data, isFetching, refetch } = useGetJourneyUsersQuery(
     { wid: active?._id ?? "", q: q || undefined, page },
     { skip: !active },
   );
@@ -47,16 +47,29 @@ export default function Journey() {
         actions={<PageHelpButton />}
       />
 
-      <TextInput
-        placeholder="Search by user id"
-        leftSection={<Search size={15} />}
-        value={q}
-        onChange={(e) => setQ(e.currentTarget.value)}
-        mb="lg"
-        maw={360}
-      />
+      <Group justify="space-between" mb="lg" wrap="wrap">
+        <TextInput
+          placeholder="Search by user id"
+          leftSection={<Search size={15} />}
+          value={q}
+          onChange={(e) => setQ(e.currentTarget.value)}
+          maw={360}
+          style={{ flex: 1, minWidth: 220 }}
+        />
+        <Tooltip label="Refresh" withArrow>
+          <ActionIcon
+            variant="default"
+            radius="xl"
+            size="lg"
+            onClick={() => refetch()}
+            aria-label="Refresh"
+          >
+            <RotateCw size={16} className={isFetching ? "spin" : undefined} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
 
-      {isFetching && users.length === 0 ? (
+      {isFetching ? (
         <Stack gap="xs">
           {Array.from({ length: 5 }).map((_, i) => (
             <Card key={i} withBorder radius="md" padding="md">
@@ -133,11 +146,6 @@ export default function Journey() {
         </Group>
       )}
 
-      {isFetching && users.length > 0 && (
-        <Center mt="md">
-          <Text size="xs" c="dimmed">Loading…</Text>
-        </Center>
-      )}
     </AppShell>
   );
 }
