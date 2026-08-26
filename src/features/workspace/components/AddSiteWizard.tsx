@@ -39,6 +39,39 @@ const APP_STEPS = [
   { label: "Install", description: "SDK + identify()", icon: Code2 },
 ];
 
+/**
+ * The two things a site can be, as data.
+ *
+ * The bullets matter more than the labels here: "web app" and "app" are the
+ * same words to most people, and what actually separates them is whether
+ * visitors are anonymous or signed in — so each card says that outright
+ * rather than leaving it to be discovered on the next step.
+ */
+const PLATFORM_CHOICES = [
+  {
+    id: "web" as const,
+    icon: Globe,
+    title: "Website or landing page",
+    blurb: "One script tag in the head. Starts collecting immediately.",
+    points: [
+      "Anonymous visitors — no cookie banner needed",
+      "Pageviews, clicks, referrers and Core Web Vitals",
+      "Best for marketing sites, blogs, docs",
+    ],
+  },
+  {
+    id: "app" as const,
+    icon: Smartphone,
+    title: "App with signed-in users",
+    blurb: "A trace() call on the actions that matter, tied to your own user ids.",
+    points: [
+      "Per-user journeys you can open and replay",
+      "Works for web apps and React Native alike",
+      "Best for products behind a login",
+    ],
+  },
+];
+
 /** Split a comma-separated field into clean entries. */
 function list(s: string): string[] {
   return s.split(",").map((x) => x.trim()).filter(Boolean);
@@ -302,37 +335,58 @@ export function AddSiteWizard({
           install guide — depends on this, so it has to be answered before
           anything else can be asked. */}
       {step === 0 && (
-        <Stack gap="md" maw={480}>
-          <div>
-            <Text size="sm" fw={500} mb={4}>What are you tracking?</Text>
-            <Text size="xs" c="dimmed">
-              Changes what you're asked next and which install guide you get —
-              the events themselves land in the same dashboard either way.
+        <Stack gap="xl" className="wizard-choice" align="center">
+          <Stack gap={6} align="center" maw={520}>
+            <Text fz={26} fw={700} style={{ letterSpacing: "-0.02em" }}>
+              What are you tracking?
             </Text>
-          </div>
-          <SimpleGrid cols={2} spacing="sm">
-            <UnstyledButton
-              className="onb-fw tile"
-              data-selected={platform === "web"}
-              aria-pressed={platform === "web"}
-              onClick={() => setPlatform("web")}
-              p="md"
-            >
-              <Globe size={22} />
-              <Text size="sm" fw={platform === "web" ? 600 : 500}>Web app / site</Text>
-              <Text size="xs" c="dimmed" fw={400}>A script tag. Anonymous by default.</Text>
-            </UnstyledButton>
-            <UnstyledButton
-              className="onb-fw tile"
-              data-selected={platform === "app"}
-              aria-pressed={platform === "app"}
-              onClick={() => setPlatform("app")}
-              p="md"
-            >
-              <Smartphone size={22} />
-              <Text size="sm" fw={platform === "app" ? 600 : 500}>App (web or mobile)</Text>
-              <Text size="xs" c="dimmed" fw={400}>Platform API. Tied to your signed-up users, not anonymous.</Text>
-            </UnstyledButton>
+            <Text size="sm" c="dimmed" ta="center">
+              This decides which install guide you get. Either way the events
+              land in the same dashboard.
+            </Text>
+          </Stack>
+
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" w="100%" maw={720}>
+            {PLATFORM_CHOICES.map((choice) => {
+              const on = platform === choice.id;
+              return (
+                <UnstyledButton
+                  key={choice.id}
+                  className="wizard-choice-card"
+                  data-selected={on || undefined}
+                  aria-pressed={on}
+                  onClick={() => setPlatform(choice.id)}
+                >
+                  <Group justify="space-between" wrap="nowrap" mb="md">
+                    <ThemeIcon
+                      size={44}
+                      radius="md"
+                      variant={on ? "filled" : "light"}
+                      color={on ? "emerald" : "gray"}
+                    >
+                      <choice.icon size={22} />
+                    </ThemeIcon>
+                    {on && (
+                      <ThemeIcon size={22} radius="xl" color="emerald">
+                        <Check size={13} />
+                      </ThemeIcon>
+                    )}
+                  </Group>
+
+                  <Text fw={650} size="md" mb={4}>{choice.title}</Text>
+                  <Text size="sm" c="dimmed" lh={1.5} mb="md">{choice.blurb}</Text>
+
+                  <Stack gap={6}>
+                    {choice.points.map((point) => (
+                      <Group key={point} gap={8} wrap="nowrap" align="flex-start">
+                        <Box className="wizard-choice-dot" />
+                        <Text size="xs" c="dimmed" lh={1.5}>{point}</Text>
+                      </Group>
+                    ))}
+                  </Stack>
+                </UnstyledButton>
+              );
+            })}
           </SimpleGrid>
         </Stack>
       )}

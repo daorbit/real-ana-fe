@@ -2767,6 +2767,54 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    the snippet step stays narrow — code is read line by line. */
 .wizard-body[data-wide="true"] { max-width: 1100px; }
 
+/* The platform step is two cards and a question — a fraction of the content
+   the later steps carry. Left top-aligned it stranded them in the top-left
+   corner of a full-screen modal, so this step alone centres in the space it
+   has rather than pretending to fill it. */
+.wizard-choice {
+  min-height: min(58vh, 520px);
+  justify-content: center;
+}
+
+.wizard-choice-card {
+  display: block;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.wizard-choice-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.wizard-choice-card[data-selected] {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 1px var(--accent-2), var(--shadow);
+}
+
+/* A dot rather than a tick: these are attributes of the option, not a
+   checklist of things already done. */
+.wizard-choice-dot {
+  width: 4px;
+  height: 4px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+
+.wizard-choice-card[data-selected] .wizard-choice-dot {
+  background: var(--accent-2);
+}
+
 .wizard-split {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
