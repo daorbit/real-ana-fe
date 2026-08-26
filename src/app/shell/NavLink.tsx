@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Text, Tooltip, UnstyledButton } from "@mantine/core";
 import type { Home } from "lucide-react";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 
 /**
  * One row of the rail.
@@ -22,6 +24,9 @@ export function NavLink({
   active: boolean;
   collapsed?: boolean;
 }) {
+  const location = useLocation();
+  const { user } = useAuth();
+
   const link = (
     <UnstyledButton
       component={Link}
@@ -33,6 +38,9 @@ export function NavLink({
       // Named explicitly: collapsed, the visible label is gone and the icon
       // alone is not a name anyone can read out.
       aria-label={collapsed ? label : undefined}
+      // One choke point for every sidebar click — traces navigation across
+      // the whole rail without wiring each destination page separately.
+      onClick={() => trace(user?.id, "nav_clicked", location.pathname, to)}
       style={{
         display: "flex",
         alignItems: "center",

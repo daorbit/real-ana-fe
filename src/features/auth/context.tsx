@@ -7,6 +7,7 @@ import {
 } from "@/shared/lib/http";
 import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
+import { trace } from "@/shared/lib/analytics";
 import type { ProfileUpdate, User } from "@/shared/types";
 
 type AuthState = {
@@ -99,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Start from a clean cache so nothing from a previous session leaks through.
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
+    trace(r.user.id, "login", "login", "app");
   };
 
   const googleSignIn = async (credential: string) => {
@@ -116,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("rta_active_ws");
     }
     setUser(r.user);
+    trace(r.user.id, r.created ? "signup" : "login", "google_signin", "app");
     return { created: Boolean(r.created) };
   };
 
@@ -133,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(rtkApi.util.resetApiState());
     const me = await api.get<AuthResp["user"]>("/api/auth/me");
     setUser(me);
+    trace(me.id, "login", "linkedin_signin", "app");
   };
 
   const startDemo = async () => {
@@ -158,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("quantalog_onboarding_skipped");
     localStorage.removeItem("quantalog_onboarding_dismissed");
     setUser(r.user);
+    trace(r.user.id, "signup", "signup_verify", "app");
   };
 
   const resendSignupCode = async (email: string) => {
@@ -181,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(r.token);
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
+    trace(r.user.id, "login", "password_reset", "app");
   };
 
   const resendResetCode = async (email: string) => {
@@ -225,6 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    if (user?.id) trace(user.id, "logout", "app", "login");
     clearToken();
     setUser(null);
     // Drop every cached response — otherwise the next user to log in on this

@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useEffect, type ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useRef, type ReactNode } from "react";
 import { setNavigate } from "@/app/navigation";
-import { analytics } from "@/shared/lib/analytics";
+import { trace } from "@/shared/lib/analytics";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 import { WorkspaceProvider, useWorkspace } from "@/features/workspace/context";
 import { DemoProvider } from "@/features/demo/context";
@@ -96,33 +96,41 @@ function NavigationCapture() {
   return null;
 }
 
-// Dogfooding: quantalog's own dashboard runs its own tracker. Pageviews need
-// no per-page wiring — tracker.js patches pushState/replaceState so
-// BrowserRouter navigation is already an SPA route change it understands.
-// Identity does need wiring: rta.identify() is in-memory only inside the
-// tracker, so it has to be called again on every load once we know who's
-// logged in, and reset() on logout — the tracker never persists it itself.
-function SelfTracking() {
+/**
+ * Traces every screen change for a logged-in user, so the journey is
+ * continuous rather than only the clicks that happened to get instrumented
+ * individually — src is the page just left, dest is the page landed on.
+ * A page reached by typing a URL or refreshing has no previous path in this
+ * tab, so it traces with an empty src rather than a stale one.
+ */
+function JourneyRouteTracer() {
+  const location = useLocation();
   const { user } = useAuth();
+  const prevPath = useRef<string | null>(null);
 
+  useEffect(() => {
+    if (user?.id) trace(user.id, "page_view", prevPath.current ?? "", location.pathname);
+    prevPath.current = location.pathname;
+  }, [location.pathname, user?.id]);
+
+  return null;
+}
+
+// Dogfooding: quantalog's own dashboard runs its own anonymous tracker.
+// Pageviews need no per-page wiring — tracker.js patches pushState/
+// replaceState so BrowserRouter navigation is already an SPA route change
+// it understands. Identified journey tracing (trace() calls at click sites,
+// see shared/lib/analytics.ts) is separate and needs no mount here — each
+// call carries the logged-in user's id itself.
+function SelfTracking() {
   useEffect(() => {
     const s = document.createElement("script");
     s.src = "https://quantalog-be.daorbit.in/tracker.js";
     s.async = true;
     s.dataset.site = "3EaS4tOSHyVG0irS";
-    // identify() is a no-op until window.rta exists — the script is async,
-    // so it may still be loading when the user is already known.
-    s.addEventListener("load", () => {
-      if (user?.id) analytics.identify(user.id);
-    });
     document.head.appendChild(s);
     return () => { document.head.removeChild(s); };
   }, []);
-
-  useEffect(() => {
-    if (user?.id) analytics.identify(user.id);
-    else analytics.reset();
-  }, [user?.id]);
 
   return null;
 }
@@ -140,6 +148,7 @@ export default function App() {
         <BrowserRouter>
           <SelfTracking />
           <NavigationCapture />
+          <JourneyRouteTracer />
           <Routes>
             <Route path="/" element={<Root />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />

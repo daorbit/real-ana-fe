@@ -17,7 +17,8 @@ import {
   LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag, Pencil, Check, Move, Split,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
-import { analytics } from "@/shared/lib/analytics";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { StatCard } from "@/shared/ui/StatCard";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { HomeHero } from "@/features/analytics/components/HomeHero";
@@ -161,6 +162,7 @@ function LivePagesCard({ stats }: { stats: Stats | null }) {
 
 export default function Home() {
   const { active, loading } = useWorkspace();
+  const { user } = useAuth();
   // The LinkedIn OAuth callback lands back here with its outcome in the query
   // string; this raises the toast and cleans the URL.
   useLinkedInReturn();
@@ -401,7 +403,7 @@ export default function Home() {
             variant="default"
             leftSection={<SlidersHorizontal size={15} />}
             onClick={() => {
-              analytics.track("add_widget_clicked", { source: "home", destination: "widget_drawer" });
+              trace(user?.id, "add_widget_clicked", "home", "widget_drawer");
               setCustomizing(true);
             }}
           >
@@ -414,7 +416,7 @@ export default function Home() {
               component={Link}
               to="/app/analytics"
               leftSection={<BarChart3 size={16} />}
-              onClick={() => analytics.track("open_analytics_clicked", { source: "home", destination: "analytics" })}
+              onClick={() => trace(user?.id, "open_analytics_clicked", "home", "analytics")}
             >
               Full analytics
             </Button>
@@ -463,7 +465,7 @@ export default function Home() {
               variant="light"
               mt={4}
               onClick={() => {
-                analytics.track("add_widget_clicked", { source: "home_empty", destination: "widget_drawer" });
+                trace(user?.id, "add_widget_clicked", "home_empty", "widget_drawer");
                 setCustomizing(true);
               }}
             >
