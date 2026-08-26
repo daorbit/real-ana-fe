@@ -107,9 +107,20 @@ function JourneyRouteTracer() {
   const location = useLocation();
   const { user } = useAuth();
   const prevPath = useRef<string | null>(null);
+  // What was last actually sent, rather than what was last rendered. Two things
+  // otherwise send the same screen twice: `user?.id` is a dependency, so
+  // signing in re-runs this for the page already on screen, and StrictMode
+  // double-invokes the effect on mount in development.
+  const lastSent = useRef<string | null>(null);
 
   useEffect(() => {
-    if (user?.id) trace(user.id, "page_view", prevPath.current ?? "", location.pathname);
+    if (!user?.id) return;
+
+    const key = `${user.id}:${location.pathname}`;
+    if (lastSent.current === key) return;
+    lastSent.current = key;
+
+    trace(user.id, "page_view", prevPath.current ?? "", location.pathname);
     prevPath.current = location.pathname;
   }, [location.pathname, user?.id]);
 
