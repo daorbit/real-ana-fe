@@ -26,6 +26,7 @@ import type {
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
+  JourneyUser, JourneyEvent,
 } from "@/shared/types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -1275,6 +1276,30 @@ export const api = createApi({
      * Markers inside the visible window. Scoped by range so a workspace with
      * years of deploys doesn't ship them all to draw a 24h chart.
      */
+    /** Recently active identified users — the entry point into their journey. */
+    getJourneyUsers: build.query<{ users: JourneyUser[] }, { wid: string; q?: string; sites?: string[] }>({
+      query: ({ wid, q, sites }) => {
+        const qs = new URLSearchParams();
+        if (q) qs.set("q", q);
+        if (sites?.length) qs.set("sites", sites.join(","));
+        const suffix = qs.toString() ? `?${qs}` : "";
+        return `/api/workspaces/${wid}/users${suffix}`;
+      },
+    }),
+
+    /** One user's full journey, oldest first. */
+    getJourneyTimeline: build.query<
+      { appUserId: string; events: JourneyEvent[] },
+      { wid: string; appUserId: string; sites?: string[] }
+    >({
+      query: ({ wid, appUserId, sites }) => {
+        const qs = new URLSearchParams();
+        if (sites?.length) qs.set("sites", sites.join(","));
+        const suffix = qs.toString() ? `?${qs}` : "";
+        return `/api/workspaces/${wid}/track/${appUserId}${suffix}`;
+      },
+    }),
+
     getMarkers: build.query<Marker[], { wid: string; from?: string; to?: string }>({
       query: ({ wid, from, to }) => {
         const qs = new URLSearchParams();
@@ -1744,6 +1769,8 @@ export const {
   useSaveSegmentMutation,
   useUpdateSegmentMutation,
   useDeleteSegmentMutation,
+  useGetJourneyUsersQuery,
+  useGetJourneyTimelineQuery,
   useGetMarkersQuery,
   useSaveMarkerMutation,
   useUpdateMarkerMutation,

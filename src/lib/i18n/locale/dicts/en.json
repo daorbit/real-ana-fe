@@ -327,8 +327,8 @@
       "docsInstallD": "The one-line snippet that starts collecting pageviews, plus framework notes for single-page apps where route changes need to be reported explicitly.",
       "docsEventsT": "Custom events",
       "docsEventsD": "rta.track() sends your own named events, optionally with a revenue value, which then appear on the Analytics page's Events and Goals tabs.",
-      "docsMobileT": "Mobile apps (React Native)",
-      "docsMobileD": "For a signed-up app rather than an anonymous site: install the React Native SDK, call identify() after signup, and every screen()/track() call is tied to that real user's id — so you can open one user and see their full journey, screen by screen.",
+      "docsMobileT": "Web and mobile apps",
+      "docsMobileD": "For a signed-up app rather than an anonymous site: one trace(userId, action, src, dest) call per step, no separate identify — see User journeys in the sidebar to open any traced user's full history.",
       "docsApiT": "Platform API",
       "docsApiD": "The endpoints an API key unlocks — creating workspaces and sites, and reading stats — for embedding analytics in your own product."
     },

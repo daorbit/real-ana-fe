@@ -1,6 +1,6 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
-  Send, CreditCard, Mail, Inbox, LifeBuoy, Swords, Share2,
+  Send, CreditCard, Mail, Inbox, LifeBuoy, Swords, Share2, Route,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 
@@ -40,6 +40,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/app", labelKey: "nav.home", label: "Home", icon: Home },
       { to: "/app/analytics", labelKey: "nav.analytics", label: "Analytics", icon: BarChart3 },
+      // Beside Analytics: this is per-user, not aggregate — the two answer
+      // different questions about the same events.
+      { to: "/app/journey", labelKey: "nav.journey", label: "User journeys", icon: Route },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
       // Beside SEO rather than inside it: an audit is a snapshot of one URL,
       // while a comparison is a set of rivals watched over time.

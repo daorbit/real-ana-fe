@@ -306,8 +306,8 @@ export function AddSiteWizard({
               p="md"
             >
               <Smartphone size={22} />
-              <Text size="sm" fw={platform === "app" ? 600 : 500}>Mobile app</Text>
-              <Text size="xs" c="dimmed" fw={400}>React Native SDK. Tied to your signed-up users.</Text>
+              <Text size="sm" fw={platform === "app" ? 600 : 500}>App (web or mobile)</Text>
+              <Text size="xs" c="dimmed" fw={400}>Platform API. Tied to your signed-up users, not anonymous.</Text>
             </UnstyledButton>
           </SimpleGrid>
         </Stack>
@@ -495,8 +495,9 @@ export function AddSiteWizard({
             <Box>
               <Text fw={600} size="sm">{created.name} is ready</Text>
               <Text size="xs" c="dimmed">
-                Install the SDK, then identify() ties every event to a real
-                signed-up user — see the full example below.
+                trace() posts straight to the Platform API with this site's
+                id — no secret key involved, so it's safe to ship inside the
+                app itself.
               </Text>
             </Box>
           </Group>

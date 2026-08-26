@@ -21,6 +21,8 @@ import Members from "@/features/workspace/pages/Members";
 import AcceptInvite from "@/features/workspace/pages/AcceptInvite";
 import Share from "@/features/analytics/pages/Share";
 import Reports from "@/features/reports/pages";
+import Journey from "@/features/journey/pages/Journey";
+import JourneyTimeline from "@/features/journey/pages/JourneyTimeline";
 import SocialPosts from "@/features/social/pages/SocialPosts";
 import LeadCapture from "@/features/leadCapture/pages/LeadCapture";
 import Impersonate from "@/features/admin/pages/Impersonate";
@@ -160,6 +162,8 @@ export default function App() {
             <Route path="/app/members" element={<Protected><Members /></Protected>} />
             <Route path="/app/share" element={<Protected><Share /></Protected>} />
             <Route path="/app/reports" element={<Protected><Reports /></Protected>} />
+            <Route path="/app/journey" element={<Protected><Journey /></Protected>} />
+            <Route path="/app/journey/:appUserId" element={<Protected><JourneyTimeline /></Protected>} />
             <Route path="/app/social" element={<Protected><SocialPosts /></Protected>} />
             <Route path="/app/lead-capture" element={<Protected><LeadCapture /></Protected>} />
             <Route path="/app/developers" element={<Protected><Developers /></Protected>} />
