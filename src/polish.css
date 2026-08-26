@@ -400,6 +400,18 @@
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* The step the user is on right now, in a journey graph. A slow pulse rather
+   than a static ring: on a canvas of twenty identical boxes, "where are they
+   now" is the one thing worth catching the eye. */
+.flow-node[data-live] {
+  animation: journey-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes journey-pulse {
+  0%, 100% { box-shadow: var(--shadow-sm); }
+  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--pink) 18%, transparent), var(--shadow); }
+}
+
 .spin {
   animation: spin 0.8s linear infinite;
 }

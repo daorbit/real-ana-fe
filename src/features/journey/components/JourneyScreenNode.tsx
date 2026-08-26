@@ -31,6 +31,7 @@ export const JourneyScreenNode = memo(function JourneyScreenNode({
     <div
       className="flow-node"
       data-selected={selected || undefined}
+      data-live={isExit && !isEntry ? "" : undefined}
       style={{ "--flow-rail": color } as CSSProperties}
     >
       <Handle type="target" position={Position.Left} className="flow-node-handle" />

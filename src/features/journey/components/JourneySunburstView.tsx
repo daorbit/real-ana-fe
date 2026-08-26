@@ -3,10 +3,11 @@ import { Box, Center, Group, Text, Stack, Badge } from "@mantine/core";
 import type { JourneyStep } from "@/features/journey/lib/deriveJourney";
 import { groupSessions } from "@/features/journey/lib/deriveJourney";
 
-const SIZE = 420;
+const SIZE = 460;
 const CENTER = SIZE / 2;
-const HOLE = 52;
-const RING = 42;
+const HOLE = 46;
+/** How many rings deep the chart will draw before it stops. */
+const MAX_DEPTH = 12;
 
 /** A node in the path tree: one screen at one depth, and where it went next. */
 type PathNode = {
@@ -78,6 +79,17 @@ export function JourneySunburstView({ steps }: { steps: JourneyStep[] }) {
   // Flattened to arcs up front: the recursion is about geometry, not React,
   // and doing it in the render would re-run it on every hover.
   const arcs = useMemo(() => {
+    // How deep the tree actually goes, capped — the ring width is derived
+    // from this so the chart always fills its box exactly rather than
+    // overflowing it (a long single-session chain used to draw its arcs
+    // clean outside the viewBox, which looked like a chart with no data).
+    const treeDepth = (node: PathNode, depth = 0): number => {
+      if (!node.children.size || depth >= MAX_DEPTH) return depth;
+      return Math.max(...[...node.children.values()].map((c) => treeDepth(c, depth + 1)));
+    };
+    const depthLimit = Math.max(1, treeDepth(tree));
+    const ring = (CENTER - HOLE - 8) / depthLimit;
+
     const out: {
       d: string;
       fill: string;
@@ -87,9 +99,7 @@ export function JourneySunburstView({ steps }: { steps: JourneyStep[] }) {
     }[] = [];
 
     const walk = (node: PathNode, depth: number, start: number, end: number, path: string[]) => {
-      // Six rings is where the arcs stop being clickable; deeper paths are
-      // still in the data, just not drawn.
-      if (depth > 5) return;
+      if (depth >= depthLimit) return;
 
       const total = [...node.children.values()].reduce((sum, c) => sum + c.count, 0);
       if (!total) return;
@@ -99,7 +109,7 @@ export function JourneySunburstView({ steps }: { steps: JourneyStep[] }) {
         const span = ((end - start) * child.count) / total;
         const childPath = [...path, child.name];
         out.push({
-          d: arcPath(cursor, cursor + span, HOLE + depth * RING, HOLE + (depth + 1) * RING),
+          d: arcPath(cursor, cursor + span, HOLE + depth * ring, HOLE + (depth + 1) * ring),
           fill: TONES[(depth + childPath.length) % TONES.length],
           path: childPath,
           count: child.count,

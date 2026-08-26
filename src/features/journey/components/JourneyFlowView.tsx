@@ -9,8 +9,11 @@ import { JourneyScreenNode, type JourneyScreenNodeData } from "./JourneyScreenNo
 
 const NODE_W = 208;
 const NODE_H = 84;
-const COL_W = 300;
-const ROW_H = 150;
+// Generous gaps: the edge labels sit at the midpoint between two nodes, so
+// the column gap has to be wider than the widest label or the text lands on
+// top of the boxes either side of it.
+const COL_W = 380;
+const ROW_H = 190;
 
 const nodeTypes = { screen: JourneyScreenNode };
 
@@ -78,26 +81,43 @@ export function JourneyFlowView({ steps: events }: { steps: JourneyStep[] }) {
       seen.set(key, hit);
     }
 
+    // The busiest edge sets the scale, so line weight reads as "how often
+    // this move happens" rather than every line looking the same.
+    const busiest = Math.max(...[...seen.values()].map((h) => h.count), 1);
+
     const edges: Edge[] = [...seen.values()].map((hit, i) => {
-      const label = [...hit.actions].slice(0, 2).join(", ") +
-        (hit.actions.size > 2 ? ` +${hit.actions.size - 2}` : "") +
-        (hit.count > 1 ? ` (${hit.count}x)` : "");
+      // One action name plus a count. Listing two or three names produced a
+      // label wider than the gap between nodes, which is what was running
+      // the text underneath the boxes.
+      const [first] = [...hit.actions];
+      const more = hit.actions.size - 1;
+      const label =
+        (first.length > 16 ? `${first.slice(0, 15)}…` : first) +
+        (more > 0 ? ` +${more}` : "") +
+        (hit.count > 1 ? ` ·${hit.count}` : "");
+
+      const weight = hit.count / busiest;
+      const stroke = weight > 0.66 ? "var(--accent-2)" : "var(--border-strong)";
+
       return {
         id: `e${i}`,
         source: hit.from,
         target: hit.to,
         type: "smoothstep",
         pathOptions: { borderRadius: 14 },
+        // The dashes travel along the path, so direction is legible without
+        // hunting for the arrowhead on a long line.
+        animated: true,
         label,
         labelShowBg: true,
         labelBgPadding: [6, 3] as [number, number],
         labelBgBorderRadius: 999,
         labelBgStyle: { fill: "var(--surface)", stroke: "var(--border)" },
         labelStyle: { fill: "var(--text-2)", fontSize: 10, fontWeight: 600 },
-        style: { stroke: "var(--border-strong)", strokeWidth: 1.4 },
+        style: { stroke, strokeWidth: 1.2 + weight * 1.8 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: "var(--border-strong)",
+          color: stroke,
           width: 14,
           height: 14,
         },
