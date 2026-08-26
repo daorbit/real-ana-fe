@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, type ReactNode } from "react";
 import { setNavigate } from "@/app/navigation";
+import { analytics } from "@/shared/lib/analytics";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 import { WorkspaceProvider, useWorkspace } from "@/features/workspace/context";
 import { DemoProvider } from "@/features/demo/context";
@@ -93,6 +94,37 @@ function NavigationCapture() {
   return null;
 }
 
+// Dogfooding: quantalog's own dashboard runs its own tracker. Pageviews need
+// no per-page wiring — tracker.js patches pushState/replaceState so
+// BrowserRouter navigation is already an SPA route change it understands.
+// Identity does need wiring: rta.identify() is in-memory only inside the
+// tracker, so it has to be called again on every load once we know who's
+// logged in, and reset() on logout — the tracker never persists it itself.
+function SelfTracking() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const s = document.createElement("script");
+    s.src = "https://quantalog-be.daorbit.in/tracker.js";
+    s.async = true;
+    s.dataset.site = "3EaS4tOSHyVG0irS";
+    // identify() is a no-op until window.rta exists — the script is async,
+    // so it may still be loading when the user is already known.
+    s.addEventListener("load", () => {
+      if (user?.id) analytics.identify(user.id);
+    });
+    document.head.appendChild(s);
+    return () => { document.head.removeChild(s); };
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) analytics.identify(user.id);
+    else analytics.reset();
+  }, [user?.id]);
+
+  return null;
+}
+
 function Root() {
   const { user, loading } = useAuth();
   if (loading) return <AppBootSkeleton />;
@@ -104,6 +136,7 @@ export default function App() {
     <AuthProvider>
       <DemoProvider>
         <BrowserRouter>
+          <SelfTracking />
           <NavigationCapture />
           <Routes>
             <Route path="/" element={<Root />} />

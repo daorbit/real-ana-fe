@@ -1,7 +1,7 @@
 import { ACCENT_PRESETS, readThemePrefs } from "@/shared/lib/theme";
 
 export const LEAD_FORMS_BASE =
-  import.meta.env.VITE_LEAD_FORMS_URL ?? "https://da-forms-ochre.vercel.app";
+  import.meta.env.VITE_LEAD_FORMS_URL ?? "https://forms.daorbit.in";
 
 export function leadFormsUrl(path: string, currentMode?: "light" | "dark"): string {
   const prefs = readThemePrefs();

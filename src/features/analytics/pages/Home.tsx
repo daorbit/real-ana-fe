@@ -17,6 +17,7 @@ import {
   LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag, Pencil, Check, Move, Split,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
+import { analytics } from "@/shared/lib/analytics";
 import { StatCard } from "@/shared/ui/StatCard";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { HomeHero } from "@/features/analytics/components/HomeHero";
@@ -396,13 +397,25 @@ export default function Home() {
             </Button>
           )}
 
-          <Button variant="default" leftSection={<SlidersHorizontal size={15} />} onClick={() => setCustomizing(true)}>
+          <Button
+            variant="default"
+            leftSection={<SlidersHorizontal size={15} />}
+            onClick={() => {
+              analytics.track("add_widget_clicked", { source: "home", destination: "widget_drawer" });
+              setCustomizing(true);
+            }}
+          >
             Add widgets
           </Button>
 
 
           {!editing && !dirty && (
-            <Button component={Link} to="/app/analytics" leftSection={<BarChart3 size={16} />}>
+            <Button
+              component={Link}
+              to="/app/analytics"
+              leftSection={<BarChart3 size={16} />}
+              onClick={() => analytics.track("open_analytics_clicked", { source: "home", destination: "analytics" })}
+            >
               Full analytics
             </Button>
           )}
@@ -445,7 +458,17 @@ export default function Home() {
             <ThemeIcon variant="light" color="gray" size={52} radius="md"><SlidersHorizontal size={24} /></ThemeIcon>
             <Text fw={600} size="sm">Your home page is empty</Text>
             <Text c="dimmed" size="xs">Choose the widgets you want to see at a glance.</Text>
-            <Button size="xs" variant="light" mt={4} onClick={() => setCustomizing(true)}>Add widgets</Button>
+            <Button
+              size="xs"
+              variant="light"
+              mt={4}
+              onClick={() => {
+                analytics.track("add_widget_clicked", { source: "home_empty", destination: "widget_drawer" });
+                setCustomizing(true);
+              }}
+            >
+              Add widgets
+            </Button>
           </Stack>
         </Center>
       ) : (
