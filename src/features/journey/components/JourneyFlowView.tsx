@@ -50,23 +50,56 @@ export function JourneyFlowView({ steps: events }: { steps: JourneyStep[] }) {
     const first = events.length ? endpoints(events[0]).from : "";
     const last = events.length ? endpoints(events[events.length - 1]).to : "";
 
-    // Wrapped into rows so a long journey stays readable instead of running
-    // off the canvas in one very wide line.
-    const perRow = Math.max(3, Math.ceil(Math.sqrt(order.length)));
+    /**
+     * Layered layout: a screen's column is how many steps it takes to first
+     * reach it from the start, and its row is its position among the screens
+     * that share that column.
+     *
+     * A plain grid (index % perRow) put screens next to each other for no
+     * reason other than the order they happened to be discovered in, so
+     * edges crossed the whole canvas and the picture read as noise. Laying
+     * out by depth means an edge is usually one column long and points
+     * rightwards, which is what makes a flow diagram legible.
+     */
+    const depth = new Map<string, number>();
+    depth.set(first || order[0], 0);
 
-    const nodes: Node[] = order.map((name, i) => ({
-      id: name,
-      type: "screen",
-      position: { x: (i % perRow) * COL_W, y: Math.floor(i / perRow) * ROW_H },
-      width: NODE_W,
-      height: NODE_H,
-      data: {
-        label: name,
-        visits: visits.get(name) ?? 0,
-        isEntry: name === first,
-        isExit: name === last,
-      } satisfies JourneyScreenNodeData,
-    }));
+    // Relaxed a few times rather than a full topological sort: journeys loop
+    // back on themselves constantly, so there is no true ordering — this
+    // settles quickly and keeps the common case (a mostly-forward path)
+    // laid out the way someone would draw it by hand.
+    for (let pass = 0; pass < 4; pass++) {
+      for (const e of events) {
+        const { from, to } = endpoints(e);
+        const at = depth.get(from);
+        if (at === undefined) continue;
+        const existing = depth.get(to);
+        if (existing === undefined || existing > at + 1) depth.set(to, at + 1);
+      }
+    }
+    // Anything never reached from the start (a session that began elsewhere)
+    // still needs a column.
+    for (const name of order) if (!depth.has(name)) depth.set(name, 0);
+
+    const rowCursor = new Map<number, number>();
+    const nodes: Node[] = order.map((name) => {
+      const col = depth.get(name) ?? 0;
+      const row = rowCursor.get(col) ?? 0;
+      rowCursor.set(col, row + 1);
+      return {
+        id: name,
+        type: "screen",
+        position: { x: col * COL_W, y: row * ROW_H },
+        width: NODE_W,
+        height: NODE_H,
+        data: {
+          label: name,
+          visits: visits.get(name) ?? 0,
+          isEntry: name === first,
+          isExit: name === last,
+        } satisfies JourneyScreenNodeData,
+      };
+    });
 
     // One edge per distinct src->dest pair. Repeats become a count on the
     // label rather than parallel lines nobody can tell apart.

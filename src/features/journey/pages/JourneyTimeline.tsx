@@ -6,7 +6,7 @@ import {
 } from "@mantine/core";
 import {
   ArrowLeft, Users, Workflow, ListOrdered, GitBranch, Braces,
-  RotateCw, PieChart,
+  RotateCw, Waypoints, CalendarDays, BarChart3,
 } from "lucide-react";
 import { useGetJourneyTimelineQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
@@ -22,7 +22,9 @@ import { JourneyFilterBar } from "@/features/journey/components/JourneyFilterBar
 import { JourneyFlowView } from "@/features/journey/components/JourneyFlowView";
 import { JourneySequenceView } from "@/features/journey/components/JourneySequenceView";
 import { JourneyTimelineView } from "@/features/journey/components/JourneyTimelineView";
-import { JourneySunburstView } from "@/features/journey/components/JourneySunburstView";
+import { JourneySankeyView } from "@/features/journey/components/JourneySankeyView";
+import { JourneyHeatmapView } from "@/features/journey/components/JourneyHeatmapView";
+import { JourneyActionsView } from "@/features/journey/components/JourneyActionsView";
 
 /**
  * The formats a journey can be read in.
@@ -33,9 +35,11 @@ import { JourneySunburstView } from "@/features/journey/components/JourneySunbur
  */
 const VIEWS = [
   { value: "flow", label: "Flow", icon: Workflow },
+  { value: "sankey", label: "Volume", icon: Waypoints },
   { value: "sequence", label: "Sequence", icon: GitBranch },
   { value: "timeline", label: "Timeline", icon: ListOrdered },
-  { value: "sunburst", label: "Paths", icon: PieChart },
+  { value: "actions", label: "Actions", icon: BarChart3 },
+  { value: "activity", label: "Activity", icon: CalendarDays },
   { value: "json", label: "JSON", icon: Braces },
 ] as const;
 
@@ -173,7 +177,9 @@ export default function JourneyTimeline() {
                   onSelect={setSelected}
                 />
               )}
-              {view === "sunburst" && <JourneySunburstView steps={steps} />}
+              {view === "sankey" && <JourneySankeyView steps={steps} />}
+              {view === "actions" && <JourneyActionsView steps={steps} />}
+              {view === "activity" && <JourneyHeatmapView steps={steps} />}
               {view === "json" && (
                 <Code block style={{ maxHeight: "calc(100vh - 320px)", minHeight: 500, overflow: "auto" }}>
                   {JSON.stringify(steps, null, 2)}
