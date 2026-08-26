@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Modal, Stack, Group, Button, TextInput, Switch, Divider, Text,
   Code, ThemeIcon, Box, ActionIcon, ScrollArea, UnstyledButton, SimpleGrid,
+  SegmentedControl,
 } from "@mantine/core";
 import {
   ArrowLeft, ArrowRight, Check, Globe, PartyPopper, X, Settings2, Code2,
@@ -66,6 +67,10 @@ export function AddSiteWizard({
 
   // step 0 — platform
   const [platform, setPlatform] = useState<Platform>("web");
+  // step 1 (app only) — is it a web app or a mobile app? Decides whether the
+  // identity fields ask for a URL or a bundle id, since "App" alone doesn't
+  // say which — a web app tracked identified-style still lives at a URL.
+  const [appKind, setAppKind] = useState<"web" | "mobile">("mobile");
 
   // step 1 (web) / step 1 (app) — identity
   const [name, setName] = useState("");
@@ -105,6 +110,7 @@ export function AddSiteWizard({
   const reset = () => {
     setStep(0);
     setPlatform("web");
+    setAppKind("mobile");
     setName("");
     setDomain("");
     setBundleId("");
@@ -146,9 +152,21 @@ export function AddSiteWizard({
   const validateAppIdentity = () => {
     const nErr = v.all(v.required("Name"), v.maxLength("Name", 60))(name);
     setNameError(nErr);
+
+    if (appKind === "web") {
+      // A web app is still a real URL, even though it's tracked
+      // identified-style instead of anonymously — same validator as the web
+      // platform's domain field.
+      const dErr = v.domain(domain);
+      setDomainError(dErr);
+      setBundleIdError(null);
+      return !nErr && !dErr;
+    }
+
     // Bundle id is optional context (shown on the site card), not a tracking
     // key, so it isn't validated against a format — teams name these
     // differently across iOS/Android and a wrong guess here blocks nothing.
+    setDomainError(null);
     setBundleIdError(null);
     return !nErr;
   };
@@ -159,7 +177,8 @@ export function AddSiteWizard({
         workspaceId,
         name: name.trim(),
         platform: "app",
-        bundleId: bundleId.trim(),
+        domain: appKind === "web" ? v.normalizeDomain(domain) : "",
+        bundleId: appKind === "mobile" ? bundleId.trim() : "",
       }).unwrap();
       setCreated(site);
       setStep(lastStep);
@@ -351,10 +370,25 @@ export function AddSiteWizard({
         </div>
       )}
 
-      {/* App identity: just a name and an optional bundle id — there's no
-          domain and no framework choice, since every app uses the same SDK. */}
+      {/* App identity: name plus either a URL (web app) or a bundle id
+          (mobile app) — "App" alone doesn't say which, and a web app tracked
+          identified-style still lives at a real URL, so it needs the same
+          field a mobile app has no use for. */}
       {step === 1 && platform === "app" && (
         <Stack gap="md" maw={480}>
+          <div>
+            <Text size="sm" fw={500} mb={6}>Is this a web app or a mobile app?</Text>
+            <SegmentedControl
+              value={appKind}
+              onChange={(v2) => setAppKind(v2 as "web" | "mobile")}
+              data={[
+                { label: "Web app", value: "web" },
+                { label: "Mobile app", value: "mobile" },
+              ]}
+              fullWidth
+            />
+          </div>
+
           <TextInput
             label="App name"
             placeholder="e.g. Quantalog mobile"
@@ -364,15 +398,28 @@ export function AddSiteWizard({
             error={nameError}
             data-autofocus
           />
-          <TextInput
-            label="Bundle id / package name"
-            placeholder="com.yourcompany.app"
-            description="Optional — shown on the app's card so you can tell two apps apart at a glance."
-            leftSection={<Smartphone size={15} />}
-            value={bundleId}
-            onChange={(e) => { setBundleId(e.currentTarget.value); setBundleIdError(null); }}
-            error={bundleIdError}
-          />
+
+          {appKind === "web" ? (
+            <TextInput
+              label="App URL"
+              placeholder="app.yourcompany.com"
+              description="Where the app is hosted. Paste a full URL if it's easier."
+              leftSection={<Globe size={15} />}
+              value={domain}
+              onChange={(e) => { setDomain(e.currentTarget.value); setDomainError(null); }}
+              error={domainError}
+            />
+          ) : (
+            <TextInput
+              label="Bundle id / package name"
+              placeholder="com.yourcompany.app"
+              description="Optional — shown on the app's card so you can tell two apps apart at a glance."
+              leftSection={<Smartphone size={15} />}
+              value={bundleId}
+              onChange={(e) => { setBundleId(e.currentTarget.value); setBundleIdError(null); }}
+              error={bundleIdError}
+            />
+          )}
         </Stack>
       )}
 
@@ -502,7 +549,7 @@ export function AddSiteWizard({
             </Box>
           </Group>
 
-          {mobileSteps(created.siteId, API_ORIGIN).map((s) => (
+          {mobileSteps(created.siteId, API_ORIGIN, appKind).map((s) => (
             <Stack key={s.id} gap="xs">
               <Text size="sm" fw={600}>{s.title}</Text>
               <Text size="xs" c="dimmed">{s.blurb}</Text>

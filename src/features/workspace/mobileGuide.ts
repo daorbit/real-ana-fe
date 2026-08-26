@@ -19,12 +19,28 @@ export type MobileStep = {
   note?: string;
 };
 
-export function mobileSteps(siteId: string, apiUrl: string): MobileStep[] {
+const journeyExample = `// User taps into the dashboard from Home
+<Button onPress={() => {
+  analytics.trace(user.id, "dashboard_opened", "home", "dashboard");
+  navigation.navigate("Dashboard");
+}}>
+  Open dashboard
+</Button>
+
+// User taps "Add widget" on the Dashboard
+<Button onPress={() => {
+  analytics.trace(user.id, "add_widget_clicked", "dashboard", "widget_modal");
+  openAddWidgetModal();
+}}>
+  Add widget
+</Button>`;
+
+function mobileGuide(siteId: string, apiUrl: string): MobileStep[] {
   return [
     {
       id: "install",
       title: "1. Install",
-      blurb: "React Native app? Install the SDK. Web app? Skip straight to the snippet below.",
+      blurb: "Add the SDK.",
       filename: "terminal",
       code: `npm install @real-ana/react-native`,
     },
@@ -45,27 +61,18 @@ export const analytics = createRealAna({
       title: "3. A full journey",
       blurb: "One call per action — the user id comes from wherever your app already keeps it (session, auth context), passed fresh every time. This is exactly what shows up on that user's timeline in the dashboard.",
       filename: "App journey",
-      code: `// User taps into the dashboard from Home
-<Button onPress={() => {
-  analytics.trace(user.id, "dashboard_opened", "home", "dashboard");
-  navigation.navigate("Dashboard");
-}}>
-  Open dashboard
-</Button>
-
-// User taps "Add widget" on the Dashboard
-<Button onPress={() => {
-  analytics.trace(user.id, "add_widget_clicked", "dashboard", "widget_modal");
-  openAddWidgetModal();
-}}>
-  Add widget
-</Button>`,
+      code: journeyExample,
       note: "src/dest are optional — omit them and only the action is recorded, useful for one-off events that aren't really a step between two places.",
     },
+  ];
+}
+
+function webGuide(siteId: string, apiUrl: string): MobileStep[] {
+  return [
     {
-      id: "web",
-      title: "For a web app instead",
-      blurb: "No SDK needed — one plain fetch call does the same thing from a browser.",
+      id: "trace-fn",
+      title: "1. One function, no install",
+      blurb: "No SDK needed — a plain fetch call is the whole thing. Put it wherever your other API helpers live.",
       filename: "trace.ts",
       code: `async function trace(userId: string, action: string, src?: string, dest?: string) {
   if (!userId) return;
@@ -74,10 +81,19 @@ export const analytics = createRealAna({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ siteId: "${siteId}", appUserId: userId, action, src, dest }),
   }).catch(() => {});
-}
-
-// Usage:
-trace(user.id, "add_widget_clicked", "dashboard", "widget_modal");`,
+}`,
+    },
+    {
+      id: "journey",
+      title: "2. A full journey",
+      blurb: "Call it right where the action happens, with the user id you already have in your app's auth state.",
+      filename: "App journey",
+      code: journeyExample.replace(/analytics\.trace/g, "trace"),
+      note: "src/dest are optional — omit them and only the action is recorded, useful for one-off events that aren't really a step between two places.",
     },
   ];
+}
+
+export function mobileSteps(siteId: string, apiUrl: string, appKind: "web" | "mobile" = "mobile"): MobileStep[] {
+  return appKind === "web" ? webGuide(siteId, apiUrl) : mobileGuide(siteId, apiUrl);
 }
