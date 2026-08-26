@@ -477,8 +477,10 @@ export const api = createApi({
       {
         workspaceId: string;
         name: string;
-        domain: string;
+        platform?: "web" | "app";
+        domain?: string;
         framework?: string;
+        bundleId?: string;
         trackerOptions?: TrackerOptions;
       }
     >({

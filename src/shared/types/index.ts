@@ -908,8 +908,12 @@ export type Site = {
   _id: string;
   workspaceId: string;
   name: string;
+  /** "app" sites are tracked by the mobile SDK against appUserId, not a domain. */
+  platform?: "web" | "app";
   domain: string;
   framework: string;
+  /** iOS bundle id / Android package name — app sites only. */
+  bundleId?: string;
   siteId: string;
   createdAt: string;
   /**
