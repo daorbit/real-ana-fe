@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  Text, Group, Card, ThemeIcon, SegmentedControl, Stack, Code,
-  CopyButton, ActionIcon, Tooltip, Skeleton,
+  Text, Group, Card, SegmentedControl, Stack, Code,
+  ActionIcon, Tooltip, Skeleton,
 } from "@mantine/core";
 import {
-  ArrowLeft, Users, Copy, Check, Workflow, ListOrdered, GitBranch, Braces,
+  ArrowLeft, Users, Workflow, ListOrdered, GitBranch, Braces,
   RotateCw, PieChart,
 } from "lucide-react";
 import { useGetJourneyTimelineQuery } from "@/app/store";
@@ -67,9 +67,6 @@ export default function JourneyTimeline() {
 
   const options = useMemo(() => actionOptions(events), [events]);
   const steps = useMemo(() => applyFilters(events, filters), [events, filters]);
-
-  const shown = selected ?? (steps.length ? steps.length - 1 : null);
-  const current = shown !== null ? steps[shown] : undefined;
 
   const span = events.length
     ? new Date(events[events.length - 1].ts).getTime() - new Date(events[0].ts).getTime()
@@ -178,53 +175,13 @@ export default function JourneyTimeline() {
               )}
               {view === "sunburst" && <JourneySunburstView steps={steps} />}
               {view === "json" && (
-                <Code block style={{ maxHeight: 460, overflow: "auto" }}>
+                <Code block style={{ maxHeight: "calc(100vh - 320px)", minHeight: 500, overflow: "auto" }}>
                   {JSON.stringify(steps, null, 2)}
                 </Code>
               )}
             </Card>
           )}
 
-          {/* The selected step's raw payload — what the app actually sent.
-              Shown beside every diagram rather than only in the JSON view, so
-              picking a step in a diagram answers "and what was in it?"
-              without switching away from the picture. */}
-          {view !== "json" && view !== "sunburst" && current && (
-            <Card withBorder radius="lg" padding="md">
-              <Group justify="space-between" mb="xs" wrap="nowrap">
-                <Group gap="xs" wrap="nowrap">
-                  <ThemeIcon variant="light" color="gray" size="sm" radius="sm">
-                    <Braces size={13} />
-                  </ThemeIcon>
-                  <Text size="xs" fw={600}>
-                    Step {(shown ?? 0) + 1} of {steps.length}
-                  </Text>
-                </Group>
-                <CopyButton value={JSON.stringify(current, null, 2)}>
-                  {({ copied, copy }) => (
-                    <Tooltip label={copied ? "Copied" : "Copy step"} withArrow>
-                      <ActionIcon variant="subtle" color="gray" onClick={copy} aria-label="Copy step">
-                        {copied ? <Check size={14} /> : <Copy size={14} />}
-                      </ActionIcon>
-                    </Tooltip>
-                  )}
-                </CopyButton>
-              </Group>
-              <Code block>
-                {JSON.stringify(
-                  {
-                    src: current.src,
-                    dest: current.dest,
-                    action: current.action,
-                    at: current.ts,
-                    ...(current.repeats > 1 ? { repeats: current.repeats } : {}),
-                  },
-                  null,
-                  2,
-                )}
-              </Code>
-            </Card>
-          )}
         </Stack>
       )}
     </AppShell>
