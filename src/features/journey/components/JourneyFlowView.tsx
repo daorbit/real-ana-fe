@@ -4,7 +4,7 @@ import {
   type Node, type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import type { JourneyEvent } from "@/shared/types";
+import type { JourneyStep } from "@/features/journey/lib/deriveJourney";
 import { JourneyScreenNode, type JourneyScreenNodeData } from "./JourneyScreenNode";
 
 const NODE_W = 208;
@@ -15,7 +15,7 @@ const ROW_H = 150;
 const nodeTypes = { screen: JourneyScreenNode };
 
 /** A step's screen names, with the empty string standing in as "direct". */
-function endpoints(e: JourneyEvent): { from: string; to: string } {
+function endpoints(e: JourneyStep): { from: string; to: string } {
   return { from: e.src || "(direct)", to: e.dest || e.action };
 }
 
@@ -28,7 +28,7 @@ function endpoints(e: JourneyEvent): { from: string; to: string } {
  * *shape* of how someone moves through the product (loops, dead ends,
  * back-and-forth) which a flat list of thirty rows cannot.
  */
-export function JourneyFlowView({ events }: { events: JourneyEvent[] }) {
+export function JourneyFlowView({ steps: events }: { steps: JourneyStep[] }) {
   const { nodes: initialNodes, edges } = useMemo(() => {
     // Distinct screens, in order of first appearance — that ordering is what
     // makes the left-to-right layout follow the actual journey.
