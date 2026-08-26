@@ -1,82 +1,186 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Text, Group, Card, Center, Badge, ThemeIcon, Timeline } from "@mantine/core";
-import { ArrowLeft, ArrowRight, MousePointerClick, Users } from "lucide-react";
+import {
+  Text, Group, Card, ThemeIcon, SegmentedControl, Stack, Code,
+  CopyButton, ActionIcon, Tooltip, Skeleton,
+} from "@mantine/core";
+import {
+  ArrowLeft, Users, Copy, Check, Workflow, ListOrdered, GitBranch, Braces,
+  RotateCw,
+} from "lucide-react";
 import { useGetJourneyTimelineQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { dateTime } from "@/shared/lib";
+import { JourneyFlowView } from "@/features/journey/components/JourneyFlowView";
+import { JourneySequenceView } from "@/features/journey/components/JourneySequenceView";
+import { JourneyTimelineView } from "@/features/journey/components/JourneyTimelineView";
 
 /**
- * One identified user's full journey: every src -> action -> dest step, in
- * the order it actually happened. This is the answer to "which page, which
- * step, which event fired" for a real signed-up user, built entirely from
- * events the app already sent via the Platform API's track endpoint.
+ * The formats a journey can be read in.
+ *
+ * Kept as data rather than a switch buried in the render, so adding another
+ * reading later is one entry here plus its component — the same reason the
+ * nav rail keeps its items in a list.
+ */
+const VIEWS = [
+  { value: "flow", label: "Flow", icon: Workflow },
+  { value: "sequence", label: "Sequence", icon: GitBranch },
+  { value: "timeline", label: "Timeline", icon: ListOrdered },
+  { value: "json", label: "JSON", icon: Braces },
+] as const;
+
+type ViewId = (typeof VIEWS)[number]["value"];
+
+/**
+ * One identified user's full journey, in whichever reading suits the
+ * question: the graph for shape, the sequence for order, the list for detail,
+ * the raw payload for debugging what the app actually sent.
  */
 export default function JourneyTimeline() {
   const { appUserId } = useParams<{ appUserId: string }>();
   const { active } = useWorkspace();
+  const [view, setView] = useState<ViewId>("flow");
+  // Which step the diagrams have highlighted, and what the JSON panel shows.
+  // Null means "nothing picked yet", which reads as the latest step.
+  const [selected, setSelected] = useState<number | null>(null);
 
-  const { data, isFetching } = useGetJourneyTimelineQuery(
+  const { data, isFetching, refetch } = useGetJourneyTimelineQuery(
     { wid: active?._id ?? "", appUserId: appUserId ?? "" },
     { skip: !active || !appUserId },
   );
   const events = data?.events ?? [];
+  const shown = selected ?? (events.length ? events.length - 1 : null);
+  const current = shown !== null ? events[shown] : undefined;
 
   return (
     <AppShell>
       <PageHeader
         title={appUserId}
-        description="Every step this user took, oldest first."
+        description={
+          events.length
+            ? `${events.length} steps · first seen ${dateTime(events[0].ts)}`
+            : "Every step this user took, oldest first."
+        }
         actions={
-          <Text
-            component={Link}
-            to="/app/journey"
-            size="sm"
-            c="dimmed"
-            style={{ display: "flex", alignItems: "center", gap: 6 }}
-          >
-            <ArrowLeft size={14} /> All users
-          </Text>
+          <Group gap="sm" wrap="nowrap">
+            <Tooltip label="Refresh" withArrow>
+              <ActionIcon
+                variant="default"
+                radius="xl"
+                size="lg"
+                onClick={() => refetch()}
+                aria-label="Refresh"
+              >
+                <RotateCw size={16} className={isFetching ? "spin" : undefined} />
+              </ActionIcon>
+            </Tooltip>
+            <Text
+              component={Link}
+              to="/app/journey"
+              size="sm"
+              c="dimmed"
+              style={{ display: "flex", alignItems: "center", gap: 6 }}
+            >
+              <ArrowLeft size={14} /> All users
+            </Text>
+          </Group>
         }
       />
 
-      {!isFetching && events.length === 0 ? (
+      {isFetching ? (
+        <Stack gap="md">
+          <Skeleton height={36} width={360} radius="md" />
+          <Skeleton height={420} radius="lg" />
+        </Stack>
+      ) : events.length === 0 ? (
         <EmptyState
           icon={Users}
           title="No events for this user"
-          description="Their traced history may have aged out, or the id doesn't match any track() calls yet."
+          description="Their traced history may have aged out, or the id doesn't match any trace() calls yet."
         />
       ) : (
-        <Card withBorder radius="lg" padding="lg">
-          <Timeline active={events.length} bulletSize={26} lineWidth={2}>
-            {events.map((e, i) => (
-              <Timeline.Item
-                key={i}
-                bullet={
-                  <ThemeIcon size={22} radius="xl" variant="light" color="emerald">
-                    <MousePointerClick size={12} />
-                  </ThemeIcon>
-                }
-                title={<Text fw={600} size="sm">{e.action}</Text>}
-              >
-                <Group gap={6} mt={2} wrap="wrap">
-                  {e.src && <Badge variant="light" color="gray" radius="sm">{e.src}</Badge>}
-                  {e.src && e.dest && <ArrowRight size={12} />}
-                  {e.dest && <Badge variant="light" color="emerald" radius="sm">{e.dest}</Badge>}
+        <Stack gap="md">
+          <SegmentedControl
+            value={view}
+            onChange={(v) => setView(v as ViewId)}
+            data={VIEWS.map((v) => ({
+              value: v.value,
+              label: (
+                <Group gap={6} wrap="nowrap" justify="center">
+                  <v.icon size={14} />
+                  <span>{v.label}</span>
                 </Group>
-                <Text size="xs" c="dimmed" mt={4}>{dateTime(e.ts)}</Text>
-              </Timeline.Item>
-            ))}
-          </Timeline>
-        </Card>
-      )}
+              ),
+            }))}
+            w="fit-content"
+          />
 
-      {isFetching && events.length === 0 && (
-        <Center mih="30vh">
-          <Text size="sm" c="dimmed">Loading…</Text>
-        </Center>
+          <Card withBorder radius="lg" padding={view === "flow" ? 0 : "lg"}>
+            {view === "flow" && <JourneyFlowView events={events} />}
+            {view === "sequence" && (
+              <JourneySequenceView
+                events={events}
+                selectedIndex={selected}
+                onSelect={setSelected}
+              />
+            )}
+            {view === "timeline" && (
+              <JourneyTimelineView
+                events={events}
+                selectedIndex={selected}
+                onSelect={setSelected}
+              />
+            )}
+            {view === "json" && (
+              <Code block style={{ maxHeight: 460, overflow: "auto" }}>
+                {JSON.stringify(events, null, 2)}
+              </Code>
+            )}
+          </Card>
+
+          {/* The selected step's raw payload — what the app actually sent.
+              Shown beside every diagram rather than only in the JSON view, so
+              picking a step in a diagram answers "and what was in it?"
+              without switching away from the picture. */}
+          {view !== "json" && current && (
+            <Card withBorder radius="lg" padding="md">
+              <Group justify="space-between" mb="xs" wrap="nowrap">
+                <Group gap="xs" wrap="nowrap">
+                  <ThemeIcon variant="light" color="gray" size="sm" radius="sm">
+                    <Braces size={13} />
+                  </ThemeIcon>
+                  <Text size="xs" fw={600}>
+                    Step {(shown ?? 0) + 1} of {events.length}
+                  </Text>
+                </Group>
+                <CopyButton value={JSON.stringify(current, null, 2)}>
+                  {({ copied, copy }) => (
+                    <Tooltip label={copied ? "Copied" : "Copy step"} withArrow>
+                      <ActionIcon variant="subtle" color="gray" onClick={copy} aria-label="Copy step">
+                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                </CopyButton>
+              </Group>
+              <Code block>
+                {JSON.stringify(
+                  {
+                    src: current.src,
+                    dest: current.dest,
+                    action: current.action,
+                    at: current.ts,
+                  },
+                  null,
+                  2,
+                )}
+              </Code>
+            </Card>
+          )}
+        </Stack>
       )}
     </AppShell>
   );
