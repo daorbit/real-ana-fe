@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "@/features/billing/components/PlanIcons";
 import { AppShell } from "@/app/AppShell";
+import { trace } from "@/shared/lib/analytics";
 import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { BillingSkeleton, InvoiceTableSkeleton } from "@/shared/ui/Skeletons";
@@ -130,8 +131,9 @@ export default function Billing() {
 
   const doSubscribe = async (plan: Plan, selection: AddonSelection = {}) => {
     setConfirmPlan(null);
- 
+
     if (!selectedWorkspaceId) return;
+    trace(user?.id, "subscribe_plan_clicked", "billing", plan.slug);
     setSubscribing(plan.slug);
     try {
       const chosen = Object.entries(selection)
@@ -203,6 +205,7 @@ export default function Billing() {
   const doBuyAddon = async (pack: AddonPack, packs: number) => {
     setConfirmAddon(null);
     if (!selectedWorkspaceId) return;
+    trace(user?.id, "buy_addon_clicked", "billing", pack.slug);
     setBuying(pack._id);
     try {
       const { orderId, amount, currency: orderCurrency, razorpayKeyId } = await startAddonPurchase({
@@ -1381,13 +1384,15 @@ function AddonCheckoutModal({
  
 function Receipts({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { data: invoices = [], isLoading, isFetching, refetch } = useGetInvoicesQuery(
     { workspaceId },
     { skip: !workspaceId },
   );
   const [downloading, setDownloading] = useState<string | null>(null);
- 
+
   const download = async (invoice: Invoice) => {
+    trace(user?.id, "download_invoice_clicked", "billing_history", invoice.kind);
     setDownloading(invoice.id);
     try {
       const token = getToken();

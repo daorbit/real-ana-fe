@@ -9,6 +9,8 @@ import {
   useDisconnectInstagramMutation,
 } from "@/app/store";
 import { INSTAGRAM_PINK, InstagramMark } from "@/shared/ui/LinkedInMark";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 
 /** The API origin the OAuth redirect has to leave from. Same base RTK Query uses. */
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -68,6 +70,7 @@ function startInstagramConnect(): Window | null {
  */
 export function InstagramConnection() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { data: status, isLoading, refetch } = useGetInstagramStatusQuery();
   const [disconnect, { isLoading: disconnecting }] = useDisconnectInstagramMutation();
   // True between opening the popup and hearing back from it, so the button can
@@ -112,6 +115,7 @@ export function InstagramConnection() {
   );
 
   const runDisconnect = async () => {
+    trace(user?.id, "disconnect_instagram", "settings", "instagram_disconnected");
     try {
       await disconnect().unwrap();
       notify.success(t("settings.instagramDisconnected", "Instagram disconnected"));
@@ -201,6 +205,7 @@ export function InstagramConnection() {
         disabled={status?.configured === false}
         loading={connecting}
         onClick={() => {
+          trace(user?.id, "connect_instagram", "settings", "instagram_oauth_popup");
           setConnecting(true);
           const popup = startInstagramConnect();
           // A blocked popup became a full navigation; nothing left to wait for.

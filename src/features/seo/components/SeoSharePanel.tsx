@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Copy, Check, RefreshCw, ExternalLink, Eye } from "lucide-react";
 import { useGetSeoShareQuery, useSetSeoShareMutation } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { num, timeAgo } from "@/shared/lib";
 import { useSaveRegistration } from "@/shared/ui/SaveBar";
 import type { SeoSharePanels } from "@/shared/types";
@@ -65,6 +67,7 @@ export function SeoSharePanel({
   siteId: string;
   reportId: string;
 }) {
+  const { user } = useAuth();
   const { data, isLoading } = useGetSeoShareQuery({ workspaceId, siteId, reportId });
   const [setShare] = useSetSeoShareMutation();
   // The mutation's own `isLoading` is shared across every call it makes, so a
@@ -94,6 +97,7 @@ export function SeoSharePanel({
 
   const savePanels = async () => {
     if (!draft) return;
+    trace(user?.id, "save_seo_share_panels", "seo_share", "seo_share");
     try {
       await setShare({ workspaceId, siteId, reportId, enabled, panels: draft }).unwrap();
       setDraft(null);
@@ -110,6 +114,7 @@ export function SeoSharePanel({
   });
 
   const toggle = async (next: boolean) => {
+    trace(user?.id, next ? "enable_seo_share_link" : "disable_seo_share_link", "seo_share", "seo_share");
     setLinkBusy(true);
     try {
       await setShare({ workspaceId, siteId, reportId, enabled: next }).unwrap();
@@ -130,6 +135,7 @@ export function SeoSharePanel({
       confirmLabel: "Generate new link",
       body: "The current link stops working immediately. Anyone you already sent it to will lose access until you send the new one.",
       onConfirm: async () => {
+        trace(user?.id, "rotate_seo_share_link", "seo_share", "seo_share");
         setLinkBusy(true);
         try {
           await setShare({ workspaceId, siteId, reportId, enabled: true, rotate: true }).unwrap();
@@ -200,7 +206,10 @@ export function SeoSharePanel({
                     size="sm"
                     variant={copied ? "light" : "default"}
                     color={copied ? "emerald" : undefined}
-                    onClick={copy}
+                    onClick={() => {
+                      trace(user?.id, "copy_report_link", "seo_share", "clipboard");
+                      copy();
+                    }}
                     leftSection={copied ? <Check size={14} /> : <Copy size={14} />}
                     style={{ flexShrink: 0 }}
                   >

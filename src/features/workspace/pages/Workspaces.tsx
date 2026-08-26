@@ -24,6 +24,8 @@ import * as v from "@/shared/lib/validate";
 import { shortDate } from "@/shared/lib";
 import { notify, errMessage, confirmDestroy } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { Workspace, Site } from "@/shared/types";
 import { WorkspacesSkeleton } from "@/shared/ui/Skeletons";
 import { AddSiteWizard } from "@/features/workspace/components/AddSiteWizard";
@@ -179,6 +181,7 @@ function SiteRow({
 export default function Workspaces() {
   const { t } = useTranslation();
   const nav = useNavigate();
+  const { user } = useAuth();
   const { workspaces, active, setActive, loading } = useWorkspace();
 
   // workspace rename (create now lives in Onboarding — see "New workspace"
@@ -237,6 +240,7 @@ export default function Workspaces() {
       setEditing(false);
       return;
     }
+    trace(user?.id, "rename_workspace", "workspaces", "workspaces");
     try {
       await renameWs({ id: active._id, name: editName.trim() }).unwrap();
       setEditing(false);
@@ -265,6 +269,7 @@ export default function Workspaces() {
       ],
       confirmLabel: t("workspaces.deleteWorkspace"),
       onConfirm: async () => {
+        trace(user?.id, "delete_workspace", "workspaces", "workspaces");
         try {
           await deleteWs(w._id).unwrap();
           notify.success(t("workspaces.deletedWsToast", { name: w.name }));
@@ -288,6 +293,7 @@ export default function Workspaces() {
       ],
       confirmLabel: t("workspaces.deleteSite"),
       onConfirm: async () => {
+        trace(user?.id, "delete_site", "workspaces", "workspaces");
         try {
           await deleteSiteMut({ workspaceId: active._id, siteId: s.siteId }).unwrap();
           notify.success(t("workspaces.deletedSiteToast", { name: s.name }));
@@ -487,7 +493,13 @@ export default function Workspaces() {
 
                 <Group gap="xs" wrap="nowrap">
                   {canEdit && (
-                    <Button leftSection={<Plus size={15} />} onClick={() => setSiteOpen(true)}>
+                    <Button
+                      leftSection={<Plus size={15} />}
+                      onClick={() => {
+                        trace(user?.id, "add_site_clicked", "workspaces", "add_site_wizard");
+                        setSiteOpen(true);
+                      }}
+                    >
                       {t("workspaces.addSite")}
                     </Button>
                   )}

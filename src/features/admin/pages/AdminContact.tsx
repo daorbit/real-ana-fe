@@ -19,7 +19,8 @@ import {
   useReplyToContactMessageMutation,
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
-import { useIsPlatformAdmin } from "@/features/auth/context";
+import { useIsPlatformAdmin, useAuth } from "@/features/auth/context";
+import { trace } from "@/shared/lib/analytics";
 import { dateTime, timeAgo } from "@/shared/lib";
 import type { ContactMessage, ContactStatus } from "@/shared/types";
 
@@ -339,6 +340,7 @@ function ListRow({
 
 
 function Detail({ message }: { message: ContactMessage }) {
+  const { user } = useAuth();
   const [note, setNote] = useState(message.adminNote);
   const [replying, setReplying] = useState(false);
   const [subject, setSubject] = useState(`Re: ${SUBJECT_LABELS[message.subject] ?? "your message"}`);
@@ -361,6 +363,7 @@ function Detail({ message }: { message: ContactMessage }) {
   const replies = message.replies ?? [];
 
   async function setStatus(status: ContactStatus) {
+    trace(user?.id, "mark_message_status", "admin_contact", status);
     try {
       await update({ id: message._id, status }).unwrap();
     } catch (e) {
@@ -370,6 +373,7 @@ function Detail({ message }: { message: ContactMessage }) {
 
   async function saveNote() {
     if (note === message.adminNote) return;
+    trace(user?.id, "save_contact_note", "admin_contact", "admin_contact");
     try {
       await update({ id: message._id, adminNote: note }).unwrap();
       notify.success("Note saved");
@@ -389,6 +393,7 @@ function Detail({ message }: { message: ContactMessage }) {
       setTouched(true);
       return;
     }
+    trace(user?.id, "send_contact_reply", "admin_contact", message._id);
     try {
       await reply({ id: message._id, subject: subject.trim(), body: body.trim() }).unwrap();
       setBody("");
@@ -406,6 +411,7 @@ function Detail({ message }: { message: ContactMessage }) {
       body: "The message, any note on it and the record of your replies are removed. This cannot be undone.",
       confirmLabel: "Delete message",
       onConfirm: async () => {
+        trace(user?.id, "delete_contact_message", "admin_contact", "admin_contact");
         try {
           await remove(message._id).unwrap();
           notify.success("Message deleted");

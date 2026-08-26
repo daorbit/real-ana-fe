@@ -8,6 +8,7 @@ import { PhoneInput, joinNumber, localNumberError } from "@/shared/ui/PhoneInput
 import { useAuth } from "@/features/auth/context";
 import { guessCountry, splitNumber, type DialCode } from "@/shared/lib/dialCodes";
 import { notifyError } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
 
 /**
  * Who you are — the first onboarding step.
@@ -82,6 +83,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
     setPhoneError(pErr);
     if (fErr || pErr) return;
 
+    trace(user?.id, "onboarding_profile_saved", "onboarding", "profile");
     setSaving(true);
     try {
       await updateProfile({

@@ -2,6 +2,8 @@ import { Card, Group, Text, Button, ThemeIcon, List, Collapse } from "@mantine/c
 import { motion, AnimatePresence } from "framer-motion";
 import { Radar, CheckCircle2, AlertTriangle, RotateCw } from "lucide-react";
 import { useInstallCheck } from "@/features/workspace";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 
 export function InstallCheck({
   workspaceId,
@@ -14,8 +16,13 @@ export function InstallCheck({
   domain?: string;
   autoStart?: boolean;
 }) {
+  const { user } = useAuth();
   const { phase, start, secondsLeft, progress } = useInstallCheck(workspaceId, siteId, autoStart);
   const site = domain ? <b>{domain}</b> : "your site";
+  const onStart = () => {
+    trace(user?.id, "verify_install_clicked", "install_check", siteId);
+    start();
+  };
 
   return (
     <Card withBorder radius="md" padding="md" className="install-check">
@@ -30,7 +37,7 @@ export function InstallCheck({
                   <Text size="xs" c="dimmed">Paste the snippet, open {site}, then check.</Text>
                 </div>
               </Group>
-              <Button size="xs" onClick={start}>Check now</Button>
+              <Button size="xs" onClick={onStart}>Check now</Button>
             </Group>
           </motion.div>
         )}
@@ -87,7 +94,7 @@ export function InstallCheck({
                   <Text size="xs" c="dimmed">The snippet hasn't reported a pageview. Check the points below.</Text>
                 </div>
               </Group>
-              <Button size="xs" variant="light" leftSection={<RotateCw size={13} />} onClick={start}>Retry</Button>
+              <Button size="xs" variant="light" leftSection={<RotateCw size={13} />} onClick={onStart}>Retry</Button>
             </Group>
             <Collapse expanded>
               <List size="xs" spacing={4} c="dimmed" pl="xs">

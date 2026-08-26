@@ -20,6 +20,8 @@ import { mobileSteps } from "@/features/workspace/mobileGuide";
 import { API_ORIGIN } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
 import { notify, notifyError } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { Site } from "@/shared/types";
 
 type Platform = "web" | "app";
@@ -62,6 +64,7 @@ export function AddSiteWizard({
   workspaceId: string;
   existingDomains: string[];
 }) {
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [createSite, { isLoading: creating }] = useCreateSiteMutation();
 
@@ -172,6 +175,7 @@ export function AddSiteWizard({
   };
 
   const createAppSite = async () => {
+    trace(user?.id, "create_site", "add_site_wizard", "app");
     try {
       const site = await createSite({
         workspaceId,
@@ -208,6 +212,7 @@ export function AddSiteWizard({
       // The site is created on leaving the options step, so the snippet on
       // the next step is the real one for a real siteId rather than a
       // preview to be re-copied later.
+      trace(user?.id, "create_site", "add_site_wizard", "web");
       try {
         const site = await createSite({
           workspaceId,

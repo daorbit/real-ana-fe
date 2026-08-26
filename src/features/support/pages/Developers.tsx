@@ -18,6 +18,8 @@ import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { RoleGate } from "@/features/billing/components/RoleGate";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 import type { ApiKey } from "@/shared/types";
 
@@ -36,10 +38,12 @@ function KeysTab() {
   const { currentData: keys = [] } = useGetApiKeysQuery(active!._id, { skip: !active });
   const [createKey, { isLoading: creating }] = useCreateApiKeyMutation();
   const [revokeKey] = useRevokeApiKeyMutation();
+  const { user } = useAuth();
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!active) return;
+    trace(user?.id, "api_key_created", "developers", "api_key");
     try {
       const k = await createKey({
         workspaceId: active._id,
@@ -61,6 +65,7 @@ function KeysTab() {
       body: t("developers.revokeBody"),
       confirmLabel: t("developers.revokeConfirm"),
       onConfirm: async () => {
+        trace(user?.id, "api_key_revoked", "developers", "api_key");
         try {
           await revokeKey({ workspaceId: active._id, keyId: k.id }).unwrap();
           notify.success(t("developers.revokedToast", { name: k.name }));

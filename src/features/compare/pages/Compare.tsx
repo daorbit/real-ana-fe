@@ -16,6 +16,8 @@ import {
   useDeleteCompetitorMutation,
 } from "@/app/store";
 import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 import { CompetitorRail } from "@/features/compare/components/CompetitorRail";
 import { CompetitorDetail } from "@/features/compare/components/CompetitorDetail";
@@ -42,6 +44,7 @@ const MAX_COMPETITORS = 10;
 export default function Compare() {
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
+  const { user } = useAuth();
   const workspaceId = active?._id ?? "";
 
   // `currentData` rather than `data`: the latter holds the previous
@@ -108,6 +111,7 @@ export default function Compare() {
   const add = async () => {
     const trimmed = url.trim();
     if (!trimmed) return;
+    trace(user?.id, "add_competitor", "compare", "competitor_added");
     try {
       await addCompetitor({ workspaceId, siteId, url: trimmed }).unwrap();
       setUrl("");
@@ -118,6 +122,7 @@ export default function Compare() {
   };
 
   const refreshOne = async (competitorId: string) => {
+    trace(user?.id, "refresh_competitor", "compare", "competitor_analysis");
     setRefreshingId(competitorId);
     try {
       await refreshCompetitor({ workspaceId, siteId, competitorId }).unwrap();
@@ -129,6 +134,7 @@ export default function Compare() {
   };
 
   const refreshEveryone = async () => {
+    trace(user?.id, "refresh_all_competitors", "compare", "competitor_analysis");
     try {
       const result = await refreshAll({ workspaceId, siteId }).unwrap();
       notify.success(
@@ -147,6 +153,7 @@ export default function Compare() {
       title: "Remove competitor",
       body: `Stop tracking ${label}? Their recorded score history goes too.`,
       onConfirm: async () => {
+        trace(user?.id, "remove_competitor", "compare", "competitor_removed");
         try {
           await deleteCompetitor({ workspaceId, siteId, competitorId }).unwrap();
         } catch (e) {

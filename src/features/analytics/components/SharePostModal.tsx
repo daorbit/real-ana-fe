@@ -9,6 +9,8 @@ import {
   Monitor, Smartphone, Link as LinkIcon, PenLine,
 } from "lucide-react";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import {
   useWriteShareCaptionMutation,
   useGetLinkedInStatusQuery,
@@ -60,6 +62,7 @@ export function SharePostModal({
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
   const [postToLinkedIn, { isLoading: posting }] = usePostToLinkedInMutation();
+  const { user } = useAuth();
   // The permalink of the post just published, so the panel can link to it.
   const [postedUrl, setPostedUrl] = useState<string | null>(null);
   const [justPosted, setJustPosted] = useState(false);
@@ -160,6 +163,7 @@ export function SharePostModal({
    * work, unlike every other toolbar action.
    */
   const generate = async () => {
+    trace(user?.id, "share_caption_generated", "share_composer", platform);
     try {
       // An empty angle keeps the original behaviour: a caption about this
       // workspace's own dashboard, built from figures the server reads itself.
@@ -180,6 +184,7 @@ export function SharePostModal({
 
   /** Publish through our own LinkedIn connection. */
   const runLinkedInPost = async () => {
+    trace(user?.id, "linkedin_post_published", "share_composer", "linkedin");
     setJustPosted(false);
     setPostedUrl(null);
     try {
@@ -197,6 +202,7 @@ export function SharePostModal({
     // through our own connection, so the intent fallback must not run for it
     // while that connection is missing.
     if (blockedOnLinkedIn) return;
+    trace(user?.id, "share_post_opened", "share_composer", platform);
     // Platforms that drop the caption get it on the clipboard first, so the
     // paste is one keystroke away in the composer that is about to open.
     //
@@ -459,7 +465,10 @@ export function SharePostModal({
                 variant="default"
                 mt="sm"
                 leftSection={<Download size={15} />}
-                onClick={() => downloadShareCard(image, workspace)}
+                onClick={() => {
+                  trace(user?.id, "share_card_downloaded", "share_composer", "image");
+                  downloadShareCard(image, workspace);
+                }}
               >
                 {t("sharePost.downloadImage")}
               </Button>

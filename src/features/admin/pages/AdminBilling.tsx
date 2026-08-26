@@ -15,6 +15,8 @@ import {
   useCheckCouponMutation,
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { CURRENCIES, CURRENCY_SYMBOLS } from "@/shared/types";
 import type { Plan, AddonPack, AddonType, Coupon, Currency, CurrencyPrices } from "@/shared/types";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
@@ -116,10 +118,12 @@ function relativeTime(iso: string): string {
  * it — the drift is silent, and the first person to notice is the customer.
  */
 function CurrencySync() {
+  const { user } = useAuth();
   const { data: fx } = useGetAdminFxQuery();
   const [sync, { isLoading: syncing }] = useSyncAdminPlanCurrencyMutation();
 
   const run = async () => {
+    trace(user?.id, "sync_usd_prices", "admin_billing", "admin_billing");
     try {
       const result = await sync().unwrap();
       const rate = result.snapshot.rates.USD;
@@ -167,6 +171,7 @@ function CurrencySync() {
  * adding or retiring a tier is a code change and a deploy, not a form submit.
  */
 function PlansTab() {
+  const { user } = useAuth();
   const { data: plans = [], isLoading, isFetching, refetch } = useGetAdminPlansQuery();
   const [save, { isLoading: saving }] = useSaveAdminPlanPriceMutation();
 
@@ -187,6 +192,7 @@ function PlansTab() {
 
   const submit = async () => {
     if (!draft) return;
+    trace(user?.id, "save_plan_price", "admin_billing", draft.slug);
     try {
       await save({
         slug: draft.slug,
@@ -279,6 +285,7 @@ const emptyAddon: Partial<AddonPack> = {
 };
 
 function AddonsTab() {
+  const { user } = useAuth();
   const { data: addons = [], isLoading, isFetching, refetch } = useGetAdminAddonPacksQuery();
   const [save, { isLoading: saving }] = useSaveAdminAddonPackMutation();
   const [remove] = useDeleteAdminAddonPackMutation();
@@ -295,6 +302,7 @@ function AddonsTab() {
   const openEdit = (a: AddonPack) => { setDraft(a); setPriceRupees(toRupees(a.price)); setModal(true); };
 
   const submit = async () => {
+    trace(user?.id, draft._id ? "update_addon_pack" : "create_addon_pack", "admin_billing", "admin_billing");
     try {
       await save({
         ...draft,
@@ -312,6 +320,7 @@ function AddonsTab() {
       title: `Delete ${a.name}?`,
       body: "Past purchases already made are unaffected — this only removes it from the Billing page.",
       onConfirm: async () => {
+        trace(user?.id, "delete_addon_pack", "admin_billing", "admin_billing");
         try {
           await remove(a._id).unwrap();
           notify.success(`${a.name} deleted.`);
@@ -415,6 +424,7 @@ function AddonsTab() {
 const emptyCoupon: Partial<Coupon> = { code: "", percentOff: 10, active: true, expiresAt: null };
 
 function CouponsTab() {
+  const { user } = useAuth();
   const { data: coupons = [], isLoading, isFetching, refetch } = useGetAdminCouponsQuery();
   const { data: plans = [] } = useGetAdminPlansQuery();
   const [save, { isLoading: saving }] = useSaveAdminCouponMutation();
@@ -428,6 +438,7 @@ function CouponsTab() {
   const openEdit = (c: Coupon) => { setDraft(c); setModal(true); };
 
   const submit = async () => {
+    trace(user?.id, draft._id ? "update_coupon" : "create_coupon", "admin_billing", "admin_billing");
     try {
       await save(draft).unwrap();
       notify.success(`${draft.code} saved.`, draft._id ? "Coupon updated" : "Coupon created");
@@ -442,6 +453,7 @@ function CouponsTab() {
       title: `Delete ${c.code}?`,
       body: "Anyone with this code will no longer be able to apply it. Past orders that used it are unaffected.",
       onConfirm: async () => {
+        trace(user?.id, "delete_coupon", "admin_billing", "admin_billing");
         try {
           await remove(c._id).unwrap();
           notify.success(`${c.code} deleted.`);

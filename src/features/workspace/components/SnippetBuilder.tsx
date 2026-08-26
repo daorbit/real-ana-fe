@@ -8,6 +8,8 @@ import { useUpdateSiteOptionsMutation } from "@/app/store";
 import { type TrackerOptions } from "@/features/workspace";
 import { getFramework, frameworkLanguage } from "@/features/workspace/frameworks";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 
 /** Split a comma-separated field into clean entries. */
 function list(v: string): string[] {
@@ -45,6 +47,7 @@ export function SnippetBuilder({
   /** Which install snippet to show — set when the site was created. */
   framework?: string;
 }) {
+  const { user } = useAuth();
   const guide = getFramework(framework);
   const [open, setOpen] = useState(false);
   const [updateOptions, { isLoading: saving }] = useUpdateSiteOptionsMutation();
@@ -102,6 +105,7 @@ export function SnippetBuilder({
     (domain.trim() ? 1 : 0);
 
   const save = async () => {
+    trace(user?.id, "save_tracker_options", "snippet_builder", siteId);
     try {
       await updateOptions({ workspaceId, siteId, options }).unwrap();
       notify.success(

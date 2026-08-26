@@ -12,6 +12,8 @@ import {
 import { SharePostModal } from "@/features/analytics/components/SharePostModal";
 import type { ShareCardStats } from "@/features/analytics/components/shareCard";
 import { AppShell } from "@/app/AppShell";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { PageHeader, Section, Field, PageStack } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { RoleGate } from "@/features/billing/components/RoleGate";
@@ -135,6 +137,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
   const { data, isLoading } = useGetShareQuery(workspaceId);
   const { active } = useWorkspace();
+  const { user } = useAuth();
   const [composerOpen, setComposerOpen] = useState(false);
   const [setShare] = useSetShareMutation();
   // The mutation's shared `isLoading` would light up the link toggle and
@@ -167,6 +170,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
 
   const savePanels = async () => {
     if (!draft) return;
+    trace(user?.id, "share_panels_saved", "share", "analytics");
     try {
       await setShare({ workspaceId, enabled, panels: draft }).unwrap();
       setDraft(null);
@@ -183,6 +187,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
   });
 
   const toggle = async (next: boolean) => {
+    trace(user?.id, "share_link_toggled", "share", next ? "enabled" : "disabled");
     setLinkBusy(true);
     try {
       await setShare({ workspaceId, enabled: next }).unwrap();
@@ -203,6 +208,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
       confirmLabel: t("share.rotateConfirm"),
       body: <>{t("share.rotateBody")}</>,
       onConfirm: async () => {
+        trace(user?.id, "share_link_rotated", "share", "new_link");
         setLinkBusy(true);
         try {
           await setShare({ workspaceId, enabled: true, rotate: true }).unwrap();
@@ -278,7 +284,10 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                 <Button
                   size="sm"
                   color="emerald"
-                  onClick={() => setComposerOpen(true)}
+                  onClick={() => {
+                    trace(user?.id, "share_composer_opened", "share", "composer");
+                    setComposerOpen(true);
+                  }}
                   leftSection={<Share2 size={14} />}
                   style={{ flexShrink: 0 }}
                 >

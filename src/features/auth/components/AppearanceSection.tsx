@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 import { useWorkspace } from "@/features/workspace/context";
+import { useAuth } from "@/features/auth/context";
+import { trace } from "@/shared/lib/analytics";
 import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
   ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES, LOADER_VARIANTS,
@@ -58,6 +60,7 @@ export function AppearanceSection({
   const [prefs, setPrefs] = useState(readThemePrefs);
   const { setColorScheme } = useMantineColorScheme();
   const { active } = useWorkspace();
+  const { user } = useAuth();
   const [saveWorkspaceTheme] = useSaveWorkspaceThemeMutation();
 
   // Debounced rather than fired on every click: dragging through a swatch
@@ -71,6 +74,7 @@ export function AppearanceSection({
   }, []);
 
   const update = (patch: Partial<ThemePrefs>) => {
+    trace(user?.id, "appearance_changed", "settings", Object.keys(patch)[0] ?? "theme");
     const next = { ...prefs, ...patch };
     setPrefs(next);
     saveThemePrefs(next);

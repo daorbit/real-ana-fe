@@ -6,6 +6,8 @@ import {
 import { Target, Plus, Trash2, Inbox } from "lucide-react";
 import { useCreateGoalMutation, useDeleteGoalMutation } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { GoalResult } from "@/shared/types";
 
  
@@ -22,11 +24,13 @@ export function GoalsPanel({
 
   const [create, { isLoading: creating }] = useCreateGoalMutation();
   const [remove] = useDeleteGoalMutation();
+  const { user } = useAuth();
 
   const add = async () => {
     const n = name.trim();
     const m = match.trim();
     if (!n || !m) return;
+    trace(user?.id, "goal_added", "goals_panel", kind);
     try {
       await create({ workspaceId, name: n, kind, match: m }).unwrap();
       setName("");
@@ -42,6 +46,7 @@ export function GoalsPanel({
       title: "Delete goal?",
       body: <><b>{g.name}</b> will stop being tracked. Past traffic is not affected.</>,
       onConfirm: async () => {
+        trace(user?.id, "goal_deleted", "goals_panel", "goal");
         try {
           await remove({ workspaceId, goalId: g.id }).unwrap();
         } catch (e) {

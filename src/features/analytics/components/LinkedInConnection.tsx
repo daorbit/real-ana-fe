@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Anchor, Box, Button, Group, Loader, Text } from "@mantine/core";
 import { Check } from "lucide-react";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { getToken } from "@/shared/lib/http";
 import {
   useGetLinkedInStatusQuery,
@@ -56,6 +58,7 @@ export function LinkedInConnection() {
   const { t } = useTranslation();
   const { data: status, isLoading, refetch } = useGetLinkedInStatusQuery();
   const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
+  const { user } = useAuth();
   // True between opening the popup and hearing back from it, so the button can
   // show that something is in flight in another window.
   const [connecting, setConnecting] = useState(false);
@@ -94,6 +97,7 @@ export function LinkedInConnection() {
   );
 
   const runDisconnect = async () => {
+    trace(user?.id, "linkedin_disconnected", "share_composer", "linkedin");
     try {
       await disconnect().unwrap();
       notify.success(t("sharePost.linkedinDisconnected"));
@@ -190,6 +194,7 @@ export function LinkedInConnection() {
             disabled={status?.configured === false}
             loading={connecting}
             onClick={() => {
+              trace(user?.id, "linkedin_connect_started", "share_composer", "linkedin_oauth");
               setConnecting(true);
               const popup = startLinkedInConnect();
               // A blocked popup falls back to a full navigation, so there is

@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/features/auth/context";
 import { useUnsavedGuard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
 
 /**
  * Date formats, previewed rather than named.
@@ -238,6 +239,7 @@ export default function Settings() {
     setErrors(next);
     if (Object.values(next).some(Boolean)) return;
 
+    trace(user?.id, "profile_saved", "settings", "profile");
     setSaving(true);
     try {
       await updateProfile({
@@ -285,6 +287,7 @@ export default function Settings() {
    * field is re-seeded from the new user, keeping the form undirty.
    */
   const saveCrop = async (cropped: Blob) => {
+    trace(user?.id, "avatar_uploaded", "settings", "profile");
     setAvatarBusy(true);
     try {
       await uploadAvatar(cropped);
@@ -299,6 +302,7 @@ export default function Settings() {
   };
 
   const clearAvatar = async () => {
+    trace(user?.id, "avatar_removed", "settings", "profile");
     setAvatarBusy(true);
     try {
       await removeAvatar();

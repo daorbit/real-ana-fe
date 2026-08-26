@@ -5,6 +5,8 @@ import {
   useUpdateFunnelMutation, useDeleteFunnelMutation,
 } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { FunnelSidebar } from "@/features/analytics/components/FunnelSidebar";
 import { FunnelStepEditor, type Draft } from "@/features/analytics/components/FunnelStepEditor";
 import { FunnelResults } from "@/features/analytics/components/FunnelResults";
@@ -39,6 +41,7 @@ export function FunnelBuilder({
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [run, { isLoading }] = useComputeFunnelMutation();
+  const { user } = useAuth();
 
   const { data: savedFunnels = [] } = useGetFunnelsQuery(workspaceId);
   const [createFunnel, { isLoading: isSaving }] = useCreateFunnelMutation();
@@ -134,6 +137,7 @@ export function FunnelBuilder({
   const compute = async (payloadSteps?: Draft[]) => {
     const payload: FunnelStepInput[] = (payloadSteps ?? steps).filter((s) => s.value);
     if (payload.length < 2) return;
+    trace(user?.id, "funnel_computed", "funnel_builder", "funnel_results");
     try {
       const res = await run({ workspaceId, steps: payload, range, sites }).unwrap();
       setResult(res.steps);
@@ -143,6 +147,7 @@ export function FunnelBuilder({
   };
 
   const runPreset = (preset: (typeof presets)[number]) => {
+    trace(user?.id, "funnel_preset_run", "funnel_builder", preset.key);
     setActivePreset(preset.key);
     setEditingId(null);
     setSteps(preset.steps);
@@ -150,6 +155,7 @@ export function FunnelBuilder({
   };
 
   const loadSaved = (funnel: (typeof savedFunnels)[number]) => {
+    trace(user?.id, "funnel_loaded", "funnel_builder", funnel.id);
     setActivePreset(null);
     setEditingId(funnel.id);
     setSteps(funnel.steps);
@@ -166,6 +172,7 @@ export function FunnelBuilder({
     if (!name) return;
     const payload: FunnelStepInput[] = steps.filter((s) => s.value);
     if (payload.length < 2) return;
+    trace(user?.id, editingId ? "funnel_updated" : "funnel_saved", "funnel_builder", "funnel");
     try {
       if (editingId) {
         await updateFunnel({ workspaceId, funnelId: editingId, name, steps: payload }).unwrap();
@@ -182,6 +189,7 @@ export function FunnelBuilder({
   };
 
   const removeSaved = async (funnelId: string) => {
+    trace(user?.id, "funnel_deleted", "funnel_builder", "funnel");
     try {
       await deleteFunnel({ workspaceId, funnelId }).unwrap();
       if (editingId === funnelId) setEditingId(null);

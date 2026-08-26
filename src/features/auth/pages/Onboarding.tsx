@@ -19,6 +19,8 @@ import type { FrameworkId } from "@/features/workspace/frameworks";
 import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker";
 import * as v from "@/shared/lib/validate";
 import { notifyError } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { Site } from "@/shared/types";
 
 // Appearance is the last step and renders full-page with no brand panel
@@ -66,6 +68,7 @@ const FIRST_SKIPPABLE_STEP = 1;
 export default function Onboarding() {
   const nav = useNavigate();
   const { setActive, workspaces } = useWorkspace();
+  const { user } = useAuth();
   const [params] = useSearchParams();
 
   // Triggered by "New workspace" for an account that already exists — the
@@ -101,6 +104,7 @@ export default function Onboarding() {
    * would be a no-op loop.
    */
   const skip = () => {
+    trace(user?.id, "onboarding_skipped", "onboarding", "app");
     localStorage.setItem("quantalog_onboarding_skipped", "1");
     nav(workspaceOnly ? "/app/workspaces" : "/app");
   };
@@ -119,6 +123,7 @@ export default function Onboarding() {
     setWsError(err);
     if (err) return;
 
+    trace(user?.id, "onboarding_workspace_created", "onboarding", "workspace");
     try {
       const ws = await createWorkspace({ name: wsName.trim() }).unwrap();
       setWsId(ws._id);
@@ -136,6 +141,7 @@ export default function Onboarding() {
     setDomainError(dErr);
     if (nErr || dErr || !wsId) return;
 
+    trace(user?.id, "onboarding_site_created", "onboarding", "site");
     try {
       const created = await createSite({
         workspaceId: wsId,

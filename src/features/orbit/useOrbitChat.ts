@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { useAskOrbitMutation, useGetOrbitStatusQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 
 /**
@@ -86,6 +88,7 @@ export function useOrbitChat() {
   // Orbit is metered per workspace, so both calls are scoped to the active one
   // and there is nothing to ask until it is known.
   const { active } = useWorkspace();
+  const { user } = useAuth();
   const workspaceId = active?._id ?? "";
   const { data: status } = useGetOrbitStatusQuery(workspaceId, { skip: !workspaceId });
 
@@ -136,6 +139,8 @@ export function useOrbitChat() {
     async (raw?: string) => {
       const question = (raw ?? input).trim();
       if (!question || thinking || !workspaceId) return;
+
+      trace(user?.id, "ask_orbit", "orbit_chat", "orbit_answer");
 
       const history = historyRef.current
         // A failed turn was never answered, so sending it back would present the
@@ -197,7 +202,7 @@ export function useOrbitChat() {
         });
       }
     },
-    [ask, input, thinking, activeModel, workspaceId],
+    [ask, input, thinking, activeModel, workspaceId, user?.id],
   );
 
   const reset = useCallback(() => {

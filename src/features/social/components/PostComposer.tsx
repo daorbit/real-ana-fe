@@ -16,6 +16,8 @@ import { useOrbitCaption } from "../hooks/useOrbitCaption";
 import { useOrbitPlan } from "../hooks/useOrbitPlan";
 import { DiscardDialog } from "./DiscardDialog";
 import { captionLimit, isDirty, type Draft } from "./draft";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -67,6 +69,7 @@ export function PostComposer({
    */
   onSave: (draft: Draft, asDraft?: boolean) => Promise<boolean>;
 }) {
+  const { user } = useAuth();
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<PreviewDevice>("desktop");
   const [confirmingClose, setConfirmingClose] = useState(false);
@@ -129,6 +132,7 @@ export function PostComposer({
   const dirty = isDirty(draft, initial);
   const requestClose = () => (dirty ? setConfirmingClose(true) : onClose());
   const discard = () => {
+    trace(user?.id, "discard_draft_confirmed", "composer", editing ? "post_unchanged" : "post_discarded");
     setConfirmingClose(false);
     onClose();
   };

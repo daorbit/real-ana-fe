@@ -12,6 +12,7 @@ import { PageHeader } from "@/shared/ui/Page";
 import { SUPPORT_KINDS, type Kind } from "@/features/support/supportKinds";
 import { useSendSupportMessageMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 
 const DOCS_URL = "https://quantalog.daorbit.in/docs";
@@ -56,6 +57,7 @@ export default function Help() {
       setTouched(true);
       return;
     }
+    trace(user?.id, "support_message_sent", "help", kind);
     try {
       await send({
         kind,

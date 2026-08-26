@@ -13,6 +13,7 @@ import { useGetAdminUsersQuery, useDeleteAdminUserMutation } from "@/app/store";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
 import { num, timeAgo, shortDate } from "@/shared/lib";
 import type { AdminUser } from "@/shared/types";
 
@@ -73,6 +74,7 @@ export default function Impersonate() {
   const isSuperAdmin = user?.role === "super_admin" && !user?.impersonating;
 
   const enter = async (u: AdminUser) => {
+    trace(user?.id, "impersonate_user", "impersonate", u.id);
     setBusy(u.id);
     try {
       await impersonate(u.id);
@@ -97,6 +99,7 @@ export default function Impersonate() {
         </>
       ),
       onConfirm: async () => {
+        trace(user?.id, "delete_user_account", "impersonate", u.id);
         setDeleting(u.id);
         try {
           await deleteUser(u.id).unwrap();
@@ -341,7 +344,10 @@ export default function Impersonate() {
                                 color="gray"
                                 size="lg"
                                 radius="md"
-                                onClick={() => setPlanUser(u)}
+                                onClick={() => {
+                                  trace(user?.id, "view_user_plan_clicked", "impersonate", "plan_dialog");
+                                  setPlanUser(u);
+                                }}
                               >
                                 <CreditCard size={16} />
                               </ActionIcon>
@@ -353,7 +359,10 @@ export default function Impersonate() {
                                 size="lg"
                                 radius="md"
                                 disabled={rowBusy}
-                                onClick={() => setMessaging(u)}
+                                onClick={() => {
+                                  trace(user?.id, "message_user_clicked", "impersonate", "email_composer");
+                                  setMessaging(u);
+                                }}
                               >
                                 <Mail size={16} />
                               </ActionIcon>

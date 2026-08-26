@@ -22,6 +22,8 @@ import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { shortDate } from "@/shared/lib";
 import { ROLE_RANK, type WorkspaceRole } from "@/shared/types";
 
@@ -160,6 +162,7 @@ export default function Members() {
   const navigate = useNavigate();
   const { active } = useWorkspace();
   const { canAdmin } = usePermissions();
+  const { user } = useAuth();
 
   const { data, isLoading } = useGetMembersQuery(active?._id ?? "", { skip: !active });
   const [invite, { isLoading: inviting }] = useInviteMemberMutation();
@@ -192,6 +195,7 @@ export default function Members() {
   const send = async (e: FormEvent) => {
     e.preventDefault();
     if (!active) return;
+    trace(user?.id, "invite_member_clicked", "members", "invite");
     try {
       await invite({ workspaceId: active._id, email: email.trim(), role }).unwrap();
       notify.success(`Invitation sent to ${email.trim()}.`);
@@ -205,6 +209,7 @@ export default function Members() {
 
   const changeRole = async (memberId: string, next: WorkspaceRole) => {
     if (!active) return;
+    trace(user?.id, "change_member_role", "members", next);
     try {
       await updateRole({ workspaceId: active._id, memberId, role: next }).unwrap();
       notify.success("Role updated.");
@@ -222,6 +227,7 @@ export default function Members() {
         : `${name} will lose access immediately. Anything they created stays in the workspace.`,
       confirmLabel: isSelf ? "Leave" : "Remove",
       onConfirm: async () => {
+        trace(user?.id, isSelf ? "leave_workspace" : "remove_member", "members", "members");
         try {
           await removeMember({ workspaceId: active._id, memberId }).unwrap();
           notify.success(isSelf ? "You've left the workspace." : `${name} was removed.`);
@@ -428,6 +434,7 @@ export default function Members() {
                                 variant="subtle"
                                 color="red"
                                 onClick={async () => {
+                                  trace(user?.id, "revoke_invite", "members", "members");
                                   try {
                                     await revokeInvite({
                                       workspaceId: active._id,

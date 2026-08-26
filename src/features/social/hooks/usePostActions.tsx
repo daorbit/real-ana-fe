@@ -7,6 +7,8 @@ import {
 } from "@/app/store";
 import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
 import { DELIVERY_WINDOW_MINUTES, describe, runAtISO, type Draft } from "../components/draft";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { ScheduledPost } from "@/shared/types";
 
 /**
@@ -30,6 +32,7 @@ export function usePostActions({
   /** A post whose time changed, so the list can mark where it went. */
   onMoved: (id: string) => void;
 }) {
+  const { user } = useAuth();
   const [create, { isLoading: creating }] = useCreateScheduledPostMutation();
   const [update, { isLoading: updating }] = useUpdateScheduledPostMutation();
   const [remove] = useDeleteScheduledPostMutation();
@@ -38,6 +41,12 @@ export function usePostActions({
   const [publishingId, setPublishingId] = useState<string | null>(null);
 
   const save = async (draft: Draft, asDraft = false): Promise<boolean> => {
+    trace(
+      user?.id,
+      editing ? "update_post" : asDraft ? "save_draft" : "create_post",
+      "composer",
+      editing ? "post_updated" : asDraft ? "draft_saved" : "post_scheduled",
+    );
     if (!workspaceId) {
       notify.error("Pick a workspace first.");
       return false;
@@ -128,6 +137,7 @@ export function usePostActions({
 
   const toggle = async (post: ScheduledPost) => {
     const next = post.status === "active" ? "paused" : "active";
+    trace(user?.id, next === "active" ? "resume_post" : "pause_post", "posts_list", next);
     try {
       await update({ id: post.id, status: next }).unwrap();
       notify.success(next === "active" ? "Post scheduled." : "Moved to drafts.");
@@ -161,6 +171,7 @@ export function usePostActions({
         </>
       ),
       onConfirm: async () => {
+        trace(user?.id, "publish_now", "posts_list", network.toLowerCase());
         setPublishingId(post.id);
         try {
           const res = await publish(post.id).unwrap();
@@ -192,6 +203,7 @@ export function usePostActions({
         </>
       ),
       onConfirm: async () => {
+        trace(user?.id, "delete_post", "posts_list", "post_deleted");
         try {
           await remove(post.id).unwrap();
           notify.success("Post deleted.");

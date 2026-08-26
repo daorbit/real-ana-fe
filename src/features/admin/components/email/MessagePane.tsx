@@ -4,6 +4,8 @@ import {
 } from "@mantine/core";
 import { Send, FlaskConical, Eye, PencilLine, Check } from "lucide-react";
 import type { EmailComposerState } from "@/features/admin/useEmailComposer";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 
 /**
  * The message: what it says, and what it will look like.
@@ -13,6 +15,7 @@ import type { EmailComposerState } from "@/features/admin/useEmailComposer";
  * leave the preview too narrow to judge anything by.
  */
 export function MessagePane({ state }: { state: EmailComposerState }) {
+  const { user } = useAuth();
   const {
     single, audience,
     templates, applyTemplate, templateId,
@@ -24,6 +27,15 @@ export function MessagePane({ state }: { state: EmailComposerState }) {
     busy, sending, testing, canSend,
     send, test,
   } = state;
+
+  const onSend = () => {
+    trace(user?.id, "send_admin_email", "email_composer", single ? "single" : "broadcast");
+    send();
+  };
+  const onTest = () => {
+    trace(user?.id, "send_test_email", "email_composer", "test");
+    test();
+  };
 
   return (
     <Stack gap="md">
@@ -158,7 +170,7 @@ export function MessagePane({ state }: { state: EmailComposerState }) {
           radius="md"
           leftSection={testing ? <Loader size={13} /> : <FlaskConical size={15} />}
           disabled={!subject.trim() || !body.trim() || busy}
-          onClick={test}
+          onClick={onTest}
         >
           Test to me
         </Button>
@@ -167,7 +179,7 @@ export function MessagePane({ state }: { state: EmailComposerState }) {
           radius="md"
           leftSection={sending ? <Loader size={13} color="white" /> : <Send size={15} />}
           disabled={!canSend || busy}
-          onClick={send}
+          onClick={onSend}
         >
           {sending
             ? "Sending…"

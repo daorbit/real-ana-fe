@@ -8,6 +8,8 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { useGetDemoUsageQuery, useSetDemoLimitMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import { num, timeAgo } from "@/shared/lib";
 
 /**
@@ -18,6 +20,7 @@ import { num, timeAgo } from "@/shared/lib";
  * starts — so there is no history to browse here, only the current picture.
  */
 export default function DemoUsage() {
+  const { user } = useAuth();
   const { data: usage, isLoading } = useGetDemoUsageQuery();
   const [setLimit, { isLoading: saving }] = useSetDemoLimitMutation();
   const [draftLimit, setDraftLimit] = useState<number | string>(3);
@@ -30,6 +33,7 @@ export default function DemoUsage() {
   const dirty = usage ? Number(draftLimit) !== usage.limit : false;
 
   const save = async () => {
+    trace(user?.id, "set_demo_limit", "demo_usage", "demo_usage");
     try {
       const r = await setLimit(Number(draftLimit)).unwrap();
       notify.success(

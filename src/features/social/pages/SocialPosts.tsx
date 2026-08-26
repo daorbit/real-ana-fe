@@ -16,6 +16,8 @@ import {
 import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { useInstagramConnect } from "@/features/social/useInstagramConnect";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
 import { ConnectPrompt } from "@/features/social/components/ConnectPrompt";
 import { PostComposer } from "@/features/social/components/PostComposer";
@@ -32,6 +34,7 @@ import type { PostAccount, ScheduledPost, SentPost } from "@/shared/types";
  
 export default function SocialPosts() {
   const { active } = useWorkspace();
+  const { user } = useAuth();
   const { data, isLoading, isFetching, refetch } = useGetScheduledPostsQuery();
  
   const { data: usage } = useGetWorkspaceUsageQuery(active?._id ?? "", { skip: !active?._id });
@@ -225,6 +228,7 @@ export default function SocialPosts() {
       labels: { confirm: "Remove", cancel: "Keep" },
       confirmProps: { color: "red" },
       onConfirm: async () => {
+        trace(user?.id, "delete_sent_post", "sent_timeline", "post_removed");
         setRemovingId(post.id);
         try {
           await deleteSent(post.id).unwrap();
@@ -385,8 +389,14 @@ export default function SocialPosts() {
           linkedin={linkedin}
           instagram={instagram}
           connecting={connecting || connectingInstagram}
-          onConnect={connect}
-          onConnectInstagram={connectInstagram}
+          onConnect={() => {
+            trace(user?.id, "connect_linkedin", "social_posts", "linkedin_oauth_popup");
+            connect();
+          }}
+          onConnectInstagram={() => {
+            trace(user?.id, "connect_instagram", "social_posts", "instagram_oauth_popup");
+            connectInstagram();
+          }}
         />
       )}
 

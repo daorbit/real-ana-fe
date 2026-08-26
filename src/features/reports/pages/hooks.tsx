@@ -9,6 +9,7 @@ import {
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
+import { trace } from "@/shared/lib/analytics";
 import type { ReportSchedule } from "@/shared/types";
 import { emptyDraft, fromSchedule, type Draft } from "@/features/reports/pages/types";
 import { EMAIL_RE, TAB_ORDER, nextSendLabel } from "@/features/reports/pages/utils";
@@ -94,6 +95,7 @@ export function useReportsPage() {
   };
 
   const toggleEnabled = async (s: ReportSchedule) => {
+    trace(user?.id, s.enabled ? "pause_report" : "resume_report", "reports", "report_schedule");
     try {
       await persist({ ...fromSchedule(s), enabled: !s.enabled }, s.id);
       notify.success(s.enabled ? t("reports.pausedToast") : t("reports.resumedToast"));
@@ -103,6 +105,7 @@ export function useReportsPage() {
   };
 
   const runTest = async (s: ReportSchedule) => {
+    trace(user?.id, "test_report", "reports", "email");
     setTestingId(s.id);
     try {
       const result = await sendTest({ workspaceId, id: s.id }).unwrap();
@@ -123,6 +126,7 @@ export function useReportsPage() {
       notify.error(t("reports.noWhatsAppNumbers"));
       return;
     }
+    trace(user?.id, "test_report_whatsapp", "reports", "whatsapp");
     setTestingId(s.id);
     try {
       await sendWaTest({ workspaceId, id: s.id, phone: first.phone }).unwrap();
@@ -142,6 +146,7 @@ export function useReportsPage() {
       title: t("reports.deleteTitle"),
       body: t("reports.deleteBody", { name: s.name }),
       onConfirm: async () => {
+        trace(user?.id, "delete_report", "reports", "report_schedule");
         try {
           await remove({ workspaceId, id: s.id }).unwrap();
           notify.success(t("reports.deletedToast"));
@@ -173,6 +178,7 @@ export function useReportDialog(opts: {
   persist: (d: Draft, id: string | null) => Promise<void>;
 }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [opened, setOpened] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
@@ -246,6 +252,7 @@ export function useReportDialog(opts: {
       return;
     }
 
+    trace(user?.id, editingId ? "update_report" : "create_report", "report_dialog", "report_schedule");
     try {
       await opts.persist(draft, editingId);
       notify.success(editingId ? t("reports.updatedToast") : t("reports.scheduledToast"));

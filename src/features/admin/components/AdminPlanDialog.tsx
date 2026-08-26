@@ -5,6 +5,8 @@ import { CreditCard, Plus } from "lucide-react";
 import { useGetAdminUserBillingQuery, useGrantAdminSiteSlotMutation } from "@/app/store";
 import { shortDate } from "@/shared/lib";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { trace } from "@/shared/lib/analytics";
+import { useAuth } from "@/features/auth/context";
 import type { AdminUser } from "@/shared/types";
 
 /**
@@ -15,10 +17,12 @@ import type { AdminUser } from "@/shared/types";
  * would have to pick one and misreport the rest.
  */
 export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onClose: () => void }) {
+  const { user: admin } = useAuth();
   const { data, isLoading } = useGetAdminUserBillingQuery(user?.id ?? "", { skip: !user });
   const [grantSiteSlot, { isLoading: isGranting }] = useGrantAdminSiteSlotMutation();
 
   const grantSlot = async (workspaceId: string) => {
+    trace(admin?.id, "grant_site_slot", "admin_plan_dialog", workspaceId);
     try {
       await grantSiteSlot(workspaceId).unwrap();
       notify.success("One extra site slot granted.");

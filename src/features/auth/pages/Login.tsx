@@ -8,6 +8,7 @@ import {
 } from "@mantine/core";
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
+import { trace } from "@/shared/lib/analytics";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
@@ -37,6 +38,7 @@ export default function Login() {
     setError(null);
     try {
       await startDemo();
+      trace(undefined, "demo_started", "login", "app");
       // No toast here: the app boots straight into a loading overlay, so a
       // notification would land on top of it and read as an error. The sidebar
       // carries a persistent "Demo mode" card, which is the better place to say
