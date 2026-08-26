@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ScrollArea } from "@mantine/core";
-import type { JourneyEvent } from "@/shared/types";
+import type { JourneyStep } from "@/features/journey/lib/deriveJourney";
 
 const COL_W = 190;
 const HEAD_H = 44;
@@ -9,7 +9,7 @@ const PAD_X = 24;
 const PAD_TOP = 16;
 
 /** A step's screen names, with the empty string standing in as "direct". */
-function endpoints(e: JourneyEvent): { from: string; to: string } {
+function endpoints(e: JourneyStep): { from: string; to: string } {
   return { from: e.src || "(direct)", to: e.dest || e.action };
 }
 
@@ -27,26 +27,26 @@ function endpoints(e: JourneyEvent): { from: string; to: string } {
  * arithmetic and stays theme-aware through CSS variables.
  */
 export function JourneySequenceView({
-  events,
+  steps,
   selectedIndex,
   onSelect,
 }: {
-  events: JourneyEvent[];
+  steps: JourneyStep[];
   selectedIndex: number | null;
   onSelect: (i: number) => void;
 }) {
   const { columns, width, height } = useMemo(() => {
     const cols: string[] = [];
-    for (const e of events) {
+    for (const e of steps) {
       const { from, to } = endpoints(e);
       for (const name of [from, to]) if (!cols.includes(name)) cols.push(name);
     }
     return {
       columns: cols,
       width: Math.max(cols.length * COL_W + PAD_X * 2, 600),
-      height: PAD_TOP + HEAD_H + events.length * ROW_H + 32,
+      height: PAD_TOP + HEAD_H + steps.length * ROW_H + 32,
     };
-  }, [events]);
+  }, [steps]);
 
   const colX = (name: string) => PAD_X + columns.indexOf(name) * COL_W + COL_W / 2;
 
@@ -102,12 +102,12 @@ export function JourneySequenceView({
           </marker>
         </defs>
 
-        {events.map((e, i) => {
+        {steps.map((e, i) => {
           const { from, to } = endpoints(e);
           const y = PAD_TOP + HEAD_H + i * ROW_H + ROW_H / 2;
           const x1 = colX(from);
           const x2 = colX(to);
-          const selected = selectedIndex === i;
+          const selected = selectedIndex === e.index;
           // A step that starts and ends on the same screen has no distance to
           // cross, so it gets a short stub rather than a zero-length arrow.
           const isSelf = from === to;
@@ -116,7 +116,7 @@ export function JourneySequenceView({
           return (
             <g
               key={i}
-              onClick={() => onSelect(i)}
+              onClick={() => onSelect(e.index)}
               style={{ cursor: "pointer" }}
               opacity={selectedIndex === null || selected ? 1 : 0.45}
             >
@@ -148,7 +148,7 @@ export function JourneySequenceView({
                 fontSize={10}
                 fontWeight={600}
               >
-                {e.action}
+                {e.repeats > 1 ? `${e.action} ×${e.repeats}` : e.action}
               </text>
 
               {/* Step number, pinned to the left margin so the sequence reads

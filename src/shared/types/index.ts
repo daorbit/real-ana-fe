@@ -1142,6 +1142,8 @@ export type JourneyEvent = {
   action: string;
   src: string;
   dest: string;
+  /** Groups steps into visits, so a journey reads as sessions not one list. */
+  sessionId?: string;
   ts: string;
 };
 
