@@ -3,7 +3,7 @@ import {
   Text, Group, Button, Card, Table, Badge, Modal, TextInput, NumberInput,
   Stack, Switch, Tabs, ActionIcon, Center, Loader, Select, Tooltip,
 } from "@mantine/core";
-import { Plus, Pencil, Trash2, Search, Globe2, Tag, Eye, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Globe2, Tag, Eye, RefreshCw, CalendarClock, ClipboardList } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -271,13 +271,18 @@ function PlansTab() {
 
 
 /**
- * A lookup rather than a ternary: with three pack types, an `audit ? … : …`
- * would silently give Orbit packs the crawl icon.
+ * A lookup rather than a ternary: an `audit ? … : …` would silently give every
+ * other pack type the crawl icon.
+ *
+ * Exhaustive over `AddonType` on purpose — a new pack type should fail to
+ * compile here rather than ship without a mark of its own.
  */
 const ADDON_TYPE_ICON: Record<AddonType, ReactNode> = {
   audit: <Search size={11} />,
   crawl: <Globe2 size={11} />,
   orbit: <OrbitMark size={11} />,
+  "post-slots": <CalendarClock size={11} />,
+  "form-submissions": <ClipboardList size={11} />,
 };
 
 const emptyAddon: Partial<AddonPack> = {
@@ -404,6 +409,8 @@ function AddonsTab() {
                 { value: "audit", label: "SEO audits" },
                 { value: "crawl", label: "Site crawls" },
                 { value: "orbit", label: "Orbit AI questions" },
+                { value: "post-slots", label: "Scheduled post slots" },
+                { value: "form-submissions", label: "Form responses" },
               ]}
             />
             <NumberInput label="Quantity" value={draft.quantity} onChange={(v) => setDraft({ ...draft, quantity: Number(v) || 1 })} min={1} />

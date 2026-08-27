@@ -11,7 +11,7 @@ import confetti from "canvas-confetti";
 import {
   Check, Search, Globe2, Info, CreditCard, ShoppingCart, Tag, X,
   Layers, Clock, PartyPopper, RefreshCw, Download, Receipt,
-  Plus, Minus, Activity,
+  Plus, Minus, Activity, ClipboardList, CalendarClock,
 } from "lucide-react";
 import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "@/features/billing/components/PlanIcons";
 import { AppShell } from "@/app/AppShell";
@@ -53,10 +53,32 @@ const CREDIT_TYPE_KEY: Record<string, string> = {
   audit: "billing.typeAudit",
   crawl: "billing.typeCrawl",
   orbit: "billing.typeOrbit",
+  "post-slots": "billing.typePostSlot",
+  "form-submissions": "billing.typeFormResponse",
 };
 
 function creditType(t: TFunction, type: string, count: number): string {
   return t(CREDIT_TYPE_KEY[type] ?? "billing.typeCrawl", { count });
+}
+
+/**
+ * The mark on a pack's card.
+ *
+ * A lookup rather than the `audit ? … : …` this replaced: a two-branch ternary
+ * drew a globe on every pack that was not an audit, so Orbit questions and post
+ * slots were both being sold under the crawl icon.
+ */
+const PACK_ICON: Record<string, React.ComponentType<{ size?: number }>> = {
+  audit: Search,
+  crawl: Globe2,
+  orbit: OrbitMark,
+  "post-slots": CalendarClock,
+  "form-submissions": ClipboardList,
+};
+
+function PackIcon({ type, size }: { type: string; size?: number }) {
+  const Icon = PACK_ICON[type] ?? Globe2;
+  return <Icon size={size} />;
 }
 
 export default function Billing() {
@@ -561,6 +583,14 @@ export default function Billing() {
                     addonCredits={usage.orbit.addonCredits}
                   />
                 )}
+                {usage.forms && (
+                  <CreditBalance
+                    icon={ClipboardList}
+                    label={t("billing.formSubmissionCredits")}
+                    planLeft={Math.max(0, usage.forms.submissionQuota - usage.forms.submissionsUsed)}
+                    addonCredits={usage.forms.addonCredits}
+                  />
+                )}
               </SimpleGrid>
             )}
 
@@ -578,7 +608,7 @@ export default function Billing() {
                       </Text>
                     </div>
                     <ThemeIcon size={38} radius="md" variant="light" color="emerald">
-                      {pack.type === "audit" ? <Search size={17} /> : <Globe2 size={17} />}
+                      <PackIcon type={pack.type} size={17} />
                     </ThemeIcon>
                   </Group>
                   <Divider my="md" />
@@ -1066,7 +1096,7 @@ function PlanCheckoutModal({
                         <Stack gap="sm">
                           <Group gap={10} wrap="nowrap">
                             <ThemeIcon size={34} radius="md" variant="light" color="emerald">
-                              {pack.type === "audit" ? <Search size={16} /> : <Globe2 size={16} />}
+                              <PackIcon type={pack.type} size={16} />
                             </ThemeIcon>
                             <div style={{ minWidth: 0, flex: 1 }}>
                               <Text size="sm" fw={650} truncate>{pack.name}</Text>
@@ -1291,7 +1321,7 @@ function AddonCheckoutModal({
         <Group justify="space-between" wrap="nowrap">
           <Group gap={10} wrap="nowrap">
             <ThemeIcon size={38} radius="md" variant="light" color="emerald">
-              {pack.type === "audit" ? <Search size={17} /> : <Globe2 size={17} />}
+              <PackIcon type={pack.type} size={17} />
             </ThemeIcon>
             <div>
               <Text fw={650}>{pack.name}</Text>
@@ -1612,7 +1642,10 @@ function UsageSummary({
       {/* Workspaces are no longer an allowance to spend — an account may have as
           many as it pays for — so the panel reports this workspace's own audits,
           crawls, sites, and the Orbit questions its plan includes. */}
-      <SimpleGrid cols={{ base: 1, sm: 2, md: usage.orbit ? 5 : 4 }} spacing={0}>
+      <SimpleGrid
+        cols={{ base: 1, sm: 2, md: 4 + (usage.orbit ? 1 : 0) + (usage.forms ? 1 : 0) }}
+        spacing={0}
+      >
         {/* First: it is the meter that decides whether tracking keeps working,
             where the rest cap features the customer opts into. */}
         <UsageCell icon={Activity} label={t("billing.usageEvents")} used={usage.events.used} quota={usage.events.planQuota} />
@@ -1621,6 +1654,18 @@ function UsageSummary({
         <UsageCell icon={Layers} label={t("billing.usageSites")} used={usage.sites.used} quota={usage.sites.quota} />
         {usage.orbit && (
           <UsageCell icon={OrbitMark} label={t("billing.usageOrbit")} used={usage.orbit.used} quota={usage.orbit.planQuota} credits={usage.orbit.addonCredits} />
+        )}
+        {/* Responses rather than forms: this is the meter that runs out and
+            stops a form collecting, where the form cap is a number the builder
+            reports when it refuses. */}
+        {usage.forms && (
+          <UsageCell
+            icon={ClipboardList}
+            label={t("billing.usageFormResponses")}
+            used={usage.forms.submissionsUsed}
+            quota={usage.forms.submissionQuota}
+            credits={usage.forms.addonCredits}
+          />
         )}
       </SimpleGrid>
     </Card>

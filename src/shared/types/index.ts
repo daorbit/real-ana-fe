@@ -493,7 +493,8 @@ export type ReportScheduleInput = {
 
 export type BillingCycle = "monthly" | "yearly";
 
-export type AddonType = "audit" | "crawl" | "orbit";
+/** Mirrors `ADDON_TYPES` on the server. A type missing here is a pack the UI cannot render. */
+export type AddonType = "audit" | "crawl" | "orbit" | "post-slots" | "form-submissions";
 
 export type AddonPack = {
   _id: string;
@@ -552,6 +553,25 @@ export type QuotaSummary = {
    * because a subscription row written before this existed reports no figures.
    */
   scheduledPosts?: { quota: number; used: number; repeatingAllowed: boolean };
+  /**
+   * Lead capture allowances. `quota` caps how many forms may exist; the
+   * submission figures are the per-cycle meter for responses received.
+   *
+   * How many forms *do* exist is absent on purpose: the forms service owns
+   * those rows, and asking it on every billing page load would make this panel
+   * depend on another service being up.
+   *
+   * Optional for the same reason as `scheduledPosts` — a subscription row
+   * written before this existed reports no figures.
+   */
+  forms?: {
+    quota: number;
+    submissionQuota: number;
+    submissionsUsed: number;
+    addonCredits: number;
+    notificationEmails: boolean;
+    fileUploads: boolean;
+  };
   maxSitesPerWorkspace: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
