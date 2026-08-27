@@ -2,11 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import { Center, Text, useComputedColorScheme } from "@mantine/core";
 import { AppShell } from "@/app/AppShell";
 import { useWorkspace } from "@/features/workspace/context";
+import { useAuth } from "@/features/auth/context";
 import { leadFormsUrl } from "../themeParams";
 import "./LeadCapture.css";
 
+/**
+ * The forms app's own read-only workspace: sample forms, an editor to explore,
+ * and no way to save. A demo session has no real workspace behind it, so this
+ * is what it gets instead of one.
+ */
+const DEMO_FORMS_WORKSPACE = "default";
+
 export default function LeadCapture() {
   const { active } = useWorkspace();
+  const { isDemo } = useAuth();
   const [themeVersion, setThemeVersion] = useState(0);
   const colorScheme = useComputedColorScheme("light");
   useEffect(() => {
@@ -26,11 +35,14 @@ export default function LeadCapture() {
   // doing that on every render would throw away whatever was being edited.
   const src = useMemo(
     () => {
-      if (!active) return null;
-      const url = leadFormsUrl(`/${active._id}/forms`, colorScheme);
+      // A demo session's workspace id is a fixture, not a real workspace the
+      // forms app knows — it goes to the sample workspace regardless.
+      const workspaceId = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
+      if (!workspaceId) return null;
+      const url = leadFormsUrl(`/${workspaceId}/forms`, colorScheme);
       return `${url}&themeRevision=${themeVersion}`;
     },
-    [active, colorScheme, themeVersion],
+    [active, isDemo, colorScheme, themeVersion],
   );
 
   if (!src) {
