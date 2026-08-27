@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card, Text, Title, Group, Table, Badge, Stack, ActionIcon, ThemeIcon, Tooltip,
 } from "@mantine/core";
@@ -14,7 +15,6 @@ import type { Invoice } from "@/shared/types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 export function Receipts({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();

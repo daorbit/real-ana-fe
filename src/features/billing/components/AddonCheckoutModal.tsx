@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Modal, Text, Group, Button, Stack, Divider, Box, ThemeIcon,
+  Modal, Text, Group, Button, Stack, Divider, ThemeIcon,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Tag } from "lucide-react";
 import { PackIcon, creditType } from "../lib/credits";
 import { MIN_CHARGE } from "../lib/constants";
 import { PackStepper } from "./PackStepper";
