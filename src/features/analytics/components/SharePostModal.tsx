@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
+import { useFitScale } from "@/hooks/useFitScale";
+import { DeviceFrame, frameSize, type DeviceId } from "@/features/social/components/DeviceFrame";
 import { useAuth } from "@/features/auth/context";
 import {
   useWriteShareCaptionMutation,
@@ -77,6 +79,14 @@ export function SharePostModal({
   const [angle, setAngle] = useState("");
 
   const active = PLATFORMS.find((p) => p.id === platform) ?? PLATFORMS[0];
+
+  const deviceId: DeviceId = device === "mobile" ? "iphone" : "macbook";
+  const frame = frameSize(deviceId);
+  const { ref: stageRef, scale, measured } = useFitScale({
+    contentWidth: frame.width,
+    contentHeight: frame.height,
+    padding: { x: 24, y: 24 },
+  });
 
   const defaultCaption = useMemo(
     () => t("sharePost.defaultCaption", { workspace, url }),
@@ -599,13 +609,14 @@ export function SharePostModal({
             </Group>
           </Group>
 
-          <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
-            <Box w="100%">
-              {/* Nothing is being composed on the link tab, so the feed mock
-                  would be previewing a post that will never exist. The card
-                  itself is still what a scraper renders for the link, which is
-                  the honest thing to show instead. */}
-              {platform === "link" ? (
+          {/* Nothing is being composed on the link tab, so the feed mock
+              would be previewing a post that will never exist. The card
+              itself is still what a scraper renders for the link, which is
+              the honest thing to show instead — no device chassis, since it
+              is not a picture of any app. */}
+          {platform === "link" ? (
+            <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
+              <Box w="100%">
                 <Box
                   style={{
                     borderRadius: "var(--mantine-radius-md)",
@@ -615,18 +626,24 @@ export function SharePostModal({
                 >
                   <img src={image} alt="" style={{ display: "block", width: "100%" }} />
                 </Box>
-              ) : (
-              <FeedPreview
-                workspace={workspace}
-                caption={caption}
-                image={image}
-                url={url}
-                platform={active}
-                device={device}
-              />
-              )}
+              </Box>
             </Box>
-          </Box>
+          ) : (
+            <Box
+              ref={stageRef}
+              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 0 }}
+            >
+              <DeviceFrame device={deviceId} scale={scale} hidden={!measured}>
+                <FeedPreview
+                  workspace={workspace}
+                  caption={caption}
+                  image={image}
+                  platform={active}
+                  device={device}
+                />
+              </DeviceFrame>
+            </Box>
+          )}
         </Box>
       </Group>
     </Modal>
