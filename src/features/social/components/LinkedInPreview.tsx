@@ -128,36 +128,7 @@ export function LinkedInPreview({
   );
 
   return (
-    <Box
-      style={{
-        // A window, not a wall: the mock keeps a browser's proportions and sits
-        // centred in the pane rather than stretching to fill it.
-        width: "100%",
-        maxWidth: mobile ? 400 : 820,
-        margin: "0 auto",
-        borderRadius: 12,
-        overflow: "hidden",
-        // The ring keeps the rounded corners from fringing against the pane —
-        // without it the light card edge anti-aliases to a pale hairline that
-        // reads as a stray white border on a dark background.
-        border: "1px solid rgba(0,0,0,0.35)",
-        background: MOCK.page,
-        boxShadow: "0 30px 70px rgba(0,0,0,0.45)",
-      }}
-    >
-      {/* Browser chrome: traffic lights and the address pill. */}
-      <Group gap={6} px={12} py={10} wrap="nowrap" style={{ background: "#2b2d31" }}>
-        {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
-          <Box key={c} w={11} h={11} style={{ borderRadius: "50%", background: c }} />
-        ))}
-        <Box style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <Box style={{ width: "58%", borderRadius: 6, background: "#404349", padding: "3px 12px" }}>
-            <Text size="10px" c="#c9ccd1" ta="center" truncate>linkedin.com/feed</Text>
-          </Box>
-        </Box>
-        <Box w={33} />
-      </Group>
-
+    <Box style={{ width: "100%", height: "100%", background: MOCK.page }}>
       {/* LinkedIn's own chrome: the mark, a search pill, nav placeholders. */}
       <Group px={12} py={7} gap={10} wrap="nowrap" style={{ background: MOCK.card, borderBottom: `1px solid ${MOCK.line}` }}>
         <Box

@@ -25,19 +25,11 @@ export function StoryPreview({
   return (
     <Box
       style={{
-        // Sized from the pane's height rather than its width: a story is tall,
-        // and a width-driven box either overflows a short pane or leaves most
-        // of a tall one empty. The width follows from the 9:16 ratio.
-        height: "min(72vh, 620px)",
-        maxWidth: "100%",
-        aspectRatio: "9 / 16",
-        margin: "0 auto",
+        width: "100%",
+        height: "100%",
         position: "relative",
-        borderRadius: 22,
         overflow: "hidden",
         background: "#000",
-        border: "1px solid rgba(255,255,255,0.09)",
-        boxShadow: "0 30px 70px rgba(0,0,0,0.45)",
       }}
     >
       {/* A blurred copy of the image fills the frame behind the real one, which
