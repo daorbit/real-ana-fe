@@ -5,16 +5,16 @@ import type { LastUser } from "@/features/auth/lastUser";
 /**
  * "Continue as ..." for whoever signed in last on this browser.
  *
- * Shown above the email form when a remembered user exists and nothing has been
- * typed yet. It carries no session — the button fills in the address and drops
- * the cursor in the password field, and a social account gets a line saying
- * which button to use. "Use another account" clears the memory outright, so a
- * shared machine has an obvious exit.
+ * Floated in the corner of the login screen when a remembered user exists and
+ * nothing has been typed yet. It carries no session — the button fills the
+ * email field and moves the cursor to the password box; a social account also
+ * gets a one-line reminder of which provider it was. "Use another account"
+ * clears the memory outright, so a shared machine has an obvious exit.
  */
-const METHOD_HINT: Record<LastUser["method"], string> = {
+const METHOD_LABEL: Record<LastUser["method"], string> = {
   password: "",
-  google: "You last signed in with Google — use the Google button above.",
-  linkedin: "You last signed in with LinkedIn — use the LinkedIn button above.",
+  google: "Last signed in with Google",
+  linkedin: "Last signed in with LinkedIn",
 };
 
 export function LastUserCard({
@@ -29,11 +29,12 @@ export function LastUserCard({
 }) {
   const initials =
     user.name.trim().slice(0, 2).toUpperCase() || user.email.slice(0, 2).toUpperCase();
-  const hint = METHOD_HINT[user.method];
+  const methodLabel = METHOD_LABEL[user.method];
+  const firstName = user.name.split(" ")[0] || user.name;
 
   return (
     <Box className="last-user-pop surface-card" p="md">
-      <Group gap="sm" wrap="nowrap" mb={hint ? 8 : "sm"}>
+      <Group gap="sm" wrap="nowrap" mb="sm">
         <Avatar src={user.avatarUrl || null} radius="xl" size={36} color="violet">
           {initials}
         </Avatar>
@@ -47,19 +48,19 @@ export function LastUserCard({
         </Stack>
       </Group>
 
-      {hint ? (
-        <Text size="xs" c="dimmed" mb="xs">
-          {hint}
+      <Button
+        fullWidth
+        size="sm"
+        leftSection={<ArrowRight size={14} />}
+        onClick={onContinue}
+      >
+        Continue as {firstName}
+      </Button>
+
+      {methodLabel && (
+        <Text size="xs" c="dimmed" ta="center" mt={6}>
+          {methodLabel}
         </Text>
-      ) : (
-        <Button
-          fullWidth
-          size="sm"
-          leftSection={<ArrowRight size={14} />}
-          onClick={onContinue}
-        >
-          Continue as {user.name.split(" ")[0] || user.name}
-        </Button>
       )}
 
       <Anchor
