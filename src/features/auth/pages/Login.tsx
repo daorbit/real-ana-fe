@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -16,6 +16,8 @@ import { turnstileConfigured } from "@/features/auth/components/TurnstileWidget"
 import { VerifyDialog } from "@/features/auth/components/VerifyDialog";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { consumeReturnPath } from "@/shared/lib/session";
+import { getLastUser, forgetLastUser } from "@/features/auth/lastUser";
+import { LastUserCard } from "@/features/auth/components/LastUserCard";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
@@ -33,6 +35,23 @@ export default function Login() {
   // state: it goes straight from the widget's callback into the login call,
   // and the widget unmounts with the modal, so each attempt gets a fresh one.
   const [verifying, setVerifying] = useState(false);
+
+  // Whoever signed in last on this browser, offered as a one-tap way back in.
+  // Hidden once the user starts typing an address, or clears it themselves.
+  const [lastUser, setLastUser] = useState(() => getLastUser());
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const continueAsLastUser = () => {
+    if (!lastUser) return;
+    setEmail(lastUser.email);
+    setTouched((t) => ({ ...t, email: true }));
+    passwordRef.current?.focus();
+  };
+
+  const forgetUser = () => {
+    forgetLastUser();
+    setLastUser(null);
+  };
 
   // After any successful sign-in, prefer the page a session-expiry bounced the
   // user off; fall back to the dashboard.
@@ -126,6 +145,18 @@ export default function Login() {
 
   return (
     <div className="auth-split">
+      {/* A quick way back in for the last account on this browser, floated in
+          the corner rather than wedged into the form — it is an offer, not a
+          step. Gone the moment the reader starts typing an address. */}
+      {lastUser && !email && (
+        <div className="last-user-slot">
+          <LastUserCard
+            user={lastUser}
+            onContinue={continueAsLastUser}
+            onForget={forgetUser}
+          />
+        </div>
+      )}
       <AuthBrand onDemo={enterDemo} demoBusy={demoBusy} />
       <div className="auth-panel">
         <motion.form
@@ -149,7 +180,6 @@ export default function Login() {
                 {error}
               </Alert>
             )}
-
 
             <Group grow align="stretch" gap="sm" wrap="nowrap">
               <GoogleSignInButton
@@ -187,6 +217,7 @@ export default function Login() {
 
             <div>
               <PasswordInput
+                ref={passwordRef}
                 label="Password"
                 placeholder="••••••••"
                 size="md"

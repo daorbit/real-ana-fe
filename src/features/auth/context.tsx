@@ -8,6 +8,7 @@ import {
 import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
 import { trace } from "@/shared/lib/analytics";
+import { rememberUser } from "@/features/auth/lastUser";
 import type { ProfileUpdate, User } from "@/shared/types";
 
 type AuthState = {
@@ -100,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Start from a clean cache so nothing from a previous session leaks through.
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
+    rememberUser(r.user, "password");
     trace(r.user.id, "login", "login", "app");
   };
 
@@ -118,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("rta_active_ws");
     }
     setUser(r.user);
+    rememberUser(r.user, "google");
     trace(r.user.id, r.created ? "signup" : "login", "google_signin", "app");
     return { created: Boolean(r.created) };
   };
@@ -136,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(rtkApi.util.resetApiState());
     const me = await api.get<AuthResp["user"]>("/api/auth/me");
     setUser(me);
+    rememberUser(me, "linkedin");
     trace(me.id, "login", "linkedin_signin", "app");
   };
 
@@ -162,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("quantalog_onboarding_skipped");
     localStorage.removeItem("quantalog_onboarding_dismissed");
     setUser(r.user);
+    rememberUser(r.user, "password");
     trace(r.user.id, "signup", "signup_verify", "app");
   };
 

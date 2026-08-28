@@ -1983,11 +1983,43 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    could not be reached until the bar collapsed. `100dvh` tracks the height
    that is actually visible; the `vh` line stays first as the fallback. */
 .auth-split {
+  position: relative;
   display: grid;
   grid-template-columns: 1.05fr 1fr;
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg);
+}
+
+/* The "continue as last user" card, dropped into the top-right corner of the
+   auth screen. Fixed so it stays put on a tall form, and it slides in once
+   rather than every render. */
+.last-user-slot {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 30;
+  width: 300px;
+  max-width: calc(100vw - 40px);
+  animation: last-user-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes last-user-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.last-user-pop {
+  box-shadow: var(--shadow);
+}
+@media (max-width: 48em) {
+  .last-user-slot {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .last-user-slot { animation: none; }
 }
 /* The panel was flat, which left the form floating in dead space with nothing
    tying it to the brand side. A faint accent wash bleeding in from the seam
