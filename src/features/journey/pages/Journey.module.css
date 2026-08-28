@@ -1,29 +1,41 @@
-/* Matches the Lead capture entries table, so the two record lists in the
-   product read as one component rather than two takes on a table. */
+/* Row cards in the same shape as the Lead capture forms list, so the two
+   record lists in the product read as one component rather than two takes on
+   a list. */
 
-.table {
+.row {
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 8px;
+  padding: 14px 20px;
   background-color: var(--mantine-color-body);
-  width: 100%;
-  table-layout: fixed;
+  cursor: pointer;
+  transition: box-shadow 120ms ease;
 }
 
-.thead {
-  background-color: var(--mantine-color-default);
+/* Shadow only on hover — the border stays put. A border that changes colour
+   under the cursor reads as the row's state changing, not as a pointer. */
+.row:hover {
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
 }
 
-.th {
+/* Keep the id from pushing the row wider than its container — it truncates
+   instead, and the full value is on the element's title and the copy button. */
+.id {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* A row is as tall as its tallest cell; without this the short ones centre
-   against it and the row stops reading as one line. */
-.table th,
-.table td {
-  vertical-align: top;
+/* The three counters sit on one baseline at a fixed width so they line up
+   down the column, the way a table's numbers would, without a table. */
+.stat {
+  min-width: 96px;
+  text-align: right;
 }
 
-/* No hover tint: the row is already a link, the cursor says so, and a
-   full-width colour wash on every pass of the mouse is noise. */
-.row {
-  cursor: pointer;
+@media (max-width: 720px) {
+  .stat {
+    min-width: 0;
+    text-align: left;
+  }
 }

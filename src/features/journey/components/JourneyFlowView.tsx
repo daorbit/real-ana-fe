@@ -165,7 +165,9 @@ export function JourneyFlowView({ steps: events }: { steps: JourneyStep[] }) {
   useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
 
   return (
-    <div style={{ height: "calc(100vh - 300px)", minHeight: 520, width: "100%", position: "relative" }}>
+    // Fills whatever the card gives it — the card owns the page's remaining
+    // height, so a second viewport calculation here would disagree with it.
+    <div style={{ height: "100%", minHeight: 360, width: "100%", position: "relative" }}>
       <ReactFlow
         nodes={nodes}
         nodeTypes={nodeTypes}

@@ -12,6 +12,7 @@ import { useGetJourneyTimelineQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import classes from "./JourneyTimeline.module.css";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { dateTime } from "@/shared/lib";
@@ -163,30 +164,38 @@ export default function JourneyTimeline() {
               description="Widen the date range, or clear the action filter."
             />
           ) : (
-            <Card withBorder radius="lg" padding={view === "flow" ? 0 : "lg"}>
-              {view === "flow" && <JourneyFlowView steps={steps} />}
-              {view === "sequence" && (
-                <JourneySequenceView
-                  steps={steps}
-                  selectedIndex={selected}
-                  onSelect={setSelected}
-                />
-              )}
-              {view === "timeline" && (
-                <JourneyTimelineView
-                  steps={steps}
-                  selectedIndex={selected}
-                  onSelect={setSelected}
-                />
-              )}
-              {view === "sankey" && <JourneySankeyView steps={steps} />}
-              {view === "actions" && <JourneyActionsView steps={steps} />}
-              {view === "activity" && <JourneyHeatmapView steps={steps} />}
-              {view === "json" && (
-                <Code block style={{ maxHeight: "calc(100vh - 320px)", minHeight: 500, overflow: "auto" }}>
-                  {JSON.stringify(steps, null, 2)}
-                </Code>
-              )}
+            <Card
+              withBorder
+              radius="lg"
+              padding={view === "flow" ? 0 : "lg"}
+              className={classes.viewCard}
+            >
+              <div
+                className={`${classes.viewScroll} ${view === "flow" ? classes.viewScrollFlush : ""}`}
+              >
+                {view === "flow" && <JourneyFlowView steps={steps} />}
+                {view === "sequence" && (
+                  <JourneySequenceView
+                    steps={steps}
+                    selectedIndex={selected}
+                    onSelect={setSelected}
+                  />
+                )}
+                {view === "timeline" && (
+                  <JourneyTimelineView
+                    steps={steps}
+                    selectedIndex={selected}
+                    onSelect={setSelected}
+                  />
+                )}
+                {view === "sankey" && <JourneySankeyView steps={steps} />}
+                {view === "actions" && <JourneyActionsView steps={steps} />}
+                {view === "activity" && <JourneyHeatmapView steps={steps} />}
+                {/* The card is already the scroller, so the block just fills it. */}
+                {view === "json" && (
+                  <Code block>{JSON.stringify(steps, null, 2)}</Code>
+                )}
+              </div>
             </Card>
           )}
 

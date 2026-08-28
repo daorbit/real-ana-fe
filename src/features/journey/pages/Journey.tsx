@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Text, Group, TextInput, Badge, Stack, Pagination,
-  Skeleton, Box, ActionIcon, Tooltip, Table, SegmentedControl, Select, CopyButton,
+  Text, Group, TextInput, Badge, Stack, Pagination, ThemeIcon,
+  Skeleton, Box, ActionIcon, Tooltip, SegmentedControl, Select, CopyButton,
 } from "@mantine/core";
-import { Search, Users, ArrowRight, RotateCw, Copy, Check } from "lucide-react";
+import { Search, Users, ArrowRight, RotateCw, Copy, Check, Fingerprint } from "lucide-react";
 import { useGetJourneyUsersQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -141,9 +141,9 @@ export default function Journey() {
       </Group>
 
       {isFetching ? (
-        <Stack gap="xs">
+        <Stack gap="sm">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} height={44} radius="sm" />
+            <Skeleton key={i} height={68} radius="sm" />
           ))}
         </Stack>
       ) : users.length === 0 ? (
@@ -165,77 +165,72 @@ export default function Journey() {
           }
         />
       ) : (
-        <Table.ScrollContainer minWidth={720}>
-          <Table withTableBorder verticalSpacing="sm" horizontalSpacing="md" className={classes.table}>
-              <Table.Thead className={classes.thead}>
-                <Table.Tr>
-                  <Table.Th className={classes.th}>User</Table.Th>
-                  <Table.Th className={classes.th}>Last action</Table.Th>
-                  <Table.Th className={classes.th} w={130}>Last seen</Table.Th>
-                  <Table.Th className={classes.th} w={110} ta="right">Sessions</Table.Th>
-                  <Table.Th className={classes.th} w={110} ta="right">Events</Table.Th>
-                  <Table.Th className={classes.th} w={52} />
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {users.map((u) => (
-                  <Table.Tr
-                    key={u.appUserId}
-                    className={classes.row}
-                    onClick={() => navigate(`/app/journey/${encodeURIComponent(u.appUserId)}`)}
-                  >
-                    <Table.Td>
-                      <Group gap={6} wrap="nowrap">
-                        <Text ff="monospace" size="sm" title={u.appUserId}>
-                          {shortId(u.appUserId)}
-                        </Text>
-                        {/* Copying the id is what someone does next when they
-                            are cross-referencing it against their own database,
-                            and the shortened form cannot be selected by hand. */}
-                        <CopyButton value={u.appUserId}>
-                          {({ copied, copy }) => (
-                            <Tooltip label={copied ? "Copied" : "Copy full id"} withArrow>
-                              <ActionIcon
-                                variant="subtle"
-                                color="gray"
-                                size="sm"
-                                aria-label="Copy user id"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copy();
-                                }}
-                              >
-                                {copied ? <Check size={13} /> : <Copy size={13} />}
-                              </ActionIcon>
-                            </Tooltip>
-                          )}
-                        </CopyButton>
-                      </Group>
-                    </Table.Td>
-                    <Table.Td>
+        <Stack gap="md">
+          {users.map((u) => (
+            <Box
+              key={u.appUserId}
+              className={classes.row}
+              onClick={() => navigate(`/app/journey/${encodeURIComponent(u.appUserId)}`)}
+            >
+              <Group justify="space-between" wrap="wrap" gap="md">
+                <Group gap="sm" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+                  <ThemeIcon variant="light" color="gray" radius="md" size={38}>
+                    <Fingerprint size={19} />
+                  </ThemeIcon>
+                  <Box style={{ minWidth: 0 }}>
+                    <Group gap={4} wrap="nowrap">
+                      <Text fw={500} size="sm" ff="monospace" title={u.appUserId} className={classes.id}>
+                        {shortId(u.appUserId)}
+                      </Text>
+                      {/* Copying the id is what someone does next when they are
+                          cross-referencing it against their own database, and
+                          the shortened form cannot be selected by hand. */}
+                      <CopyButton value={u.appUserId}>
+                        {({ copied, copy }) => (
+                          <Tooltip label={copied ? "Copied" : "Copy full id"} withArrow>
+                            <ActionIcon
+                              variant="subtle"
+                              color="gray"
+                              size="sm"
+                              aria-label="Copy user id"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copy();
+                              }}
+                            >
+                              {copied ? <Check size={13} /> : <Copy size={13} />}
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                      </CopyButton>
+                    </Group>
+                    <Group gap={6} wrap="nowrap">
+                      <Text size="sm" c="dimmed" title={new Date(u.lastSeen).toLocaleString()}>
+                        Last seen {timeAgo(u.lastSeen)}
+                      </Text>
+                      <Text size="sm" c="dimmed">&bull;</Text>
                       <Badge variant="light" color="gray" radius="sm" tt="none">
                         {u.lastAction}
                       </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm" c="dimmed" title={new Date(u.lastSeen).toLocaleString()}>
-                        {timeAgo(u.lastSeen)}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td ta="right">
-                      <Text size="sm" c="dimmed">{u.sessionCount || "—"}</Text>
-                    </Table.Td>
-                    <Table.Td ta="right">
-                      <Text size="sm">{u.eventCount.toLocaleString()}</Text>
-                    </Table.Td>
-                    <Table.Td ta="right">
-                      <ArrowRight size={14} opacity={0.5} />
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
+                    </Group>
+                  </Box>
+                </Group>
+
+                <Group gap={64} wrap="nowrap" style={{ flexShrink: 0 }}>
+                  <Box className={classes.stat}>
+                    <Text size="xs" c="dimmed">Sessions</Text>
+                    <Text size="sm" fw={500}>{u.sessionCount || "—"}</Text>
+                  </Box>
+                  <Box className={classes.stat}>
+                    <Text size="xs" c="dimmed">Events</Text>
+                    <Text size="sm" fw={500}>{u.eventCount.toLocaleString()}</Text>
+                  </Box>
+                  <ArrowRight size={15} opacity={0.5} />
+                </Group>
+              </Group>
+            </Box>
+          ))}
+        </Stack>
       )}
 
       {total > PAGE_SIZE && (

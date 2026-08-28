@@ -1,0 +1,26 @@
+/* The steps scroll inside their own card, not by moving the page.
+   A 500-step journey scrolled the whole route: the user id, the filters and
+   the view switcher all left the screen, so choosing a different view meant
+   scrolling back up to find the control. Pinning the card to the remaining
+   viewport height keeps every control on screen while the list moves. */
+.viewCard {
+  /* Everything above the card — header, filter bar, view switcher, padding —
+     measured once rather than per breakpoint; the card takes what is left. */
+  height: calc(100vh - 320px);
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.viewScroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* A view that draws its own canvas (the flow graph) manages its own space and
+   must not be given a second scrollbar. */
+.viewScrollFlush {
+  overflow: hidden;
+}
