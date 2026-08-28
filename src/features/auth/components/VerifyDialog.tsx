@@ -1,4 +1,4 @@
-import { Box, Modal, Stack, Text } from "@mantine/core";
+import { Box, Divider, Group, Modal, Stack, Text } from "@mantine/core";
 import { ShieldCheck } from "lucide-react";
 import TurnstileWidget from "./TurnstileWidget";
 
@@ -10,9 +10,10 @@ import TurnstileWidget from "./TurnstileWidget";
  * gets out of the way. The shield animates while the check runs, because a
  * dialog that appears and then sits still reads as something that has hung.
  *
- * No close button. Dismissing it would abandon a sign-in already in progress
- * with nothing to show for it — the escape route is the cancel line at the
- * bottom, which says what it does.
+ * It cannot be dismissed by clicking the overlay or pressing Escape, and there
+ * is no close button — a stray click should never abandon a sign-in already in
+ * progress. The only way out is the cancel line at the bottom, which says what
+ * it does.
  */
 export function VerifyDialog({
   opened,
@@ -28,26 +29,52 @@ export function VerifyDialog({
       opened={opened}
       onClose={onCancel}
       withCloseButton={false}
+      closeOnClickOutside={false}
+      closeOnEscape={false}
       radius="lg"
-      size={380}
+      size={400}
       centered
       padding={0}
-      overlayProps={{ backgroundOpacity: 0.6, blur: 4 }}
-      transitionProps={{ transition: "pop", duration: 220 }}
+      overlayProps={{ backgroundOpacity: 0.65, blur: 6 }}
+      transitionProps={{ transition: "pop", duration: 200 }}
     >
-      <Stack gap={0} p={26} align="center">
-        <Box className="verify-shield" mb={16}>
-          <span className="verify-shield__pulse" />
-          <ShieldCheck size={26} />
-        </Box>
+      <Stack gap={0} className="verify-card">
+        <span className="verify-card__sheen" />
 
-        <Text fw={650} size="md" ta="center">Just checking you're human</Text>
-        <Text size="sm" c="dimmed" ta="center" mt={6} lh={1.55} maw={280}>
-          It takes a second, and it keeps everyone's account safer. You'll be
-          signed in automatically.
-        </Text>
+        <Group
+          gap={14}
+          wrap="nowrap"
+          px={26}
+          pt={26}
+          pb={20}
+          align="flex-start"
+          className="verify-rise"
+          style={{ animationDelay: "40ms" }}
+        >
+          <Box className="verify-shield">
+            <span className="verify-shield__pulse" />
+            <span className="verify-shield__pulse verify-shield__pulse--2" />
+            <span className="verify-shield__spin" />
+            <ShieldCheck size={22} strokeWidth={2.25} />
+          </Box>
+          <Stack gap={4}>
+            <Text fw={650} size="sm">Quick security check</Text>
+            <Text size="xs" c="dimmed" lh={1.5}>
+              One tap to confirm you're human. You'll be signed in automatically
+              once it clears.
+            </Text>
+          </Stack>
+        </Group>
 
-        <Box mt={20} style={{ minHeight: 65 }}>
+        <Divider />
+
+        <Box
+          px={26}
+          py={22}
+          className="verify-slot verify-rise"
+          style={{ animationDelay: "120ms" }}
+        >
+          <span className="verify-slot__scan" />
           <TurnstileWidget
             onVerify={onVerify}
             // Expiry and errors both mean there is no usable token. The dialog
@@ -57,17 +84,26 @@ export function VerifyDialog({
           />
         </Box>
 
-        <Text
-          component="button"
-          type="button"
-          onClick={onCancel}
-          size="xs"
-          c="dimmed"
-          mt={18}
-          className="verify-cancel"
+        <Divider />
+
+        <Box
+          px={26}
+          py={16}
+          ta="center"
+          className="verify-rise"
+          style={{ animationDelay: "200ms" }}
         >
-          Cancel and go back
-        </Text>
+          <Text
+            component="button"
+            type="button"
+            onClick={onCancel}
+            size="xs"
+            fw={500}
+            className="verify-cancel"
+          >
+            Cancel and go back
+          </Text>
+        </Box>
       </Stack>
     </Modal>
   );
