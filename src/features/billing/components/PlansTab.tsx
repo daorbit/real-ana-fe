@@ -79,7 +79,7 @@ export function PlansTab({
     </Group>
 
     <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(plans.length, 4) || 1 }} spacing="lg">
-      {plans.map((plan) => {
+      {plans.map((plan, index) => {
         const price = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
         // Free (or any zero-price plan) is assigned directly, not
         // bought — it stays "current" once assigned and never expires,
@@ -87,6 +87,8 @@ export function PlansTab({
         const buyable = price > 0;
         const current = usage?.plan.slug === plan.slug && !expired;
         const featured = plan.slug === featuredSlug && !current;
+        const currentIndex = plans.findIndex((p) => p.slug === usage?.plan.slug);
+        const lower = !expired && currentIndex > -1 && index < currentIndex;
         return (
           <Card
             key={plan.slug}
@@ -168,7 +170,7 @@ export function PlansTab({
               radius="md"
               color="emerald"
               variant={current ? "light" : featured ? "filled" : "outline"}
-              disabled={current || !buyable || isDemo || !selectedWorkspaceId}
+              disabled={current || lower || !buyable || isDemo || !selectedWorkspaceId}
               loading={subscribing === plan.slug}
               leftSection={<CreditCard size={15} />}
               // The recommended plan's button carries that plan's
@@ -192,6 +194,7 @@ export function PlansTab({
             >
               {isDemo ? t("billing.ctaSignUpSubscribe")
                 : current ? t("billing.ctaCurrentPlan")
+                : lower ? t("billing.ctaIncludedInPlan")
                 : !buyable ? t("billing.ctaIncludedFree")
                 : usage?.plan.slug === plan.slug ? t("billing.ctaRenew")
                 : t("billing.ctaSubscribe")}
