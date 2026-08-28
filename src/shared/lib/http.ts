@@ -75,6 +75,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     } catch {
       /* ignore */
     }
+    // A 401 on a call that carried a token is an expired session, not a
+    // sign-in attempt. Route it through the one shared handler. The `/auth`
+    // endpoints are exempt: a wrong password there is a normal 401 the form
+    // shows inline, not a reason to blow the whole session away.
+    if (res.status === 401 && token && !path.includes("/auth/")) {
+      void import("./session").then((m) => m.handleSessionExpired());
+    }
     // Carry the status and payload on the error so callers that need more than
     // a message — a rate limit's retry time, say — can read it without
     // re-parsing a response that has already been consumed.

@@ -15,6 +15,7 @@ import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButto
 import { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { VerifyDialog } from "@/features/auth/components/VerifyDialog";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { consumeReturnPath } from "@/shared/lib/session";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
@@ -33,6 +34,10 @@ export default function Login() {
   // and the widget unmounts with the modal, so each attempt gets a fresh one.
   const [verifying, setVerifying] = useState(false);
 
+  // After any successful sign-in, prefer the page a session-expiry bounced the
+  // user off; fall back to the dashboard.
+  const goAfterLogin = () => nav(consumeReturnPath() ?? "/app");
+
   const enterDemo = async () => {
     setDemoBusy(true);
     setError(null);
@@ -43,7 +48,7 @@ export default function Login() {
       // notification would land on top of it and read as an error. The sidebar
       // carries a persistent "Demo mode" card, which is the better place to say
       // it anyway — it's still there a minute later.
-      nav("/app");
+      goAfterLogin();
     } catch (err) {
       const e = err as ApiError;
       // The demo is capped per address per day. Say when it frees up rather
@@ -94,7 +99,7 @@ export default function Login() {
     try {
       await login(email.trim(), password, token);
       notify.success("Welcome back!", "Logged in");
-      nav("/app");
+      goAfterLogin();
     } catch (err) {
       setError(errMessage(err, "Login failed. Check your email and password."));
       // The token is spent either way — Cloudflare refuses a second use — and
@@ -145,11 +150,7 @@ export default function Login() {
               </Alert>
             )}
 
-            {/* The two providers share a row, above the form: both are one
-                click against two fields and a password, and putting them under
-                the form would make the slower path look like the intended one.
-                `grow` splits the width evenly, which also gives the Google
-                button a measured box to size its invisible GIS overlay to. */}
+
             <Group grow align="stretch" gap="sm" wrap="nowrap">
               <GoogleSignInButton
                 label="Google"
@@ -161,7 +162,7 @@ export default function Login() {
                     created ? "Your account is ready." : "Welcome back!",
                     created ? "Signed up with Google" : "Logged in"
                   );
-                  nav("/app");
+                  goAfterLogin();
                 }}
                 onError={setError}
               />

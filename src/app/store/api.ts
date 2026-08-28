@@ -100,6 +100,14 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 
   const result = await rawBaseQuery(args, apiArg, extra);
 
+  // An expired token surfaces here as a 401 on any authed request. One shared
+  // handler prompts a re-login and remembers the current page — a call site
+  // never has to notice. Auth endpoints are exempt: their 401s are normal
+  // form-level failures.
+  if (result.error?.status === 401 && getToken() && !url.includes("/auth/")) {
+    void import("@/shared/lib/session").then((m) => m.handleSessionExpired());
+  }
+
   // A plan/quota limit hit anywhere in the app — workspace, site, audit,
   // crawl, analytics range, whatever comes next — surfaces the same upgrade
   // dialog automatically. This is the one place every request passes
