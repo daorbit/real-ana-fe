@@ -95,6 +95,29 @@
   border-radius: 6px;
 }
 
+/* ---- Settings · Info tab layout ----------------------------------------
+   Two columns on a wide screen: the profile column carries the identity card
+   and the name/contact fields, the narrower aside holds the date-and-time
+   block, which is shorter and otherwise left a tall empty gutter on the right.
+   Collapses to one column below 60em. */
+.settings-info-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--mantine-spacing-xl);
+  align-items: start;
+}
+@media (min-width: 60em) {
+  .settings-info-grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+  /* The date settings are short — let them ride along as you scroll the
+     taller profile column. */
+  .settings-info-aside {
+    position: sticky;
+    top: var(--mantine-spacing-xl);
+  }
+}
+
 /* ---- Sticky save bar ------------------------------------------------------
    Appears only while a form has unsaved edits, so Save is reachable from
    anywhere in a long form without scrolling back to the header. */
