@@ -3,6 +3,7 @@ import { Badge, Box, Group, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
 import { InstagramConnection } from "@/features/social/components/InstagramConnection";
+import { useCanUseInstagram } from "@/features/auth/context";
 import {
   FACEBOOK_BLUE,
   FacebookMark,
@@ -56,6 +57,7 @@ function ConnectionCard({
 
 export function ConnectionsPanel() {
   const { t } = useTranslation();
+  const canUseInstagram = useCanUseInstagram();
 
   return (
     <>
@@ -86,8 +88,9 @@ export function ConnectionsPanel() {
           tint={INSTAGRAM_PINK}
           name="Instagram"
           hint="Feed posts from the same composer."
+          soon={!canUseInstagram}
         >
-          <InstagramConnection />
+          {canUseInstagram && <InstagramConnection />}
         </ConnectionCard>
 
         <ConnectionCard

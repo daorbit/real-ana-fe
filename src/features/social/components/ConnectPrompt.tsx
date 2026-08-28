@@ -20,12 +20,15 @@ import type { PostAccount } from "@/shared/types";
 export function ConnectPrompt({
   linkedin,
   instagram,
+  showInstagram = true,
   connecting,
   onConnect,
   onConnectInstagram,
 }: {
   linkedin: PostAccount | undefined;
   instagram: PostAccount | undefined;
+  /** Instagram is held back to super_admins while the integration is finished. */
+  showInstagram?: boolean;
   /** True while a connection popup is open, so the button that opened it spins. */
   connecting: boolean;
   onConnect: () => void;
@@ -54,16 +57,18 @@ export function ConnectPrompt({
           onConnect={onConnect}
         />
 
-        <NetworkChoice
-          mark={<InstagramMark size={22} />}
-          tint={INSTAGRAM_PINK}
-          name="Instagram"
-          account={instagram}
-          hint="Publishes to a Business or Creator account."
-          note="Personal Instagram accounts cannot publish through any app. Switch the account type in the Instagram app first."
-          connecting={connecting}
-          onConnect={onConnectInstagram}
-        />
+        {showInstagram && (
+          <NetworkChoice
+            mark={<InstagramMark size={22} />}
+            tint={INSTAGRAM_PINK}
+            name="Instagram"
+            account={instagram}
+            hint="Publishes to a Business or Creator account."
+            note="Personal Instagram accounts cannot publish through any app. Switch the account type in the Instagram app first."
+            connecting={connecting}
+            onConnect={onConnectInstagram}
+          />
+        )}
       </div>
     </Box>
   );

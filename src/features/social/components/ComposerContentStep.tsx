@@ -1,8 +1,9 @@
-import type { RefObject } from "react";
+import { useEffect, type RefObject } from "react";
 import {
   Box, Button, Group, RingProgress, SegmentedControl, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import { PenLine } from "lucide-react";
+import { useCanUseInstagram } from "@/features/auth/context";
 import {
   CaptionEditor, CaptionToolbar, type CaptionEditorHandle,
 } from "@/shared/components/CaptionEditor";
@@ -53,6 +54,39 @@ export function ComposerContentStep({
   /** True when editing: the network is fixed for the life of a post. */
   lockProvider?: boolean;
 }) {
+  const canUseInstagram = useCanUseInstagram();
+
+  useEffect(() => {
+    if (!canUseInstagram && !lockProvider && draft.provider === "instagram") {
+      patch({ provider: "linkedin" });
+    }
+  }, [canUseInstagram, lockProvider, draft.provider, patch]);
+
+  const providerOptions = [
+    {
+      value: "linkedin",
+      label: (
+        <Group gap={6} justify="center" wrap="nowrap">
+          <LinkedInMark size={14} />
+          <span>LinkedIn</span>
+        </Group>
+      ),
+    },
+    ...(canUseInstagram || draft.provider === "instagram"
+      ? [
+          {
+            value: "instagram",
+            label: (
+              <Group gap={6} justify="center" wrap="nowrap">
+                <InstagramMark size={14} />
+                <span>Instagram</span>
+              </Group>
+            ),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
       {/* First, because it decides the rules everything below is written
@@ -66,26 +100,7 @@ export function ComposerContentStep({
           disabled={lockProvider}
           value={draft.provider}
           onChange={(value) => patch({ provider: value as Draft["provider"] })}
-          data={[
-            {
-              value: "linkedin",
-              label: (
-                <Group gap={6} justify="center" wrap="nowrap">
-                  <LinkedInMark size={14} />
-                  <span>LinkedIn</span>
-                </Group>
-              ),
-            },
-            {
-              value: "instagram",
-              label: (
-                <Group gap={6} justify="center" wrap="nowrap">
-                  <InstagramMark size={14} />
-                  <span>Instagram</span>
-                </Group>
-              ),
-            },
-          ]}
+          data={providerOptions}
         />
       </ComposerField>
 

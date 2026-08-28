@@ -17,7 +17,7 @@ import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
 import { useInstagramConnect } from "@/features/social/useInstagramConnect";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
 import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
+import { useAuth, useCanUseInstagram } from "@/features/auth/context";
 import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
 import { ConnectPrompt } from "@/features/social/components/ConnectPrompt";
 import { PostComposer } from "@/features/social/components/PostComposer";
@@ -35,6 +35,7 @@ import type { PostAccount, ScheduledPost, SentPost } from "@/shared/types";
 export default function SocialPosts() {
   const { active } = useWorkspace();
   const { user } = useAuth();
+  const canUseInstagram = useCanUseInstagram();
   const { data, isLoading, isFetching, refetch } = useGetScheduledPostsQuery();
  
   const { data: usage } = useGetWorkspaceUsageQuery(active?._id ?? "", { skip: !active?._id });
@@ -123,7 +124,9 @@ export default function SocialPosts() {
 
   const posts = data?.posts ?? [];
   const linkedin = data?.linkedin;
-  const instagram = data?.instagram;
+  // Instagram is held back to super_admins while the integration is finished:
+  // masked off here so every "is it usable" check below already excludes it.
+  const instagram = canUseInstagram ? data?.instagram : undefined;
   /** Whether an account can actually publish: connected, live, and granted. */
   const usable = (account?: PostAccount) =>
     Boolean(account?.connected && !account.expired && account.canPublish !== false);
@@ -388,6 +391,7 @@ export default function SocialPosts() {
         <ConnectPrompt
           linkedin={linkedin}
           instagram={instagram}
+          showInstagram={canUseInstagram}
           connecting={connecting || connectingInstagram}
           onConnect={() => {
             trace(user?.id, "connect_linkedin", "social_posts", "linkedin_oauth_popup");

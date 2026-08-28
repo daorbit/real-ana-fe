@@ -298,3 +298,15 @@ export function useIsPlatformAdmin(): boolean {
   const { user } = useAuth();
   return user?.role === "super_admin" && !user?.impersonating;
 }
+
+/**
+ * Whether Instagram is available to this session.
+ *
+ * Held back to `super_admin` while the integration is finished — everyone else
+ * sees it marked "Coming soon" and cannot connect an account or compose an
+ * Instagram post. One helper so lifting the gate later is a single edit.
+ */
+export function useCanUseInstagram(): boolean {
+  const { user } = useAuth();
+  return user?.role === "super_admin";
+}
