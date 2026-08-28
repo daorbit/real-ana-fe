@@ -37,6 +37,17 @@ export function useProfileForm() {
     setErrors((prev) => (prev[key] && !check(v) ? { ...prev, [key]: null } : prev));
   };
 
+  // Surface a field's error the moment focus leaves it, rather than only on
+  // Save — a wrong phone number should be caught while the user is still
+  // looking at it, not two fields later.
+  const validateOnBlur = (
+    key: string,
+    check: (v: string) => string | null,
+    v: string,
+  ) => {
+    setErrors((prev) => ({ ...prev, [key]: check(v) }));
+  };
+
   const seedFromUser = useCallback(() => {
     if (!user) return;
     setFirstName(user.firstName ?? "");
@@ -182,6 +193,7 @@ export function useProfileForm() {
     dirty,
     preview,
     clearIfValid,
+    validateOnBlur,
     seedFromUser,
     submit,
     pickAvatar,

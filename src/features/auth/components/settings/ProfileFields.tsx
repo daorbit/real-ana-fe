@@ -16,8 +16,11 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
     setMobile,
     errors,
     clearIfValid,
+    validateOnBlur,
     errText,
   } = form;
+
+  const nameRequired = (s: string) => (s.trim() ? null : "settings.firstNameRequired");
 
   if (!user) return null;
 
@@ -29,8 +32,9 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
           onChange={(e) => {
             const v = e.currentTarget.value;
             setFirstName(v);
-            clearIfValid("firstName", (s) => (s.trim() ? null : "x"), v);
+            clearIfValid("firstName", nameRequired, v);
           }}
+          onBlur={(e) => validateOnBlur("firstName", nameRequired, e.currentTarget.value)}
           error={errText(errors.firstName)}
         />
       </Field>
@@ -52,6 +56,7 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
             setMobile(v);
             clearIfValid("mobile", mobileError, v);
           }}
+          onBlur={(e) => validateOnBlur("mobile", mobileError, e.currentTarget.value)}
           error={errText(errors.mobile)}
         />
       </Field>

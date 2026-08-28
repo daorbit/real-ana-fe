@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Anchor, Badge, Box, Button, Card, Center, Group, Loader, Select, Stack,
+  Anchor, Badge, Box, Button, Card, Group, Select, Stack,
   Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
   UnstyledButton, Pagination,
 } from "@mantine/core";
@@ -96,10 +96,12 @@ function HistoryPanel({
 
   if (loading) {
     return (
-      <Card withBorder radius="md" padding="xl">
-        <Center>
-          <Loader size="sm" />
-        </Center>
+      <Card withBorder radius="md" padding="md">
+        <Stack gap="xs">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} height={44} radius="sm" />
+          ))}
+        </Stack>
       </Card>
     );
   }

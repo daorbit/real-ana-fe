@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Center, Text, useComputedColorScheme } from "@mantine/core";
+import { useComputedColorScheme } from "@mantine/core";
+import { FolderOpen } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
 import { leadFormsUrl } from "../themeParams";
@@ -48,9 +50,12 @@ export default function LeadCapture() {
   if (!src) {
     return (
       <AppShell>
-        <Center h="60vh">
-          <Text c="dimmed">Select a workspace to manage its lead forms.</Text>
-        </Center>
+        <EmptyState
+          icon={FolderOpen}
+          title="No workspace selected"
+          description="Pick a workspace from the switcher to build and manage its lead forms."
+          action={{ label: "Go to workspaces", to: "/app/workspaces" }}
+        />
       </AppShell>
     );
   }

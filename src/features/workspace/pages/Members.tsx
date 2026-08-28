@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Text, Group, Button, Card, ActionIcon, Modal, TextInput, Select,
-  Stack, Center, Badge, Tooltip, Box, ThemeIcon, SimpleGrid,
+  Stack, Badge, Tooltip, Box, ThemeIcon, SimpleGrid,
   SegmentedControl, Divider,
 } from "@mantine/core";
 import { motion } from "framer-motion";
@@ -17,6 +17,7 @@ import {
 } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { MembersSkeleton } from "@/shared/ui/Skeletons";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
@@ -27,23 +28,7 @@ import { useAuth } from "@/features/auth/context";
 import { shortDate } from "@/shared/lib";
 import { ROLE_RANK, type WorkspaceRole } from "@/shared/types";
 
-/**
- * Who can reach this workspace.
- *
- * Scoped to the active workspace like every other page — switching in the
- * sidebar switches whose team this is. Everyone can see the list, because
- * knowing who else reads your analytics is not privileged information to the
- * people already in the room; only changing it is gated.
- */
-
-/**
- * How each role is presented: its icon, its colour, and what it actually
- * permits.
- *
- * Kept as one table rather than scattered ternaries so a role never renders as
- * one colour in the list and another in the picker — and so adding a role is
- * one entry, not a hunt through the file.
- */
+ 
 const ROLE_META: Record<
   WorkspaceRole,
   { icon: typeof Eye; color: string; short: string; blurb: string }
@@ -244,9 +229,12 @@ export default function Members() {
   if (!active) {
     return (
       <AppShell>
-        <Center py={64}>
-          <Text c="dimmed">No workspace selected.</Text>
-        </Center>
+        <EmptyState
+          icon={Users}
+          title="No workspace selected"
+          description="Choose a workspace from the switcher to see who has access and invite teammates."
+          action={{ label: "Go to workspaces", to: "/app/workspaces" }}
+        />
       </AppShell>
     );
   }

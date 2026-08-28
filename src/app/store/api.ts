@@ -162,6 +162,22 @@ export const api = createApi({
         body: { name },
       }),
       invalidatesTags: ["Workspace"],
+      // The new name lands in the list the instant the user commits it, and
+      // rolls back if the PATCH fails — a rename is trivial and the wait for a
+      // round-trip is the only slow part of it.
+      async onQueryStarted({ id, name }, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          api.util.updateQueryData("getWorkspaces", undefined, (draft) => {
+            const ws = draft.find((w) => w._id === id);
+            if (ws) ws.name = name;
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
     }),
 
     deleteWorkspace: build.mutation<void, string>({
@@ -1406,6 +1422,21 @@ export const api = createApi({
         body: { role },
       }),
       invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Members", id: workspaceId }],
+      // The badge flips to the new role on click; if the PATCH is refused it
+      // flips back and the caller's toast explains why.
+      async onQueryStarted({ workspaceId, memberId, role }, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          api.util.updateQueryData("getMembers", workspaceId, (draft) => {
+            const member = draft.members.find((m) => m.id === memberId);
+            if (member) member.role = role;
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
     }),
 
     /** Remove someone, or leave the workspace yourself. */
