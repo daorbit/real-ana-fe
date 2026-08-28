@@ -6,6 +6,7 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
 import { leadFormsUrl } from "../themeParams";
+import { useEmbeddedPlanLimit } from "../useEmbeddedPlanLimit";
 import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
 
@@ -22,6 +23,7 @@ export default function LeadCapture() {
   const { isDemo } = useAuth();
   const [themeVersion, setThemeVersion] = useState(0);
   const colorScheme = useComputedColorScheme("light");
+  useEmbeddedPlanLimit();
   useEffect(() => {
     document.body.dataset.page = "lead-capture";
     return () => {

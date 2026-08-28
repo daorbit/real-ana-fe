@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import { Text, TextInput, Group, Button, Stack, Code, Alert, ThemeIcon } from "@mantine/core";
-import { TriangleAlert, ArrowUpCircle, Lock } from "lucide-react";
+import { Text, TextInput, Group, Button, Stack, Code, Alert } from "@mantine/core";
+import { TriangleAlert } from "lucide-react";
 import { navigateTo } from "@/app/navigation";
+import { UpgradeDialog } from "@/shared/ui/UpgradeDialog";
 import type { ReactNode } from "react";
 
 /**
@@ -74,52 +75,31 @@ export const notify = {
    */
   quotaLimit: (message: ReactNode, limit?: QuotaLimitInfo) => {
     const id = "quota-limit";
-    // The heading names what ran out when the server said so. "You've used all
-    // your forms" tells the reader which cap they hit; the generic line leaves
-    // them to infer it from the sentence below.
-    const heading = limit?.label
-      ? `You've reached your ${limit.label} limit`
-      : "Upgrade to unlock this";
     modals.open({
       modalId: id,
       centered: true,
       radius: "lg",
       size: "sm",
       withCloseButton: false,
+      // The dialog paints its own surface and padding, so the modal shell gets
+      // out of its way rather than boxing it inside a second card.
+      padding: 0,
+      styles: { content: { overflow: "hidden" } },
       children: (
-        <Stack align="center" gap="sm" py="sm">
-          <ThemeIcon size={52} radius="xl" variant="light" color="emerald">
-            <Lock size={22} />
-          </ThemeIcon>
-          <Text fw={650} size="lg" ta="center">{heading}</Text>
-          <Text size="sm" c="dimmed" ta="center" maw={300}>{message}</Text>
-          {typeof limit?.used === "number" && typeof limit?.quota === "number" && (
-            <Text size="xs" c="dimmed" ta="center">
-              {limit.used} of {limit.quota} used on the {limit.plan ?? "current"} plan
-            </Text>
-          )}
-          <Group mt="sm">
-            <Button variant="subtle" color="gray" onClick={() => modals.close(id)}>
-              Not now
-            </Button>
-            <Button
-              color="emerald"
-              leftSection={<ArrowUpCircle size={15} />}
-              onClick={() => {
-                modals.close(id);
-                // Not <Link> — Mantine renders modal content as a sibling of
-                // ModalsProvider's own children, so it sits outside App's
-                // <BrowserRouter> and has no Router context to read a
-                // client-side <Link> against. `navigateTo` reaches the
-                // router's own `navigate` via a module-level handle instead
-                // of falling back to a full-page reload.
-                navigateTo("/app/billing");
-              }}
-            >
-              Upgrade plan
-            </Button>
-          </Group>
-        </Stack>
+        <UpgradeDialog
+          message={message}
+          limit={limit}
+          onDismiss={() => modals.close(id)}
+          onUpgrade={() => {
+            modals.close(id);
+            // Not <Link> — Mantine renders modal content as a sibling of
+            // ModalsProvider's own children, so it sits outside App's
+            // <BrowserRouter> and has no Router context to read a client-side
+            // <Link> against. `navigateTo` reaches the router's own `navigate`
+            // via a module-level handle instead of a full-page reload.
+            navigateTo("/app/billing");
+          }}
+        />
       ),
     });
   },
