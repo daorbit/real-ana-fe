@@ -2785,9 +2785,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .demo-exit:hover { opacity: 0.75; text-decoration: underline; }
 .demo-exit:focus-visible { outline: 2px solid var(--violet-2); outline-offset: 2px; }
 
-/* Impersonation session. Same shape as the demo card — a persistent sidebar
-   note rather than a banner — but amber, because unlike the demo every action
-   here lands on a real customer's account. */
 .impersonation-card {
   padding: 9px 10px;
   border-radius: var(--radius-sm);
@@ -2817,10 +2814,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   }
 }
 
-/* Compare: the competitor rail pins beside the detail pane, which is much the
-   taller of the two. Below the width where the grid stacks, the rail sits
-   above the detail instead — pinning it there would hold a list in place over
-   the content it selects. */
+
 @media (max-width: 62em) {
   .compare-rail {
     position: static !important;
@@ -2829,13 +2823,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   }
 }
 
-/* ---------------------------------------------------------------------------
-   Full-screen wizard (Add site)
-
-   A step rail on a recessed ground beside a capped, centred column. The rail
-   is frame and stays tight to the edge; the column is content and keeps a
-   readable width however wide the window gets.
---------------------------------------------------------------------------- */
 .wizard-rail {
   width: 260px;
   flex-shrink: 0;
@@ -2857,8 +2844,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--accent-soft);
   color: var(--text);
 }
-/* A finished step stays legible rather than dimming to the colour of one not
-   reached yet — it is a place you can go back to, not a disabled control. */
+
 .wizard-step[data-state="done"] { color: var(--text-2); }
 .wizard-step[data-state="todo"] { color: var(--muted); }
 
@@ -2867,14 +2853,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   margin: 0 auto;
   padding: 32px 24px 40px;
 }
-/* The form steps use the width instead of leaving it blank either side. Only
-   the snippet step stays narrow — code is read line by line. */
 .wizard-body[data-wide="true"] { max-width: 1100px; }
 
-/* The platform step is two cards and a question — a fraction of the content
-   the later steps carry. Left top-aligned it stranded them in the top-left
-   corner of a full-screen modal, so this step alone centres in the space it
-   has rather than pretending to fill it. */
 .wizard-choice {
   min-height: min(58vh, 520px);
   justify-content: center;
@@ -2940,13 +2920,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .wizard-foot { padding: 12px 16px; }
 }
 
-/* ---------------------------------------------------------------------------
-   Share Post composer
-
-   A full-screen split: the composer on a plain surface at a fixed comfortable
-   reading width, and the preview on a darker gridded ground so the mock reads
-   as a rendering of the post rather than as more of the page.
---------------------------------------------------------------------------- */
 .share-post-shell {
   overflow: hidden;
 }
@@ -2954,21 +2927,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .share-post-composer {
   display: flex;
   flex-direction: column;
-  /* The composer needs only enough width to read a caption comfortably; the
-     preview is the thing being judged, so it takes the larger share. */
   width: 40%;
   min-width: 400px;
   height: 100%;
   background: var(--surface);
 
-  /* The inset shared by the tab strip and the composer body, so the content and
-     the tab that labels it line up on one edge. The window chrome either side
-     of them — the title bar and the action bar — sits tighter deliberately:
-     those are frame, not content, and indenting them to match would push the
-     close button oddly far from the corner it belongs in.
-
-     It relaxes as the panel narrows; at 80px a 400px-wide panel would carry
-     more margin than content. */
   --share-post-inset: 80px;
 }
 @media (max-width: 100em) {
@@ -3012,16 +2975,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     var(--bg-2);
 }
 
-/* The composer's scrolling content. Generous vertical rhythm and a matching
-   inset either side — the panel is narrow, and content run to its edges is what
-   makes a split like this feel cramped. */
 .share-post-body {
   padding: 26px var(--share-post-inset) 44px;
 }
 
-/* The tab strip scrolls when the platforms outrun the panel, but a scrollbar
-   across a five-item row reads as a broken control rather than an affordance —
-   the tabs are all still reachable by dragging or by keyboard. */
 .share-post-tabs {
   overflow-x: auto;
   scrollbar-width: none;
@@ -3557,31 +3514,17 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 [data-motion="off"] .empty-state__icon,
 [data-motion="off"] .empty-state__icon::before { animation: none; }
 
-/* ============ Account menu ============
-   The identity block at the head of the dropdown. Padded to the menu's own
-   edges rather than inset like an item, so it reads as the menu's header
-   rather than as the first thing in the list. */
+
 .account-menu__header {
   padding: 12px;
-  /* Tinted a step off the dropdown so the identity block reads as a header
-     rather than as the first row of the list. `--surface-2` rather than a
-     literal colour: it is the app's existing raised-surface token and is
-     already defined for both themes, so this follows a light/dark switch
-     instead of needing its own override. */
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
-  /* The block sits flush against the dropdown's top edge, so a square corner
-     would show through the rounded one. Negative margins bleed it to the
-     dropdown's inner edges, which its own padding then puts back. */
+
   margin: calc(var(--mantine-spacing-xs) * -1) calc(var(--mantine-spacing-xs) * -1) 0;
   border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
 }
 
-/* Mantine's default Menu.Item padding (10px vertical) reads as loose,
-   uneven air once several rows are stacked — each row's label sits nowhere
-   near its icon and the gaps between rows look bigger than the gaps inside
-   a row. Tightened and made uniform for this dropdown specifically, rather
-   than globally, since other menus in the app are shorter and unaffected. */
+
 .account-menu .mantine-Menu-item {
   padding-top: 8px;
   padding-bottom: 8px;
@@ -3733,9 +3676,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: 10px;
 }
 
-/* ============ Post composer ============
-   Header and action bar frame the scrolling middle, so neither runs into the
-   content when a long post scrolls under them. */
 .composer-header { border-bottom: 1px solid var(--mantine-color-default-border); }
 
 .composer-footer {
@@ -3743,11 +3683,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
-/* ============ Week calendar ============
-   Days across, hours down, each post drawn at the time it publishes. Posts are
-   placed absolutely against a fixed hour height rather than stacked in rows:
-   two posts an hour apart have to look an hour apart, which is the only reason
-   to draw a time axis in the first place. */
+
 .cal-week {
   border: 1px solid var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-md);
@@ -3755,7 +3691,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--mantine-color-body);
 }
 
-/* Day names stay put while the hours scroll under them. */
 .cal-week__head {
   display: grid;
   grid-template-columns: 62px repeat(7, 1fr);
