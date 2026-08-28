@@ -31,6 +31,23 @@ function showDeduped(opts: Parameters<typeof notifications.show>[0]) {
   notifications.show(opts);
 }
 
+/**
+ * What the server says about the cap that was hit, when it says anything.
+ *
+ * Every field is optional: the dialog works from the message alone, and a route
+ * that has not been taught to send this yet still opens the same dialog rather
+ * than falling back to a red toast.
+ */
+export interface QuotaLimitInfo {
+  /** Machine name of the cap — `forms`, `sites`, `audits`, `orbit_questions`. */
+  kind?: string;
+  /** Human name for the heading: "Forms", "Scheduled posts", "Orbit questions". */
+  label?: string;
+  used?: number;
+  quota?: number;
+  plan?: string;
+}
+
 export const notify = {
   /**
    * `emerald` rather than a literal colour: that is the alias the theme
@@ -55,8 +72,14 @@ export const notify = {
    * dialog in this file uses, so there's one dialog stack for the whole app
    * rather than a second ad hoc one per feature.
    */
-  quotaLimit: (message: ReactNode) => {
+  quotaLimit: (message: ReactNode, limit?: QuotaLimitInfo) => {
     const id = "quota-limit";
+    // The heading names what ran out when the server said so. "You've used all
+    // your forms" tells the reader which cap they hit; the generic line leaves
+    // them to infer it from the sentence below.
+    const heading = limit?.label
+      ? `You've reached your ${limit.label} limit`
+      : "Upgrade to unlock this";
     modals.open({
       modalId: id,
       centered: true,
@@ -68,8 +91,13 @@ export const notify = {
           <ThemeIcon size={52} radius="xl" variant="light" color="emerald">
             <Lock size={22} />
           </ThemeIcon>
-          <Text fw={650} size="lg" ta="center">Upgrade to unlock this</Text>
+          <Text fw={650} size="lg" ta="center">{heading}</Text>
           <Text size="sm" c="dimmed" ta="center" maw={300}>{message}</Text>
+          {typeof limit?.used === "number" && typeof limit?.quota === "number" && (
+            <Text size="xs" c="dimmed" ta="center">
+              {limit.used} of {limit.quota} used on the {limit.plan ?? "current"} plan
+            </Text>
+          )}
           <Group mt="sm">
             <Button variant="subtle" color="gray" onClick={() => modals.close(id)}>
               Not now
@@ -139,14 +167,37 @@ export function errCode(e: unknown): string | undefined {
 }
 
 /**
- * `notify.error` for anything except a quota_exceeded error, which is
+ * The error codes that mean "your plan stops you here", as opposed to a bug or
+ * a bad request. `quota_exceeded` is an allowance used up; `plan_required` is a
+ * feature the plan never included. Both end at the same upgrade dialog — the
+ * reader's next step is identical — so both are matched wherever one is.
+ */
+const PLAN_LIMIT_CODES = ["quota_exceeded", "plan_required"];
+
+export function isPlanLimit(e: unknown): boolean {
+  const code = errCode(e);
+  return code !== undefined && PLAN_LIMIT_CODES.includes(code);
+}
+
+/** The `limit` block a plan-limit response carries, when the route sends one. */
+export function quotaLimitInfo(e: unknown): QuotaLimitInfo | undefined {
+  if (typeof e !== "object" || e === null) return undefined;
+  const data = (e as { data?: unknown }).data;
+  if (typeof data !== "object" || data === null) return undefined;
+  const limit = (data as { limit?: unknown }).limit;
+  if (typeof limit !== "object" || limit === null) return undefined;
+  return limit as QuotaLimitInfo;
+}
+
+/**
+ * `notify.error` for anything except a plan-limit error, which is
  * skipped here — the RTK Query `baseQuery` in `store/api.ts` already opens
  * `notify.quotaLimit` for every request that comes back with that code, so a
  * call site using this doesn't also need to check for it or risk a duplicate
  * toast stacked under the dialog.
  */
 export function notifyError(e: unknown, fallback = "Request failed") {
-  if (errCode(e) === "quota_exceeded") return;
+  if (isPlanLimit(e)) return;
   notify.error(errMessage(e, fallback));
 }
 
