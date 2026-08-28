@@ -64,6 +64,7 @@ import type {
   Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind, BreakdownComparisonRow,
 } from "@/shared/types";
 import { serializeFilter } from "@/shared/types";
+import { useTitle } from "@/shared/lib/useTitle";
 
 const CHART = "var(--accent)";
 
@@ -336,6 +337,7 @@ function LiveNow({ stats }: { stats: Stats | null }) {
 }
 
 export default function Analytics() {
+  useTitle("Analytics");
   const { t } = useTranslation();
   // Funnels are entitled per workspace, so this follows the active one.
   const billing = useActiveBilling();

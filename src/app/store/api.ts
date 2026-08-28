@@ -98,7 +98,25 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     return Promise.resolve({ data: data ?? undefined });
   }
 
-  const result = await rawBaseQuery(args, apiArg, extra);
+  let result = await rawBaseQuery(args, apiArg, extra);
+
+  // Retry a read that failed for a reason that is plausibly transient — a
+  // 5xx, or a network error with no status at all (fetch rejected). Two extra
+  // attempts with a short backoff clears most single-flake failures without a
+  // manual Refresh. Writes are never retried here: a POST that reached the
+  // server and then dropped the response would run twice.
+  const status = result.error?.status;
+  const transient =
+    !isWrite &&
+    (status === "FETCH_ERROR" ||
+      status === "TIMEOUT_ERROR" ||
+      (typeof status === "number" && status >= 500));
+  if (transient) {
+    for (let attempt = 1; attempt <= 2 && result.error; attempt++) {
+      await new Promise((r) => setTimeout(r, attempt * 400));
+      result = await rawBaseQuery(args, apiArg, extra);
+    }
+  }
 
   // An expired token surfaces here as a 401 on any authed request. One shared
   // handler prompts a re-login and remembers the current page — a call site

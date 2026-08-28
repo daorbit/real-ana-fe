@@ -24,6 +24,7 @@ import { CompetitorDetail } from "@/features/compare/components/CompetitorDetail
 import { ScoreTrendChart } from "@/features/compare/components/ScoreTrendChart";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { CompareSkeleton } from "@/shared/ui/Skeletons";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * How your pages compare to your competitors'.
@@ -42,6 +43,7 @@ import { CompareSkeleton } from "@/shared/ui/Skeletons";
 const MAX_COMPETITORS = 10;
 
 export default function Compare() {
+  useTitle("Compare");
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
   const { user } = useAuth();

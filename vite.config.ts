@@ -18,6 +18,27 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    // The entry is split by route (React.lazy in App.tsx), so the remaining
+    // "large" chunks are deliberate vendor bundles, not an oversight.
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        // Pull the biggest third-party libraries into their own long-lived
+        // chunks. They change far less often than app code, so a deploy that
+        // only touches features leaves these cached in the browser. Written as
+        // a function because this toolchain types `manualChunks` that way.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (/[\\/]react(-dom|-router-dom)?[\\/]/.test(id)) return 'vendor-react';
+          if (id.includes('framer-motion')) return 'vendor-motion';
+          if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+          if (id.includes('@mantine')) return 'vendor-mantine';
+          if (id.includes('i18next')) return 'vendor-i18n';
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

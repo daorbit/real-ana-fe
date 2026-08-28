@@ -35,6 +35,7 @@ import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { getFramework } from "@/features/workspace/frameworks";
 import type { FrameworkId } from "@/features/workspace/frameworks";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /* Small id + copy row */
 function IdRow({ label, value }: { label: string; value: string }) {
@@ -179,6 +180,7 @@ function SiteRow({
 }
 
 export default function Workspaces() {
+  useTitle("Workspaces");
   const { t } = useTranslation();
   const nav = useNavigate();
   const { user } = useAuth();

@@ -443,3 +443,37 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* The background-refetch strip (shared/ui/FetchProgress). A shimmer that sweeps
+   left to right on a loop while any query is pending — no start/end position to
+   track, so it needs no progress number. */
+@keyframes fetch-progress {
+  0%   { transform: scaleX(0);   opacity: 1; }
+  50%  { transform: scaleX(0.6); opacity: 1; }
+  100% { transform: scaleX(1);   opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="fetch-progress"] { animation: none; opacity: 0.9; }
+}
+
+/* Skip-to-content link (shared/AppShell). Visually hidden until it receives
+   keyboard focus, then it drops into the top-left as a real button. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent, var(--mantine-color-emerald-6));
+  transform: translateY(-150%);
+  transition: transform 120ms ease;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}

@@ -24,11 +24,17 @@ export function Onboarding({
   hasWorkspace,
   hasSite,
   hasData,
+  hasAudit,
+  hasTeammate,
 }: {
   hasWorkspace: boolean;
   hasSite: boolean;
   /** First pageview has landed — the snippet is confirmed working. */
   hasData: boolean;
+  /** At least one SEO audit has been run. */
+  hasAudit?: boolean;
+  /** Someone besides the owner is in the workspace. */
+  hasTeammate?: boolean;
 }) {
   const [dismissed, setDismissed] = useState(
     () => localStorage.getItem(DISMISS_KEY) === "1"
@@ -52,6 +58,18 @@ export function Onboarding({
       desc: "Paste one script tag into your site's <head>.",
       done: hasData,
       cta: { label: "Get the snippet", to: "/app/workspaces" },
+    },
+    {
+      label: "Run an SEO audit",
+      desc: "A Lighthouse score and fixes for your homepage.",
+      done: hasAudit ?? true,
+      cta: { label: "Open SEO", to: "/app/seo" },
+    },
+    {
+      label: "Invite a teammate",
+      desc: "Share the workspace with someone who needs the numbers.",
+      done: hasTeammate ?? true,
+      cta: { label: "Invite people", to: "/app/members" },
     },
   ];
 

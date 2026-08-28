@@ -28,6 +28,7 @@ import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { SeoSharePanel } from "@/features/seo/components/SeoSharePanel";
 import { SaveBarProvider, useSaveRegistration } from "@/shared/ui/SaveBar";
 import type { SharePanels } from "@/shared/types";
+import { useTitle } from "@/shared/lib/useTitle";
 
 // Panel `key` doubles as the i18n stem: label is `share.panel.<key>`, hint is
 // `share.panel.<key>Hint`. Group headings/notes resolve from `share.group.*`.
@@ -693,6 +694,7 @@ function NoWorkspace() {
 }
 
 export default function Share() {
+  useTitle("Public dashboard");
   const { t } = useTranslation();
   const { active } = useWorkspace();
 

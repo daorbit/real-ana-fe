@@ -10,8 +10,10 @@ import { useProfileForm } from "@/features/auth/components/settings/useProfileFo
 import { InfoPanel } from "@/features/auth/components/settings/InfoPanel";
 import { ConnectionsPanel } from "@/features/auth/components/settings/ConnectionsPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
+import { useTitle } from "@/shared/lib/useTitle";
 
 export default function Settings() {
+  useTitle("Settings");
   const { t } = useTranslation();
   useInstagramReturn();
   const form = useProfileForm();

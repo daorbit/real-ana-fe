@@ -16,6 +16,16 @@ import { useOrbitCaption } from "../hooks/useOrbitCaption";
 import { useOrbitPlan } from "../hooks/useOrbitPlan";
 import { DiscardDialog } from "./DiscardDialog";
 import { captionLimit, isDirty, type Draft } from "./draft";
+
+/**
+ * A new post in progress is stashed to sessionStorage on every change and
+ * restored if the composer is reopened in the same tab — an accidental close
+ * or a refresh mid-compose no longer loses the caption. Scoped per workspace,
+ * and never used while editing an existing post: that already has a saved
+ * source of truth on the server.
+ */
+const DRAFT_KEY = (workspaceId: string | undefined) =>
+  `quantalog_post_draft_${workspaceId ?? "none"}`;
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import type { ScheduledPost } from "@/shared/types";
@@ -96,7 +106,18 @@ export function PostComposer({
   // one starts blank — without wiping what is being typed on every re-render.
   useEffect(() => {
     if (opened) {
-      setDraft(initial);
+      // Restore a stashed draft only for a fresh new post — never over an edit,
+      // and never once the user has started this session's post.
+      let seed = initial;
+      if (!editing) {
+        try {
+          const raw = sessionStorage.getItem(DRAFT_KEY(workspaceId));
+          if (raw) seed = { ...initial, ...(JSON.parse(raw) as Partial<Draft>) };
+        } catch {
+          /* corrupt stash — fall back to the blank draft */
+        }
+      }
+      setDraft(seed);
       setStep("content");
       setTopic("");
       onPane("preview");
@@ -131,8 +152,34 @@ export function PostComposer({
   // on an untouched form is one people learn to click through.
   const dirty = isDirty(draft, initial);
   const requestClose = () => (dirty ? setConfirmingClose(true) : onClose());
+
+  const clearStash = () => {
+    try {
+      sessionStorage.removeItem(DRAFT_KEY(workspaceId));
+    } catch {
+      /* nothing to clear */
+    }
+  };
+
+  // Mirror a dirty new-post draft to sessionStorage as it changes; clear the
+  // moment it stops being dirty or the composer is closed.
+  useEffect(() => {
+    if (editing || !opened) return;
+    if (!dirty) {
+      clearStash();
+      return;
+    }
+    try {
+      sessionStorage.setItem(DRAFT_KEY(workspaceId), JSON.stringify(draft));
+    } catch {
+      /* quota or private mode — losing the autosave is acceptable */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, dirty, editing, opened, workspaceId]);
+
   const discard = () => {
     trace(user?.id, "discard_draft_confirmed", "composer", editing ? "post_unchanged" : "post_discarded");
+    clearStash();
     setConfirmingClose(false);
     onClose();
   };
@@ -145,6 +192,7 @@ export function PostComposer({
     // open, and a button that kept spinning could never be pressed again.
     setPending(null);
     if (!ok) return;
+    clearStash();
     if (andAnother) {
       // The cadence is the part people keep across a batch — only the content
       // changes from one post to the next.

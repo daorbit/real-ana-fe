@@ -38,6 +38,7 @@ import {
   OverviewPanel, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel, AiSearchPanel,
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
+import { useTitle } from "@/shared/lib/useTitle";
 
 const TABS = [
   { value: "overview", label: "Overview", icon: ListChecks },
@@ -271,6 +272,7 @@ function HistoryPanel({
  * scanner pointed at arbitrary hosts. The server enforces the same rule.
  */
 export default function Seo() {
+  useTitle("SEO");
   const { t } = useTranslation();
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();

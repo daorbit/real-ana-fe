@@ -14,6 +14,7 @@ import { useSendSupportMessageMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
+import { useTitle } from "@/shared/lib/useTitle";
 
 const DOCS_URL = "https://quantalog.daorbit.in/docs";
 const MIN_MESSAGE = 10;
@@ -37,6 +38,7 @@ const MIN_MESSAGE = 10;
  * fields they retype — and the server takes them from the session regardless.
  */
 export default function Help() {
+  useTitle("Help");
   const { user, isDemo } = useAuth();
   const loc = useLocation();
 

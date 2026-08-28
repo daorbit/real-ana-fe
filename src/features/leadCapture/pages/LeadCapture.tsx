@@ -7,6 +7,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
 import { leadFormsUrl } from "../themeParams";
 import "./LeadCapture.css";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * The forms app's own read-only workspace: sample forms, an editor to explore,
@@ -16,6 +17,7 @@ import "./LeadCapture.css";
 const DEMO_FORMS_WORKSPACE = "default";
 
 export default function LeadCapture() {
+  useTitle("Lead capture");
   const { active } = useWorkspace();
   const { isDemo } = useAuth();
   const [themeVersion, setThemeVersion] = useState(0);

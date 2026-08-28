@@ -10,6 +10,8 @@ import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { useSyncWorkspaceTheme } from "@/features/auth/components/useSyncWorkspaceTheme";
 import { CommandPalette } from "@/shared/ui/CommandPalette";
 import { QuotaNudge } from "@/shared/ui/QuotaNudge";
+import { OfflineBar } from "@/shared/ui/OfflineBar";
+import { FetchProgress } from "@/shared/ui/FetchProgress";
 import { useDemo } from "@/features/demo/context";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
@@ -36,6 +38,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
+      {/* First tab stop on every screen: jump straight past the rail to the
+          page content. Off-screen until focused. */}
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      <OfflineBar />
+      <FetchProgress />
       <CommandPalette />
       {wsSwitch.active && active && (
         <SwitchOverlay
@@ -75,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           onToggleAdmin={toggleAdmin}
         />
 
-        <MantineShell.Main className="app-main" style={{ position: "relative" }}>
+        <MantineShell.Main id="main-content" className="app-main" style={{ position: "relative" }}>
           {demo && (
             <Box
               aria-hidden

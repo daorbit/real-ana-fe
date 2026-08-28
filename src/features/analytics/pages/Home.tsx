@@ -38,6 +38,7 @@ import { SortableWidget, WidgetDragPreview } from "@/shared/ui/SortableWidget";
 import { Onboarding } from "@/features/auth/components/Onboarding";
 import { useStats, useHomeWidgets, WIDGET_MAP, useLinkedInReturn, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
+import { useGetSeoReportsQuery, useGetMembersQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import type { WidgetId, Span } from "@/features/analytics";
 import { countryFlag, countryLabel, duration, num } from "@/shared/lib";
@@ -45,6 +46,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 import type { Bucket, Stats } from "@/shared/types";
 import { HomeSkeleton } from "@/shared/ui/Skeletons";
+import { useTitle } from "@/shared/lib/useTitle";
 
 
 function MiniList({
@@ -161,6 +163,7 @@ function LivePagesCard({ stats }: { stats: Stats | null }) {
 
 
 export default function Home() {
+  useTitle("Home");
   const { active, loading } = useWorkspace();
   const { user } = useAuth();
   // The LinkedIn OAuth callback lands back here with its outcome in the query
@@ -182,6 +185,18 @@ export default function Home() {
   );
   const { sites } = useSites(active?._id);
   const { demo } = useDemo();
+
+  // Extra signals for the getting-started checklist. Cheap: both are already
+  // cached once their pages have been visited, and skipped until there is a
+  // site to key the SEO query on.
+  const firstSiteId = sites[0]?._id ?? "";
+  const { data: seoReports } = useGetSeoReportsQuery(
+    { workspaceId: active?._id ?? "", siteId: firstSiteId, limit: 1 },
+    { skip: !active?._id || !firstSiteId || demo },
+  );
+  const { data: memberData } = useGetMembersQuery(active?._id ?? "", {
+    skip: !active?._id || demo,
+  });
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
     has, spanOf, toggle, remove, setSpan, move, reset, clear,
@@ -441,6 +456,8 @@ export default function Home() {
           hasWorkspace={!!active}
           hasSite={sites.length > 0}
           hasData={(stats?.pageviews ?? 0) > 0}
+          hasAudit={(seoReports?.length ?? 0) > 0}
+          hasTeammate={(memberData?.members?.length ?? 0) > 1}
         />
       )}
 

@@ -22,6 +22,7 @@ import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 import type { ApiKey } from "@/shared/types";
+import { useTitle } from "@/shared/lib/useTitle";
 
 
 function KeysTab() {
@@ -220,6 +221,7 @@ function DocsLink() {
 }
 
 export default function Developers() {
+  useTitle("Developers");
   const { t } = useTranslation();
   return (
     <AppShell>

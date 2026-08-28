@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Text, Tooltip, UnstyledButton } from "@mantine/core";
 import type { Home } from "lucide-react";
 import { trace } from "@/shared/lib/analytics";
+import { prefetchRoute } from "@/app/routePrefetch";
 import { useAuth } from "@/features/auth/context";
 
 /**
@@ -41,6 +42,10 @@ export function NavLink({
       // One choke point for every sidebar click — traces navigation across
       // the whole rail without wiring each destination page separately.
       onClick={() => trace(user?.id, "nav_clicked", location.pathname, to)}
+      // Start fetching the target's lazy chunk the moment the pointer or
+      // keyboard lands on the row, so it is ready by the time it is clicked.
+      onMouseEnter={() => prefetchRoute(to)}
+      onFocus={() => prefetchRoute(to)}
       style={{
         display: "flex",
         alignItems: "center",

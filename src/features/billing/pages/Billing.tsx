@@ -21,6 +21,7 @@ import { Receipts } from "../components/Receipts";
 import { PlanCheckoutModal } from "../components/PlanCheckoutModal";
 import { AddonCheckoutModal } from "../components/AddonCheckoutModal";
 import { CheckoutOutcome } from "../components/CheckoutOutcome";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * Billing: what this workspace is on, what it could be on, and what it has
@@ -32,6 +33,7 @@ import { CheckoutOutcome } from "../components/CheckoutOutcome";
  * `useCheckout` because opening a payment sheet is not a rendering concern.
  */
 export default function Billing() {
+  useTitle("Billing");
   const { t } = useTranslation();
   const { user: _user, isDemo } = useAuth();
   const { tab, setTab, cycle, setCycle, currency, changeCurrency, money } = useBillingView();

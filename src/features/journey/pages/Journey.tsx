@@ -12,6 +12,7 @@ import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { timeAgo } from "@/shared/lib";
+import { useTitle } from "@/shared/lib/useTitle";
 
 const PAGE_SIZE = 10;
 
@@ -22,6 +23,7 @@ const PAGE_SIZE = 10;
  * src -> action -> dest step, in order.
  */
 export default function Journey() {
+  useTitle("User journeys");
   const navigate = useNavigate();
   const { active } = useWorkspace();
   const [q, setQ] = useState("");

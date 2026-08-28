@@ -30,9 +30,11 @@ import {
   draftFromPost, draftFromRun, emptyDraft, toDateInput, type Draft,
 } from "@/features/social/components/draft";
 import type { PostAccount, ScheduledPost, SentPost } from "@/shared/types";
+import { useTitle } from "@/shared/lib/useTitle";
 
  
 export default function SocialPosts() {
+  useTitle("Scheduled posts");
   const { active } = useWorkspace();
   const { user } = useAuth();
   const canUseInstagram = useCanUseInstagram();

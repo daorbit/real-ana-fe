@@ -13,6 +13,7 @@ import { StatTile, ReportCard } from "@/features/reports/pages/ReportCard";
 import { ReportDialog } from "@/features/reports/pages/ReportDialog";
 import { useReportsPage, useReportDialog } from "@/features/reports/pages/hooks";
 import { nextSendLabel } from "@/features/reports/pages/utils";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * Reports.
@@ -34,6 +35,7 @@ import { nextSendLabel } from "@/features/reports/pages/utils";
  * and the dialog in their own files.
  */
 export default function Reports() {
+  useTitle("Reports");
   const { t } = useTranslation();
   const page = useReportsPage();
   const dialog = useReportDialog({

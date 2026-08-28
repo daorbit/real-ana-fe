@@ -27,6 +27,7 @@ import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { shortDate } from "@/shared/lib";
 import { ROLE_RANK, type WorkspaceRole } from "@/shared/types";
+import { useTitle } from "@/shared/lib/useTitle";
 
  
 const ROLE_META: Record<
@@ -143,6 +144,7 @@ function RolePicker({
 }
 
 export default function Members() {
+  useTitle("Members");
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { active } = useWorkspace();
