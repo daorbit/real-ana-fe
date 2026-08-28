@@ -154,6 +154,7 @@ export default function Login() {
               <GoogleSignInButton
                 label="Google"
                 text="signin_with"
+                oneTap
                 onBusyChange={setGoogleBusy}
                 onSuccess={(created) => {
                   notify.success(

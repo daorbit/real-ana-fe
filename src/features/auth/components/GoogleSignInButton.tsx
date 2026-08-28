@@ -27,8 +27,12 @@ declare global {
           initialize: (config: {
             client_id: string;
             callback: (response: { credential: string }) => void;
+            use_fedcm_for_prompt?: boolean;
+            auto_select?: boolean;
+            itp_support?: boolean;
           }) => void;
           renderButton: (parent: HTMLElement, options: GsiButtonOptions) => void;
+          prompt: () => void;
         };
       };
     };
@@ -65,6 +69,8 @@ function GoogleIcon() {
 type Props = {
   label?: string;
   text?: GsiButtonOptions["text"];
+  /** Show the One Tap card automatically on mount. Off inside modals. */
+  oneTap?: boolean;
   onSuccess: (created: boolean) => void;
   onError: (message: string) => void;
   onBusyChange?: (busy: boolean) => void;
@@ -73,6 +79,7 @@ type Props = {
 export default function GoogleSignInButton({
   label = "Continue with Google",
   text = "signin_with",
+  oneTap = false,
   onSuccess,
   onError,
   onBusyChange,
@@ -125,6 +132,10 @@ export default function GoogleSignInButton({
     window.google.accounts.id.initialize({
       client_id: CLIENT_ID,
       callback: handleCredential,
+      // Renders the account chooser as Chrome's native FedCM mini-dialog rather
+      // than a separate popup window that a blocker can eat.
+      use_fedcm_for_prompt: true,
+      itp_support: true,
     });
 
     window.google.accounts.id.renderButton(holder.current, {
@@ -136,7 +147,9 @@ export default function GoogleSignInButton({
       logo_alignment: "center",
       width,
     });
-  }, [handleCredential, text, width]);
+
+    if (oneTap) window.google.accounts.id.prompt();
+  }, [handleCredential, text, width, oneTap]);
 
   useEffect(() => {
     if (!CLIENT_ID) return;
