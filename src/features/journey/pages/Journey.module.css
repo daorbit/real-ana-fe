@@ -1,0 +1,29 @@
+/* Matches the Lead capture entries table, so the two record lists in the
+   product read as one component rather than two takes on a table. */
+
+.table {
+  background-color: var(--mantine-color-body);
+  width: 100%;
+  table-layout: fixed;
+}
+
+.thead {
+  background-color: var(--mantine-color-default);
+}
+
+.th {
+  white-space: nowrap;
+}
+
+/* A row is as tall as its tallest cell; without this the short ones centre
+   against it and the row stops reading as one line. */
+.table th,
+.table td {
+  vertical-align: top;
+}
+
+/* No hover tint: the row is already a link, the cursor says so, and a
+   full-width colour wash on every pass of the mouse is noise. */
+.row {
+  cursor: pointer;
+}

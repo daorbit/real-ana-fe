@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Text, Group, Card, TextInput, Badge, Stack, Pagination,
+  Text, Group, TextInput, Badge, Stack, Pagination,
   Skeleton, Box, ActionIcon, Tooltip, Table, SegmentedControl, Select, CopyButton,
 } from "@mantine/core";
 import { Search, Users, ArrowRight, RotateCw, Copy, Check } from "lucide-react";
@@ -13,6 +13,7 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { timeAgo } from "@/shared/lib";
 import { useTitle } from "@/shared/lib/useTitle";
+import classes from "./Journey.module.css";
 
 const PAGE_SIZE = 10;
 
@@ -164,24 +165,23 @@ export default function Journey() {
           }
         />
       ) : (
-        <Card withBorder radius="md" padding={0}>
-          <Table.ScrollContainer minWidth={720}>
-            <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
-              <Table.Thead>
+        <Table.ScrollContainer minWidth={720}>
+          <Table withTableBorder verticalSpacing="sm" horizontalSpacing="md" className={classes.table}>
+              <Table.Thead className={classes.thead}>
                 <Table.Tr>
-                  <Table.Th>User</Table.Th>
-                  <Table.Th>Last action</Table.Th>
-                  <Table.Th w={120}>Last seen</Table.Th>
-                  <Table.Th w={100} ta="right">Sessions</Table.Th>
-                  <Table.Th w={100} ta="right">Events</Table.Th>
-                  <Table.Th w={44} />
+                  <Table.Th className={classes.th}>User</Table.Th>
+                  <Table.Th className={classes.th}>Last action</Table.Th>
+                  <Table.Th className={classes.th} w={130}>Last seen</Table.Th>
+                  <Table.Th className={classes.th} w={110} ta="right">Sessions</Table.Th>
+                  <Table.Th className={classes.th} w={110} ta="right">Events</Table.Th>
+                  <Table.Th className={classes.th} w={52} />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {users.map((u) => (
                   <Table.Tr
                     key={u.appUserId}
-                    style={{ cursor: "pointer" }}
+                    className={classes.row}
                     onClick={() => navigate(`/app/journey/${encodeURIComponent(u.appUserId)}`)}
                   >
                     <Table.Td>
@@ -234,9 +234,8 @@ export default function Journey() {
                   </Table.Tr>
                 ))}
               </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
-        </Card>
+          </Table>
+        </Table.ScrollContainer>
       )}
 
       {total > PAGE_SIZE && (
