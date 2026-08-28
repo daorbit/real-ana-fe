@@ -9,6 +9,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { useSyncWorkspaceTheme } from "@/features/auth/components/useSyncWorkspaceTheme";
 import { CommandPalette } from "@/shared/ui/CommandPalette";
+import { QuotaNudge } from "@/shared/ui/QuotaNudge";
 import { useDemo } from "@/features/demo/context";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
@@ -92,6 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="app-panel">
             <div className="app-panel__scroll">
         
+              <QuotaNudge />
               <div key={loc.pathname} className="route-fade">
                 {children}
               </div>

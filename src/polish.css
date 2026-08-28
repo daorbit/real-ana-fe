@@ -198,6 +198,7 @@
 @media (prefers-reduced-motion: reduce) {
   .route-fade,
   .save-bar,
+  .flow-node[data-live],
   .live-badge__dot::after { animation: none; }
 
   .mantine-Card-root:hover,

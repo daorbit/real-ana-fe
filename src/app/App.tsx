@@ -105,6 +105,40 @@ function NavigationCapture() {
 }
 
 /**
+ * Moves focus to the page's <h1> on every client-side navigation.
+ *
+ * An SPA route change swaps the DOM but leaves focus where it was — on a nav
+ * link the user just clicked, or nowhere. A screen-reader or keyboard user then
+ * starts the new page from the middle of the old one. Focusing the heading (or
+ * <main> as a fallback) puts them at the top of what actually changed, and the
+ * `tabIndex=-1` is removed on blur so it never becomes a lingering tab stop.
+ */
+function FocusOnRouteChange() {
+  const { pathname } = useLocation();
+  const first = useRef(true);
+
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    const target =
+      (document.querySelector("main h1, h1") as HTMLElement | null) ??
+      (document.querySelector("main") as HTMLElement | null);
+    if (!target) return;
+    target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: false });
+    const drop = () => {
+      target.removeAttribute("tabindex");
+      target.removeEventListener("blur", drop);
+    };
+    target.addEventListener("blur", drop);
+  }, [pathname]);
+
+  return null;
+}
+
+/**
  * A route-level error boundary that re-mounts its subtree on navigation, so a
  * crash on one page doesn't stick when the user moves to another. Also wraps
  * every lazy route in one Suspense fallback.
@@ -182,6 +216,7 @@ export default function App() {
           <BrowserRouter>
             <SelfTracking />
             <NavigationCapture />
+            <FocusOnRouteChange />
             <JourneyRouteTracer />
             <Routes>
               <Route path="/" element={<Root />} />

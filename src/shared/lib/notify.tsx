@@ -6,6 +6,31 @@ import { TriangleAlert, ArrowUpCircle, Lock } from "lucide-react";
 import { navigateTo } from "@/app/navigation";
 import type { ReactNode } from "react";
 
+/**
+ * Collapse a burst of identical toasts into one.
+ *
+ * A network flap fails five in-flight requests at once, each raising the same
+ * red bar — a stack of five copies of one message reads as five separate
+ * problems. Keyed on `color + title + message`, so genuinely different toasts
+ * still stack; a repeat inside the window is dropped, and a repeat after it
+ * shows again (the condition is still live).
+ */
+const DEDUPE_MS = 4000;
+const recent = new Map<string, number>();
+
+function showDeduped(opts: Parameters<typeof notifications.show>[0]) {
+  const key = `${opts?.color ?? ""}|${String(opts?.title ?? "")}|${String(opts?.message ?? "")}`;
+  const now = Date.now();
+  const last = recent.get(key);
+  if (last && now - last < DEDUPE_MS) return;
+  recent.set(key, now);
+  // Keep the map from growing without bound in a long session.
+  if (recent.size > 50) {
+    for (const [k, t] of recent) if (now - t > DEDUPE_MS) recent.delete(k);
+  }
+  notifications.show(opts);
+}
+
 export const notify = {
   /**
    * `emerald` rather than a literal colour: that is the alias the theme
@@ -13,13 +38,13 @@ export const notify = {
    * colour. A fixed `teal` here left a green bar on a crimson theme.
    */
   success: (message: ReactNode, title = "Success") =>
-    notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
+    showDeduped({ title, message, color: "emerald", autoClose: 3000 }),
 
   error: (message: ReactNode, title = "Something went wrong") =>
-    notifications.show({ title, message, color: "red", autoClose: 5000 }),
+    showDeduped({ title, message, color: "red", autoClose: 5000 }),
 
   info: (message: ReactNode, title?: string) =>
-    notifications.show({ title, message, color: "emerald", autoClose: 3000 }),
+    showDeduped({ title, message, color: "emerald", autoClose: 3000 }),
 
   /**
    * A plan/quota limit was hit (workspace, site, audit, crawl, or analytics
