@@ -64,7 +64,7 @@ export function Rail({
   };
 
   return (
-    <MantineShell.Navbar p="sm" style={{ background: "var(--shell)", border: "none" }}>
+    <MantineShell.Navbar p="sm" style={{ background: "var(--rail)", border: "none" }}>
       {/* On mobile the wordmark already sits in the top bar, so the one here
           would double up inside the open drawer — desktop-only. */}
       <MantineShell.Section visibleFrom="sm">
