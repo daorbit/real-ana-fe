@@ -33,6 +33,7 @@ declare global {
           }) => void;
           renderButton: (parent: HTMLElement, options: GsiButtonOptions) => void;
           prompt: () => void;
+          cancel: () => void;
         };
       };
     };
@@ -86,6 +87,7 @@ export default function GoogleSignInButton({
 }: Props) {
   const { googleSignIn } = useAuth();
   const holder = useRef<HTMLDivElement | null>(null);
+  const prompted = useRef(false);
   const [width, setWidth] = useState(0);
   const [busy, setBusy] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -109,6 +111,9 @@ export default function GoogleSignInButton({
       onBusyChange?.(true);
       try {
         const { created } = await googleSignIn(response.credential);
+        // Close the One Tap card before the caller navigates away — otherwise it
+        // lingers on the next page and prompts a second time.
+        window.google?.accounts.id.cancel();
         onSuccess(created);
       } catch (err) {
         const message =
@@ -148,8 +153,18 @@ export default function GoogleSignInButton({
       width,
     });
 
-    if (oneTap) window.google.accounts.id.prompt();
+    // Once only: `render` re-runs whenever the button is remeasured, and each
+    // extra `prompt()` re-opens the card the user may have just dismissed.
+    if (oneTap && !prompted.current) {
+      prompted.current = true;
+      window.google.accounts.id.prompt();
+    }
   }, [handleCredential, text, width, oneTap]);
+
+  useEffect(() => {
+    if (!CLIENT_ID) return;
+    return () => window.google?.accounts.id.cancel();
+  }, []);
 
   useEffect(() => {
     if (!CLIENT_ID) return;
