@@ -91,6 +91,15 @@ function Nvidia({ size }: { size: number }) {
   );
 }
 
+/** Meta's mark, for the Llama models. */
+function Meta({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="#0081FB" aria-hidden="true">
+      <path d="M6.9 4.5c-2.2 0-3.9 1.7-4.9 4C1.1 10.4.7 12.6.7 14.1c0 2.9 1.4 4.9 3.7 4.9 1.6 0 2.8-.8 4.8-4.3l1.4-2.5c.2-.3.3-.6.5-.9.2.3.3.6.5.9l2.1 3.6c1.9 3.1 3 3.2 4.3 3.2 2.3 0 3.6-2 3.6-5 0-1.6-.4-3.7-1.3-5.6-1-2.2-2.6-3.9-4.8-3.9-1.7 0-3 1.1-4.2 2.9C10 5.6 8.7 4.5 6.9 4.5zm-.1 2.7c1 0 1.8.7 2.8 2.2l-1 1.6c-1.7 2.9-2.3 3.6-3.3 3.6-.9 0-1.5-.8-1.5-2.3 0-1.2.3-2.7.9-4 .6-1.3 1.4-2.1 2.1-2.1zm10.3 0c.9 0 1.7.8 2.3 2.1.6 1.4.9 2.9.9 4.1 0 1.4-.5 2.3-1.5 2.3-.9 0-1.4-.6-3-3.3l-1.3-2.2c1.1-1.9 2-3 2.6-3z" />
+    </svg>
+  );
+}
+
 /** Cohere's mark. */
 function Cohere({ size }: { size: number }) {
   return (
@@ -123,6 +132,9 @@ export function ModelIcon({ id, size = 15 }: { id: string; size?: number }) {
       return <DeepSeek size={size} />;
     case "north-mini":
       return <Cohere size={size} />;
+    case "llama-fast":
+    case "llama-8b":
+      return <Meta size={size} />;
     default:
       return null;
   }

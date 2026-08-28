@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { usePlanScheduledPostMutation } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
-import { readPreferredModel } from "@/features/orbit/useOrbitChat";
 import { toDateInput, type Draft } from "../components/draft";
 
 export type PlanTurn = {
@@ -74,7 +73,11 @@ export function useOrbitPlan({
           dayOfMonth: draft.dayOfMonth,
         },
         now: localStamp(),
-        modelId: readPreferredModel(),
+        // No model is sent: the server picks. This used to forward the *chat
+        // panel's* picker value out of localStorage, which is a preference
+        // about support answers rather than about scheduling — and the models
+        // it names are the slow ones here, so a stale entry silently overrode
+        // the fast default and made every plan request take half a minute.
       }).unwrap();
 
       setTurns([
