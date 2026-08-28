@@ -11,6 +11,7 @@ import {
 import { useGetJourneyTimelineQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { dateTime } from "@/shared/lib";
@@ -98,6 +99,7 @@ export default function JourneyTimeline() {
                 <RotateCw size={16} className={isFetching ? "spin" : undefined} />
               </ActionIcon>
             </Tooltip>
+            <PageHelpButton />
             <Text
               component={Link}
               to="/app/journey"

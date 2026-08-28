@@ -6,6 +6,7 @@ import {
   FolderKanban, Globe, Code2,
   LayoutGrid, SlidersHorizontal, Users, UserPlus,
   PenLine, Clock, Link2,
+  Fingerprint, Route, Filter,
 } from "lucide-react";
 import type { TFunction } from "i18next";
 import type { HelpSection } from "@/shared/ui/HelpDrawer";
@@ -86,6 +87,13 @@ const SOCIAL_SPEC: SectionSpec[] = [
   { id: "accounts", icon: Link2, items: ["Connect", "Expired", "Disconnect"] },
 ];
 
+const JOURNEY_SPEC: SectionSpec[] = [
+  { id: "users", icon: Fingerprint, items: ["Who", "Id", "Search", "LastSeen"] },
+  { id: "steps", icon: Route, items: ["Shape", "Order", "Repeats", "Gaps"] },
+  { id: "filters", icon: Filter, items: ["Range", "Action", "Clear"] },
+  { id: "source", icon: Code2, items: ["Api", "NotTracker", "Missing"] },
+];
+
 /**
  * Route path to the help it opens.
  *
@@ -102,11 +110,24 @@ const PAGE_SPECS: Record<string, { ns: string; spec: SectionSpec[] }> = {
   "/app": { ns: "home", spec: HOME_SPEC },
   "/app/members": { ns: "members", spec: MEMBERS_SPEC },
   "/app/social": { ns: "social", spec: SOCIAL_SPEC },
+  "/app/journey": { ns: "journey", spec: JOURNEY_SPEC },
 };
+
+/**
+ * Resolve a pathname to its help entry.
+ *
+ * A single user's timeline lives under `/app/journey/<id>`, which no exact key
+ * can match — it falls back to the journey list's help, since the sections
+ * describe the same trace either way.
+ */
+function specFor(pathname: string) {
+  return PAGE_SPECS[pathname]
+    ?? (pathname.startsWith("/app/journey/") ? PAGE_SPECS["/app/journey"] : undefined);
+}
 
 /** Whether a route has help at all — cheap enough to call during render. */
 export function hasPageHelp(pathname: string): boolean {
-  return pathname in PAGE_SPECS;
+  return specFor(pathname) !== undefined;
 }
 
 /**
@@ -119,7 +140,7 @@ export function getPageHelp(
   pathname: string,
   t: TFunction,
 ): { title: string; sections: HelpSection[] } | null {
-  const entry = PAGE_SPECS[pathname];
+  const entry = specFor(pathname);
   if (!entry) return null;
 
   const { ns, spec } = entry;

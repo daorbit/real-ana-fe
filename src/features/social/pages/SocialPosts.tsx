@@ -4,6 +4,7 @@ import {
 } from "@mantine/core";
 import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
+import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { useWorkspace } from "@/features/workspace/context";
 import { modals } from "@mantine/modals";
 import { notify, notifyError } from "@/shared/lib/notify";
@@ -353,6 +354,8 @@ export default function SocialPosts() {
               <RefreshCw size={16} />
             </ActionIcon>
           </Tooltip>
+
+          <PageHelpButton />
 
           <Tooltip
             label={!ready ? "Connect an account first" : "This workspace's scheduled posts are full"}
