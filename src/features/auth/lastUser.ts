@@ -1,21 +1,12 @@
 import type { User } from "@/shared/types";
 
-/**
- * A memory of who signed in last on this browser, so the login screen can
- * offer a one-tap way back in instead of a blank form.
- *
- * Deliberately small and non-sensitive: a name, an address, an avatar URL, and
- * which method was used. No token, no password — signing back in still goes
- * through the real flow. Kept across logout (that is the whole point) and
- * cleared only when the reader picks "use another account".
- */
+ 
 const KEY = "quantalog_last_user";
 
 export type LastUser = {
   name: string;
   email: string;
   avatarUrl: string;
-  /** How they got in last time, so the card can lead with the right button. */
   method: "password" | "google" | "linkedin";
 };
 
