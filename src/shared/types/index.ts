@@ -1153,9 +1153,11 @@ export type Marker = {
 export type JourneyUser = {
   appUserId: string;
   lastSeen: string;
+  firstSeen: string;
   lastAction: string;
   siteId: string;
   eventCount: number;
+  sessionCount: number;
 };
 
 /** One step of a user's journey: what happened, and where it went. */

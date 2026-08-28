@@ -1323,14 +1323,29 @@ export const api = createApi({
      */
     /** Recently active identified users — the entry point into their journey. */
     getJourneyUsers: build.query<
-      { users: JourneyUser[]; total: number; page: number; pageSize: number },
-      { wid: string; q?: string; sites?: string[]; page?: number }
+      {
+        users: JourneyUser[];
+        total: number;
+        summary: { users: number; events: number; activeToday: number };
+        page: number;
+        pageSize: number;
+      },
+      {
+        wid: string;
+        q?: string;
+        sites?: string[];
+        page?: number;
+        sort?: "recent" | "events" | "new";
+        filter?: "all" | "active";
+      }
     >({
-      query: ({ wid, q, sites, page }) => {
+      query: ({ wid, q, sites, page, sort, filter }) => {
         const qs = new URLSearchParams();
         if (q) qs.set("q", q);
         if (sites?.length) qs.set("sites", sites.join(","));
         if (page) qs.set("page", String(page));
+        if (sort && sort !== "recent") qs.set("sort", sort);
+        if (filter === "active") qs.set("filter", "active");
         const suffix = qs.toString() ? `?${qs}` : "";
         return `/api/workspaces/${wid}/users${suffix}`;
       },
