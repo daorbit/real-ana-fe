@@ -38,12 +38,12 @@ export function UpgradeDialog({
   return (
     <div className="upgrade-dialog">
       <div className="aurora-wash" />
-      <Stack className="upgrade-dialog__body" align="center" gap="sm">
+      <Stack className="upgrade-dialog__body" align="center" gap="lg">
         <div className="upgrade-dialog__seal">
           <Lock size={24} strokeWidth={1.8} />
         </div>
 
-        <Stack align="center" gap={6}>
+        <Stack align="center" gap={10}>
           {limit?.plan && (
             <Badge size="sm" radius="sm" variant="light" color="emerald">
               {limit.plan} plan
@@ -59,7 +59,7 @@ export function UpgradeDialog({
         </Text>
 
         {showMeter && (
-          <Stack gap={6} w="100%" maw={300}>
+          <Stack gap={10} w="100%" maw={300}>
             <div className="upgrade-dialog__meter">
               <div className="upgrade-dialog__meter-fill" />
             </div>
@@ -74,7 +74,7 @@ export function UpgradeDialog({
           </Stack>
         )}
 
-        <Group mt="xs" gap="sm">
+        <Group mt={4} gap="sm">
           <Button variant="subtle" color="gray" onClick={onDismiss}>
             Not now
           </Button>

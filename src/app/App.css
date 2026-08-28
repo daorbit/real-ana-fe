@@ -2010,6 +2010,25 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .last-user-pop {
   box-shadow: var(--shadow);
 }
+/* The continue button is a shortcut, not the screen's main action, so it sits
+   at the weight of a row rather than a slab: a light fill, a hairline that
+   firms up on hover, and the arrow sliding the way the click goes. */
+.last-user-pop__continue {
+  border: 1px solid var(--mantine-color-default-border);
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.last-user-pop__continue:hover {
+  border-color: var(--accent-2, var(--mantine-color-emerald-6));
+}
+.last-user-pop__continue svg {
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.last-user-pop__continue:hover svg {
+  transform: translateX(3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .last-user-pop__continue svg { transition: none; }
+}
 @media (max-width: 48em) {
   .last-user-slot {
     top: 12px;

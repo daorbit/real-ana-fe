@@ -18,7 +18,7 @@
 .upgrade-dialog__body {
   position: relative;
   z-index: 1;
-  padding: 26px 24px 22px;
+  padding: 30px 26px 24px;
 }
 
 /* Entrance. Short and slightly overshooting — the dialog interrupts a click,

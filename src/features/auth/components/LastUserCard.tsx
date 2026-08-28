@@ -48,11 +48,18 @@ export function LastUserCard({
         </Stack>
       </Group>
 
+      {/* Trailing arrow, not leading: the arrow points at where the click goes,
+          and in front of the label it reads as a bullet. `variant="light"` keeps
+          this a suggestion — the real submit button is the one in the form
+          below, and two solid buttons on one screen compete for the same act. */}
       <Button
+        className="last-user-pop__continue"
         fullWidth
         size="sm"
-        leftSection={<ArrowRight size={14} />}
+        variant="light"
+        rightSection={<ArrowRight size={14} />}
         onClick={onContinue}
+        styles={{ inner: { justifyContent: "space-between" } }}
       >
         Continue as {firstName}
       </Button>
