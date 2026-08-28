@@ -327,19 +327,12 @@ export default function Settings() {
   return (
     <AppShell>
       <form onSubmit={submit}>
+        {/* No Save action up here: it duplicated the sticky bar below, which is
+            the one place changes are saved from and only shows when there is
+            something to save. */}
         <PageHeader
           title={t("settings.title")}
           description={t("settings.description")}
-          actions={
-            <Button
-              type="submit"
-              leftSection={<Save size={15} />}
-              loading={saving}
-              disabled={!dirty}
-            >
-              {t("common.save")}
-            </Button>
-          }
         />
 
         <Tabs defaultValue="info" keepMounted={false}>
