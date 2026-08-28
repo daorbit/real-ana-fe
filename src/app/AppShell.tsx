@@ -10,6 +10,7 @@ import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { useSyncWorkspaceTheme } from "@/features/auth/components/useSyncWorkspaceTheme";
 import { CommandPalette } from "@/shared/ui/CommandPalette";
 import { QuotaNudge } from "@/shared/ui/QuotaNudge";
+import { PlanExpiryNotice } from "@/shared/ui/PlanExpiryNotice";
 import { OfflineBar } from "@/shared/ui/OfflineBar";
 import { FetchProgress } from "@/shared/ui/FetchProgress";
 import { useDemo } from "@/features/demo/context";
@@ -102,6 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="app-panel">
             <div className="app-panel__scroll">
         
+              <PlanExpiryNotice />
               <QuotaNudge />
               <div key={loc.pathname} className="route-fade">
                 {children}

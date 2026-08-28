@@ -42,6 +42,7 @@ export const demoWorkspaces: Workspace[] = [
     billing: {
       workspaceId: DEMO_WORKSPACE_ID,
       plan: { slug: "pro", name: "Pro" },
+      lapsedPlan: null,
       cycle: "monthly",
       status: "active",
       currentPeriodEnd: iso(-25 * DAY),

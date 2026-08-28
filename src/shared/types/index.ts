@@ -517,6 +517,8 @@ export const MAX_SITES_PER_WORKSPACE = 2;
 export type QuotaSummary = {
   workspaceId: string;
   plan: { slug: string; name: string };
+  /** The plan that lapsed, when one has. Null while the period is live. */
+  lapsedPlan: { slug: string; name: string } | null;
   cycle: BillingCycle;
   status: "active" | "expired";
   currentPeriodEnd: string | null;
