@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useComputedColorScheme, Center, Loader } from "@mantine/core";
+import { useComputedColorScheme } from "@mantine/core";
 import { FolderOpen } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -50,31 +50,8 @@ export default function LeadCapture() {
    * keeps working if this fails, which is why a failure leaves the frame to
    * load rather than blocking it.
    */
-  const [formsToken, setFormsToken] = useState<string | null>(null);
   const workspaceId = isDemo ? null : active?._id;
 
-  useEffect(() => {
-    if (!workspaceId) {
-      setFormsToken(null);
-      return;
-    }
-    let cancelled = false;
-    api
-      .post<{ token: string }>(`/api/workspaces/${workspaceId}/forms-token`, {})
-      .then((res) => {
-        if (!cancelled) setFormsToken(res.token);
-      })
-      .catch(() => {
-        // A viewer has no editor role and gets no token — correct, and not an
-        // error worth showing: they simply cannot reach the forms app's
-        // workspace routes.
-        if (!cancelled) setFormsToken(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [workspaceId]);
- 
   useEffect(() => {
     if (!workspaceId) return;
     function onMessage(event: MessageEvent) {
@@ -84,13 +61,17 @@ export default function LeadCapture() {
       api
         .post<{ token: string }>(`/api/workspaces/${workspaceId}/forms-token`, {})
         .then((res) => {
-          setFormsToken(res.token);
+          // Targeted at the forms app's own origin rather than "*": this is a
+          // credential, and it goes to the frame that asked for it, nobody else.
           frame.postMessage(
             { type: "quantalog:workspace-token", token: res.token },
             LEAD_FORMS_BASE,
           );
         })
         .catch(() => {
+          // A viewer has no editor role and gets no token. Answering with an
+          // empty one lets the frame stop waiting and say so, rather than
+          // hanging until its own timeout.
           frame.postMessage(
             { type: "quantalog:workspace-token", token: "" },
             LEAD_FORMS_BASE,
@@ -109,28 +90,16 @@ export default function LeadCapture() {
       // forms app knows — it goes to the sample workspace regardless.
       const frameWorkspace = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
       if (!frameWorkspace) return null;
-      // The frame waits for its token: loading without one would leave the
-      // forms app making calls it cannot authorise, and every one of them
-      // would fail before the token arrived.
-      if (!isDemo && !formsToken) return null;
+      // Loaded without waiting for the token. The forms app has its own
+      // loading state for its own screens, and that is a better wait than a
+      // blank parent guessing at what those screens look like — it asks for a
+      // token over postMessage as soon as it needs one.
       const url = leadFormsUrl(`/${frameWorkspace}/forms`, colorScheme);
-      const token = formsToken ? `&wt=${encodeURIComponent(formsToken)}` : "";
-      return `${url}&themeRevision=${themeVersion}${token}`;
+      return `${url}&themeRevision=${themeVersion}`;
     },
- 
-    [active, isDemo, colorScheme, themeVersion, formsToken === null],
+    [active, isDemo, colorScheme, themeVersion],
   );
  
-  if (!src && workspaceId) {
-    return (
-      <AppShell>
-        <Center h="60vh">
-          <Loader size="sm" />
-        </Center>
-      </AppShell>
-    );
-  }
-
   if (!src) {
     return (
       <AppShell>
