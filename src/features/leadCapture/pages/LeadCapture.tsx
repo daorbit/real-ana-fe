@@ -9,6 +9,7 @@ import { leadFormsUrl } from "../themeParams";
 import { useEmbeddedPlanLimit } from "../useEmbeddedPlanLimit";
 import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
+import { api } from "@/shared/lib/http";
 
 /**
  * The forms app's own read-only workspace: sample forms, an editor to explore,
@@ -37,6 +38,40 @@ export default function LeadCapture() {
     return () => window.removeEventListener("quantalog-theme-change", refresh);
   }, []);
 
+  /**
+   * Proof for the forms app that this session may act for the workspace.
+   *
+   * A workspace id in an iframe URL says nothing about who is looking at it,
+   * and the forms app needs more than that before it will hand over or change
+   * the workspace's payment credentials. The session lives here, so the token
+   * is minted here and travels with the frame.
+   *
+   * Only the payment settings require it — everything else in the forms app
+   * keeps working if this fails, which is why a failure leaves the frame to
+   * load rather than blocking it.
+   */
+  const [formsToken, setFormsToken] = useState<string | null>(null);
+  useEffect(() => {
+    if (isDemo || !active?._id) {
+      setFormsToken(null);
+      return;
+    }
+    let cancelled = false;
+    api
+      .post<{ token: string }>(`/workspaces/${active._id}/forms-token`, {})
+      .then((res) => {
+        if (!cancelled) setFormsToken(res.token);
+      })
+      .catch(() => {
+        // A viewer has no editor role and gets no token — correct, and not an
+        // error worth showing: they simply cannot reach payment settings.
+        if (!cancelled) setFormsToken(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [active?._id, isDemo]);
+
   // Rebuilt only when the workspace changes: a new src reloads the frame, and
   // doing that on every render would throw away whatever was being edited.
   const src = useMemo(
@@ -46,9 +81,10 @@ export default function LeadCapture() {
       const workspaceId = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
       if (!workspaceId) return null;
       const url = leadFormsUrl(`/${workspaceId}/forms`, colorScheme);
-      return `${url}&themeRevision=${themeVersion}`;
+      const token = formsToken ? `&wt=${encodeURIComponent(formsToken)}` : "";
+      return `${url}&themeRevision=${themeVersion}${token}`;
     },
-    [active, isDemo, colorScheme, themeVersion],
+    [active, isDemo, colorScheme, themeVersion, formsToken],
   );
 
   if (!src) {
