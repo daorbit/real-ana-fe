@@ -58,7 +58,7 @@ export default function LeadCapture() {
     }
     let cancelled = false;
     api
-      .post<{ token: string }>(`/workspaces/${active._id}/forms-token`, {})
+      .post<{ token: string }>(`/api/workspaces/${active._id}/forms-token`, {})
       .then((res) => {
         if (!cancelled) setFormsToken(res.token);
       })
