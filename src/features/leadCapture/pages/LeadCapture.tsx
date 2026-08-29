@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useComputedColorScheme } from "@mantine/core";
+import { useComputedColorScheme, Center, Loader } from "@mantine/core";
 import { FolderOpen } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
-import { leadFormsUrl } from "../themeParams";
+import { leadFormsUrl, LEAD_FORMS_BASE } from "../themeParams";
 import { useEmbeddedPlanLimit } from "../useEmbeddedPlanLimit";
 import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -51,26 +51,55 @@ export default function LeadCapture() {
    * load rather than blocking it.
    */
   const [formsToken, setFormsToken] = useState<string | null>(null);
+  const workspaceId = isDemo ? null : active?._id;
+
   useEffect(() => {
-    if (isDemo || !active?._id) {
+    if (!workspaceId) {
       setFormsToken(null);
       return;
     }
     let cancelled = false;
     api
-      .post<{ token: string }>(`/api/workspaces/${active._id}/forms-token`, {})
+      .post<{ token: string }>(`/api/workspaces/${workspaceId}/forms-token`, {})
       .then((res) => {
         if (!cancelled) setFormsToken(res.token);
       })
       .catch(() => {
         // A viewer has no editor role and gets no token — correct, and not an
-        // error worth showing: they simply cannot reach payment settings.
+        // error worth showing: they simply cannot reach the forms app's
+        // workspace routes.
         if (!cancelled) setFormsToken(null);
       });
     return () => {
       cancelled = true;
     };
-  }, [active?._id, isDemo]);
+  }, [workspaceId]);
+ 
+  useEffect(() => {
+    if (!workspaceId) return;
+    function onMessage(event: MessageEvent) {
+      if (event.data?.type !== "quantalog:workspace-token-request") return;
+      const frame = event.source as Window | null;
+      if (!frame) return;
+      api
+        .post<{ token: string }>(`/api/workspaces/${workspaceId}/forms-token`, {})
+        .then((res) => {
+          setFormsToken(res.token);
+          frame.postMessage(
+            { type: "quantalog:workspace-token", token: res.token },
+            LEAD_FORMS_BASE,
+          );
+        })
+        .catch(() => {
+          frame.postMessage(
+            { type: "quantalog:workspace-token", token: "" },
+            LEAD_FORMS_BASE,
+          );
+        });
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [workspaceId]);
 
   // Rebuilt only when the workspace changes: a new src reloads the frame, and
   // doing that on every render would throw away whatever was being edited.
@@ -78,14 +107,29 @@ export default function LeadCapture() {
     () => {
       // A demo session's workspace id is a fixture, not a real workspace the
       // forms app knows — it goes to the sample workspace regardless.
-      const workspaceId = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
-      if (!workspaceId) return null;
-      const url = leadFormsUrl(`/${workspaceId}/forms`, colorScheme);
+      const frameWorkspace = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
+      if (!frameWorkspace) return null;
+      // The frame waits for its token: loading without one would leave the
+      // forms app making calls it cannot authorise, and every one of them
+      // would fail before the token arrived.
+      if (!isDemo && !formsToken) return null;
+      const url = leadFormsUrl(`/${frameWorkspace}/forms`, colorScheme);
       const token = formsToken ? `&wt=${encodeURIComponent(formsToken)}` : "";
       return `${url}&themeRevision=${themeVersion}${token}`;
     },
-    [active, isDemo, colorScheme, themeVersion, formsToken],
+ 
+    [active, isDemo, colorScheme, themeVersion, formsToken === null],
   );
+ 
+  if (!src && workspaceId) {
+    return (
+      <AppShell>
+        <Center h="60vh">
+          <Loader size="sm" />
+        </Center>
+      </AppShell>
+    );
+  }
 
   if (!src) {
     return (
