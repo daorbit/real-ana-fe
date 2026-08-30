@@ -1,4 +1,5 @@
 export { useStats } from "@/features/analytics/hooks/useStats";
+export { useLive } from "@/features/analytics/hooks/useLive";
 export { useLinkedInReturn } from "@/features/analytics/hooks/useLinkedInReturn";
 export { useSiteScope } from "@/features/analytics/hooks/useSiteScope";
 export { useHomeWidgets, WIDGETS, WIDGET_GROUPS, WIDGET_MAP } from "@/features/analytics/hooks/useHomeWidgets";

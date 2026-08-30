@@ -36,7 +36,7 @@ import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { SeoScoreCard } from "@/features/seo/components/SeoScoreCard";
 import { SortableWidget, WidgetDragPreview } from "@/shared/ui/SortableWidget";
 import { Onboarding } from "@/features/auth/components/Onboarding";
-import { useStats, useHomeWidgets, WIDGET_MAP, useLinkedInReturn, useSiteScope } from "@/features/analytics";
+import { useStats, useLive, useHomeWidgets, WIDGET_MAP, useLinkedInReturn, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
 import { useGetSeoReportsQuery, useGetMembersQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
@@ -132,8 +132,18 @@ function TrafficCard({ stats }: { stats: Stats | null }) {
   );
 }
 
-function LivePagesCard({ stats }: { stats: Stats | null }) {
-  const pages = stats?.livePages ?? [];
+/**
+ * Everything on this card is the five-minute window, so it reads from the live
+ * poll rather than the stats payload — the same numbers arrive in `stats`, but
+ * a minute behind.
+ */
+function LivePagesCard({
+  live,
+  pages,
+}: {
+  live: number;
+  pages: { key: string; count: number }[];
+}) {
   return (
     <Card withBorder radius="lg" padding="lg" h="100%">
       <Group justify="space-between" mb="md">
@@ -141,7 +151,7 @@ function LivePagesCard({ stats }: { stats: Stats | null }) {
           <span className="status-dot live" style={{ background: "var(--mantine-color-teal-6)" }} />
           <Text fw={600} c="dimmed" size="sm">Right now</Text>
         </Group>
-        <Badge variant="light" color="teal" size="sm">{stats?.live ?? 0}</Badge>
+        <Badge variant="light" color="teal" size="sm">{live}</Badge>
       </Group>
       {pages.length === 0 ? (
         <Center py="xl">
@@ -183,6 +193,9 @@ export default function Home() {
     undefined,
     siteScope,
   );
+  // The hero figure, on its own faster cycle — `stats.live` is the same number
+  // but only as fresh as the 60s stats poll.
+  const { live, livePages } = useLive(active?._id, undefined, siteScope);
   const { sites } = useSites(active?._id);
   const { demo } = useDemo();
 
@@ -271,7 +284,7 @@ export default function Home() {
   const METRICS: Record<string, any> = {
     visitors: { icon: Users, label: "Visitors", value: stats?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors" },
     pageviews: { icon: Eye, label: "Pageviews", value: stats?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views" },
-    live: { icon: Radio, label: "Live now", value: stats?.live ?? 0, color: "green", live: true },
+    live: { icon: Radio, label: "Live now", value: live, color: "green", live: true },
     sessions: { icon: Layers, label: "Sessions", value: stats?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null },
     bounce: { icon: MousePointerClick, label: "Bounce rate", value: `${stats?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true },
     avgSession: { icon: Timer, label: "Avg. session", value: duration(stats?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null },
@@ -310,7 +323,7 @@ export default function Home() {
       return <MiniList title={l.title} icon={l.icon} items={l.items} empty={l.empty} format={l.format} />;
     }
     if (id === "traffic") return <TrafficCard stats={stats} />;
-    if (id === "livePages") return <LivePagesCard stats={stats} />;
+    if (id === "livePages") return <LivePagesCard live={live} pages={livePages} />;
     if (id === "worldMap") return <WorldMap countries={stats?.countries ?? []} />;
     if (id === "clicks") return <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} />;
     if (id === "heatmap") return <Heatmap cells={stats?.heatmap ?? []} />;
@@ -441,7 +454,7 @@ export default function Home() {
       {!editing && !dirty && (
         <HomeHero
           workspaceName={active.name}
-          live={stats?.live ?? 0}
+          live={live}
           visitors={stats?.visitors ?? 0}
           pageviews={stats?.pageviews ?? 0}
           series={stats?.timeseries ?? []}

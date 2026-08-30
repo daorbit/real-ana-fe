@@ -28,6 +28,12 @@ export function resolveDemoRequest(url: string): unknown | undefined {
 
   // analytics
   if (/\/stats$/.test(path)) return demoStats(params.get("range") ?? "24h");
+  // Served from the same fixture the stats payload uses, so the hero figure and
+  // the live-pages panel agree with each other on a demo dashboard.
+  if (/\/live$/.test(path)) {
+    const s = demoStats("24h");
+    return { live: s.live, livePages: s.livePages };
+  }
   if (/\/retention$/.test(path)) return [];
   if (/\/funnel$/.test(path)) return { steps: [] };
   if (/\/user-flow$/.test(path)) return demoUserFlow();

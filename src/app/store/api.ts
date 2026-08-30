@@ -607,6 +607,31 @@ export const api = createApi({
       ],
     }),
 
+    /**
+     * Visitors online right now, on its own short poll.
+     *
+     * The figure is in `getStats` too, but that response is the whole dashboard
+     * and is refreshed on a slow cycle. A number labelled "online now" that is
+     * up to a minute stale reads as broken, so it is fetched separately at a
+     * rate the small payload can afford.
+     *
+     * Untagged on purpose: nothing invalidates it, the poll is what keeps it
+     * current, and giving it a Stats tag would drag it into every dashboard
+     * mutation's refetch.
+     */
+    getLive: build.query<
+      { live: number; livePages: { key: string; count: number }[] },
+      { workspaceId: string; filter?: string; sites?: string[] }
+    >({
+      query: ({ workspaceId, filter, sites }) => {
+        const qs = new URLSearchParams();
+        if (filter) qs.set("filter", filter);
+        if (sites && sites.length) qs.set("sites", sites.join(","));
+        const suffix = qs.toString();
+        return `/api/workspaces/${workspaceId}/live${suffix ? `?${suffix}` : ""}`;
+      },
+    }),
+
     getStatsCompare: build.query<
       { dimension: string; compare: CompareMode; rows: BreakdownComparisonRow[] },
       {
@@ -1754,6 +1779,7 @@ export const {
   useUpdateSiteOptionsMutation,
   useDeleteSiteMutation,
   useGetStatsQuery,
+  useGetLiveQuery,
   useGetStatsCompareQuery,
   useComputeFunnelMutation,
   useGetFunnelsQuery,
