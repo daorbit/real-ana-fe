@@ -52,6 +52,38 @@ export default function LeadCapture() {
    */
   const workspaceId = isDemo ? null : active?._id;
 
+  /**
+   * The token the frame boots with.
+   *
+   * Minted here before the frame is built, rather than left to the postMessage
+   * handshake below: the forms app's first workspace request goes out as it
+   * loads, and without a token already in hand that request is refused and has
+   * to be made again once one arrives. `undefined` means "not minted yet" and
+   * holds the frame back; `""` means the mint failed and the frame should load
+   * anyway, since only payment settings actually require one.
+   */
+  const [bootToken, setBootToken] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    let cancelled = false;
+    setBootToken(undefined);
+    api
+      .post<{ token: string }>(`/api/workspaces/${workspaceId}/forms-token`, {})
+      .then((res) => {
+        if (!cancelled) setBootToken(res.token);
+      })
+      .catch(() => {
+        // A viewer has no editor role and gets no token. The frame still loads
+        // — it is only the payment screens that need one, and they report the
+        // refusal themselves.
+        if (!cancelled) setBootToken("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceId]);
+
   useEffect(() => {
     if (!workspaceId) return;
     function onMessage(event: MessageEvent) {
@@ -90,17 +122,24 @@ export default function LeadCapture() {
       // forms app knows — it goes to the sample workspace regardless.
       const frameWorkspace = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
       if (!frameWorkspace) return null;
-      // Loaded without waiting for the token. The forms app has its own
-      // loading state for its own screens, and that is a better wait than a
-      // blank parent guessing at what those screens look like — it asks for a
-      // token over postMessage as soon as it needs one.
-      const url = leadFormsUrl(`/${frameWorkspace}/forms`, colorScheme);
+      // A demo session has no real workspace and mints no token, so it never
+      // waits for one. Otherwise hold until the mint settles: loading the frame
+      // first only means its opening request is refused and repeated.
+      if (!isDemo && bootToken === undefined) return null;
+      const url = leadFormsUrl(
+        `/${frameWorkspace}/forms`,
+        colorScheme,
+        isDemo ? undefined : bootToken,
+      );
       return `${url}&themeRevision=${themeVersion}`;
     },
-    [active, isDemo, colorScheme, themeVersion],
+    [active, isDemo, colorScheme, themeVersion, bootToken],
   );
  
-  if (!src) {
+  // There genuinely is no workspace to show — distinct from having one whose
+  // token is still being minted, which is a moment's wait rather than a state
+  // the reader has to act on.
+  if (!isDemo && !active?._id) {
     return (
       <AppShell>
         <EmptyState
@@ -112,6 +151,11 @@ export default function LeadCapture() {
       </AppShell>
     );
   }
+
+  // Minting the boot token. One API call, so this is a blank frame area for a
+  // moment rather than a screen worth dressing — and dressing it would only
+  // flash something the reader cannot use.
+  if (!src) return <AppShell><div className="lead-capture__frame" /></AppShell>;
 
   return (
     <AppShell>
