@@ -39,6 +39,7 @@ import {
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
+import { useSiteScope } from "@/features/analytics";
 
 const TABS = [
   { value: "overview", label: "Overview", icon: ListChecks },
@@ -295,7 +296,16 @@ export default function Seo() {
    * instead meant a render happened with the stale value before any effect
    * could clear it, and every query keyed on it went out and 404'd.
    */
-  const [picked, setPicked] = useState<string>("");
+  // Shared with Home's site filter (LS `rta_site_scope`, per workspace) so a
+  // site chosen on one page carries to the other. Home's scope is a list; SEO
+  // audits one site, so it reads/writes only the first entry.
+  const [siteScope, setSiteScope] = useSiteScope(workspaceId || undefined);
+  const [picked, setPicked] = useState<string>(siteScope[0] ?? "");
+
+  // Adopt the scope when it changes elsewhere (workspace switch, Home picker).
+  useEffect(() => {
+    setPicked(siteScope[0] ?? "");
+  }, [siteScope]);
   const [path, setPath] = useState("/");
   const [tab, setTab] = useState<TabValue>("overview");
   /** Set when the user opens an older report from history. */
@@ -518,7 +528,11 @@ export default function Seo() {
               label="Site"
               data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
               value={siteId}
-              onChange={(v) => v && setPicked(v)}
+              onChange={(v) => {
+                if (!v) return;
+                setPicked(v);
+                setSiteScope([v]);
+              }}
               allowDeselect={false}
               w={{ base: "100%", sm: 240 }}
               leftSection={<Globe size={15} />}
