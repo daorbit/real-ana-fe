@@ -1,15 +1,17 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Badge, Box, Group, Menu, Text, UnstyledButton,
 } from "@mantine/core";
 import {
-  BookOpen, ChevronsUpDown, FlaskConical, Languages, LogOut, Moon,
+  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LogOut, Moon,
   Settings as SettingsIcon, Sun,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { ACCOUNT_ITEMS } from "./navItems";
+import { RequestFeatureModal } from "./RequestFeatureModal";
 
 /**
  * Who is signed in, and everything that belongs to them rather than to a
@@ -44,8 +46,11 @@ export function AccountMenu({
   onLogout: () => void;
 }) {
   const { t } = useTranslation();
+  const [featureOpen, setFeatureOpen] = useState(false);
 
   return (
+    <>
+    <RequestFeatureModal opened={featureOpen} onClose={() => setFeatureOpen(false)} />
     <Menu
       position={mobile ? "top" : "right-end"}
       withArrow
@@ -180,6 +185,16 @@ export function AccountMenu({
           {t("nav.documentation")}
         </Menu.Item>
 
+        {/* Opens the hosted feature-request form in a modal rather than a new
+            tab, so the user stays in the app. */}
+        <Menu.Item
+          leftSection={<Lightbulb size={15} />}
+          onClick={() => setFeatureOpen(true)}
+          closeMenuOnClick={false}
+        >
+          {t("nav.requestFeature", "Request a feature")}
+        </Menu.Item>
+
         <Menu.Divider />
 
         {/* Mantine fills a coloured menu item solid on hover, which for a
@@ -195,5 +210,6 @@ export function AccountMenu({
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>
+    </>
   );
 }
