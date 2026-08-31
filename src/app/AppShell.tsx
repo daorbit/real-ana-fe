@@ -111,7 +111,9 @@ export function AppShell({ children }: { children: ReactNode }) {
          
               <div className="orbit-fab-spacer" />
             </div>
-            <OrbitBubble />
+            {/* Lead Capture carries its own assistant surface — a second
+                floating launcher on top of it is one too many. */}
+            {!loc.pathname.startsWith("/app/lead-capture") && <OrbitBubble />}
           </div>
         </MantineShell.Main>
       </MantineShell>
