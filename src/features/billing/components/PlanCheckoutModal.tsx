@@ -23,6 +23,7 @@ export function PlanCheckoutModal({
   coupon,
   onCoupon,
   busy,
+  renewal,
   onClose,
   onConfirm,
 }: {
@@ -33,6 +34,12 @@ export function PlanCheckoutModal({
   coupon: CouponCheckResult | null;
   onCoupon: (result: CouponCheckResult | null) => void;
   busy: boolean;
+  /**
+   * When this checkout renews the plan the workspace is already on, the ISO
+   * date the period will run to once paid — the current end plus one cycle.
+   * Null for any other purchase.
+   */
+  renewal: { newPeriodEnd: string } | null;
   onClose: () => void;
   onConfirm: (plan: Plan, selection: AddonSelection) => void;
 }) {
@@ -90,7 +97,11 @@ export function PlanCheckoutModal({
     <Modal
       opened
       onClose={onClose}
-      title={<Text fw={700}>{t("billing.confirmSubscription")}</Text>}
+      title={
+        <Text fw={700}>
+          {renewal ? t("billing.confirmRenewal", "Confirm renewal") : t("billing.confirmSubscription")}
+        </Text>
+      }
       centered
       radius="lg"
       size={980}
@@ -314,6 +325,21 @@ export function PlanCheckoutModal({
                         : "billing.oneTimeChargeMonth",
                     )}
               </Text>
+
+              {/* Renewing early stacks the new cycle onto the days already
+                  paid for rather than restarting from today — spell out the
+                  resulting end date so that is not a surprise. */}
+              {renewal && (
+                <Text size="xs" c="dimmed" ta="center" mt={-6}>
+                  {t("billing.renewalExtendsTo", {
+                    date: new Date(renewal.newPeriodEnd).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    }),
+                  })}
+                </Text>
+              )}
             </Stack>
           </Card>
         </Grid.Col>

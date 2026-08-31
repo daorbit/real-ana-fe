@@ -73,6 +73,25 @@ export default function Billing() {
   const loading = plansLoading || addonsLoading || billingLoading;
   const expired = usage?.status === "expired";
 
+  // A renewal is the current plan bought again, on its own cycle, before the
+  // period has lapsed. The server stacks another cycle onto the existing end
+  // date in that case; this mirrors the sum so the checkout dialog can show
+  // the resulting date.
+  const CYCLE_DAYS = cycle === "yearly" ? 365 : 30;
+  const renewal =
+    confirmPlan &&
+    usage &&
+    !expired &&
+    usage.plan.slug === confirmPlan.slug &&
+    usage.cycle === cycle &&
+    usage.currentPeriodEnd
+      ? {
+          newPeriodEnd: new Date(
+            new Date(usage.currentPeriodEnd).getTime() + CYCLE_DAYS * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+        }
+      : null;
+
   // The plan one tier above the current one is the one worth calling out —
   // sorted by monthly price, since that's the one axis every plan (including
   // Free) actually has.
@@ -210,6 +229,7 @@ export default function Billing() {
         coupon={planCoupon}
         onCoupon={setPlanCoupon}
         busy={!!confirmPlan && subscribing === confirmPlan.slug}
+        renewal={renewal}
         onClose={() => setConfirmPlan(null)}
         onConfirm={(plan, selection) => { setConfirmPlan(null); subscribe(plan, selection); }}
       />

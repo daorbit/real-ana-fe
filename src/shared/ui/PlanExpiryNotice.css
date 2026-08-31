@@ -31,15 +31,6 @@
   transform: translateY(0) scale(1);
 }
 
-/* Accent rail down the left edge, tone-coded. */
-.plan-notice::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--plan-notice-accent);
-}
-
 .plan-notice--ending {
   --plan-notice-accent: #d97706;
 }

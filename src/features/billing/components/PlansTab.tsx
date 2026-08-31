@@ -12,6 +12,13 @@ import { CURRENCIES, priceIn } from "@/shared/lib/currency";
 import { MAX_SITES_PER_WORKSPACE } from "@/shared/types";
 import type { BillingCycle, Plan, QuotaSummary, Currency } from "@/shared/types";
 
+ 
+const RENEW_WITHIN_DAYS = 7;
+
+function daysUntil(iso: string): number {
+  return Math.ceil((new Date(iso).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+}
+
 interface Props {
   plans: Plan[];
   usage: QuotaSummary;
@@ -89,6 +96,19 @@ export function PlansTab({
         const featured = plan.slug === featuredSlug && !current;
         const currentIndex = plans.findIndex((p) => p.slug === usage?.plan.slug);
         const lower = !expired && currentIndex > -1 && index < currentIndex;
+
+        // The current plan, on its own cycle, close enough to expiry to renew.
+        // Renewing on a *different* cycle is a plan change, not a renewal, and
+        // goes through the normal subscribe path — so it is gated on the cycle
+        // matching what the workspace is actually on.
+        const daysLeft = usage?.currentPeriodEnd ? daysUntil(usage.currentPeriodEnd) : null;
+        const renewable =
+          current &&
+          buyable &&
+          usage?.cycle === cycle &&
+          daysLeft !== null &&
+          daysLeft > 0 &&
+          daysLeft <= RENEW_WITHIN_DAYS;
         return (
           <Card
             key={plan.slug}
@@ -111,7 +131,13 @@ export function PlansTab({
  
             {(featured || current) && (
               <CornerRibbon
-                label={current ? t("billing.ribbonCurrent") : t("billing.ribbonRecommended")}
+                label={
+                  renewable
+                    ? t("billing.ribbonRenewSoon", "Renew soon")
+                    : current
+                      ? t("billing.ribbonCurrent")
+                      : t("billing.ribbonRecommended")
+                }
                 color={PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK}
                 background={PLAN_GRADIENTS[plan.slug]}
                 fg={PLAN_ON_ACCENT[plan.slug] ?? "#fff"}
@@ -169,8 +195,8 @@ export function PlansTab({
               size="md"
               radius="md"
               color="emerald"
-              variant={current ? "light" : featured ? "filled" : "outline"}
-              disabled={current || lower || !buyable || isDemo || !selectedWorkspaceId}
+              variant={renewable ? "filled" : current ? "light" : featured ? "filled" : "outline"}
+              disabled={(current && !renewable) || lower || !buyable || isDemo || !selectedWorkspaceId}
               loading={subscribing === plan.slug}
               leftSection={<CreditCard size={15} />}
               // The recommended plan's button carries that plan's
@@ -193,6 +219,7 @@ export function PlansTab({
               onClick={() => onPick(plan)}
             >
               {isDemo ? t("billing.ctaSignUpSubscribe")
+                : renewable ? t("billing.ctaRenew")
                 : current ? t("billing.ctaCurrentPlan")
                 : lower ? t("billing.ctaIncludedInPlan")
                 : !buyable ? t("billing.ctaIncludedFree")
