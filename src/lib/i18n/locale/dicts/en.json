@@ -1126,7 +1126,7 @@
     "oneMore": "One more",
     "confirmSubscription": "Confirm subscription",
     "confirmRenewal": "Confirm renewal",
-    "renewalExtendsTo": "Renewing now extends this plan to {{date}}.",
+    "renewalExtendsTo": "Renewing now extends this plan to {{date}} and starts a fresh allowance.",
     "addExtraCredits": "Add extra credits",
     "orderSummary": "Order summary",
     "subtotal": "Subtotal",
