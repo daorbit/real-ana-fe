@@ -3053,29 +3053,56 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .report-flow-canvas .react-flow__renderer,
 .report-flow-canvas .react-flow { background: transparent; }
 
-.report-flow-node {
+/* Scoped through the canvas so these win over polish.css's `.flow-node` rules,
+   which load after this file and would otherwise tie on specificity — that tie
+   is why the resting shadow was being replaced by the shared `--shadow-sm`. */
+/* The resting shadow is tinted with the node's own hue, not just black: on the
+   dark canvas a black drop shadow falls on an almost-black backdrop and reads
+   as no shadow at all, which is why it only appeared to exist on hover. */
+.report-flow-canvas .report-flow-node {
   width: 208px;
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.28),
-    0 10px 24px -8px rgba(0, 0, 0, 0.45);
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 8px 20px -8px color-mix(in srgb, var(--flow-rail) 28%, transparent),
+    0 2px 8px -2px rgba(0, 0, 0, 0.5);
 }
 
-.report-flow-node:hover {
+.report-flow-canvas .report-flow-node:hover {
   border-color: color-mix(in srgb, var(--flow-rail) 55%, var(--border));
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.3),
     0 14px 30px -8px color-mix(in srgb, var(--flow-rail) 30%, transparent);
 }
 
-/* The shared `.flow-node[data-selected]` rule paints the ring in the theme
-   accent, which made every selected node the same green regardless of its own
-   colour — and on a node whose rail already was that green, the ring vanished
-   into the border. Selection keeps the node's own hue. */
-.report-flow-node[data-selected] {
-  border-color: var(--flow-rail);
+/* Nothing marks a selected node: the graph is a preview, not an editor, so
+   clicking one selects nothing worth showing — and both React Flow's own
+   wrapper ring and polish.css's `.flow-node[data-selected]` painted it in a
+   fixed green that fought every node's own colour. Both are suppressed here. */
+.report-flow-canvas .react-flow__node,
+.report-flow-canvas .react-flow__node.selected,
+.report-flow-canvas .react-flow__node:focus,
+.report-flow-canvas .react-flow__node:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: none;
+  background: transparent;
+}
+
+.report-flow-canvas .report-flow-node[data-selected] {
+  border-color: var(--border);
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--flow-rail) 55%, transparent),
-    0 14px 30px -8px color-mix(in srgb, var(--flow-rail) 35%, transparent);
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 8px 20px -8px color-mix(in srgb, var(--flow-rail) 28%, transparent),
+    0 2px 8px -2px rgba(0, 0, 0, 0.5);
+}
+
+/* Hover still wins over the selected state above — a pointer on a node is the
+   one bit of feedback the preview does keep. */
+.report-flow-canvas .report-flow-node[data-selected]:hover {
+  border-color: color-mix(in srgb, var(--flow-rail) 55%, var(--border));
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 14px 30px -8px color-mix(in srgb, var(--flow-rail) 30%, transparent);
 }
 
 .report-flow-ic {
