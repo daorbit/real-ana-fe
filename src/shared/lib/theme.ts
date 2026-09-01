@@ -42,7 +42,7 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "graphite", label: "Graphite", hex: "#27272a" },
 ];
 
-export type BgKind = "flat" | "mesh" | "dots" | "lines" | "diagonal";
+export type BgKind = "flat" | "mesh" | "wash" | "dots" | "lines" | "diagonal";
 
 export type BgPreset = {
   id: string;
@@ -70,6 +70,17 @@ export const BG_STYLES: BgPreset[] = [
   { id: "dusk", label: "Mesh — Dusk", kind: "mesh", hues: ["#6366f1", "#4c1d95", "#ec4899"] },
   { id: "solar", label: "Mesh — Solar", kind: "mesh", hues: ["#fbbf24", "#f97316"] },
   { id: "mono", label: "Mesh — Mono", kind: "mesh", hues: ["#94a3b8", "#64748b"] },
+  // "wash" presets are full-bleed: one diagonal sweep through every hue plus a
+  // wide corner glow, rather than mesh's three small blobs over a flat base.
+  // The hue order is the order the sweep passes through them.
+  { id: "wash-nordic", label: "Wash — Nordic", kind: "wash", hues: ["#86efac", "#38bdf8", "#3b5bdb"] },
+  { id: "wash-twilight", label: "Wash — Twilight", kind: "wash", hues: ["#312e81", "#7c3aed", "#f472b6"] },
+  { id: "wash-horizon", label: "Wash — Horizon", kind: "wash", hues: ["#fb923c", "#e11d48", "#4c1d95"] },
+  { id: "wash-tidal", label: "Wash — Tidal", kind: "wash", hues: ["#0d9488", "#0ea5e9", "#1e3a8a"] },
+  { id: "wash-linen", label: "Wash — Linen", kind: "wash", hues: ["#fde68a", "#fca5a5", "#c084fc"] },
+  { id: "wash-basalt", label: "Wash — Basalt", kind: "wash", hues: ["#64748b", "#334155", "#0f172a"] },
+  { id: "wash-verdant", label: "Wash — Verdant", kind: "wash", hues: ["#a3e635", "#16a34a", "#0f766e"] },
+  { id: "wash-plum", label: "Wash — Plum", kind: "wash", hues: ["#f0abfc", "#a21caf", "#1e1b4b"] },
   { id: "grid", label: "Dot grid", kind: "dots" },
   { id: "lines", label: "Line grid", kind: "lines" },
   { id: "graph", label: "Graph paper", kind: "diagonal" },
@@ -197,6 +208,9 @@ const MESH_ANCHORS = [
   { pos: "90% 90%", alpha: 0.14, size: 55 },
 ];
 
+/** Per-stop strength of a "wash" preset's diagonal sweep. */
+const WASH_ALPHA = 0.3;
+
 /** Builds the CSS `background` value for a preset, resolved against `bg`
  *  (the current theme's base colour) and `border` (for grid line presets) —
  *  both passed in rather than read from CSS so this stays a pure function. */
@@ -210,6 +224,23 @@ export function buildBgValue(preset: BgPreset, bg: string, border: string): stri
       return `radial-gradient(at ${anchor.pos}, color-mix(in srgb, ${hue} ${anchor.alpha * 100}%, transparent), transparent ${anchor.size}%)`;
     });
     return `${layers.join(", ")}, ${bg}`;
+  }
+
+  if (preset.kind === "wash") {
+    const hues = preset.hues && preset.hues.length > 0 ? preset.hues : ["#3b82f6"];
+    // Stops are spread evenly along the sweep, and each hue is mixed down to a
+    // fraction of itself so text keeps its contrast — a wash covers the whole
+    // surface, so it has to sit far lighter than mesh's isolated blobs.
+    const stops = hues
+      .map((hue, i) => {
+        const pct = hues.length === 1 ? 50 : (i / (hues.length - 1)) * 100;
+        return `color-mix(in srgb, ${hue} ${WASH_ALPHA * 100}%, transparent) ${Math.round(pct)}%`;
+      })
+      .join(", ");
+    // The glow re-states the first hue in the top-left corner so the sweep has
+    // a light source rather than reading as a flat band.
+    const glow = `radial-gradient(120% 80% at 12% 8%, color-mix(in srgb, ${hues[0]} 18%, transparent), transparent 60%)`;
+    return `${glow}, linear-gradient(145deg, ${stops}), ${bg}`;
   }
 
   if (preset.kind === "dots") {
