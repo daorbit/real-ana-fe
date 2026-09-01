@@ -189,8 +189,15 @@ function JourneyRouteTracer() {
 // it understands. Identified journey tracing (trace() calls at click sites,
 // see shared/lib/analytics.ts) is separate and needs no mount here — each
 // call carries the logged-in user's id itself.
+//
+// Temporarily off: the script auto-captures pageviews and clicks (buttons,
+// sidebar menu items) with no per-site wiring, so the mount is skipped rather
+// than the call sites edited. Flip back to true to resume.
+const SELF_TRACKING_ENABLED = false;
+
 function SelfTracking() {
   useEffect(() => {
+    if (!SELF_TRACKING_ENABLED) return;
     const s = document.createElement("script");
     s.src = "https://quantalog-be.daorbit.in/tracker.js";
     s.async = true;

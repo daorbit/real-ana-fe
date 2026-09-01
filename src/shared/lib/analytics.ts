@@ -17,7 +17,17 @@ import { API_ORIGIN } from "@/shared/lib/http";
  */
 const JOURNEY_SITE_ID = "WdPhndWAd6-CrQsJ";
 
+/**
+ * Temporarily disabled: the ~120 trace() call sites (button clicks, sidebar
+ * menu items, dialog actions) stay where they are and keep compiling — the
+ * request is dropped here, in the one place that makes it, rather than by
+ * commenting each caller out. Delete this early return to switch tracking
+ * back on.
+ */
+const TRACKING_ENABLED = false;
+
 export function trace(userId: string | undefined, action: string, src?: string, dest?: string): void {
+  if (!TRACKING_ENABLED) return;
   if (!userId) return;
   fetch(`${API_ORIGIN}/api/track`, {
     method: "POST",
