@@ -3038,36 +3038,68 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--accent);
 }
 
-/* ---- Report dialog: preview document ---- */
-/* Paper-like, so it reads as the thing that will arrive rather than another
-   panel of the app's own chrome. */
-.report-preview-doc {
-  max-width: 520px; margin: 0 auto; padding: 1.75rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--mantine-radius-lg);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+/* ---- Report dialog: pipeline preview ----
+   The draft drawn as a graph (trigger, scope, content, delivery). Nodes reuse
+   the `.flow-node` shell from the journey/funnel graphs (polish.css) — only the
+   report-specific parts live here. */
+/* Frameless and transparent: the pane's own grid is the canvas backdrop, so a
+   card around the graph would have been a second surface over the same grid. */
+.report-flow-canvas {
+  flex: 1;
+  min-height: 320px;
+  min-width: 0;
 }
-.report-preview-head { padding-bottom: 1.1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.1rem; }
-.report-preview-kicker {
-  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.35rem;
-}
-.report-preview-title {
-  font-size: 1.3rem; font-weight: 700; line-height: 1.25;
-  letter-spacing: -0.01em; color: var(--text);
-}
-.report-preview-scope { font-size: 0.8rem; color: var(--mantine-color-dimmed); margin-top: 0.3rem; }
-.report-preview-section-ic {
-  width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+
+.report-flow-canvas .react-flow__renderer,
+.report-flow-canvas .react-flow { background: transparent; }
+
+.report-flow-node { width: 208px; }
+
+.report-flow-ic {
+  flex-shrink: 0;
+  width: 22px; height: 22px; border-radius: 7px;
   display: grid; place-items: center;
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--flow-rail) 16%, transparent);
+  color: var(--flow-rail);
 }
-.report-preview-empty {
-  padding: 1.5rem; text-align: center;
-  border: 1px dashed var(--border); border-radius: var(--mantine-radius-md);
+
+.report-flow-kicker {
+  margin-top: 6px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted);
 }
+
+.report-flow-detail {
+  margin-top: 2px;
+  font-size: 11px; color: var(--text-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* A live schedule pulses; paused ones are the warn state below, so the two
+   never have to be told apart by reading the text. */
+.report-flow-live {
+  flex-shrink: 0;
+  width: 7px; height: 7px; border-radius: 999px;
+  background: var(--green);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 55%, transparent);
+  animation: report-flow-pulse 1.9s ease-out infinite;
+}
+
+@keyframes report-flow-pulse {
+  70% { box-shadow: 0 0 0 6px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+[data-motion="off"] .report-flow-live { animation: none; }
+
+/* A step that would stop the report going out: no channel, nothing included,
+   or the whole schedule paused. */
+.report-flow-node[data-warn] {
+  border-color: color-mix(in srgb, var(--flow-rail) 45%, var(--border));
+  background: color-mix(in srgb, var(--flow-rail) 7%, var(--surface));
+}
+
+.report-flow-node[data-kind="empty"] { border-style: dashed; }
 
 .caption-editor {
   min-height: 210px;

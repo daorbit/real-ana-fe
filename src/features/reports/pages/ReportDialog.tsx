@@ -7,7 +7,7 @@ import type { Site, ShareState, WhatsAppStatus } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { TAB_ORDER } from "@/features/reports/pages/utils";
 import { ReportSteps } from "@/features/reports/components/ReportSteps";
-import { ReportPreview } from "@/features/reports/components/ReportPreview";
+import { ReportFlowPreview } from "@/features/reports/components/flow/ReportFlowPreview";
 import { ScheduleStep } from "@/features/reports/components/ScheduleStep";
 import { DeliveryStep } from "@/features/reports/components/DeliveryStep";
 import { ContentStep } from "@/features/reports/components/ContentStep";
@@ -190,14 +190,12 @@ export function ReportDialog({
             </Tooltip>
           </Group>
 
-          <Box style={{ flex: 1, display: "flex", alignItems: "center", minHeight: 0 }}>
-            <Box w="100%">
-              <ReportPreview
-                draft={draft}
-                sites={sites}
-                shareEnabled={Boolean(share?.enabled)}
-              />
-            </Box>
+          <Box style={{ flex: 1, display: "flex", minHeight: 0 }}>
+            <ReportFlowPreview
+              draft={draft}
+              sites={sites}
+              shareEnabled={Boolean(share?.enabled)}
+            />
           </Box>
         </Box>
       </Group>

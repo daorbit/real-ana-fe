@@ -1086,7 +1086,14 @@
     "previewHint": "Updates as you change the form. This is the shape of the report, not real figures.",
     "previewEmpty": "Nothing selected yet — this report would arrive empty.",
     "previewNoChannel": "No delivery channel",
-    "previewPaused": "Paused"
+    "previewPaused": "Paused",
+    "previewFlowTrigger": "Trigger",
+    "previewFlowScope": "Scope",
+    "previewFlowSection": "Content",
+    "previewFlowDelivery": "Delivery",
+    "previewFlowMoreSites": "more",
+    "previewFlowRecipients": "recipients",
+    "previewFlowNothing": "Nothing included"
   },
   "billing": {
     "title": "Billing",
