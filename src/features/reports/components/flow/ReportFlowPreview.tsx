@@ -23,6 +23,21 @@ const nodeTypes = { report: ReportFlowNode };
 /** Columns of the pipeline, left to right. */
 const COL = { trigger: 0, scope: 1, section: 2, channel: 3 };
 
+/**
+ * One colour per node, walked in order down the graph.
+ *
+ * Fixed hues rather than the theme accent: the accent is the user's own choice
+ * and would collide with whichever entry matched it, and the point here is that
+ * no two nodes share a colour. Ordered so neighbours in the pipeline are far
+ * apart on the wheel.
+ */
+const HUES = [
+  "#22d3ee", "#a78bfa", "#34d399", "#f472b6", "#facc15",
+  "#60a5fa", "#fb923c", "#2dd4bf", "#e879f9", "#4ade80",
+];
+
+const hueAt = (i: number) => HUES[i % HUES.length];
+
 /** Centres a column's rows against the tallest column, so the pipeline reads as
  *  one horizontal band instead of every column starting at the top. */
 function laneY(index: number, count: number, tallest: number) {
@@ -97,6 +112,11 @@ function ReportFlowCanvas({
     const tallest = Math.max(sectionNodes.length, channelNodes.length, 1);
 
     const recipientCount = draft.recipients.length;
+    // Hues are handed out in pipeline order, so an edge can be painted with its
+    // source node's colour and the two read as the same strand.
+    const sectionHue = (i: number) => hueAt(2 + i);
+    const channelHue = (i: number) => hueAt(2 + sectionNodes.length + i);
+
     const nodes: Node[] = [
       {
         id: "trigger",
@@ -111,6 +131,7 @@ function ReportFlowCanvas({
           detail: draft.name.trim() || t("reports.namePlaceholder"),
           live: draft.enabled,
           warn: !draft.enabled,
+          hue: hueAt(0),
         } satisfies ReportFlowNodeData,
       },
       {
@@ -126,6 +147,7 @@ function ReportFlowCanvas({
           detail: scopeNames.length > 1
             ? `+${scopeNames.length - 1} ${t("reports.previewFlowMoreSites", "more")}`
             : undefined,
+          hue: hueAt(1),
         } satisfies ReportFlowNodeData,
       },
       ...sectionNodes.map((s, i) => ({
@@ -139,6 +161,7 @@ function ReportFlowCanvas({
           kicker: t("reports.previewFlowSection", "Content"),
           title: s.title,
           warn: !sections.length,
+          hue: sectionHue(i),
         } satisfies ReportFlowNodeData,
       })),
       ...channelNodes.map((c, i) => ({
@@ -155,6 +178,7 @@ function ReportFlowCanvas({
             ? `${recipientCount} ${t("reports.previewFlowRecipients", "recipients")}`
             : undefined,
           warn: !channels.length,
+          hue: channelHue(i),
         } satisfies ReportFlowNodeData,
       })),
     ];
@@ -162,35 +186,46 @@ function ReportFlowCanvas({
     // Dashed travelling edges: the point of the picture is that data moves
     // along it on a schedule, and a static line reads as a diagram of
     // structure rather than of a run.
-    const edge = (id: string, source: string, target: string, dim?: boolean): Edge => ({
-      id,
-      source,
-      target,
-      type: "smoothstep",
-      pathOptions: { borderRadius: 16 },
-      animated: !dim,
-      style: {
-        stroke: dim ? "var(--border-strong)" : "var(--accent-2)",
-        strokeWidth: dim ? 1.2 : 1.6,
-      },
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        color: dim ? "var(--border-strong)" : "var(--accent-2)",
-        width: 13,
-        height: 13,
-      },
-    });
+    // Each edge is painted in the colour of the node it leaves, so a branch can
+    // be followed across the fan-out by colour instead of by tracing the line.
+    const edge = (
+      id: string,
+      source: string,
+      target: string,
+      hue: string,
+      dim?: boolean,
+    ): Edge => {
+      const stroke = dim ? "var(--border-strong)" : hue;
+      return {
+        id,
+        source,
+        target,
+        type: "smoothstep",
+        pathOptions: { borderRadius: 16 },
+        animated: !dim,
+        style: { stroke, strokeWidth: dim ? 1.2 : 1.6 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 13, height: 13 },
+      };
+    };
 
     const dimSections = !sections.length;
     const dimChannels = !channels.length;
     const edges: Edge[] = [
-      edge("e-trigger-scope", "trigger", "scope", !draft.enabled),
-      ...sectionNodes.map((s) => edge(`e-scope-${s.id}`, "scope", `section-${s.id}`, dimSections)),
+      edge("e-trigger-scope", "trigger", "scope", hueAt(0), !draft.enabled),
+      ...sectionNodes.map((s, i) =>
+        edge(`e-scope-${s.id}`, "scope", `section-${s.id}`, sectionHue(i), dimSections),
+      ),
       // Each section feeds every channel: the whole document goes out on each
       // one, so a per-channel subset would be a lie about what is sent.
-      ...sectionNodes.flatMap((s) =>
+      ...sectionNodes.flatMap((s, i) =>
         channelNodes.map((c) =>
-          edge(`e-${s.id}-${c.id}`, `section-${s.id}`, `channel-${c.id}`, dimSections || dimChannels),
+          edge(
+            `e-${s.id}-${c.id}`,
+            `section-${s.id}`,
+            `channel-${c.id}`,
+            sectionHue(i),
+            dimSections || dimChannels,
+          ),
         ),
       ),
     ];

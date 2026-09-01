@@ -3053,7 +3053,30 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .report-flow-canvas .react-flow__renderer,
 .report-flow-canvas .react-flow { background: transparent; }
 
-.report-flow-node { width: 208px; }
+.report-flow-node {
+  width: 208px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.28),
+    0 10px 24px -8px rgba(0, 0, 0, 0.45);
+}
+
+.report-flow-node:hover {
+  border-color: color-mix(in srgb, var(--flow-rail) 55%, var(--border));
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 14px 30px -8px color-mix(in srgb, var(--flow-rail) 30%, transparent);
+}
+
+/* The shared `.flow-node[data-selected]` rule paints the ring in the theme
+   accent, which made every selected node the same green regardless of its own
+   colour — and on a node whose rail already was that green, the ring vanished
+   into the border. Selection keeps the node's own hue. */
+.report-flow-node[data-selected] {
+  border-color: var(--flow-rail);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--flow-rail) 55%, transparent),
+    0 14px 30px -8px color-mix(in srgb, var(--flow-rail) 35%, transparent);
+}
 
 .report-flow-ic {
   flex-shrink: 0;

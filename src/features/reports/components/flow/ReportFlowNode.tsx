@@ -20,15 +20,12 @@ export interface ReportFlowNodeData extends Record<string, unknown> {
   /** A problem with this step — no channel selected, no recipients. Paints the
    *  node red rather than only failing on save. */
   warn?: boolean;
+  /** This node's own colour, from REPORT_FLOW_HUES. Every node in the graph
+   *  gets a distinct one so a node and the edge leaving it can be matched by
+   *  eye — with one colour per kind, four content branches were the same
+   *  green and told apart only by reading them. */
+  hue: string;
 }
-
-const RAIL: Record<ReportNodeKind, string> = {
-  trigger: "var(--accent-2)",
-  scope: "var(--cyan)",
-  section: "var(--green)",
-  channel: "var(--pink)",
-  empty: "var(--border-strong)",
-};
 
 /**
  * One step of a report schedule drawn as a pipeline node.
@@ -41,8 +38,8 @@ export const ReportFlowNode = memo(function ReportFlowNode({
   data,
   selected,
 }: NodeProps & { data: ReportFlowNodeData }) {
-  const { kind, Icon, kicker, title, detail, live, warn } = data;
-  const rail = warn ? "var(--amber)" : RAIL[kind];
+  const { kind, Icon, kicker, title, detail, live, warn, hue } = data;
+  const rail = warn ? "var(--amber)" : hue;
 
   return (
     <div
