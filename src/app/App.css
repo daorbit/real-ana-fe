@@ -2616,9 +2616,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .seo-serp-title:hover { text-decoration: underline; }
 [data-mantine-color-scheme="light"] .seo-serp-title { color: #1a0dab; }
 
-/* Report tables read as a data grid: quiet uppercase headers on a faint bar,
-   hairline row rules, and a comfortable header height. Applied across every
-   tab's table at once. */
+
 .seo-report table thead th {
   font-size: 11px !important;
   font-weight: 650 !important;
@@ -2635,8 +2633,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .seo-report table tbody tr:last-child td { border-bottom: 0 !important; }
 
-/* A quiet segmented control for in-panel filters — one recessed track with a
-   raised active segment, in place of a row of coloured buttons. */
+
 .seo-segment {
   display: inline-flex;
   gap: 2px;
@@ -2664,8 +2661,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   box-shadow: var(--seo-elev, var(--shadow-sm));
 }
 
-/* Image thumbnail in the SEO content table. The eye overlay only appears on
-   hover, so a column of thumbnails reads as images rather than as buttons. */
+
 .seo-thumb {
   position: relative;
   cursor: zoom-in;
@@ -2691,9 +2687,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   opacity: 1;
 }
 
-/* ============ Help drawer ============
-   A right-side drawer: a section nav on the left, the selected section's help
-   on the right. Reused from any page that passes it a set of help sections. */
 .help-drawer {
   display: flex;
   flex-direction: column;
@@ -2754,7 +2747,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .help-pane { min-width: 0; }
 
-/* A section's items read as a definition list — the "tooltip", written out. */
 .help-items { display: flex; flex-direction: column; }
 .help-item {
   padding: 14px 0;
@@ -2762,9 +2754,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .help-item:first-child { padding-top: 0; border-top: 0; }
 
-/* Demo-session card in the sidebar. Present enough to explain why actions are
-   disabled, quiet enough that it isn't the loudest thing on the page — the way
-   out is a text link, not a call to action. */
+
 .demo-card {
   padding: 9px 10px;
   border-radius: var(--radius-sm);
@@ -2806,8 +2796,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .impersonation-exit:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .impersonation-exit:disabled { opacity: 0.5; cursor: default; text-decoration: none; }
 
-/* Contact inbox: list beside a reading pane, stacking below the width where
-   340px of list leaves the message itself unreadable. */
+
 @media (max-width: 62em) {
   .contact-layout {
     grid-template-columns: minmax(0, 1fr) !important;
@@ -2884,8 +2873,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   box-shadow: 0 0 0 1px var(--accent-2), var(--shadow);
 }
 
-/* A dot rather than a tick: these are attributes of the option, not a
-   checklist of things already done. */
+
 .wizard-choice-dot {
   width: 4px;
   height: 4px;
@@ -2955,8 +2943,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   min-width: 0;
   height: 100%;
   overflow-y: auto;
-  /* Centred vertically, so the mock sits in the pane rather than hanging from
-     its top edge on a tall screen. */
+
   display: flex;
   flex-direction: column;
   padding: 24px 28px 32px;
@@ -2964,8 +2951,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     linear-gradient(to right, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
     linear-gradient(to bottom, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
     var(--bg);
-  /* The grid is scaffolding, not content — it should read as texture behind
-     the preview rather than competing with it. */
+
   background-blend-mode: normal;
 }
 [data-mantine-color-scheme="light"] .share-post-preview {
@@ -3002,7 +2988,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .share-post-tab:hover { color: var(--text) !important; }
 .share-post-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
-/* ---- Report dialog: numbered step strip ---- */
 .report-steps { overflow-x: auto; scrollbar-width: none; }
 .report-steps::-webkit-scrollbar { display: none; }
 .report-step {
@@ -3038,12 +3023,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--accent);
 }
 
-/* ---- Report dialog: pipeline preview ----
-   The draft drawn as a graph (trigger, scope, content, delivery). Nodes reuse
-   the `.flow-node` shell from the journey/funnel graphs (polish.css) — only the
-   report-specific parts live here. */
-/* Frameless and transparent: the pane's own grid is the canvas backdrop, so a
-   card around the graph would have been a second surface over the same grid. */
+ 
 .report-flow-canvas {
   flex: 1;
   min-height: 320px;
@@ -3053,12 +3033,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .report-flow-canvas .react-flow__renderer,
 .report-flow-canvas .react-flow { background: transparent; }
 
-/* Scoped through the canvas so these win over polish.css's `.flow-node` rules,
-   which load after this file and would otherwise tie on specificity — that tie
-   is why the resting shadow was being replaced by the shared `--shadow-sm`. */
-/* The resting shadow is tinted with the node's own hue, not just black: on the
-   dark canvas a black drop shadow falls on an almost-black backdrop and reads
-   as no shadow at all, which is why it only appeared to exist on hover. */
+ 
 .report-flow-canvas .report-flow-node {
   width: 208px;
   box-shadow:
@@ -3066,6 +3041,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     0 8px 20px -8px color-mix(in srgb, var(--flow-rail) 28%, transparent),
     0 2px 8px -2px rgba(0, 0, 0, 0.5);
 }
+
+/* A node that leads to a form step: the pointer is the only cue that the graph
+   is navigable, since nothing else about it looks like a control. */
+.report-flow-canvas .report-flow-node[data-clickable] { cursor: pointer; }
 
 .report-flow-canvas .report-flow-node:hover {
   border-color: color-mix(in srgb, var(--flow-rail) 55%, var(--border));

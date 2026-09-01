@@ -7,21 +7,26 @@ import "@xyflow/react/dist/style.css";
 import {
   BarChart3, MessageCircle, Mail, FileSpreadsheet, CalendarClock, Globe,
   Link as LinkIcon, Search, PenLine, CircleSlash, TriangleAlert,
+  UserRound, AtSign, Smartphone,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Site } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
-import { frequencyLabel } from "@/features/reports/pages/utils";
+import { frequencyLabel, nextRunLabel } from "@/features/reports/pages/utils";
 import { ReportFlowNode, type ReportFlowNodeData } from "./ReportFlowNode";
 
 const NODE_W = 208;
-const COL_W = 280;
-const ROW_H = 96;
+/** Vertical: stages run down the canvas, the items within a stage across it.
+ *  Laid out horizontally the graph was five columns wide, so fitting it into
+ *  the preview pane zoomed far enough out that the node text stopped being
+ *  readable — downward, the long axis is the one the pane has to spare. */
+const COL_W = 244;
+const ROW_H = 150;
 
 const nodeTypes = { report: ReportFlowNode };
 
-/** Columns of the pipeline, left to right. */
-const COL = { trigger: 0, scope: 1, section: 2, channel: 3 };
+/** Stages of the pipeline, top to bottom. */
+const STAGE = { trigger: 0, scope: 1, section: 2, channel: 3, recipient: 4 };
 
 /**
  * One colour per node, walked in order down the graph.
@@ -38,10 +43,10 @@ const HUES = [
 
 const hueAt = (i: number) => HUES[i % HUES.length];
 
-/** Centres a column's rows against the tallest column, so the pipeline reads as
- *  one horizontal band instead of every column starting at the top. */
-function laneY(index: number, count: number, tallest: number) {
-  return (index - (count - 1) / 2) * ROW_H + ((tallest - 1) / 2) * ROW_H;
+/** Centres a stage's items against the widest stage, so the pipeline reads as
+ *  one vertical spine instead of every stage starting at the left edge. */
+function laneX(index: number, count: number, widest: number) {
+  return (index - (count - 1) / 2) * COL_W + ((widest - 1) / 2) * COL_W;
 }
 
 /**
@@ -58,6 +63,11 @@ export function ReportFlowPreview(props: {
   draft: Draft;
   sites: Site[];
   shareEnabled: boolean;
+  /** The owner's WhatsApp number, shown as the destination of that channel —
+   *  it is not in `recipients`, which holds the extra email addresses only. */
+  ownerMobile?: string;
+  /** Opens the form step that owns the clicked node. */
+  onNavigate?: (tab: string) => void;
 }) {
   // Its own provider: the dialog is not inside one, and `useReactFlow` below
   // needs the store to exist above the canvas to re-fit the viewport.
@@ -72,10 +82,14 @@ function ReportFlowCanvas({
   draft,
   sites,
   shareEnabled,
+  ownerMobile,
+  onNavigate,
 }: {
   draft: Draft;
   sites: Site[];
   shareEnabled: boolean;
+  ownerMobile?: string;
+  onNavigate?: (tab: string) => void;
 }) {
   const { t } = useTranslation();
 
@@ -109,35 +123,65 @@ function ReportFlowCanvas({
       ? channels
       : [{ id: "nochannel", Icon: TriangleAlert, title: t("reports.previewNoChannel") }];
 
-    const tallest = Math.max(sectionNodes.length, channelNodes.length, 1);
+    // Who actually receives it, per channel. The owner is added server-side on
+    // every save and is not in `draft.recipients`, so it is stated here rather
+    // than leaving the graph implying the extra addresses are the whole list.
+    const recipients: { id: string; Icon: typeof Mail; title: string; from: string }[] = [];
+    if (draft.emailChannel) {
+      recipients.push({
+        id: "owner-email",
+        Icon: UserRound,
+        title: t("reports.previewFlowYou", "You (workspace owner)"),
+        from: "channel-email",
+      });
+      for (const email of draft.recipients) {
+        recipients.push({ id: `to-${email}`, Icon: AtSign, title: email, from: "channel-email" });
+      }
+    }
+    if (draft.whatsappChannel) {
+      recipients.push({
+        id: "owner-wa",
+        Icon: Smartphone,
+        title: ownerMobile || t("reports.previewFlowNoNumber", "No number on file"),
+        from: "channel-whatsapp",
+      });
+    }
 
-    const recipientCount = draft.recipients.length;
+    const widest = Math.max(sectionNodes.length, channelNodes.length, recipients.length, 1);
     // Hues are handed out in pipeline order, so an edge can be painted with its
     // source node's colour and the two read as the same strand.
     const sectionHue = (i: number) => hueAt(2 + i);
     const channelHue = (i: number) => hueAt(2 + sectionNodes.length + i);
+    const recipientHue = (i: number) =>
+      hueAt(2 + sectionNodes.length + channelNodes.length + i);
 
     const nodes: Node[] = [
       {
         id: "trigger",
         type: "report",
-        position: { x: COL.trigger * COL_W, y: laneY(0, 1, tallest) },
+        position: { x: laneX(0, 1, widest), y: STAGE.trigger * ROW_H },
         width: NODE_W,
         data: {
           kind: "trigger",
           Icon: CalendarClock,
           kicker: t("reports.previewFlowTrigger", "Trigger"),
           title: frequencyLabel(draft.frequency),
-          detail: draft.name.trim() || t("reports.namePlaceholder"),
+          // The actual next fire time, in the reader's timezone. "Weekly" alone
+          // left the one thing people check — when does this land — unanswered
+          // until after the first send.
+          detail: draft.enabled
+            ? nextRunLabel(draft.frequency)
+            : t("reports.previewPaused"),
           live: draft.enabled,
           warn: !draft.enabled,
           hue: hueAt(0),
+          tab: "schedule",
         } satisfies ReportFlowNodeData,
       },
       {
         id: "scope",
         type: "report",
-        position: { x: COL.scope * COL_W, y: laneY(0, 1, tallest) },
+        position: { x: laneX(0, 1, widest), y: STAGE.scope * ROW_H },
         width: NODE_W,
         data: {
           kind: "scope",
@@ -148,12 +192,13 @@ function ReportFlowCanvas({
             ? `+${scopeNames.length - 1} ${t("reports.previewFlowMoreSites", "more")}`
             : undefined,
           hue: hueAt(1),
+          tab: "schedule",
         } satisfies ReportFlowNodeData,
       },
       ...sectionNodes.map((s, i) => ({
         id: `section-${s.id}`,
         type: "report",
-        position: { x: COL.section * COL_W, y: laneY(i, sectionNodes.length, tallest) },
+        position: { x: laneX(i, sectionNodes.length, widest), y: STAGE.section * ROW_H },
         width: NODE_W,
         data: {
           kind: sections.length ? "section" : "empty",
@@ -162,23 +207,36 @@ function ReportFlowCanvas({
           title: s.title,
           warn: !sections.length,
           hue: sectionHue(i),
+          tab: "content",
         } satisfies ReportFlowNodeData,
       })),
       ...channelNodes.map((c, i) => ({
         id: `channel-${c.id}`,
         type: "report",
-        position: { x: COL.channel * COL_W, y: laneY(i, channelNodes.length, tallest) },
+        position: { x: laneX(i, channelNodes.length, widest), y: STAGE.channel * ROW_H },
         width: NODE_W,
         data: {
           kind: channels.length ? "channel" : "empty",
           Icon: c.Icon,
           kicker: t("reports.previewFlowDelivery", "Delivery"),
           title: c.title,
-          detail: channels.length && recipientCount
-            ? `${recipientCount} ${t("reports.previewFlowRecipients", "recipients")}`
-            : undefined,
           warn: !channels.length,
           hue: channelHue(i),
+          tab: "delivery",
+        } satisfies ReportFlowNodeData,
+      })),
+      ...recipients.map((r, i) => ({
+        id: `recipient-${r.id}`,
+        type: "report",
+        position: { x: laneX(i, recipients.length, widest), y: STAGE.recipient * ROW_H },
+        width: NODE_W,
+        data: {
+          kind: "recipient",
+          Icon: r.Icon,
+          kicker: t("reports.previewFlowRecipients", "Recipients"),
+          title: r.title,
+          hue: recipientHue(i),
+          tab: "delivery",
         } satisfies ReportFlowNodeData,
       })),
     ];
@@ -201,7 +259,6 @@ function ReportFlowCanvas({
         source,
         target,
         type: "smoothstep",
-        pathOptions: { borderRadius: 16 },
         animated: !dim,
         style: { stroke, strokeWidth: dim ? 1.2 : 1.6 },
         markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 13, height: 13 },
@@ -228,10 +285,14 @@ function ReportFlowCanvas({
           ),
         ),
       ),
+      // The last hop: which addresses each channel actually delivers to.
+      ...recipients.map((r, i) =>
+        edge(`e-${r.from}-${r.id}`, r.from, `recipient-${r.id}`, recipientHue(i)),
+      ),
     ];
 
     return { nodes, edges };
-  }, [draft, sites, shareEnabled, t]);
+  }, [draft, sites, shareEnabled, ownerMobile, t]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
@@ -260,11 +321,19 @@ function ReportFlowCanvas({
         fitView
         fitViewOptions={{ padding: 0.18 }}
         minZoom={0.3}
-        maxZoom={1.3}
+        // Above 1 so a short pipeline (one section, one channel) fills the pane
+        // instead of sitting small in the middle of it.
+        maxZoom={1.6}
         nodesDraggable
         nodesConnectable={false}
         edgesFocusable={false}
         panOnScroll
+        // Clicking a node opens the step that owns it, which is what makes the
+        // graph a way through the form rather than an illustration beside it.
+        onNodeClick={(_, node) => {
+          const tab = (node.data as ReportFlowNodeData).tab;
+          if (tab) onNavigate?.(tab);
+        }}
         proOptions={{ hideAttribution: true }}
       />
       {/* No <Background>: the preview pane already paints the grid this canvas

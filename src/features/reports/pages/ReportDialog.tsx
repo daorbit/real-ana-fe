@@ -195,6 +195,8 @@ export function ReportDialog({
               draft={draft}
               sites={sites}
               shareEnabled={Boolean(share?.enabled)}
+              ownerMobile={ownerMobile}
+              onNavigate={setTab}
             />
           </Box>
         </Box>

@@ -1092,7 +1092,9 @@
     "previewFlowSection": "Content",
     "previewFlowDelivery": "Delivery",
     "previewFlowMoreSites": "more",
-    "previewFlowRecipients": "recipients",
+    "previewFlowRecipients": "Recipients",
+    "previewFlowYou": "You (workspace owner)",
+    "previewFlowNoNumber": "No number on file",
     "previewFlowNothing": "Nothing included"
   },
   "billing": {

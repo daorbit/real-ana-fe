@@ -4,7 +4,8 @@ import type { LucideIcon } from "lucide-react";
 
 /** What a node stands for in the pipeline, which decides its rail colour and
  *  which handles it grows. */
-export type ReportNodeKind = "trigger" | "scope" | "section" | "channel" | "empty";
+export type ReportNodeKind =
+  | "trigger" | "scope" | "section" | "channel" | "recipient" | "empty";
 
 export interface ReportFlowNodeData extends Record<string, unknown> {
   kind: ReportNodeKind;
@@ -25,6 +26,10 @@ export interface ReportFlowNodeData extends Record<string, unknown> {
    *  eye — with one colour per kind, four content branches were the same
    *  green and told apart only by reading them. */
   hue: string;
+  /** Form step this node stands for, opened when the node is clicked. Nodes
+   *  with no step behind them (the empty-state ones) leave it unset and are
+   *  not presented as clickable. */
+  tab?: string;
 }
 
 /**
@@ -38,7 +43,7 @@ export const ReportFlowNode = memo(function ReportFlowNode({
   data,
   selected,
 }: NodeProps & { data: ReportFlowNodeData }) {
-  const { kind, Icon, kicker, title, detail, live, warn, hue } = data;
+  const { kind, Icon, kicker, title, detail, live, warn, hue, tab } = data;
   const rail = warn ? "var(--amber)" : hue;
 
   return (
@@ -47,13 +52,17 @@ export const ReportFlowNode = memo(function ReportFlowNode({
       data-selected={selected || undefined}
       data-kind={kind}
       data-warn={warn || undefined}
+      // The click itself is handled once on the canvas (`onNodeClick`), which
+      // already has the navigate callback — this only says the node leads
+      // somewhere, so the cursor and title match what clicking does.
+      data-clickable={tab ? "" : undefined}
       style={{ "--flow-rail": rail } as CSSProperties}
     >
-      {/* The trigger starts the pipeline and the channels end it, so neither
+      {/* The trigger starts the pipeline and the recipients end it, so neither
           grows the handle it would never use — a dangling handle reads as a
           missing connection. */}
       {kind !== "trigger" && (
-        <Handle type="target" position={Position.Left} className="flow-node-handle" />
+        <Handle type="target" position={Position.Top} className="flow-node-handle" />
       )}
 
       <div className="flow-node-head">
@@ -65,8 +74,8 @@ export const ReportFlowNode = memo(function ReportFlowNode({
       <div className="report-flow-kicker">{kicker}</div>
       {detail && <div className="report-flow-detail" title={detail}>{detail}</div>}
 
-      {kind !== "channel" && kind !== "empty" && (
-        <Handle type="source" position={Position.Right} className="flow-node-handle" />
+      {kind !== "recipient" && kind !== "empty" && (
+        <Handle type="source" position={Position.Bottom} className="flow-node-handle" />
       )}
     </div>
   );

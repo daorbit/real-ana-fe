@@ -30,6 +30,46 @@ export function nextSendLabel(s: ReportSchedule): string {
   return when.toLocaleDateString(i18n.language, { day: "numeric", month: "short" });
 }
 
+/** Minimum gap between runs, matching the server's own floor. */
+const MIN_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * When a draft of this frequency would next fire.
+ *
+ * A deliberate port of the server's `computeNextRun` (08:00 UTC anchor, next
+ * Monday for weekly, the 1st for monthly, a 24h floor on the result): a draft
+ * has no `nextRunAt` until it is saved, and the preview claiming a different
+ * time than the one the report actually arrives at is worse than showing none.
+ * If the server's rule changes, this has to change with it.
+ */
+export function computeNextRun(f: ReportFrequency, from: Date = new Date()): Date {
+  const next = new Date(from);
+  next.setUTCHours(8, 0, 0, 0);
+  if (next <= from) next.setUTCDate(next.getUTCDate() + 1);
+
+  if (f === "weekly") {
+    const daysUntilMonday = (8 - next.getUTCDay()) % 7 || 7;
+    next.setUTCDate(next.getUTCDate() + daysUntilMonday - 1);
+  } else if (f === "monthly") {
+    next.setUTCMonth(next.getUTCMonth() + 1, 1);
+  }
+
+  const earliest = new Date(from.getTime() + MIN_INTERVAL_MS);
+  return next < earliest ? earliest : next;
+}
+
+/** "Mon 8 Sep, 13:30" in the viewer's own timezone — the anchor is 08:00 UTC,
+ *  which is a different wall-clock time for whoever is reading it. */
+export function nextRunLabel(f: ReportFrequency, from?: Date): string {
+  return computeNextRun(f, from).toLocaleString(i18n.language, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 /** "3 emails · 1 WhatsApp · 1 opted out", counting only channels that are on. */
 export function recipientSummary(s: ReportSchedule): string {
   const parts: string[] = [];
