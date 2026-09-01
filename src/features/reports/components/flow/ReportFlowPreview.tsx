@@ -7,7 +7,7 @@ import "@xyflow/react/dist/style.css";
 import {
   BarChart3, MessageCircle, Mail, FileSpreadsheet, CalendarClock, Globe,
   Link as LinkIcon, Search, PenLine, CircleSlash, TriangleAlert,
-  UserRound, AtSign, Smartphone,
+  UserRound, AtSign, Smartphone, FileText,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Site } from "@/shared/types";
@@ -20,13 +20,18 @@ const NODE_W = 208;
  *  Laid out horizontally the graph was five columns wide, so fitting it into
  *  the preview pane zoomed far enough out that the node text stopped being
  *  readable — downward, the long axis is the one the pane has to spare. */
-const COL_W = 244;
-const ROW_H = 150;
+// A node is ~78px tall and 208px wide, so these are the gaps *between* them.
+// The fan-out from one stage to the next crosses the whole vertical gap, and
+// a tight one put those diagonals through the boxes either side of it.
+const COL_W = 268;
+const ROW_H = 210;
 
 const nodeTypes = { report: ReportFlowNode };
 
 /** Stages of the pipeline, top to bottom. */
-const STAGE = { trigger: 0, scope: 1, section: 2, channel: 3, recipient: 4 };
+const STAGE = {
+  trigger: 0, scope: 1, section: 2, document: 3, channel: 4, recipient: 5,
+};
 
 /**
  * One colour per node, walked in order down the graph.
@@ -151,9 +156,11 @@ function ReportFlowCanvas({
     // Hues are handed out in pipeline order, so an edge can be painted with its
     // source node's colour and the two read as the same strand.
     const sectionHue = (i: number) => hueAt(2 + i);
-    const channelHue = (i: number) => hueAt(2 + sectionNodes.length + i);
+    // +1 for the document node, which sits between the sections and channels.
+    const documentHue = hueAt(2 + sectionNodes.length);
+    const channelHue = (i: number) => hueAt(3 + sectionNodes.length + i);
     const recipientHue = (i: number) =>
-      hueAt(2 + sectionNodes.length + channelNodes.length + i);
+      hueAt(3 + sectionNodes.length + channelNodes.length + i);
 
     const nodes: Node[] = [
       {
@@ -210,6 +217,32 @@ function ReportFlowCanvas({
           tab: "content",
         } satisfies ReportFlowNodeData,
       })),
+      // The join between the fan-out and the fan-in. Without it every section
+      // drew an edge to every channel — an N×M mesh of identical lines that
+      // crossed each other and the nodes between them, while saying only what
+      // this one node says: the sections are assembled into one document, and
+      // that document is what each channel carries.
+      {
+        id: "document",
+        type: "report",
+        position: { x: laneX(0, 1, widest), y: STAGE.document * ROW_H },
+        width: NODE_W,
+        data: {
+          kind: "document",
+          Icon: FileText,
+          kicker: t("reports.previewFlowDocument", "Report"),
+          title: draft.name.trim() || t("reports.namePlaceholder"),
+          detail: sections.length
+            ? t("reports.previewFlowSectionCount", {
+              count: sections.length,
+              defaultValue: "{{count}} sections",
+            })
+            : undefined,
+          warn: !sections.length,
+          hue: documentHue,
+          tab: "content",
+        } satisfies ReportFlowNodeData,
+      },
       ...channelNodes.map((c, i) => ({
         id: `channel-${c.id}`,
         type: "report",
@@ -272,17 +305,19 @@ function ReportFlowCanvas({
       ...sectionNodes.map((s, i) =>
         edge(`e-scope-${s.id}`, "scope", `section-${s.id}`, sectionHue(i), dimSections),
       ),
-      // Each section feeds every channel: the whole document goes out on each
-      // one, so a per-channel subset would be a lie about what is sent.
-      ...sectionNodes.flatMap((s, i) =>
-        channelNodes.map((c) =>
-          edge(
-            `e-${s.id}-${c.id}`,
-            `section-${s.id}`,
-            `channel-${c.id}`,
-            sectionHue(i),
-            dimSections || dimChannels,
-          ),
+      // Sections assemble into the document, and the document is what each
+      // channel carries — the same claim the old section-to-channel mesh made,
+      // in N+M lines instead of N×M.
+      ...sectionNodes.map((s, i) =>
+        edge(`e-${s.id}-document`, `section-${s.id}`, "document", sectionHue(i), dimSections),
+      ),
+      ...channelNodes.map((c, i) =>
+        edge(
+          `e-document-${c.id}`,
+          "document",
+          `channel-${c.id}`,
+          channelHue(i),
+          dimSections || dimChannels,
         ),
       ),
       // The last hop: which addresses each channel actually delivers to.

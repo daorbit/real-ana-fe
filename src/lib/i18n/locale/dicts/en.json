@@ -1094,6 +1094,9 @@
     "previewFlowMoreSites": "more",
     "previewFlowRecipients": "Recipients",
     "previewFlowYou": "You (workspace owner)",
+    "previewFlowDocument": "Report",
+    "previewFlowSectionCount_one": "{{count}} section",
+    "previewFlowSectionCount_other": "{{count}} sections",
     "previewFlowNoNumber": "No number on file",
     "previewFlowNothing": "Nothing included"
   },

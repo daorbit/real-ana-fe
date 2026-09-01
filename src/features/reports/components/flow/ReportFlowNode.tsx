@@ -5,7 +5,7 @@ import type { LucideIcon } from "lucide-react";
 /** What a node stands for in the pipeline, which decides its rail colour and
  *  which handles it grows. */
 export type ReportNodeKind =
-  | "trigger" | "scope" | "section" | "channel" | "recipient" | "empty";
+  | "trigger" | "scope" | "section" | "document" | "channel" | "recipient" | "empty";
 
 export interface ReportFlowNodeData extends Record<string, unknown> {
   kind: ReportNodeKind;
