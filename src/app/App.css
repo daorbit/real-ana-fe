@@ -214,7 +214,7 @@ html[data-bg-style="textured"]:has(.app-panel) body::before { display: none; }
    --mantine-color-body fill; make every layer between the pseudo-layer and
    the content transparent so the wash actually shows through instead of
    being hidden behind flat layers stacked on top of it. */
-[data-bg-style="textured"] body,
+[data-bg-style="textured"],
 [data-bg-style="textured"] .mantine-AppShell-main,
 [data-bg-style="textured"] .app-main {
   background: transparent !important;
