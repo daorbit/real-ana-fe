@@ -184,8 +184,12 @@ export default function Home() {
   const [siteScope, setSiteScope] = useSiteScope(active?._id);
 
   // Narrowing the site scope swaps every number on the page, same as a
-  // workspace switch — cover it with the same transition.
-  const scopeSwitch = useSwitchOverlay(siteScope.join(",") || "all");
+  // workspace switch — cover it with the same transition. Null until the
+  // workspace is known: on a reload the scope resolves from undefined to the
+  // saved selection, and that first settle is not a switch to announce.
+  const scopeSwitch = useSwitchOverlay(
+    active?._id ? siteScope.join(",") || "all" : null,
+  );
 
   const { stats, refresh, refreshing, lastUpdated } = useStats(
     active?._id,

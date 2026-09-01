@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const KEY = "rta_site_scope";
 
@@ -26,15 +26,29 @@ function readAll(): Record<string, string[]> {
  * nothing. Stored as "all" (an empty list) by default, matching how the
  * filter is sent to the API.
  */
-export function useSiteScope(workspaceId: string | undefined) {
-  const [scope, setScope] = useState<string[]>([]);
+/** The saved selection for a workspace, or "all sites" when there is none. */
+function savedScope(workspaceId: string | undefined): string[] {
+  if (!workspaceId) return [];
+  const saved = readAll()[workspaceId];
+  return Array.isArray(saved) ? saved : [];
+}
 
-  // Load on workspace change rather than once on mount: switching workspace
-  // has to swap the selection, not keep the previous one.
+export function useSiteScope(workspaceId: string | undefined) {
+  // Resolved during the first render, not in an effect after it. Loading it
+  // afterwards meant every mount went "all sites" -> saved selection, which
+  // the pages read as a scope *change* and answered with the switch overlay —
+  // so a route change back to Home replayed the loading screen even for a
+  // workspace with a single site.
+  const [scope, setScope] = useState<string[]>(() => savedScope(workspaceId));
+  const loadedFor = useRef(workspaceId);
+
+  // Switching workspace still has to swap the selection rather than keep the
+  // previous one — but only on an actual change, which the ref makes
+  // distinguishable from the initial render the state above already covered.
   useEffect(() => {
-    if (!workspaceId) return setScope([]);
-    const saved = readAll()[workspaceId];
-    setScope(Array.isArray(saved) ? saved : []);
+    if (loadedFor.current === workspaceId) return;
+    loadedFor.current = workspaceId;
+    setScope(savedScope(workspaceId));
   }, [workspaceId]);
 
   const update = useCallback(

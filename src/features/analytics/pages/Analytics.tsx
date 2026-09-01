@@ -380,8 +380,12 @@ export default function Analytics() {
   }, [pickedSites, sites]);
 
   // Narrowing the site scope swaps every number on the page — cover the swap
-  // with the same transition the workspace switcher uses.
-  const scopeSwitch = useSwitchOverlay(siteScope.join(",") || "all");
+  // with the same transition the workspace switcher uses. Null until the
+  // workspace is known: on a reload the scope resolves from undefined to the
+  // saved selection, and that first settle is not a switch to announce.
+  const scopeSwitch = useSwitchOverlay(
+    active?._id ? siteScope.join(",") || "all" : null,
+  );
   const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
     useStats(
       active?._id,
