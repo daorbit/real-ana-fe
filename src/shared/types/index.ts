@@ -1692,6 +1692,15 @@ export type SeoMetricComparison = {
   verdict: SeoCompareVerdict;
   /** Why the metric matters. Present only on rows you are losing. */
   note?: string;
+  /**
+   * Why a row showing two different numbers is nonetheless a tie. Absent on
+   * exact matches, where there is nothing to explain.
+   */
+  tieReason?: string;
+  /** Share of the on-page score this signal can move, 0-1. */
+  weight: number;
+  /** `weight` scaled by how far apart the pages are, 0-1. Zero unless losing. */
+  impact: number;
 };
 
 /** Everything the server worked out about one competitor versus your page. */
@@ -1722,12 +1731,67 @@ export type SeoCompetitorComparison = {
  * Computed server-side so the page and Orbit cannot disagree about who is
  * winning.
  */
+/** A rival immediately above or below you in the standings. */
+export type SeoStandingsNeighbour = {
+  label: string;
+  competitorId: string;
+  /** Always positive — the direction is implied by which field this sits in. */
+  gap: number;
+};
+
+/**
+ * Where you sit in the tracked field.
+ *
+ * A per-competitor delta answers "am I ahead of them", which stops being the
+ * question once more than one rival is tracked.
+ */
+export type SeoCompetitivePosition = {
+  rank: number;
+  /** Competitors plus you, so rank reads as "N of fieldSize". */
+  fieldSize: number;
+  /** Share of tracked rivals you beat, 0-100. */
+  percentile: number;
+  /** Whoever leads the field. Null when that is you. */
+  leader: string | null;
+  gapToLeader: number;
+  /** The competitor immediately above — the winnable fight. */
+  nextUp: SeoStandingsNeighbour | null;
+  /** The one immediately below, so a lead reads as safe or precarious. */
+  closestBehind: SeoStandingsNeighbour | null;
+};
+
 export type SeoCompetitorAnalysis = {
   mine: SeoCompareSnapshot;
   auditedAt: string;
   competitors: SeoCompetitorComparison[];
   /** Whoever leads by the most — the one worth reading first. */
   toughest: string | null;
+  /** Standings across the whole field, not just against one rival. */
+  position: SeoCompetitivePosition;
+};
+
+/**
+ * The AI reading of one comparison.
+ *
+ * Interpretation of the measured gaps, not new facts about the competitor —
+ * the server only ever hands the model numbers it computed itself.
+ */
+export type SeoCompetitorBrief = {
+  /** One sentence on where they are genuinely beating you. */
+  headline: string;
+  /** What their page appears built to do, read off the measured signals. */
+  theirStrategy: string;
+  /** The single highest-return change, and why it beats the alternatives. */
+  topMove: string;
+  /** What you are already winning. */
+  yourEdge: string;
+};
+
+export type SeoCompetitorBriefResponse = {
+  brief: SeoCompetitorBrief;
+  /** Which model wrote it, so the panel can attribute the reading. */
+  model: string;
+  generatedAt: string;
 };
 
 /** One recorded refresh, for plotting a competitor's score over time. */

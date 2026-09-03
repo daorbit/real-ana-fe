@@ -11,7 +11,8 @@ import { COMPARE_HELP } from "@/features/compare/components/help";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import {
   useGetSitesQuery, useGetCompetitorsQuery, useGetCompetitorAnalysisQuery,
-  useGetCompetitorHistoryQuery, useAddCompetitorMutation,
+  useGetCompetitorHistoryQuery, useGetCompetitorBriefAvailabilityQuery,
+  useAddCompetitorMutation,
   useRefreshCompetitorMutation, useRefreshAllCompetitorsMutation,
   useDeleteCompetitorMutation,
 } from "@/app/store";
@@ -21,6 +22,7 @@ import { useAuth } from "@/features/auth/context";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 import { CompetitorRail } from "@/features/compare/components/CompetitorRail";
 import { CompetitorDetail } from "@/features/compare/components/CompetitorDetail";
+import { StandingsCard } from "@/features/compare/components/StandingsCard";
 import { ScoreTrendChart } from "@/features/compare/components/ScoreTrendChart";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { CompareSkeleton } from "@/shared/ui/Skeletons";
@@ -88,6 +90,12 @@ export default function Compare() {
     error: analysisError,
   } = useGetCompetitorAnalysisQuery({ workspaceId, siteId }, { skip });
   const { data: history = [] } = useGetCompetitorHistoryQuery({ workspaceId, siteId }, { skip });
+  // Asked once per site rather than per competitor: whether the deployment has
+  // model credentials is a property of the server, not of who is being compared.
+  const { data: briefAvailable } = useGetCompetitorBriefAvailabilityQuery(
+    { workspaceId, siteId },
+    { skip }
+  );
 
   const [addCompetitor, { isLoading: adding }] = useAddCompetitorMutation();
   const [refreshCompetitor] = useRefreshCompetitorMutation();
@@ -296,6 +304,19 @@ export default function Compare() {
             />
           )}
 
+          {/* Above the master-detail because it is the only part of the page
+              about the field as a whole: everything below answers "versus this
+              one rival", which is the second question, not the first.
+              Guarded on `position` so a client running against a server that
+              predates it renders the rest of the page rather than crashing. */}
+          {analysis && analysis.competitors.length > 0 && analysis.position && (
+            <StandingsCard
+              position={analysis.position}
+              myScore={analysis.mine.score}
+              onSelectCompetitor={setPickedCompetitor}
+            />
+          )}
+
           {analysis && analysis.competitors.length > 0 && selected && (
             // Master-detail rather than four stacked blocks: showing every
             // competitor's full comparison at once restated the same data four
@@ -344,6 +365,10 @@ export default function Compare() {
                 <CompetitorDetail
                   comparison={selected}
                   myDomain={site.domain}
+                  myAuditedAt={analysis.auditedAt ?? null}
+                  workspaceId={workspaceId}
+                  siteId={siteId}
+                  briefAvailable={briefAvailable?.available ?? false}
                   canEdit={canEdit}
                   refreshing={refreshingId === selected.competitorId}
                   onRefresh={() => refreshOne(selected.competitorId)}

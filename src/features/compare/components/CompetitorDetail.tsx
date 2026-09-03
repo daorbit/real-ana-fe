@@ -1,11 +1,13 @@
+import { useState } from "react";
 import {
-  ActionIcon, Anchor, Badge, Box, Card, Divider, Group, Stack, Table, Text, Tooltip,
+  ActionIcon, Alert, Anchor, Badge, Box, Card, Divider, Group, SegmentedControl,
+  Stack, Table, Text, Tooltip,
 } from "@mantine/core";
-import { ArrowDown, ArrowUp, ExternalLink, Minus, RefreshCw, Trash2 } from "lucide-react";
-import type { SeoCompareVerdict, SeoCompetitorComparison } from "@/shared/types";
+import { ArrowDown, ArrowUp, ExternalLink, Info, Minus, RefreshCw, Trash2 } from "lucide-react";
+import type { SeoCompareVerdict, SeoCompetitorComparison, SeoMetricComparison } from "@/shared/types";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
-import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
-import { timeAgo } from "@/shared/lib";
+import { FreshnessBadge, freshnessOf, STALE_AFTER_DAYS } from "./FreshnessBadge";
+import { CompetitorBriefCard } from "./CompetitorBriefCard";
 
 /**
  * One competitor, in full.
@@ -24,7 +26,18 @@ import { timeAgo } from "@/shared/lib";
  * ahead — so it is inverted here to describe the column it sits in. Arrows
  * rather than ticks: the question is directional, not correct/incorrect.
  */
-function VerdictMark({ verdict }: { verdict: SeoCompareVerdict }) {
+function VerdictMark({
+  verdict,
+  tieReason,
+}: {
+  verdict: SeoCompareVerdict;
+  /**
+   * Why two visibly different numbers tied. Without it a row reading "68 vs 70
+   * — too close to call" looks like the comparison failed to do its arithmetic,
+   * which costs more trust than the tolerance saves.
+   */
+  tieReason?: string;
+}) {
   if (verdict === "lose") {
     return (
       <Tooltip label="They beat you here" withArrow>
@@ -40,7 +53,12 @@ function VerdictMark({ verdict }: { verdict: SeoCompareVerdict }) {
     );
   }
   return (
-    <Tooltip label="Too close to call" withArrow>
+    <Tooltip
+      label={tieReason ?? "Both pages measure the same here."}
+      withArrow
+      multiline={Boolean(tieReason)}
+      w={tieReason ? 250 : undefined}
+    >
       <Minus size={13} style={{ opacity: 0.35 }} />
     </Tooltip>
   );
@@ -56,9 +74,33 @@ function GapRow({ title, items, hint }: { title: string; items: string[]; hint: 
           {title}
         </Text>
       </Tooltip>
-      <Group gap={6}>
+      {/* `wrap` explicitly, and a light variant rather than the filled default:
+          eight filled orange chips read as eight warnings, where these are
+          prompts to look at something.
+
+          `tt="none"` because Badge uppercases its content — fine for a status
+          word, wrong for a section heading, which is prose someone wrote and is
+          about to go and look for on the page. */}
+      <Group gap={6} wrap="wrap">
         {items.map((item) => (
-          <Badge key={item} size="sm" color="orange">
+          <Badge
+            key={item}
+            size="sm"
+            variant="light"
+            color="orange"
+            tt="none"
+            style={{
+              // Badge truncates to a single line by default, which turned a
+              // long heading into an unreadable stub. Letting it wrap costs a
+              // taller chip and keeps the text legible.
+              height: "auto",
+              whiteSpace: "normal",
+              lineHeight: 1.4,
+              padding: "3px 8px",
+              maxWidth: "100%",
+              textAlign: "left",
+            }}
+          >
             {item}
           </Badge>
         ))}
@@ -67,9 +109,34 @@ function GapRow({ title, items, hint }: { title: string; items: string[]; hint: 
   );
 }
 
+/** How the check table is ordered. */
+type SortMode = "impact" | "listed";
+
+/**
+ * Order rows by what is actually costing points.
+ *
+ * The declared order is a reasonable reading order but a poor diagnostic one:
+ * it puts the overall score first and buries a 900-word content deficit below
+ * a tied Open Graph row. Sorting by impact leads with the fix worth making.
+ *
+ * The score row is pinned to the top in both modes. It is the summary the rest
+ * of the table explains, and it carries no impact of its own by design, so
+ * sorting would otherwise drop the headline number to the bottom.
+ */
+function orderMetrics(metrics: SeoMetricComparison[], mode: SortMode): SeoMetricComparison[] {
+  if (mode === "listed") return metrics;
+  const score = metrics.filter((m) => m.id === "score");
+  const rest = [...metrics.filter((m) => m.id !== "score")].sort((a, b) => b.impact - a.impact);
+  return [...score, ...rest];
+}
+
 export function CompetitorDetail({
   comparison,
   myDomain,
+  myAuditedAt,
+  workspaceId,
+  siteId,
+  briefAvailable,
   canEdit,
   refreshing,
   onRefresh,
@@ -77,6 +144,16 @@ export function CompetitorDetail({
 }: {
   comparison: SeoCompetitorComparison;
   myDomain: string;
+  /**
+   * When your own baseline was measured. Needed to say whether the two sides of
+   * the comparison were taken far enough apart to distrust the result.
+   */
+  myAuditedAt: string | null;
+  /** Identifiers the briefing endpoint is scoped by. */
+  workspaceId: string;
+  siteId: string;
+  /** False where the deployment has no model credentials — the panel is hidden. */
+  briefAvailable: boolean;
   canEdit: boolean;
   refreshing: boolean;
   onRefresh: () => void;
@@ -85,6 +162,23 @@ export function CompetitorDetail({
   const { gap, snapshot, label } = comparison;
   const theyLead = gap.scoreGap > 0;
   const losing = gap.metrics.filter((m) => m.verdict === "lose");
+
+  const [sortMode, setSortMode] = useState<SortMode>("impact");
+  const rows = orderMetrics(gap.metrics, sortMode);
+
+  const stale = freshnessOf(comparison.lastCheckedAt) === "stale";
+
+  // Two measurements taken weeks apart are not really a comparison, however
+  // precise each one is on its own. Said plainly rather than left for the
+  // reader to work out from two timestamps in different corners of the page.
+  const skewDays =
+    myAuditedAt && comparison.lastCheckedAt
+      ? Math.abs(
+          new Date(myAuditedAt).getTime() - new Date(comparison.lastCheckedAt).getTime()
+        ) /
+        (24 * 60 * 60 * 1000)
+      : 0;
+  const skewed = skewDays > STALE_AFTER_DAYS;
 
   return (
     <Stack gap="lg">
@@ -195,43 +289,48 @@ export function CompetitorDetail({
             </Text>
           </Box>
           <Box style={{ marginLeft: "auto" }}>
-            <Text size="xs" c="dimmed" mb={2}>
+            <Text size="xs" c="dimmed" mb={4}>
               Last checked
             </Text>
-            <Text size="sm" lh={1.5}>
-              {comparison.lastCheckedAt ? timeAgo(comparison.lastCheckedAt) : "Not yet"}
-            </Text>
+            <FreshnessBadge checkedAt={comparison.lastCheckedAt} />
           </Box>
         </Group>
+
+        {/* Placed under the numbers rather than above them: the caveat qualifies
+            the figures, so it should not be read before there is anything to
+            qualify. */}
+        {(stale || skewed) && (
+          <Alert
+            icon={<Info size={15} />}
+            color="orange"
+            variant="light"
+            radius="md"
+            mt="md"
+            p="sm"
+          >
+            <Text size="xs">
+              {skewed
+                ? `Your audit and this snapshot were taken ${Math.round(skewDays)} days apart. Refresh both for a comparison of what is live now.`
+                : "This snapshot is over a week old. Their page may have changed since it was taken."}
+            </Text>
+          </Alert>
+        )}
       </Card>
 
+      {/* The measured recommendations and Orbit's reading of them are one card,
+          not two: they answer the same question, and shown separately the page
+          said "add internal links" twice in different words directly above
+          itself. Where the briefing is unavailable this still renders, carrying
+          the measured list alone. */}
       {gap.recommendations.length > 0 && (
-        <Card withBorder radius="md" padding="lg">
-          <Group justify="space-between" wrap="nowrap" mb="md">
-            <Text fw={650} size="sm">
-              What would close the gap
-            </Text>
-            {/* Orbit receives these same gaps in its data digest, so it answers
-                from the measured comparison rather than guessing. */}
-            <AskOrbitButton
-              question={`How do I close the SEO gap against ${label}? Walk me through the changes in order.`}
-            />
-          </Group>
-          <Stack gap={10}>
-            {gap.recommendations.map((rec, i) => (
-              <Group key={i} gap={10} align="flex-start" wrap="nowrap">
-                {/* Numbered, because the server returns these in priority order
-                    and a bullet would hide that they are ranked. */}
-                <Text size="xs" fw={700} c="dimmed" style={{ minWidth: 14, marginTop: 2 }}>
-                  {i + 1}
-                </Text>
-                <Text size="sm" style={{ minWidth: 0 }}>
-                  {rec}
-                </Text>
-              </Group>
-            ))}
-          </Stack>
-        </Card>
+        <CompetitorBriefCard
+          workspaceId={workspaceId}
+          siteId={siteId}
+          competitorId={comparison.competitorId}
+          label={label}
+          recommendations={gap.recommendations}
+          briefAvailable={briefAvailable && Boolean(comparison.lastCheckedAt)}
+        />
       )}
 
       {(gap.contentGaps.length > 0 ||
@@ -262,15 +361,31 @@ export function CompetitorDetail({
       )}
 
       <Card withBorder radius="md" padding={0}>
-        <Group justify="space-between" px="lg" pt="lg" pb="md" wrap="nowrap">
-          <Text fw={650} size="sm">
-            Every check
-          </Text>
-          <Text size="xs" c="dimmed">
-            {losing.length === 0
-              ? "You match or beat them everywhere"
-              : `Behind on ${losing.length} of ${gap.metrics.length}`}
-          </Text>
+        <Group justify="space-between" px="lg" pt="lg" pb="md" wrap="wrap" gap="sm">
+          <Box>
+            <Text fw={650} size="sm">
+              Every check
+            </Text>
+            <Text size="xs" c="dimmed">
+              {losing.length === 0
+                ? "You match or beat them everywhere"
+                : `Behind on ${losing.length} of ${gap.metrics.length}`}
+            </Text>
+          </Box>
+          {/* Defaults to impact, so the table opens on the thing worth fixing.
+              The declared order stays available because it groups related
+              checks together, which is easier to read once you know the page
+              rather than triage it. */}
+          <SegmentedControl
+            size="xs"
+            radius="md"
+            value={sortMode}
+            onChange={(v) => setSortMode(v as SortMode)}
+            data={[
+              { label: "Biggest gaps", value: "impact" },
+              { label: "Grouped", value: "listed" },
+            ]}
+          />
         </Group>
         <Box style={{ overflowX: "auto" }}>
           <Table verticalSpacing="sm" fz="sm" miw={420}>
@@ -292,20 +407,36 @@ export function CompetitorDetail({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {gap.metrics.map((m) => (
+              {rows.map((m) => (
                 <Table.Tr key={m.id}>
                   <Table.Td>
-                    {m.note ? (
-                      <Tooltip label={m.note} withArrow multiline w={280} position="top-start">
-                        <Text size="sm" fw={500} style={{ width: "fit-content", cursor: "help" }}>
+                    <Group gap={8} wrap="nowrap">
+                      {m.note ? (
+                        <Tooltip label={m.note} withArrow multiline w={280} position="top-start">
+                          <Text size="sm" fw={500} style={{ width: "fit-content", cursor: "help" }}>
+                            {m.label}
+                          </Text>
+                        </Tooltip>
+                      ) : (
+                        <Text size="sm" fw={500}>
                           {m.label}
                         </Text>
-                      </Tooltip>
-                    ) : (
-                      <Text size="sm" fw={500}>
-                        {m.label}
-                      </Text>
-                    )}
+                      )}
+                      {/* Marks the rows carrying most of the deficit, so the
+                          ranking stays legible after switching to the grouped
+                          order. Threshold rather than every losing row: a badge
+                          on eight of eleven rows marks nothing. */}
+                      {m.impact >= 0.05 && (
+                        <Tooltip
+                          label="One of the largest contributors to the score gap."
+                          withArrow
+                        >
+                          <Badge size="xs" variant="light" color="red" style={{ cursor: "help" }}>
+                            High impact
+                          </Badge>
+                        </Tooltip>
+                      )}
+                    </Group>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" style={{ fontVariantNumeric: "tabular-nums" }}>
@@ -314,7 +445,7 @@ export function CompetitorDetail({
                   </Table.Td>
                   <Table.Td>
                     <Group gap={6} wrap="nowrap">
-                      <VerdictMark verdict={m.verdict} />
+                      <VerdictMark verdict={m.verdict} tieReason={m.tieReason} />
                       <Text
                         size="sm"
                         c={m.verdict === "lose" ? undefined : "dimmed"}
@@ -331,11 +462,6 @@ export function CompetitorDetail({
         </Box>
       </Card>
 
-      {comparison.lastCheckedAt === null && (
-        <Text size="xs" c="dimmed">
-          This page has not been fetched yet.
-        </Text>
-      )}
     </Stack>
   );
 }

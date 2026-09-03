@@ -14,7 +14,7 @@ import type { Placed } from "@/features/analytics/hooks/useHomeWidgets";
 import type { TrackerOptions } from "@/features/workspace/tracker";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
-  SeoCompetitorAnalysis, SeoCompetitorHistoryPoint,
+  SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
@@ -1248,6 +1248,37 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
     }),
 
+    /**
+     * Whether this deployment has the AI briefing configured.
+     *
+     * Asked separately and cheaply so the panel can be absent rather than
+     * present-and-broken where the Cloudflare credentials are unset.
+     */
+    getCompetitorBriefAvailability: build.query<
+      { available: boolean },
+      { workspaceId: string; siteId: string }
+    >({
+      query: ({ workspaceId, siteId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/brief/availability`,
+    }),
+
+    /**
+     * The AI reading of one comparison.
+     *
+     * A mutation despite returning a reading rather than changing state: it
+     * costs a model call, so it must fire when the user asks for it and never
+     * on render or refocus the way a query would.
+     */
+    getCompetitorBrief: build.mutation<
+      SeoCompetitorBriefResponse,
+      { workspaceId: string; siteId: string; competitorId: string }
+    >({
+      query: ({ workspaceId, siteId, competitorId }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/${competitorId}/brief`,
+        method: "POST",
+      }),
+    }),
+
     getCompetitorHistory: build.query<
       SeoCompetitorHistoryPoint[],
       { workspaceId: string; siteId: string }
@@ -1832,6 +1863,8 @@ export const {
   useGetCompetitorsQuery,
   useGetCompetitorAnalysisQuery,
   useGetCompetitorHistoryQuery,
+  useGetCompetitorBriefAvailabilityQuery,
+  useGetCompetitorBriefMutation,
   useAddCompetitorMutation,
   useRefreshCompetitorMutation,
   useRefreshAllCompetitorsMutation,

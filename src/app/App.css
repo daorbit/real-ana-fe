@@ -465,6 +465,26 @@ body { overflow-wrap: break-word; }
   .orbit-thinking { animation: none; }
 }
 
+/* Orbit's brief on a competitor comparison, inside the Compare page.
+
+   The wash is tuned for the chat panel and the audit cover, which are tall
+   surfaces a user looks *at*; this is a card in a scrolling column of other
+   cards, and the stock 0.16 makes it the loudest thing on the page. Softened
+   and slowed so the card is recognisably Orbit without competing with the
+   comparison it is describing.
+
+   Not a `filter: none` like the textured-preset rule does: the blur is what
+   keeps this a wash rather than two visible coloured discs at this size. */
+.orbit-brief .aurora-wash {
+  opacity: 0.1;
+  animation-duration: 14s;
+}
+[data-mantine-color-scheme="light"] .orbit-brief .aurora-wash {
+  /* Light theme needs a touch more to register at all — the same alpha over
+     white reads as a faint smudge rather than a tint. */
+  opacity: 0.14;
+}
+
 /* An opening suggestion. Quiet by default — these are a prompt, not the point
    of the panel — and only the border warms on hover, so three of them stacked
    read as a list rather than three buttons demanding to be pressed. */
