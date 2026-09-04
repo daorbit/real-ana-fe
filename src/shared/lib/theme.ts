@@ -42,7 +42,7 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "graphite", label: "Graphite", hex: "#27272a" },
 ];
 
-export type BgKind = "flat" | "mesh" | "wash" | "dots" | "lines" | "diagonal";
+export type BgKind = "flat" | "mesh" | "wash" | "dots" | "lines" | "diagonal" | "stars";
 
 export type BgPreset = {
   id: string;
@@ -81,6 +81,11 @@ export const BG_STYLES: BgPreset[] = [
   { id: "wash-basalt", label: "Wash — Basalt", kind: "wash", hues: ["#64748b", "#334155", "#0f172a"] },
   { id: "wash-verdant", label: "Wash — Verdant", kind: "wash", hues: ["#a3e635", "#16a34a", "#0f766e"] },
   { id: "wash-plum", label: "Wash — Plum", kind: "wash", hues: ["#f0abfc", "#a21caf", "#1e1b4b"] },
+  // Scattered dots that drift. Unlike every other preset this one animates, so
+  // the CSS carries a keyframe as well as the background value (see
+  // `[data-bg-style="stars"]` in App.css).
+  { id: "stars", label: "Starfield", kind: "stars" },
+  { id: "stars-dense", label: "Starfield — Dense", kind: "stars" },
   { id: "grid", label: "Dot grid", kind: "dots" },
   { id: "lines", label: "Line grid", kind: "lines" },
   { id: "graph", label: "Graph paper", kind: "diagonal" },
@@ -243,6 +248,29 @@ export function buildBgValue(preset: BgPreset, bg: string, border: string): stri
     return `${glow}, linear-gradient(145deg, ${stops}), ${bg}`;
   }
 
+  if (preset.kind === "stars") {
+    // Each layer is one tile of dots at its own size and offset. Because the
+    // tiles are mutually prime-ish they never line up into a visible grid, and
+    // varying the dot radius per layer gives the field some depth. The layers
+    // are what the drift animation moves — see the `stars` block in App.css.
+    const dense = preset.id === "stars-dense";
+    const layers: [number, number, string][] = dense
+      ? [[1.4, 90, "0.5"], [1.1, 140, "0.35"], [2, 200, "0.28"], [1.2, 260, "0.22"]]
+      : [[1.3, 130, "0.42"], [1, 190, "0.3"], [1.9, 280, "0.22"]];
+    // --star-ink carries the dot colour rather than a literal white, because a
+    // white dot field is invisible on a light page. It is defined per
+    // colour-scheme in App.css, so this stays a pure function.
+    const stops = layers
+      .map(([r, tile, alpha], i) =>
+        `radial-gradient(circle at ${18 + i * 27}% ${22 + i * 21}%, ` +
+        `color-mix(in srgb, var(--star-ink, #fff) ${Math.round(Number(alpha) * 100)}%, transparent) ` +
+        `0 ${r}px, transparent ${r}px) ` +
+        `0 0 / ${tile}px ${tile}px`
+      )
+      .join(", ");
+    return `${stops}, ${bg}`;
+  }
+
   if (preset.kind === "dots") {
     const gap = preset.id === "grid-fine" ? 18 : 28;
     return `linear-gradient(90deg, ${border} 1px, transparent 1px) 0 0 / ${gap}px ${gap}px, linear-gradient(${border} 1px, transparent 1px) 0 0 / ${gap}px ${gap}px, ${bg}`;
@@ -327,7 +355,10 @@ export function applyTheme(prefs: ThemePrefs) {
   const bgPreset = BG_STYLES.find((b) => b.id === prefs.bg) ?? BG_STYLES[0];
   const bgValue = buildBgValue(bgPreset, "var(--bg)", "var(--border)");
   root.style.setProperty("--bg-wash", bgValue);
+  // "stars" still paints through every `textured` rule; the extra attribute is
+  // what lets the CSS attach the drift animation to that one kind.
   root.setAttribute("data-bg-style", bgPreset.kind === "flat" ? "flat" : "textured");
+  root.toggleAttribute("data-bg-animated", bgPreset.kind === "stars");
 
   const radiusPx = RADIUS_STYLES.find((r) => r.id === prefs.radius)?.px ?? 16;
   root.style.setProperty("--radius", `${radiusPx}px`);

@@ -161,7 +161,10 @@ export function AppearanceSection({
                   p={0}
                   style={{ overflow: "hidden" }}
                 >
+                  {/* The starfield preset animates, so its swatch does too —
+                      a still preview of a moving background is a lie. */}
                   <div
+                    className={bg.kind === "stars" ? "bg-swatch bg-swatch--stars" : "bg-swatch"}
                     style={{
                       height: 64,
                       background: buildBgValue(bg, "var(--surface-2)", "var(--border-strong)"),

@@ -203,15 +203,19 @@ export default function Signup() {
                 label="First name"
                 placeholder="Jane"
                 size="md"
-                withAsterisk
                 autoComplete="given-name"
                 value={firstName}
                 error={show("firstName")}
                 onChange={(e) => setFirstName(e.currentTarget.value)}
                 onBlur={blur("firstName")}
               />
+         
               <TextInput
-                label="Last name"
+                label={
+                  <>
+                    Last name <span className="auth-optional">optional</span>
+                  </>
+                }
                 placeholder="Doe"
                 size="md"
                 autoComplete="family-name"
@@ -227,7 +231,6 @@ export default function Signup() {
               type="email"
               placeholder="you@company.com"
               size="md"
-              withAsterisk
               autoComplete="email"
               value={email}
               error={show("email")}
@@ -240,7 +243,6 @@ export default function Signup() {
                 label="Password"
                 placeholder="At least 8 characters"
                 size="md"
-                withAsterisk
                 autoComplete="new-password"
                 value={password}
                 error={show("password")}
@@ -254,7 +256,6 @@ export default function Signup() {
               label="Confirm password"
               placeholder="Re-enter your password"
               size="md"
-              withAsterisk
               autoComplete="new-password"
               value={confirm}
               error={show("confirm")}
@@ -262,9 +263,14 @@ export default function Signup() {
               onBlur={blur("confirm")}
             />
 
-            <Button type="submit" loading={busy} disabled={googleBusy} fullWidth size="md">
-              Create account
-            </Button>
+         
+            <button
+              type="submit"
+              className="auth-submit"
+              disabled={busy || googleBusy}
+            >
+              {busy ? <span className="auth-submit-spinner" /> : "Create account"}
+            </button>
 
             {/* The demo's real home is the brand panel now. That panel is
                 hidden below 900px, so this stays as the mobile-only fallback —

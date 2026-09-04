@@ -243,6 +243,45 @@ html[data-bg-style="textured"]:has(.app-panel) body::before { display: none; }
   background: var(--bg-wash);
 }
 
+/* ---- Starfield: the one background preset that moves ----
+   Every other preset is a static `background` value. This one is the same
+   tiled-dot value, drifting: animating `background-position` slides each tile
+   layer at its own rate (the layers have different tile sizes, so one shared
+   translation moves them by different fractions of a tile), which reads as
+   parallax without a single element or timer. */
+/* Dot colour for the starfield preset. White dots vanish on a light page, so
+   the field inverts to ink rather than disappearing. */
+:root { --star-ink: #ffffff; }
+:root[data-mantine-color-scheme="light"] { --star-ink: #1f2430; }
+
+@keyframes bg-stars-drift {
+  from { background-position: 0 0, 0 0, 0 0, 0 0; }
+  to   { background-position: 0 -130px, 0 -190px, 0 -280px, 0 -360px; }
+}
+[data-bg-animated] body::before,
+[data-bg-animated] .app-panel::before,
+[data-bg-animated] .mantine-AppShell-navbar {
+  animation: bg-stars-drift 90s linear infinite;
+}
+/* Decorative motion, so it follows both the OS setting and the app's own
+   Motion switch — the dots stay, they just stop moving. */
+@media (prefers-reduced-motion: reduce) {
+  [data-bg-animated] body::before,
+  [data-bg-animated] .app-panel::before,
+  [data-bg-animated] .mantine-AppShell-navbar { animation: none; }
+}
+[data-motion="off"][data-bg-animated] body::before,
+[data-motion="off"][data-bg-animated] .app-panel::before,
+[data-motion="off"][data-bg-animated] .mantine-AppShell-navbar { animation: none; }
+
+/* Appearance picker swatch. Faster than the page itself so the motion is
+   legible in a 64px tile. */
+.bg-swatch--stars { animation: bg-stars-drift 26s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .bg-swatch--stars { animation: none; }
+}
+[data-motion="off"] .bg-swatch--stars { animation: none; }
+
 /* Above the wash, and transparent so it shows through. */
 .app-panel__scroll { position: relative; z-index: 1; }
 
@@ -2122,6 +2161,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    the eye after the submit — white rather than dimmed, but still not accent. */
 .auth-form > .mantine-Stack-root > .mantine-Text-root .mantine-Anchor-root {
   --anchor-color: rgba(255,255,255,0.92);
+}
+.auth-optional {
+  font-weight: 400; font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  margin-left: 0.3rem;
 }
 .auth-form .mantine-Divider-label {
   font-size: 0.75rem; color: var(--text-dim, rgba(255,255,255,0.5));
