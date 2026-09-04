@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Card, Group, Text, Stack, Center, ThemeIcon } from "@mantine/core";
-import { Globe2 } from "lucide-react";
+import { Card, Group, Text, Stack, Center, ThemeIcon, SegmentedControl } from "@mantine/core";
+import { Globe2, Map as MapIcon, Satellite } from "lucide-react";
+import { SatelliteMap } from "@/shared/ui/SatelliteMap";
 import { geoMercator, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import topo from "world-atlas/countries-110m.json";
@@ -48,6 +49,14 @@ function useWorldPaths() {
 export function WorldMap({ countries }: { countries: Bucket[] }) {
   const shapes = useWorldPaths();
   const [hover, setHover] = useState<{ name: string; count: number } | null>(null);
+  const [view, setView] = useState<"flat" | "satellite">(
+    () => (localStorage.getItem("worldmap:view") as "flat" | "satellite") ?? "flat"
+  );
+
+  const setViewPersisted = (v: string) => {
+    setView(v as "flat" | "satellite");
+    localStorage.setItem("worldmap:view", v);
+  };
 
   // Events store ISO-2 codes; the topology labels countries by name.
   const byName = useMemo(() => {
@@ -75,11 +84,22 @@ export function WorldMap({ countries }: { countries: Bucket[] }) {
     <Card withBorder radius="lg" padding="lg" h="100%">
       <Group justify="space-between" mb="md">
         <Text fw={600} c="dimmed" size="sm">Visitors by country</Text>
-        {hover && hover.count > 0 && (
-          <Text size="xs" fw={600}>
-            {hover.name} · {hover.count.toLocaleString()}
-          </Text>
-        )}
+        <Group gap="sm">
+          {view === "flat" && hover && hover.count > 0 && (
+            <Text size="xs" fw={600}>
+              {hover.name} · {hover.count.toLocaleString()}
+            </Text>
+          )}
+          <SegmentedControl
+            size="xs"
+            value={view}
+            onChange={setViewPersisted}
+            data={[
+              { value: "flat", label: <MapIcon size={14} aria-label="Flat map" /> },
+              { value: "satellite", label: <Satellite size={14} aria-label="Satellite map" /> },
+            ]}
+          />
+        </Group>
       </Group>
 
       {!hasData ? (
@@ -89,6 +109,8 @@ export function WorldMap({ countries }: { countries: Bucket[] }) {
             <Text c="dimmed" size="xs">No location data yet</Text>
           </Stack>
         </Center>
+      ) : view === "satellite" ? (
+        <SatelliteMap countries={countries} height={340} />
       ) : (
         <>
           <svg
