@@ -115,13 +115,13 @@ export function PlansTab({
             withBorder
             radius="lg"
             padding="lg"
-            className={`plan-card${featured ? " plan-card--featured" : ""}`}
+            className={`plan-card${featured || current ? " plan-card--featured" : ""}`}
             style={{
               display: "flex",
               flexDirection: "column",
               position: "relative",
               overflow: "visible",
-              borderColor: featured
+              borderColor: featured || current
                 ? PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK
                 : undefined,
               // Read by both the beam and the top-edge hairline in polish.css.
@@ -129,8 +129,10 @@ export function PlansTab({
             }}
           >
             {/* Lit from above, the way the marketing card is — the ribbon
-                still carries the words, this carries the emphasis. */}
-            {featured && <span className="plan-card__beam" aria-hidden="true" />}
+                still carries the words, this carries the emphasis. The current
+                plan gets it too: on a billing page the plan you are on is as
+                worth finding as the one being recommended. */}
+            {(featured || current) && <span className="plan-card__beam" aria-hidden="true" />}
 
             {(featured || current) && (
               <CornerRibbon
@@ -150,7 +152,7 @@ export function PlansTab({
             {/* The mark leads the card on its own line rather than sitting
                 beside the name — it reads as the tier's badge that way, and
                 the name and description get the full card width. */}
-            <PlanIcon slug={plan.slug} size={34} uid={`card-${plan.slug}`} />
+            <PlanIcon slug={plan.slug} size={42} uid={`card-${plan.slug}`} />
 
             <Text fw={700} fz={17} mt={12} style={{ letterSpacing: "-0.01em" }}>
               {plan.name}
@@ -170,35 +172,42 @@ export function PlansTab({
               )}
             </Group>
 
-            {/* What yearly actually saves, in money rather than in
-                "save 2 months" — the toggle already says that, and a
-                figure is what makes the case. */}
-            {buyable && cycle === "yearly" ? (
-              <Text size="xs" c="emerald" fw={600} mt={2}>
-                {t("billing.savesPerYear", {
-                  amount: money(priceIn(plan.priceMonthly, currency) * 12 - price),
-                })}
-              </Text>
-            ) : (
-              <Text size="xs" c="transparent" mt={2}>.</Text>
-            )}
+            {/* What yearly actually saves, in money rather than in "save 2
+                months" — the toggle already says that, and a figure is what
+                makes the case. Reserved at a fixed height rather than with a
+                blank line of text, so the row of cards keeps a shared baseline
+                without opening a gap under the price. */}
+            <div style={{ minHeight: 18, marginTop: 4 }}>
+              {buyable && cycle === "yearly" && (
+                <Text size="xs" c="emerald" fw={600}>
+                  {t("billing.savesPerYear", {
+                    amount: money(priceIn(plan.priceMonthly, currency) * 12 - price),
+                  })}
+                </Text>
+              )}
+            </div>
 
             {/* The action sits directly under the price, as on the marketing
                 card — the feature list is what you read after deciding, not
-                what you scroll past to reach the button. */}
+                what you scroll past to reach the button.
+
+                `light` rather than `outline`/`subtle` for the inactive states:
+                a disabled outline button renders as a bare grey label with no
+                button shape at all, which read as broken rather than as
+                unavailable. */}
             <Button
               mt="md"
               fullWidth
               size="md"
-              radius="xl"
+              radius="md"
               color="emerald"
-              variant={renewable ? "filled" : current ? "light" : featured ? "filled" : "outline"}
+              variant={renewable || featured ? "filled" : "light"}
               disabled={(current && !renewable) || lower || !buyable || isDemo || !selectedWorkspaceId}
               loading={subscribing === plan.slug}
-              leftSection={<CreditCard size={15} />}
-              // The recommended plan's button carries that plan's
-              // colour rather than the shared accent, so the card the
-              // page is steering toward is visually one thing.
+              leftSection={buyable && !current && !lower ? <CreditCard size={15} /> : undefined}
+              // The recommended plan's button carries that plan's colour rather
+              // than the shared accent, so the card the page is steering toward
+              // is visually one thing.
               style={
                 featured
                   ? {
@@ -206,8 +215,8 @@ export function PlansTab({
                         PLAN_GRADIENTS[plan.slug] ??
                         PLAN_ACCENTS[plan.slug] ??
                         RIBBON_FALLBACK,
-                      // The gold ramp is too light for white text —
-                      // the label has to follow the fill.
+                      // The gold ramp is too light for white text — the label
+                      // has to follow the fill.
                       color: PLAN_ON_ACCENT[plan.slug] ?? "#fff",
                       border: "none",
                     }
@@ -224,21 +233,18 @@ export function PlansTab({
                 : t("billing.ctaSubscribe")}
             </Button>
 
-            {/* The headline quota, called out above the list the way the
-                marketing card leads with it. */}
-            <Group gap={9} wrap="nowrap" mt="lg">
-              <PlanIcon slug={plan.slug} size={20} uid={`quota-${plan.slug}`} />
-              <Text fz={13} fw={700}>
-                {t("billing.featureAudits", { count: plan.monthlyAuditQuota })}
-              </Text>
-            </Group>
-
             <Divider my="md" />
 
-            <Stack gap={8} style={{ flex: 1 }}>
-              {/* Sites are capped the same on every tier — it is a
-                  property of a workspace, not of a plan — so it is
-                  stated once here rather than sold as a differentiator. */}
+            <Stack gap={9} style={{ flex: 1 }}>
+              {/* The headline quota leads the list in the plan's own colour —
+                  it is the number the tiers actually differ by. The tier mark
+                  is not repeated here; it is already at the top of the card. */}
+              <Text fz={13} fw={700} c={PLAN_ACCENTS[plan.slug] ?? undefined}>
+                {t("billing.featureAudits", { count: plan.monthlyAuditQuota })}
+              </Text>
+              {/* Sites are capped the same on every tier — it is a property of
+                  a workspace, not of a plan — so it is stated once here rather
+                  than sold as a differentiator. */}
               <FeatureLine text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
               <FeatureLine text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
               {plan.features.map((f) => <FeatureLine key={f} text={f} />)}
