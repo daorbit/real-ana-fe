@@ -2051,6 +2051,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .auth-form .mantine-Title-root + .mantine-Text-root { text-align: center; }
 
+.auth-form .mantine-InputWrapper-label {
+  font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem;
+}
+.auth-form .mantine-Divider-label {
+  font-size: 0.75rem; color: var(--text-dim, rgba(255,255,255,0.5));
+}
+
 /* Borderless pill fields: the ground is a lifted surface, not an outlined box,
    and the label sits inside as the placeholder. */
 .auth-form .mantine-InputWrapper-root .mantine-Input-input {
@@ -2063,7 +2070,29 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-form .mantine-Input-input:focus-within {
   border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
 }
-.auth-form .mantine-Button-root[data-variant="filled"] { height: 46px; border-radius: 10px; }
+.auth-form .mantine-Button-root[data-variant="filled"] {
+  height: 46px; border-radius: 10px; font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25), 0 8px 20px -10px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* Google / LinkedIn: flat dark boxes read as generic secondary actions. A
+   lifted card with a real border and icon gap reads as a deliberate,
+   individually-chosen sign-in method instead. */
+.auth-form .mantine-Button-root[data-variant="default"] {
+  height: 46px; border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-2) 82%, transparent);
+  border: 1px solid var(--border);
+  font-weight: 600; font-size: 0.9rem;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.auth-form .mantine-Button-root[data-variant="default"]:hover {
+  background: var(--bg-2);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  transform: translateY(-1px);
+}
+.auth-form .mantine-Button-root[data-variant="default"] .mantine-Button-section {
+  margin-inline-end: 0.55rem;
+}
 
 @media (max-width: 48em) {
   /* The 2rem gutter left a 380px form only ~296px on a small phone, which
