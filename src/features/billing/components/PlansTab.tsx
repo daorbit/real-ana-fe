@@ -144,19 +144,19 @@ export function PlansTab({
               />
             )}
 
-            <Group gap={12} wrap="nowrap" align="center">
-              <PlanIcon slug={plan.slug} size={38} uid={`card-${plan.slug}`} />
-              <div style={{ minWidth: 0 }}>
-                <Text fw={700} fz={17} style={{ letterSpacing: "-0.01em" }}>
-                  {plan.name}
-                </Text>
-                {plan.description && (
-                  <Text size="xs" c="dimmed" lh={1.4} lineClamp={2}>
-                    {plan.description}
-                  </Text>
-                )}
-              </div>
-            </Group>
+            {/* The mark leads the card on its own line rather than sitting
+                beside the name — it reads as the tier's badge that way, and
+                the name and description get the full card width. */}
+            <PlanIcon slug={plan.slug} size={34} uid={`card-${plan.slug}`} />
+
+            <Text fw={700} fz={17} mt={12} style={{ letterSpacing: "-0.01em" }}>
+              {plan.name}
+            </Text>
+            {plan.description && (
+              <Text size="xs" c="dimmed" lh={1.4} lineClamp={2} mt={2}>
+                {plan.description}
+              </Text>
+            )}
 
             <Group gap={5} align="baseline" mt="lg">
               <Text fz={34} fw={800} style={{ letterSpacing: "-0.03em" }}>{money(price)}</Text>
