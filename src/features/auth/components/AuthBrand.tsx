@@ -25,9 +25,6 @@ type Props = {
 export function AuthBrand({ onDemo, demoBusy = false }: Props) {
   return (
     <div className="auth-brand">
-      {/* faint grid texture behind the copy */}
-      <div className="ab-grid" />
-
       <div className="ab-content">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <Wordmark />
