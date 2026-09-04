@@ -1591,7 +1591,8 @@ export const api = createApi({
       { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
     >({
       query: (body) => ({ url: "/api/billing/subscribe/verify", method: "POST", body }),
-      invalidatesTags: ["Billing", "Usage"],
+
+      invalidatesTags: ["Billing", "Usage", "Workspace"],
     }),
 
     startAddonPurchase: build.mutation<
