@@ -243,45 +243,6 @@ html[data-bg-style="textured"]:has(.app-panel) body::before { display: none; }
   background: var(--bg-wash);
 }
 
-/* ---- Starfield: the one background preset that moves ----
-   Every other preset is a static `background` value. This one is the same
-   tiled-dot value, drifting: animating `background-position` slides each tile
-   layer at its own rate (the layers have different tile sizes, so one shared
-   translation moves them by different fractions of a tile), which reads as
-   parallax without a single element or timer. */
-/* Dot colour for the starfield preset. White dots vanish on a light page, so
-   the field inverts to ink rather than disappearing. */
-:root { --star-ink: #ffffff; }
-:root[data-mantine-color-scheme="light"] { --star-ink: #1f2430; }
-
-@keyframes bg-stars-drift {
-  from { background-position: 0 0, 0 0, 0 0, 0 0; }
-  to   { background-position: 0 -130px, 0 -190px, 0 -280px, 0 -360px; }
-}
-[data-bg-animated] body::before,
-[data-bg-animated] .app-panel::before,
-[data-bg-animated] .mantine-AppShell-navbar {
-  animation: bg-stars-drift 90s linear infinite;
-}
-/* Decorative motion, so it follows both the OS setting and the app's own
-   Motion switch — the dots stay, they just stop moving. */
-@media (prefers-reduced-motion: reduce) {
-  [data-bg-animated] body::before,
-  [data-bg-animated] .app-panel::before,
-  [data-bg-animated] .mantine-AppShell-navbar { animation: none; }
-}
-[data-motion="off"][data-bg-animated] body::before,
-[data-motion="off"][data-bg-animated] .app-panel::before,
-[data-motion="off"][data-bg-animated] .mantine-AppShell-navbar { animation: none; }
-
-/* Appearance picker swatch. Faster than the page itself so the motion is
-   legible in a 64px tile. */
-.bg-swatch--stars { animation: bg-stars-drift 26s linear infinite; }
-@media (prefers-reduced-motion: reduce) {
-  .bg-swatch--stars { animation: none; }
-}
-[data-motion="off"] .bg-swatch--stars { animation: none; }
-
 /* Above the wash, and transparent so it shows through. */
 .app-panel__scroll { position: relative; z-index: 1; }
 
@@ -2291,30 +2252,63 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Drifting dot field — depth behind the copy so the panel is not a flat slab.
    Sits under .ab-content (z-index 3) and takes no pointer events. */
-.ab-particles {
-  position: absolute; inset: 0; z-index: 1;
+/* ============ Starfield ============ */
+/* White dots vanish on a light page, so the field inverts to ink instead of
+   disappearing. */
+:root { --star-ink: #ffffff; }
+:root[data-mantine-color-scheme="light"] { --star-ink: #1f2430; }
+
+/* Dots are real elements at random positions, not a tiled gradient — a
+   repeating tile puts every dot on a visible lattice. Takes no pointer
+   events, and never sits above content. */
+.starfield {
   pointer-events: none; overflow: hidden;
-  /* Fades out toward the copy column so the dots never sit behind text. */
+  --scroll-y: 0;
+}
+
+/* Inside the auth brand card: under .ab-content (z-index 3), masked away from
+   the copy column so no dot ever sits behind text. */
+.starfield-panel {
+  position: absolute; inset: 0; z-index: 1;
   mask-image: radial-gradient(70% 60% at 30% 50%, transparent 0%, #000 65%);
   -webkit-mask-image: radial-gradient(70% 60% at 30% 50%, transparent 0%, #000 65%);
 }
-.ab-particles span {
+
+/* App-wide layer: fills the content panel, clipped to its radius, behind the
+   scrolling content. */
+.starfield-app {
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: inherit;
+}
+
+.starfield span {
   position: absolute; border-radius: 50%;
-  background: #fff;
-  will-change: transform, opacity;
-  animation-name: ab-drift;
+  background: var(--star-ink, #fff);
+  will-change: transform;
+  /* Two motions on one element: `translate` carries the scroll parallax, and
+     the keyframes animate `rotate`/`scale`-free `translate3d` via a separate
+     property so the two never overwrite each other. Depth drives how far a
+     dot travels — near dots move most, which is what sells it as depth
+     rather than a sticker sliding over the page. */
+  translate: 0 calc(var(--scroll-y) * -0.06px * var(--depth, 0.5));
+  animation-name: starfield-drift;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
 }
-@keyframes ab-drift {
+
+@keyframes starfield-drift {
   0%, 100% { transform: translate3d(0, 0, 0); }
   25%      { transform: translate3d(6px, -14px, 0); }
   50%      { transform: translate3d(-4px, -24px, 0); }
   75%      { transform: translate3d(-9px, -10px, 0); }
 }
+
+/* Decorative motion: follows the OS setting and the app's own Motion switch.
+   The dots stay, they just stop moving. */
 @media (prefers-reduced-motion: reduce) {
-  .ab-particles span { animation: none; }
+  .starfield span { animation: none; translate: none; }
 }
+[data-motion="off"] .starfield span { animation: none; translate: none; }
 
 /* Was capped at 430px, which left the right half of a wide panel empty while
    the copy stayed squeezed into a narrow column. The cap now scales with the

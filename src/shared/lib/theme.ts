@@ -248,28 +248,11 @@ export function buildBgValue(preset: BgPreset, bg: string, border: string): stri
     return `${glow}, linear-gradient(145deg, ${stops}), ${bg}`;
   }
 
-  if (preset.kind === "stars") {
-    // Each layer is one tile of dots at its own size and offset. Because the
-    // tiles are mutually prime-ish they never line up into a visible grid, and
-    // varying the dot radius per layer gives the field some depth. The layers
-    // are what the drift animation moves — see the `stars` block in App.css.
-    const dense = preset.id === "stars-dense";
-    const layers: [number, number, string][] = dense
-      ? [[1.4, 90, "0.5"], [1.1, 140, "0.35"], [2, 200, "0.28"], [1.2, 260, "0.22"]]
-      : [[1.3, 130, "0.42"], [1, 190, "0.3"], [1.9, 280, "0.22"]];
-    // --star-ink carries the dot colour rather than a literal white, because a
-    // white dot field is invisible on a light page. It is defined per
-    // colour-scheme in App.css, so this stays a pure function.
-    const stops = layers
-      .map(([r, tile, alpha], i) =>
-        `radial-gradient(circle at ${18 + i * 27}% ${22 + i * 21}%, ` +
-        `color-mix(in srgb, var(--star-ink, #fff) ${Math.round(Number(alpha) * 100)}%, transparent) ` +
-        `0 ${r}px, transparent ${r}px) ` +
-        `0 0 / ${tile}px ${tile}px`
-      )
-      .join(", ");
-    return `${stops}, ${bg}`;
-  }
+  // "stars" has no background value of its own: tiled gradients repeat, which
+  // put every dot on a lattice. The field is rendered as real elements at
+  // random positions instead (see <Starfield />), so this preset only supplies
+  // the base colour under it.
+  if (preset.kind === "stars") return bg;
 
   if (preset.kind === "dots") {
     const gap = preset.id === "grid-fine" ? 18 : 28;

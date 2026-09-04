@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AppShell as MantineShell, Box, Burger, Group } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
@@ -14,8 +14,25 @@ import { PlanExpiryNotice } from "@/shared/ui/PlanExpiryNotice";
 import { OfflineBar } from "@/shared/ui/OfflineBar";
 import { FetchProgress } from "@/shared/ui/FetchProgress";
 import { useDemo } from "@/features/demo/context";
+import { Starfield } from "@/shared/ui/Starfield";
+import { BG_STYLES, readThemePrefs } from "@/shared/lib/theme";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
+
+/** True while the chosen background preset is one of the starfield ones. */
+function useStarfieldPreset(): boolean {
+  const [on, setOn] = useState(
+    () => BG_STYLES.find((b) => b.id === readThemePrefs().bg)?.kind === "stars"
+  );
+  useEffect(() => {
+    const sync = () =>
+      setOn(BG_STYLES.find((b) => b.id === readThemePrefs().bg)?.kind === "stars");
+    // applyTheme fires this on every preference change.
+    window.addEventListener("quantalog-theme-change", sync);
+    return () => window.removeEventListener("quantalog-theme-change", sync);
+  }, []);
+  return on;
+}
 
  
 export function AppShell({ children }: { children: ReactNode }) {
@@ -30,6 +47,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
  
   const wsSwitch = useSwitchOverlay(active?._id ?? null);
+  const stars = useStarfieldPreset();
+  // The page scrolls inside the panel, not the window, so the parallax has to
+  // listen there or the field never moves.
+  const scroller = useRef<HTMLDivElement>(null);
 
    useSyncWorkspaceTheme(active?._id);
   const [navOpen, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
@@ -101,7 +122,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
 
           <div className="app-panel">
-            <div className="app-panel__scroll">
+            {/* Inside the panel so it is clipped to the panel's radius and
+                bounded by its border, exactly like the other backgrounds. */}
+            {stars && <Starfield variant="app" count={70} scrollTarget={scroller} />}
+            <div className="app-panel__scroll" ref={scroller}>
         
               <PlanExpiryNotice />
               <QuotaNudge />

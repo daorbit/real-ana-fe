@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
+import { Starfield } from "@/shared/ui/Starfield";
 import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
 import { trace } from "@/shared/lib/analytics";
@@ -161,15 +162,19 @@ export function AppearanceSection({
                   p={0}
                   style={{ overflow: "hidden" }}
                 >
-                  {/* The starfield preset animates, so its swatch does too —
-                      a still preview of a moving background is a lie. */}
+                
                   <div
-                    className={bg.kind === "stars" ? "bg-swatch bg-swatch--stars" : "bg-swatch"}
                     style={{
                       height: 64,
+                      position: "relative",
+                      overflow: "hidden",
                       background: buildBgValue(bg, "var(--surface-2)", "var(--border-strong)"),
                     }}
-                  />
+                  >
+                    {bg.kind === "stars" && (
+                      <Starfield variant="app" count={bg.id === "stars-dense" ? 26 : 14} />
+                    )}
+                  </div>
                   <Text size="xs" fw={550} px={10} py={8} truncate>
                     {bg.label}
                   </Text>
