@@ -2116,8 +2116,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding: 3rem 2.75rem; overflow-y: auto;
   scrollbar-width: none; -ms-overflow-style: none;
   /* Inset card, not a full-bleed half — the split's gutter shows around it. */
-  border-radius: 22px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.09);
   display: flex; align-items: center; justify-content: flex-start;
   /* A near-black base tinted by the live accent rather than a fixed hue, so
      the login panel matches whichever preset is active instead of always
@@ -2126,32 +2126,26 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
      white text and left no dark ground for the card to sit against. */
   /* Same ground as the form column — the panel is the page background with one
      soft glow on it, not a separate darker slab. */
+  /* One quiet glow low in the panel, well below the copy, plus a hairline grid
+     for texture. No floating orbs — those read as stray blobs rather than
+     product chrome. */
   background:
-    radial-gradient(52% 44% at 26% 45%,
-      color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 70%),
-    linear-gradient(150deg, rgba(12,14,16,0.9), rgba(8,9,11,0.95));
+    radial-gradient(60% 50% at 30% 92%,
+      color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 72%),
+    linear-gradient(150deg, rgba(12,14,16,0.92), rgba(8,9,11,0.97));
   color: #fff;
 }
 .auth-brand::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Fainter than before and masked to the lit centre, so the lines read as
-   texture under the glow rather than a ruled sheet across the whole card. */
 .ab-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at 28% 45%, #000 18%, transparent 66%);
-  -webkit-mask-image: radial-gradient(ellipse at 28% 45%, #000 18%, transparent 66%);
+  mask-image: linear-gradient(180deg, #000, transparent 85%);
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%);
 }
-
-.ab-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
-/* Were hardcoded emerald, so they stayed green on every other accent preset. */
-/* Pulled in from the corners to sit under the central glow, so they read as
-   one light source rather than two stray blobs at the card's edges. */
-.ab-orb-1 { width: 300px; height: 300px; background: color-mix(in srgb, var(--accent) 20%, transparent); top: 24%; left: 12%; }
-.ab-orb-2 { width: 220px; height: 220px; background: color-mix(in srgb, var(--accent) 11%, transparent); top: 46%; left: 30%; }
 
 /* Was capped at 430px, which left the right half of a wide panel empty while
    the copy stayed squeezed into a narrow column. The cap now scales with the
@@ -2190,8 +2184,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   display: flex; flex-direction: column;
   gap: 0.75rem;
 }
-.ab-feature { display: flex; align-items: center; gap: 0.7rem; font-size: 0.9rem; color: rgba(255,255,255,0.92); font-weight: 500; }
-.ab-feature-ic { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.15); display: grid; place-items: center; flex-shrink: 0; }
+.ab-feature { display: flex; align-items: center; gap: 0.65rem; font-size: 0.87rem; color: rgba(255,255,255,0.82); font-weight: 500; }
+.ab-feature-ic { width: 26px; height: 26px; border-radius: 8px; background: rgba(255,255,255,0.08); display: grid; place-items: center; flex-shrink: 0; color: rgba(255,255,255,0.7); }
 /* Stacked, both full width. Side by side, the card got too narrow for its own
    stat labels and the CTA read as a stranded box floating beside it. */
 .ab-showcase {
@@ -2201,46 +2195,43 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   max-width: 420px;
 }
 
+/* Plain row, not a card — a hairline underneath and an icon rather than a
+   bordered box, so it reads as a link-weight action, not a competing button
+   next to the real "Log in"/"Create account" below on the form column. */
 .ab-demo {
-  display: flex; align-items: center; gap: 0.8rem; width: 100%;
-  margin: 0; padding: 0.8rem 0.95rem;
-  border-radius: 14px; cursor: pointer; text-align: left;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.14);
+  display: flex; align-items: center; gap: 0.7rem; width: 100%;
+  margin: 0; padding: 0 0 0.9rem;
+  border: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: none; cursor: pointer; text-align: left;
   color: #fff; font: inherit;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
-.ab-demo:hover:not(:disabled) {
-  background: rgba(255,255,255,0.09);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  transform: translateY(-1px);
-}
-.ab-demo:disabled { opacity: 0.6; cursor: default; }
+.ab-demo:hover:not(:disabled) { opacity: 0.85; transform: translateX(2px); }
+.ab-demo:disabled { opacity: 0.5; cursor: default; }
 .ab-demo-ic {
-  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
   display: grid; place-items: center;
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-  color: color-mix(in srgb, var(--accent) 60%, #fff);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: color-mix(in srgb, var(--accent) 65%, #fff);
 }
 .ab-demo-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.ab-demo-title { font-size: 0.9rem; font-weight: 600; }
-.ab-demo-sub { font-size: 0.73rem; color: rgba(255,255,255,0.58); }
+.ab-demo-title { font-size: 0.88rem; font-weight: 600; }
+.ab-demo-sub { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
 .ab-demo-arrow {
-  margin-left: auto; flex-shrink: 0; color: rgba(255,255,255,0.5);
+  margin-left: auto; flex-shrink: 0; color: rgba(255,255,255,0.4);
   transition: transform 0.18s ease, color 0.18s ease;
 }
 .ab-demo:hover:not(:disabled) .ab-demo-arrow { transform: translateX(3px); color: #fff; }
 
 .ab-proof {
-  display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem;
-  margin-top: 1.5rem; padding-top: 1.1rem;
-  border-top: 1px solid rgba(255,255,255,0.14);
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem;
+  margin-top: 1.5rem;
 }
 .ab-proof-item {
   display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.72);
+  font-size: 0.76rem; font-weight: 500; color: rgba(255,255,255,0.5);
 }
-.ab-proof-item svg { color: var(--accent); flex-shrink: 0; }
+.ab-proof-item svg { color: color-mix(in srgb, var(--accent) 70%, #fff); flex-shrink: 0; }
 
 .auth-brand .wordmark-text { color: #fff; }
 .auth-brand .wordmark-dot { color: var(--accent); }

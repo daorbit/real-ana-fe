@@ -25,10 +25,8 @@ type Props = {
 export function AuthBrand({ onDemo, demoBusy = false }: Props) {
   return (
     <div className="auth-brand">
-      {/* faint grid + drifting orbs behind the copy */}
+      {/* faint grid texture behind the copy */}
       <div className="ab-grid" />
-      <motion.div className="ab-orb ab-orb-1" animate={{ y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
-      <motion.div className="ab-orb ab-orb-2" animate={{ y: [0, 24, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
 
       <div className="ab-content">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
