@@ -183,13 +183,18 @@ export default function Onboarding() {
           </div>
           <Group gap="sm">
             <Button
+              className="auth-btn"
               variant="default"
               leftSection={<ArrowLeft size={15} />}
               onClick={() => setStep(3)}
             >
               Back
             </Button>
-            <Button onClick={done} rightSection={<ArrowRight size={16} />}>
+            <Button
+              className="auth-btn"
+              onClick={done}
+              rightSection={<ArrowRight size={16} />}
+            >
               Continue
             </Button>
           </Group>
@@ -259,6 +264,7 @@ export default function Onboarding() {
                   />
 
                   <Button
+                    className="auth-btn"
                     size="md"
                     fullWidth
                     loading={creatingWs}
@@ -320,6 +326,7 @@ export default function Onboarding() {
 
                   <Group grow>
                     <Button
+                      className="auth-btn"
                       size="md"
                       variant="default"
                       leftSection={<ArrowLeft size={15} />}
@@ -328,6 +335,7 @@ export default function Onboarding() {
                       Back
                     </Button>
                     <Button
+                      className="auth-btn"
                       size="md"
                       loading={creatingSite}
                       onClick={submitSite}
@@ -381,6 +389,7 @@ export default function Onboarding() {
                   </Group>
 
                   <Button
+                    className="auth-btn"
                     size="md"
                     fullWidth
                     onClick={() => setStep(4)}

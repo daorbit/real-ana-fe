@@ -194,7 +194,13 @@ export default function ForgotPassword() {
                   onBlur={() => email && setTouched(true)}
                 />
 
-                <Button type="submit" loading={busy} fullWidth size="md">
+                <Button
+                  className="auth-btn"
+                  type="submit"
+                  loading={busy}
+                  fullWidth
+                  size="md"
+                >
                   Send reset code
                 </Button>
               </>
@@ -267,6 +273,7 @@ export default function ForgotPassword() {
                 </div>
 
                 <Button
+                  className="auth-btn"
                   type="submit"
                   loading={busy}
                   disabled={code.length !== 6 || Boolean(v.password(password))}

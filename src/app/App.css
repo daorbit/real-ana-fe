@@ -2025,13 +2025,19 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .auth-form .mantine-Title-root + .mantine-Text-root { text-align: center; }
 
-.auth-form .mantine-InputWrapper-label {
+/* Onboarding shares the auth screens' field, link and button treatment. Its
+   headings deliberately stay left-aligned in the sans face — a centred serif
+   display line belongs on a single-question door, not on step 3 of 4 — so the
+   Title rules above are the one part it doesn't inherit. */
+.auth-form .mantine-InputWrapper-label,
+.onb-col .mantine-InputWrapper-label {
   font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem;
   color: rgba(255,255,255,0.72);
 }
 /* Every field on these forms is required, so the asterisks were noise on every
    row rather than a signal on some. Any that survive shouldn't be error-red. */
-.auth-form .mantine-InputWrapper-required { color: rgba(255,255,255,0.35); }
+.auth-form .mantine-InputWrapper-required,
+.onb-col .mantine-InputWrapper-required { color: rgba(255,255,255,0.35); }
 
 /* Field with its own header row: label left, helper link right. */
 .auth-field-head {
@@ -2044,13 +2050,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Links are text, not accent-coloured buttons. On a screen whose only coloured
    element should be the brand dot, a green link competes with the submit. */
-.auth-form .mantine-Anchor-root {
+.auth-form .mantine-Anchor-root,
+.onb-col .mantine-Anchor-root {
   --anchor-color: rgba(255,255,255,0.6);
   color: var(--anchor-color);
   text-decoration: none;
   transition: color 0.15s ease;
 }
-.auth-form .mantine-Anchor-root:hover {
+.auth-form .mantine-Anchor-root:hover,
+.onb-col .mantine-Anchor-root:hover {
   --anchor-color: #fff;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -2071,14 +2079,17 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Borderless pill fields: the ground is a lifted surface, not an outlined box,
    and the label sits inside as the placeholder. */
-.auth-form .mantine-InputWrapper-root .mantine-Input-input {
+.auth-form .mantine-InputWrapper-root .mantine-Input-input,
+.onb-col .mantine-InputWrapper-root .mantine-Input-input {
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg-2) 70%, transparent);
   border-radius: 10px;
   height: 46px;
 }
 .auth-form .mantine-Input-input:focus,
-.auth-form .mantine-Input-input:focus-within {
+.auth-form .mantine-Input-input:focus-within,
+.onb-col .mantine-Input-input:focus,
+.onb-col .mantine-Input-input:focus-within {
   border-color: rgba(255,255,255,0.32);
   background: color-mix(in srgb, var(--bg-2) 90%, transparent);
 }
@@ -2121,6 +2132,58 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-submit:disabled .auth-submit-spinner {
   border-color: rgba(255,255,255,0.25);
   border-top-color: rgba(255,255,255,0.75);
+}
+
+/* Same white-on-near-black primary as .auth-submit, but as a class on a Mantine
+   <Button> — onboarding's primaries need `loading` and icon sections, which a
+   plain <button> would have to reimplement. Mantine's own filled variant is
+   wired to the theme's primary colour, so the surface is overridden here rather
+   than themed. */
+.auth-btn.mantine-Button-root[data-variant="filled"] {
+  background: #fff;
+  color: #0a0b0d;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-btn.mantine-Button-root[data-variant="filled"]:hover:not([data-disabled]):not(:disabled) {
+  background: rgba(255,255,255,0.88);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -8px rgba(255,255,255,0.3);
+}
+.auth-btn.mantine-Button-root[data-variant="filled"]:active:not([data-disabled]):not(:disabled) {
+  transform: translateY(0);
+}
+.auth-btn.mantine-Button-root[data-variant="filled"]:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.6);
+  outline-offset: 2px;
+}
+/* Mantine paints both the disabled and the loading state through data-disabled,
+   so this covers the in-flight button too. */
+.auth-btn.mantine-Button-root[data-variant="filled"][data-disabled],
+.auth-btn.mantine-Button-root[data-variant="filled"]:disabled {
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+}
+.auth-btn.mantine-Button-root[data-variant="filled"] .mantine-Loader-root {
+  --loader-color: currentColor;
+}
+
+/* Secondary (Back / Skip): outlined on the same ground, so the pair reads as
+   one primary and one way out rather than two equal choices. */
+.auth-btn.mantine-Button-root[data-variant="default"] {
+  background: color-mix(in srgb, var(--bg-2) 70%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.78);
+  font-weight: 550;
+}
+.auth-btn.mantine-Button-root[data-variant="default"]:hover:not([data-disabled]) {
+  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
+  border-color: rgba(255,255,255,0.22);
+  color: #fff;
 }
 
 /* Google / LinkedIn: flat dark boxes read as generic secondary actions. A

@@ -204,6 +204,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
       </Alert>
 
       <Button
+        className="auth-btn"
         size="md"
         fullWidth
         loading={saving}
