@@ -56,6 +56,9 @@
   --shadow: 0 2px 6px rgba(0,0,0,0.35), 0 20px 48px -20px rgba(0,0,0,0.6);
   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: "Space Grotesk", "Inter", sans-serif;
+  /* Serif display, auth screens only. Kept separate from --font-display so
+     the rest of the app is untouched by it. */
+  --font-auth-display: "Instrument Serif", Georgia, "Times New Roman", serif;
 }
 
 [data-mantine-color-scheme="light"] {
@@ -2004,13 +2007,19 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    centred form sat partly under the browser chrome and the sign-in button
    could not be reached until the bar collapsed. `100dvh` tracks the height
    that is actually visible; the `vh` line stays first as the fallback. */
+/* The brand side is an inset rounded card floating on the page ground rather
+   than a full-bleed half, so the padding below is the gutter around it. */
 .auth-split {
   position: relative;
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
+  grid-template-columns: 0.85fr 1fr;
+  gap: 1.25rem;
+  padding: 1.25rem;
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--bg);
+  /* Gradient ground across the whole page, so the gutter around the brand card
+     and the form column are lit rather than flat black. */
+  background: linear-gradient(150deg, #0c0e10 0%, var(--bg) 50%, #08090b 100%);
 }
 
 /* The panel was flat, which left the form floating in dead space with nothing
@@ -2019,15 +2028,42 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-panel {
   position: relative;
   display: flex; align-items: center; justify-content: center;
-  padding: 2rem; background: var(--bg);
+  padding: 2rem; background: transparent;
 }
+/* A glow of its own behind the form, sitting on top of the page gradient so
+   the right half is not just the dark end of it. */
 .auth-panel::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(60% 50% at 0% 30%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
-    radial-gradient(50% 40% at 100% 100%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%);
+  background: radial-gradient(46% 40% at 50% 50%,
+    color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 70%);
 }
 .auth-form { position: relative; z-index: 1; width: 100%; max-width: 380px; }
+
+/* Centred heading block in a serif display face — the form column is a quiet
+   centred stack rather than a left-aligned card. */
+.auth-form .mantine-Title-root {
+  font-family: var(--font-auth-display);
+  font-weight: 400;
+  font-size: 2.6rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+.auth-form .mantine-Title-root + .mantine-Text-root { text-align: center; }
+
+/* Borderless pill fields: the ground is a lifted surface, not an outlined box,
+   and the label sits inside as the placeholder. */
+.auth-form .mantine-InputWrapper-root .mantine-Input-input {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-2) 70%, transparent);
+  border-radius: 10px;
+  height: 46px;
+}
+.auth-form .mantine-Input-input:focus,
+.auth-form .mantine-Input-input:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.auth-form .mantine-Button-root[data-variant="filled"] { height: 46px; border-radius: 10px; }
 
 @media (max-width: 48em) {
   /* The 2rem gutter left a 380px form only ~296px on a small phone, which
@@ -2038,6 +2074,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     padding: 1.75rem 1.1rem calc(2rem + env(safe-area-inset-bottom, 0px));
   }
   .auth-form { max-width: 100%; }
+  .auth-form .mantine-Title-root { font-size: 2.15rem; }
 }
 
 /* Brand panel */
@@ -2047,124 +2084,45 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
      clipping the proof strip on a short laptop viewport. */
   /* Scroll stays for short viewports, but the bar itself is hidden — it sat on
      the seam between the two panels and read as a page-level scrollbar. */
-  padding: 3.25rem 3.5rem; overflow-y: auto;
+  padding: 3rem 2.75rem; overflow-y: auto;
   scrollbar-width: none; -ms-overflow-style: none;
+  /* Inset card, not a full-bleed half — the split's gutter shows around it. */
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.07);
   display: flex; align-items: center; justify-content: flex-start;
   /* A near-black base tinted by the live accent rather than a fixed hue, so
      the login panel matches whichever preset is active instead of always
      reading green. The accent is held well below half strength and pushed to
      one corner: at 55% it flooded the bottom of the panel, which muddied the
      white text and left no dark ground for the card to sit against. */
+  /* Same ground as the form column — the panel is the page background with one
+     soft glow on it, not a separate darker slab. */
   background:
-    radial-gradient(90% 70% at 12% 108%,
-      color-mix(in srgb, var(--accent) 42%, transparent) 0%, transparent 62%),
-    radial-gradient(70% 55% at 96% -8%,
-      color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 60%),
-    linear-gradient(160deg, #0b0d0f 0%, #0a0c0d 55%, #090a0c 100%);
+    radial-gradient(52% 44% at 26% 45%,
+      color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 70%),
+    linear-gradient(150deg, rgba(12,14,16,0.9), rgba(8,9,11,0.95));
   color: #fff;
 }
 .auth-brand::-webkit-scrollbar { width: 0; height: 0; }
 
+/* Fainter than before and masked to the lit centre, so the lines read as
+   texture under the glow rather than a ruled sheet across the whole card. */
 .ab-grid {
   position: absolute; inset: 0;
-  background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse at 30% 40%, #000 30%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 30%, transparent 75%);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 28% 45%, #000 18%, transparent 66%);
+  -webkit-mask-image: radial-gradient(ellipse at 28% 45%, #000 18%, transparent 66%);
 }
+
 .ab-orb { position: absolute; border-radius: 50%; filter: blur(80px); }
 /* Were hardcoded emerald, so they stayed green on every other accent preset. */
-.ab-orb-1 { width: 320px; height: 320px; background: color-mix(in srgb, var(--accent) 30%, transparent); top: -80px; right: -60px; }
-.ab-orb-2 { width: 260px; height: 260px; background: color-mix(in srgb, var(--accent) 16%, transparent); bottom: -60px; left: -40px; }
-
-/* Live dashboard miniature. Replaces the three floating chips: one focal
-   point, and it shows the product instead of describing it. */
-.ab-card {
-  position: relative; z-index: 3;
-  margin: 0 0 1.9rem;
-  padding: 1.2rem 1.35rem 1.15rem;
-  border-radius: 18px;
-  /* A flat translucent white box read as a generic glass panel. A faint accent
-     tint plus a lit top edge gives it a light source and ties it to the
-     gradient behind it. */
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035)),
-    color-mix(in srgb, var(--accent) 7%, rgba(10,12,13,0.55));
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.13);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.16),
-    0 1px 2px rgba(0,0,0,0.4),
-    0 8px 16px rgba(0,0,0,0.3),
-    0 24px 60px rgba(0,0,0,0.5);
-}
-/* Badge pushed to the far edge so the head reads as a real panel header rather
-   than two labels stuck together. */
-.ab-card-head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 0.6rem; margin-bottom: 0.7rem;
-}
-.ab-card-title {
-  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.07em; color: rgba(255,255,255,0.55);
-}
-.ab-live {
-  display: inline-flex; align-items: center; gap: 0.35rem;
-  font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.06em; color: rgba(255,255,255,0.9);
-  background: rgba(255,255,255,0.12); border-radius: 999px;
-  padding: 0.2rem 0.5rem;
-}
-.ab-live-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent);
-  animation: ab-pulse 2s ease-out infinite;
-}
-@keyframes ab-pulse {
-  70% { box-shadow: 0 0 0 7px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
-
-.ab-card-figure { display: flex; align-items: baseline; gap: 0.5rem; }
-.ab-card-value {
-  font-size: 2.1rem; font-weight: 800; line-height: 1; color: #fff;
-  letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
-}
-.ab-card-delta {
-  display: inline-flex; align-items: center; gap: 0.2rem;
-  font-size: 0.75rem; font-weight: 600;
-  color: color-mix(in srgb, var(--accent) 70%, #fff);
-}
-
-/* Bars became an area sparkline: a continuous trend line says "traffic over
-   time" at a glance, where twelve identical bars just read as decoration. */
-.ab-spark {
-  display: block; width: 100%; height: 58px;
-  margin: 0.85rem 0 0.15rem; overflow: visible;
-}
-
-/* Three stats plus the sample-data caption on the same baseline. `auto` on the
-   last track lets the caption keep its natural width so the stats stay even. */
-.ab-card-foot {
-  display: grid; grid-template-columns: repeat(3, 1fr) auto;
-  align-items: end; gap: 0.5rem;
-  padding-top: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1);
-}
-.ab-stat { display: flex; flex-direction: column; gap: 2px; }
-.ab-stat-val {
-  font-size: 1rem; font-weight: 700; color: #fff; line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.ab-stat-label { font-size: 0.66rem; color: rgba(255,255,255,0.6); }
-
-/* Its own row under the stats. Absolute-positioning it into the corner would
-   have overlapped the third stat's label at narrow widths. */
-/* Sits on the footer's own baseline rather than a row of its own — as a
-   separate right-aligned line it collided with the third stat's label. */
-.ab-card-note {
-  font-size: 0.62rem; color: rgba(255,255,255,0.34); letter-spacing: 0.02em;
-  align-self: end; text-align: right; white-space: nowrap;
-}
+/* Pulled in from the corners to sit under the central glow, so they read as
+   one light source rather than two stray blobs at the card's edges. */
+.ab-orb-1 { width: 300px; height: 300px; background: color-mix(in srgb, var(--accent) 20%, transparent); top: 24%; left: 12%; }
+.ab-orb-2 { width: 220px; height: 220px; background: color-mix(in srgb, var(--accent) 11%, transparent); top: 46%; left: 30%; }
 
 /* Was capped at 430px, which left the right half of a wide panel empty while
    the copy stayed squeezed into a narrow column. The cap now scales with the
@@ -2172,35 +2130,46 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    feature grid can use the full width. */
 /* Left-aligned in the panel, vertically centred. The column stays capped so
    the prose keeps a readable measure instead of stretching the full width. */
+/* Wordmark at the top of the card, the pitch block vertically centred under
+   it. The auto margins sit on the two spacer edges rather than on the heading,
+   so removing or adding a block between them never opens a dead band. */
 .ab-content {
   position: relative; z-index: 3;
-  max-width: 620px; width: 100%; margin: auto 0;
+  max-width: 460px; width: 100%;
+  display: flex; flex-direction: column;
 }
+/* No auto gaps: the whole block is centred as one unit (see `align-items` on
+   .auth-brand), so the wordmark sits directly above the headline instead of
+   being flung to the top edge with dead space under it. */
+.ab-content > :first-child { margin-bottom: 2.25rem; }
 /* The hardcoded <br /> is gone — it fought this measure and orphaned "for" on
    its own line. `balance` keeps the two lines close to even at any width. */
 .ab-content h2 {
-  color: #fff; font-size: 2.35rem; line-height: 1.14;
-  margin: 1.75rem 0 0.9rem; letter-spacing: -0.025em;
-  max-width: 20ch; text-wrap: balance;
+  color: #fff; font-size: 2.4rem; line-height: 1.12;
+  margin: 0 0 1rem;
+  letter-spacing: -0.03em; font-weight: 700;
+  max-width: 18ch; text-wrap: balance;
 }
-.ab-content > p { color: rgba(255,255,255,0.82); line-height: 1.6; font-size: 1.02rem; margin: 0 0 1.9rem; max-width: 46ch; }
+.ab-content > p { color: rgba(255,255,255,0.62); line-height: 1.6; font-size: 1rem; margin: 0 0 1.5rem; max-width: 46ch; }
 /* Two columns filled down rather than across: three items in the left column,
    two in the right. `grid-auto-flow: column` with three explicit rows is what
    splits them 3/2 — the default row flow would put 1-2 on the first row and
    strand the fifth. */
+/* One column now that the panel is narrower — two columns of 0.9rem text in a
+   460px measure wrapped every other label. */
 .ab-features {
-  display: grid;
-  grid-template-rows: repeat(3, auto);
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 0.9rem 1.5rem;
+  display: flex; flex-direction: column;
+  gap: 0.75rem;
 }
 .ab-feature { display: flex; align-items: center; gap: 0.7rem; font-size: 0.9rem; color: rgba(255,255,255,0.92); font-weight: 500; }
 .ab-feature-ic { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.15); display: grid; place-items: center; flex-shrink: 0; }
 /* Stacked, both full width. Side by side, the card got too narrow for its own
    stat labels and the CTA read as a stranded box floating beside it. */
 .ab-showcase {
-  display: flex; flex-direction: column; gap: 0.9rem; margin: 0 0 2.25rem;
+  display: flex; flex-direction: column; gap: 0.9rem; margin: 0 0 1.75rem;
+  /* Without the dashboard card beside it the CTA stretched the full column and
+     read as a banner; capped, it stays a button. */
+  max-width: 420px;
 }
 
 .ab-demo {
@@ -2235,7 +2204,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .ab-proof {
   display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem;
-  margin-top: 2.25rem; padding-top: 1.35rem;
+  margin-top: 1.5rem; padding-top: 1.1rem;
   border-top: 1px solid rgba(255,255,255,0.14);
 }
 .ab-proof-item {
@@ -2252,7 +2221,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-demo-fallback { display: none; }
 
 @media (max-width: 900px) {
-  .auth-split { grid-template-columns: 1fr; }
+  /* With the brand card hidden there is nothing for the gutter to frame, so
+     the form column goes back to full-bleed. */
+  .auth-split { grid-template-columns: 1fr; gap: 0; padding: 0; }
   .auth-brand { display: none; }
   .auth-demo-fallback { display: flex; }
 }
