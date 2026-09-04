@@ -2069,7 +2069,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-panel::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(46% 40% at 50% 50%,
-    color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 70%);
+    rgba(255,255,255,0.035) 0%, transparent 70%);
 }
 .auth-form { position: relative; z-index: 1; width: 100%; max-width: 380px; }
 
@@ -2078,15 +2078,50 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-form .mantine-Title-root {
   font-family: var(--font-auth-display);
   font-weight: 400;
-  font-size: 2.6rem;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  /* Was 2.6rem — at that size the serif shouted over a 380px form and made the
+     fields look like an afterthought under a poster. */
+  font-size: 2.1rem;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
   text-align: center;
+  color: rgba(255,255,255,0.95);
 }
 .auth-form .mantine-Title-root + .mantine-Text-root { text-align: center; }
 
 .auth-form .mantine-InputWrapper-label {
   font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem;
+  color: rgba(255,255,255,0.72);
+}
+/* Every field on these forms is required, so the asterisks were noise on every
+   row rather than a signal on some. Any that survive shouldn't be error-red. */
+.auth-form .mantine-InputWrapper-required { color: rgba(255,255,255,0.35); }
+
+/* Field with its own header row: label left, helper link right. */
+.auth-field-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: 0.4rem;
+}
+.auth-field-head label {
+  font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.72);
+}
+
+/* Links are text, not accent-coloured buttons. On a screen whose only coloured
+   element should be the brand dot, a green link competes with the submit. */
+.auth-form .mantine-Anchor-root {
+  --anchor-color: rgba(255,255,255,0.6);
+  color: var(--anchor-color);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.auth-form .mantine-Anchor-root:hover {
+  --anchor-color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* The "No account? Sign up free" line is the one link that should still pull
+   the eye after the submit — white rather than dimmed, but still not accent. */
+.auth-form > .mantine-Stack-root > .mantine-Text-root .mantine-Anchor-root {
+  --anchor-color: rgba(255,255,255,0.92);
 }
 .auth-form .mantine-Divider-label {
   font-size: 0.75rem; color: var(--text-dim, rgba(255,255,255,0.5));
@@ -2102,11 +2137,48 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .auth-form .mantine-Input-input:focus,
 .auth-form .mantine-Input-input:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  border-color: rgba(255,255,255,0.32);
+  background: color-mix(in srgb, var(--bg-2) 90%, transparent);
 }
-.auth-form .mantine-Button-root[data-variant="filled"] {
-  height: 46px; border-radius: 10px; font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.25), 0 8px 20px -10px color-mix(in srgb, var(--accent) 55%, transparent);
+/* Neutral primary, and a plain <button> rather than Mantine's — its filled
+   variant is wired to the theme's primary colour, and the accent belongs to
+   the data inside the product, not to the door. White on near-black is also
+   the highest-contrast target on the page. */
+.auth-submit {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 46px;
+  border: none; border-radius: 10px;
+  background: #fff;
+  color: #0a0b0d;
+  font: inherit; font-weight: 600; font-size: 0.94rem;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-submit:hover:not(:disabled) {
+  background: rgba(255,255,255,0.88);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -8px rgba(255,255,255,0.3);
+}
+.auth-submit:active:not(:disabled) { transform: translateY(0); }
+.auth-submit:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.6);
+  outline-offset: 2px;
+}
+.auth-submit:disabled {
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+  cursor: default;
+}
+.auth-submit-spinner {
+  width: 17px; height: 17px; border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.25);
+  border-top-color: #0a0b0d;
+  animation: spin 0.7s linear infinite;
+}
+.auth-submit:disabled .auth-submit-spinner {
+  border-color: rgba(255,255,255,0.25);
+  border-top-color: rgba(255,255,255,0.75);
 }
 
 /* Google / LinkedIn: flat dark boxes read as generic secondary actions. A
@@ -2121,7 +2193,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .auth-form .mantine-Button-root[data-variant="default"]:hover {
   background: var(--bg-2);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  border-color: rgba(255,255,255,0.22);
   transform: translateY(-1px);
 }
 .auth-form .mantine-Button-root[data-variant="default"] .mantine-Button-section {
@@ -2162,13 +2234,43 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
      soft glow on it, not a separate darker slab. */
   /* One faint glow low in the panel, well below the copy. No grid texture, no
      floating orbs — just a near-flat dark ground. */
+  /* Colourless bloom behind the copy. Tinting this with the live accent made
+     the whole door read as one brand colour; a neutral light source keeps the
+     panel a dark room with the headline lit in it. */
   background:
-    radial-gradient(55% 45% at 28% 94%,
-      color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 75%),
+    radial-gradient(42% 38% at 32% 48%,
+      rgba(255,255,255,0.07) 0%, transparent 72%),
     linear-gradient(150deg, rgba(11,12,14,0.97), rgba(8,9,11,0.99));
   color: #fff;
 }
 .auth-brand::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Drifting dot field — depth behind the copy so the panel is not a flat slab.
+   Sits under .ab-content (z-index 3) and takes no pointer events. */
+.ab-particles {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none; overflow: hidden;
+  /* Fades out toward the copy column so the dots never sit behind text. */
+  mask-image: radial-gradient(70% 60% at 30% 50%, transparent 0%, #000 65%);
+  -webkit-mask-image: radial-gradient(70% 60% at 30% 50%, transparent 0%, #000 65%);
+}
+.ab-particles span {
+  position: absolute; border-radius: 50%;
+  background: #fff;
+  will-change: transform, opacity;
+  animation-name: ab-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ab-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  25%      { transform: translate3d(6px, -14px, 0); }
+  50%      { transform: translate3d(-4px, -24px, 0); }
+  75%      { transform: translate3d(-9px, -10px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-particles span { animation: none; }
+}
 
 /* Was capped at 430px, which left the right half of a wide panel empty while
    the copy stayed squeezed into a narrow column. The cap now scales with the
@@ -2234,8 +2336,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .ab-demo-ic {
   width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
   display: grid; place-items: center;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: color-mix(in srgb, var(--accent) 65%, #fff);
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
 }
 .ab-demo-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .ab-demo-title { font-size: 0.88rem; font-weight: 600; }
@@ -2254,9 +2356,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   display: flex; align-items: center; gap: 0.4rem;
   font-size: 0.76rem; font-weight: 500; color: rgba(255,255,255,0.5);
 }
-.ab-proof-item svg { color: color-mix(in srgb, var(--accent) 70%, #fff); flex-shrink: 0; }
+.ab-proof-item svg { color: rgba(255,255,255,0.45); flex-shrink: 0; }
 
 .auth-brand .wordmark-text { color: #fff; }
+/* The one place the brand colour is allowed on the auth screens. */
 .auth-brand .wordmark-dot { color: var(--accent); }
 
 /* The demo CTA lives on the brand panel; this fallback only appears at the

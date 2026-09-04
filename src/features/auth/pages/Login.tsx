@@ -189,7 +189,6 @@ export default function Login() {
                 type="email"
                 placeholder="you@company.com"
                 size="md"
-                withAsterisk
                 autoComplete="email"
                 value={email}
                 error={show("email")}
@@ -198,38 +197,39 @@ export default function Login() {
               />
             </div>
 
-            <div>
+            {/* Label row, now that no required asterisk competes for it — the
+                recovery link is part of the field's own header rather than a
+                stray line under it. */}
+            <div className="auth-field">
+              <div className="auth-field-head">
+                <label htmlFor="login-password">Password</label>
+                <Anchor component={Link} to="/forgot-password" size="xs" fw={500}>
+                  Forgot password?
+                </Anchor>
+              </div>
               <PasswordInput
+                id="login-password"
                 ref={passwordRef}
-                label="Password"
                 placeholder="••••••••"
                 size="md"
-                withAsterisk
                 autoComplete="current-password"
                 value={password}
                 error={show("password")}
                 onChange={(e) => setPassword(e.currentTarget.value)}
                 onBlur={blur("password")}
               />
-              {/* Under the field rather than on the label row: the label row
-                  fights the required asterisk, and this is where the eye
-                  already is once the password has been typed and rejected. */}
-              <Group justify="flex-end" mt={6}>
-                <Anchor component={Link} to="/forgot-password" size="xs" fw={500}>
-                  Forgot password?
-                </Anchor>
-              </Group>
             </div>
 
-            <Button
+            {/* Plain element rather than Mantine's Button: the filled variant
+                is driven by the theme's primary colour, and the auth screens
+                deliberately carry no accent. */}
+            <button
               type="submit"
-              loading={busy || verifying}
-              disabled={googleBusy}
-              fullWidth
-              size="md"
+              className="auth-submit"
+              disabled={busy || verifying || googleBusy}
             >
-              Log in
-            </Button>
+              {busy || verifying ? <span className="auth-submit-spinner" /> : "Log in"}
+            </button>
 
             {/* The demo's real home is the brand panel now. That panel is
                 hidden below 900px, so this stays as the mobile-only fallback —

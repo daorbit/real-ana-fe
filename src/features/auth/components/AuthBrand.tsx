@@ -3,6 +3,7 @@ import {
   Zap, Search, Share2, ShieldCheck, TrendingUp, Check, PlayCircle, ArrowRight,
 } from "lucide-react";
 import { Wordmark } from "@/shared/ui/Brand";
+import { AuthParticles } from "@/features/auth/components/AuthParticles";
 
 const FEATURES = [
   { icon: Zap, text: "Real-time visitor tracking" },
@@ -25,6 +26,7 @@ type Props = {
 export function AuthBrand({ onDemo, demoBusy = false }: Props) {
   return (
     <div className="auth-brand">
+      <AuthParticles />
       <div className="ab-content">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <Wordmark />

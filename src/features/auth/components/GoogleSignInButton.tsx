@@ -6,8 +6,9 @@ import { useAuth } from "@/features/auth/context";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 const SCRIPT_ID = "google-gsi";
-/** Matches Mantine's `size="md"` button, so the overlay covers ours exactly. */
-const HEIGHT = 42;
+/** The auth form restyles `variant="default"` buttons to this height, so the
+    invisible GSI overlay has to track it or it stops covering our button. */
+const HEIGHT = 46;
 
 type GsiButtonOptions = {
   type: "standard" | "icon";
