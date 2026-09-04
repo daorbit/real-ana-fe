@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
+import type { Map as LeafletMap } from "leaflet";
 import { geoCentroid } from "d3-geo";
 import { feature } from "topojson-client";
 import topo from "world-atlas/countries-110m.json";
@@ -24,7 +25,10 @@ function useCentroids() {
   }, []);
 }
 
-export function SatelliteMap({ countries, height = 340 }: { countries: Bucket[]; height?: number }) {
+/** Matches the flat map's 800x380 viewBox so both views occupy the same box. */
+const ASPECT = 800 / 380;
+
+export function SatelliteMap({ countries }: { countries: Bucket[] }) {
   const centroids = useCentroids();
 
   // Radius scales with share of traffic, on a log curve so one dominant
@@ -42,22 +46,38 @@ export function SatelliteMap({ countries, height = 340 }: { countries: Bucket[];
       .filter(Boolean) as { name: string; count: number; pos: [number, number]; radius: number }[];
   }, [countries, centroids]);
 
+  // The card is wide and short, so the zoom that fills it is driven by width.
+  // Compute it from the container and make that the floor, otherwise Leaflet
+  // zooms out past the tile set and Esri serves "no data" placeholders.
+  const onMapReady = useCallback((map: LeafletMap | null) => {
+    if (!map) return;
+    const fit = () => {
+      const width = map.getSize().x;
+      if (!width) return;
+      // Web Mercator: one world is 256px at zoom 0.
+      const z = Math.log2(width / 256);
+      map.setMinZoom(z);
+      map.setZoom(Math.max(map.getZoom(), z), { animate: false });
+    };
+    fit();
+    map.on("resize", fit);
+  }, []);
+
   return (
-    <div className="satellite-map" style={{ height }}>
+    <div className="satellite-map" style={{ aspectRatio: ASPECT }}>
       <MapContainer
-        center={[20, 10]}
+        center={[25, 0]}
         zoom={2}
-        minZoom={2}
         maxZoom={8}
         scrollWheelZoom
-        worldCopyJump
+        zoomSnap={0.25}
         style={{ height: "100%", width: "100%" }}
         attributionControl={false}
+        ref={onMapReady}
       >
         <TileLayer
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           attribution="Tiles © Esri"
-          noWrap={false}
         />
         {points.map((p) => (
           <CircleMarker

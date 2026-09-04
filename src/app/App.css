@@ -1880,6 +1880,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border: 1px solid var(--border);
 }
 .satellite-map .leaflet-container { background: var(--surface-2); font: inherit; }
+.satellite-map .leaflet-control-attribution { display: none; }
 /* Leaflet's default popup/tooltip chrome is white — match the dashboard. */
 .satellite-map .leaflet-tooltip {
   background: var(--surface-1);

@@ -37,9 +37,10 @@ export class ErrorBoundary extends Component<Props, State> {
     return (
       <Box
         style={{
-          minHeight: isApp ? "100dvh" : "60vh",
-          display: "grid",
-          placeItems: "center",
+          minHeight:"100dvh",
+          display: "flex",
+          justifyContent:"center",
+          alignItems:"center",
           padding: "2rem",
         }}
       >

@@ -125,7 +125,7 @@ export function WorldMap({ countries }: { countries: Bucket[] }) {
           </Stack>
         </Center>
       ) : view === "satellite" ? (
-        <SatelliteMap countries={countries} height={340} />
+        <SatelliteMap countries={countries} />
       ) : (
         <>
           <svg
