@@ -1584,6 +1584,14 @@ export const api = createApi({
       }
     >({
       query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
+      // A 100%-off coupon activates the plan server-side and returns `{ free: true }`
+      // with no Razorpay step, so there is no later verify call to refresh the
+      // cache — do it here when the response says the plan is already live. A paid
+      // response carries an order id instead and is refreshed by verifySubscription.
+      invalidatesTags: (result) =>
+        result && "free" in result && result.free
+          ? ["Billing", "Usage", "Workspace"]
+          : [],
     }),
 
     verifySubscription: build.mutation<
