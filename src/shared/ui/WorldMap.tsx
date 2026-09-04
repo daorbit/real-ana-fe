@@ -95,8 +95,22 @@ export function WorldMap({ countries }: { countries: Bucket[] }) {
             value={view}
             onChange={setViewPersisted}
             data={[
-              { value: "flat", label: <MapIcon size={14} aria-label="Flat map" /> },
-              { value: "satellite", label: <Satellite size={14} aria-label="Satellite map" /> },
+              {
+                value: "flat",
+                label: (
+                  <Center h={16}>
+                    <MapIcon size={14} aria-label="Flat map" />
+                  </Center>
+                ),
+              },
+              {
+                value: "satellite",
+                label: (
+                  <Center h={16}>
+                    <Satellite size={14} aria-label="Satellite map" />
+                  </Center>
+                ),
+              },
             ]}
           />
         </Group>
