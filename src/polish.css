@@ -86,6 +86,48 @@
   box-shadow: none !important;
 }
 
+/* ---- Plan cards -----------------------------------------------------------
+   The recommended plan is lit from above rather than scaled up: scaling one
+   card in a row breaks the shared baseline its neighbours sit on. The beam is
+   tinted with that plan's own colour, passed in as --beam. */
+/* The card keeps `overflow: visible` so the corner ribbon can hang outside it,
+   so the beam clips itself rather than relying on the card to do it. */
+.plan-card__beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 170px;
+  pointer-events: none;
+  border-radius: var(--mantine-radius-lg) var(--mantine-radius-lg) 0 0;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse 46% 100% at 50% 0%,
+    color-mix(in srgb, var(--beam, var(--accent)) 22%, transparent) 0%,
+    transparent 72%
+  );
+}
+/* A bright hairline where the beam meets the card's top edge. */
+.plan-card--featured::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 22%;
+  right: 22%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--beam, var(--accent)) 65%, transparent),
+    transparent
+  );
+}
+/* The card's own content has to sit above the beam. */
+.plan-card > *:not(.plan-card__beam) {
+  position: relative;
+}
+
 /* ---- Focus ----------------------------------------------------------------
    Keyboard focus gets a visible accent ring everywhere. Pointer focus does not,
    so clicking a control doesn't leave a ring behind. */

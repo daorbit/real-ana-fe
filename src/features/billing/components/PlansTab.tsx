@@ -115,20 +115,23 @@ export function PlansTab({
             withBorder
             radius="lg"
             padding="lg"
-            className="static-card"
+            className={`plan-card${featured ? " plan-card--featured" : ""}`}
             style={{
               display: "flex",
               flexDirection: "column",
- 
               position: "relative",
               overflow: "visible",
- 
               borderColor: featured
                 ? PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK
                 : undefined,
+              // Read by both the beam and the top-edge hairline in polish.css.
+              ["--beam" as string]: PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK,
             }}
           >
- 
+            {/* Lit from above, the way the marketing card is — the ribbon
+                still carries the words, this carries the emphasis. */}
+            {featured && <span className="plan-card__beam" aria-hidden="true" />}
+
             {(featured || current) && (
               <CornerRibbon
                 label={
@@ -159,7 +162,9 @@ export function PlansTab({
             )}
 
             <Group gap={5} align="baseline" mt="lg">
-              <Text fz={34} fw={800} style={{ letterSpacing: "-0.03em" }}>{money(price)}</Text>
+              <Text fz={40} fw={700} style={{ letterSpacing: "-0.045em" }}>
+                {money(price)}
+              </Text>
               {buyable && (
                 <Text size="sm" c="dimmed">/ {cycle === "yearly" ? t("billing.perYear") : t("billing.perMonth")}</Text>
               )}
@@ -178,22 +183,14 @@ export function PlansTab({
               <Text size="xs" c="transparent" mt={2}>.</Text>
             )}
 
-            <Divider my="md" />
-
-            <Stack gap={8} mb="lg" style={{ flex: 1 }}>
-              {/* Sites are capped the same on every tier — it is a
-                  property of a workspace, not of a plan — so it is
-                  stated once here rather than sold as a differentiator. */}
-              <FeatureLine text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
-              <FeatureLine text={t("billing.featureAudits", { count: plan.monthlyAuditQuota })} />
-              <FeatureLine text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
-              {plan.features.map((f) => <FeatureLine key={f} text={f} />)}
-            </Stack>
-
+            {/* The action sits directly under the price, as on the marketing
+                card — the feature list is what you read after deciding, not
+                what you scroll past to reach the button. */}
             <Button
+              mt="md"
               fullWidth
               size="md"
-              radius="md"
+              radius="xl"
               color="emerald"
               variant={renewable ? "filled" : current ? "light" : featured ? "filled" : "outline"}
               disabled={(current && !renewable) || lower || !buyable || isDemo || !selectedWorkspaceId}
@@ -226,6 +223,26 @@ export function PlansTab({
                 : usage?.plan.slug === plan.slug ? t("billing.ctaRenew")
                 : t("billing.ctaSubscribe")}
             </Button>
+
+            {/* The headline quota, called out above the list the way the
+                marketing card leads with it. */}
+            <Group gap={9} wrap="nowrap" mt="lg">
+              <PlanIcon slug={plan.slug} size={20} uid={`quota-${plan.slug}`} />
+              <Text fz={13} fw={700}>
+                {t("billing.featureAudits", { count: plan.monthlyAuditQuota })}
+              </Text>
+            </Group>
+
+            <Divider my="md" />
+
+            <Stack gap={8} style={{ flex: 1 }}>
+              {/* Sites are capped the same on every tier — it is a
+                  property of a workspace, not of a plan — so it is
+                  stated once here rather than sold as a differentiator. */}
+              <FeatureLine text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
+              <FeatureLine text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
+              {plan.features.map((f) => <FeatureLine key={f} text={f} />)}
+            </Stack>
           </Card>
         );
       })}
