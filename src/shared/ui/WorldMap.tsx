@@ -92,6 +92,7 @@ export function WorldMap({ countries }: { countries: Bucket[] }) {
           )}
           <SegmentedControl
             size="xs"
+            className="map-view-switch"
             value={view}
             onChange={setViewPersisted}
             data={[

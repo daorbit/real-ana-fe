@@ -1863,6 +1863,16 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .legend-swatch {
   width: 16px; height: 8px; border-radius: 2px; display: inline-block;
 }
+/* Icon-only view switcher: Mantine's label is baseline-aligned text by
+   default, which drops the icons a pixel or two off centre. */
+.map-view-switch .mantine-SegmentedControl-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 10px;
+  line-height: 1;
+}
+
 /* Satellite (Leaflet) view */
 .satellite-map {
   border-radius: var(--mantine-radius-md);
