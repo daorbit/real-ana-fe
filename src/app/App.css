@@ -583,28 +583,6 @@ body { overflow-wrap: break-word; }
   overflow: hidden;
 }
 
-/* A diagonal band of light that slides across the whole card once on open. */
-.verify-card__sheen {
-  position: absolute;
-  top: 0;
-  left: -60%;
-  width: 55%;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(
-    100deg,
-    transparent 0%,
-    color-mix(in srgb, var(--accent) 14%, transparent) 50%,
-    transparent 100%
-  );
-  transform: skewX(-18deg);
-  animation: verify-sheen 1.1s ease-out 0.15s both;
-}
-@keyframes verify-sheen {
-  from { left: -60%; }
-  to   { left: 140%; }
-}
-
 /* Card contents lift into place, each row a beat behind the last. */
 .verify-rise {
   animation: verify-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -614,88 +592,51 @@ body { overflow-wrap: break-word; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* A soft horizontal scan line that travels down the Turnstile panel on a loop
-   while the check is running. */
-.verify-slot__scan {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--accent) 55%, transparent),
-    transparent
-  );
-  animation: verify-scan 2.6s ease-in-out infinite;
-}
-@keyframes verify-scan {
-  0%   { top: 6%;  opacity: 0; }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { top: 94%; opacity: 0; }
-}
-
+/* Monochrome, like the auth screens this interrupts. The accent belongs to the
+   data inside the product; a security prompt in brand green reads as a
+   promotion rather than a checkpoint. */
 .verify-shield {
   position: relative;
   display: grid;
   place-items: center;
   flex: none;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  color: var(--accent);
-  background: var(--accent-soft);
-  animation: verify-shield-in 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-@keyframes verify-shield-in {
-  from { transform: rotate(-90deg) scale(0.6); opacity: 0; }
-  to   { transform: rotate(0) scale(1); opacity: 1; }
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* A thin arc that sweeps around the shield like an indeterminate spinner. */
+/* One thin arc sweeping the shield — the only motion left in the card, and the
+   thing that says the check is still running rather than hung. The pulse rings
+   and the scan line were two more loops saying the same thing. */
 .verify-shield__spin {
   position: absolute;
   inset: -3px;
   border-radius: 50%;
   border: 1.5px solid transparent;
-  border-top-color: var(--accent);
-  border-right-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  border-top-color: rgba(255, 255, 255, 0.75);
+  border-right-color: rgba(255, 255, 255, 0.25);
   animation: verify-spin 1.4s linear infinite;
 }
 @keyframes verify-spin {
   to { transform: rotate(360deg); }
 }
-
-/* Second pulse ring, offset so the shield emits a steady double ripple. */
-.verify-shield__pulse--2 {
-  animation-delay: 1.2s;
+@media (prefers-reduced-motion: reduce) {
+  .verify-shield__spin { animation-duration: 3s; }
 }
 
-/* The Turnstile widget sits on a faintly recessed panel so the iframe reads as
-   part of the dialog rather than pasted on top of it. */
+/* The Turnstile iframe renders its own light-on-dark panel with a hard border.
+   Left bare it reads as a foreign object pasted into the card; a matching
+   recess and radius around it settles it into the dialog. */
 .verify-slot {
   display: flex;
   justify-content: center;
-  background: var(--mantine-color-default-hover, rgba(0, 0, 0, 0.03));
-}
-
-/* A ring that expands out of the shield and fades, on a slow loop. Drawn as a
-   sibling rather than a box-shadow so it can scale past its own bounds without
-   pushing the layout around. */
-.verify-shield__pulse {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1.5px solid var(--accent);
-  opacity: 0;
-  animation: verify-pulse 2.4s ease-out infinite;
-}
-@keyframes verify-pulse {
-  0%   { transform: scale(1);    opacity: 0.5; }
-  70%  { transform: scale(1.55); opacity: 0; }
-  100% { transform: scale(1.55); opacity: 0; }
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
 }
 
 .verify-cancel {
@@ -709,18 +650,14 @@ body { overflow-wrap: break-word; }
 }
 .verify-cancel:hover { color: var(--mantine-color-text); }
 .verify-cancel:focus-visible {
-  outline: 2px solid var(--mantine-color-emerald-6);
+  outline: 2px solid rgba(255, 255, 255, 0.55);
   outline-offset: 1px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .verify-shield__pulse,
-  .verify-shield__spin,
-  .verify-card__sheen,
-  .verify-slot__scan { animation: none; }
-  .verify-shield__sheen,
-  .verify-slot__scan { display: none; }
-  .verify-shield { animation: none; }
+  /* The spinner keeps turning, only slower (see above) — it is the sole
+     indication that the check is still running, so removing it would leave a
+     dialog that looks frozen. */
   .verify-rise { animation-duration: 1ms; }
 }
 
