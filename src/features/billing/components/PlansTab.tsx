@@ -87,6 +87,7 @@ export function PlansTab({
 
     <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(plans.length, 4) || 1 }} spacing="lg">
       {plans.map((plan, index) => {
+        const planAccent = PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK;
         const price = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
         // Free (or any zero-price plan) is assigned directly, not
         // bought — it stays "current" once assigned and never expires,
