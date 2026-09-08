@@ -3,14 +3,13 @@ import { Box, Group, SimpleGrid, Text, UnstyledButton, useMantineColorScheme, Sw
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
-import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 import { Starfield } from "@/shared/ui/Starfield";
 import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
 import { trace } from "@/shared/lib/analytics";
 import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
-  ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES, LOADER_VARIANTS,
+  ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES,
   FONT_SIZES, TABLE_STYLES,
   // no SIDEBAR_STYLES: the sidebar-compact control was pulled back out of
   // Appearance, see theme.ts.
@@ -291,56 +290,6 @@ export function AppearanceSection({
             />
           </div>
         </Group>
-
-        <Box>
-          <GroupLabel>{t("settings.loadingScreen", "Loading screen")}</GroupLabel>
-          <SimpleGrid cols={{ base: 2, xs: 3, sm: 5 }} spacing={14}>
-            {LOADER_VARIANTS.map((v) => {
-              const active = prefs.loader === v.id;
-              return (
-                <UnstyledButton
-                  key={v.id}
-                  className="tile"
-                  data-selected={active}
-                  onClick={() => update({ loader: v.id })}
-                  p={0}
-                  style={{ overflow: "hidden" }}
-                >
-                  <div
-                    style={{
-                      height: 84,
-                      background: "var(--bg-2)",
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {/* SwitchVisual sizes its stage with vw/vh-based CSS
-                        (min(Npx, Nvw)), meant for a full viewport — scaled
-                        down here rather than restyled, so the preview stays
-                        pixel-identical to what boot/switch actually shows. */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        transform: "scale(0.3)",
-                        transformOrigin: "center",
-                        width: "334%",
-                        height: "334%",
-                        left: "-117%",
-                        top: "-117%",
-                      }}
-                    >
-                      <SwitchVisual variant={v.id} loop inline />
-                    </div>
-                  </div>
-                  <Text size="xs" fw={550} px={10} py={8} truncate>
-                    {v.label}
-                  </Text>
-                </UnstyledButton>
-              );
-            })}
-          </SimpleGrid>
-        </Box>
       </Box>
   );
 

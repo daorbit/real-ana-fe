@@ -114,19 +114,6 @@ export const TABLE_STYLES: { id: TableStyle; label: string }[] = [
   { id: "striped", label: "Striped" },
 ];
 
-/** Canonical home for the loader variant list — SwitchOverlay.tsx (the
- *  component that renders them) imports the type and id list from here
- *  rather than theme.ts importing from a component file. */
-export type LoaderVariant = "bars" | "rings" | "pulse" | "dots" | "wave";
-
-export const LOADER_VARIANTS: { id: LoaderVariant; label: string }[] = [
-  { id: "bars", label: "Bars" },
-  { id: "rings", label: "Orbit rings" },
-  { id: "pulse", label: "Pulse mark" },
-  { id: "dots", label: "Dots" },
-  { id: "wave", label: "Wave" },
-];
-
 const STORAGE_KEY = "quantalog.theme";
 
 type ThemePrefs = {
@@ -135,7 +122,6 @@ type ThemePrefs = {
   bg: string; // preset id
   radius: RadiusStyle;
   density: Density;
-  loader: LoaderVariant;
   fontSize: FontSize;
   table: TableStyle;
   /** Motion off disables the app's own decorative transitions/hover motion
@@ -146,7 +132,7 @@ type ThemePrefs = {
 
 const DEFAULT_PREFS: ThemePrefs = {
   mode: "system", accent: "blue", bg: "flat", radius: "rounded", density: "comfortable",
-  loader: "bars", fontSize: "default", table: "plain", motion: true,
+  fontSize: "default", table: "plain", motion: true,
 };
 
 export function readThemePrefs(): ThemePrefs {
@@ -160,7 +146,6 @@ export function readThemePrefs(): ThemePrefs {
       bg: parsed.bg ?? DEFAULT_PREFS.bg,
       radius: parsed.radius ?? DEFAULT_PREFS.radius,
       density: parsed.density ?? DEFAULT_PREFS.density,
-      loader: parsed.loader ?? DEFAULT_PREFS.loader,
       fontSize: parsed.fontSize ?? DEFAULT_PREFS.fontSize,
       table: parsed.table ?? DEFAULT_PREFS.table,
       motion: parsed.motion ?? DEFAULT_PREFS.motion,
@@ -399,13 +384,6 @@ export function loadAndApplyTheme(): ThemePrefs {
   const prefs = readThemePrefs();
   applyTheme(prefs);
   return prefs;
-}
-
-/** The chosen loading-screen animation. Read directly by whatever renders
- *  SwitchVisual — boot screen, workspace/site switch — rather than pushed
- *  through a CSS var, since it selects a React branch, not a style. */
-export function getLoaderVariant(): LoaderVariant {
-  return readThemePrefs().loader;
 }
 
 let transitionTimer: ReturnType<typeof setTimeout> | null = null;

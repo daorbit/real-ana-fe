@@ -513,7 +513,7 @@ export function CompareSkeleton() {
   );
 }
 
-/** Full-screen boot animation — used while the session is being restored. */
+/** Full-screen boot state, shown while the session is being restored. */
 export function AppBootSkeleton() {
-  return <SwitchVisual sublabel="Restoring your session" loop />;
+  return <SwitchVisual sublabel="Restoring your session…" solid />;
 }
