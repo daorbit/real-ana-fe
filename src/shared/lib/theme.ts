@@ -54,7 +54,7 @@ export type BgPreset = {
 export const BG_STYLES: BgPreset[] = [
   { id: "flat", label: "Flat", kind: "flat" },
 
-  { id: "classic", label: "Classic", kind: "corners", hues: ["#818cf8", "#5b21b6", "#eab308"] },
+  { id: "classic", label: "Classic", kind: "corners", hues: ["#818cf8", "#eab308"] },
   { id: "aurora", label: "Mesh — Aurora", kind: "mesh", hues: ["#3b82f6", "#8b5cf6", "#ec4899"] },
   { id: "meadow", label: "Mesh — Meadow", kind: "mesh", hues: ["#22c55e", "#06b6d4"] },
   { id: "sunset", label: "Mesh — Sunset", kind: "mesh", hues: ["#fb923c", "#f43f5e", "#d946ef"] },
@@ -145,7 +145,11 @@ export const THEME_PRESETS: ThemePreset[] = [
     label: "Classic",
     swatch:
       "radial-gradient(58% 80% at 0 0, #818cf83d, transparent 62%), radial-gradient(58% 80% at 100% 0, #eab30826, transparent 62%), var(--surface-2)",
-    apply: { accent: "indigo", bg: "classic", cta: "neutral" },
+    // A neutral slate accent — classic means restrained: tabs, the active
+    // mode toggle, selected tiles and the nav pill all read as a quiet grey,
+    // not a vivid indigo. Indigo shows only in the hero bg glow and (light
+    // mode) the primary CTA chip.
+    apply: { accent: "slate", bg: "classic", cta: "neutral" },
   },
 ];
 
@@ -272,17 +276,17 @@ export function buildBgValue(preset: BgPreset, bg: string, border: string): stri
   }
 
   if (preset.kind === "corners") {
-    // daorbit's "Ready to build" band: an indigo bloom top-left, a deeper
-    // violet one bottom-right, and a faint warm ember between them. Alphas are
-    // pitched to read on a near-black dark ground without washing out text;
-    // color-mix against `transparent` keeps them subtle on a light ground too.
-    const [indigo, violet, ember] = preset.hues && preset.hues.length >= 3
+    // daorbit's hero wash, verbatim in intent: one indigo glow anchored to the
+    // top-LEFT corner, one warm amber glow to the top-RIGHT, both low-alpha and
+    // faded out by ~62% so the whole lower half of the surface stays the plain
+    // near-black base. Nothing centred, nothing at the bottom — the restraint
+    // is the point.
+    const [indigo, amber] = preset.hues && preset.hues.length >= 2
       ? preset.hues
-      : ["#818cf8", "#5b21b6", "#eab308"];
-    const tl = `radial-gradient(60% 85% at 0% 0%, color-mix(in srgb, ${indigo} 22%, transparent), transparent 60%)`;
-    const br = `radial-gradient(70% 90% at 100% 100%, color-mix(in srgb, ${violet} 30%, transparent), transparent 62%)`;
-    const warm = `radial-gradient(50% 60% at 85% 20%, color-mix(in srgb, ${ember} 10%, transparent), transparent 55%)`;
-    return `${tl}, ${br}, ${warm}, ${bg}`;
+      : ["#818cf8", "#eab308"];
+    const left = `radial-gradient(55% 80% at 0% 0%, color-mix(in srgb, ${indigo} 16%, transparent), transparent 62%)`;
+    const right = `radial-gradient(55% 80% at 100% 0%, color-mix(in srgb, ${amber} 12%, transparent), transparent 62%)`;
+    return `${left}, ${right}, ${bg}`;
   }
 
   // "stars" has no background value of its own: tiled gradients repeat, which

@@ -3395,7 +3395,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 
-  margin: calc(var(--mantine-spacing-xs) * -1) calc(var(--mantine-spacing-xs) * -1) 0;
+  margin: calc(var(--mantine-spacing-xs) * -1) calc(var(--mantine-spacing-xs) * -1) 6px;
   border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
 }
 

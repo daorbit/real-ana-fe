@@ -23,6 +23,11 @@
   animation: sw-fade-in 220ms ease-out both;
 }
 
+/* Classic preset: a flat ground, no glow. */
+[data-theme-preset="classic"] .switch-overlay {
+  background: var(--bg);
+}
+
 .switch-overlay[data-inline] {
   position: absolute;
   width: 100%;
