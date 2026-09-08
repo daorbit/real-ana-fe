@@ -362,12 +362,7 @@ export const CURRENCY_SYMBOLS: Record<Currency, string> = { INR: "₹", USD: "$"
 /** Amount in the smallest unit of each currency (paise/cents). */
 export type CurrencyPrices = Record<Currency, number>;
 
-/**
- * A resolved plan: the fixed catalogue entry (name, quotas, limits — all
- * decided in backend code) merged with its current price (the one thing an
- * admin can change). There's no `_id`/`active`/`sortOrder` here because plans
- * aren't documents the client creates or deletes — `slug` is the identity.
- */
+ 
 export type Plan = {
   slug: string;
   name: string;
@@ -376,16 +371,12 @@ export type Plan = {
   priceYearly: CurrencyPrices;
   monthlyAuditQuota: number;
   monthlyCrawlQuota: number;
+  /** Addresses one emailed report schedule may send to, owner included. */
+  maxReportRecipients: number;
   features: string[];
 };
 
-/**
- * An Orbit AI tier.
- *
- * A separate ladder from `Plan`: bought per workspace like a plan, but
- * independently of one, so a workspace carries both at once. Everything except
- * price is fixed in backend code (`src/orbit-plans.ts`).
- */
+ 
 export type OrbitPlan = {
   slug: string;
   name: string;

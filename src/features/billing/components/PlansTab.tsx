@@ -239,15 +239,16 @@ export function PlansTab({
               {/* The headline quota leads the list in the plan's own colour —
                   it is the number the tiers actually differ by. The tier mark
                   is not repeated here; it is already at the top of the card. */}
-              <Text fz={13} fw={700} c={PLAN_ACCENTS[plan.slug] ?? undefined}>
+              <Text fz={13} fw={700} c={planAccent}>
                 {t("billing.featureAudits", { count: plan.monthlyAuditQuota })}
               </Text>
-              {/* Sites are capped the same on every tier — it is a property of
-                  a workspace, not of a plan — so it is stated once here rather
-                  than sold as a differentiator. */}
-              <FeatureLine text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
-              <FeatureLine text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
-              {plan.features.map((f) => <FeatureLine key={f} text={f} />)}
+              {/* Every tick carries the plan's own accent so the column reads
+                  as part of that tier's card, not one shared green run. */}
+              <FeatureLine color={planAccent} text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
+              <FeatureLine color={planAccent} text={t("billing.featureAudits", { count: plan.monthlyAuditQuota })} />
+              <FeatureLine color={planAccent} text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
+              <FeatureLine color={planAccent} text={t("billing.featureRecipients", { count: plan.maxReportRecipients })} />
+              {plan.features.map((f) => <FeatureLine key={f} color={planAccent} text={f} />)}
             </Stack>
           </Card>
         );
