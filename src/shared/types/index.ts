@@ -352,6 +352,37 @@ export type DemoUsage = {
   since: string;
 };
 
+/** One collection's slice of database storage. */
+export type DbCollectionStats = {
+  name: string;
+  /** Document count. */
+  count: number;
+  /** Uncompressed size of the documents, bytes. */
+  dataSize: number;
+  /** On-disk size after compression, bytes. */
+  storageSize: number;
+  /** Size of this collection's indexes, bytes. */
+  indexSize: number;
+};
+
+/**
+ * Admin view of database storage.
+ *
+ * `used` is `storageSize + indexSize` — what counts against the plan. `limit`
+ * is the Atlas M0 free-tier ceiling of 512 MB. All sizes are bytes.
+ */
+export type DbStats = {
+  name: string;
+  collections: number;
+  objects: number;
+  dataSize: number;
+  storageSize: number;
+  indexSize: number;
+  used: number;
+  limit: number;
+  collectionStats: DbCollectionStats[];
+};
+
 
 /** Currencies sold through Razorpay's international checkout. */
 export const CURRENCIES = ["INR", "USD"] as const;
