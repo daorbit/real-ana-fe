@@ -10,7 +10,7 @@ import { trace } from "@/shared/lib/analytics";
 import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
   ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES,
-  FONT_SIZES, TABLE_STYLES,
+  FONT_SIZES, TABLE_STYLES, THEME_PRESETS,
   // no SIDEBAR_STYLES: the sidebar-compact control was pulled back out of
   // Appearance, see theme.ts.
   applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
@@ -75,6 +75,15 @@ export function AppearanceSection({
 
   const update = (patch: Partial<ThemePrefs>) => {
     trace(user?.id, "appearance_changed", "settings", Object.keys(patch)[0] ?? "theme");
+    // A manual accent/bg/cta change means the active preset no longer
+    // describes the look — drop back to "Custom" unless this patch is the
+    // preset itself being applied.
+    if (
+      patch.preset === undefined &&
+      ("accent" in patch || "bg" in patch || "cta" in patch)
+    ) {
+      patch = { ...patch, preset: "none" };
+    }
     const next = { ...prefs, ...patch };
     setPrefs(next);
     saveThemePrefs(next);
@@ -114,6 +123,42 @@ export function AppearanceSection({
               </UnstyledButton>
             ))}
           </Group>
+        </GroupBlock>
+
+        <GroupBlock>
+          <GroupLabel>{t("settings.themePreset", "Theme preset")}</GroupLabel>
+          <SimpleGrid cols={{ base: 2, xs: 3, sm: 4 }} spacing={14}>
+            {THEME_PRESETS.map((p) => {
+              const selected = prefs.preset === p.id;
+              return (
+                <UnstyledButton
+                  key={p.id}
+                  className="tile"
+                  data-selected={selected}
+                  onClick={() =>
+                    update(
+                      p.apply
+                        ? { preset: p.id, ...p.apply }
+                        : { preset: p.id }
+                    )
+                  }
+                  p={0}
+                  style={{ overflow: "hidden" }}
+                >
+                  <div style={{ height: 56, background: p.swatch }} />
+                  <Text size="xs" fw={550} px={10} py={8} truncate>
+                    {p.label}
+                  </Text>
+                </UnstyledButton>
+              );
+            })}
+          </SimpleGrid>
+          <Text size="xs" c="dimmed" mt={8}>
+            {t(
+              "settings.themePresetHint",
+              "A preset sets accent, background and CTA style at once. Adjust any control below to fine-tune."
+            )}
+          </Text>
         </GroupBlock>
 
         <GroupBlock>

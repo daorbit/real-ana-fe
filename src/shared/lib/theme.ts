@@ -42,19 +42,19 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "graphite", label: "Graphite", hex: "#27272a" },
 ];
 
-export type BgKind = "flat" | "mesh" | "wash" | "dots" | "lines" | "diagonal" | "stars";
+export type BgKind = "flat" | "mesh" | "wash" | "dots" | "lines" | "diagonal" | "stars" | "corners";
 
 export type BgPreset = {
   id: string;
   label: string;
   kind: BgKind;
-  /** Fixed wash colours (mesh) or line colour source (grid/lines). Never the
-   *  live accent — background and accent are independent choices. */
   hues?: string[];
 };
 
 export const BG_STYLES: BgPreset[] = [
   { id: "flat", label: "Flat", kind: "flat" },
+
+  { id: "classic", label: "Classic", kind: "corners", hues: ["#818cf8", "#5b21b6", "#eab308"] },
   { id: "aurora", label: "Mesh — Aurora", kind: "mesh", hues: ["#3b82f6", "#8b5cf6", "#ec4899"] },
   { id: "meadow", label: "Mesh — Meadow", kind: "mesh", hues: ["#22c55e", "#06b6d4"] },
   { id: "sunset", label: "Mesh — Sunset", kind: "mesh", hues: ["#fb923c", "#f43f5e", "#d946ef"] },
@@ -116,8 +116,43 @@ export const TABLE_STYLES: { id: TableStyle; label: string }[] = [
 
 const STORAGE_KEY = "quantalog.theme";
 
+/**
+ * A named look that sets several other prefs at once, plus its own extras
+ * (sidebar wash, CTA scheme) that no individual control exposes. Picking a
+ * preset writes `accent` + `bg` and flips `cta`; the individual controls stay
+ * live afterwards for fine-tuning, and changing one just means the preset no
+ * longer matches — it is a shortcut, not a mode.
+ */
+export type ThemePresetId = "none" | "classic";
+
+export type ThemePreset = {
+  id: ThemePresetId;
+  label: string;
+  /** What the tile paints as its preview background. */
+  swatch: string;
+  /** Prefs the preset writes. `none` writes nothing. */
+  apply?: { accent: string; bg: string; cta: CtaScheme };
+};
+
+/** How primary CTA buttons are coloured. `accent` = the themed accent (default);
+ *  `neutral` = daorbit-style chip: white-on-dark / near-black-on-light. */
+export type CtaScheme = "accent" | "neutral";
+
+export const THEME_PRESETS: ThemePreset[] = [
+  { id: "none", label: "Custom", swatch: "var(--surface-2)" },
+  {
+    id: "classic",
+    label: "Classic",
+    swatch:
+      "radial-gradient(58% 80% at 0 0, #818cf83d, transparent 62%), radial-gradient(58% 80% at 100% 0, #eab30826, transparent 62%), var(--surface-2)",
+    apply: { accent: "indigo", bg: "classic", cta: "neutral" },
+  },
+];
+
 type ThemePrefs = {
   mode: ThemeMode;
+  preset: ThemePresetId;
+  cta: CtaScheme;
   accent: string; // preset id
   bg: string; // preset id
   radius: RadiusStyle;
@@ -131,7 +166,8 @@ type ThemePrefs = {
 };
 
 const DEFAULT_PREFS: ThemePrefs = {
-  mode: "system", accent: "blue", bg: "flat", radius: "rounded", density: "comfortable",
+  mode: "system", preset: "none", cta: "accent", accent: "blue", bg: "flat",
+  radius: "rounded", density: "comfortable",
   fontSize: "default", table: "plain", motion: true,
 };
 
@@ -142,6 +178,8 @@ export function readThemePrefs(): ThemePrefs {
     const parsed = JSON.parse(raw);
     return {
       mode: parsed.mode ?? DEFAULT_PREFS.mode,
+      preset: parsed.preset ?? DEFAULT_PREFS.preset,
+      cta: parsed.cta ?? DEFAULT_PREFS.cta,
       accent: parsed.accent ?? DEFAULT_PREFS.accent,
       bg: parsed.bg ?? DEFAULT_PREFS.bg,
       radius: parsed.radius ?? DEFAULT_PREFS.radius,
@@ -231,6 +269,20 @@ export function buildBgValue(preset: BgPreset, bg: string, border: string): stri
     // a light source rather than reading as a flat band.
     const glow = `radial-gradient(120% 80% at 12% 8%, color-mix(in srgb, ${hues[0]} 18%, transparent), transparent 60%)`;
     return `${glow}, linear-gradient(145deg, ${stops}), ${bg}`;
+  }
+
+  if (preset.kind === "corners") {
+    // daorbit's "Ready to build" band: an indigo bloom top-left, a deeper
+    // violet one bottom-right, and a faint warm ember between them. Alphas are
+    // pitched to read on a near-black dark ground without washing out text;
+    // color-mix against `transparent` keeps them subtle on a light ground too.
+    const [indigo, violet, ember] = preset.hues && preset.hues.length >= 3
+      ? preset.hues
+      : ["#818cf8", "#5b21b6", "#eab308"];
+    const tl = `radial-gradient(60% 85% at 0% 0%, color-mix(in srgb, ${indigo} 22%, transparent), transparent 60%)`;
+    const br = `radial-gradient(70% 90% at 100% 100%, color-mix(in srgb, ${violet} 30%, transparent), transparent 62%)`;
+    const warm = `radial-gradient(50% 60% at 85% 20%, color-mix(in srgb, ${ember} 10%, transparent), transparent 55%)`;
+    return `${tl}, ${br}, ${warm}, ${bg}`;
   }
 
   // "stars" has no background value of its own: tiled gradients repeat, which
@@ -327,6 +379,30 @@ export function applyTheme(prefs: ThemePrefs) {
   // what lets the CSS attach the drift animation to that one kind.
   root.setAttribute("data-bg-style", bgPreset.kind === "flat" ? "flat" : "textured");
   root.toggleAttribute("data-bg-animated", bgPreset.kind === "stars");
+
+  // CTA scheme. `accent` (default) leaves .btn-cta reading the themed accent;
+  // `neutral` is daorbit's chip — a white pill on dark, a near-black pill on
+  // light, with text to match. Set as its own tokens so only opted-in CTA
+  // buttons pick it up and the rest of the accent system is untouched.
+  const cta =
+    prefs.cta === "neutral"
+      ? dark
+        ? { bg: "#ffffff", bgHover: "#e9eaec", fg: "#0a0b0d" }
+        : { bg: "#4f46e5", bgHover: "#4338ca", fg: "#ffffff" }
+      : { bg: "var(--accent)", bgHover: "var(--accent-2)", fg: "#ffffff" };
+  root.style.setProperty("--cta", cta.bg);
+  root.style.setProperty("--cta-hover", cta.bgHover);
+  root.style.setProperty("--cta-fg", cta.fg);
+
+  // The neutral CTA chip is applied to <Button> only, via CSS in App.css
+  // ([data-theme-preset="classic"] rules) — NOT by redirecting the whole
+  // "emerald"/"primary" Mantine colour family, which also feeds Tabs, Chips,
+  // Badges, SegmentedControl and would leave each of those with a white fill
+  // and no matching text colour. Tabs/segmented stay on the indigo accent.
+
+  // The sidebar stays flat --rail in every preset.
+  root.style.setProperty("--rail-wash", "var(--rail)");
+  root.setAttribute("data-theme-preset", prefs.preset);
 
   const radiusPx = RADIUS_STYLES.find((r) => r.id === prefs.radius)?.px ?? 16;
   root.style.setProperty("--radius", `${radiusPx}px`);
