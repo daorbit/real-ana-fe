@@ -44,6 +44,7 @@ const Billing = lazy(() => import("@/features/billing/pages/Billing"));
 const AdminBilling = lazy(() => import("@/features/admin/pages/AdminBilling"));
 const AdminBroadcast = lazy(() => import("@/features/admin/pages/AdminBroadcast"));
 const AdminContact = lazy(() => import("@/features/admin/pages/AdminContact"));
+const AdminDatabase = lazy(() => import("@/features/admin/pages/AdminDatabase"));
 const Onboarding = lazy(() => import("@/features/auth/pages/Onboarding"));
 const PublicDashboard = lazy(() => import("@/features/analytics/pages/PublicDashboard"));
 const PublicSeoReport = lazy(() => import("@/features/seo/pages/PublicSeoReport"));
@@ -261,6 +262,7 @@ export default function App() {
               <Route path="/app/admin/billing" element={<Protected><RouteFrame><AdminBilling /></RouteFrame></Protected>} />
               <Route path="/app/admin/broadcast" element={<Protected><RouteFrame><AdminBroadcast /></RouteFrame></Protected>} />
               <Route path="/app/admin/contact" element={<Protected><RouteFrame><AdminContact /></RouteFrame></Protected>} />
+              <Route path="/app/admin/database" element={<Protected><RouteFrame><AdminDatabase /></RouteFrame></Protected>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
