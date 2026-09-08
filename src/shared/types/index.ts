@@ -366,10 +366,28 @@ export type DbCollectionStats = {
 };
 
 /**
+ * Cloudinary account usage. `null` in {@link DbStats} when the service is not
+ * configured or the usage call failed. A limit is absent on the free plan,
+ * which meters a credit pool instead.
+ */
+export type CloudinaryUsage = {
+  plan: string;
+  storageUsed: number;
+  storageLimit?: number;
+  bandwidthUsed: number;
+  bandwidthLimit?: number;
+  resources: number;
+  creditsUsed?: number;
+  creditsLimit?: number;
+};
+
+/**
  * Admin view of database storage.
  *
  * `used` is `storageSize + indexSize` — what counts against the plan. `limit`
  * is the Atlas M0 free-tier ceiling of 512 MB. All sizes are bytes.
+ * `cloudinary` rides along on the same request; it is unrelated storage but
+ * the same "how full are we" question.
  */
 export type DbStats = {
   name: string;
@@ -381,6 +399,7 @@ export type DbStats = {
   used: number;
   limit: number;
   collectionStats: DbCollectionStats[];
+  cloudinary: CloudinaryUsage | null;
 };
 
 

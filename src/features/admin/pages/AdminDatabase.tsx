@@ -7,7 +7,7 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { useGetDbStatsQuery } from "@/app/store";
 import { num } from "@/shared/lib";
-import type { DbCollectionStats } from "@/shared/types";
+import type { DbCollectionStats, CloudinaryUsage } from "@/shared/types";
 
 /**
  * Admin-only: how much storage the database holds and how close it sits to the
@@ -145,6 +145,8 @@ export default function AdminDatabase() {
           </Card>
         </SimpleGrid>
 
+        {data.cloudinary && <CloudinaryCard usage={data.cloudinary} />}
+
         {/* Per-collection */}
         <Card withBorder radius="lg" padding={0}>
           <Group justify="space-between" px="xl" py="md">
@@ -214,6 +216,86 @@ export default function AdminDatabase() {
         </Text>
       </Stack>
     </AppShell>
+  );
+}
+
+ 
+function CloudinaryCard({ usage: u }: { usage: CloudinaryUsage }) {
+  const credPct = u.creditsLimit ? (u.creditsUsed ?? 0) / u.creditsLimit * 100 : null;
+  const storePct = u.storageLimit ? u.storageUsed / u.storageLimit * 100 : null;
+  const bwPct = u.bandwidthLimit ? u.bandwidthUsed / u.bandwidthLimit * 100 : null;
+  const metered = credPct != null;
+
+  return (
+    <Card withBorder radius="lg" padding="xl">
+      <Group justify="space-between" align="baseline" mb="lg">
+        <Text fw={700} size="sm">Cloudinary media storage</Text>
+        <Text size="xs" c="dimmed" tt="capitalize">{u.plan} plan · {num(u.resources)} assets</Text>
+      </Group>
+
+      {metered && (
+        <>
+          <Meter
+            label="Monthly credits"
+            used={`${(u.creditsUsed ?? 0).toFixed(2)} credits`}
+            limit={`${u.creditsLimit}`}
+            pct={credPct}
+          />
+          <Text size="xs" c="dimmed" mt="xs">
+            One credit covers 1&nbsp;GB stored, 1&nbsp;GB delivered, or 1,000
+            transformations — there is no separate 25&nbsp;GB storage allowance,
+            just this shared pool. Resets monthly.
+          </Text>
+          <Divider my="lg" />
+        </>
+      )}
+
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl">
+        <Meter
+          label={metered ? "Stored now (draws on credits)" : "Storage"}
+          used={bytes(u.storageUsed)}
+          limit={u.storageLimit ? bytes(u.storageLimit) : undefined}
+          pct={storePct}
+        />
+        <Meter
+          label={metered ? "Delivered this cycle (draws on credits)" : "Bandwidth this cycle"}
+          used={bytes(u.bandwidthUsed)}
+          limit={u.bandwidthLimit ? bytes(u.bandwidthLimit) : undefined}
+          pct={bwPct}
+        />
+      </SimpleGrid>
+    </Card>
+  );
+}
+
+function Meter({
+  label,
+  used,
+  limit,
+  pct,
+}: {
+  label: string;
+  used: string;
+  limit?: string;
+  pct: number | null;
+}) {
+  const tone = pct == null ? "gray.5" : pct >= 90 ? "red.5" : pct >= 75 ? "yellow.5" : "emerald.5";
+  return (
+    <div>
+      <Text size="xs" c="dimmed" fw={550}>{label}</Text>
+      <Group gap={6} align="baseline" mt={2}>
+        <Text fw={700} fz="lg" style={{ letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>{used}</Text>
+        {limit && <Text size="xs" c="dimmed">of {limit}</Text>}
+      </Group>
+      <Box mt={8} h={5} style={{ borderRadius: 3, background: "var(--mantine-color-default-border)", overflow: "hidden" }}>
+        <Box
+          h="100%"
+          w={pct == null ? "0%" : `${Math.max(2, Math.min(100, pct))}%`}
+          style={{ background: `var(--mantine-color-${tone.replace(".", "-")})`, borderRadius: 3 }}
+        />
+      </Box>
+      {pct != null && <Text size="xs" c="dimmed" mt={3}>{pct.toFixed(pct < 1 ? 1 : 0)}%</Text>}
+    </div>
   );
 }
 
