@@ -382,12 +382,23 @@ export type CloudinaryUsage = {
 };
 
 /**
+ * Cloudflare Workers AI usage. `null` when the account is not configured.
+ * `unavailable` is set (with usage left at 0) when the analytics API refused,
+ * usually because the API token lacks the Account Analytics read scope.
+ */
+export type WorkersAiUsage = {
+  neuronsToday: number;
+  dailyLimit: number;
+  unavailable?: string;
+};
+
+/**
  * Admin view of database storage.
  *
  * `used` is `storageSize + indexSize` — what counts against the plan. `limit`
  * is the Atlas M0 free-tier ceiling of 512 MB. All sizes are bytes.
- * `cloudinary` rides along on the same request; it is unrelated storage but
- * the same "how full are we" question.
+ * `cloudinary` and `workersAi` ride along on the same request; unrelated to
+ * the database but the same "how full are we" question.
  */
 export type DbStats = {
   name: string;
@@ -400,6 +411,7 @@ export type DbStats = {
   limit: number;
   collectionStats: DbCollectionStats[];
   cloudinary: CloudinaryUsage | null;
+  workersAi: WorkersAiUsage | null;
 };
 
 

@@ -1,13 +1,14 @@
 import { useMemo } from "react";
 import {
   Text, Stack, Group, Card, Center, Loader, RingProgress, Table,
-  Box, Divider, Tooltip, SimpleGrid,
+  Box, Divider, Tooltip, SimpleGrid, Button,
 } from "@mantine/core";
+import { RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { useGetDbStatsQuery } from "@/app/store";
 import { num } from "@/shared/lib";
-import type { DbCollectionStats, CloudinaryUsage } from "@/shared/types";
+import type { DbCollectionStats, CloudinaryUsage, WorkersAiUsage } from "@/shared/types";
 
 /**
  * Admin-only: how much storage the database holds and how close it sits to the
@@ -50,7 +51,19 @@ function prettyName(raw: string): string {
 }
 
 export default function AdminDatabase() {
-  const { data } = useGetDbStatsQuery();
+  const { data, isFetching, refetch } = useGetDbStatsQuery();
+
+  const refreshButton = (
+    <Button
+      variant="default"
+      size="sm"
+      leftSection={<RefreshCw size={14} />}
+      loading={isFetching}
+      onClick={() => refetch()}
+    >
+      Refresh
+    </Button>
+  );
 
   const rows = useMemo(() => {
     if (!data) return { shown: [] as DbCollectionStats[], tail: [] as DbCollectionStats[], tailBytes: 0 };
@@ -70,7 +83,7 @@ export default function AdminDatabase() {
   if (!data) {
     return (
       <AppShell>
-        <PageHeader title="Database" description="Storage the database is using." />
+        <PageHeader title="Database" description="Storage the database is using." actions={refreshButton} />
         <Center py={64}><Loader size="sm" /></Center>
       </AppShell>
     );
@@ -87,6 +100,7 @@ export default function AdminDatabase() {
       <PageHeader
         title="Database"
         description={`Storage used by “${data.name}”, and headroom against the plan limit.`}
+        actions={refreshButton}
       />
 
       <Stack gap="lg">
@@ -145,7 +159,12 @@ export default function AdminDatabase() {
           </Card>
         </SimpleGrid>
 
-        {data.cloudinary && <CloudinaryCard usage={data.cloudinary} />}
+        {(data.cloudinary || data.workersAi) && (
+          <SimpleGrid cols={{ base: 1, md: data.cloudinary && data.workersAi ? 2 : 1 }} spacing="lg">
+            {data.cloudinary && <CloudinaryCard usage={data.cloudinary} />}
+            {data.workersAi && <WorkersAiCard usage={data.workersAi} />}
+          </SimpleGrid>
+        )}
 
         {/* Per-collection */}
         <Card withBorder radius="lg" padding={0}>
@@ -296,6 +315,47 @@ function Meter({
       </Box>
       {pct != null && <Text size="xs" c="dimmed" mt={3}>{pct.toFixed(pct < 1 ? 1 : 0)}%</Text>}
     </div>
+  );
+}
+
+/**
+ * Cloudflare Workers AI usage — neurons burned today against the free-tier
+ * ceiling of 10,000/day, which resets at 00:00 UTC. A "neuron" is Cloudflare's
+ * normalised unit of inference cost; every model call spends some. When the
+ * analytics API refused (usually a token-scope gap) the card says so instead
+ * of showing a misleading zero.
+ */
+function WorkersAiCard({ usage: u }: { usage: WorkersAiUsage }) {
+  const pct = u.dailyLimit ? (u.neuronsToday / u.dailyLimit) * 100 : null;
+
+  return (
+    <Card withBorder radius="lg" padding="xl">
+      <Group justify="space-between" align="baseline" mb="lg">
+        <Text fw={700} size="sm">Cloudflare Workers AI</Text>
+        <Text size="xs" c="dimmed">used by Orbit chat &amp; the post planner</Text>
+      </Group>
+
+      {u.unavailable ? (
+        <Text size="sm" c="dimmed">
+          Usage unavailable — {u.unavailable}. The API token needs the
+          “Account Analytics: Read” permission for the neuron count to show here.
+        </Text>
+      ) : (
+        <>
+          <Meter
+            label="Neurons today"
+            used={num(u.neuronsToday)}
+            limit={num(u.dailyLimit)}
+            pct={pct}
+          />
+          <Text size="xs" c="dimmed" mt="xs">
+            One neuron is Cloudflare’s unit of inference cost; every model call
+            spends some. Free tier allows {num(u.dailyLimit)} a day and resets
+            at 00:00&nbsp;UTC.
+          </Text>
+        </>
+      )}
+    </Card>
   );
 }
 
