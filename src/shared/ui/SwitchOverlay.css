@@ -1,9 +1,10 @@
 /* ---------------------------------------------------------------------------
    Loading overlay
 
-   One state: the wordmark under two counter-rotating arcs, over a frosted
-   blur of whatever is behind. Covers the app-boot hold and the workspace
-   switch. Nothing here blocks a fetch — it is purely visual.
+   The "Quantalog" wordmark with its accent dot tracing a small orbit, over a
+   thin rule with a bright segment sweeping across it. Covers the app-boot hold
+   and the workspace switch. Nothing here blocks a fetch — it is purely visual,
+   and only transform / opacity animate.
    --------------------------------------------------------------------------- */
 .switch-overlay {
   position: fixed;
@@ -16,12 +17,10 @@
   height: 100dvh;
   overflow: hidden;
   color: var(--text);
-  /* Frosted glass over the real app: a light tint plus blur, no brightness
-     knock-down — dimming an already-dark UI just turns it to mud. */
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  animation: sw-fade-in 260ms ease-out both;
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 60%),
+    var(--bg);
+  animation: sw-fade-in 220ms ease-out both;
 }
 
 .switch-overlay[data-inline] {
@@ -29,18 +28,6 @@
   width: 100%;
   height: 100%;
   background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-/* Boot hold: nothing rendered behind it, so a blur has nothing to work on.
-   Paint a real ground with a faint accent gradient so it is not flat black. */
-.switch-overlay[data-solid] {
-  background:
-    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--accent-2) 9%, transparent), transparent 60%),
-    var(--bg);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .switch-overlay__body {
@@ -48,55 +35,86 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
+  gap: 20px;
   text-align: center;
 }
 
 .switch-overlay__mark {
-  position: relative;
-  width: 76px;
-  height: 76px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
 
-/* Two arcs, each a partial ring, turning opposite ways at different speeds —
-   reads as deliberate motion rather than a default spinner. */
-.switch-overlay__arc {
-  position: absolute;
+.switch-overlay__wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.switch-overlay__word {
+  /* A soft shimmer passes through the letters — a moving highlight, not a
+     colour change, so it reads as "working" without turning the wordmark
+     into a gradient. */
+  background: linear-gradient(
+    100deg,
+    var(--text) 40%,
+    color-mix(in srgb, var(--accent-2) 85%, var(--text)) 50%,
+    var(--text) 60%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sw-shimmer 1600ms linear infinite;
+}
+
+/* The trailing dot from the brand, tracing a small circle. */
+.switch-overlay__dot {
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
   border-radius: 50%;
-  border: 2px solid transparent;
+  background: var(--accent-2);
+  animation: sw-orbit 1150ms cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }
 
-.switch-overlay__arc--outer {
+.switch-overlay__rule {
+  position: relative;
+  width: 164px;
+  height: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  overflow: hidden;
+}
+
+.switch-overlay__rule span {
+  position: absolute;
   inset: 0;
-  border-top-color: var(--accent-2);
-  border-right-color: color-mix(in srgb, var(--accent-2) 45%, transparent);
-  animation: sw-spin 900ms cubic-bezier(0.45, 0.05, 0.4, 0.95) infinite;
-}
-
-.switch-overlay__arc--inner {
-  inset: 9px;
-  border-bottom-color: color-mix(in srgb, var(--text) 55%, transparent);
-  animation: sw-spin-rev 1400ms linear infinite;
-}
-
-.switch-overlay__logo {
-  display: grid;
-  place-items: center;
-  animation: sw-pulse 2000ms ease-in-out infinite;
+  width: 38%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent-2),
+    transparent
+  );
+  animation: sw-slide 1150ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .switch-overlay__label {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text);
 }
 
 .switch-overlay__sub {
-  margin: -13px 0 0;
+  margin: -12px 0 0;
   font-size: 12.5px;
   color: var(--text-2);
 }
@@ -106,28 +124,35 @@
   to   { opacity: 1; transform: none; }
 }
 
-@keyframes sw-spin {
-  to { transform: rotate(360deg); }
+@keyframes sw-shimmer {
+  from { background-position: 120% 0; }
+  to   { background-position: -120% 0; }
 }
 
-@keyframes sw-spin-rev {
-  to { transform: rotate(-360deg); }
+@keyframes sw-orbit {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(2px, -3px); }
+  50%  { transform: translate(0, -4px); }
+  75%  { transform: translate(-2px, -3px); }
+  100% { transform: translate(0, 0); }
 }
 
-@keyframes sw-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(0.93); opacity: 0.85; }
+@keyframes sw-slide {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(360%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .switch-overlay { animation-duration: 0s; }
-  .switch-overlay__arc--inner,
-  .switch-overlay__logo { animation: none; }
-  .switch-overlay__arc--outer {
+  .switch-overlay__word,
+  .switch-overlay__dot,
+  .switch-overlay__rule span {
     animation: sw-breathe 1.4s ease-in-out infinite;
   }
+  .switch-overlay__word { color: var(--text); }
+  .switch-overlay__rule span { width: 100%; transform: none; }
   @keyframes sw-breathe {
-    0%, 100% { opacity: 0.45; }
+    0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
   }
 }

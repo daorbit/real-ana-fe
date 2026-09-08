@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Logo } from "@/shared/ui/Brand";
 import "@/shared/ui/SwitchOverlay.css";
 
 /** How long the overlay stays up, in ms. Matches the CSS animation budget. */
@@ -36,40 +35,50 @@ export function SwitchOverlay({
 }
 
 /**
- * A plain, centred loading state — the wordmark, a slim ring spinner, and one
- * or two lines of text on a solid ground. Used for the app-boot hold, the
- * workspace switch, and anywhere a full-surface wait needs covering.
+ * The loading mark: the "Quantalog" wordmark — the real brand — with its
+ * trailing accent dot tracing a small orbit, over a thin rule that sweeps a
+ * bright segment left to right. Pure CSS; only transform and opacity animate.
+ */
+function LoaderMark() {
+  return (
+    <div className="switch-overlay__mark" aria-hidden>
+      <div className="switch-overlay__wordmark">
+        <span className="switch-overlay__word">Quantalog</span>
+        <span className="switch-overlay__dot" />
+      </div>
+      <div className="switch-overlay__rule">
+        <span />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A plain, centred loading state — the animated mark and one or two lines of
+ * text on a solid ground. Used for the app-boot hold, the workspace switch,
+ * and anywhere a full-surface wait needs covering.
  */
 export function SwitchVisual({
   label,
   sublabel,
   loop = false,
   inline = false,
-  solid = false,
 }: {
   label?: string;
   sublabel?: string;
   loop?: boolean;
   inline?: boolean;
-  solid?: boolean;
 }) {
   return (
     <div
       className="switch-overlay"
       data-loop={loop || undefined}
       data-inline={inline || undefined}
-      data-solid={solid || undefined}
       role="status"
       aria-live="polite"
     >
       <div className="switch-overlay__body">
-        <div className="switch-overlay__mark">
-          <span className="switch-overlay__arc switch-overlay__arc--outer" aria-hidden />
-          <span className="switch-overlay__arc switch-overlay__arc--inner" aria-hidden />
-          <span className="switch-overlay__logo">
-            <Logo size={28} />
-          </span>
-        </div>
+        <LoaderMark />
         {label && <p className="switch-overlay__label">{label}</p>}
         {sublabel && <p className="switch-overlay__sub">{sublabel}</p>}
       </div>
@@ -77,10 +86,7 @@ export function SwitchVisual({
   );
 }
 
-/**
- * Fires the overlay whenever `key` changes — but not on first mount, where
- * there is no transition to cover.
- */
+ 
 export function useSwitchOverlay(key: string | null | undefined) {
   const [active, setActive] = useState(false);
   const prev = useRef(key);
