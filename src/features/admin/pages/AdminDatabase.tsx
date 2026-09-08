@@ -1,8 +1,8 @@
+import { useMemo } from "react";
 import {
-  Text, Stack, Group, Card, Center, Loader, ThemeIcon, SimpleGrid,
-  Progress, Table, Alert, Badge,
+  Text, Stack, Group, Card, Center, Loader, RingProgress, Table,
+  Box, Divider, Tooltip,
 } from "@mantine/core";
-import { Database, HardDrive, ListTree, Boxes, Info } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { useGetDbStatsQuery } from "@/app/store";
@@ -14,13 +14,33 @@ import type { DbCollectionStats } from "@/shared/types";
  * plan ceiling.
  *
  * `used` is on-disk storage plus indexes — the figure the Atlas M0 free tier
- * caps at 512 MB. The per-collection table is sorted by that same weight so
- * the ones worth pruning sit at the top.
+ * caps at 512 MB. The table is sorted by that same weight and folds the long
+ * tail of near-empty collections into one row so the ones that matter stay
+ * readable.
  */
-export default function AdminDatabase() {
-  const { data, isLoading } = useGetDbStatsQuery();
 
-  if (isLoading || !data) {
+/** Collections below this share of total storage get folded into one row. */
+const TAIL_THRESHOLD = 0.01;
+
+export default function AdminDatabase() {
+  const { data } = useGetDbStatsQuery();
+
+  const rows = useMemo(() => {
+    if (!data) return { shown: [] as DbCollectionStats[], tail: [] as DbCollectionStats[], tailBytes: 0 };
+    const weight = (c: DbCollectionStats) => c.storageSize + c.indexSize;
+    const total = data.used || 1;
+    const sorted = [...data.collectionStats].sort((a, b) => weight(b) - weight(a));
+    const shown: DbCollectionStats[] = [];
+    const tail: DbCollectionStats[] = [];
+    for (const c of sorted) {
+      if (weight(c) / total >= TAIL_THRESHOLD || shown.length < 5) shown.push(c);
+      else tail.push(c);
+    }
+    const tailBytes = tail.reduce((s, c) => s + weight(c), 0);
+    return { shown, tail, tailBytes };
+  }, [data]);
+
+  if (!data) {
     return (
       <AppShell>
         <PageHeader title="Database" description="Storage the database is using." />
@@ -30,83 +50,128 @@ export default function AdminDatabase() {
   }
 
   const pct = data.limit > 0 ? (data.used / data.limit) * 100 : 0;
-  const tone = pct >= 90 ? "red" : pct >= 75 ? "yellow" : "emerald";
+  const tone = pct >= 90 ? "red.5" : pct >= 75 ? "yellow.5" : "emerald.5";
+  const maxWeight = rows.shown.length
+    ? Math.max(...rows.shown.map((c) => c.storageSize + c.indexSize))
+    : 1;
 
   return (
     <AppShell>
       <PageHeader
         title="Database"
-        description={`Storage used by "${data.name}", and headroom against the plan limit.`}
+        description={`Storage used by “${data.name}”, and headroom against the plan limit.`}
       />
 
-      <Stack gap="lg">
-        <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
-          <Stat icon={HardDrive} label="Used (storage + indexes)" value={bytes(data.used)} />
-          <Stat icon={Database} label="Documents on disk" value={bytes(data.storageSize)} />
-          <Stat icon={ListTree} label="Indexes" value={bytes(data.indexSize)} />
-          <Stat icon={Boxes} label="Documents" value={num(data.objects)} />
-        </SimpleGrid>
+      <Stack gap="lg" style={{ maxWidth: 1000 }}>
+        {/* Hero: plan usage */}
+        <Card withBorder radius="lg" padding="xl">
+          <Group align="center" gap="xl" wrap="nowrap">
+            <RingProgress
+              size={132}
+              thickness={12}
+              roundCaps
+              sections={[{ value: Math.min(100, pct), color: tone }]}
+              label={
+                <Text ta="center" fw={800} fz={22} style={{ letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums" }}>
+                  {pct < 1 ? pct.toFixed(1) : Math.round(pct)}%
+                </Text>
+              }
+            />
+            <Box style={{ flex: 1 }}>
+              <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.06em" }}>
+                Plan usage
+              </Text>
+              <Group gap={6} align="baseline" mt={4}>
+                <Text fw={800} fz={30} style={{ letterSpacing: "-0.03em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}>
+                  {bytes(data.used)}
+                </Text>
+                <Text c="dimmed" fz="sm">of {bytes(data.limit)}</Text>
+              </Group>
+              <Text size="sm" c="dimmed" mt={2}>
+                {bytes(data.limit - data.used)} free · Atlas M0 free-tier ceiling
+              </Text>
 
-        <Card withBorder radius="md" padding="lg">
-          <Group justify="space-between" align="baseline" mb="xs">
-            <Text fw={650} size="sm">Plan usage</Text>
-            <Text size="sm" c="dimmed">
-              {bytes(data.used)} of {bytes(data.limit)} · {pct.toFixed(1)}%
-            </Text>
+              <Divider my="md" />
+
+              <Group gap="xl">
+                <Metric label="Documents on disk" value={bytes(data.storageSize)} />
+                <Metric label="Indexes" value={bytes(data.indexSize)} />
+                <Metric label="Uncompressed" value={bytes(data.dataSize)} />
+                <Metric label="Documents" value={num(data.objects)} />
+              </Group>
+            </Box>
           </Group>
-          <Progress value={Math.min(100, pct)} color={tone} size="lg" radius="md" />
-          <Text size="xs" c="dimmed" mt="xs">
-            {bytes(Math.max(0, data.limit - data.used))} free. The limit is the
-            Atlas M0 free-tier ceiling of {bytes(data.limit)} (storage plus
-            indexes). Uncompressed the documents are {bytes(data.dataSize)}.
-          </Text>
         </Card>
 
-        <Card withBorder radius="md" padding={0}>
-          <Group justify="space-between" px="lg" py="md">
-            <Text fw={650} size="sm">By collection</Text>
-            <Badge variant="light" color="gray">{num(data.collections)} collections</Badge>
+        {/* Per-collection */}
+        <Card withBorder radius="lg" padding={0}>
+          <Group justify="space-between" px="xl" py="md">
+            <Text fw={700} size="sm">By collection</Text>
+            <Text size="xs" c="dimmed">{num(data.collections)} collections · sorted by storage + indexes</Text>
           </Group>
-          <Table.ScrollContainer minWidth={560}>
-            <Table striped highlightOnHover verticalSpacing="xs" horizontalSpacing="lg">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Collection</Table.Th>
-                  <Table.Th ta="right">Documents</Table.Th>
-                  <Table.Th ta="right">Data</Table.Th>
-                  <Table.Th ta="right">Storage</Table.Th>
-                  <Table.Th ta="right">Indexes</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {data.collectionStats.map((c: DbCollectionStats) => (
+          <Table verticalSpacing="sm" horizontalSpacing="xl" layout="fixed">
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th style={{ width: "40%" }}>Collection</Table.Th>
+                <Table.Th ta="right" style={{ width: "15%" }}>Docs</Table.Th>
+                <Table.Th ta="right" style={{ width: "15%" }}>Storage</Table.Th>
+                <Table.Th ta="right" style={{ width: "15%" }}>Indexes</Table.Th>
+                <Table.Th ta="right" style={{ width: "15%" }}>Total</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {rows.shown.map((c) => {
+                const w = c.storageSize + c.indexSize;
+                return (
                   <Table.Tr key={c.name}>
-                    <Table.Td><Text size="sm" ff="var(--font-mono, monospace)">{c.name}</Text></Table.Td>
-                    <Table.Td ta="right">{num(c.count)}</Table.Td>
-                    <Table.Td ta="right">{bytes(c.dataSize)}</Table.Td>
-                    <Table.Td ta="right">{bytes(c.storageSize)}</Table.Td>
-                    <Table.Td ta="right">{bytes(c.indexSize)}</Table.Td>
+                    <Table.Td>
+                      <Text size="sm" fw={550} truncate>{c.name}</Text>
+                      <Box mt={5} h={4} style={{ borderRadius: 3, background: "var(--mantine-color-default-border)", overflow: "hidden" }}>
+                        <Box h="100%" w={`${Math.max(2, (w / maxWeight) * 100)}%`} style={{ background: "var(--mantine-color-blue-5)", borderRadius: 3 }} />
+                      </Box>
+                    </Table.Td>
+                    <Table.Td ta="right"><Num>{num(c.count)}</Num></Table.Td>
+                    <Table.Td ta="right"><Num>{bytes(c.storageSize)}</Num></Table.Td>
+                    <Table.Td ta="right"><Num>{bytes(c.indexSize)}</Num></Table.Td>
+                    <Table.Td ta="right"><Num fw={650}>{bytes(w)}</Num></Table.Td>
                   </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
+                );
+              })}
+              {rows.tail.length > 0 && (
+                <Table.Tr>
+                  <Table.Td>
+                    <Tooltip
+                      multiline
+                      w={260}
+                      label={rows.tail.map((c) => c.name).join(", ")}
+                      events={{ hover: true, focus: true, touch: true }}
+                    >
+                      <Text size="sm" c="dimmed" style={{ cursor: "help" }}>
+                        {rows.tail.length} smaller collections
+                      </Text>
+                    </Tooltip>
+                  </Table.Td>
+                  <Table.Td ta="right"><Num c="dimmed">—</Num></Table.Td>
+                  <Table.Td ta="right"><Num c="dimmed">—</Num></Table.Td>
+                  <Table.Td ta="right"><Num c="dimmed">—</Num></Table.Td>
+                  <Table.Td ta="right"><Num c="dimmed">{bytes(rows.tailBytes)}</Num></Table.Td>
+                </Table.Tr>
+              )}
+            </Table.Tbody>
+          </Table>
         </Card>
 
-        <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
-          <Text size="sm">
-            Storage is what the documents take on disk after WiredTiger
-            compression, which is why it reads well below the uncompressed data
-            size. Indexes are counted separately and both together are what the
-            plan limit measures.
-          </Text>
-        </Alert>
+        <Text size="xs" c="dimmed">
+          Storage is what the documents take on disk after compression, which is
+          why it reads below the uncompressed size. Indexes are counted
+          separately; the two together are what the plan limit measures.
+        </Text>
       </Stack>
     </AppShell>
   );
 }
 
-/** Bytes as a short human string — decimal units, matching what Atlas shows. */
+/** Bytes as a short human string — binary units, matching Atlas. */
 function bytes(n: number): string {
   if (!Number.isFinite(n) || n <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
@@ -115,29 +180,29 @@ function bytes(n: number): string {
   return `${v.toFixed(i === 0 ? 0 : v < 10 ? 2 : 1)} ${units[i]}`;
 }
 
-function Stat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Database;
-  label: string;
-  value: string;
-}) {
+function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <Card withBorder radius="md" padding="md">
-      <ThemeIcon size={28} radius="md" variant="light" color="gray" mb="sm">
-        <Icon size={14} />
-      </ThemeIcon>
-      <Text
-        fz={26}
-        fw={700}
-        lh={1.1}
-        style={{ letterSpacing: "-0.03em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}
-      >
+    <div>
+      <Text fw={700} fz="lg" style={{ letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
         {value}
       </Text>
-      <Text size="xs" c="dimmed" mt={2}>{label}</Text>
-    </Card>
+      <Text size="xs" c="dimmed" mt={1}>{label}</Text>
+    </div>
+  );
+}
+
+function Num({
+  children,
+  fw = 500,
+  c,
+}: {
+  children: React.ReactNode;
+  fw?: number;
+  c?: string;
+}) {
+  return (
+    <Text component="span" size="sm" fw={fw} c={c} style={{ fontVariantNumeric: "tabular-nums" }}>
+      {children}
+    </Text>
   );
 }
