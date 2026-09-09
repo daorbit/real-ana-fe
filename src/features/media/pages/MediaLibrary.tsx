@@ -136,45 +136,44 @@ export default function MediaLibraryPage() {
     }
   }
 
-  async function deleteOne(asset: MediaAsset) {
+  function deleteOne(asset: MediaAsset) {
     // Worth confirming: anything already pointing at this file keeps its URL,
     // and that URL stops resolving.
-    if (
-      !(await confirmDelete({
-        title: `Delete ${asset.name}?`,
-        body: "Anything already using this file keeps its URL, and that URL will stop working.",
-      }))
-    )
-      return;
-    try {
-      await remove({ workspaceId, id: asset.id }).unwrap();
-      setViewing(null);
-      setSelected((ids) => {
-        const next = new Set(ids);
-        next.delete(asset.id);
-        return next;
-      });
-      notify.success("Deleted");
-    } catch (err) {
-      notify.error(errMessage(err));
-    }
+    confirmDelete({
+      title: `Delete ${asset.name}?`,
+      body: "Anything already using this file keeps its URL, and that URL will stop working.",
+      onConfirm: async () => {
+        try {
+          await remove({ workspaceId, id: asset.id }).unwrap();
+          setViewing(null);
+          setSelected((ids) => {
+            const next = new Set(ids);
+            next.delete(asset.id);
+            return next;
+          });
+          notify.success("Deleted");
+        } catch (err) {
+          notify.error(errMessage(err));
+        }
+      },
+    });
   }
 
-  async function deleteSelected() {
-    if (
-      !(await confirmDelete({
-        title: `Delete ${selected.size} file(s)?`,
-        body: "Anything already using them keeps its URL, and those URLs will stop working.",
-      }))
-    )
-      return;
-    try {
-      await bulkRemove({ workspaceId, ids: [...selected] }).unwrap();
-      notify.success(`${selected.size} file(s) deleted.`);
-      setSelected(new Set());
-    } catch (err) {
-      notify.error(errMessage(err));
-    }
+  function deleteSelected() {
+    const count = selected.size;
+    confirmDelete({
+      title: `Delete ${count} file(s)?`,
+      body: "Anything already using them keeps its URL, and those URLs will stop working.",
+      onConfirm: async () => {
+        try {
+          await bulkRemove({ workspaceId, ids: [...selected] }).unwrap();
+          notify.success(`${count} file(s) deleted.`);
+          setSelected(new Set());
+        } catch (err) {
+          notify.error(errMessage(err));
+        }
+      },
+    });
   }
 
   if (!active) {
