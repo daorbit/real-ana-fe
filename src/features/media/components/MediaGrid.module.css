@@ -1,0 +1,128 @@
+/*
+ * CSS columns rather than a grid: uploads arrive at whatever aspect ratio they
+ * have, and a grid would either crop them all to one shape or leave ragged
+ * gaps. Columns let each tile keep its own height and close up behind it.
+ */
+.masonry {
+  column-count: 2;
+  column-gap: 12px;
+}
+
+@media (min-width: 48em) {
+  .masonry {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 75em) {
+  .masonry {
+    column-count: 4;
+  }
+}
+
+/* The picker gives each tile more room, so an image reads at a glance. */
+.threeUp {
+  column-count: 2;
+}
+
+@media (min-width: 48em) {
+  .threeUp {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 75em) {
+  .threeUp {
+    column-count: 3;
+  }
+}
+
+.tile {
+  position: relative;
+  /* Stops a tile being split across a column break mid-image. */
+  break-inside: avoid;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-body);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.tile:hover {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.selected {
+  border-color: var(--mantine-primary-color-filled);
+  box-shadow: 0 0 0 1px var(--mantine-primary-color-filled);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* A file with no visual preview still needs a tile of a sensible height. */
+.fileTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 120px;
+  color: var(--mantine-color-dimmed);
+  background: var(--mantine-color-default-hover);
+}
+
+.meta {
+  padding: 6px 8px 7px;
+  border-top: 1px solid var(--mantine-color-default-border);
+}
+
+/* Actions sit over the preview, revealed on hover so the wall stays quiet. */
+.actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.tile:hover .actions,
+.tile:focus-within .actions {
+  opacity: 1;
+}
+
+.check {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--mantine-primary-color-filled);
+  color: #fff;
+}
+
+.pick {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 3px;
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-body);
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.2);
+}

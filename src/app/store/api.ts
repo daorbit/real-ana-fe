@@ -9,6 +9,7 @@ import type {
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout, Branding, BrandingInput,
+  MediaAsset, MediaListResult, MediaKind, MediaUploadInput,
 } from "@/shared/types";
 import type { Placed } from "@/features/analytics/hooks/useHomeWidgets";
 import type { TrackerOptions } from "@/features/workspace/tracker";
@@ -144,7 +145,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Branding", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -1508,6 +1509,67 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Branding", id: workspaceId }],
     }),
 
+    /**
+     * A workspace's media library.
+     *
+     * One place files live, so a post image, a brand logo and an avatar all
+     * pick from the same shelf rather than each growing an upload button.
+     */
+    getMedia: build.query<
+      MediaListResult,
+      { workspaceId: string; kind?: MediaKind; q?: string; page?: number; perPage?: number }
+    >({
+      query: ({ workspaceId, ...params }) => ({
+        url: `/api/workspaces/${workspaceId}/media`,
+        params,
+      }),
+      providesTags: (_r, _e, { workspaceId }) => [{ type: "Media", id: workspaceId }],
+    }),
+
+    uploadMedia: build.mutation<
+      { items: MediaAsset[]; failed: { name: string; message: string }[] },
+      { workspaceId: string; files: MediaUploadInput[] }
+    >({
+      query: ({ workspaceId, files }) => ({
+        url: `/api/workspaces/${workspaceId}/media`,
+        method: "POST",
+        body: { files },
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Media", id: workspaceId }],
+    }),
+
+    updateMedia: build.mutation<
+      MediaAsset,
+      { workspaceId: string; id: string; name?: string; alt?: string }
+    >({
+      query: ({ workspaceId, id, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/media/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Media", id: workspaceId }],
+    }),
+
+    deleteMedia: build.mutation<void, { workspaceId: string; id: string }>({
+      query: ({ workspaceId, id }) => ({
+        url: `/api/workspaces/${workspaceId}/media/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Media", id: workspaceId }],
+    }),
+
+    bulkDeleteMedia: build.mutation<
+      { deleted: string[] },
+      { workspaceId: string; ids: string[] }
+    >({
+      query: ({ workspaceId, ids }) => ({
+        url: `/api/workspaces/${workspaceId}/media/bulk-delete`,
+        method: "POST",
+        body: { ids },
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Media", id: workspaceId }],
+    }),
+
     /** Everyone in a workspace, the pending invitations, and the caller's own role. */
     getMembers: build.query<MembersResponse, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/members`,
@@ -1913,6 +1975,11 @@ export const {
   useGetFieldVitalsQuery,
   useRunCrawlMutation,
   useGetLatestCrawlQuery,
+  useGetMediaQuery,
+  useUploadMediaMutation,
+  useUpdateMediaMutation,
+  useDeleteMediaMutation,
+  useBulkDeleteMediaMutation,
   useGetBrandingQuery,
   useUpdateBrandingMutation,
   useGetMembersQuery,

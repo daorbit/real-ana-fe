@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import {
-  Text, Group, Button, Card, Stack, TextInput, Switch,
-  Alert, Badge, Divider, ColorInput, Grid,
+  Text, Group, Button, Card, Stack, TextInput, Switch, Box,
+  Alert, Badge, Divider, ColorInput, Grid, Input,
 } from "@mantine/core";
-import { Palette, Lock, TriangleAlert } from "lucide-react";
+import { Palette, Lock, TriangleAlert, Images } from "lucide-react";
 import { useGetBrandingQuery, useUpdateBrandingMutation } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -12,6 +12,7 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
 import { BrandingPreview } from "../components/BrandingPreview";
+import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
 
 /**
  * What the people a workspace collects from actually see.
@@ -37,6 +38,7 @@ export default function BrandingPage() {
   // Whether the logo URL actually resolves. A broken link is worth saying here
   // rather than leaving someone to find a missing image on a payment window.
   const [logoBroken, setLogoBroken] = useState(false);
+  const [picking, setPicking] = useState(false);
 
   // Seeded from what the workspace stored, not from the resolved values: a free
   // workspace's fields would otherwise fill with our own name, and saving would
@@ -94,7 +96,7 @@ export default function BrandingPage() {
         }
       />
 
-      <Grid gutter="lg" mt="md">
+      <Grid gap="lg" mt="md">
         <Grid.Col span={{ base: 12, lg: 8 }}>
       <Stack gap="lg">
         {!editable && (
@@ -152,17 +154,59 @@ export default function BrandingPage() {
               maxLength={60}
             />
 
-            <TextInput
-              label="Logo URL"
-              description="A square image, served over https. Razorpay loads it from the payer's browser."
-              placeholder="https://example.com/logo.png"
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.currentTarget.value)}
-              disabled={locked}
-              error={
-                logoUrl && logoBroken ? "That image could not be loaded." : undefined
-              }
-            />
+            {/* Picked from the library rather than typed: a logo is a file the
+                workspace owns, and a pasted URL is one nobody can re-find when
+                it breaks. */}
+            <Input.Wrapper
+              label="Logo"
+              description="A square image. Razorpay loads it from the payer's browser."
+              error={logoUrl && logoBroken ? "That image could not be loaded." : undefined}
+            >
+              <Group gap="sm" mt={6}>
+                {/* The chosen file, at the size it is actually used. The phone
+                    mock shows it in context; this says which file it is. */}
+                {logoUrl && !logoBroken && (
+                  <Box
+                    style={{
+                      width: 44,
+                      height: 44,
+                      flexShrink: 0,
+                      borderRadius: "var(--mantine-radius-sm)",
+                      border: "1px solid var(--mantine-color-default-border)",
+                      background: "var(--mantine-color-default-hover)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={logoUrl}
+                      alt=""
+                      style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+                    />
+                  </Box>
+                )}
+                <Button
+                  variant="default"
+                  leftSection={<Images size={15} />}
+                  onClick={() => setPicking(true)}
+                  disabled={locked}
+                >
+                  {logoUrl ? "Change logo" : "Choose from media"}
+                </Button>
+                {logoUrl && (
+                  <Button
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => setLogoUrl("")}
+                    disabled={locked}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </Group>
+            </Input.Wrapper>
 
             {/* A hidden <img> rather than a visible thumbnail: the phone mock
                 beside these fields already shows the logo, but it only reports a
@@ -230,6 +274,14 @@ export default function BrandingPage() {
           </Card>
         </Grid.Col>
       </Grid>
+
+      <MediaPickerModal
+        opened={picking}
+        onClose={() => setPicking(false)}
+        onPick={(asset) => setLogoUrl(asset.url)}
+        kind="image"
+        title="Choose a logo"
+      />
     </AppShell>
   );
 }

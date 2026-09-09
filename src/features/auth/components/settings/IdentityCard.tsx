@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Avatar, Badge, Box, Button, Group, Text } from "@mantine/core";
-import { Trash2, Upload } from "lucide-react";
+import { Trash2, Upload, Images } from "lucide-react";
+import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
 import { useTranslation } from "react-i18next";
 import type { ProfileForm } from "./useProfileForm";
 
@@ -15,8 +17,10 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
     firstName,
     lastName,
     pickAvatar,
+    pickAvatarFromLibrary,
     clearAvatar,
   } = form;
+  const [picking, setPicking] = useState(false);
 
   if (!user) return null;
 
@@ -77,6 +81,18 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
             >
               {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
             </Button>
+            {/* The workspace's own files, as an alternative to a fresh upload.
+                Either way it goes through the cropper — an avatar is square
+                wherever it is shown. */}
+            <Button
+              size="xs"
+              variant="light"
+              leftSection={<Images size={14} />}
+              disabled={avatarBusy}
+              onClick={() => setPicking(true)}
+            >
+              From media
+            </Button>
             {avatarUrl && (
               <Button
                 size="xs"
@@ -92,6 +108,14 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
           </Group>
         </Box>
       </Group>
+
+      <MediaPickerModal
+        opened={picking}
+        onClose={() => setPicking(false)}
+        onPick={(asset) => void pickAvatarFromLibrary(asset.url, asset.name)}
+        kind="image"
+        title="Choose a profile photo"
+      />
     </Box>
   );
 }

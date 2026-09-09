@@ -138,6 +138,32 @@ export function useProfileForm() {
     if (fileInput.current) fileInput.current.value = "";
   };
 
+  /**
+   * An avatar chosen from the workspace's media library.
+   *
+   * Fetched into a File so it goes through the same cropper as an upload: an
+   * avatar is square wherever it is shown, and a library image is whatever
+   * shape it happens to be. Cloudinary serves these with CORS, which is what
+   * makes reading the blob back possible at all.
+   */
+  const pickAvatarFromLibrary = async (url: string, name: string) => {
+    setAvatarBusy(true);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("could not load that image");
+      const blob = await res.blob();
+      if (!blob.type.startsWith("image/")) {
+        notify.error(t("settings.avatarNotImage"));
+        return;
+      }
+      setCropFile(new File([blob], name || "avatar", { type: blob.type }));
+    } catch (err) {
+      notify.error(errMessage(err, t("settings.avatarUploadError")));
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
   const saveCrop = async (cropped: Blob) => {
     trace(user?.id, "avatar_uploaded", "settings", "profile");
     setAvatarBusy(true);
@@ -175,6 +201,7 @@ export function useProfileForm() {
     avatarBusy,
     cropFile,
     setCropFile,
+    pickAvatarFromLibrary,
     firstName,
     setFirstName,
     lastName,

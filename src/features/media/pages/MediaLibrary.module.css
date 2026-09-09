@@ -1,0 +1,15 @@
+/* The whole library is the drop target, so the cue has to be visible without
+   moving anything — a dashed outline over the wall rather than a box that
+   appears and pushes the tiles down. */
+.dropZone {
+  position: relative;
+  min-height: 320px;
+  border: 1px dashed transparent;
+  border-radius: var(--mantine-radius-md);
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.dropping {
+  border-color: var(--mantine-primary-color-filled);
+  background: var(--mantine-color-default-hover);
+}

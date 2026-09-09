@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
-import { Box, FileButton, Group, SimpleGrid, Text } from "@mantine/core";
-import { Image as ImageIcon, Plus } from "lucide-react";
-import { MAX_IMAGES, MAX_IMAGE_MB } from "../draft";
+import { useState } from "react";
+import { Box, Group, SimpleGrid, Text } from "@mantine/core";
+import { Images as ImagesIcon, Plus } from "lucide-react";
+import { MAX_IMAGES } from "../draft";
 import { ImageSlide } from "./ImageSlide";
-import { ACCEPT_ATTR, readImageFiles } from "./readImageFiles";
+import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
 
 /**
  * The post's images, in the order they will publish.
@@ -26,15 +26,14 @@ export function PostImagesField({
   provider: "linkedin" | "instagram";
   max?: number;
 }) {
-  const [dragging, setDragging] = useState(false);
-  const resetRef = useRef<() => void>(null);
+  const [picking, setPicking] = useState(false);
 
   const room = max - value.length;
 
-  const add = async (files: File[]) => {
-    const read = await readImageFiles(files, room, max);
-    if (read.length) onChange([...value, ...read]);
-    resetRef.current?.();
+  /** One more picture from the library, unless the post is already full. */
+  const add = (url: string) => {
+    if (room <= 0) return;
+    onChange([...value, url]);
   };
 
   const move = (from: number, to: number) => {
@@ -48,40 +47,38 @@ export function PostImagesField({
 
   if (value.length === 0) {
     return (
-      <FileButton resetRef={resetRef} accept={ACCEPT_ATTR} multiple onChange={add}>
-        {(props) => (
-          <Box
-            {...props}
-            component="button"
-            type="button"
-            onDragOver={(e: React.DragEvent) => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e: React.DragEvent) => {
-              e.preventDefault();
-              setDragging(false);
-              void add(Array.from(e.dataTransfer.files));
-            }}
-            style={{
-              width: "100%",
-              padding: "28px 16px",
-              cursor: "pointer",
-              background: "transparent",
-              border: `1px dashed ${dragging ? "var(--accent)" : "var(--mantine-color-default-border)"}`,
-              borderRadius: "var(--mantine-radius-md)",
-              color: "inherit",
-            }}
-          >
-            <ImageIcon size={20} style={{ color: "var(--mantine-color-dimmed)" }} />
-            <Text size="sm" mt={8}>
-              {max === 1 ? "Drop an image, or click to choose" : "Drop images, or click to choose"}
-            </Text>
-            <Text size="xs" c="dimmed" mt={4}>
-              PNG, JPEG or WebP · up to {MAX_IMAGE_MB}MB
-              {max > 1 ? ` each · ${max} max` : ""}
-            </Text>
-          </Box>
-        )}
-      </FileButton>
+      <>
+        <Box
+          component="button"
+          type="button"
+          onClick={() => setPicking(true)}
+          style={{
+            width: "100%",
+            padding: "28px 16px",
+            cursor: "pointer",
+            background: "transparent",
+            border: "1px dashed var(--mantine-color-default-border)",
+            borderRadius: "var(--mantine-radius-md)",
+            color: "inherit",
+          }}
+        >
+          <ImagesIcon size={20} style={{ color: "var(--mantine-color-dimmed)" }} />
+          <Text size="sm" mt={8}>
+            {max === 1 ? "Choose an image" : "Choose images"}
+          </Text>
+          <Text size="xs" c="dimmed" mt={4}>
+            From your media library{max > 1 ? ` · ${max} max` : ""}
+          </Text>
+        </Box>
+
+        <MediaPickerModal
+          opened={picking}
+          onClose={() => setPicking(false)}
+          onPick={(asset) => add(asset.url)}
+          kind="image"
+          title="Choose an image"
+        />
+      </>
     );
   }
 
@@ -100,29 +97,26 @@ export function PostImagesField({
         ))}
 
         {room > 0 && (
-          <FileButton resetRef={resetRef} accept={ACCEPT_ATTR} multiple onChange={add}>
-            {(props) => (
-              <Box
-                {...props}
-                component="button"
-                type="button"
-                aria-label="Add images"
-                style={{
-                  aspectRatio: "1 / 1",
-                  display: "grid",
-                  placeItems: "center",
-                  cursor: "pointer",
-                  background: "transparent",
-                  border: "1px dashed var(--mantine-color-default-border)",
-                  borderRadius: "var(--mantine-radius-md)",
-                  color: "var(--mantine-color-dimmed)",
-                }}
-              >
-                <Plus size={18} />
-              </Box>
-            )}
-          </FileButton>
+          <Box
+            component="button"
+            type="button"
+            aria-label="Add images"
+            onClick={() => setPicking(true)}
+            style={{
+              aspectRatio: "1 / 1",
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
+              background: "transparent",
+              border: "1px dashed var(--mantine-color-default-border)",
+              borderRadius: "var(--mantine-radius-md)",
+              color: "var(--mantine-color-dimmed)",
+            }}
+          >
+            <Plus size={18} />
+          </Box>
         )}
+
       </SimpleGrid>
 
       <Group justify="space-between" mt={8} wrap="nowrap">
@@ -137,6 +131,14 @@ export function PostImagesField({
             was never in question. */}
         {max > 1 && <Text size="xs" c="dimmed">{value.length} / {max}</Text>}
       </Group>
+
+      <MediaPickerModal
+        opened={picking}
+        onClose={() => setPicking(false)}
+        onPick={(asset) => add(asset.url)}
+        kind="image"
+        title="Add an image"
+      />
     </div>
   );
 }

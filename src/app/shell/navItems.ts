@@ -1,6 +1,6 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
-  Send, CreditCard, Mail, Inbox, LifeBuoy, Swords, Share2, Route, Database, Palette,
+  Send, CreditCard, Mail, Inbox, LifeBuoy, Swords, Share2, Route, Database, Palette, Images,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 
@@ -61,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
       // Beside the other outbound channels: a lead form is another way traffic
       // turns into something you can act on.
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Leads Capture", icon: LeadMagnetIcon },
+      { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
     ],
   },

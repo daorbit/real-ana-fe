@@ -1997,3 +1997,33 @@ export type BrandingInput = {
   accentColor?: string;
   hidePoweredBy?: boolean;
 };
+
+export type MediaKind = "image" | "video" | "raw";
+
+/** One asset in a workspace's media library. */
+export type MediaAsset = {
+  id: string;
+  name: string;
+  alt: string;
+  url: string;
+  kind: MediaKind;
+  mime: string;
+  format: string;
+  bytes: number;
+  width: number | null;
+  height: number | null;
+  /** A delivery-time preview. Empty for `raw`, which has nothing to show. */
+  thumbnailUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type MediaListResult = {
+  items: MediaAsset[];
+  total: number;
+  page: number;
+  perPage: number;
+};
+
+/** One file on its way up, as a batch upload reports it. */
+export type MediaUploadInput = { file: string; name: string; alt?: string };
