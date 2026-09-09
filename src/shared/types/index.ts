@@ -1980,6 +1980,8 @@ export type Branding = {
   showPoweredBy: boolean;
   poweredByLabel: string;
   editable: boolean;
+  /** Ours, whatever this workspace has set — for previewing an empty field. */
+  defaults: { name: string; logoUrl?: string };
   /** What the workspace saved, honoured or not — so the form shows their text. */
   stored: {
     name?: string;

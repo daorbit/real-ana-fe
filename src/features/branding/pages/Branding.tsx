@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import {
-  Text, Group, Button, Card, Stack, TextInput, Switch, Box,
-  Alert, Badge, Divider, ThemeIcon, ColorInput,
+  Text, Group, Button, Card, Stack, TextInput, Switch,
+  Alert, Badge, Divider, ColorInput, Grid,
 } from "@mantine/core";
-import { Palette, Lock, TriangleAlert, ImageOff } from "lucide-react";
+import { Palette, Lock, TriangleAlert } from "lucide-react";
 import { useGetBrandingQuery, useUpdateBrandingMutation } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -11,6 +11,7 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
+import { BrandingPreview } from "../components/BrandingPreview";
 
 /**
  * What the people a workspace collects from actually see.
@@ -93,7 +94,9 @@ export default function BrandingPage() {
         }
       />
 
-      <Stack gap="lg" mt="md">
+      <Grid gutter="lg" mt="md">
+        <Grid.Col span={{ base: 12, lg: 8 }}>
+      <Stack gap="lg">
         {!editable && (
           <Alert
             variant="light"
@@ -161,40 +164,17 @@ export default function BrandingPage() {
               }
             />
 
-            {/* The preview is the check: a URL that looks right and 404s is the
-                failure this field actually has, and it only shows up on a
-                payment window otherwise. */}
+            {/* A hidden <img> rather than a visible thumbnail: the phone mock
+                beside these fields already shows the logo, but it only reports a
+                failure if something is watching for one. */}
             {logoUrl && (
-              <Group gap="sm">
-                <Box
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 8,
-                    border: "1px solid var(--mantine-color-default-border)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    overflow: "hidden",
-                  }}
-                >
-                  {logoBroken ? (
-                    <ThemeIcon variant="subtle" color="gray" size="sm">
-                      <ImageOff size={16} />
-                    </ThemeIcon>
-                  ) : (
-                    <img
-                      src={logoUrl}
-                      alt=""
-                      style={{ maxWidth: "100%", maxHeight: "100%" }}
-                      onError={() => setLogoBroken(true)}
-                    />
-                  )}
-                </Box>
-                <Text size="xs" c="dimmed">
-                  {logoBroken ? "Not loading — check the URL." : "This is what payers will see."}
-                </Text>
-              </Group>
+              <img
+                src={logoUrl}
+                alt=""
+                hidden
+                onError={() => setLogoBroken(true)}
+                onLoad={() => setLogoBroken(false)}
+              />
             )}
 
             <ColorInput
@@ -224,6 +204,32 @@ export default function BrandingPage() {
           </Stack>
         </Card>
       </Stack>
+        </Grid.Col>
+
+        {/* The preview is sticky: the fields below it are what change it, and
+            scrolling to a colour picker should not scroll the thing it
+            colours off the screen. */}
+        <Grid.Col span={{ base: 12, lg: 4 }}>
+          <Card
+            withBorder
+            radius="md"
+            padding="md"
+            // Tall enough for the phone and no taller: a fixed height left a
+            // band of empty card under it on wide screens.
+            style={{ position: "sticky", top: 16, height: "fit-content" }}
+          >
+            <BrandingPreview
+              name={name}
+              logoUrl={logoBroken ? "" : logoUrl}
+              accentColor={accentColor}
+              showPoweredBy={!(editable && hidePoweredBy)}
+              poweredByLabel={data?.poweredByLabel ?? "Powered by Quantalog Forms"}
+              fallbackName={data?.defaults.name ?? "Quantalog"}
+              fallbackLogo={data?.defaults.logoUrl}
+            />
+          </Card>
+        </Grid.Col>
+      </Grid>
     </AppShell>
   );
 }
