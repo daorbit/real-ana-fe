@@ -20,6 +20,7 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/compare": () => import("@/features/compare/pages/Compare"),
   "/app/workspaces": () => import("@/features/workspace/pages/Workspaces"),
   "/app/members": () => import("@/features/workspace/pages/Members"),
+  "/app/branding": () => import("@/features/branding/pages/Branding"),
   "/app/share": () => import("@/features/analytics/pages/Share"),
   "/app/reports": () => import("@/features/reports/pages"),
   "/app/journey": () => import("@/features/journey/pages/Journey"),

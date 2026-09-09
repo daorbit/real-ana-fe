@@ -8,7 +8,7 @@ import type {
   ContactMessage, ContactMessagePage, ContactStatus,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
-  MailLayout,
+  MailLayout, Branding, BrandingInput,
 } from "@/shared/types";
 import type { Placed } from "@/features/analytics/hooks/useHomeWidgets";
 import type { TrackerOptions } from "@/features/workspace/tracker";
@@ -144,7 +144,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Branding", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -1483,6 +1483,31 @@ export const api = createApi({
       invalidatesTags: ["Marker"],
     }),
 
+    /**
+     * How this workspace presents itself on what its own customers see —
+     * payment windows, public forms, notification emails.
+     *
+     * The server has already reconciled it against the plan, so `name` and
+     * `logoUrl` are what will actually be rendered; `editable` says whether
+     * this workspace may change them.
+     */
+    getBranding: build.query<Branding, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/branding`,
+      providesTags: (_r, _e, workspaceId) => [{ type: "Branding", id: workspaceId }],
+    }),
+
+    updateBranding: build.mutation<
+      Branding,
+      { workspaceId: string } & BrandingInput
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/branding`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Branding", id: workspaceId }],
+    }),
+
     /** Everyone in a workspace, the pending invitations, and the caller's own role. */
     getMembers: build.query<MembersResponse, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/members`,
@@ -1888,6 +1913,8 @@ export const {
   useGetFieldVitalsQuery,
   useRunCrawlMutation,
   useGetLatestCrawlQuery,
+  useGetBrandingQuery,
+  useUpdateBrandingMutation,
   useGetMembersQuery,
   useInviteMemberMutation,
   useRevokeInviteMutation,

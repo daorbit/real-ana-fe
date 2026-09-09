@@ -1964,3 +1964,34 @@ export type SeoCrawlReport = {
   data: SeoCrawlData;
   createdAt: string;
 };
+
+/**
+ * How a workspace presents itself to the people its forms collect from.
+ *
+ * Already reconciled against the plan by the server: `name` and `logoUrl` are
+ * what will actually be rendered, whatever the workspace happens to have
+ * stored. `editable` is what the settings screen keys off — false means the
+ * plan does not include branding, and the stored values are being ignored.
+ */
+export type Branding = {
+  name: string;
+  logoUrl?: string;
+  accentColor?: string;
+  showPoweredBy: boolean;
+  poweredByLabel: string;
+  editable: boolean;
+  /** What the workspace saved, honoured or not — so the form shows their text. */
+  stored: {
+    name?: string;
+    logoUrl?: string;
+    accentColor?: string;
+    hidePoweredBy: boolean;
+  };
+};
+
+export type BrandingInput = {
+  name?: string;
+  logoUrl?: string;
+  accentColor?: string;
+  hidePoweredBy?: boolean;
+};

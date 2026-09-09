@@ -1,6 +1,6 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
-  Send, CreditCard, Mail, Inbox, LifeBuoy, Swords, Share2, Route, Database,
+  Send, CreditCard, Mail, Inbox, LifeBuoy, Swords, Share2, Route, Database, Palette,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 
@@ -69,6 +69,7 @@ export const NAV_GROUPS: NavGroup[] = [
 /** Rows in the account menu rather than the rail — per-person, not per-page. */
 export const ACCOUNT_ITEMS: NavItem[] = [
   { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
+  { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette },
   { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
   { to: "/app/help", labelKey: "nav.help", label: "Help & support", icon: LifeBuoy },
 ];

@@ -29,6 +29,7 @@ const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
 const Developers = lazy(() => import("@/features/support/pages/Developers"));
 const Help = lazy(() => import("@/features/support/pages/Help"));
 const Members = lazy(() => import("@/features/workspace/pages/Members"));
+const Branding = lazy(() => import("@/features/branding/pages/Branding"));
 const AcceptInvite = lazy(() => import("@/features/workspace/pages/AcceptInvite"));
 const Share = lazy(() => import("@/features/analytics/pages/Share"));
 const Reports = lazy(() => import("@/features/reports/pages"));
@@ -246,6 +247,7 @@ export default function App() {
               />
               <Route path="/app/workspaces" element={<Protected><RouteFrame><Workspaces /></RouteFrame></Protected>} />
               <Route path="/app/members" element={<Protected><RouteFrame><Members /></RouteFrame></Protected>} />
+              <Route path="/app/branding" element={<Protected><RouteFrame><Branding /></RouteFrame></Protected>} />
               <Route path="/app/share" element={<Protected><RouteFrame><Share /></RouteFrame></Protected>} />
               <Route path="/app/reports" element={<Protected><RouteFrame><Reports /></RouteFrame></Protected>} />
               <Route path="/app/journey" element={<Protected><RouteFrame><Journey /></RouteFrame></Protected>} />
