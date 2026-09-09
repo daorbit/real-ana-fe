@@ -1787,7 +1787,62 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   min-height: 100vh;
   min-height: 100dvh;
 
-  background: linear-gradient(150deg, #0c0e10 0%, var(--bg) 50%, #08090b 100%);
+ 
+  --auth-ink: rgba(255, 255, 255, 0.95);
+  --auth-ink-dim: rgba(255, 255, 255, 0.72);
+  --auth-ink-faint: rgba(255, 255, 255, 0.5);
+  --auth-ink-ghost: rgba(255, 255, 255, 0.35);
+  --auth-line: rgba(255, 255, 255, 0.12);
+  --auth-line-strong: rgba(255, 255, 255, 0.32);
+  --auth-surface: rgba(255, 255, 255, 0.05);
+  --auth-surface-hover: rgba(255, 255, 255, 0.08);
+  --auth-glow: rgba(255, 255, 255, 0.035);
+  /* The primary button is the inverse of the ground, in both schemes. */
+  --auth-solid: #ffffff;
+  --auth-solid-ink: #0a0b0d;
+  --auth-solid-hover: rgba(255, 255, 255, 0.88);
+
+  background: linear-gradient(150deg, #0c0e10 0%, #101215 50%, #08090b 100%);
+}
+
+/* Onboarding reuses the auth form's rules but sits outside `.auth-split`, so
+   it needs the same names defined on its own root — without these the tokens
+   resolve to nothing and its labels render as invisible text. */
+.onb-col {
+  --auth-ink: rgba(255, 255, 255, 0.95);
+  --auth-ink-dim: rgba(255, 255, 255, 0.72);
+  --auth-ink-faint: rgba(255, 255, 255, 0.5);
+  --auth-ink-ghost: rgba(255, 255, 255, 0.35);
+  --auth-line: rgba(255, 255, 255, 0.12);
+  --auth-line-strong: rgba(255, 255, 255, 0.32);
+  --auth-surface: rgba(255, 255, 255, 0.05);
+  --auth-surface-hover: rgba(255, 255, 255, 0.08);
+  --auth-glow: rgba(255, 255, 255, 0.035);
+  --auth-solid: #ffffff;
+  --auth-solid-ink: #0a0b0d;
+  --auth-solid-hover: rgba(255, 255, 255, 0.88);
+}
+
+[data-mantine-color-scheme="light"] .auth-split,
+[data-mantine-color-scheme="light"] .onb-col {
+  --auth-ink: rgba(17, 24, 39, 0.95);
+  --auth-ink-dim: rgba(17, 24, 39, 0.7);
+  --auth-ink-faint: rgba(17, 24, 39, 0.5);
+  --auth-ink-ghost: rgba(17, 24, 39, 0.35);
+  --auth-line: rgba(17, 24, 39, 0.14);
+  --auth-line-strong: rgba(17, 24, 39, 0.3);
+  --auth-surface: rgba(255, 255, 255, 0.9);
+  --auth-surface-hover: #ffffff;
+  --auth-glow: rgba(17, 24, 39, 0.04);
+  --auth-solid: #111827;
+  --auth-solid-ink: #ffffff;
+  --auth-solid-hover: #1f2937;
+}
+
+/* Only the auth page paints a ground; onboarding sits inside a surface that
+   already has one. */
+[data-mantine-color-scheme="light"] .auth-split {
+  background: linear-gradient(150deg, #f6f7f9 0%, #eef0f4 50%, #f8f9fb 100%);
 }
 
 
@@ -1800,7 +1855,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-panel::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(46% 40% at 50% 50%,
-    rgba(255,255,255,0.035) 0%, transparent 70%);
+    var(--auth-glow) 0%, transparent 70%);
 }
 .auth-form { position: relative; z-index: 1; width: 100%; max-width: 380px; }
 
@@ -1813,7 +1868,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   line-height: 1.1;
   letter-spacing: -0.005em;
   text-align: center;
-  color: rgba(255,255,255,0.95);
+  color: var(--auth-ink);
 }
 .auth-form .mantine-Title-root + .mantine-Text-root { text-align: center; }
 
@@ -1821,11 +1876,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-form .mantine-InputWrapper-label,
 .onb-col .mantine-InputWrapper-label {
   font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem;
-  color: rgba(255,255,255,0.72);
+  color: var(--auth-ink-dim);
 }
 
 .auth-form .mantine-InputWrapper-required,
-.onb-col .mantine-InputWrapper-required { color: rgba(255,255,255,0.35); }
+.onb-col .mantine-InputWrapper-required { color: var(--auth-ink-ghost); }
 
 
 .auth-field-head {
@@ -1833,13 +1888,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   gap: 1rem; margin-bottom: 0.4rem;
 }
 .auth-field-head label {
-  font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.72);
+  font-size: 0.82rem; font-weight: 600; color: var(--auth-ink-dim);
 }
 
 
 .auth-form .mantine-Anchor-root,
 .onb-col .mantine-Anchor-root {
-  --anchor-color: rgba(255,255,255,0.6);
+  --anchor-color: var(--auth-ink-faint);
   color: var(--anchor-color);
   text-decoration: none;
   transition: color 0.15s ease;
@@ -1852,57 +1907,63 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 .auth-form > .mantine-Stack-root > .mantine-Text-root .mantine-Anchor-root {
-  --anchor-color: rgba(255,255,255,0.92);
+  --anchor-color: var(--auth-ink);
 }
 .auth-optional {
   font-weight: 400; font-size: 0.72rem;
-  color: rgba(255,255,255,0.35);
+  color: var(--auth-ink-ghost);
   margin-left: 0.3rem;
 }
 .auth-form .mantine-Divider-label {
-  font-size: 0.75rem; color: var(--text-dim, rgba(255,255,255,0.5));
+  font-size: 0.75rem; color: var(--auth-ink-faint);
 }
 
 
+ 
 .auth-form .mantine-InputWrapper-root .mantine-Input-input,
 .onb-col .mantine-InputWrapper-root .mantine-Input-input {
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-2) 70%, transparent);
+  border: 1px solid var(--auth-line);
+  background: var(--auth-surface);
+  color: var(--auth-ink);
   border-radius: 10px;
   height: 46px;
+}
+.auth-form .mantine-InputWrapper-root .mantine-Input-input::placeholder,
+.onb-col .mantine-InputWrapper-root .mantine-Input-input::placeholder {
+  color: var(--auth-ink-ghost);
 }
 .auth-form .mantine-Input-input:focus,
 .auth-form .mantine-Input-input:focus-within,
 .onb-col .mantine-Input-input:focus,
 .onb-col .mantine-Input-input:focus-within {
-  border-color: rgba(255,255,255,0.32);
-  background: color-mix(in srgb, var(--bg-2) 90%, transparent);
+  border-color: var(--auth-line-strong);
+  background: var(--auth-surface-hover);
 }
 
 .auth-submit {
   display: flex; align-items: center; justify-content: center;
   width: 100%; height: 46px;
   border: none; border-radius: 10px;
-  background: #fff;
-  color: #0a0b0d;
+  background: var(--auth-solid);
+  color: var(--auth-solid-ink);
   font: inherit; font-weight: 600; font-size: 0.94rem;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0,0,0,0.3);
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .auth-submit:hover:not(:disabled) {
-  background: rgba(255,255,255,0.88);
+  background: var(--auth-solid-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px -8px rgba(255,255,255,0.3);
+  box-shadow: 0 6px 20px -8px var(--auth-line-strong);
 }
 .auth-submit:active:not(:disabled) { transform: translateY(0); }
 .auth-submit:focus-visible {
-  outline: 2px solid rgba(255,255,255,0.6);
+  outline: 2px solid var(--auth-ink-faint);
   outline-offset: 2px;
 }
 .auth-submit:disabled {
-  background: rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.5);
+  background: var(--auth-surface);
+  color: var(--auth-ink-faint);
   cursor: default;
 }
 .auth-submit-spinner {
@@ -1918,8 +1979,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .auth-btn.mantine-Button-root[data-variant="filled"] {
-  background: #fff;
-  color: #0a0b0d;
+  background: var(--auth-solid);
+  color: var(--auth-solid-ink);
   border: none;
   border-radius: 10px;
   font-weight: 600;
@@ -1927,7 +1988,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .auth-btn.mantine-Button-root[data-variant="filled"]:hover:not([data-disabled]):not(:disabled) {
-  background: rgba(255,255,255,0.88);
+  background: var(--auth-solid-hover);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px -8px rgba(255,255,255,0.3);
 }
@@ -1935,14 +1996,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transform: translateY(0);
 }
 .auth-btn.mantine-Button-root[data-variant="filled"]:focus-visible {
-  outline: 2px solid rgba(255,255,255,0.6);
+  outline: 2px solid var(--auth-ink-faint);
   outline-offset: 2px;
 }
 
 .auth-btn.mantine-Button-root[data-variant="filled"][data-disabled],
 .auth-btn.mantine-Button-root[data-variant="filled"]:disabled {
-  background: rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.5);
+  background: var(--auth-surface);
+  color: var(--auth-ink-faint);
 }
 .auth-btn.mantine-Button-root[data-variant="filled"] .mantine-Loader-root {
   --loader-color: currentColor;
@@ -1950,29 +2011,29 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .auth-btn.mantine-Button-root[data-variant="default"] {
-  background: color-mix(in srgb, var(--bg-2) 70%, transparent);
-  border: 1px solid var(--border);
+  background: var(--auth-surface);
+  border: 1px solid var(--auth-line);
   border-radius: 10px;
-  color: rgba(255,255,255,0.78);
+  color: var(--auth-ink-dim);
   font-weight: 550;
 }
 .auth-btn.mantine-Button-root[data-variant="default"]:hover:not([data-disabled]) {
-  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
-  border-color: rgba(255,255,255,0.22);
+  background: var(--auth-surface);
+  border-color: var(--auth-line-strong);
   color: #fff;
 }
 
 
 .auth-form .mantine-Button-root[data-variant="default"] {
   height: 46px; border-radius: 10px;
-  background: color-mix(in srgb, var(--bg-2) 82%, transparent);
-  border: 1px solid var(--border);
+  background: var(--auth-surface);
+  border: 1px solid var(--auth-line);
   font-weight: 600; font-size: 0.9rem;
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 .auth-form .mantine-Button-root[data-variant="default"]:hover {
-  background: var(--bg-2);
-  border-color: rgba(255,255,255,0.22);
+  background: var(--auth-surface-hover);
+  border-color: var(--auth-line-strong);
   transform: translateY(-1px);
 }
 .auth-form .mantine-Button-root[data-variant="default"] .mantine-Button-section {
@@ -2086,7 +2147,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   gap: 0.75rem;
 }
 .ab-feature { display: flex; align-items: center; gap: 0.65rem; font-size: 0.87rem; color: rgba(255,255,255,0.82); font-weight: 500; }
-.ab-feature-ic { width: 26px; height: 26px; border-radius: 8px; background: rgba(255,255,255,0.08); display: grid; place-items: center; flex-shrink: 0; color: rgba(255,255,255,0.7); }
+.ab-feature-ic { width: 26px; height: 26px; border-radius: 8px; background: var(--auth-surface-hover); display: grid; place-items: center; flex-shrink: 0; color: rgba(255,255,255,0.7); }
 
 .ab-showcase {
   display: flex; flex-direction: column; gap: 0.9rem; margin: 0 0 1.75rem;
@@ -2113,7 +2174,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .ab-demo-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .ab-demo-title { font-size: 0.88rem; font-weight: 600; }
-.ab-demo-sub { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
+.ab-demo-sub { font-size: 0.72rem; color: var(--auth-ink-faint); }
 .ab-demo-arrow {
   margin-left: auto; flex-shrink: 0; color: rgba(255,255,255,0.4);
   transition: transform 0.18s ease, color 0.18s ease;
@@ -2126,7 +2187,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .ab-proof-item {
   display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.76rem; font-weight: 500; color: rgba(255,255,255,0.5);
+  font-size: 0.76rem; font-weight: 500; color: var(--auth-ink-faint);
 }
 .ab-proof-item svg { color: rgba(255,255,255,0.45); flex-shrink: 0; }
 
