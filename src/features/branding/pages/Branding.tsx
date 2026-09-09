@@ -24,7 +24,7 @@ export default function BrandingPage() {
   useTitle("Branding");
   const { active } = useWorkspace();
   const { canAdmin } = usePermissions();
-  const workspaceId = active?.id ? String(active.id) : "";
+  const workspaceId = active?._id ?? "";
 
   const { data, isLoading } = useGetBrandingQuery(workspaceId, { skip: !workspaceId });
   const [save, { isLoading: saving }] = useUpdateBrandingMutation();
