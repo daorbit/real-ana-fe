@@ -17,14 +17,11 @@
   height: 100dvh;
   overflow: hidden;
   color: var(--text);
-  background:
-    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 60%),
-    var(--bg);
-  animation: sw-fade-in 220ms ease-out both;
-}
-
-/* Classic preset: a flat ground, no glow. */
-[data-theme-preset="classic"] .switch-overlay {
+  /* A flat ground, and no fade.
+     This covers the reload hold, so it is the first thing painted and the
+     thing painted over. A tinted glow arriving on a 220ms fade and then
+     leaving again reads as a flash between the blank page and the app — two
+     visible transitions for a wait that is usually shorter than either. */
   background: var(--bg);
 }
 
@@ -122,11 +119,6 @@
   margin: -12px 0 0;
   font-size: 12.5px;
   color: var(--text-2);
-}
-
-@keyframes sw-fade-in {
-  from { opacity: 0; transform: scale(0.98); }
-  to   { opacity: 1; transform: none; }
 }
 
 @keyframes sw-shimmer {
