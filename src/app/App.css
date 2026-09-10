@@ -84,6 +84,25 @@ body.rzp-checkout-open .app-panel__scroll {
 }
 body.rzp-checkout-open .app-main { min-height: 100dvh; }
 
+/*
+ * Razorpay's checkout mounts a `.razorpay-container` on <body> holding two
+ * iframes: a full-viewport backdrop and the payment card. The iframes have no
+ * background of their own, so on a dark page — where the root sets
+ * `color-scheme: dark` — the browser paints their empty area white, and the
+ * whole screen behind the card goes solid white instead of a dimmed backdrop.
+ *
+ * `color-scheme: normal` on the container stops that inheritance, and a
+ * translucent black on the backdrop iframe itself (the first, full-bleed one)
+ * gives the dim-the-page look. Razorpay's own iframe content is unaffected —
+ * only its transparent chrome picks this up.
+ */
+.razorpay-container {
+  color-scheme: normal !important;
+}
+.razorpay-container > iframe:first-child {
+  background: rgba(4, 10, 18, 0.66) !important;
+}
+
 
 html.theme-transitioning,
 html.theme-transitioning body,
