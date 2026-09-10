@@ -30,27 +30,33 @@ export function loadCashfreeCheckout(): Promise<void> {
 }
 
 /**
- * Open Cashfree's hosted checkout in a modal over the page.
+ * Send the browser to Cashfree's hosted checkout.
  *
- * Resolves once the sheet closes. Unlike Razorpay there is no signed payload in
- * the result — the caller confirms by asking the server to read the order
- * status — so this only reports whether the customer reached a terminal state
- * or dismissed.
+ * A full-page redirect (`_self`), not a modal: the modal flow silently falls
+ * back to a redirect for UPI and some cards, and the `checkout()` promise then
+ * never resolves, hanging the page. The server set a `return_url` back to
+ * `/billing?cf_order_id=…`; the billing page reads that on load and confirms.
+ *
+ * This call does not return in the success case — navigation has already
+ * happened. It only throws (and returns) if the SDK rejects the session
+ * outright, e.g. an expired or malformed `paymentSessionId`.
  */
-export async function openCashfreeCheckout(params: {
+export async function startCashfreeRedirect(params: {
   paymentSessionId: string;
   mode: CashfreeMode;
-}): Promise<{ dismissed: boolean; error?: string }> {
+}): Promise<{ error: string }> {
   await loadCashfreeCheckout();
 
   const factory = (window as unknown as { Cashfree: CashfreeFactory }).Cashfree;
   const cashfree = factory({ mode: params.mode });
 
-  const result = await cashfree.checkout({
-    paymentSessionId: params.paymentSessionId,
-    redirectTarget: "_modal",
-  });
-
-  if (result?.error) return { dismissed: true, error: result.error.message };
-  return { dismissed: false };
+  try {
+    const result = await cashfree.checkout({
+      paymentSessionId: params.paymentSessionId,
+      redirectTarget: "_self",
+    });
+    return { error: result?.error?.message ?? "Checkout did not start" };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Checkout did not start" };
+  }
 }

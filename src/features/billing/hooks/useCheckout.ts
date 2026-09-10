@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import confetti from "canvas-confetti";
 import {
@@ -9,7 +9,7 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "@/features/billing/lib/razorpay";
-import { openCashfreeCheckout } from "@/features/billing/lib/cashfree";
+import { startCashfreeRedirect } from "@/features/billing/lib/cashfree";
 import { CHECKOUT_LOGO } from "../lib/constants";
 import type {
   BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
@@ -65,6 +65,45 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     confetti({ particleCount: 60, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors, angle: 120, decay: 0.9 });
   };
 
+  /**
+   * Confirm a Cashfree checkout after its redirect back to `/billing`.
+   *
+   * Cashfree returns the browser with `?cf_order_id=…`; there is no signed
+   * payload, so confirmation is the server reading the order status. Runs once
+   * per param value — `handled` guards a re-run on re-render — and clears the
+   * query string so a refresh does not re-confirm.
+   */
+  const handledReturn = useRef<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("cf_order_id");
+    if (!orderId || handledReturn.current === orderId) return;
+    handledReturn.current = orderId;
+
+    (async () => {
+      try {
+        // A plan and an addon order are told apart server-side by which
+        // collection holds the id, so trying the plan verify first and falling
+        // back covers both without the client needing to remember which it was.
+        try {
+          await verifySubscription({ gateway: "cashfree", cashfree_order_id: orderId }).unwrap();
+        } catch {
+          await verifyAddonPurchase({ gateway: "cashfree", cashfree_order_id: orderId }).unwrap();
+        }
+        await refreshUser();
+        setCelebration({ kind: "plan", planName: t("billing.yourPlan", "your plan"), credits: [] });
+        fireConfetti();
+      } catch (e) {
+        notify.error(errMessage(e, t("billing.verifyFailed")));
+      } finally {
+        params.delete("cf_order_id");
+        const qs = params.toString();
+        window.history.replaceState({}, "", window.location.pathname + (qs ? `?${qs}` : ""));
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const subscribe = async (
     plan: Plan,
     selection: AddonSelection = {},
@@ -105,19 +144,14 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
       };
 
       if (started.gateway === "cashfree") {
-        const { dismissed, error } = await openCashfreeCheckout({
+        // Full-page redirect to Cashfree; the billing page confirms on return
+        // via the `cf_order_id` query param. Only reached again here if the SDK
+        // refuses to start.
+        const { error } = await startCashfreeRedirect({
           paymentSessionId: started.paymentSessionId,
           mode: started.cashfreeMode,
         });
-        if (error) notify.error(error);
-        // Cashfree's return carries nothing signed — confirm by order status.
-        try {
-          await verifySubscription({ gateway: "cashfree", cashfree_order_id: started.orderId }).unwrap();
-          await onPaid();
-        } catch (e) {
-          if (dismissed) setCancelled(`${plan.name} — ${cycle}`);
-          else notify.error(errMessage(e, t("billing.verifyFailed")));
-        }
+        notify.error(error);
         return;
       }
 
@@ -184,18 +218,11 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
       };
 
       if (started.gateway === "cashfree") {
-        const { dismissed, error } = await openCashfreeCheckout({
+        const { error } = await startCashfreeRedirect({
           paymentSessionId: started.paymentSessionId,
           mode: started.cashfreeMode,
         });
-        if (error) notify.error(error);
-        try {
-          await verifyAddonPurchase({ gateway: "cashfree", cashfree_order_id: started.orderId }).unwrap();
-          await onPaid();
-        } catch (e) {
-          if (dismissed) setCancelled(pack.name);
-          else notify.error(errMessage(e, t("billing.verifyFailed")));
-        }
+        notify.error(error);
         return;
       }
 
