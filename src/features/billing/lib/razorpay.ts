@@ -35,7 +35,22 @@ export type RazorpayCheckoutOptions = {
   modal?: { ondismiss?: () => void };
 };
 
+ 
+function releaseScrollLock() {
+  for (const el of [document.documentElement, document.body]) {
+    el.style.removeProperty("overflow");
+    el.style.removeProperty("overflow-x");
+    el.style.removeProperty("overflow-y");
+    el.style.removeProperty("padding-right");
+    el.style.removeProperty("position");
+    el.style.removeProperty("top");
+    el.style.removeProperty("width");
+    el.removeAttribute("data-scroll-locked");
+  }
+}
+
 export function openRazorpayCheckout(options: RazorpayCheckoutOptions) {
+  releaseScrollLock();
   type RazorpayCtor = new (opts: RazorpayCheckoutOptions) => { open: () => void };
   const Razorpay = (window as unknown as { Razorpay: RazorpayCtor }).Razorpay;
   new Razorpay(options).open();
