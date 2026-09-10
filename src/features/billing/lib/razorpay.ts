@@ -36,22 +36,51 @@ export type RazorpayCheckoutOptions = {
 };
 
  
-function releaseScrollLock() {
+const RZP_OPEN_CLASS = "rzp-checkout-open";
+
+function unlockForCheckout() {
   for (const el of [document.documentElement, document.body]) {
-    el.style.removeProperty("overflow");
-    el.style.removeProperty("overflow-x");
-    el.style.removeProperty("overflow-y");
-    el.style.removeProperty("padding-right");
-    el.style.removeProperty("position");
-    el.style.removeProperty("top");
-    el.style.removeProperty("width");
+    for (const prop of [
+      "overflow",
+      "overflow-x",
+      "overflow-y",
+      "padding-right",
+      "position",
+      "top",
+      "width",
+    ]) {
+      el.style.removeProperty(prop);
+    }
     el.removeAttribute("data-scroll-locked");
   }
+  document.body.classList.add(RZP_OPEN_CLASS);
+}
+
+function relockAfterCheckout() {
+  document.body.classList.remove(RZP_OPEN_CLASS);
 }
 
 export function openRazorpayCheckout(options: RazorpayCheckoutOptions) {
-  releaseScrollLock();
+  unlockForCheckout();
+
   type RazorpayCtor = new (opts: RazorpayCheckoutOptions) => { open: () => void };
   const Razorpay = (window as unknown as { Razorpay: RazorpayCtor }).Razorpay;
-  new Razorpay(options).open();
+
+  const onDismiss = options.modal?.ondismiss;
+  const wrapped: RazorpayCheckoutOptions = {
+    ...options,
+    handler: (resp) => {
+      relockAfterCheckout();
+      options.handler(resp);
+    },
+    modal: {
+      ...options.modal,
+      ondismiss: () => {
+        relockAfterCheckout();
+        onDismiss?.();
+      },
+    },
+  };
+
+  new Razorpay(wrapped).open();
 }

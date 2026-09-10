@@ -65,9 +65,24 @@
 }
 
 * { box-sizing: border-box; }
- 
-html, body, #root { min-height: 100%; }
+html, body, #root { height: 100%; }
 body { margin: 0; font-family: var(--font); -webkit-font-smoothing: antialiased; background: var(--bg); }
+
+/*
+ * While Razorpay's Standard Checkout is open, the window must be a normal
+ * scrolling document or checkout.js drops to its full-page view instead of the
+ * centred modal. The app shell otherwise pins the viewport (`.app-main` is
+ * `100dvh; overflow: hidden`, scrolling an inner panel), which Razorpay reads
+ * as a broken viewport. `openRazorpayCheckout` adds this class before `.open()`
+ * and removes it when checkout closes.
+ */
+body.rzp-checkout-open .app-main,
+body.rzp-checkout-open .app-panel,
+body.rzp-checkout-open .app-panel__scroll {
+  height: auto;
+  overflow: visible;
+}
+body.rzp-checkout-open .app-main { min-height: 100dvh; }
 
 
 html.theme-transitioning,
