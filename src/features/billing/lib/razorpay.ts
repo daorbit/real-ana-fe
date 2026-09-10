@@ -15,24 +15,30 @@ export function loadRazorpayCheckout(): Promise<void> {
   return loading;
 }
 
+/** Minimal shape of the options Razorpay Checkout accepts, typed for our usage. */
 export type RazorpayCheckoutOptions = {
   key: string;
   amount?: number;
   currency?: string;
   name: string;
   description?: string;
+  /** Absolute URL — Razorpay falls back to the first letter of `name` without it. */
   image?: string;
   order_id?: string;
   subscription_id?: string;
-  prefill?: { name?: string; email?: string };
+  prefill?: { name?: string; email?: string; contact?: string };
+  notes?: Record<string, string>;
   theme?: { color?: string };
   handler: (response: Record<string, string>) => void;
-  modal?: { ondismiss?: () => void; backdropclose?: boolean; escape?: boolean };
-  redirect?: boolean;
+  modal?: { ondismiss?: () => void; escape?: boolean; backdrop?: boolean };
 };
 
 export function openRazorpayCheckout(options: RazorpayCheckoutOptions) {
   type RazorpayCtor = new (opts: RazorpayCheckoutOptions) => { open: () => void };
   const Razorpay = (window as unknown as { Razorpay: RazorpayCtor }).Razorpay;
-  new Razorpay({ redirect: false, ...options }).open();
+
+  new Razorpay({
+    ...options,
+    modal: { escape: true, backdrop: true, ...options.modal },
+  }).open();
 }
