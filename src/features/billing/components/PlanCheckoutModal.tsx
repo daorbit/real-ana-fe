@@ -10,6 +10,7 @@ import { PackIcon, creditType } from "../lib/credits";
 import { MIN_CHARGE } from "../lib/constants";
 import { PackStepper } from "./PackStepper";
 import { CouponField } from "./CouponField";
+import { GatewayOption } from "./GatewayLogos";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
 import type {
   BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
@@ -312,9 +313,10 @@ export function PlanCheckoutModal({
                     value={gateway}
                     onChange={(v) => setGateway(v as PaymentGateway)}
                     disabled={busy}
+                    styles={{ label: { paddingTop: 10, paddingBottom: 10 } }}
                     data={[
-                      { label: "Razorpay", value: "razorpay" },
-                      { label: "Cashfree", value: "cashfree" },
+                      { value: "razorpay", label: <GatewayOption gateway="razorpay" /> },
+                      { value: "cashfree", label: <GatewayOption gateway="cashfree" /> },
                     ]}
                   />
                 </Stack>
