@@ -231,7 +231,7 @@ export default function Billing() {
         busy={!!confirmPlan && subscribing === confirmPlan.slug}
         renewal={renewal}
         onClose={() => setConfirmPlan(null)}
-        onConfirm={(plan, selection, gateway) => { setConfirmPlan(null); subscribe(plan, selection, gateway); }}
+        onConfirm={(plan, selection, gateway, phone) => { setConfirmPlan(null); subscribe(plan, selection, gateway, phone); }}
       />
 
       <AddonCheckoutModal
@@ -241,7 +241,7 @@ export default function Billing() {
         onCoupon={setAddonCoupon}
         busy={!!confirmAddon && buying === confirmAddon._id}
         onClose={() => setConfirmAddon(null)}
-        onConfirm={(pack, packs, gateway) => { setConfirmAddon(null); buyAddon(pack, packs, gateway); }}
+        onConfirm={(pack, packs, gateway, phone) => { setConfirmAddon(null); buyAddon(pack, packs, gateway, phone); }}
       />
 
       <CheckoutOutcome

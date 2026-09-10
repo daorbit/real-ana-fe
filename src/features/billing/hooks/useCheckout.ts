@@ -108,6 +108,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     plan: Plan,
     selection: AddonSelection = {},
     gateway: PaymentGateway = "razorpay",
+    phone?: string,
   ) => {
     if (!workspaceId) return;
     trace(user?.id, "subscribe_plan_clicked", "billing", plan.slug);
@@ -124,6 +125,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         couponCode: planCoupon?.coupon?.code,
         currency,
         gateway,
+        ...(phone ? { phone } : {}),
         ...(chosen.length ? { addons: chosen } : {}),
       }).unwrap();
 
@@ -197,6 +199,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     pack: AddonPack,
     packs: number,
     gateway: PaymentGateway = "razorpay",
+    phone?: string,
   ) => {
     if (!workspaceId) return;
     trace(user?.id, "buy_addon_clicked", "billing", pack.slug);
@@ -209,6 +212,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         currency,
         packs,
         gateway,
+        ...(phone ? { phone } : {}),
       }).unwrap();
 
       const onPaid = async () => {

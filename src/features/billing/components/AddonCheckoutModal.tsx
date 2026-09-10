@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import {
-  Modal, Text, Group, Button, Stack, Divider, ThemeIcon, SegmentedControl,
+  Modal, Text, Group, Button, Stack, Divider, ThemeIcon, SegmentedControl, TextInput,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, Tag } from "lucide-react";
+import { ShoppingCart, Tag, Phone } from "lucide-react";
+import { useAuth } from "@/features/auth/context";
 import { PackIcon, creditType } from "../lib/credits";
 import { MIN_CHARGE } from "../lib/constants";
 import { PackStepper } from "./PackStepper";
@@ -33,11 +34,18 @@ export function AddonCheckoutModal({
   onCoupon: (result: CouponCheckResult | null) => void;
   busy: boolean;
   onClose: () => void;
-  onConfirm: (pack: AddonPack, packs: number, gateway: PaymentGateway) => void;
+  onConfirm: (
+    pack: AddonPack,
+    packs: number,
+    gateway: PaymentGateway,
+    phone?: string,
+  ) => void;
 }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [packs, setPacks] = useState(1);
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
+  const [phone, setPhone] = useState(user?.mobile ?? "");
 
   useEffect(() => {
     if (pack) setPacks(1);
@@ -155,6 +163,21 @@ export function AddonCheckoutModal({
               { value: "cashfree", label: <GatewayOption gateway="cashfree" /> },
             ]}
           />
+          {gateway === "cashfree" && (
+            <TextInput
+              mt={6}
+              label={t("billing.mobileForReceipt", "Mobile number")}
+              description={t(
+                "billing.mobileCashfreeHint",
+                "Cashfree sends the payment receipt here.",
+              )}
+              placeholder="9876543210"
+              leftSection={<Phone size={15} />}
+              value={phone}
+              onChange={(e) => setPhone(e.currentTarget.value)}
+              disabled={busy}
+            />
+          )}
         </Stack>
 
         <Group justify="flex-end">
@@ -163,7 +186,13 @@ export function AddonCheckoutModal({
             color="emerald"
             leftSection={<ShoppingCart size={15} />}
             loading={busy}
-            onClick={() => onConfirm(pack, packs, gateway)}
+            disabled={
+              gateway === "cashfree" &&
+              phone.replace(/\D/g, "").replace(/^(0|91)(?=\d{10}$)/, "").length !== 10
+            }
+            onClick={() =>
+              onConfirm(pack, packs, gateway, gateway === "cashfree" ? phone : undefined)
+            }
           >
             {t("billing.payAmount", { amount: money(chargeable) })}
           </Button>

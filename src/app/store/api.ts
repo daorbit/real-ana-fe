@@ -1673,6 +1673,8 @@ export const api = createApi({
         currency: Currency;
         /** Which gateway to check out with. Defaults to Razorpay server-side. */
         gateway?: PaymentGateway;
+        /** A 10-digit mobile, required by Cashfree when the profile has none. */
+        phone?: string;
         /** Packs to buy in the same checkout. Priced server-side from the catalogue. */
         addons?: { slug: string; packs: number }[];
       }
@@ -1703,13 +1705,14 @@ export const api = createApi({
         currency: Currency;
         packs?: number;
         gateway?: PaymentGateway;
+        phone?: string;
       }
     >({
       // Credits land on one workspace's subscription, so the purchase names it.
-      query: ({ slug, workspaceId, couponCode, currency, packs, gateway }) => ({
+      query: ({ slug, workspaceId, couponCode, currency, packs, gateway, phone }) => ({
         url: `/api/billing/addons/${slug}/purchase`,
         method: "POST",
-        body: { workspaceId, couponCode, currency, packs, gateway },
+        body: { workspaceId, couponCode, currency, packs, gateway, phone },
       }),
     }),
 

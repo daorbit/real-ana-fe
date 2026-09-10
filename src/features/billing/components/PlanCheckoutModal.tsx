@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   Modal, Text, Group, Button, Stack, Divider, Badge, ThemeIcon, Card,
-  SimpleGrid, Grid, SegmentedControl,
+  SimpleGrid, Grid, SegmentedControl, TextInput,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { CreditCard, Tag } from "lucide-react";
+import { CreditCard, Tag, Phone } from "lucide-react";
+import { useAuth } from "@/features/auth/context";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { PackIcon, creditType } from "../lib/credits";
 import { MIN_CHARGE } from "../lib/constants";
@@ -42,11 +43,19 @@ export function PlanCheckoutModal({
    */
   renewal: { newPeriodEnd: string } | null;
   onClose: () => void;
-  onConfirm: (plan: Plan, selection: AddonSelection, gateway: PaymentGateway) => void;
+  onConfirm: (
+    plan: Plan,
+    selection: AddonSelection,
+    gateway: PaymentGateway,
+    phone?: string,
+  ) => void;
 }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [selection, setSelection] = useState<AddonSelection>({});
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
+  // Only Cashfree needs a mobile up front; prefill from the profile.
+  const [phone, setPhone] = useState(user?.mobile ?? "");
 
   // Reset when a different plan is picked, so quantities chosen for one plan
   // don't silently carry into the next dialog.
@@ -319,6 +328,21 @@ export function PlanCheckoutModal({
                       { value: "cashfree", label: <GatewayOption gateway="cashfree" /> },
                     ]}
                   />
+                  {gateway === "cashfree" && (
+                    <TextInput
+                      mt={6}
+                      label={t("billing.mobileForReceipt", "Mobile number")}
+                      description={t(
+                        "billing.mobileCashfreeHint",
+                        "Cashfree sends the payment receipt here.",
+                      )}
+                      placeholder="9876543210"
+                      leftSection={<Phone size={15} />}
+                      value={phone}
+                      onChange={(e) => setPhone(e.currentTarget.value)}
+                      disabled={busy}
+                    />
+                  )}
                 </Stack>
               )}
 
@@ -328,7 +352,8 @@ export function PlanCheckoutModal({
                 color="emerald"
                 leftSection={<CreditCard size={16} />}
                 loading={busy}
-                onClick={() => onConfirm(plan, selection, gateway)}
+                disabled={gateway === "cashfree" && phone.replace(/\D/g, "").replace(/^(0|91)(?=\d{10}$)/, "").length !== 10}
+                onClick={() => onConfirm(plan, selection, gateway, gateway === "cashfree" ? phone : undefined)}
               >
                 {noCharge ? t("billing.confirm") : t("billing.payAmount", { amount: money(chargeable) })}
               </Button>
