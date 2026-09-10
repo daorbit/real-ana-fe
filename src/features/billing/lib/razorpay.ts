@@ -1,7 +1,4 @@
-/**
- * Loads Razorpay's Checkout script on demand rather than as a static tag —
- * only the billing page ever needs it, so every other page skips the request.
- */
+
 let loading: Promise<void> | null = null;
 
 export function loadRazorpayCheckout(): Promise<void> {
@@ -18,14 +15,12 @@ export function loadRazorpayCheckout(): Promise<void> {
   return loading;
 }
 
-/** Minimal shape of the options Razorpay Checkout accepts, typed for our usage. */
 export type RazorpayCheckoutOptions = {
   key: string;
   amount?: number;
   currency?: string;
   name: string;
   description?: string;
-  /** Absolute URL — Razorpay falls back to the first letter of `name` without it. */
   image?: string;
   order_id?: string;
   subscription_id?: string;
