@@ -9,9 +9,10 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "@/features/billing/lib/razorpay";
+import { openCashfreeCheckout } from "@/features/billing/lib/cashfree";
 import { CHECKOUT_LOGO } from "../lib/constants";
 import type {
-  BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection,
+  BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
 } from "@/shared/types";
 
 /** What the page shows after a purchase lands. */
@@ -64,7 +65,11 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     confetti({ particleCount: 60, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors, angle: 120, decay: 0.9 });
   };
 
-  const subscribe = async (plan: Plan, selection: AddonSelection = {}) => {
+  const subscribe = async (
+    plan: Plan,
+    selection: AddonSelection = {},
+    gateway: PaymentGateway = "razorpay",
+  ) => {
     if (!workspaceId) return;
     trace(user?.id, "subscribe_plan_clicked", "billing", plan.slug);
     setSubscribing(plan.slug);
@@ -79,6 +84,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         cycle,
         couponCode: planCoupon?.coupon?.code,
         currency,
+        gateway,
         ...(chosen.length ? { addons: chosen } : {}),
       }).unwrap();
 
@@ -92,9 +98,30 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
       }
 
       const boughtCredits = (started.addons ?? []).map((a) => ({ type: a.type, credits: a.credits }));
+      const onPaid = async () => {
+        await refreshUser();
+        setCelebration({ kind: "plan", planName: plan.name, credits: boughtCredits });
+        fireConfetti();
+      };
+
+      if (started.gateway === "cashfree") {
+        const { dismissed, error } = await openCashfreeCheckout({
+          paymentSessionId: started.paymentSessionId,
+          mode: started.cashfreeMode,
+        });
+        if (error) notify.error(error);
+        // Cashfree's return carries nothing signed — confirm by order status.
+        try {
+          await verifySubscription({ gateway: "cashfree", cashfree_order_id: started.orderId }).unwrap();
+          await onPaid();
+        } catch (e) {
+          if (dismissed) setCancelled(`${plan.name} — ${cycle}`);
+          else notify.error(errMessage(e, t("billing.verifyFailed")));
+        }
+        return;
+      }
 
       let paid = false;
-
       await loadRazorpayCheckout();
       openRazorpayCheckout({
         key: started.razorpayKeyId,
@@ -114,9 +141,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
-            await refreshUser();
-            setCelebration({ kind: "plan", planName: plan.name, credits: boughtCredits });
-            fireConfetti();
+            await onPaid();
           } catch (e) {
             notify.error(errMessage(e, t("billing.verifyFailed")));
           }
@@ -134,28 +159,53 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     }
   };
 
-  const buyAddon = async (pack: AddonPack, packs: number) => {
+  const buyAddon = async (
+    pack: AddonPack,
+    packs: number,
+    gateway: PaymentGateway = "razorpay",
+  ) => {
     if (!workspaceId) return;
     trace(user?.id, "buy_addon_clicked", "billing", pack.slug);
     setBuying(pack._id);
     try {
-      const { orderId, amount, currency: orderCurrency, razorpayKeyId } = await startAddonPurchase({
+      const started = await startAddonPurchase({
         slug: pack.slug,
         workspaceId,
         couponCode: addonCoupon?.coupon?.code,
         currency,
         packs,
+        gateway,
       }).unwrap();
 
-      // Same success/dismiss ambiguity as the plan flow above.
-      let paid = false;
+      const onPaid = async () => {
+        await refreshUser();
+        setCelebration({ kind: "addon", pack, packs });
+        fireConfetti();
+      };
 
+      if (started.gateway === "cashfree") {
+        const { dismissed, error } = await openCashfreeCheckout({
+          paymentSessionId: started.paymentSessionId,
+          mode: started.cashfreeMode,
+        });
+        if (error) notify.error(error);
+        try {
+          await verifyAddonPurchase({ gateway: "cashfree", cashfree_order_id: started.orderId }).unwrap();
+          await onPaid();
+        } catch (e) {
+          if (dismissed) setCancelled(pack.name);
+          else notify.error(errMessage(e, t("billing.verifyFailed")));
+        }
+        return;
+      }
+
+      let paid = false;
       await loadRazorpayCheckout();
       openRazorpayCheckout({
-        key: razorpayKeyId,
-        amount,
-        currency: orderCurrency,
-        order_id: orderId,
+        key: started.razorpayKeyId,
+        amount: started.amount,
+        currency: started.currency,
+        order_id: started.orderId,
         name: "Quantalog",
         description: packs > 1 ? `${pack.name} × ${packs}` : pack.name,
         image: CHECKOUT_LOGO,
@@ -169,9 +219,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
             }).unwrap();
-            await refreshUser();
-            setCelebration({ kind: "addon", pack, packs });
-            fireConfetti();
+            await onPaid();
           } catch (e) {
             notify.error(errMessage(e, t("billing.verifyFailed")));
           }

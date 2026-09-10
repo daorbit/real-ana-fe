@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Modal, Text, Group, Button, Stack, Divider, Badge, ThemeIcon, Card,
-  SimpleGrid, Grid,
+  SimpleGrid, Grid, SegmentedControl,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { CreditCard, Tag } from "lucide-react";
@@ -12,7 +12,7 @@ import { PackStepper } from "./PackStepper";
 import { CouponField } from "./CouponField";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
 import type {
-  BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection,
+  BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
 } from "@/shared/types";
 
 export function PlanCheckoutModal({
@@ -41,10 +41,11 @@ export function PlanCheckoutModal({
    */
   renewal: { newPeriodEnd: string } | null;
   onClose: () => void;
-  onConfirm: (plan: Plan, selection: AddonSelection) => void;
+  onConfirm: (plan: Plan, selection: AddonSelection, gateway: PaymentGateway) => void;
 }) {
   const { t } = useTranslation();
   const [selection, setSelection] = useState<AddonSelection>({});
+  const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
 
   // Reset when a different plan is picked, so quantities chosen for one plan
   // don't silently carry into the next dialog.
@@ -301,13 +302,31 @@ export function PlanCheckoutModal({
                 </Card>
               )}
 
+              {!noCharge && (
+                <Stack gap={4}>
+                  <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+                    {t("billing.payWith", "Pay with")}
+                  </Text>
+                  <SegmentedControl
+                    fullWidth
+                    value={gateway}
+                    onChange={(v) => setGateway(v as PaymentGateway)}
+                    disabled={busy}
+                    data={[
+                      { label: "Razorpay", value: "razorpay" },
+                      { label: "Cashfree", value: "cashfree" },
+                    ]}
+                  />
+                </Stack>
+              )}
+
               <Button
                 fullWidth
                 size="md"
                 color="emerald"
                 leftSection={<CreditCard size={16} />}
                 loading={busy}
-                onClick={() => onConfirm(plan, selection)}
+                onClick={() => onConfirm(plan, selection, gateway)}
               >
                 {noCharge ? t("billing.confirm") : t("billing.payAmount", { amount: money(chargeable) })}
               </Button>

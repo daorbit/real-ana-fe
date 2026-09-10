@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Modal, Text, Group, Button, Stack, Divider, ThemeIcon,
+  Modal, Text, Group, Button, Stack, Divider, ThemeIcon, SegmentedControl,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { ShoppingCart, Tag } from "lucide-react";
@@ -9,7 +9,7 @@ import { MIN_CHARGE } from "../lib/constants";
 import { PackStepper } from "./PackStepper";
 import { CouponField } from "./CouponField";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
-import type { AddonPack, CouponCheckResult, Currency } from "@/shared/types";
+import type { AddonPack, CouponCheckResult, Currency, PaymentGateway } from "@/shared/types";
 
 /**
  * Buying one credit pack, in whatever quantity.
@@ -32,10 +32,11 @@ export function AddonCheckoutModal({
   onCoupon: (result: CouponCheckResult | null) => void;
   busy: boolean;
   onClose: () => void;
-  onConfirm: (pack: AddonPack, packs: number) => void;
+  onConfirm: (pack: AddonPack, packs: number, gateway: PaymentGateway) => void;
 }) {
   const { t } = useTranslation();
   const [packs, setPacks] = useState(1);
+  const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
 
   useEffect(() => {
     if (pack) setPacks(1);
@@ -138,13 +139,29 @@ export function AddonCheckoutModal({
           {t("billing.addonOneTime")}
         </Text>
 
+        <Stack gap={4}>
+          <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+            {t("billing.payWith", "Pay with")}
+          </Text>
+          <SegmentedControl
+            fullWidth
+            value={gateway}
+            onChange={(v) => setGateway(v as PaymentGateway)}
+            disabled={busy}
+            data={[
+              { label: "Razorpay", value: "razorpay" },
+              { label: "Cashfree", value: "cashfree" },
+            ]}
+          />
+        </Stack>
+
         <Group justify="flex-end">
           <Button variant="subtle" onClick={onClose} disabled={busy}>{t("common.cancel")}</Button>
           <Button
             color="emerald"
             leftSection={<ShoppingCart size={15} />}
             loading={busy}
-            onClick={() => onConfirm(pack, packs)}
+            onClick={() => onConfirm(pack, packs, gateway)}
           >
             {t("billing.payAmount", { amount: money(chargeable) })}
           </Button>

@@ -22,7 +22,7 @@ import type {
   PostFrequency, PostMode, PostProvider,
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
-  StartSubscriptionResponse, StartAddonPurchaseResponse,
+  StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
   Coupon, CouponCheckResult, Invoice, QuotaSummary,
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
@@ -1671,6 +1671,8 @@ export const api = createApi({
         cycle: BillingCycle;
         couponCode?: string;
         currency: Currency;
+        /** Which gateway to check out with. Defaults to Razorpay server-side. */
+        gateway?: PaymentGateway;
         /** Packs to buy in the same checkout. Priced server-side from the catalogue. */
         addons?: { slug: string; packs: number }[];
       }
@@ -1686,10 +1688,7 @@ export const api = createApi({
           : [],
     }),
 
-    verifySubscription: build.mutation<
-      { ok: true },
-      { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
-    >({
+    verifySubscription: build.mutation<{ ok: true }, VerifyPurchaseBody>({
       query: (body) => ({ url: "/api/billing/subscribe/verify", method: "POST", body }),
 
       invalidatesTags: ["Billing", "Usage", "Workspace"],
@@ -1697,20 +1696,24 @@ export const api = createApi({
 
     startAddonPurchase: build.mutation<
       StartAddonPurchaseResponse,
-      { slug: string; workspaceId: string; couponCode?: string; currency: Currency; packs?: number }
+      {
+        slug: string;
+        workspaceId: string;
+        couponCode?: string;
+        currency: Currency;
+        packs?: number;
+        gateway?: PaymentGateway;
+      }
     >({
       // Credits land on one workspace's subscription, so the purchase names it.
-      query: ({ slug, workspaceId, couponCode, currency, packs }) => ({
+      query: ({ slug, workspaceId, couponCode, currency, packs, gateway }) => ({
         url: `/api/billing/addons/${slug}/purchase`,
         method: "POST",
-        body: { workspaceId, couponCode, currency, packs },
+        body: { workspaceId, couponCode, currency, packs, gateway },
       }),
     }),
 
-    verifyAddonPurchase: build.mutation<
-      { ok: true },
-      { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }
-    >({
+    verifyAddonPurchase: build.mutation<{ ok: true }, VerifyPurchaseBody>({
       query: (body) => ({ url: "/api/billing/addons/verify", method: "POST", body }),
       invalidatesTags: ["Billing", "Usage"],
     }),

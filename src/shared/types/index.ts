@@ -648,31 +648,57 @@ export type WorkspaceBilling = {
   billing: QuotaSummary;
 };
 
+/** Which payment gateway a checkout runs through. The user picks per purchase. */
+export type PaymentGateway = "razorpay" | "cashfree";
+
 /**
- * A ₹0 plan (Free) is assigned server-side with no order — `free: true` and
- * nothing else. A paid plan returns a Razorpay Order to check out with, same
- * shape as `StartAddonPurchaseResponse`.
+ * The gateway-specific half of a start-checkout response.
+ *
+ * Razorpay returns an Order the client checks out with its own key. Cashfree
+ * returns a payment session the SDK opens, plus which environment (`mode`) the
+ * SDK must be told to run in.
  */
-export type StartSubscriptionResponse =
-  | { free: true; plan: { name: string; cycle: BillingCycle } }
+type GatewayOrder =
   | {
-      free?: false;
+      gateway: "razorpay";
       orderId: string;
       amount: number;
       currency: string;
       razorpayKeyId: string;
+    }
+  | {
+      gateway: "cashfree";
+      orderId: string;
+      paymentSessionId: string;
+      cashfreeMode: "production" | "sandbox";
+    };
+
+/**
+ * A ₹0 plan (Free) is assigned server-side with no order — `free: true` and
+ * nothing else. A paid plan returns a gateway order to check out with.
+ */
+export type StartSubscriptionResponse =
+  | { free: true; plan: { name: string; cycle: BillingCycle } }
+  | (GatewayOrder & {
+      free?: false;
       plan: { name: string; cycle: BillingCycle };
       /** Packs bought in the same checkout, priced and confirmed server-side. */
       addons?: { name: string; type: AddonType; packs: number; credits: number }[];
-    };
+    });
 
-export type StartAddonPurchaseResponse = {
-  orderId: string;
-  amount: number;
-  currency: string;
-  razorpayKeyId: string;
+export type StartAddonPurchaseResponse = GatewayOrder & {
   addon: { name: string; type: AddonType; quantity: number; packs: number; credits: number };
 };
+
+/** What the client sends to confirm a purchase — either gateway. */
+export type VerifyPurchaseBody =
+  | {
+      gateway?: "razorpay";
+      razorpay_payment_id: string;
+      razorpay_order_id: string;
+      razorpay_signature: string;
+    }
+  | { gateway: "cashfree"; cashfree_order_id: string };
 
 /** How many of one pack the user has chosen, keyed by pack slug. */
 export type AddonSelection = Record<string, number>;
