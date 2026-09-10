@@ -1,5 +1,12 @@
 import { useCallback, useRef, useState } from "react";
-import { useAskOrbitMutation, useGetOrbitStatusQuery } from "@/app/store";
+import {
+  useAskOrbitMutation,
+  useGetOrbitStatusQuery,
+  useGetOrbitConversationsQuery,
+  useLazyGetOrbitConversationQuery,
+  useDeleteOrbitConversationMutation,
+  useRenameOrbitConversationMutation,
+} from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
@@ -8,12 +15,18 @@ import { useWorkspace } from "@/features/workspace/context";
 /**
  * The Orbit conversation.
  *
- * Held in React state, not on the server and not in storage. A support chat is
- * a thing you have while stuck and do not come back to, and keeping it in
- * memory means there is no transcript to retain, expire or hand over — the
- * privacy question never arises because the data never lands anywhere.
+ * The live thread is React state; the server keeps a copy. The state is still
+ * what the panel renders and what is posted with the next question, so the
+ * chat works unchanged when saving fails — history is a record, not the source
+ * of truth, and a storage problem costs a saved thread rather than an answer.
  *
- * The consequence, which the UI should not hide: a refresh loses the thread.
+ * What it buys is the thing memory-only could not do: a refresh, or coming back
+ * tomorrow, no longer loses the thread, and what people actually ask becomes
+ * reviewable — the best docs backlog there is.
+ *
+ * Scoped to the workspace, because Orbit is metered per workspace: a colleague
+ * who can read the analytics can read the Orbit history, which is the same rule
+ * as everything else in the product.
  *
  * Shared by the floating window and the Help & support page so the two are the
  * same conversation while the tab is open — opening the page after asking
@@ -85,12 +98,28 @@ export function useOrbitChat() {
   const [input, setInput] = useState("");
   const [ask, { isLoading: thinking }] = useAskOrbitMutation();
 
+  /**
+   * The saved thread the live conversation belongs to.
+   *
+   * Null until the first answer comes back with an id, or until a past thread
+   * is opened. A ref as well as state: `send` needs the current value without
+   * being rebuilt, the same reason the transcript is one.
+   */
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const conversationRef = useRef<string | null>(null);
+
   // Orbit is metered per workspace, so both calls are scoped to the active one
   // and there is nothing to ask until it is known.
   const { active } = useWorkspace();
   const { user } = useAuth();
   const workspaceId = active?._id ?? "";
   const { data: status } = useGetOrbitStatusQuery(workspaceId, { skip: !workspaceId });
+
+  const { data: saved } = useGetOrbitConversationsQuery(workspaceId, { skip: !workspaceId });
+  const [fetchConversation, { isFetching: loadingConversation }] =
+    useLazyGetOrbitConversationQuery();
+  const [removeConversation] = useDeleteOrbitConversationMutation();
+  const [renameConversationMutation] = useRenameOrbitConversationMutation();
 
   // Read once, lazily: `localStorage` is unavailable in some privacy modes, and
   // a throw here would take the whole panel down over a remembered preference.
@@ -162,8 +191,15 @@ export function useOrbitChat() {
           question,
           history,
           model: activeModel,
+          // Absent on the first question: the server starts a thread and tells
+          // us which one it was.
+          conversationId: conversationRef.current ?? undefined,
         }).unwrap();
         setRemaining(answered.remaining);
+        if (answered.conversationId) {
+          conversationRef.current = answered.conversationId;
+          setConversationId(answered.conversationId);
+        }
         setMessages((prev) => {
           const next = [
             ...prev,
@@ -205,11 +241,76 @@ export function useOrbitChat() {
     [ask, input, thinking, activeModel, workspaceId, user?.id],
   );
 
+  /**
+   * Start a new thread.
+   *
+   * Clears the conversation id too, so the next question opens a fresh one on
+   * the server rather than appending to whatever was last on screen. Nothing is
+   * deleted — the previous thread stays in the list.
+   */
   const reset = useCallback(() => {
     setMessages([]);
     setInput("");
     historyRef.current = [];
+    conversationRef.current = null;
+    setConversationId(null);
   }, []);
+
+  /**
+   * Load a saved thread into the panel and continue it.
+   *
+   * A failed turn is restored as a failure, so the thread reads the way it did
+   * when it happened, and stays excluded from the history posted to the model
+   * for the same reason it always was.
+   */
+  const openConversation = useCallback(
+    async (id: string) => {
+      if (!workspaceId) return;
+      try {
+        const convo = await fetchConversation({ workspaceId, conversationId: id }).unwrap();
+        const restored: OrbitMessage[] = convo.messages.map((m) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          failed: m.failed || undefined,
+          suggestions: m.suggestions.length ? m.suggestions : undefined,
+          modelLabel: m.modelLabel,
+        }));
+        setMessages(restored);
+        historyRef.current = restored;
+        conversationRef.current = convo.id;
+        setConversationId(convo.id);
+        setInput("");
+      } catch {
+        // Deleted in another tab, most likely. Leaving the panel on what it was
+        // showing is better than blanking it over a thread that is gone.
+      }
+    },
+    [fetchConversation, workspaceId],
+  );
+
+  /**
+   * Remove a saved thread.
+   *
+   * Clears the panel only when it is the one on screen — deleting a thread from
+   * the list should not wipe the conversation someone is in the middle of.
+   */
+  const removeSaved = useCallback(
+    async (id: string) => {
+      if (!workspaceId) return;
+      await removeConversation({ workspaceId, conversationId: id }).unwrap();
+      if (conversationRef.current === id) reset();
+    },
+    [removeConversation, workspaceId, reset],
+  );
+
+  const renameSaved = useCallback(
+    async (id: string, title: string) => {
+      if (!workspaceId) return;
+      await renameConversationMutation({ workspaceId, conversationId: id, title }).unwrap();
+    },
+    [renameConversationMutation, workspaceId],
+  );
 
   return {
     messages,
@@ -236,5 +337,18 @@ export function useOrbitChat() {
     plan: status?.plan ?? null,
     /** Questions left this cycle. Null until an answer reports it. */
     remaining,
+
+    /**
+     * The workspace's saved threads, newest activity first. Empty while loading
+     * and when there are none — the sidebar renders the same in both cases.
+     */
+    conversations: saved?.conversations ?? [],
+    /** The thread on screen, when it has been saved. Null on an unsaved one. */
+    conversationId,
+    /** True while a past thread is being pulled in, for the sidebar's spinner. */
+    loadingConversation,
+    openConversation,
+    deleteConversation: removeSaved,
+    renameConversation: renameSaved,
   };
 }

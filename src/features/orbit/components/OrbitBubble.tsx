@@ -1,6 +1,7 @@
 import { Paper, Group, Text, ActionIcon, Tooltip, UnstyledButton } from "@mantine/core";
 import { X, RotateCcw } from "lucide-react";
 import { OrbitChat } from "@/features/orbit/components/OrbitChat";
+import { OrbitHistoryMenu } from "@/features/orbit/components/OrbitHistoryMenu";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 // Where `.aurora-wash` lives. Imported here too because the running dialog that
@@ -17,9 +18,10 @@ import "@/shared/ui/RunningDialog.css";
  *
  * The chrome is deliberately thin. At 400px wide, every element in the header
  * is competing with the conversation for the same few hundred pixels, so the
- * header is one line: a mark, a name, and the two controls that matter. "Start
- * over" moved into an overflow menu — it is used once a session at most, and it
- * was costing a permanent slot beside the close button.
+ * header is one line: a mark, a name, and only the controls that have somewhere
+ * to go. Past conversations are a dropdown for the same reason — the sidebar a
+ * full-page assistant would give them does not fit beside a 400px thread, and
+ * it renders nothing at all until something has been saved.
  *
  * Rendered by the app shell, so it is available on every signed-in page and
  * keeps its conversation across navigation.
@@ -59,9 +61,12 @@ export function OrbitBubble() {
             </Group>
 
             <Group gap={0} wrap="nowrap">
-              {/* Only "start over" here. The model picker moved down beside
-                  the input, where it sits next to the thing it affects — in the
-                  header it was a setting nobody would think to look for. */}
+              {/* Past threads. Renders nothing until there is at least one, so
+                  the header stays at two controls for a first-time user. */}
+              <OrbitHistoryMenu chat={chat} />
+
+              {/* "Start over" leaves the current thread rather than deleting
+                  it — it is saved, and the history menu is how you get back. */}
               {chat.started && (
                 <Tooltip label="Start over" withArrow>
                   <ActionIcon

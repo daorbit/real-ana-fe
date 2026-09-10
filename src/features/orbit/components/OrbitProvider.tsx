@@ -7,9 +7,10 @@ import { useOrbitChat } from "@/features/orbit/useOrbitChat";
  *
  * Without this each surface would call the hook and get its own thread: asking
  * something in the bubble, then opening the page to see it properly, would show
- * an empty chat and lose the question. Since the conversation is only ever
- * in-memory, the provider is also the thing that decides how long it lives —
- * mounted at the app shell, so it survives navigation and ends with the tab.
+ * an empty chat and lose the question. The provider decides how long the *live*
+ * thread lives — mounted at the app shell, so it survives navigation and ends
+ * with the tab. The saved copy on the server outlives it, and is what the
+ * history sidebar reads.
  *
  * It also owns whether the bubble is open, so anything else can start a
  * conversation: a future "Ask Orbit about this" beside an error only needs

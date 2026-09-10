@@ -145,7 +145,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -882,9 +882,10 @@ export const api = createApi({
     /**
      * Ask Orbit a question.
      *
-     * The transcript is sent with every question because the server keeps none
-     * — the conversation lives in the browser, so there is nothing stored to
-     * retain or hand over.
+     * The transcript is still sent with every question even though the server
+     * now saves it. Storage is a record, not the source of truth: the request
+     * carries everything the answer needs, so a database problem costs a saved
+     * thread rather than an answer.
      */
     askOrbit: build.mutation<
       {
@@ -907,6 +908,14 @@ export const api = createApi({
          * round trip. Null when the workspace has no subscription row to read.
          */
         remaining: number | null;
+        /**
+         * The saved thread this landed in.
+         *
+         * Sent back with the next question to continue the same conversation.
+         * Null when the server could not store it, which is not an error — the
+         * chat carries on in memory exactly as it did before history existed.
+         */
+        conversationId: string | null;
       },
       {
         workspaceId: string;
@@ -914,6 +923,8 @@ export const api = createApi({
         history: { role: "user" | "assistant"; content: string }[];
         /** Preferred model. The server treats an unknown id as "no preference". */
         model?: string;
+        /** The thread to continue. Omitted on the first question of a new one. */
+        conversationId?: string;
       }
     >({
       query: ({ workspaceId, ...body }) => ({
@@ -923,8 +934,87 @@ export const api = createApi({
       }),
       // An answered question spends quota, so anything showing a remaining
       // count is now wrong. Invalidating here is what keeps the Billing meters
-      // honest without the chat panel knowing they exist.
-      invalidatesTags: ["Usage"],
+      // honest without the chat panel knowing they exist. The conversation list
+      // moves too — a new thread appears, an existing one changes position.
+      invalidatesTags: ["Usage", "OrbitConversation"],
+    }),
+
+    /**
+     * The workspace's saved Orbit conversations, most recently active first.
+     *
+     * Per workspace, not per person: Orbit is metered against the workspace, so
+     * the transcript belongs to what paid for it and a colleague who can read
+     * the analytics can read the history.
+     */
+    getOrbitConversations: build.query<
+      {
+        conversations: {
+          id: string;
+          title: string;
+          messageCount: number;
+          lastMessageAt: string;
+          lastModelLabel: string;
+          createdAt: string;
+          /** Who started it, so the list can attribute a colleague's thread. */
+          userId: string | null;
+        }[];
+      },
+      string
+    >({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/orbit/conversations`,
+      providesTags: ["OrbitConversation"],
+    }),
+
+    /** One saved conversation and its turns, for restoring it into the panel. */
+    getOrbitConversation: build.query<
+      {
+        id: string;
+        title: string;
+        messageCount: number;
+        lastMessageAt: string;
+        createdAt: string;
+        messages: {
+          id: string;
+          seq: number;
+          role: "user" | "assistant";
+          content: string;
+          suggestions: string[];
+          /** True when the turn is a stored error rather than an answer. */
+          failed: boolean;
+          modelLabel?: string;
+          createdAt: string;
+        }[];
+      },
+      { workspaceId: string; conversationId: string }
+    >({
+      query: ({ workspaceId, conversationId }) =>
+        `/api/workspaces/${workspaceId}/orbit/conversations/${conversationId}`,
+      providesTags: ["OrbitConversation"],
+    }),
+
+    /** Rename a thread — the generated title is only ever the first question. */
+    renameOrbitConversation: build.mutation<
+      { ok: true },
+      { workspaceId: string; conversationId: string; title: string }
+    >({
+      query: ({ workspaceId, conversationId, title }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/conversations/${conversationId}`,
+        method: "PATCH",
+        body: { title },
+      }),
+      invalidatesTags: ["OrbitConversation"],
+    }),
+
+    /** Remove a thread from the list. Soft on the server. */
+    deleteOrbitConversation: build.mutation<
+      { ok: true },
+      { workspaceId: string; conversationId: string }
+    >({
+      query: ({ workspaceId, conversationId }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/conversations/${conversationId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["OrbitConversation"],
     }),
 
     getContactMessages: build.query<
@@ -1891,6 +1981,10 @@ export const {
   useSendSupportMessageMutation,
   useGetOrbitStatusQuery,
   useAskOrbitMutation,
+  useGetOrbitConversationsQuery,
+  useLazyGetOrbitConversationQuery,
+  useRenameOrbitConversationMutation,
+  useDeleteOrbitConversationMutation,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,
