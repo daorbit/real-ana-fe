@@ -32,11 +32,12 @@ export type RazorpayCheckoutOptions = {
   prefill?: { name?: string; email?: string };
   theme?: { color?: string };
   handler: (response: Record<string, string>) => void;
-  modal?: { ondismiss?: () => void };
+  modal?: { ondismiss?: () => void; backdropclose?: boolean; escape?: boolean };
+  redirect?: boolean;
 };
 
 export function openRazorpayCheckout(options: RazorpayCheckoutOptions) {
   type RazorpayCtor = new (opts: RazorpayCheckoutOptions) => { open: () => void };
   const Razorpay = (window as unknown as { Razorpay: RazorpayCtor }).Razorpay;
-  new Razorpay(options).open();
+  new Razorpay({ redirect: false, ...options }).open();
 }
