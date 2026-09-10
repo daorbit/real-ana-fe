@@ -4,12 +4,13 @@ import confetti from "canvas-confetti";
 import {
   useStartSubscriptionMutation, useVerifySubscriptionMutation,
   useStartAddonPurchaseMutation, useVerifyAddonPurchaseMutation,
+  useConfirmCashfreeMutation,
 } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "@/features/billing/lib/razorpay";
-import { startCashfreeRedirect } from "@/features/billing/lib/cashfree";
+import { openCashfreeCheckout } from "@/features/billing/lib/cashfree";
 import { CHECKOUT_LOGO } from "../lib/constants";
 import type {
   BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
@@ -43,6 +44,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
   const [verifySubscription] = useVerifySubscriptionMutation();
   const [startAddonPurchase] = useStartAddonPurchaseMutation();
   const [verifyAddonPurchase] = useVerifyAddonPurchaseMutation();
+  const [confirmCashfree] = useConfirmCashfreeMutation();
 
   /** The slug/id being paid for, so only that card shows a spinner. */
   const [subscribing, setSubscribing] = useState<string | null>(null);
@@ -66,12 +68,13 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
   };
 
   /**
-   * Confirm a Cashfree checkout after its redirect back to `/billing`.
+   * Safety net for Cashfree payment methods that force a full-page redirect
+   * despite the `_modal` flow (some netbanking, wallets).
    *
-   * Cashfree returns the browser with `?cf_order_id=…`; there is no signed
-   * payload, so confirmation is the server reading the order status. Runs once
-   * per param value — `handled` guards a re-run on re-render — and clears the
-   * query string so a refresh does not re-confirm.
+   * Those return to `/app/billing?cf_order_id=…`; the in-page flow above never
+   * gets to confirm, so this does it on load. Runs once per id, then strips the
+   * param so a refresh does not re-confirm. A 409 here means the payment did not
+   * complete — quietly clear it rather than shouting an error.
    */
   const handledReturn = useRef<string | null>(null);
   useEffect(() => {
@@ -82,19 +85,19 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
 
     (async () => {
       try {
-        // A plan and an addon order are told apart server-side by which
-        // collection holds the id, so trying the plan verify first and falling
-        // back covers both without the client needing to remember which it was.
-        try {
-          await verifySubscription({ gateway: "cashfree", cashfree_order_id: orderId }).unwrap();
-        } catch {
-          await verifyAddonPurchase({ gateway: "cashfree", cashfree_order_id: orderId }).unwrap();
-        }
+        await confirmCashfree({ cf_order_id: orderId }).unwrap();
         await refreshUser();
-        setCelebration({ kind: "plan", planName: t("billing.yourPlan", "your plan"), credits: [] });
+        setCelebration({
+          kind: "plan",
+          planName: t("billing.purchaseComplete", "your purchase"),
+          credits: [],
+        });
         fireConfetti();
       } catch (e) {
-        notify.error(errMessage(e, t("billing.verifyFailed")));
+        const status = (e as { status?: number }).status;
+        if (status !== 409 && status !== 404) {
+          notify.error(errMessage(e, t("billing.verifyFailed")));
+        }
       } finally {
         params.delete("cf_order_id");
         const qs = params.toString();
@@ -103,6 +106,33 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+ 
+  const runCashfree = async (
+    paymentSessionId: string,
+    mode: "production" | "sandbox",
+    orderId: string,
+    opts: { onPaid: () => Promise<void>; cancelledLabel: string },
+  ) => {
+    const outcome = await openCashfreeCheckout({ paymentSessionId, mode });
+    if (outcome.status === "error") {
+      notify.error(outcome.message);
+      return;
+    }
+
+    try {
+      await confirmCashfree({ cf_order_id: orderId }).unwrap();
+      await opts.onPaid();
+    } catch (e) {
+      const status = (e as { status?: number }).status;
+      if (status === 409) {
+        // "payment not completed" — the customer closed the sheet.
+        setCancelled(opts.cancelledLabel);
+      } else {
+        notify.error(errMessage(e, t("billing.verifyFailed")));
+      }
+    }
+  };
 
   const subscribe = async (
     plan: Plan,
@@ -146,14 +176,10 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
       };
 
       if (started.gateway === "cashfree") {
-        // Full-page redirect to Cashfree; the billing page confirms on return
-        // via the `cf_order_id` query param. Only reached again here if the SDK
-        // refuses to start.
-        const { error } = await startCashfreeRedirect({
-          paymentSessionId: started.paymentSessionId,
-          mode: started.cashfreeMode,
+        await runCashfree(started.paymentSessionId, started.cashfreeMode, started.orderId, {
+          onPaid,
+          cancelledLabel: `${plan.name} — ${cycle}`,
         });
-        notify.error(error);
         return;
       }
 
@@ -222,11 +248,10 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
       };
 
       if (started.gateway === "cashfree") {
-        const { error } = await startCashfreeRedirect({
-          paymentSessionId: started.paymentSessionId,
-          mode: started.cashfreeMode,
+        await runCashfree(started.paymentSessionId, started.cashfreeMode, started.orderId, {
+          onPaid,
+          cancelledLabel: packs > 1 ? `${pack.name} × ${packs}` : pack.name,
         });
-        notify.error(error);
         return;
       }
 

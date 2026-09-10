@@ -10,7 +10,13 @@ interface CashfreeInstance {
   checkout(opts: {
     paymentSessionId: string;
     redirectTarget?: "_self" | "_blank" | "_modal";
-  }): Promise<{ error?: { message: string }; paymentDetails?: { paymentMessage: string } }>;
+  }): Promise<{
+    error?: { message: string };
+    /** Present when the customer reached a terminal payment state in the modal. */
+    paymentDetails?: { paymentMessage: string };
+    /** Present when the customer closed the modal without completing. */
+    redirect?: boolean;
+  }>;
 }
 
 type CashfreeFactory = (opts: { mode: CashfreeMode }) => CashfreeInstance;
@@ -29,22 +35,31 @@ export function loadCashfreeCheckout(): Promise<void> {
   return loading;
 }
 
+export type CashfreeCheckoutOutcome =
+  /** The customer reached a terminal payment state; confirm by order id. */
+  | { status: "completed" }
+  /** The customer closed the sheet without paying. */
+  | { status: "dismissed" }
+  /** The SDK refused to open — bad or expired session. */
+  | { status: "error"; message: string };
+
 /**
- * Send the browser to Cashfree's hosted checkout.
+ * Open Cashfree's hosted checkout in a modal over the billing page.
  *
- * A full-page redirect (`_self`), not a modal: the modal flow silently falls
- * back to a redirect for UPI and some cards, and the `checkout()` promise then
- * never resolves, hanging the page. The server set a `return_url` back to
- * `/billing?cf_order_id=…`; the billing page reads that on load and confirms.
+ * `_modal` and no `return_url` on the order: the modal then resolves in-page
+ * for card and UPI instead of navigating away, and `checkout()`'s promise
+ * settles when the sheet closes. There is no signed payload in the result — the
+ * caller confirms the outcome with a server-to-server order-status read.
  *
- * This call does not return in the success case — navigation has already
- * happened. It only throws (and returns) if the SDK rejects the session
- * outright, e.g. an expired or malformed `paymentSessionId`.
+ * The v3 SDK reports a completed payment and a dismissal the same way (a
+ * resolved promise with no `error`), so this only distinguishes an outright SDK
+ * failure here; "completed vs dismissed" is settled by the follow-up status
+ * check.
  */
-export async function startCashfreeRedirect(params: {
+export async function openCashfreeCheckout(params: {
   paymentSessionId: string;
   mode: CashfreeMode;
-}): Promise<{ error: string }> {
+}): Promise<CashfreeCheckoutOutcome> {
   await loadCashfreeCheckout();
 
   const factory = (window as unknown as { Cashfree: CashfreeFactory }).Cashfree;
@@ -53,10 +68,11 @@ export async function startCashfreeRedirect(params: {
   try {
     const result = await cashfree.checkout({
       paymentSessionId: params.paymentSessionId,
-      redirectTarget: "_self",
+      redirectTarget: "_modal",
     });
-    return { error: result?.error?.message ?? "Checkout did not start" };
+    if (result?.error) return { status: "error", message: result.error.message };
+    return { status: "completed" };
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "Checkout did not start" };
+    return { status: "error", message: e instanceof Error ? e.message : "Checkout did not start" };
   }
 }

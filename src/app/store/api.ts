@@ -1720,22 +1720,13 @@ export const api = createApi({
       query: (body) => ({ url: "/api/billing/addons/verify", method: "POST", body }),
       invalidatesTags: ["Billing", "Usage"],
     }),
+ 
+    confirmCashfree: build.mutation<{ ok: true; kind: "plan" | "addon" }, { cf_order_id: string }>({
+      query: (body) => ({ url: "/api/billing/cashfree/confirm", method: "POST", body }),
+      invalidatesTags: ["Billing", "Usage", "Workspace"],
+    }),
 
-    /**
-     * Paid receipts, newest first. Plans and addon packs arrive as one merged
-     * history — the server interleaves them, since that's how someone reading
-     * their own billing thinks about it.
-     *
-     * Tagged "Billing" so completing a purchase pulls the new receipt in
-     * without a manual refresh.
-     */
-    /**
-     * Receipts for one workspace — everything else on the Billing page
-     * describes the workspace being viewed, so the history has to as well.
-     *
-     * Still only the caller's own purchases: a member of a shared workspace
-     * sees what they paid for, not their colleague's card statement.
-     */
+ 
     getInvoices: build.query<Invoice[], { workspaceId: string }>({
       query: ({ workspaceId }) => `/api/billing/invoices?workspaceId=${workspaceId}`,
       providesTags: ["Billing"],
@@ -1999,6 +1990,7 @@ export const {
   useGetAddonPacksQuery,
   useStartSubscriptionMutation,
   useVerifySubscriptionMutation,
+  useConfirmCashfreeMutation,
   useStartAddonPurchaseMutation,
   useVerifyAddonPurchaseMutation,
   useGetAdminPlansQuery,
