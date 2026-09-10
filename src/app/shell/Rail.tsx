@@ -11,15 +11,9 @@ import { SearchButton } from "./SearchButton";
 import { NavGroups } from "./NavGroups";
 import { AccountMenu } from "./AccountMenu";
 import { DemoCard, ImpersonationCard, PendingInviteCard, PlanCard } from "./RailCards";
-import { ADMIN_ITEMS, NAV_GROUPS } from "./navItems";
+import { NAV_GROUPS } from "./navItems";
 
-/**
- * The navigation rail.
- *
- * The same surface as the content panel, so the two read as one app divided by
- * a hairline rather than as two different greys. Flat all the same — no radius,
- * border or shadow of its own; the panel beside it is what carries the frame.
- */
+ 
 export function Rail({
   pathname,
   collapsed,

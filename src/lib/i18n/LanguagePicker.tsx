@@ -5,15 +5,15 @@ import { useTranslation } from "react-i18next";
 import { LANGUAGES, useLang } from "@/lib/i18n/locale";
 
  
-export function LanguagePicker() {
+export function LanguagePicker({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const { t } = useTranslation();
 
   return (
-    <Menu position="right-end" withArrow radius="md" width={220}>
+    <Menu position="right-end" withArrow radius="md" width={220} withinPortal zIndex={400}>
       <Menu.Target>
-        <Tooltip label={t("nav.language")} withArrow>
-          <ActionIcon variant="subtle" color="gray" aria-label={t("nav.language")}>
-            <Languages size={16} />
+        <Tooltip label={t("nav.language")} withArrow position="top">
+          <ActionIcon variant="subtle" color="gray" size={size} aria-label={t("nav.language")}>
+            <Languages size={14} />
           </ActionIcon>
         </Tooltip>
       </Menu.Target>

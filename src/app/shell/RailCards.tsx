@@ -1,8 +1,22 @@
 import { Link } from "react-router-dom";
-import { Badge, Box, Button, Group, Progress, Text, ThemeIcon, UnstyledButton } from "@mantine/core";
-import { ArrowUpRight, Eye, LogOut, PlayCircle, UserPlus } from "lucide-react";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Group,
+  Progress,
+  Text,
+  ThemeIcon,
+  Tooltip,
+  UnstyledButton,
+  useComputedColorScheme,
+  useMantineColorScheme,
+} from "@mantine/core";
+import { ArrowUpRight, Eye, LogOut, Moon, PlayCircle, Sun, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
+import { LanguagePicker } from "@/lib/i18n/LanguagePicker";
 import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
@@ -149,6 +163,44 @@ export function DemoCard({ collapsed, onExit }: { collapsed: boolean; onExit: ()
   );
 }
 
+/**
+ * Theme and language, as bare icons.
+ *
+ * They sit on the plan row rather than in the account menu because they are
+ * flipped often and reached rarely from where the menu puts them. `stopPropagation`
+ * keeps a click on either from also following the row's link to billing.
+ */
+function QuickPrefs() {
+  const { t } = useTranslation();
+  const { setColorScheme } = useMantineColorScheme();
+  const scheme = useComputedColorScheme("light");
+  const dark = scheme === "dark";
+
+  return (
+    <Group
+      gap={2}
+      wrap="nowrap"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
+      <Tooltip label={dark ? t("nav.lightMode") : t("nav.darkMode")} withArrow position="top">
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="sm"
+          aria-label={dark ? t("nav.lightMode") : t("nav.darkMode")}
+          onClick={() => setColorScheme(dark ? "light" : "dark")}
+        >
+          {dark ? <Sun size={14} /> : <Moon size={14} />}
+        </ActionIcon>
+      </Tooltip>
+      <LanguagePicker size="sm" />
+    </Group>
+  );
+}
+
 /** The active workspace's plan — plans are bought per workspace, not per account. */
 export function PlanCard() {
   const billing = useActiveBilling();
@@ -181,11 +233,11 @@ export function PlanCard() {
         style={{ display: "block", width: "100%", padding: "8px 10px", marginBottom: 8 }}
       >
         <Group justify="space-between" wrap="nowrap">
-          <Group gap={6} wrap="nowrap">
+          <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
             <PlanIcon slug={billing.plan.slug} size={16} uid="rail" />
             <Text size="xs" fw={600} truncate>{billing.plan.name} plan</Text>
           </Group>
-          <Badge size="xs" variant="light" color="gray" tt="none">{billing.cycle}</Badge>
+          <QuickPrefs />
         </Group>
 
         {/* No usage bar while there is room: unlabelled, it reads as a stray
