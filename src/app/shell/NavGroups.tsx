@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "./NavLink";
 import type { NavGroup } from "./navItems";
 
- 
+
 export function NavGroups({
   groups,
   pathname,
@@ -63,7 +63,6 @@ export function NavGroups({
               <p className="nav-heading">{t(group.headingKey, group.heading)}</p>
             )}
 
-          
             {group.collapsible ? (
               <Collapse expanded={collapsed || open}>
                 <div>{rows}</div>

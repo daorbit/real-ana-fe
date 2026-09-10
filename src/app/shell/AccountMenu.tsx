@@ -4,13 +4,12 @@ import {
   Badge, Box, Group, Menu, Text, UnstyledButton,
 } from "@mantine/core";
 import {
-  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LogOut, Moon,
-  Settings as SettingsIcon, Sun,
+  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LogOut, Moon, Sun,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
-import { ACCOUNT_ITEMS } from "./navItems";
+import { ADMIN_ITEMS } from "./navItems";
 import { RequestFeatureModal } from "./RequestFeatureModal";
 
 /**
@@ -24,6 +23,7 @@ export function AccountMenu({
   email,
   avatarUrl,
   initials,
+  isAdmin,
   dark,
   onToggleScheme,
   demo,
@@ -37,6 +37,8 @@ export function AccountMenu({
   email: string;
   avatarUrl?: string;
   initials: string;
+  /** Super-admin: shows the platform-administration rows in this menu. */
+  isAdmin: boolean;
   dark: boolean;
   onToggleScheme: () => void;
   demo: boolean;
@@ -119,23 +121,26 @@ export function AccountMenu({
               reads as an account identity block rather than a billing panel. */}
         </Box>
 
-        {/* No divider here: the header carries its own bottom border now, and
-            the two together read as a double rule. */}
-        <Menu.Item component={Link} to="/app/settings" leftSection={<SettingsIcon size={15} />}>
-          {t("nav.settings")}
-        </Menu.Item>
-        {ACCOUNT_ITEMS.map((item) => (
-          <Menu.Item
-            key={item.to}
-            component={Link}
-            to={item.to}
-            leftSection={<item.icon size={15} />}
-          >
-            {t(item.labelKey, item.label)}
-          </Menu.Item>
-        ))}
+        {/* Settings, Members, Branding and the rest moved to the sidebar's
+            Manage / Workspace groups — this menu is now appearance, language
+            and the account itself, plus the admin rows below for super-admins. */}
 
-        <Menu.Divider />
+        {isAdmin && (
+          <>
+            <Menu.Label>{t("nav.groupAdmin", "Admin")}</Menu.Label>
+            {ADMIN_ITEMS.map((item) => (
+              <Menu.Item
+                key={item.to}
+                component={Link}
+                to={item.to}
+                leftSection={<item.icon size={15} />}
+              >
+                {t(item.labelKey, item.label)}
+              </Menu.Item>
+            ))}
+            <Menu.Divider />
+          </>
+        )}
 
         {/* Named rather than a glyph, and stating what it will switch *to* —
             a moon captioned only by its own icon leaves you guessing whether it

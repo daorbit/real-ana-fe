@@ -11,7 +11,7 @@ import { SearchButton } from "./SearchButton";
 import { NavGroups } from "./NavGroups";
 import { AccountMenu } from "./AccountMenu";
 import { DemoCard, ImpersonationCard, PendingInviteCard, PlanCard } from "./RailCards";
-import { ADMIN_GROUP, NAV_GROUPS } from "./navItems";
+import { ADMIN_ITEMS, NAV_GROUPS } from "./navItems";
 
 /**
  * The navigation rail.
@@ -49,7 +49,9 @@ export function Rail({
   const [leaving, setLeaving] = useState(false);
 
   const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
-  const groups = isAdmin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS;
+  // The admin rows live in the account menu now, not the rail — a regular
+  // member should never see navigation they cannot use.
+  const groups = NAV_GROUPS;
 
   const leave = async () => {
     setLeaving(true);
@@ -116,6 +118,7 @@ export function Rail({
           email={user?.email ?? ""}
           avatarUrl={user?.avatarUrl}
           initials={initials}
+          isAdmin={isAdmin}
           dark={dark}
           onToggleScheme={() => setColorScheme(dark ? "light" : "dark")}
           demo={demo}

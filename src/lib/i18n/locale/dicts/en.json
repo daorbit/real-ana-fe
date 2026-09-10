@@ -20,6 +20,7 @@
   "nav": {
     "groupAnalyze": "Analyze",
     "groupManage": "Manage",
+    "groupWorkspace": "Workspace",
     "groupAdmin": "Admin",
     "home": "Home",
     "analytics": "Analytics",
