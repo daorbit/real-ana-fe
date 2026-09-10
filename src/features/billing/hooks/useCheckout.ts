@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import confetti from "canvas-confetti";
 import {
-  useStartSubscriptionMutation, useVerifySubscriptionMutation,
-  useStartAddonPurchaseMutation, useVerifyAddonPurchaseMutation,
-  useConfirmCashfreeMutation,
+  useStartSubscriptionMutation,
+  useStartAddonPurchaseMutation,
+  useConfirmPurchaseMutation,
 } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
@@ -41,10 +41,9 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
   const { user, refreshUser } = useAuth();
 
   const [startSubscription] = useStartSubscriptionMutation();
-  const [verifySubscription] = useVerifySubscriptionMutation();
   const [startAddonPurchase] = useStartAddonPurchaseMutation();
-  const [verifyAddonPurchase] = useVerifyAddonPurchaseMutation();
-  const [confirmCashfree] = useConfirmCashfreeMutation();
+  // One endpoint for every confirmation — plan or addon, Razorpay or Cashfree.
+  const [confirmPurchase] = useConfirmPurchaseMutation();
 
   /** The slug/id being paid for, so only that card shows a spinner. */
   const [subscribing, setSubscribing] = useState<string | null>(null);
@@ -85,7 +84,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
 
     (async () => {
       try {
-        await confirmCashfree({ cf_order_id: orderId }).unwrap();
+        await confirmPurchase({ gateway: "cashfree", cf_order_id: orderId }).unwrap();
         await refreshUser();
         setCelebration({
           kind: "plan",
@@ -121,7 +120,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     }
 
     try {
-      await confirmCashfree({ cf_order_id: orderId }).unwrap();
+      await confirmPurchase({ gateway: "cashfree", cf_order_id: orderId }).unwrap();
       await opts.onPaid();
     } catch (e) {
       const status = (e as { status?: number }).status;
@@ -198,7 +197,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         handler: async (response) => {
           paid = true;
           try {
-            await verifySubscription({
+            await confirmPurchase({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
@@ -270,7 +269,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         handler: async (response) => {
           paid = true;
           try {
-            await verifyAddonPurchase({
+            await confirmPurchase({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,

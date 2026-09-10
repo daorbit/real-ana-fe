@@ -1103,12 +1103,7 @@ export const api = createApi({
       invalidatesTags: ["ApiKey"],
     }),
 
-
-    /**
-     * Run an audit. A mutation rather than a query because it is an expensive,
-     * explicitly triggered action — the server reuses a recent report unless
-     * `refresh` is set, so repeat clicks are cheap without RTK caching them.
-     */
+ 
     analyzeSeo: build.mutation<
       { report: SeoReport; cached: boolean },
       { workspaceId: string; siteId: string; url?: string; refresh?: boolean }
@@ -1239,12 +1234,7 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
     }),
 
-    /**
-     * Your latest audit against every competitor, with the gaps worked out.
-     *
-     * 404s until the site has an audit of its own — there is no baseline to
-     * compare against before then, and the page says so rather than retrying.
-     */
+ 
     getCompetitorAnalysis: build.query<
       SeoCompetitorAnalysis,
       { workspaceId: string; siteId: string }
@@ -1254,12 +1244,7 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "Competitor", id: siteId }],
     }),
 
-    /**
-     * Whether this deployment has the AI briefing configured.
-     *
-     * Asked separately and cheaply so the panel can be absent rather than
-     * present-and-broken where the Cloudflare credentials are unset.
-     */
+ 
     getCompetitorBriefAvailability: build.query<
       { available: boolean },
       { workspaceId: string; siteId: string }
@@ -1268,13 +1253,7 @@ export const api = createApi({
         `/api/workspaces/${workspaceId}/sites/${siteId}/seo/competitors/brief/availability`,
     }),
 
-    /**
-     * The AI reading of one comparison.
-     *
-     * A mutation despite returning a reading rather than changing state: it
-     * costs a model call, so it must fire when the user asks for it and never
-     * on render or refocus the way a query would.
-     */
+ 
     getCompetitorBrief: build.mutation<
       SeoCompetitorBriefResponse,
       { workspaceId: string; siteId: string; competitorId: string }
@@ -1378,12 +1357,7 @@ export const api = createApi({
       invalidatesTags: ["Segment"],
     }),
 
-
-    /**
-     * Markers inside the visible window. Scoped by range so a workspace with
-     * years of deploys doesn't ship them all to draw a 24h chart.
-     */
-    /** Recently active identified users — the entry point into their journey. */
+ 
     getJourneyUsers: build.query<
       {
         users: JourneyUser[];
@@ -1484,14 +1458,7 @@ export const api = createApi({
       invalidatesTags: ["Marker"],
     }),
 
-    /**
-     * How this workspace presents itself on what its own customers see —
-     * payment windows, public forms, notification emails.
-     *
-     * The server has already reconciled it against the plan, so `name` and
-     * `logoUrl` are what will actually be rendered; `editable` says whether
-     * this workspace may change them.
-     */
+ 
     getBranding: build.query<Branding, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/branding`,
       providesTags: (_r, _e, workspaceId) => [{ type: "Branding", id: workspaceId }],
@@ -1509,12 +1476,7 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Branding", id: workspaceId }],
     }),
 
-    /**
-     * A workspace's media library.
-     *
-     * One place files live, so a post image, a brand logo and an avatar all
-     * pick from the same shelf rather than each growing an upload button.
-     */
+ 
     getMedia: build.query<
       MediaListResult,
       { workspaceId: string; kind?: MediaKind; q?: string; page?: number; perPage?: number }
@@ -1665,35 +1627,26 @@ export const api = createApi({
     startSubscription: build.mutation<
       StartSubscriptionResponse,
       {
-        /** Which workspace this plan period is for — plans are bought per workspace. */
+ 
         workspaceId: string;
         planSlug: string;
         cycle: BillingCycle;
         couponCode?: string;
         currency: Currency;
-        /** Which gateway to check out with. Defaults to Razorpay server-side. */
+ 
         gateway?: PaymentGateway;
-        /** A 10-digit mobile, required by Cashfree when the profile has none. */
+ 
         phone?: string;
-        /** Packs to buy in the same checkout. Priced server-side from the catalogue. */
+ 
         addons?: { slug: string; packs: number }[];
       }
     >({
       query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
-      // A 100%-off coupon activates the plan server-side and returns `{ free: true }`
-      // with no Razorpay step, so there is no later verify call to refresh the
-      // cache — do it here when the response says the plan is already live. A paid
-      // response carries an order id instead and is refreshed by verifySubscription.
+ 
       invalidatesTags: (result) =>
         result && "free" in result && result.free
           ? ["Billing", "Usage", "Workspace"]
           : [],
-    }),
-
-    verifySubscription: build.mutation<{ ok: true }, VerifyPurchaseBody>({
-      query: (body) => ({ url: "/api/billing/subscribe/verify", method: "POST", body }),
-
-      invalidatesTags: ["Billing", "Usage", "Workspace"],
     }),
 
     startAddonPurchase: build.mutation<
@@ -1716,13 +1669,16 @@ export const api = createApi({
       }),
     }),
 
-    verifyAddonPurchase: build.mutation<{ ok: true }, VerifyPurchaseBody>({
-      query: (body) => ({ url: "/api/billing/addons/verify", method: "POST", body }),
-      invalidatesTags: ["Billing", "Usage"],
-    }),
- 
-    confirmCashfree: build.mutation<{ ok: true; kind: "plan" | "addon" }, { cf_order_id: string }>({
-      query: (body) => ({ url: "/api/billing/cashfree/confirm", method: "POST", body }),
+    /**
+     * Confirm a purchase after checkout — plan or addon, Razorpay or Cashfree.
+     * The server looks the order id up in both collections, so the caller does
+     * not have to know which it was.
+     */
+    confirmPurchase: build.mutation<
+      { ok: true; kind: "plan" | "addon" },
+      VerifyPurchaseBody | { gateway: "cashfree"; cf_order_id: string }
+    >({
+      query: (body) => ({ url: "/api/billing/confirm", method: "POST", body }),
       invalidatesTags: ["Billing", "Usage", "Workspace"],
     }),
 
@@ -1989,10 +1945,8 @@ export const {
   useGetPlansQuery,
   useGetAddonPacksQuery,
   useStartSubscriptionMutation,
-  useVerifySubscriptionMutation,
-  useConfirmCashfreeMutation,
+  useConfirmPurchaseMutation,
   useStartAddonPurchaseMutation,
-  useVerifyAddonPurchaseMutation,
   useGetAdminPlansQuery,
   useSaveAdminPlanPriceMutation,
   useGetAdminOrbitPlansQuery,
