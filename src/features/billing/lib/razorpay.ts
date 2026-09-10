@@ -1,4 +1,7 @@
-
+/**
+ * Loads Razorpay's Checkout script on demand rather than as a static tag —
+ * only the billing page ever needs it, so every other page skips the request.
+ */
 let loading: Promise<void> | null = null;
 
 export function loadRazorpayCheckout(): Promise<void> {
@@ -26,19 +29,14 @@ export type RazorpayCheckoutOptions = {
   image?: string;
   order_id?: string;
   subscription_id?: string;
-  prefill?: { name?: string; email?: string; contact?: string };
-  notes?: Record<string, string>;
+  prefill?: { name?: string; email?: string };
   theme?: { color?: string };
   handler: (response: Record<string, string>) => void;
-  modal?: { ondismiss?: () => void; escape?: boolean; backdrop?: boolean };
+  modal?: { ondismiss?: () => void };
 };
 
 export function openRazorpayCheckout(options: RazorpayCheckoutOptions) {
   type RazorpayCtor = new (opts: RazorpayCheckoutOptions) => { open: () => void };
   const Razorpay = (window as unknown as { Razorpay: RazorpayCtor }).Razorpay;
-
-  new Razorpay({
-    ...options,
-    modal: { escape: true, backdrop: true, ...options.modal },
-  }).open();
+  new Razorpay(options).open();
 }

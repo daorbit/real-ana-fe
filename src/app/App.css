@@ -191,24 +191,13 @@ html[data-bg-style="textured"]:has(.app-panel) body::before { display: none; }
 
  
 html, body {
+  overflow-x: clip;
   max-width: 100%;
 }
 #root { overflow-x: clip; }
 
 
 .mantine-AppShell-main { min-width: 0; overflow-x: clip; }
- 
-.razorpay-container,
-.razorpay-backdrop,
-#cashfree-pg-checkout,
-iframe[src*="checkout.razorpay.com"],
-iframe[src*="cashfree.com"] {
-  position: fixed !important;
-  inset: 0 !important;
-  max-width: none !important;
-  contain: none !important;
-  z-index: 2147483647 !important;
-}
 
 
 body { overflow-wrap: break-word; }
