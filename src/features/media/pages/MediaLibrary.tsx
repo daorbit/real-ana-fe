@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import {
-  Group, Button, TextInput, Stack, Text, Center, Loader, Box,
+  Group, Button, TextInput, Stack, Center, Loader, Box,
   SegmentedControl, Pagination, ActionIcon, Tooltip,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
