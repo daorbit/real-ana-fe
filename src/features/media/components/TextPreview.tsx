@@ -41,36 +41,32 @@ export function TextPreview({ url }: { url: string }) {
     };
   }, [url]);
 
-  if (state.status === "loading") {
-    return (
-      <Center h={180}>
-        <Loader size="sm" />
-      </Center>
-    );
-  }
-
-  if (state.status === "error") {
-    return (
-      <Center h={180}>
-        <Text size="sm" c="dimmed">
-          Couldn't load a preview for this file.
-        </Text>
-      </Center>
-    );
-  }
-
   return (
-    <ScrollArea h={380} type="auto">
-      <Text
-        component="pre"
-        size="xs"
-        ff="monospace"
-        p="sm"
-        style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
-      >
-        {state.text}
-        {state.truncated ? "\n…truncated" : ""}
-      </Text>
-    </ScrollArea>
+    <div data-text-preview style={{ width: "100%", height: "100%", minHeight: 0 }}>
+      {state.status === "loading" ? (
+        <Center h="100%">
+          <Loader size="sm" />
+        </Center>
+      ) : state.status === "error" ? (
+        <Center h="100%">
+          <Text size="sm" c="dimmed">
+            Couldn't load a preview for this file.
+          </Text>
+        </Center>
+      ) : (
+        <ScrollArea h="100%" type="auto">
+          <Text
+            component="pre"
+            size="xs"
+            ff="monospace"
+            p="sm"
+            style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+          >
+            {state.text}
+            {state.truncated ? "\n…truncated" : ""}
+          </Text>
+        </ScrollArea>
+      )}
+    </div>
   );
 }

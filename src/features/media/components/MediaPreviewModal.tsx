@@ -53,6 +53,9 @@ export function MediaPreviewModal({
       padding={0}
       transitionProps={{ transition: "fade", duration: 150 }}
       classNames={{ content: classes.content, inner: classes.inner }}
+      styles={{
+        body: { flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" },
+      }}
     >
       {asset && (
         <Box className={classes.body}>
