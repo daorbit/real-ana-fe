@@ -24,6 +24,7 @@ import { useTitle } from "@/shared/lib/useTitle";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "../components/MediaGrid";
 import { FileTypeIcon } from "../components/FileTypeIcon";
+import { TextPreview } from "../components/TextPreview";
 import { UploadTray, type UploadItem } from "../components/UploadTray";
 import {
   formatBytes,
@@ -32,6 +33,7 @@ import {
   isPdf,
   isOfficeDoc,
   officePreviewUrl,
+  isTextLike,
   MAX_ASSET_BYTES,
 } from "../lib";
 import classes from "./MediaLibrary.module.css";
@@ -359,7 +361,7 @@ export default function MediaLibraryPage() {
           <Stack gap="md">
             <Box
               style={
-                isPdf(viewing) || isOfficeDoc(viewing)
+                isPdf(viewing) || isOfficeDoc(viewing) || isTextLike(viewing)
                   ? undefined
                   : {
                       borderRadius: "var(--mantine-radius-md)",
@@ -389,6 +391,8 @@ export default function MediaLibraryPage() {
                   title={viewing.name}
                   className={classes.previewFrame}
                 />
+              ) : isTextLike(viewing) ? (
+                <TextPreview url={viewing.url} />
               ) : (
                 <Stack align="center" gap="xs" py="xl">
                   <FileTypeIcon fileName={viewing.name} size={64} />

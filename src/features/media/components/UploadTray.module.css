@@ -1,6 +1,6 @@
 .tray {
   position: fixed;
-  right: 20px;
+  left: 50%;
   bottom: 20px;
   z-index: 300;
   width: 340px;
@@ -10,13 +10,14 @@
   background: var(--mantine-color-body);
   box-shadow: 0 10px 30px rgba(16, 24, 40, 0.18);
   overflow: hidden;
+  transform: translateX(-50%);
   animation: rise 160ms ease;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translate(-50%, 8px);
   }
 }
 

@@ -48,3 +48,14 @@ export function isOfficeDoc(asset: MediaAsset): boolean {
 export function officePreviewUrl(fileUrl: string): string {
   return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
 }
+
+// Plain text formats a browser can just fetch and print — no renderer needed,
+// unlike a pdf or an office doc.
+const TEXT_EXTENSIONS = /\.(?:csv|tsv|txt|log|json|md|xml|ya?ml)$/i;
+
+export function isTextLike(asset: MediaAsset): boolean {
+  return TEXT_EXTENSIONS.test(asset.name) || asset.mime.startsWith("text/");
+}
+
+/** Cap on how much of a text file the preview fetches and renders. */
+export const TEXT_PREVIEW_MAX_BYTES = 200 * 1024;
