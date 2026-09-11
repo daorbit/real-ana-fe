@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/features/auth/context";
@@ -11,7 +11,6 @@ export function useProfileForm() {
   const { t } = useTranslation();
   const { user, updateProfile, uploadAvatar, removeAvatar } = useAuth();
 
-  const fileInput = useRef<HTMLInputElement | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
 
@@ -128,16 +127,6 @@ export function useProfileForm() {
     }
   };
 
-  const pickAvatar = (file: File | null) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      notify.error(t("settings.avatarNotImage"));
-      return;
-    }
-    setCropFile(file);
-    if (fileInput.current) fileInput.current.value = "";
-  };
-
   /**
    * An avatar chosen from the workspace's media library.
    *
@@ -197,7 +186,6 @@ export function useProfileForm() {
 
   return {
     user,
-    fileInput,
     avatarBusy,
     cropFile,
     setCropFile,
@@ -223,7 +211,6 @@ export function useProfileForm() {
     validateOnBlur,
     seedFromUser,
     submit,
-    pickAvatar,
     saveCrop,
     clearAvatar,
     errText,

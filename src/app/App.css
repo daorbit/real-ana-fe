@@ -3417,6 +3417,39 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   overscroll-behavior: contain;
 }
 
+/*
+ * Mount point for a full-surface overlay inside the panel (the media preview).
+ * It covers the panel and nothing beyond it, so the rail stays reachable while
+ * the overlay is up.
+ *
+ * Laid over the panel rather than in its flow, and `display: contents` would
+ * defeat that — the overlay positions against this box. Inert until something
+ * is rendered into it: with no children there is nothing to hit-test, and the
+ * `:empty` guard drops it out of the layer entirely so it can never swallow a
+ * click meant for the page.
+ */
+#panel-overlay-root {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  overflow: hidden;
+  /*
+   * The box itself never takes a click — it spans the whole panel, so without
+   * this it would swallow every click meant for the page under it. A closed
+   * Mantine modal leaves its portal div mounted here, so `:empty` is not the
+   * guard it looks like: the container always has a child and would always be
+   * blocking. What actually renders (the overlay and the modal content) takes
+   * pointer events back below.
+   */
+  pointer-events: none;
+}
+
+/* The overlay component re-enables events on its own painted parts (see the
+   media preview's `.overlay` / `.inner`). Nothing is re-enabled here: Mantine's
+   portal wrapper is a child too, so a blanket `> *` would put the full-panel
+   click blocker straight back. */
+
 
 .app-panel__scroll::-webkit-scrollbar { width: 10px; }
 .app-panel__scroll::-webkit-scrollbar-track { background: transparent; }
@@ -3795,4 +3828,62 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .cal-week__head,
   .cal-week__grid { grid-template-columns: 52px repeat(7, minmax(110px, 1fr)); }
   .cal-week { overflow-x: auto; }
+}
+
+
+/*
+ * Skeleton shimmer.
+ *
+ * Mantine's placeholder animates opacity — the whole block fades in and out
+ * together, which at card size reads as the page flickering rather than as
+ * something arriving. A highlight travelling across it has a direction, so a
+ * screen full of them reads as one surface loading.
+ *
+ * Written against Skeleton's real structure rather than a guess at it: the
+ * component paints `::before` as the body-coloured mask and `::after` as the
+ * visible grey block (z-index 10 and 11), and marks itself `[data-visible]`
+ * while it is standing in for something and `[data-animate]` when it may move.
+ * So the sweep goes on `::after`'s own background — there is no third
+ * pseudo-element to put it on — and the root already clips it.
+ *
+ * Targeted via `:has()` on those attributes instead of Mantine's hashed class
+ * (`m_18320242`), which is a build artifact and not ours to depend on.
+ */
+.skeleton-shimmer[data-visible][data-animate]::after {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--mantine-color-white) 6%, transparent) 40%,
+    color-mix(in srgb, var(--mantine-color-white) 11%, transparent) 50%,
+    color-mix(in srgb, var(--mantine-color-white) 6%, transparent) 60%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 220% 100%;
+  /* Replaces the opacity pulse rather than running alongside it. */
+  animation: skeleton-sweep 1.5s ease-in-out infinite !important;
+}
+
+[data-mantine-color-scheme="light"] .skeleton-shimmer[data-visible][data-animate]::after {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--mantine-color-white) 45%, transparent) 40%,
+    color-mix(in srgb, var(--mantine-color-white) 80%, transparent) 50%,
+    color-mix(in srgb, var(--mantine-color-white) 45%, transparent) 60%,
+    transparent 100%
+  );
+}
+
+@keyframes skeleton-sweep {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+
+/* The grey block still shows where content will land; only the travel stops. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer[data-visible][data-animate]::after {
+    background-image: none;
+    animation: none !important;
+  }
 }

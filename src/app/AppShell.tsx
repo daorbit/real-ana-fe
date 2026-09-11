@@ -135,6 +135,12 @@ export function AppShell({ children }: { children: ReactNode }) {
          
               <div className="orbit-fab-spacer" />
             </div>
+            {/* Where a full-surface overlay (the media preview) mounts, so it
+                fills the panel and stops at its border rather than covering
+                the rail — the rail is how someone gets back out. Inside the
+                panel so it is clipped to the same radius. */}
+            <div id="panel-overlay-root" />
+
             {/* Lead Capture carries its own assistant surface — a second
                 floating launcher on top of it is one too many. */}
             {!loc.pathname.startsWith("/app/lead-capture") && <OrbitBubble />}

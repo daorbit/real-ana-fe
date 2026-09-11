@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import {
-  Group, Button, TextInput, Stack, Center, Loader, Box,
+  Group, Button, TextInput, Stack, Box,
   SegmentedControl, Pagination, ActionIcon, Tooltip,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
@@ -20,6 +20,7 @@ import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "../components/MediaGrid";
+import { MediaGridSkeleton } from "../components/MediaGridSkeleton";
 import { MediaPreviewModal } from "../components/MediaPreviewModal";
 import { UploadTray, type UploadItem } from "../components/UploadTray";
 import { readAsDataUrl, MAX_ASSET_BYTES } from "../lib";
@@ -277,9 +278,7 @@ export default function MediaLibraryPage() {
         }}
       >
         {isLoading ? (
-          <Center h={320}>
-            <Loader size="sm" />
-          </Center>
+          <MediaGridSkeleton />
         ) : items.length ? (
           <Stack gap="md">
             <MediaGrid

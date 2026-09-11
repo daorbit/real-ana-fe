@@ -41,6 +41,15 @@ export const theme = createTheme({
     // buttons and panels. Spin instead, everywhere, in one place.
     Loader: { defaultProps: { type: "oval" } },
     /**
+     * Placeholders shimmer rather than pulse.
+     *
+     * Mantine animates a skeleton's opacity, so a screen of them fades in and
+     * out together and reads as flicker. The class carries a travelling
+     * highlight instead (see `.skeleton-shimmer` in App.css) — applied here so
+     * every skeleton in the app gets it without touching call sites.
+     */
+    Skeleton: { defaultProps: { className: "skeleton-shimmer" } },
+    /**
      * Badges read as text, not as pills.
      *
      * Mantine's `light` variant paints a tinted rounded capsule behind every

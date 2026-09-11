@@ -1,9 +1,13 @@
-import { Modal, Box, Stack, Text, Group, Badge, TextInput, Button, Menu, ActionIcon, Center } from "@mantine/core";
-import { Pencil, MoreVertical, Copy, ExternalLink, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Box, Center, Modal, Stack, Text } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import type { MediaAsset } from "@/shared/types";
-import { notify } from "@/shared/lib/notify";
+import { useFitScale } from "@/hooks/useFitScale";
 import { FileTypeIcon } from "./FileTypeIcon";
 import { TextPreview } from "./TextPreview";
+import { DeviceFrame, frameSize } from "./DeviceFrame";
+import { PreviewTopbar } from "./PreviewTopbar";
+import { PreviewDetailsPanel } from "./PreviewDetailsPanel";
 import {
   formatBytes,
   previewUrl,
@@ -26,13 +30,16 @@ interface Props {
 }
 
 /**
- * A file, full-screen: the stage takes the right side, everything you can do
- * with the file sits in a column on the left — the same split the form
- * builder's own preview uses.
+ * A file on a stage, the way the form builder previews a form: chrome across
+ * the top, the file inside a MacBook mock on a workbench, and its details and
+ * actions in a column on the left.
  *
- * Fixed rather than Mantine's `fullScreen`, and inset by the app shell's own
- * navbar offset: the rail is how someone gets back out of this screen, so it
- * has to stay reachable rather than being buried under the overlay.
+ * The mock renders at the device's true CSS viewport and is then scaled to fit,
+ * so the file is judged at a real desktop width rather than being squashed into
+ * whatever width the modal happens to have.
+ *
+ * Inset by the shell's navbar rather than covering it: the rail is how someone
+ * gets back out, so it stays reachable.
  */
 export function MediaPreviewModal({
   asset,
@@ -44,108 +51,96 @@ export function MediaPreviewModal({
   renamingBusy,
   canEdit,
 }: Props) {
+  const [panelOpen, setPanelOpen] = useState(true);
+  // The shell's panel — the bordered card the page sits in. Rendering into it
+  // keeps the preview inside the app rather than over it, so the rail stays
+  // reachable. Null before the shell has mounted, and on any screen that has no
+  // panel, where the modal falls back to Mantine's own body portal.
+  const [panelRoot, setPanelRoot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setPanelRoot(document.getElementById("panel-overlay-root"));
+  }, []);
+  // The collapse toggle has nowhere to sit on a phone, where the panel stacks
+  // above the stage — so it stays open there rather than becoming unreachable.
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
+
+  const size = frameSize();
+  // Matches `.stage`'s 24px padding on each side. Reserving more than the stage
+  // actually pads would shrink the frame for no reason.
+  const { ref: stageRef, scale, measured } = useFitScale({
+    contentWidth: size.width,
+    contentHeight: size.height,
+    padding: { x: 48, y: 48 },
+  });
+
+  const meta = asset
+    ? [
+        asset.kind,
+        formatBytes(asset.bytes),
+        ...(asset.width && asset.height ? [`${asset.width}×${asset.height}`] : []),
+      ]
+    : [];
+
   return (
     <Modal
       opened={Boolean(asset)}
       onClose={onClose}
-      fullScreen
       withCloseButton={false}
       padding={0}
+      // Absolute rather than fixed: the overlay and the modal position against
+      // the panel they are rendered into, not the viewport.
+      portalProps={panelRoot ? { target: panelRoot } : undefined}
+      withinPortal={Boolean(panelRoot)}
       transitionProps={{ transition: "fade", duration: 150 }}
-      classNames={{ content: classes.content, inner: classes.inner }}
+      overlayProps={{ backgroundOpacity: 0.35, blur: 2 }}
+      classNames={{
+        root: classes.root,
+        overlay: classes.overlay,
+        content: classes.content,
+        inner: classes.inner,
+      }}
       styles={{
-        body: { flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" },
+        // Mantine's own body wrapper sits between the content box and the
+        // stage; without a bounded height here the stage measures taller than
+        // the panel and the frame is scaled to overflow it.
+        body: {
+          flex: 1,
+          minHeight: 0,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        },
       }}
     >
       {asset && (
-        <Box className={classes.body}>
-          <Stack className={classes.info} gap="md">
-            <Group justify="space-between" wrap="nowrap">
-              <Text fw={600} lineClamp={2} title={asset.name}>
-                {asset.name}
-              </Text>
-              <ActionIcon variant="subtle" color="gray" onClick={onClose} aria-label="Close">
-                <X size={18} />
-              </ActionIcon>
-            </Group>
+        <>
+          <PreviewTopbar title={asset.name} meta={meta} onClose={onClose} />
 
-            <Group gap="xs">
-              <Badge variant="light" size="sm">
-                {asset.kind}
-              </Badge>
-              <Badge variant="light" color="gray" size="sm">
-                {formatBytes(asset.bytes)}
-              </Badge>
-              {asset.width && asset.height && (
-                <Badge variant="light" color="gray" size="sm">
-                  {asset.width}×{asset.height}
-                </Badge>
-              )}
-            </Group>
-
-            <TextInput
-              label="Name"
-              value={renaming}
-              onChange={(e) => onRenamingChange(e.currentTarget.value)}
-              disabled={!canEdit}
+          <Box className={classes.body}>
+            <PreviewDetailsPanel
+              asset={asset}
+              open={panelOpen || mobile}
+              onToggle={() => setPanelOpen((v) => !v)}
+              renaming={renaming}
+              onRenamingChange={onRenamingChange}
+              onSaveName={onSaveName}
+              onDelete={onDelete}
+              renamingBusy={renamingBusy}
+              canEdit={canEdit}
             />
 
-            <Group gap="xs">
-              <Button
-                variant="light"
-                leftSection={<Pencil size={14} />}
-                onClick={onSaveName}
-                loading={renamingBusy}
-                disabled={!canEdit || renaming.trim() === asset.name}
-              >
-                Rename
-              </Button>
-              <Menu position="bottom-start">
-                <Menu.Target>
-                  <ActionIcon variant="default" size="lg">
-                    <MoreVertical size={16} />
-                  </ActionIcon>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Item
-                    leftSection={<Copy size={14} />}
-                    onClick={() => {
-                      void navigator.clipboard.writeText(asset.url);
-                      notify.success("URL copied");
-                    }}
-                  >
-                    Copy URL
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={<ExternalLink size={14} />}
-                    component="a"
-                    href={asset.url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open original
-                  </Menu.Item>
-                  {canEdit && (
-                    <>
-                      <Menu.Divider />
-                      <Menu.Item
-                        color="red"
-                        leftSection={<Trash2 size={14} />}
-                        onClick={() => onDelete(asset)}
-                      >
-                        Delete
-                      </Menu.Item>
-                    </>
-                  )}
-                </Menu.Dropdown>
-              </Menu>
-            </Group>
-          </Stack>
-
-          <Box className={classes.stage}>
-            <PreviewSurface asset={asset} />
+            {/* Laid out from the first render so the stage has something to
+                size against, and unpainted until that fit is measured. */}
+            <Box className={classes.stage} ref={stageRef}>
+              <DeviceFrame scale={scale} hidden={!measured}>
+                <Box className={classes.screen}>
+                  <PreviewSurface asset={asset} />
+                </Box>
+              </DeviceFrame>
+            </Box>
           </Box>
-        </Box>
+        </>
       )}
     </Modal>
   );
@@ -175,9 +170,9 @@ function PreviewSurface({ asset }: { asset: MediaAsset }) {
 
   return (
     <Center h="100%">
-      <Stack align="center" gap="xs">
+      <Stack align="center" gap="xs" p="md">
         <FileTypeIcon fileName={asset.name} size={64} />
-        <Text size="sm" c="dimmed">
+        <Text size="sm" c="dimmed" ta="center">
           Preview isn't available for this file type — open or download it instead.
         </Text>
       </Stack>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Avatar, Badge, Box, Button, Group, Text } from "@mantine/core";
-import { Trash2, Upload, Images } from "lucide-react";
+import { Trash2, Images } from "lucide-react";
 import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
 import { useTranslation } from "react-i18next";
 import type { ProfileForm } from "./useProfileForm";
@@ -9,14 +9,12 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
   const { t } = useTranslation();
   const {
     user,
-    fileInput,
     avatarBusy,
     avatarUrl,
     avatarBroken,
     setAvatarBroken,
     firstName,
     lastName,
-    pickAvatar,
     pickAvatarFromLibrary,
     clearAvatar,
   } = form;
@@ -64,34 +62,19 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
             {user.email}
           </Text>
 
-          <input
-            ref={fileInput}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            hidden
-            onChange={(e) => pickAvatar(e.currentTarget.files?.[0] ?? null)}
-          />
           <Group gap="xs" mt="sm">
-            <Button
-              size="xs"
-              variant="light"
-              leftSection={<Upload size={14} />}
-              loading={avatarBusy}
-              onClick={() => fileInput.current?.click()}
-            >
-              {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
-            </Button>
-            {/* The workspace's own files, as an alternative to a fresh upload.
-                Either way it goes through the cropper — an avatar is square
-                wherever it is shown. */}
+            {/* The media library is the only way a file enters the product, so
+                an avatar is chosen from it rather than uploaded here. It still
+                goes through the cropper — an avatar is square wherever it is
+                shown. */}
             <Button
               size="xs"
               variant="light"
               leftSection={<Images size={14} />}
-              disabled={avatarBusy}
+              loading={avatarBusy}
               onClick={() => setPicking(true)}
             >
-              From media
+              {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
             </Button>
             {avatarUrl && (
               <Button

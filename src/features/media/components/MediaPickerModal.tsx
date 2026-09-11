@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Modal, TextInput, Group, Button, Stack, Text, Center, Loader,
+  Modal, TextInput, Group, Button, Stack, Text, Center,
   SegmentedControl, Pagination,
 } from "@mantine/core";
 import { Search, ImageOff, Upload } from "lucide-react";
@@ -10,6 +10,7 @@ import { useGetMediaQuery } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "./MediaGrid";
+import { MediaGridSkeleton } from "./MediaGridSkeleton";
 
 /** Enough to fill the wall without making the modal scroll far. */
 const PER_PAGE = 12;
@@ -126,9 +127,9 @@ export function MediaPickerModal({
             put while the files move. */}
         <div style={{ maxHeight: "58vh", overflowY: "auto" }}>
           {isFetching && !items.length ? (
-            <Center py={60}>
-              <Loader size="sm" />
-            </Center>
+            /* Fewer than the library page draws: this is a 58vh scroll box, and
+               a full wall of placeholders below the fold is wasted motion. */
+            <MediaGridSkeleton count={6} threeUp />
           ) : items.length === 0 ? (
             <Center py={50}>
               <Stack align="center" gap="xs">
