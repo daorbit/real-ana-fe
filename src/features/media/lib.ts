@@ -30,3 +30,21 @@ export function previewUrl(asset: MediaAsset): string | undefined {
   if (asset.kind === "raw") return undefined;
   return asset.thumbnailUrl || asset.url;
 }
+
+export function isPdf(asset: MediaAsset): boolean {
+  return /\.pdf$/i.test(asset.name) || asset.format === "pdf";
+}
+
+// Word/Excel/PowerPoint have no native browser renderer, unlike a PDF.
+// Microsoft's Office Online Viewer renders these itself off a public URL.
+// Not used for pdf (its own direct iframe) or anything neither viewer
+// handles (zip, txt, csv).
+const OFFICE_EXTENSIONS = /\.(?:docx?|xlsx?|pptx?|rtf|odt|ods|odp)$/i;
+
+export function isOfficeDoc(asset: MediaAsset): boolean {
+  return OFFICE_EXTENSIONS.test(asset.name);
+}
+
+export function officePreviewUrl(fileUrl: string): string {
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+}

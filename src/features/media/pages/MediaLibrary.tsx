@@ -24,7 +24,15 @@ import { useTitle } from "@/shared/lib/useTitle";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "../components/MediaGrid";
 import { UploadTray, type UploadItem } from "../components/UploadTray";
-import { formatBytes, previewUrl, readAsDataUrl, MAX_ASSET_BYTES } from "../lib";
+import {
+  formatBytes,
+  previewUrl,
+  readAsDataUrl,
+  isPdf,
+  isOfficeDoc,
+  officePreviewUrl,
+  MAX_ASSET_BYTES,
+} from "../lib";
 import classes from "./MediaLibrary.module.css";
 
 const PER_PAGE = 40;
@@ -349,16 +357,21 @@ export default function MediaLibraryPage() {
         title={viewing?.name}
         size="lg"
         radius="md"
+        centered
       >
         {viewing && (
           <Stack gap="md">
             <Box
-              style={{
-                borderRadius: "var(--mantine-radius-md)",
-                border: "1px solid var(--mantine-color-default-border)",
-                overflow: "hidden",
-                background: "var(--mantine-color-default-hover)",
-              }}
+              style={
+                isPdf(viewing) || isOfficeDoc(viewing)
+                  ? undefined
+                  : {
+                      borderRadius: "var(--mantine-radius-md)",
+                      border: "1px solid var(--mantine-color-default-border)",
+                      overflow: "hidden",
+                      background: "var(--mantine-color-default-hover)",
+                    }
+              }
             >
               {viewing.kind === "video" ? (
                 <video src={viewing.url} controls style={{ width: "100%", maxHeight: 380 }} />
@@ -367,6 +380,18 @@ export default function MediaLibraryPage() {
                   src={viewing.url}
                   alt={viewing.alt || viewing.name}
                   style={{ width: "100%", maxHeight: 380, objectFit: "contain" }}
+                />
+              ) : isPdf(viewing) ? (
+                // A browser renders a PDF natively, so it goes straight into
+                // the iframe with no viewer service in between.
+                <iframe src={viewing.url} title={viewing.name} className={classes.previewFrame} />
+              ) : isOfficeDoc(viewing) ? (
+                // No native renderer for these, so Office Online Viewer does
+                // the rendering and this just iframes its output.
+                <iframe
+                  src={officePreviewUrl(viewing.url)}
+                  title={viewing.name}
+                  className={classes.previewFrame}
                 />
               ) : (
                 <Center h={180}>
