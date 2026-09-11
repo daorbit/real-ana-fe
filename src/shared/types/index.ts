@@ -547,7 +547,13 @@ export type ReportScheduleInput = {
 export type BillingCycle = "monthly" | "yearly";
 
 /** Mirrors `ADDON_TYPES` on the server. A type missing here is a pack the UI cannot render. */
-export type AddonType = "audit" | "crawl" | "orbit" | "post-slots" | "form-submissions";
+export type AddonType =
+  | "audit"
+  | "crawl"
+  | "orbit"
+  | "post-slots"
+  | "form-submissions"
+  | "media-slots";
 
 export type AddonPack = {
   _id: string;

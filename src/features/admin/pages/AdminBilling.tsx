@@ -3,7 +3,7 @@ import {
   Text, Group, Button, Card, Table, Badge, Modal, TextInput, NumberInput,
   Stack, Switch, Tabs, ActionIcon, Center, Loader, Select, Tooltip,
 } from "@mantine/core";
-import { Plus, Pencil, Trash2, Search, Globe2, Tag, Eye, RefreshCw, CalendarClock, ClipboardList } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Globe2, Tag, Eye, RefreshCw, CalendarClock, ClipboardList, Images } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -283,6 +283,7 @@ const ADDON_TYPE_ICON: Record<AddonType, ReactNode> = {
   orbit: <OrbitMark size={11} />,
   "post-slots": <CalendarClock size={11} />,
   "form-submissions": <ClipboardList size={11} />,
+  "media-slots": <Images size={11} />,
 };
 
 const emptyAddon: Partial<AddonPack> = {
@@ -411,6 +412,7 @@ function AddonsTab() {
                 { value: "orbit", label: "Orbit AI questions" },
                 { value: "post-slots", label: "Scheduled post slots" },
                 { value: "form-submissions", label: "Form responses" },
+                { value: "media-slots", label: "Media library slots" },
               ]}
             />
             <NumberInput label="Quantity" value={draft.quantity} onChange={(v) => setDraft({ ...draft, quantity: Number(v) || 1 })} min={1} />
