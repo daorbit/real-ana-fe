@@ -23,6 +23,7 @@ import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "../components/MediaGrid";
+import { FileTypeIcon } from "../components/FileTypeIcon";
 import { UploadTray, type UploadItem } from "../components/UploadTray";
 import {
   formatBytes,
@@ -61,7 +62,7 @@ export default function MediaLibraryPage() {
   /** What the floating tray is reporting. Cleared a moment after it settles. */
   const [tray, setTray] = useState<UploadItem[]>([]);
 
-  const { data, isLoading, isFetching } = useGetMediaQuery(
+  const { data, isLoading } = useGetMediaQuery(
     {
       workspaceId,
       q: debouncedQ || undefined,
@@ -330,11 +331,6 @@ export default function MediaLibraryPage() {
                 <Pagination value={page} onChange={setPage} total={pages} size="sm" />
               </Group>
             )}
-
-            <Text size="xs" c="dimmed" ta="center">
-              {data?.total} file{data?.total === 1 ? "" : "s"}
-              {isFetching ? " · refreshing" : ""}
-            </Text>
           </Stack>
         ) : (
           <EmptyState
@@ -394,11 +390,12 @@ export default function MediaLibraryPage() {
                   className={classes.previewFrame}
                 />
               ) : (
-                <Center h={180}>
+                <Stack align="center" gap="xs" py="xl">
+                  <FileTypeIcon fileName={viewing.name} size={64} />
                   <Text size="sm" c="dimmed">
-                    No preview for {viewing.format || "this file"}
+                    Preview isn't available for this file type — open or download it instead.
                   </Text>
-                </Center>
+                </Stack>
               )}
             </Box>
 

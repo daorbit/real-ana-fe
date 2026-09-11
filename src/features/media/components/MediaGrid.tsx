@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { Box, Checkbox, Text, Group } from "@mantine/core";
-import { Check, File, FileText, Film, Music } from "lucide-react";
+import { Check } from "lucide-react";
 import type { MediaAsset } from "@/shared/types";
 import { formatBytes, previewUrl } from "../lib";
+import { FileTypeIcon } from "./FileTypeIcon";
 import classes from "./MediaGrid.module.css";
 
 interface Props {
@@ -122,17 +123,10 @@ function Preview({ asset }: { asset: MediaAsset }) {
 
   return (
     <Box className={classes.fileTile}>
-      <FileIcon mime={asset.mime} />
+      <FileTypeIcon fileName={asset.name} size={32} />
       <Text size="10px" c="dimmed">
         {asset.format?.toUpperCase() || "FILE"}
       </Text>
     </Box>
   );
-}
-
-function FileIcon({ mime }: { mime: string }) {
-  if (mime === "application/pdf") return <FileText size={22} />;
-  if (mime.startsWith("video/")) return <Film size={22} />;
-  if (mime.startsWith("audio/")) return <Music size={22} />;
-  return <File size={22} />;
 }
