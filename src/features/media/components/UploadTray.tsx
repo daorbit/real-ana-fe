@@ -1,4 +1,4 @@
-import { Box, Group, Text, ThemeIcon } from "@mantine/core";
+import { Box, Group, Portal, Text, ThemeIcon } from "@mantine/core";
 import { Check, File, FileText, Film, Music, Image as ImageIcon, X } from "lucide-react";
 import { formatBytes } from "../lib";
 import classes from "./UploadTray.module.css";
@@ -12,9 +12,15 @@ export interface UploadItem {
 }
 
 /**
- * A floating panel, pinned bottom-right, listing the files in an upload one row
- * each — which file is going up, which one failed — instead of a spinner on a
- * button. It floats so it never pushes the library around while it works.
+ * A floating panel, pinned bottom-center, listing the files in an upload one
+ * row each — which file is going up, which one failed — instead of a spinner
+ * on a button. It floats so it never pushes the library around while it
+ * works.
+ *
+ * Rendered through a Portal straight into `document.body`: the page layout
+ * clips overflow on an ancestor, which turns `position: fixed` into
+ * relative-to-that-ancestor instead of the viewport, so nesting it there
+ * pinned the tray to the middle of the page instead of the screen's bottom.
  */
 export function UploadTray({ items }: { items: UploadItem[] }) {
   if (items.length === 0) return null;
@@ -24,6 +30,7 @@ export function UploadTray({ items }: { items: UploadItem[] }) {
   const busy = items.length - done - failed;
 
   return (
+    <Portal>
     <Box className={classes.tray}>
       <div className={classes.header}>
         {busy > 0
@@ -38,6 +45,7 @@ export function UploadTray({ items }: { items: UploadItem[] }) {
         ))}
       </div>
     </Box>
+    </Portal>
   );
 }
 
