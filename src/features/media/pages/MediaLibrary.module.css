@@ -13,13 +13,3 @@
   border-color: var(--mantine-primary-color-filled);
   background: var(--mantine-color-default-hover);
 }
-
-.previewFrame {
-  display: block;
-  width: 100%;
-  height: 72vh;
-  min-height: 380px;
-  max-height: 640px;
-  border: 0;
-  border-radius: var(--mantine-radius-md);
-}

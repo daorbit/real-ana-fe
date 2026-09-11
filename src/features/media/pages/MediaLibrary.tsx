@@ -1,13 +1,10 @@
 import { useRef, useState } from "react";
 import {
-  Group, Button, TextInput, Stack, Text, Center, Loader, Box, Modal,
-  SegmentedControl, Pagination, Badge, Menu, ActionIcon, Tooltip,
+  Group, Button, TextInput, Stack, Text, Center, Loader, Box,
+  SegmentedControl, Pagination, ActionIcon, Tooltip,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import {
-  Search, Upload, Trash2, ImageOff, Images, Pencil, MoreVertical,
-  ExternalLink, Copy, Check,
-} from "lucide-react";
+import { Search, Upload, Trash2, ImageOff, Images, Check } from "lucide-react";
 import {
   useGetMediaQuery,
   useUploadMediaMutation,
@@ -23,19 +20,9 @@ import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "../components/MediaGrid";
-import { FileTypeIcon } from "../components/FileTypeIcon";
-import { TextPreview } from "../components/TextPreview";
+import { MediaPreviewModal } from "../components/MediaPreviewModal";
 import { UploadTray, type UploadItem } from "../components/UploadTray";
-import {
-  formatBytes,
-  previewUrl,
-  readAsDataUrl,
-  isPdf,
-  isOfficeDoc,
-  officePreviewUrl,
-  isTextLike,
-  MAX_ASSET_BYTES,
-} from "../lib";
+import { readAsDataUrl, MAX_ASSET_BYTES } from "../lib";
 import classes from "./MediaLibrary.module.css";
 
 const PER_PAGE = 40;
@@ -347,136 +334,16 @@ export default function MediaLibraryPage() {
         )}
       </Box>
 
-      {/* One asset, close up — the only place its URL and dimensions are
-          readable, and where renaming happens. */}
-      <Modal
-        opened={Boolean(viewing)}
+      <MediaPreviewModal
+        asset={viewing}
+        renaming={renaming}
+        onRenamingChange={setRenaming}
         onClose={() => setViewing(null)}
-        title={viewing?.name}
-        size="lg"
-        radius="md"
-        centered
-      >
-        {viewing && (
-          <Stack gap="md">
-            <Box
-              style={
-                isPdf(viewing) || isOfficeDoc(viewing) || isTextLike(viewing)
-                  ? undefined
-                  : {
-                      borderRadius: "var(--mantine-radius-md)",
-                      border: "1px solid var(--mantine-color-default-border)",
-                      overflow: "hidden",
-                      background: "var(--mantine-color-default-hover)",
-                    }
-              }
-            >
-              {viewing.kind === "video" ? (
-                <video src={viewing.url} controls style={{ width: "100%", maxHeight: 380 }} />
-              ) : previewUrl(viewing) ? (
-                <img
-                  src={viewing.url}
-                  alt={viewing.alt || viewing.name}
-                  style={{ width: "100%", maxHeight: 380, objectFit: "contain" }}
-                />
-              ) : isPdf(viewing) ? (
-                // A browser renders a PDF natively, so it goes straight into
-                // the iframe with no viewer service in between.
-                <iframe src={viewing.url} title={viewing.name} className={classes.previewFrame} />
-              ) : isOfficeDoc(viewing) ? (
-                // No native renderer for these, so Office Online Viewer does
-                // the rendering and this just iframes its output.
-                <iframe
-                  src={officePreviewUrl(viewing.url)}
-                  title={viewing.name}
-                  className={classes.previewFrame}
-                />
-              ) : isTextLike(viewing) ? (
-                <TextPreview url={viewing.url} />
-              ) : (
-                <Stack align="center" gap="xs" py="xl">
-                  <FileTypeIcon fileName={viewing.name} size={64} />
-                  <Text size="sm" c="dimmed">
-                    Preview isn't available for this file type — open or download it instead.
-                  </Text>
-                </Stack>
-              )}
-            </Box>
-
-            <Group gap="xs">
-              <Badge variant="light" size="sm">
-                {viewing.kind}
-              </Badge>
-              <Badge variant="light" color="gray" size="sm">
-                {formatBytes(viewing.bytes)}
-              </Badge>
-              {viewing.width && viewing.height && (
-                <Badge variant="light" color="gray" size="sm">
-                  {viewing.width}×{viewing.height}
-                </Badge>
-              )}
-            </Group>
-
-            <Group gap="xs" align="flex-end">
-              <TextInput
-                flex={1}
-                label="Name"
-                value={renaming}
-                onChange={(e) => setRenaming(e.currentTarget.value)}
-                disabled={!canEdit}
-              />
-              <Button
-                variant="light"
-                leftSection={<Pencil size={14} />}
-                onClick={saveName}
-                loading={renamingBusy}
-                disabled={!canEdit || renaming.trim() === viewing.name}
-              >
-                Rename
-              </Button>
-              <Menu position="bottom-end">
-                <Menu.Target>
-                  <ActionIcon variant="default" size="lg">
-                    <MoreVertical size={16} />
-                  </ActionIcon>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Item
-                    leftSection={<Copy size={14} />}
-                    onClick={() => {
-                      void navigator.clipboard.writeText(viewing.url);
-                      notify.success("URL copied");
-                    }}
-                  >
-                    Copy URL
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={<ExternalLink size={14} />}
-                    component="a"
-                    href={viewing.url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open original
-                  </Menu.Item>
-                  {canEdit && (
-                    <>
-                      <Menu.Divider />
-                      <Menu.Item
-                        color="red"
-                        leftSection={<Trash2 size={14} />}
-                        onClick={() => deleteOne(viewing)}
-                      >
-                        Delete
-                      </Menu.Item>
-                    </>
-                  )}
-                </Menu.Dropdown>
-              </Menu>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
+        onSaveName={saveName}
+        onDelete={deleteOne}
+        renamingBusy={renamingBusy}
+        canEdit={canEdit}
+      />
 
       <UploadTray items={tray} />
     </AppShell>
