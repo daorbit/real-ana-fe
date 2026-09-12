@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Box, Group, Text, Title, Stack, Divider } from "@mantine/core";
+import { DocsButton } from "@/shared/ui/DocsButton";
 
 /**
  * Shared page furniture.
@@ -15,6 +16,7 @@ export function PageHeader({
   description,
   actions,
   children,
+  docsPath,
 }: {
   title: ReactNode;
   description?: ReactNode;
@@ -22,6 +24,8 @@ export function PageHeader({
   actions?: ReactNode;
   /** Anything that belongs under the header — filters, tabs. */
   children?: ReactNode;
+  /** Path suffix appended to the hosted docs base URL, e.g. "/analytics". */
+  docsPath?: string;
 }) {
   return (
     <Box mb="xl">
@@ -36,11 +40,10 @@ export function PageHeader({
             </Text>
           )}
         </div>
-        {actions && (
-          <Group gap="sm" wrap="wrap" justify="flex-end">
-            {actions}
-          </Group>
-        )}
+        <Group gap="sm" wrap="wrap" justify="flex-end">
+          {actions}
+          <DocsButton path={docsPath} />
+        </Group>
       </Group>
       {children && <Box mt="lg">{children}</Box>}
     </Box>

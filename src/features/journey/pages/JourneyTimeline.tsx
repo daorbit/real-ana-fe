@@ -82,6 +82,7 @@ export default function JourneyTimeline() {
     <AppShell>
       <PageHeader
         title={appUserId}
+        docsPath="/funnels"
         description={
           events.length
             ? `${events.length} steps over ${gapLabel(span)} · first seen ${dateTime(events[0].ts)}`

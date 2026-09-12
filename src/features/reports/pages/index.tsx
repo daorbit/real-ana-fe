@@ -46,13 +46,12 @@ export default function Reports() {
 
   return (
     <AppShell>
-      {/* Full width rather than the usual capped column: a report card is a row
-          of facets — channels, recipients, next send — and a narrow page pushes
-          them onto stacked lines that read as unrelated. */}
+     
       <PageStack maxWidth="100%">
         <PageHeader
           title={t("reports.title")}
           description={t("reports.description")}
+          docsPath="/email-reports"
           actions={
             <>
               {page.canEdit && (

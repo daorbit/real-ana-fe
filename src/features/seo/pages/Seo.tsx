@@ -441,7 +441,7 @@ export default function Seo() {
   if (sitesLoading) {
     return (
       <AppShell>
-        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." />
+        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath="/seo-audits" />
         <Stack gap="lg">
           <Skeleton height={92} radius="md" />
           <Skeleton height={220} radius="md" />
@@ -453,7 +453,7 @@ export default function Seo() {
   if (!sites.length) {
     return (
       <AppShell>
-        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." />
+        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath="/seo-audits" />
         <EmptyState
           icon={Globe}
           title="No sites yet"
@@ -490,6 +490,7 @@ export default function Seo() {
       <PageHeader
         title="SEO"
         description="Audit a tracked site's meta tags, content, technical setup and Lighthouse scores."
+        docsPath="/seo-audits"
         actions={
           report && (
             <Group gap="sm">

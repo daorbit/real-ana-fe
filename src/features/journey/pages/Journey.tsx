@@ -65,6 +65,7 @@ export default function Journey() {
       <PageHeader
         title="User journeys"
         description="Look up a signed-in user and replay what they did, step by step — traced via the Platform API, not the anonymous site tracker."
+        docsPath="/funnels"
         actions={
           <Group gap="sm" wrap="nowrap">
             <Tooltip label="Refresh" withArrow>

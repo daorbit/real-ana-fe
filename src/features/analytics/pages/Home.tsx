@@ -24,6 +24,7 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { HomeHero } from "@/features/analytics/components/HomeHero";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { RefreshButton } from "@/shared/ui/Refresh";
+import { DocsButton } from "@/shared/ui/DocsButton";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { WorldMap } from "@/shared/ui/WorldMap";
@@ -399,6 +400,7 @@ export default function Home() {
           {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           )}
+          {!editing && !dirty && <DocsButton path="/overview" />}
 
           {/* Widths and widget choices are edited in the drawer, order in edit
               mode — either can leave unsaved work, so Save follows `dirty`

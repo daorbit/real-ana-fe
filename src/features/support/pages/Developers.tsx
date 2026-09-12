@@ -185,7 +185,7 @@ function KeysTab() {
 
 // Full documentation lives on the marketing site now; the dashboard only manages
 // keys and points developers there.
-const DOCS_URL = "https://quantalog.daorbit.in/docs";
+const DOCS_URL = "https://quantalog.daorbit.in/docs/platform-api";
 
 /** Slim banner linking out to the full docs, which moved to the landing site. */
 function DocsLink() {
@@ -228,6 +228,7 @@ export default function Developers() {
       <PageHeader
         title={t("developers.title")}
         description={t("developers.description")}
+        docsPath="/platform-api"
         actions={<PageHelpButton />}
       />
 

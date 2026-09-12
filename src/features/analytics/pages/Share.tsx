@@ -703,6 +703,7 @@ export default function Share() {
       <PageHeader
         title={t("share.pageTitle")}
         description={t("share.pageDescription")}
+        docsPath="/public-dashboards"
         actions={<PageHelpButton />}
       />
       {active ? (

@@ -44,6 +44,7 @@ import { ComparePicker, type CompareState } from "@/features/analytics/component
 import { ExportMenu } from "@/shared/ui/ExportMenu";
 import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
+import { DocsButton } from "@/shared/ui/DocsButton";
 import { getAnalyticsHelp } from "@/features/analytics/components/analyticsHelp";
 import { useStats, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
@@ -591,16 +592,7 @@ export default function Analytics() {
 
   const comparing = Boolean(view?.comparison?.timeseries?.length);
 
-  /**
-   * Fetches one breakdown across both periods, for whichever cards have their
-   * compare toggle on.
-   *
-   * Passed down as a function rather than called here so each card owns its own
-   * request: the query is skipped until that card is toggled on, and RTK Query
-   * caches per dimension, so opening the same panel again is free. Every card
-   * gets today's range, filter and site scope automatically, which is what
-   * keeps the comparison describing the same slice as the page around it.
-   */
+ 
   const useBreakdownCompare = (dimension: string, enabled: boolean) => {
     const { data, isFetching } = useGetStatsCompareQuery(
       {
@@ -729,10 +721,7 @@ export default function Analytics() {
           <Title order={1}>{t("analytics.title")}</Title>
           <Text c="dimmed" size="sm" mt={6}>
             Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
-            {/* Read off the payload rather than the picker: the server may have
-                fallen back to "previous" if the plan doesn't include the
-                baseline that was asked for, and the caption has to describe
-                what is actually on screen. */}
+ 
             {view?.comparison?.mode === "yoy"
               ? " Changes compare to the same period last year."
               : view?.comparison?.mode === "custom"
@@ -752,8 +741,7 @@ export default function Analytics() {
               filter={serializeFilter(filter)}
               sites={siteScope}
             />
-            {/* Same help affordance as the dashboard — every metric on this page
-                has a plain-language definition behind it. */}
+        
             <MTooltip label={t("analytics.helpTooltip")} withArrow>
               <ActionIcon
                 variant="default"
@@ -764,13 +752,13 @@ export default function Analytics() {
                 <HelpCircle size={17} />
               </ActionIcon>
             </MTooltip>
+            <DocsButton path="/analytics" />
           </Group>
           <Group gap="xs" wrap="nowrap" className="an-range">
             {(statsLoading || refetching) && (
               <Loader size="xs" color="emerald" type="oval" />
             )}
-            {/* A second range change mid-flight would land whichever request
-                finishes last, so lock the control while one is in flight. */}
+ 
             <RangePicker
               value={rangeState}
               onChange={setRangeState}
