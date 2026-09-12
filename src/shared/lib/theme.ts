@@ -40,6 +40,7 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "violet", label: "Violet", hex: "#7c3aed" },
   { id: "slate", label: "Slate", hex: "#475569" },
   { id: "graphite", label: "Graphite", hex: "#27272a" },
+  { id: "white", label: "White", hex: "#f8fafc" },
 ];
 
 export type BgKind = "flat" | "mesh" | "wash" | "dots" | "lines" | "diagonal" | "stars" | "corners";
@@ -149,7 +150,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     // mode toggle, selected tiles and the nav pill all read as a quiet grey,
     // not a vivid indigo. Indigo shows only in the hero bg glow and (light
     // mode) the primary CTA chip.
-    apply: { accent: "slate", bg: "classic", cta: "neutral" },
+    apply: { accent: "white", bg: "classic", cta: "neutral" },
   },
 ];
 
@@ -330,7 +331,19 @@ export function applyTheme(prefs: ThemePrefs) {
   // preset that paints a darker shade of itself reads as the wrong colour.
   // Only --accent-2 (gradient partner, hover) moves off it.
   const accent = preset.hex;
-  const accent2 = dark ? shade(preset.hex, 0.12) : shade(preset.hex, -0.15);
+  // --violet-2 doubles as a foreground colour (active nav icons, tab
+  // underlines) as well as a hover shade, so it must stay readable against
+  // both --surface and --accent-soft even when the accent itself is very
+  // light (e.g. white) — nudging a pale colour 15% further towards white or
+  // black barely moves it and leaves the icon invisible.
+  const { r: ar, g: ag, b: ab } = hexToRgb(preset.hex);
+  const accentLuminance = (0.299 * ar + 0.587 * ag + 0.114 * ab) / 255;
+  const accent2 =
+    accentLuminance > 0.75
+      ? "var(--text)"
+      : dark
+        ? shade(preset.hex, 0.12)
+        : shade(preset.hex, -0.15);
   const accentSoft = dark
     ? `color-mix(in srgb, ${preset.hex} 18%, transparent)`
     : `color-mix(in srgb, ${preset.hex} 10%, transparent)`;
@@ -354,6 +367,18 @@ export function applyTheme(prefs: ThemePrefs) {
   });
   const filled = scale[primaryShadeIdx];
   const filledHover = scale[Math.min(primaryShadeIdx + 1, 9)];
+  // A light accent (e.g. white) makes "filled" surfaces — pills tabs, solid
+  // buttons — pale, and Mantine hardcodes white text on top of them assuming
+  // filled is always dark. Pick text by the fill's own luminance instead, or
+  // it renders as invisible white-on-white / near-white-on-white.
+  const { r: fr, g: fg, b: fb } = hexToRgb(filled);
+  const filledLuminance = (0.299 * fr + 0.587 * fg + 0.114 * fb) / 255;
+  const filledText = filledLuminance > 0.6 ? "#0a0b0d" : "#ffffff";
+  root.style.setProperty("--tabs-text-color", filledText);
+  // Same problem as above for solid buttons and filled theme-icons: both
+  // hardcode white text on top of --mantine-primary-color-filled.
+  root.style.setProperty("--button-color", filledText);
+  root.style.setProperty("--section-color", filledText);
   // Mantine bakes -light / -light-hover / -text as literal computed colours
   // at theme-build time (see get-css-color-variables.mjs) rather than as var()
   // references to the numbered scale, so overwriting emerald-0..9 above does

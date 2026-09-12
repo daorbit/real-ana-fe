@@ -185,7 +185,13 @@ export function AppearanceSection({
                     transition: "box-shadow 0.12s ease",
                   }}
                 >
-                  {active && <Check size={15} color="#fff" strokeWidth={3} />}
+                  {active && (
+                    <Check
+                      size={15}
+                      color={preset.id === "white" ? "#000" : "#fff"}
+                      strokeWidth={3}
+                    />
+                  )}
                 </UnstyledButton>
               );
             })}
