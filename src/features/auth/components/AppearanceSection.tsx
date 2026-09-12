@@ -14,6 +14,7 @@ import {
   // no SIDEBAR_STYLES: the sidebar-compact control was pulled back out of
   // Appearance, see theme.ts.
   applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
+  contrastOn,
 } from "@/shared/lib/theme";
 import type { ThemeMode, ThemePrefs } from "@/shared/lib/theme";
 
@@ -186,11 +187,7 @@ export function AppearanceSection({
                   }}
                 >
                   {active && (
-                    <Check
-                      size={15}
-                      color={preset.id === "white" ? "#000" : "#fff"}
-                      strokeWidth={3}
-                    />
+                    <Check size={15} color={contrastOn(preset.hex)} strokeWidth={3} />
                   )}
                 </UnstyledButton>
               );

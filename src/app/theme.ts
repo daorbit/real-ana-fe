@@ -90,6 +90,52 @@ export const theme = createTheme({
         },
       },
     },
+    /**
+     * Unchecked switches, checkboxes and radios carry a visible edge.
+     *
+     * Mantine paints the off state from `--mantine-color-gray-2`, a near-white
+     * that disappears against this app's light surfaces and reads as a blank
+     * shape against its dark ones. The checked state is handled in
+     * `applyTheme`, which drives the thumb and tick off the accent's luminance.
+     */
+    Switch: {
+      vars: () => ({
+        root: {
+          "--switch-bg": "var(--surface-2)",
+          "--switch-bd": "1px solid var(--border)",
+          "--switch-thumb-bg": "var(--text)",
+        },
+      }),
+    },
+    Checkbox: {
+      vars: () => ({
+        root: {
+          "--checkbox-bd": "1px solid var(--border)",
+          "--checkbox-icon-color": "var(--accent-contrast)",
+        },
+      }),
+    },
+    Radio: {
+      vars: () => ({
+        root: {
+          "--radio-bd": "1px solid var(--border)",
+          "--radio-icon-color": "var(--accent-contrast)",
+        },
+      }),
+    },
+    /**
+     * Filled icons stay legible on a pale accent.
+     *
+     * Mantine hardcodes the glyph to white on a filled ThemeIcon, so a light
+     * accent (white, lime, gold) renders white-on-white and the icon vanishes.
+     * `applyTheme` picks the colour from the fill's own luminance.
+     */
+    ThemeIcon: {
+      vars: (_theme, props) =>
+        props.variant === "filled"
+          ? { root: { "--ti-color": "var(--accent-contrast)" } }
+          : { root: {} },
+    },
     Card: { defaultProps: { radius: "md" } },
     Button: { defaultProps: { radius: "md" } },
     Paper: { defaultProps: { radius: "md" } },

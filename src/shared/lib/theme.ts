@@ -207,6 +207,11 @@ function hexToRgb(hex: string) {
   const n = parseInt(hex.replace("#", ""), 16);
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
+/** Black or white, whichever stays readable on top of `hex`. */
+export function contrastOn(hex: string) {
+  const { r, g, b } = hexToRgb(hex);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? "#0a0b0d" : "#ffffff";
+}
 function rgbToHex(r: number, g: number, b: number) {
   const c = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
   return `#${c(r)}${c(g)}${c(b)}`;
@@ -371,14 +376,16 @@ export function applyTheme(prefs: ThemePrefs) {
   // buttons — pale, and Mantine hardcodes white text on top of them assuming
   // filled is always dark. Pick text by the fill's own luminance instead, or
   // it renders as invisible white-on-white / near-white-on-white.
-  const { r: fr, g: fg, b: fb } = hexToRgb(filled);
-  const filledLuminance = (0.299 * fr + 0.587 * fg + 0.114 * fb) / 255;
-  const filledText = filledLuminance > 0.6 ? "#0a0b0d" : "#ffffff";
+  const filledText = contrastOn(filled);
   root.style.setProperty("--tabs-text-color", filledText);
   // Same problem as above for solid buttons and filled theme-icons: both
   // hardcode white text on top of --mantine-primary-color-filled.
   root.style.setProperty("--button-color", filledText);
   root.style.setProperty("--section-color", filledText);
+  // Anything painted on top of the accent — a filled ThemeIcon's glyph, a
+  // checkbox tick, a switch thumb — is hardcoded white by Mantine and
+  // disappears on a pale accent, exactly as the filled-button text above does.
+  root.style.setProperty("--accent-contrast", filledText);
   // Mantine bakes -light / -light-hover / -text as literal computed colours
   // at theme-build time (see get-css-color-variables.mjs) rather than as var()
   // references to the numbered scale, so overwriting emerald-0..9 above does
