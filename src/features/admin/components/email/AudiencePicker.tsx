@@ -4,25 +4,7 @@ import {
 import { Check, ChevronDown, ChevronRight, Users } from "lucide-react";
 import type { AdminUser } from "@/shared/types";
 import type { EmailComposerState } from "@/features/admin/useEmailComposer";
-
-/**
- * Who the message goes to.
- *
- * Previously its own step, on a screen you left before writing anything. That
- * split the two decisions that inform each other — you pick a segment to decide
- * what to say, and you change your mind about the segment once you have said it
- * — and it meant the audience was invisible for the entire time you were
- * writing. Now it sits beside the message and stays on screen.
- *
- * Two rules run through the layout:
- *
- *  - a count is never a bare number. "0" next to an option reads as disabled,
- *    not as "you haven't typed any addresses yet", so every count carries the
- *    noun it counts.
- *  - the selected option is never only a colour. It gets a tick as well, since
- *    an emerald fill on a dark panel is a weak signal and no signal at all to
- *    anyone who cannot separate the two hues.
- */
+ 
 
 function Option({
   active,
