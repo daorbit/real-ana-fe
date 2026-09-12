@@ -1,9 +1,7 @@
-import { createTheme, rem } from "@mantine/core";
+import { createTheme, rem, ThemeIcon } from "@mantine/core";
 
-// Professional dark-first theme, emerald accent, flat surfaces.
 export const theme = createTheme({
   primaryColor: "emerald",
-  // Dark mode: use a deeper shade so filled surfaces don't glare neon.
   primaryShade: { light: 6, dark: 7 },
   fontFamily: "Inter, system-ui, -apple-system, sans-serif",
   fontFamilyMonospace: "ui-monospace, 'SF Mono', Menlo, monospace",
@@ -17,9 +15,7 @@ export const theme = createTheme({
     },
   },
   defaultRadius: "md",
-  // Mantine ships checkboxes, switches and radios with the default arrow
-  // cursor, which makes them read as labels rather than controls. One setting
-  // covers every such input in the app.
+ 
   cursorType: "pointer",
   colors: {
     emerald: [
@@ -37,37 +33,13 @@ export const theme = createTheme({
     lg: "0 16px 40px -12px rgba(0,0,0,0.55)",
   },
   components: {
-    // The default Mantine loader is bouncing dots, which looks toy-ish inside
-    // buttons and panels. Spin instead, everywhere, in one place.
+ 
     Loader: { defaultProps: { type: "oval" } },
-    /**
-     * Placeholders shimmer rather than pulse.
-     *
-     * Mantine animates a skeleton's opacity, so a screen of them fades in and
-     * out together and reads as flicker. The class carries a travelling
-     * highlight instead (see `.skeleton-shimmer` in App.css) — applied here so
-     * every skeleton in the app gets it without touching call sites.
-     */
+ 
     Skeleton: { defaultProps: { className: "skeleton-shimmer" } },
-    /**
-     * Badges read as text, not as pills.
-     *
-     * Mantine's `light` variant paints a tinted rounded capsule behind every
-     * badge. At the density this app runs — a score in every history row, a
-     * severity tag on every issue, a status chip on every table row — that
-     * produced a page of coloured lozenges competing with the content they
-     * were labelling. The colour still carries the meaning; the container was
-     * the only thing doing decoration, so it goes.
-     *
-     * `transparent` keeps Mantine's `color` prop driving the text colour, so
-     * all 112 call sites keep working unchanged and no per-file edit is needed.
-     */
+ 
     Badge: {
-      // `vars` rather than `defaultProps`: 88 of the call sites pass
-      // `variant="light"` explicitly, and an explicit prop always beats a
-      // default — so overriding the variant would have missed most of them.
-      // The variant still computes `--badge-color` from the `color` prop;
-      // these three lines strip the capsule it paints behind it.
+ 
       vars: () => ({
         root: {
           "--badge-bg": "transparent",
@@ -80,24 +52,15 @@ export const theme = createTheme({
           paddingInline: 0,
           textTransform: "none",
           fontWeight: 650,
-          // Mantine sizes badges by a fixed capsule height; without the
-          // capsule that only adds dead vertical space around the text.
+ 
           height: "auto",
           lineHeight: 1.35,
           letterSpacing: "0.01em",
-          // Digits in a column must line up; badges here are mostly counts.
           fontVariantNumeric: "tabular-nums",
         },
       },
     },
-    /**
-     * Unchecked switches, checkboxes and radios carry a visible edge.
-     *
-     * Mantine paints the off state from `--mantine-color-gray-2`, a near-white
-     * that disappears against this app's light surfaces and reads as a blank
-     * shape against its dark ones. The checked state is handled in
-     * `applyTheme`, which drives the thumb and tick off the accent's luminance.
-     */
+ 
     Switch: {
       vars: () => ({
         root: {
@@ -123,19 +86,13 @@ export const theme = createTheme({
         },
       }),
     },
-    /**
-     * Filled icons stay legible on a pale accent.
-     *
-     * Mantine hardcodes the glyph to white on a filled ThemeIcon, so a light
-     * accent (white, lime, gold) renders white-on-white and the icon vanishes.
-     * `applyTheme` picks the colour from the fill's own luminance.
-     */
-    ThemeIcon: {
+ 
+    ThemeIcon: ThemeIcon.extend({
       vars: (_theme, props) =>
         props.variant === "filled"
           ? { root: { "--ti-color": "var(--accent-contrast)" } }
           : { root: {} },
-    },
+    }),
     Card: { defaultProps: { radius: "md" } },
     Button: { defaultProps: { radius: "md" } },
     Paper: { defaultProps: { radius: "md" } },
