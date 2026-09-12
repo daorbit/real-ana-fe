@@ -1,11 +1,3 @@
-/**
- * Runtime theme: mode (light/dark/system), accent preset, background style,
- * corner radius, and density. Applied by writing CSS custom properties onto
- * <html> and a data attribute Mantine already reads for color scheme, so no
- * component needs to know the theme system exists — everything already
- * renders off var(--accent) / var(--violet) / [data-mantine-color-scheme].
- */
-
 export type ThemeMode = "system" | "light" | "dark";
 export type RadiusStyle = "rounded" | "soft" | "sharp";
 export type Density = "comfortable" | "compact";
@@ -43,7 +35,15 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "white", label: "White", hex: "#f8fafc" },
 ];
 
-export type BgKind = "flat" | "mesh" | "wash" | "dots" | "lines" | "diagonal" | "stars" | "corners";
+export type BgKind =
+  | "flat"
+  | "mesh"
+  | "wash"
+  | "dots"
+  | "lines"
+  | "diagonal"
+  | "stars"
+  | "corners";
 
 export type BgPreset = {
   id: string;
@@ -55,36 +55,152 @@ export type BgPreset = {
 export const BG_STYLES: BgPreset[] = [
   { id: "flat", label: "Flat", kind: "flat" },
 
-  { id: "classic", label: "Classic", kind: "corners", hues: ["#818cf8", "#eab308"] },
-  { id: "aurora", label: "Mesh — Aurora", kind: "mesh", hues: ["#3b82f6", "#8b5cf6", "#ec4899"] },
-  { id: "meadow", label: "Mesh — Meadow", kind: "mesh", hues: ["#22c55e", "#06b6d4"] },
-  { id: "sunset", label: "Mesh — Sunset", kind: "mesh", hues: ["#fb923c", "#f43f5e", "#d946ef"] },
-  { id: "ocean", label: "Mesh — Ocean", kind: "mesh", hues: ["#0ea5e9", "#2dd4bf", "#6366f1"] },
-  { id: "candy", label: "Mesh — Candy", kind: "mesh", hues: ["#f472b6", "#a78bfa", "#38bdf8"] },
-  { id: "citrus", label: "Mesh — Citrus", kind: "mesh", hues: ["#facc15", "#fb923c", "#84cc16"] },
-  { id: "lagoon", label: "Mesh — Lagoon", kind: "mesh", hues: ["#14b8a6", "#3b82f6"] },
-  { id: "berry", label: "Mesh — Berry", kind: "mesh", hues: ["#a855f7", "#e11d48"] },
-  { id: "ember", label: "Mesh — Ember", kind: "mesh", hues: ["#f97316", "#dc2626", "#7c2d12"] },
-  { id: "glacier", label: "Mesh — Glacier", kind: "mesh", hues: ["#93c5fd", "#a5f3fc"] },
-  { id: "orchid", label: "Mesh — Orchid", kind: "mesh", hues: ["#c084fc", "#f0abfc"] },
-  { id: "forest-mesh", label: "Mesh — Forest", kind: "mesh", hues: ["#16a34a", "#65a30d"] },
-  { id: "dusk", label: "Mesh — Dusk", kind: "mesh", hues: ["#6366f1", "#4c1d95", "#ec4899"] },
-  { id: "solar", label: "Mesh — Solar", kind: "mesh", hues: ["#fbbf24", "#f97316"] },
-  { id: "mono", label: "Mesh — Mono", kind: "mesh", hues: ["#94a3b8", "#64748b"] },
-  // "wash" presets are full-bleed: one diagonal sweep through every hue plus a
-  // wide corner glow, rather than mesh's three small blobs over a flat base.
-  // The hue order is the order the sweep passes through them.
-  { id: "wash-nordic", label: "Wash — Nordic", kind: "wash", hues: ["#86efac", "#38bdf8", "#3b5bdb"] },
-  { id: "wash-twilight", label: "Wash — Twilight", kind: "wash", hues: ["#312e81", "#7c3aed", "#f472b6"] },
-  { id: "wash-horizon", label: "Wash — Horizon", kind: "wash", hues: ["#fb923c", "#e11d48", "#4c1d95"] },
-  { id: "wash-tidal", label: "Wash — Tidal", kind: "wash", hues: ["#0d9488", "#0ea5e9", "#1e3a8a"] },
-  { id: "wash-linen", label: "Wash — Linen", kind: "wash", hues: ["#fde68a", "#fca5a5", "#c084fc"] },
-  { id: "wash-basalt", label: "Wash — Basalt", kind: "wash", hues: ["#64748b", "#334155", "#0f172a"] },
-  { id: "wash-verdant", label: "Wash — Verdant", kind: "wash", hues: ["#a3e635", "#16a34a", "#0f766e"] },
-  { id: "wash-plum", label: "Wash — Plum", kind: "wash", hues: ["#f0abfc", "#a21caf", "#1e1b4b"] },
-  // Scattered dots that drift. Unlike every other preset this one animates, so
-  // the CSS carries a keyframe as well as the background value (see
-  // `[data-bg-style="stars"]` in App.css).
+  {
+    id: "classic",
+    label: "Classic",
+    kind: "corners",
+    hues: ["#818cf8", "#eab308"],
+  },
+  {
+    id: "aurora",
+    label: "Mesh — Aurora",
+    kind: "mesh",
+    hues: ["#3b82f6", "#8b5cf6", "#ec4899"],
+  },
+  {
+    id: "meadow",
+    label: "Mesh — Meadow",
+    kind: "mesh",
+    hues: ["#22c55e", "#06b6d4"],
+  },
+  {
+    id: "sunset",
+    label: "Mesh — Sunset",
+    kind: "mesh",
+    hues: ["#fb923c", "#f43f5e", "#d946ef"],
+  },
+  {
+    id: "ocean",
+    label: "Mesh — Ocean",
+    kind: "mesh",
+    hues: ["#0ea5e9", "#2dd4bf", "#6366f1"],
+  },
+  {
+    id: "candy",
+    label: "Mesh — Candy",
+    kind: "mesh",
+    hues: ["#f472b6", "#a78bfa", "#38bdf8"],
+  },
+  {
+    id: "citrus",
+    label: "Mesh — Citrus",
+    kind: "mesh",
+    hues: ["#facc15", "#fb923c", "#84cc16"],
+  },
+  {
+    id: "lagoon",
+    label: "Mesh — Lagoon",
+    kind: "mesh",
+    hues: ["#14b8a6", "#3b82f6"],
+  },
+  {
+    id: "berry",
+    label: "Mesh — Berry",
+    kind: "mesh",
+    hues: ["#a855f7", "#e11d48"],
+  },
+  {
+    id: "ember",
+    label: "Mesh — Ember",
+    kind: "mesh",
+    hues: ["#f97316", "#dc2626", "#7c2d12"],
+  },
+  {
+    id: "glacier",
+    label: "Mesh — Glacier",
+    kind: "mesh",
+    hues: ["#93c5fd", "#a5f3fc"],
+  },
+  {
+    id: "orchid",
+    label: "Mesh — Orchid",
+    kind: "mesh",
+    hues: ["#c084fc", "#f0abfc"],
+  },
+  {
+    id: "forest-mesh",
+    label: "Mesh — Forest",
+    kind: "mesh",
+    hues: ["#16a34a", "#65a30d"],
+  },
+  {
+    id: "dusk",
+    label: "Mesh — Dusk",
+    kind: "mesh",
+    hues: ["#6366f1", "#4c1d95", "#ec4899"],
+  },
+  {
+    id: "solar",
+    label: "Mesh — Solar",
+    kind: "mesh",
+    hues: ["#fbbf24", "#f97316"],
+  },
+  {
+    id: "mono",
+    label: "Mesh — Mono",
+    kind: "mesh",
+    hues: ["#94a3b8", "#64748b"],
+  },
+
+  {
+    id: "wash-nordic",
+    label: "Wash — Nordic",
+    kind: "wash",
+    hues: ["#86efac", "#38bdf8", "#3b5bdb"],
+  },
+  {
+    id: "wash-twilight",
+    label: "Wash — Twilight",
+    kind: "wash",
+    hues: ["#312e81", "#7c3aed", "#f472b6"],
+  },
+  {
+    id: "wash-horizon",
+    label: "Wash — Horizon",
+    kind: "wash",
+    hues: ["#fb923c", "#e11d48", "#4c1d95"],
+  },
+  {
+    id: "wash-tidal",
+    label: "Wash — Tidal",
+    kind: "wash",
+    hues: ["#0d9488", "#0ea5e9", "#1e3a8a"],
+  },
+  {
+    id: "wash-linen",
+    label: "Wash — Linen",
+    kind: "wash",
+    hues: ["#fde68a", "#fca5a5", "#c084fc"],
+  },
+  {
+    id: "wash-basalt",
+    label: "Wash — Basalt",
+    kind: "wash",
+    hues: ["#64748b", "#334155", "#0f172a"],
+  },
+  {
+    id: "wash-verdant",
+    label: "Wash — Verdant",
+    kind: "wash",
+    hues: ["#a3e635", "#16a34a", "#0f766e"],
+  },
+  {
+    id: "wash-plum",
+    label: "Wash — Plum",
+    kind: "wash",
+    hues: ["#f0abfc", "#a21caf", "#1e1b4b"],
+  },
+
   { id: "stars", label: "Starfield", kind: "stars" },
   { id: "stars-dense", label: "Starfield — Dense", kind: "stars" },
   { id: "grid", label: "Dot grid", kind: "dots" },
@@ -117,26 +233,15 @@ export const TABLE_STYLES: { id: TableStyle; label: string }[] = [
 
 const STORAGE_KEY = "quantalog.theme";
 
-/**
- * A named look that sets several other prefs at once, plus its own extras
- * (sidebar wash, CTA scheme) that no individual control exposes. Picking a
- * preset writes `accent` + `bg` and flips `cta`; the individual controls stay
- * live afterwards for fine-tuning, and changing one just means the preset no
- * longer matches — it is a shortcut, not a mode.
- */
 export type ThemePresetId = "none" | "classic";
 
 export type ThemePreset = {
   id: ThemePresetId;
   label: string;
-  /** What the tile paints as its preview background. */
   swatch: string;
-  /** Prefs the preset writes. `none` writes nothing. */
   apply?: { accent: string; bg: string; cta: CtaScheme };
 };
 
-/** How primary CTA buttons are coloured. `accent` = the themed accent (default);
- *  `neutral` = daorbit-style chip: white-on-dark / near-black-on-light. */
 export type CtaScheme = "accent" | "neutral";
 
 export const THEME_PRESETS: ThemePreset[] = [
@@ -146,10 +251,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     label: "Classic",
     swatch:
       "radial-gradient(58% 80% at 0 0, #818cf83d, transparent 62%), radial-gradient(58% 80% at 100% 0, #eab30826, transparent 62%), var(--surface-2)",
-    // A neutral slate accent — classic means restrained: tabs, the active
-    // mode toggle, selected tiles and the nav pill all read as a quiet grey,
-    // not a vivid indigo. Indigo shows only in the hero bg glow and (light
-    // mode) the primary CTA chip.
+
     apply: { accent: "white", bg: "classic", cta: "neutral" },
   },
 ];
@@ -164,16 +266,21 @@ type ThemePrefs = {
   density: Density;
   fontSize: FontSize;
   table: TableStyle;
-  /** Motion off disables the app's own decorative transitions/hover motion
-   *  on top of whatever the OS-level prefers-reduced-motion already covers —
-   *  some users want it off regardless of their system setting. */
+
   motion: boolean;
 };
 
 const DEFAULT_PREFS: ThemePrefs = {
-  mode: "system", preset: "none", cta: "accent", accent: "blue", bg: "flat",
-  radius: "rounded", density: "comfortable",
-  fontSize: "default", table: "plain", motion: true,
+  mode: "system",
+  preset: "none",
+  cta: "accent",
+  accent: "blue",
+  bg: "flat",
+  radius: "rounded",
+  density: "comfortable",
+  fontSize: "default",
+  table: "plain",
+  motion: true,
 };
 
 export function readThemePrefs(): ThemePrefs {
@@ -210,10 +317,15 @@ function hexToRgb(hex: string) {
 /** Black or white, whichever stays readable on top of `hex`. */
 export function contrastOn(hex: string) {
   const { r, g, b } = hexToRgb(hex);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? "#0a0b0d" : "#ffffff";
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6
+    ? "#0a0b0d"
+    : "#ffffff";
 }
 function rgbToHex(r: number, g: number, b: number) {
-  const c = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  const c = (v: number) =>
+    Math.max(0, Math.min(255, Math.round(v)))
+      .toString(16)
+      .padStart(2, "0");
   return `#${c(r)}${c(g)}${c(b)}`;
 }
 /** Mixes a hex color toward white (amount > 0) or black (amount < 0). */
@@ -221,42 +333,45 @@ function shade(hex: string, amount: number) {
   const { r, g, b } = hexToRgb(hex);
   const target = amount > 0 ? 255 : 0;
   const t = Math.abs(amount);
-  return rgbToHex(r + (target - r) * t, g + (target - g) * t, b + (target - b) * t);
+  return rgbToHex(
+    r + (target - r) * t,
+    g + (target - g) * t,
+    b + (target - b) * t,
+  );
 }
 
- 
 function buildScale(hex: string, anchor: number): string[] {
- 
   const steps = [0.92, 0.8, 0.64, 0.44, 0.22, 0.08, -0.14, -0.3, -0.46, -0.6];
   const at = steps[anchor];
   return steps.map((s, i) => {
     if (i === anchor) return hex;
-    // Re-space the remaining stops around the anchor so the ramp stays smooth:
-    // lighter stops keep their distance above it, darker ones below.
-    const rel = s > at
-      ? (s - at) / (steps[0] - at)   // 0..1 towards white
-      : (s - at) / (at - steps[9]);  // 0..-1 towards black
+
+    const rel =
+      s > at
+        ? (s - at) / (steps[0] - at) // 0..1 towards white
+        : (s - at) / (at - steps[9]); // 0..-1 towards black
     return shade(hex, rel * (s > at ? 0.92 : 0.72));
   });
 }
- 
+
 const MESH_ANCHORS = [
   { pos: "20% 20%", alpha: 0.22, size: 55 },
   { pos: "80% 0%", alpha: 0.18, size: 50 },
   { pos: "90% 90%", alpha: 0.14, size: 55 },
 ];
 
-/** Per-stop strength of a "wash" preset's diagonal sweep. */
 const WASH_ALPHA = 0.3;
 
-/** Builds the CSS `background` value for a preset, resolved against `bg`
- *  (the current theme's base colour) and `border` (for grid line presets) —
- *  both passed in rather than read from CSS so this stays a pure function. */
-export function buildBgValue(preset: BgPreset, bg: string, border: string): string {
+export function buildBgValue(
+  preset: BgPreset,
+  bg: string,
+  border: string,
+): string {
   if (preset.kind === "flat") return bg;
 
   if (preset.kind === "mesh") {
-    const hues = preset.hues && preset.hues.length > 0 ? preset.hues : ["#3b82f6"];
+    const hues =
+      preset.hues && preset.hues.length > 0 ? preset.hues : ["#3b82f6"];
     const layers = MESH_ANCHORS.map((anchor, i) => {
       const hue = hues[i % hues.length];
       return `radial-gradient(at ${anchor.pos}, color-mix(in srgb, ${hue} ${anchor.alpha * 100}%, transparent), transparent ${anchor.size}%)`;
@@ -265,40 +380,30 @@ export function buildBgValue(preset: BgPreset, bg: string, border: string): stri
   }
 
   if (preset.kind === "wash") {
-    const hues = preset.hues && preset.hues.length > 0 ? preset.hues : ["#3b82f6"];
-    // Stops are spread evenly along the sweep, and each hue is mixed down to a
-    // fraction of itself so text keeps its contrast — a wash covers the whole
-    // surface, so it has to sit far lighter than mesh's isolated blobs.
+    const hues =
+      preset.hues && preset.hues.length > 0 ? preset.hues : ["#3b82f6"];
+
     const stops = hues
       .map((hue, i) => {
         const pct = hues.length === 1 ? 50 : (i / (hues.length - 1)) * 100;
         return `color-mix(in srgb, ${hue} ${WASH_ALPHA * 100}%, transparent) ${Math.round(pct)}%`;
       })
       .join(", ");
-    // The glow re-states the first hue in the top-left corner so the sweep has
-    // a light source rather than reading as a flat band.
+
     const glow = `radial-gradient(120% 80% at 12% 8%, color-mix(in srgb, ${hues[0]} 18%, transparent), transparent 60%)`;
     return `${glow}, linear-gradient(145deg, ${stops}), ${bg}`;
   }
 
   if (preset.kind === "corners") {
-    // daorbit's hero wash, verbatim in intent: one indigo glow anchored to the
-    // top-LEFT corner, one warm amber glow to the top-RIGHT, both low-alpha and
-    // faded out by ~62% so the whole lower half of the surface stays the plain
-    // near-black base. Nothing centred, nothing at the bottom — the restraint
-    // is the point.
-    const [indigo, amber] = preset.hues && preset.hues.length >= 2
-      ? preset.hues
-      : ["#818cf8", "#eab308"];
+    const [indigo, amber] =
+      preset.hues && preset.hues.length >= 2
+        ? preset.hues
+        : ["#818cf8", "#eab308"];
     const left = `radial-gradient(55% 80% at 0% 0%, color-mix(in srgb, ${indigo} 16%, transparent), transparent 62%)`;
     const right = `radial-gradient(55% 80% at 100% 0%, color-mix(in srgb, ${amber} 12%, transparent), transparent 62%)`;
     return `${left}, ${right}, ${bg}`;
   }
 
-  // "stars" has no background value of its own: tiled gradients repeat, which
-  // put every dot on a lattice. The field is rendered as real elements at
-  // random positions instead (see <Starfield />), so this preset only supplies
-  // the base colour under it.
   if (preset.kind === "stars") return bg;
 
   if (preset.kind === "dots") {
@@ -314,11 +419,6 @@ export function buildBgValue(preset: BgPreset, bg: string, border: string): stri
   return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
 }
 
-/**
- * Applies mode + accent + background + radius + density to the document
- * root. Call once on boot and again whenever a preference changes — cheap
- * enough to run on every change without debouncing.
- */
 export function applyTheme(prefs: ThemePrefs) {
   const root = document.documentElement;
 
@@ -328,19 +428,15 @@ export function applyTheme(prefs: ThemePrefs) {
     root.setAttribute("data-theme-mode", prefs.mode);
   }
 
-  const preset = ACCENT_PRESETS.find((p) => p.id === prefs.accent) ?? ACCENT_PRESETS[0];
-  const dark = prefs.mode === "dark" ||
-    (prefs.mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const preset =
+    ACCENT_PRESETS.find((p) => p.id === prefs.accent) ?? ACCENT_PRESETS[0];
+  const dark =
+    prefs.mode === "dark" ||
+    (prefs.mode === "system" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-  // The picked colour, exactly as the swatch shows it, in both modes — a
-  // preset that paints a darker shade of itself reads as the wrong colour.
-  // Only --accent-2 (gradient partner, hover) moves off it.
   const accent = preset.hex;
-  // --violet-2 doubles as a foreground colour (active nav icons, tab
-  // underlines) as well as a hover shade, so it must stay readable against
-  // both --surface and --accent-soft even when the accent itself is very
-  // light (e.g. white) — nudging a pale colour 15% further towards white or
-  // black barely moves it and leaves the icon invisible.
+
   const { r: ar, g: ag, b: ab } = hexToRgb(preset.hex);
   const accentLuminance = (0.299 * ar + 0.587 * ag + 0.114 * ab) / 255;
   const accent2 =
@@ -361,10 +457,6 @@ export function applyTheme(prefs: ThemePrefs) {
   root.style.setProperty("--violet-2", accent2);
   root.style.setProperty("--violet-soft", accentSoft);
 
-  // Mantine's own components (Button, Badge, ThemeIcon, focus rings, every
-  // color="emerald" call site) resolve colour through these CSS vars, not
-  // through the custom --accent ones above.
- 
   const primaryShadeIdx = dark ? 7 : 6;
   const scale = buildScale(preset.hex, primaryShadeIdx);
   scale.forEach((c, i) => {
@@ -372,34 +464,28 @@ export function applyTheme(prefs: ThemePrefs) {
   });
   const filled = scale[primaryShadeIdx];
   const filledHover = scale[Math.min(primaryShadeIdx + 1, 9)];
-  // A light accent (e.g. white) makes "filled" surfaces — pills tabs, solid
-  // buttons — pale, and Mantine hardcodes white text on top of them assuming
-  // filled is always dark. Pick text by the fill's own luminance instead, or
-  // it renders as invisible white-on-white / near-white-on-white.
+
   const filledText = contrastOn(filled);
   root.style.setProperty("--tabs-text-color", filledText);
-  // Same problem as above for solid buttons and filled theme-icons: both
-  // hardcode white text on top of --mantine-primary-color-filled.
+
   root.style.setProperty("--button-color", filledText);
   root.style.setProperty("--section-color", filledText);
-  // Anything painted on top of the accent — a filled ThemeIcon's glyph, a
-  // checkbox tick, a switch thumb — is hardcoded white by Mantine and
-  // disappears on a pale accent, exactly as the filled-button text above does.
+
   root.style.setProperty("--accent-contrast", filledText);
-  // Mantine bakes -light / -light-hover / -text as literal computed colours
-  // at theme-build time (see get-css-color-variables.mjs) rather than as var()
-  // references to the numbered scale, so overwriting emerald-0..9 above does
-  // NOT reach them — every "light" variant button/badge stayed green until
-  // these are set explicitly too. Same family of vars, set for both the
-  // named "emerald" colour and the "primary" alias Mantine also exposes, so
-  // every call site — color="emerald" and unset/primary — repaints.
+
   for (const name of ["emerald", "primary"]) {
     root.style.setProperty(`--mantine-color-${name}-filled`, filled);
     root.style.setProperty(`--mantine-color-${name}-filled-hover`, filledHover);
     root.style.setProperty(`--mantine-color-${name}-light`, accentSoft);
     root.style.setProperty(`--mantine-color-${name}-light-hover`, accentSoft);
-    root.style.setProperty(`--mantine-color-${name}-light-color`, scale[dark ? 4 : 6]);
-    root.style.setProperty(`--mantine-color-${name}-text`, dark ? scale[4] : filled);
+    root.style.setProperty(
+      `--mantine-color-${name}-light-color`,
+      scale[dark ? 4 : 6],
+    );
+    root.style.setProperty(
+      `--mantine-color-${name}-text`,
+      dark ? scale[4] : filled,
+    );
     root.style.setProperty(`--mantine-color-${name}-outline`, filled);
     root.style.setProperty(`--mantine-color-${name}-outline-hover`, accentSoft);
   }
@@ -407,36 +493,31 @@ export function applyTheme(prefs: ThemePrefs) {
     root.style.setProperty(`--mantine-primary-color-${i}`, scale[i]);
   }
 
-
   const bgPreset = BG_STYLES.find((b) => b.id === prefs.bg) ?? BG_STYLES[0];
   const bgValue = buildBgValue(bgPreset, "var(--bg)", "var(--border)");
   root.style.setProperty("--bg-wash", bgValue);
   // "stars" still paints through every `textured` rule; the extra attribute is
   // what lets the CSS attach the drift animation to that one kind.
-  root.setAttribute("data-bg-style", bgPreset.kind === "flat" ? "flat" : "textured");
+  root.setAttribute(
+    "data-bg-style",
+    bgPreset.kind === "flat" ? "flat" : "textured",
+  );
   root.toggleAttribute("data-bg-animated", bgPreset.kind === "stars");
 
-  // CTA scheme. `accent` (default) leaves .btn-cta reading the themed accent;
-  // `neutral` is daorbit's chip — a white pill on dark, a near-black pill on
-  // light, with text to match. Set as its own tokens so only opted-in CTA
-  // buttons pick it up and the rest of the accent system is untouched.
   const cta =
     prefs.cta === "neutral"
       ? dark
         ? { bg: "#ffffff", bgHover: "#e9eaec", fg: "#0a0b0d" }
         : { bg: "#4f46e5", bgHover: "#4338ca", fg: "#ffffff" }
-      : { bg: "var(--accent)", bgHover: "var(--accent-2)", fg: "#ffffff" };
+      : {
+          bg: "var(--accent)",
+          bgHover: "var(--accent-2)",
+          fg: contrastOn(accent),
+        };
   root.style.setProperty("--cta", cta.bg);
   root.style.setProperty("--cta-hover", cta.bgHover);
   root.style.setProperty("--cta-fg", cta.fg);
 
-  // The neutral CTA chip is applied to <Button> only, via CSS in App.css
-  // ([data-theme-preset="classic"] rules) — NOT by redirecting the whole
-  // "emerald"/"primary" Mantine colour family, which also feeds Tabs, Chips,
-  // Badges, SegmentedControl and would leave each of those with a white fill
-  // and no matching text colour. Tabs/segmented stay on the indigo accent.
-
-  // The sidebar stays flat --rail in every preset.
   root.style.setProperty("--rail-wash", "var(--rail)");
   root.setAttribute("data-theme-preset", prefs.preset);
 
@@ -446,24 +527,23 @@ export function applyTheme(prefs: ThemePrefs) {
   root.style.setProperty("--radius-lg", `${Math.round(radiusPx * 1.25)}px`);
   root.style.setProperty("--mantine-radius-md", `${radiusPx}px`);
 
-  // Density: compact trims Mantine's own spacing scale so lists, form rows,
-  // and table cells sit closer together across every page at once.
   root.setAttribute("data-density", prefs.density);
 
-  // Font size: --mantine-scale is Mantine's own multiplier, but it scales
-  // *everything* — spacing, radii, avatar/badge sizes, border widths, not
-  // just type (665 uses across styles.css) — so touching it here would also
-  // resize buttons and inputs whenever someone just wants bigger text, and
-  // compound unpredictably with the separate Density control. Each font-size
-  // step is set directly instead: every Mantine Text/Title/Button/Badge
-  // resolves its size from these five vars (font-size-xs..xl), and this
-  // covers all of them so a size="sm"/"xs" call (most of the app's own UI
-  // text) scales along with the default "md" one.
-  const fontStep = FONT_SIZES.find((f) => f.id === prefs.fontSize) ?? FONT_SIZES[1];
+  const fontStep =
+    FONT_SIZES.find((f) => f.id === prefs.fontSize) ?? FONT_SIZES[1];
   const scaleFactor = fontStep.px / 14;
-  const FONT_BASE: Record<string, number> = { xs: 12, sm: 14, md: 16, lg: 18, xl: 20 };
+  const FONT_BASE: Record<string, number> = {
+    xs: 12,
+    sm: 14,
+    md: 16,
+    lg: 18,
+    xl: 20,
+  };
   for (const [step, basePx] of Object.entries(FONT_BASE)) {
-    root.style.setProperty(`--mantine-font-size-${step}`, `${Math.round(basePx * scaleFactor * 10) / 10}px`);
+    root.style.setProperty(
+      `--mantine-font-size-${step}`,
+      `${Math.round(basePx * scaleFactor * 10) / 10}px`,
+    );
   }
   root.style.setProperty("--font-scale", String(scaleFactor));
 
@@ -472,11 +552,6 @@ export function applyTheme(prefs: ThemePrefs) {
 
   window.dispatchEvent(new CustomEvent("quantalog-theme-change"));
 
-  // Mantine's own dark[6]/dark[7] are its default surface colours for
-  // Menu/Modal/Popover/Card/etc — a fixed grey unrelated to the app's own
-  // --surface/--bg scale, so a themed dark background sat next to a
-  // Mantine-grey dropdown. Remapped to the app's real dark tones so every
-  // built-in surface matches instead of standing out as "the Mantine one".
   if (dark) {
     root.style.setProperty("--mantine-color-dark-4", "var(--border-strong)");
     root.style.setProperty("--mantine-color-dark-5", "var(--surface-2)");
@@ -501,16 +576,6 @@ export function loadAndApplyTheme(): ThemePrefs {
 let transitionTimer: ReturnType<typeof setTimeout> | null = null;
 let pulseTimer: ReturnType<typeof setTimeout> | null = null;
 
-/**
- * Briefly enables a CSS transition on colour/background properties so a
- * mode, accent, or background change crossfades instead of snapping, and
- * fires a one-shot accent-tinted pulse across the whole viewport (see
- * `.theme-pulse` in App.css) so the change reads as a single visible event
- * rather than just a quiet colour drift — a crossfade alone can pass
- * unnoticed if the visible viewport doesn't touch much of what changed.
- * Both are scoped to classes toggled on <html> for the animation's own
- * duration rather than left on permanently.
- */
 export function withThemeTransition(apply: () => void) {
   const root = document.documentElement;
   root.classList.add("theme-transitioning", "theme-pulse");

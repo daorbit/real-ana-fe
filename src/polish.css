@@ -509,3 +509,12 @@
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
+
+/* The checked thumb sits on the accent, so it has to contrast with it rather
+   than stay Mantine's hardcoded white — a white accent otherwise paints a
+   white thumb on a white track. Mantine's own checked rule only moves the
+   thumb, and its `styles` API cannot target the checked state, so it is set
+   here. --accent-contrast comes from applyTheme() in shared/lib/theme.ts. */
+.mantine-Switch-input:checked + .mantine-Switch-track .mantine-Switch-thumb {
+  background-color: var(--accent-contrast);
+}
