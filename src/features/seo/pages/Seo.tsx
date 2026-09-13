@@ -8,7 +8,7 @@ import {
   Search, RefreshCw, Globe, History, Trash2, Trophy,
   ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Layers, Printer,
-  HelpCircle, Bot,
+  HelpCircle, Bot, AlertTriangle,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
@@ -36,6 +36,7 @@ import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
 import { CrawlPanel } from "@/features/seo/components/CrawlPanel";
 import {
   OverviewPanel, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel, AiSearchPanel,
+  IssuesPanel,
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -43,6 +44,7 @@ import { useSiteScope } from "@/features/analytics";
 
 const TABS = [
   { value: "overview", label: "Overview", icon: ListChecks },
+  { value: "issues", label: "Issues", icon: AlertTriangle },
   { value: "meta", label: "Meta tags", icon: Tags },
   { value: "content", label: "Content", icon: FileText },
   { value: "technical", label: "Technical", icon: Wrench },
@@ -651,7 +653,7 @@ export default function Seo() {
                   const activeTab = tab === t.value;
                   const Icon = t.icon;
                   const count =
-                    t.value === "overview"
+                    t.value === "overview" || t.value === "issues"
                       ? data.issues.length
                       : t.value === "suggestions"
                       ? data.performance.suggestions.length
@@ -665,7 +667,9 @@ export default function Seo() {
                   // Counts that flag a problem (broken links, schema errors,
                   // critical issues) read red; neutral tallies stay grey.
                   const alarm =
-                    (t.value === "links" || t.value === "schema") && count > 0;
+                    ((t.value === "links" || t.value === "schema") && count > 0) ||
+                    (t.value === "issues" &&
+                      data.issues.some((i) => i.severity === "critical"));
                   return (
                     <UnstyledButton
                       key={t.value}
@@ -724,6 +728,7 @@ export default function Seo() {
                 history={history}
               />
             )}
+            {tab === "issues" && <IssuesPanel issues={data.issues} />}
             {tab === "meta" && <MetaPanel meta={data.meta} url={data.finalUrl} />}
             {tab === "content" && <ContentPanel content={data.content} />}
             {tab === "technical" && (
