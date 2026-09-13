@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import {
-  Anchor, Badge, Box, Card, Group, ScrollArea, SegmentedControl, Stack, Table, Text, ThemeIcon,
+  ActionIcon, Anchor, Badge, Box, Button, Card, CopyButton, Group, ScrollArea,
+  SegmentedControl, Stack, Table, Text, ThemeIcon, Tooltip,
 } from "@mantine/core";
-import { CircleCheck } from "lucide-react";
+import { Check, CircleCheck, Copy } from "lucide-react";
 import type { SeoReportData } from "@/shared/types";
 import { SEVERITY } from "@/features/seo/components/shared/Panel";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 
 type Severity = "critical" | "warning" | "info";
 
@@ -111,6 +113,23 @@ export function collectIssues(data: SeoReportData): Row[] {
   return rows;
 }
 
+/**
+ * One issue as plain text, for pasting into a ticket or a message.
+ *
+ * Severity and source lead the line because they are what someone triaging the
+ * paste reads first; the URL trails on its own line so it stays clickable in
+ * clients that linkify.
+ */
+function issueText(row: Row): string {
+  const head = `[${SEVERITY[row.severity].label} · ${row.source}] ${row.title}`;
+  return [head, row.detail, row.url].filter(Boolean).join("\n");
+}
+
+/** The visible list as one block, numbered to match what is on screen. */
+function listText(rows: Row[], heading: string): string {
+  return [heading, "", ...rows.map((r, i) => `${i + 1}. ${issueText(r)}`)].join("\n");
+}
+
 
 export function IssuesPanel({ data }: { data: SeoReportData }) {
   const [filter, setFilter] = useState<Filter>("all");
@@ -131,6 +150,12 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
     const list = filter === "all" ? all : all.filter((i) => i.severity === filter);
     return [...list].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
   }, [all, filter]);
+
+  // Names the page and the filter, so a pasted list still says what it is a
+  // list of once it has left the app.
+  const copyHeading = `SEO issues — ${data.finalUrl}${
+    filter === "all" ? "" : ` (${SEVERITY[filter].label.toLowerCase()} only)`
+  } — ${rows.length} of ${all.length}`;
 
   if (!all.length) {
     return (
@@ -167,18 +192,38 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
           )}
         </Group>
 
-        <SegmentedControl
-          size="xs"
-          radius="md"
-          value={filter}
-          onChange={(v) => setFilter(v as Filter)}
-          data={[
-            { value: "all", label: `All (${counts.all})` },
-            { value: "critical", label: `Critical (${counts.critical})` },
-            { value: "warning", label: `Warnings (${counts.warning})` },
-            { value: "info", label: `Notes (${counts.info})` },
-          ]}
-        />
+        <Group gap="xs" wrap="nowrap">
+          <SegmentedControl
+            size="xs"
+            radius="md"
+            value={filter}
+            onChange={(v) => setFilter(v as Filter)}
+            data={[
+              { value: "all", label: `All (${counts.all})` },
+              { value: "critical", label: `Critical (${counts.critical})` },
+              { value: "warning", label: `Warnings (${counts.warning})` },
+              { value: "info", label: `Notes (${counts.info})` },
+            ]}
+          />
+
+          {/* Copies what is on screen, not the whole audit — a filtered list is
+              usually the one being handed to someone. */}
+          <CopyButton value={listText(rows, copyHeading)}>
+            {({ copied, copy }) => (
+              <Button
+                size="xs"
+                radius="md"
+                variant={copied ? "light" : "default"}
+                color={copied ? "teal" : undefined}
+                onClick={copy}
+                disabled={!rows.length}
+                leftSection={copied ? <Check size={14} /> : <Copy size={14} />}
+              >
+                {copied ? "Copied" : "Copy all"}
+              </Button>
+            )}
+          </CopyButton>
+        </Group>
       </Group>
 
       {!rows.length ? (
@@ -191,13 +236,14 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
       ) : (
         <Card withBorder radius="md" padding={0}>
           <ScrollArea>
-            <Table highlightOnHover verticalSpacing="sm" miw={720}>
+            <Table highlightOnHover verticalSpacing="sm" miw={760}>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th w={52}>#</Table.Th>
                   <Table.Th w={124}>Severity</Table.Th>
                   <Table.Th w={124}>Source</Table.Th>
                   <Table.Th>Issue</Table.Th>
+                  <Table.Th w={84} />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -250,6 +296,34 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
                             </Anchor>
                           )}
                         </Box>
+                      </Table.Td>
+                      <Table.Td>
+                        <Group gap={2} wrap="nowrap" justify="flex-end">
+                        <AskOrbitButton
+                          iconOnly
+                          label="Ask Orbit how to fix this"
+                          question={`My SEO audit flagged: "${row.title}". ${row.detail} How do I fix this?`}
+                        />
+                        <CopyButton value={issueText(row)}>
+                          {({ copied, copy }) => (
+                            <Tooltip
+                              label={copied ? "Copied" : "Copy this issue"}
+                              withArrow
+                              position="left"
+                            >
+                              <ActionIcon
+                                variant="subtle"
+                                size="sm"
+                                color={copied ? "teal" : "gray"}
+                                onClick={copy}
+                                aria-label="Copy this issue"
+                              >
+                                {copied ? <Check size={14} /> : <Copy size={14} />}
+                              </ActionIcon>
+                            </Tooltip>
+                          )}
+                        </CopyButton>
+                        </Group>
                       </Table.Td>
                     </Table.Tr>
                   );
