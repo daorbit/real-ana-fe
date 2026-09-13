@@ -1,7 +1,7 @@
 
 export { OverviewPanel } from "@/features/seo/components/panels/OverviewPanel";
 export { IssueList, ScorePanel } from "@/features/seo/components/panels/IssueList";
-export { IssuesPanel } from "@/features/seo/components/panels/IssuesPanel";
+export { IssuesPanel, collectIssues } from "@/features/seo/components/panels/IssuesPanel";
 export { MetaPanel } from "@/features/seo/components/panels/MetaPanel";
 export { ContentPanel } from "@/features/seo/components/panels/ContentPanel";
 export { TechnicalPanel } from "@/features/seo/components/panels/TechnicalPanel";

@@ -36,7 +36,7 @@ import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
 import { CrawlPanel } from "@/features/seo/components/CrawlPanel";
 import {
   OverviewPanel, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel, AiSearchPanel,
-  IssuesPanel,
+  IssuesPanel, collectIssues,
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -59,23 +59,10 @@ const TABS = [
 
 type TabValue = (typeof TABS)[number]["value"];
 
-/**
- * How many past audits to fetch, and how many to show per page.
- *
- * The history rows omit the report body, so 200 of them is a small payload —
- * cheaper to fetch once and page through on the client than to round-trip per
- * page, and it keeps the score-trend sparkline working off the full series.
- */
+
 const HISTORY_LIMIT = 200;
 const HISTORY_PAGE_SIZE = 15;
 
-/**
- * Past audits for this site, newest first.
- *
- * The point of keeping history is to answer "did that fix work?", so each row
- * carries the change in score against the run before it rather than just the
- * score on its own.
- */
 function HistoryPanel({
   history,
   loading,
@@ -85,16 +72,13 @@ function HistoryPanel({
 }: {
   history: SeoReportSummary[];
   loading: boolean;
-  /** The report currently on screen, highlighted in the list. */
   openId: string;
   onOpen: (id: string) => void;
-  /** Null for a viewer, who keeps the full history but cannot remove a run. */
   onDelete: ((id: string) => void) | null;
 }) {
   const [page, setPage] = useState(1);
 
-  // A deleted run can leave the last page empty; step back rather than showing
-  // an empty table under a page number that no longer exists.
+
   const pageCount = Math.max(1, Math.ceil(history.length / HISTORY_PAGE_SIZE));
   const current = Math.min(page, pageCount);
 
@@ -267,13 +251,7 @@ function HistoryPanel({
   );
 }
 
-/**
- * SEO auditing for a tracked site.
- *
- * The URL box is deliberately anchored to the selected site's domain: this is
- * an audit of a property the workspace already owns, not a general-purpose
- * scanner pointed at arbitrary hosts. The server enforces the same rule.
- */
+
 export default function Seo() {
   useTitle("SEO");
   const { t } = useTranslation();
@@ -282,25 +260,10 @@ export default function Seo() {
   const { user, refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
 
-  // `currentData`, not `data`: the latter holds the previous workspace's sites
-  // across the switch, which would offer a site picker full of properties this
-  // workspace doesn't own.
   const { currentData: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
 
-  /**
-   * The site the user picked, if any. Not the source of truth — see `siteId`.
-   *
-   * Holding only the *choice* here, and resolving it against the current
-   * workspace's list below, is what keeps a workspace switch from firing
-   * requests at the previous workspace's site. Storing the resolved id in state
-   * instead meant a render happened with the stale value before any effect
-   * could clear it, and every query keyed on it went out and 404'd.
-   */
-  // Shared with Home's site filter (LS `rta_site_scope`, per workspace) so a
-  // site chosen on one page carries to the other. Home's scope is a list; SEO
-  // audits one site, so it reads/writes only the first entry.
   const [siteScope, setSiteScope] = useSiteScope(workspaceId || undefined);
   const [picked, setPicked] = useState<string>(siteScope[0] ?? "");
 
@@ -314,21 +277,10 @@ export default function Seo() {
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
 
-  /**
-   * The site actually being audited, derived during render rather than stored.
-   *
-   * A pick only counts while it names a site in the workspace currently loaded;
-   * otherwise this falls back to the first site, or to empty while the list is
-   * still in flight. Because it is computed, the very first render after a
-   * switch already has the right value, and every query below either targets a
-   * real site or skips.
-   */
+
   const site = sites.find((s) => s.siteId === picked) ?? sites[0] ?? null;
   const siteId = site?.siteId ?? "";
 
-  // A different site means a different report; nothing from the last one
-  // applies. Keyed on the resolved id, so it also fires when a workspace switch
-  // lands on a different site.
   useEffect(() => {
     setViewingId(null);
     setPath("/");
@@ -387,6 +339,10 @@ export default function Seo() {
   const report: SeoReport | undefined = viewingId ? viewed : latest;
   const data = report?.data;
   const loading = analyzing || latestFetching || viewedFetching;
+
+  // Every finding from every checker, not just the on-page ones — the Issues
+  // tab's badge counts the same list the tab itself renders.
+  const allIssues = useMemo(() => (data ? collectIssues(data) : []), [data]);
 
   /** The site's bare hostname, shown as a fixed prefix on the path field. */
   const domainLabel = useMemo(
@@ -653,8 +609,10 @@ export default function Seo() {
                   const activeTab = tab === t.value;
                   const Icon = t.icon;
                   const count =
-                    t.value === "overview" || t.value === "issues"
+                    t.value === "overview"
                       ? data.issues.length
+                      : t.value === "issues"
+                      ? allIssues.length
                       : t.value === "suggestions"
                       ? data.performance.suggestions.length
                       : t.value === "links"
@@ -669,7 +627,7 @@ export default function Seo() {
                   const alarm =
                     ((t.value === "links" || t.value === "schema") && count > 0) ||
                     (t.value === "issues" &&
-                      data.issues.some((i) => i.severity === "critical"));
+                      allIssues.some((i) => i.severity === "critical"));
                   return (
                     <UnstyledButton
                       key={t.value}
@@ -728,7 +686,7 @@ export default function Seo() {
                 history={history}
               />
             )}
-            {tab === "issues" && <IssuesPanel issues={data.issues} />}
+            {tab === "issues" && <IssuesPanel data={data} />}
             {tab === "meta" && <MetaPanel meta={data.meta} url={data.finalUrl} />}
             {tab === "content" && <ContentPanel content={data.content} />}
             {tab === "technical" && (

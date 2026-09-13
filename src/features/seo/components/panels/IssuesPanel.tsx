@@ -1,42 +1,144 @@
 import { useMemo, useState } from "react";
 import {
-  Badge, Box, Card, Group, ScrollArea, SegmentedControl, Stack, Table, Text, ThemeIcon,
+  Anchor, Badge, Box, Card, Group, ScrollArea, SegmentedControl, Stack, Table, Text, ThemeIcon,
 } from "@mantine/core";
 import { CircleCheck } from "lucide-react";
-import type { SeoIssue } from "@/shared/types";
+import type { SeoReportData } from "@/shared/types";
 import { SEVERITY } from "@/features/seo/components/shared/Panel";
 import { EmptyState } from "@/shared/ui/EmptyState";
 
-const ORDER: Record<SeoIssue["severity"], number> = { critical: 0, warning: 1, info: 2 };
+type Severity = "critical" | "warning" | "info";
 
-type Filter = "all" | SeoIssue["severity"];
+type Row = {
+  severity: Severity;
+  source: string;
+  title: string;
+  detail: string;
+  url?: string;
+};
+
+const ORDER: Record<Severity, number> = { critical: 0, warning: 1, info: 2 };
+
+type Filter = "all" | Severity;
+
+export function collectIssues(data: SeoReportData): Row[] {
+  const rows: Row[] = [];
+
+  for (const issue of data.issues) {
+    rows.push({
+      severity: issue.severity,
+      source: issue.area,
+      title: issue.title,
+      detail: issue.detail,
+    });
+  }
+
+  // Link checker. Only the failures — an OK link is not an issue, and the
+  // Links tab already lists the full set.
+  for (const link of data.links?.results ?? []) {
+    if (link.status === "ok" || link.status === "skipped" || link.status === "blocked") continue;
+    const title =
+      link.status === "broken"
+        ? "Broken link"
+        : link.status === "server-error"
+        ? "Link returns a server error"
+        : link.status === "timeout"
+        ? "Link timed out"
+        : "Link redirects";
+    rows.push({
+      // A redirect still resolves, so it is a note, not a failure.
+      severity:
+        link.status === "redirect" ? "info" : link.status === "timeout" ? "warning" : "critical",
+      source: "links",
+      title,
+      detail: [
+        link.text ? `"${link.text}"` : null,
+        link.statusCode ? `HTTP ${link.statusCode}` : null,
+        link.internal ? "internal" : "external",
+        link.note,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      url: link.url,
+    });
+  }
+
+  for (const finding of data.schema?.findings ?? []) {
+    rows.push({
+      severity: finding.severity === "error" ? "critical" : "warning",
+      source: "schema",
+      title: `${finding.type}${finding.property ? ` · ${finding.property}` : ""}`,
+      detail: finding.message,
+    });
+  }
+
+  for (const finding of data.siteFiles?.robotsReport?.findings ?? []) {
+    rows.push({
+      severity: finding.severity,
+      source: "robots.txt",
+      title: finding.line ? `robots.txt line ${finding.line}` : "robots.txt",
+      detail: finding.message,
+    });
+  }
+
+  for (const finding of data.siteFiles?.sitemapReport?.findings ?? []) {
+    rows.push({
+      severity: finding.severity,
+      source: "sitemap",
+      title: "Sitemap",
+      detail: finding.message,
+    });
+  }
+
+  for (const finding of data.aiSearch?.findings ?? []) {
+    rows.push({
+      severity: finding.severity,
+      source: "ai",
+      title: "AI search",
+      detail: finding.message,
+    });
+  }
+
+  for (const s of data.performance?.suggestions ?? []) {
+    rows.push({
+      severity: s.score < 0.5 ? "warning" : "info",
+      source: s.category || "performance",
+      title: s.title,
+      detail: [s.displayValue, s.description].filter(Boolean).join(" — "),
+    });
+  }
+
+  return rows;
+}
 
 
-export function IssuesPanel({ issues }: { issues: SeoIssue[] }) {
+export function IssuesPanel({ data }: { data: SeoReportData }) {
   const [filter, setFilter] = useState<Filter>("all");
+
+  const all = useMemo(() => collectIssues(data), [data]);
 
   const counts = useMemo(
     () => ({
-      all: issues.length,
-      critical: issues.filter((i) => i.severity === "critical").length,
-      warning: issues.filter((i) => i.severity === "warning").length,
-      info: issues.filter((i) => i.severity === "info").length,
+      all: all.length,
+      critical: all.filter((i) => i.severity === "critical").length,
+      warning: all.filter((i) => i.severity === "warning").length,
+      info: all.filter((i) => i.severity === "info").length,
     }),
-    [issues]
+    [all]
   );
 
   const rows = useMemo(() => {
-    const list = filter === "all" ? issues : issues.filter((i) => i.severity === filter);
+    const list = filter === "all" ? all : all.filter((i) => i.severity === filter);
     return [...list].sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
-  }, [issues, filter]);
+  }, [all, filter]);
 
-  if (!issues.length) {
+  if (!all.length) {
     return (
       <EmptyState
         compact
         icon={CircleCheck}
         title="No issues found"
-        description="Every on-page check this audit runs came back clean."
+        description="Every check this audit runs came back clean."
       />
     );
   }
@@ -45,6 +147,9 @@ export function IssuesPanel({ issues }: { issues: SeoIssue[] }) {
     <Stack gap="md">
       <Group justify="space-between" wrap="wrap" gap="sm">
         <Group gap={6}>
+          <Text size="sm" fw={600}>
+            {counts.all} issue{counts.all === 1 ? "" : "s"}
+          </Text>
           {counts.critical > 0 && (
             <Badge size="sm" variant="light" color="red">
               {counts.critical} critical
@@ -57,7 +162,7 @@ export function IssuesPanel({ issues }: { issues: SeoIssue[] }) {
           )}
           {counts.info > 0 && (
             <Badge size="sm" variant="light" color="blue">
-              {counts.info} suggestion{counts.info === 1 ? "" : "s"}
+              {counts.info} note{counts.info === 1 ? "" : "s"}
             </Badge>
           )}
         </Group>
@@ -86,21 +191,21 @@ export function IssuesPanel({ issues }: { issues: SeoIssue[] }) {
       ) : (
         <Card withBorder radius="md" padding={0}>
           <ScrollArea>
-            <Table highlightOnHover verticalSpacing="sm" miw={640}>
+            <Table highlightOnHover verticalSpacing="sm" miw={720}>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th w={56}>#</Table.Th>
-                  <Table.Th w={130}>Severity</Table.Th>
-                  <Table.Th w={110}>Area</Table.Th>
+                  <Table.Th w={52}>#</Table.Th>
+                  <Table.Th w={124}>Severity</Table.Th>
+                  <Table.Th w={124}>Source</Table.Th>
                   <Table.Th>Issue</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {rows.map((issue, i) => {
-                  const s = SEVERITY[issue.severity];
+                {rows.map((row, i) => {
+                  const s = SEVERITY[row.severity];
                   const Icon = s.icon;
                   return (
-                    <Table.Tr key={`${issue.title}-${i}`}>
+                    <Table.Tr key={`${row.source}-${row.title}-${i}`}>
                       <Table.Td>
                         <Text size="xs" c="dimmed">
                           {i + 1}
@@ -118,17 +223,32 @@ export function IssuesPanel({ issues }: { issues: SeoIssue[] }) {
                       </Table.Td>
                       <Table.Td>
                         <Badge size="xs" variant="default" tt="capitalize">
-                          {issue.area}
+                          {row.source}
                         </Badge>
                       </Table.Td>
                       <Table.Td>
                         <Box style={{ minWidth: 0 }}>
                           <Text size="sm" fw={600}>
-                            {issue.title}
+                            {row.title}
                           </Text>
-                          <Text size="xs" c="dimmed" lh={1.5}>
-                            {issue.detail}
-                          </Text>
+                          {row.detail && (
+                            <Text size="xs" c="dimmed" lh={1.5}>
+                              {row.detail}
+                            </Text>
+                          )}
+                          {row.url && (
+                            <Anchor
+                              href={row.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              size="xs"
+                              truncate
+                              maw={420}
+                              display="block"
+                            >
+                              {row.url}
+                            </Anchor>
+                          )}
                         </Box>
                       </Table.Td>
                     </Table.Tr>
