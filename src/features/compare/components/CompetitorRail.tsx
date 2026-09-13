@@ -45,13 +45,18 @@ export function CompetitorRail({
 
   return (
     <Stack gap={2}>
+      {/* Deliberately not a button, and deliberately not shaped like the rows
+          below: this is the baseline every competitor is measured against, not
+          the first entry in a selectable list. A dashed edge and the "Baseline"
+          label mark it as a reference, so a click that does nothing reads as
+          "not a control" rather than "broken". */}
       <Box
         px="sm"
         py={10}
         style={{
           borderRadius: 8,
-          border: "1px solid var(--mantine-color-emerald-filled)",
-          background: "var(--mantine-color-default-hover)",
+          border: "1px dashed var(--mantine-color-emerald-filled)",
+          background: "color-mix(in srgb, var(--mantine-color-emerald-filled) 7%, transparent)",
         }}
       >
         <Group gap="sm" wrap="nowrap">
@@ -61,7 +66,7 @@ export function CompetitorRail({
               {myDomain}
             </Text>
             <Text size="xs" c="emerald">
-              Your page
+              Your page · baseline
             </Text>
           </Box>
           <Text size="sm" fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
@@ -70,9 +75,17 @@ export function CompetitorRail({
         </Group>
       </Box>
 
-      <Text size="xs" c="dimmed" fw={650} mt="md" mb={4} px="sm">
-        Competitors
-      </Text>
+      {/* The order is deliberate and not obvious — without saying so, a list
+          that reorders itself after every refresh looks unstable rather than
+          ranked. */}
+      <Group justify="space-between" align="baseline" mt="md" mb={4} px="sm" wrap="nowrap">
+        <Text size="xs" c="dimmed" fw={650}>
+          Competitors
+        </Text>
+        <Text size="xs" c="dimmed">
+          Toughest first
+        </Text>
+      </Group>
 
       {ordered.map((c) => {
         const selected = c.competitorId === selectedId;

@@ -1,5 +1,7 @@
-import { Box, Card, Group, Progress, Stack, Text, Tooltip } from "@mantine/core";
-import { Trophy } from "lucide-react";
+import {
+  Box, Card, Group, Progress, Stack, Text, Tooltip, UnstyledButton,
+} from "@mantine/core";
+import { ChevronRight, Info, Trophy } from "lucide-react";
 import type { SeoCompetitivePosition } from "@/shared/types";
 
 /**
@@ -95,46 +97,61 @@ export function StandingsCard({
         </Box>
       </Group>
 
-      <Tooltip
-        label={`You beat ${percentile}% of the competitors you track. This is the tracked set only — not the whole search results page.`}
-        withArrow
-        multiline
-        w={260}
-      >
-        <Progress value={percentile} color={tone} size="sm" radius="xl" mb="md" />
-      </Tooltip>
+      {/* Labelled inline, not by tooltip alone. An unlabelled progress bar under
+          a rank reads as a completion meter — "66% done" — and a tooltip is not
+          an answer for touch, where it never opens. */}
+      <Group justify="space-between" gap="sm" mb={6}>
+        <Text size="xs" c="dimmed">
+          You beat{" "}
+          <Text span fw={650} c={tone}>
+            {percentile}%
+          </Text>{" "}
+          of the competitors you track
+        </Text>
+        <Tooltip
+          label="The set you track here, not the whole search results page."
+          withArrow
+          multiline
+          w={240}
+        >
+          <Info size={13} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
+        </Tooltip>
+      </Group>
+      <Progress value={percentile} color={tone} size="sm" radius="xl" mb="md" />
 
-      <Stack gap={6}>
+      <Stack gap={4}>
         {/* The winnable fight, stated as one specific move. "You rank 3rd" is a
-            fact; "you are 4 points from passing Acme" is a thing to go and do. */}
+            fact; "you are 4 points from passing Acme" is a thing to go and do.
+
+            Real buttons, not text with a pointer cursor: these open the rival in
+            the detail pane, which makes them the most useful controls on the
+            card — and as bare `<Text onClick>` they were unreachable by keyboard
+            and gave no hover or focus feedback at all. */}
         {nextUp && (
-          <Text
-            size="sm"
-            style={{ cursor: "pointer" }}
+          <UnstyledButton
+            className="standings-line"
             onClick={() => onSelectCompetitor(nextUp.competitorId)}
           >
-            <Text span fw={700} c="orange">
-              {nextUp.gap} {nextUp.gap === 1 ? "point" : "points"}
-            </Text>{" "}
-            from passing{" "}
-            <Text span fw={600} td="underline">
-              {nextUp.label}
+            <Text size="sm">
+              <Text span fw={700} c="orange">
+                {nextUp.gap} {nextUp.gap === 1 ? "point" : "points"}
+              </Text>{" "}
+              from passing <Text span fw={600}>{nextUp.label}</Text>
             </Text>
-            .
-          </Text>
+            <ChevronRight size={14} className="standings-line__go" />
+          </UnstyledButton>
         )}
         {closestBehind && (
-          <Text
-            size="sm"
-            c="dimmed"
-            style={{ cursor: "pointer" }}
+          <UnstyledButton
+            className="standings-line"
             onClick={() => onSelectCompetitor(closestBehind.competitorId)}
           >
-            <Text span fw={600}>
-              {closestBehind.label}
-            </Text>{" "}
-            is {closestBehind.gap} behind you.
-          </Text>
+            <Text size="sm" c="dimmed">
+              <Text span fw={600}>{closestBehind.label}</Text> is{" "}
+              {closestBehind.gap} behind you
+            </Text>
+            <ChevronRight size={14} className="standings-line__go" />
+          </UnstyledButton>
         )}
         {!nextUp && !closestBehind && (
           <Text size="sm" c="dimmed">

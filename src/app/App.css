@@ -2806,6 +2806,34 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   }
 }
 
+/* The two actionable lines on the standings card. They open a rival in the
+   detail pane, so they need to look and behave like the controls they are —
+   a hover state, a focus ring from the global :focus-visible rule, and a
+   chevron that leans in on hover to say "this goes somewhere". */
+.standings-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 9px;
+  margin-left: -9px;
+  border-radius: 8px;
+  transition: background-color 0.14s ease;
+}
+.standings-line:hover {
+  background: var(--mantine-color-default-hover);
+}
+.standings-line__go {
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: transform 0.14s ease, color 0.14s ease;
+}
+.standings-line:hover .standings-line__go {
+  color: var(--text);
+  transform: translateX(2px);
+}
+
 .wizard-rail {
   width: 260px;
   flex-shrink: 0;

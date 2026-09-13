@@ -248,45 +248,47 @@ export function CompetitorDetail({
 
         <Divider my="md" />
 
-        <Group gap="xl" wrap="wrap">
+        {/* One head-to-head line rather than three separate figures. "Their
+            score", "Yours" and "Standing" said the same thing three ways — the
+            third being arithmetic on the first two — and your own score already
+            appears on the standings card and at the top of the rail. Reading it
+            as `78 vs 93` puts the comparison in the shape people already use for
+            a scoreline. */}
+        <Group gap="xl" wrap="wrap" align="flex-end">
           <Box>
             <Text size="xs" c="dimmed" mb={2}>
-              Their score
+              {label} vs you
             </Text>
-            <Text fz={28} fw={700} lh={1.1} style={{ fontVariantNumeric: "tabular-nums" }}>
-              {snapshot.score}
-            </Text>
+            <Group gap={10} align="baseline" wrap="nowrap">
+              <Text fz={28} fw={700} lh={1.1} style={{ fontVariantNumeric: "tabular-nums" }}>
+                {snapshot.score}
+              </Text>
+              <Text fz={16} c="dimmed" lh={1.1}>
+                vs
+              </Text>
+              <Text
+                fz={28}
+                fw={700}
+                lh={1.1}
+                c="emerald"
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
+                {snapshot.score - gap.scoreGap}
+              </Text>
+            </Group>
           </Box>
           <Box>
-            <Text size="xs" c="dimmed" mb={2}>
-              Yours
-            </Text>
-            <Text
-              fz={28}
-              fw={700}
-              lh={1.1}
-              c="emerald"
-              style={{ fontVariantNumeric: "tabular-nums" }}
-            >
-              {snapshot.score - gap.scoreGap}
-            </Text>
-          </Box>
-          <Box>
-            <Text size="xs" c="dimmed" mb={2}>
-              Standing
-            </Text>
-            <Text
-              fz={18}
-              fw={650}
-              lh={1.5}
-              c={theyLead ? "red" : gap.scoreGap === 0 ? "dimmed" : "teal"}
+            <Badge
+              size="lg"
+              variant="light"
+              color={theyLead ? "red" : gap.scoreGap === 0 ? "gray" : "teal"}
             >
               {theyLead
                 ? `They lead by ${gap.scoreGap}`
                 : gap.scoreGap === 0
                 ? "Level"
                 : `You lead by ${Math.abs(gap.scoreGap)}`}
-            </Text>
+            </Badge>
           </Box>
           <Box style={{ marginLeft: "auto" }}>
             <Text size="xs" c="dimmed" mb={4}>
