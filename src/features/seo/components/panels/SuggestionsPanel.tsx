@@ -2,7 +2,7 @@ import {
   Alert, Badge, Box, Card, Group, RingProgress, Stack, Text,
 } from "@mantine/core";
 import { Info, Gauge, ShieldCheck } from "lucide-react";
-import type { SeoPerformance, SeoSuggestion } from "@/shared/types";
+import type { SeoPerformance, SeoResource, SeoSuggestion } from "@/shared/types";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -148,12 +148,29 @@ function SuggestionCard({ suggestion: s }: { suggestion: SeoSuggestion }) {
               <Text size="xs" fw={650} c="dimmed" mb={5} tt="uppercase" style={{ letterSpacing: "0.05em" }}>
                 Affected resources
               </Text>
+              {/* `items` carries the cost attributed to each resource, which is
+                  what says which one to open first. Reports stored before it
+                  was read still have the plain URL list. */}
               <Stack gap={3}>
-                {s.resources.map((r) => (
-                  <Text key={r} size="xs" c="dimmed" truncate>
-                    {r}
-                  </Text>
-                ))}
+                {(s.items ?? s.resources.map((url): SeoResource => ({ url }))).map((r) => {
+                  const cost = [
+                    r.wastedBytes ? `${Math.round(r.wastedBytes / 1024)} KB` : null,
+                    r.wastedMs ? `${Math.round(r.wastedMs)} ms` : null,
+                  ].filter(Boolean);
+
+                  return (
+                    <Group key={r.url} gap="sm" wrap="nowrap" justify="space-between">
+                      <Text size="xs" c="dimmed" truncate style={{ minWidth: 0 }}>
+                        {r.url}
+                      </Text>
+                      {cost.length > 0 && (
+                        <Text size="xs" c="orange" fw={600} style={{ whiteSpace: "nowrap" }}>
+                          {cost.join(" · ")}
+                        </Text>
+                      )}
+                    </Group>
+                  );
+                })}
               </Stack>
             </Box>
           )}

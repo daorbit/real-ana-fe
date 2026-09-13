@@ -10,6 +10,8 @@ import type {
 } from "@/shared/types";
 import { scoreColor, scoreLabel } from "@/features/seo/components/ScoreRing";
 import { CrawlerFilesPanel } from "@/features/seo/components/SchemaPanel";
+import { CruxPanel } from "@/features/seo/components/CruxPanel";
+import { DiagnosticsPanel } from "@/features/seo/components/DiagnosticsPanel";
 import { Panel, CheckRow } from "@/features/seo/components/shared/Panel";
 import { Tile } from "@/features/seo/components/shared/Tile";
 import { METRIC_ROWS, pageSize } from "@/features/seo/components/utils";
@@ -95,7 +97,9 @@ export function TechnicalPanel({
 }) {
   return (
     <Stack gap="lg">
+      <CruxPanel crux={performance.crux} />
       {vitals}
+      <DiagnosticsPanel diagnostics={performance.diagnostics} />
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
         <Panel
           title="Page checks"

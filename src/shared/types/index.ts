@@ -1473,6 +1473,58 @@ export type SeoSuggestion = {
   advice: string;
   /** Up to five offending URLs from the audit details. */
   resources: string[];
+  /** The same resources with their attributed savings. Absent on older reports. */
+  items?: SeoResource[];
+};
+
+/** One offending resource behind a failing audit, with its attributed cost. */
+export type SeoResource = {
+  url: string;
+  wastedBytes?: number;
+  wastedMs?: number;
+  totalBytes?: number;
+};
+
+/** One Core Web Vital as Chrome measured it on real visits. */
+export type CruxMetric = {
+  /** 75th percentile — the figure Google judges. */
+  p75: number | null;
+  /** Share of samples in each Google band, as percentages. */
+  good: number;
+  needsImprovement: number;
+  poor: number;
+  category: "FAST" | "AVERAGE" | "SLOW" | "NONE";
+};
+
+/**
+ * Chrome UX Report field data, arriving in the same PageSpeed response as the
+ * Lighthouse run. This is the dataset Google ranks on. Absent for sites without
+ * enough Chrome traffic to anonymise, and on reports stored before it was read.
+ */
+export type CruxVitals = {
+  available: boolean;
+  /** "url" for this exact page, "origin" when only site-wide data existed. */
+  scope: "url" | "origin";
+  overall: "FAST" | "AVERAGE" | "SLOW" | "NONE";
+  metrics: {
+    lcp: CruxMetric | null;
+    cls: CruxMetric | null;
+    inp: CruxMetric | null;
+    fcp: CruxMetric | null;
+    ttfb: CruxMetric | null;
+  };
+};
+
+/** Page composition and third-party cost, from audits that report either way. */
+export type SeoDiagnostics = {
+  byType: { type: string; requests: number; bytes: number }[];
+  totalRequests: number | null;
+  totalBytes: number | null;
+  thirdParty: { entity: string; blockingMs: number; bytes: number }[];
+  thirdPartyBlockingMs: number | null;
+  domElements: number | null;
+  mainThreadMs: number | null;
+  serverResponseMs: number | null;
 };
 
 export type SeoPerformance = {
@@ -1483,6 +1535,13 @@ export type SeoPerformance = {
   desktop: SeoStrategyResult | null;
   mobile: SeoStrategyResult | null;
   suggestions: SeoSuggestion[];
+  /** Chrome field data. Absent on reports stored before this was read. */
+  crux?: CruxVitals;
+  /** Composition and third-party cost. Absent on older reports. */
+  diagnostics?: SeoDiagnostics;
+  /** Which Lighthouse produced these scores — they shift between versions. */
+  lighthouseVersion?: string;
+  fetchTime?: string;
 };
 
 /** One finding from the robots.txt or sitemap validator. */
