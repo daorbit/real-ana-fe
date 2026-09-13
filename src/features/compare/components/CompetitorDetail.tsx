@@ -296,6 +296,17 @@ export function CompetitorDetail({
           </Box>
         </Group>
 
+        {/* Both sides are scored the same way, and it is not the way the SEO
+            report scores your own pages: Lighthouse is never run against a
+            competitor, because that spends quota belonging to the customer's
+            own sites. Saying so under the numbers stops "their 78 against my
+            93" being read across two different scales. */}
+        <Text size="xs" c="dimmed" mt="sm">
+          Both scores cover on-page signals only — titles, headings, structure and
+          schema. Neither includes speed or Core Web Vitals, so this figure will
+          differ from the score in your own SEO report.
+        </Text>
+
         {/* Placed under the numbers rather than above them: the caveat qualifies
             the figures, so it should not be read before there is anything to
             qualify. */}

@@ -3,7 +3,7 @@ import {
   Box, Button, Card, Grid, Group, Select, Stack,
   Text, TextInput, Tooltip, ActionIcon,
 } from "@mantine/core";
-import { HelpCircle, Plus, RefreshCw, Swords, Target } from "lucide-react";
+import { HelpCircle, Plus, Swords, Target } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
@@ -149,9 +149,9 @@ export default function Compare() {
       const result = await refreshAll({ workspaceId, siteId }).unwrap();
       notify.success(
         result.failed > 0
-          ? `${result.refreshed} updated, ${result.failed} could not be reached.`
-          : `${result.refreshed} updated.`,
-        "Competitors refreshed"
+          ? `${result.refreshed} re-fetched, ${result.failed} could not be reached.`
+          : `${result.refreshed} re-fetched against ${site?.domain ?? "your site"}.`,
+        "Comparison updated"
       );
     } catch (e) {
       notifyError(e, "Refresh failed");
@@ -216,15 +216,22 @@ export default function Compare() {
               />
             )}
             {canEdit && competitors.length > 0 && (
-              <Button
-                variant="default"
-                radius="md"
-                leftSection={<RefreshCw size={15} />}
-                loading={refreshingAll}
-                onClick={refreshEveryone}
-              >
-                Compare
-              </Button>
+              /* Labelled for the job, not the mechanism: this re-fetches every
+                 tracked page and rebuilds the comparison from it, and "compare
+                 again" is what someone is actually asking for. The tooltip
+                 carries the mechanism, since the detail pane has an identical
+                 icon scoped to one competitor. */
+              <Tooltip label="Re-fetch every tracked competitor and rebuild the comparison" withArrow>
+                <Button
+                  variant="default"
+                  radius="md"
+                  leftSection={<Swords size={15} />}
+                  loading={refreshingAll}
+                  onClick={refreshEveryone}
+                >
+                  Compare again
+                </Button>
+              </Tooltip>
             )}
           </Group>
         }
@@ -332,11 +339,15 @@ export default function Compare() {
                 <Box
                   style={{
                     position: "sticky",
-                    top: 16,
+                    top: 0,
                     // Its own scrollbar rather than the page's, so ten
-                    // competitors plus the trend cannot exceed the viewport and
-                    // strand the last row out of reach.
-                    maxHeight: "calc(100vh - 32px)",
+                    // competitors plus the trend cannot exceed the container and
+                    // strand the last row out of reach. `dvh` rather than `vh`
+                    // so a mobile browser's collapsing toolbar does not leave
+                    // the rail taller than the space it actually has, and the
+                    // subtraction covers the shell's own padding around the
+                    // scroll container.
+                    maxHeight: "calc(100dvh - var(--mantine-spacing-md) * 2)",
                     overflowY: "auto",
                   }}
                   className="compare-rail"
