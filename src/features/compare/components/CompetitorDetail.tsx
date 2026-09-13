@@ -304,9 +304,10 @@ export function CompetitorDetail({
             own sites. Saying so under the numbers stops "their 78 against my
             93" being read across two different scales. */}
         <Text size="xs" c="dimmed" mt="sm">
-          Both scores cover on-page signals only — titles, headings, structure and
-          schema. Neither includes speed or Core Web Vitals, so this figure will
-          differ from the score in your own SEO report.
+          Measured, not estimated: both pages were fetched and parsed the same way,
+          and scored by the same formula. On-page signals only — titles, headings,
+          structure and schema — so this differs from your SEO report, which also
+          includes Lighthouse.
         </Text>
 
         {/* Placed under the numbers rather than above them: the caveat qualifies
