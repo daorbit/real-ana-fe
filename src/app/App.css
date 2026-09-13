@@ -2272,13 +2272,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
   --seo-hairline: var(--border-strong);
 
-  /* The tab bar sticks within this element, so its run ends where the report
-     does rather than following the pointer onto whatever is below. Without a
-     positioned ancestor the bar's containing block is the shell's main
-     element, which carries `overflow-x: clip` — enough to make it a scroll
-     container for sticky while the page itself scrolls on the window, so the
-     bar detaches and floats over the content. */
-  position: relative;
+
 }
 [data-mantine-color-scheme="light"] .seo-report {
   --seo-elev: 0 1px 2px rgba(16, 24, 40, 0.06), 0 10px 28px -14px rgba(16, 24, 40, 0.12);
@@ -2456,21 +2450,16 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .seo-tabbar {
-  position: sticky;
+  /* position: sticky; */
 
-  /* The shell's header is 56px on mobile and absent from `sm` up, so the bar
-     has to stick below it rather than at the viewport top — otherwise it
-     scrolls up underneath the header and is lost behind it. */
-  top: var(--seo-tabbar-top, 0px);
-  z-index: 5;
+
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   gap: 6px;
-  /* No padding at all: the first tab starts at the left edge and the bar runs
-     full width. The negative side margins stay so the background still bleeds
-     past the report's own gutters rather than leaving a strip of page showing
-     either side when the bar is stuck. */
-  margin: 0 calc(var(--seo-tabbar-inset) * -1);
+
+  margin: 0 calc(var(--mantine-spacing-md) * -1);
   padding: 0;
 
   background: var(--shell);
@@ -2478,11 +2467,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-sm); }
 @media (max-width: 48em) {
-  .seo-tabbar {
-    --seo-tabbar-inset: var(--mantine-spacing-xs);
-    /* Matches the shell's `sm` breakpoint, where its 56px header exists. */
-    --seo-tabbar-top: 56px;
-  }
+  .seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-xs); }
 }
 .seo-tabbar-track {
   display: flex;
@@ -2517,7 +2502,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   /* The bar itself has no padding, and the negative side margins pull it past
      the report's gutters — so the pinned tab carries its own left inset to keep
      its label off the bleed edge. */
-  padding-left: calc(var(--seo-tabbar-inset) + 11px);
+  padding-left: calc(var(--mantine-spacing-md) + 11px);
 }
 
 
@@ -2525,7 +2510,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
    of its own, so the trailing control keeps itself off the bleed edge. */
 .seo-tab-help {
   flex-shrink: 0;
-  margin-right: var(--seo-tabbar-inset);
+  margin-right: var(--mantine-spacing-md);
 }
 
 .seo-tab {

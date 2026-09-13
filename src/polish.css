@@ -50,25 +50,18 @@
   100% { opacity: 0;   transform: scale(1.7); }
 }
 
-/* ---- Route transitions ----------------------------------------------------
-   Pages fade and lift a few pixels on entry. Short enough that navigation still
-   feels instant, long enough that the swap doesn't read as a flash. */
+ 
 .route-fade {
-  animation: route-in 280ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation: route-in 280ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
 }
 
 @keyframes route-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; translate: 0 6px; }
+  99%  { translate: 0 0; }
+  to   { opacity: 1; }
 }
 
-/* ---- Panels ---------------------------------------------------------------
-   Panels deepen their shadow under the pointer. They used to lift on the Y
-   axis as well, but this selector catches every top-level Card in the app, so
-   entire dashboards shifted a pixel as the pointer crossed them — busy on a
-   dense grid, and the movement said "draggable" about panels that are not.
-   Nested cards are excluded: a chart tooltip is also a Card, and it must not
-   restyle itself out from under the cursor. */
+ 
 .mantine-Card-root:not(.mantine-Card-root .mantine-Card-root) {
   transition: box-shadow 0.18s ease, border-color 0.18s ease;
 }
@@ -77,23 +70,14 @@
   box-shadow: var(--shadow);
 }
 
-/* Opt-out for cards that are controls rather than panels.
-   A card holding a stepper or a form field is something the pointer has to
-   land on precisely; lifting it under the cursor fights the click it is
-   inviting. `.static-card` keeps the border and background without the
-   movement. */
+ 
 .static-card,
 .static-card:hover {
   transform: none !important;
   box-shadow: none !important;
 }
 
-/* ---- Plan cards -----------------------------------------------------------
-   The recommended plan is lit from above rather than scaled up: scaling one
-   card in a row breaks the shared baseline its neighbours sit on. The beam is
-   tinted with that plan's own colour, passed in as --beam. */
-/* The card keeps `overflow: visible` so the corner ribbon can hang outside it,
-   so the beam clips itself rather than relying on the card to do it. */
+ 
 .plan-card__beam {
   position: absolute;
   top: 0;
