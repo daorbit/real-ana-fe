@@ -1056,13 +1056,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     inset 0 0 0 1px var(--border),
     var(--shadow-sm);
   overflow: hidden;
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  transition: box-shadow 0.18s ease;
 }
 .stat-card:hover {
   box-shadow:
     inset 0 0 0 1px var(--border-strong),
     var(--shadow);
-  transform: translateY(-1px);
 }
 .stat-card-value {
   font-family: var(--font-display);
@@ -1243,10 +1242,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .ws-other-del { opacity: 1; }
 }
 
-.ws-other { transition: box-shadow 0.18s ease, transform 0.18s ease; }
+.ws-other { transition: box-shadow 0.18s ease; }
 .ws-other:hover {
   box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow);
-  transform: translateY(-1px);
 }
 
 
@@ -2439,10 +2437,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     var(--surface);
   border-radius: var(--seo-radius-sm, var(--radius));
   box-shadow: inset 0 0 0 1px var(--seo-hairline, var(--border));
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  transition: box-shadow 0.18s ease;
 }
 .seo-tile:hover {
-  transform: translateY(-2px);
   box-shadow: inset 0 0 0 1px var(--border-strong), var(--seo-elev-hover, var(--shadow-sm));
 }
 [data-mantine-color-scheme="light"] .seo-tile {
@@ -2453,20 +2450,24 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .seo-tabbar {
   position: sticky;
 
-  top: calc(var(--seo-tabbar-inset) * -1);
+  top: 0;
   z-index: 5;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: calc(var(--seo-tabbar-inset) * -1) calc(var(--seo-tabbar-inset) * -1) 0;
-  padding: var(--seo-tabbar-inset) var(--seo-tabbar-inset) 0;
+  /* No top padding: the tabs sit flush against whatever precedes them. The
+     negative top margin goes with it — the two were a pair, one pulling the bar
+     up and the other putting the space back. Horizontal insets stay so the
+     background still bleeds to the card edges when stuck. */
+  margin: 0 calc(var(--seo-tabbar-inset) * -1) 0;
+  padding: 0 var(--seo-tabbar-inset);
 
   background: var(--shell);
   border-bottom: 1px solid var(--border);
 }
-.seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-md); }
+.seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-sm); }
 @media (max-width: 48em) {
-  .seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-sm); }
+  .seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-xs); }
 }
 .seo-tabbar-track {
   display: flex;
@@ -2487,7 +2488,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   align-items: center;
   gap: 7px;
   flex: 0 0 auto;
-  padding: 12px 12px 13px;
+  padding: 8px 11px 9px;
   font-size: 13px;
   font-weight: 550;
   line-height: 1;
@@ -2820,14 +2821,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   text-align: left;
   transition:
     border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
+    box-shadow 140ms ease;
 }
 
 .wizard-choice-card:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow);
-  transform: translateY(-2px);
 }
 
 .wizard-choice-card[data-selected] {

@@ -5,7 +5,9 @@ import {
   Image as ImageIcon, ShieldCheck, Smartphone, Monitor, Share2, Bot, Server, Clock,
   FileText,
 } from "lucide-react";
-import type { SeoPerformance, SeoSiteFiles, SeoStrategyResult, SeoTechnical } from "@/shared/types";
+import type {
+  SeoPerformance, SeoScores, SeoSiteFiles, SeoStrategyResult, SeoTechnical,
+} from "@/shared/types";
 import { scoreColor, scoreLabel } from "@/features/seo/components/ScoreRing";
 import { CrawlerFilesPanel } from "@/features/seo/components/SchemaPanel";
 import { Panel, CheckRow } from "@/features/seo/components/shared/Panel";
@@ -34,6 +36,48 @@ function MetricsTable({ result }: { result: SeoStrategyResult }) {
         );
       })}
     </Stack>
+  );
+}
+
+/**
+ * The three category scores other than Performance, which already has the ring
+ * in the panel header. Lighthouse scores every category per profile, and the
+ * two runs disagree often enough — accessibility in particular, where tap
+ * target and viewport audits only apply on mobile — that showing one profile's
+ * numbers for both would be wrong.
+ */
+function CategoryScores({ scores }: { scores: SeoScores }) {
+  const cats = [
+    { label: "SEO", value: scores.seo },
+    { label: "Accessibility", value: scores.accessibility },
+    { label: "Best practices", value: scores.bestPractices },
+  ];
+  if (cats.every((c) => c.value === null)) return null;
+
+  return (
+    <>
+      <Divider my="sm" />
+      <Group gap="lg" wrap="wrap">
+        {cats.map((c) => (
+          <Group key={c.label} gap={6} wrap="nowrap">
+            <Box
+              w={7}
+              h={7}
+              style={{
+                borderRadius: "50%",
+                background: `var(--mantine-color-${scoreColor(c.value)}-6)`,
+              }}
+            />
+            <Text size="xs" c="dimmed">
+              {c.label}{" "}
+              <Text span fw={650} c="var(--mantine-color-text)">
+                {c.value ?? "—"}
+              </Text>
+            </Text>
+          </Group>
+        ))}
+      </Group>
+    </>
   );
 }
 
@@ -181,7 +225,7 @@ export function TechnicalPanel({
               <Panel
                 key={strategy}
                 title={strategy === "mobile" ? "Mobile" : "Desktop"}
-                description="Core Web Vitals as measured by Lighthouse."
+                description="Core Web Vitals and category scores from this profile's Lighthouse run."
                 icon={strategy === "mobile" ? Smartphone : Monitor}
                 color={strategy === "mobile" ? "emerald" : "cyan"}
                 right={
@@ -204,6 +248,7 @@ export function TechnicalPanel({
                 }
               >
                 <MetricsTable result={result} />
+                <CategoryScores scores={result.scores} />
               </Panel>
             );
           })}

@@ -63,15 +63,17 @@
 }
 
 /* ---- Panels ---------------------------------------------------------------
-   Panels lift slightly under the pointer, matching the stat tiles so the whole
-   grid responds the same way. Nested cards are excluded: a chart tooltip is
-   also a Card, and it must not shift out from under the cursor. */
+   Panels deepen their shadow under the pointer. They used to lift on the Y
+   axis as well, but this selector catches every top-level Card in the app, so
+   entire dashboards shifted a pixel as the pointer crossed them — busy on a
+   dense grid, and the movement said "draggable" about panels that are not.
+   Nested cards are excluded: a chart tooltip is also a Card, and it must not
+   restyle itself out from under the cursor. */
 .mantine-Card-root:not(.mantine-Card-root .mantine-Card-root) {
-  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .mantine-Card-root:not(.mantine-Card-root .mantine-Card-root):hover {
-  transform: translateY(-1px);
   box-shadow: var(--shadow);
 }
 

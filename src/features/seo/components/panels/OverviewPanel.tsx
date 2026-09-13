@@ -1,7 +1,10 @@
-import { Alert, Badge, Box, Card, Center, Group, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
+import { useState } from "react";
+import {
+  Alert, Badge, Box, Card, Center, Group, SegmentedControl, SimpleGrid, Stack, Text, ThemeIcon,
+} from "@mantine/core";
 import {
   AlertTriangle, CheckCircle2, XCircle, FileText, Image as ImageIcon, Share2, Bot,
-  Lock, Braces, Smartphone, CircleCheck, TrendingUp, TrendingDown, Minus,
+  Lock, Braces, Smartphone, Monitor, CircleCheck, TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -46,7 +49,7 @@ export function OverviewPanel({
       )}
 
       <Box className="seo-bento">
-        <ScoreHero score={score} scores={performance.scores} available={performance.available} />
+        <ScoreHero score={score} performance={performance} available={performance.available} />
         <SeverityDonut breakdown={breakdown} />
         <MetricStrip content={content} technical={technical} />
         <ScoreSpark history={history} current={score} />
@@ -80,8 +83,23 @@ export function OverviewPanel({
 }
 
 
-/** The focal hero: overall score gauge + the four Lighthouse categories as bars. */
-function ScoreHero({ score, scores, available }: { score: number; scores: SeoScores; available: boolean }) {
+
+function ScoreHero({
+  score,
+  performance,
+  available,
+}: {
+  score: number;
+  performance: SeoPerformance;
+  available: boolean;
+}) {
+  const [strategy, setStrategy] = useState<"mobile" | "desktop">("mobile");
+
+
+  const bothProfiles = Boolean(performance.mobile && performance.desktop);
+  const active = strategy === "desktop" ? performance.desktop : performance.mobile;
+  const scores: SeoScores = bothProfiles && active ? active.scores : performance.scores;
+
   const cats: { label: string; value: number | null }[] = [
     { label: "SEO", value: scores.seo },
     { label: "Performance", value: scores.performance },
@@ -92,9 +110,38 @@ function ScoreHero({ score, scores, available }: { score: number; scores: SeoSco
     <Card withBorder radius="md" padding="lg" className="col-8 seo-panel">
       <Group justify="space-between" mb="lg">
         <Text className="seo-eyebrow">Audit summary</Text>
-        {!available && (
-          <Badge size="xs" variant="light" color="gray">Re-run for category scores</Badge>
-        )}
+        <Group gap={8}>
+          {bothProfiles && (
+            <SegmentedControl
+              size="xs"
+              value={strategy}
+              onChange={(v) => setStrategy(v as "mobile" | "desktop")}
+              data={[
+                {
+                  value: "mobile",
+                  label: (
+                    <Group gap={5} wrap="nowrap" justify="center">
+                      <Smartphone size={12} />
+                      <Text size="xs">Mobile</Text>
+                    </Group>
+                  ),
+                },
+                {
+                  value: "desktop",
+                  label: (
+                    <Group gap={5} wrap="nowrap" justify="center">
+                      <Monitor size={12} />
+                      <Text size="xs">Desktop</Text>
+                    </Group>
+                  ),
+                },
+              ]}
+            />
+          )}
+          {!available && (
+            <Badge size="xs" variant="light" color="gray">Re-run for category scores</Badge>
+          )}
+        </Group>
       </Group>
       <Group gap={28} align="center" wrap="wrap">
         <Stack gap={8} align="center">
@@ -108,6 +155,12 @@ function ScoreHero({ score, scores, available }: { score: number; scores: SeoSco
             </ThemeIcon>
             <Text size="xs" fw={600} c={scoreColor(score)}>{scoreLabel(score)}</Text>
           </Group>
+
+          {bothProfiles && (
+            <Text size="xs" c="dimmed" ta="center">
+              Overall · mobile
+            </Text>
+          )}
         </Stack>
         <Box className="seo-cats">
           {cats.map((c) => (
