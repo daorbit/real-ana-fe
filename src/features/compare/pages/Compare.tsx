@@ -223,7 +223,7 @@ export default function Compare() {
                 loading={refreshingAll}
                 onClick={refreshEveryone}
               >
-                Refresh all
+                Compare
               </Button>
             )}
           </Group>
