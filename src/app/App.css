@@ -2271,6 +2271,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   --seo-elev-hover: 0 1px 2px rgba(0, 0, 0, 0.3), 0 14px 34px -14px rgba(0, 0, 0, 0.55);
 
   --seo-hairline: var(--border-strong);
+
+  /* The tab bar sticks within this element, so its run ends where the report
+     does rather than following the pointer onto whatever is below. Without a
+     positioned ancestor the bar's containing block is the shell's main
+     element, which carries `overflow-x: clip` — enough to make it a scroll
+     container for sticky while the page itself scrolls on the window, so the
+     bar detaches and floats over the content. */
+  position: relative;
 }
 [data-mantine-color-scheme="light"] .seo-report {
   --seo-elev: 0 1px 2px rgba(16, 24, 40, 0.06), 0 10px 28px -14px rgba(16, 24, 40, 0.12);
@@ -2450,24 +2458,31 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .seo-tabbar {
   position: sticky;
 
-  top: 0;
+  /* The shell's header is 56px on mobile and absent from `sm` up, so the bar
+     has to stick below it rather than at the viewport top — otherwise it
+     scrolls up underneath the header and is lost behind it. */
+  top: var(--seo-tabbar-top, 0px);
   z-index: 5;
   display: flex;
   align-items: center;
   gap: 6px;
-  /* No top padding: the tabs sit flush against whatever precedes them. The
-     negative top margin goes with it — the two were a pair, one pulling the bar
-     up and the other putting the space back. Horizontal insets stay so the
-     background still bleeds to the card edges when stuck. */
-  margin: 0 calc(var(--seo-tabbar-inset) * -1) 0;
-  padding: 0 var(--seo-tabbar-inset);
+  /* No padding at all: the first tab starts at the left edge and the bar runs
+     full width. The negative side margins stay so the background still bleeds
+     past the report's own gutters rather than leaving a strip of page showing
+     either side when the bar is stuck. */
+  margin: 0 calc(var(--seo-tabbar-inset) * -1);
+  padding: 0;
 
   background: var(--shell);
   border-bottom: 1px solid var(--border);
 }
 .seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-sm); }
 @media (max-width: 48em) {
-  .seo-tabbar { --seo-tabbar-inset: var(--mantine-spacing-xs); }
+  .seo-tabbar {
+    --seo-tabbar-inset: var(--mantine-spacing-xs);
+    /* Matches the shell's `sm` breakpoint, where its 56px header exists. */
+    --seo-tabbar-top: 56px;
+  }
 }
 .seo-tabbar-track {
   display: flex;
@@ -2479,8 +2494,39 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .seo-tabbar-track::-webkit-scrollbar { display: none; }
 
+/* Divider before the first tab of each group, so fourteen tabs read as four
+   short runs. Decorative only — the groups carry no meaning a screen reader
+   needs, and naming them would add noise to every tab announcement. */
+.seo-tab-sep {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 1px;
+  height: 15px;
+  margin: 0 7px;
+  background: var(--border);
+}
+.seo-tabbar-track > .seo-tab-sep:first-child { display: none; }
 
-.seo-tab-help { flex-shrink: 0; }
+/* The pinned tab sits outside the scrolling track, so it stays reachable
+   however far along the bar you have scrolled. */
+.seo-tabbar > .seo-tab {
+  flex: 0 0 auto;
+  margin-right: 2px;
+  border-right: 1px solid var(--border);
+  padding-right: 13px;
+  /* The bar itself has no padding, and the negative side margins pull it past
+     the report's gutters — so the pinned tab carries its own left inset to keep
+     its label off the bleed edge. */
+  padding-left: calc(var(--seo-tabbar-inset) + 11px);
+}
+
+
+/* Mirrors the pinned tab's inset, for the same reason: the bar has no padding
+   of its own, so the trailing control keeps itself off the bleed edge. */
+.seo-tab-help {
+  flex-shrink: 0;
+  margin-right: var(--seo-tabbar-inset);
+}
 
 .seo-tab {
   position: relative;

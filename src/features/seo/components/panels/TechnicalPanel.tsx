@@ -1,22 +1,20 @@
 import {
-  Anchor, Badge, Box, Divider, Group, RingProgress, SimpleGrid, Stack, Text,
+  Anchor, Badge, Box, Divider, Group, SimpleGrid, Stack, Text,
 } from "@mantine/core";
 import {
-  Image as ImageIcon, ShieldCheck, Smartphone, Monitor, Share2, Bot, Server, Clock,
+  Image as ImageIcon, ShieldCheck, Smartphone, Share2, Bot, Server, Clock,
   FileText,
 } from "lucide-react";
 import type {
-  SeoPerformance, SeoScores, SeoSiteFiles, SeoStrategyResult, SeoTechnical,
+  SeoScores, SeoSiteFiles, SeoStrategyResult, SeoTechnical,
 } from "@/shared/types";
-import { scoreColor, scoreLabel } from "@/features/seo/components/ScoreRing";
+import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { CrawlerFilesPanel } from "@/features/seo/components/SchemaPanel";
-import { CruxPanel } from "@/features/seo/components/CruxPanel";
-import { DiagnosticsPanel } from "@/features/seo/components/DiagnosticsPanel";
 import { Panel, CheckRow } from "@/features/seo/components/shared/Panel";
 import { Tile } from "@/features/seo/components/shared/Tile";
 import { METRIC_ROWS, pageSize } from "@/features/seo/components/utils";
 
-function MetricsTable({ result }: { result: SeoStrategyResult }) {
+export function MetricsTable({ result }: { result: SeoStrategyResult }) {
   return (
     <Stack gap={0}>
       {METRIC_ROWS.map((row, i) => {
@@ -48,7 +46,7 @@ function MetricsTable({ result }: { result: SeoStrategyResult }) {
  * target and viewport audits only apply on mobile — that showing one profile's
  * numbers for both would be wrong.
  */
-function CategoryScores({ scores }: { scores: SeoScores }) {
+export function CategoryScores({ scores }: { scores: SeoScores }) {
   const cats = [
     { label: "SEO", value: scores.seo },
     { label: "Accessibility", value: scores.accessibility },
@@ -83,23 +81,21 @@ function CategoryScores({ scores }: { scores: SeoScores }) {
   );
 }
 
+/**
+ * Whether the page is set up correctly for a crawler.
+ *
+ * Speed lives on the Performance tab: this one is about correctness — the tags
+ * a crawler looks for, what the server answered, and the site-wide files.
+ */
 export function TechnicalPanel({
   technical,
-  performance,
   siteFiles,
-  vitals,
 }: {
   technical: SeoTechnical;
-  performance: SeoPerformance;
   siteFiles: SeoSiteFiles;
-  /** Real-user Core Web Vitals, shown beside the Lighthouse lab numbers. */
-  vitals?: React.ReactNode;
 }) {
   return (
     <Stack gap="lg">
-      <CruxPanel crux={performance.crux} />
-      {vitals}
-      <DiagnosticsPanel diagnostics={performance.diagnostics} />
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
         <Panel
           title="Page checks"
@@ -218,46 +214,6 @@ export function TechnicalPanel({
           )}
         </Stack>
       </SimpleGrid>
-
-      {performance.available && (
-        <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-          {(["mobile", "desktop"] as const).map((strategy) => {
-            const result = performance[strategy];
-            if (!result) return null;
-            const perf = result.scores.performance;
-            return (
-              <Panel
-                key={strategy}
-                title={strategy === "mobile" ? "Mobile" : "Desktop"}
-                description="Core Web Vitals and category scores from this profile's Lighthouse run."
-                icon={strategy === "mobile" ? Smartphone : Monitor}
-                color={strategy === "mobile" ? "emerald" : "cyan"}
-                right={
-                  <Group gap={8} wrap="nowrap">
-                    <RingProgress
-                      size={40}
-                      thickness={4}
-                      roundCaps
-                      sections={[{ value: perf ?? 0, color: scoreColor(perf) }]}
-                      label={
-                        <Text ta="center" size="xs" fw={700}>
-                          {perf ?? "—"}
-                        </Text>
-                      }
-                    />
-                    <Text size="xs" c={scoreColor(perf)}>
-                      {scoreLabel(perf)}
-                    </Text>
-                  </Group>
-                }
-              >
-                <MetricsTable result={result} />
-                <CategoryScores scores={result.scores} />
-              </Panel>
-            );
-          })}
-        </SimpleGrid>
-      )}
     </Stack>
   );
 }

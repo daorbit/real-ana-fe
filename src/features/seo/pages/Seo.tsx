@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   Anchor, Badge, Box, Button, Card, Group, Select, Stack,
   Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
@@ -6,7 +6,8 @@ import {
 } from "@mantine/core";
 import {
   Search, RefreshCw, Globe, History, Trash2, Trophy,
-  ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink,
+  ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink, Gauge,
+  Image as ImageIcon,
   TrendingUp, TrendingDown, Minus, Braces, Link2, Layers, Printer,
   HelpCircle, Bot, AlertTriangle,
 } from "lucide-react";
@@ -35,25 +36,39 @@ import { SearchPanel } from "@/features/seo/components/SearchPanel";
 import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
 import { CrawlPanel } from "@/features/seo/components/CrawlPanel";
 import {
-  OverviewPanel, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel, AiSearchPanel,
-  IssuesPanel, collectIssues,
+  OverviewPanel, MetaPanel, ContentPanel, ImagesPanel, TechnicalPanel, PerformancePanel,
+  SuggestionsPanel, AiSearchPanel, IssuesPanel, collectIssues,
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useSiteScope } from "@/features/analytics";
 
+/**
+ * Report tabs, in four groups.
+ *
+ * `group` is the first tab of a run, and the bar draws a divider before it —
+ * fourteen tabs read as four short runs rather than one long strip. Overview is
+ * pinned outside the scrolling track, so the tab people return to is always one
+ * click away however far along the bar they have scrolled.
+ */
 const TABS = [
-  { value: "overview", label: "Overview", icon: ListChecks },
-  { value: "issues", label: "Issues", icon: AlertTriangle },
-  { value: "meta", label: "Meta tags", icon: Tags },
-  { value: "content", label: "Content", icon: FileText },
-  { value: "technical", label: "Technical", icon: Wrench },
-  { value: "links", label: "Links", icon: Link2 },
-  { value: "schema", label: "Schema", icon: Braces },
-  { value: "ai", label: "AI search", icon: Bot },
-  { value: "crawl", label: "Crawl", icon: Layers },
-  { value: "search", label: "Search", icon: Search },
+  { value: "overview", label: "Overview", icon: ListChecks, pinned: true },
+
+  { value: "issues", label: "Issues", icon: AlertTriangle, group: "Fix" },
   { value: "suggestions", label: "Suggestions", icon: Lightbulb },
+
+  { value: "meta", label: "Meta tags", icon: Tags, group: "Page" },
+  { value: "content", label: "Content", icon: FileText },
+  { value: "images", label: "Images", icon: ImageIcon },
+  { value: "schema", label: "Schema", icon: Braces },
+
+  { value: "technical", label: "Technical", icon: Wrench, group: "Site" },
+  { value: "performance", label: "Performance", icon: Gauge },
+  { value: "links", label: "Links", icon: Link2 },
+  { value: "crawl", label: "Crawl", icon: Layers },
+  { value: "ai", label: "AI search", icon: Bot },
+
+  { value: "search", label: "Search", icon: Search, group: "Results" },
   { value: "history", label: "History", icon: History },
 ] as const;
 
@@ -604,24 +619,25 @@ export default function Seo() {
             </Group>
 
             <Box className="seo-tabbar">
-              <Box className="seo-tabbar-track">
-                {TABS.map((t) => {
-                  const activeTab = tab === t.value;
+              {(() => {
+                const countFor = (value: TabValue) =>
+                  value === "overview"
+                    ? data.issues.length
+                    : value === "issues"
+                    ? allIssues.length
+                    : value === "suggestions"
+                    ? data.performance.suggestions.length
+                    : value === "links"
+                    ? (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0)
+                    : value === "schema"
+                    ? data.schema?.errorCount ?? 0
+                    : value === "history"
+                    ? history.length
+                    : 0;
+
+                const renderTab = (t: (typeof TABS)[number]) => {
                   const Icon = t.icon;
-                  const count =
-                    t.value === "overview"
-                      ? data.issues.length
-                      : t.value === "issues"
-                      ? allIssues.length
-                      : t.value === "suggestions"
-                      ? data.performance.suggestions.length
-                      : t.value === "links"
-                      ? (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0)
-                      : t.value === "schema"
-                      ? data.schema?.errorCount ?? 0
-                      : t.value === "history"
-                      ? history.length
-                      : 0;
+                  const count = countFor(t.value);
                   // Counts that flag a problem (broken links, schema errors,
                   // critical issues) read red; neutral tallies stay grey.
                   const alarm =
@@ -632,23 +648,37 @@ export default function Seo() {
                     <UnstyledButton
                       key={t.value}
                       className="seo-tab"
-                      data-active={activeTab || undefined}
+                      data-active={tab === t.value || undefined}
                       onClick={() => setTab(t.value)}
                     >
                       <Icon size={15} className="seo-tab-icon" />
                       <span className="seo-tab-label">{t.label}</span>
                       {count > 0 && (
-                        <span
-                          className="seo-tab-count"
-                          data-alarm={alarm || undefined}
-                        >
+                        <span className="seo-tab-count" data-alarm={alarm || undefined}>
                           {count}
                         </span>
                       )}
                     </UnstyledButton>
                   );
-                })}
-              </Box>
+                };
+
+                const pinned = TABS.filter((t) => "pinned" in t && t.pinned);
+                const scrolling = TABS.filter((t) => !("pinned" in t && t.pinned));
+
+                return (
+                  <>
+                    {pinned.map(renderTab)}
+                    <Box className="seo-tabbar-track">
+                      {scrolling.map((t) => (
+                        <Fragment key={t.value}>
+                          {"group" in t && t.group && <span className="seo-tab-sep" />}
+                          {renderTab(t)}
+                        </Fragment>
+                      ))}
+                    </Box>
+                  </>
+                );
+              })()}
               {/* Help for the current tab. Opens the shared drawer selected to
                   whatever tab you're on, so the relevant explanation is already
                   on screen. */}
@@ -689,11 +719,13 @@ export default function Seo() {
             {tab === "issues" && <IssuesPanel data={data} />}
             {tab === "meta" && <MetaPanel meta={data.meta} url={data.finalUrl} />}
             {tab === "content" && <ContentPanel content={data.content} />}
+            {tab === "images" && <ImagesPanel content={data.content} />}
             {tab === "technical" && (
-              <TechnicalPanel
-                technical={data.technical}
+              <TechnicalPanel technical={data.technical} siteFiles={data.siteFiles} />
+            )}
+            {tab === "performance" && (
+              <PerformancePanel
                 performance={data.performance}
-                siteFiles={data.siteFiles}
                 vitals={<VitalsPanel vitals={fieldVitals} />}
               />
             )}

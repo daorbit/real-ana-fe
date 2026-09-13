@@ -1,6 +1,6 @@
 import {
   ListChecks, Tags, FileText, Wrench, Link2, Braces, Layers, Search,
-  Lightbulb, History, Bot, AlertTriangle,
+  Lightbulb, History, Bot, AlertTriangle, Gauge, Image as ImageIcon,
 } from "lucide-react";
 import type { TFunction } from "i18next";
 import type { HelpSection } from "@/shared/ui/HelpDrawer";
@@ -11,11 +11,13 @@ const SPEC = [
   { id: "issues", icon: AlertTriangle, items: ["List", "Severity", "Area", "Filter"] },
   { id: "meta", icon: Tags, items: ["Preview", "Title*", "Description*", "Canonical", "Social"] },
   { id: "content", icon: FileText, items: ["Words", "H1*", "Readability", "Quality", "Keywords"] },
-  { id: "technical", icon: Wrench, items: ["Checks", "Response", "CrawlerFiles", "Vitals"] },
-  { id: "links", icon: Link2, items: ["Broken*", "Redirects", "Errors", "Scope"] },
+  { id: "images", icon: ImageIcon, items: ["Alt*", "Dimensions", "Loading"] },
   { id: "schema", icon: Braces, items: ["Blocks", "Errors*", "Recommended"] },
-  { id: "ai", icon: Bot, items: ["Access*", "Training", "Readiness", "LlmsTxt"] },
+  { id: "technical", icon: Wrench, items: ["Checks", "Response", "CrawlerFiles"] },
+  { id: "performance", icon: Gauge, items: ["Crux*", "Vitals", "Lab", "Composition"] },
+  { id: "links", icon: Link2, items: ["Broken*", "Redirects", "Errors", "Scope"] },
   { id: "crawl", icon: Layers, items: ["Pages", "Depth", "Issues"] },
+  { id: "ai", icon: Bot, items: ["Access*", "Training", "Readiness", "LlmsTxt"] },
   { id: "search", icon: Search, items: ["Clicks", "Queries", "Position"] },
   { id: "suggestions", icon: Lightbulb, items: ["Sorted", "Advice", "Saving"] },
   { id: "history", icon: History, items: ["Change", "Open", "Best"] },

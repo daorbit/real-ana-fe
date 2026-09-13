@@ -1,5 +1,5 @@
 import {
-  Anchor, Badge, Box, Group, Progress, ScrollArea, SimpleGrid, Stack, Table, Text,
+  Badge, Box, Group, Progress, ScrollArea, SimpleGrid, Stack, Text,
 } from "@mantine/core";
 import {
   FileText, Image as ImageIcon, Link2, Type, Gauge, ExternalLink, Hash,
@@ -8,11 +8,9 @@ import type { SeoContent } from "@/shared/types";
 import { num } from "@/shared/lib";
 import { Panel, Empty } from "@/features/seo/components/shared/Panel";
 import { Tile } from "@/features/seo/components/shared/Tile";
-import { Thumb } from "@/features/seo/components/shared/Thumb";
 import { readabilityBand } from "@/features/seo/components/utils";
 
 export function ContentPanel({ content }: { content: SeoContent }) {
-  const missingAlt = content.images.filter((i) => !i.hasAlt);
   const band = readabilityBand(content.readabilityScore);
 
   return (
@@ -171,83 +169,6 @@ export function ContentPanel({ content }: { content: SeoContent }) {
         </Panel>
       </SimpleGrid>
 
-      <Panel
-        title="Images"
-        description="Alt text is what search engines and screen readers read."
-        icon={ImageIcon}
-        color="grape"
-        right={
-          missingAlt.length > 0 ? (
-            <Badge size="sm" variant="light" color="yellow">
-              {missingAlt.length} missing alt
-            </Badge>
-          ) : content.images.length > 0 ? (
-            <Badge size="sm" variant="light" color="teal">
-              All labelled
-            </Badge>
-          ) : undefined
-        }
-      >
-        {content.images.length ? (
-          <ScrollArea.Autosize mah={360}>
-            <Table striped highlightOnHover verticalSpacing="xs" fz="xs">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th w={72}>Preview</Table.Th>
-                  <Table.Th>Source</Table.Th>
-                  <Table.Th w={220}>Alt text</Table.Th>
-                  <Table.Th w={110}>Size</Table.Th>
-                  <Table.Th w={80}>Loading</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {content.images.map((img, i) => (
-                  <Table.Tr key={`${img.src}-${i}`}>
-                    <Table.Td>
-                      <Thumb src={img.src} alt={img.alt} />
-                    </Table.Td>
-                    <Table.Td style={{ maxWidth: 300 }}>
-                      <Anchor
-                        href={img.src}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        size="xs"
-                        truncate
-                        display="block"
-                      >
-                        {img.src}
-                      </Anchor>
-                    </Table.Td>
-                    <Table.Td>
-                      {img.hasAlt ? (
-                        <Text size="xs" truncate>
-                          {img.alt}
-                        </Text>
-                      ) : (
-                        <Badge size="xs" color="yellow" variant="light">
-                          Missing
-                        </Badge>
-                      )}
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="xs" c="dimmed">
-                        {img.width && img.height ? `${img.width}×${img.height}` : "—"}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="xs" c="dimmed">
-                        {img.loading || "eager"}
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          </ScrollArea.Autosize>
-        ) : (
-          <Empty>No images on this page.</Empty>
-        )}
-      </Panel>
     </Stack>
   );
 }

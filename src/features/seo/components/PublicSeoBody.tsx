@@ -1,7 +1,8 @@
 import { Stack, Group, Text, Alert, Tooltip } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import {
-  ScorePanel, IssueList, MetaPanel, ContentPanel, TechnicalPanel, SuggestionsPanel,
+  ScorePanel, IssueList, MetaPanel, ContentPanel, ImagesPanel, TechnicalPanel,
+  PerformancePanel, SuggestionsPanel,
   AiSearchPanel,
 } from "@/features/seo/components/SeoPanels";
 import { LinksPanel } from "@/features/seo/components/LinksPanel";
@@ -62,13 +63,20 @@ export function PublicSeoBody({
       )}
 
       {p.meta && data.meta && <MetaPanel meta={data.meta} url={data.finalUrl} />}
-      {p.content && data.content && <ContentPanel content={data.content} />}
-      {p.technical && data.technical && data.siteFiles && data.performance && (
-        <TechnicalPanel
-          technical={data.technical}
-          performance={data.performance}
-          siteFiles={data.siteFiles}
-        />
+      {p.content && data.content && (
+        <>
+          <ContentPanel content={data.content} />
+          <ImagesPanel content={data.content} />
+        </>
+      )}
+      {/* Technical and Performance are separate tabs in the app, but a shared
+          report is one flowing document — both are rendered under the single
+          "technical" toggle the owner chose when publishing. */}
+      {p.technical && data.technical && data.siteFiles && (
+        <TechnicalPanel technical={data.technical} siteFiles={data.siteFiles} />
+      )}
+      {p.technical && data.performance && (
+        <PerformancePanel performance={data.performance} />
       )}
       {p.performance && data.performance && (
         <SuggestionsPanel performance={data.performance} />
