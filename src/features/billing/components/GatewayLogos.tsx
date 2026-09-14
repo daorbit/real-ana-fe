@@ -81,22 +81,49 @@ export function CashfreeLogo({ height = 18 }: LogoProps) {
  * each shrinks to fit its half-width slot without being clipped. The Cashfree
  * artboard is proportionally taller, so it is given a larger nominal height to
  * land at the same visual weight as Razorpay's.
+ *
+ * `soon` dims the mark and tags it, for a gateway that is shown but cannot be
+ * picked yet — Cashfree on a USD order, which its account does not collect.
  */
-export function GatewayOption({ gateway }: { gateway: "razorpay" | "cashfree" }) {
+export function GatewayOption({
+  gateway,
+  soon = false,
+}: {
+  gateway: "razorpay" | "cashfree";
+  soon?: boolean;
+}) {
   return (
     <span
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        gap: 6,
         width: "100%",
         height: 22,
+        opacity: soon ? 0.45 : 1,
       }}
     >
       {gateway === "cashfree" ? (
         <CashfreeLogo height={22} />
       ) : (
         <RazorpayLogo height={15} />
+      )}
+      {soon && (
+        <span
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            padding: "1px 5px",
+            borderRadius: 999,
+            border: "1px solid currentColor",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Soon
+        </span>
       )}
     </span>
   );

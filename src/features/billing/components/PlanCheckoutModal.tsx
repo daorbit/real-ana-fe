@@ -57,6 +57,16 @@ export function PlanCheckoutModal({
   // Only Cashfree needs a mobile up front; prefill from the profile.
   const [phone, setPhone] = useState(user?.mobile ?? "");
 
+  // Cashfree's account collects INR only for now, so on a USD order it is
+  // shown tagged and unselectable rather than hidden — the option is coming,
+  // and the server rejects it in the meantime either way.
+  const cashfreeDisabled = currency !== "INR";
+
+  // Guard against a currency switch made while Cashfree was already picked.
+  useEffect(() => {
+    if (cashfreeDisabled && gateway === "cashfree") setGateway("razorpay");
+  }, [cashfreeDisabled, gateway]);
+
   // Reset when a different plan is picked, so quantities chosen for one plan
   // don't silently carry into the next dialog.
   useEffect(() => {
@@ -325,10 +335,23 @@ export function PlanCheckoutModal({
                     styles={{ label: { paddingTop: 10, paddingBottom: 10 } }}
                     data={[
                       { value: "razorpay", label: <GatewayOption gateway="razorpay" /> },
-                      { value: "cashfree", label: <GatewayOption gateway="cashfree" /> },
+                      {
+                        value: "cashfree",
+                        label: <GatewayOption gateway="cashfree" soon={cashfreeDisabled} />,
+                        disabled: cashfreeDisabled,
+                      },
                     ]}
                   />
-                  {gateway === "cashfree" && (
+                  {cashfreeDisabled && (
+                    <Text size="xs" c="dimmed">
+                      {t(
+                        "billing.cashfreeCurrencySoon",
+                        "Cashfree does not take {{currency}} payments yet — coming soon.",
+                        { currency },
+                      )}
+                    </Text>
+                  )}
+                  {gateway === "cashfree" && !cashfreeDisabled && (
                     <TextInput
                       mt={6}
                       label={t("billing.mobileForReceipt", "Mobile number")}
@@ -352,7 +375,11 @@ export function PlanCheckoutModal({
                 color="emerald"
                 leftSection={<CreditCard size={16} />}
                 loading={busy}
-                disabled={gateway === "cashfree" && phone.replace(/\D/g, "").replace(/^(0|91)(?=\d{10}$)/, "").length !== 10}
+                disabled={
+                  gateway === "cashfree" &&
+                  (cashfreeDisabled ||
+                    phone.replace(/\D/g, "").replace(/^(0|91)(?=\d{10}$)/, "").length !== 10)
+                }
                 onClick={() => onConfirm(plan, selection, gateway, gateway === "cashfree" ? phone : undefined)}
               >
                 {noCharge ? t("billing.confirm") : t("billing.payAmount", { amount: money(chargeable) })}

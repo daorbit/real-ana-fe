@@ -47,9 +47,16 @@ export function AddonCheckoutModal({
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
   const [phone, setPhone] = useState(user?.mobile ?? "");
 
+  // Cashfree's account collects INR only for now — see PlanCheckoutModal.
+  const cashfreeDisabled = currency !== "INR";
+
   useEffect(() => {
     if (pack) setPacks(1);
   }, [pack?._id]);
+
+  useEffect(() => {
+    if (cashfreeDisabled && gateway === "cashfree") setGateway("razorpay");
+  }, [cashfreeDisabled, gateway]);
 
   if (!pack) return <Modal opened={false} onClose={onClose} children={null} />;
 
@@ -160,10 +167,23 @@ export function AddonCheckoutModal({
             styles={{ label: { paddingTop: 10, paddingBottom: 10 } }}
             data={[
               { value: "razorpay", label: <GatewayOption gateway="razorpay" /> },
-              { value: "cashfree", label: <GatewayOption gateway="cashfree" /> },
+              {
+                value: "cashfree",
+                label: <GatewayOption gateway="cashfree" soon={cashfreeDisabled} />,
+                disabled: cashfreeDisabled,
+              },
             ]}
           />
-          {gateway === "cashfree" && (
+          {cashfreeDisabled && (
+            <Text size="xs" c="dimmed">
+              {t(
+                "billing.cashfreeCurrencySoon",
+                "Cashfree does not take {{currency}} payments yet — coming soon.",
+                { currency },
+              )}
+            </Text>
+          )}
+          {gateway === "cashfree" && !cashfreeDisabled && (
             <TextInput
               mt={6}
               label={t("billing.mobileForReceipt", "Mobile number")}
@@ -188,7 +208,8 @@ export function AddonCheckoutModal({
             loading={busy}
             disabled={
               gateway === "cashfree" &&
-              phone.replace(/\D/g, "").replace(/^(0|91)(?=\d{10}$)/, "").length !== 10
+              (cashfreeDisabled ||
+                phone.replace(/\D/g, "").replace(/^(0|91)(?=\d{10}$)/, "").length !== 10)
             }
             onClick={() =>
               onConfirm(pack, packs, gateway, gateway === "cashfree" ? phone : undefined)
