@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images,
-  Settings,
+  Settings, Star,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 
@@ -53,6 +53,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       // Beside Reports: both are "write it once, it goes out on a schedule".
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
+      // Beside the outbound channels rather than under Analyze: reviews are
+      // customer-facing content to publish and reply to, not a metric to read.
+      { to: "/app/reviews", labelKey: "nav.reviews", label: "Google Reviews", icon: Star },
       // Beside the other outbound channels: a lead form is another way traffic
       // turns into something you can act on.
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Leads Capture", icon: LeadMagnetIcon },

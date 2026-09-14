@@ -2054,3 +2054,87 @@ export type MediaListResult = {
 
 /** One file on its way up, as a batch upload reports it. */
 export type MediaUploadInput = { file: string; name: string; alt?: string };
+
+// ---- Google Reviews ----
+
+/** One business location connected to a workspace. */
+export type GoogleReviewLocation = {
+  id: string;
+  title: string;
+  address: string;
+  status: "connected" | "disconnected" | "error";
+  /**
+   * Google's own figures, not an average of the reviews listed. Google counts
+   * star-only ratings that its reviews API never returns, so a number computed
+   * from the list would disagree with what the business sees on Google.
+   */
+  averageRating: number;
+  totalReviewCount: number;
+  lastSyncedAt?: string;
+  /** Our own wording for the last failure, shown against the location. */
+  lastSyncError?: string;
+};
+
+/**
+ * Everything the module needs to decide which of its states to render.
+ *
+ * The three-way split matters: `configured` false means an administrator has
+ * not added the Google credentials, `connected` false means nobody in this
+ * workspace has authorised yet, and a `connection.status` of `revoked` means
+ * the authorisation existed and has stopped working. Each needs a different
+ * message and a different action.
+ */
+export type GoogleReviewsStatus = {
+  configured: boolean;
+  connected: boolean;
+  connection?: {
+    googleEmail: string;
+    status: "active" | "revoked" | "error";
+    statusMessage: string;
+    connectedAt?: string;
+  };
+  locations: GoogleReviewLocation[];
+};
+
+/** A business the connected Google account can see, offered in the picker. */
+export type GoogleAvailableLocation = {
+  googleAccountId: string;
+  googleLocationId: string;
+  title: string;
+  address: string;
+};
+
+export type GoogleAvailableLocations = {
+  accounts: number;
+  locations: GoogleAvailableLocation[];
+  /** Guidance when the list is empty — no Business Profile, or no locations. */
+  message?: string;
+};
+
+/** One cached review, as the dashboard reads it. */
+export type GoogleReviewItem = {
+  id: string;
+  author: string;
+  photo: string;
+  rating: number;
+  comment: string;
+  /** The business owner's public reply, when there is one. */
+  reply?: string;
+  createdAt?: string;
+};
+
+export type GoogleReviewsList = {
+  reviews: GoogleReviewItem[];
+  /** Star histogram, always five entries, 5 down to 1. */
+  breakdown: { stars: number; count: number }[];
+};
+
+/** What a sync reports back, for the toast after the button. */
+export type GoogleSyncResult = {
+  locationId: string;
+  added: number;
+  updated: number;
+  removed: number;
+  total: number;
+  averageRating: number;
+};

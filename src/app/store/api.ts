@@ -27,6 +27,8 @@ import type {
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
   JourneyUser, JourneyEvent,
+  GoogleReviewsStatus, GoogleReviewLocation, GoogleAvailableLocations,
+  GoogleReviewsList, GoogleSyncResult,
 } from "@/shared/types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -113,7 +115,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -1808,6 +1810,65 @@ export const api = createApi({
     deleteAdminCoupon: build.mutation<void, string>({
       query: (id) => ({ url: `/api/admin/billing/coupons/${id}`, method: "DELETE" }),
       invalidatesTags: ["Coupon"],
+    }),
+
+    // ---- Google Reviews ----
+
+    getGoogleReviewsStatus: build.query<GoogleReviewsStatus, string>({
+      query: (workspaceId) => `/api/auth/google-business/workspaces/${workspaceId}/status`,
+      providesTags: ["GoogleReviews"],
+    }),
+
+    /**
+     * The businesses the connected account can see.
+     *
+     * Not tagged, and so not cached against an invalidation: it is read live
+     * from Google at the moment of choosing, and a list cached from an earlier
+     * session could offer a location the user no longer manages.
+     */
+    getGoogleAvailableLocations: build.query<GoogleAvailableLocations, string>({
+      query: (workspaceId) =>
+        `/api/auth/google-business/workspaces/${workspaceId}/available-locations`,
+      keepUnusedDataFor: 0,
+    }),
+
+    connectGoogleLocation: build.mutation<
+      { location: GoogleReviewLocation; sync?: GoogleSyncResult; syncError?: string },
+      { workspaceId: string; googleAccountId: string; googleLocationId: string; title: string; address: string }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/auth/google-business/workspaces/${workspaceId}/locations`,
+        method: "POST",
+        body,
+      }),
+      // Also invalidates the review list: connecting runs a first sync, so the
+      // reviews it pulled must appear without a manual refresh.
+      invalidatesTags: ["GoogleReviews", "GoogleReviewList"],
+    }),
+
+    syncGoogleLocation: build.mutation<GoogleSyncResult, { workspaceId: string; locationId: string }>({
+      query: ({ workspaceId, locationId }) => ({
+        url: `/api/auth/google-business/workspaces/${workspaceId}/locations/${locationId}/sync`,
+        method: "POST",
+        body: {},
+      }),
+      invalidatesTags: ["GoogleReviews", "GoogleReviewList"],
+    }),
+
+    getGoogleReviews: build.query<GoogleReviewsList, { workspaceId: string; locationId?: string }>({
+      query: ({ workspaceId, locationId }) => ({
+        url: `/api/auth/google-business/workspaces/${workspaceId}/reviews`,
+        params: locationId ? { locationId } : undefined,
+      }),
+      providesTags: ["GoogleReviewList"],
+    }),
+
+    disconnectGoogleReviews: build.mutation<{ disconnected: boolean }, string>({
+      query: (workspaceId) => ({
+        url: `/api/auth/google-business/workspaces/${workspaceId}/connection`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["GoogleReviews", "GoogleReviewList"],
     }),
   }),
 });

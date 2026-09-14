@@ -36,6 +36,7 @@ const Reports = lazy(() => import("@/features/reports/pages"));
 const Journey = lazy(() => import("@/features/journey/pages/Journey"));
 const JourneyTimeline = lazy(() => import("@/features/journey/pages/JourneyTimeline"));
 const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
+const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
 const LeadCapture = lazy(() => import("@/features/leadCapture/pages/LeadCapture"));
 const Impersonate = lazy(() => import("@/features/admin/pages/Impersonate"));
 const DemoUsage = lazy(() => import("@/features/admin/pages/DemoUsage"));
@@ -253,6 +254,7 @@ export default function App() {
               <Route path="/app/journey" element={<Protected><RouteFrame><Journey /></RouteFrame></Protected>} />
               <Route path="/app/journey/:appUserId" element={<Protected><RouteFrame><JourneyTimeline /></RouteFrame></Protected>} />
               <Route path="/app/social" element={<Protected><RouteFrame><SocialPosts /></RouteFrame></Protected>} />
+              <Route path="/app/reviews" element={<Protected><RouteFrame><Reviews /></RouteFrame></Protected>} />
               <Route path="/app/lead-capture" element={<Protected><RouteFrame><LeadCapture /></RouteFrame></Protected>} />
               <Route path="/app/developers" element={<Protected><RouteFrame><Developers /></RouteFrame></Protected>} />
               <Route path="/app/settings" element={<Protected><RouteFrame><Settings /></RouteFrame></Protected>} />
