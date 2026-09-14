@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActionIcon, Box, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title, Tooltip,
-  UnstyledButton,
+  ActionIcon, Box, Button, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
+  Tooltip, UnstyledButton,
 } from "@mantine/core";
 import { AlertTriangle, ArrowUp, History, Mic, RotateCcw, Square } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
@@ -208,18 +208,21 @@ export default function Orbit() {
                 </ActionIcon>
               </Tooltip>
             )}
-            <ActionIcon
-              variant={empty ? "subtle" : "filled"}
-              color={empty ? "gray" : "emerald"}
+            {/* Named, not a bare arrow. It is the one action the composer is
+                for, and there is room here to say so — the panel's icon-only
+                button was a concession to 400px that this page does not have to
+                make. */}
+            <Button
+              color="emerald"
               radius="xl"
-              size="md"
+              size="sm"
+              leftSection={<ArrowUp size={15} />}
               disabled={empty || thinking}
               loading={thinking}
               onClick={() => sendAndStop()}
-              aria-label="Send"
             >
-              <ArrowUp size={15} />
-            </ActionIcon>
+              Send
+            </Button>
           </Group>
         </div>
       </div>
@@ -235,11 +238,17 @@ export default function Orbit() {
     <AppShell>
       <div className={classes.page}>
         <div className={classes.header}>
-        {/* No page title. The rail already says which module this is, and the
-            empty state says it again in the middle of the screen — a third
-            heading in the corner was just taking the room the conversation
-            wants. The header exists for its two controls. */}
-        <div />
+       
+        {started ? (
+          <Group gap={9} wrap="nowrap" className={classes.headerMark}>
+            <OrbitMark size={24} />
+            <Text size="sm" fw={650}>
+              Orbit AI
+            </Text>
+          </Group>
+        ) : (
+          <div />
+        )}
 
         <Group gap={2} wrap="nowrap">
           {/* "Start over" leaves the current thread rather than deleting it —

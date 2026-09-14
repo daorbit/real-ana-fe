@@ -1,16 +1,12 @@
  
 
 /*
- * Orbit is a module like Analytics or Compare, and is built like one: ordinary
- * content inside the app panel, beside the rail, sized by the panel's own
- * scroller.
- *
- * Everything this page needs is a tall-enough box for the empty state to centre
- * in. `min-height` does that without claiming a height of its own — a `100vh`
- * calculation measures the window rather than the panel and overflows it, and a
- * `height: 100%` collapses against the auto-height wrapper the router puts in
- * between. Both of those pushed the layout out from under the navigation.
+ * Orbit is a module like Analytics or Compare: ordinary content inside the app
+ * panel, beside the rail, sized by the panel rather than by the window. A
+ * `100vh` calculation here measures the window instead, overflows the panel and
+ * pushes the layout out from under the navigation.
  */
+
 /*
  * The panel's scroller and the router's fade wrapper are auto-height, so a
  * `height: 100%` page collapses inside them. Given a height for this page only
@@ -59,6 +55,35 @@
   gap: 12px;
   margin-bottom: 8px;
   flex-shrink: 0;
+}
+
+/*
+ * The mark's second home, in the header once the conversation has started.
+ *
+ * It rises into place rather than blinking on. The hero's copy is gone by the
+ * time this mounts, so nothing actually travels between the two — the movement
+ * is implied by both marks sharing a size and a direction, which is enough to
+ * read as one object relocating.
+ */
+.headerMark {
+  animation: header-mark-in 320ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes header-mark-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headerMark {
+    animation: none;
+  }
 }
 
 /* ---------------------------------------------------------------- body --- */
@@ -164,12 +189,9 @@
 /* -------------------------------------------------------------- thread --- */
 
 /*
- * The thread.
- *
- * Capped rather than stretched. The composer follows the conversation instead
- * of being pinned to the floor of the panel — the page scrolls as a whole, so a
- * composer nailed to the bottom would sit in the middle of the reading area on
- * a tall window.
+ * The thread takes whatever height the composer leaves, and scrolls inside it.
+ * That is what keeps the composer on the floor of the module while a long
+ * conversation runs past the top of the screen.
  */
 .scroll {
   flex: 1;
