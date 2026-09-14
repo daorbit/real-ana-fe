@@ -28,7 +28,6 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/social": () => import("@/features/social/pages/SocialPosts"),
   "/app/lead-capture": () => import("@/features/leadCapture/pages/LeadCapture"),
   "/app/developers": () => import("@/features/support/pages/Developers"),
-  "/app/help": () => import("@/features/support/pages/Help"),
   "/app/settings": () => import("@/features/auth/pages/Settings"),
   "/app/billing": () => import("@/features/billing/pages/Billing"),
 };

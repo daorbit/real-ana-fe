@@ -5,7 +5,6 @@ import { notify, errMessage, isPlanLimit, quotaLimitInfo } from "@/shared/lib/no
 import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace,
-  ContactMessage, ContactMessagePage, ContactStatus,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout, Branding, BrandingInput,
@@ -32,14 +31,7 @@ import type {
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
 
-/**
- * One cache for every server resource.
- *
- * RTK Query dedupes concurrent requests for the same key, keeps the result in
- * the store, and serves it instantly on the next mount — so navigating between
- * pages no longer refires the same calls. Data only goes stale when a poll
- * fires, a mutation invalidates its tag, or the user hits Refresh.
- */
+
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE,
   prepareHeaders: (headers) => {
@@ -50,17 +42,7 @@ const rawBaseQuery = fetchBaseQuery({
 });
 
 
-/**
- * The plan and addon catalogue, which a demo session reads from the server like
- * anyone else.
- *
- * This is the one exception to the demo's "never hit the network" rule, and it
- * earns it: prices are set per deployment and live only in the database, so a
- * fixture would have to invent them — and invented prices shown on a pricing
- * page are worse than a request. The data is public, read-only, and identical
- * for every visitor. Buying still goes nowhere: checkout is a write, and writes
- * are refused above.
- */
+
 const DEMO_LIVE_READS = ["/api/billing/plans", "/api/billing/addons"];
 
 function isPublicCatalogue(url: string, isWrite: boolean): boolean {
@@ -79,9 +61,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   const isWrite = method.toUpperCase() !== "GET";
 
   if (isDemoToken() && !isPublicCatalogue(url, isWrite)) {
-    // A demo session is served entirely from generated fixtures. Nothing goes
-    // to the server: browsing the product costs no queries, and there is no
-    // real account behind the numbers to protect.
+
     if (isWrite) {
       notify.info("You're in demo mode — changes are turned off here.", "Read-only demo");
       return Promise.resolve({
@@ -89,23 +69,11 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
       });
     }
     const data = resolveDemoRequest(url);
-    // An unmapped read resolves empty rather than falling through to the
-    // network — a demo must never be the reason a request goes out.
-    //
-    // Empty is `undefined`, not `null`: a call site's `data = []` default only
-    // fires on `undefined`, so `null` would sail past it and reach code that
-    // expects an array. An unmapped endpoint should degrade to a bare page, not
-    // crash it.
     return Promise.resolve({ data: data ?? undefined });
   }
 
   let result = await rawBaseQuery(args, apiArg, extra);
 
-  // Retry a read that failed for a reason that is plausibly transient — a
-  // 5xx, or a network error with no status at all (fetch rejected). Two extra
-  // attempts with a short backoff clears most single-flake failures without a
-  // manual Refresh. Writes are never retried here: a POST that reached the
-  // server and then dropped the response would run twice.
   const status = result.error?.status;
   const transient =
     !isWrite &&
@@ -145,17 +113,11 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "ContactMessage", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
-    /**
-     * One workspace's plan and usage, without refetching the workspace list.
-     *
-     * Usage moves on every audit, crawl and Orbit question; the list around it
-     * does not. Anything that spends quota invalidates `Usage`, so the counters
-     * refresh themselves rather than going stale until the next full reload.
-     */
+
     getWorkspaceUsage: build.query<QuotaSummary, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/usage`,
       providesTags: ["Usage"],
@@ -232,16 +194,10 @@ export const api = createApi({
       ],
     }),
 
-    // A written share caption. A mutation rather than a query: it spends Orbit
-    // quota, so it must only run when the user asks for it — never re-fetched
-    // on remount or refocus.
+
     writeShareCaption: build.mutation<
       { caption: string },
-      /**
-       * `topic` writes about whatever the author names instead of about their
-       * public dashboard — the scheduled-post composer sends it, the share
-       * panel does not.
-       */
+
       { workspaceId: string; platform: string; topic?: string }
     >({
       query: ({ workspaceId, platform, topic }) => ({
@@ -251,15 +207,7 @@ export const api = createApi({
       }),
     }),
 
-    /**
-     * One turn of a scheduling conversation: Orbit asks what it still needs,
-     * and returns the whole plan each time so the composer's fields track the
-     * conversation as it happens.
-     *
-     * `now` is the author's own wall clock, sent because "tomorrow" means their
-     * tomorrow. A mutation for the same reason `writeShareCaption` is one: it
-     * spends Orbit quota and must run only when asked.
-     */
+
     planScheduledPost: build.mutation<
       {
         /** What Orbit says back — a question, or its summary of the finished post. */
@@ -835,17 +783,6 @@ export const api = createApi({
       invalidatesTags: ["AdminUserBilling"],
     }),
 
-    /** Support request raised from inside the app. Identity comes from the
-     *  session server-side, so nothing about the sender is passed here. */
-    sendSupportMessage: build.mutation<
-      { ok: true },
-      { kind: "support" | "bug" | "feedback"; message: string; pageUrl: string }
-    >({
-      query: (body) => ({ url: "/api/support", method: "POST", body }),
-      invalidatesTags: ["ContactMessage"],
-    }),
-
-
     /**
      * Whether Orbit can run, which models may answer, and the workspace's tier.
      *
@@ -1015,58 +952,6 @@ export const api = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["OrbitConversation"],
-    }),
-
-    getContactMessages: build.query<
-      ContactMessagePage,
-      { status?: string; q?: string; page?: number; source?: string }
-    >({
-      query: ({ status, q, page, source }) => {
-        const p = new URLSearchParams();
-        if (status) p.set("status", status);
-        if (source) p.set("source", source);
-        if (q) p.set("q", q);
-        if (page && page > 1) p.set("page", String(page));
-        const qs = p.toString();
-        return `/api/admin/contact${qs ? `?${qs}` : ""}`;
-      },
-      providesTags: ["ContactMessage"],
-    }),
-
-    /** Just the badge count. The list query is far too heavy to poll for it. */
-    getContactUnread: build.query<{ unread: number }, void>({
-      query: () => "/api/admin/contact/unread",
-      providesTags: ["ContactMessage"],
-    }),
-
-    updateContactMessage: build.mutation<
-      ContactMessage,
-      { id: string; status?: ContactStatus; adminNote?: string }
-    >({
-      query: ({ id, ...body }) => ({
-        url: `/api/admin/contact/${id}`,
-        method: "PATCH",
-        body,
-      }),
-      invalidatesTags: ["ContactMessage"],
-    }),
-
-    deleteContactMessage: build.mutation<void, string>({
-      query: (id) => ({ url: `/api/admin/contact/${id}`, method: "DELETE" }),
-      invalidatesTags: ["ContactMessage"],
-    }),
-
-    /** Send a reply from the dashboard. The server mails it, then records it. */
-    replyToContactMessage: build.mutation<
-      ContactMessage,
-      { id: string; subject: string; body: string }
-    >({
-      query: ({ id, ...body }) => ({
-        url: `/api/admin/contact/${id}/reply`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["ContactMessage"],
     }),
 
     getEmailStatus: build.query<EmailStatus, void>({
@@ -1973,12 +1858,6 @@ export const {
   useDeleteAdminUserMutation,
   useGetAdminUserBillingQuery,
   useGrantAdminSiteSlotMutation,
-  useGetContactMessagesQuery,
-  useGetContactUnreadQuery,
-  useUpdateContactMessageMutation,
-  useDeleteContactMessageMutation,
-  useReplyToContactMessageMutation,
-  useSendSupportMessageMutation,
   useGetOrbitStatusQuery,
   useAskOrbitMutation,
   useGetOrbitConversationsQuery,

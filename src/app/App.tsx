@@ -27,7 +27,6 @@ const Compare = lazy(() => import("@/features/compare/pages/Compare"));
 const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"));
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
 const Developers = lazy(() => import("@/features/support/pages/Developers"));
-const Help = lazy(() => import("@/features/support/pages/Help"));
 const Members = lazy(() => import("@/features/workspace/pages/Members"));
 const Branding = lazy(() => import("@/features/branding/pages/Branding"));
 const MediaLibrary = lazy(() => import("@/features/media/pages/MediaLibrary"));
@@ -45,7 +44,6 @@ const DataDeletion = lazy(() => import("@/features/auth/pages/DataDeletion"));
 const Billing = lazy(() => import("@/features/billing/pages/Billing"));
 const AdminBilling = lazy(() => import("@/features/admin/pages/AdminBilling"));
 const AdminBroadcast = lazy(() => import("@/features/admin/pages/AdminBroadcast"));
-const AdminContact = lazy(() => import("@/features/admin/pages/AdminContact"));
 const AdminDatabase = lazy(() => import("@/features/admin/pages/AdminDatabase"));
 const Onboarding = lazy(() => import("@/features/auth/pages/Onboarding"));
 const PublicDashboard = lazy(() => import("@/features/analytics/pages/PublicDashboard"));
@@ -257,7 +255,6 @@ export default function App() {
               <Route path="/app/social" element={<Protected><RouteFrame><SocialPosts /></RouteFrame></Protected>} />
               <Route path="/app/lead-capture" element={<Protected><RouteFrame><LeadCapture /></RouteFrame></Protected>} />
               <Route path="/app/developers" element={<Protected><RouteFrame><Developers /></RouteFrame></Protected>} />
-              <Route path="/app/help" element={<Protected><RouteFrame><Help /></RouteFrame></Protected>} />
               <Route path="/app/settings" element={<Protected><RouteFrame><Settings /></RouteFrame></Protected>} />
               <Route path="/app/billing" element={<Protected><RouteFrame><Billing /></RouteFrame></Protected>} />
               {/* Admin-only, enforced by the page and by every /api/admin route. */}
@@ -265,7 +262,6 @@ export default function App() {
               <Route path="/app/demo-usage" element={<Protected><RouteFrame><DemoUsage /></RouteFrame></Protected>} />
               <Route path="/app/admin/billing" element={<Protected><RouteFrame><AdminBilling /></RouteFrame></Protected>} />
               <Route path="/app/admin/broadcast" element={<Protected><RouteFrame><AdminBroadcast /></RouteFrame></Protected>} />
-              <Route path="/app/admin/contact" element={<Protected><RouteFrame><AdminContact /></RouteFrame></Protected>} />
               <Route path="/app/admin/database" element={<Protected><RouteFrame><AdminDatabase /></RouteFrame></Protected>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

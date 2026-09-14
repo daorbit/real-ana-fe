@@ -1,17 +1,10 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
-  Send, CreditCard, Mail, Inbox, LifeBuoy, Swords, Share2, Route, Database, Palette, Images,
+  Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images,
   Settings,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 
-/**
- * What the rail contains, as data.
- *
- * Kept apart from the components that draw it so the two questions stay
- * separate: this file answers "what is in the navigation", and the components
- * beside it answer "how does a row look". Adding a page is an edit here alone.
- */
 
 export type NavItem = {
   to: string;
@@ -74,20 +67,12 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images },
       { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: Settings },
-      { to: "/app/help", labelKey: "nav.help", label: "Help & support", icon: LifeBuoy },
     ],
   },
 ];
 
-/**
- * Platform administration.
- *
- * Shown to super-admins only, and in the account menu rather than the rail:
- * these are a different job from using the product, and keeping them out of the
- * sidebar means a regular member never sees rows they cannot open.
- */
+
 export const ADMIN_ITEMS: NavItem[] = [
-  { to: "/app/admin/contact", labelKey: "nav.adminContact", label: "Inbox", icon: Inbox },
   { to: "/app/admin/broadcast", labelKey: "nav.adminBroadcast", label: "Email users", icon: Mail },
   { to: "/app/impersonate", labelKey: "nav.viewAsUser", label: "Impersonate", icon: Users },
   { to: "/app/demo-usage", labelKey: "nav.demoUsage", label: "Demo usage", icon: PlayCircle },
