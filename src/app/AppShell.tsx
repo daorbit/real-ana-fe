@@ -4,7 +4,6 @@ import { AppShell as MantineShell, Box, Burger, Group } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { Wordmark } from "@/shared/ui/Brand";
-import { OrbitBubble } from "@/features/orbit/components/OrbitBubble";
 import { useWorkspace } from "@/features/workspace/context";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { useSyncWorkspaceTheme } from "@/features/auth/components/useSyncWorkspaceTheme";
@@ -132,8 +131,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div key={loc.pathname} className="route-fade">
                 {children}
               </div>
-         
-              <div className="orbit-fab-spacer" />
+
             </div>
             {/* Where a full-surface overlay (the media preview) mounts, so it
                 fills the panel and stops at its border rather than covering
@@ -141,9 +139,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 panel so it is clipped to the same radius. */}
             <div id="panel-overlay-root" />
 
-            {/* Lead Capture carries its own assistant surface — a second
-                floating launcher on top of it is one too many. */}
-            {!loc.pathname.startsWith("/app/lead-capture") && <OrbitBubble />}
           </div>
         </MantineShell.Main>
       </MantineShell>

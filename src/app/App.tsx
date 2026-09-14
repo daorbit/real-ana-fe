@@ -21,6 +21,7 @@ import Home from "@/features/analytics/pages/Home";
 
 // Everything else is split out — most sessions touch only a few of these, and
 // the admin, print and journey routes are dead weight for almost everyone.
+const Orbit = lazy(() => import("@/features/orbit/pages/Orbit"));
 const Analytics = lazy(() => import("@/features/analytics/pages/Analytics"));
 const Seo = lazy(() => import("@/features/seo/pages/Seo"));
 const Compare = lazy(() => import("@/features/compare/pages/Compare"));
@@ -247,6 +248,7 @@ export default function App() {
               />
               <Route path="/app/workspaces" element={<Protected><RouteFrame><Workspaces /></RouteFrame></Protected>} />
               <Route path="/app/members" element={<Protected><RouteFrame><Members /></RouteFrame></Protected>} />
+              <Route path="/app/orbit" element={<Protected><RouteFrame><Orbit /></RouteFrame></Protected>} />
               <Route path="/app/branding" element={<Protected><RouteFrame><Branding /></RouteFrame></Protected>} />
               <Route path="/app/media" element={<Protected><RouteFrame><MediaLibrary /></RouteFrame></Protected>} />
               <Route path="/app/share" element={<Protected><RouteFrame><Share /></RouteFrame></Protected>} />

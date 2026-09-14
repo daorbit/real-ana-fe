@@ -3,7 +3,7 @@ import {
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images,
   Settings, Star,
 } from "lucide-react";
-import { LeadMagnetIcon } from "./icons";
+import { LeadMagnetIcon, OrbitNavIcon } from "./icons";
 
 
 export type NavItem = {
@@ -28,6 +28,16 @@ export type NavGroup = {
 };
 
 export const NAV_GROUPS: NavGroup[] = [
+  // Alone at the top, above Analyze. Orbit is not one of the reports — it is
+  // the way into all of them for anyone who does not yet know which report they
+  // want, so it sits where it is seen before the list rather than inside it.
+  {
+    headingKey: "nav.groupAssistant",
+    heading: "Assistant",
+    items: [
+      { to: "/app/orbit", labelKey: "nav.orbit", label: "Orbit AI", icon: OrbitNavIcon },
+    ],
+  },
   {
     headingKey: "nav.groupAnalyze",
     heading: "Analyze",

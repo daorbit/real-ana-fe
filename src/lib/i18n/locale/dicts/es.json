@@ -19,6 +19,8 @@
   },
   "nav": {
     "groupAnalyze": "Analizar",
+    "groupAssistant": "Assistant",
+    "orbit": "Orbit AI",
     "groupManage": "Gestionar",
     "groupAdmin": "Administración",
     "home": "Inicio",

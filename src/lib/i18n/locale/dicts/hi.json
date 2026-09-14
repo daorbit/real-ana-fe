@@ -19,6 +19,8 @@
   },
   "nav": {
     "groupAnalyze": "विश्लेषण करें",
+    "groupAssistant": "Assistant",
+    "orbit": "Orbit AI",
     "groupManage": "प्रबंधित करें",
     "groupAdmin": "एडमिन",
     "home": "होम",

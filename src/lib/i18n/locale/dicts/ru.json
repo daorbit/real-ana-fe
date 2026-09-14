@@ -19,6 +19,8 @@
   },
   "nav": {
     "groupAnalyze": "Анализ",
+    "groupAssistant": "Assistant",
+    "orbit": "Orbit AI",
     "groupManage": "Управление",
     "groupAdmin": "Администрирование",
     "home": "Главная",

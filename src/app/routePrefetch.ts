@@ -15,6 +15,7 @@
  * set keeps a slow hover from queueing duplicates.
  */
 const importers: Record<string, () => Promise<unknown>> = {
+  "/app/orbit": () => import("@/features/orbit/pages/Orbit"),
   "/app/analytics": () => import("@/features/analytics/pages/Analytics"),
   "/app/seo": () => import("@/features/seo/pages/Seo"),
   "/app/compare": () => import("@/features/compare/pages/Compare"),

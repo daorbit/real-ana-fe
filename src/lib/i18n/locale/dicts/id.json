@@ -19,6 +19,8 @@
   },
   "nav": {
     "groupAnalyze": "Analisis",
+    "groupAssistant": "Assistant",
+    "orbit": "Orbit AI",
     "groupManage": "Kelola",
     "groupAdmin": "Admin",
     "home": "Beranda",

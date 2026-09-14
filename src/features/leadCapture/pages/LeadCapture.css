@@ -8,10 +8,6 @@ body[data-page="lead-capture"] .app-panel__scroll > .route-fade {
   height: 100%;
 }
 
-body[data-page="lead-capture"] .orbit-fab-spacer {
-  display: none;
-}
-
 .lead-capture__frame {
   display: block;
   width: 100%;

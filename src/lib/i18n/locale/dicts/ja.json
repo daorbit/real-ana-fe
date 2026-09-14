@@ -19,6 +19,8 @@
   },
   "nav": {
     "groupAnalyze": "分析",
+    "groupAssistant": "Assistant",
+    "orbit": "Orbit AI",
     "groupManage": "管理",
     "groupAdmin": "管理者",
     "home": "ホーム",
