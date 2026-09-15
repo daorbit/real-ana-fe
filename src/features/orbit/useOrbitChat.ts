@@ -290,6 +290,97 @@ export function useOrbitChat() {
   );
 
   /**
+   * Re-ask the question behind the last answer, replacing it in place.
+   *
+   * Only the last turn — the same scope ChatGPT gives regeneration, and the
+   * only one that is unambiguous: redoing an answer in the middle of a thread
+   * would leave the turns after it talking about a reply that no longer
+   * exists. The preceding user turn's own content and image are replayed
+   * rather than the composer's current state, so this still works after the
+   * question box has moved on to something else. Whether it draws or answers
+   * is read back off the answer itself, not off `imageMode` (which may have
+   * changed since), by checking if the answer being replaced carried a
+   * picture.
+   */
+  const regenerateLast = useCallback(async () => {
+    const current = historyRef.current;
+    const lastIndex = current.length - 1;
+    const last = current[lastIndex];
+    if (!last || last.role !== "assistant" || thinking) return;
+
+    const userTurn = current[lastIndex - 1];
+    if (!userTurn || userTurn.role !== "user") return;
+
+    const drawing = Boolean(last.imageUrl) && !userTurn.imageUrl;
+    const question = userTurn.content;
+    if (!question && !userTurn.imageUrl) return;
+
+    const withoutLast = current.slice(0, lastIndex);
+    setMessages(withoutLast);
+    historyRef.current = withoutLast;
+
+    trace(user?.id, "regenerate_orbit", "orbit_chat", "orbit_answer");
+
+    const history = withoutLast
+      .slice(0, -1)
+      .filter((m) => !m.failed)
+      .map((m) => ({ role: m.role, content: m.content }));
+
+    setGeneratingImage(drawing);
+
+    try {
+      const answered = await ask({
+        workspaceId,
+        question,
+        history,
+        model: activeModel,
+        image: userTurn.imageUrl,
+        generateImage: drawing,
+        conversationId: conversationRef.current ?? undefined,
+      }).unwrap();
+      setRemaining(answered.remaining);
+      if (answered.conversationId) {
+        conversationRef.current = answered.conversationId;
+        setConversationId(answered.conversationId);
+      }
+      setMessages((prev) => {
+        const next = [
+          ...prev,
+          {
+            id: nextId(),
+            role: "assistant" as const,
+            content: answered.reply,
+            imageUrl: answered.imageUrl,
+            suggestions: answered.suggestions,
+            modelLabel:
+              answered.model && answered.model !== activeModel
+                ? answered.modelLabel
+                : undefined,
+          },
+        ];
+        historyRef.current = next;
+        return next;
+      });
+    } catch (e) {
+      setMessages((prev) => {
+        const next = [
+          ...prev,
+          {
+            id: nextId(),
+            role: "assistant" as const,
+            content: errMessage(e, "Orbit could not answer that. Try again, or use Email support."),
+            failed: true,
+          },
+        ];
+        historyRef.current = next;
+        return next;
+      });
+    } finally {
+      setGeneratingImage(false);
+    }
+  }, [ask, thinking, activeModel, workspaceId, user?.id]);
+
+  /**
    * Start a new thread.
    *
    * Clears the conversation id too, so the next question opens a fresh one on
@@ -377,6 +468,9 @@ export function useOrbitChat() {
     setImageMode,
     send,
     reset,
+    /** Re-run the last question, replacing its answer in place. No-op if the
+     * last turn isn't an answered assistant turn. */
+    regenerateLast,
     thinking,
     /** True while the in-flight question is a drawing request. */
     generatingImage,

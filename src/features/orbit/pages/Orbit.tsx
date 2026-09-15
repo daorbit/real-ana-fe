@@ -3,7 +3,10 @@ import {
   ActionIcon, Box, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
   Tooltip, UnstyledButton,
 } from "@mantine/core";
-import { AlertTriangle, ArrowUp, Download, History, ImagePlus, Mic, Palette, RotateCcw, Square, X } from "lucide-react";
+import {
+  AlertTriangle, ArrowUp, Copy, Download, History, ImagePlus, Mic, Palette,
+  RefreshCw, RotateCcw, Share2, Square, X,
+} from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
@@ -14,6 +17,46 @@ import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { notify } from "@/shared/lib/notify";
 import classes from "./orbitPage.module.css";
 
+
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    notify.success("Copied to clipboard");
+  } catch {
+    notify.error("Couldn't copy that.");
+  }
+}
+
+async function copyImage(url: string) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+    notify.success("Image copied to clipboard");
+  } catch {
+    // Clipboard image writes are unsupported on some browsers (Firefox) and
+    // fail outright on http — a link is still something to share.
+    await copyText(url);
+  }
+}
+
+async function shareTurn(message: OrbitMessage) {
+  const shareData: ShareData = message.imageUrl
+    ? { title: "Orbit AI", text: message.content || undefined, url: message.imageUrl }
+    : { title: "Orbit AI", text: message.content };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch {
+      // Cancelled by the person, most likely — nothing to report.
+    }
+    return;
+  }
+
+  await copyText(message.imageUrl ?? message.content);
+  notify.info("Sharing isn't available here — copied instead.");
+}
 
 async function downloadImage(url: string) {
   try {
@@ -66,7 +109,73 @@ function GeneratedImage({ url }: { url: string }) {
   );
 }
 
-function Turn({ message }: { message: OrbitMessage }) {
+/** Copy / share / regenerate, under an answered assistant turn. Regenerate
+ * only on the last turn — see `regenerateLast`'s own note on why. */
+function TurnActions({
+  message,
+  onRegenerate,
+  regenerating,
+}: {
+  message: OrbitMessage;
+  onRegenerate?: () => void;
+  regenerating?: boolean;
+}) {
+  return (
+    <Group gap={2} mt={6} wrap="nowrap">
+      <Tooltip label={message.imageUrl ? "Copy image" : "Copy"} withArrow>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="sm"
+          radius="xl"
+          onClick={() => (message.imageUrl ? copyImage(message.imageUrl) : copyText(message.content))}
+          aria-label="Copy"
+        >
+          <Copy size={13} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Share" withArrow>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="sm"
+          radius="xl"
+          onClick={() => shareTurn(message)}
+          aria-label="Share"
+        >
+          <Share2 size={13} />
+        </ActionIcon>
+      </Tooltip>
+      {onRegenerate && (
+        <Tooltip label="Regenerate" withArrow>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            radius="xl"
+            onClick={onRegenerate}
+            disabled={regenerating}
+            aria-label="Regenerate"
+          >
+            <RefreshCw size={13} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+    </Group>
+  );
+}
+
+function Turn({
+  message,
+  isLast,
+  onRegenerate,
+  regenerating,
+}: {
+  message: OrbitMessage;
+  isLast?: boolean;
+  onRegenerate?: () => void;
+  regenerating?: boolean;
+}) {
   if (message.role === "user") {
     return (
       <Group justify="flex-end" wrap="nowrap">
@@ -105,6 +214,13 @@ function Turn({ message }: { message: OrbitMessage }) {
             <RichText text={message.content} />
           </Text>
         )}
+        {!message.failed && (
+          <TurnActions
+            message={message}
+            onRegenerate={isLast ? onRegenerate : undefined}
+            regenerating={regenerating}
+          />
+        )}
       </div>
     </Group>
   );
@@ -116,7 +232,7 @@ export default function Orbit() {
   const { chat } = useOrbit();
   const {
     messages, input, setInput, pendingImage, attachImage, imageMode, setImageMode,
-    send, thinking, generatingImage, available, started, plan,
+    send, regenerateLast, thinking, generatingImage, available, started, plan,
   } = chat;
 
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -473,8 +589,14 @@ export default function Orbit() {
             <ScrollArea className={classes.scroll} type="hover" scrollbarSize={7}>
               <div className={classes.column}>
                 <Stack gap={26}>
-                  {messages.map((m) => (
-                    <Turn key={m.id} message={m} />
+                  {messages.map((m, i) => (
+                    <Turn
+                      key={m.id}
+                      message={m}
+                      isLast={i === messages.length - 1}
+                      onRegenerate={() => void regenerateLast()}
+                      regenerating={thinking}
+                    />
                   ))}
 
                   {thinking && generatingImage && (
