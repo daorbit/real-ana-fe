@@ -221,7 +221,11 @@ export function useOrbitChat() {
       setInput("");
       setPendingImage(null);
       const drawing = imageMode && !image;
-      setImageMode(false);
+      // Left on after a drawing turn — someone who just asked for a picture
+      // is likely to ask for another, and re-enabling it every time is the
+      // friction that made this worth remembering. Off is still the default
+      // once anything else is sent, same as before.
+      if (!drawing) setImageMode(false);
       setGeneratingImage(drawing);
 
       try {

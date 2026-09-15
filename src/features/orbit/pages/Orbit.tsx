@@ -33,6 +33,39 @@ async function downloadImage(url: string) {
   }
 }
 
+/** A generated image, held back behind the skeleton until it has actually
+ * decoded — otherwise the skeleton vanishes the instant the URL arrives and
+ * the browser shows a blank gap while the bytes are still loading. */
+function GeneratedImage({ url }: { url: string }) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className={classes.generatedImageWrap}>
+      {!loaded && <div className={classes.generatedImageSkeleton} />}
+      <img
+        src={url}
+        alt="Generated"
+        className={classes.generatedImage}
+        data-loaded={loaded}
+        onLoad={() => setLoaded(true)}
+      />
+      {loaded && (
+        <Tooltip label="Download image" withArrow>
+          <ActionIcon
+            className={classes.generatedImageDownload}
+            variant="default"
+            radius="xl"
+            onClick={() => downloadImage(url)}
+            aria-label="Download image"
+          >
+            <Download size={16} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+    </div>
+  );
+}
+
 function Turn({ message }: { message: OrbitMessage }) {
   if (message.role === "user") {
     return (
@@ -61,22 +94,7 @@ function Turn({ message }: { message: OrbitMessage }) {
         )}
       </Box>
       <div style={{ minWidth: 0, flex: 1 }}>
-        {message.imageUrl && (
-          <div className={classes.generatedImageWrap}>
-            <img src={message.imageUrl} alt="Generated" className={classes.generatedImage} />
-            <Tooltip label="Download image" withArrow>
-              <ActionIcon
-                className={classes.generatedImageDownload}
-                variant="default"
-                radius="xl"
-                onClick={() => downloadImage(message.imageUrl!)}
-                aria-label="Download image"
-              >
-                <Download size={16} />
-              </ActionIcon>
-            </Tooltip>
-          </div>
-        )}
+        {message.imageUrl && <GeneratedImage url={message.imageUrl} />}
         {message.content && (
           <Text
             size="sm"
@@ -462,7 +480,13 @@ export default function Orbit() {
                   {thinking && generatingImage && (
                     <Group gap={12} wrap="nowrap" align="flex-start">
                       <OrbitMark size={22} />
-                      <div className={classes.generatedImageSkeleton} />
+                      <div className={classes.generatingImage}>
+                        <div className={classes.generatingImageSweep} />
+                        <Palette size={20} className={classes.generatingImageIcon} />
+                        <Text size="xs" fw={500} className={classes.generatingImageLabel}>
+                          Painting
+                        </Text>
+                      </div>
                     </Group>
                   )}
 

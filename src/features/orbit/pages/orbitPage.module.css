@@ -132,12 +132,24 @@
   max-width: min(420px, 100%);
   border-radius: 12px;
   border: 1px solid var(--mantine-color-default-border);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.generatedImage[data-loaded='true'] {
+  opacity: 1;
 }
 
 .generatedImageWrap {
   position: relative;
-  display: inline-block;
+  display: grid;
   max-width: min(420px, 100%);
+}
+
+/* Skeleton and image share the same cell while the image decodes, so the
+   swap is a crossfade rather than a layout jump or a blank gap between them. */
+.generatedImageWrap > * {
+  grid-area: 1 / 1;
 }
 
 .generatedImageDownload {
@@ -163,6 +175,70 @@
   );
   background-size: 200% 100%;
   animation: orbitImageShimmer 1.4s ease-in-out infinite;
+}
+
+/* The in-flight drawing placeholder — a dark canvas with a light sweep
+   crossing it and a pulsing brush glyph, closer to what a paint request
+   feels like than a plain shimmer bar. */
+.generatingImage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: min(420px, 100%);
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  border: 1px solid var(--mantine-color-default-border);
+  background: color-mix(in srgb, var(--mantine-color-default) 70%, var(--mantine-color-body));
+  overflow: hidden;
+}
+
+.generatingImageSweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--mantine-color-emerald-5) 16%, transparent) 48%,
+    color-mix(in srgb, var(--mantine-color-emerald-5) 28%, transparent) 50%,
+    color-mix(in srgb, var(--mantine-color-emerald-5) 16%, transparent) 52%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  animation: orbitPaintSweep 2s ease-in-out infinite;
+}
+
+.generatingImageIcon {
+  position: relative;
+  color: var(--mantine-color-emerald-5);
+  animation: orbitPaintPulse 1.6s ease-in-out infinite;
+}
+
+.generatingImageLabel {
+  position: relative;
+  color: var(--mantine-color-emerald-5);
+}
+
+@keyframes orbitPaintSweep {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -20% 0;
+  }
+}
+
+@keyframes orbitPaintPulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 }
 
 @keyframes orbitImageShimmer {
