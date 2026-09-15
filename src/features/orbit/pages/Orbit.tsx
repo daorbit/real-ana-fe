@@ -239,16 +239,9 @@ export default function Orbit() {
       <div className={classes.page}>
         <div className={classes.header}>
        
-        {started ? (
-          <Group gap={9} wrap="nowrap" className={classes.headerMark}>
-            <OrbitMark size={24} />
-            <Text size="sm" fw={650}>
-              Orbit AI
-            </Text>
-          </Group>
-        ) : (
-          <div />
-        )}
+        <Text size="sm" fw={650}>
+          Orbit AI
+        </Text>
 
         <Group gap={2} wrap="nowrap">
           {/* "Start over" leaves the current thread rather than deleting it —
@@ -284,9 +277,8 @@ export default function Orbit() {
         {!started ? (
           <div className={classes.hero}>
             <div className={classes.heroHead}>
-              <OrbitMark size={54} className={classes.mark} />
-              <Title order={2} fw={750}>
-                Ask Orbit anything
+              <Title order={2} fw={500} className={classes.heroTitle}>
+                How can Orbit help today?
               </Title>
             </div>
             {composer}

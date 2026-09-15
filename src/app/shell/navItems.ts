@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images,
-  Settings, Star,
+  Settings,
 } from "lucide-react";
 import { LeadMagnetIcon, OrbitNavIcon } from "./icons";
 

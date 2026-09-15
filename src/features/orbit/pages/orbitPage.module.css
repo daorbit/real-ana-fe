@@ -1,21 +1,6 @@
  
 
-/*
- * Orbit is a module like Analytics or Compare: ordinary content inside the app
- * panel, beside the rail, sized by the panel rather than by the window. A
- * `100vh` calculation here measures the window instead, overflows the panel and
- * pushes the layout out from under the navigation.
- */
 
-/*
- * The panel's scroller and the router's fade wrapper are auto-height, so a
- * `height: 100%` page collapses inside them. Given a height for this page only
- * — the body carries `data-page="orbit"` while Orbit is mounted — the chain
- * resolves and the composer can sit on the module's floor.
- *
- * The scroller also stops scrolling itself here: the thread owns the scrolling,
- * and two nested scrollbars would fight over the wheel.
- */
 :global(body[data-page='orbit']) :global(.app-panel__scroll) {
   overflow: hidden;
 }
@@ -24,15 +9,7 @@
   height: 100%;
 }
 
-/*
- * A fixed frame, not flowing content: the composer has to sit on the floor of
- * the module with the thread scrolling above it, the way every chat client
- * works. `min-height` alone would let the page grow with the conversation and
- * push the composer off the bottom of the screen.
- *
- * Sized against the panel's scroller (`100%` of it) rather than the window, so
- * the module still stops at the panel's edges and the rail keeps its column.
- */
+
 .page {
   display: flex;
   flex-direction: column;
@@ -40,14 +17,7 @@
   min-height: 520px;
 }
 
-/* --------------------------------------------------------------- header -- */
 
-/*
- * The module's title row, the same shape every other page here uses: a heading
- * on the left, its actions on the right. No rule under it and no bar — those
- * made the page read as an application inside the application rather than one
- * more module beside Analytics and Workspaces.
- */
 .header {
   display: flex;
   align-items: flex-start;
@@ -55,35 +25,6 @@
   gap: 12px;
   margin-bottom: 8px;
   flex-shrink: 0;
-}
-
-/*
- * The mark's second home, in the header once the conversation has started.
- *
- * It rises into place rather than blinking on. The hero's copy is gone by the
- * time this mounts, so nothing actually travels between the two — the movement
- * is implied by both marks sharing a size and a direction, which is enough to
- * read as one object relocating.
- */
-.headerMark {
-  animation: header-mark-in 320ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-
-@keyframes header-mark-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .headerMark {
-    animation: none;
-  }
 }
 
 /* ---------------------------------------------------------------- body --- */
@@ -95,23 +36,13 @@
   flex-direction: column;
 }
 
-/*
- * Empty: everything centred as one block — the mark, the composer, and the
- * starters under it.
- */
+
 .body[data-state='empty'] {
   justify-content: center;
   padding-bottom: 40px;
 }
 
-/*
- * The opening questions, in one row under the composer.
- *
- * Pills rather than the stacked rows the follow-ups use: there are only three,
- * they are short, and side by side they read as a set of options to glance
- * across instead of a list to work down. They wrap onto a second line rather
- * than shrinking, so a narrow window keeps them legible.
- */
+
 .starters {
   display: flex;
   flex-wrap: wrap;
@@ -121,11 +52,7 @@
   margin: 0 auto;
 }
 
-/*
- * The follow-ups after an answer — the same pills, left-aligned and indented to
- * the column the answer starts at, so they read as continuing that turn rather
- * than as a new one.
- */
+
 .followUps {
   display: flex;
   flex-wrap: wrap;
@@ -152,7 +79,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
+  gap: 36px;
   padding: 0 24px;
 }
 
@@ -165,46 +92,13 @@
   text-align: center;
 }
 
-.mark {
-  /* A slow bob, so the mark reads as alive while the page is idle. */
-  animation: orbit-bob 4.5s ease-in-out infinite;
-}
 
-@keyframes orbit-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-7px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mark {
-    animation: none;
-  }
-}
-
-/* -------------------------------------------------------------- thread --- */
-
-/*
- * The thread takes whatever height the composer leaves, and scrolls inside it.
- * That is what keeps the composer on the floor of the module while a long
- * conversation runs past the top of the screen.
- */
 .scroll {
   flex: 1;
   min-height: 0;
 }
 
-/*
- * The conversation's column width.
- *
- * Capped and centred rather than filling the page: on a wide monitor a
- * full-width paragraph runs past the length anyone can track back from, and the
- * answers here are prose, not a table.
- */
+
 .column {
   width: min(760px, 100%);
   margin: 0 auto;
@@ -220,7 +114,6 @@
   border: 1px solid color-mix(in srgb, var(--mantine-color-emerald-5) 22%, transparent);
 }
 
-/* ------------------------------------------------------------ composer --- */
 
 .composerWrap {
   width: min(760px, 100%);
@@ -228,25 +121,14 @@
   padding: 4px 24px 16px;
 }
 
-/* Centred, the composer is the hero's own child and carries no page padding of
-   its own — the hero's gap already spaces it from the heading. */
+
 .hero .composerWrap {
   padding: 0;
 }
 
-/*
- * The prompt box, with a border that runs through several colours.
- *
- * The hues are declared once and used by both the border and the glow beneath
- * it, so the light spilling onto the page is the same light as the edge rather
- * than an approximation of it.
- */
+
 .composer {
-  /*
-   * The hue sequence, ending on the colour it starts with so the animated slide
-   * wraps invisibly — a different colour at each end would show a hard seam
-   * once per loop.
-   */
+
   --composer-edge: linear-gradient(
     90deg,
     #8b5cf6 0%,
@@ -265,20 +147,7 @@
   position: relative;
   border-radius: 18px;
 
-  /*
-   * A gradient border, which CSS has no direct property for.
-   *
-   * Two backgrounds in one declaration: the fill clipped to the padding box and
-   * the gradient clipped to the border box. The border itself is transparent,
-   * so what shows through it is the gradient and what covers the middle is the
-   * fill. `border-box` on the origin stops the fill being offset by the border
-   * width.
-   *
-   * The gradient layer is drawn at triple width and its position animated, so
-   * the colours travel left to right around the edge. A gradient's own stops
-   * cannot be transitioned — sliding an oversized copy is what makes the motion
-   * possible at all. The hues repeat end to end, so the loop has no seam.
-   */
+
   border: 2px solid transparent;
   background:
     linear-gradient(var(--mantine-color-body), var(--mantine-color-body)) padding-box,
@@ -296,14 +165,7 @@
   to   { background-position: 0 0, 100% 50%; }
 }
 
-/*
- * The glow: the same gradient again, blurred, behind the box.
- *
- * A `box-shadow` cannot take a gradient, and `filter: blur()` on the composer
- * itself would blur the text inside it. A copy on its own layer, pushed back
- * with a negative z-index, is the only way to spill the edge's colours onto the
- * page.
- */
+
 .composer::before {
   content: '';
   position: absolute;
@@ -311,8 +173,7 @@
   z-index: -1;
   border-radius: inherit;
   background: var(--composer-edge);
-  /* Travels with the border, on the same clock, so the spilled light stays the
-     same colour as the edge above it rather than drifting out of step. */
+
   background-size: 300% 100%;
   animation: glow-drift 9s linear infinite;
   filter: blur(14px);
@@ -371,13 +232,6 @@
   opacity: 0.6;
 }
 
-/*
- * The input's own surface has to stay out of the way.
- *
- * `variant="unstyled"` drops the border, but Mantine still paints a background
- * on the input, which would cover the composer's fill with a straight-edged
- * rectangle inside the rounded border.
- */
 .composer textarea {
   background: transparent;
 }
@@ -390,65 +244,130 @@
   padding: 2px 10px 10px;
 }
 
-/* --------------------------------------------------------------- drawer -- */
 
-.drawerList {
-  /* The drawer's own header and New-conversation button sit above this, so the
-     list takes what is left of its panel rather than a guess at the window. */
-  flex: 1;
-  min-height: 0;
-  padding: 0 8px 12px;
+.drawerContent {
+  background:
+    radial-gradient(100% 40% at 100% 0%, color-mix(in srgb, #8b5cf6 6%, transparent), transparent 70%),
+    var(--mantine-color-body);
 }
 
-/*
- * One saved thread.
- *
- * The row actions are hidden until hover or keyboard focus. A rename and a
- * delete button on every row turned the list into a column of icons with titles
- * squeezed between them, and the titles are what people scan.
- */
+:global([data-mantine-color-scheme='dark']) .drawerContent {
+  background:
+    radial-gradient(100% 40% at 100% 0%, color-mix(in srgb, #a78bfa 8%, transparent), transparent 70%),
+    var(--mantine-color-body);
+}
+
+.drawerList {
+
+  flex: 1;
+  min-height: 0;
+  padding: 0 10px 12px;
+}
+
+
 .thread {
   position: relative;
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  margin-bottom: 2px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
   color: var(--mantine-color-text);
-  transition: background-color 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease;
 }
 
 .thread:hover {
   background: var(--mantine-color-default-hover);
+  border-color: var(--mantine-color-default-border);
 }
 
 .thread[data-active='true'] {
-  background: color-mix(in srgb, var(--mantine-color-emerald-5) 14%, transparent);
+  background: color-mix(in srgb, var(--mantine-color-emerald-5) 12%, transparent);
+  border-color: color-mix(in srgb, var(--mantine-color-emerald-5) 28%, transparent);
+}
+
+.threadIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  border-radius: 8px;
+  background: var(--mantine-color-default);
+  color: var(--mantine-color-dimmed);
+}
+
+.thread[data-active='true'] .threadIcon {
+  background: color-mix(in srgb, var(--mantine-color-emerald-5) 20%, transparent);
+  color: var(--mantine-color-emerald-6);
+}
+
+.threadBody {
+  flex: 1;
+  min-width: 0;
+  /* Room for the action buttons, which sit on top of this at the right edge
+     rather than pushing it — see `.threadActions`. */
+  padding-right: 46px;
 }
 
 .threadActions {
   position: absolute;
-  top: 5px;
-  right: 4px;
+  top: 8px;
+  right: 8px;
   display: flex;
-  gap: 0;
+  gap: 2px;
   opacity: 0;
   transition: opacity 120ms ease;
-  /* Sits over the title, so the fade has something to fade against rather than
-     letting a long title run underneath the buttons. */
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--mantine-color-body) 22%,
-    var(--mantine-color-body)
-  );
-  padding-left: 14px;
-  border-radius: 8px;
 }
 
 .thread:hover .threadActions,
 .thread:focus-within .threadActions {
   opacity: 1;
+}
+
+.threadActionBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: var(--mantine-color-dimmed);
+  transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.threadActionBtn:hover {
+  transform: translateY(-1px);
+}
+
+.threadActionBtn[data-tone='edit']:hover {
+  background: color-mix(in srgb, var(--mantine-color-emerald-5) 16%, transparent);
+  color: var(--mantine-color-emerald-6);
+}
+
+.threadActionBtn[data-tone='delete']:hover {
+  background: color-mix(in srgb, var(--mantine-color-red-5) 14%, transparent);
+  color: var(--mantine-color-red-6);
+}
+
+.thread[data-deleting='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* The delete confirmation's warning glyph, in the modal. */
+.confirmIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mantine-color-red-5) 14%, transparent);
+  color: var(--mantine-color-red-6);
 }
 
 /* -------------------------------------------------------------- mobile --- */
