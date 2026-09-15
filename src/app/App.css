@@ -4,10 +4,7 @@
   --bg-2: #101214;
 
   --shell: #0b0c0e;
-  /* A step lighter than the page behind it, so the rail reads as a card
-     sitting on the shell rather than a region of it — the border alone did
-     not carry that at this contrast. */
-  --rail: #121417;
+  --rail: #0b0c0e;
 
   --surface: #16181b;
   --surface-2: #1c1f23;
@@ -1013,8 +1010,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: 10px;
   transition: background 0.15s ease, color 0.15s ease;
 }
+
 .nav-link:hover {
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 .nav-link[data-active="true"] {
@@ -1025,13 +1023,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .nav-heading {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  padding: 0 0.5rem;
-  margin-bottom: 0.4rem;
+  padding: 0 0.625rem;
+  margin-bottom: 0.35rem;
+  opacity: 0.75;
 }
 
 
@@ -3334,18 +3333,22 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .app-main { height: calc(100dvh - 56px); }
 }
 
+/* The shell's own corners are fixed at 16px rather than following the
+   radius preference. The preference is for the things *inside* the page;
+   the frame around them is the window, and a window that changes shape with
+   a content setting reads as a bug. */
 .app-panel {
   position: relative;
   height: 100%;
   background: var(--shell);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 16px;
   overflow: hidden;
 }
 
 
 .mantine-AppShell-navbar {
-  border-radius: var(--radius);
+  border-radius: 16px;
   border: 1px solid var(--border);
   box-shadow: none;
   top: var(--mantine-spacing-sm);
