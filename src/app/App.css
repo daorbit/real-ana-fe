@@ -286,37 +286,20 @@ body { overflow-wrap: break-word; }
 }
 
 
-.share-post-preview:has(.orbit-plan-pane) {
-  overflow-y: hidden;
-}
 
-.orbit-plan-pane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  width: 100%;
-  max-width: 560px;
-  margin: 0 auto;
+.orbit-plan-starter {
+  padding: 7px 14px;
+  border-radius: 999px;
   border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-lg);
-  background: var(--surface);
-  overflow: hidden;
+  background: color-mix(in srgb, var(--mantine-color-default) 45%, transparent);
+  color: var(--mantine-color-text);
+  transition: border-color 140ms ease, background-color 140ms ease;
 }
-
-.orbit-plan-pane > .aurora-wash { z-index: 0; }
-.orbit-plan-pane > *:not(.aurora-wash) { position: relative; z-index: 1; }
-
-
-.orbit-plan-pane .orbit-suggestion {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 10px 12px;
-  background: var(--surface-2);
+.orbit-plan-starter:hover {
+  border-color: color-mix(in srgb, var(--mantine-color-emerald-5) 50%, transparent);
+  background: color-mix(in srgb, var(--mantine-color-emerald-5) 8%, transparent);
 }
-.orbit-plan-pane .orbit-suggestion:disabled {
+.orbit-plan-starter:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -2843,28 +2826,39 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 .share-post-preview {
+  position: relative;
   width: 60%;
   flex: 1;
   min-width: 0;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
 
   display: flex;
   flex-direction: column;
   padding: 24px 28px 32px;
-  background:
-    linear-gradient(to right, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
-    var(--bg);
-
-  background-blend-mode: normal;
+  background: var(--bg);
 }
 [data-mantine-color-scheme="light"] .share-post-preview {
-  background:
-    linear-gradient(to right, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px) 0 0 / 34px 34px,
-    var(--bg-2);
+  background: var(--bg-2);
 }
+
+.share-post-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(55% 80% at 0% 0%, color-mix(in srgb, #818cf8 16%, transparent), transparent 62%),
+    radial-gradient(55% 80% at 100% 0%, color-mix(in srgb, #eab308 12%, transparent), transparent 62%);
+}
+.share-post-preview > * {
+  position: relative;
+  z-index: 1;
+}
+
 
 .share-post-body {
   padding: 26px var(--share-post-inset) 44px;

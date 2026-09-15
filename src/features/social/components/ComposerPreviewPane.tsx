@@ -45,7 +45,7 @@ export function ComposerPreviewPane({
   });
 
   return (
-    <Box className="share-post-preview">
+    <Box className="share-post-preview" data-tab={tab}>
       {/* Pane switch at one end, device width at the other — what is shown and
           how wide it is shown are separate decisions. */}
       <Group justify="space-between" align="center" wrap="nowrap" mb="md">

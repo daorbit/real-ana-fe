@@ -66,13 +66,12 @@
   border: 1px solid var(--mantine-color-default-border);
   background: color-mix(in srgb, var(--mantine-color-default) 45%, transparent);
   color: var(--mantine-color-text);
-  transition: border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+  transition: border-color 140ms ease, background-color 140ms ease;
 }
 
 .starter:hover {
   border-color: color-mix(in srgb, var(--mantine-color-emerald-5) 50%, transparent);
   background: color-mix(in srgb, var(--mantine-color-emerald-5) 8%, transparent);
-  transform: translateY(-1px);
 }
 
 .hero {

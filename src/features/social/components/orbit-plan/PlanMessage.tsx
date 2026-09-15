@@ -1,4 +1,5 @@
 import { Box, Group, Text } from "@mantine/core";
+import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import type { PlanTurn } from "../../hooks/useOrbitPlan";
 
 /**
@@ -23,8 +24,13 @@ export function PlanMessage({ turn }: { turn: PlanTurn }) {
   }
 
   return (
-    <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
-      {turn.content}
-    </Text>
+    <Group gap={12} wrap="nowrap" align="flex-start">
+      <Box style={{ flexShrink: 0, marginTop: 1 }}>
+        <OrbitMark size={22} />
+      </Box>
+      <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap", minWidth: 0, flex: 1 }}>
+        {turn.content}
+      </Text>
+    </Group>
   );
 }
