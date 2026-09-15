@@ -51,13 +51,13 @@ export function NavLink({
         alignItems: "center",
         gap: 10,
         width: "100%",
-        padding: "8px 10px",
-        marginBottom: 2,
+        padding: "7px 10px",
+        marginBottom: 1,
         justifyContent: collapsed ? "center" : undefined,
         color: active ? "var(--text)" : "var(--text-2)",
       }}
     >
-      <Icon size={17} style={{ flexShrink: 0, color: active ? "var(--violet-2)" : undefined }} />
+      <Icon size={16} style={{ flexShrink: 0, color: active ? "var(--violet-2)" : undefined }} />
       {!collapsed && (
         <Text size="sm" fw={active ? 600 : 500} truncate>
           {label}

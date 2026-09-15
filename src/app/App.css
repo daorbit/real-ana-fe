@@ -1007,16 +1007,17 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .nav-link {
   position: relative;
-  border-radius: var(--radius-sm);
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 10px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 .nav-link:hover {
   background: var(--surface-2);
 }
 
 .nav-link[data-active="true"] {
-  background: var(--accent-soft);
+  background: var(--surface-2);
   color: var(--text);
+  font-weight: 600;
 }
 
 
