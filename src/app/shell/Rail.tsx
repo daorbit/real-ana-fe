@@ -88,7 +88,7 @@ export function Rail({
         />
       </MantineShell.Section>
 
-      <MantineShell.Section>
+      <MantineShell.Section pt="sm">
         {impersonating && (
           <ImpersonationCard
             collapsed={collapsed}
