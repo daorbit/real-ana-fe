@@ -3,7 +3,7 @@ import {
   ActionIcon, Box, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
   Tooltip, UnstyledButton,
 } from "@mantine/core";
-import { AlertTriangle, ArrowUp, History, ImagePlus, Mic, Palette, RotateCcw, Square, X } from "lucide-react";
+import { AlertTriangle, ArrowUp, Download, History, ImagePlus, Mic, Palette, RotateCcw, Square, X } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
@@ -13,7 +13,25 @@ import { ORBIT_SUGGESTIONS, type OrbitMessage } from "@/features/orbit/useOrbitC
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import classes from "./orbitPage.module.css";
 
- 
+
+async function downloadImage(url: string) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const ext = blob.type.split("/")[1]?.split("+")[0] || "png";
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = `orbit-${Date.now()}.${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    window.open(url, "_blank");
+  }
+}
+
 function Turn({ message }: { message: OrbitMessage }) {
   if (message.role === "user") {
     return (
@@ -43,7 +61,20 @@ function Turn({ message }: { message: OrbitMessage }) {
       </Box>
       <div style={{ minWidth: 0, flex: 1 }}>
         {message.imageUrl && (
-          <img src={message.imageUrl} alt="Generated" className={classes.generatedImage} />
+          <div className={classes.generatedImageWrap}>
+            <img src={message.imageUrl} alt="Generated" className={classes.generatedImage} />
+            <Tooltip label="Download image" withArrow>
+              <ActionIcon
+                className={classes.generatedImageDownload}
+                variant="default"
+                radius="xl"
+                onClick={() => downloadImage(message.imageUrl!)}
+                aria-label="Download image"
+              >
+                <Download size={16} />
+              </ActionIcon>
+            </Tooltip>
+          </div>
         )}
         {message.content && (
           <Text

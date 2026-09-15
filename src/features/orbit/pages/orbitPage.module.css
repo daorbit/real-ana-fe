@@ -134,6 +134,19 @@
   border: 1px solid var(--mantine-color-default-border);
 }
 
+.generatedImageWrap {
+  position: relative;
+  display: inline-block;
+  max-width: min(420px, 100%);
+}
+
+.generatedImageDownload {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: color-mix(in srgb, var(--mantine-color-body) 75%, transparent);
+}
+
 /*
  * The staged image, above the textarea, before anything is sent.
  *
