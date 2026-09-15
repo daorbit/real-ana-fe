@@ -22,17 +22,27 @@ export interface UpgradeLimit {
 export function UpgradeDialog({
   message,
   limit,
+  reason,
   onDismiss,
   onUpgrade,
 }: {
   message: ReactNode;
   limit?: UpgradeLimit;
+  /** Why the upgrade is being asked for: an allowance that ran out, or a
+   * feature this plan does not include. Decides the heading. */
+  reason?: "quota_exceeded" | "plan_required";
   onDismiss: () => void;
   onUpgrade: () => void;
 }) {
-  const heading = limit?.label
-    ? `You've reached your ${limit.label} limit`
-    : "Upgrade to unlock this";
+  // A spent allowance and a feature the plan never had are different things to
+  // be told. "You've reached your … limit" is only true of the first: said
+  // about the second it describes a limit that was never approached, and the
+  // obvious reading — wait for the period to reset — is wrong.
+  const heading = !limit?.label
+    ? "Upgrade to unlock this"
+    : reason === "plan_required"
+      ? `${limit.label} is part of a higher plan`
+      : `You've reached your ${limit.label} limit`;
   const showMeter = typeof limit?.used === "number" && typeof limit?.quota === "number";
 
   return (

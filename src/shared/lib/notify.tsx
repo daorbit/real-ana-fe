@@ -73,7 +73,11 @@ export const notify = {
    * dialog in this file uses, so there's one dialog stack for the whole app
    * rather than a second ad hoc one per feature.
    */
-  quotaLimit: (message: ReactNode, limit?: QuotaLimitInfo) => {
+  quotaLimit: (
+    message: ReactNode,
+    limit?: QuotaLimitInfo,
+    reason?: "quota_exceeded" | "plan_required",
+  ) => {
     const id = "quota-limit";
     modals.open({
       modalId: id,
@@ -89,6 +93,7 @@ export const notify = {
         <UpgradeDialog
           message={message}
           limit={limit}
+          reason={reason}
           onDismiss={() => modals.close(id)}
           onUpgrade={() => {
             modals.close(id);
@@ -157,6 +162,18 @@ const PLAN_LIMIT_CODES = ["quota_exceeded", "plan_required"];
 export function isPlanLimit(e: unknown): boolean {
   const code = errCode(e);
   return code !== undefined && PLAN_LIMIT_CODES.includes(code);
+}
+
+/**
+ * Which kind of plan limit a response reports.
+ *
+ * `quota_exceeded` is an allowance that ran out and comes back next period;
+ * `plan_required` is a feature this plan does not include and never will. The
+ * dialog says different things about them.
+ */
+export function planLimitReason(e: unknown): "quota_exceeded" | "plan_required" | undefined {
+  const code = errCode(e);
+  return code === "plan_required" || code === "quota_exceeded" ? code : undefined;
 }
 
 /** The `limit` block a plan-limit response carries, when the route sends one. */

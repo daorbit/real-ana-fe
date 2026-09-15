@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { getToken, isDemoToken } from "@/shared/lib/http";
-import { notify, errMessage, isPlanLimit, quotaLimitInfo } from "@/shared/lib/notify";
+import { notify, errMessage, isPlanLimit, quotaLimitInfo, planLimitReason } from "@/shared/lib/notify";
 import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace,
@@ -107,6 +107,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     notify.quotaLimit(
       errMessage(result.error, "Upgrade your plan to continue."),
       quotaLimitInfo(result.error),
+      planLimitReason(result.error),
     );
   }
   return result;

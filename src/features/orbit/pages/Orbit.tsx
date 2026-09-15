@@ -489,11 +489,14 @@ export default function Orbit() {
 
   const toggleImageMode = () => {
     if (!imageMode && plan && !plan.imageGeneration) {
-      notify.quotaLimit("Drawing pictures is part of Orbit Pro.", {
-        kind: "orbit_image_generation",
-        label: "Orbit image generation",
-        plan: plan.name,
-      });
+      notify.quotaLimit(
+        "Drawing pictures is part of Orbit Pro.",
+        { kind: "orbit_image_generation", plan: plan.name },
+        // Not a quota that ran out — a feature this plan never had. Without
+        // this the dialog says "You've reached your … limit", which points a
+        // free workspace at waiting for a reset that will not help.
+        "plan_required",
+      );
       return;
     }
     setImageMode((v) => !v);
