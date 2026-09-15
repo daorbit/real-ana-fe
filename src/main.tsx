@@ -4,6 +4,8 @@ import { Provider } from 'react-redux'
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { ModalsProvider } from '@mantine/modals'
+import { CodeHighlightAdapterProvider, createHighlightJsAdapter } from '@mantine/code-highlight'
+import hljs from 'highlight.js'
 import { store } from '@/app/store'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
@@ -35,16 +37,20 @@ applyDocumentLang(readLanguage())
 const initialPrefs = loadAndApplyTheme()
 const mantineScheme = initialPrefs.mode === 'system' ? 'auto' : initialPrefs.mode
 
+const highlightJsAdapter = createHighlightJsAdapter(hljs)
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <MantineProvider theme={theme} defaultColorScheme={mantineScheme}>
-        <Notifications position="top-right" />
-        <ModalsProvider>
-          <ErrorBoundary>
-            <App />
-          </ErrorBoundary>
-        </ModalsProvider>
+        <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>
+          <Notifications position="top-right" />
+          <ModalsProvider>
+            <ErrorBoundary>
+              <App />
+            </ErrorBoundary>
+          </ModalsProvider>
+        </CodeHighlightAdapterProvider>
       </MantineProvider>
     </Provider>
   </StrictMode>,

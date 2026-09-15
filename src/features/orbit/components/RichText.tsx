@@ -92,7 +92,11 @@ export function RichText({ text }: { text: string }) {
         radius="md"
         my={8}
         withCopyButton
-        style={{ fontSize: "0.85em" }}
+        style={{
+          fontSize: "0.85em",
+          border: "1px solid var(--mantine-color-default-border)",
+        }}
+        styles={{ pre: { background: "var(--mantine-color-default)" } }}
       />,
     );
 
