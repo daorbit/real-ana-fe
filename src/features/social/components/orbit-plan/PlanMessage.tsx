@@ -1,7 +1,8 @@
-import { ActionIcon, Box, Group, Loader, Stack, Text, Tooltip } from "@mantine/core";
-import { AlertTriangle, Check, RotateCcw } from "lucide-react";
+import { ActionIcon, Box, Group, Stack, Text, Tooltip } from "@mantine/core";
+import { AlertTriangle, Check, Palette, RotateCcw } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import type { PlanTurn } from "../../hooks/useOrbitPlan";
+import classes from "./planMessage.module.css";
 
 /**
  * One turn, styled like the main Orbit panel: the author gets a filled bubble,
@@ -42,21 +43,13 @@ export function PlanMessage({
         </Box>
         <Stack gap={8} style={{ minWidth: 0 }}>
           {turn.image.status === "generating" ? (
-            <Group
-              gap={9}
-              wrap="nowrap"
-              style={{
-                width: 200,
-                height: 200,
-                borderRadius: 12,
-                border: "1px solid var(--mantine-color-default-border)",
-                background: "var(--surface)",
-              }}
-              align="center"
-              justify="center"
-            >
-              <Loader size={18} type="dots" />
-            </Group>
+            <div className={classes.generatingImage}>
+              <div className={classes.generatingImageSweep} />
+              <Palette size={20} className={classes.generatingImageIcon} />
+              <Text size="xs" fw={500} className={classes.generatingImageLabel}>
+                Painting
+              </Text>
+            </div>
           ) : turn.image.status === "failed" ? (
             <Group
               gap={8}

@@ -1,0 +1,65 @@
+/* Same "painting" animation as the Orbit AI page's own image-generation
+   placeholder — see features/orbit/pages/orbitPage.module.css for the
+   source; kept as a straight copy so a drawn image looks the same wherever
+   it is drawn. */
+
+.generatingImage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 200px;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  border: 1px solid var(--mantine-color-default-border);
+  background: color-mix(in srgb, var(--mantine-color-default) 70%, var(--mantine-color-body));
+  overflow: hidden;
+}
+
+.generatingImageSweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--mantine-color-emerald-5) 16%, transparent) 48%,
+    color-mix(in srgb, var(--mantine-color-emerald-5) 28%, transparent) 50%,
+    color-mix(in srgb, var(--mantine-color-emerald-5) 16%, transparent) 52%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  animation: planPaintSweep 2s ease-in-out infinite;
+}
+
+.generatingImageIcon {
+  position: relative;
+  color: var(--mantine-color-emerald-5);
+  animation: planPaintPulse 1.6s ease-in-out infinite;
+}
+
+.generatingImageLabel {
+  position: relative;
+  color: var(--mantine-color-emerald-5);
+}
+
+@keyframes planPaintSweep {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -20% 0;
+  }
+}
+
+@keyframes planPaintPulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
