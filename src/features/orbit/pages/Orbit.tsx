@@ -13,6 +13,7 @@ import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { RichText } from "@/features/orbit/components/RichText";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { ORBIT_SUGGESTIONS, type OrbitMessage } from "@/features/orbit/useOrbitChat";
+import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { notify } from "@/shared/lib/notify";
 import classes from "./orbitPage.module.css";
@@ -165,14 +166,45 @@ function TurnActions({
   );
 }
 
+/** An answer's prose, revealed at reading speed when it has just arrived. */
+function AnswerText({
+  message,
+  live,
+  onDone,
+}: {
+  message: OrbitMessage;
+  live: boolean;
+  onDone?: () => void;
+}) {
+  const shown = useTypewriter(message.content, live, onDone);
+
+  return (
+    <Text
+      size="sm"
+      lh={1.7}
+      c={message.failed ? "dimmed" : undefined}
+      style={{ whiteSpace: "pre-wrap" }}
+    >
+      <RichText text={shown} />
+    </Text>
+  );
+}
+
 function Turn({
   message,
   isLast,
+  live,
+  onRevealed,
   onRegenerate,
   regenerating,
 }: {
   message: OrbitMessage;
   isLast?: boolean;
+  /** Whether this answer should type itself in rather than appear whole. */
+  live?: boolean;
+  /** Fired once the reveal has finished, so the page can stop treating this
+   * turn as still arriving. */
+  onRevealed?: () => void;
   onRegenerate?: () => void;
   regenerating?: boolean;
 }) {
@@ -205,16 +237,9 @@ function Turn({
       <div style={{ minWidth: 0, flex: 1 }}>
         {message.imageUrl && <GeneratedImage url={message.imageUrl} />}
         {message.content && (
-          <Text
-            size="sm"
-            lh={1.7}
-            c={message.failed ? "dimmed" : undefined}
-            style={{ whiteSpace: "pre-wrap" }}
-          >
-            <RichText text={message.content} />
-          </Text>
+          <AnswerText message={message} live={Boolean(live)} onDone={onRevealed} />
         )}
-        {!message.failed && (
+        {!message.failed && !live && (
           <TurnActions
             message={message}
             onRegenerate={isLast ? onRegenerate : undefined}
@@ -235,21 +260,32 @@ export default function Orbit() {
     send, regenerateLast, thinking, generatingImage, available, started, plan,
   } = chat;
 
+ 
+  const [liveId, setLiveId] = useState<string | null>(null);
+  const wasThinking = useRef(false);
+
+  useEffect(() => {
+    const last = messages[messages.length - 1];
+    if (
+      wasThinking.current &&
+      !thinking &&
+      last?.role === "assistant" &&
+      !last.failed &&
+      // A drawing's caption is four words under the picture everyone is
+      // actually looking at — typing it out delays the row of actions for
+      // nothing.
+      !last.imageUrl
+    ) {
+      setLiveId(last.id);
+    }
+    wasThinking.current = thinking;
+  }, [thinking, messages]);
+
   const [historyOpen, setHistoryOpen] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  /*
-   * Marks the body while Orbit is on screen.
-   *
-   * The panel's scroller and the router's fade wrapper are both auto-height, so
-   * a `height: 100%` page collapses inside them and the composer floats up
-   * under the last message instead of sitting on the floor. Giving those two
-   * boxes a height — for this page only — is what lets the thread scroll under
-   * a pinned composer. Lead Capture marks the body the same way for the same
-   * kind of reason.
-   */
+ 
   useEffect(() => {
     document.body.dataset.page = "orbit";
     return () => {
@@ -342,11 +378,24 @@ export default function Orbit() {
   };
 
   const last = messages[messages.length - 1];
-  const followUps = last?.role === "assistant" && !last.failed ? (last.suggestions ?? []) : [];
- 
+  // Held back until the answer has finished typing — chips appearing under a
+  // half-written reply read as the answer having ended there.
+  const typing = liveId != null && last?.id === liveId;
+  const followUps =
+    last?.role === "assistant" && !last.failed && !typing ? (last.suggestions ?? []) : [];
+
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, thinking]);
+
+ 
+  useEffect(() => {
+    if (!typing) return;
+    const id = setInterval(() => {
+      bottom.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    }, 120);
+    return () => clearInterval(id);
+  }, [typing]);
 
   if (!available) {
     return (
@@ -594,6 +643,8 @@ export default function Orbit() {
                       key={m.id}
                       message={m}
                       isLast={i === messages.length - 1}
+                      live={m.id === liveId}
+                      onRevealed={() => setLiveId(null)}
                       onRegenerate={() => void regenerateLast()}
                       regenerating={thinking}
                     />

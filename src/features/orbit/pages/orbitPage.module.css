@@ -342,7 +342,7 @@
   background-size: 300% 100%;
   animation: glow-drift 9s linear infinite;
   filter: blur(14px);
-  opacity: 0.5;
+  opacity: 0.28;
   transition: opacity 220ms ease, filter 220ms ease;
 }
 
@@ -364,7 +364,7 @@
 }
 
 .composer:focus-within::before {
-  opacity: 0.8;
+  opacity: 0.45;
   filter: blur(18px);
 }
 
@@ -390,11 +390,11 @@
 }
 
 :global([data-mantine-color-scheme='dark']) .composer::before {
-  opacity: 0.36;
+  opacity: 0.18;
 }
 
 :global([data-mantine-color-scheme='dark']) .composer:focus-within::before {
-  opacity: 0.6;
+  opacity: 0.32;
 }
 
 .composer textarea {
