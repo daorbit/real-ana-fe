@@ -36,6 +36,9 @@ export function OrbitPlanPane({
   onSchedule,
   scheduling,
   blockedReason,
+  onSendImage,
+  onApproveImage,
+  generatingImage,
 }: {
   workspaceId: string | undefined;
   draft: Draft;
@@ -54,6 +57,10 @@ export function OrbitPlanPane({
   onSchedule: () => void;
   scheduling: boolean;
   blockedReason?: string;
+  /** Draw an image as a chat turn (new one, or redo `turnIndex`). */
+  onSendImage: (prompt: string, turnIndex?: number) => void;
+  onApproveImage: (turnIndex: number) => void;
+  generatingImage: boolean;
 }) {
   const thread = useRef<HTMLDivElement | null>(null);
 
@@ -104,10 +111,20 @@ export function OrbitPlanPane({
             workspaceId={workspaceId}
             images={draft.images}
             onImages={onImages}
+            onSendImage={onSendImage}
+            generatingImage={generatingImage}
           />
         ) : (
           <Stack gap={14} px={4} py={10} maw={720} mx="auto">
-            {turns.map((t, i) => <PlanMessage key={i} turn={t} />)}
+            {turns.map((t, i) => (
+              <PlanMessage
+                key={i}
+                turn={t}
+                onApproveImage={() => onApproveImage(i)}
+                onRetryImage={() => t.image && onSendImage(t.image.prompt, i)}
+                generating={generatingImage}
+              />
+            ))}
 
             {thinking && (
               <Group gap={9} wrap="nowrap">
@@ -122,7 +139,6 @@ export function OrbitPlanPane({
 
             {awaitingImage && !thinking && (
               <PlanImagePrompt
-                workspaceId={workspaceId}
                 images={draft.images}
                 onImages={onImages}
                 provider={draft.provider}
@@ -156,6 +172,8 @@ export function OrbitPlanPane({
             workspaceId={workspaceId}
             images={draft.images}
             onImages={onImages}
+            onDraw={onSendImage}
+            drawing={generatingImage}
           />
           <Text size="10.5px" c="dimmed" mt={8} ta="center">
             Orbit fills the form — nothing publishes until you confirm.
@@ -179,6 +197,8 @@ function Intro({
   workspaceId,
   images,
   onImages,
+  onSendImage,
+  generatingImage,
 }: {
   provider: Draft["provider"];
   input: string;
@@ -188,6 +208,8 @@ function Intro({
   workspaceId: string | undefined;
   images: string[];
   onImages: (next: string[]) => void;
+  onSendImage: (prompt: string, turnIndex?: number) => void;
+  generatingImage: boolean;
 }) {
   const starters = startersFor(provider);
   const scroller = useRef<HTMLDivElement | null>(null);
@@ -215,6 +237,8 @@ function Intro({
           workspaceId={workspaceId}
           images={images}
           onImages={onImages}
+          onDraw={onSendImage}
+          drawing={generatingImage}
         />
       </Box>
 

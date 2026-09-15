@@ -1,4 +1,5 @@
-import { Box, Group, Text } from "@mantine/core";
+import { ActionIcon, Box, Group, Loader, Stack, Text, Tooltip } from "@mantine/core";
+import { AlertTriangle, Check, RotateCcw } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import type { PlanTurn } from "../../hooks/useOrbitPlan";
 
@@ -7,7 +8,17 @@ import type { PlanTurn } from "../../hooks/useOrbitPlan";
  * Orbit speaks as plain text on the surface. Two bubbles read as two systems
  * talking past each other.
  */
-export function PlanMessage({ turn }: { turn: PlanTurn }) {
+export function PlanMessage({
+  turn,
+  onApproveImage,
+  onRetryImage,
+  generating,
+}: {
+  turn: PlanTurn;
+  onApproveImage?: () => void;
+  onRetryImage?: () => void;
+  generating?: boolean;
+}) {
   if (turn.role === "user") {
     return (
       <Group justify="flex-end" wrap="nowrap">
@@ -19,6 +30,114 @@ export function PlanMessage({ turn }: { turn: PlanTurn }) {
             {turn.content}
           </Text>
         </Box>
+      </Group>
+    );
+  }
+
+  if (turn.image) {
+    return (
+      <Group gap={12} wrap="nowrap" align="flex-start">
+        <Box style={{ flexShrink: 0, marginTop: 1 }}>
+          <OrbitMark size={22} />
+        </Box>
+        <Stack gap={8} style={{ minWidth: 0 }}>
+          {turn.image.status === "generating" ? (
+            <Group
+              gap={9}
+              wrap="nowrap"
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 12,
+                border: "1px solid var(--mantine-color-default-border)",
+                background: "var(--surface)",
+              }}
+              align="center"
+              justify="center"
+            >
+              <Loader size={18} type="dots" />
+            </Group>
+          ) : turn.image.status === "failed" ? (
+            <Group
+              gap={8}
+              p={12}
+              wrap="nowrap"
+              style={{
+                border: "1px dashed var(--mantine-color-red-6)",
+                borderRadius: 12,
+                background: "var(--surface)",
+              }}
+            >
+              <AlertTriangle size={16} color="var(--mantine-color-red-6)" />
+              <Text size="xs" c="red">Couldn't draw that.</Text>
+              {onRetryImage && (
+                <Tooltip label="Try again" withArrow>
+                  <ActionIcon size="sm" variant="subtle" color="gray" onClick={onRetryImage} disabled={generating}>
+                    <RotateCcw size={14} />
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </Group>
+          ) : (
+            <Box style={{ position: "relative", width: 200 }}>
+              <img
+                src={turn.image.url}
+                alt={turn.image.prompt}
+                style={{
+                  width: 200,
+                  height: 200,
+                  objectFit: "cover",
+                  borderRadius: 12,
+                  border: "1px solid var(--mantine-color-default-border)",
+                  display: "block",
+                  opacity: turn.image.status === "approved" ? 0.6 : 1,
+                }}
+              />
+              {turn.image.status === "approved" && (
+                <Group
+                  gap={5}
+                  wrap="nowrap"
+                  style={{
+                    position: "absolute", top: 8, left: 8,
+                    background: "var(--mantine-color-emerald-6)",
+                    color: "#fff", borderRadius: 999, padding: "3px 9px",
+                  }}
+                >
+                  <Check size={12} />
+                  <Text size="10px" fw={600}>Added</Text>
+                </Group>
+              )}
+            </Box>
+          )}
+
+          {turn.image.status === "ready" && (
+            <Group gap={8}>
+              <ActionIcon
+                size="sm"
+                radius="xl"
+                color="emerald"
+                variant="filled"
+                onClick={onApproveImage}
+                aria-label="Use this image"
+              >
+                <Check size={14} />
+              </ActionIcon>
+              <Tooltip label="Draw again" withArrow>
+                <ActionIcon
+                  size="sm"
+                  radius="xl"
+                  variant="subtle"
+                  color="gray"
+                  onClick={onRetryImage}
+                  disabled={generating}
+                  aria-label="Draw again"
+                >
+                  <RotateCcw size={14} />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          )}
+        </Stack>
       </Group>
     );
   }

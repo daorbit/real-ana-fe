@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { usePlanScheduledPostMutation } from "@/app/store";
-import { errMessage } from "@/shared/lib/notify";
+import { usePlanImageMutation, usePlanScheduledPostMutation } from "@/app/store";
+import { errMessage, notify } from "@/shared/lib/notify";
 import { toDateInput, type Draft } from "../components/draft";
 
 export type PlanTurn = {
@@ -10,6 +10,12 @@ export type PlanTurn = {
   done?: boolean;
   /** Orbit is waiting on an image; the transcript offers an upload here. */
   needsImage?: boolean;
+  /** A drawn image on this turn — pending until approved into the post. */
+  image?: {
+    url: string;
+    prompt: string;
+    status: "generating" | "ready" | "failed" | "approved";
+  };
 };
 
 /**
@@ -34,6 +40,8 @@ export function useOrbitPlan({
   /** The message the last failed turn carried, for the retry button. */
   const failed = useRef("");
   const [plan, { isLoading: thinking }] = usePlanScheduledPostMutation();
+  const [generateImage] = usePlanImageMutation();
+  const [generating, setGenerating] = useState(false);
 
   const last = turns.at(-1);
   const ready = last?.done === true;
@@ -118,6 +126,75 @@ export function useOrbitPlan({
     if (message) void send(message);
   };
 
+  /**
+   * Draw an image as a turn in the conversation, not a side panel — the
+   * prompt is what the author "said", so Orbit can refer to it later ("write
+   * a caption for that") the same way it refers to anything else they typed.
+   */
+  const sendImage = async (prompt: string, turnIndex?: number) => {
+    const text = prompt.trim();
+    if (!text || !workspaceId || generating) return;
+
+    if (turnIndex == null) {
+      setTurns((t) => [
+        ...t,
+        { role: "user", content: `Draw: ${text}` },
+        {
+          role: "assistant",
+          // Plain text too, not just the `image` field — this is what gets
+          // replayed into the next `plan` call's transcript, so Orbit still
+          // knows a picture exists even though the image itself never is.
+          content: `I drew "${text}" for the post.`,
+          image: { url: "", prompt: text, status: "generating" },
+        },
+      ]);
+    } else {
+      // A retry reuses the existing pair of turns rather than adding new ones,
+      // so asking again doesn't fork the transcript into two pictures.
+      setTurns((t) =>
+        t.map((turn, i) =>
+          i === turnIndex
+            ? { ...turn, image: { url: "", prompt: text, status: "generating" } }
+            : turn,
+        ),
+      );
+    }
+    setGenerating(true);
+
+    try {
+      const res = await generateImage({ workspaceId, prompt: text }).unwrap();
+      setTurns((t) =>
+        t.map((turn) =>
+          turn.image?.prompt === text && turn.image.status === "generating"
+            ? { ...turn, image: { url: res.imageUrl, prompt: text, status: "ready" } }
+            : turn,
+        ),
+      );
+    } catch (e) {
+      notify.error(errMessage(e, "Orbit could not draw that."));
+      setTurns((t) =>
+        t.map((turn) =>
+          turn.image?.prompt === text && turn.image.status === "generating"
+            ? { ...turn, image: { url: "", prompt: text, status: "failed" } }
+            : turn,
+        ),
+      );
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  /** Put a drawn image into the post and mark the turn approved, so the
+   * transcript still shows what was chosen rather than the card vanishing. */
+  const approveImage = (turnIndex: number) => {
+    const turn = turns[turnIndex];
+    if (!turn?.image || turn.image.status !== "ready") return;
+    onPlan({ images: [...draft.images, turn.image.url] });
+    setTurns((t) =>
+      t.map((turn, i) => (i === turnIndex && turn.image ? { ...turn, image: { ...turn.image, status: "approved" } } : turn)),
+    );
+  };
+
   const reset = () => {
     setTurns([]);
     setInput("");
@@ -125,7 +202,10 @@ export function useOrbitPlan({
     failed.current = "";
   };
 
-  return { turns, input, setInput, send, retry, thinking, ready, awaitingImage, error, reset };
+  return {
+    turns, input, setInput, send, retry, thinking, ready, awaitingImage, error, reset,
+    sendImage, approveImage, generatingImage: generating,
+  };
 }
 
 /** The local wall clock — "tomorrow at 9" means the author's tomorrow. */

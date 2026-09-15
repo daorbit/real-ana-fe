@@ -294,6 +294,9 @@ export function PostComposer({
               awaitingImage={planner.awaitingImage}
               error={planner.error}
               onReset={planner.reset}
+              onSendImage={planner.sendImage}
+              onApproveImage={planner.approveImage}
+              generatingImage={planner.generatingImage}
               // "Edit first" leaves the filled fields behind and returns to the
               // post, which is the point of filling them.
               onEdit={() => onPane("preview")}
