@@ -114,6 +114,45 @@
   border: 1px solid color-mix(in srgb, var(--mantine-color-emerald-5) 22%, transparent);
 }
 
+/* An attached image, above the question it was sent with. */
+.userTurnImage {
+  display: block;
+  max-width: 100%;
+  max-height: 280px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  object-fit: cover;
+}
+
+/*
+ * The staged image, above the textarea, before anything is sent.
+ *
+ * A pill rather than filling the composer's width: the thumbnail is a
+ * reminder of what is attached, not the thing being edited, so it stays
+ * small and out of the way of the text below it.
+ */
+.imageChip {
+  position: relative;
+  display: inline-flex;
+  margin: 10px 0 0 14px;
+}
+
+.imageChip img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.imageChip button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--mantine-color-body);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
 
 .composerWrap {
   width: min(760px, 100%);

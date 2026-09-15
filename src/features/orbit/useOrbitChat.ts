@@ -37,6 +37,9 @@ export type OrbitMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  /** A user turn's attached image — a data URL locally, a Cloudinary URL once
+   * restored from a saved conversation. */
+  imageUrl?: string;
   /** Set when a send failed, so the bubble can render as an error. */
   failed?: boolean;
   /**
@@ -97,6 +100,16 @@ export function useOrbitChat() {
   const [messages, setMessages] = useState<OrbitMessage[]>([]);
   const [input, setInput] = useState("");
   const [ask, { isLoading: thinking }] = useAskOrbitMutation();
+
+  /**
+   * An image staged for the next question, as a data URL.
+   *
+   * Held separately from `input` rather than folded into the message text:
+   * it is sent as its own field (`image`) so the server can route the whole
+   * question to the vision model, and the composer needs it to render the
+   * thumbnail chip before anything is sent.
+   */
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
 
   /**
    * The saved thread the live conversation belongs to.
@@ -167,7 +180,11 @@ export function useOrbitChat() {
   const send = useCallback(
     async (raw?: string) => {
       const question = (raw ?? input).trim();
-      if (!question || thinking || !workspaceId) return;
+      const image = pendingImage;
+      // A typed question is normally required, but an attached image is
+      // itself a question ("what's in this") — the server fills in a
+      // default prompt when both are empty and only the image was sent.
+      if ((!question && !image) || thinking || !workspaceId) return;
 
       trace(user?.id, "ask_orbit", "orbit_chat", "orbit_answer");
 
@@ -177,13 +194,19 @@ export function useOrbitChat() {
         .filter((m) => !m.failed)
         .map((m) => ({ role: m.role, content: m.content }));
 
-      const userTurn: OrbitMessage = { id: nextId(), role: "user", content: question };
+      const userTurn: OrbitMessage = {
+        id: nextId(),
+        role: "user",
+        content: question,
+        imageUrl: image ?? undefined,
+      };
       setMessages((prev) => {
         const next = [...prev, userTurn];
         historyRef.current = next;
         return next;
       });
       setInput("");
+      setPendingImage(null);
 
       try {
         const answered = await ask({
@@ -191,6 +214,7 @@ export function useOrbitChat() {
           question,
           history,
           model: activeModel,
+          image: image ?? undefined,
           // Absent on the first question: the server starts a thread and tells
           // us which one it was.
           conversationId: conversationRef.current ?? undefined,
@@ -238,7 +262,7 @@ export function useOrbitChat() {
         });
       }
     },
-    [ask, input, thinking, activeModel, workspaceId, user?.id],
+    [ask, input, pendingImage, thinking, activeModel, workspaceId, user?.id],
   );
 
   /**
@@ -251,6 +275,7 @@ export function useOrbitChat() {
   const reset = useCallback(() => {
     setMessages([]);
     setInput("");
+    setPendingImage(null);
     historyRef.current = [];
     conversationRef.current = null;
     setConversationId(null);
@@ -272,6 +297,7 @@ export function useOrbitChat() {
           id: m.id,
           role: m.role,
           content: m.content,
+          imageUrl: m.imageUrl,
           failed: m.failed || undefined,
           suggestions: m.suggestions.length ? m.suggestions : undefined,
           modelLabel: m.modelLabel,
@@ -281,6 +307,7 @@ export function useOrbitChat() {
         conversationRef.current = convo.id;
         setConversationId(convo.id);
         setInput("");
+        setPendingImage(null);
       } catch {
         // Deleted in another tab, most likely. Leaving the panel on what it was
         // showing is better than blanking it over a thread that is gone.
@@ -316,6 +343,10 @@ export function useOrbitChat() {
     messages,
     input,
     setInput,
+    /** An image staged for the next question, as a data URL. Null when none. */
+    pendingImage,
+    /** Stage or clear the image for the next question. */
+    attachImage: setPendingImage,
     send,
     reset,
     thinking,

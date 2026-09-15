@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActionIcon, Box, Button, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
+  ActionIcon, Box, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
   Tooltip, UnstyledButton,
 } from "@mantine/core";
-import { AlertTriangle, ArrowUp, History, Mic, RotateCcw, Square } from "lucide-react";
+import { AlertTriangle, ArrowUp, History, ImagePlus, Mic, RotateCcw, Square, X } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
-import { ModelPicker } from "@/features/orbit/components/ModelPicker";
 import { RichText } from "@/features/orbit/components/RichText";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { ORBIT_SUGGESTIONS, type OrbitMessage } from "@/features/orbit/useOrbitChat";
@@ -20,9 +19,14 @@ function Turn({ message }: { message: OrbitMessage }) {
     return (
       <Group justify="flex-end" wrap="nowrap">
         <Box className={classes.userTurn}>
-          <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
-            {message.content}
-          </Text>
+          {message.imageUrl && (
+            <img src={message.imageUrl} alt="Attached" className={classes.userTurnImage} />
+          )}
+          {message.content && (
+            <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
+              {message.content}
+            </Text>
+          )}
         </Box>
       </Group>
     );
@@ -46,14 +50,6 @@ function Turn({ message }: { message: OrbitMessage }) {
         >
           <RichText text={message.content} />
         </Text>
-        {/* Present only when the server fell through to a different model than
-            the one chosen — silence there would make the picker look broken to
-            anyone who noticed the answer's style change. */}
-        {message.modelLabel && (
-          <Text size="10px" c="dimmed" mt={5}>
-            Answered by {message.modelLabel}
-          </Text>
-        )}
       </div>
     </Group>
   );
@@ -63,10 +59,14 @@ export default function Orbit() {
   // The page reads the provider's chat rather than calling the hook, so it is
   // the same conversation the bubble holds.
   const { chat } = useOrbit();
-  const { messages, input, setInput, send, thinking, available, started } = chat;
+  const {
+    messages, input, setInput, pendingImage, attachImage, send, thinking, available, started,
+  } = chat;
 
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   /*
    * Marks the body while Orbit is on screen.
@@ -111,7 +111,52 @@ export default function Orbit() {
     dictationBase.current = "";
     send(q);
   };
- 
+
+  /**
+   * Read a dropped, pasted or picked file as the data URL the composer stages
+   * and the server later validates for real. This check is a courtesy, not
+   * the guard — the route rejects anything past its own size and type
+   * ceiling regardless of what the browser let through.
+   */
+  const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+
+  const acceptImage = (file: File | undefined | null) => {
+    if (!file) return;
+    setImageError(null);
+
+    if (!file.type.startsWith("image/")) {
+      setImageError("That isn't an image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setImageError("That image is too large — 6MB or smaller.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") attachImage(reader.result);
+    };
+    reader.onerror = () => setImageError("Couldn't read that image.");
+    reader.readAsDataURL(file);
+  };
+
+  const onFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    acceptImage(e.currentTarget.files?.[0]);
+    // Cleared so picking the same file twice in a row still fires onChange.
+    e.currentTarget.value = "";
+  };
+
+  const onComposerDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    acceptImage(e.dataTransfer.files?.[0]);
+  };
+
+  const onTextareaPaste = (e: React.ClipboardEvent) => {
+    const file = Array.from(e.clipboardData.files).find((f) => f.type.startsWith("image/"));
+    if (file) acceptImage(file);
+  };
+
   const last = messages[messages.length - 1];
   const followUps = last?.role === "assistant" && !last.failed ? (last.suggestions ?? []) : [];
  
@@ -135,12 +180,27 @@ export default function Orbit() {
     );
   }
 
-  const empty = !input.trim();
+  const empty = !input.trim() && !pendingImage;
 
- 
+
   const composer = (
     <div className={classes.composerWrap}>
-      <div className={classes.composer}>
+      <div className={classes.composer} onDragOver={(e) => e.preventDefault()} onDrop={onComposerDrop}>
+        {pendingImage && (
+          <div className={classes.imageChip}>
+            <img src={pendingImage} alt="Attached" />
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="xs"
+              radius="xl"
+              onClick={() => attachImage(null)}
+              aria-label="Remove attached image"
+            >
+              <X size={12} />
+            </ActionIcon>
+          </div>
+        )}
         <Textarea
           placeholder={speech.listening ? "Listening — speak your question" : "Ask anything"}
           value={input}
@@ -148,23 +208,24 @@ export default function Orbit() {
             setInput(e.currentTarget.value);
             if (speech.listening) dictationBase.current = e.currentTarget.value;
           }}
- 
+
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               sendAndStop();
             }
           }}
+          onPaste={onTextareaPaste}
           variant="unstyled"
           autosize
- 
+
           minRows={started ? 1 : 3}
           maxRows={started ? 8 : 10}
           px="md"
           pt="sm"
           disabled={thinking}
           data-autofocus
- 
+
           styles={{
             input: {
               fontSize: 15,
@@ -176,16 +237,34 @@ export default function Orbit() {
           }}
         />
 
+        {imageError && (
+          <Text size="10px" c="orange.5" px="md" pb={4}>
+            {imageError}
+          </Text>
+        )}
+
         <div className={classes.composerFoot}>
           <Group gap={4} wrap="nowrap">
-            <ModelPicker chat={chat} variant="labelled" />
-            <Text size="xs" c="dimmed">
-              {thinking ? "Orbit is thinking…" : "Enter to send"}
-            </Text>
-          </Group>
-
-          <Group gap={4} wrap="nowrap">
-          
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={onFilePicked}
+            />
+            <Tooltip label="Attach an image" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                radius="xl"
+                size="md"
+                disabled={thinking}
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Attach an image"
+              >
+                <ImagePlus size={15} />
+              </ActionIcon>
+            </Tooltip>
             {speech.supported && (
               <Tooltip
                 label={speech.listening ? "Stop dictating" : "Dictate your question"}
@@ -208,21 +287,22 @@ export default function Orbit() {
                 </ActionIcon>
               </Tooltip>
             )}
-            {/* Named, not a bare arrow. It is the one action the composer is
-                for, and there is room here to say so — the panel's icon-only
-                button was a concession to 400px that this page does not have to
-                make. */}
-            <Button
-              color="emerald"
-              radius="xl"
-              size="sm"
-              leftSection={<ArrowUp size={15} />}
-              disabled={empty || thinking}
-              loading={thinking}
-              onClick={() => sendAndStop()}
-            >
-              Send
-            </Button>
+          </Group>
+
+          <Group gap={4} wrap="nowrap">
+            <Tooltip label="Send" withArrow>
+              <ActionIcon
+                color="emerald"
+                radius="xl"
+                size="lg"
+                disabled={empty || thinking}
+                loading={thinking}
+                onClick={() => sendAndStop()}
+                aria-label="Send"
+              >
+                <ArrowUp size={16} />
+              </ActionIcon>
+            </Tooltip>
           </Group>
         </div>
       </div>

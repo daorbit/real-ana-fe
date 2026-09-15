@@ -864,6 +864,9 @@ export const api = createApi({
         model?: string;
         /** The thread to continue. Omitted on the first question of a new one. */
         conversationId?: string;
+        /** An attached image, as a base64 data URL. Routes to Orbit's vision
+         * model server-side regardless of `model`. */
+        image?: string;
       }
     >({
       query: ({ workspaceId, ...body }) => ({
@@ -917,6 +920,8 @@ export const api = createApi({
           seq: number;
           role: "user" | "assistant";
           content: string;
+          /** Set on a user turn that attached an image — its Cloudinary URL. */
+          imageUrl?: string;
           suggestions: string[];
           /** True when the turn is a stored error rather than an answer. */
           failed: boolean;
