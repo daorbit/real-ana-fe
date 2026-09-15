@@ -14,11 +14,13 @@ export function PlanMessage({
   onApproveImage,
   onRetryImage,
   generating,
+  onApproveCaption,
 }: {
   turn: PlanTurn;
   onApproveImage?: () => void;
   onRetryImage?: () => void;
   generating?: boolean;
+  onApproveCaption?: () => void;
 }) {
   if (turn.role === "user") {
     return (
@@ -140,9 +142,45 @@ export function PlanMessage({
       <Box style={{ flexShrink: 0, marginTop: 1 }}>
         <OrbitMark size={22} />
       </Box>
-      <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap", minWidth: 0, flex: 1 }}>
-        {turn.content}
-      </Text>
+      <Stack gap={8} style={{ minWidth: 0, flex: 1 }}>
+        <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
+          {turn.content}
+        </Text>
+
+        {turn.caption && (
+          <Box
+            p={12}
+            style={{
+              border: `1px solid ${turn.caption.status === "approved" ? "var(--mantine-color-emerald-6)" : "var(--mantine-color-default-border)"}`,
+              borderRadius: "var(--mantine-radius-md)",
+              background: "var(--surface)",
+            }}
+          >
+            <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
+              {turn.caption.text}
+            </Text>
+            <Group justify="flex-end" mt={10}>
+              {turn.caption.status === "approved" ? (
+                <Group gap={5} wrap="nowrap">
+                  <Check size={13} color="var(--mantine-color-emerald-6)" />
+                  <Text size="xs" c="emerald.6" fw={500}>Added to the post</Text>
+                </Group>
+              ) : (
+                <ActionIcon
+                  size="sm"
+                  radius="xl"
+                  color="emerald"
+                  variant="filled"
+                  onClick={onApproveCaption}
+                  aria-label="Use this caption"
+                >
+                  <Check size={14} />
+                </ActionIcon>
+              )}
+            </Group>
+          </Box>
+        )}
+      </Stack>
     </Group>
   );
 }

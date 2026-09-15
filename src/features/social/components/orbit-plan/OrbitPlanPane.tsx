@@ -39,6 +39,7 @@ export function OrbitPlanPane({
   onSendImage,
   onApproveImage,
   generatingImage,
+  onApproveCaption,
 }: {
   workspaceId: string | undefined;
   draft: Draft;
@@ -61,6 +62,7 @@ export function OrbitPlanPane({
   onSendImage: (prompt: string, turnIndex?: number) => void;
   onApproveImage: (turnIndex: number) => void;
   generatingImage: boolean;
+  onApproveCaption: (turnIndex: number) => void;
 }) {
   const thread = useRef<HTMLDivElement | null>(null);
 
@@ -123,6 +125,7 @@ export function OrbitPlanPane({
                 onApproveImage={() => onApproveImage(i)}
                 onRetryImage={() => t.image && onSendImage(t.image.prompt, i)}
                 generating={generatingImage}
+                onApproveCaption={() => onApproveCaption(i)}
               />
             ))}
 

@@ -16,6 +16,12 @@ export type PlanTurn = {
     prompt: string;
     status: "generating" | "ready" | "failed" | "approved";
   };
+  /** A caption Orbit wrote on this turn — pending until approved into the
+   * post, same as a drawn image, rather than silently overwriting the field. */
+  caption?: {
+    text: string;
+    status: "ready" | "approved";
+  };
 };
 
 /**
@@ -44,7 +50,10 @@ export function useOrbitPlan({
   const [generating, setGenerating] = useState(false);
 
   const last = turns.at(-1);
-  const ready = last?.done === true;
+  // A caption offered on the very last turn still needs a press before the
+  // post is actually finished — "done" from the model means "I'm ready to
+  // show this", not "the author has already seen it".
+  const ready = last?.done === true && last.caption?.status !== "ready";
   const awaitingImage = last?.needsImage === true && draft.images.length === 0;
 
   const send = async (text?: string) => {
@@ -90,7 +99,18 @@ export function useOrbitPlan({
 
       setTurns([
         ...sent,
-        { role: "assistant", content: res.message, done: res.done, needsImage: res.needsImage },
+        {
+          role: "assistant",
+          content: res.message,
+          done: res.done,
+          needsImage: res.needsImage,
+          // A new or changed caption waits for a press before it lands in the
+          // form — same as a drawn image, so what ships is always something
+          // the author looked at, not whatever the model wrote first.
+          caption: res.caption && res.caption !== draft.caption
+            ? { text: res.caption, status: "ready" }
+            : undefined,
+        },
       ]);
 
       // Empty means "not decided yet", never "clear this" — writing blanks back
@@ -103,7 +123,6 @@ export function useOrbitPlan({
         weekday: res.weekday,
         dayOfMonth: res.dayOfMonth,
       };
-      if (res.caption) patch.caption = res.caption;
       if (res.name) patch.name = res.name;
       if (res.mode === "once" && res.date && res.time) {
         patch.date = res.date;
@@ -195,6 +214,18 @@ export function useOrbitPlan({
     );
   };
 
+  /** Put a written caption into the post and mark the turn approved. */
+  const approveCaption = (turnIndex: number) => {
+    const turn = turns[turnIndex];
+    if (!turn?.caption || turn.caption.status !== "ready") return;
+    onPlan({ caption: turn.caption.text });
+    setTurns((t) =>
+      t.map((turn, i) =>
+        i === turnIndex && turn.caption ? { ...turn, caption: { ...turn.caption, status: "approved" } } : turn,
+      ),
+    );
+  };
+
   const reset = () => {
     setTurns([]);
     setInput("");
@@ -204,7 +235,7 @@ export function useOrbitPlan({
 
   return {
     turns, input, setInput, send, retry, thinking, ready, awaitingImage, error, reset,
-    sendImage, approveImage, generatingImage: generating,
+    sendImage, approveImage, generatingImage: generating, approveCaption,
   };
 }
 
