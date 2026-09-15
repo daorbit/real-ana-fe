@@ -101,6 +101,10 @@ export function useOrbitChat() {
   const [input, setInput] = useState("");
   const [ask, { isLoading: thinking }] = useAskOrbitMutation();
 
+  /** True while the in-flight question is a drawing request, for the panel's
+   * image-shaped loading placeholder instead of the plain "Thinking" dots. */
+  const [generatingImage, setGeneratingImage] = useState(false);
+
   /**
    * An image staged for the next question, as a data URL.
    *
@@ -217,6 +221,7 @@ export function useOrbitChat() {
       setPendingImage(null);
       const drawing = imageMode && !image;
       setImageMode(false);
+      setGeneratingImage(drawing);
 
       try {
         const answered = await ask({
@@ -272,6 +277,8 @@ export function useOrbitChat() {
           historyRef.current = next;
           return next;
         });
+      } finally {
+        setGeneratingImage(false);
       }
     },
     [ask, input, pendingImage, imageMode, thinking, activeModel, workspaceId, user?.id],
@@ -366,6 +373,8 @@ export function useOrbitChat() {
     send,
     reset,
     thinking,
+    /** True while the in-flight question is a drawing request. */
+    generatingImage,
     /** False when the server has no model key — the UI says so instead of failing on send. */
     available: status?.configured ?? true,
     started: messages.length > 0,

@@ -97,7 +97,7 @@ export default function Orbit() {
   const { chat } = useOrbit();
   const {
     messages, input, setInput, pendingImage, attachImage, imageMode, setImageMode,
-    send, thinking, available, started,
+    send, thinking, generatingImage, available, started,
   } = chat;
 
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -446,7 +446,14 @@ export default function Orbit() {
                     <Turn key={m.id} message={m} />
                   ))}
 
-                  {thinking && (
+                  {thinking && generatingImage && (
+                    <Group gap={12} wrap="nowrap" align="flex-start">
+                      <OrbitMark size={22} />
+                      <div className={classes.generatedImageSkeleton} />
+                    </Group>
+                  )}
+
+                  {thinking && !generatingImage && (
                     <Group gap={12} wrap="nowrap">
                       <OrbitMark size={22} />
                       <Group gap={7} wrap="nowrap">

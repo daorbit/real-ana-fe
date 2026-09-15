@@ -147,6 +147,33 @@
   background: color-mix(in srgb, var(--mantine-color-body) 75%, transparent);
 }
 
+/* Placeholder shown in the assistant's turn while a drawing request is in
+   flight — same box the finished image will occupy, so it doesn't jump size
+   when the real picture lands. */
+.generatedImageSkeleton {
+  width: min(420px, 100%);
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  border: 1px solid var(--mantine-color-default-border);
+  background: linear-gradient(
+    100deg,
+    var(--mantine-color-default) 40%,
+    var(--mantine-color-default-hover) 50%,
+    var(--mantine-color-default) 60%
+  );
+  background-size: 200% 100%;
+  animation: orbitImageShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes orbitImageShimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
 /*
  * The staged image, above the textarea, before anything is sent.
  *
