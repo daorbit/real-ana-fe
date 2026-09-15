@@ -97,6 +97,14 @@ export function useOrbitPlan({
         // the fast default and made every plan request take half a minute.
       }).unwrap();
 
+      // Only the final caption — the one Orbit is showing for confirmation —
+      // waits for a press before it lands in the form, same as a drawn image.
+      // Every draft along the way fills the field silently, the way it always
+      // did: a card on each intermediate rewrite would make answering "just
+      // fun" or picking a time feel like approving a caption you never asked
+      // to review yet.
+      const captionPending = res.done && res.caption && res.caption !== draft.caption;
+
       setTurns([
         ...sent,
         {
@@ -104,12 +112,7 @@ export function useOrbitPlan({
           content: res.message,
           done: res.done,
           needsImage: res.needsImage,
-          // A new or changed caption waits for a press before it lands in the
-          // form — same as a drawn image, so what ships is always something
-          // the author looked at, not whatever the model wrote first.
-          caption: res.caption && res.caption !== draft.caption
-            ? { text: res.caption, status: "ready" }
-            : undefined,
+          caption: captionPending ? { text: res.caption, status: "ready" } : undefined,
         },
       ]);
 
@@ -123,6 +126,7 @@ export function useOrbitPlan({
         weekday: res.weekday,
         dayOfMonth: res.dayOfMonth,
       };
+      if (res.caption && !captionPending) patch.caption = res.caption;
       if (res.name) patch.name = res.name;
       if (res.mode === "once" && res.date && res.time) {
         patch.date = res.date;
