@@ -3,7 +3,7 @@ import {
   ActionIcon, Box, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
   Tooltip, UnstyledButton,
 } from "@mantine/core";
-import { AlertTriangle, ArrowUp, History, ImagePlus, Mic, RotateCcw, Square, X } from "lucide-react";
+import { AlertTriangle, ArrowUp, History, ImagePlus, Mic, Palette, RotateCcw, Square, X } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
@@ -42,14 +42,19 @@ function Turn({ message }: { message: OrbitMessage }) {
         )}
       </Box>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <Text
-          size="sm"
-          lh={1.7}
-          c={message.failed ? "dimmed" : undefined}
-          style={{ whiteSpace: "pre-wrap" }}
-        >
-          <RichText text={message.content} />
-        </Text>
+        {message.imageUrl && (
+          <img src={message.imageUrl} alt="Generated" className={classes.generatedImage} />
+        )}
+        {message.content && (
+          <Text
+            size="sm"
+            lh={1.7}
+            c={message.failed ? "dimmed" : undefined}
+            style={{ whiteSpace: "pre-wrap" }}
+          >
+            <RichText text={message.content} />
+          </Text>
+        )}
       </div>
     </Group>
   );
@@ -60,7 +65,8 @@ export default function Orbit() {
   // the same conversation the bubble holds.
   const { chat } = useOrbit();
   const {
-    messages, input, setInput, pendingImage, attachImage, send, thinking, available, started,
+    messages, input, setInput, pendingImage, attachImage, imageMode, setImageMode,
+    send, thinking, available, started,
   } = chat;
 
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -202,7 +208,13 @@ export default function Orbit() {
           </div>
         )}
         <Textarea
-          placeholder={speech.listening ? "Listening — speak your question" : "Ask anything"}
+          placeholder={
+            speech.listening
+              ? "Listening — speak your question"
+              : imageMode
+                ? "Describe what to draw"
+                : "Ask anything"
+          }
           value={input}
           onChange={(e) => {
             setInput(e.currentTarget.value);
@@ -258,11 +270,25 @@ export default function Orbit() {
                 color="gray"
                 radius="xl"
                 size="md"
-                disabled={thinking}
+                disabled={thinking || imageMode}
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Attach an image"
               >
                 <ImagePlus size={15} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label={imageMode ? "Cancel drawing" : "Draw a picture"} withArrow>
+              <ActionIcon
+                variant={imageMode ? "filled" : "subtle"}
+                color={imageMode ? "emerald" : "gray"}
+                radius="xl"
+                size="md"
+                disabled={thinking || !!pendingImage}
+                onClick={() => setImageMode((v) => !v)}
+                aria-label={imageMode ? "Cancel drawing" : "Draw a picture"}
+                aria-pressed={imageMode}
+              >
+                <Palette size={15} />
               </ActionIcon>
             </Tooltip>
             {speech.supported && (

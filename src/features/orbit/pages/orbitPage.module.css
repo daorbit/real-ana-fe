@@ -124,6 +124,16 @@
   object-fit: cover;
 }
 
+/* A drawn picture, in the assistant's own turn. Capped narrower than the
+   attached-image style above — a generated image is the answer itself and
+   earns more presence than a reference photo tucked above a question. */
+.generatedImage {
+  display: block;
+  max-width: min(420px, 100%);
+  border-radius: 12px;
+  border: 1px solid var(--mantine-color-default-border);
+}
+
 /*
  * The staged image, above the textarea, before anything is sent.
  *

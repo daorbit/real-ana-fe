@@ -112,6 +112,14 @@ export function useOrbitChat() {
   const [pendingImage, setPendingImage] = useState<string | null>(null);
 
   /**
+   * Explicit toggle: the next question is a request to draw a picture, not
+   * a question to answer. Off by default and cleared after every send —
+   * a picture request is a one-off turn, not a mode the whole conversation
+   * stays in.
+   */
+  const [imageMode, setImageMode] = useState(false);
+
+  /**
    * The saved thread the live conversation belongs to.
    *
    * Null until the first answer comes back with an id, or until a past thread
@@ -207,6 +215,8 @@ export function useOrbitChat() {
       });
       setInput("");
       setPendingImage(null);
+      const drawing = imageMode && !image;
+      setImageMode(false);
 
       try {
         const answered = await ask({
@@ -215,6 +225,7 @@ export function useOrbitChat() {
           history,
           model: activeModel,
           image: image ?? undefined,
+          generateImage: drawing,
           // Absent on the first question: the server starts a thread and tells
           // us which one it was.
           conversationId: conversationRef.current ?? undefined,
@@ -231,6 +242,7 @@ export function useOrbitChat() {
               id: nextId(),
               role: "assistant" as const,
               content: answered.reply,
+              imageUrl: answered.imageUrl,
               suggestions: answered.suggestions,
               // Only when it differs from what was asked for — labelling every
               // answer with the model people already chose is noise.
@@ -262,7 +274,7 @@ export function useOrbitChat() {
         });
       }
     },
-    [ask, input, pendingImage, thinking, activeModel, workspaceId, user?.id],
+    [ask, input, pendingImage, imageMode, thinking, activeModel, workspaceId, user?.id],
   );
 
   /**
@@ -276,6 +288,7 @@ export function useOrbitChat() {
     setMessages([]);
     setInput("");
     setPendingImage(null);
+    setImageMode(false);
     historyRef.current = [];
     conversationRef.current = null;
     setConversationId(null);
@@ -347,6 +360,9 @@ export function useOrbitChat() {
     pendingImage,
     /** Stage or clear the image for the next question. */
     attachImage: setPendingImage,
+    /** Whether the next question draws a picture instead of answering one. */
+    imageMode,
+    setImageMode,
     send,
     reset,
     thinking,

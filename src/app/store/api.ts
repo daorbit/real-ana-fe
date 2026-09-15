@@ -840,6 +840,8 @@ export const api = createApi({
          */
         model: string;
         modelLabel: string;
+        /** A generated picture's URL, set only when the question asked for one. */
+        imageUrl?: string;
         /**
          * Questions left this cycle, plan remainder plus purchased credits.
          *
@@ -867,6 +869,9 @@ export const api = createApi({
         /** An attached image, as a base64 data URL. Routes to Orbit's vision
          * model server-side regardless of `model`. */
         image?: string;
+        /** Draw a picture from `question` instead of answering it. Ignored
+         * when `image` is also set. */
+        generateImage?: boolean;
       }
     >({
       query: ({ workspaceId, ...body }) => ({
