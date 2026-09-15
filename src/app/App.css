@@ -1,3 +1,24 @@
+/* da-frame-set's own viewport only sets min-height:100% on the scroll
+   container, which gives a shorter-than-frame child (a feed preview with
+   little content) nothing definite to size `height:100%` against — the
+   screen's real fixed pixel height comes from .dfs__screen, one level up. A
+   flex column here passes that real height down so the preview's own
+   background can stretch to fill the device instead of leaving a blank strip
+   of the screen's white default below it. */
+.dfs__screen {
+  display: flex;
+  flex-direction: column;
+}
+.dfs__viewport {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.dfs__viewport > * {
+  flex: 1;
+  min-height: 100%;
+}
+
 :root {
 
   --bg: #0b0c0e;

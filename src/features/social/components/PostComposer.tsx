@@ -12,7 +12,6 @@ import { ComposerFooter } from "./ComposerFooter";
 import { ComposerSteps, type Step } from "./ComposerSteps";
 import { ScheduleFields } from "./ScheduleFields";
 import { OrbitPlanPane } from "./orbit-plan/OrbitPlanPane";
-import { useOrbitCaption } from "../hooks/useOrbitCaption";
 import { useOrbitPlan } from "../hooks/useOrbitPlan";
 import { DiscardDialog } from "./DiscardDialog";
 import { captionLimit, isDirty, type Draft } from "./draft";
@@ -92,11 +91,6 @@ export function PostComposer({
 
   const patch = (next: Partial<Draft>) => setDraft((d) => ({ ...d, ...next }));
 
-  const { topic, setTopic, generate, writing } = useOrbitCaption({
-    workspaceId,
-    onCaption: (caption) => patch({ caption }),
-  });
-
   // Orbit asking for the post rather than being told it. Its answers land in
   // the same fields the author types into, so nothing it settles is hidden
   // from them — and nothing it settles is saved until a Schedule press.
@@ -119,14 +113,12 @@ export function PostComposer({
       }
       setDraft(seed);
       setStep("content");
-      setTopic("");
       onPane("preview");
       // A new post starts a new conversation — carrying the last one over would
       // have Orbit answering about a post that is no longer on screen.
       planner.reset();
       setConfirmingClose(false);
     }
-    // `setTopic` is stable; re-running on it would reset the field mid-edit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opened, initial]);
 
@@ -238,10 +230,6 @@ export function PostComposer({
                   draft={draft}
                   patch={patch}
                   editor={editor}
-                  topic={topic}
-                  onTopic={setTopic}
-                  onGenerate={generate}
-                  writing={writing}
                   chars={chars}
                   tags={tags}
                   overLimit={overLimit}
@@ -293,6 +281,7 @@ export function PostComposer({
           }
           orbit={
             <OrbitPlanPane
+              workspaceId={workspaceId}
               draft={draft}
               onImages={(images) => patch({ images })}
               turns={planner.turns}

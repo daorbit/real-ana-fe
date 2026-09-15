@@ -19,6 +19,7 @@ import type { PlanTurn } from "../../hooks/useOrbitPlan";
  * widget version of it.
  */
 export function OrbitPlanPane({
+  workspaceId,
   draft,
   onImages,
   turns,
@@ -36,6 +37,7 @@ export function OrbitPlanPane({
   scheduling,
   blockedReason,
 }: {
+  workspaceId: string | undefined;
   draft: Draft;
   onImages: (next: string[]) => void;
   turns: PlanTurn[];
@@ -99,6 +101,9 @@ export function OrbitPlanPane({
             onInput={onInput}
             onSend={onSend}
             thinking={thinking}
+            workspaceId={workspaceId}
+            images={draft.images}
+            onImages={onImages}
           />
         ) : (
           <Stack gap={14} px={4} py={10} maw={720} mx="auto">
@@ -117,6 +122,7 @@ export function OrbitPlanPane({
 
             {awaitingImage && !thinking && (
               <PlanImagePrompt
+                workspaceId={workspaceId}
                 images={draft.images}
                 onImages={onImages}
                 provider={draft.provider}
@@ -147,6 +153,9 @@ export function OrbitPlanPane({
             thinking={thinking}
             placeholder="Reply to Orbit…"
             minRows={2}
+            workspaceId={workspaceId}
+            images={draft.images}
+            onImages={onImages}
           />
           <Text size="10.5px" c="dimmed" mt={8} ta="center">
             Orbit fills the form — nothing publishes until you confirm.
@@ -167,12 +176,18 @@ function Intro({
   onInput,
   onSend,
   thinking,
+  workspaceId,
+  images,
+  onImages,
 }: {
   provider: Draft["provider"];
   input: string;
   onInput: (value: string) => void;
   onSend: (text?: string) => void;
   thinking: boolean;
+  workspaceId: string | undefined;
+  images: string[];
+  onImages: (next: string[]) => void;
 }) {
   const starters = startersFor(provider);
   const scroller = useRef<HTMLDivElement | null>(null);
@@ -197,6 +212,9 @@ function Intro({
           thinking={thinking}
           placeholder="Tell Orbit what to post, and when"
           minRows={3}
+          workspaceId={workspaceId}
+          images={images}
+          onImages={onImages}
         />
       </Box>
 

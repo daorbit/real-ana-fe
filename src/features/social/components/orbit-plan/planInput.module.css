@@ -1,6 +1,27 @@
 /* Same gradient composer treatment as the Orbit AI page's own input box —
    see features/orbit/pages/orbitPage.module.css .composer for the source. */
 
+.imageChip {
+  position: relative;
+  display: inline-flex;
+}
+
+.imageChip img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.imageChip button {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--mantine-color-body);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
 .composer {
   --composer-edge: linear-gradient(
     90deg,

@@ -1,8 +1,7 @@
 import { useEffect, type RefObject } from "react";
 import {
-  Box, Button, Group, RingProgress, SegmentedControl, Text, TextInput, Tooltip,
+  Box, Group, RingProgress, SegmentedControl, Text, TextInput,
 } from "@mantine/core";
-import { PenLine } from "lucide-react";
 import { useCanUseInstagram } from "@/features/auth/context";
 import {
   CaptionEditor, CaptionToolbar, type CaptionEditorHandle,
@@ -25,10 +24,6 @@ export function ComposerContentStep({
   draft,
   patch,
   editor,
-  topic,
-  onTopic,
-  onGenerate,
-  writing,
   chars,
   tags,
   overLimit,
@@ -39,11 +34,6 @@ export function ComposerContentStep({
   draft: Draft;
   patch: (next: Partial<Draft>) => void;
   editor: RefObject<CaptionEditorHandle | null>;
-  /** What the post is about, in the author's words — the steer Orbit writes from. */
-  topic: string;
-  onTopic: (topic: string) => void;
-  onGenerate: () => void;
-  writing: boolean;
   chars: number;
   tags: number;
   overLimit: boolean;
@@ -99,7 +89,13 @@ export function ComposerContentStep({
           fullWidth
           disabled={lockProvider}
           value={draft.provider}
-          onChange={(value) => patch({ provider: value as Draft["provider"] })}
+          onChange={(value) => {
+            const provider = value as Draft["provider"];
+            // LinkedIn has no story format — leaving it set would hide the
+            // caption field and cap images at one under a network that never
+            // asked for either.
+            patch({ provider, ...(provider !== "instagram" ? { format: "feed" } : {}) });
+          }}
           data={providerOptions}
         />
       </ComposerField>
@@ -133,47 +129,6 @@ export function ComposerContentStep({
           was never going to be published. */}
       {draft.format !== "story" && (
       <ComposerField label="Post" hint={`${tags}/${MAX_HASHTAGS} hashtags`}>
-        {/* Say what the post is about and Orbit drafts it. A topic box rather
-            than a bare "write for me" button: the post goes out under the
-            author's own name, so the model is given their subject rather than
-            left to guess one. Writing over an existing caption is deliberate —
-            the button says "Rewrite" once there is something to lose. */}
-        <Group gap="sm" mb="sm" wrap="nowrap" align="flex-end">
-          <TextInput
-            placeholder="What is this post about?"
-            value={topic}
-            onChange={(e) => onTopic(e.currentTarget.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && topic.trim() && !writing) {
-                e.preventDefault();
-                onGenerate();
-              }
-            }}
-            style={{ flex: 1 }}
-          />
-          <Tooltip
-            label={
-              topic.trim()
-                ? "Orbit writes the post from this. Costs one Orbit question."
-                : "Say what the post is about first"
-            }
-            withArrow
-          >
-            <Box>
-              <Button
-                variant="light"
-                color="emerald"
-                loading={writing}
-                disabled={!topic.trim()}
-                onClick={onGenerate}
-                leftSection={<PenLine size={15} />}
-              >
-                {draft.caption.trim() ? "Rewrite" : "Write with Orbit"}
-              </Button>
-            </Box>
-          </Tooltip>
-        </Group>
-
         <Box
           style={{
             border: `1px solid ${overLimit ? "var(--mantine-color-red-5)" : "var(--mantine-color-default-border)"}`,

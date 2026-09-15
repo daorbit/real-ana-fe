@@ -128,9 +128,18 @@ export function LinkedInPreview({
   );
 
   return (
-    <Box style={{ width: "100%", height: "100%", background: MOCK.page }}>
+    <Box
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: "100%",
+        background: MOCK.page,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* LinkedIn's own chrome: the mark, a search pill, nav placeholders. */}
-      <Group px={12} py={7} gap={10} wrap="nowrap" style={{ background: MOCK.card, borderBottom: `1px solid ${MOCK.line}` }}>
+      <Group px={12} py={7} gap={10} wrap="nowrap" style={{ background: MOCK.card, borderBottom: `1px solid ${MOCK.line}`, flexShrink: 0 }}>
         <Box
           style={{
             width: 22, height: 22, borderRadius: 4, background: MOCK.brand, color: "#fff",
@@ -165,7 +174,7 @@ export function LinkedInPreview({
         )}
       </Group>
 
-      <Box p={mobile ? 10 : 14} style={{ background: MOCK.page }}>
+      <Box p={mobile ? 10 : 14} style={{ background: MOCK.page, flex: "1 1 auto", minHeight: 0 }}>
         {mobile ? (
           post
         ) : (

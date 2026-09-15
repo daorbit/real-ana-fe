@@ -250,6 +250,19 @@ export const api = createApi({
       }),
     }),
 
+    /** Draw an image for the post being planned — same Flux/Cloudinary
+     * pipeline as the Orbit assistant's own "draw a picture" mode. */
+    planImage: build.mutation<
+      { imageUrl: string },
+      { workspaceId: string; prompt: string }
+    >({
+      query: ({ workspaceId, prompt }) => ({
+        url: `/api/workspaces/${workspaceId}/share/plan-image`,
+        method: "POST",
+        body: { prompt },
+      }),
+    }),
+
     /**
      * Whether this account has LinkedIn connected, and as whom.
      *
@@ -1896,6 +1909,7 @@ export const {
   useSetShareMutation,
   useWriteShareCaptionMutation,
   usePlanScheduledPostMutation,
+  usePlanImageMutation,
   useGetLinkedInStatusQuery,
   useGetInstagramStatusQuery,
   useDisconnectInstagramMutation,
