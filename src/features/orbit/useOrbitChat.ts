@@ -140,7 +140,8 @@ export function useOrbitChat() {
   const workspaceId = active?._id ?? "";
   const { data: status } = useGetOrbitStatusQuery(workspaceId, { skip: !workspaceId });
 
-  const { data: saved } = useGetOrbitConversationsQuery(workspaceId, { skip: !workspaceId });
+  const { data: saved, isLoading: loadingConversations } =
+    useGetOrbitConversationsQuery(workspaceId, { skip: !workspaceId });
   const [fetchConversation, { isFetching: loadingConversation }] =
     useLazyGetOrbitConversationQuery();
   const [removeConversation] = useDeleteOrbitConversationMutation();
@@ -399,6 +400,9 @@ export function useOrbitChat() {
      * and when there are none — the sidebar renders the same in both cases.
      */
     conversations: saved?.conversations ?? [],
+    /** True while the workspace's saved threads are first fetched, for the
+     * drawer's skeleton list. */
+    loadingConversations,
     /** The thread on screen, when it has been saved. Null on an unsaved one. */
     conversationId,
     /** True while a past thread is being pulled in, for the sidebar's spinner. */

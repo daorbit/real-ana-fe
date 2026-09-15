@@ -45,7 +45,7 @@ export function OrbitHistoryDrawer({
 }) {
   const {
     conversations, conversationId, openConversation, deleteConversation,
-    renameConversation, loadingConversation, reset, started,
+    renameConversation, loadingConversation, loadingConversations, reset, started,
   } = chat;
 
   /** The row being renamed, and the text so far. Only ever one at a time. */
@@ -157,7 +157,19 @@ export function OrbitHistoryDrawer({
       </Box>
 
       <ScrollArea className={classes.drawerList} type="hover" scrollbarSize={6}>
-        {!conversations.length ? (
+        {loadingConversations ? (
+          <Stack gap={0}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className={classes.threadSkeleton}>
+                <div className={classes.threadSkeletonIcon} />
+                <div className={classes.threadSkeletonLines}>
+                  <div className={classes.threadSkeletonLine} />
+                  <div className={classes.threadSkeletonLine} data-w="short" />
+                </div>
+              </div>
+            ))}
+          </Stack>
+        ) : !conversations.length ? (
           <Text size="xs" c="dimmed" lh={1.5} px={10} py={6}>
             Threads you start are saved here for everyone in this workspace.
           </Text>
