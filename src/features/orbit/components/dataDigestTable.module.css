@@ -51,20 +51,40 @@
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
-.rowKey {
-  font-size: 12px;
+.barList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.barKey {
   color: var(--mantine-color-text);
-  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-inline: 0 !important;
 }
 
-.rowCount {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--mantine-color-dimmed);
+.barTrack {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--mantine-color-default-hover);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mantine-color-emerald-5) 70%, transparent);
+}
+
+.barCount {
+  min-width: 22px;
   text-align: right;
-  padding-inline: 0 !important;
 }

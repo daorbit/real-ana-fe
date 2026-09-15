@@ -4,29 +4,37 @@ import {
   Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
-  AlertTriangle, ArrowUp, Copy, Download, History, ImagePlus, Mic, Palette,
-  Pencil, RefreshCw, RotateCcw, Share2, Square, X,
+  AlertTriangle, ArrowUp, ClipboardList, Copy, Download, History, ImagePlus, Mic, Palette,
+  Pencil, RefreshCw, RotateCcw, Share2, Square, Volume2, VolumeX, X,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { RichText } from "@/features/orbit/components/RichText";
-import { DataDigestTable } from "@/features/orbit/components/DataDigestTable";
+import { DataDigestTable, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { ORBIT_SUGGESTIONS, type OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { notify } from "@/shared/lib/notify";
+import { useWorkspace } from "@/features/workspace/context";
+import { useStats } from "@/features/analytics/hooks/useStats";
+import { useGetSitesQuery, useGetCompetitorsQuery } from "@/app/store";
 import classes from "./orbitPage.module.css";
 
 
-async function copyText(text: string) {
+async function copyText(text: string, successMessage = "Copied to clipboard") {
   try {
     await navigator.clipboard.writeText(text);
-    notify.success("Copied to clipboard");
+    notify.success(successMessage);
   } catch {
     notify.error("Couldn't copy that.");
   }
+}
+
+async function copyDigestAsReport(digest: unknown) {
+  if (!isDataDigest(digest)) return;
+  await copyText(formatDigestAsText(digest), "Report copied to clipboard");
 }
 
 async function copyImage(url: string) {
@@ -58,6 +66,53 @@ async function shareTurn(message: OrbitMessage) {
 
   await copyText(message.imageUrl ?? message.content);
   notify.info("Sharing isn't available here — copied instead.");
+}
+
+/**
+ * Read an answer aloud with the browser's own voice, and stop cleanly when
+ * asked to, the turn changes, or the component unmounts.
+ *
+ * `window.speechSynthesis` is a single shared, global queue — without
+ * cancelling on unmount and on every new play, a second "Read aloud" click
+ * elsewhere in the thread would queue behind the first instead of replacing
+ * it, and a closed panel would keep talking.
+ */
+function useSpeech() {
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+
+  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
+
+  const stop = useCallback(() => {
+    if (supported) window.speechSynthesis.cancel();
+    setSpeakingId(null);
+  }, [supported]);
+
+  const speak = useCallback(
+    (id: string, text: string) => {
+      if (!supported || !text.trim()) return;
+      window.speechSynthesis.cancel();
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 1;
+      utter.onend = () => setSpeakingId((cur) => (cur === id ? null : cur));
+      utter.onerror = () => setSpeakingId((cur) => (cur === id ? null : cur));
+      window.speechSynthesis.speak(utter);
+      setSpeakingId(id);
+    },
+    [supported],
+  );
+
+  const toggle = useCallback(
+    (id: string, text: string) => {
+      if (speakingId === id) stop();
+      else speak(id, text);
+    },
+    [speakingId, speak, stop],
+  );
+
+  useEffect(() => () => stop(), [stop]);
+
+  return { supported, speakingId, toggle };
 }
 
 async function downloadImage(url: string) {
@@ -111,16 +166,23 @@ function GeneratedImage({ url }: { url: string }) {
   );
 }
 
-/** Copy / share / regenerate, under an answered assistant turn. Regenerate
- * only on the last turn — see `regenerateLast`'s own note on why. */
+/** Copy / share / read aloud / copy as report / regenerate, under an answered
+ * assistant turn. Regenerate only on the last turn — see `regenerateLast`'s
+ * own note on why. Read aloud and report are both conditional: a drawing has
+ * no prose to speak, and only an answer that carried a data digest has
+ * anything to export as a report. */
 function TurnActions({
   message,
   onRegenerate,
   regenerating,
+  speaking,
+  onToggleSpeech,
 }: {
   message: OrbitMessage;
   onRegenerate?: () => void;
   regenerating?: boolean;
+  speaking?: boolean;
+  onToggleSpeech?: () => void;
 }) {
   return (
     <Group gap={2} mt={6} wrap="nowrap">
@@ -148,6 +210,35 @@ function TurnActions({
           <Share2 size={13} />
         </ActionIcon>
       </Tooltip>
+      {onToggleSpeech && (
+        <Tooltip label={speaking ? "Stop reading" : "Read aloud"} withArrow>
+          <ActionIcon
+            variant="subtle"
+            color={speaking ? "emerald" : "gray"}
+            size="sm"
+            radius="xl"
+            onClick={onToggleSpeech}
+            aria-label={speaking ? "Stop reading" : "Read aloud"}
+            aria-pressed={speaking}
+          >
+            {speaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          </ActionIcon>
+        </Tooltip>
+      )}
+      {isDataDigest(message.dataDigest) && (
+        <Tooltip label="Copy as report" withArrow>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            radius="xl"
+            onClick={() => copyDigestAsReport(message.dataDigest)}
+            aria-label="Copy as report"
+          >
+            <ClipboardList size={13} />
+          </ActionIcon>
+        </Tooltip>
+      )}
       {onRegenerate && (
         <Tooltip label="Regenerate" withArrow>
           <ActionIcon
@@ -304,6 +395,8 @@ function Turn({
   onEdit,
   editable,
   regenerating,
+  speaking,
+  onToggleSpeech,
 }: {
   message: OrbitMessage;
   isLast?: boolean;
@@ -318,6 +411,9 @@ function Turn({
   /** Whether this question can be edited — false while Orbit is busy. */
   editable?: boolean;
   regenerating?: boolean;
+  /** Whether this turn is the one currently being read aloud. */
+  speaking?: boolean;
+  onToggleSpeech?: () => void;
 }) {
   if (message.role === "user") {
     return <UserTurn message={message} onEdit={onEdit} editable={editable} />;
@@ -371,6 +467,10 @@ function Turn({
             message={message}
             onRegenerate={isLast ? onRegenerate : undefined}
             regenerating={regenerating}
+            speaking={speaking}
+            onToggleSpeech={
+              message.content && !message.imageUrl ? onToggleSpeech : undefined
+            }
           />
         )}
       </div>
@@ -391,6 +491,55 @@ export default function Orbit() {
  
   const [liveId, setLiveId] = useState<string | null>(null);
   const wasThinking = useRef(false);
+  const tts = useSpeech();
+
+  // Extra starter chips, computed from data already loaded elsewhere in the
+  // app rather than a new endpoint: one calls out whichever 7-day metric
+  // moved the most, the other turns an already-tracked competitor into a
+  // one-click question. Both degrade to nothing rather than a placeholder —
+  // an empty workspace or one with no competitors just keeps the static three.
+  const { active } = useWorkspace();
+  const workspaceId = active?._id ?? "";
+  const { data: sites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId });
+  const primarySiteId = sites[0]?.siteId ?? "";
+  const { stats: weekStats } = useStats(workspaceId || undefined, "7d");
+  const { data: competitors = [] } = useGetCompetitorsQuery(
+    { workspaceId, siteId: primarySiteId },
+    { skip: !workspaceId || !primarySiteId },
+  );
+
+  const dynamicStarters = (() => {
+    const chips: string[] = [];
+
+    // The single biggest mover among the metrics Orbit can actually explain
+    // — matches `DATA_MARKERS` on the server, so the question this chip asks
+    // is guaranteed to pull the data digest into the answer.
+    const deltas = weekStats?.deltas;
+    if (deltas) {
+      const candidates: { label: string; pct: number; question: string }[] = [
+        { label: "Bounce rate", pct: deltas.bounceRate ?? 0, question: "Why did my bounce rate change this week?" },
+        { label: "Visitors", pct: deltas.visitors ?? 0, question: "Why did my visitors change this week?" },
+        { label: "Pageviews", pct: deltas.pageviews ?? 0, question: "Why did my pageviews change this week?" },
+      ].filter((c) => Number.isFinite(c.pct) && Math.abs(c.pct) >= 15);
+
+      const biggest = candidates.sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct))[0];
+      if (biggest) {
+        const dir = biggest.pct >= 0 ? "up" : "down";
+        chips.push(`${biggest.label} is ${dir} ${Math.abs(Math.round(biggest.pct))}% this week — why?`);
+      }
+    }
+
+    // Whichever tracked competitor was checked most recently — same
+    // "one clear default over a menu" reasoning as the static three chips.
+    const competitor = [...competitors]
+      .filter((c) => c.snapshot)
+      .sort((a, b) => (b.lastCheckedAt ?? "").localeCompare(a.lastCheckedAt ?? ""))[0];
+    if (competitor) {
+      chips.push(`How do we beat ${competitor.label || competitor.url}?`);
+    }
+
+    return chips;
+  })();
 
   useEffect(() => {
     const last = messages[messages.length - 1];
@@ -746,7 +895,7 @@ export default function Orbit() {
 
 
             <div className={classes.starters}>
-              {ORBIT_SUGGESTIONS.map((q) => (
+              {[...dynamicStarters, ...ORBIT_SUGGESTIONS].map((q) => (
                 <UnstyledButton
                   key={q}
                   className={classes.starter}
@@ -775,6 +924,10 @@ export default function Orbit() {
                       onEdit={(text) => void editAndResend(m.id, text)}
                       editable={!thinking}
                       regenerating={thinking}
+                      speaking={tts.speakingId === m.id}
+                      onToggleSpeech={
+                        tts.supported ? () => tts.toggle(m.id, m.content) : undefined
+                      }
                     />
                   ))}
 

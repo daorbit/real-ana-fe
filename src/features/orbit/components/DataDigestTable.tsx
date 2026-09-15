@@ -1,4 +1,4 @@
-import { Table, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import classes from "./dataDigestTable.module.css";
 
@@ -22,8 +22,48 @@ export type DataDigestSite = {
 };
 export type DataDigest = { sites: DataDigestSite[] };
 
-function isDataDigest(v: unknown): v is DataDigest {
+export function isDataDigest(v: unknown): v is DataDigest {
   return Boolean(v) && typeof v === "object" && Array.isArray((v as DataDigest).sites);
+}
+
+/** A signed percentage for one line of a plain-text report, or nothing when
+ * there is no prior period to compare — mirrors `change()` in orbit-data.ts
+ * so the copied report reads the same as the figures Orbit itself was given. */
+function changeLine(pct: number | null): string {
+  if (pct === null || !Number.isFinite(pct)) return "";
+  const rounded = Math.round(pct);
+  return ` (${rounded >= 0 ? "+" : ""}${rounded}% vs previous period)`;
+}
+
+function rowsLine(label: string, rows: DataDigestRow[]): string {
+  if (!rows.length) return "";
+  return `${label}: ${rows.map((r) => `${r.key} (${r.count})`).join(", ")}`;
+}
+
+/**
+ * The same digest as plain text, for the "Copy as report" action — a
+ * standalone summary someone can paste into an email or a doc, rather than a
+ * chat turn that only makes sense next to the question that produced it.
+ */
+export function formatDigestAsText(digest: DataDigest): string {
+  return digest.sites
+    .map((site) =>
+      [
+        `${site.domain} — last 7 days`,
+        `Visitors: ${site.visitors}${changeLine(site.visitorsChangePct)}`,
+        `Pageviews: ${site.pageviews}${changeLine(site.pageviewsChangePct)}`,
+        `Sessions: ${site.sessions}${changeLine(site.sessionsChangePct)}`,
+        `Bounce rate: ${site.bounceRate}%${changeLine(site.bounceRateChangePct)}`,
+        `Visitors online now: ${site.live}`,
+        rowsLine("Top pages", site.topPages),
+        rowsLine("Top referrers", site.topReferrers),
+        rowsLine("Countries", site.countries),
+        rowsLine("Devices", site.devices),
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    )
+    .join("\n\n");
 }
 
 function Delta({ pct }: { pct: number | null }) {
@@ -52,23 +92,36 @@ function Stat({ label, value, pct }: { label: string; value: string | number; pc
   );
 }
 
+/**
+ * One breakdown (top pages, referrers, …) as a small horizontal bar list —
+ * each row's bar scaled against the section's own highest count, so "top
+ * pages" and "devices" each fill their own width rather than one dwarfing
+ * the other because a site has far more distinct pages than device types.
+ */
 function TopRows({ label, rows }: { label: string; rows: DataDigestRow[] }) {
   if (!rows.length) return null;
+  const max = Math.max(...rows.map((r) => r.count), 1);
+
   return (
     <div className={classes.breakdown}>
-      <Text size="10px" c="dimmed" tt="uppercase" fw={600} mb={4}>
+      <Text size="10px" c="dimmed" tt="uppercase" fw={600} mb={6}>
         {label}
       </Text>
-      <Table withRowBorders={false} verticalSpacing={2} horizontalSpacing={8}>
-        <Table.Tbody>
-          {rows.map((r) => (
-            <Table.Tr key={r.key}>
-              <Table.Td className={classes.rowKey}>{r.key}</Table.Td>
-              <Table.Td className={classes.rowCount}>{r.count}</Table.Td>
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+      <div className={classes.barList}>
+        {rows.map((r) => (
+          <div key={r.key} className={classes.barRow}>
+            <Text size="11px" className={classes.barKey} lh={1.3}>
+              {r.key}
+            </Text>
+            <div className={classes.barTrack}>
+              <div className={classes.barFill} style={{ width: `${(r.count / max) * 100}%` }} />
+            </div>
+            <Text size="11px" fw={600} c="dimmed" className={classes.barCount}>
+              {r.count}
+            </Text>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
