@@ -11,6 +11,7 @@ import { RichText } from "@/features/orbit/components/RichText";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { ORBIT_SUGGESTIONS, type OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
+import { notify } from "@/shared/lib/notify";
 import classes from "./orbitPage.module.css";
 
 
@@ -97,7 +98,7 @@ export default function Orbit() {
   const { chat } = useOrbit();
   const {
     messages, input, setInput, pendingImage, attachImage, imageMode, setImageMode,
-    send, thinking, generatingImage, available, started,
+    send, thinking, generatingImage, available, started, plan,
   } = chat;
 
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -187,6 +188,18 @@ export default function Orbit() {
   const onComposerDrop = (e: React.DragEvent) => {
     e.preventDefault();
     acceptImage(e.dataTransfer.files?.[0]);
+  };
+
+  const toggleImageMode = () => {
+    if (!imageMode && plan && !plan.imageGeneration) {
+      notify.quotaLimit("Drawing pictures is part of Orbit Pro.", {
+        kind: "orbit_image_generation",
+        label: "Orbit image generation",
+        plan: plan.name,
+      });
+      return;
+    }
+    setImageMode((v) => !v);
   };
 
   const onTextareaPaste = (e: React.ClipboardEvent) => {
@@ -315,7 +328,7 @@ export default function Orbit() {
                 radius="xl"
                 size="md"
                 disabled={thinking || !!pendingImage}
-                onClick={() => setImageMode((v) => !v)}
+                onClick={toggleImageMode}
                 aria-label={imageMode ? "Cancel drawing" : "Draw a picture"}
                 aria-pressed={imageMode}
               >

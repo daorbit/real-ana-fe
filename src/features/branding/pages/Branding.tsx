@@ -35,6 +35,7 @@ export default function BrandingPage() {
   const [logoUrl, setLogoUrl] = useState("");
   const [accentColor, setAccentColor] = useState("");
   const [hidePoweredBy, setHidePoweredBy] = useState(false);
+  const [watermarkAiImages, setWatermarkAiImages] = useState(true);
   // Whether the logo URL actually resolves. A broken link is worth saying here
   // rather than leaving someone to find a missing image on a payment window.
   const [logoBroken, setLogoBroken] = useState(false);
@@ -49,6 +50,7 @@ export default function BrandingPage() {
     setLogoUrl(data.stored.logoUrl ?? "");
     setAccentColor(data.stored.accentColor ?? "");
     setHidePoweredBy(data.stored.hidePoweredBy);
+    setWatermarkAiImages(data.stored.watermarkAiImages);
   }, [data]);
 
   useEffect(() => setLogoBroken(false), [logoUrl]);
@@ -77,6 +79,7 @@ export default function BrandingPage() {
         logoUrl,
         accentColor,
         hidePoweredBy,
+        watermarkAiImages,
       }).unwrap();
       notify.success("Your forms and payment windows will use it.", "Branding saved");
     } catch (err) {
@@ -243,6 +246,13 @@ export default function BrandingPage() {
               description="Removes it from your public forms, thank-you screens and the emails your respondents get."
               checked={hidePoweredBy}
               onChange={(e) => setHidePoweredBy(e.currentTarget.checked)}
+              disabled={locked}
+            />
+            <Switch
+              label="Add Orbit AI watermark to generated images"
+              description="Marks pictures Orbit draws as AI-generated. Free and Starter workspaces always show it; Pro can turn it off."
+              checked={locked ? true : watermarkAiImages}
+              onChange={(e) => setWatermarkAiImages(e.currentTarget.checked)}
               disabled={locked}
             />
           </Stack>

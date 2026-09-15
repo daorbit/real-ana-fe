@@ -802,6 +802,8 @@ export const api = createApi({
           tier: "basic" | "standard" | "advanced";
           monthlyQuota: number;
           maxQuestionChars: number;
+          /** Whether this plan may ask Orbit to draw a picture. */
+          imageGeneration: boolean;
         };
         models: {
           id: string;

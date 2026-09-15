@@ -2007,6 +2007,9 @@ export type Branding = {
   showPoweredBy: boolean;
   poweredByLabel: string;
   editable: boolean;
+  /** Whether Orbit's watermark is left on pictures it draws for this
+   * workspace. True unless a Pro workspace has switched it off. */
+  watermarkAiImages: boolean;
   /** Ours, whatever this workspace has set — for previewing an empty field. */
   defaults: { name: string; logoUrl?: string };
   /** What the workspace saved, honoured or not — so the form shows their text. */
@@ -2015,6 +2018,7 @@ export type Branding = {
     logoUrl?: string;
     accentColor?: string;
     hidePoweredBy: boolean;
+    watermarkAiImages: boolean;
   };
 };
 
@@ -2023,6 +2027,7 @@ export type BrandingInput = {
   logoUrl?: string;
   accentColor?: string;
   hidePoweredBy?: boolean;
+  watermarkAiImages?: boolean;
 };
 
 export type MediaKind = "image" | "video" | "raw";
