@@ -492,9 +492,6 @@ export default function Orbit() {
       notify.quotaLimit(
         "Drawing pictures is part of Orbit Pro.",
         { kind: "orbit_image_generation", plan: plan.name },
-        // Not a quota that ran out — a feature this plan never had. Without
-        // this the dialog says "You've reached your … limit", which points a
-        // free workspace at waiting for a reset that will not help.
         "plan_required",
       );
       return;
@@ -508,8 +505,7 @@ export default function Orbit() {
   };
 
   const last = messages[messages.length - 1];
-  // Held back until the answer has finished typing — chips appearing under a
-  // half-written reply read as the answer having ended there.
+
   const typing = liveId != null && last?.id === liveId;
   const followUps =
     last?.role === "assistant" && !last.failed && !last.stopped && !typing
@@ -665,9 +661,7 @@ export default function Orbit() {
                   aria-label={speech.listening ? "Stop dictating" : "Dictate your question"}
                   aria-pressed={speech.listening}
                 >
-                  {/* A stop square while live, not a second mic. The mic is what
-                      turns it on, so leaving it there gives no sign that
-                      pressing again is what turns it off. */}
+                 
                   {speech.listening ? <Square size={12} /> : <Mic size={15} />}
                 </ActionIcon>
               </Tooltip>
@@ -675,10 +669,7 @@ export default function Orbit() {
           </Group>
 
           <Group gap={4} wrap="nowrap">
-            {/* The same button, not a second one beside it: while a question is
-                running, stopping it is the only thing that button can usefully
-                do, and a spinner that cannot be pressed is a dead control in
-                the one place someone is looking. */}
+        
             <Tooltip label={thinking ? "Stop" : "Send"} withArrow>
               <ActionIcon
                 color={thinking ? "red" : "emerald"}
@@ -751,9 +742,7 @@ export default function Orbit() {
             </div>
             {composer}
 
-            {/* Under the composer, not above it: the box is what the page is
-                for, and these are the fallback for someone who does not yet
-                know what to type into it. */}
+   
             <div className={classes.starters}>
               {ORBIT_SUGGESTIONS.map((q) => (
                 <UnstyledButton

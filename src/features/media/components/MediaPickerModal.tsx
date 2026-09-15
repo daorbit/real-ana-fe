@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Modal, TextInput, Group, Button, Stack, Text, Center,
-  SegmentedControl, Pagination,
+  SegmentedControl, Pagination, Box,
 } from "@mantine/core";
 import { Search, ImageOff, Upload } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useGetMediaQuery } from "@/app/store";
-import { useWorkspace } from "@/features/workspace/context";
+import { useGetMediaQuery, useUploadMediaMutation } from "@/app/store";
+import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { notify, errMessage } from "@/shared/lib/notify";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "./MediaGrid";
 import { MediaGridSkeleton } from "./MediaGridSkeleton";
+import { UploadTray, type UploadItem } from "./UploadTray";
+import { readAsDataUrl, MAX_ASSET_BYTES } from "../lib";
 
 /** Enough to fill the wall without making the modal scroll far. */
 const PER_PAGE = 12;
@@ -31,9 +33,8 @@ interface Props {
  * closing on the first click. At this size a tile is easy to hit by accident,
  * and the field being filled is usually one someone has already thought about.
  *
- * There is no upload here: files enter the workspace on the media page, so
- * what a post, a logo and an avatar draw from is one shelf, and nothing
- * arrives that cannot be found again.
+ * Upload also lives here (button, drop zone) so a file that isn't in the
+ * library yet doesn't force a trip to the Media page and back.
  */
 export function MediaPickerModal({
   opened,
@@ -42,9 +43,13 @@ export function MediaPickerModal({
   kind,
   title = "Choose a file",
 }: Props) {
-  const navigate = useNavigate();
   const { active } = useWorkspace();
+  const { canEdit } = usePermissions();
   const workspaceId = active?._id ?? "";
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [upload] = useUploadMediaMutation();
+  const [tray, setTray] = useState<UploadItem[]>([]);
+  const [dragging, setDragging] = useState(false);
 
   const [q, setQ] = useState("");
   // The library would be queried per keystroke otherwise, and a search that
@@ -61,6 +66,8 @@ export function MediaPickerModal({
     setQ("");
     setFilter(kind ?? "image");
     setPage(1);
+    setTray([]);
+    setDragging(false);
   }, [opened, kind]);
 
   // A narrowed result set may be shorter than the page being viewed.
@@ -82,6 +89,55 @@ export function MediaPickerModal({
   const items = data?.items ?? [];
   const pages = data ? Math.max(1, Math.ceil(data.total / data.perPage)) : 1;
 
+  async function onFiles(list: FileList | null) {
+    if (!list?.length || !canEdit || !workspaceId) return;
+
+    const files = Array.from(list);
+    const queued: UploadItem[] = files.map((file) =>
+      file.size > MAX_ASSET_BYTES
+        ? { file, state: "error", error: "Larger than 25MB" }
+        : { file, state: "queued" },
+    );
+    setTray(queued);
+
+    const ok = files.filter((f) => f.size <= MAX_ASSET_BYTES);
+    if (!ok.length) {
+      window.setTimeout(() => setTray([]), 6000);
+      return;
+    }
+
+    setTray((rows) =>
+      rows.map((r) => (r.state === "queued" ? { ...r, state: "uploading" } : r)),
+    );
+
+    try {
+      const payload = await Promise.all(
+        ok.map(async (f) => ({ file: await readAsDataUrl(f), name: f.name, alt: "" })),
+      );
+      const res = await upload({ workspaceId, files: payload }).unwrap();
+
+      const failedNames = new Map(res.failed?.map((f) => [f.name, f.message]) ?? []);
+      setTray((rows) =>
+        rows.map((r) =>
+          r.state === "error"
+            ? r
+            : failedNames.has(r.file.name)
+              ? { ...r, state: "error", error: failedNames.get(r.file.name) }
+              : { ...r, state: "done" },
+        ),
+      );
+    } catch (err) {
+      const message = errMessage(err);
+      setTray((rows) =>
+        rows.map((r) => (r.state === "error" ? r : { ...r, state: "error", error: message })),
+      );
+      notify.error(message);
+    } finally {
+      if (fileInput.current) fileInput.current.value = "";
+      window.setTimeout(() => setTray([]), 6000);
+    }
+  }
+
   function confirm() {
     if (!selected) return;
     onPick(selected);
@@ -98,6 +154,15 @@ export function MediaPickerModal({
       styles={{ title: { fontWeight: 600, fontSize: "var(--mantine-font-size-lg)" } }}
     >
       <Stack>
+        <input
+          ref={fileInput}
+          type="file"
+          multiple
+          accept={kind === "image" ? "image/*" : kind === "video" ? "video/*" : undefined}
+          hidden
+          onChange={(e) => onFiles(e.currentTarget.files)}
+        />
+
         <Group gap="sm">
           <TextInput
             style={{ flex: 1 }}
@@ -121,11 +186,36 @@ export function MediaPickerModal({
               ]}
             />
           )}
+          {canEdit && (
+            <Button
+              variant="default"
+              size="sm"
+              leftSection={<Upload size={15} />}
+              onClick={() => fileInput.current?.click()}
+            >
+              Upload
+            </Button>
+          )}
         </Group>
 
         {/* The wall scrolls, not the modal: the search row and the footer stay
-            put while the files move. */}
-        <div style={{ maxHeight: "58vh", overflowY: "auto" }}>
+            put while the files move. Also takes a drop, same as the library page. */}
+        <Box
+          style={{ maxHeight: "58vh", overflowY: "auto", position: "relative" }}
+          onDragOver={(e) => {
+            if (!canEdit) return;
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            if (!canEdit) return;
+            e.preventDefault();
+            setDragging(false);
+            void onFiles(e.dataTransfer.files);
+          }}
+          data-dragging={dragging || undefined}
+        >
           {isFetching && !items.length ? (
             /* Fewer than the library page draws: this is a 58vh scroll box, and
                a full wall of placeholders below the fold is wasted motion. */
@@ -137,18 +227,14 @@ export function MediaPickerModal({
                 <Text size="sm" c="dimmed">
                   {debouncedQ ? "Nothing matches that." : "Nothing here yet."}
                 </Text>
-                {/* The only route to an upload, since this modal has none. */}
-                {!debouncedQ && (
+                {!debouncedQ && canEdit && (
                   <Button
                     variant="light"
                     size="xs"
                     leftSection={<Upload size={14} />}
-                    onClick={() => {
-                      onClose();
-                      navigate("/app/media");
-                    }}
+                    onClick={() => fileInput.current?.click()}
                   >
-                    Add files to your library
+                    Upload a file
                   </Button>
                 )}
               </Stack>
@@ -161,13 +247,15 @@ export function MediaPickerModal({
               maxColumns={3}
             />
           )}
-        </div>
+        </Box>
 
         {pages > 1 && (
           <Group justify="center">
             <Pagination size="sm" value={page} onChange={setPage} total={pages} />
           </Group>
         )}
+
+        <UploadTray items={tray} />
 
         <Group justify="space-between">
           <Text size="xs" c="dimmed">
