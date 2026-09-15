@@ -77,11 +77,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <MantineShell
         header={{ height: { base: 56, sm: 0 } }}
         navbar={{
-          width: collapsed ? 64 : 252,
+          width: collapsed ? 72 : 264,
           breakpoint: "sm",
           collapsed: { mobile: !navOpen },
         }}
-        padding="xs"
+        padding="sm"
       >
         <MantineShell.Header
           px="md"

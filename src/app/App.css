@@ -4,7 +4,10 @@
   --bg-2: #101214;
 
   --shell: #0b0c0e;
-  --rail: #0b0c0e;
+  /* A step lighter than the page behind it, so the rail reads as a card
+     sitting on the shell rather than a region of it — the border alone did
+     not carry that at this contrast. */
+  --rail: #121417;
 
   --surface: #16181b;
   --surface-2: #1c1f23;
@@ -3342,11 +3345,43 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .mantine-AppShell-navbar {
-  border-radius: 0;
-  border: none;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   box-shadow: none;
+  top: var(--mantine-spacing-sm);
+  left: var(--mantine-spacing-sm);
+  height: calc(100dvh - 2 * var(--mantine-spacing-sm));
+  overflow: hidden;
 
-  background: var(--rail-wash, var(--rail));
+  background-color: var(--rail);
+  background-image: var(--rail-wash);
+}
+
+/* Mantine offsets the main column by the navbar's *width*, which is where it
+   would sit flush against the edge. The rail is inset by the shell padding
+   instead, so the same amount has to be added back here or the gap the inset
+   was for lands behind the panel rather than between the two. */
+.mantine-AppShell-main {
+  padding-inline-start: calc(
+    var(--app-shell-navbar-offset, 0rem) + var(--app-shell-padding) + var(--mantine-spacing-sm)
+  );
+}
+
+/* The mobile drawer is a full sheet over the page, not a card floating on
+   it — flush edges match every other drawer in the app rather than reading
+   as a misplaced panel. */
+@media (max-width: 48em) {
+  .mantine-AppShell-navbar {
+    border-radius: 0;
+    border: none;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+  }
+
+  .mantine-AppShell-main {
+    padding-inline-start: var(--app-shell-padding);
+  }
 }
 
 

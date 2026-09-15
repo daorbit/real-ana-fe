@@ -518,7 +518,7 @@ export function applyTheme(prefs: ThemePrefs) {
   root.style.setProperty("--cta-hover", cta.bgHover);
   root.style.setProperty("--cta-fg", cta.fg);
 
-  root.style.setProperty("--rail-wash", "var(--rail)");
+  root.style.setProperty("--rail-wash", "none");
   root.setAttribute("data-theme-preset", prefs.preset);
 
   const radiusPx = RADIUS_STYLES.find((r) => r.id === prefs.radius)?.px ?? 16;

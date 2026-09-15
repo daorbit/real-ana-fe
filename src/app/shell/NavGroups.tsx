@@ -22,7 +22,7 @@ export function NavGroups({
 
   return (
     <>
-      {groups.map((group) => {
+      {groups.map((group, i) => {
         // A folded group still shows its rows when one of them is the page you
         // are on — hiding the item that is currently highlighted leaves the
         // navigation with nothing marked.
@@ -42,9 +42,8 @@ export function NavGroups({
 
         return (
           <Box key={group.heading} mb="md">
-            {collapsed ? (
-              <Box className="nav-rule" mb={6} />
-            ) : group.collapsible ? (
+            {collapsed && i > 0 && <Box className="nav-rule" mb={6} />}
+            {collapsed ? null : group.collapsible ? (
               <UnstyledButton
                 className="nav-heading nav-heading--button"
                 onClick={onToggleAdmin}
