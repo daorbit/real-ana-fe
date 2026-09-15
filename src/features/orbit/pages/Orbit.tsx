@@ -11,6 +11,7 @@ import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { RichText } from "@/features/orbit/components/RichText";
+import { DataDigestTable } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { ORBIT_SUGGESTIONS, type OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
@@ -364,6 +365,7 @@ function Turn({
         {message.content && (
           <AnswerText message={message} live={Boolean(live)} onDone={onRevealed} />
         )}
+        {!live && <DataDigestTable digest={message.dataDigest} />}
         {!message.failed && !live && (
           <TurnActions
             message={message}
@@ -742,7 +744,7 @@ export default function Orbit() {
             </div>
             {composer}
 
-   
+
             <div className={classes.starters}>
               {ORBIT_SUGGESTIONS.map((q) => (
                 <UnstyledButton

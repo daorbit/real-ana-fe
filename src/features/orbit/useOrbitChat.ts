@@ -47,6 +47,9 @@ export type OrbitMessage = {
    * change.
    */
   modelLabel?: string;
+  /** The tenant's 7-day figures as data, set only when this answer used them.
+   * Rendered as a table under the prose — see `DataDigestTable`. */
+  dataDigest?: unknown;
 };
 
 /**
@@ -231,6 +234,7 @@ export function useOrbitChat() {
               content: answered.reply,
               imageUrl: answered.imageUrl,
               suggestions: answered.suggestions,
+              dataDigest: answered.dataDigest,
               // Only when it differs from what was asked for — labelling every
               // answer with the model people already chose is noise.
               modelLabel:

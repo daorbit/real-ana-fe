@@ -859,6 +859,13 @@ export const api = createApi({
         /** A generated picture's URL, set only when the question asked for one. */
         imageUrl?: string;
         /**
+         * The tenant's 7-day figures as data, set only when this question pulled
+         * them into the answer — the same condition that put them in the prose.
+         * Shape matches `OrbitDataDigest` on the server; typed loosely here since
+         * the panel only ever passes it straight to `DataDigestTable`.
+         */
+        dataDigest?: unknown;
+        /**
          * Questions left this cycle, plan remainder plus purchased credits.
          *
          * Returned with the answer so the panel can count down without a second
