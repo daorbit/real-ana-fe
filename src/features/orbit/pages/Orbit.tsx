@@ -5,7 +5,7 @@ import {
 } from "@mantine/core";
 import {
   AlertTriangle, ArrowUp, Copy, Download, History, ImagePlus, Mic, Palette,
-  RefreshCw, RotateCcw, Share2, Square, X,
+  Pencil, RefreshCw, RotateCcw, Share2, Square, X,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
@@ -190,12 +190,118 @@ function AnswerText({
   );
 }
 
+/**
+ * A question that was asked, with the pencil that lets it be asked again.
+ *
+ * The control is revealed on hover rather than sitting under every bubble:
+ * editing is the rare case, and a row of buttons beside each of your own
+ * questions makes a thread look like a form.
+ */
+function UserTurn({
+  message,
+  onEdit,
+  editable,
+}: {
+  message: OrbitMessage;
+  onEdit?: (text: string) => void;
+  editable?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(message.content);
+
+  const begin = () => {
+    setDraft(message.content);
+    setEditing(true);
+  };
+
+  const commit = () => {
+    const text = draft.trim();
+    setEditing(false);
+    if (!text || text === message.content) return;
+    onEdit?.(text);
+  };
+
+  if (editing) {
+    return (
+      <Group justify="flex-end" wrap="nowrap">
+        <Box className={classes.userTurnEditing}>
+          <Textarea
+            value={draft}
+            autoFocus
+            autosize
+            minRows={1}
+            maxRows={8}
+            variant="unstyled"
+            size="sm"
+            onChange={(e) => setDraft(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                commit();
+              }
+              if (e.key === "Escape") setEditing(false);
+            }}
+          />
+          <Group gap={6} justify="flex-end" mt={6}>
+            <UnstyledButton className={classes.editCancel} onClick={() => setEditing(false)}>
+              <Text size="xs">Cancel</Text>
+            </UnstyledButton>
+            <UnstyledButton
+              component="button"
+              type="button"
+              className={classes.editSave}
+              onClick={commit}
+              disabled={!draft.trim()}
+            >
+              <Text size="xs" fw={600}>
+                Send
+              </Text>
+            </UnstyledButton>
+          </Group>
+        </Box>
+      </Group>
+    );
+  }
+
+  return (
+    <Group justify="flex-end" wrap="nowrap" gap={4} className={classes.userTurnRow}>
+      {editable && message.content && (
+        <Tooltip label="Edit and re-ask" withArrow position="left">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            radius="xl"
+            className={classes.userTurnEdit}
+            onClick={begin}
+            aria-label="Edit and re-ask"
+          >
+            <Pencil size={13} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+      <Box className={classes.userTurn}>
+        {message.imageUrl && (
+          <img src={message.imageUrl} alt="Attached" className={classes.userTurnImage} />
+        )}
+        {message.content && (
+          <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
+            {message.content}
+          </Text>
+        )}
+      </Box>
+    </Group>
+  );
+}
+
 function Turn({
   message,
   isLast,
   live,
   onRevealed,
   onRegenerate,
+  onEdit,
+  editable,
   regenerating,
 }: {
   message: OrbitMessage;
@@ -206,21 +312,40 @@ function Turn({
    * turn as still arriving. */
   onRevealed?: () => void;
   onRegenerate?: () => void;
+  /** Re-ask this question with different wording. */
+  onEdit?: (text: string) => void;
+  /** Whether this question can be edited — false while Orbit is busy. */
+  editable?: boolean;
   regenerating?: boolean;
 }) {
   if (message.role === "user") {
+    return <UserTurn message={message} onEdit={onEdit} editable={editable} />;
+  }
+
+  /*
+   * A question that was stopped.
+   *
+   * Deliberately not the assistant bubble with the mark beside it: Orbit never
+   * said anything here, and dressing our own note up as a turn from the
+   * assistant is a small lie that makes the transcript untrustworthy. A quiet
+   * line and the way back is all this needs.
+   */
+  if (message.stopped) {
     return (
-      <Group justify="flex-end" wrap="nowrap">
-        <Box className={classes.userTurn}>
-          {message.imageUrl && (
-            <img src={message.imageUrl} alt="Attached" className={classes.userTurnImage} />
-          )}
-          {message.content && (
-            <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
-              {message.content}
-            </Text>
-          )}
-        </Box>
+      <Group gap={10} wrap="nowrap" align="center" pl={34}>
+        <Text size="xs" c="dimmed">
+          Stopped
+        </Text>
+        {isLast && onRegenerate && (
+          <UnstyledButton onClick={onRegenerate} disabled={regenerating}>
+            <Group gap={5} wrap="nowrap">
+              <RefreshCw size={12} color="var(--mantine-color-emerald-5)" />
+              <Text size="xs" c="emerald.5" fw={500}>
+                Ask again
+              </Text>
+            </Group>
+          </UnstyledButton>
+        )}
       </Group>
     );
   }
@@ -257,7 +382,8 @@ export default function Orbit() {
   const { chat } = useOrbit();
   const {
     messages, input, setInput, pendingImage, attachImage, imageMode, setImageMode,
-    send, regenerateLast, thinking, generatingImage, available, started, plan,
+    send, regenerateLast, editAndResend, stop, thinking, generatingImage,
+    available, started, plan,
   } = chat;
 
  
@@ -271,6 +397,7 @@ export default function Orbit() {
       !thinking &&
       last?.role === "assistant" &&
       !last.failed &&
+      !last.stopped &&
       // A drawing's caption is four words under the picture everyone is
       // actually looking at — typing it out delays the row of actions for
       // nothing.
@@ -382,7 +509,9 @@ export default function Orbit() {
   // half-written reply read as the answer having ended there.
   const typing = liveId != null && last?.id === liveId;
   const followUps =
-    last?.role === "assistant" && !last.failed && !typing ? (last.suggestions ?? []) : [];
+    last?.role === "assistant" && !last.failed && !last.stopped && !typing
+      ? (last.suggestions ?? [])
+      : [];
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -543,17 +672,20 @@ export default function Orbit() {
           </Group>
 
           <Group gap={4} wrap="nowrap">
-            <Tooltip label="Send" withArrow>
+            {/* The same button, not a second one beside it: while a question is
+                running, stopping it is the only thing that button can usefully
+                do, and a spinner that cannot be pressed is a dead control in
+                the one place someone is looking. */}
+            <Tooltip label={thinking ? "Stop" : "Send"} withArrow>
               <ActionIcon
-                color="emerald"
+                color={thinking ? "red" : "emerald"}
                 radius="xl"
                 size="lg"
-                disabled={empty || thinking}
-                loading={thinking}
-                onClick={() => sendAndStop()}
-                aria-label="Send"
+                disabled={!thinking && empty}
+                onClick={() => (thinking ? stop() : sendAndStop())}
+                aria-label={thinking ? "Stop" : "Send"}
               >
-                <ArrowUp size={16} />
+                {thinking ? <Square size={12} fill="currentColor" /> : <ArrowUp size={16} />}
               </ActionIcon>
             </Tooltip>
           </Group>
@@ -646,6 +778,8 @@ export default function Orbit() {
                       live={m.id === liveId}
                       onRevealed={() => setLiveId(null)}
                       onRegenerate={() => void regenerateLast()}
+                      onEdit={(text) => void editAndResend(m.id, text)}
+                      editable={!thinking}
                       regenerating={thinking}
                     />
                   ))}

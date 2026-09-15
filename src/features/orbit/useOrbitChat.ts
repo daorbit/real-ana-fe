@@ -12,26 +12,7 @@ import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 
-/**
- * The Orbit conversation.
- *
- * The live thread is React state; the server keeps a copy. The state is still
- * what the panel renders and what is posted with the next question, so the
- * chat works unchanged when saving fails — history is a record, not the source
- * of truth, and a storage problem costs a saved thread rather than an answer.
- *
- * What it buys is the thing memory-only could not do: a refresh, or coming back
- * tomorrow, no longer loses the thread, and what people actually ask becomes
- * reviewable — the best docs backlog there is.
- *
- * Scoped to the workspace, because Orbit is metered per workspace: a colleague
- * who can read the analytics can read the Orbit history, which is the same rule
- * as everything else in the product.
- *
- * Shared by the floating window and the Help & support page so the two are the
- * same conversation while the tab is open — opening the page after asking
- * something in the bubble continues it rather than starting again.
- */
+ 
 
 export type OrbitMessage = {
   id: string;
@@ -42,6 +23,14 @@ export type OrbitMessage = {
   imageUrl?: string;
   /** Set when a send failed, so the bubble can render as an error. */
   failed?: boolean;
+  /**
+   * Set when the question was abandoned rather than answered.
+   *
+   * Distinct from `failed`: nothing went wrong, so it is not shown as a
+   * problem — but it is also not an answer, so it is kept out of the history
+   * posted to the model for the same reason a failure is.
+   */
+  stopped?: boolean;
   /**
    * What to ask next, from the model.
    *
@@ -190,56 +179,44 @@ export function useOrbitChat() {
    */
   const historyRef = useRef<OrbitMessage[]>([]);
 
-  const send = useCallback(
-    async (raw?: string) => {
-      const question = (raw ?? input).trim();
-      const image = pendingImage;
-      // A typed question is normally required, but an attached image is
-      // itself a question ("what's in this") — the server fills in a
-      // default prompt when both are empty and only the image was sent.
-      if ((!question && !image) || thinking || !workspaceId) return;
 
-      trace(user?.id, "ask_orbit", "orbit_chat", "orbit_answer");
+  const inFlight = useRef<{ abort: () => void } | null>(null);
+  const abandoned = useRef(false);
 
-      const history = historyRef.current
-        // A failed turn was never answered, so sending it back would present the
-        // error text to the model as something Orbit said.
-        .filter((m) => !m.failed)
+
+  const run = useCallback(
+    async (opts: {
+      question: string;
+      image?: string;
+      drawing: boolean;
+      /** The transcript as it stands *before* this question's own turn. */
+      history: OrbitMessage[];
+    }) => {
+      const history = opts.history
+        // Neither a failed turn nor an abandoned one was ever answered, so
+        // sending them back would present our own text to the model as
+        // something Orbit said.
+        .filter((m) => !m.failed && !m.stopped)
         .map((m) => ({ role: m.role, content: m.content }));
 
-      const userTurn: OrbitMessage = {
-        id: nextId(),
-        role: "user",
-        content: question,
-        imageUrl: image ?? undefined,
-      };
-      setMessages((prev) => {
-        const next = [...prev, userTurn];
-        historyRef.current = next;
-        return next;
-      });
-      setInput("");
-      setPendingImage(null);
-      const drawing = imageMode && !image;
-      // Left on after a drawing turn — someone who just asked for a picture
-      // is likely to ask for another, and re-enabling it every time is the
-      // friction that made this worth remembering. Off is still the default
-      // once anything else is sent, same as before.
-      if (!drawing) setImageMode(false);
-      setGeneratingImage(drawing);
+      setGeneratingImage(opts.drawing);
+      abandoned.current = false;
 
       try {
-        const answered = await ask({
+        const request = ask({
           workspaceId,
-          question,
+          question: opts.question,
           history,
           model: activeModel,
-          image: image ?? undefined,
-          generateImage: drawing,
+          image: opts.image,
+          generateImage: opts.drawing,
           // Absent on the first question: the server starts a thread and tells
           // us which one it was.
           conversationId: conversationRef.current ?? undefined,
-        }).unwrap();
+        });
+        inFlight.current = request;
+
+        const answered = await request.unwrap();
         setRemaining(answered.remaining);
         if (answered.conversationId) {
           conversationRef.current = answered.conversationId;
@@ -266,6 +243,28 @@ export function useOrbitChat() {
           return next;
         });
       } catch (e) {
+        // A question someone stopped is not a question that failed — saying
+        // "Orbit could not answer that" about a deliberate cancel reads as a
+        // bug in the product rather than the thing they just asked for. It
+        // still needs a turn of its own: a question left sitting with nothing
+        // under it looks like the app lost it.
+        if (abandoned.current) {
+          setMessages((prev) => {
+            const next = [
+              ...prev,
+              {
+                id: nextId(),
+                role: "assistant" as const,
+                content: "Stopped.",
+                stopped: true,
+              },
+            ];
+            historyRef.current = next;
+            return next;
+          });
+          return;
+        }
+
         // Rendered in the thread rather than as a toast: the failure belongs to
         // the question that caused it, and a toast disappears before it can be
         // read alongside what was asked.
@@ -283,25 +282,62 @@ export function useOrbitChat() {
           return next;
         });
       } finally {
+        inFlight.current = null;
         setGeneratingImage(false);
       }
     },
-    [ask, input, pendingImage, imageMode, thinking, activeModel, workspaceId, user?.id],
+    [ask, activeModel, workspaceId],
   );
 
   /**
-   * Re-ask the question behind the last answer, replacing it in place.
+   * Abandon the question in flight.
    *
-   * Only the last turn — the same scope ChatGPT gives regeneration, and the
-   * only one that is unambiguous: redoing an answer in the middle of a thread
-   * would leave the turns after it talking about a reply that no longer
-   * exists. The preceding user turn's own content and image are replayed
-   * rather than the composer's current state, so this still works after the
-   * question box has moved on to something else. Whether it draws or answers
-   * is read back off the answer itself, not off `imageMode` (which may have
-   * changed since), by checking if the answer being replaced carried a
-   * picture.
+   * The user's turn stays in the transcript — it was asked, and removing it
+   * would leave the composer looking like nothing happened. Nothing is
+   * appended in reply, so the thread reads as a question that was dropped,
+   * which is what it is.
    */
+  const stop = useCallback(() => {
+    abandoned.current = true;
+    inFlight.current?.abort();
+    inFlight.current = null;
+  }, []);
+
+  const send = useCallback(
+    async (raw?: string) => {
+      const question = (raw ?? input).trim();
+      const image = pendingImage;
+      // A typed question is normally required, but an attached image is
+      // itself a question ("what's in this") — the server fills in a
+      // default prompt when both are empty and only the image was sent.
+      if ((!question && !image) || thinking || !workspaceId) return;
+
+      trace(user?.id, "ask_orbit", "orbit_chat", "orbit_answer");
+
+      const before = historyRef.current;
+      const userTurn: OrbitMessage = {
+        id: nextId(),
+        role: "user",
+        content: question,
+        imageUrl: image ?? undefined,
+      };
+      setMessages(() => {
+        const next = [...before, userTurn];
+        historyRef.current = next;
+        return next;
+      });
+      setInput("");
+      setPendingImage(null);
+      const drawing = imageMode && !image;
+
+      if (!drawing) setImageMode(false);
+
+      await run({ question, image: image ?? undefined, drawing, history: before });
+    },
+    [run, input, pendingImage, imageMode, thinking, workspaceId, user?.id],
+  );
+
+ 
   const regenerateLast = useCallback(async () => {
     const current = historyRef.current;
     const lastIndex = current.length - 1;
@@ -310,10 +346,7 @@ export function useOrbitChat() {
 
     const userTurn = current[lastIndex - 1];
     if (!userTurn || userTurn.role !== "user") return;
-
-    const drawing = Boolean(last.imageUrl) && !userTurn.imageUrl;
-    const question = userTurn.content;
-    if (!question && !userTurn.imageUrl) return;
+    if (!userTurn.content && !userTurn.imageUrl) return;
 
     const withoutLast = current.slice(0, lastIndex);
     setMessages(withoutLast);
@@ -321,64 +354,49 @@ export function useOrbitChat() {
 
     trace(user?.id, "regenerate_orbit", "orbit_chat", "orbit_answer");
 
-    const history = withoutLast
-      .slice(0, -1)
-      .filter((m) => !m.failed)
-      .map((m) => ({ role: m.role, content: m.content }));
+    await run({
+      question: userTurn.content,
+      image: userTurn.imageUrl,
+      // A stopped turn carries no picture to read the mode off — it never got
+      // far enough — so fall back to the toggle, which `send` leaves on after
+      // a drawing request for exactly this kind of follow-on.
+      drawing: last.stopped
+        ? imageMode && !userTurn.imageUrl
+        : Boolean(last.imageUrl) && !userTurn.imageUrl,
+      history: withoutLast.slice(0, -1),
+    });
+  }, [run, thinking, imageMode, user?.id]);
 
-    setGeneratingImage(drawing);
 
-    try {
-      const answered = await ask({
-        workspaceId,
+  const editAndResend = useCallback(
+    async (messageId: string, text: string) => {
+      const question = text.trim();
+      if (!question || thinking) return;
+
+      const current = historyRef.current;
+      const at = current.findIndex((m) => m.id === messageId);
+      if (at < 0 || current[at].role !== "user") return;
+
+      const before = current.slice(0, at);
+      const edited: OrbitMessage = { ...current[at], content: question };
+
+      const next = [...before, edited];
+      setMessages(next);
+      historyRef.current = next;
+
+      trace(user?.id, "edit_orbit_question", "orbit_chat", "orbit_answer");
+
+      await run({
         question,
-        history,
-        model: activeModel,
-        image: userTurn.imageUrl,
-        generateImage: drawing,
-        conversationId: conversationRef.current ?? undefined,
-      }).unwrap();
-      setRemaining(answered.remaining);
-      if (answered.conversationId) {
-        conversationRef.current = answered.conversationId;
-        setConversationId(answered.conversationId);
-      }
-      setMessages((prev) => {
-        const next = [
-          ...prev,
-          {
-            id: nextId(),
-            role: "assistant" as const,
-            content: answered.reply,
-            imageUrl: answered.imageUrl,
-            suggestions: answered.suggestions,
-            modelLabel:
-              answered.model && answered.model !== activeModel
-                ? answered.modelLabel
-                : undefined,
-          },
-        ];
-        historyRef.current = next;
-        return next;
+        image: edited.imageUrl,
+        // Read off the answer this question originally got, before it is
+        // dropped: editing "draw a pizza" should draw again, not describe.
+        drawing: Boolean(current[at + 1]?.imageUrl) && !edited.imageUrl,
+        history: before,
       });
-    } catch (e) {
-      setMessages((prev) => {
-        const next = [
-          ...prev,
-          {
-            id: nextId(),
-            role: "assistant" as const,
-            content: errMessage(e, "Orbit could not answer that. Try again, or use Email support."),
-            failed: true,
-          },
-        ];
-        historyRef.current = next;
-        return next;
-      });
-    } finally {
-      setGeneratingImage(false);
-    }
-  }, [ask, thinking, activeModel, workspaceId, user?.id]);
+    },
+    [run, thinking, user?.id],
+  );
 
   /**
    * Start a new thread.
@@ -471,6 +489,11 @@ export function useOrbitChat() {
     /** Re-run the last question, replacing its answer in place. No-op if the
      * last turn isn't an answered assistant turn. */
     regenerateLast,
+    /** Rewrite an already-asked question and answer it again. Everything
+     * below it in the thread is dropped. */
+    editAndResend,
+    /** Abandon the question in flight. The turn stays; no reply is added. */
+    stop,
     thinking,
     /** True while the in-flight question is a drawing request. */
     generatingImage,

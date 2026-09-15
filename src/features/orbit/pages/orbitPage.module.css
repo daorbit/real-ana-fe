@@ -114,6 +114,58 @@
   border: 1px solid color-mix(in srgb, var(--mantine-color-emerald-5) 22%, transparent);
 }
 
+/* The pencil beside a question, hidden until the row is hovered or the
+   button itself is focused — see `UserTurn` on why it is not always shown. */
+.userTurnEdit {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.userTurnRow:hover .userTurnEdit,
+.userTurnEdit:focus-visible {
+  opacity: 1;
+}
+
+/* The same bubble while its text is being rewritten. Wider than the bubble it
+   replaces because it is a field now, and a field that wraps at 78% of the
+   column is harder to edit than the sentence was to read. */
+.userTurnEditing {
+  width: 100%;
+  max-width: 92%;
+  padding: 6px 12px 8px;
+  border-radius: 16px;
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.editCancel,
+.editSave {
+  padding: 4px 12px;
+  border-radius: 999px;
+  transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+.editCancel {
+  color: var(--mantine-color-dimmed);
+}
+
+.editCancel:hover {
+  background: var(--mantine-color-default-hover);
+}
+
+.editSave {
+  background: var(--mantine-color-emerald-6);
+  color: #fff;
+}
+
+.editSave:hover {
+  background: var(--mantine-color-emerald-7);
+}
+
+.editSave:disabled {
+  opacity: 0.5;
+}
+
 /* An attached image, above the question it was sent with. */
 .userTurnImage {
   display: block;

@@ -3,7 +3,7 @@ import {
   ActionIcon, Box, Button, Drawer, Group, Loader, Modal, ScrollArea, Stack,
   Text, TextInput, UnstyledButton,
 } from "@mantine/core";
-import { AlertTriangle, Check, MessageSquare, Pencil, Plus, Trash2, X } from "lucide-react";
+import { AlertTriangle, Check, MessageSquare, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import type { useOrbitChat } from "@/features/orbit/useOrbitChat";
 import classes from "./orbitPage.module.css";
 
@@ -51,6 +51,20 @@ export function OrbitHistoryDrawer({
   /** The row being renamed, and the text so far. Only ever one at a time. */
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+
+  /**
+   * Filter over the titles, in the browser.
+   *
+   * The whole list is already here — it is what the drawer renders — so
+   * filtering it is a substring test, not a round trip. A server-side search
+   * would be the answer for message *bodies*, which the list does not carry;
+   * titles are what someone scanning this actually recognises a thread by.
+   */
+  const [query, setQuery] = useState("");
+  const needle = query.trim().toLowerCase();
+  const shown = needle
+    ? conversations.filter((c) => c.title.toLowerCase().includes(needle))
+    : conversations;
 
   /** The row asking "are you sure?" before it deletes anything. */
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
@@ -156,6 +170,34 @@ export function OrbitHistoryDrawer({
         </Button>
       </Box>
 
+      {/* Hidden below a handful of threads: a search box over five rows costs
+          more attention than reading the five. */}
+      {conversations.length > 6 && (
+        <Box px="md" pb="sm">
+          <TextInput
+            size="xs"
+            radius="md"
+            placeholder="Search conversations"
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+            leftSection={<Search size={13} />}
+            rightSection={
+              query ? (
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="xs"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                >
+                  <X size={12} />
+                </ActionIcon>
+              ) : null
+            }
+          />
+        </Box>
+      )}
+
       <ScrollArea className={classes.drawerList} type="hover" scrollbarSize={6}>
         {loadingConversations ? (
           <Stack gap={0}>
@@ -173,9 +215,13 @@ export function OrbitHistoryDrawer({
           <Text size="xs" c="dimmed" lh={1.5} px={10} py={6}>
             Threads you start are saved here for everyone in this workspace.
           </Text>
+        ) : !shown.length ? (
+          <Text size="xs" c="dimmed" lh={1.5} px={10} py={6}>
+            No conversation matches &ldquo;{query.trim()}&rdquo;.
+          </Text>
         ) : (
           <Stack gap={0}>
-            {conversations.map((c) => {
+            {shown.map((c) => {
               const active = c.id === conversationId;
 
               if (editing === c.id) {
