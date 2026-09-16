@@ -69,10 +69,12 @@ export function WorkersAiTrendCard() {
                 fontSize: 12,
               }}
               labelStyle={{ color: axis, marginBottom: 4 }}
-              formatter={(value: number | undefined, name: string) => [
-                value !== undefined && name === "neurons" ? value.toFixed(1) : value,
-                name === "neurons" ? "Neurons" : "Requests",
-              ]}
+              formatter={(value) => {
+                if (typeof value === "number") {
+                  return [value.toFixed(1), "Neurons"];
+                }
+                return [value, "Requests"];
+              }}
             />
             <Line
               type="monotone"
