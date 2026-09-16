@@ -362,21 +362,31 @@ function UserTurn({
       )}
       {message.content && (
         <Group justify="flex-end" wrap="nowrap" gap={4} className={classes.userTurnRow}>
-          {editable && (
-            <Tooltip label="Edit and re-ask" withArrow position="left">
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size="sm"
-                radius="xl"
-                className={classes.userTurnEdit}
-                onClick={begin}
-                aria-label="Edit and re-ask"
-              >
-                <Pencil size={13} />
-              </ActionIcon>
-            </Tooltip>
-          )}
+          {/*
+            Always mounted, disabled rather than removed while a reply streams.
+            Dropping it from the tree changed the row's width mid-turn, so the
+            question re-wrapped the moment the answer arrived — the same
+            sentence on two lines while thinking and one line after, which reads
+            as the layout breaking rather than as a button appearing.
+          */}
+          <Tooltip label="Edit and re-ask" withArrow position="left" disabled={!editable}>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              radius="xl"
+              className={classes.userTurnEdit}
+              onClick={begin}
+              disabled={!editable}
+              aria-label="Edit and re-ask"
+              // Hidden from assistive tech while it cannot be used, but still
+              // occupying its place in the row.
+              aria-hidden={!editable}
+              style={editable ? undefined : { visibility: "hidden" }}
+            >
+              <Pencil size={13} />
+            </ActionIcon>
+          </Tooltip>
           <Box className={classes.userTurn}>
             <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
               {message.content}
