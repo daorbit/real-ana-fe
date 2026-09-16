@@ -1,16 +1,27 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useAskOrbitMutation,
   useGetOrbitStatusQuery,
-  useGetOrbitConversationsQuery,
+  useLazyGetOrbitConversationsQuery,
   useLazyGetOrbitConversationQuery,
   useDeleteOrbitConversationMutation,
+  useBulkDeleteOrbitConversationsMutation,
   useRenameOrbitConversationMutation,
 } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
+
+type OrbitConversationSummary = {
+  id: string;
+  title: string;
+  messageCount: number;
+  lastMessageAt: string;
+  lastModelLabel: string;
+  createdAt: string;
+  userId: string | null;
+};
 
  
 
@@ -132,11 +143,66 @@ export function useOrbitChat() {
   const workspaceId = active?._id ?? "";
   const { data: status } = useGetOrbitStatusQuery(workspaceId, { skip: !workspaceId });
 
-  const { data: saved, isLoading: loadingConversations } =
-    useGetOrbitConversationsQuery(workspaceId, { skip: !workspaceId });
+  // Pages are accumulated here rather than kept as separate RTK Query cache
+  // entries (one per cursor) — the drawer wants one growing list, not a page
+  // per fetch. `workspaceId` resets everything: switching workspaces starts
+  // the list over from the first page.
+  const [conversationPages, setConversationPages] = useState<OrbitConversationSummary[]>([]);
+  const [conversationsCursor, setConversationsCursor] = useState<string | null>(null);
+  const [hasMoreConversations, setHasMoreConversations] = useState(true);
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [loadingMoreConversations, setLoadingMoreConversations] = useState(false);
+  const [fetchConversationsPage] = useLazyGetOrbitConversationsQuery();
+
+  const loadFirstConversationsPage = useCallback(async () => {
+    if (!workspaceId) return;
+    setLoadingConversations(true);
+    try {
+      const page = await fetchConversationsPage({ workspaceId }).unwrap();
+      setConversationPages(page.conversations);
+      setConversationsCursor(page.nextCursor);
+      setHasMoreConversations(page.nextCursor != null);
+    } catch {
+      // Left empty — the drawer's own empty state reads fine as "nothing yet"
+      // and a toast over a sidebar list would be noise.
+    } finally {
+      setLoadingConversations(false);
+    }
+  }, [fetchConversationsPage, workspaceId]);
+
+  // Runs once per workspace: the list this hook exposes is a live cache the
+  // drawer scrolls through, not a per-open fetch.
+  useEffect(() => {
+    setConversationPages([]);
+    setConversationsCursor(null);
+    setHasMoreConversations(true);
+    void loadFirstConversationsPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId]);
+
+  const loadMoreConversations = useCallback(async () => {
+    if (!workspaceId || !hasMoreConversations || loadingMoreConversations || loadingConversations) return;
+    setLoadingMoreConversations(true);
+    try {
+      const page = await fetchConversationsPage({
+        workspaceId,
+        cursor: conversationsCursor ?? undefined,
+      }).unwrap();
+      setConversationPages((prev) => [...prev, ...page.conversations]);
+      setConversationsCursor(page.nextCursor);
+      setHasMoreConversations(page.nextCursor != null);
+    } catch {
+      // Leaves `hasMoreConversations` as-is — the sentinel simply tries again
+      // on the next scroll, no different from a missed network blip elsewhere.
+    } finally {
+      setLoadingMoreConversations(false);
+    }
+  }, [fetchConversationsPage, workspaceId, conversationsCursor, hasMoreConversations, loadingMoreConversations, loadingConversations]);
+
   const [fetchConversation, { isFetching: loadingConversation }] =
     useLazyGetOrbitConversationQuery();
   const [removeConversation] = useDeleteOrbitConversationMutation();
+  const [bulkRemoveConversations] = useBulkDeleteOrbitConversationsMutation();
   const [renameConversationMutation] = useRenameOrbitConversationMutation();
 
   // Read once, lazily: `localStorage` is unavailable in some privacy modes, and
@@ -224,6 +290,9 @@ export function useOrbitChat() {
         if (answered.conversationId) {
           conversationRef.current = answered.conversationId;
           setConversationId(answered.conversationId);
+          // A new thread just appeared, or an existing one just moved to the
+          // top on `lastMessageAt` — either way the first page is stale.
+          void loadFirstConversationsPage();
         }
         setMessages((prev) => {
           const next = [
@@ -290,7 +359,7 @@ export function useOrbitChat() {
         setGeneratingImage(false);
       }
     },
-    [ask, activeModel, workspaceId],
+    [ask, activeModel, workspaceId, loadFirstConversationsPage],
   );
 
   /**
@@ -464,15 +533,34 @@ export function useOrbitChat() {
     async (id: string) => {
       if (!workspaceId) return;
       await removeConversation({ workspaceId, conversationId: id }).unwrap();
+      setConversationPages((prev) => prev.filter((c) => c.id !== id));
       if (conversationRef.current === id) reset();
     },
     [removeConversation, workspaceId, reset],
+  );
+
+  /**
+   * Remove several saved threads at once — the drawer's bulk-select action.
+   *
+   * Clears the panel when the thread on screen was among those removed, same
+   * as the single-delete path.
+   */
+  const bulkRemoveSaved = useCallback(
+    async (ids: string[]) => {
+      if (!workspaceId || !ids.length) return;
+      await bulkRemoveConversations({ workspaceId, ids }).unwrap();
+      const removed = new Set(ids);
+      setConversationPages((prev) => prev.filter((c) => !removed.has(c.id)));
+      if (conversationRef.current && removed.has(conversationRef.current)) reset();
+    },
+    [bulkRemoveConversations, workspaceId, reset],
   );
 
   const renameSaved = useCallback(
     async (id: string, title: string) => {
       if (!workspaceId) return;
       await renameConversationMutation({ workspaceId, conversationId: id, title }).unwrap();
+      setConversationPages((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
     },
     [renameConversationMutation, workspaceId],
   );
@@ -521,19 +609,28 @@ export function useOrbitChat() {
     remaining,
 
     /**
-     * The workspace's saved threads, newest activity first. Empty while loading
-     * and when there are none — the sidebar renders the same in both cases.
+     * The workspace's saved threads, newest activity first, accumulated across
+     * every page fetched so far. Empty while loading and when there are none —
+     * the sidebar renders the same in both cases.
      */
-    conversations: saved?.conversations ?? [],
+    conversations: conversationPages,
     /** True while the workspace's saved threads are first fetched, for the
      * drawer's skeleton list. */
     loadingConversations,
+    /** True while a further page is being fetched, for the list's bottom loader. */
+    loadingMoreConversations,
+    /** Whether a further page exists — drives the infinite-scroll sentinel. */
+    hasMoreConversations,
+    /** Fetch the next page and append it to `conversations`. */
+    loadMoreConversations,
     /** The thread on screen, when it has been saved. Null on an unsaved one. */
     conversationId,
     /** True while a past thread is being pulled in, for the sidebar's spinner. */
     loadingConversation,
     openConversation,
     deleteConversation: removeSaved,
+    /** Remove several saved threads at once. */
+    deleteConversations: bulkRemoveSaved,
     renameConversation: renameSaved,
   };
 }

@@ -928,10 +928,15 @@ export const api = createApi({
           /** Who started it, so the list can attribute a colleague's thread. */
           userId: string | null;
         }[];
+        /** Pass back as `cursor` to fetch the next page; null at the end. */
+        nextCursor: string | null;
       },
-      string
+      { workspaceId: string; cursor?: string }
     >({
-      query: (workspaceId) => `/api/workspaces/${workspaceId}/orbit/conversations`,
+      query: ({ workspaceId, cursor }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/conversations`,
+        params: cursor ? { cursor } : undefined,
+      }),
       providesTags: ["OrbitConversation"],
     }),
 
@@ -985,6 +990,19 @@ export const api = createApi({
       query: ({ workspaceId, conversationId }) => ({
         url: `/api/workspaces/${workspaceId}/orbit/conversations/${conversationId}`,
         method: "DELETE",
+      }),
+      invalidatesTags: ["OrbitConversation"],
+    }),
+
+    /** Remove several threads at once — the drawer's bulk-select action. */
+    bulkDeleteOrbitConversations: build.mutation<
+      { ok: true; deleted: number },
+      { workspaceId: string; ids: string[] }
+    >({
+      query: ({ workspaceId, ids }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/conversations/bulk-delete`,
+        method: "POST",
+        body: { ids },
       }),
       invalidatesTags: ["OrbitConversation"],
     }),
@@ -1956,9 +1974,11 @@ export const {
   useGetOrbitStatusQuery,
   useAskOrbitMutation,
   useGetOrbitConversationsQuery,
+  useLazyGetOrbitConversationsQuery,
   useLazyGetOrbitConversationQuery,
   useRenameOrbitConversationMutation,
   useDeleteOrbitConversationMutation,
+  useBulkDeleteOrbitConversationsMutation,
   useGetGoogleReviewsStatusQuery,
   useGetGoogleAvailableLocationsQuery,
   useConnectGoogleLocationMutation,

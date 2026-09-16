@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ActionIcon, Box, Button, Drawer, Group, Loader, Modal, ScrollArea, Stack,
-  Text, TextInput, UnstyledButton,
+  ActionIcon, Box, Button, Checkbox, Drawer, Group, Loader, Modal, ScrollArea,
+  Stack, Text, TextInput, UnstyledButton,
 } from "@mantine/core";
-import { AlertTriangle, Check, MessageSquare, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle, Check, CheckSquare, MessageSquare, Pencil, Plus, Search, Trash2, X,
+} from "lucide-react";
 import type { useOrbitChat } from "@/features/orbit/useOrbitChat";
 import classes from "./orbitPage.module.css";
 
@@ -45,7 +47,8 @@ export function OrbitHistoryDrawer({
 }) {
   const {
     conversations, conversationId, openConversation, deleteConversation,
-    renameConversation, loadingConversation, loadingConversations, reset, started,
+    deleteConversations, renameConversation, loadingConversation, loadingConversations,
+    loadingMoreConversations, hasMoreConversations, loadMoreConversations, reset, started,
   } = chat;
 
   /** The row being renamed, and the text so far. Only ever one at a time. */
@@ -69,6 +72,73 @@ export function OrbitHistoryDrawer({
   /** The row asking "are you sure?" before it deletes anything. */
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  /** Whether the list is in bulk-select mode — checkboxes per row, the
+   * new-conversation row swapped for Select all / Delete / Cancel. */
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmingBulkDelete, setConfirmingBulkDelete] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelected(new Set());
+  };
+
+  const toggleSelected = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const allShownSelected = shown.length > 0 && shown.every((c) => selected.has(c.id));
+  const someShownSelected = shown.some((c) => selected.has(c.id));
+
+  const toggleSelectAll = () =>
+    setSelected((prev) => {
+      if (allShownSelected) {
+        const next = new Set(prev);
+        for (const c of shown) next.delete(c.id);
+        return next;
+      }
+      const next = new Set(prev);
+      for (const c of shown) next.add(c.id);
+      return next;
+    });
+
+  const confirmBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      await deleteConversations(Array.from(selected));
+      exitSelectMode();
+    } catch {
+      // Left in the list — the truth until the next fetch.
+    } finally {
+      setBulkDeleting(false);
+      setConfirmingBulkDelete(false);
+    }
+  };
+
+  /** The sentinel at the bottom of the list — loads the next page once it
+   * scrolls into view, so the list grows as someone scrolls rather than
+   * requiring a button. */
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMoreConversations) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) void loadMoreConversations();
+      },
+      { root: node.closest(".mantine-ScrollArea-viewport"), rootMargin: "120px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMoreConversations, loadMoreConversations, shown.length]);
 
   const beginRename = (id: string, title: string) => {
     setConfirmingDelete(null);
@@ -118,6 +188,7 @@ export function OrbitHistoryDrawer({
   const close = () => {
     setEditing(null);
     setConfirmingDelete(null);
+    exitSelectMode();
     onClose();
   };
 
@@ -126,7 +197,7 @@ export function OrbitHistoryDrawer({
       opened={opened}
       onClose={close}
       position="right"
-      size={320}
+      size={380}
       padding={0}
       withCloseButton={false}
       // The rail stays reachable behind the overlay, and the drawer is a
@@ -154,20 +225,61 @@ export function OrbitHistoryDrawer({
       </Group>
 
       <Box px="md" pb="sm">
-        {/* Disabled rather than hidden on an empty thread: this is the drawer's
-            primary action, and a button that comes and goes at the top of a
-            list makes everything below it jump. */}
-        <Button
-          fullWidth
-          variant="default"
-          size="xs"
-          radius="md"
-          leftSection={<Plus size={14} />}
-          onClick={startNew}
-          disabled={!started}
-        >
-          New conversation
-        </Button>
+        {selectMode ? (
+          <Group gap={6} wrap="nowrap">
+            <Checkbox
+              size="xs"
+              checked={allShownSelected}
+              indeterminate={someShownSelected && !allShownSelected}
+              onChange={toggleSelectAll}
+              aria-label="Select all"
+            />
+            <Text size="xs" c="dimmed" style={{ flex: 1 }}>
+              {selected.size ? `${selected.size} selected` : "Select all"}
+            </Text>
+            <Button
+              size="xs"
+              variant="light"
+              color="red"
+              radius="md"
+              disabled={!selected.size}
+              onClick={() => setConfirmingBulkDelete(true)}
+            >
+              Delete{selected.size ? ` (${selected.size})` : ""}
+            </Button>
+            <Button size="xs" variant="default" radius="md" onClick={exitSelectMode}>
+              Cancel
+            </Button>
+          </Group>
+        ) : (
+          <Group gap={6} wrap="nowrap">
+            {/* Disabled rather than hidden on an empty thread: this is the
+                drawer's primary action, and a button that comes and goes at
+                the top of a list makes everything below it jump. */}
+            <Button
+              variant="default"
+              size="xs"
+              radius="md"
+              leftSection={<Plus size={14} />}
+              onClick={startNew}
+              disabled={!started}
+              style={{ flex: 1, minWidth: 0 }}
+            >
+              New conversation
+            </Button>
+            <Button
+              variant="default"
+              size="xs"
+              radius="md"
+              leftSection={<CheckSquare size={14} />}
+              onClick={() => setSelectMode(true)}
+              disabled={!conversations.length}
+              style={{ flexShrink: 0 }}
+            >
+              Select
+            </Button>
+          </Group>
+        )}
       </Box>
 
       {/* Hidden below a handful of threads: a search box over five rows costs
@@ -268,6 +380,7 @@ export function OrbitHistoryDrawer({
               }
 
               const deleting = deletingId === c.id;
+              const isSelected = selected.has(c.id);
 
               return (
                 <UnstyledButton
@@ -275,11 +388,22 @@ export function OrbitHistoryDrawer({
                   className={classes.thread}
                   data-active={active}
                   data-deleting={deleting || undefined}
-                  onClick={() => pick(c.id)}
+                  onClick={() => (selectMode ? toggleSelected(c.id) : pick(c.id))}
                 >
-                  <div className={classes.threadIcon}>
-                    {deleting ? <Loader size={13} color="red" /> : <MessageSquare size={14} />}
-                  </div>
+                  {selectMode ? (
+                    <Checkbox
+                      size="xs"
+                      checked={isSelected}
+                      onChange={() => toggleSelected(c.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ marginTop: 6, flexShrink: 0 }}
+                      aria-label={`Select ${c.title}`}
+                    />
+                  ) : (
+                    <div className={classes.threadIcon}>
+                      {deleting ? <Loader size={13} color="red" /> : <MessageSquare size={14} />}
+                    </div>
+                  )}
 
                   <div className={classes.threadBody}>
                     <Text size="xs" fw={active ? 600 : 500} lh={1.4} truncate>
@@ -294,7 +418,7 @@ export function OrbitHistoryDrawer({
                   {/* Hidden until the row is hovered or focused — see the CSS.
                       Divs, not nested buttons: the row itself is the button
                       that opens the thread. */}
-                  {!deleting && (
+                  {!deleting && !selectMode && (
                     <div className={classes.threadActions}>
                       <ActionIcon
                         component="div"
@@ -334,6 +458,12 @@ export function OrbitHistoryDrawer({
                 </UnstyledButton>
               );
             })}
+
+            {hasMoreConversations && (
+              <div ref={sentinelRef} style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
+                {loadingMoreConversations && <Loader size={14} type="dots" />}
+              </div>
+            )}
           </Stack>
         )}
       </ScrollArea>
@@ -373,6 +503,40 @@ export function OrbitHistoryDrawer({
               loading={!!deletingId}
               onClick={() => confirmingDelete && void confirmDelete(confirmingDelete)}
             >
+              Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <Modal
+        opened={confirmingBulkDelete}
+        onClose={() => !bulkDeleting && setConfirmingBulkDelete(false)}
+        withCloseButton={false}
+        centered
+        size={340}
+        radius="md"
+        overlayProps={{ backgroundOpacity: 0.45, blur: 2 }}
+      >
+        <Stack gap={4} align="center" ta="center" py={4}>
+          <Box className={classes.confirmIcon}>
+            <AlertTriangle size={20} />
+          </Box>
+          <Text size="sm" fw={650}>
+            Delete {selected.size} conversation{selected.size === 1 ? "" : "s"}?
+          </Text>
+          <Text size="xs" c="dimmed" lh={1.5} maw={260}>
+            All their messages will be gone for everyone in this workspace. This can&apos;t be undone.
+          </Text>
+          <Group gap={8} mt={14} w="100%" grow>
+            <Button
+              variant="default"
+              onClick={() => setConfirmingBulkDelete(false)}
+              disabled={bulkDeleting}
+            >
+              Cancel
+            </Button>
+            <Button color="red" loading={bulkDeleting} onClick={() => void confirmBulkDelete()}>
               Delete
             </Button>
           </Group>
