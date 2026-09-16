@@ -50,6 +50,16 @@
   gap: 8px;
   width: min(760px, 100%);
   margin: 0 auto;
+  /* Two rows' worth, held whether the chips have arrived or not: the dynamic
+     ones resolve a moment after the page paints, and without a floor here the
+     composer above jumped as the row filled in. */
+  min-height: 66px;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.starters[data-ready] {
+  opacity: 1;
 }
 
 
