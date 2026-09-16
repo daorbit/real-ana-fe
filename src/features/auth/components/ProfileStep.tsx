@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import {
-  Button, Group, Text, Title, TextInput, Stack, Avatar, ActionIcon,
+  Button, Group, Text, TextInput, Stack, Avatar, ActionIcon,
 } from "@mantine/core";
 import { ArrowRight, Camera, Trash2, UserRound } from "lucide-react";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
@@ -86,16 +86,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
 
   return (
     <Stack gap="xl">
-      <div>
-        <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-          Confirm your details
-        </Title>
-        <Text c="dimmed" size="sm" mt={8}>
-          Your name appears on the reports you send. Your mobile is where
-          WhatsApp alerts are delivered — a photo is optional.
-        </Text>
-      </div>
-
+ 
       <Group gap="lg" wrap="nowrap">
         <div style={{ position: "relative" }}>
           <Avatar

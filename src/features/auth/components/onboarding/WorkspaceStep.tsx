@@ -1,12 +1,13 @@
-import { Button, Group, Stack, Text, TextInput, Title } from "@mantine/core";
+import { Button, Group, Stack, Text, TextInput } from "@mantine/core";
 import { ArrowRight, BarChart3, Share2, Users } from "lucide-react";
 
 const WHY = [
-  { icon: BarChart3, text: "Every site's traffic and reports live in one place" },
+  { icon: BarChart3, text: "Analytics, forms, SEO and scheduling, all in one place" },
   { icon: Users, text: "Invite teammates with access to just this workspace" },
   { icon: Share2, text: "Switch between workspaces any time from the sidebar" },
 ];
 
+/** Title and lede live on the shell — this is the step's controls only. */
 export function WorkspaceStepBody({
   wsName,
   wsError,
@@ -20,16 +21,6 @@ export function WorkspaceStepBody({
 }) {
   return (
     <Stack gap="xl">
-      <div>
-        <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-          Name your workspace
-        </Title>
-        <Text c="dimmed" size="sm" mt={8}>
-          A workspace groups the sites you track together — usually your
-          company, or one client.
-        </Text>
-      </div>
-
       <TextInput
         size="md"
         label="Workspace name"
@@ -60,16 +51,19 @@ export function WorkspaceStepFooter({
   loading: boolean;
   onSubmit: () => void;
 }) {
+  // Sized to its label, not stretched across the column: a button as wide as
+  // the form reads as a banner, and there is nothing to balance it against.
   return (
-    <Button
-      className="auth-btn"
-      size="md"
-      fullWidth
-      loading={loading}
-      onClick={onSubmit}
-      rightSection={<ArrowRight size={16} />}
-    >
-      Continue
-    </Button>
+    <Group justify="flex-end">
+      <Button
+        className="auth-btn"
+        size="md"
+        loading={loading}
+        onClick={onSubmit}
+        rightSection={<ArrowRight size={16} />}
+      >
+        Continue
+      </Button>
+    </Group>
   );
 }

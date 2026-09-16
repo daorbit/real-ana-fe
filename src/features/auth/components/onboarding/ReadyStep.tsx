@@ -1,4 +1,4 @@
-import { Button, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Group, Stack, Text } from "@mantine/core";
 import { ArrowRight, Zap } from "lucide-react";
 import { BrandIcon } from "@/shared/ui/BrandIcon";
 import { CodeBlock } from "@/shared/ui/CodeBlock";
@@ -22,17 +22,14 @@ export function ReadyStepBody({
 }) {
   return (
     <Stack gap="lg">
-      <div>
-        <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-          {aiCopy?.readyHeadline ?? "You're ready"}
-        </Title>
-        <Group gap={8} mt={8} wrap="nowrap">
-          <BrandIcon framework={framework} size={15} />
-          <Text c="dimmed" size="sm">
-            {aiCopy?.readyDescription ?? guide.placement}
-          </Text>
-        </Group>
-      </div>
+      {/* The shell shows the step's title; this is the framework-specific
+          placement line that goes with the snippet below it. */}
+      <Group gap={8} wrap="nowrap">
+        <BrandIcon framework={framework} size={15} />
+        <Text c="dimmed" size="sm">
+          {aiCopy?.readyDescription ?? guide.placement}
+        </Text>
+      </Group>
 
       <CodeBlock
         code={guide.code(site.siteId, {})}
@@ -62,14 +59,15 @@ export function ReadyStepBody({
 
 export function ReadyStepFooter({ onContinue }: { onContinue: () => void }) {
   return (
-    <Button
-      className="auth-btn"
-      size="md"
-      fullWidth
-      onClick={onContinue}
-      rightSection={<ArrowRight size={16} />}
-    >
-      Continue
-    </Button>
+    <Group justify="flex-end">
+      <Button
+        className="auth-btn"
+        size="md"
+        onClick={onContinue}
+        rightSection={<ArrowRight size={16} />}
+      >
+        Continue
+      </Button>
+    </Group>
   );
 }

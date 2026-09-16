@@ -1,0 +1,236 @@
+/* The AI form step: an ask, then a preview of what came back. */
+
+/* The ask reads as a prompt box, the same shape as Orbit's composer — the two
+   are the same gesture (describe a thing, get it made), and they should look
+   it. */
+.ask {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* ------------------------------------------------------------- composer --- */
+
+.composerWrap {
+  width: 100%;
+}
+
+/* The moving gradient edge, lifted from `orbitPage.module.css`. Two layers:
+   the fill painted to the padding box, the gradient to the border box, so the
+   border itself carries the colour without a wrapper element. */
+.composer {
+  --composer-edge: linear-gradient(
+    90deg,
+    #a78bfa 0%, #c084fc 9%, #f5b8fb 16%, #fcd34d 27%, #bef264 39%,
+    #34d399 50%, #c084fc 59%, #f5b8fb 66%, #fcd34d 77%, #bef264 89%,
+    #a78bfa 100%
+  );
+
+  position: relative;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--bg-2, #12141a), var(--bg-2, #12141a)) padding-box,
+    var(--composer-edge) border-box;
+  background-size: 100% 100%, 300% 100%;
+  animation: composer-drift 9s linear infinite;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.55);
+  transition: box-shadow 220ms ease;
+}
+
+:global([data-mantine-color-scheme="light"]) .composer {
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    var(--composer-edge) border-box;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Only the second layer moves; the fill stays put under it. */
+@keyframes composer-drift {
+  from { background-position: 0 0, 0% 50%; }
+  to   { background-position: 0 0, 100% 50%; }
+}
+
+/* The bloom under the box, the same gradient blurred. */
+.composer::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--composer-edge);
+  background-size: 300% 100%;
+  animation: glow-drift 9s linear infinite;
+  filter: blur(14px);
+  opacity: 0.18;
+  transition: opacity 220ms ease, filter 220ms ease;
+}
+
+@keyframes glow-drift {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+.composer:focus-within::before {
+  opacity: 0.32;
+  filter: blur(18px);
+}
+
+/* A permanently moving edge is exactly what this setting is for. */
+@media (prefers-reduced-motion: reduce) {
+  .composer,
+  .composer::before {
+    animation: none;
+  }
+}
+
+/* The textarea sheds every border of its own — the composer is the border. */
+.composerInput {
+  background: transparent;
+}
+.composerInput textarea {
+  background: transparent !important;
+  border: none !important;
+  padding: 16px 18px 4px !important;
+  font-size: 0.95rem !important;
+  line-height: 1.55 !important;
+  color: var(--onb-ink, inherit) !important;
+}
+.composerInput textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.composerFoot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 4px 12px 12px;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--onb-ink-dim, inherit);
+  text-align: center;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------- prompts --- */
+
+/* Pills, as on Orbit's welcome screen. Shortened to a few words each: the
+   full sentence goes into the box on click, but as a row of chips they only
+   have to say which direction they point. */
+.ideaList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.idea {
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--onb-line, rgba(255, 255, 255, 0.1));
+  background: transparent;
+  color: var(--onb-ink-dim, inherit);
+  font: inherit;
+  font-size: 0.83rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.idea:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--onb-ink, inherit);
+}
+.idea:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.working {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  font-size: 0.86rem;
+  color: var(--onb-ink-dim, inherit);
+}
+
+/* Set apart from the suggestion pills above: these leave the step, where the
+   pills fill it in, and a row of similar-sized controls running together
+   blurs that difference. */
+.escape {
+  margin-top: 0.5rem;
+}
+
+.error {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--mantine-color-red-4, #f87171);
+  margin: 0.75rem 0 0;
+}
+
+/* ---------------------------------------------------------------- result --- */
+
+/* Preview first and full width, with a single line of controls beneath it.
+   Side by side, the mock was squeezed into a third of the screen while the
+   controls sat in a column of dead space — and the preview is the whole
+   answer this step exists to give. */
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Bounded in both axes: `useFitScale` measures this to size the laptop mock,
+   so an auto height would leave it nothing to fit against. Tall enough that
+   the form inside is actually readable at the scale the frame lands on. */
+.resultPreview {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: min(62vh, 560px);
+}
+
+/* What came back, and the one way to change it. */
+.resultBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.9rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid var(--onb-line, rgba(255, 255, 255, 0.1));
+  background: rgba(255, 255, 255, 0.025);
+}
+
+:global([data-mantine-color-scheme="light"]) .resultBar {
+  background: #ffffff;
+}
+
+.resultSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resultTitle {
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--onb-ink, inherit);
+}
+
+.resultCount {
+  font-size: 0.8rem;
+  color: var(--onb-ink-dim, inherit);
+}
+
+@media (max-width: 48em) {
+  .resultPreview { height: 380px; }
+}

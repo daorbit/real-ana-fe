@@ -1,0 +1,61 @@
+/* The site step: two labelled sections on the wide column.
+ *
+ * Headed rules rather than bordered cards. Two boxes stacked on a screen that
+ * is itself a panel read as boxes inside a box, and the nesting made the step
+ * look heavier than the three fields it actually asks for.
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  min-width: 0;
+}
+
+/* A rule across the full width with the label sitting on it — enough to
+   separate the two groups without drawing a container around either. */
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--onb-line, rgba(255, 255, 255, 0.1));
+}
+
+.sectionTitle {
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--onb-ink, inherit);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.sectionNote {
+  font-size: 0.8rem;
+  color: var(--onb-ink-dim, inherit);
+  margin: 0;
+  min-width: 0;
+}
+
+/* Two-up where there's room: a site name and a domain are one thought, and
+   stacking them put a full-width gap between two short fields. */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 48em) {
+  .root { gap: 1.5rem; }
+  .sectionHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}

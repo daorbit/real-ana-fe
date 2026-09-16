@@ -1,0 +1,293 @@
+/* First-run setup.
+ *
+ * One centred column, not the two-panel split this used to be. A brand panel
+ * beside the form meant the thing being filled in got half the screen and sat
+ * off to one side; centring it puts the current question where the eye already
+ * is and gives the wide steps (the framework picker, the theme grids) room.
+ *
+ * Structure, top to bottom: a fixed bar with the stepper, the step itself in a
+ * centred column, and the actions pinned at the foot. Only the middle scrolls.
+ *
+ * Nothing here animates. The screen is read while being typed into.
+ */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  /* The viewport never scrolls — only `.body` does. */
+  overflow: hidden;
+  max-width: 100%;
+
+  /* Colour in the far corners, falling off to near-black across the middle
+     where the content sits — a wash behind the text greys it out. */
+  background:
+    radial-gradient(38% 34% at 0% 0%,
+      color-mix(in srgb, var(--accent-2) 22%, transparent) 0%, transparent 70%),
+    radial-gradient(34% 30% at 100% 100%,
+      color-mix(in srgb, var(--cyan) 12%, transparent) 0%, transparent 70%),
+    #0a0b0d;
+
+  --onb-ink: rgba(255, 255, 255, 0.95);
+  --onb-ink-dim: rgba(255, 255, 255, 0.62);
+  --onb-line: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-mantine-color-scheme="light"]) .shell {
+  background:
+    radial-gradient(38% 34% at 0% 0%,
+      color-mix(in srgb, var(--accent-2) 10%, transparent) 0%, transparent 70%),
+    radial-gradient(34% 30% at 100% 100%,
+      color-mix(in srgb, var(--cyan) 7%, transparent) 0%, transparent 70%),
+    #f7f8fa;
+
+  --onb-ink: rgba(17, 24, 39, 0.95);
+  --onb-ink-dim: rgba(17, 24, 39, 0.62);
+  --onb-line: rgba(17, 24, 39, 0.12);
+}
+
+/* ------------------------------------------------------------------ bar --- */
+
+.bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.1rem 1.75rem;
+  border-bottom: 1px solid var(--onb-line);
+}
+
+.barEnd {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------- stepper --- */
+
+/* Horizontal, centred in the bar. Each step is a dot and a label, joined by a
+   rule that fills as the steps complete. Below `sm` the labels go and the
+   dots alone carry it — see the media query at the foot. */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.stepDot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--onb-ink-dim);
+  border: 1px solid var(--onb-line);
+}
+.step[data-state="current"] .stepDot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04150e;
+}
+.step[data-state="done"] .stepDot {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.stepLabel {
+  font-size: 0.8rem;
+  font-weight: 550;
+  white-space: nowrap;
+  color: var(--onb-ink-dim);
+}
+.step[data-state="current"] .stepLabel {
+  color: var(--onb-ink);
+  font-weight: 650;
+}
+
+/* The joining rule. On the step's own row rather than between list items, so
+   it can be coloured by that step's state. */
+.stepLine {
+  width: 2.5rem;
+  height: 2px;
+  margin: 0 0.6rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--onb-line);
+}
+.step[data-state="done"] + .stepLine,
+.stepLine[data-done] {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* ----------------------------------------------------------------- body --- */
+
+/* The scrolling middle, and the only thing that scrolls. `place-items: center`
+   keeps a short step in the middle of the screen; a tall one fills the space
+   and scrolls instead of being squashed. */
+/* The scroll container, and a plain block rather than a grid or a flex row:
+   both of those size their child to its content, which leaves a sticky footer
+   inside it with no taller ancestor to stick within. The column centres
+   itself horizontally with `margin-inline: auto`, and a short step is centred
+   vertically by `.bodyCentred` below. */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Vertical only. The sticky footer's backdrop is pulled wider than the
+     column on purpose, and without this that overflow becomes a horizontal
+     scrollbar across the whole step. */
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  /* No bottom padding: `position: sticky` bottoms out at the container's
+     padding edge, so any padding here leaves the footer hovering that far
+     above the bottom of the screen with content sliding under it. The steps
+     that need clearance add it themselves. */
+  padding: 3rem 1.75rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--onb-line) transparent;
+}
+
+/* Only the short steps centre. On a tall one this would do nothing useful and
+   flex would break the sticky footer, so it is opt-in per step. These steps
+   also want the bottom padding the container gives up for sticky's sake. */
+.bodyCentred {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 3rem;
+}
+.body::-webkit-scrollbar { width: 8px; }
+.body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--onb-line);
+}
+
+/* Single column, capped at a comfortable measure. The wide steps opt out with
+   `.columnWide`. */
+.column {
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+/* The framework picker and the install snippet: a 520px column turns the
+   tile grid into a long thin scroll and wraps the snippet badly. Wider, but
+   still a readable measure — the full width of a large screen would leave the
+   heading stranded above a very long line. */
+.columnWide {
+  max-width: 760px;
+}
+
+/* ----------------------------------------------------------------- head --- */
+
+.eyebrow {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--onb-ink);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.lede {
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: var(--onb-ink-dim);
+  margin: 0.5rem 0 0;
+  max-width: 52ch;
+}
+
+/* ----------------------------------------------------------------- foot --- */
+
+/* Directly under the step's own content, inside the centred column — not a
+   bar across the foot of the viewport. Pinned there it sat a long way below
+   a short form, with dead space between the last field and the button that
+   submits it. */
+.foot {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--onb-line);
+}
+
+/* Sticky on the steps tall enough to scroll: the button rides the bottom of
+   the viewport while there is more content below, then settles into place at
+   the end. Without this the only way to reach Continue on the site step is to
+   scroll past the whole framework grid.
+ *
+ * The backdrop has to reach the full width of the screen, not just the
+ * column, or tiles scroll through the gutters either side of it — hence the
+ * viewport-wide pseudo-element rather than a background on the bar itself.
+ * Opaque, not translucent: content sliding under a blurred bar reads as a
+ * rendering fault. */
+.footSticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: 2rem;
+  padding: 0.85rem 0 calc(0.85rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Pulled well past the column on both sides so the backdrop reaches the edges
+   of the screen. A generous fixed figure rather than viewport units: `100vw`
+   counts the vertical scrollbar's width, so `-50vw` overflows the page and
+   adds a horizontal scrollbar. `.body` clips the overhang. */
+.footSticky::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  /* Past the container's own bottom edge, so no sliver of content shows
+     between the bar and the foot of the screen at any scroll position. */
+  bottom: -1px;
+  left: -50rem;
+  right: -50rem;
+  z-index: -1;
+  border-top: 1px solid var(--onb-line);
+  background: #0a0b0d;
+}
+:global([data-mantine-color-scheme="light"]) .footSticky::before {
+  background: #f7f8fa;
+}
+
+/* ------------------------------------------------------------ responsive --- */
+
+@media (max-width: 62em) {
+  .stepLabel { display: none; }
+  .stepLine { width: 1.5rem; margin: 0 0.35rem; }
+}
+
+@media (max-width: 48em) {
+  .bar { padding: 0.9rem 1.1rem; gap: 1rem; }
+  .body { padding: 1.75rem 1.1rem; }
+  .foot { padding: 0.9rem 1.1rem calc(0.9rem + env(safe-area-inset-bottom, 0px)); }
+  .title { font-size: 1.45rem; }
+}

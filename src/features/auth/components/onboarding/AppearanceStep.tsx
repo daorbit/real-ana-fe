@@ -21,7 +21,7 @@ export function AppearanceStep({
   onDone: () => void;
 }) {
   return (
-    <div className={`auth-split ${s.shell}`}>
+    <div className={`onb-form ${s.shell}`}>
       <div className={s.page}>
         <div className={s.head}>
           <div className={s.headText}>

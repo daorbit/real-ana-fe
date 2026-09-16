@@ -719,213 +719,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-/* The viewport itself never scrolls here: the brand column stays put and only
-   the form card's body moves, so the step actions and progress never leave
-   the screen on a long step like the framework picker. */
-.onb-split {
-  grid-template-columns: 1fr 1.1fr;
-  height: 100vh;
-  height: 100dvh;
-  align-items: stretch;
-  overflow: hidden;
-}
-
-.onb-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2.25rem 2.5rem;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-[data-mantine-color-scheme="light"] .onb-panel {
-  background: #ffffff;
-  border-color: #e3e6ec;
-}
-
-.onb-col {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 460px;
-  height: 100%;
-  min-height: 0;
-}
-
-/* Header, actions and progress are all pinned; the body below them is the
-   only thing that scrolls. */
-.onb-head {
-  flex-shrink: 0;
-  margin-bottom: 1.25rem;
-}
-
-.onb-main {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.onb-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  /* Room for focus rings so they aren't clipped by the scroll edge, plus
-     clearance between the scrollbar and the field borders. */
-  padding: 2px 14px 2px 2px;
-  margin: -2px -14px -2px -2px;
-}
-.onb-body::-webkit-scrollbar { width: 8px; }
-.onb-body::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: var(--auth-line);
-}
-.onb-body::-webkit-scrollbar-thumb:hover { background: var(--auth-line-strong); }
-.onb-body { scrollbar-width: thin; scrollbar-color: var(--auth-line) transparent; }
-
-/* Actions sit above the scroll area on this flow — they stay reachable
-   without the body having to be scrolled to the bottom first. */
-.onb-foot {
-  flex-shrink: 0;
-  order: -1;
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--auth-line);
-}
-
-
-
-
-
-/* Vertical: four labels with hints never fit side by side in a half-width
-   panel — as columns they wrapped to two lines each and the connector ran
-   through the text. */
-.onb-steps { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 2.25rem; }
-
-.onb-step {
-  position: relative;
-  display: flex; align-items: flex-start; gap: 0.85rem;
-  padding-bottom: 1.1rem;
-}
-.onb-step:last-child { padding-bottom: 0; }
-.onb-step::before {
-  content: ""; position: absolute; left: 13px; top: 28px; bottom: 0;
-  width: 2px;
-  background: rgba(255, 255, 255, 0.12);
-}
-.onb-step:last-child::before { display: none; }
-.onb-step[data-state="done"]::before {
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
-}
-.onb-step-ic {
-  position: relative; z-index: 1;
-  width: 28px; height: 28px; border-radius: 50%;
-  display: grid; place-items: center; flex-shrink: 0;
-  font-size: 0.78rem; font-weight: 700;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-}
-.onb-step[data-state="current"] .onb-step-ic {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #04150e;
-
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
-}
-.onb-step[data-state="done"] .onb-step-ic {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  color: var(--accent);
-}
-.onb-step-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 3px; }
-.onb-step-label {
-  font-size: 0.88rem; font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
-  transition: color 0.25s ease;
-}
-.onb-step[data-state="current"] .onb-step-label { color: #fff; }
-.onb-step[data-state="done"] .onb-step-label { color: rgba(255, 255, 255, 0.8); }
-.onb-step-hint { font-size: 0.74rem; color: rgba(255, 255, 255, 0.45); }
-
-
-.onb-visual { display: flex; justify-content: center; margin: 0.25rem 0 1.5rem; }
-.onb-radar {
-  position: relative; width: 100%; max-width: 240px; aspect-ratio: 1;
-}
-/* The step list is the point of this panel; the radar is filler. It goes
-   first when vertical space runs short, rather than pushing the list into
-   the panel's hidden overflow. */
-@media (max-height: 820px) {
-  .onb-visual { display: none; }
-}
-.onb-ring {
-  position: absolute; inset: 0; margin: auto; border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.onb-ring-1 { width: 100%; height: 100%; }
-.onb-ring-2 { width: 66%; height: 66%; }
-.onb-ring-3 {
-  width: 33%; height: 33%;
-  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-.onb-sweep {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    color-mix(in srgb, var(--accent) 34%, transparent) 0deg,
-    transparent 55deg,
-    transparent 360deg
-  );
-  mask-image: radial-gradient(circle, #000 62%, transparent 71%);
-  -webkit-mask-image: radial-gradient(circle, #000 62%, transparent 71%);
-  animation: onb-sweep 6s linear infinite;
-}
-@keyframes onb-sweep { to { transform: rotate(360deg); } }
-
-.onb-ping {
-  position: absolute; width: 8px; height: 8px; border-radius: 50%;
-  margin: -4px 0 0 -4px;
-  background: var(--accent);
-  animation: onb-ping 4s ease-out infinite;
-}
-@keyframes onb-ping {
-  0%, 100% { opacity: 0.25; box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
-  12% { opacity: 1; }
-  60% { box-shadow: 0 0 0 14px transparent; }
-}
-
-
-@media (prefers-reduced-motion: reduce) {
-  .onb-sweep, .onb-ping { animation: none; }
-  .onb-ping { opacity: 0.85; }
-}
-
-@media (max-width: 1100px) {
-  .onb-radar { max-width: 200px; }
-}
-
-/* Onboarding's left panel carries a step list the auth screens don't, so the
-   headline block gets less room than it does there. */
-.onb-split .auth-brand {
-  align-items: flex-start;
-  padding-top: 3.5rem;
-  min-height: 0;
-  overflow: hidden;
-}
-.onb-split .ab-content > :first-child { margin-bottom: 1.75rem; }
-.onb-split .ab-content h2 { font-size: 2rem; margin-bottom: 0.75rem; }
-.onb-split .ab-content > p { font-size: 0.94rem; margin-bottom: 1.75rem; }
-.onb-split .ab-proof { margin-top: 0; }
-
-
 .onb-fw {
   display: flex;
   flex-direction: column;
@@ -936,34 +729,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   text-align: center;
 }
 
-@media (max-width: 900px) {
-  /* `.auth-brand` is hidden at this width, so the panel is the whole screen:
-     no floating card, and the progress bar in `.onb-head` becomes the only
-     step indicator left. */
-  .onb-split { grid-template-columns: 1fr; padding: 0; gap: 0; }
-  .onb-panel {
-    padding: 1.75rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
-    border: none;
-    border-radius: 0;
-    background: transparent;
-  }
-  [data-mantine-color-scheme="light"] .onb-panel { background: transparent; }
-}
-@media (max-width: 560px) {
-  .onb-panel { padding: 1.25rem 1.1rem calc(1.25rem + env(safe-area-inset-bottom, 0px)); }
-}
-
-/* Step indicator in the form column — the left panel is gone below 900px and
-   "STEP 2 OF 4" alone gives no sense of how far along you are. */
-.onb-progress {
-  display: flex; gap: 5px; margin-top: 0.75rem;
-}
-.onb-progress span {
-  height: 3px; flex: 1; border-radius: 999px;
-  background: var(--auth-line);
-  transition: background 0.25s ease;
-}
-.onb-progress span[data-on] { background: var(--accent); }
 
 
 .section-rail {
@@ -1832,10 +1597,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: linear-gradient(150deg, #0c0e10 0%, #101215 50%, #08090b 100%);
 }
 
-/* Onboarding reuses the auth form's rules but sits outside `.auth-split`, so
-   it needs the same names defined on its own root — without these the tokens
-   resolve to nothing and its labels render as invisible text. */
-.onb-col {
+/* Onboarding reuses the auth form's field rules but sits outside
+   `.auth-split`, so it needs the same names defined on its own root — without
+   these the tokens resolve to nothing and its labels render as invisible text.
+
+   A plain global class, not one from `Onboarding.module.css`: these selectors
+   reach into Mantine's own generated class names, which a module cannot do. */
+.onb-form {
   --auth-ink: rgba(255, 255, 255, 0.95);
   --auth-ink-dim: rgba(255, 255, 255, 0.72);
   --auth-ink-faint: rgba(255, 255, 255, 0.5);
@@ -1851,7 +1619,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 [data-mantine-color-scheme="light"] .auth-split,
-[data-mantine-color-scheme="light"] .onb-col {
+[data-mantine-color-scheme="light"] .onb-form {
   --auth-ink: rgba(17, 24, 39, 0.95);
   --auth-ink-dim: rgba(17, 24, 39, 0.72);
   --auth-ink-faint: rgba(17, 24, 39, 0.58);
@@ -1901,13 +1669,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .auth-form .mantine-InputWrapper-label,
-.onb-col .mantine-InputWrapper-label {
+.onb-form .mantine-InputWrapper-label {
   font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem;
   color: var(--auth-ink-dim);
 }
 
 .auth-form .mantine-InputWrapper-required,
-.onb-col .mantine-InputWrapper-required { color: var(--auth-ink-ghost); }
+.onb-form .mantine-InputWrapper-required { color: var(--auth-ink-ghost); }
 
 
 .auth-field-head {
@@ -1920,14 +1688,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .auth-form .mantine-Anchor-root,
-.onb-col .mantine-Anchor-root {
+.onb-form .mantine-Anchor-root {
   --anchor-color: var(--auth-ink-faint);
   color: var(--anchor-color);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 .auth-form .mantine-Anchor-root:hover,
-.onb-col .mantine-Anchor-root:hover {
+.onb-form .mantine-Anchor-root:hover {
   --anchor-color: #fff;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1948,7 +1716,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
  
 .auth-form .mantine-InputWrapper-root .mantine-Input-input,
-.onb-col .mantine-InputWrapper-root .mantine-Input-input {
+.onb-form .mantine-InputWrapper-root .mantine-Input-input {
   border: 1px solid var(--auth-line);
   background: var(--auth-surface);
   color: var(--auth-ink);
@@ -1956,13 +1724,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   height: 46px;
 }
 .auth-form .mantine-InputWrapper-root .mantine-Input-input::placeholder,
-.onb-col .mantine-InputWrapper-root .mantine-Input-input::placeholder {
+.onb-form .mantine-InputWrapper-root .mantine-Input-input::placeholder {
   color: var(--auth-ink-ghost);
 }
 .auth-form .mantine-Input-input:focus,
 .auth-form .mantine-Input-input:focus-within,
-.onb-col .mantine-Input-input:focus,
-.onb-col .mantine-Input-input:focus-within {
+.onb-form .mantine-Input-input:focus,
+.onb-form .mantine-Input-input:focus-within {
   border-color: var(--auth-line-strong);
   background: var(--auth-surface-hover);
 }
