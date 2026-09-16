@@ -1885,19 +1885,16 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   outline-offset: 2px;
 }
 .auth-submit:disabled {
-  background: var(--auth-surface);
-  color: var(--auth-ink-faint);
+  background: var(--auth-solid);
+  color: var(--auth-solid-ink);
+  opacity: 0.6;
   cursor: default;
 }
 .auth-submit-spinner {
   width: 17px; height: 17px; border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.25);
-  border-top-color: #0a0b0d;
+  border: 2px solid color-mix(in srgb, var(--auth-solid-ink) 25%, transparent);
+  border-top-color: var(--auth-solid-ink);
   animation: spin 0.7s linear infinite;
-}
-.auth-submit:disabled .auth-submit-spinner {
-  border-color: rgba(255,255,255,0.25);
-  border-top-color: rgba(255,255,255,0.75);
 }
 
 
@@ -2110,9 +2107,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .ab-proof-item {
   display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.76rem; font-weight: 500; color: var(--auth-ink-faint);
+  font-size: 0.76rem; font-weight: 500; color: rgba(255,255,255,0.7);
 }
-.ab-proof-item svg { color: rgba(255,255,255,0.45); flex-shrink: 0; }
+.ab-proof-item svg { color: rgba(255,255,255,0.65); flex-shrink: 0; }
 
 .auth-brand .wordmark-text { color: #fff; }
 

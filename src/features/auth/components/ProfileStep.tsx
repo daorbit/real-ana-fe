@@ -127,7 +127,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
             variant="filled"
             loading={avatarBusy}
             onClick={() => fileInput.current?.click()}
-            style={{ position: "absolute", right: -2, bottom: -2 }}
+            style={{ position: "absolute", right: 0, bottom: 0 }}
             aria-label="Upload a photo"
           >
             <Camera size={13} />
@@ -197,8 +197,15 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
         description="Used for WhatsApp report delivery. We never share it."
       />
 
-      <Alert color="gray" variant="light" radius="md" p="xs" icon={<Info size={15} />}>
-        <Text size="xs">
+      <Alert
+        color="gray"
+        variant="outline"
+        radius="md"
+        p="xs"
+        icon={<Info size={15} />}
+        styles={{ icon: { alignSelf: "center", marginTop: 0 }, message: { display: "flex", alignItems: "center" } }}
+      >
+        <Text size="xs" c="dimmed">
           You can change any of this later under Settings.
         </Text>
       </Alert>
