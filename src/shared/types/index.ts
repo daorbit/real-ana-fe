@@ -382,11 +382,14 @@ export type CloudinaryUsage = {
 };
 
 /**
- * Cloudflare Workers AI usage. `null` when the account is not configured.
+ * Cloudflare Workers AI usage, one entry per configured account (there can be
+ * a primary and a fallback, sharing no quota with each other).
  * `unavailable` is set (with usage left at 0) when the analytics API refused,
  * usually because the API token lacks the Account Analytics read scope.
  */
 export type WorkersAiUsage = {
+  /** "Primary" or "Fallback" — which account this is. */
+  label: string;
   neuronsToday: number;
   dailyLimit: number;
   unavailable?: string;
@@ -411,7 +414,7 @@ export type DbStats = {
   limit: number;
   collectionStats: DbCollectionStats[];
   cloudinary: CloudinaryUsage | null;
-  workersAi: WorkersAiUsage | null;
+  workersAi: WorkersAiUsage[];
 };
 
 

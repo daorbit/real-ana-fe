@@ -159,10 +159,12 @@ export default function AdminDatabase() {
           </Card>
         </SimpleGrid>
 
-        {(data.cloudinary || data.workersAi) && (
-          <SimpleGrid cols={{ base: 1, md: data.cloudinary && data.workersAi ? 2 : 1 }} spacing="lg">
+        {(data.cloudinary || data.workersAi.length > 0) && (
+          <SimpleGrid cols={{ base: 1, md: Math.min(2, (data.cloudinary ? 1 : 0) + data.workersAi.length) || 1 }} spacing="lg">
             {data.cloudinary && <CloudinaryCard usage={data.cloudinary} />}
-            {data.workersAi && <WorkersAiCard usage={data.workersAi} />}
+            {data.workersAi.map((u) => (
+              <WorkersAiCard key={u.label} usage={u} />
+            ))}
           </SimpleGrid>
         )}
 
@@ -331,7 +333,7 @@ function WorkersAiCard({ usage: u }: { usage: WorkersAiUsage }) {
   return (
     <Card withBorder radius="lg" padding="xl">
       <Group justify="space-between" align="baseline" mb="lg">
-        <Text fw={700} size="sm">Cloudflare Workers AI</Text>
+        <Text fw={700} size="sm">Cloudflare Workers AI — {u.label}</Text>
         <Text size="xs" c="dimmed">used by Orbit chat &amp; the post planner</Text>
       </Group>
 
