@@ -407,6 +407,18 @@ export type WorkersAiModelUsage = {
   outputTokens: number;
   neurons: number;
   avgLatencyMs: number;
+  bytesIn: number;
+  bytesOut: number;
+  /** Failures broken out by Cloudflare's own error code, e.g. 4006 is the
+   * daily neuron limit. */
+  errorsByCode: { code: number; count: number }[];
+};
+
+/** One point on the AI-usage trend chart — an hour (today) or a day (7d). */
+export type WorkersAiTrendPoint = {
+  bucket: string;
+  neurons: number;
+  requests: number;
 };
 
 /**

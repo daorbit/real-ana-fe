@@ -17,7 +17,7 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage, DbStats, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
+  DemoUsage, DbStats, WorkersAiTrendPoint, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
   Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
@@ -1083,6 +1083,13 @@ export const api = createApi({
       providesTags: ["DbStats"],
     }),
 
+    getWorkersAiTrend: build.query<{ points: WorkersAiTrendPoint[] }, { range: "today" | "7d" }>({
+      query: ({ range }) => ({
+        url: "/api/admin/workers-ai/trend",
+        params: { range },
+      }),
+    }),
+
     getGoals: build.query<Goal[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/goals`,
       providesTags: ["Goal"],
@@ -2009,6 +2016,7 @@ export const {
   useGetDemoUsageQuery,
   useSetDemoLimitMutation,
   useGetDbStatsQuery,
+  useGetWorkersAiTrendQuery,
   useGetCompetitorsQuery,
   useGetCompetitorAnalysisQuery,
   useGetCompetitorHistoryQuery,
