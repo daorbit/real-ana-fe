@@ -356,33 +356,35 @@ function UserTurn({
   }
 
   return (
-    <Group justify="flex-end" wrap="nowrap" gap={4} className={classes.userTurnRow}>
-      {editable && message.content && (
-        <Tooltip label="Edit and re-ask" withArrow position="left">
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            radius="xl"
-            className={classes.userTurnEdit}
-            onClick={begin}
-            aria-label="Edit and re-ask"
-          >
-            <Pencil size={13} />
-          </ActionIcon>
-        </Tooltip>
+    <Stack gap={6} align="flex-end">
+      {message.imageUrl && (
+        <img src={message.imageUrl} alt="Attached" className={classes.userTurnImageStandalone} />
       )}
-      <Box className={classes.userTurn}>
-        {message.imageUrl && (
-          <img src={message.imageUrl} alt="Attached" className={classes.userTurnImage} />
-        )}
-        {message.content && (
-          <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
-            {message.content}
-          </Text>
-        )}
-      </Box>
-    </Group>
+      {message.content && (
+        <Group justify="flex-end" wrap="nowrap" gap={4} className={classes.userTurnRow}>
+          {editable && (
+            <Tooltip label="Edit and re-ask" withArrow position="left">
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                radius="xl"
+                className={classes.userTurnEdit}
+                onClick={begin}
+                aria-label="Edit and re-ask"
+              >
+                <Pencil size={13} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+          <Box className={classes.userTurn}>
+            <Text size="sm" lh={1.6} style={{ whiteSpace: "pre-wrap" }}>
+              {message.content}
+            </Text>
+          </Box>
+        </Group>
+      )}
+    </Stack>
   );
 }
 

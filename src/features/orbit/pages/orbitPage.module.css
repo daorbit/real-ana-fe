@@ -106,12 +106,12 @@
 }
 
 .userTurn {
-  max-width: 78%;
-  padding: 9px 14px;
-  border-radius: 16px;
+  max-width: 92%;
+  padding: 10px 15px;
+  border-radius: 18px;
   border-bottom-right-radius: 5px;
-  background: color-mix(in srgb, var(--mantine-color-emerald-5) 16%, var(--mantine-color-default));
-  border: 1px solid color-mix(in srgb, var(--mantine-color-emerald-5) 22%, transparent);
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
 }
 
 /* The pencil beside a question, hidden until the row is hovered or the
@@ -166,14 +166,16 @@
   opacity: 0.5;
 }
 
-/* An attached image, above the question it was sent with. */
-.userTurnImage {
+/* An attached image, sent as its own element above the question's bubble
+   rather than inside it — an attachment is not part of the sentence, and a
+   full-bleed screenshot inside a chat bubble reads as the bubble itself. */
+.userTurnImageStandalone {
   display: block;
-  max-width: 100%;
-  max-height: 280px;
-  border-radius: 10px;
-  margin-bottom: 6px;
+  max-width: min(78%, 320px);
+  max-height: 220px;
+  border-radius: 14px;
   object-fit: cover;
+  border: 1px solid var(--mantine-color-default-border);
 }
 
 /* A drawn picture, in the assistant's own turn. Capped narrower than the
