@@ -160,11 +160,9 @@ export default function AdminDatabase() {
         </SimpleGrid>
 
         {(data.cloudinary || data.workersAi.length > 0) && (
-          <SimpleGrid cols={{ base: 1, md: Math.min(2, (data.cloudinary ? 1 : 0) + data.workersAi.length) || 1 }} spacing="lg">
+          <SimpleGrid cols={{ base: 1, md: data.cloudinary && data.workersAi.length > 0 ? 2 : 1 }} spacing="lg">
             {data.cloudinary && <CloudinaryCard usage={data.cloudinary} />}
-            {data.workersAi.map((u) => (
-              <WorkersAiCard key={u.label} usage={u} />
-            ))}
+            {data.workersAi.length > 0 && <WorkersAiCard accounts={data.workersAi} />}
           </SimpleGrid>
         )}
 
@@ -322,41 +320,51 @@ function Meter({
 
 /**
  * Cloudflare Workers AI usage — neurons burned today against the free-tier
- * ceiling of 10,000/day, which resets at 00:00 UTC. A "neuron" is Cloudflare's
- * normalised unit of inference cost; every model call spends some. When the
- * analytics API refused (usually a token-scope gap) the card says so instead
- * of showing a misleading zero.
+ * ceiling of 10,000/day per account, which resets at 00:00 UTC. A "neuron" is
+ * Cloudflare's normalised unit of inference cost; every model call spends
+ * some. One card, one meter per configured account (Primary, and a Fallback
+ * used only once Primary's daily allocation is spent). When an account's
+ * analytics API refused (usually a token-scope gap) its meter is replaced
+ * with a note instead of a misleading zero.
  */
-function WorkersAiCard({ usage: u }: { usage: WorkersAiUsage }) {
-  const pct = u.dailyLimit ? (u.neuronsToday / u.dailyLimit) * 100 : null;
-
+function WorkersAiCard({ accounts }: { accounts: WorkersAiUsage[] }) {
   return (
     <Card withBorder radius="lg" padding="xl">
       <Group justify="space-between" align="baseline" mb="lg">
-        <Text fw={700} size="sm">Cloudflare Workers AI — {u.label}</Text>
+        <Text fw={700} size="sm">Cloudflare Workers AI</Text>
         <Text size="xs" c="dimmed">used by Orbit chat &amp; the post planner</Text>
       </Group>
 
-      {u.unavailable ? (
-        <Text size="sm" c="dimmed">
-          Usage unavailable — {u.unavailable}. The API token needs the
-          “Account Analytics: Read” permission for the neuron count to show here.
-        </Text>
-      ) : (
-        <>
-          <Meter
-            label="Neurons today"
-            used={num(u.neuronsToday)}
-            limit={num(u.dailyLimit)}
-            pct={pct}
-          />
-          <Text size="xs" c="dimmed" mt="xs">
-            One neuron is Cloudflare’s unit of inference cost; every model call
-            spends some. Free tier allows {num(u.dailyLimit)} a day and resets
-            at 00:00&nbsp;UTC.
-          </Text>
-        </>
-      )}
+      <Stack gap="lg">
+        {accounts.map((u, i) => {
+          const pct = u.dailyLimit ? (u.neuronsToday / u.dailyLimit) * 100 : null;
+          return (
+            <div key={u.label}>
+              <Text size="xs" fw={600} c="dimmed" mb={6}>{u.label}</Text>
+              {u.unavailable ? (
+                <Text size="sm" c="dimmed">
+                  Usage unavailable — {u.unavailable}. The API token needs the
+                  “Account Analytics: Read” permission for the neuron count to show here.
+                </Text>
+              ) : (
+                <Meter
+                  label="Neurons today"
+                  used={num(u.neuronsToday)}
+                  limit={num(u.dailyLimit)}
+                  pct={pct}
+                />
+              )}
+              {i === accounts.length - 1 && (
+                <Text size="xs" c="dimmed" mt="xs">
+                  One neuron is Cloudflare’s unit of inference cost; every model call
+                  spends some. Free tier allows {num(u.dailyLimit)} a day per account
+                  and resets at 00:00&nbsp;UTC.
+                </Text>
+              )}
+            </div>
+          );
+        })}
+      </Stack>
     </Card>
   );
 }
