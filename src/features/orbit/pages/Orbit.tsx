@@ -473,7 +473,7 @@ function Turn({
         {message.content && (
           <AnswerText message={message} live={Boolean(live)} onDone={onRevealed} />
         )}
-        {!live && <DataDigestTable digest={message.dataDigest} />}
+        {!live && <DataDigestTable digest={message.dataDigest} takenAtIso={message.digestAt} />}
         {!message.failed && !live && (
           <TurnActions
             message={message}

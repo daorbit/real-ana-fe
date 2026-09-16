@@ -61,6 +61,16 @@ export type OrbitMessage = {
   /** The tenant's 7-day figures as data, set only when this answer used them.
    * Rendered as a table under the prose — see `DataDigestTable`. */
   dataDigest?: unknown;
+  /**
+   * When those figures were taken, ISO.
+   *
+   * The digest is a snapshot stored with the turn, not a live query, so a
+   * thread reopened later shows the numbers the answer reasoned about. The
+   * table captions itself with this so nobody reads month-old figures as
+   * today's. Absent on the turn that has just been answered, where "now" is
+   * obvious and a timestamp would be noise.
+   */
+  digestAt?: string;
 };
 
 /**
@@ -507,6 +517,10 @@ export function useOrbitChat() {
           imageUrl: m.imageUrl,
           failed: m.failed || undefined,
           suggestions: m.suggestions.length ? m.suggestions : undefined,
+          // Restored with the turn. Leaving this out is what made the table
+          // vanish the moment a thread was reopened.
+          dataDigest: m.dataDigest,
+          digestAt: m.createdAt,
           modelLabel: m.modelLabel,
         }));
         setMessages(restored);

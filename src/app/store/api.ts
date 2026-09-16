@@ -968,6 +968,11 @@ export const api = createApi({
           /** Set on a user turn that attached an image — its Cloudinary URL. */
           imageUrl?: string;
           suggestions: string[];
+          /**
+           * The analytics snapshot the answer was based on, when it pulled one.
+           * Shape is validated by `isDataDigest` before rendering.
+           */
+          dataDigest?: unknown;
           /** True when the turn is a stored error rather than an answer. */
           failed: boolean;
           modelLabel?: string;

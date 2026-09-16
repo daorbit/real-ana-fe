@@ -134,8 +134,37 @@ function TopRows({ label, rows }: { label: string; rows: DataDigestRow[] }) {
  * Renders nothing for anything that isn't the expected shape, so a caller
  * can pass an answer's `dataDigest` through unconditionally.
  */
-export function DataDigestTable({ digest }: { digest: unknown }) {
+/**
+ * When a stored digest was taken, as a short caption.
+ *
+ * Omitted for anything from the last few minutes: on the answer someone is
+ * reading right now, "as of today" is noise. Beyond that it matters, because
+ * these are the figures the prose above quotes and they are not today's.
+ */
+function takenAt(iso?: string): string | null {
+  if (!iso) return null;
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return null;
+  if (Date.now() - at.getTime() < 5 * 60_000) return null;
+
+  return `as of ${at.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: at.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
+  })}`;
+}
+
+export function DataDigestTable({
+  digest,
+  /** ISO time the snapshot was taken — set on a restored turn, not a live one. */
+  takenAtIso,
+}: {
+  digest: unknown;
+  takenAtIso?: string;
+}) {
   if (!isDataDigest(digest) || !digest.sites.length) return null;
+
+  const stamp = takenAt(takenAtIso);
 
   return (
     <div className={classes.wrap}>
@@ -143,6 +172,7 @@ export function DataDigestTable({ digest }: { digest: unknown }) {
         <div key={site.domain} className={classes.card}>
           <Text size="xs" fw={600} c="dimmed" mb={8}>
             {site.domain} · last 7 days
+            {stamp ? <Text span c="dimmed" fw={400}> · {stamp}</Text> : null}
           </Text>
           <div className={classes.statRow}>
             <Stat label="Visitors" value={site.visitors} pct={site.visitorsChangePct} />
