@@ -150,15 +150,6 @@
   cursor: default;
 }
 
-.working {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
-  font-size: 0.86rem;
-  color: var(--onb-ink-dim, inherit);
-}
-
 /* Set apart from the suggestion pills above: these leave the step, where the
    pills fill it in, and a row of similar-sized controls running together
    blurs that difference. */

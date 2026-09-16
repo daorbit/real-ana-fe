@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Button, Group, Loader, Textarea } from "@mantine/core";
+import { ActionIcon, Button, Group, Textarea } from "@mantine/core";
 import { ArrowLeft, ArrowRight, ArrowUp, RefreshCw } from "lucide-react";
 import { FormPreview } from "./FormPreview";
 import type { GeneratedForm } from "./formsApi";
@@ -182,9 +182,7 @@ export function FormStepBody({
           </div>
         </div>
 
-        <p className={s.hint}>
-          Quantalog drafts the fields — you can change every one of them later.
-        </p>
+
       </div>
 
       <div className={s.ideaList}>
@@ -200,13 +198,6 @@ export function FormStepBody({
           </button>
         ))}
       </div>
-
-      {generating && (
-        <div className={s.working}>
-          <Loader size="sm" />
-          <span>Drafting your form — this takes a few seconds.</span>
-        </div>
-      )}
 
       {error && <p className={s.error}>{error}</p>}
 
