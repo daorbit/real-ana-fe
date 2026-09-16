@@ -284,7 +284,7 @@ function CloudinaryCard({ usage: u }: { usage: CloudinaryUsage }) {
         </>
       )}
 
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl">
+      <Stack gap="xl">
         <Meter
           label={metered ? "Stored now (draws on credits)" : "Storage"}
           used={bytes(u.storageUsed)}
@@ -297,7 +297,7 @@ function CloudinaryCard({ usage: u }: { usage: CloudinaryUsage }) {
           limit={u.bandwidthLimit ? bytes(u.bandwidthLimit) : undefined}
           pct={bwPct}
         />
-      </SimpleGrid>
+      </Stack>
     </Card>
   );
 }
