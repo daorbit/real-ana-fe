@@ -719,83 +719,103 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
+/* The viewport itself never scrolls here: the brand column stays put and only
+   the form card's body moves, so the step actions and progress never leave
+   the screen on a long step like the framework picker. */
 .onb-split {
-  grid-template-columns: 1fr 1.15fr;
+  grid-template-columns: 1fr 1.1fr;
   height: 100vh;
   height: 100dvh;
+  align-items: stretch;
   overflow: hidden;
 }
 
 .onb-panel {
   display: flex;
-  justify-content: center;
-  padding: 3rem 2rem;
-  background: var(--bg);
-  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.25rem 2.5rem;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 20px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
+[data-mantine-color-scheme="light"] .onb-panel {
+  background: #ffffff;
+  border-color: #e3e6ec;
+}
+
 .onb-col {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 520px;
+  max-width: 460px;
   height: 100%;
-  max-height: 100%;
+  min-height: 0;
 }
 
+/* Header, actions and progress are all pinned; the body below them is the
+   only thing that scrolls. */
 .onb-head {
   flex-shrink: 0;
+  margin-bottom: 1.25rem;
 }
 
-/* Body and footer as one unit, centred in whatever space is left under the
-   header — a short step (one field) sits in the middle of the panel instead
-   of pinned to the top with a dead gap before the footer. On a tall step the
-   unit fills the space instead (it can't grow past 100%) and `.onb-body`
-   itself scrolls. */
 .onb-main {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  flex: 1;
+  min-height: 0;
 }
 
 .onb-body {
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
-  /* Room for the focus ring / shadow on the last field so it isn't clipped
-     by the scroll container's edge. */
-  padding-left: 2px;
-  padding-right: 2px;
-  margin-left: -2px;
-  margin-right: -2px;
+  overscroll-behavior: contain;
+  /* Room for focus rings so they aren't clipped by the scroll edge, plus
+     clearance between the scrollbar and the field borders. */
+  padding: 2px 14px 2px 2px;
+  margin: -2px -14px -2px -2px;
 }
+.onb-body::-webkit-scrollbar { width: 8px; }
+.onb-body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--auth-line);
+}
+.onb-body::-webkit-scrollbar-thumb:hover { background: var(--auth-line-strong); }
+.onb-body { scrollbar-width: thin; scrollbar-color: var(--auth-line) transparent; }
 
+/* Actions sit above the scroll area on this flow — they stay reachable
+   without the body having to be scrolled to the bottom first. */
 .onb-foot {
   flex-shrink: 0;
-  padding-top: 1.25rem;
-}
-
-
-.onb-appearance-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2.5rem 2rem 4rem;
-}
-@media (max-width: 48em) {
-  .onb-appearance-page { padding: 1.5rem 1.1rem 3rem; }
+  order: -1;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--auth-line);
 }
 
 
 
-.onb-steps { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0; margin-bottom: 2.5rem; }
 
-.onb-step { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0.55rem; padding-right: 1rem; }
+
+/* Vertical: four labels with hints never fit side by side in a half-width
+   panel — as columns they wrapped to two lines each and the connector ran
+   through the text. */
+.onb-steps { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 2.25rem; }
+
+.onb-step {
+  position: relative;
+  display: flex; align-items: flex-start; gap: 0.85rem;
+  padding-bottom: 1.1rem;
+}
+.onb-step:last-child { padding-bottom: 0; }
 .onb-step::before {
-  content: ""; position: absolute; left: 28px; top: 13px;
-  height: 2px; right: 0;
+  content: ""; position: absolute; left: 13px; top: 28px; bottom: 0;
+  width: 2px;
   background: rgba(255, 255, 255, 0.12);
 }
 .onb-step:last-child::before { display: none; }
@@ -824,7 +844,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
   color: var(--accent);
 }
-.onb-step-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-right: 0.5rem; }
+.onb-step-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 3px; }
 .onb-step-label {
   font-size: 0.88rem; font-weight: 600;
   color: rgba(255, 255, 255, 0.55);
@@ -835,9 +855,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .onb-step-hint { font-size: 0.74rem; color: rgba(255, 255, 255, 0.45); }
 
 
-.onb-visual { display: flex; justify-content: center; margin: 0.5rem 0 2.25rem; }
+.onb-visual { display: flex; justify-content: center; margin: 0.25rem 0 1.5rem; }
 .onb-radar {
-  position: relative; width: 100%; max-width: 320px; aspect-ratio: 1;
+  position: relative; width: 100%; max-width: 240px; aspect-ratio: 1;
+}
+/* The step list is the point of this panel; the radar is filler. It goes
+   first when vertical space runs short, rather than pushing the list into
+   the panel's hidden overflow. */
+@media (max-height: 820px) {
+  .onb-visual { display: none; }
 }
 .onb-ring {
   position: absolute; inset: 0; margin: auto; border-radius: 50%;
@@ -883,8 +909,21 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 @media (max-width: 1100px) {
-  .onb-radar { max-width: 230px; }
+  .onb-radar { max-width: 200px; }
 }
+
+/* Onboarding's left panel carries a step list the auth screens don't, so the
+   headline block gets less room than it does there. */
+.onb-split .auth-brand {
+  align-items: flex-start;
+  padding-top: 3.5rem;
+  min-height: 0;
+  overflow: hidden;
+}
+.onb-split .ab-content > :first-child { margin-bottom: 1.75rem; }
+.onb-split .ab-content h2 { font-size: 2rem; margin-bottom: 0.75rem; }
+.onb-split .ab-content > p { font-size: 0.94rem; margin-bottom: 1.75rem; }
+.onb-split .ab-proof { margin-top: 0; }
 
 
 .onb-fw {
@@ -898,12 +937,33 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 @media (max-width: 900px) {
-
-  .onb-split { grid-template-columns: 1fr; }
+  /* `.auth-brand` is hidden at this width, so the panel is the whole screen:
+     no floating card, and the progress bar in `.onb-head` becomes the only
+     step indicator left. */
+  .onb-split { grid-template-columns: 1fr; padding: 0; gap: 0; }
+  .onb-panel {
+    padding: 1.75rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
+  [data-mantine-color-scheme="light"] .onb-panel { background: transparent; }
 }
 @media (max-width: 560px) {
-  .onb-panel { padding: 1.5rem 1.1rem 3rem; }
+  .onb-panel { padding: 1.25rem 1.1rem calc(1.25rem + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Step indicator in the form column — the left panel is gone below 900px and
+   "STEP 2 OF 4" alone gives no sense of how far along you are. */
+.onb-progress {
+  display: flex; gap: 5px; margin-top: 0.75rem;
+}
+.onb-progress span {
+  height: 3px; flex: 1; border-radius: 999px;
+  background: var(--auth-line);
+  transition: background 0.25s ease;
+}
+.onb-progress span[data-on] { background: var(--accent); }
 
 
 .section-rail {

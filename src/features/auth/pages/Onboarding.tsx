@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Group, Text, Anchor, Badge } from "@mantine/core";
+import { Group, Text, Anchor } from "@mantine/core";
 import { OnboardingBrand } from "@/features/auth/components/OnboardingBrand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
 import { AppearanceStep } from "@/features/auth/components/onboarding/AppearanceStep";
@@ -165,16 +165,27 @@ export default function Onboarding() {
 
       <div className="onb-panel">
         <div className="onb-col">
-          <Group justify="space-between" mb="xl" wrap="nowrap" className="onb-head">
-            <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
-              STEP {displayStep + 1} OF {displaySteps.length}
-            </Text>
-            {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
-              <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
-                Skip for now
-              </Anchor>
-            )}
-          </Group>
+          <div className="onb-head">
+            <Group justify="space-between" wrap="nowrap">
+              <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
+                {displaySteps[displayStep]?.label ?? "Setup"}
+                {" · "}
+                {displayStep + 1}/{displaySteps.length}
+              </Text>
+              {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
+                <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
+                  Skip for now
+                </Anchor>
+              )}
+            </Group>
+            {/* The left panel carries the full step list, but it's hidden below
+                900px — this is the only progress cue left on a phone. */}
+            <div className="onb-progress" aria-hidden="true">
+              {displaySteps.map((s, i) => (
+                <span key={s.label} data-on={i <= displayStep || undefined} />
+              ))}
+            </div>
+          </div>
 
           <div className="onb-main">
           <div className="onb-body">
@@ -237,14 +248,6 @@ export default function Onboarding() {
                 )}
               </motion.div>
             </AnimatePresence>
-
-            <Group justify="center" gap="lg" mt={40} wrap="wrap">
-              {["Under 1 KB", "No cookies", "No consent banner"].map((t) => (
-                <Badge key={t} variant="light" color="gray" size="sm" radius="sm">
-                  {t}
-                </Badge>
-              ))}
-            </Group>
           </div>
 
           {footer && <div className="onb-foot">{footer}</div>}

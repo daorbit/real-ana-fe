@@ -100,8 +100,8 @@ export function OnboardingBrand({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          Three short steps and your first visitor shows up live. You can skip
-          any of it and come back later.
+          {steps.length} short steps and your first visitor shows up live. You
+          can skip any of it and come back later.
         </motion.p>
 
         {/* Above the visual, directly under the copy — progress is the thing

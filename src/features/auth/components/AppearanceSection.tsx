@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Group, SimpleGrid, Text, UnstyledButton, useMantineColorScheme, Switch } from "@mantine/core";
+import { Box, Group, Text, UnstyledButton, useMantineColorScheme, Switch } from "@mantine/core";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
@@ -128,7 +128,13 @@ export function AppearanceSection({
 
         <GroupBlock>
           <GroupLabel>{t("settings.themePreset", "Theme preset")}</GroupLabel>
-          <SimpleGrid cols={{ base: 2, xs: 3, sm: 4 }} spacing={14}>
+          <Box
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(132px, 1fr))",
+              gap: 14,
+            }}
+          >
             {THEME_PRESETS.map((p) => {
               const selected = prefs.preset === p.id;
               return (
@@ -153,7 +159,7 @@ export function AppearanceSection({
                 </UnstyledButton>
               );
             })}
-          </SimpleGrid>
+          </Box>
           <Text size="xs" c="dimmed" mt={8}>
             {t(
               "settings.themePresetHint",
@@ -164,7 +170,17 @@ export function AppearanceSection({
 
         <GroupBlock>
           <GroupLabel>{t("settings.accentColor", "Accent color")}</GroupLabel>
-          <SimpleGrid cols={{ base: 5, xs: 8, sm: 10, md: 12, lg: 14 }} spacing={14}>
+          {/* Auto-fill rather than fixed counts: this block is rendered both
+              full-width in Settings and in the onboarding step's narrower
+              control column, where a fixed 14 columns overflowed sideways. */}
+          <Box
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(38px, 1fr))",
+              gap: 14,
+              justifyItems: "center",
+            }}
+          >
             {ACCENT_PRESETS.map((preset) => {
               const active = prefs.accent === preset.id;
               return (
@@ -192,12 +208,20 @@ export function AppearanceSection({
                 </UnstyledButton>
               );
             })}
-          </SimpleGrid>
+          </Box>
         </GroupBlock>
 
         <GroupBlock>
           <GroupLabel>{t("settings.background", "Background")}</GroupLabel>
-          <SimpleGrid cols={{ base: 2, xs: 3, sm: 4, md: 5, lg: 6 }} spacing={14}>
+          {/* Wide enough for the full label — "Mesh — Aurora" truncated to
+              "Me…" in every tile once this column narrowed. */}
+          <Box
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(132px, 1fr))",
+              gap: 14,
+            }}
+          >
             {BG_STYLES.map((bg) => {
               const active = prefs.bg === bg.id;
               return (
@@ -228,7 +252,7 @@ export function AppearanceSection({
                 </UnstyledButton>
               );
             })}
-          </SimpleGrid>
+          </Box>
         </GroupBlock>
 
         <Group gap={40} align="flex-start" mb={32} wrap="wrap">
