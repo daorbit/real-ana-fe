@@ -493,6 +493,7 @@ export const api = createApi({
         framework?: string;
         bundleId?: string;
         trackerOptions?: TrackerOptions;
+        purpose?: string;
       }
     >({
       query: ({ workspaceId, ...body }) => ({
@@ -504,6 +505,17 @@ export const api = createApi({
         { type: "Site", id: `LIST-${workspaceId}` },
         "Stats",
       ],
+    }),
+
+    generateOnboardingCopy: build.mutation<
+      { readyHeadline: string; readyDescription: string },
+      { workspaceId: string; siteName: string; domain: string; framework: string; purpose: string }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/onboarding-ai/copy`,
+        method: "POST",
+        body,
+      }),
     }),
 
     updateSiteOptions: build.mutation<
@@ -1956,6 +1968,7 @@ export const {
   usePublishScheduledPostMutation,
   useGetSitesQuery,
   useCreateSiteMutation,
+  useGenerateOnboardingCopyMutation,
   useUpdateSiteOptionsMutation,
   useDeleteSiteMutation,
   useGetStatsQuery,

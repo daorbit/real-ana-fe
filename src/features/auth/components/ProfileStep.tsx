@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import {
-  Button, Group, Text, Title, TextInput, Stack, Avatar, ActionIcon, Alert,
+  Button, Group, Text, Title, TextInput, Stack, Avatar, ActionIcon,
 } from "@mantine/core";
-import { ArrowRight, Camera, Trash2, UserRound, Info } from "lucide-react";
+import { ArrowRight, Camera, Trash2, UserRound } from "lucide-react";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { PhoneInput, joinNumber, localNumberError } from "@/shared/ui/PhoneInput";
 import { useAuth } from "@/features/auth/context";
@@ -10,22 +10,7 @@ import { guessCountry, splitNumber, type DialCode } from "@/shared/lib/dialCodes
 import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 
-/**
- * Who you are — the first onboarding step.
- *
- * Required rather than skippable, unlike the steps after it. The mobile number
- * is what WhatsApp report delivery sends to, so an account that skips this
- * finds the channel refusing to turn on, in a screen far from here and for a
- * reason that isn't obvious from there.
- *
- * Name arrives prefilled — typed at signup, or taken from Google — and stays
- * editable rather than hidden: this is the last point before it starts
- * appearing on reports that go to other people.
- *
- * The avatar is the one optional field, and it says so: a stock initial is a
- * perfectly good default, and blocking setup on a photo people don't have to
- * hand would cost more than it's worth.
- */
+ 
 export function ProfileStep({ onDone }: { onDone: () => void }) {
   const { user, updateProfile, uploadAvatar, removeAvatar } = useAuth();
   const fileInput = useRef<HTMLInputElement | null>(null);
@@ -197,18 +182,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
         description="Used for WhatsApp report delivery. We never share it."
       />
 
-      <Alert
-        color="gray"
-        variant="outline"
-        radius="md"
-        p="xs"
-        icon={<Info size={15} />}
-        styles={{ icon: { alignSelf: "center", marginTop: 0 }, message: { display: "flex", alignItems: "center" } }}
-      >
-        <Text size="xs" c="dimmed">
-          You can change any of this later under Settings.
-        </Text>
-      </Alert>
+ 
 
       <Button
         className="auth-btn"

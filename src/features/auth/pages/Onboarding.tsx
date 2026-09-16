@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Button, Group, Text, Title, TextInput,
+  Button, Group, Text, Title, TextInput, Select,
   Stack, Anchor, Badge,
 } from "@mantine/core";
 import { ArrowRight, ArrowLeft, Globe, Zap } from "lucide-react";
@@ -12,7 +12,7 @@ import { AppearanceSection } from "@/features/auth/components/AppearanceSection"
 import { BrandIcon } from "@/shared/ui/BrandIcon";
 import { CodeBlock } from "@/shared/ui/CodeBlock";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
-import { useCreateWorkspaceMutation, useCreateSiteMutation } from "@/app/store";
+import { useCreateWorkspaceMutation, useCreateSiteMutation, useGenerateOnboardingCopyMutation } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
 import { getFramework, frameworkLanguage } from "@/features/workspace/frameworks";
 import type { FrameworkId } from "@/features/workspace/frameworks";
@@ -42,6 +42,14 @@ const WORKSPACE_ONLY_STEPS = [
   { label: "Workspace", hint: "Where your sites live" },
   { label: "Your site", hint: "What you want to track" },
   { label: "Install", hint: "One script tag" },
+];
+
+// Feeds the onboarding-copy generator, not a hard taxonomy — short and
+// specific enough to steer the model, not exhaustive.
+const SITE_PURPOSES = [
+  "Company website", "Blog", "SaaS product", "E-commerce store",
+  "Marketing site", "Portfolio", "Documentation", "Landing page",
+  "Internal tool", "Other",
 ];
 
 /**
@@ -80,6 +88,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(workspaceOnly ? 1 : 0);
   const [createWorkspace, { isLoading: creatingWs }] = useCreateWorkspaceMutation();
   const [createSite, { isLoading: creatingSite }] = useCreateSiteMutation();
+  const [generateOnboardingCopy] = useGenerateOnboardingCopyMutation();
 
   // step 1
   const [wsName, setWsName] = useState("");
@@ -90,11 +99,13 @@ export default function Onboarding() {
   const [siteName, setSiteName] = useState("");
   const [domain, setDomain] = useState("");
   const [framework, setFramework] = useState<FrameworkId>("html");
+  const [purpose, setPurpose] = useState("");
   const [siteError, setSiteError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
   // step 3
   const [site, setSite] = useState<Site | null>(null);
+  const [aiCopy, setAiCopy] = useState<{ readyHeadline: string; readyDescription: string } | null>(null);
 
   const guide = getFramework(framework);
 
@@ -148,9 +159,26 @@ export default function Onboarding() {
         name: siteName.trim(),
         domain: v.normalizeDomain(domain),
         framework,
+        purpose: purpose.trim(),
       }).unwrap();
       setSite(created);
       setStep(3);
+
+      // Best-effort, never blocks onboarding: the "you're ready" step just
+      // keeps its static copy if this fails, times out, or purpose was left
+      // blank and the model has nothing to personalize with.
+      if (purpose.trim()) {
+        generateOnboardingCopy({
+          workspaceId: wsId,
+          siteName: siteName.trim(),
+          domain: v.normalizeDomain(domain),
+          framework,
+          purpose: purpose.trim(),
+        })
+          .unwrap()
+          .then(setAiCopy)
+          .catch(() => {});
+      }
     } catch (e) {
       notifyError(e, "Could not add the site.");
     }
@@ -314,6 +342,17 @@ export default function Onboarding() {
                     }}
                   />
 
+                  <Select
+                    size="md"
+                    label="What's this site for?"
+                    description="Optional — helps us tailor the next screen"
+                    placeholder="Choose one"
+                    data={SITE_PURPOSES}
+                    value={purpose || null}
+                    onChange={(v) => setPurpose(v ?? "")}
+                    clearable
+                  />
+
                   <div>
                     <Text size="sm" fw={500} mb={2}>
                       What is it built with?
@@ -351,12 +390,12 @@ export default function Onboarding() {
                 <Stack gap="lg">
                   <div>
                     <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-                      You&apos;re ready
+                      {aiCopy?.readyHeadline ?? "You're ready"}
                     </Title>
                     <Group gap={8} mt={8} wrap="nowrap">
                       <BrandIcon framework={framework} size={15} />
                       <Text c="dimmed" size="sm">
-                        {guide.placement}
+                        {aiCopy?.readyDescription ?? guide.placement}
                       </Text>
                     </Group>
                   </div>

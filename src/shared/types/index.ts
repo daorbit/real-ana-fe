@@ -988,6 +988,8 @@ export type Site = {
   bundleId?: string;
   siteId: string;
   createdAt: string;
+  /** One-line "what's this site for?" answer from onboarding, if given. */
+  purpose?: string;
   /**
    * The options the snippet was built with. Stored so the dashboard can
    * rebuild the exact tag later — the tracker itself reads them from the
