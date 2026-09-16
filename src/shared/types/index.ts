@@ -393,6 +393,20 @@ export type WorkersAiUsage = {
   neuronsToday: number;
   dailyLimit: number;
   unavailable?: string;
+  /** Per-model breakdown for the day, most active first. */
+  models: WorkersAiModelUsage[];
+};
+
+/** One model's activity today on one account — what's spending the neuron
+ * budget and how much of it is failing. */
+export type WorkersAiModelUsage = {
+  modelId: string;
+  requests: number;
+  failed: number;
+  inputTokens: number;
+  outputTokens: number;
+  neurons: number;
+  avgLatencyMs: number;
 };
 
 /**

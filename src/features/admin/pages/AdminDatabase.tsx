@@ -10,6 +10,13 @@ import { useGetDbStatsQuery } from "@/app/store";
 import { num } from "@/shared/lib";
 import type { DbCollectionStats, CloudinaryUsage, WorkersAiUsage } from "@/shared/types";
 
+/** Cloudflare's model ids are a full path like
+ * "@cf/meta/llama-3.3-70b-instruct-fp8-fast" — the table shows just the last
+ * segment, which is what tells two Llama variants apart. */
+function shortModelName(id: string): string {
+  return id.split("/").pop() ?? id;
+}
+
 /**
  * Admin-only: how much storage the database holds and how close it sits to the
  * plan ceiling.
@@ -160,10 +167,18 @@ export default function AdminDatabase() {
         </SimpleGrid>
 
         {(data.cloudinary || data.workersAi.length > 0) && (
-          <SimpleGrid cols={{ base: 1, md: data.cloudinary && data.workersAi.length > 0 ? 2 : 1 }} spacing="lg">
-            {data.cloudinary && <CloudinaryCard usage={data.cloudinary} />}
-            {data.workersAi.length > 0 && <WorkersAiCard accounts={data.workersAi} />}
-          </SimpleGrid>
+          <Group align="stretch" gap="lg" wrap="wrap">
+            {data.cloudinary && (
+              <Box style={{ flex: "1 1 320px", minWidth: 0 }}>
+                <CloudinaryCard usage={data.cloudinary} />
+              </Box>
+            )}
+            {data.workersAi.length > 0 && (
+              <Box style={{ flex: "2 1 480px", minWidth: 0 }}>
+                <WorkersAiCard accounts={data.workersAi} />
+              </Box>
+            )}
+          </Group>
         )}
 
         {/* Per-collection */}
@@ -347,12 +362,50 @@ function WorkersAiCard({ accounts }: { accounts: WorkersAiUsage[] }) {
                   “Account Analytics: Read” permission for the neuron count to show here.
                 </Text>
               ) : (
-                <Meter
-                  label="Neurons today"
-                  used={num(u.neuronsToday)}
-                  limit={num(u.dailyLimit)}
-                  pct={pct}
-                />
+                <>
+                  <Meter
+                    label="Neurons today"
+                    used={num(u.neuronsToday)}
+                    limit={num(u.dailyLimit)}
+                    pct={pct}
+                  />
+                  {u.models.length > 0 && (
+                    <Table.ScrollContainer minWidth={420} mt="sm">
+                      <Table verticalSpacing={4} horizontalSpacing="sm" fz="xs">
+                        <Table.Thead>
+                          <Table.Tr>
+                            <Table.Th>Model</Table.Th>
+                            <Table.Th ta="right">Requests</Table.Th>
+                            <Table.Th ta="right">Failed</Table.Th>
+                            <Table.Th ta="right">Tokens in/out</Table.Th>
+                            <Table.Th ta="right">Avg time</Table.Th>
+                            <Table.Th ta="right">Neurons</Table.Th>
+                          </Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>
+                          {u.models.map((m) => (
+                            <Table.Tr key={m.modelId}>
+                              <Table.Td>
+                                <Tooltip label={m.modelId} openDelay={300} events={{ hover: true, focus: true, touch: false }}>
+                                  <Text size="xs" truncate style={{ maxWidth: 160, width: "fit-content" }}>
+                                    {shortModelName(m.modelId)}
+                                  </Text>
+                                </Tooltip>
+                              </Table.Td>
+                              <Table.Td ta="right">{num(m.requests)}</Table.Td>
+                              <Table.Td ta="right">
+                                <Text size="xs" c={m.failed ? "red" : "dimmed"}>{num(m.failed)}</Text>
+                              </Table.Td>
+                              <Table.Td ta="right">{num(m.inputTokens)} / {num(m.outputTokens)}</Table.Td>
+                              <Table.Td ta="right">{Math.round(m.avgLatencyMs)}ms</Table.Td>
+                              <Table.Td ta="right">{m.neurons.toFixed(1)}</Table.Td>
+                            </Table.Tr>
+                          ))}
+                        </Table.Tbody>
+                      </Table>
+                    </Table.ScrollContainer>
+                  )}
+                </>
               )}
               {i === accounts.length - 1 && (
                 <Text size="xs" c="dimmed" mt="xs">
