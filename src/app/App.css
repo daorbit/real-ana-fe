@@ -719,19 +719,63 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-.onb-split { grid-template-columns: 1fr 1.15fr; }
+.onb-split {
+  grid-template-columns: 1fr 1.15fr;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
 
 .onb-panel {
   display: flex;
-  align-items: center;
   justify-content: center;
   padding: 3rem 2rem;
   background: var(--bg);
-  overflow-y: auto;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid var(--border);
 }
 .onb-col {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 520px;
+  height: 100%;
+  max-height: 100%;
+}
+
+.onb-head {
+  flex-shrink: 0;
+}
+
+/* Body and footer as one unit, centred in whatever space is left under the
+   header — a short step (one field) sits in the middle of the panel instead
+   of pinned to the top with a dead gap before the footer. On a tall step the
+   unit fills the space instead (it can't grow past 100%) and `.onb-body`
+   itself scrolls. */
+.onb-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.onb-body {
+  min-height: 0;
+  overflow-y: auto;
+  /* Room for the focus ring / shadow on the last field so it isn't clipped
+     by the scroll container's edge. */
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: -2px;
+  margin-right: -2px;
+}
+
+.onb-foot {
+  flex-shrink: 0;
+  padding-top: 1.25rem;
 }
 
 

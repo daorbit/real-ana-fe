@@ -1,32 +1,23 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Button, Group, Text, Title, TextInput, Select,
-  Stack, Anchor, Badge,
-} from "@mantine/core";
-import { ArrowRight, ArrowLeft, Globe, Zap } from "lucide-react";
+import { Group, Text, Anchor, Badge } from "@mantine/core";
 import { OnboardingBrand } from "@/features/auth/components/OnboardingBrand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
-import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
-import { BrandIcon } from "@/shared/ui/BrandIcon";
-import { CodeBlock } from "@/shared/ui/CodeBlock";
-import { InstallCheck } from "@/features/workspace/components/InstallCheck";
+import { AppearanceStep } from "@/features/auth/components/onboarding/AppearanceStep";
+import { WorkspaceStepBody, WorkspaceStepFooter } from "@/features/auth/components/onboarding/WorkspaceStep";
+import { SiteStepBody, SiteStepFooter } from "@/features/auth/components/onboarding/SiteStep";
+import { ReadyStepBody, ReadyStepFooter } from "@/features/auth/components/onboarding/ReadyStep";
 import { useCreateWorkspaceMutation, useCreateSiteMutation, useGenerateOnboardingCopyMutation } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
-import { getFramework, frameworkLanguage } from "@/features/workspace/frameworks";
+import { getFramework } from "@/features/workspace/frameworks";
 import type { FrameworkId } from "@/features/workspace/frameworks";
-import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker";
 import * as v from "@/shared/lib/validate";
 import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import type { Site } from "@/shared/types";
-
-// Appearance is the last step and renders full-page with no brand panel
-// (see the `step === 4` branch below), so it deliberately has no entry
-// here — the "STEP N OF M" counter and step list only ever cover the steps
-// that share the split layout.
+ 
 const STEPS = [
   { label: "Your details", hint: "Name, mobile and photo" },
   { label: "Workspace", hint: "Where your sites live" },
@@ -34,55 +25,24 @@ const STEPS = [
   { label: "Install", hint: "One script tag" },
 ];
 
-// Same steps, minus the profile one — used when an existing account with a
-// profile already filled in adds a second workspace. Keeping this as its
-// own array rather than STEPS.slice(1) so the brand panel's numbering
-// ("Step 1 of 3") reads correctly instead of starting at "2 of 4".
+
 const WORKSPACE_ONLY_STEPS = [
   { label: "Workspace", hint: "Where your sites live" },
   { label: "Your site", hint: "What you want to track" },
   { label: "Install", hint: "One script tag" },
 ];
 
-// Feeds the onboarding-copy generator, not a hard taxonomy — short and
-// specific enough to steer the model, not exhaustive.
-const SITE_PURPOSES = [
-  "Company website", "Blog", "SaaS product", "E-commerce store",
-  "Marketing site", "Portfolio", "Documentation", "Landing page",
-  "Internal tool", "Other",
-];
-
-/**
- * The first step is the only one that can't be skipped.
- *
- * Everything after it has a fallback — the Home checklist picks up a missing
- * workspace or site. A missing mobile has no such recovery: WhatsApp delivery
- * simply refuses to turn on, in a screen far away from here, and the reason is
- * not obvious from there.
- */
+ 
 const FIRST_SKIPPABLE_STEP = 1;
 
-/**
- * First-run setup: your details, workspace, site, snippet.
- *
- * Full-page, using the same split as the auth screens — someone arriving from
- * signup stays in one continuous flow. The step list sits in the brand panel
- * so the form column holds exactly one question at a time.
- *
- * Every step but the first is skippable; the Home checklist covers anyone who
- * leaves early, so this is never a wall between someone and the product. The
- * exception is explained at `FIRST_SKIPPABLE_STEP`.
- */
+ 
 export default function Onboarding() {
   const nav = useNavigate();
   const { setActive, workspaces } = useWorkspace();
   const { user } = useAuth();
   const [params] = useSearchParams();
 
-  // Triggered by "New workspace" for an account that already exists — the
-  // profile step is meaningless here (there's nothing to fill in that
-  // isn't already set), so this skips straight to naming the workspace and
-  // returns to the workspace list rather than the dashboard on completion.
+ 
   const workspaceOnly = params.get("mode") === "workspace";
 
   const [step, setStep] = useState(workspaceOnly ? 1 : 0);
@@ -164,9 +124,7 @@ export default function Onboarding() {
       setSite(created);
       setStep(3);
 
-      // Best-effort, never blocks onboarding: the "you're ready" step just
-      // keeps its static copy if this fails, times out, or purpose was left
-      // blank and the model has nothing to personalize with.
+
       if (purpose.trim()) {
         generateOnboardingCopy({
           workspaceId: wsId,
@@ -177,61 +135,29 @@ export default function Onboarding() {
         })
           .unwrap()
           .then(setAiCopy)
-          .catch(() => {});
+          .catch((e) => console.error("[onboarding-ai] copy generation failed:", e));
       }
     } catch (e) {
       notifyError(e, "Could not add the site.");
     }
   };
 
-  // The brand panel's step list and "Step N of M" counter both index into
-  // whichever array is showing — workspaceOnly drops the profile step
-  // entirely, so its indices need shifting down by one to stay correct
-  // rather than starting the count at "2 of 4".
+
   const displaySteps = workspaceOnly ? WORKSPACE_ONLY_STEPS : STEPS;
   const displayStep = workspaceOnly ? step - 1 : step;
 
-  // Appearance is the last step and deliberately breaks from the split
-  // layout every other step shares: it's a grid of swatches and preview
-  // tiles that wants the full page width, not the ~380px column the brand
-  // panel leaves it, and Continue/Back move to the top since there's no
-  // step counter/skip-link header to share the row with here.
   if (step === 4) {
-    return (
-      <div className="onb-appearance-page">
-        <Group justify="space-between" mb="lg" wrap="wrap">
-          <div>
-            <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-              Make it yours
-            </Title>
-            <Text c="dimmed" size="sm" mt={4}>
-              Pick a mode, an accent, and a background — you can change any of
-              it later from Settings.
-            </Text>
-          </div>
-          <Group gap="sm">
-            <Button
-              className="auth-btn"
-              variant="default"
-              leftSection={<ArrowLeft size={15} />}
-              onClick={() => setStep(3)}
-            >
-              Back
-            </Button>
-            <Button
-              className="auth-btn"
-              onClick={done}
-              rightSection={<ArrowRight size={16} />}
-            >
-              Continue
-            </Button>
-          </Group>
-        </Group>
-
-        <AppearanceSection bare />
-      </div>
-    );
+    return <AppearanceStep onBack={() => setStep(3)} onDone={done} />;
   }
+
+  const footer =
+    step === 1 ? (
+      <WorkspaceStepFooter loading={creatingWs} onSubmit={submitWorkspace} />
+    ) : step === 2 ? (
+      <SiteStepFooter loading={creatingSite} onBack={() => setStep(1)} onSubmit={submitSite} />
+    ) : step === 3 && site ? (
+      <ReadyStepFooter onContinue={() => setStep(4)} />
+    ) : null;
 
   return (
     <div className="auth-split onb-split">
@@ -239,7 +165,7 @@ export default function Onboarding() {
 
       <div className="onb-panel">
         <div className="onb-col">
-          <Group justify="space-between" mb="xl" wrap="nowrap">
+          <Group justify="space-between" mb="xl" wrap="nowrap" className="onb-head">
             <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
               STEP {displayStep + 1} OF {displaySteps.length}
             </Text>
@@ -250,204 +176,79 @@ export default function Onboarding() {
             )}
           </Group>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 16 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -16 }}
-              transition={{ duration: 0.25 }}
-            >
-              {/* An existing account sent back here only for its missing mobile
-                  already has a workspace — walking it through setup again would
-                  ask it to create a second one. */}
-              {step === 0 && (
-                <ProfileStep onDone={() => (workspaces.length ? done() : setStep(1))} />
-              )}
+          <div className="onb-main">
+          <div className="onb-body">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -16 }}
+                transition={{ duration: 0.25 }}
+              >
+                {/* An existing account sent back here only for its missing mobile
+                    already has a workspace — walking it through setup again would
+                    ask it to create a second one. */}
+                {step === 0 && (
+                  <ProfileStep onDone={() => (workspaces.length ? done() : setStep(1))} />
+                )}
 
-              {step === 1 && (
-                <Stack gap="xl">
-                  <div>
-                    <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-                      Name your workspace
-                    </Title>
-                    <Text c="dimmed" size="sm" mt={8}>
-                      A workspace groups the sites you track together — usually
-                      your company, or one client.
-                    </Text>
-                  </div>
-
-                  <TextInput
-                    size="md"
-                    label="Workspace name"
-                    placeholder="Acme Inc"
-                    value={wsName}
-                    error={wsError}
-                    onChange={(e) => {
-                      setWsName(e.currentTarget.value);
+                {step === 1 && (
+                  <WorkspaceStepBody
+                    wsName={wsName}
+                    wsError={wsError}
+                    onChange={(v) => {
+                      setWsName(v);
                       setWsError(null);
                     }}
-                    onKeyDown={(e) => e.key === "Enter" && submitWorkspace()}
-                    data-autofocus
+                    onSubmit={submitWorkspace}
                   />
+                )}
 
-                  <Button
-                    className="auth-btn"
-                    size="md"
-                    fullWidth
-                    loading={creatingWs}
-                    onClick={submitWorkspace}
-                    rightSection={<ArrowRight size={16} />}
-                  >
-                    Continue
-                  </Button>
-                </Stack>
-              )}
-
-              {step === 2 && (
-                <Stack gap="xl">
-                  <div>
-                    <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-                      Add your first site
-                    </Title>
-                    <Text c="dimmed" size="sm" mt={8}>
-                      Tell us what you&apos;re tracking and what it&apos;s built
-                      with — we&apos;ll tailor the install instructions.
-                    </Text>
-                  </div>
-
-                  <TextInput
-                    size="md"
-                    label="Site name"
-                    placeholder="Marketing site"
-                    value={siteName}
-                    error={siteError}
-                    onChange={(e) => {
-                      setSiteName(e.currentTarget.value);
+                {step === 2 && (
+                  <SiteStepBody
+                    siteName={siteName}
+                    siteError={siteError}
+                    onSiteNameChange={(v) => {
+                      setSiteName(v);
                       setSiteError(null);
                     }}
-                    data-autofocus
-                  />
-
-                  <TextInput
-                    size="md"
-                    label="Domain"
-                    placeholder="example.com"
-                    leftSection={<Globe size={15} />}
-                    value={domain}
-                    error={domainError}
-                    onChange={(e) => {
-                      setDomain(e.currentTarget.value);
+                    domain={domain}
+                    domainError={domainError}
+                    onDomainChange={(v) => {
+                      setDomain(v);
                       setDomainError(null);
                     }}
+                    purpose={purpose}
+                    onPurposeChange={setPurpose}
+                    framework={framework}
+                    onFrameworkChange={setFramework}
                   />
+                )}
 
-                  <Select
-                    size="md"
-                    label="What's this site for?"
-                    description="Optional — helps us tailor the next screen"
-                    placeholder="Choose one"
-                    data={SITE_PURPOSES}
-                    value={purpose || null}
-                    onChange={(v) => setPurpose(v ?? "")}
-                    clearable
+                {step === 3 && site && (
+                  <ReadyStepBody
+                    site={site}
+                    framework={framework}
+                    guide={guide}
+                    aiCopy={aiCopy}
+                    workspaceId={wsId}
                   />
+                )}
+              </motion.div>
+            </AnimatePresence>
 
-                  <div>
-                    <Text size="sm" fw={500} mb={2}>
-                      What is it built with?
-                    </Text>
-                    <Text size="xs" c="dimmed" mb="sm">
-                      Only changes the install snippet you get next.
-                    </Text>
-                    <FrameworkPicker value={framework} onChange={setFramework} />
-                  </div>
+            <Group justify="center" gap="lg" mt={40} wrap="wrap">
+              {["Under 1 KB", "No cookies", "No consent banner"].map((t) => (
+                <Badge key={t} variant="light" color="gray" size="sm" radius="sm">
+                  {t}
+                </Badge>
+              ))}
+            </Group>
+          </div>
 
-                  <Group grow>
-                    <Button
-                      className="auth-btn"
-                      size="md"
-                      variant="default"
-                      leftSection={<ArrowLeft size={15} />}
-                      onClick={() => setStep(1)}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      className="auth-btn"
-                      size="md"
-                      loading={creatingSite}
-                      onClick={submitSite}
-                      rightSection={<ArrowRight size={16} />}
-                    >
-                      Continue
-                    </Button>
-                  </Group>
-                </Stack>
-              )}
-
-              {step === 3 && site && (
-                <Stack gap="lg">
-                  <div>
-                    <Title order={2} style={{ letterSpacing: "-0.02em" }}>
-                      {aiCopy?.readyHeadline ?? "You're ready"}
-                    </Title>
-                    <Group gap={8} mt={8} wrap="nowrap">
-                      <BrandIcon framework={framework} size={15} />
-                      <Text c="dimmed" size="sm">
-                        {aiCopy?.readyDescription ?? guide.placement}
-                      </Text>
-                    </Group>
-                  </div>
-
-                  <CodeBlock
-                    code={guide.code(site.siteId, {})}
-                    filename={guide.filename}
-                    language={frameworkLanguage(guide.id)}
-                  />
-
-                  {guide.note && (
-                    <Text size="xs" c="dimmed">
-                      {guide.note}
-                    </Text>
-                  )}
-
-                  {wsId && (
-                    <InstallCheck
-                      workspaceId={wsId}
-                      siteId={site.siteId}
-                      domain={site.domain}
-                    />
-                  )}
-
-                  <Group gap={6}>
-                    <Zap size={14} style={{ color: "var(--violet-2)" }} />
-                    <Text size="xs" c="dimmed">
-                      Numbers appear within seconds of your first visitor.
-                    </Text>
-                  </Group>
-
-                  <Button
-                    className="auth-btn"
-                    size="md"
-                    fullWidth
-                    onClick={() => setStep(4)}
-                    rightSection={<ArrowRight size={16} />}
-                  >
-                    Continue
-                  </Button>
-                </Stack>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          <Group justify="center" gap="lg" mt={40} wrap="wrap">
-            {["Under 1 KB", "No cookies", "No consent banner"].map((t) => (
-              <Badge key={t} variant="light" color="gray" size="sm" radius="sm">
-                {t}
-              </Badge>
-            ))}
-          </Group>
+          {footer && <div className="onb-foot">{footer}</div>}
+          </div>
         </div>
       </div>
     </div>
