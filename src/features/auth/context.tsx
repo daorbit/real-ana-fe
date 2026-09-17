@@ -9,7 +9,7 @@ import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
 import { trace } from "@/shared/lib/analytics";
 import { rememberUser } from "@/features/auth/lastUser";
-import { hideLock } from "@/shared/lib/lockState";
+import { hideLock, showLock } from "@/shared/lib/lockState";
 import type { ProfileUpdate, User } from "@/shared/types";
 
 type AuthState = {
@@ -83,7 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     api
       .get<User>("/api/auth/me")
-      .then(setUser)
+      .then((me) => {
+        setUser(me);
+        if (me.locked) showLock();
+      })
       .catch(() => clearToken())
       .finally(() => setLoading(false));
   }, []);
@@ -94,15 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {
         email,
         password,
-        // Omitted rather than sent as undefined when there is none, so the payload
-        // is unchanged on a build with Turnstile switched off.
         ...(turnstileToken ? { turnstileToken } : {}),
       },
     );
     if ("requires2fa" in r) return { requires2fa: true as const, pendingToken: r.pendingToken };
 
     setToken(r.token);
-    // Start from a clean cache so nothing from a previous session leaks through.
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
     rememberUser(r.user, "password");
@@ -139,15 +139,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { created: Boolean(r.created) };
   };
 
-  /**
-   * Adopt a session from a token the server already issued.
-   *
-   * LinkedIn sign-in is a redirect flow, not a request/response one: by the
-   * time the browser is back here the server has verified the profile and
-   * signed a token, and it arrives in the URL rather than in a response body.
-   * So there is no credential left to post — the work is to store the token and
-   * load the account it belongs to.
-   */
   const adoptToken = async (token: string) => {
     setToken(token);
     dispatch(rtkApi.util.resetApiState());
@@ -165,8 +156,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser({ ...r.user, demo: true });
   };
 
-  // Signing up no longer signs anyone in: it only stashes the details server-
-  // side and sends a code. Nothing local changes until the code is verified.
   const signup = async (email: string, password: string, name: string) => {
     await api.post("/api/auth/signup", { email, password, name });
   };
@@ -328,32 +317,11 @@ export function useAuth(): AuthState {
   return ctx;
 }
 
-/**
- * Whether the admin module is visible to this session.
- *
- * `super_admin` only. The platform `admin` role still exists and still passes
- * the server's `requireAdmin` gate, but the console — impersonation, broadcast
- * email, the plan catalogue — is not something it gets to see.
- *
- * Impersonation is excluded outright: acting as someone else must not carry the
- * admin console along with it, or an impersonated session becomes a way to
- * impersonate onward.
- *
- * One helper rather than the same two-way comparison in six files, so
- * tightening it again later is one edit, not six.
- */
 export function useIsPlatformAdmin(): boolean {
   const { user } = useAuth();
   return user?.role === "super_admin" && !user?.impersonating;
 }
 
-/**
- * Whether Instagram is available to this session.
- *
- * Held back to `super_admin` while the integration is finished — everyone else
- * sees it marked "Coming soon" and cannot connect an account or compose an
- * Instagram post. One helper so lifting the gate later is a single edit.
- */
 export function useCanUseInstagram(): boolean {
   const { user } = useAuth();
   return user?.role === "super_admin";

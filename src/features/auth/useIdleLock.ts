@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { api } from "@/shared/lib/http";
-import { showLock, isLocked } from "@/shared/lib/lockState";
+import { showLock, isLocked, subscribeLock } from "@/shared/lib/lockState";
 
 const IDLE_MS = 5 * 60 * 1000;
 const ACTIVITY_EVENTS = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"] as const;
@@ -23,6 +23,12 @@ export function useIdleLock(enabled: boolean) {
     const bump = () => { lastActivity.current = Date.now(); };
     ACTIVITY_EVENTS.forEach((evt) => window.addEventListener(evt, bump, { passive: true }));
 
+    // Clearing the lock is itself activity. Without this the ref still holds
+    // the timestamp from before the lock, so the very next tick reads the
+    // account as idle and re-locks it seconds after a correct PIN — while the
+    // user is plainly using the tab.
+    const unsubscribe = subscribeLock((locked) => { if (!locked) bump(); });
+
     const interval = setInterval(() => {
       if (isLocked()) return;
       if (Date.now() - lastActivity.current >= IDLE_MS) {
@@ -34,6 +40,7 @@ export function useIdleLock(enabled: boolean) {
 
     return () => {
       ACTIVITY_EVENTS.forEach((evt) => window.removeEventListener(evt, bump));
+      unsubscribe();
       clearInterval(interval);
     };
   }, [enabled]);
