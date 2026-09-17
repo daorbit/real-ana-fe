@@ -167,5 +167,5 @@ export default function TurnstileWidget({ onVerify, onExpire }: Props) {
     return null;
   }
 
-  return <Box ref={ref} mih={65} />;
+  return <Box ref={ref} mih={65} w="100%" />;
 }
