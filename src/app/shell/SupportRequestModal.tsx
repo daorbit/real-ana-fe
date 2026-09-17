@@ -1,7 +1,7 @@
 import { Box, Modal } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 
-const FORM_URL = "https://forms.daorbit.in/form/6aabb7b5969a550af691c542/view";
+const FORM_URL = "https://forms.daorbit.in/form/6aabcec12a889884425a7d6d/view";
 
 
 export function SupportRequestModal({
