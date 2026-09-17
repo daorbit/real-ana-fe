@@ -25,9 +25,9 @@
     <circle cx="150" cy="292" r="2"/>
   </g>
 
-  <text x="80" y="175" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#ffffff">Add an extra</text>
-  <text x="80" y="228" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#bfdbfe">layer of security.</text>
-  <text x="80" y="270" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" fill="#dbeafe" fill-opacity="0.8">Scan the code with your authenticator app to turn on 2FA.</text>
+  <text x="80" y="175" font-family="'Space Grotesk', 'Inter', sans-serif" font-size="40" font-weight="800" fill="#ffffff">Add an extra</text>
+  <text x="80" y="228" font-family="'Space Grotesk', 'Inter', sans-serif" font-size="40" font-weight="800" fill="#bfdbfe">layer of security.</text>
+  <text x="80" y="270" font-family="'Space Grotesk', 'Inter', sans-serif" font-size="17" fill="#dbeafe" fill-opacity="0.8">Scan the code with your authenticator app to turn on 2FA.</text>
 
   <g transform="translate(1020, 210)">
     <circle r="118" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1"/>

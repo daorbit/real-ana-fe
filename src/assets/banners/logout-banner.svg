@@ -26,8 +26,8 @@
     <path d="M 160 300 v 14 M 153 307 h 14"/>
   </g>
 
-  <text x="80" y="220" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#ffffff">See you next time.</text>
-  <text x="80" y="260" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" fill="#dbeafe" fill-opacity="0.85">You'll need to sign in again to see your analytics.</text>
+  <text x="80" y="220" font-family="'Space Grotesk', 'Inter', sans-serif" font-size="40" font-weight="800" fill="#ffffff">See you next time.</text>
+  <text x="80" y="260" font-family="'Space Grotesk', 'Inter', sans-serif" font-size="17" fill="#dbeafe" fill-opacity="0.85">You'll need to sign in again to see your analytics.</text>
 
   <g transform="translate(1020, 210)">
     <circle r="118" fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1"/>
