@@ -2,7 +2,7 @@ import { AppShell as MantineShell, ScrollArea } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
-import { notify, confirmLogout, errMessage } from "@/shared/lib/notify";
+import { notify, errMessage } from "@/shared/lib/notify";
 import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import { useState } from "react";
 import { RailBrand } from "./RailBrand";
@@ -12,6 +12,7 @@ import { NavGroups } from "./NavGroups";
 import { AccountMenu } from "./AccountMenu";
 import { DemoCard, ImpersonationCard, PendingInviteCard, PlanCard } from "./RailCards";
 import { NAV_GROUPS } from "./navItems";
+import { LogoutDialog } from "./LogoutDialog";
 
  
 export function Rail({
@@ -36,6 +37,8 @@ export function Rail({
   const dark = scheme === "dark";
 
   const { demo, available: demoAvailable, toggle: toggleDemo } = useDemo();
+
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const impersonating = Boolean(user?.impersonating);
   // Super-admin only, and never while impersonating — see `useIsPlatformAdmin`.
@@ -120,14 +123,19 @@ export function Rail({
           demo={demo}
           demoAvailable={demoAvailable}
           onToggleDemo={toggleDemo}
-          onLogout={() =>
-            confirmLogout(() => {
-              logout();
-              notify.info(t("nav.loggedOut"));
-            })
-          }
+          onLogout={() => setLogoutOpen(true)}
         />
       </MantineShell.Section>
+
+      <LogoutDialog
+        opened={logoutOpen}
+        onStay={() => setLogoutOpen(false)}
+        onLogout={() => {
+          setLogoutOpen(false);
+          logout();
+          notify.info(t("nav.loggedOut"));
+        }}
+      />
     </MantineShell.Navbar>
   );
 }
