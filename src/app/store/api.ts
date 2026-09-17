@@ -936,20 +936,33 @@ export const api = createApi({
         method: "POST",
         body,
       }),
-      // An answered question spends quota, so anything showing a remaining
-      // count is now wrong. Invalidating here is what keeps the Billing meters
-      // honest without the chat panel knowing they exist. The conversation list
-      // moves too — a new thread appears, an existing one changes position.
+
       invalidatesTags: ["Usage", "OrbitConversation"],
     }),
 
-    /**
-     * The workspace's saved Orbit conversations, most recently active first.
-     *
-     * Per workspace, not per person: Orbit is metered against the workspace, so
-     * the transcript belongs to what paid for it and a colleague who can read
-     * the analytics can read the history.
-     */
+
+    explainMetric: build.mutation<
+      { reply: string },
+      {
+        workspaceId: string;
+        siteId: string;
+        metric: string;
+        range: string;
+        from?: string;
+        to?: string;
+        compare?: string;
+        compareFrom?: string;
+        compareTo?: string;
+      }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/explain`,
+        method: "POST",
+        body,
+      }),
+    }),
+
+
     getOrbitConversations: build.query<
       {
         conversations: {
@@ -2022,6 +2035,7 @@ export const {
   useGrantAdminSiteSlotMutation,
   useGetOrbitStatusQuery,
   useAskOrbitMutation,
+  useExplainMetricMutation,
   useGetOrbitConversationsQuery,
   useLazyGetOrbitConversationsQuery,
   useLazyGetOrbitConversationQuery,

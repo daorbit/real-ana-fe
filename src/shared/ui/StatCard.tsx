@@ -1,17 +1,12 @@
-import { Group, Text, Badge, Tooltip, Box } from "@mantine/core";
+import { Group, Text, Badge, Tooltip, Box, Popover, Loader, ActionIcon, CloseButton } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useState } from "react";
 import { useCountUp } from "@/shared/hooks/useCountUp";
+import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 
-/**
- * The accent each metric's trend line is drawn in.
- *
- * Only the sparkline and the icon wear this — the card surface stays neutral.
- * Six tinted cards side by side means nothing is emphasised, and the tints were
- * decoration rather than encoding: they carried no information the label didn't
- * already give.
- */
+
 const ACCENT: Record<string, string> = {
   emerald: "var(--accent)",
   violet: "var(--accent)",
@@ -21,11 +16,7 @@ const ACCENT: Record<string, string> = {
   pink: "#f472b6",
 };
 
-/**
- * Numeric values count from their previous figure to the new one, so a metric
- * that moved on a poll is visibly the one that moved. Pre-formatted strings
- * ("2m 14s", "38%") render as-is — there is no number to interpolate.
- */
+
 function StatValue({ value }: { value: number | string }) {
   const numeric = typeof value === "number";
   const counted = useCountUp(numeric ? value : 0);
@@ -67,6 +58,10 @@ export function StatCard({
   spark,
   sparkKey = "views",
   hint,
+  onExplain,
+  explaining,
+  explanation,
+  explainError,
 }: {
   icon: LucideIcon;
   label: string;
@@ -82,9 +77,16 @@ export function StatCard({
   sparkKey?: string;
   /** Plain-language explanation of what this metric means, shown on an info icon. */
   hint?: string;
+  /** "Why did this change?" — rendered only when passed, so cards that don't
+   * support it (multi-site view, etc) simply omit the prop. */
+  onExplain?: () => void;
+  explaining?: boolean;
+  explanation?: string | null;
+  explainError?: string | null;
 }) {
   const accent = ACCENT[color] ?? ACCENT.emerald;
   const sparkId = `spark-${String(label).replace(/\W/g, "")}`;
+  const [explainOpen, setExplainOpen] = useState(false);
 
   return (
     <Box className="stat-card">
@@ -113,20 +115,53 @@ export function StatCard({
               </Tooltip>
             )}
           </Group>
-          {live ? (
-            // A static dot says "this is the live metric"; a pulsing one says
-            // the number is still arriving. Same footprint, more information.
-            <span className="live-badge">
-              <span className="live-badge__dot" aria-hidden />
-              live
-            </span>
-          ) : delta !== undefined ? (
-            <DeltaBadge delta={delta} inverse={inverseDelta} />
-          ) : null}
+          <Group gap={6} wrap="nowrap" style={{ flexShrink: 0 }}>
+            {live ? (
+              <span className="live-badge">
+                <span className="live-badge__dot" aria-hidden />
+                live
+              </span>
+            ) : delta !== undefined ? (
+              <DeltaBadge delta={delta} inverse={inverseDelta} />
+            ) : null}
+            {onExplain && (
+              <Popover
+                width={280}
+                position="bottom-end"
+                withArrow
+                shadow="md"
+                opened={explainOpen}
+                onClose={() => setExplainOpen(false)}
+              >
+                <Popover.Target>
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    size="xs"
+                    onClick={() => {
+                      const opening = !explainOpen;
+                      setExplainOpen(opening);
+                      if (opening) onExplain();
+                    }}
+                    aria-label="Why did this change? — ask Orbit"
+                  >
+                    {explaining ? <Loader size={10} /> : <OrbitMark size={14} />}
+                  </ActionIcon>
+                </Popover.Target>
+                <Popover.Dropdown>
+                  <Group justify="space-between" wrap="nowrap" mb={6} gap={8}>
+                    <Text size="xs" fw={600} c="dimmed">Orbit</Text>
+                    <CloseButton size="xs" onClick={() => setExplainOpen(false)} />
+                  </Group>
+                  <Text size="xs" c={explainError ? "red" : undefined}>
+                    {explaining ? "Thinking…" : explainError ?? explanation ?? ""}
+                  </Text>
+                </Popover.Dropdown>
+              </Popover>
+            )}
+          </Group>
         </Group>
 
-        {/* Proportional figures, not tabular: at 30px, tabular spacing makes a
-            number like 121 look gappy. Columns of numbers still use tabular. */}
         <Text
           className="stat-card-value"
           fw={700}

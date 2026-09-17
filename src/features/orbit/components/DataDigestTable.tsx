@@ -20,7 +20,7 @@ export type DataDigestSite = {
   countries: DataDigestRow[];
   devices: DataDigestRow[];
 };
-export type DataDigest = { sites: DataDigestSite[] };
+export type DataDigest = { sites: DataDigestSite[]; rangeLabel?: string };
 
 export function isDataDigest(v: unknown): v is DataDigest {
   return Boolean(v) && typeof v === "object" && Array.isArray((v as DataDigest).sites);
@@ -46,10 +46,11 @@ function rowsLine(label: string, rows: DataDigestRow[]): string {
  * chat turn that only makes sense next to the question that produced it.
  */
 export function formatDigestAsText(digest: DataDigest): string {
+  const range = digest.rangeLabel ?? "the last 7 days";
   return digest.sites
     .map((site) =>
       [
-        `${site.domain} — last 7 days`,
+        `${site.domain} — ${range}`,
         `Visitors: ${site.visitors}${changeLine(site.visitorsChangePct)}`,
         `Pageviews: ${site.pageviews}${changeLine(site.pageviewsChangePct)}`,
         `Sessions: ${site.sessions}${changeLine(site.sessionsChangePct)}`,
@@ -165,13 +166,14 @@ export function DataDigestTable({
   if (!isDataDigest(digest) || !digest.sites.length) return null;
 
   const stamp = takenAt(takenAtIso);
+  const range = digest.rangeLabel ?? "the last 7 days";
 
   return (
     <div className={classes.wrap}>
       {digest.sites.map((site) => (
         <div key={site.domain} className={classes.card}>
           <Text size="xs" fw={600} c="dimmed" mb={8}>
-            {site.domain} · last 7 days
+            {site.domain} · {range}
             {stamp ? <Text span c="dimmed" fw={400}> · {stamp}</Text> : null}
           </Text>
           <div className={classes.statRow}>

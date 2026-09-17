@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
@@ -52,7 +52,7 @@ import {
   useGetSegmentsQuery, useSaveSegmentMutation,
   useUpdateSegmentMutation, useDeleteSegmentMutation,
   useGetMarkersQuery, useSaveMarkerMutation, useDeleteMarkerMutation,
-  useGetStatsCompareQuery,
+  useGetStatsCompareQuery, useExplainMetricMutation,
 } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import {
@@ -565,6 +565,54 @@ export default function Analytics() {
     }));
   }, [view?.timeseries, view?.comparison?.timeseries]);
 
+  // The one site "why did this change" would explain — only when exactly one
+  // is unambiguously in view, whether from an explicit pick or because the
+  // workspace only has one site. Ambiguous across a multi-site aggregate, so
+  // the button is hidden rather than guessing which site's story to tell.
+  const explainSiteId =
+    siteScope.length === 1 ? siteScope[0] : sites.length === 1 ? sites[0].siteId : null;
+
+  const [explainMetric] = useExplainMetricMutation();
+  const [explainState, setExplainState] = useState<
+    Record<string, { text?: string; error?: string }>
+  >({});
+  // Which card's request is in flight — a shared mutation-loading flag would
+  // light up every sparkle icon at once, not just the one that was clicked.
+  const [explainPendingKey, setExplainPendingKey] = useState<string | null>(null);
+
+  const explainKey = `${range}:${rangeState.from ?? ""}:${rangeState.to ?? ""}:${compareState.mode}`;
+
+  const onExplainMetric = useCallback(
+    async (metric: string) => {
+      if (!active?._id || !explainSiteId) return;
+      const key = `${metric}:${explainKey}`;
+      if (explainState[key] || explainPendingKey === key) return;
+
+      setExplainPendingKey(key);
+      try {
+        const { reply } = await explainMetric({
+          workspaceId: active._id,
+          siteId: explainSiteId,
+          metric,
+          range,
+          from: rangeState.from,
+          to: rangeState.to,
+          compare: compareState.mode,
+          compareFrom: compareState.from,
+        }).unwrap();
+        setExplainState((prev) => ({ ...prev, [key]: { text: reply } }));
+      } catch (e) {
+        setExplainState((prev) => ({
+          ...prev,
+          [key]: { error: errMessage(e, "Could not explain this right now.") },
+        }));
+      } finally {
+        setExplainPendingKey((cur) => (cur === key ? null : cur));
+      }
+    },
+    [active?._id, explainSiteId, explainKey, explainState, explainPendingKey, explainMetric, range, rangeState, compareState],
+  );
+
   // Skeleton only on a true first load, when there is nothing to show at all.
   if (loading || (active && !view)) {
     return <AppShell><AnalyticsSkeleton /></AppShell>;
@@ -614,26 +662,26 @@ export default function Analytics() {
   // Stat `label`s are translated; the long `hint` tooltips stay English for a
   // later pass — they fall back cleanly and aren't blocking to read.
   const audience = [
-    { icon: Users, label: t("analytics.stat.visitors"), value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors",
+    { metric: "visitors", icon: Users, label: t("analytics.stat.visitors"), value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors",
       hint: "Distinct people in this period. A visitor is a privacy-friendly daily hash of IP and browser — no cookies, so the same person on two days counts twice." },
-    { icon: Eye, label: t("analytics.stat.pageviews"), value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views",
+    { metric: "pageviews", icon: Eye, label: t("analytics.stat.pageviews"), value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views",
       hint: "Every page load, including SPA route changes. One visitor can rack up many pageviews." },
-    { icon: Layers, label: t("analytics.stat.sessions"), value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null,
+    { metric: "sessions", icon: Layers, label: t("analytics.stat.sessions"), value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null,
       hint: "A visit — one or more pageviews with no 30-minute gap. A returning visitor later in the day starts a fresh session." },
-    { icon: Radio, label: t("analytics.stat.live"), value: view?.live ?? 0, color: "green", live: true,
+    { metric: null, icon: Radio, label: t("analytics.stat.live"), value: view?.live ?? 0, color: "green", live: true,
       hint: "Distinct visitors active in the last 5 minutes, updated as the page refreshes." },
-  ];
+  ] as const;
 
   const engagement = [
-    { icon: MousePointerClick, label: t("analytics.stat.bounce"), value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true,
+    { metric: "bounceRate", icon: MousePointerClick, label: t("analytics.stat.bounce"), value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true,
       hint: "Share of sessions that left after a single pageview without interacting. Lower is usually better." },
-    { icon: Timer, label: t("analytics.stat.avgSession"), value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null,
+    { metric: "avgSessionMs", icon: Timer, label: t("analytics.stat.avgSession"), value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null,
       hint: "Average visible time across a whole visit. A backgrounded tab doesn't count, so this is real attention time." },
-    { icon: Timer, label: t("analytics.stat.avgTimeOnPage"), value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan",
+    { metric: "avgTimeOnPageMs", icon: Timer, label: t("analytics.stat.avgTimeOnPage"), value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan",
       hint: "Average visible time on a single page before moving on." },
-    { icon: Layers, label: t("analytics.stat.pagesPerSession"), value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null,
+    { metric: "pagesPerSession", icon: Layers, label: t("analytics.stat.pagesPerSession"), value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null,
       hint: "How many pages a typical visit touches. Higher means people explore more." },
-  ];
+  ] as const;
 
   // Top-level sections. "Overview" is just the headline widgets; the rest each
   // hold a small set of detail views, so nothing is buried in a long scroll.
@@ -827,21 +875,41 @@ export default function Analytics() {
       {/* audience */}
       <SectionLabel icon={Users}>{t("analytics.sectionAudience")}</SectionLabel>
       <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} spacing="lg" mb="xl">
-        {audience.map((k, i) => (
-          <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
-            <StatCard {...k} />
-          </motion.div>
-        ))}
+        {audience.map((k, i) => {
+          const { metric, ...card } = k;
+          const key = metric ? `${metric}:${explainKey}` : "";
+          return (
+            <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
+              <StatCard
+                {...card}
+                onExplain={metric && explainSiteId ? () => onExplainMetric(metric) : undefined}
+                explaining={metric ? explainPendingKey === key : false}
+                explanation={metric ? explainState[key]?.text ?? null : null}
+                explainError={metric ? explainState[key]?.error ?? null : null}
+              />
+            </motion.div>
+          );
+        })}
       </SimpleGrid>
 
       {/* engagement */}
       <SectionLabel icon={ArrowDownWideNarrow}>{t("analytics.sectionEngagement")}</SectionLabel>
       <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} spacing="lg" mb="xl">
-        {engagement.map((k, i) => (
-          <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05, duration: 0.35 }}>
-            <StatCard {...k} />
-          </motion.div>
-        ))}
+        {engagement.map((k, i) => {
+          const { metric, ...card } = k;
+          const key = metric ? `${metric}:${explainKey}` : "";
+          return (
+            <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.05, duration: 0.35 }}>
+              <StatCard
+                {...card}
+                onExplain={metric && explainSiteId ? () => onExplainMetric(metric) : undefined}
+                explaining={metric ? explainPendingKey === key : false}
+                explanation={metric ? explainState[key]?.text ?? null : null}
+                explainError={metric ? explainState[key]?.error ?? null : null}
+              />
+            </motion.div>
+          );
+        })}
       </SimpleGrid>
 
       {/* traffic chart + live */}
