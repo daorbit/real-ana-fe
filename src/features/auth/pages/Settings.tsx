@@ -1,4 +1,4 @@
-import { Tabs } from "@mantine/core";
+import { Tabs, Divider } from "@mantine/core";
 import { UserRound, Palette, Link2, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
@@ -10,6 +10,7 @@ import { useProfileForm } from "@/features/auth/components/settings/useProfileFo
 import { InfoPanel } from "@/features/auth/components/settings/InfoPanel";
 import { ConnectionsPanel } from "@/features/auth/components/settings/ConnectionsPanel";
 import { TwoFactorPanel } from "@/features/auth/components/settings/TwoFactorPanel";
+import { PasswordPanel } from "@/features/auth/components/settings/PasswordPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
 import { useTitle } from "@/shared/lib/useTitle";
 
@@ -60,6 +61,8 @@ export default function Settings() {
           </Tabs.Panel>
 
           <Tabs.Panel value="security">
+            <PasswordPanel />
+            <Divider my="xl" />
             <TwoFactorPanel />
           </Tabs.Panel>
         </Tabs>

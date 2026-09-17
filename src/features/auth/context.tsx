@@ -38,6 +38,8 @@ type AuthState = {
   /** Proves the code, sets the new password, and signs in. */
   resetPassword: (email: string, code: string, password: string) => Promise<void>;
   resendResetCode: (email: string) => Promise<void>;
+  /** Change (or set) the password from inside the app. */
+  changePassword: (newPassword: string, currentPassword?: string) => Promise<void>;
   startDemo: () => Promise<void>;
   logout: () => void;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
@@ -206,6 +208,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api.post("/api/auth/forgot-password/resend", { email });
   };
 
+  const changePassword = async (newPassword: string, currentPassword?: string) => {
+    const updated = await api.post<User>("/api/auth/me/password", {
+      newPassword,
+      ...(currentPassword ? { currentPassword } : {}),
+    });
+    setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
+  };
+
   const updateProfile = async (patch: ProfileUpdate) => {
     const updated = await api.patch<User>("/api/auth/me", patch);
     // /api/auth/me does not echo `impersonating` on PATCH, and losing it would
@@ -255,13 +265,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const impersonate = async (userId: string) => {
     const r = await api.post<AuthResp>(`/api/admin/impersonate/${userId}`, {});
     startImpersonating(r.token);
-    // The cache is full of the admin's own workspaces and stats. Clearing it is
-    // what makes the switch complete rather than cosmetic.
     dispatch(rtkApi.util.resetApiState());
     setUser({ ...r.user, impersonating: true });
-    // The active workspace is remembered per browser, and it belongs to the
-    // admin — leaving it would point every query at a workspace this user
-    // cannot see.
     localStorage.removeItem("rta_active_ws");
   };
 
@@ -280,7 +285,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>
