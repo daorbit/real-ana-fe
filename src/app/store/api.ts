@@ -807,6 +807,20 @@ export const api = createApi({
       invalidatesTags: ["AdminUser"],
     }),
 
+    /** Support-side recovery for someone locked out of 2FA with no backup
+     * codes left. Turns 2FA off; never reads the secret or the codes. */
+    adminReset2fa: build.mutation<{ ok: true }, string>({
+      query: (userId) => ({ url: `/api/admin/users/${userId}/2fa/disable`, method: "POST" }),
+      invalidatesTags: ["AdminUser"],
+    }),
+
+    /** Same recovery for the idle screen lock: clears the PIN and the lock
+     * flag so the account opens normally again. */
+    adminResetScreenLock: build.mutation<{ ok: true }, string>({
+      query: (userId) => ({ url: `/api/admin/users/${userId}/screen-lock/reset`, method: "POST" }),
+      invalidatesTags: ["AdminUser"],
+    }),
+
     getAdminUserBilling: build.query<AdminUserBilling, string>({
       query: (userId) => `/api/admin/users/${userId}/billing`,
       providesTags: ["AdminUserBilling"],
@@ -2002,6 +2016,8 @@ export const {
   useSaveWorkspaceThemeMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
+  useAdminReset2faMutation,
+  useAdminResetScreenLockMutation,
   useGetAdminUserBillingQuery,
   useGrantAdminSiteSlotMutation,
   useGetOrbitStatusQuery,

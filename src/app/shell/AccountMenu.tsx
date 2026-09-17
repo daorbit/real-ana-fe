@@ -4,13 +4,14 @@ import {
   Badge, Box, Group, Menu, Text, UnstyledButton,
 } from "@mantine/core";
 import {
-  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LogOut, Moon, Sun,
+  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Moon, Sun,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { ADMIN_ITEMS } from "./navItems";
 import { RequestFeatureModal } from "./RequestFeatureModal";
+import { SupportRequestModal } from "./SupportRequestModal";
 
 /**
  * Who is signed in, and everything that belongs to them rather than to a
@@ -49,10 +50,12 @@ export function AccountMenu({
 }) {
   const { t } = useTranslation();
   const [featureOpen, setFeatureOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   return (
     <>
     <RequestFeatureModal opened={featureOpen} onClose={() => setFeatureOpen(false)} />
+    <SupportRequestModal opened={supportOpen} onClose={() => setSupportOpen(false)} />
     <Menu
       position={mobile ? "top" : "right-end"}
       withArrow
@@ -198,6 +201,18 @@ export function AccountMenu({
           closeMenuOnClick={false}
         >
           {t("nav.requestFeature", "Request a feature")}
+        </Menu.Item>
+
+        {/* Same modal-embed pattern as the feature request above — this is
+            where a locked-out account (lost 2FA, forgotten PIN) reaches
+            support, since neither can be recovered from inside the app by
+            design. */}
+        <Menu.Item
+          leftSection={<LifeBuoy size={15} />}
+          onClick={() => setSupportOpen(true)}
+          closeMenuOnClick={false}
+        >
+          {t("nav.contactSupport", "Contact support")}
         </Menu.Item>
 
         <Menu.Divider />

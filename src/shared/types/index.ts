@@ -799,6 +799,8 @@ export type AdminUser = {
   lastEventAt: string | null;
   /** null when the account has no subscription row at all. */
   plan: { slug: string; name: string; expired: boolean } | null;
+  totpEnabled: boolean;
+  screenLockEnabled: boolean;
 };
 
 export type AdminUserPage = {

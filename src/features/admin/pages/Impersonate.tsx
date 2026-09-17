@@ -5,11 +5,14 @@ import {
   Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
   HoverCard, Image,
 } from "@mantine/core";
-import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, RefreshCw } from "lucide-react";
+import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, RefreshCw, ShieldOff, LockKeyholeOpen } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmailComposer } from "@/features/admin/components/EmailComposer";
 import { AdminPlanDialog } from "@/features/admin/components/AdminPlanDialog";
-import { useGetAdminUsersQuery, useDeleteAdminUserMutation } from "@/app/store";
+import {
+  useGetAdminUsersQuery, useDeleteAdminUserMutation,
+  useAdminReset2faMutation, useAdminResetScreenLockMutation,
+} from "@/app/store";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
@@ -71,6 +74,8 @@ export default function Impersonate() {
     { skip: !isAdmin }
   );
   const [deleteUser] = useDeleteAdminUserMutation();
+  const [reset2fa, { isLoading: resetting2fa }] = useAdminReset2faMutation();
+  const [resetScreenLock, { isLoading: resettingLock }] = useAdminResetScreenLockMutation();
   const isSuperAdmin = user?.role === "super_admin" && !user?.impersonating;
 
   const enter = async (u: AdminUser) => {
@@ -85,6 +90,53 @@ export default function Impersonate() {
     } finally {
       setBusy(null);
     }
+  };
+
+  const resetTwoFactor = (u: AdminUser) => {
+    confirmDelete({
+      title: "Turn off two-factor authentication?",
+      confirmLabel: "Turn off 2FA",
+      body: (
+        <>
+          Turns off 2FA for <b>{u.name}</b> ({u.email}) so they can sign in
+          with just their password again. Use this when someone has lost
+          their authenticator and used up their backup codes — the codes
+          themselves are never visible to anyone, including admins, so this
+          reset is the only way back in.
+        </>
+      ),
+      onConfirm: async () => {
+        try {
+          await reset2fa(u.id).unwrap();
+          notify.success(`Two-factor authentication turned off for ${u.email}.`, "2FA reset");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not turn off 2FA for that account."));
+        }
+      },
+    });
+  };
+
+  const resetScreenLockFor = (u: AdminUser) => {
+    confirmDelete({
+      title: "Reset the screen lock?",
+      confirmLabel: "Reset lock",
+      body: (
+        <>
+          Clears the screen-lock PIN and turns the idle lock off for{" "}
+          <b>{u.name}</b> ({u.email}). Use this when someone is locked out
+          with no working PIN or authenticator code — the PIN is never
+          visible to anyone, including admins.
+        </>
+      ),
+      onConfirm: async () => {
+        try {
+          await resetScreenLock(u.id).unwrap();
+          notify.success(`Screen lock reset for ${u.email}.`, "Screen lock reset");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not reset the screen lock for that account."));
+        }
+      },
+    });
   };
 
   const remove = (u: AdminUser) => {
@@ -367,6 +419,48 @@ export default function Impersonate() {
                                 <Mail size={16} />
                               </ActionIcon>
                             </Tooltip>
+                            {isSuperAdmin && (
+                              <Tooltip
+                                label={
+                                  !u.totpEnabled
+                                    ? "2FA is already off for this account"
+                                    : "Turn off 2FA — for a lost authenticator with no backup codes left"
+                                }
+                                withArrow
+                              >
+                                <ActionIcon
+                                  variant="light"
+                                  color="orange"
+                                  size="lg"
+                                  radius="md"
+                                  disabled={!u.totpEnabled || resetting2fa}
+                                  onClick={() => resetTwoFactor(u)}
+                                >
+                                  <ShieldOff size={16} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                            {isSuperAdmin && (
+                              <Tooltip
+                                label={
+                                  !u.screenLockEnabled
+                                    ? "Screen lock is already off for this account"
+                                    : "Reset screen lock — for someone locked out with no working PIN"
+                                }
+                                withArrow
+                              >
+                                <ActionIcon
+                                  variant="light"
+                                  color="orange"
+                                  size="lg"
+                                  radius="md"
+                                  disabled={!u.screenLockEnabled || resettingLock}
+                                  onClick={() => resetScreenLockFor(u)}
+                                >
+                                  <LockKeyholeOpen size={16} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
                             <Tooltip
                               label={
                                 !isSuperAdmin

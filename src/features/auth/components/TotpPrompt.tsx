@@ -2,13 +2,9 @@ import { useState } from "react";
 import { ActionIcon, Box, Button, Group, Modal, PinInput, Stack, Text, TextInput } from "@mantine/core";
 import { ShieldCheck, X } from "lucide-react";
 import { errMessage } from "@/shared/lib/notify";
+import { SupportRequestModal } from "@/app/shell/SupportRequestModal";
 
-/**
- * The second step of a 2FA login: a 6-digit TOTP code, or a backup code
- * typed into the same field. Styled as a sibling of `VerifyDialog` — same
- * card shell, shield and rise-in — since both interrupt the same moment,
- * between pressing sign in and being signed in.
- */
+
 export function TotpPrompt({
   opened,
   busy,
@@ -23,6 +19,7 @@ export function TotpPrompt({
   const [code, setCode] = useState("");
   const [useBackup, setUseBackup] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const submit = async (value = code) => {
     if (!value.trim()) return;
@@ -41,6 +38,8 @@ export function TotpPrompt({
   };
 
   return (
+    <>
+    <SupportRequestModal opened={supportOpen} onClose={() => setSupportOpen(false)} />
     <Modal
       opened={opened}
       onClose={onCancel}
@@ -133,7 +132,21 @@ export function TotpPrompt({
             {useBackup ? "Use an authenticator code instead" : "Use a backup code instead"}
           </Text>
         </Box>
+
+        <Box mt={10} ta="center" className="verify-rise" style={{ animationDelay: "170ms" }}>
+          <Text
+            component="button"
+            type="button"
+            onClick={() => setSupportOpen(true)}
+            size="xs"
+            fw={500}
+            className="verify-cancel"
+          >
+            Lost access to both? Contact support
+          </Text>
+        </Box>
       </Stack>
     </Modal>
+    </>
   );
 }

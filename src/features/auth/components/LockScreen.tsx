@@ -4,6 +4,7 @@ import { Lock } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { subscribeLock, isLocked } from "@/shared/lib/lockState";
 import { errMessage } from "@/shared/lib/notify";
+import { SupportRequestModal } from "@/app/shell/SupportRequestModal";
 
 /**
  * The idle lock overlay. Deliberately not dismissible any way but a correct
@@ -20,6 +21,7 @@ export function LockScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"pin" | "totp">(user?.totpEnabled ? "totp" : "pin");
+  const [supportOpen, setSupportOpen] = useState(false);
 
   useEffect(() => subscribeLock(setVisible), []);
 
@@ -51,6 +53,8 @@ export function LockScreen() {
   const canSwitchToPin = Boolean(user.hasPin);
 
   return (
+    <>
+    <SupportRequestModal opened={supportOpen} onClose={() => setSupportOpen(false)} />
     <Modal
       opened
       onClose={() => {}}
@@ -131,7 +135,21 @@ export function LockScreen() {
             {mode === "pin" ? "Use an authenticator code instead" : "Use your PIN instead"}
           </Text>
         )}
+
+        <Text
+          component="button"
+          type="button"
+          mt={canSwitchToTotp && canSwitchToPin ? 8 : 16}
+          size="xs"
+          fw={500}
+          c="dimmed"
+          style={{ background: "none", border: "none", cursor: "pointer" }}
+          onClick={() => setSupportOpen(true)}
+        >
+          Lost your PIN or authenticator? Contact support
+        </Text>
       </Stack>
     </Modal>
+    </>
   );
 }
