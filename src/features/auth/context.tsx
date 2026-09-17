@@ -22,7 +22,6 @@ type AuthState = {
     password: string,
     turnstileToken?: string,
   ) => Promise<{ requires2fa: false } | { requires2fa: true; pendingToken: string }>;
-  /** Second step of a 2FA login: a TOTP code or an unused backup code. */
   verifyTotp: (pendingToken: string, code: string) => Promise<void>;
 
   googleSignIn: (credential: string) => Promise<{ created: boolean }>;
@@ -38,16 +37,14 @@ type AuthState = {
   /** Proves the code, sets the new password, and signs in. */
   resetPassword: (email: string, code: string, password: string) => Promise<void>;
   resendResetCode: (email: string) => Promise<void>;
+
+  recoverWithTotp: (email: string, code: string, password: string) => Promise<void>;
   /** Change (or set) the password from inside the app. */
   changePassword: (newPassword: string, currentPassword?: string) => Promise<void>;
   startDemo: () => Promise<void>;
   logout: () => void;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
-  /**
-   * Upload a new profile picture. Takes the image itself, not a data URL — the
-   * encoding is this layer's business, not the form's. A Blob rather than a File
-   * because the cropper produces one. Saves immediately.
-   */
+
   uploadAvatar: (file: Blob) => Promise<void>;
   removeAvatar: () => Promise<void>;
   impersonate: (userId: string) => Promise<void>;
@@ -208,6 +205,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api.post("/api/auth/forgot-password/resend", { email });
   };
 
+  /** Prove a TOTP or backup code and set the new password. Signs in on success. */
+  const recoverWithTotp = async (email: string, code: string, password: string) => {
+    const r = await api.post<AuthResp>("/api/auth/recover-with-totp", { email, code, password });
+    setToken(r.token);
+    dispatch(rtkApi.util.resetApiState());
+    setUser(r.user);
+    trace(r.user.id, "login", "password_reset_totp", "app");
+  };
+
   const changePassword = async (newPassword: string, currentPassword?: string) => {
     const updated = await api.post<User>("/api/auth/me/password", {
       newPassword,
@@ -285,7 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, recoverWithTotp, changePassword, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

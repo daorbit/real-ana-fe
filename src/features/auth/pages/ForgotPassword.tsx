@@ -14,32 +14,20 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
 
-/**
- * Password reset, in two steps on one page.
- *
- * A code rather than a reset link, matching the signup flow: a link is a bearer
- * credential living in a URL, and URLs leak into history, referrers, chat
- * previews and mail scanners that fetch everything they see. A code has to be
- * read by a person and typed back.
- *
- * The first step never says whether the address has an account — the server
- * answers identically either way, and this screen has to preserve that or it
- * hands back the enumeration oracle the API refuses to be.
- */
 
-/** Matches the server's resend spacing, so the button reflects the real rule. */
 const RESEND_COOLDOWN = 60;
 
-type Step = "request" | "reset";
+type Step = "request" | "reset" | "totp";
 
 export default function ForgotPassword() {
-  const { forgotPassword, resetPassword, resendResetCode } = useAuth();
+  const { forgotPassword, resetPassword, resendResetCode, recoverWithTotp } = useAuth();
   const nav = useNavigate();
 
   const [step, setStep] = useState<Step>("request");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
+  const [useBackupCode, setUseBackupCode] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -119,6 +107,32 @@ export default function ForgotPassword() {
     }
   }
 
+  async function submitTotp(e: FormEvent) {
+    e.preventDefault();
+    const emailErr = v.email(email);
+    if (emailErr) {
+      setTouched(true);
+      return;
+    }
+    if (v.password(password)) {
+      setError("Choose a password that meets the requirements below.");
+      return;
+    }
+    if (!code.trim()) return;
+
+    setBusy(true);
+    setError(null);
+    try {
+      await recoverWithTotp(email.trim().toLowerCase(), code.trim(), password);
+      notify.success("Password changed — you're signed in");
+      nav("/app");
+    } catch (err) {
+      setError(errMessage(err, "That code didn't work."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function resend() {
     setResending(true);
     setError(null);
@@ -145,7 +159,9 @@ export default function ForgotPassword() {
         <motion.form
           className="auth-form"
           noValidate
-          onSubmit={step === "request" ? request : (e) => { e.preventDefault(); submit(code); }}
+          onSubmit={
+            step === "request" ? request : step === "totp" ? submitTotp : (e) => { e.preventDefault(); submit(code); }
+          }
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
@@ -203,6 +219,150 @@ export default function ForgotPassword() {
                 >
                   Send reset code
                 </Button>
+
+                <Text ta="center" size="sm">
+                  <Anchor
+                    component="button"
+                    type="button"
+                    size="sm"
+                    c="dimmed"
+                    onClick={() => {
+                      const invalid = v.email(email);
+                      if (invalid) {
+                        setTouched(true);
+                        return;
+                      }
+                      setError(null);
+                      setStep("totp");
+                    }}
+                  >
+                    Have an authenticator app? Use it instead
+                  </Anchor>
+                </Text>
+              </>
+            ) : step === "totp" ? (
+              <>
+                <div>
+                  <Title order={2}>Reset with your authenticator</Title>
+                  <Text c="dimmed" size="sm" mt={4}>
+                    Enter the account email, a code from your authenticator app (or a
+                    backup code), and your new password.
+                  </Text>
+                </div>
+
+                {error && <Alert color="red" variant="light">{error}</Alert>}
+
+                <TextInput
+                  label="Email"
+                  placeholder="you@company.com"
+                  size="md"
+                  withAsterisk
+                  autoComplete="email"
+                  autoFocus
+                  value={email}
+                  error={emailError}
+                  onChange={(e) => {
+                    setEmail(e.currentTarget.value);
+                    if (touched) setTouched(false);
+                  }}
+                  onBlur={() => email && setTouched(true)}
+                />
+
+                <div>
+                  <PasswordInput
+                    label="New password"
+                    placeholder="••••••••"
+                    size="md"
+                    withAsterisk
+                    autoComplete="new-password"
+                    value={password}
+                    error={passwordError}
+                    onChange={(e) => {
+                      setPassword(e.currentTarget.value);
+                      setError(null);
+                    }}
+                  />
+                  {password && (
+                    <div style={{ marginTop: 8 }}>
+                      <PasswordStrength value={password} />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Text size="sm" fw={500} mb={8}>
+                    {useBackupCode ? "Backup code" : "Authenticator code"}
+                  </Text>
+                  {useBackupCode ? (
+                    <TextInput
+                      placeholder="XXXX-XXXX"
+                      size="md"
+                      disabled={busy}
+                      value={code}
+                      onChange={(e) => {
+                        setCode(e.currentTarget.value);
+                        setError(null);
+                      }}
+                      styles={{ input: { textAlign: "center", letterSpacing: 2 } }}
+                    />
+                  ) : (
+                    <Center>
+                      <PinInput
+                        length={6}
+                        type="number"
+                        inputMode="numeric"
+                        size="lg"
+                        disabled={busy}
+                        value={code}
+                        onChange={(val) => {
+                          setCode(val);
+                          setError(null);
+                        }}
+                      />
+                    </Center>
+                  )}
+                </div>
+
+                <Button
+                  className="auth-btn"
+                  type="submit"
+                  loading={busy}
+                  disabled={!code.trim() || Boolean(v.password(password)) || Boolean(v.email(email))}
+                  fullWidth
+                  size="md"
+                >
+                  Set new password
+                </Button>
+
+                <Stack gap={6} align="center">
+                  <Anchor
+                    component="button"
+                    type="button"
+                    size="sm"
+                    c="dimmed"
+                    onClick={() => {
+                      setUseBackupCode((b) => !b);
+                      setCode("");
+                      setError(null);
+                    }}
+                  >
+                    {useBackupCode ? "Use an authenticator code instead" : "Use a backup code instead"}
+                  </Anchor>
+                  <Anchor
+                    component="button"
+                    type="button"
+                    size="sm"
+                    c="dimmed"
+                    onClick={() => {
+                      setStep("request");
+                      setCode("");
+                      setPassword("");
+                      setError(null);
+                    }}
+                  >
+                    Email me a code instead
+                  </Anchor>
+                </Stack>
               </>
             ) : (
               <>
@@ -220,9 +380,6 @@ export default function ForgotPassword() {
                 {error && <Alert color="red" variant="light">{error}</Alert>}
                 {notice && <Alert color="green" variant="light">{notice}</Alert>}
 
-                {/* The strength meter belongs to the field above it, so the two
-                    are one block — as siblings in the stack they drift apart by
-                    the stack's own gap. */}
                 <div>
                   <PasswordInput
                     label="New password"
