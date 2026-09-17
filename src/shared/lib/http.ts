@@ -84,8 +84,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     }
     // A 423 means the account's screen lock is engaged — surfaced here so any
     // request anywhere, not just the idle timer's own, can bring the overlay
-    // up if a stale lock state got out of sync.
-    if (res.status === 423) {
+    // up if a stale lock state got out of sync. `/auth/login`'s own 423 is a
+    // different thing entirely (the 12-hour wrong-password lock, before any
+    // session exists) and is handled inline by the login form instead.
+    if (res.status === 423 && !path.includes("/auth/")) {
       void import("./lockState").then((m) => m.showLock());
     }
     // Carry the status and payload on the error so callers that need more than

@@ -15,6 +15,7 @@ import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButto
 import { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { VerifyDialog } from "@/features/auth/components/VerifyDialog";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
+import { AccountLockedDialog } from "@/features/auth/components/AccountLockedDialog";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { consumeReturnPath } from "@/shared/lib/session";
 import { getLastUser } from "@/features/auth/lastUser";
@@ -41,6 +42,7 @@ export default function Login() {
   // be open at once, since the challenge already ran before this exists.
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [totpBusy, setTotpBusy] = useState(false);
+  const [lockedUntil, setLockedUntil] = useState<Date | null>(null);
 
   const [lastUser] = useState(() => getLastUser());
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -99,7 +101,12 @@ export default function Login() {
       notify.success("Welcome back!", "Logged in");
       goAfterLogin();
     } catch (err) {
-      setError(errMessage(err, "Login failed. Check your email and password."));
+      const e = err as ApiError;
+      if (e?.status === 423 && e.body?.lockedUntil) {
+        setLockedUntil(new Date(String(e.body.lockedUntil)));
+      } else {
+        setError(errMessage(err, "Login failed. Check your email and password."));
+      }
     } finally {
       setBusy(false);
     }
@@ -265,6 +272,8 @@ export default function Login() {
         onSubmit={submitTotp}
         onCancel={() => setPendingToken(null)}
       />
+
+      <AccountLockedDialog lockedUntil={lockedUntil} onClose={() => setLockedUntil(null)} />
     </div>
   );
 }
