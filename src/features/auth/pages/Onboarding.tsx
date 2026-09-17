@@ -8,9 +8,6 @@ import { Stepper } from "@/features/auth/components/onboarding/Stepper";
 import { WorkspaceStepBody, WorkspaceStepFooter } from "@/features/auth/components/onboarding/WorkspaceStep";
 import { SiteStepBody, SiteStepFooter } from "@/features/auth/components/onboarding/SiteStep";
 import { ReadyStepBody, ReadyStepFooter } from "@/features/auth/components/onboarding/ReadyStep";
-import { FormStepBody } from "@/features/auth/components/onboarding/FormStep";
-import { generateForm, saveForm, mintWorkspaceToken } from "@/features/auth/components/onboarding/formsApi";
-import type { GeneratedForm } from "@/features/auth/components/onboarding/formsApi";
 import { useCreateWorkspaceMutation, useCreateSiteMutation, useGenerateOnboardingCopyMutation } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
 import { getFramework } from "@/features/workspace/frameworks";
@@ -54,13 +51,6 @@ const STEPS = [
     tall: true,
   },
   {
-    label: "Your first form",
-    hint: "Built for you by AI",
-    title: "Let's build your first form",
-    lede: "Describe what you want to collect and we'll draft it — you can change anything afterwards.",
-    wide: true,
-  },
-  {
     label: "Install",
     hint: "One script tag",
     title: "You're ready",
@@ -69,29 +59,20 @@ const STEPS = [
   },
 ];
 
-/**
- * The forms step, by index.
- *
- * Only offered during first-run setup. An existing account adding another
- * workspace has been through this once, and generating a second form it never
- * asked for would spend its AI quota to make a point it already understands.
- */
-const FORM_STEP = 3;
-const INSTALL_STEP = 4;
+const INSTALL_STEP = 3;
 
 /** Index into `STEPS` of the first step that may be skipped. */
 const FIRST_SKIPPABLE_STEP = 1;
 
 /** The appearance screen, which sits past the stepper and runs its own layout. */
-const APPEARANCE_STEP = 5;
+const APPEARANCE_STEP = 4;
 
 
-const SLUGS = ["details", "workspace", "site", "form", "install", "appearance"];
+const SLUGS = ["details", "workspace", "site", "install", "appearance"];
 
 
 function furthestReachable(step: number, wsId: string | null, site: Site | null): number {
-  if (step >= INSTALL_STEP && !site) return wsId ? FORM_STEP : 1;
-  if (step >= FORM_STEP && !wsId) return 1;
+  if (step >= INSTALL_STEP && !site) return wsId ? 2 : 1;
   if (step >= 2 && !wsId) return 1;
   return step;
 }
@@ -151,13 +132,7 @@ export default function Onboarding() {
   const [siteError, setSiteError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
-  // step 3 — the AI form
-  const [formPrompt, setFormPrompt] = useState("");
-  const [generatedForm, setGeneratedForm] = useState<GeneratedForm | null>(null);
-  const [formBusy, setFormBusy] = useState<"generating" | "saving" | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  // step 4
+  // step 3
   const [site, setSite] = useState<Site | null>(restored.site);
   const [aiCopy, setAiCopy] = useState<{ readyHeadline: string; readyDescription: string } | null>(null);
 
@@ -246,9 +221,7 @@ export default function Onboarding() {
         purpose: purpose.trim(),
       }).unwrap();
       setSite(created);
-      // The forms step is first-run only; an account adding a second
-      // workspace goes straight to the snippet.
-      setStep(workspaceOnly ? INSTALL_STEP : FORM_STEP);
+      setStep(INSTALL_STEP);
 
       // Best-effort: a tailored headline is a nicety, and the step is already
       // on screen and usable without it.
@@ -269,62 +242,6 @@ export default function Onboarding() {
     }
   };
 
-  /**
-   * Draft a form from the prompt.
-   *
-   * The workspace token is minted per attempt rather than held: it lasts an
-   * hour, this is one call, and a token fetched once at step three would be a
-   * thing to keep fresh for no gain.
-   */
-  const generate = async () => {
-    const text = formPrompt.trim();
-    if (!text || !wsId) return;
-
-    setFormBusy("generating");
-    setFormError(null);
-    trace(user?.id, "onboarding_form_generated", "onboarding", "form");
-
-    try {
-      const token = await mintWorkspaceToken(wsId);
-      setGeneratedForm(await generateForm(wsId, token, text));
-    } catch (e) {
-      // Shown in the step rather than as a toast: the retry button is right
-      // there, and this is the one thing on screen that just failed.
-      setFormError(
-        e instanceof Error ? e.message : "The form could not be generated.",
-      );
-    } finally {
-      setFormBusy(null);
-    }
-  };
-
-  /** Keep the draft, then carry on to the snippet. */
-  const keepForm = async () => {
-    if (!generatedForm || !wsId) return;
-
-    setFormBusy("saving");
-    setFormError(null);
-
-    try {
-      const token = await mintWorkspaceToken(wsId);
-      await saveForm(wsId, token, generatedForm);
-      trace(user?.id, "onboarding_form_kept", "onboarding", "form");
-      setStep(INSTALL_STEP);
-    } catch (e) {
-      setFormError(
-        e instanceof Error ? e.message : "The form could not be saved.",
-      );
-    } finally {
-      setFormBusy(null);
-    }
-  };
-
-  /** Move past the form step without creating one. */
-  const skipForm = () => {
-    trace(user?.id, "onboarding_form_skipped", "onboarding", "form");
-    setStep(INSTALL_STEP);
-  };
-
   // The appearance step runs its own full-width layout and sits past the
   // stepper, so it returns before any of the shell below is built.
   if (step === APPEARANCE_STEP) {
@@ -332,31 +249,25 @@ export default function Onboarding() {
   }
 
   /**
-   * What the stepper shows. An account adding another workspace skips both
-   * its own details and the forms step, so those come out of the list as well
-   * as out of the flow — a stepper promising a step that never arrives is
-   * worse than one step shorter.
+   * What the stepper shows. An account adding another workspace skips its
+   * own details step, so that comes out of the list as well as out of the
+   * flow — a stepper promising a step that never arrives is worse than one
+   * step shorter.
    */
-  const displaySteps = workspaceOnly
-    ? STEPS.filter((_, i) => i !== 0 && i !== FORM_STEP)
-    : STEPS;
+  const displaySteps = workspaceOnly ? STEPS.filter((_, i) => i !== 0) : STEPS;
   const displayStep = workspaceOnly
-    ? STEPS.slice(0, step).filter((_, i) => i !== 0 && i !== FORM_STEP).length
+    ? STEPS.slice(0, step).filter((_, i) => i !== 0).length
     : step;
   const current = STEPS[step];
   const wide = current?.wide;
-  // The forms step is a centred prompt box until a draft comes back; only then
-  // does it grow a preview tall enough to need scrolling.
-  const tall = current?.tall || (step === FORM_STEP && generatedForm !== null);
+  const tall = current?.tall;
 
   const footer =
     step === 1 ? (
       <WorkspaceStepFooter loading={creatingWs} onSubmit={submitWorkspace} />
     ) : step === 2 ? (
       <SiteStepFooter loading={creatingSite} onBack={() => setStep(1)} onSubmit={submitSite} />
-    ) : // The forms step has no footer: its actions sit in the step itself, in
-    // a bar above the preview they apply to.
-    step === INSTALL_STEP && site ? (
+    ) : step === INSTALL_STEP && site ? (
       <ReadyStepFooter onContinue={() => setStep(APPEARANCE_STEP)} />
     ) : null;
 
@@ -366,10 +277,7 @@ export default function Onboarding() {
         <Wordmark />
         <Stepper step={displayStep} steps={displaySteps} />
         <div className={s.barEnd}>
-          {/* The form step carries its own "Skip this", which leaves setup
-              running rather than abandoning it — two skips meaning different
-              things side by side is a trap. */}
-          {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && step !== FORM_STEP && (
+          {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
             <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
               Skip for now
             </Anchor>
@@ -388,16 +296,10 @@ export default function Onboarding() {
                 Step {displayStep + 1} of {displaySteps.length}
               </span>
               <h1 className={s.title}>
-                {step === INSTALL_STEP
-                  ? (aiCopy?.readyHeadline ?? current.title)
-                  : step === FORM_STEP && generatedForm
-                    ? "Here's your first form"
-                    : current.title}
+                {step === INSTALL_STEP ? (aiCopy?.readyHeadline ?? current.title) : current.title}
               </h1>
 
-              {!(step === FORM_STEP && generatedForm) && (
-                <p className={s.lede}>{current.lede}</p>
-              )}
+              <p className={s.lede}>{current.lede}</p>
             </div>
           )}
 
@@ -437,29 +339,6 @@ export default function Onboarding() {
                 onPurposeChange={setPurpose}
                 framework={framework}
                 onFrameworkChange={setFramework}
-              />
-            )}
-
-            {step === FORM_STEP && (
-              <FormStepBody
-                purpose={purpose}
-                prompt={formPrompt}
-                onPromptChange={(val) => {
-                  setFormPrompt(val);
-                  setFormError(null);
-                }}
-                form={generatedForm}
-                generating={formBusy === "generating"}
-                saving={formBusy === "saving"}
-                error={formError}
-                onGenerate={generate}
-                onBack={() => setStep(2)}
-                onSkip={skipForm}
-                onKeep={keepForm}
-                onDiscard={() => {
-                  setGeneratedForm(null);
-                  setFormError(null);
-                }}
               />
             )}
 
