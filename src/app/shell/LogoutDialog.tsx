@@ -39,15 +39,10 @@ export function LogoutDialog({
           }}
         />
         <Stack gap="lg" p={26}>
-          <Stack gap={4}>
-            <Text size="sm" c="dimmed">
-              You'll be signed out of this browser and sent back to the sign-in page.
-            </Text>
-            <Text size="sm" c="dimmed">
-              Nothing is lost — your workspaces, sites, and settings stay exactly as they are.
-              Sign back in any time to pick up where you left off.
-            </Text>
-          </Stack>
+          <Text size="sm" c="dimmed" lh={1.55}>
+            You'll be signed out and need to log in again to see your analytics.
+            Your workspaces and settings stay exactly as you left them.
+          </Text>
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onStay}>Stay</Button>
             <Button color="emerald" onClick={onLogout}>Log out</Button>
