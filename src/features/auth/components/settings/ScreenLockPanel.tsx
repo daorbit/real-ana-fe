@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
-  Alert, Badge, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
+  ActionIcon, Alert, Badge, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
-import { LockKeyhole, LockKeyholeOpen } from "lucide-react";
+import { LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
+import lockBannerSrc from "@/assets/banners/lock-inactivity-banner.svg";
+import pinBannerSrc from "@/assets/banners/change-pin-banner.svg";
 
 /**
  * Turning the lock on needs a PIN set first, unless 2FA already covers
@@ -176,55 +178,97 @@ export function ScreenLockPanel() {
       <Modal
         opened={disableOpen}
         onClose={() => setDisableOpen(false)}
-        title="Turn off lock on inactivity"
+        radius="lg"
+        size={440}
         centered
+        padding={0}
+        withCloseButton={false}
       >
-        <Stack gap="md">
-          <Text size="sm" c="dimmed">
-            Confirm your password to turn off the screen lock for this account.
-          </Text>
-          {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
-          <PasswordInput
-            placeholder="Current password"
-            value={disablePassword}
-            onChange={(e) => setDisablePassword(e.currentTarget.value)}
-            onKeyDown={(e) => e.key === "Enter" && void disable()}
+        <Stack gap={0} className="verify-card" pos="relative">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={() => setDisableOpen(false)}
+            style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
+          >
+            <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />
+          </ActionIcon>
+          <div
+            style={{
+              height: 154,
+              backgroundImage: `url(${lockBannerSrc})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
           />
-          <Button color="red" loading={disabling} disabled={!disablePassword} onClick={() => void disable()}>
-            Turn off
-          </Button>
+          <Stack gap="md" p={26}>
+            <Text size="sm" c="dimmed">
+              Confirm your password to turn off the screen lock for this account.
+            </Text>
+            {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
+            <PasswordInput
+              placeholder="Current password"
+              value={disablePassword}
+              onChange={(e) => setDisablePassword(e.currentTarget.value)}
+              onKeyDown={(e) => e.key === "Enter" && void disable()}
+            />
+            <Button color="red" loading={disabling} disabled={!disablePassword} onClick={() => void disable()}>
+              Turn off
+            </Button>
+          </Stack>
         </Stack>
       </Modal>
 
       <Modal
         opened={pinOpen}
         onClose={() => setPinOpen(false)}
-        title={user.hasPin ? "Change PIN" : "Set a PIN"}
         radius="lg"
-        size={400}
+        size={440}
         centered
+        padding={0}
+        withCloseButton={false}
       >
-        <Stack gap="md" pt={4}>
-          {pinError && <Alert color="red" variant="light">{pinError}</Alert>}
-          {user.hasPin && (
+        <Stack gap={0} className="verify-card" pos="relative">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={() => setPinOpen(false)}
+            style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
+          >
+            <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />
+          </ActionIcon>
+          <div
+            style={{
+              height: 154,
+              backgroundImage: `url(${pinBannerSrc})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <Stack gap="md" p={26}>
+            {pinError && <Alert color="red" variant="light">{pinError}</Alert>}
+            {user.hasPin && (
+              <PasswordInput
+                label="Current PIN"
+                maxLength={4}
+                value={currentPin}
+                onChange={(e) => setCurrentPin(e.currentTarget.value)}
+                disabled={pinBusy}
+              />
+            )}
             <PasswordInput
-              label="Current PIN"
+              label="New PIN (4 digits)"
               maxLength={4}
-              value={currentPin}
-              onChange={(e) => setCurrentPin(e.currentTarget.value)}
+              value={newPin}
+              onChange={(e) => setNewPin(e.currentTarget.value)}
               disabled={pinBusy}
             />
-          )}
-          <PasswordInput
-            label="New PIN (4 digits)"
-            maxLength={4}
-            value={newPin}
-            onChange={(e) => setNewPin(e.currentTarget.value)}
-            disabled={pinBusy}
-          />
-          <Button fullWidth size="md" loading={pinBusy} disabled={newPin.trim().length !== 4} onClick={() => void savePin()}>
-            Save
-          </Button>
+            <Button fullWidth size="md" loading={pinBusy} disabled={newPin.trim().length !== 4} onClick={() => void savePin()}>
+              Save
+            </Button>
+          </Stack>
         </Stack>
       </Modal>
     </Box>

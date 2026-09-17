@@ -1,11 +1,12 @@
 import { useState } from "react";
 import {
-  Alert, Badge, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
+  ActionIcon, Alert, Badge, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
-import { ShieldCheck, ShieldOff, Download } from "lucide-react";
+import { ShieldCheck, ShieldOff, Download, X } from "lucide-react";
 import { api } from "@/shared/lib/http";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
+import totpSetupBannerSrc from "@/assets/banners/totp-setup-banner.svg";
 
 type SetupResp = { secret: string; qrDataUrl: string };
 type EnableResp = { backupCodes: string[] };
@@ -147,62 +148,101 @@ export function TwoFactorPanel() {
         )}
       </Group>
 
-      <Modal opened={setup !== null} onClose={finishSetup} title="Set up two-factor authentication" centered>
-        {setup && step === "qr" && (
-          <Stack gap="md">
-            <Text size="sm" c="dimmed">
-              Scan this with your authenticator app, then enter the 6-digit code it shows.
-            </Text>
-            <Box style={{ textAlign: "center" }}>
-              <img src={setup.qrDataUrl} alt="Scan with your authenticator app" width={200} height={200} />
-            </Box>
-            <Text size="xs" c="dimmed" ta="center">
-              Can't scan it? Enter this key instead: <code>{setup.secret}</code>
-            </Text>
+      <Modal
+        opened={setup !== null}
+        onClose={finishSetup}
+        radius="lg"
+        size={setup && step === "qr" ? 620 : 440}
+        centered
+        padding={0}
+        withCloseButton={false}
+      >
+        <Stack gap={0} className="verify-card" pos="relative">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={finishSetup}
+            style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
+          >
+            <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />
+          </ActionIcon>
+          <div
+            style={{
+              height: 154,
+              backgroundImage: `url(${totpSetupBannerSrc})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <Box p={26}>
+            {setup && step === "qr" && (
+              <Group align="flex-start" gap="xl" wrap="nowrap">
+                {/* Left: the thing you scan once. Right: the thing you type
+                    every time after — separating them reads as two steps
+                    instead of one long stack the eye has to scan top to
+                    bottom to find the input. */}
+                <Stack gap="sm" align="center" style={{ flexShrink: 0 }}>
+                  <img src={setup.qrDataUrl} alt="Scan with your authenticator app" width={180} height={180} />
+                </Stack>
 
-            {error && <Alert color="red" variant="light">{error}</Alert>}
+                <Stack gap="md" style={{ flex: 1 }}>
+                  <Text size="sm" c="dimmed">
+                    Scan the code with your authenticator app, then enter the 6-digit code it shows.
+                  </Text>
 
-            <PinInput
-              length={6}
-              type="number"
-              value={code}
-              onChange={setCode}
-              onComplete={() => void confirmSetup()}
-              disabled={enabling}
-              styles={{ root: { justifyContent: "center" } }}
-            />
-            <Button loading={enabling} disabled={code.trim().length !== 6} onClick={() => void confirmSetup()}>
-              Confirm and turn on
-            </Button>
-          </Stack>
-        )}
+                  {error && <Alert color="red" variant="light">{error}</Alert>}
 
-        {step === "codes" && (
-          <Stack gap="md">
-            <Alert color="teal" variant="light">
-              Two-factor authentication is on.
-            </Alert>
-            <Text size="sm" c="dimmed">
-              Save these backup codes somewhere safe. Each works once, in place of a code from
-              your app, if you lose access to it. They won't be shown again.
-            </Text>
-            <Box className="totp-backup-codes" style={{
-              fontFamily: "monospace", background: "var(--mantine-color-default-hover)",
-              borderRadius: 8, padding: 12, display: "grid",
-              gridTemplateColumns: "1fr 1fr", gap: 8,
-            }}>
-              {backupCodes.map((c) => <span key={c}>{c}</span>)}
-            </Box>
-            <Button
-              variant="light"
-              leftSection={<Download size={15} />}
-              onClick={downloadBackupCodes}
-            >
-              Download codes
-            </Button>
-            <Button onClick={finishSetup}>Done</Button>
-          </Stack>
-        )}
+                  <PinInput
+                    length={6}
+                    type="number"
+                    value={code}
+                    onChange={setCode}
+                    onComplete={() => void confirmSetup()}
+                    disabled={enabling}
+                  />
+                  <Button loading={enabling} disabled={code.trim().length !== 6} onClick={() => void confirmSetup()}>
+                    Confirm and turn on
+                  </Button>
+
+                  <Text size="xs" c="dimmed">
+                    Can't scan it? Enter this key instead:{" "}
+                    <Text span style={{ wordBreak: "break-all", fontFamily: "monospace" }}>
+                      {setup.secret}
+                    </Text>
+                  </Text>
+                </Stack>
+              </Group>
+            )}
+
+            {step === "codes" && (
+              <Stack gap="md">
+                <Alert color="teal" variant="light">
+                  Two-factor authentication is on.
+                </Alert>
+                <Text size="sm" c="dimmed">
+                  Save these backup codes somewhere safe. Each works once, in place of a code from
+                  your app, if you lose access to it. They won't be shown again.
+                </Text>
+                <Box className="totp-backup-codes" style={{
+                  fontFamily: "monospace", background: "var(--mantine-color-default-hover)",
+                  borderRadius: 8, padding: 12, display: "grid",
+                  gridTemplateColumns: "1fr 1fr", gap: 8,
+                }}>
+                  {backupCodes.map((c) => <span key={c}>{c}</span>)}
+                </Box>
+                <Button
+                  variant="light"
+                  leftSection={<Download size={15} />}
+                  onClick={downloadBackupCodes}
+                >
+                  Download codes
+                </Button>
+                <Button onClick={finishSetup}>Done</Button>
+              </Stack>
+            )}
+          </Box>
+        </Stack>
       </Modal>
 
       <Modal

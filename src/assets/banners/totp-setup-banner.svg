@@ -1,0 +1,56 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg3" cx="70%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="55%" stop-color="#1e40af"/>
+      <stop offset="100%" stop-color="#0c1e4a"/>
+    </radialGradient>
+    <linearGradient id="badge3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#bfdbfe"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="420" fill="url(#bg3)"/>
+
+  <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="1">
+    <line x1="0" y1="420" x2="420" y2="0"/>
+    <line x1="60" y1="420" x2="480" y2="0"/>
+    <line x1="120" y1="420" x2="540" y2="0"/>
+  </g>
+
+  <g fill="#ffffff" fill-opacity="0.12">
+    <circle cx="108" cy="92" r="2.5"/>
+    <circle cx="200" cy="320" r="2.5"/>
+    <circle cx="150" cy="292" r="2"/>
+  </g>
+
+  <text x="80" y="175" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#ffffff">Add an extra</text>
+  <text x="80" y="228" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#bfdbfe">layer of security.</text>
+  <text x="80" y="270" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" fill="#dbeafe" fill-opacity="0.8">Scan the code with your authenticator app to turn on 2FA.</text>
+
+  <g transform="translate(1020, 210)">
+    <circle r="118" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1"/>
+    <circle r="92" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
+    <path d="M -92 -35 A 92 92 0 0 1 -35 -92" fill="none" stroke="#bfdbfe" stroke-opacity="0.6" stroke-width="2.5" stroke-linecap="round"/>
+
+    <circle cx="111" cy="-57" r="4" fill="#60a5fa" fill-opacity="0.85"/>
+    <circle cx="-122" cy="58" r="3.5" fill="#60a5fa" fill-opacity="0.6"/>
+    <circle cx="120" cy="88" r="3" fill="#bfdbfe" fill-opacity="0.75"/>
+
+    <rect x="-63" y="-63" width="126" height="126" rx="28" fill="#ffffff" fill-opacity="0.08"/>
+    <g transform="translate(-35, -42)">
+      <path d="M 35 0 L 70 12 V 42 C 70 62 55 76 35 84 C 15 76 0 62 0 42 V 12 Z" fill="url(#badge3)"/>
+      <g fill="#0c1e4a">
+        <rect x="17" y="24" width="8" height="8"/>
+        <rect x="29" y="24" width="8" height="8"/>
+        <rect x="45" y="24" width="8" height="8"/>
+        <rect x="17" y="36" width="8" height="8"/>
+        <rect x="45" y="36" width="8" height="8"/>
+        <rect x="17" y="48" width="8" height="8"/>
+        <rect x="29" y="48" width="8" height="8"/>
+        <rect x="45" y="48" width="8" height="8"/>
+      </g>
+    </g>
+  </g>
+</svg>

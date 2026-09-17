@@ -1,0 +1,54 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="70%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#0e7490"/>
+      <stop offset="55%" stop-color="#155e63"/>
+      <stop offset="100%" stop-color="#0a1f26"/>
+    </radialGradient>
+    <linearGradient id="badge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a5f3fc"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="420" fill="url(#bg)"/>
+
+  <!-- faint diagonal hairlines -->
+  <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="1">
+    <line x1="0" y1="420" x2="420" y2="0"/>
+    <line x1="60" y1="420" x2="480" y2="0"/>
+    <line x1="120" y1="420" x2="540" y2="0"/>
+  </g>
+
+  <!-- scattered decorative glyphs -->
+  <g fill="#ffffff" fill-opacity="0.12">
+    <circle cx="108" cy="92" r="2.5"/>
+    <path d="M 425 65 h 12 M 431 59 v 12" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="205" cy="325" r="2.5"/>
+    <circle cx="150" cy="298" r="2"/>
+  </g>
+
+  <!-- headline -->
+  <text x="80" y="175" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#ffffff">Stepped away</text>
+  <text x="80" y="228" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#a5f3fc">for a while?</text>
+  <text x="80" y="270" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" fill="#e2f4f6" fill-opacity="0.8">Turn off the lock, or unlock to pick up where you left off.</text>
+
+  <!-- icon side: badge and rings share one center -->
+  <g transform="translate(1020, 210)">
+    <circle r="118" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1"/>
+    <circle r="92" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
+    <path d="M -92 -35 A 92 92 0 0 1 -35 -92" fill="none" stroke="#a5f3fc" stroke-opacity="0.6" stroke-width="2.5" stroke-linecap="round"/>
+
+    <circle cx="111" cy="-57" r="4" fill="#22d3ee" fill-opacity="0.85"/>
+    <circle cx="-122" cy="58" r="3.5" fill="#22d3ee" fill-opacity="0.6"/>
+    <circle cx="120" cy="88" r="3" fill="#a5f3fc" fill-opacity="0.75"/>
+
+    <rect x="-63" y="-63" width="126" height="126" rx="28" fill="#ffffff" fill-opacity="0.08"/>
+    <g transform="translate(-38, -42)">
+      <path d="M 10 38 v -10 a 20 20 0 0 1 40 0 v 10" fill="none" stroke="#0a2e33" stroke-width="7" stroke-linecap="round"/>
+      <rect x="0" y="38" width="60" height="46" rx="11" fill="url(#badge)"/>
+      <circle cx="30" cy="57" r="7" fill="#0a2e33"/>
+      <rect x="27" y="57" width="6" height="15" rx="3" fill="#0a2e33"/>
+    </g>
+  </g>
+</svg>
