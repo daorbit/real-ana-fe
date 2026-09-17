@@ -20,6 +20,7 @@ import { LanguagePicker } from "@/lib/i18n/LanguagePicker";
 import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
+import { WorkspaceMenuButton } from "./WorkspaceSwitcher";
 
 /**
  * The cards above the account tile.
@@ -164,11 +165,11 @@ export function DemoCard({ collapsed, onExit }: { collapsed: boolean; onExit: ()
 }
 
 /**
- * Theme and language, as bare icons.
+ * Workspace, theme and language, as bare icons.
  *
  * They sit on the plan row rather than in the account menu because they are
  * flipped often and reached rarely from where the menu puts them. `stopPropagation`
- * keeps a click on either from also following the row's link to billing.
+ * keeps a click on any of them from also following the row's link to billing.
  */
 function QuickPrefs() {
   const { t } = useTranslation();
@@ -185,6 +186,7 @@ function QuickPrefs() {
         e.stopPropagation();
       }}
     >
+      <WorkspaceMenuButton />
       <Tooltip label={dark ? t("nav.lightMode") : t("nav.darkMode")} withArrow position="top">
         <ActionIcon
           variant="subtle"

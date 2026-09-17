@@ -878,32 +878,71 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
+/* The rail rows.
+   Held to the pattern the rest of the category settled on: one row height, a
+   quiet hover, and an active row marked by an accent wash that fades out to
+   the right, plus an accent icon. */
 .nav-link {
   position: relative;
-  border-radius: 10px;
-  transition: background 0.15s ease, color 0.15s ease;
+  border-radius: 6px;
+  color: var(--text-2);
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .nav-link:hover {
-  background: color-mix(in srgb, var(--text) 6%, transparent);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+}
+
+.nav-link-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: color 0.12s ease;
+}
+
+.nav-link:hover .nav-link-icon {
+  color: var(--text-2);
 }
 
 .nav-link[data-active="true"] {
-  background: var(--surface-2);
   color: var(--text);
   font-weight: 600;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--violet-2) 16%, transparent),
+    transparent 78%
+  );
+}
+
+.nav-link[data-active="true"] .nav-link-icon {
+  color: var(--violet-2);
+}
+
+
+/* The assistant row: a nav item like any other, set apart by sitting alone
+   above the groups with a rule under it. Its icon keeps the accent so the eye
+   finds it first without the row changing shape. */
+.nav-lead {
+  margin-bottom: 0.75rem;
+}
+
+.nav-lead .nav-rule {
+  margin-top: 0.75rem;
+}
+
+.nav-link[data-hero] .nav-link-icon {
+  color: var(--violet-2);
 }
 
 
 .nav-heading {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   color: var(--muted);
   padding: 0 0.625rem;
-  margin-bottom: 0.35rem;
-  opacity: 0.75;
+  margin-bottom: 0.25rem;
 }
 
 
@@ -914,7 +953,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   width: 100%;
   color: var(--muted);
   border-radius: var(--radius-sm);
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color 0.12s ease;
 }
 
 .nav-heading--button:hover {

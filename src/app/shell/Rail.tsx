@@ -6,8 +6,8 @@ import { notify, confirmLogout, errMessage } from "@/shared/lib/notify";
 import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import { useState } from "react";
 import { RailBrand } from "./RailBrand";
-import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { SearchButton } from "./SearchButton";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { NavGroups } from "./NavGroups";
 import { AccountMenu } from "./AccountMenu";
 import { DemoCard, ImpersonationCard, PendingInviteCard, PlanCard } from "./RailCards";
@@ -68,10 +68,6 @@ export function Rail({
       </MantineShell.Section>
 
       <MantineShell.Section mb="md">
-        <WorkspaceSwitcher collapsed={collapsed} />
-      </MantineShell.Section>
-
-      <MantineShell.Section mb="md">
         <SearchButton collapsed={collapsed} />
       </MantineShell.Section>
 
@@ -102,6 +98,12 @@ export function Rail({
             prose, and the plan is still one click away in the account menu. */}
         {!isDemo && !collapsed && <PendingInviteCard />}
         {!isDemo && !collapsed && <PlanCard />}
+
+        {/* The workspace switch rides on the plan row, so wherever that row is
+            not drawn — collapsed, or in a demo session — it needs its own icon
+            here. Switching workspace is not something the rail may stop
+            offering just because the card carrying it is gone. */}
+        {(collapsed || isDemo) && <WorkspaceSwitcher />}
 
         {isDemo && <DemoCard collapsed={collapsed} onExit={logout} />}
 

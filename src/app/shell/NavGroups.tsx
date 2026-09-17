@@ -29,6 +29,12 @@ export function NavGroups({
         const holdsCurrent = group.items.some((n) => n.to === pathname);
         const open = !group.collapsible || adminOpen || holdsCurrent;
 
+        // The assistant is one row that is not a report. It is set apart by
+        // where it sits — alone above the groups, with a rule under it — not by
+        // being painted a different colour. A nav item that looks like a banner
+        // stops reading as somewhere you can go.
+        const hero = group.hero;
+
         const rows = group.items.map((n) => (
           <NavLink
             key={n.to}
@@ -37,8 +43,18 @@ export function NavGroups({
             icon={n.icon}
             active={pathname === n.to}
             collapsed={collapsed}
+            hero={hero}
           />
         ));
+
+        if (hero) {
+          return (
+            <Box key={group.heading} className="nav-lead">
+              {rows}
+              <Box className="nav-rule" />
+            </Box>
+          );
+        }
 
         return (
           <Box key={group.heading} mb="md">
