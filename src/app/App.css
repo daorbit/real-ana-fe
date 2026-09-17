@@ -955,9 +955,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   );
 }
 
+/* The mark is wider than the 16px icons below it, so it is centred on the
+   same column rather than pushing the label out of line with them. */
 .orbit-launcher-mark {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 16px;
+  margin-block: -3px;
 }
 
 .orbit-launcher-label {

@@ -885,9 +885,12 @@ export default function Orbit() {
       <div className={classes.page}>
         <div className={classes.header}>
        
-        <Text size="sm" fw={650}>
-          Orbit AI
-        </Text>
+        {/* The mark alone — the rail row that got here already said the name,
+            and the page it opens is only ever Orbit. The mark itself is
+            decorative, so the heading carries the name for a screen reader. */}
+        <span role="heading" aria-level={1} aria-label="Orbit AI" style={{ display: "inline-flex" }}>
+          <OrbitMark size={26} />
+        </span>
 
         <Group gap={2} wrap="nowrap">
           {/* "Start over" leaves the current thread rather than deleting it —

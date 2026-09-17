@@ -29,7 +29,7 @@ export function OrbitLauncher({ collapsed, active }: { collapsed: boolean; activ
           aria-label={label}
           onMouseEnter={() => prefetchRoute("/app/orbit")}
         >
-          <OrbitNavIcon size={17} />
+          <OrbitNavIcon size={22} />
         </UnstyledButton>
       </Tooltip>
     );
@@ -45,8 +45,10 @@ export function OrbitLauncher({ collapsed, active }: { collapsed: boolean; activ
       onMouseEnter={() => prefetchRoute("/app/orbit")}
       onFocus={() => prefetchRoute("/app/orbit")}
     >
+      {/* Larger than a rail icon: this is the product's mark rather than a
+          line glyph, and at 16px its detail collapses into a dot. */}
       <span className="orbit-launcher-mark" aria-hidden>
-        <OrbitNavIcon size={15} />
+        <OrbitNavIcon size={22} />
       </span>
 
       <Text component="span" className="orbit-launcher-label">
