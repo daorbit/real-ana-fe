@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActionIcon, Box, Button, Modal, PinInput, Stack, Text, TextInput } from "@mantine/core";
 import { X } from "lucide-react";
 import { errMessage } from "@/shared/lib/notify";
@@ -21,6 +21,21 @@ export function TotpPrompt({
   const [useBackup, setUseBackup] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [supportOpen, setSupportOpen] = useState(false);
+  const pinRef = useRef<HTMLInputElement>(null);
+  const backupRef = useRef<HTMLInputElement>(null);
+
+  // Mantine's Modal focus-trap grabs focus on mount after the input's own
+  // `autoFocus` effect has already run, so the trap wins the race and the
+  // modal's outer element ends up focused — visible as a ring around the
+  // card rather than a cursor in the field. Focusing again a tick later, once
+  // the trap has settled, wins for real.
+  useEffect(() => {
+    if (!opened) return;
+    const id = requestAnimationFrame(() => {
+      (useBackup ? backupRef.current : pinRef.current)?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [opened, useBackup]);
 
   const submit = async (value = code) => {
     if (!value.trim()) return;
@@ -84,10 +99,10 @@ export function TotpPrompt({
         <Stack gap={14} mt={22} px={26} align="center" className="verify-rise" style={{ animationDelay: "90ms" }}>
           {useBackup ? (
             <TextInput
+              ref={backupRef}
               w="100%"
               placeholder="XXXX-XXXX"
               size="md"
-              autoFocus
               value={code}
               onChange={(e) => setCode(e.currentTarget.value)}
               onKeyDown={(e) => e.key === "Enter" && void submit()}
@@ -96,11 +111,11 @@ export function TotpPrompt({
             />
           ) : (
             <PinInput
+              ref={pinRef}
               length={6}
               type="number"
               size="lg"
               radius="md"
-              autoFocus
               value={code}
               onChange={setCode}
               onComplete={(value) => void submit(value)}

@@ -1,19 +1,12 @@
-import { useEffect, useState } from "react";
-import { Box, Button, Modal, PinInput, Stack, Text, TextInput } from "@mantine/core";
-import { Lock } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Button, Modal, PinInput, Stack, Text, TextInput } from "@mantine/core";
 import { useAuth } from "@/features/auth/context";
 import { subscribeLock, isLocked } from "@/shared/lib/lockState";
 import { errMessage } from "@/shared/lib/notify";
 import { SupportRequestModal } from "@/app/shell/SupportRequestModal";
+import bannerSrc from "@/assets/banners/session-locked-banner.png";
 
-/**
- * The idle lock overlay. Deliberately not dismissible any way but a correct
- * PIN or TOTP code: no close button, no click-outside, no Escape — the point
- * is that the account is actually locked server-side (`requireUnlocked`
- * rejects every data route until `/api/auth/unlock` clears it), so a client
- * that let this modal be closed without that call would just be showing a
- * decoration in front of a still-working app for everyone except this one.
- */
+
 export function LockScreen() {
   const { user, unlockScreen } = useAuth();
   const [visible, setVisible] = useState(isLocked());
@@ -22,6 +15,8 @@ export function LockScreen() {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"pin" | "totp">(user?.totpEnabled ? "totp" : "pin");
   const [supportOpen, setSupportOpen] = useState(false);
+  const pinRef = useRef<HTMLInputElement>(null);
+  const totpRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => subscribeLock(setVisible), []);
 
@@ -32,6 +27,19 @@ export function LockScreen() {
       setMode(user?.totpEnabled ? "totp" : "pin");
     }
   }, [visible, user?.totpEnabled]);
+
+  // Mantine's Modal runs its own focus-trap on mount, which grabs focus after
+  // the input's own `autoFocus` effect has already run — the trap wins the
+  // race, and the modal's outer element ends up focused instead, which is
+  // what shows as a ring around the card rather than a cursor in the field.
+  // Focusing again a tick later, once the trap has settled, wins for real.
+  useEffect(() => {
+    if (!visible) return;
+    const id = requestAnimationFrame(() => {
+      (mode === "pin" ? pinRef.current : totpRef.current)?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [visible, mode]);
 
   if (!visible || !user) return null;
 
@@ -59,40 +67,40 @@ export function LockScreen() {
       opened
       onClose={() => {}}
       radius="lg"
-      size={380}
+      size={440}
       centered
       padding={0}
       withCloseButton={false}
       closeOnClickOutside={false}
       closeOnEscape={false}
-      overlayProps={{ backgroundOpacity: 0.85, blur: 10 }}
+      overlayProps={{ backgroundOpacity: 0.5, blur: 10 }}
       transitionProps={{ transition: "pop", duration: 200 }}
     >
-      <Stack gap={0} px={28} py={30} align="center">
-        <Box
+      <Stack gap={0} className="verify-card">
+        <div
+          className="verify-rise"
           style={{
-            width: 44, height: 44, borderRadius: 12,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "var(--mantine-color-default-hover)",
+            height: 154,
+            backgroundImage: `url(${bannerSrc})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
-        >
-          <Lock size={20} strokeWidth={2.25} />
-        </Box>
+        />
 
-        <Text fw={650} size="md" mt={16}>Session locked</Text>
-        <Text size="xs" c="dimmed" mt={4} ta="center">
-          You've been idle a while. {mode === "pin" ? "Enter your PIN" : "Enter your authenticator code"} to continue.
+        <Stack gap={0} px={28} py={26} align="center">
+        <Text size="xs" c="dimmed" ta="center">
+          {mode === "pin" ? "Enter your PIN" : "Enter your authenticator code"} to continue.
         </Text>
 
-        <Stack gap={14} mt={22} align="center" w="100%">
+        <Stack gap={14} mt={18} align="center" w="100%">
           {mode === "pin" ? (
             <PinInput
+              ref={pinRef}
               length={4}
               mask
               type="number"
               size="lg"
               radius="md"
-              autoFocus
               value={code}
               onChange={setCode}
               onComplete={(value) => void submit(value)}
@@ -100,10 +108,10 @@ export function LockScreen() {
             />
           ) : (
             <TextInput
+              ref={totpRef}
               w="100%"
               placeholder="6-digit code"
               size="md"
-              autoFocus
               value={code}
               onChange={(e) => setCode(e.currentTarget.value)}
               onKeyDown={(e) => e.key === "Enter" && void submit()}
@@ -148,6 +156,7 @@ export function LockScreen() {
         >
           Lost your PIN or authenticator? Contact support
         </Text>
+        </Stack>
       </Stack>
     </Modal>
     </>
