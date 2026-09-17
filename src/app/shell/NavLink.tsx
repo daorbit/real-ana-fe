@@ -18,15 +18,12 @@ export function NavLink({
   icon: Icon,
   active,
   collapsed,
-  hero,
 }: {
   to: string;
   label: string;
   icon: typeof Home;
   active: boolean;
   collapsed?: boolean;
-  /** The lead row above the groups — same shape, accent icon. */
-  hero?: boolean;
 }) {
   const location = useLocation();
   const { user } = useAuth();
@@ -38,7 +35,6 @@ export function NavLink({
       className="nav-link"
       data-active={active}
       data-collapsed={collapsed || undefined}
-      data-hero={hero || undefined}
       aria-current={active ? "page" : undefined}
       // Named explicitly: collapsed, the visible label is gone and the icon
       // alone is not a name anyone can read out.
