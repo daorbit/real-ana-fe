@@ -15,25 +15,18 @@ type AuthState = {
   user: User | null;
   loading: boolean;
   isDemo: boolean;
-  /**
-   * `turnstileToken` is the Cloudflare challenge token the login form collected.
-   * Optional so a deployment with no sitekey configured still calls this the
-   * same way — the server decides whether a token was required.
-   */
-  login: (email: string, password: string, turnstileToken?: string) => Promise<void>;
-  /**
-   * Exchange a Google credential for a session. Serves signup and login both —
-   * Google has already proved the address, so a first-time user is created here.
-   * Resolves with whether the account was just created, so the caller can send
-   * new users to onboarding.
-   */
+
+
+  login: (
+    email: string,
+    password: string,
+    turnstileToken?: string,
+  ) => Promise<{ requires2fa: false } | { requires2fa: true; pendingToken: string }>;
+  /** Second step of a 2FA login: a TOTP code or an unused backup code. */
+  verifyTotp: (pendingToken: string, code: string) => Promise<void>;
+
   googleSignIn: (credential: string) => Promise<{ created: boolean }>;
-  /**
-   * Adopt a session from a token the server issued during a redirect flow.
-   *
-   * Used by LinkedIn sign-in, where the token comes back in the URL rather than
-   * in a response body — there is no credential left to exchange by then.
-   */
+
   adoptToken: (token: string) => Promise<void>;
   /** Starts a signup and emails a code. No account exists until `verifySignup`. */
   signup: (email: string, password: string, name: string) => Promise<void>;
@@ -90,19 +83,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string, turnstileToken?: string) => {
-    const r = await api.post<AuthResp>("/api/auth/login", {
-      email,
-      password,
-      // Omitted rather than sent as undefined when there is none, so the payload
-      // is unchanged on a build with Turnstile switched off.
-      ...(turnstileToken ? { turnstileToken } : {}),
-    });
+    const r = await api.post<AuthResp | { requires2fa: true; pendingToken: string }>(
+      "/api/auth/login",
+      {
+        email,
+        password,
+        // Omitted rather than sent as undefined when there is none, so the payload
+        // is unchanged on a build with Turnstile switched off.
+        ...(turnstileToken ? { turnstileToken } : {}),
+      },
+    );
+    if ("requires2fa" in r) return { requires2fa: true as const, pendingToken: r.pendingToken };
+
     setToken(r.token);
     // Start from a clean cache so nothing from a previous session leaks through.
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
     rememberUser(r.user, "password");
     trace(r.user.id, "login", "login", "app");
+    return { requires2fa: false as const };
+  };
+
+  const verifyTotp = async (pendingToken: string, code: string) => {
+    const r = await api.post<AuthResp>("/api/auth/2fa/verify", { pendingToken, code });
+    setToken(r.token);
+    dispatch(rtkApi.util.resetApiState());
+    setUser(r.user);
+    rememberUser(r.user, "password");
+    trace(r.user.id, "login", "login_2fa", "app");
   };
 
   const googleSignIn = async (credential: string) => {
@@ -272,7 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

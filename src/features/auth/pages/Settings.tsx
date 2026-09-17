@@ -1,5 +1,5 @@
 import { Tabs } from "@mantine/core";
-import { UserRound, Palette, Link2 } from "lucide-react";
+import { UserRound, Palette, Link2, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -9,6 +9,7 @@ import { useInstagramReturn } from "@/features/social/useInstagramReturn";
 import { useProfileForm } from "@/features/auth/components/settings/useProfileForm";
 import { InfoPanel } from "@/features/auth/components/settings/InfoPanel";
 import { ConnectionsPanel } from "@/features/auth/components/settings/ConnectionsPanel";
+import { TwoFactorPanel } from "@/features/auth/components/settings/TwoFactorPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
 import { useTitle } from "@/shared/lib/useTitle";
 
@@ -41,6 +42,9 @@ export default function Settings() {
             <Tabs.Tab value="connections" leftSection={<Link2 size={15} />}>
               {t("settings.tabConnections", "Connections")}
             </Tabs.Tab>
+            <Tabs.Tab value="security" leftSection={<ShieldCheck size={15} />}>
+              {t("settings.tabSecurity", "Security")}
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="info">
@@ -53,6 +57,10 @@ export default function Settings() {
 
           <Tabs.Panel value="connections">
             <ConnectionsPanel />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="security">
+            <TwoFactorPanel />
           </Tabs.Panel>
         </Tabs>
 

@@ -14,6 +14,7 @@ import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
 import { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { VerifyDialog } from "@/features/auth/components/VerifyDialog";
+import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { consumeReturnPath } from "@/shared/lib/session";
 import { getLastUser } from "@/features/auth/lastUser";
@@ -23,7 +24,7 @@ import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
 
 export default function Login() {
-  const { login, startDemo } = useAuth();
+  const { login, verifyTotp, startDemo } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,6 +36,11 @@ export default function Login() {
   // state: it goes straight from the widget's callback into the login call,
   // and the widget unmounts with the modal, so each attempt gets a fresh one.
   const [verifying, setVerifying] = useState(false);
+  // Set once the password check comes back asking for a second factor.
+  // Distinct from `verifying` (the Turnstile challenge modal) — both can't
+  // be open at once, since the challenge already ran before this exists.
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [totpBusy, setTotpBusy] = useState(false);
 
   const [lastUser] = useState(() => getLastUser());
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -49,15 +55,9 @@ export default function Login() {
     try {
       await startDemo();
       trace(undefined, "demo_started", "login", "app");
-      // No toast here: the app boots straight into a loading overlay, so a
-      // notification would land on top of it and read as an error. The sidebar
-      // carries a persistent "Demo mode" card, which is the better place to say
-      // it anyway — it's still there a minute later.
       goAfterLogin();
     } catch (err) {
       const e = err as ApiError;
-      // The demo is capped per address per day. Say when it frees up rather
-      // than leaving "try again later" to be guessed at.
       if (e?.status === 429) {
         const retryAt = e.body?.retryAt ? new Date(String(e.body.retryAt)) : null;
         setError(
@@ -76,9 +76,6 @@ export default function Login() {
 
   const errors = {
     email: v.email(email),
-    // Presence only. Signup's strength rules must not apply here: accounts
-    // created before those rules have shorter passwords, and refusing them at
-    // login would lock people out of working accounts.
     password: password ? null : "Password is required",
   };
 
@@ -88,30 +85,35 @@ export default function Login() {
   const blur = (field: string) => () =>
     setTouched((t) => ({ ...t, [field]: true }));
 
-  /**
-   * Log in with a token the modal has just produced.
-   *
-   * Split out from `submit` because the challenge now sits between the two:
-   * the click validates the form and opens the modal, and this runs once
-   * Cloudflare has answered. The token is passed in rather than read from
-   * state — it arrives in the widget's callback, and state set in that same
-   * tick would not be visible here yet.
-   */
+
   const finishLogin = async (token?: string) => {
     setVerifying(false);
     setBusy(true);
     setError(null);
     try {
-      await login(email.trim(), password, token);
+      const r = await login(email.trim(), password, token);
+      if (r.requires2fa) {
+        setPendingToken(r.pendingToken);
+        return;
+      }
       notify.success("Welcome back!", "Logged in");
       goAfterLogin();
     } catch (err) {
       setError(errMessage(err, "Login failed. Check your email and password."));
-      // The token is spent either way — Cloudflare refuses a second use — and
-      // the widget is unmounted with the modal, so the next attempt opens a
-      // fresh one. Nothing to reset here.
     } finally {
       setBusy(false);
+    }
+  };
+
+  const submitTotp = async (code: string) => {
+    if (!pendingToken) return;
+    setTotpBusy(true);
+    try {
+      await verifyTotp(pendingToken, code);
+      notify.success("Welcome back!", "Logged in");
+      goAfterLogin();
+    } finally {
+      setTotpBusy(false);
     }
   };
 
@@ -197,9 +199,6 @@ export default function Login() {
               />
             </div>
 
-            {/* Label row, now that no required asterisk competes for it — the
-                recovery link is part of the field's own header rather than a
-                stray line under it. */}
             <div className="auth-field">
               <div className="auth-field-head">
                 <label htmlFor="login-password">Password</label>
@@ -220,9 +219,6 @@ export default function Login() {
               />
             </div>
 
-            {/* Plain element rather than Mantine's Button: the filled variant
-                is driven by the theme's primary colour, and the auth screens
-                deliberately carry no accent. */}
             <button
               type="submit"
               className="auth-submit"
@@ -261,6 +257,13 @@ export default function Login() {
         opened={verifying}
         onCancel={() => setVerifying(false)}
         onVerify={(token) => void finishLogin(token)}
+      />
+
+      <TotpPrompt
+        opened={pendingToken !== null}
+        busy={totpBusy}
+        onSubmit={submitTotp}
+        onCancel={() => setPendingToken(null)}
       />
     </div>
   );

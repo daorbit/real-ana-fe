@@ -20,6 +20,8 @@ export type User = {
   linkedinLinked?: boolean;
   /** False on social-only accounts, which have never set a password. */
   hasPassword?: boolean;
+  /** Whether login requires a TOTP code after the password check. */
+  totpEnabled?: boolean;
   /**
    * How this account signs in: a password, or the provider it was created with.
    *
