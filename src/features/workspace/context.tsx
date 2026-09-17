@@ -24,6 +24,11 @@ type WsState = {
   workspaces: Workspace[];
   active: Workspace | null;
   loading: boolean;
+  /** True when the list fetch itself failed (locked account, network, 5xx) —
+   * distinct from a genuinely empty list. `RequireSetup` reads this so a
+   * failed fetch never gets mistaken for "no workspaces yet" and sent to
+   * onboarding. */
+  fetchFailed: boolean;
   setActive: (id: string) => void;
   refresh: () => Promise<unknown>;
 };
@@ -32,7 +37,7 @@ const Ctx = createContext<WsState | null>(null);
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Cached by RTK Query — the list is fetched once and reused across pages.
-  const { data, isLoading, refetch } = useGetWorkspacesQuery();
+  const { data, isLoading, isError, refetch } = useGetWorkspacesQuery();
   const workspaces = data ?? EMPTY;
 
   const [activeId, setActiveId] = useState<string | null>(() =>
@@ -57,7 +62,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const active = workspaces.find((w) => w._id === activeId) ?? null;
 
   return (
-    <Ctx.Provider value={{ workspaces, active, loading: isLoading, setActive, refresh }}>
+    <Ctx.Provider value={{ workspaces, active, loading: isLoading, fetchFailed: isError, setActive, refresh }}>
       {children}
     </Ctx.Provider>
   );

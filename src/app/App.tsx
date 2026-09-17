@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useRef, lazy, Suspense, type ReactNode } from "react";
+import { useEffect, useRef, useState, lazy, Suspense, type ReactNode } from "react";
 import { setNavigate } from "@/app/navigation";
 import { trace } from "@/shared/lib/analytics";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 import { useIdleLock } from "@/features/auth/useIdleLock";
 import { LockScreen } from "@/features/auth/components/LockScreen";
+import { isLocked, subscribeLock } from "@/shared/lib/lockState";
 import { WorkspaceProvider, useWorkspace } from "@/features/workspace/context";
 import { DemoProvider } from "@/features/demo/context";
 import { OrbitProvider } from "@/features/orbit/components/OrbitProvider";
@@ -54,8 +55,11 @@ const PublicDashboard = lazy(() => import("@/features/analytics/pages/PublicDash
 const PublicSeoReport = lazy(() => import("@/features/seo/pages/PublicSeoReport"));
 
 function RequireSetup({ children }: { children: ReactNode }) {
-  const { workspaces, loading } = useWorkspace();
+  const { workspaces, loading, fetchFailed } = useWorkspace();
   const { user } = useAuth();
+  const [locked, setLocked] = useState(isLocked());
+
+  useEffect(() => subscribeLock(setLocked), []);
 
   if (loading) return <AppBootSkeleton />;
 
@@ -64,6 +68,12 @@ function RequireSetup({ children }: { children: ReactNode }) {
   if (!user?.mobile && !setupExempt) {
     return <Navigate to="/app/onboarding" replace />;
   }
+
+  // A failed workspaces fetch — most commonly the screen lock's 423 on a cold
+  // reload — must never be read as "this account has no workspaces yet".
+  // Staying put lets the lock overlay (mounted alongside this in `Protected`)
+  // do its job instead of racing it to onboarding.
+  if (fetchFailed || locked) return <>{children}</>;
 
   const skipped = localStorage.getItem("quantalog_onboarding_skipped") === "1";
   if (!workspaces.length && !skipped && !setupExempt) {
