@@ -1,12 +1,8 @@
 import { Box, Modal } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 
-const FORM_URL = "https://forms.daorbit.in/form/6a9566fff4f4fb14f6082131/view";
+const FORM_URL = "https://forms.daorbit.in/form/6aabcec12a889884425a7d6d/view";
 
-/**
- * The hosted feature-request form, shown in a modal so the user stays in the
- * app rather than bouncing to a new tab. Opened from the account menu.
- */
 export function RequestFeatureModal({
   opened,
   onClose,
