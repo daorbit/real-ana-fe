@@ -3,6 +3,7 @@ import {
   Modal, Stack, TextInput, Textarea, Select, Button, Group, Text, ActionIcon,
   Tooltip, ScrollArea, Badge,
 } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
 import { ReferenceLine, Label } from "recharts";
 import { Flag, Trash2, Plus } from "lucide-react";
 import type { Marker, MarkerKind, Point } from "@/shared/types";
@@ -110,12 +111,6 @@ export function markerLines(markers: Marker[], series: Point[], hourly: boolean)
   });
 }
 
-/** Turn a Date into the value a `datetime-local` input expects, in local time. */
-function toLocalInput(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
 /**
  * Add a marker, and manage the ones already on the chart.
  *
@@ -167,11 +162,11 @@ export function MarkerDialog({
   const [kind, setKind] = useState<MarkerKind>("deploy");
   // Defaults to now, which is what someone recording a deploy they just made
   // wants; editable for backfilling one that already happened.
-  const [at, setAt] = useState(() => toLocalInput(new Date()));
+  const [at, setAt] = useState<Date | null>(() => new Date());
 
   const submit = async () => {
     const trimmed = label.trim();
-    if (!trimmed || saving || !onSave) return;
+    if (!trimmed || saving || !onSave || !at) return;
 
     // Awaited so the form only clears once the marker is actually stored —
     // clearing first would discard what the user typed if the save failed.
@@ -179,13 +174,12 @@ export function MarkerDialog({
       label: trimmed,
       description: description.trim(),
       kind,
-      // The input is local time; the API takes an instant.
-      at: new Date(at).toISOString(),
+      at: at.toISOString(),
     });
 
     setLabel("");
     setDescription("");
-    setAt(toLocalInput(new Date()));
+    setAt(new Date());
   };
 
   return (
@@ -224,11 +218,12 @@ export function MarkerDialog({
               />
             </Group>
 
-            <TextInput
+            <DateTimePicker
               label="When"
-              type="datetime-local"
               value={at}
-              onChange={(e) => setAt(e.currentTarget.value)}
+              onChange={(v) => setAt(v ? new Date(v) : null)}
+              valueFormat="MM/DD/YYYY hh:mm A"
+              clearable
             />
 
             <Textarea
