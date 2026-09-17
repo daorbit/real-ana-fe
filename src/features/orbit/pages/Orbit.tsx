@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import {
   ActionIcon, Box, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
   Tooltip, UnstyledButton,
@@ -13,7 +13,8 @@ import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { RichText } from "@/features/orbit/components/RichText";
 import { DataDigestTable, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
-import { ORBIT_SUGGESTIONS, type OrbitMessage } from "@/features/orbit/useOrbitChat";
+import { pickOrbitSuggestions } from "@/features/orbit/orbitSuggestions";
+import type { OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { notify } from "@/shared/lib/notify";
@@ -539,6 +540,10 @@ export default function Orbit() {
   const startersReady =
     !workspaceId || (!sitesLoading && !statsLoading && (!primarySiteId || !competitorsLoading));
 
+  // Picked once per visit, not on every render: reshuffling on each keystroke
+  // would make the chips jump around while the composer is still empty.
+  const staticStarters = useMemo(() => pickOrbitSuggestions(3), []);
+
   const dynamicStarters = (() => {
     const chips: string[] = [];
 
@@ -932,7 +937,7 @@ export default function Orbit() {
             */}
             <div className={classes.starters} data-ready={startersReady || undefined}>
               {startersReady &&
-                [...dynamicStarters, ...ORBIT_SUGGESTIONS].map((q) => (
+                [...dynamicStarters, ...staticStarters].map((q) => (
                   <UnstyledButton
                     key={q}
                     className={classes.starter}

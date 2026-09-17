@@ -42,34 +42,11 @@ export type OrbitMessage = {
    * posted to the model for the same reason a failure is.
    */
   stopped?: boolean;
-  /**
-   * What to ask next, from the model.
-   *
-   * Carried on the turn that produced them rather than held as one "current"
-   * list, so scrolling back up a conversation shows the follow-ups that were
-   * offered at each point. Only the last turn's are rendered.
-   */
   suggestions?: string[];
-  /**
-   * Which model produced this turn.
-   *
-   * Shown only when it is not the one the user picked — a silent fallback would
-   * make the picker look broken to anyone who noticed the answer's style
-   * change.
-   */
   modelLabel?: string;
   /** The tenant's 7-day figures as data, set only when this answer used them.
    * Rendered as a table under the prose — see `DataDigestTable`. */
   dataDigest?: unknown;
-  /**
-   * When those figures were taken, ISO.
-   *
-   * The digest is a snapshot stored with the turn, not a live query, so a
-   * thread reopened later shows the numbers the answer reasoned about. The
-   * table captions itself with this so nobody reads month-old figures as
-   * today's. Absent on the turn that has just been answered, where "now" is
-   * obvious and a timestamp would be noise.
-   */
   digestAt?: string;
 };
 
@@ -91,20 +68,6 @@ export function readPreferredModel(): string | undefined {
     return undefined;
   }
 }
-
-/**
- * What Orbit opens with.
- *
- * Three, not four: the panel is short, and a fourth pushed the input below the
- * fold on a laptop. Each is a question the knowledge base actually answers, so
- * the first thing a new user tries succeeds rather than teaching them the
- * assistant is useless.
- */
-export const ORBIT_SUGGESTIONS = [
-  "How do I install the tracker?",
-  "Why is my site showing no data?",
-  "What can a viewer do?",
-];
 
 let counter = 0;
 const nextId = () => `orbit-${Date.now()}-${counter++}`;
