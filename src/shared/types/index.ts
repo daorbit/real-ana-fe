@@ -22,6 +22,13 @@ export type User = {
   hasPassword?: boolean;
   /** Whether login requires a TOTP code after the password check. */
   totpEnabled?: boolean;
+  /** Whether the idle screen lock is turned on for this account. */
+  screenLockEnabled?: boolean;
+  /** Whether a quick-unlock PIN is set. */
+  hasPin?: boolean;
+  /** True the instant `/me` is read while the account is locked — normally
+   * false, since a locked session gets a 423 before it would see this. */
+  locked?: boolean;
   /**
    * How this account signs in: a password, or the provider it was created with.
    *

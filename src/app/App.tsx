@@ -3,6 +3,8 @@ import { useEffect, useRef, lazy, Suspense, type ReactNode } from "react";
 import { setNavigate } from "@/app/navigation";
 import { trace } from "@/shared/lib/analytics";
 import { AuthProvider, useAuth } from "@/features/auth/context";
+import { useIdleLock } from "@/features/auth/useIdleLock";
+import { LockScreen } from "@/features/auth/components/LockScreen";
 import { WorkspaceProvider, useWorkspace } from "@/features/workspace/context";
 import { DemoProvider } from "@/features/demo/context";
 import { OrbitProvider } from "@/features/orbit/components/OrbitProvider";
@@ -72,12 +74,14 @@ function RequireSetup({ children }: { children: ReactNode }) {
 
 function Protected({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  useIdleLock(Boolean(user?.screenLockEnabled && !user?.demo));
   if (loading) return <AppBootSkeleton />;
   if (!user) return <Navigate to="/login" replace />;
   return (
     <WorkspaceProvider>
       <OrbitProvider>
         <RequireSetup>{children}</RequireSetup>
+        <LockScreen />
       </OrbitProvider>
     </WorkspaceProvider>
   );

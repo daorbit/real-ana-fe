@@ -9,6 +9,7 @@ import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
 import { trace } from "@/shared/lib/analytics";
 import { rememberUser } from "@/features/auth/lastUser";
+import { hideLock } from "@/shared/lib/lockState";
 import type { ProfileUpdate, User } from "@/shared/types";
 
 type AuthState = {
@@ -39,6 +40,14 @@ type AuthState = {
   resendResetCode: (email: string) => Promise<void>;
   /** Change (or set) the password from inside the app. */
   changePassword: (newPassword: string, currentPassword?: string) => Promise<void>;
+  /** Set or replace the screen-lock PIN. */
+  setPin: (newPin: string, currentPin?: string) => Promise<void>;
+  /** Turn the idle screen lock on. `pin` is required the first time unless
+   * 2FA is already on. */
+  enableScreenLock: (pin?: string) => Promise<void>;
+  disableScreenLock: (password: string) => Promise<void>;
+  /** Prove the PIN or a TOTP code and clear the lock. */
+  unlockScreen: (proof: { pin: string } | { totpCode: string }) => Promise<void>;
   startDemo: () => Promise<void>;
   logout: () => void;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
@@ -211,6 +220,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
   };
 
+  const setPin = async (newPin: string, currentPin?: string) => {
+    const updated = await api.post<User>("/api/auth/me/pin", {
+      newPin,
+      ...(currentPin ? { currentPin } : {}),
+    });
+    setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
+  };
+
+  const enableScreenLock = async (pin?: string) => {
+    const updated = await api.post<User>("/api/auth/me/screen-lock/enable", {
+      ...(pin ? { pin } : {}),
+    });
+    setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
+  };
+
+  const disableScreenLock = async (password: string) => {
+    await api.post("/api/auth/me/screen-lock/disable", { password });
+    setUser((prev) => (prev ? { ...prev, screenLockEnabled: false } : prev));
+  };
+
+  const unlockScreen = async (proof: { pin: string } | { totpCode: string }) => {
+    await api.post("/api/auth/unlock", proof);
+    hideLock();
+  };
+
   const updateProfile = async (patch: ProfileUpdate) => {
     const updated = await api.patch<User>("/api/auth/me", patch);
     // /api/auth/me does not echo `impersonating` on PATCH, and losing it would
@@ -251,6 +285,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     if (user?.id) trace(user.id, "logout", "app", "login");
     clearToken();
+    hideLock();
     setUser(null);
     // Drop every cached response — otherwise the next user to log in on this
     // browser would briefly see the previous user's workspaces and stats.
@@ -280,7 +315,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, setPin, enableScreenLock, disableScreenLock, unlockScreen, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

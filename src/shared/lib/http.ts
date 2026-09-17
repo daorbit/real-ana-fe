@@ -82,6 +82,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     if (res.status === 401 && token && !path.includes("/auth/")) {
       void import("./session").then((m) => m.handleSessionExpired());
     }
+    // A 423 means the account's screen lock is engaged — surfaced here so any
+    // request anywhere, not just the idle timer's own, can bring the overlay
+    // up if a stale lock state got out of sync.
+    if (res.status === 423) {
+      void import("./lockState").then((m) => m.showLock());
+    }
     // Carry the status and payload on the error so callers that need more than
     // a message — a rate limit's retry time, say — can read it without
     // re-parsing a response that has already been consumed.

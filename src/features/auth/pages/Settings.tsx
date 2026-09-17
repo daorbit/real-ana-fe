@@ -10,6 +10,7 @@ import { useProfileForm } from "@/features/auth/components/settings/useProfileFo
 import { InfoPanel } from "@/features/auth/components/settings/InfoPanel";
 import { ConnectionsPanel } from "@/features/auth/components/settings/ConnectionsPanel";
 import { TwoFactorPanel } from "@/features/auth/components/settings/TwoFactorPanel";
+import { ScreenLockPanel } from "@/features/auth/components/settings/ScreenLockPanel";
 import { PasswordPanel } from "@/features/auth/components/settings/PasswordPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -64,6 +65,8 @@ export default function Settings() {
             <PasswordPanel />
             <Divider my="xl" />
             <TwoFactorPanel />
+            <Divider my="xl" />
+            <ScreenLockPanel />
           </Tabs.Panel>
         </Tabs>
 

@@ -97,6 +97,14 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     void import("@/shared/lib/session").then((m) => m.handleSessionExpired());
   }
 
+  // The screen lock is enforced server-side on every workspace/data route, so
+  // any of these RTK calls can come back 423 the moment the idle timer's own
+  // `/lock` call lands — this is what brings the overlay up for a caller that
+  // didn't trigger the lock itself.
+  if (result.error?.status === 423) {
+    void import("@/shared/lib/lockState").then((m) => m.showLock());
+  }
+
   // A plan/quota limit hit anywhere in the app — workspace, site, audit,
   // crawl, analytics range, whatever comes next — surfaces the same upgrade
   // dialog automatically. This is the one place every request passes
