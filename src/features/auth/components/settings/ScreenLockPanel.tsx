@@ -123,7 +123,7 @@ export function ScreenLockPanel() {
 
       {user.screenLockEnabled && (
         <Group mt="sm">
-          <Button variant="subtle" size="xs" onClick={() => setPinOpen(true)}>
+          <Button variant="light" color="teal" size="xs" onClick={() => setPinOpen(true)}>
             {user.hasPin ? "Change PIN" : "Set a PIN"}
           </Button>
         </Group>
