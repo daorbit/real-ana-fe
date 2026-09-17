@@ -3,13 +3,7 @@ import { useTranslation } from "react-i18next";
 
 const FORM_URL = "https://forms.daorbit.in/form/6aabb7b5969a550af691c542/view";
 
-/**
- * The hosted support-request form, shown in a modal so the user stays in the
- * app rather than bouncing to a new tab. Opened from the account menu — this
- * is the general "I have an issue" route, including account lockouts an
- * admin has to reset by hand (lost 2FA with no backup codes, forgotten
- * screen-lock PIN).
- */
+
 export function SupportRequestModal({
   opened,
   onClose,
