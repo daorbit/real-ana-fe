@@ -32,6 +32,7 @@ export function useLive(
   return {
     live: data?.live ?? 0,
     livePages: data?.livePages ?? [],
+    liveCountries: data?.liveCountries ?? [],
     isFetching,
   };
 }

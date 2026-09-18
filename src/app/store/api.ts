@@ -605,7 +605,11 @@ export const api = createApi({
      * mutation's refetch.
      */
     getLive: build.query<
-      { live: number; livePages: { key: string; count: number }[] },
+      {
+        live: number;
+        livePages: { key: string; count: number }[];
+        liveCountries: { key: string; count: number }[];
+      },
       { workspaceId: string; filter?: string; sites?: string[] }
     >({
       query: ({ workspaceId, filter, sites }) => {

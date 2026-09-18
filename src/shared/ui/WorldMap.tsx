@@ -46,27 +46,36 @@ function useWorldPaths() {
   }, []);
 }
 
-export function WorldMap({ countries }: { countries: Bucket[] }) {
+export function WorldMap({
+  countries,
+  liveCountries,
+}: {
+  countries: Bucket[];
+  liveCountries?: Bucket[];
+}) {
   const shapes = useWorldPaths();
   const [hover, setHover] = useState<{ name: string; count: number } | null>(null);
   const [view, setView] = useState<"flat" | "satellite">(
     () => (localStorage.getItem("worldmap:view") as "flat" | "satellite") ?? "flat"
   );
+  const [range, setRange] = useState<"24h" | "live">("24h");
 
   const setViewPersisted = (v: string) => {
     setView(v as "flat" | "satellite");
     localStorage.setItem("worldmap:view", v);
   };
 
+  const activeCountries = range === "live" ? liveCountries ?? [] : countries;
+
   // Events store ISO-2 codes; the topology labels countries by name.
   const byName = useMemo(() => {
     const m = new Map<string, number>();
-    for (const c of countries) {
+    for (const c of activeCountries) {
       const name = countryName(c.key);
       if (name) m.set(name, (m.get(name) ?? 0) + c.count);
     }
     return m;
-  }, [countries]);
+  }, [activeCountries]);
 
   const max = Math.max(1, ...byName.values());
 
@@ -82,8 +91,24 @@ export function WorldMap({ countries }: { countries: Bucket[] }) {
 
   return (
     <Card withBorder radius="lg" padding="lg" h="100%">
-      <Group justify="space-between" mb="md">
+      <Group justify="space-between" mb="xs">
         <Text fw={600} c="dimmed" size="sm">Visitors by country</Text>
+        <SegmentedControl
+          size="xs"
+          value={range}
+          onChange={(v) => setRange(v as "24h" | "live")}
+          data={[
+            { value: "24h", label: "Last 24h" },
+            { value: "live", label: "Live now" },
+          ]}
+        />
+      </Group>
+      <Group justify="space-between" mb="md">
+        <Text size="xs" c="dimmed">
+          {range === "live"
+            ? `${activeCountries.reduce((s, c) => s + c.count, 0).toLocaleString()} online now`
+            : " "}
+        </Text>
         <Group gap="sm">
           {view === "flat" && hover && hover.count > 0 && (
             <Text size="xs" fw={600}>
@@ -125,7 +150,7 @@ export function WorldMap({ countries }: { countries: Bucket[] }) {
           </Stack>
         </Center>
       ) : view === "satellite" ? (
-        <SatelliteMap countries={countries} />
+        <SatelliteMap countries={activeCountries} />
       ) : (
         <>
           <svg

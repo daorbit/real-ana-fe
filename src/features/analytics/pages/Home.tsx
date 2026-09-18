@@ -200,7 +200,7 @@ export default function Home() {
   );
   // The hero figure, on its own faster cycle — `stats.live` is the same number
   // but only as fresh as the 60s stats poll.
-  const { live, livePages } = useLive(active?._id, undefined, siteScope);
+  const { live, livePages, liveCountries } = useLive(active?._id, undefined, siteScope);
   const { sites } = useSites(active?._id);
   const { demo } = useDemo();
 
@@ -329,7 +329,7 @@ export default function Home() {
     }
     if (id === "traffic") return <TrafficCard stats={stats} />;
     if (id === "livePages") return <LivePagesCard live={live} pages={livePages} />;
-    if (id === "worldMap") return <WorldMap countries={stats?.countries ?? []} />;
+    if (id === "worldMap") return <WorldMap countries={stats?.countries ?? []} liveCountries={liveCountries} />;
     if (id === "clicks") return <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} />;
     if (id === "heatmap") return <Heatmap cells={stats?.heatmap ?? []} />;
     if (id === "scrollDepth") return <ScrollPanel items={stats?.scrollDepth ?? []} />;
