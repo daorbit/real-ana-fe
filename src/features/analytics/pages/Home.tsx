@@ -25,6 +25,7 @@ import { HomeHero } from "@/features/analytics/components/HomeHero";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { DocsButton } from "@/shared/ui/DocsButton";
+import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { WorldMap } from "@/shared/ui/WorldMap";
@@ -400,6 +401,11 @@ export default function Home() {
           {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           )}
+          {/* Placed by hand because this page builds its own toolbar instead of
+              using `PageHeader`, which carries the bell for every other screen.
+              Shown while editing too: a notification arriving does not stop
+              mattering because someone is rearranging widgets. */}
+          <ActivityBellIcon />
           {!editing && !dirty && <DocsButton path="/overview" />}
 
           {/* Widths and widget choices are edited in the drawer, order in edit

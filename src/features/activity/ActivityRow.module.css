@@ -1,0 +1,124 @@
+/*
+ * One notification in the panel.
+ *
+ * The row is a single button rather than a container with a link inside it:
+ * everywhere in this panel the whole row is the target, and nesting an anchor
+ * in a clickable div gives two overlapping hit areas that disagree about what
+ * a click does.
+ */
+.row {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  /* Only what actually changes. Transitioning `all` here would animate the
+     unread wash on first paint, so every row would fade in on open. */
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.row:hover {
+  background: var(--hover, rgba(128, 128, 128, 0.08));
+}
+
+.row:active {
+  transform: scale(0.995);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--accent-2, #059669);
+  outline-offset: -2px;
+}
+
+/*
+ * Unread.
+ *
+ * A faint wash plus the dot, rather than bold text: a panel of twenty rows in
+ * bold is a panel with no emphasis left to spend, and the weight change also
+ * shifts the layout as rows are read.
+ */
+.row[data-unread="true"] {
+  background: var(--unread-wash, rgba(5, 150, 105, 0.055));
+}
+
+.row[data-unread="true"]:hover {
+  background: var(--unread-wash-hover, rgba(5, 150, 105, 0.09));
+}
+
+/* The chip holding either the type icon or the actor's avatar. */
+.chip {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+/*
+ * The unread dot.
+ *
+ * Sits in a fixed-width gutter that is present on every row, read or not, so
+ * marking one read does not shift the text of every row beneath it.
+ */
+.dotSlot {
+  width: 8px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  align-self: flex-start;
+  margin-top: 13px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-2, #059669);
+}
+
+/* The overflow menu, revealed on hover — visible always on touch, where there
+   is no hover to reveal it with. */
+.actions {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.row:hover .actions,
+.row:focus-within .actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .actions {
+    opacity: 1;
+  }
+}
+
+/* A sticky date heading inside the scrolling list. */
+.groupLabel {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 14px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted, #6b7280);
+  background: var(--body-bg, var(--mantine-color-body));
+  backdrop-filter: blur(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .actions {
+    transition: none;
+  }
+  .row:active {
+    transform: none;
+  }
+}

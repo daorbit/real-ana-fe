@@ -1,0 +1,216 @@
+import type { TFunction } from "i18next";
+import type { AppNotification, NotificationType } from "@/shared/types";
+
+/**
+ * Turning a stored notification into the sentence a reader sees.
+ *
+ * The backend stores `type` and `data`, never prose — the dashboard reads in
+ * ten languages and the server has no idea which one applies. So the words live
+ * here, behind `t()`, and `data` supplies the names and numbers.
+ *
+ * `admin.message` is the exception and always will be: an admin types its
+ * subject and body into a form minutes before it sends, so there is nothing to
+ * key a translation off. Those two fields are rendered as written.
+ */
+
+function str(data: Record<string, unknown>, key: string, fallback = ""): string {
+  const value = data[key];
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function num(data: Record<string, unknown>, key: string): number | null {
+  const value = Number(data[key]);
+  return Number.isFinite(value) ? value : null;
+}
+
+export type NotificationCopy = {
+  title: string;
+  /** The supporting line. Empty when the title says everything. */
+  body: string;
+};
+
+export function notificationCopy(
+  notification: AppNotification,
+  t: TFunction,
+): NotificationCopy {
+  const d = notification.data ?? {};
+
+  switch (notification.type) {
+    case "invite.received": {
+      const workspace = str(d, "workspaceName", t("activity.aWorkspace", "a workspace"));
+      const inviter = str(d, "inviterName");
+      return {
+        title: t("activity.inviteReceived.title", "You've been invited"),
+        body: inviter
+          ? t("activity.inviteReceived.body", "{{inviter}} invited you to {{workspace}}.", {
+              inviter,
+              workspace,
+            })
+          : t("activity.inviteReceived.bodyNoActor", "You've been invited to {{workspace}}.", {
+              workspace,
+            }),
+      };
+    }
+
+    case "invite.accepted": {
+      const who = str(d, "actorName", t("activity.someone", "Someone"));
+      const workspace = str(d, "workspaceName", t("activity.yourWorkspace", "your workspace"));
+      return {
+        title: t("activity.inviteAccepted.title", "Invitation accepted"),
+        body: t("activity.inviteAccepted.body", "{{who}} joined {{workspace}}.", { who, workspace }),
+      };
+    }
+
+    case "report.ready": {
+      const name = str(d, "reportName", t("activity.yourReport", "Your report"));
+      return {
+        title: t("activity.reportReady.title", "Report ready"),
+        body: t("activity.reportReady.body", "{{name}} has been sent and is ready to read.", {
+          name,
+        }),
+      };
+    }
+
+    case "plan.ending": {
+      const workspace = str(d, "workspaceName", t("activity.yourWorkspace", "your workspace"));
+      const days = num(d, "daysLeft");
+      const when =
+        days === null
+          ? t("activity.soon", "soon")
+          : days <= 1
+            ? t("activity.tomorrow", "tomorrow")
+            : t("activity.inDays", "in {{count}} days", { count: days });
+      return {
+        title: t("activity.planEnding.title", "Plan ending"),
+        body: t("activity.planEnding.body", "The plan for {{workspace}} ends {{when}}.", {
+          workspace,
+          when,
+        }),
+      };
+    }
+
+    case "payment.received": {
+      const amount = str(d, "amountLabel");
+      return {
+        title: t("activity.paymentReceived.title", "Payment received"),
+        body: amount
+          ? t("activity.paymentReceived.body", "We received your payment of {{amount}}.", { amount })
+          : t("activity.paymentReceived.bodyNoAmount", "We received your payment."),
+      };
+    }
+
+    case "seo.audit.done": {
+      const site = str(d, "siteName", t("activity.yourSite", "your site"));
+      return {
+        title: t("activity.seoAuditDone.title", "Audit finished"),
+        body: t("activity.seoAuditDone.body", "The SEO audit for {{site}} is ready.", { site }),
+      };
+    }
+
+    case "admin.message":
+      // Authored, not translated — see the note at the top of this file.
+      return {
+        title: str(d, "subject", t("activity.adminMessage.title", "A message for you")),
+        body: str(d, "body"),
+      };
+
+    case "security.alert":
+      return {
+        title: t("activity.securityAlert.title", "Security alert"),
+        body: str(d, "what", t("activity.securityAlert.body", "Something changed on your account.")),
+      };
+  }
+}
+
+/**
+ * The label for a notification's type, used by the preferences screen.
+ *
+ * Separate from the copy above because it names the *category* rather than one
+ * event: "Reports", not "your Tuesday report is ready".
+ */
+export function notificationTypeLabel(type: NotificationType, t: TFunction): string {
+  const labels: Record<NotificationType, [string, string]> = {
+    "invite.received": ["activity.pref.inviteReceived", "Invitations to you"],
+    "invite.accepted": ["activity.pref.inviteAccepted", "People joining your workspaces"],
+    "report.ready": ["activity.pref.reportReady", "Scheduled reports"],
+    "plan.ending": ["activity.pref.planEnding", "Plan expiry reminders"],
+    "payment.received": ["activity.pref.paymentReceived", "Payments and receipts"],
+    "seo.audit.done": ["activity.pref.seoAuditDone", "Finished SEO audits"],
+    "admin.message": ["activity.pref.adminMessage", "Product announcements"],
+    "security.alert": ["activity.pref.securityAlert", "Security alerts"],
+  };
+
+  const [key, fallback] = labels[type];
+  return t(key, fallback);
+}
+
+/**
+ * The relative time on a row, at the resolution the panel actually needs.
+ *
+ * Deliberately not a library: the panel shows minutes, hours, days and then
+ * gives up and shows a date, which is a dozen lines here against a dependency
+ * that would arrive with its own locale data for all ten languages.
+ */
+export function relativeTime(iso: string, t: TFunction, locale: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+
+  const seconds = Math.max(0, Math.round((Date.now() - then) / 1000));
+  if (seconds < 60) return t("activity.justNow", "just now");
+
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return t("activity.minutesAgo", "{{count}}m ago", { count: minutes });
+
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return t("activity.hoursAgo", "{{count}}h ago", { count: hours });
+
+  const days = Math.round(hours / 24);
+  if (days < 7) return t("activity.daysAgo", "{{count}}d ago", { count: days });
+
+  // Past a week, "14d ago" stops being easier to read than the date itself.
+  return new Date(iso).toLocaleDateString(locale || undefined, {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+/**
+ * Which heading a row sits under.
+ *
+ * Grouping by recency rather than by date: a feed of bare dates makes the
+ * reader do the arithmetic to work out whether something is new.
+ */
+export type DateGroup = "today" | "yesterday" | "week" | "earlier";
+
+export function dateGroup(iso: string): DateGroup {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return "earlier";
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  if (then.getTime() >= startOfToday.getTime()) return "today";
+
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+  if (then.getTime() >= startOfYesterday.getTime()) return "yesterday";
+
+  const weekAgo = new Date(startOfToday);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  if (then.getTime() >= weekAgo.getTime()) return "week";
+
+  return "earlier";
+}
+
+export function dateGroupLabel(group: DateGroup, t: TFunction): string {
+  switch (group) {
+    case "today":
+      return t("activity.group.today", "Today");
+    case "yesterday":
+      return t("activity.group.yesterday", "Yesterday");
+    case "week":
+      return t("activity.group.week", "This week");
+    case "earlier":
+      return t("activity.group.earlier", "Earlier");
+  }
+}

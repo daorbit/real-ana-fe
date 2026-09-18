@@ -5,6 +5,7 @@ import {
 import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { useWorkspace } from "@/features/workspace/context";
 import { modals } from "@mantine/modals";
 import { notify, notifyError } from "@/shared/lib/notify";
@@ -354,6 +355,10 @@ export default function SocialPosts() {
               <RefreshCw size={16} />
             </ActionIcon>
           </Tooltip>
+
+          {/* Placed by hand: this page builds its own header rather than using
+              `PageHeader`, which carries the bell everywhere else. */}
+          <ActivityBellIcon />
 
           <PageHelpButton />
 

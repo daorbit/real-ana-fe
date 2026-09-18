@@ -29,6 +29,7 @@ import type {
   JourneyUser, JourneyEvent,
   GoogleReviewsStatus, GoogleReviewLocation, GoogleAvailableLocations,
   GoogleReviewsList, GoogleSyncResult,
+  NotificationPage, NotificationPrefsResponse,
 } from "@/shared/types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -124,10 +125,135 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "Notification", "NotificationCount", "NotificationPrefs"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
+
+    /* ------------------------------ notifications ----------------------------- */
+
+    /**
+     * The bell's number, and the only endpoint in the app that polls forever.
+     *
+     * Kept separate from the feed on purpose: this runs on a timer in every open
+     * tab for as long as the tab is open, and the list is fetched only when the
+     * panel is actually opened. Merging them would mean paying for a page of
+     * rows every interval to render a single digit.
+     */
+    getNotificationCount: build.query<{ count: number }, void>({
+      query: () => "/api/notifications/unread-count",
+      providesTags: ["NotificationCount"],
+    }),
+
+    /**
+     * The feed, paged by cursor.
+     *
+     * `serializeQueryArgs` drops the cursor so every page lands in one cache
+     * entry, and `merge` appends — the same infinite-list shape as
+     * `getSentPosts`. Without that, each page would replace the last and the
+     * panel would appear to jump back to the top as you scroll.
+     */
+    getNotifications: build.query<
+      NotificationPage,
+      { cursor?: string | null; unread?: boolean } | void
+    >({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args && "cursor" in args && args.cursor) params.set("cursor", args.cursor);
+        if (args && "unread" in args && args.unread) params.set("unread", "true");
+        const qs = params.toString();
+        return `/api/notifications${qs ? `?${qs}` : ""}`;
+      },
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        // The unread filter is a different list, so it gets its own entry; the
+        // cursor is a position within one list and must not fragment the cache.
+        `${endpointName}-${queryArgs && "unread" in queryArgs && queryArgs.unread ? "unread" : "all"}`,
+      merge: (current, incoming, { arg }) => {
+        // A fetch with no cursor is a refresh from the top, not another page.
+        if (!arg || !("cursor" in arg) || !arg.cursor) return incoming;
+
+        const seen = new Set(current.items.map((i) => i.id));
+        current.items.push(...incoming.items.filter((i) => !seen.has(i.id)));
+        current.nextCursor = incoming.nextCursor;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        (currentArg as { cursor?: string } | undefined)?.cursor !==
+        (previousArg as { cursor?: string } | undefined)?.cursor,
+      providesTags: ["Notification"],
+    }),
+
+    /**
+     * Clear the badge without marking anything read.
+     *
+     * Invalidates only the count: the rows are unchanged, and refetching the
+     * list here would repaint the panel the moment it opened.
+     */
+    markNotificationsSeen: build.mutation<{ ok: true }, void>({
+      query: () => ({ url: "/api/notifications/seen", method: "POST" }),
+      invalidatesTags: ["NotificationCount"],
+    }),
+
+    markNotificationsRead: build.mutation<{ ok: true }, { ids: string[] }>({
+      query: (body) => ({ url: "/api/notifications/read", method: "POST", body }),
+      // Optimistic, because the row is already being dismissed under the
+      // pointer — waiting for a round trip to grey it out reads as lag.
+      async onQueryStarted({ ids }, { dispatch, queryFulfilled }) {
+        const marked = new Set(ids);
+        const now = new Date().toISOString();
+        const patches = (["all", "unread"] as const).map((scope) =>
+          dispatch(
+            api.util.updateQueryData(
+              "getNotifications",
+              scope === "unread" ? { unread: true } : undefined,
+              (draft) => {
+                for (const item of draft.items) {
+                  if (marked.has(item.id)) item.readAt = now;
+                }
+              },
+            ),
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
+    }),
+
+    markNotificationUnread: build.mutation<{ ok: true }, { id: string }>({
+      query: (body) => ({ url: "/api/notifications/unread", method: "POST", body }),
+      invalidatesTags: ["Notification"],
+    }),
+
+    markAllNotificationsRead: build.mutation<{ ok: true }, void>({
+      query: () => ({ url: "/api/notifications/read-all", method: "POST" }),
+      invalidatesTags: ["Notification", "NotificationCount"],
+    }),
+
+    getNotificationPreferences: build.query<NotificationPrefsResponse, void>({
+      query: () => "/api/notifications/preferences",
+      providesTags: ["NotificationPrefs"],
+    }),
+
+    updateNotificationPreference: build.mutation<
+      { ok: true },
+      { type: string; inApp?: boolean; push?: boolean }
+    >({
+      query: (body) => ({ url: "/api/notifications/preferences", method: "PATCH", body }),
+      invalidatesTags: ["NotificationPrefs"],
+    }),
+
+    subscribeToPush: build.mutation<
+      { ok: true },
+      { endpoint: string; keys: { p256dh: string; auth: string } }
+    >({
+      query: (body) => ({ url: "/api/notifications/push/subscribe", method: "POST", body }),
+    }),
+
+    unsubscribeFromPush: build.mutation<{ ok: true }, { endpoint: string }>({
+      query: (body) => ({ url: "/api/notifications/push/unsubscribe", method: "POST", body }),
+    }),
 
     getWorkspaceUsage: build.query<QuotaSummary, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/usage`,
@@ -2139,4 +2265,15 @@ export const {
   useGetAdminCouponsQuery,
   useSaveAdminCouponMutation,
   useDeleteAdminCouponMutation,
+  useGetNotificationCountQuery,
+  useGetNotificationsQuery,
+  useLazyGetNotificationsQuery,
+  useMarkNotificationsSeenMutation,
+  useMarkNotificationsReadMutation,
+  useMarkNotificationUnreadMutation,
+  useMarkAllNotificationsReadMutation,
+  useGetNotificationPreferencesQuery,
+  useUpdateNotificationPreferenceMutation,
+  useSubscribeToPushMutation,
+  useUnsubscribeFromPushMutation,
 } = api;

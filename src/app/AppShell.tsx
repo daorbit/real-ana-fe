@@ -15,6 +15,7 @@ import { FetchProgress } from "@/shared/ui/FetchProgress";
 import { useDemo } from "@/features/demo/context";
 import { Starfield } from "@/shared/ui/Starfield";
 import { BG_STYLES, readThemePrefs } from "@/shared/lib/theme";
+import { ActivityPanelProvider } from "@/features/activity/ActivityPanelContext";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 
@@ -58,7 +59,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [loc.pathname, closeNav]);
 
   return (
-    <>
+    // Wraps the whole authenticated shell, so the one activity drawer is
+    // reachable from the rail's bell and from the bell in every page header
+    // without either of them owning it.
+    <ActivityPanelProvider>
       {/* First tab stop on every screen: jump straight past the rail to the
           page content. Off-screen until focused. */}
       <a href="#main-content" className="skip-link">
@@ -142,6 +146,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </MantineShell.Main>
       </MantineShell>
-    </>
+    </ActivityPanelProvider>
   );
 }

@@ -17,6 +17,7 @@ import { pickOrbitSuggestions } from "@/features/orbit/orbitSuggestions";
 import type { OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
+import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { notify } from "@/shared/lib/notify";
 import { useWorkspace } from "@/features/workspace/context";
 import { useStats } from "@/features/analytics/hooks/useStats";
@@ -919,6 +920,10 @@ export default function Orbit() {
               <History size={16} />
             </ActionIcon>
           </Tooltip>
+          {/* Placed by hand: Orbit's chat header is its own layout, not
+              `PageHeader`, which carries the bell on every other screen. Sized
+              to match the subtle/md icons already in this toolbar. */}
+          <ActivityBellIcon variant="subtle" size="md" iconSize={16} />
         </Group>
       </div>
 

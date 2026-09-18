@@ -45,6 +45,7 @@ import { ExportMenu } from "@/shared/ui/ExportMenu";
 import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { DocsButton } from "@/shared/ui/DocsButton";
+import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { getAnalyticsHelp } from "@/features/analytics/components/analyticsHelp";
 import { useStats, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
@@ -800,6 +801,8 @@ export default function Analytics() {
                 <HelpCircle size={17} />
               </ActionIcon>
             </MTooltip>
+
+            <ActivityBellIcon />
             <DocsButton path="/analytics" />
           </Group>
           <Group gap="xs" wrap="nowrap" className="an-range">

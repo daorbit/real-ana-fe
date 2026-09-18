@@ -1,5 +1,7 @@
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, Divider } from "@mantine/core";
-import { UserRound, Palette, Link2, ShieldCheck } from "lucide-react";
+import { UserRound, Palette, Link2, ShieldCheck, BellRing } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -12,12 +14,25 @@ import { ConnectionsPanel } from "@/features/auth/components/settings/Connection
 import { TwoFactorPanel } from "@/features/auth/components/settings/TwoFactorPanel";
 import { ScreenLockPanel } from "@/features/auth/components/settings/ScreenLockPanel";
 import { PasswordPanel } from "@/features/auth/components/settings/PasswordPanel";
+import { NotificationsPanel } from "@/features/auth/components/settings/NotificationsPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
 import { useTitle } from "@/shared/lib/useTitle";
+
+/** Tabs that may be linked to from elsewhere, so a bad `?tab=` cannot blank the page. */
+const TABS = ["info", "appearance", "connections", "notifications", "security"];
 
 export default function Settings() {
   useTitle("Settings");
   const { t } = useTranslation();
+
+  // The activity panel's settings button links straight to the notifications
+  // tab, so the open tab has to be readable from the URL rather than fixed at
+  // mount.
+  const [params] = useSearchParams();
+  const requested = params.get("tab");
+  const [tab, setTab] = useState<string | null>(
+    requested && TABS.includes(requested) ? requested : "info",
+  );
   useInstagramReturn();
   const form = useProfileForm();
   const { user, cropFile, setCropFile, avatarBusy, saving, dirty, seedFromUser, submit, saveCrop } =
@@ -33,7 +48,7 @@ export default function Settings() {
           description={t("settings.description")}
         />
 
-        <Tabs defaultValue="info" keepMounted={false}>
+        <Tabs value={tab} onChange={setTab} keepMounted={false}>
           <Tabs.List mb="xl">
             <Tabs.Tab value="info" leftSection={<UserRound size={15} />}>
               {t("settings.tabInfo", "Info")}
@@ -43,6 +58,9 @@ export default function Settings() {
             </Tabs.Tab>
             <Tabs.Tab value="connections" leftSection={<Link2 size={15} />}>
               {t("settings.tabConnections", "Connections")}
+            </Tabs.Tab>
+            <Tabs.Tab value="notifications" leftSection={<BellRing size={15} />}>
+              {t("settings.tabNotifications", "Notifications")}
             </Tabs.Tab>
             <Tabs.Tab value="security" leftSection={<ShieldCheck size={15} />}>
               {t("settings.tabSecurity", "Security")}
@@ -59,6 +77,10 @@ export default function Settings() {
 
           <Tabs.Panel value="connections">
             <ConnectionsPanel />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="notifications">
+            <NotificationsPanel />
           </Tabs.Panel>
 
           <Tabs.Panel value="security">

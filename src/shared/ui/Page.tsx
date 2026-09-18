@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Box, Group, Text, Title, Stack, Divider } from "@mantine/core";
 import { DocsButton } from "@/shared/ui/DocsButton";
+import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 
 /**
  * Shared page furniture.
@@ -42,6 +43,11 @@ export function PageHeader({
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">
           {actions}
+          {/* Every page that uses this header gets the bell for free. The few
+              screens that build their own top row — Home, Analytics, Orbit, the
+              social composer — place `ActivityBellIcon` themselves, so the
+              control sits in the same corner on all of them. */}
+          <ActivityBellIcon />
           <DocsButton path={docsPath} />
         </Group>
       </Group>

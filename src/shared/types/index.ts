@@ -2185,3 +2185,75 @@ export type GoogleSyncResult = {
   total: number;
   averageRating: number;
 };
+
+/* ------------------------------ notifications ----------------------------- */
+
+/**
+ * Every kind of notification the backend can raise.
+ *
+ * Mirrors `NOTIFICATION_TYPES` in the backend's notifications module. There is
+ * no shared package between the two apps, so this is a hand-kept copy — adding
+ * a type on the server means adding it here and giving it a dictionary entry,
+ * or the panel renders a row it has no words for.
+ */
+export type NotificationType =
+  | "invite.received"
+  | "invite.accepted"
+  | "report.ready"
+  | "plan.ending"
+  | "payment.received"
+  | "seo.audit.done"
+  | "admin.message"
+  | "security.alert";
+
+/**
+ * One row in the panel.
+ *
+ * Deliberately carries `type` and `data` rather than a rendered sentence: the
+ * dashboard ships ten locales, and the backend has no idea which one the reader
+ * uses. The copy lives in the dictionaries, keyed off `type`; `data` fills in
+ * the names and numbers.
+ */
+export type AppNotification = {
+  id: string;
+  type: NotificationType;
+  /** Type-specific fields — a report name, an amount, the actor's name. */
+  data: Record<string, unknown>;
+  /** Dashboard-relative path this row opens. Empty when there is nowhere to go. */
+  link: string;
+  workspaceId: string | null;
+  actorId: string | null;
+  /** Set once the panel has been opened on it — clears the bell, not the row. */
+  seenAt: string | null;
+  /** Set once this particular row has been opened or dismissed. */
+  readAt: string | null;
+  createdAt: string;
+};
+
+export type NotificationPage = {
+  items: AppNotification[];
+  /** Pass back as `cursor` for the next page. Null at the end of the feed. */
+  nextCursor: string | null;
+};
+
+/** One row of the preferences screen: a type, and where it may be delivered. */
+export type NotificationPreference = {
+  type: NotificationType;
+  /** False means the switches are shown but locked — security notices. */
+  optional: boolean;
+  /** Whether this type is ever pushed, whatever the preference says. */
+  pushable: boolean;
+  inApp: boolean;
+  push: boolean;
+};
+
+export type NotificationPrefsResponse = {
+  /** False when the deployment has no VAPID keys — push UI stays hidden. */
+  pushConfigured: boolean;
+  /**
+   * The server's VAPID public key, fetched rather than built into the bundle so
+   * rotating it does not need a frontend deploy.
+   */
+  vapidPublicKey: string;
+  items: NotificationPreference[];
+};
