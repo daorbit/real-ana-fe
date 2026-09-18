@@ -5,15 +5,16 @@ import {
   Divider,
   Drawer,
   Group,
+  Menu,
   ScrollArea,
   SegmentedControl,
   Skeleton,
   Stack,
   Text,
-  Tooltip,
   ActionIcon,
+  UnstyledButton,
 } from "@mantine/core";
-import { BellOff, CheckCheck, ListChecks, Settings2, Trash2, X } from "lucide-react";
+import { BellOff, ListChecks, MoreHorizontal, Settings2, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -185,64 +186,59 @@ export function ActivityDrawer({
               {t("activity.title", "Activity")}
             </Text>
 
-            <Group gap={4} wrap="nowrap">
+            <Group gap="md" wrap="nowrap">
               {!selecting && (
                 <>
-                  <Tooltip label={t("activity.markAllRead", "Mark all as read")} withArrow>
-                    <ActionIcon
-                      variant="subtle"
-                      color="gray"
-                      // Nothing to do at zero unread, and a live button that does
-                      // nothing is worse than one that says so. Also off in
-                      // demo mode: there is no server state behind these rows
-                      // for it to change.
-                      disabled={unreadCount === 0 || markingAll || demo}
-                      loading={markingAll}
-                      onClick={() => void markAllRead()}
-                      aria-label={t("activity.markAllRead", "Mark all as read")}
-                    >
-                      <CheckCheck size={17} />
-                    </ActionIcon>
-                  </Tooltip>
+                  <UnstyledButton
+                    onClick={() => void markAllRead()}
+                    disabled={unreadCount === 0 || markingAll || demo}
+                    className={classes.linkAction}
+                  >
+                    <Text fz="xs" fw={600} c={unreadCount === 0 || demo ? "dimmed" : "emerald"}>
+                      {t("activity.markAllRead", "Mark all as read")}
+                    </Text>
+                  </UnstyledButton>
 
-                  <Tooltip label={t("activity.select", "Select notifications")} withArrow>
-                    <ActionIcon
-                      variant="subtle"
-                      color="gray"
-                      disabled={items.length === 0}
-                      onClick={() => setSelecting(true)}
-                      aria-label={t("activity.select", "Select notifications")}
-                    >
-                      <ListChecks size={17} />
-                    </ActionIcon>
-                  </Tooltip>
-
-                  <Tooltip label={t("activity.preferences", "Notification settings")} withArrow>
-                    <ActionIcon
-                      variant="subtle"
-                      color="gray"
-                      onClick={() => {
-                        navigate("/app/settings?tab=notifications");
-                        onClose();
-                      }}
-                      aria-label={t("activity.preferences", "Notification settings")}
-                    >
-                      <Settings2 size={17} />
-                    </ActionIcon>
-                  </Tooltip>
+                  <Menu position="bottom-end" withArrow radius="md" width={190} withinPortal>
+                    <Menu.Target>
+                      <ActionIcon
+                        variant="subtle"
+                        color="gray"
+                        aria-label={t("activity.moreActions", "More actions")}
+                      >
+                        <MoreHorizontal size={18} />
+                      </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<ListChecks size={14} />}
+                        disabled={items.length === 0}
+                        onClick={() => setSelecting(true)}
+                      >
+                        {t("activity.select", "Select notifications")}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<Settings2 size={14} />}
+                        onClick={() => {
+                          navigate("/app/settings?tab=notifications");
+                          onClose();
+                        }}
+                      >
+                        {t("activity.preferences", "Notification settings")}
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
                 </>
               )}
 
-              <Tooltip label={t("activity.close", "Close")} withArrow>
-                <ActionIcon
-                  variant="subtle"
-                  color="gray"
-                  onClick={onClose}
-                  aria-label={t("activity.close", "Close")}
-                >
-                  <X size={18} />
-                </ActionIcon>
-              </Tooltip>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                onClick={onClose}
+                aria-label={t("activity.close", "Close")}
+              >
+                <X size={18} />
+              </ActionIcon>
             </Group>
           </Group>
 
@@ -338,8 +334,9 @@ export function ActivityDrawer({
           )}
 
           {!isLoading &&
-            grouped.map(({ group, items: rows }) => (
+            grouped.map(({ group, items: rows }, index) => (
               <div key={group}>
+                {index > 0 && <Divider mx="md" my={4} />}
                 <div className={classes.groupLabel}>{dateGroupLabel(group, t)}</div>
                 <Stack gap={2} px={6} pb={4}>
                   {rows.map((notification) => (
@@ -352,6 +349,12 @@ export function ActivityDrawer({
                           : typeof notification.data?.inviterName === "string"
                             ? notification.data.inviterName
                             : undefined
+                      }
+                      actorAvatarUrl={
+                        typeof notification.data?.actorAvatarUrl === "string" &&
+                        notification.data.actorAvatarUrl
+                          ? notification.data.actorAvatarUrl
+                          : undefined
                       }
                       onOpen={open}
                       onMarkRead={(id) => {

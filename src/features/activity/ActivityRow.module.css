@@ -10,14 +10,14 @@
   display: block;
   width: 100%;
   padding: 12px 14px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 10px;
   background: transparent;
   text-align: left;
   cursor: pointer;
   /* Only what actually changes. Transitioning `all` here would animate the
      unread wash on first paint, so every row would fade in on open. */
-  transition: background-color 120ms ease, transform 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
 .row:hover {
@@ -42,17 +42,20 @@
  */
 .row[data-unread="true"] {
   background: var(--unread-wash, rgba(250, 204, 21, 0.09));
+  border-color: var(--unread-border, rgba(250, 204, 21, 0.28));
 }
 
 .row[data-unread="true"]:hover {
   background: var(--unread-wash-hover, rgba(250, 204, 21, 0.14));
 }
 
-/* The chip holding either the type icon or the actor's avatar. */
+/* The chip holding either the type icon or the actor's avatar. Circular, like
+   an avatar always reads, rather than a rounded square that looks like a
+   placeholder icon that never got replaced with a real image. */
 .chip {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -64,6 +67,15 @@
   flex-shrink: 0;
   align-self: center;
   color: var(--muted, #9ca3af);
+}
+
+/* The header's "Mark all as read" text link. */
+.linkAction {
+  cursor: pointer;
+}
+
+.linkAction:disabled {
+  cursor: default;
 }
 
 /* A sticky date heading inside the scrolling list. */

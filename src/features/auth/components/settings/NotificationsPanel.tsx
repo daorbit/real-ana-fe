@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Group, Loader, Stack, Switch, Table, Text } from "@mantine/core";
+import { Alert, Badge, Box, Button, Group, Loader, Stack, Switch, Text } from "@mantine/core";
 import { BellRing, Info, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -133,81 +133,82 @@ export function NotificationsPanel() {
           )}
         </Text>
 
-        <Table mt="md" verticalSpacing="sm" highlightOnHover={false}>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>{t("activity.pref.type", "Notification")}</Table.Th>
-              <Table.Th w={110} ta="center">
-                {t("activity.pref.inApp", "In app")}
-              </Table.Th>
-              <Table.Th w={110} ta="center">
-                {t("activity.pref.push", "Push")}
-              </Table.Th>
-            </Table.Tr>
-          </Table.Thead>
+        {/* Column labels once, above the cards, rather than repeated on each
+            one — the two switches read the same way down the list without it. */}
+        <Group justify="flex-end" gap="xl" mt="md" pr="sm">
+          <Text fz="xs" fw={600} c="dimmed" w={70} ta="center">
+            {t("activity.pref.inApp", "In app")}
+          </Text>
+          <Text fz="xs" fw={600} c="dimmed" w={70} ta="center">
+            {t("activity.pref.push", "Push")}
+          </Text>
+        </Group>
 
-          <Table.Tbody>
-            {data.items.map((item) => (
-              <Table.Tr key={item.type}>
-                <Table.Td>
-                  <Group gap={8} wrap="nowrap">
-                    <Text fz="sm">{notificationTypeLabel(item.type, t)}</Text>
-                    {/*
-                     * Security notices cannot be switched off, and the badge
-                     * says so rather than leaving a disabled toggle to be read
-                     * as a bug. The server refuses the change too — this is the
-                     * explanation, not the enforcement.
-                     */}
-                    {!item.optional && (
-                      <Badge
-                        size="xs"
-                        variant="light"
-                        color="gray"
-                        tt="none"
-                        leftSection={<Lock size={10} />}
-                      >
-                        {t("activity.pref.always", "Always on")}
-                      </Badge>
-                    )}
-                  </Group>
-                </Table.Td>
-
-                <Table.Td ta="center">
-                  <Switch
-                    checked={item.inApp}
-                    disabled={!item.optional}
-                    onChange={(event) =>
-                      void change(item.type, "inApp", event.currentTarget.checked)
-                    }
-                    aria-label={notificationTypeLabel(item.type, t)}
-                  />
-                </Table.Td>
-
-                <Table.Td ta="center">
-                  {item.pushable ? (
-                    <Switch
-                      checked={item.push && pushOn}
-                      // A push preference is meaningless until the browser is
-                      // registered, so the column stays inert until it is.
-                      disabled={!item.optional || !pushOn}
-                      onChange={(event) =>
-                        void change(item.type, "push", event.currentTarget.checked)
-                      }
-                      aria-label={`${notificationTypeLabel(item.type, t)} — ${t("activity.pref.push", "Push")}`}
-                    />
-                  ) : (
-                    // Not every type earns an interruption. A dash says the
-                    // choice does not exist, where an off switch would imply it
-                    // could be turned on.
-                    <Text c="dimmed" fz="sm">
-                      —
-                    </Text>
+        <Stack gap={8} mt={6}>
+          {data.items.map((item) => (
+            <Box key={item.type} className="surface-card" px="md" py="sm">
+              <Group justify="space-between" align="center" wrap="nowrap">
+                <Group gap={8} wrap="nowrap">
+                  <Text fz="sm" fw={500}>
+                    {notificationTypeLabel(item.type, t)}
+                  </Text>
+                  {/*
+                   * Security notices cannot be switched off, and the badge
+                   * says so rather than leaving a disabled toggle to be read
+                   * as a bug. The server refuses the change too — this is the
+                   * explanation, not the enforcement.
+                   */}
+                  {!item.optional && (
+                    <Badge
+                      size="xs"
+                      variant="light"
+                      color="gray"
+                      tt="none"
+                      leftSection={<Lock size={10} />}
+                    >
+                      {t("activity.pref.always", "Always on")}
+                    </Badge>
                   )}
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+                </Group>
+
+                <Group gap="xl" wrap="nowrap">
+                  <Box w={70} style={{ display: "grid", justifyContent: "center" }}>
+                    <Switch
+                      checked={item.inApp}
+                      disabled={!item.optional}
+                      onChange={(event) =>
+                        void change(item.type, "inApp", event.currentTarget.checked)
+                      }
+                      aria-label={notificationTypeLabel(item.type, t)}
+                    />
+                  </Box>
+
+                  <Box w={70} style={{ display: "grid", justifyContent: "center" }}>
+                    {item.pushable ? (
+                      <Switch
+                        checked={item.push && pushOn}
+                        // A push preference is meaningless until the browser is
+                        // registered, so the column stays inert until it is.
+                        disabled={!item.optional || !pushOn}
+                        onChange={(event) =>
+                          void change(item.type, "push", event.currentTarget.checked)
+                        }
+                        aria-label={`${notificationTypeLabel(item.type, t)} — ${t("activity.pref.push", "Push")}`}
+                      />
+                    ) : (
+                      // Not every type earns an interruption. A dash says the
+                      // choice does not exist, where an off switch would imply it
+                      // could be turned on.
+                      <Text c="dimmed" fz="sm" ta="center">
+                        —
+                      </Text>
+                    )}
+                  </Box>
+                </Group>
+              </Group>
+            </Box>
+          ))}
+        </Stack>
       </div>
 
       {pushState === "off" && data.pushConfigured && (

@@ -16,6 +16,11 @@ import type { AppNotification, NotificationPage } from "@/shared/types";
 
 const MIN = 60 * 1000;
 
+/** A stable placeholder photo per demo person, keyed so the same name always gets the same face. */
+function avatar(seed: string): string {
+  return `https://i.pravatar.cc/100?u=${seed}`;
+}
+
 function ago(ms: number): string {
   return new Date(Date.now() - ms).toISOString();
 }
@@ -43,7 +48,11 @@ export function demoNotifications(): NotificationPage {
       12,
       {
         type: "invite.received",
-        data: { inviterName: "Priya Shah", workspaceName: "Acme Growth" },
+        data: {
+          inviterName: "Priya Shah",
+          actorAvatarUrl: avatar("demo-priya-shah"),
+          workspaceName: "Acme Growth",
+        },
         link: "/invite/demo-token",
         workspaceId: null,
         actorId: "demo-actor-1",
@@ -103,7 +112,12 @@ export function demoNotifications(): NotificationPage {
       2 * 24 * 60,
       {
         type: "invite.accepted",
-        data: { actorName: "Diego Ramirez", workspaceName: "Acme Growth", role: "editor" },
+        data: {
+          actorName: "Diego Ramirez",
+          actorAvatarUrl: avatar("demo-diego-ramirez"),
+          workspaceName: "Acme Growth",
+          role: "editor",
+        },
         link: "/app/settings/members",
         workspaceId: "demo-workspace",
         actorId: "demo-actor-2",
