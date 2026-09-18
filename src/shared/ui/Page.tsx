@@ -3,15 +3,7 @@ import { Box, Group, Text, Title, Stack, Divider } from "@mantine/core";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 
-/**
- * Shared page furniture.
- *
- * Every screen was hand-rolling its own title block and card headers, which is
- * why they drifted apart. These are deliberately thin — layout and rhythm
- * only, no behaviour — so a page can adopt them without changing what it does.
- */
 
-/** The title block at the top of a page: heading, one line of context, actions. */
 export function PageHeader({
   title,
   description,
@@ -43,12 +35,9 @@ export function PageHeader({
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">
           {actions}
-          {/* Every page that uses this header gets the bell for free. The few
-              screens that build their own top row — Home, Analytics, Orbit, the
-              social composer — place `ActivityBellIcon` themselves, so the
-              control sits in the same corner on all of them. */}
-          <ActivityBellIcon />
+    
           <DocsButton path={docsPath} />
+          <ActivityBellIcon />
         </Group>
       </Group>
       {children && <Box mt="lg">{children}</Box>}
@@ -56,12 +45,7 @@ export function PageHeader({
   );
 }
 
-/**
- * A titled group of related settings or content.
- *
- * The label sits outside the surface rather than inside it — a heading on its
- * own line above the card scans faster than one more row of text within it.
- */
+
 export function Section({
   title,
   description,
@@ -93,12 +77,7 @@ export function Section({
   );
 }
 
-/**
- * One labelled control inside a Section, as a row on wide screens.
- *
- * Label and help text on the left, the control on the right — so a column of
- * settings reads as a list of decisions rather than a stack of inputs.
- */
+
 export function Field({
   label,
   hint,
@@ -138,13 +117,7 @@ export function Field({
   );
 }
 
-/**
- * Vertical rhythm between sections on a settings-style page.
- *
- * The default width keeps prose and single-column forms readable. Pages with
- * wide content — long URLs, multi-column grids — can opt into more room rather
- * than every page paying for the widest one.
- */
+
 export function PageStack({
   children,
   maxWidth = 860,

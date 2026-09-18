@@ -401,11 +401,6 @@ export default function Home() {
           {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           )}
-          {/* Placed by hand because this page builds its own toolbar instead of
-              using `PageHeader`, which carries the bell for every other screen.
-              Shown while editing too: a notification arriving does not stop
-              mattering because someone is rearranging widgets. */}
-          <ActivityBellIcon />
           {!editing && !dirty && <DocsButton path="/overview" />}
 
           {/* Widths and widget choices are edited in the drawer, order in edit
@@ -460,6 +455,8 @@ export default function Home() {
               Full analytics
             </Button>
           )}
+
+          <ActivityBellIcon />
         </Group>
       </Group>
 

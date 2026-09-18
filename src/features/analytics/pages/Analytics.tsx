@@ -802,14 +802,13 @@ export default function Analytics() {
               </ActionIcon>
             </MTooltip>
 
-            <ActivityBellIcon />
             <DocsButton path="/analytics" />
           </Group>
           <Group gap="xs" wrap="nowrap" className="an-range">
             {(statsLoading || refetching) && (
               <Loader size="xs" color="emerald" type="oval" />
             )}
- 
+
             <RangePicker
               value={rangeState}
               onChange={setRangeState}
@@ -820,6 +819,7 @@ export default function Analytics() {
               onChange={setCompareState}
               disabled={statsLoading || refetching}
             />
+            <ActivityBellIcon />
           </Group>
         </Group>
       </Group>

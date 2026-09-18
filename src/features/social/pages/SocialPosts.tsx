@@ -356,10 +356,6 @@ export default function SocialPosts() {
             </ActionIcon>
           </Tooltip>
 
-          {/* Placed by hand: this page builds its own header rather than using
-              `PageHeader`, which carries the bell everywhere else. */}
-          <ActivityBellIcon />
-
           <PageHelpButton />
 
           <Tooltip
@@ -368,7 +364,7 @@ export default function SocialPosts() {
             withArrow
           >
             <Box>
- 
+
               <Button
                 leftSection={<Plus size={16} />}
                 disabled={!ready || postsFull}
@@ -378,6 +374,10 @@ export default function SocialPosts() {
               </Button>
             </Box>
           </Tooltip>
+
+          {/* Placed by hand: this page builds its own header rather than using
+              `PageHeader`, which carries the bell everywhere else. */}
+          <ActivityBellIcon />
         </Group>
       </Group>
 
