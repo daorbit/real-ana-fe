@@ -1,4 +1,4 @@
-import { Alert, Badge, Box, Button, Group, Loader, Stack, Switch, Text } from "@mantine/core";
+import { Alert, Badge, Box, Button, Group, Loader, SimpleGrid, Stack, Switch, Text, useMantineTheme } from "@mantine/core";
 import { BellRing, Info, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -7,6 +7,7 @@ import {
 } from "@/app/store";
 import { notificationTypeLabel } from "@/features/activity/copy";
 import { usePush } from "@/features/activity/usePush";
+import { NOTIFICATION_VISUALS } from "@/features/activity/visuals";
 import { notify, errMessage } from "@/shared/lib/notify";
 
 /**
@@ -19,6 +20,7 @@ import { notify, errMessage } from "@/shared/lib/notify";
  */
 export function NotificationsPanel() {
   const { t } = useTranslation();
+  const theme = useMantineTheme();
 
   const { data, isLoading } = useGetNotificationPreferencesQuery();
   const [update] = useUpdateNotificationPreferenceMutation();
@@ -133,46 +135,63 @@ export function NotificationsPanel() {
           )}
         </Text>
 
-        {/* Column labels once, above the cards, rather than repeated on each
-            one — the two switches read the same way down the list without it. */}
-        <Group justify="flex-end" gap="xl" mt="md" pr="sm">
-          <Text fz="xs" fw={600} c="dimmed" w={70} ta="center">
-            {t("activity.pref.inApp", "In app")}
-          </Text>
-          <Text fz="xs" fw={600} c="dimmed" w={70} ta="center">
-            {t("activity.pref.push", "Push")}
-          </Text>
-        </Group>
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm" mt="md">
+          {data.items.map((item) => {
+            const visual = NOTIFICATION_VISUALS[item.type];
+            const Icon = visual.icon;
+            const accent = theme.colors[visual.color]?.[6] ?? theme.colors.gray[6];
+            const wash = theme.colors[visual.color]?.[0] ?? theme.colors.gray[1];
 
-        <Stack gap={8} mt={6}>
-          {data.items.map((item) => (
-            <Box key={item.type} className="surface-card" px="md" py="sm">
-              <Group justify="space-between" align="center" wrap="nowrap">
-                <Group gap={8} wrap="nowrap">
-                  <Text fz="sm" fw={500}>
-                    {notificationTypeLabel(item.type, t)}
-                  </Text>
-                  {/*
-                   * Security notices cannot be switched off, and the badge
-                   * says so rather than leaving a disabled toggle to be read
-                   * as a bug. The server refuses the change too — this is the
-                   * explanation, not the enforcement.
-                   */}
-                  {!item.optional && (
-                    <Badge
-                      size="xs"
-                      variant="light"
-                      color="gray"
-                      tt="none"
-                      leftSection={<Lock size={10} />}
+            return (
+              <Box key={item.type} className="surface-card" p="md">
+                <Group justify="space-between" align="flex-start" wrap="nowrap">
+                  <Group gap={10} wrap="nowrap" align="flex-start">
+                    <Box
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        display: "grid",
+                        placeItems: "center",
+                        flexShrink: 0,
+                        background: wash,
+                        color: accent,
+                      }}
                     >
-                      {t("activity.pref.always", "Always on")}
-                    </Badge>
-                  )}
+                      <Icon size={16} strokeWidth={2} />
+                    </Box>
+
+                    <div>
+                      <Text fz="sm" fw={500}>
+                        {notificationTypeLabel(item.type, t)}
+                      </Text>
+                      {/*
+                       * Security notices cannot be switched off, and the badge
+                       * says so rather than leaving a disabled toggle to be
+                       * read as a bug. The server refuses the change too —
+                       * this is the explanation, not the enforcement.
+                       */}
+                      {!item.optional && (
+                        <Badge
+                          size="xs"
+                          variant="light"
+                          color="gray"
+                          tt="none"
+                          mt={4}
+                          leftSection={<Lock size={10} />}
+                        >
+                          {t("activity.pref.always", "Always on")}
+                        </Badge>
+                      )}
+                    </div>
+                  </Group>
                 </Group>
 
-                <Group gap="xl" wrap="nowrap">
-                  <Box w={70} style={{ display: "grid", justifyContent: "center" }}>
+                <Group gap="xl" mt="md" pl={44}>
+                  <Stack gap={4} align="center">
+                    <Text fz={11} fw={600} c="dimmed">
+                      {t("activity.pref.inApp", "In app")}
+                    </Text>
                     <Switch
                       checked={item.inApp}
                       disabled={!item.optional}
@@ -181,9 +200,12 @@ export function NotificationsPanel() {
                       }
                       aria-label={notificationTypeLabel(item.type, t)}
                     />
-                  </Box>
+                  </Stack>
 
-                  <Box w={70} style={{ display: "grid", justifyContent: "center" }}>
+                  <Stack gap={4} align="center">
+                    <Text fz={11} fw={600} c="dimmed">
+                      {t("activity.pref.push", "Push")}
+                    </Text>
                     {item.pushable ? (
                       <Switch
                         checked={item.push && pushOn}
@@ -197,18 +219,18 @@ export function NotificationsPanel() {
                       />
                     ) : (
                       // Not every type earns an interruption. A dash says the
-                      // choice does not exist, where an off switch would imply it
-                      // could be turned on.
-                      <Text c="dimmed" fz="sm" ta="center">
+                      // choice does not exist, where an off switch would imply
+                      // it could be turned on.
+                      <Text c="dimmed" fz="sm">
                         —
                       </Text>
                     )}
-                  </Box>
+                  </Stack>
                 </Group>
-              </Group>
-            </Box>
-          ))}
-        </Stack>
+              </Box>
+            );
+          })}
+        </SimpleGrid>
       </div>
 
       {pushState === "off" && data.pushConfigured && (
