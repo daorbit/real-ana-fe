@@ -1,22 +1,18 @@
-import { ActionIcon, Box, Group, Menu, Text, useMantineTheme } from "@mantine/core";
-import { Check, MoreHorizontal, Undo2 } from "lucide-react";
+import { Box, Button, Checkbox, Group, Text, useMantineTheme } from "@mantine/core";
+import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { AppNotification } from "@/shared/types";
-import { notificationCopy, relativeTime } from "./copy";
+import { notificationCopy, notificationTypeLabel, relativeTime } from "./copy";
 import { NOTIFICATION_VISUALS, showsAvatar } from "./visuals";
 import classes from "./ActivityRow.module.css";
 
 /**
  * One notification.
  *
- * The whole row is the click target and it does three things at once: marks the
- * notification read, navigates to whatever it refers to, and closes the panel.
- * That is the action a reader wants in every case, and splitting it into
- * separate controls would mean a row where the obvious click does only part of
- * what was meant.
- *
- * The overflow menu exists for the other case — putting something aside, or
- * clearing it without going anywhere.
+ * The whole row is the click target: it marks the notification read,
+ * navigates to whatever it refers to, and closes the panel. There is no
+ * per-row menu — clearing one aside is what selection mode is for, reached
+ * from the header, not hidden behind a hover-only kebab on each row.
  */
 export function ActivityRow({
   notification,
@@ -24,15 +20,21 @@ export function ActivityRow({
   actorAvatarUrl,
   onOpen,
   onMarkRead,
-  onMarkUnread,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
 }: {
   notification: AppNotification;
   /** The actor's display name, where the row shows a person. */
   actorName?: string;
   actorAvatarUrl?: string;
   onOpen: (notification: AppNotification) => void;
+  /** Used by Decline on an invite: dismiss without navigating anywhere. */
   onMarkRead: (id: string) => void;
-  onMarkUnread: (id: string) => void;
+  /** Selection mode is on: shows a checkbox instead of the row acting as a link. */
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   const { t, i18n } = useTranslation();
   const theme = useMantineTheme();
@@ -48,16 +50,29 @@ export function ActivityRow({
 
   const withAvatar = showsAvatar(notification.type) && Boolean(actorAvatarUrl || actorName);
 
+  // Only an unread invite carries a live choice — once accepted or declined,
+  // the row is just history and the buttons would have nothing left to do.
+  const isPendingInvite = notification.type === "invite.received" && unread;
+
   return (
     <Box
       component="button"
       type="button"
       className={classes.row}
       data-unread={unread}
-      onClick={() => onOpen(notification)}
+      onClick={() => (selectable ? onToggleSelect?.(notification.id) : onOpen(notification))}
     >
       <Group gap={10} wrap="nowrap" align="flex-start">
-        <div className={classes.dotSlot}>{unread && <span className={classes.dot} />}</div>
+        {selectable && (
+          <Checkbox
+            checked={selected}
+            onChange={() => onToggleSelect?.(notification.id)}
+            onClick={(event) => event.stopPropagation()}
+            size="sm"
+            mt={11}
+            aria-label={t("activity.selectRow", "Select notification")}
+          />
+        )}
 
         <div
           className={classes.chip}
@@ -85,7 +100,7 @@ export function ActivityRow({
         </div>
 
         <div style={{ minWidth: 0, flex: 1 }}>
-          <Text fz="sm" fw={unread ? 600 : 500} lh={1.4} style={{ wordBreak: "break-word" }}>
+          <Text fz="sm" fw={unread ? 650 : 500} lh={1.4} style={{ wordBreak: "break-word" }}>
             {copy.title}
           </Text>
 
@@ -106,44 +121,29 @@ export function ActivityRow({
 
           <Text fz={11} c="dimmed" mt={4}>
             {relativeTime(notification.createdAt, t, i18n.language)}
+            {" · "}
+            {notificationTypeLabel(notification.type, t)}
           </Text>
-        </div>
 
-        <div className={classes.actions}>
-          <Menu position="bottom-end" withArrow radius="md" width={180} withinPortal zIndex={500}>
-            <Menu.Target>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size="sm"
-                aria-label={t("activity.rowActions", "Notification actions")}
-                // The row beneath is a button too, and a click here means the
-                // menu, not "open this notification".
-                onClick={(event) => event.stopPropagation()}
+          {isPendingInvite && !selectable && (
+            <Group gap={8} mt={8} onClick={(event) => event.stopPropagation()}>
+              <Button size="xs" onClick={() => onOpen(notification)}>
+                {t("activity.accept", "Accept")}
+              </Button>
+              <Button
+                size="xs"
+                variant="default"
+                onClick={() => onMarkRead(notification.id)}
               >
-                <MoreHorizontal size={15} />
-              </ActionIcon>
-            </Menu.Target>
-
-            <Menu.Dropdown onClick={(event) => event.stopPropagation()}>
-              {unread ? (
-                <Menu.Item
-                  leftSection={<Check size={14} />}
-                  onClick={() => onMarkRead(notification.id)}
-                >
-                  {t("activity.markRead", "Mark as read")}
-                </Menu.Item>
-              ) : (
-                <Menu.Item
-                  leftSection={<Undo2 size={14} />}
-                  onClick={() => onMarkUnread(notification.id)}
-                >
-                  {t("activity.markUnread", "Mark as unread")}
-                </Menu.Item>
-              )}
-            </Menu.Dropdown>
-          </Menu>
+                {t("activity.decline", "Decline")}
+              </Button>
+            </Group>
+          )}
         </div>
+
+        {!selectable && (
+          <ChevronRight size={16} className={classes.chevron} aria-hidden />
+        )}
       </Group>
     </Box>
   );

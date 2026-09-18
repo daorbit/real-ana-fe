@@ -231,6 +231,11 @@ export const api = createApi({
       invalidatesTags: ["Notification", "NotificationCount"],
     }),
 
+    deleteNotifications: build.mutation<{ ok: true }, { ids: string[] }>({
+      query: (body) => ({ url: "/api/notifications/delete", method: "POST", body }),
+      invalidatesTags: ["Notification", "NotificationCount"],
+    }),
+
     getNotificationPreferences: build.query<NotificationPrefsResponse, void>({
       query: () => "/api/notifications/preferences",
       providesTags: ["NotificationPrefs"],
@@ -2272,6 +2277,7 @@ export const {
   useMarkNotificationsReadMutation,
   useMarkNotificationUnreadMutation,
   useMarkAllNotificationsReadMutation,
+  useDeleteNotificationsMutation,
   useGetNotificationPreferencesQuery,
   useUpdateNotificationPreferenceMutation,
   useSubscribeToPushMutation,

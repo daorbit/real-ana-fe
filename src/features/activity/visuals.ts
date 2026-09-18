@@ -1,10 +1,9 @@
 import {
   AlertTriangle,
-  BadgeCheck,
+  DollarSign,
   CalendarClock,
-  CreditCard,
   FileText,
-  Gauge,
+  RefreshCw,
   Megaphone,
   UserPlus,
   type LucideIcon,
@@ -32,11 +31,11 @@ export type NotificationVisual = {
 
 export const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
   "invite.received": { icon: UserPlus, color: "violet" },
-  "invite.accepted": { icon: BadgeCheck, color: "teal" },
-  "report.ready": { icon: FileText, color: "blue" },
+  "invite.accepted": { icon: UserPlus, color: "teal" },
+  "report.ready": { icon: FileText, color: "gray" },
   "plan.ending": { icon: CalendarClock, color: "orange" },
-  "payment.received": { icon: CreditCard, color: "green" },
-  "seo.audit.done": { icon: Gauge, color: "cyan" },
+  "payment.received": { icon: DollarSign, color: "green" },
+  "seo.audit.done": { icon: RefreshCw, color: "gray" },
   "admin.message": { icon: Megaphone, color: "indigo" },
   "security.alert": { icon: AlertTriangle, color: "red" },
 };

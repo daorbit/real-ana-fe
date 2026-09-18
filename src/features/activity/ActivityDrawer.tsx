@@ -13,18 +13,20 @@ import {
   Tooltip,
   ActionIcon,
 } from "@mantine/core";
-import { BellOff, CheckCheck, Settings2 } from "lucide-react";
+import { BellOff, CheckCheck, ListChecks, Settings2, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   useGetNotificationsQuery,
   useMarkAllNotificationsReadMutation,
   useMarkNotificationsReadMutation,
-  useMarkNotificationUnreadMutation,
   useMarkNotificationsSeenMutation,
+  useDeleteNotificationsMutation,
 } from "@/app/store";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import type { AppNotification } from "@/shared/types";
+import { useDemo } from "@/features/demo/context";
+import { demoNotifications } from "@/features/demo/demoNotifications";
 import { ActivityRow } from "./ActivityRow";
 import { dateGroup, dateGroupLabel, type DateGroup } from "./copy";
 import classes from "./ActivityRow.module.css";
@@ -51,21 +53,34 @@ export function ActivityDrawer({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { demo } = useDemo();
 
   const [tab, setTab] = useState<"all" | "unread">("all");
   const [cursor, setCursor] = useState<string | null>(null);
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const { data, isLoading, isFetching } = useGetNotificationsQuery(
+  const { data: fetched, isLoading, isFetching } = useGetNotificationsQuery(
     { unread: tab === "unread", cursor },
     // Nothing is fetched until the panel is actually opened: the feed is the
-    // expensive half of this feature and most sessions never look at it.
-    { skip: !opened },
+    // expensive half of this feature and most sessions never look at it. Demo
+    // mode skips it too — the panel shows sample rows instead, and there is
+    // nothing real underneath worth fetching for a workspace with no traffic.
+    { skip: !opened || demo },
   );
+
+  // Same swap as the stats hook: generated rows while demo mode is on, so an
+  // empty workspace does not show the one panel in the app that still looks
+  // unused. Filtered here rather than in the generator, so the Unread tab
+  // still behaves like a real list.
+  const data = demo
+    ? { ...demoNotifications(), items: demoNotifications().items.filter((n) => tab !== "unread" || !n.readAt) }
+    : fetched;
 
   const [markSeen] = useMarkNotificationsSeenMutation();
   const [markRead] = useMarkNotificationsReadMutation();
-  const [markUnread] = useMarkNotificationUnreadMutation();
   const [markAllRead, { isLoading: markingAll }] = useMarkAllNotificationsReadMutation();
+  const [deleteNotifications, { isLoading: deleting }] = useDeleteNotificationsMutation();
 
   /*
    * Opening the panel clears the badge but marks nothing read.
@@ -76,15 +91,44 @@ export function ActivityDrawer({
    * come back to.
    */
   useEffect(() => {
-    if (opened && unreadCount > 0) void markSeen();
-  }, [opened, unreadCount, markSeen]);
+    if (opened && unreadCount > 0 && !demo) void markSeen();
+  }, [opened, unreadCount, demo, markSeen]);
 
   // Switching tabs is a different list, so paging starts again from the top.
   useEffect(() => {
     setCursor(null);
+    setSelecting(false);
+    setSelected(new Set());
   }, [tab]);
 
+  // Closing the panel with a selection in progress should not leave it primed
+  // for whatever happens to be on screen next time it opens.
+  useEffect(() => {
+    if (!opened) {
+      setSelecting(false);
+      setSelected(new Set());
+    }
+  }, [opened]);
+
   const items = data?.items ?? [];
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const deleteSelected = async () => {
+    if (!selected.size) return;
+    // Demo rows have no server side to delete — dropping the selection is
+    // enough to end the flow the same way a real delete would.
+    if (!demo) await deleteNotifications({ ids: [...selected] });
+    setSelecting(false);
+    setSelected(new Set());
+  };
 
   /**
    * Rows under their date headings, in feed order.
@@ -105,6 +149,14 @@ export function ActivityDrawer({
   }, [items]);
 
   const open = (notification: AppNotification) => {
+    // Demo rows close the panel and show where a real click would land, but
+    // nothing is marked read on the server and the fake invite link goes
+    // nowhere real, so it stays put rather than 404ing.
+    if (demo) {
+      if (notification.link && notification.type !== "invite.received") navigate(notification.link);
+      onClose();
+      return;
+    }
     if (!notification.readAt) void markRead({ ids: [notification.id] });
     if (notification.link) navigate(notification.link);
     onClose();
@@ -134,54 +186,115 @@ export function ActivityDrawer({
             </Text>
 
             <Group gap={4} wrap="nowrap">
-              <Tooltip label={t("activity.markAllRead", "Mark all as read")} withArrow>
-                <ActionIcon
-                  variant="subtle"
-                  color="gray"
-                  // Nothing to do at zero unread, and a live button that does
-                  // nothing is worse than one that says so.
-                  disabled={unreadCount === 0 || markingAll}
-                  loading={markingAll}
-                  onClick={() => void markAllRead()}
-                  aria-label={t("activity.markAllRead", "Mark all as read")}
-                >
-                  <CheckCheck size={17} />
-                </ActionIcon>
-              </Tooltip>
+              {!selecting && (
+                <>
+                  <Tooltip label={t("activity.markAllRead", "Mark all as read")} withArrow>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      // Nothing to do at zero unread, and a live button that does
+                      // nothing is worse than one that says so. Also off in
+                      // demo mode: there is no server state behind these rows
+                      // for it to change.
+                      disabled={unreadCount === 0 || markingAll || demo}
+                      loading={markingAll}
+                      onClick={() => void markAllRead()}
+                      aria-label={t("activity.markAllRead", "Mark all as read")}
+                    >
+                      <CheckCheck size={17} />
+                    </ActionIcon>
+                  </Tooltip>
 
-              <Tooltip label={t("activity.preferences", "Notification settings")} withArrow>
+                  <Tooltip label={t("activity.select", "Select notifications")} withArrow>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      disabled={items.length === 0}
+                      onClick={() => setSelecting(true)}
+                      aria-label={t("activity.select", "Select notifications")}
+                    >
+                      <ListChecks size={17} />
+                    </ActionIcon>
+                  </Tooltip>
+
+                  <Tooltip label={t("activity.preferences", "Notification settings")} withArrow>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      onClick={() => {
+                        navigate("/app/settings?tab=notifications");
+                        onClose();
+                      }}
+                      aria-label={t("activity.preferences", "Notification settings")}
+                    >
+                      <Settings2 size={17} />
+                    </ActionIcon>
+                  </Tooltip>
+                </>
+              )}
+
+              <Tooltip label={t("activity.close", "Close")} withArrow>
                 <ActionIcon
                   variant="subtle"
                   color="gray"
-                  onClick={() => {
-                    navigate("/app/settings?tab=notifications");
-                    onClose();
-                  }}
-                  aria-label={t("activity.preferences", "Notification settings")}
+                  onClick={onClose}
+                  aria-label={t("activity.close", "Close")}
                 >
-                  <Settings2 size={17} />
+                  <X size={18} />
                 </ActionIcon>
               </Tooltip>
             </Group>
           </Group>
 
-          <SegmentedControl
-            fullWidth
-            size="xs"
-            mt="sm"
-            value={tab}
-            onChange={(value) => setTab(value as "all" | "unread")}
-            data={[
-              { value: "all", label: t("activity.tabAll", "All") },
-              {
-                value: "unread",
-                label:
-                  unreadCount > 0
-                    ? `${t("activity.tabUnread", "Unread")} · ${unreadCount > 99 ? "99+" : unreadCount}`
-                    : t("activity.tabUnread", "Unread"),
-              },
-            ]}
-          />
+          {selecting ? (
+            <Group justify="space-between" align="center" mt="sm" wrap="nowrap">
+              <Text fz="sm" c="dimmed">
+                {t("activity.selectedCount", "{{count}} selected", { count: selected.size })}
+              </Text>
+              <Group gap="xs" wrap="nowrap">
+                <Button
+                  variant="subtle"
+                  color="gray"
+                  size="xs"
+                  onClick={() => {
+                    setSelecting(false);
+                    setSelected(new Set());
+                  }}
+                >
+                  {t("activity.cancel", "Cancel")}
+                </Button>
+                <Button
+                  variant="light"
+                  color="red"
+                  size="xs"
+                  leftSection={<Trash2 size={14} />}
+                  disabled={selected.size === 0 || deleting}
+                  loading={deleting}
+                  onClick={() => void deleteSelected()}
+                >
+                  {t("activity.deleteSelected", "Delete")}
+                </Button>
+              </Group>
+            </Group>
+          ) : (
+            <SegmentedControl
+              fullWidth
+              size="xs"
+              mt="sm"
+              value={tab}
+              onChange={(value) => setTab(value as "all" | "unread")}
+              data={[
+                { value: "all", label: t("activity.tabAll", "All") },
+                {
+                  value: "unread",
+                  label:
+                    unreadCount > 0
+                      ? `${t("activity.tabUnread", "Unread")} · ${unreadCount > 99 ? "99+" : unreadCount}`
+                      : t("activity.tabUnread", "Unread"),
+                },
+              ]}
+            />
+          )}
         </Box>
 
         <Divider />
@@ -241,8 +354,12 @@ export function ActivityDrawer({
                             : undefined
                       }
                       onOpen={open}
-                      onMarkRead={(id) => void markRead({ ids: [id] })}
-                      onMarkUnread={(id) => void markUnread({ id })}
+                      onMarkRead={(id) => {
+                        if (!demo) void markRead({ ids: [id] });
+                      }}
+                      selectable={selecting}
+                      selected={selected.has(notification.id)}
+                      onToggleSelect={toggleSelect}
                     />
                   ))}
                 </Stack>

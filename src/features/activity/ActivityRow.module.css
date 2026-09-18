@@ -41,11 +41,11 @@
  * shifts the layout as rows are read.
  */
 .row[data-unread="true"] {
-  background: var(--unread-wash, rgba(5, 150, 105, 0.055));
+  background: var(--unread-wash, rgba(250, 204, 21, 0.09));
 }
 
 .row[data-unread="true"]:hover {
-  background: var(--unread-wash-hover, rgba(5, 150, 105, 0.09));
+  background: var(--unread-wash-hover, rgba(250, 204, 21, 0.14));
 }
 
 /* The chip holding either the type icon or the actor's avatar. */
@@ -58,44 +58,12 @@
   flex-shrink: 0;
 }
 
-/*
- * The unread dot.
- *
- * Sits in a fixed-width gutter that is present on every row, read or not, so
- * marking one read does not shift the text of every row beneath it.
- */
-.dotSlot {
-  width: 8px;
+/* The chevron that signals the row opens something. Always visible — unlike
+   the old hover-only menu, there is nothing here that needs discovering. */
+.chevron {
   flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  align-self: flex-start;
-  margin-top: 13px;
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent-2, #059669);
-}
-
-/* The overflow menu, revealed on hover — visible always on touch, where there
-   is no hover to reveal it with. */
-.actions {
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-
-.row:hover .actions,
-.row:focus-within .actions {
-  opacity: 1;
-}
-
-@media (hover: none) {
-  .actions {
-    opacity: 1;
-  }
+  align-self: center;
+  color: var(--muted, #9ca3af);
 }
 
 /* A sticky date heading inside the scrolling list. */
@@ -114,8 +82,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .row,
-  .actions {
+  .row {
     transition: none;
   }
   .row:active {
