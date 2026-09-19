@@ -6,6 +6,7 @@ import {
   RefreshCw,
   Megaphone,
   UserPlus,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import type { NotificationType } from "@/shared/types";
@@ -38,6 +39,7 @@ export const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> 
   "seo.audit.done": { icon: RefreshCw, color: "gray" },
   "admin.message": { icon: Megaphone, color: "indigo" },
   "security.alert": { icon: AlertTriangle, color: "red" },
+  "form.submission": { icon: Inbox, color: "teal" },
 };
 
 /**

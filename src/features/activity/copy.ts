@@ -119,6 +119,20 @@ export function notificationCopy(
         title: t("activity.securityAlert.title", "Security alert"),
         body: str(d, "what", t("activity.securityAlert.body", "Something changed on your account.")),
       };
+
+    case "form.submission": {
+      const formTitle = str(d, "formTitle", t("activity.aForm", "a form"));
+      const answers = Array.isArray(d.answers) ? (d.answers as { label: string; value: string }[]) : [];
+      const preview = answers
+        .slice(0, 2)
+        .map((a) => a.value)
+        .filter(Boolean)
+        .join(", ");
+      return {
+        title: t("activity.formSubmission.title", "New submission on {{form}}", { form: formTitle }),
+        body: preview,
+      };
+    }
   }
 }
 
@@ -138,6 +152,7 @@ export function notificationTypeLabel(type: NotificationType, t: TFunction): str
     "seo.audit.done": ["activity.pref.seoAuditDone", "Finished SEO audits"],
     "admin.message": ["activity.pref.adminMessage", "Product announcements"],
     "security.alert": ["activity.pref.securityAlert", "Security alerts"],
+    "form.submission": ["activity.pref.formSubmission", "Form submissions"],
   };
 
   const [key, fallback] = labels[type];

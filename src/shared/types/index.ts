@@ -2204,7 +2204,8 @@ export type NotificationType =
   | "payment.received"
   | "seo.audit.done"
   | "admin.message"
-  | "security.alert";
+  | "security.alert"
+  | "form.submission";
 
 /**
  * One row in the panel.
