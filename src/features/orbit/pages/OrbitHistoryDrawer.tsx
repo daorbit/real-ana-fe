@@ -48,8 +48,16 @@ export function OrbitHistoryDrawer({
   const {
     conversations, conversationId, openConversation, deleteConversation,
     deleteConversations, renameConversation, loadingConversation, loadingConversations,
-    loadingMoreConversations, hasMoreConversations, loadMoreConversations, reset, started,
+    loadingMoreConversations, hasMoreConversations, loadMoreConversations,
+    ensureConversationsLoaded, reset, started,
   } = chat;
+
+  // The list is fetched the first time this drawer opens, not when the app
+  // mounts — it lives behind a provider that wraps every page, so loading it
+  // eagerly made every route pay for a drawer most sessions never open.
+  useEffect(() => {
+    if (opened) ensureConversationsLoaded();
+  }, [opened, ensureConversationsLoaded]);
 
   /** The row being renamed, and the text so far. Only ever one at a time. */
   const [editing, setEditing] = useState<string | null>(null);

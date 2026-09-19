@@ -35,7 +35,15 @@ export function useStats(
     originalArgs,
   } = useGetStatsQuery(
     { workspaceId: workspaceId!, range, filter, sites, from, to, compare, compareFrom, compareTo },
-    { skip: !workspaceId, pollingInterval: POLL_MS }
+    {
+      skip: !workspaceId,
+      pollingInterval: POLL_MS,
+      // Stats are the heaviest query in the app. A backgrounded tab asking for
+      // them every cycle is load the server carries for a dashboard nobody is
+      // looking at; the focus refetch catches it up on return.
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
+    }
   );
 
   /**

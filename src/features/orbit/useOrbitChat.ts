@@ -77,35 +77,12 @@ export function useOrbitChat() {
   const [input, setInput] = useState("");
   const [ask, { isLoading: thinking }] = useAskOrbitMutation();
 
-  /** True while the in-flight question is a drawing request, for the panel's
-   * image-shaped loading placeholder instead of the plain "Thinking" dots. */
   const [generatingImage, setGeneratingImage] = useState(false);
 
-  /**
-   * An image staged for the next question, as a data URL.
-   *
-   * Held separately from `input` rather than folded into the message text:
-   * it is sent as its own field (`image`) so the server can route the whole
-   * question to the vision model, and the composer needs it to render the
-   * thumbnail chip before anything is sent.
-   */
   const [pendingImage, setPendingImage] = useState<string | null>(null);
 
-  /**
-   * Explicit toggle: the next question is a request to draw a picture, not
-   * a question to answer. Off by default and cleared after every send —
-   * a picture request is a one-off turn, not a mode the whole conversation
-   * stays in.
-   */
   const [imageMode, setImageMode] = useState(false);
 
-  /**
-   * The saved thread the live conversation belongs to.
-   *
-   * Null until the first answer comes back with an id, or until a past thread
-   * is opened. A ref as well as state: `send` needs the current value without
-   * being rebuilt, the same reason the transcript is one.
-   */
   const [conversationId, setConversationId] = useState<string | null>(null);
   const conversationRef = useRef<string | null>(null);
 
@@ -116,16 +93,15 @@ export function useOrbitChat() {
   const workspaceId = active?._id ?? "";
   const { data: status } = useGetOrbitStatusQuery(workspaceId, { skip: !workspaceId });
 
-  // Pages are accumulated here rather than kept as separate RTK Query cache
-  // entries (one per cursor) — the drawer wants one growing list, not a page
-  // per fetch. `workspaceId` resets everything: switching workspaces starts
-  // the list over from the first page.
+
   const [conversationPages, setConversationPages] = useState<OrbitConversationSummary[]>([]);
   const [conversationsCursor, setConversationsCursor] = useState<string | null>(null);
   const [hasMoreConversations, setHasMoreConversations] = useState(true);
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [loadingMoreConversations, setLoadingMoreConversations] = useState(false);
   const [fetchConversationsPage] = useLazyGetOrbitConversationsQuery();
+  /** Whether the first page has been asked for under the current workspace. */
+  const conversationsRequested = useRef(false);
 
   const loadFirstConversationsPage = useCallback(async () => {
     if (!workspaceId) return;
@@ -143,15 +119,19 @@ export function useOrbitChat() {
     }
   }, [fetchConversationsPage, workspaceId]);
 
-  // Runs once per workspace: the list this hook exposes is a live cache the
-  // drawer scrolls through, not a per-open fetch.
+
   useEffect(() => {
     setConversationPages([]);
     setConversationsCursor(null);
     setHasMoreConversations(true);
-    void loadFirstConversationsPage();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    conversationsRequested.current = false;
   }, [workspaceId]);
+
+  const ensureConversationsLoaded = useCallback(() => {
+    if (conversationsRequested.current || !workspaceId) return;
+    conversationsRequested.current = true;
+    void loadFirstConversationsPage();
+  }, [loadFirstConversationsPage, workspaceId]);
 
   const loadMoreConversations = useCallback(async () => {
     if (!workspaceId || !hasMoreConversations || loadingMoreConversations || loadingConversations) return;
@@ -178,8 +158,6 @@ export function useOrbitChat() {
   const [bulkRemoveConversations] = useBulkDeleteOrbitConversationsMutation();
   const [renameConversationMutation] = useRenameOrbitConversationMutation();
 
-  // Read once, lazily: `localStorage` is unavailable in some privacy modes, and
-  // a throw here would take the whole panel down over a remembered preference.
   const [model, setModelState] = useState<string>(() => {
     try {
       return localStorage.getItem(MODEL_KEY) ?? "";
@@ -191,10 +169,6 @@ export function useOrbitChat() {
   /** Questions left this cycle. Null until the first answer reports it. */
   const [remaining, setRemaining] = useState<number | null>(null);
 
-  // Every model is reachable on every plan now — the only thing that locks the
-  // picker is running out of questions for the period, which is a workspace
-  // fact, not a per-model one. `locked` here means "quota is exhausted", shown
-  // on every row alike, rather than the old "this model needs a higher tier".
   const outOfQuota = remaining === 0;
   const models = (status?.models ?? []).map((m) => ({ ...m, locked: outOfQuota }));
   const activeModel = model && models.some((m) => m.id === model) ? model : models[0]?.id ?? "";
@@ -212,13 +186,6 @@ export function useOrbitChat() {
     }
   }, [outOfQuota]);
 
-  /**
-   * The transcript as the server wants it.
-   *
-   * A ref rather than reading `messages` inside the callback: the send appends
-   * the user's turn before awaiting, so reading state there would either miss
-   * that turn or force the callback to be rebuilt on every keystroke.
-   */
   const historyRef = useRef<OrbitMessage[]>([]);
 
 
@@ -235,9 +202,7 @@ export function useOrbitChat() {
       history: OrbitMessage[];
     }) => {
       const history = opts.history
-        // Neither a failed turn nor an abandoned one was ever answered, so
-        // sending them back would present our own text to the model as
-        // something Orbit said.
+
         .filter((m) => !m.failed && !m.stopped)
         .map((m) => ({ role: m.role, content: m.content }));
 
@@ -252,8 +217,7 @@ export function useOrbitChat() {
           model: activeModel,
           image: opts.image,
           generateImage: opts.drawing,
-          // Absent on the first question: the server starts a thread and tells
-          // us which one it was.
+
           conversationId: conversationRef.current ?? undefined,
         });
         inFlight.current = request;
@@ -289,11 +253,7 @@ export function useOrbitChat() {
           return next;
         });
       } catch (e) {
-        // A question someone stopped is not a question that failed — saying
-        // "Orbit could not answer that" about a deliberate cancel reads as a
-        // bug in the product rather than the thing they just asked for. It
-        // still needs a turn of its own: a question left sitting with nothing
-        // under it looks like the app lost it.
+
         if (abandoned.current) {
           setMessages((prev) => {
             const next = [
@@ -335,14 +295,7 @@ export function useOrbitChat() {
     [ask, activeModel, workspaceId, loadFirstConversationsPage],
   );
 
-  /**
-   * Abandon the question in flight.
-   *
-   * The user's turn stays in the transcript — it was asked, and removing it
-   * would leave the composer looking like nothing happened. Nothing is
-   * appended in reply, so the thread reads as a question that was dropped,
-   * which is what it is.
-   */
+
   const stop = useCallback(() => {
     abandoned.current = true;
     inFlight.current?.abort();
@@ -353,9 +306,7 @@ export function useOrbitChat() {
     async (raw?: string) => {
       const question = (raw ?? input).trim();
       const image = pendingImage;
-      // A typed question is normally required, but an attached image is
-      // itself a question ("what's in this") — the server fills in a
-      // default prompt when both are empty and only the image was sent.
+
       if ((!question && !image) || thinking || !workspaceId) return;
 
       trace(user?.id, "ask_orbit", "orbit_chat", "orbit_answer");
@@ -403,9 +354,6 @@ export function useOrbitChat() {
     await run({
       question: userTurn.content,
       image: userTurn.imageUrl,
-      // A stopped turn carries no picture to read the mode off — it never got
-      // far enough — so fall back to the toggle, which `send` leaves on after
-      // a drawing request for exactly this kind of follow-on.
       drawing: last.stopped
         ? imageMode && !userTurn.imageUrl
         : Boolean(last.imageUrl) && !userTurn.imageUrl,
@@ -444,13 +392,7 @@ export function useOrbitChat() {
     [run, thinking, user?.id],
   );
 
-  /**
-   * Start a new thread.
-   *
-   * Clears the conversation id too, so the next question opens a fresh one on
-   * the server rather than appending to whatever was last on screen. Nothing is
-   * deleted — the previous thread stays in the list.
-   */
+
   const reset = useCallback(() => {
     setMessages([]);
     setInput("");
@@ -461,13 +403,7 @@ export function useOrbitChat() {
     setConversationId(null);
   }, []);
 
-  /**
-   * Load a saved thread into the panel and continue it.
-   *
-   * A failed turn is restored as a failure, so the thread reads the way it did
-   * when it happened, and stays excluded from the history posted to the model
-   * for the same reason it always was.
-   */
+
   const openConversation = useCallback(
     async (id: string) => {
       if (!workspaceId) return;
@@ -480,8 +416,6 @@ export function useOrbitChat() {
           imageUrl: m.imageUrl,
           failed: m.failed || undefined,
           suggestions: m.suggestions.length ? m.suggestions : undefined,
-          // Restored with the turn. Leaving this out is what made the table
-          // vanish the moment a thread was reopened.
           dataDigest: m.dataDigest,
           digestAt: m.createdAt,
           modelLabel: m.modelLabel,
@@ -500,12 +434,6 @@ export function useOrbitChat() {
     [fetchConversation, workspaceId],
   );
 
-  /**
-   * Remove a saved thread.
-   *
-   * Clears the panel only when it is the one on screen — deleting a thread from
-   * the list should not wipe the conversation someone is in the middle of.
-   */
   const removeSaved = useCallback(
     async (id: string) => {
       if (!workspaceId) return;
@@ -516,12 +444,6 @@ export function useOrbitChat() {
     [removeConversation, workspaceId, reset],
   );
 
-  /**
-   * Remove several saved threads at once — the drawer's bulk-select action.
-   *
-   * Clears the panel when the thread on screen was among those removed, same
-   * as the single-delete path.
-   */
   const bulkRemoveSaved = useCallback(
     async (ids: string[]) => {
       if (!workspaceId || !ids.length) return;
@@ -555,27 +477,15 @@ export function useOrbitChat() {
     setImageMode,
     send,
     reset,
-    /** Re-run the last question, replacing its answer in place. No-op if the
-     * last turn isn't an answered assistant turn. */
+
     regenerateLast,
-    /** Rewrite an already-asked question and answer it again. Everything
-     * below it in the thread is dropped. */
+
     editAndResend,
-    /** Abandon the question in flight. The turn stays; no reply is added. */
     stop,
     thinking,
-    /** True while the in-flight question is a drawing request. */
     generatingImage,
-    /** False when the server has no model key — the UI says so instead of failing on send. */
     available: status?.configured ?? true,
     started: messages.length > 0,
-
-    /**
-     * Every model, on every plan. `locked` is true on all of them together,
-     * only once the workspace is out of questions for the period — the picker
-     * greys the whole menu and points at Billing rather than singling out any
-     * one model.
-     */
     models,
     model: activeModel,
     setModel,
@@ -584,22 +494,15 @@ export function useOrbitChat() {
     plan: status?.plan ?? null,
     /** Questions left this cycle. Null until an answer reports it. */
     remaining,
-
-    /**
-     * The workspace's saved threads, newest activity first, accumulated across
-     * every page fetched so far. Empty while loading and when there are none —
-     * the sidebar renders the same in both cases.
-     */
     conversations: conversationPages,
-    /** True while the workspace's saved threads are first fetched, for the
-     * drawer's skeleton list. */
     loadingConversations,
-    /** True while a further page is being fetched, for the list's bottom loader. */
     loadingMoreConversations,
-    /** Whether a further page exists — drives the infinite-scroll sentinel. */
     hasMoreConversations,
     /** Fetch the next page and append it to `conversations`. */
     loadMoreConversations,
+    /** Load the first page, once, when something is about to show the list.
+     * Nothing fetches it on mount — see the effect that resets it. */
+    ensureConversationsLoaded,
     /** The thread on screen, when it has been saved. Null on an unsaved one. */
     conversationId,
     /** True while a past thread is being pulled in, for the sidebar's spinner. */

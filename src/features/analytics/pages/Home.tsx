@@ -37,7 +37,7 @@ import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/Outb
 import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { SeoScoreCard } from "@/features/seo/components/SeoScoreCard";
 import { SortableWidget, WidgetDragPreview } from "@/shared/ui/SortableWidget";
-import { Onboarding } from "@/features/auth/components/Onboarding";
+import { Onboarding, onboardingCanShow } from "@/features/auth/components/Onboarding";
 import { useStats, useLive, useHomeWidgets, WIDGET_MAP, useLinkedInReturn, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
 import { useGetSeoReportsQuery, useGetMembersQuery } from "@/app/store";
@@ -205,16 +205,23 @@ export default function Home() {
   const { sites } = useSites(active?._id);
   const { demo } = useDemo();
 
-  // Extra signals for the getting-started checklist. Cheap: both are already
-  // cached once their pages have been visited, and skipped until there is a
-  // site to key the SEO query on.
+  /*
+   * Extra signals for the getting-started checklist, and only for it.
+   *
+   * The checklist removes itself once every step is done or someone dismisses
+   * it, which for an established workspace is always — so fetching these on
+   * every visit to Home bought two requests to fill in a panel that then
+   * renders nothing. Both are skipped unless the checklist can actually
+   * appear, on top of the existing guards.
+   */
+  const onboardingVisible = onboardingCanShow();
   const firstSiteId = sites[0]?._id ?? "";
   const { data: seoReports } = useGetSeoReportsQuery(
     { workspaceId: active?._id ?? "", siteId: firstSiteId, limit: 1 },
-    { skip: !active?._id || !firstSiteId || demo },
+    { skip: !onboardingVisible || !active?._id || !firstSiteId || demo },
   );
   const { data: memberData } = useGetMembersQuery(active?._id ?? "", {
-    skip: !active?._id || demo,
+    skip: !onboardingVisible || !active?._id || demo,
   });
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,

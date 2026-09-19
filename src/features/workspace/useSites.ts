@@ -13,7 +13,15 @@ import type { Site } from "@/shared/types";
 export function useSites(workspaceId: string | undefined) {
   const { data, currentData, refetch, fulfilledTimeStamp, originalArgs } = useGetSitesQuery(
     workspaceId!,
-    { skip: !workspaceId, pollingInterval: POLL_MS },
+    {
+      skip: !workspaceId,
+      pollingInterval: POLL_MS,
+      // A backgrounded tab is not being looked at, and polling it on a timer
+      // is load the server carries for nobody. The refetch on focus is what
+      // catches the list up when someone comes back.
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
+    },
   );
 
   const [refreshing, setRefreshing] = useState(false);

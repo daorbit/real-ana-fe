@@ -16,6 +16,24 @@ type Step = {
 const DISMISS_KEY = "quantalog_onboarding_dismissed";
 
 /**
+ * Whether the checklist could still appear at all.
+ *
+ * For callers that pay to work out its props: the checklist hides itself once
+ * it is dismissed, so there is no point fetching the signals that fill it in.
+ * It cannot answer the `allDone` half — that is what the signals are for — but
+ * a dismissal is the case that lasts forever.
+ */
+export function onboardingCanShow(): boolean {
+  try {
+    return localStorage.getItem(DISMISS_KEY) !== "1";
+  } catch {
+    // Unavailable in some privacy modes. Showing the checklist and paying for
+    // its signals is the safer way to be wrong.
+    return true;
+  }
+}
+
+/**
  * Getting-started checklist for new workspaces. Walks a user from an empty
  * account to their first live pageview, then bows out on its own. It also
  * remembers a manual dismissal, so someone who closes it never sees it again.
