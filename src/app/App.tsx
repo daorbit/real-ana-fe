@@ -68,11 +68,7 @@ function RequireSetup({ children }: { children: ReactNode }) {
   if (!user?.mobile && !setupExempt) {
     return <Navigate to="/app/onboarding" replace />;
   }
-
-  // A failed workspaces fetch — most commonly the screen lock's 423 on a cold
-  // reload — must never be read as "this account has no workspaces yet".
-  // Staying put lets the lock overlay (mounted alongside this in `Protected`)
-  // do its job instead of racing it to onboarding.
+ 
   if (fetchFailed || locked) return <>{children}</>;
 
   const skipped = localStorage.getItem("quantalog_onboarding_skipped") === "1";
@@ -121,15 +117,7 @@ function NavigationCapture() {
   return null;
 }
 
-/**
- * Moves focus to the page's <h1> on every client-side navigation.
- *
- * An SPA route change swaps the DOM but leaves focus where it was — on a nav
- * link the user just clicked, or nowhere. A screen-reader or keyboard user then
- * starts the new page from the middle of the old one. Focusing the heading (or
- * <main> as a fallback) puts them at the top of what actually changed, and the
- * `tabIndex=-1` is removed on blur so it never becomes a lingering tab stop.
- */
+ 
 function FocusOnRouteChange() {
   const { pathname } = useLocation();
   const first = useRef(true);
@@ -155,11 +143,7 @@ function FocusOnRouteChange() {
   return null;
 }
 
-/**
- * A route-level error boundary that re-mounts its subtree on navigation, so a
- * crash on one page doesn't stick when the user moves to another. Also wraps
- * every lazy route in one Suspense fallback.
- */
+ 
 function RouteFrame({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   return (
@@ -169,21 +153,12 @@ function RouteFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Traces every screen change for a logged-in user, so the journey is
- * continuous rather than only the clicks that happened to get instrumented
- * individually — src is the page just left, dest is the page landed on.
- * A page reached by typing a URL or refreshing has no previous path in this
- * tab, so it traces with an empty src rather than a stale one.
- */
+ 
 function JourneyRouteTracer() {
   const location = useLocation();
   const { user } = useAuth();
   const prevPath = useRef<string | null>(null);
-  // What was last actually sent, rather than what was last rendered. Two things
-  // otherwise send the same screen twice: `user?.id` is a dependency, so
-  // signing in re-runs this for the page already on screen, and StrictMode
-  // double-invokes the effect on mount in development.
+ 
   const lastSent = useRef<string | null>(null);
 
   useEffect(() => {
@@ -200,16 +175,7 @@ function JourneyRouteTracer() {
   return null;
 }
 
-// Dogfooding: quantalog's own dashboard runs its own anonymous tracker.
-// Pageviews need no per-page wiring — tracker.js patches pushState/
-// replaceState so BrowserRouter navigation is already an SPA route change
-// it understands. Identified journey tracing (trace() calls at click sites,
-// see shared/lib/analytics.ts) is separate and needs no mount here — each
-// call carries the logged-in user's id itself.
-//
-// Temporarily off: the script auto-captures pageviews and clicks (buttons,
-// sidebar menu items) with no per-site wiring, so the mount is skipped rather
-// than the call sites edited. Flip back to true to resume.
+ 
 const SELF_TRACKING_ENABLED = false;
 
 function SelfTracking() {

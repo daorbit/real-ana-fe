@@ -204,7 +204,14 @@ export function useOrbitChat() {
       const history = opts.history
 
         .filter((m) => !m.failed && !m.stopped)
-        .map((m) => ({ role: m.role, content: m.content }));
+        .map((m) => {
+          let content = m.content;
+          if (m.imageUrl) {
+            const tag = m.role === "assistant" ? "[generated an image]" : "[attached an image]";
+            content = `${tag} ${content}`;
+          }
+          return { role: m.role, content };
+        });
 
       setGeneratingImage(opts.drawing);
       abandoned.current = false;
@@ -326,8 +333,7 @@ export function useOrbitChat() {
       setInput("");
       setPendingImage(null);
       const drawing = imageMode && !image;
-
-      if (!drawing) setImageMode(false);
+      setImageMode(false);
 
       await run({ question, image: image ?? undefined, drawing, history: before });
     },

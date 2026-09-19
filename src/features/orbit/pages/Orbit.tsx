@@ -165,11 +165,6 @@ function GeneratedImage({ url }: { url: string }) {
   );
 }
 
-/** Copy / share / read aloud / copy as report / regenerate, under an answered
- * assistant turn. Regenerate only on the last turn — see `regenerateLast`'s
- * own note on why. Read aloud and report are both conditional: a drawing has
- * no prose to speak, and only an answer that carried a data digest has
- * anything to export as a report. */
 function TurnActions({
   message,
   onRegenerate,
@@ -281,13 +276,6 @@ function AnswerText({
   );
 }
 
-/**
- * A question that was asked, with the pencil that lets it be asked again.
- *
- * The control is revealed on hover rather than sitting under every bubble:
- * editing is the rare case, and a row of buttons beside each of your own
- * questions makes a thread look like a form.
- */
 function UserTurn({
   message,
   onEdit,
@@ -361,13 +349,7 @@ function UserTurn({
       )}
       {message.content && (
         <Group justify="flex-end" wrap="nowrap" gap={4} className={classes.userTurnRow}>
-          {/*
-            Always mounted, disabled rather than removed while a reply streams.
-            Dropping it from the tree changed the row's width mid-turn, so the
-            question re-wrapped the moment the answer arrived — the same
-            sentence on two lines while thinking and one line after, which reads
-            as the layout breaking rather than as a button appearing.
-          */}
+
           <Tooltip label="Edit and re-ask" withArrow position="left" disabled={!editable}>
             <ActionIcon
               variant="subtle"
@@ -430,14 +412,6 @@ function Turn({
     return <UserTurn message={message} onEdit={onEdit} editable={editable} />;
   }
 
-  /*
-   * A question that was stopped.
-   *
-   * Deliberately not the assistant bubble with the mark beside it: Orbit never
-   * said anything here, and dressing our own note up as a turn from the
-   * assistant is a small lie that makes the transcript untrustworthy. A quiet
-   * line and the way back is all this needs.
-   */
   if (message.stopped) {
     return (
       <Group gap={10} wrap="nowrap" align="center" pl={34}>
@@ -489,6 +463,9 @@ function Turn({
   );
 }
 
+/** Anchored regex: leading verb that suggests drawing. */
+const DRAW_RE = /^(draw|generate|gen|create|illustrate|paint|sketch|render|make me (an? )?(image|picture|photo))\b/i;
+
 export default function Orbit() {
   // The page reads the provider's chat rather than calling the hook, so it is
   // the same conversation the bubble holds.
@@ -530,6 +507,9 @@ export default function Orbit() {
   const [imageError, setImageError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Change E: track whether the user manually toggled drawing for the current
+  // message. A manual choice outranks the keyword guess.
+  const manualToggle = useRef(false);
  
   useEffect(() => {
     document.body.dataset.page = "orbit";
@@ -562,15 +542,10 @@ export default function Orbit() {
   const sendAndStop = (q?: string) => {
     if (speech.listening) speech.stop();
     dictationBase.current = "";
+    manualToggle.current = false;
     send(q);
   };
 
-  /**
-   * Read a dropped, pasted or picked file as the data URL the composer stages
-   * and the server later validates for real. This check is a courtesy, not
-   * the guard — the route rejects anything past its own size and type
-   * ceiling regardless of what the browser let through.
-   */
   const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
 
   const acceptImage = (file: File | undefined | null) => {
@@ -585,6 +560,8 @@ export default function Orbit() {
       setImageError("That image is too large — 6MB or smaller.");
       return;
     }
+ 
+    setImageMode(false);
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -605,6 +582,8 @@ export default function Orbit() {
     acceptImage(e.dataTransfer.files?.[0]);
   };
 
+
+
   const toggleImageMode = () => {
     if (!imageMode && plan && !plan.imageGeneration) {
       notify.quotaLimit(
@@ -614,12 +593,16 @@ export default function Orbit() {
       );
       return;
     }
+    manualToggle.current = true;
     setImageMode((v) => !v);
   };
 
   const onTextareaPaste = (e: React.ClipboardEvent) => {
     const file = Array.from(e.clipboardData.files).find((f) => f.type.startsWith("image/"));
-    if (file) acceptImage(file);
+    if (file) {
+      setImageMode(false);
+      acceptImage(file);
+    }
   };
 
   const last = messages[messages.length - 1];
@@ -690,8 +673,16 @@ export default function Orbit() {
           }
           value={input}
           onChange={(e) => {
-            setInput(e.currentTarget.value);
-            if (speech.listening) dictationBase.current = e.currentTarget.value;
+            const val = e.currentTarget.value;
+            setInput(val);
+            if (speech.listening) dictationBase.current = val;
+
+            // Change E: auto-light the drawing toggle on a leading draw verb,
+            // unless the user already made a manual choice for this message.
+            if (!manualToggle.current && !pendingImage && plan?.imageGeneration) {
+              const match = DRAW_RE.test(val.trim());
+              if (match && !imageMode) setImageMode(true);
+            }
           }}
 
           onKeyDown={(e) => {
