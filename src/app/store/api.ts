@@ -1238,9 +1238,19 @@ export const api = createApi({
         emails?: string[];
         cta?: { label: string; href: string };
         layout?: MailLayout;
+        /**
+         * Also drop this into the notification panel of every recipient who
+         * has an account. Off by default: this endpoint sends cold outreach
+         * too, and a campaign aimed at strangers has no business appearing in
+         * existing customers' panels.
+         */
+        notifyInApp?: boolean;
       }
     >({
       query: (payload) => ({ url: "/api/admin/email/send", method: "POST", body: payload }),
+      // The send writes a notification row per recipient, so any panel open
+      // elsewhere in this session is now stale.
+      invalidatesTags: ["Notification", "NotificationCount"],
     }),
 
     sendTestEmail: build.mutation<

@@ -54,6 +54,19 @@ export function useEmailComposer({
   const [customTo, setCustomTo] = useState("");
   /** Which body layout the server renders. Owned by the chosen template. */
   const [layout, setLayout] = useState<MailLayout>("plain");
+
+  /**
+   * Whether the message also lands in recipients' notification panels.
+   *
+   * Off by default, deliberately: this composer sends cold outreach to
+   * addresses that have never signed up as well as announcements to existing
+   * customers, and only the person writing it knows which this is. The server
+   * mirrors it to accounts it can resolve and ignores the rest.
+   *
+   * No control wired to it yet — in-app announcements are getting their own
+   * screen rather than a checkbox on the mailer.
+   */
+  const notifyInApp = false;
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   /** The template the draft came from. Null once the copy is edited by hand. */
@@ -197,6 +210,7 @@ export function useEmailComposer({
           : { userIds: recipients.map((r) => r.id!).filter(Boolean) }),
         cta,
         layout,
+        notifyInApp,
       }).unwrap();
 
       if (result.failed) {

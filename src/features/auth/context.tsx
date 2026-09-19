@@ -85,9 +85,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .get<User>("/api/auth/me")
       .then((me) => {
         setUser(me);
+        // Before `setLoading(false)`, so `LockScreen` is already seeded from
+        // `isLocked()` on its very first render rather than waiting for a
+        // notify it was not yet subscribed to.
         if (me.locked) showLock();
       })
-      .catch(() => clearToken())
+      .catch((e: { status?: number }) => {
+        // A 423 is a locked account, not a dead session — clearing the token
+        // here would log someone out for locking their screen. `/me` answers
+        // while locked by design, but a future guard on it must not turn into
+        // a logout.
+        if (e?.status === 423) {
+          showLock();
+          return;
+        }
+        clearToken();
+      })
       .finally(() => setLoading(false));
   }, []);
 

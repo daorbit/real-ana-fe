@@ -3,7 +3,7 @@ import {
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images,
   Settings,
 } from "lucide-react";
-import { LeadMagnetIcon, OrbitNavIcon } from "./icons";
+import { LeadMagnetIcon } from "./icons";
 
 
 export type NavItem = {

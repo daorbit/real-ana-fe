@@ -38,8 +38,32 @@ export function useIdleLock(enabled: boolean) {
       }
     }, 15_000);
 
+    /*
+     * Re-read the server's lock whenever the tab comes back.
+     *
+     * `lockState` is a module variable, so it starts false on every fresh
+     * document — and a tab restored from the back/forward cache never re-runs
+     * the boot `/me` that would have set it. Either way the overlay was
+     * missing while `lockedAt` was still set in the database, which looks
+     * exactly like the lock having been forgotten.
+     *
+     * The routes were still refusing to serve data, so this was never a way
+     * to read anything — but a locked account has to *look* locked.
+     */
+    const recheck = () => {
+      if (document.visibilityState !== "visible" || isLocked()) return;
+      api.get<{ locked?: boolean }>("/api/auth/me")
+        .then((me) => { if (me.locked) showLock(); })
+        .catch(() => { /* a 401 is handled by the shared session handler */ });
+    };
+
+    document.addEventListener("visibilitychange", recheck);
+    window.addEventListener("pageshow", recheck);
+
     return () => {
       ACTIVITY_EVENTS.forEach((evt) => window.removeEventListener(evt, bump));
+      document.removeEventListener("visibilitychange", recheck);
+      window.removeEventListener("pageshow", recheck);
       unsubscribe();
       clearInterval(interval);
     };
