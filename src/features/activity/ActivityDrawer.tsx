@@ -29,6 +29,7 @@ import type { AppNotification } from "@/shared/types";
 import { useDemo } from "@/features/demo/context";
 import { demoNotifications } from "@/features/demo/demoNotifications";
 import { ActivityRow } from "./ActivityRow";
+import { SubmissionDetailModal } from "./SubmissionDetailModal";
 import { dateGroup, dateGroupLabel, type DateGroup } from "./copy";
 import classes from "./ActivityRow.module.css";
 
@@ -52,7 +53,6 @@ export function ActivityDrawer({
   onClose: () => void;
   unreadCount: number;
 }) {
-  debugger
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { demo } = useDemo();
@@ -61,7 +61,7 @@ export function ActivityDrawer({
   const [cursor, setCursor] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<AppNotification | null>(null);
 
   const { data: fetched, isLoading, isFetching } = useGetNotificationsQuery(
     { unread: tab === "unread", cursor },
@@ -154,10 +154,10 @@ export function ActivityDrawer({
   const open = (notification: AppNotification) => {
     // A submission's answers live only in the row's own `data` — there is no
     // per-submission route to send this to inside the forms app's iframe, so
-    // the row unfolds in place instead of navigating like every other type.
+    // it opens in a modal instead of navigating like every other type.
     if (notification.type === "form.submission") {
       if (!demo && !notification.readAt) void markRead({ ids: [notification.id] });
-      setExpandedId((prev) => (prev === notification.id ? null : notification.id));
+      setDetail(notification);
       return;
     }
     // Demo rows close the panel and show where a real click would land, but
@@ -373,7 +373,6 @@ export function ActivityDrawer({
                       selectable={selecting}
                       selected={selected.has(notification.id)}
                       onToggleSelect={toggleSelect}
-                      expanded={expandedId === notification.id}
                     />
                   ))}
                 </Stack>
@@ -394,6 +393,7 @@ export function ActivityDrawer({
           )}
         </ScrollArea>
       </Stack>
+      <SubmissionDetailModal notification={detail} onClose={() => setDetail(null)} />
     </Drawer>
   );
 }

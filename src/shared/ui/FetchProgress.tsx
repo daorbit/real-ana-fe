@@ -2,20 +2,33 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
 
 /**
+ * Endpoints that poll on a timer in the background, on every screen, for as
+ * long as the app is open. A pending request from one of these is not a
+ * refresh anyone asked for — it is the badge or the live counter doing its
+ * job — and flashing the bar every 10-30 seconds forever reads as the app
+ * being perpetually busy rather than as a signal worth noticing.
+ */
+const POLLING_ENDPOINTS = new Set(["getNotificationCount", "getLive", "getStats", "getSites"]);
+
+/**
  * A thin bar across the top of the viewport whenever a background refetch is
  * in flight while data is already on screen.
  *
  * The full-page skeletons only cover a first load. A stale-while-revalidate
- * refresh — a poll, a tag invalidation, a manual Refresh — otherwise gives no
- * sign anything is happening, so a number that is about to change looks static.
+ * refresh — a tag invalidation or a manual Refresh — otherwise gives no sign
+ * anything is happening, so a number that is about to change looks static.
  * This is the smallest possible signal: no layout shift, gone the instant the
- * last request settles.
+ * last request settles. Excludes the endpoints above, whose pending state is
+ * routine rather than newsworthy.
  */
 export function FetchProgress() {
   const busy = useSelector((state: RootState) => {
     const queries = state.api.queries;
     for (const key in queries) {
-      if (queries[key]?.status === "pending") return true;
+      const query = queries[key];
+      if (!query || query.status !== "pending") continue;
+      if (POLLING_ENDPOINTS.has(query.endpointName ?? "")) continue;
+      return true;
     }
     return false;
   });
