@@ -54,12 +54,19 @@ export function ActivityRow({
   // the row is just history and the buttons would have nothing left to do.
   const isPendingInvite = notification.type === "invite.received" && unread;
 
+  // An invite that was already accepted or declined: the row is still visible
+  // as history, but clicking it would land on a dead token page, so we disable
+  // the clickable affordances (cursor, chevron) to make it clear it's settled.
+  const isSettledInvite = notification.type === "invite.received" && !unread;
+
   return (
     <Box
       component="button"
       type="button"
       className={classes.row}
       data-unread={unread}
+      data-settled={isSettledInvite || undefined}
+      style={isSettledInvite ? { cursor: "default" } : undefined}
       onClick={() => (selectable ? onToggleSelect?.(notification.id) : onOpen(notification))}
     >
       <Group gap={10} wrap="nowrap" align="flex-start">
@@ -77,9 +84,10 @@ export function ActivityRow({
         <div
           className={classes.chip}
           style={{
-            background: withAvatar ? undefined : wash,
+            // An avatar photo fills the chip on its own; initials still need
+            // the wash behind them or they are invisible in dark mode.
+            background: actorAvatarUrl || visual.image ? undefined : wash,
             color: accent,
-            // An avatar fills its chip; a type icon sits on its own wash.
             backgroundImage: actorAvatarUrl ? `url(${actorAvatarUrl})` : undefined,
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -91,9 +99,11 @@ export function ActivityRow({
             // reads as a person rather than an empty square.
             !actorAvatarUrl && (
               <Text fz={13} fw={700} c={visual.color}>
-                {(actorName ?? "?").slice(0, 1).toUpperCase()}
+                {(actorName?.trim() || "?").slice(0, 1).toUpperCase()}
               </Text>
             )
+          ) : visual.image ? (
+            <img src={visual.image} alt="" width={38} height={38} style={{ borderRadius: 999 }} />
           ) : (
             <Icon size={18} strokeWidth={2} />
           )}
@@ -139,9 +149,14 @@ export function ActivityRow({
               </Button>
             </Group>
           )}
+          {isSettledInvite && !selectable && (
+            <Text fz={11} c="dimmed" mt={6} fs="italic">
+              {t("activity.inviteHandled", "Responded")}
+            </Text>
+          )}
         </div>
 
-        {!selectable && (
+        {!selectable && !isSettledInvite && (
           <ChevronRight size={16} className={classes.chevron} aria-hidden />
         )}
       </Group>

@@ -19,9 +19,6 @@ import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { notify } from "@/shared/lib/notify";
-import { useWorkspace } from "@/features/workspace/context";
-import { useStats } from "@/features/analytics/hooks/useStats";
-import { useGetSitesQuery, useGetCompetitorsQuery } from "@/app/store";
 import classes from "./orbitPage.module.css";
 
 
@@ -507,76 +504,9 @@ export default function Orbit() {
   const wasThinking = useRef(false);
   const tts = useSpeech();
 
-  // Extra starter chips, computed from data already loaded elsewhere in the
-  // app rather than a new endpoint: one calls out whichever 7-day metric
-  // moved the most, the other turns an already-tracked competitor into a
-  // one-click question. Both degrade to nothing rather than a placeholder —
-  // an empty workspace or one with no competitors just keeps the static three.
-  const { active } = useWorkspace();
-  const workspaceId = active?._id ?? "";
-  const { data: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
-    skip: !workspaceId,
-  });
-  const primarySiteId = sites[0]?.siteId ?? "";
-  const { stats: weekStats, loading: statsLoading } = useStats(workspaceId || undefined, "7d");
-  const { data: competitors = [], isLoading: competitorsLoading } = useGetCompetitorsQuery(
-    { workspaceId, siteId: primarySiteId },
-    { skip: !workspaceId || !primarySiteId },
-  );
-
-  /**
-   * Whether the chips can be drawn yet.
-   *
-   * The two dynamic starters come from three requests that land at different
-   * times — and competitors cannot even begin until sites has returned a
-   * primary id. Rendering as each one arrived reflowed the wrap from one row to
-   * two and re-centred it twice, which read as the page flickering rather than
-   * as chips appearing. So nothing is drawn until all three have settled, and
-   * the row then appears once, complete.
-   *
-   * A workspace with nothing to say still resolves — these are loading flags,
-   * not "has data" flags, so an empty workspace falls through to the static
-   * three immediately rather than waiting on anything.
-   */
-  const startersReady =
-    !workspaceId || (!sitesLoading && !statsLoading && (!primarySiteId || !competitorsLoading));
-
   // Picked once per visit, not on every render: reshuffling on each keystroke
   // would make the chips jump around while the composer is still empty.
   const staticStarters = useMemo(() => pickOrbitSuggestions(3), []);
-
-  const dynamicStarters = (() => {
-    const chips: string[] = [];
-
-    // The single biggest mover among the metrics Orbit can actually explain
-    // — matches `DATA_MARKERS` on the server, so the question this chip asks
-    // is guaranteed to pull the data digest into the answer.
-    const deltas = weekStats?.deltas;
-    if (deltas) {
-      const candidates: { label: string; pct: number; question: string }[] = [
-        { label: "Bounce rate", pct: deltas.bounceRate ?? 0, question: "Why did my bounce rate change this week?" },
-        { label: "Visitors", pct: deltas.visitors ?? 0, question: "Why did my visitors change this week?" },
-        { label: "Pageviews", pct: deltas.pageviews ?? 0, question: "Why did my pageviews change this week?" },
-      ].filter((c) => Number.isFinite(c.pct) && Math.abs(c.pct) >= 15);
-
-      const biggest = candidates.sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct))[0];
-      if (biggest) {
-        const dir = biggest.pct >= 0 ? "up" : "down";
-        chips.push(`${biggest.label} is ${dir} ${Math.abs(Math.round(biggest.pct))}% this week — why?`);
-      }
-    }
-
-    // Whichever tracked competitor was checked most recently — same
-    // "one clear default over a menu" reasoning as the static three chips.
-    const competitor = [...competitors]
-      .filter((c) => c.snapshot)
-      .sort((a, b) => (b.lastCheckedAt ?? "").localeCompare(a.lastCheckedAt ?? ""))[0];
-    if (competitor) {
-      chips.push(`How do we beat ${competitor.label || competitor.url}?`);
-    }
-
-    return chips;
-  })();
 
   useEffect(() => {
     const last = messages[messages.length - 1];
@@ -943,19 +873,18 @@ export default function Orbit() {
               settled. The row keeps its space while it waits, so the composer
               above it does not shift when the chips arrive.
             */}
-            <div className={classes.starters} data-ready={startersReady || undefined}>
-              {startersReady &&
-                [...dynamicStarters, ...staticStarters].map((q) => (
-                  <UnstyledButton
-                    key={q}
-                    className={classes.starter}
-                    onClick={() => sendAndStop(q)}
-                  >
-                    <Text size="xs" lh={1.4}>
-                      {q}
-                    </Text>
-                  </UnstyledButton>
-                ))}
+            <div className={classes.starters} data-ready>
+              {staticStarters.map((q) => (
+                <UnstyledButton
+                  key={q}
+                  className={classes.starter}
+                  onClick={() => sendAndStop(q)}
+                >
+                  <Text size="xs" lh={1.4}>
+                    {q}
+                  </Text>
+                </UnstyledButton>
+              ))}
             </div>
           </div>
         ) : (

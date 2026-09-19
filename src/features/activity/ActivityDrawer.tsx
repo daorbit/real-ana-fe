@@ -168,6 +168,15 @@ export function ActivityDrawer({
       onClose();
       return;
     }
+
+    // An invite that has already been acted on (accepted or declined) must not
+    // navigate to the /invite/:token page — the token is spent and that page
+    // would show a "not valid" error.  The row stays in the feed as history,
+    // but clicking it is a no-op.
+    if (notification.type === "invite.received" && notification.readAt) {
+      return;
+    }
+
     if (!notification.readAt) void markRead({ ids: [notification.id] });
     if (notification.link) navigate(notification.link);
     onClose();

@@ -154,11 +154,21 @@ export function NotificationsPanel() {
                         display: "grid",
                         placeItems: "center",
                         flexShrink: 0,
-                        background: wash,
+                        background: visual.image ? undefined : wash,
                         color: accent,
                       }}
                     >
-                      <Icon size={16} strokeWidth={2} />
+                      {visual.image ? (
+                        <img
+                          src={visual.image}
+                          alt=""
+                          width={34}
+                          height={34}
+                          style={{ borderRadius: 999 }}
+                        />
+                      ) : (
+                        <Icon size={16} strokeWidth={2} />
+                      )}
                     </Box>
 
                     <div>

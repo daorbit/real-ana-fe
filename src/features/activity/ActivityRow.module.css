@@ -28,6 +28,21 @@
   transform: scale(0.995);
 }
 
+/* A settled invite (accepted / declined): the row stays in the feed as
+   history, but no longer navigates anywhere.  Kill every interactive cue
+   so the reader isn't tempted to click. */
+.row[data-settled] {
+  cursor: default;
+}
+
+.row[data-settled]:hover {
+  background: transparent;
+}
+
+.row[data-settled]:active {
+  transform: none;
+}
+
 .row:focus-visible {
   outline: 2px solid var(--accent-2, #059669);
   outline-offset: -2px;
