@@ -74,6 +74,7 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 /* The chevron that signals the row opens something. Always visible — unlike

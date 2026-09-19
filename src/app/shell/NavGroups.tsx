@@ -2,7 +2,6 @@ import { Box, Collapse, UnstyledButton } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "./NavLink";
-import { OrbitLauncher } from "./OrbitLauncher";
 import type { NavGroup } from "./navItems";
 
 
@@ -29,18 +28,6 @@ export function NavGroups({
         // navigation with nothing marked.
         const holdsCurrent = group.items.some((n) => n.to === pathname);
         const open = !group.collapsible || adminOpen || holdsCurrent;
-
-        // The assistant is not a destination in the list — it is a question
-        // box, so it is drawn as one and sits above the groups rather than in
-        // them.
-        if (group.hero) {
-          const [orbit] = group.items;
-          return (
-            <Box key={group.heading} className="nav-lead">
-              <OrbitLauncher collapsed={collapsed} active={pathname === orbit.to} />
-            </Box>
-          );
-        }
 
         const rows = group.items.map((n) => (
           <NavLink

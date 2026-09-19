@@ -154,6 +154,7 @@ export function NotificationsPanel() {
                         display: "grid",
                         placeItems: "center",
                         flexShrink: 0,
+                        overflow: "hidden",
                         background: visual.image ? undefined : wash,
                         color: accent,
                       }}
@@ -164,7 +165,7 @@ export function NotificationsPanel() {
                           alt=""
                           width={34}
                           height={34}
-                          style={{ borderRadius: 999 }}
+                          style={{ borderRadius: 999, objectFit: "cover", display: "block" }}
                         />
                       ) : (
                         <Icon size={16} strokeWidth={2} />

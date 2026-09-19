@@ -103,7 +103,13 @@ export function ActivityRow({
               </Text>
             )
           ) : visual.image ? (
-            <img src={visual.image} alt="" width={38} height={38} style={{ borderRadius: 999 }} />
+            <img
+              src={visual.image}
+              alt=""
+              width={38}
+              height={38}
+              style={{ borderRadius: 999, objectFit: "cover", display: "block" }}
+            />
           ) : (
             <Icon size={18} strokeWidth={2} />
           )}

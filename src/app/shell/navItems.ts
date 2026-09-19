@@ -25,13 +25,6 @@ export type NavGroup = {
    * someone opens on every visit is a click added to every visit.
    */
   collapsible?: boolean;
-  /**
-   * Draw the group as a single highlighted pill with no heading.
-   *
-   * For a one-row group that is a different kind of thing from the reports
-   * below it — a heading over one row is a label doing no sorting.
-   */
-  hero?: boolean;
 };
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -41,7 +34,6 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     headingKey: "nav.groupAssistant",
     heading: "Assistant",
-    hero: true,
     items: [
       { to: "/app/orbit", labelKey: "nav.orbit", label: "Orbit AI", icon: OrbitNavIcon },
     ],
