@@ -44,6 +44,13 @@ export default function AcceptInvite() {
     if (token) sessionStorage.setItem("pendingInvite", `/invite/${token}`);
   }, [token]);
 
+  // An invite that turns out dead (expired, already accepted, revoked) must
+  // not stay remembered — otherwise the next successful login bounces the
+  // user straight back to this same dead link instead of into the app.
+  useEffect(() => {
+    if (error) sessionStorage.removeItem("pendingInvite");
+  }, [error]);
+
   const claim = async () => {
     trace(user?.id, "accept_invite_clicked", "accept_invite", "workspace");
     try {
@@ -80,7 +87,13 @@ export default function AcceptInvite() {
             <Text size="sm" c="dimmed" ta="center">
               {errMessage(error, "The link may have expired or already been used. Ask for a new one.")}
             </Text>
-            <Button component={Link} to="/app" variant="light" mt="sm">
+            <Button
+              component={Link}
+              to="/app"
+              variant="light"
+              mt="sm"
+              onClick={() => sessionStorage.removeItem("pendingInvite")}
+            >
               Go to Quantalog
             </Button>
           </Stack>
