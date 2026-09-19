@@ -10,7 +10,7 @@ import { SearchButton } from "./SearchButton";
 import { NavGroups } from "./NavGroups";
 import { RailWorkspaceHeader } from "./RailWorkspaceHeader";
 import { AccountMenu } from "./AccountMenu";
-import { DemoCard, ImpersonationCard, PendingInviteCard, PlanCard } from "./RailCards";
+import { DemoCard, ImpersonationCard, PlanCard } from "./RailCards";
 import { NAV_GROUPS } from "./navItems";
 import { LogoutDialog } from "./LogoutDialog";
 
@@ -115,9 +115,13 @@ export function Rail({
           />
         )}
 
-        {/* Dropped rather than abbreviated when the rail is narrow: both are
-            prose, and the plan is still one click away in the account menu. */}
-        {!isDemo && !collapsed && <PendingInviteCard />}
+        {/* No invite card here: an invitation arrives as a notification with
+            Accept and Decline on it, so the rail was a second copy of the same
+            thing with fewer controls.
+
+            The plan is dropped rather than abbreviated when the rail is
+            narrow — it is prose, and still one click away in the account
+            menu. */}
         {!isDemo && !collapsed && <PlanCard />}
 
         {/* No workspace switch down here: the header at the top of the rail

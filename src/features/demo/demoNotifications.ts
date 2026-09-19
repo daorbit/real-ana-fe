@@ -118,7 +118,7 @@ export function demoNotifications(): NotificationPage {
           workspaceName: "Acme Growth",
           role: "editor",
         },
-        link: "/app/settings/members",
+        link: "/app/members",
         workspaceId: "demo-workspace",
         actorId: "demo-actor-2",
       },

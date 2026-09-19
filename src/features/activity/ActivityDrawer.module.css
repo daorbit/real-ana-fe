@@ -1,0 +1,164 @@
+/* The activity panel sits inside the shell's panel and stops at its border,
+   rather than covering the window: the rail beside the panel is how someone
+   gets back out, so it stays reachable. Everything here is absolute against
+   `#panel-overlay-root`'s offset parent — the panel — instead of fixed to the
+   viewport, which is what would swallow the rail. */
+.root,
+.overlay,
+.inner {
+  position: absolute;
+  inset: 0;
+}
+
+/* Spans the panel like the mount point does, so it stays transparent to clicks
+   and lets its painted children opt back in. */
+.root {
+  pointer-events: none;
+}
+
+.overlay {
+  z-index: 1;
+  pointer-events: auto;
+  /* Darkest under the sheet and clearing toward the left, so the page stays
+     legible where the sheet is furthest away. */
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, #000 42%, transparent),
+    color-mix(in srgb, #000 20%, transparent) 60%,
+    transparent
+  );
+}
+
+/* The sheet itself: pinned to the panel's right edge, inset a little so the
+   panel's own rounded corner still reads behind it. */
+.inner {
+  z-index: 2;
+  inset-inline-start: auto;
+  width: min(440px, 100%);
+  padding: 0;
+  pointer-events: auto;
+}
+
+.content {
+  position: absolute;
+  inset: 6px 6px 6px 0;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  /* A wash down the whole sheet, not a flat fill: lit from the top-right
+     where the header sits and settling into the surface by the footer, so the
+     panel reads as one lit object rather than a black rectangle. */
+  background:
+    radial-gradient(
+      100% 60% at 100% 0%,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--text) 4%, var(--surface-2)),
+      var(--surface-2) 45%
+    );
+  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.7);
+}
+
+/* Transparent: the sheet's own gradient is lit from up here, and a second
+   wash layered on top of it only muddied the corner. */
+.header {
+  flex-shrink: 0;
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Mantine wraps the drawer's children in its own body element, which is a
+   plain block with padding. Left alone it sizes to its content, so the column
+   inside it could never reach the sheet's bottom edge and the footer floated
+   under a short feed. Made a flex column that fills the sheet, it passes the
+   height through to `.body` below. */
+.content > :global(.mantine-Drawer-body) {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The column inside the sheet. It is a flex child of the body above, so it
+   takes its height by growing into the line rather than from a percentage —
+   which would resolve against the line and leave the footer mid-sheet. */
+.body {
+  flex: 1;
+  min-height: 0;
+}
+
+.title {
+  letter-spacing: -0.01em;
+}
+
+/* The unread tally beside the title, so the count is still answerable once the
+   badge on the bell has been cleared by opening this panel. */
+.count {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-2);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* The track sits a shade off the header it is on, rather than the near-black
+   the default picks up against this surface. */
+.tabs {
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+}
+
+.tabs [data-active] {
+  font-weight: 600;
+}
+
+/* Takes whatever height is left between the header and the footer, and scrolls
+   inside it — `min-height: 0` is what stops a long feed from growing the
+   column and pushing the footer off the bottom. */
+.scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.scroll > :global(.mantine-ScrollArea-viewport) {
+  height: 100%;
+}
+
+/* Sits on the sheet, not in the feed: its own surface and a top border, so
+   rows scrolling behind it stop at a definite edge. */
+.footer {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* Full-height sheet on a phone: at that width a 440px card inset from the
+   edges would leave slivers of page around it that read as a mistake. */
+@media (max-width: 48em) {
+  .inner {
+    width: 100%;
+  }
+
+  .content {
+    inset: 0;
+    border: none;
+    border-radius: 0;
+  }
+}

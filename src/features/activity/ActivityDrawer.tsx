@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
-  Divider,
   Drawer,
   Group,
   Menu,
@@ -12,9 +11,8 @@ import {
   Stack,
   Text,
   ActionIcon,
-  UnstyledButton,
 } from "@mantine/core";
-import { BellOff, ListChecks, MoreHorizontal, Settings2, Trash2, X } from "lucide-react";
+import { BellOff, CheckCheck, ListChecks, MoreHorizontal, Settings2, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -32,6 +30,7 @@ import { ActivityRow } from "./ActivityRow";
 import { SubmissionDetailModal } from "./SubmissionDetailModal";
 import { dateGroup, dateGroupLabel, type DateGroup } from "./copy";
 import classes from "./ActivityRow.module.css";
+import styles from "./ActivityDrawer.module.css";
 
 /**
  * The notification panel.
@@ -63,7 +62,16 @@ export function ActivityDrawer({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detail, setDetail] = useState<AppNotification | null>(null);
 
-  const { data: fetched, isLoading, isFetching } = useGetNotificationsQuery(
+  // The shell's panel — the bordered card the page sits in. Rendering into it
+  // keeps the feed inside the app rather than over it. Null before the shell
+  // has mounted, and on any screen that has no panel, where the drawer falls
+  // back to Mantine's own body portal.
+  const [panelRoot, setPanelRoot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setPanelRoot(document.getElementById("panel-overlay-root"));
+  }, []);
+
+  const { data: fetched, isLoading, isFetching, refetch } = useGetNotificationsQuery(
     { unread: tab === "unread", cursor },
     // Nothing is fetched until the panel is actually opened: the feed is the
     // expensive half of this feature and most sessions never look at it. Demo
@@ -71,6 +79,24 @@ export function ActivityDrawer({
     // nothing real underneath worth fetching for a workspace with no traffic.
     { skip: !opened || demo },
   );
+
+  /*
+   * Reopening the panel fetches the feed again.
+   *
+   * The badge polls on its own timer, so a notification that arrived since the
+   * last open is counted long before the list knows about it. Without this the
+   * cached feed is served straight back and the panel opens with a badge
+   * promising rows that are not in it.
+   *
+   * Only on the first page: `cursor` non-null means older pages have been
+   * loaded, and refetching from the top would throw them away.
+   */
+  useEffect(() => {
+    if (opened && !demo && cursor === null) void refetch();
+    // `cursor` is read but deliberately not a trigger — this fires on open,
+    // not on every page loaded while the panel is already up.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opened, demo, refetch]);
 
   // Same swap as the stats hook: generated rows while demo mode is on, so an
   // empty workspace does not show the one panel in the app that still looks
@@ -194,31 +220,58 @@ export function ActivityDrawer({
       radius={0}
       // The panel's own header is built below, with the tabs and actions in it.
       withCloseButton={false}
-      overlayProps={{ backgroundOpacity: 0.35, blur: 2 }}
+      // Rendered into the shell's panel rather than over the window, so the
+      // rail stays reachable while the feed is open. Falls back to Mantine's
+      // own body portal on any screen without a panel — the auth pages.
+      portalProps={panelRoot ? { target: panelRoot } : undefined}
+      withinPortal={Boolean(panelRoot)}
+      classNames={
+        panelRoot
+          ? {
+              root: styles.root,
+              overlay: styles.overlay,
+              inner: styles.inner,
+              content: styles.content,
+            }
+          : undefined
+      }
+      // Absolute rather than fixed: the overlay and sheet position against the
+      // panel they are rendered into, not the viewport.
+      overlayProps={
+        panelRoot
+          ? { blur: 2, backgroundOpacity: 0 }
+          : { backgroundOpacity: 0.35, blur: 2 }
+      }
       transitionProps={{ duration: 180, transition: "slide-left" }}
       aria-label={t("activity.title", "Activity")}
     >
-      <Stack gap={0} h="100%">
-        <Box px="md" pt="md" pb="xs">
+      {/* Grows to the sheet's full height rather than to its content, so the
+          footer is pinned to the bottom edge and not left floating under a
+          short feed. */}
+      <Stack gap={0} className={styles.body}>
+        <Box className={styles.header}>
           <Group justify="space-between" align="center" wrap="nowrap">
-            <Text fw={680} fz="lg">
-              {t("activity.title", "Activity")}
-            </Text>
+            <Group gap={8} wrap="nowrap" align="center">
+              <Text fw={680} fz="lg" className={styles.title}>
+                {t("activity.title", "Activity")}
+              </Text>
+              {/* Opening the panel clears the bell's badge, so without this
+                  the count vanishes at the moment it becomes readable. */}
+              {unreadCount > 0 && (
+                <span className={styles.count}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </Group>
 
-            <Group gap="md" wrap="nowrap">
+            <Group gap={4} wrap="nowrap">
               {!selecting && (
                 <>
-                  <UnstyledButton
-                    onClick={() => void markAllRead()}
-                    disabled={unreadCount === 0 || markingAll || demo}
-                    className={classes.linkAction}
-                  >
-                    <Text fz="xs" fw={600} c={unreadCount === 0 || demo ? "dimmed" : "emerald"}>
-                      {t("activity.markAllRead", "Mark all as read")}
-                    </Text>
-                  </UnstyledButton>
-
-                  <Menu position="bottom-end" withArrow radius="md" width={190} withinPortal>
+                  {/* The title row keeps only what is not a primary action:
+                      marking everything read and closing both live in the
+                      footer bar, where they stay reachable at any scroll
+                      position. */}
+                  <Menu position="bottom-end" withArrow radius="md" width={210} withinPortal>
                     <Menu.Target>
                       <ActionIcon
                         variant="subtle"
@@ -236,6 +289,7 @@ export function ActivityDrawer({
                       >
                         {t("activity.select", "Select notifications")}
                       </Menu.Item>
+                      <Menu.Divider />
                       <Menu.Item
                         leftSection={<Settings2 size={14} />}
                         onClick={() => {
@@ -295,7 +349,9 @@ export function ActivityDrawer({
             <SegmentedControl
               fullWidth
               size="xs"
-              mt="sm"
+              radius="md"
+              mt={12}
+              className={styles.tabs}
               value={tab}
               onChange={(value) => setTab(value as "all" | "unread")}
               data={[
@@ -312,9 +368,8 @@ export function ActivityDrawer({
           )}
         </Box>
 
-        <Divider />
-
-        <ScrollArea style={{ flex: 1 }} type="hover" offsetScrollbars={false}>
+        {/* No rule here: the header carries its own bottom border. */}
+        <ScrollArea className={styles.scroll} type="hover" offsetScrollbars={false}>
           {isLoading && (
             // Skeleton rows rather than a spinner: the panel's shape is known
             // before its contents are, and showing it settles the layout
@@ -353,11 +408,13 @@ export function ActivityDrawer({
           )}
 
           {!isLoading &&
-            grouped.map(({ group, items: rows }, index) => (
+            grouped.map(({ group, items: rows }) => (
               <div key={group}>
-                {index > 0 && <Divider mx="md" my={4} />}
+                {/* No rule between groups: the sticky date heading already
+                    says where one ends and the next begins, and a line under
+                    it as well read as a band across the panel. */}
                 <div className={classes.groupLabel}>{dateGroupLabel(group, t)}</div>
-                <Stack gap={2} px={6} pb={4}>
+                <Stack gap={6} px={8} pb={10}>
                   {rows.map((notification) => (
                     <ActivityRow
                       key={notification.id}
@@ -401,6 +458,27 @@ export function ActivityDrawer({
             </Group>
           )}
         </ScrollArea>
+
+        {/* Pinned under the feed rather than riding the title row: both of
+            these act on the whole panel, and at the bottom they stay put
+            however far down the list someone has scrolled. Hidden while
+            selecting — that mode has its own Cancel and Delete. */}
+        {!selecting && (
+          <Group className={styles.footer} justify="space-between" wrap="nowrap">
+            <Button variant="default" size="xs" onClick={onClose}>
+              {t("activity.close", "Close")}
+            </Button>
+            <Button
+              size="xs"
+              leftSection={<CheckCheck size={14} />}
+              disabled={unreadCount === 0 || markingAll || demo}
+              loading={markingAll}
+              onClick={() => void markAllRead()}
+            >
+              {t("activity.markAllRead", "Mark all as read")}
+            </Button>
+          </Group>
+        )}
       </Stack>
       <SubmissionDetailModal notification={detail} onClose={() => setDetail(null)} />
     </Drawer>
