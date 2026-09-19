@@ -8,7 +8,6 @@
  */
 .row {
   display: block;
-  position: relative;
   width: 100%;
   padding: 12px 14px;
   border: 1px solid transparent;
@@ -65,18 +64,6 @@
   background: var(--unread-wash-hover, color-mix(in srgb, var(--accent) 18%, transparent));
 }
 
-/* A bar down the leading edge, because the wash alone is a dark green on a
-   dark surface and all but disappears there — which read as every row having
-   been marked read the moment the panel opened. */
-.row[data-unread="true"]::before {
-  content: "";
-  position: absolute;
-  inset-block: 8px;
-  inset-inline-start: 0;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--accent-2, #059669);
-}
 
 /* The chip holding either the type icon or the actor's avatar. Circular, like
    an avatar always reads, rather than a rounded square that looks like a

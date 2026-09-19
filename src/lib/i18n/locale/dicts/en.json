@@ -48,6 +48,7 @@
     "language": "Language",
     "toggleNav": "Toggle navigation",
     "activeWorkspace": "Active workspace",
+    "planName": "{{plan}} plan",
     "documentation": "Documentation",
     "requestFeature": "Request a feature",
     "contactSupport": "Contact support",

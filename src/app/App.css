@@ -972,6 +972,21 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
+/* A plan card's button in a state that cannot be pressed — the plan you are
+   already on, or one whose features a higher plan already includes.
+
+   Mantine drops the variant's fill when a button is disabled, which left these
+   as floating text with no edge. The outline gives the button its shape back
+   while staying visibly inert. */
+.plan-cta--resting:disabled,
+.plan-cta--resting[data-disabled] {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  opacity: 1;
+}
+
+
 /* The workspace list. */
 
 .ws-menu {

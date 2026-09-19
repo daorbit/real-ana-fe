@@ -129,10 +129,7 @@ export function PlansTab({
               ["--beam" as string]: PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK,
             }}
           >
-            {/* Lit from above, the way the marketing card is — the ribbon
-                still carries the words, this carries the emphasis. The current
-                plan gets it too: on a billing page the plan you are on is as
-                worth finding as the one being recommended. */}
+
             {(featured || current) && <span className="plan-card__beam" aria-hidden="true" />}
 
             {(featured || current) && (
@@ -188,14 +185,6 @@ export function PlansTab({
               )}
             </div>
 
-            {/* The action sits directly under the price, as on the marketing
-                card — the feature list is what you read after deciding, not
-                what you scroll past to reach the button.
-
-                `light` rather than `outline`/`subtle` for the inactive states:
-                a disabled outline button renders as a bare grey label with no
-                button shape at all, which read as broken rather than as
-                unavailable. */}
             <Button
               mt="md"
               fullWidth
@@ -206,9 +195,7 @@ export function PlansTab({
               disabled={(current && !renewable) || lower || !buyable || isDemo || !selectedWorkspaceId}
               loading={subscribing === plan.slug}
               leftSection={buyable && !current && !lower ? <CreditCard size={15} /> : undefined}
-              // The recommended plan's button carries that plan's colour rather
-              // than the shared accent, so the card the page is steering toward
-              // is visually one thing.
+
               style={
                 featured
                   ? {
@@ -221,6 +208,19 @@ export function PlansTab({
                       color: PLAN_ON_ACCENT[plan.slug] ?? "#fff",
                       border: "none",
                     }
+                  : undefined
+              }
+
+              // A disabled Mantine button drops its variant's fill whichever
+              // variant is asked for, so "Current plan" and "Included in your
+              // plan" were left as bare text with no edge — a caption floating
+              // on the card rather than the button's own resting state. This
+              // puts an outline back on exactly those states, without implying
+              // the button can be pressed.
+              classNames={
+                !featured &&
+                ((current && !renewable) || lower || !buyable)
+                  ? { root: "plan-cta--resting" }
                   : undefined
               }
               onClick={() => onPick(plan)}

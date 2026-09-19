@@ -1,7 +1,8 @@
 import { Box, Menu, UnstyledButton } from "@mantine/core";
-import { ChevronDown, Users } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useWorkspace } from "@/features/workspace/context";
+import { useWorkspace, useActiveBilling } from "@/features/workspace/context";
+import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { WorkspaceMenuItems } from "./WorkspaceSwitcher";
 
 /**
@@ -18,6 +19,7 @@ import { WorkspaceMenuItems } from "./WorkspaceSwitcher";
 export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
   const { workspaces, active } = useWorkspace();
+  const billing = useActiveBilling();
 
   if (collapsed || workspaces.length === 0) return null;
 
@@ -54,14 +56,13 @@ export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
               <ChevronDown size={13} style={{ flexShrink: 0, color: "var(--muted)" }} />
             </Box>
 
-            {/* The reference puts a member count here, which nothing on the
-                client knows without another request. The caller's own role is
-                already on the workspace and answers a question they are more
-                likely to have: what am I allowed to do in here. */}
-            {active?.role && (
+            {/* The plan, not the role: which tier this workspace is on decides
+                what the app will actually let you do, and it used to need a
+                card of its own at the foot of the rail to say so. */}
+            {billing?.plan && (
               <Box className="rail-workspace__meta" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <Users size={11} />
-                {t(`roles.${active.role}`, active.role)}
+                <PlanIcon slug={billing.plan.slug} size={12} uid="rail-header" />
+                {t("nav.planName", "{{plan}} plan", { plan: billing.plan.name })}
               </Box>
             )}
           </Box>

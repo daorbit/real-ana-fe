@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import {
-  ActionIcon,
   Badge,
   Box,
   Button,
@@ -8,15 +7,11 @@ import {
   Progress,
   Text,
   ThemeIcon,
-  Tooltip,
   UnstyledButton,
-  useComputedColorScheme,
-  useMantineColorScheme,
 } from "@mantine/core";
-import { ArrowUpRight, Eye, LogOut, Moon, PlayCircle, Sun, UserPlus } from "lucide-react";
+import { ArrowUpRight, Eye, LogOut, PlayCircle, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
-import { LanguagePicker } from "@/lib/i18n/LanguagePicker";
 import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
@@ -163,43 +158,11 @@ export function DemoCard({ collapsed, onExit }: { collapsed: boolean; onExit: ()
   );
 }
 
-/**
- * Workspace, theme and language, as bare icons.
- *
- * They sit on the plan row rather than in the account menu because they are
- * flipped often and reached rarely from where the menu puts them. `stopPropagation`
- * keeps a click on any of them from also following the row's link to billing.
+/*
+ * The theme and language toggles that used to ride on this row are gone with
+ * it. Both are in the account menu at the foot of the rail, which is where a
+ * preference belongs.
  */
-function QuickPrefs() {
-  const { t } = useTranslation();
-  const { setColorScheme } = useMantineColorScheme();
-  const scheme = useComputedColorScheme("light");
-  const dark = scheme === "dark";
-
-  return (
-    <Group
-      gap={2}
-      wrap="nowrap"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-    >
-      <Tooltip label={dark ? t("nav.lightMode") : t("nav.darkMode")} withArrow position="top">
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          size="sm"
-          aria-label={dark ? t("nav.lightMode") : t("nav.darkMode")}
-          onClick={() => setColorScheme(dark ? "light" : "dark")}
-        >
-          {dark ? <Sun size={14} /> : <Moon size={14} />}
-        </ActionIcon>
-      </Tooltip>
-      <LanguagePicker size="sm" />
-    </Group>
-  );
-}
 
 /** The active workspace's plan — plans are bought per workspace, not per account. */
 export function PlanCard() {
@@ -224,28 +187,11 @@ export function PlanCard() {
 
   const nudge = expired || nearLimit;
 
-  if (!nudge) {
-    return (
-      <UnstyledButton
-        component={Link}
-        to="/app/billing"
-        className="tile"
-        style={{ display: "block", width: "100%", padding: "8px 10px", marginBottom: 8 }}
-      >
-        <Group justify="space-between" wrap="nowrap">
-          <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-            <PlanIcon slug={billing.plan.slug} size={16} uid="rail" />
-            <Text size="xs" fw={600} truncate>{billing.plan.name} plan</Text>
-          </Group>
-          <QuickPrefs />
-        </Group>
-
-        {/* No usage bar while there is room: unlabelled, it reads as a stray
-            rule under the plan name rather than as a quota, and the card that
-            replaces this one the moment a limit is close says it in words. */}
-      </UnstyledButton>
-    );
-  }
+  // Nothing while the plan is healthy: the workspace header at the top of the
+  // rail already names the tier and its icon, so a card down here repeating it
+  // was the same fact twice. This one appears only when there is something to
+  // say — a lapsed plan, or a quota about to run out.
+  if (!nudge) return null;
 
   return (
     <Box className="tile" style={{ padding: 10, marginBottom: 8 }}>

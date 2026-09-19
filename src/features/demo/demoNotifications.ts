@@ -59,6 +59,36 @@ export function demoNotifications(): NotificationPage {
       },
       false,
     ),
+    // The one failure that is invisible from the dashboard, so it leads the
+    // unread rows — see its spec in the server's notification registry.
+    row(
+      "tracking",
+      24,
+      {
+        type: "tracking.stopped",
+        data: { siteName: "acme.com", hoursSilent: 6 },
+        link: "/app/developers",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      false,
+    ),
+    row(
+      "lead",
+      38,
+      {
+        type: "lead.captured",
+        data: {
+          formTitle: "Pricing enquiry",
+          leadName: "Marcus Webb",
+          leadEmail: "marcus@northwind.io",
+        },
+        link: "/app/lead-capture",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      false,
+    ),
     row(
       "report",
       55,
@@ -66,6 +96,18 @@ export function demoNotifications(): NotificationPage {
         type: "report.ready",
         data: { reportName: "Weekly traffic summary" },
         link: "/app/analytics",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      false,
+    ),
+    row(
+      "quota",
+      90,
+      {
+        type: "quota.exceeded",
+        data: { workspaceName: "Acme Growth", limit: 100000 },
+        link: "/app/settings?tab=billing",
         workspaceId: "demo-workspace",
         actorId: null,
       },
@@ -84,12 +126,52 @@ export function demoNotifications(): NotificationPage {
       true,
     ),
     row(
+      "payment-failed",
+      5 * 60,
+      {
+        type: "payment.failed",
+        data: { amountLabel: "$49.00", reason: "card expired" },
+        link: "/app/settings?tab=billing",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      true,
+    ),
+    row(
+      "social",
+      7 * 60,
+      {
+        type: "social.post.failed",
+        data: { channel: "LinkedIn" },
+        link: "/app/social",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      true,
+    ),
+    row(
       "audit",
       9 * 60,
       {
         type: "seo.audit.done",
         data: { siteName: "acme.com" },
         link: "/app/analytics",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      true,
+    ),
+    row(
+      "rank",
+      11 * 60,
+      {
+        type: "seo.rank.changed",
+        data: {
+          keyword: "site speed monitoring",
+          competitorName: "Northwind",
+          gained: true,
+        },
+        link: "/app/compare",
         workspaceId: "demo-workspace",
         actorId: null,
       },
@@ -121,6 +203,79 @@ export function demoNotifications(): NotificationPage {
         link: "/app/members",
         workspaceId: "demo-workspace",
         actorId: "demo-actor-2",
+      },
+      true,
+    ),
+    row(
+      "submission",
+      2 * 24 * 60 + 90,
+      {
+        type: "form.submission",
+        data: {
+          formTitle: "Interview feedback",
+          answers: [
+            { label: "Name", value: "Hinata Tachibana" },
+            { label: "Email", value: "hinata@tachibana.dev" },
+            { label: "How did it go?", value: "Strong on the systems round." },
+          ],
+        },
+        link: "",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      true,
+    ),
+    row(
+      "security",
+      3 * 24 * 60,
+      {
+        type: "security.alert",
+        data: { what: "A new sign-in from Chrome on Windows, from Pune, India." },
+        link: "/app/settings?tab=security",
+        workspaceId: null,
+        actorId: null,
+      },
+      true,
+    ),
+    row(
+      "announcement",
+      3 * 24 * 60 + 240,
+      {
+        // Authored prose, not translated — the one type whose words the server
+        // owns, because an admin types them into a form before it sends.
+        type: "admin.message",
+        data: {
+          subject: "User journeys is out of beta",
+          body: "Session replays now stitch across subdomains. Nothing to turn on.",
+        },
+        link: "/app/journey",
+        workspaceId: null,
+        actorId: null,
+      },
+      true,
+    ),
+    row(
+      "role",
+      4 * 24 * 60,
+      {
+        type: "role.changed",
+        data: { workspaceName: "Acme Growth", role: "admin" },
+        link: "/app/members",
+        workspaceId: "demo-workspace",
+        actorId: null,
+      },
+      true,
+    ),
+    row(
+      "removed",
+      9 * 24 * 60,
+      {
+        type: "member.removed",
+        data: { workspaceName: "Northwind Labs" },
+        // Nowhere to send someone whose access to it has just ended.
+        link: "",
+        workspaceId: null,
+        actorId: null,
       },
       true,
     ),
