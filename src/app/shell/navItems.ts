@@ -27,17 +27,11 @@ export type NavGroup = {
   collapsible?: boolean;
 };
 
+// Orbit is not in here. It is not one of the reports — it is the way into all
+// of them for anyone who does not yet know which report they want — and as a
+// one-row group at the top it read as a section someone forgot to fill. It has
+// its own card at the foot of the rail instead; see `OrbitCard`.
 export const NAV_GROUPS: NavGroup[] = [
-  // Alone at the top, above Analyze. Orbit is not one of the reports — it is
-  // the way into all of them for anyone who does not yet know which report they
-  // want, so it sits where it is seen before the list rather than inside it.
-  {
-    headingKey: "nav.groupAssistant",
-    heading: "Assistant",
-    items: [
-      { to: "/app/orbit", labelKey: "nav.orbit", label: "Orbit AI", icon: OrbitNavIcon },
-    ],
-  },
   {
     headingKey: "nav.groupAnalyze",
     heading: "Analyze",

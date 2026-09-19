@@ -972,6 +972,188 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
+/* The Orbit banner at the foot of the rail.
+
+   Promotional rather than navigational — this is our own assistant being put
+   forward, not another destination in the list — so it carries a moving wash
+   the flat nav rows deliberately do not. */
+.rail-orbit {
+  /*
+   * Orbit's own ramp, on the border only — the same treatment its composer
+   * uses on its page (`orbitPage.module.css`), so the two read as one product.
+   *
+   * Hard-coded rather than built from `--violet`: the theme redefines that
+   * token to the workspace accent, green here, so a token-built version came
+   * out as a flat green slab.
+   */
+  --rail-orbit-edge: linear-gradient(
+    90deg,
+    #8b5cf6 0%,
+    #a855f7 9%,
+    #f0abfc 16%,
+    #fbbf24 27%,
+    #a3e635 39%,
+    #22c55e 50%,
+    #a855f7 59%,
+    #f0abfc 66%,
+    #fbbf24 77%,
+    #a3e635 89%,
+    #8b5cf6 100%
+  );
+
+  position: relative;
+  /* Its own stacking context, so the glow behind it sits under the card but
+     still above the rail rather than disappearing through it. */
+  isolation: isolate;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: var(--text);
+
+  /* The fill stays the rail's own surface and only the edge is painted: two
+     layers, the inner one clipped to the padding box and the ramp to the
+     border box. */
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    var(--rail-orbit-edge) border-box;
+  background-size: 100% 100%, 300% 100%;
+  animation: rail-orbit-drift 9s linear infinite;
+}
+
+/*
+ * The glow that comes and goes.
+ *
+ * A copy of the ramp sitting behind the card, blurred and pulsing. The pulse
+ * lives here rather than on `.rail-orbit` itself because fading the card would
+ * take its label down with it — only the light around the edge should breathe.
+ */
+.rail-orbit::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--rail-orbit-edge);
+  background-size: 300% 100%;
+  filter: blur(7px);
+  animation:
+    rail-orbit-glow-drift 9s linear infinite,
+    rail-orbit-breathe 3.6s ease-in-out infinite;
+}
+
+/* One layer here, unlike the card's two, so it shifts a single position. */
+@keyframes rail-orbit-glow-drift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+/* Only the edge moves; the fill underneath stays put. */
+@keyframes rail-orbit-drift {
+  from { background-position: 0 0, 0% 50%; }
+  to { background-position: 0 0, 100% 50%; }
+}
+
+/* Never all the way out: the glow should ebb, not blink off and back on. */
+@keyframes rail-orbit-breathe {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.7; }
+}
+
+.rail-orbit:hover {
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    var(--rail-orbit-edge) border-box;
+  background-size: 100% 100%, 300% 100%;
+}
+
+/*
+ * Arriving on Orbit's page: the card flies off toward it rather than blinking
+ * out, so the thing you clicked visibly becomes the page you landed on.
+ *
+ * It launches to the right — the page is that way — tilting and shrinking as
+ * it goes, and the row collapses behind it so the cards below slide up rather
+ * than jumping.
+ */
+.rail-orbit[data-leaving],
+.nav-link[data-leaving] {
+  animation: rail-orbit-fly 500ms cubic-bezier(0.55, 0, 0.85, 0.3) forwards;
+  pointer-events: none;
+  /* The keyframes animate `max-height` down to nothing so the cards below
+     slide up as this one leaves. That needs a real starting value — from
+     `none` the property has nothing to travel from and simply snaps. */
+  max-height: 80px;
+  /* Clipped as it shrinks, so the label does not spill past the collapsing
+     box on the way out. */
+  overflow: hidden;
+  /* Beats the inline `marginBottom` the card carries, which would otherwise
+     win over the keyframes and leave a gap where it used to be. */
+  margin-bottom: 8px !important;
+  /* Lifted over the cards it flies across on the way out. */
+  position: relative;
+  z-index: 2;
+}
+
+/* The glow goes with it rather than pulsing through the exit. */
+.rail-orbit[data-leaving]::after {
+  animation: none;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+/* The `!important` here is not emphasis — it is what lets these values beat
+   the same-property declarations on the element above, which themselves exist
+   to beat the card's inline style. */
+@keyframes rail-orbit-fly {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+    margin-bottom: 8px !important;
+    max-height: 80px;
+  }
+  30% {
+    /* A short wind-up the other way, so the launch reads as thrown rather
+       than dragged off the edge. */
+    transform: translate(-7px, 2px) scale(0.96) rotate(-3deg);
+    opacity: 1;
+    margin-bottom: 8px !important;
+    max-height: 80px;
+  }
+  100% {
+    /* Stops short of the rail's own edge: the navbar clips its overflow, so a
+       longer throw would be cut off mid-flight rather than fading out. The
+       card is nearly gone by then anyway. */
+    transform: translate(90px, -22px) scale(0.3) rotate(14deg);
+    opacity: 0;
+    margin-bottom: 0 !important;
+    max-height: 0;
+  }
+}
+
+/* A decorative loop is exactly what someone turning motion down is asking to
+   be spared, and the card reads the same standing still. */
+[data-motion="off"] .rail-orbit,
+[data-motion="off"] .rail-orbit::after {
+  animation: none;
+}
+
+/* The pulsing glow is the part someone turning motion down is asking to be
+   spared; the bordered card reads fine without it. */
+[data-motion="off"] .rail-orbit::after {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-orbit {
+    animation: none;
+  }
+
+  .rail-orbit::after {
+    display: none;
+  }
+}
+
+
 /* A plan card's button in a state that cannot be pressed — the plan you are
    already on, or one whose features a higher plan already includes.
 

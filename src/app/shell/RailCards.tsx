@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Badge,
   Box,
@@ -12,6 +13,7 @@ import {
 import { ArrowUpRight, Eye, LogOut, PlayCircle, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
+import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
@@ -25,6 +27,117 @@ import { NavAction } from "./NavLink";
  * standing in for a real customer, and a read-only demo, are not things the
  * rail may stop saying to save space.
  */
+
+/**
+ * The way into Orbit, as a card rather than a navigation row.
+ *
+ * It sits with the cards at the foot of the rail because it is not one of the
+ * reports — it is the thing you ask when you do not yet know which report you
+ * want. As a one-row "Assistant" group at the top of the list it read as a
+ * section someone had forgotten to finish filling in.
+ *
+ * Collapsed it falls back to the same icon row as the other rail actions, so
+ * the assistant is still one click away at that width.
+ */
+export function OrbitCard({ collapsed }: { collapsed: boolean }) {
+  const { t } = useTranslation();
+  const { pathname } = useLocation();
+  const label = t("nav.orbit", "Orbit AI");
+
+  // Nothing to advertise once you are already there — on Orbit's own page the
+  // card is a button that goes nowhere.
+  const onOrbit = pathname.startsWith("/app/orbit");
+
+  /*
+   * Kept mounted for one beat after arriving on Orbit, so it can fly out.
+   *
+   * Unmounting on the route change would make the card vanish between frames.
+   * `leaving` runs the exit; `gone` drops it once the exit has finished.
+   *
+   * Both are seeded from the current route, and the exit only runs on an
+   * actual transition into Orbit — `wasOnOrbit` is what distinguishes that
+   * from landing on the page directly. Without it, opening /app/orbit in a
+   * fresh tab flashed the card in just to animate it straight back out.
+   */
+  const [leaving, setLeaving] = useState(false);
+  const [gone, setGone] = useState(onOrbit);
+  const wasOnOrbit = useRef(onOrbit);
+
+  useEffect(() => {
+    const arriving = onOrbit && !wasOnOrbit.current;
+    wasOnOrbit.current = onOrbit;
+
+    if (!onOrbit) {
+      setLeaving(false);
+      setGone(false);
+      return;
+    }
+
+    // Already here when this mounted: stay hidden, with nothing to animate.
+    if (!arriving) {
+      setGone(true);
+      return;
+    }
+
+    setLeaving(true);
+    const timer = setTimeout(() => {
+      setLeaving(false);
+      setGone(true);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [onOrbit]);
+
+  if (gone) return null;
+
+  if (collapsed) {
+    return (
+      <UnstyledButton
+        component={Link}
+        to="/app/orbit"
+        className="nav-link"
+        data-collapsed
+        data-leaving={leaving || undefined}
+        aria-label={label}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          padding: "8px 10px",
+          marginBottom: 8,
+        }}
+      >
+        <OrbitMark size={18} />
+      </UnstyledButton>
+    );
+  }
+
+  return (
+    <UnstyledButton
+      component={Link}
+      to="/app/orbit"
+      className="rail-orbit"
+      data-leaving={leaving || undefined}
+      style={{ display: "block", width: "100%", marginBottom: 8 }}
+    >
+      <Group gap={9} wrap="nowrap" align="flex-start">
+        <Box mt={1} style={{ flexShrink: 0 }}>
+          <OrbitMark size={20} />
+        </Box>
+        <Box style={{ minWidth: 0, flex: 1 }}>
+          <Text size="xs" fw={700} lh={1.3} truncate>
+            {label}
+          </Text>
+          {/* Says what it does rather than naming the page — the row it
+              replaced in the navigation list already said the name twice. */}
+          <Text size="xs" lh={1.35} mt={1} c="dimmed">
+            {t("nav.orbitHint", "Ask anything about your analytics")}
+          </Text>
+        </Box>
+      </Group>
+    </UnstyledButton>
+  );
+}
 
 /** An outstanding invitation, one at a time. */
 export function PendingInviteCard() {
