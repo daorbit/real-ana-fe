@@ -11,11 +11,7 @@ import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
 import { api } from "@/shared/lib/http";
 
-/**
- * The forms app's own read-only workspace: sample forms, an editor to explore,
- * and no way to save. A demo session has no real workspace behind it, so this
- * is what it gets instead of one.
- */
+
 const DEMO_FORMS_WORKSPACE = "default";
 
 export default function LeadCapture() {
@@ -24,7 +20,6 @@ export default function LeadCapture() {
   const { isDemo } = useAuth();
   const [themeVersion, setThemeVersion] = useState(0);
   const colorScheme = useComputedColorScheme("light");
-  useEmbeddedPlanLimit();
   useEffect(() => {
     document.body.dataset.page = "lead-capture";
     return () => {
@@ -38,30 +33,10 @@ export default function LeadCapture() {
     return () => window.removeEventListener("quantalog-theme-change", refresh);
   }, []);
 
-  /**
-   * Proof for the forms app that this session may act for the workspace.
-   *
-   * A workspace id in an iframe URL says nothing about who is looking at it,
-   * and the forms app needs more than that before it will hand over or change
-   * the workspace's payment credentials. The session lives here, so the token
-   * is minted here and travels with the frame.
-   *
-   * Only the payment settings require it — everything else in the forms app
-   * keeps working if this fails, which is why a failure leaves the frame to
-   * load rather than blocking it.
-   */
+
   const workspaceId = isDemo ? null : active?._id;
 
-  /**
-   * The token the frame boots with.
-   *
-   * Minted here before the frame is built, rather than left to the postMessage
-   * handshake below: the forms app's first workspace request goes out as it
-   * loads, and without a token already in hand that request is refused and has
-   * to be made again once one arrives. `undefined` means "not minted yet" and
-   * holds the frame back; `""` means the mint failed and the frame should load
-   * anyway, since only payment settings actually require one.
-   */
+
   const [bootToken, setBootToken] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -136,9 +111,7 @@ export default function LeadCapture() {
     [active, isDemo, colorScheme, themeVersion, bootToken],
   );
  
-  // There genuinely is no workspace to show — distinct from having one whose
-  // token is still being minted, which is a moment's wait rather than a state
-  // the reader has to act on.
+
   if (!isDemo && !active?._id) {
     return (
       <AppShell>
@@ -152,20 +125,25 @@ export default function LeadCapture() {
     );
   }
 
-  // Minting the boot token. One API call, so this is a blank frame area for a
-  // moment rather than a screen worth dressing — and dressing it would only
-  // flash something the reader cannot use.
   if (!src) return <AppShell><div className="lead-capture__frame" /></AppShell>;
 
   return (
     <AppShell>
-      <iframe
-        key={src}
-        src={src}
-        title="Lead forms"
-        className="lead-capture__frame"
-        allow="clipboard-write"
-      />
+      <LeadCaptureFrame src={src} />
     </AppShell>
+  );
+}
+
+ 
+function LeadCaptureFrame({ src }: { src: string }) {
+  useEmbeddedPlanLimit();
+  return (
+    <iframe
+      key={src}
+      src={src}
+      title="Lead forms"
+      className="lead-capture__frame"
+      allow="clipboard-write"
+    />
   );
 }

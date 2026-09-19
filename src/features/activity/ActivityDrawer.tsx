@@ -52,6 +52,7 @@ export function ActivityDrawer({
   onClose: () => void;
   unreadCount: number;
 }) {
+  debugger
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { demo } = useDemo();
