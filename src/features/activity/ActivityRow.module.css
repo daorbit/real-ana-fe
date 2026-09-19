@@ -6,18 +6,24 @@
  * in a clickable div gives two overlapping hit areas that disagree about what
  * a click does.
  */
+.rowWrap {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
 .row {
   display: block;
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid transparent;
+  border: none;
   border-radius: 10px;
   background: transparent;
   text-align: left;
   cursor: pointer;
   /* Only what actually changes. Transitioning `all` here would animate the
      unread wash on first paint, so every row would fade in on open. */
-  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+  transition: background-color 120ms ease, transform 120ms ease;
 }
 
 .row:hover {
@@ -40,13 +46,30 @@
  * bold is a panel with no emphasis left to spend, and the weight change also
  * shifts the layout as rows are read.
  */
-.row[data-unread="true"] {
+.rowWrap[data-unread="true"] {
   background: var(--unread-wash, rgba(250, 204, 21, 0.09));
   border-color: var(--unread-border, rgba(250, 204, 21, 0.28));
 }
 
-.row[data-unread="true"]:hover {
+.rowWrap[data-unread="true"] .row:hover {
   background: var(--unread-wash-hover, rgba(250, 204, 21, 0.14));
+}
+
+/* Answers unfolded below a `form.submission` row. Its own inset and tinted
+   background — not just left-aligned under the row's text — so it reads as
+   detail attached to the row rather than a second row that happens to be
+   unstyled. */
+.expandPanel {
+  margin: 0 10px 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--expand-bg, rgba(128, 128, 128, 0.06));
+}
+
+.expandRow + .expandRow {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--expand-border, rgba(128, 128, 128, 0.12));
 }
 
 /* The chip holding either the type icon or the actor's avatar. Circular, like
