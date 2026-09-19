@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="seoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="50%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+
+    <!-- Inner Glow -->
+    <linearGradient id="seoGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="seoShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#134e4a" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Base Circle -->
+  <circle cx="24" cy="24" r="22" fill="url(#seoBg)"/>
+  <circle cx="24" cy="24" r="21.5" stroke="url(#seoGlow)" stroke-width="1"/>
+
+  <!-- SEO Glyph: Stylized browser card with growth chart + magnifying glass -->
+  <g filter="url(#seoShadow)">
+    <!-- Browser/Card Base -->
+    <rect x="12" y="12" width="22" height="20" rx="3.5" fill="#ffffff" fill-opacity="0.95"/>
+    <!-- Browser Top Bar -->
+    <path d="M12 15.5C12 13.567 13.567 12 15.5 12H30.5C32.433 12 34 13.567 34 15.5V17H12V15.5Z" fill="#ccfbf1"/>
+    <!-- Dots -->
+    <circle cx="15.5" cy="14.5" r="1" fill="#0d9488"/>
+    <circle cx="18.5" cy="14.5" r="1" fill="#14b8a6"/>
+
+    <!-- Rising Analytics Bars -->
+    <rect x="15.5" y="24" width="2.5" height="5" rx="1" fill="#99f6e4"/>
+    <rect x="19.5" y="21.5" width="2.5" height="7.5" rx="1" fill="#2dd4bf"/>
+    <rect x="23.5" y="19" width="2.5" height="10" rx="1" fill="#0d9488"/>
+
+    <!-- Magnifying Glass Accent -->
+    <circle cx="29.5" cy="27.5" r="5.5" fill="#042f2e" fill-opacity="0.85"/>
+    <circle cx="29.5" cy="27.5" r="5" stroke="#2dd4bf" stroke-width="1.5"/>
+    <path d="M33.5 31.5L37 35" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <!-- Checkmark inside lens -->
+    <path d="M28 27.5L29.2 28.7L31.5 26.2" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+

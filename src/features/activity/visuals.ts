@@ -10,10 +10,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { NotificationType } from "@/shared/types";
-import formSubmissionLogo from "@/assets/banners/notications-logos/form-submissions.png";
-import paymentReceivedLogo from "@/assets/banners/notications-logos/payments-and-receipts.png";
-import reportReadyLogo from "@/assets/banners/notications-logos/scheduled-reports.png";
-import seoAuditLogo from "@/assets/banners/notications-logos/seo-audits.png";
+import formSubmissionLogo from "@/assets/banners/notications-logos/form-submissions.svg";
+import paymentReceivedLogo from "@/assets/banners/notications-logos/payments-and-receipts.svg";
+import reportReadyLogo from "@/assets/banners/notications-logos/scheduled-reports.svg";
+import seoAuditLogo from "@/assets/banners/notications-logos/seo-audits.svg";
 
 
 export type NotificationVisual = {

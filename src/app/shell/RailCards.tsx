@@ -20,7 +20,6 @@ import { LanguagePicker } from "@/lib/i18n/LanguagePicker";
 import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
-import { WorkspaceMenuButton } from "./WorkspaceSwitcher";
 
 /**
  * The cards above the account tile.
@@ -186,7 +185,6 @@ function QuickPrefs() {
         e.stopPropagation();
       }}
     >
-      <WorkspaceMenuButton />
       <Tooltip label={dark ? t("nav.lightMode") : t("nav.darkMode")} withArrow position="top">
         <ActionIcon
           variant="subtle"

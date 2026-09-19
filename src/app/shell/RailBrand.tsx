@@ -1,15 +1,12 @@
-import { Link } from "react-router-dom";
-import { ActionIcon, Box, Group, Tooltip } from "@mantine/core";
+import { ActionIcon, Group, Tooltip } from "@mantine/core";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Wordmark } from "@/shared/ui/Brand";
 
 /**
- * The wordmark and the control that hides it, on one row.
+ * The control that narrows the rail to its icon column.
  *
- * Collapsed the wordmark goes and the toggle takes the whole width — the mark
- * does not shorten to a letter, because a lone "Q" is a different logo rather
- * than a smaller one.
+ * It sits at the end of the workspace row rather than on a line of its own.
+ * Collapsed there is nothing beside it, so it centres in the icon column.
  */
 export function RailBrand({
   collapsed,
@@ -27,16 +24,9 @@ export function RailBrand({
     <Group
       gap={4}
       wrap="nowrap"
-      px={6}
-      pt={6}
-      pb="md"
-      justify={collapsed ? "center" : "space-between"}
+      justify={collapsed ? "center" : "flex-end"}
+      style={{ flex: collapsed ? 1 : undefined }}
     >
-      {!collapsed && (
-        <Box component={Link} to="/app" display="flex" style={{ minWidth: 0 }}>
-          <Wordmark />
-        </Box>
-      )}
       <Tooltip label={label} position="right" withArrow openDelay={200}>
         <ActionIcon
           variant="subtle"

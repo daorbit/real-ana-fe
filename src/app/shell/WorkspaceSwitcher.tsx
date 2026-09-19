@@ -1,7 +1,9 @@
 import { ActionIcon, Menu, Tooltip, UnstyledButton } from "@mantine/core";
-import { Check, FolderKanban } from "lucide-react";
+import { Check, FolderKanban, Plus, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
+import { useAuth } from "@/features/auth/context";
 
 /**
  * Which workspace everything on screen belongs to, as a rail-width icon row.
@@ -53,30 +55,95 @@ export function WorkspaceSwitcher() {
  * the button on the plan row open the same menu, so switching workspace looks
  * the same wherever it was reached from.
  */
-function WorkspaceMenuItems() {
+export function WorkspaceMenuItems() {
   const { t } = useTranslation();
-  const { workspaces, active, setActive } = useWorkspace();
+  const nav = useNavigate();
+  const { user } = useAuth();
+  const { workspaces, active, setActive, refresh } = useWorkspace();
 
   return (
     <Menu.Dropdown>
-      <Menu.Label>{t("nav.activeWorkspace")}</Menu.Label>
-      {workspaces.map((w) => (
+      {/* Whose workspaces these are. With several accounts in play the list
+          alone does not say which login it belongs to. */}
+      {user?.email && (
+        <div className="ws-menu__account">
+          <span className="ws-menu__email">{user.email}</span>
+          <Tooltip label={t("common.refresh", "Refresh")} withArrow position="top">
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              aria-label={t("common.refresh", "Refresh")}
+              // Re-fetches the list in place. The menu stays open: this is for
+              // when a workspace you were just given has not appeared yet, and
+              // closing would hide the result you asked for.
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                refresh();
+              }}
+            >
+              <RefreshCw size={14} />
+            </ActionIcon>
+          </Tooltip>
+        </div>
+      )}
+
+      {workspaces.map((w, i) => (
         <Menu.Item
           key={w._id}
           onClick={() => setActive(w._id)}
-          leftSection={<FolderKanban size={15} />}
+          leftSection={<WorkspaceMark name={w.name} />}
           // The current one is marked rather than omitted: a list that
           // silently drops where you are makes you count to find out.
           rightSection={
-            w._id === active?._id
-              ? <Check size={14} style={{ color: "var(--accent-2)" }} />
-              : null
+            w._id === active?._id ? (
+              <Check size={15} style={{ color: "var(--accent-2)" }} />
+            ) : (
+              // Only the first nine are reachable by number, so only those
+              // advertise one.
+              i < 9 && <span className="ws-menu__hint">Ctrl {i + 1}</span>
+            )
           }
         >
-          {w.name}
+          <span className={w._id === active?._id ? "ws-menu__name--active" : undefined}>
+            {w.name}
+          </span>
         </Menu.Item>
       ))}
+
+      <Menu.Divider />
+
+      {/* Creating one runs through the same onboarding steps a new signup
+          gets — see the Workspaces page, which links to the same place. */}
+      <Menu.Item
+        leftSection={<Plus size={15} />}
+        onClick={() => nav("/app/onboarding?mode=workspace")}
+      >
+        {t("workspaces.newWorkspace", "New workspace")}
+      </Menu.Item>
     </Menu.Dropdown>
+  );
+}
+
+/**
+ * The square mark beside a workspace in the list.
+ *
+ * A workspace has no logo of its own, so this is its initial on a tile whose
+ * colour is derived from the name — stable per workspace, and enough to tell
+ * the rows apart at a glance without inventing branding for them.
+ */
+function WorkspaceMark({ name }: { name: string }) {
+  const hue = [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+
+  return (
+    <span
+      aria-hidden
+      className="ws-menu__mark"
+      style={{ background: `hsl(${hue} 52% 46%)` }}
+    >
+      {(name || "?").slice(0, 1).toUpperCase()}
+    </span>
   );
 }
 

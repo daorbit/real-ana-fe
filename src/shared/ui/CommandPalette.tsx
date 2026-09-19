@@ -48,11 +48,22 @@ export function CommandPalette() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setOpen((v) => !v);
+        return;
+      }
+
+      // Ctrl/Cmd 1-9 jumps straight to a workspace by position, which is what
+      // the hints in the workspace menu promise. Bound here beside the palette
+      // key so every global shortcut in the app is declared in one place.
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && /^[1-9]$/.test(e.key)) {
+        const target = workspaces[Number(e.key) - 1];
+        if (!target || target._id === active?._id) return;
+        e.preventDefault();
+        setActive(target._id);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [workspaces, active?._id, setActive]);
 
   const close = () => {
     setOpen(false);

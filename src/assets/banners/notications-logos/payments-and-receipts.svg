@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="payBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+
+    <!-- Inner Glow -->
+    <linearGradient id="payGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Card Gradient -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+
+    <!-- Coin Gold Gradient -->
+    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="payShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#022c22" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Base Circle -->
+  <circle cx="24" cy="24" r="22" fill="url(#payBg)"/>
+  <circle cx="24" cy="24" r="21.5" stroke="url(#payGlow)" stroke-width="1"/>
+
+  <!-- Payment Glyph: Sleek Card + Success Coin / Receipt -->
+  <g filter="url(#payShadow)">
+    <!-- Credit Card Base -->
+    <rect x="11" y="14" width="23" height="15" rx="3" fill="url(#cardGrad)"/>
+    <rect x="11" y="17.5" width="23" height="3" fill="#047857"/>
+    <!-- Chip -->
+    <rect x="14" y="22" width="4" height="3.2" rx="0.8" fill="#fbbf24"/>
+
+    <!-- Shiny Coin Badge with Check / Currency -->
+    <circle cx="29.5" cy="28" r="7.5" fill="url(#coinGrad)"/>
+    <circle cx="29.5" cy="28" r="6.5" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.4"/>
+    <path d="M26.5 28L28.5 30L32.5 26" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+

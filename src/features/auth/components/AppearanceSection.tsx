@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Group, Text, UnstyledButton, useMantineColorScheme, Switch } from "@mantine/core";
+import { Box, Group, Text, UnstyledButton, useMantineColorScheme } from "@mantine/core";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
@@ -9,10 +9,11 @@ import { useAuth } from "@/features/auth/context";
 import { trace } from "@/shared/lib/analytics";
 import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
-  ACCENT_PRESETS, BG_STYLES, RADIUS_STYLES, DENSITIES,
-  FONT_SIZES, TABLE_STYLES, THEME_PRESETS,
-  // no SIDEBAR_STYLES: the sidebar-compact control was pulled back out of
-  // Appearance, see theme.ts.
+  ACCENT_PRESETS, BG_STYLES, THEME_PRESETS,
+  // Appearance offers mode, preset, accent and background only. Radius,
+  // density, font size, table rows and motion were pulled back out: they are
+  // fine-tuning nobody asked for, and each one is another way for the app to
+  // look wrong. Their defaults in `theme.ts` still apply.
   applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
   contrastOn,
 } from "@/shared/lib/theme";
@@ -44,10 +45,9 @@ function GroupBlock({ children }: { children: React.ReactNode }) {
  
 
 /**
- * Mode, accent, background, radius, density, and loading-screen animation
- * all live in one preference object and apply immediately on click — a
- * settings page for how the app looks should show the result instantly
- * rather than waiting on a Save button.
+ * Mode, theme preset, accent and background all live in one preference object
+ * and apply immediately on click — a settings page for how the app looks
+ * should show the result instantly rather than waiting on a Save button.
  */
 export function AppearanceSection({
   /** Skip the Section card chrome (title + surface) — used on its own full
@@ -255,113 +255,6 @@ export function AppearanceSection({
           </Box>
         </GroupBlock>
 
-        <Group gap={40} align="flex-start" mb={32} wrap="wrap">
-          <div>
-            <GroupLabel>{t("settings.cornerRadius", "Corner radius")}</GroupLabel>
-            <Group gap="sm">
-              {RADIUS_STYLES.map((r) => {
-                const active = prefs.radius === r.id;
-                return (
-                  <UnstyledButton
-                    key={r.id}
-                    onClick={() => update({ radius: r.id })}
-                    title={r.label}
-                    aria-label={r.label}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      display: "grid",
-                      placeItems: "center",
-                      background: "var(--surface-2)",
-                      boxShadow: active
-                        ? "inset 0 0 0 2px var(--accent)"
-                        : "inset 0 0 0 1px var(--border)",
-                      borderRadius: 11,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 20,
-                        height: 20,
-                        borderTopLeftRadius: r.px * 0.7,
-                        border: "2px solid var(--text-2)",
-                        borderRight: "none",
-                        borderBottom: "none",
-                      }}
-                    />
-                  </UnstyledButton>
-                );
-              })}
-            </Group>
-          </div>
-
-          <div>
-            <GroupLabel>{t("settings.density", "Density")}</GroupLabel>
-            <Group gap="sm">
-              {DENSITIES.map((d) => (
-                <UnstyledButton
-                  key={d.id}
-                  className="tile"
-                  data-selected={prefs.density === d.id}
-                  onClick={() => update({ density: d.id })}
-                  px="lg"
-                  py={10}
-                  style={{ fontSize: 13.5, fontWeight: 550 }}
-                >
-                  {d.label}
-                </UnstyledButton>
-              ))}
-            </Group>
-          </div>
-
-          <div>
-            <GroupLabel>{t("settings.fontSize", "Font size")}</GroupLabel>
-            <Group gap="sm">
-              {FONT_SIZES.map((f) => (
-                <UnstyledButton
-                  key={f.id}
-                  className="tile"
-                  data-selected={prefs.fontSize === f.id}
-                  onClick={() => update({ fontSize: f.id })}
-                  px="lg"
-                  py={10}
-                  style={{ fontSize: 13.5, fontWeight: 550 }}
-                >
-                  {f.label}
-                </UnstyledButton>
-              ))}
-            </Group>
-          </div>
-
-          <div>
-            <GroupLabel>{t("settings.tableStyle", "Table rows")}</GroupLabel>
-            <Group gap="sm">
-              {TABLE_STYLES.map((tb) => (
-                <UnstyledButton
-                  key={tb.id}
-                  className="tile"
-                  data-selected={prefs.table === tb.id}
-                  onClick={() => update({ table: tb.id })}
-                  px="lg"
-                  py={10}
-                  style={{ fontSize: 13.5, fontWeight: 550 }}
-                >
-                  {tb.label}
-                </UnstyledButton>
-              ))}
-            </Group>
-          </div>
-
-          <div>
-            <GroupLabel>{t("settings.motion", "Motion")}</GroupLabel>
-            <Switch
-              checked={prefs.motion}
-              onChange={(e) => update({ motion: e.currentTarget.checked })}
-              label={prefs.motion ? t("settings.motionOn", "Animations on") : t("settings.motionOff", "Animations off")}
-              size="md"
-            />
-          </div>
-        </Group>
       </Box>
   );
 

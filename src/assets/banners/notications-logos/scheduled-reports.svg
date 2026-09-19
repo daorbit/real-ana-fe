@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="repBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <!-- Inner Glow -->
+    <linearGradient id="repGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="repShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#7c2d12" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Base Circle -->
+  <circle cx="24" cy="24" r="22" fill="url(#repBg)"/>
+  <circle cx="24" cy="24" r="21.5" stroke="url(#repGlow)" stroke-width="1"/>
+
+  <!-- Scheduled Report Glyph: Crisp document chart + clock pill -->
+  <g filter="url(#repShadow)">
+    <!-- Report Document -->
+    <rect x="13" y="11" width="18" height="23" rx="3.5" fill="#ffffff" fill-opacity="0.95"/>
+    <!-- Analytics Bars -->
+    <rect x="16.5" y="22" width="2.5" height="7" rx="1" fill="#fed7aa"/>
+    <rect x="20.5" y="18" width="2.5" height="11" rx="1" fill="#fb923c"/>
+    <rect x="24.5" y="15" width="2.5" height="14" rx="1" fill="#ea580c"/>
+
+    <!-- Clock Pill Badge -->
+    <circle cx="29.5" cy="28.5" r="7.5" fill="#c2410c"/>
+    <circle cx="29.5" cy="28.5" r="6.8" stroke="#ffedd5" stroke-width="1" stroke-opacity="0.3"/>
+    <!-- Clock Hands -->
+    <path d="M29.5 24.5V28.5L32 30" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+

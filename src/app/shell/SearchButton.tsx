@@ -34,8 +34,8 @@ export function SearchButton({ collapsed }: { collapsed: boolean }) {
 
   return (
     <UnstyledButton
-      className="tile"
-      style={{ display: "block", width: "100%", padding: "7px 10px" }}
+      className="rail-search"
+      style={{ display: "block", width: "100%" }}
       onClick={openPalette}
     >
       <Group gap="xs" wrap="nowrap">

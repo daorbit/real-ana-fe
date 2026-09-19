@@ -1,4 +1,4 @@
-import { AppShell as MantineShell, ScrollArea } from "@mantine/core";
+import { AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
@@ -7,8 +7,8 @@ import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import { useState } from "react";
 import { RailBrand } from "./RailBrand";
 import { SearchButton } from "./SearchButton";
-import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { NavGroups } from "./NavGroups";
+import { RailWorkspaceHeader } from "./RailWorkspaceHeader";
 import { AccountMenu } from "./AccountMenu";
 import { DemoCard, ImpersonationCard, PendingInviteCard, PlanCard } from "./RailCards";
 import { NAV_GROUPS } from "./navItems";
@@ -64,13 +64,31 @@ export function Rail({
 
   return (
     <MantineShell.Navbar p="md">
-      {/* On mobile the wordmark already sits in the top bar, so the one here
-          would double up inside the open drawer — desktop-only. */}
-      <MantineShell.Section visibleFrom="sm">
-        <RailBrand collapsed={collapsed} onToggle={onToggleRail} />
+      {/* The workspace row carries the product mark, so the two sit on one
+          line: mark and name on the left, the collapse control on the right.
+          A separate wordmark row above them would say the product's name
+          twice. On mobile the wordmark is already in the top bar. */}
+      <MantineShell.Section visibleFrom="sm" mb="md">
+        <Group gap={4} wrap="nowrap" align="center">
+          {/* Collapsed the workspace row draws nothing, so the spacer it would
+              sit in is left out too — otherwise it would hold width and push
+              the toggle out of the icon column. */}
+          {!collapsed && (
+            <Box style={{ minWidth: 0, flex: 1 }}>
+              <RailWorkspaceHeader collapsed={collapsed} />
+            </Box>
+          )}
+          <RailBrand collapsed={collapsed} onToggle={onToggleRail} />
+        </Group>
       </MantineShell.Section>
 
-      <MantineShell.Section mb="md">
+      {/* In the mobile drawer there is no collapse control to share a line
+          with, so the workspace row stands on its own. */}
+      <MantineShell.Section hiddenFrom="sm" mb="md">
+        <RailWorkspaceHeader collapsed={collapsed} />
+      </MantineShell.Section>
+
+      <MantineShell.Section mb="lg">
         <SearchButton collapsed={collapsed} />
       </MantineShell.Section>
 
@@ -102,12 +120,9 @@ export function Rail({
         {!isDemo && !collapsed && <PendingInviteCard />}
         {!isDemo && !collapsed && <PlanCard />}
 
-        {/* The workspace switch rides on the plan row, so wherever that row is
-            not drawn — collapsed, or in a demo session — it needs its own icon
-            here. Switching workspace is not something the rail may stop
-            offering just because the card carrying it is gone. */}
-        {(collapsed || isDemo) && <WorkspaceSwitcher />}
-
+        {/* No workspace switch down here: the header at the top of the rail
+            names the active workspace and opens the same menu, so a second
+            way in at the other end of the column is just a duplicate. */}
         {isDemo && <DemoCard collapsed={collapsed} onExit={logout} />}
 
         <AccountMenu

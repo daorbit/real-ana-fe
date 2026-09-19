@@ -51,16 +51,16 @@ export function NavLink({
         alignItems: "center",
         gap: 10,
         width: "100%",
-        padding: "7px 10px",
-        marginBottom: 1,
+        padding: "5px 8px",
+        marginBottom: 2,
         justifyContent: collapsed ? "center" : undefined,
       }}
     >
       <span className="nav-link-icon">
-        <Icon size={16} style={{ flexShrink: 0 }} />
+        <Icon size={15} style={{ flexShrink: 0 }} />
       </span>
       {!collapsed && (
-        <Text size="sm" fw={active ? 600 : 500} truncate>
+        <Text fz={13} fw={active ? 600 : 450} lh={1.4} truncate>
           {label}
         </Text>
       )}
