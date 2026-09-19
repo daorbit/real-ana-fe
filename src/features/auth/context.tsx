@@ -245,6 +245,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const unlockScreen = async (proof: { pin: string } | { totpCode: string }) => {
     await api.post("/api/auth/unlock", proof);
     hideLock();
+    /*
+     * Refetch everything the lock refused.
+     *
+     * While locked, every data route answers 423, and RTK Query caches those
+     * rejections like any other result. Lifting the overlay does not retry
+     * them, so the app came back to a screen of dead panels and the only way
+     * out was a manual reload.
+     *
+     * `resetApiState` rather than `invalidateTags`: invalidation drives off
+     * `providesTags`, which does not run for a failed query — a cache entry
+     * holding an error has no tags to match, so invalidating would skip
+     * exactly the entries that need retrying. Dropping the cache makes every
+     * mounted query refetch from scratch, which is what is wanted here.
+     *
+     * The usual objection to this — components flashing through their loading
+     * state — does not apply: the lock overlay has been covering them, so
+     * there is nothing on screen to flash.
+     */
+    dispatch(rtkApi.util.resetApiState());
   };
 
   const updateProfile = async (patch: ProfileUpdate) => {
