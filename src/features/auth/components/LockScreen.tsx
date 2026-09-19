@@ -120,7 +120,25 @@ export function LockScreen() {
             />
           )}
 
-          <Button fullWidth size="md" loading={busy} disabled={!code.trim()} onClick={() => void submit()}>
+          {/* Hard-coded purple rather than the theme accent: this button sits
+              directly under the lock banner, and the accent — which the
+              workspace can change — turned it green against a purple
+              illustration. A shade off the banner's own, so it reads as
+              belonging to it without trying to match it exactly. */}
+          <Button
+            fullWidth
+            size="md"
+            loading={busy}
+            disabled={!code.trim()}
+            onClick={() => void submit()}
+            styles={{
+              root: {
+                "--button-bg": "#6d3fd4",
+                "--button-hover": "#5c33bd",
+                "--button-color": "#fff",
+              } as React.CSSProperties,
+            }}
+          >
             Unlock
           </Button>
         </Stack>

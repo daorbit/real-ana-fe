@@ -2199,10 +2199,18 @@ export type GoogleSyncResult = {
 export type NotificationType =
   | "invite.received"
   | "invite.accepted"
+  | "member.removed"
+  | "role.changed"
   | "report.ready"
   | "plan.ending"
   | "payment.received"
+  | "payment.failed"
+  | "quota.exceeded"
   | "seo.audit.done"
+  | "seo.rank.changed"
+  | "tracking.stopped"
+  | "social.post.failed"
+  | "lead.captured"
   | "admin.message"
   | "security.alert"
   | "form.submission";

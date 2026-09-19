@@ -8,6 +8,7 @@
  */
 .row {
   display: block;
+  position: relative;
   width: 100%;
   padding: 12px 14px;
   border: 1px solid transparent;
@@ -56,12 +57,25 @@
  * shifts the layout as rows are read.
  */
 .row[data-unread="true"] {
-  background: var(--unread-wash, color-mix(in srgb, var(--accent) 9%, transparent));
-  border-color: var(--unread-border, color-mix(in srgb, var(--accent) 24%, transparent));
+  background: var(--unread-wash, color-mix(in srgb, var(--accent) 12%, transparent));
+  border-color: var(--unread-border, color-mix(in srgb, var(--accent) 34%, transparent));
 }
 
 .row[data-unread="true"]:hover {
-  background: var(--unread-wash-hover, color-mix(in srgb, var(--accent) 14%, transparent));
+  background: var(--unread-wash-hover, color-mix(in srgb, var(--accent) 18%, transparent));
+}
+
+/* A bar down the leading edge, because the wash alone is a dark green on a
+   dark surface and all but disappears there — which read as every row having
+   been marked read the moment the panel opened. */
+.row[data-unread="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block: 8px;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-2, #059669);
 }
 
 /* The chip holding either the type icon or the actor's avatar. Circular, like
@@ -107,15 +121,13 @@
   border-bottom: none;
 }
 
-/* A sticky date heading inside the scrolling list.
+/* A date heading inside the list.
 
-   It sits on the panel's own surface, not the page body — against the sheet
-   the body colour read as a heavy full-bleed band rather than a label. The
-   blur alone carries it over the rows scrolling underneath. */
+   It scrolls with the rows rather than sticking, and carries no fill of its
+   own: any background here reads as a band across the panel, and a sticky one
+   sat on whatever scrolled under it, so the first heading looked like a
+   selected section rather than a label. */
 .groupLabel {
-  position: sticky;
-  top: 0;
-  z-index: 1;
   margin: 0 8px;
   padding: 12px 6px 6px;
   font-size: 10.5px;
@@ -123,8 +135,6 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted, #6b7280);
-  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
-  backdrop-filter: blur(8px);
 }
 
 @media (prefers-reduced-motion: reduce) {

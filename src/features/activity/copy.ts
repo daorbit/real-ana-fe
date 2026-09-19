@@ -61,6 +61,32 @@ export function notificationCopy(
       };
     }
 
+    case "member.removed": {
+      const workspace = str(d, "workspaceName", t("activity.aWorkspace", "a workspace"));
+      return {
+        title: t("activity.memberRemoved.title", "Access removed"),
+        body: t("activity.memberRemoved.body", "You no longer have access to {{workspace}}.", {
+          workspace,
+        }),
+      };
+    }
+
+    case "role.changed": {
+      const workspace = str(d, "workspaceName", t("activity.aWorkspace", "a workspace"));
+      const role = str(d, "role");
+      return {
+        title: t("activity.roleChanged.title", "Your role changed"),
+        body: role
+          ? t("activity.roleChanged.body", "You are now {{role}} in {{workspace}}.", {
+              role,
+              workspace,
+            })
+          : t("activity.roleChanged.bodyNoRole", "Your role in {{workspace}} changed.", {
+              workspace,
+            }),
+      };
+    }
+
     case "report.ready": {
       const name = str(d, "reportName", t("activity.yourReport", "Your report"));
       return {
@@ -96,6 +122,102 @@ export function notificationCopy(
         body: amount
           ? t("activity.paymentReceived.body", "We received your payment of {{amount}}.", { amount })
           : t("activity.paymentReceived.bodyNoAmount", "We received your payment."),
+      };
+    }
+
+    case "payment.failed": {
+      const amount = str(d, "amountLabel");
+      const reason = str(d, "reason");
+      return {
+        title: t("activity.paymentFailed.title", "Payment failed"),
+        body: reason
+          ? t("activity.paymentFailed.bodyReason", "We couldn't take your payment: {{reason}}.", {
+              reason,
+            })
+          : amount
+            ? t("activity.paymentFailed.body", "We couldn't take your payment of {{amount}}.", {
+                amount,
+              })
+            : t("activity.paymentFailed.bodyNoAmount", "We couldn't take your payment."),
+      };
+    }
+
+    case "quota.exceeded": {
+      const workspace = str(d, "workspaceName", t("activity.yourWorkspace", "your workspace"));
+      const limit = num(d, "limit");
+      return {
+        title: t("activity.quotaExceeded.title", "Event limit reached"),
+        body:
+          limit === null
+            ? t("activity.quotaExceeded.bodyNoLimit", "{{workspace}} has used its events for this cycle.", {
+                workspace,
+              })
+            : t(
+                "activity.quotaExceeded.body",
+                "{{workspace}} has used all {{limit}} events for this cycle.",
+                { workspace, limit: limit.toLocaleString() },
+              ),
+      };
+    }
+
+    case "tracking.stopped": {
+      const site = str(d, "siteName", t("activity.yourSite", "your site"));
+      const hours = num(d, "hoursSilent");
+      return {
+        title: t("activity.trackingStopped.title", "Tracking stopped"),
+        body:
+          hours === null
+            ? t("activity.trackingStopped.bodyNoTime", "{{site}} has stopped sending events.", { site })
+            : t(
+                "activity.trackingStopped.body",
+                "{{site}} has sent no events for {{count}} hours.",
+                { site, count: hours },
+              ),
+      };
+    }
+
+    case "social.post.failed": {
+      const channel = str(d, "channel");
+      return {
+        title: t("activity.socialPostFailed.title", "Post didn't go out"),
+        body: channel
+          ? t("activity.socialPostFailed.body", "A scheduled post to {{channel}} failed to send.", {
+              channel,
+            })
+          : t("activity.socialPostFailed.bodyNoChannel", "A scheduled post failed to send."),
+      };
+    }
+
+    case "lead.captured": {
+      const formTitle = str(d, "formTitle", t("activity.aForm", "a form"));
+      const who = str(d, "leadName") || str(d, "leadEmail");
+      return {
+        title: t("activity.leadCaptured.title", "New lead from {{form}}", { form: formTitle }),
+        body: who,
+      };
+    }
+
+    case "seo.rank.changed": {
+      const keyword = str(d, "keyword", t("activity.aKeyword", "a keyword"));
+      const rival = str(d, "competitorName");
+      const gained = Boolean(d.gained);
+      return {
+        title: gained
+          ? t("activity.seoRankChanged.titleUp", "You moved up")
+          : t("activity.seoRankChanged.titleDown", "You slipped"),
+        body: rival
+          ? gained
+            ? t("activity.seoRankChanged.bodyUp", "You overtook {{rival}} on “{{keyword}}”.", {
+                rival,
+                keyword,
+              })
+            : t("activity.seoRankChanged.bodyDown", "{{rival}} overtook you on “{{keyword}}”.", {
+                rival,
+                keyword,
+              })
+          : t("activity.seoRankChanged.bodyNoRival", "Your ranking for “{{keyword}}” changed.", {
+              keyword,
+            }),
       };
     }
 
@@ -146,10 +268,18 @@ export function notificationTypeLabel(type: NotificationType, t: TFunction): str
   const labels: Record<NotificationType, [string, string]> = {
     "invite.received": ["activity.pref.inviteReceived", "Invitations to you"],
     "invite.accepted": ["activity.pref.inviteAccepted", "People joining your workspaces"],
+    "member.removed": ["activity.pref.memberRemoved", "Losing access to a workspace"],
+    "role.changed": ["activity.pref.roleChanged", "Changes to your role"],
     "report.ready": ["activity.pref.reportReady", "Scheduled reports"],
     "plan.ending": ["activity.pref.planEnding", "Plan expiry reminders"],
     "payment.received": ["activity.pref.paymentReceived", "Payments and receipts"],
+    "payment.failed": ["activity.pref.paymentFailed", "Failed payments"],
+    "quota.exceeded": ["activity.pref.quotaExceeded", "Event limit warnings"],
     "seo.audit.done": ["activity.pref.seoAuditDone", "Finished SEO audits"],
+    "seo.rank.changed": ["activity.pref.seoRankChanged", "Competitor ranking changes"],
+    "tracking.stopped": ["activity.pref.trackingStopped", "Tracking outages"],
+    "social.post.failed": ["activity.pref.socialPostFailed", "Failed scheduled posts"],
+    "lead.captured": ["activity.pref.leadCaptured", "New leads"],
     "admin.message": ["activity.pref.adminMessage", "Product announcements"],
     "security.alert": ["activity.pref.securityAlert", "Security alerts"],
     "form.submission": ["activity.pref.formSubmission", "Form submissions"],

@@ -6,14 +6,6 @@ import { notificationCopy, notificationTypeLabel, relativeTime } from "./copy";
 import { NOTIFICATION_VISUALS, showsAvatar } from "./visuals";
 import classes from "./ActivityRow.module.css";
 
-/**
- * One notification.
- *
- * The whole row is the click target: it marks the notification read,
- * navigates to whatever it refers to, and closes the panel. There is no
- * per-row menu — clearing one aside is what selection mode is for, reached
- * from the header, not hidden behind a hover-only kebab on each row.
- */
 export function ActivityRow({
   notification,
   actorName,
@@ -44,19 +36,15 @@ export function ActivityRow({
   const visual = NOTIFICATION_VISUALS[notification.type];
   const Icon = visual.icon;
 
-  // Mantine's palette, read at the shade that holds up on both themes.
   const accent = theme.colors[visual.color]?.[6] ?? theme.colors.gray[6];
   const wash = theme.colors[visual.color]?.[0] ?? theme.colors.gray[1];
 
   const withAvatar = showsAvatar(notification.type) && Boolean(actorAvatarUrl || actorName);
 
-  // Only an unread invite carries a live choice — once accepted or declined,
-  // the row is just history and the buttons would have nothing left to do.
+
   const isPendingInvite = notification.type === "invite.received" && unread;
 
-  // An invite that was already accepted or declined: the row is still visible
-  // as history, but clicking it would land on a dead token page, so we disable
-  // the clickable affordances (cursor, chevron) to make it clear it's settled.
+
   const isSettledInvite = notification.type === "invite.received" && !unread;
 
   return (
@@ -65,6 +53,10 @@ export function ActivityRow({
       type="button"
       className={classes.row}
       data-unread={unread}
+      // Only while unread: a failure that has been read is history, and a row
+      // that keeps shouting after it has been dealt with is what teaches
+      // people to stop reading the panel.
+      data-severity={(unread && visual.severity) || undefined}
       data-settled={isSettledInvite || undefined}
       style={isSettledInvite ? { cursor: "default" } : undefined}
       onClick={() => (selectable ? onToggleSelect?.(notification.id) : onOpen(notification))}
