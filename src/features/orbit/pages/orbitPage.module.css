@@ -488,6 +488,68 @@
     var(--mantine-color-body);
 }
 
+/* Same panel-confinement the notification drawer uses: rendered into
+   `#panel-overlay-root` and positioned absolute against the panel, so the
+   drawer stops at the panel's border and the rail beside it stays reachable —
+   rather than a full-window sheet fixed to the viewport. */
+.panelRoot,
+.panelOverlay,
+.panelInner {
+  position: absolute;
+  inset: 0;
+}
+
+.panelRoot {
+  pointer-events: none;
+}
+
+.panelOverlay {
+  z-index: 1;
+  pointer-events: auto;
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, #000 42%, transparent),
+    color-mix(in srgb, #000 20%, transparent) 60%,
+    transparent
+  );
+}
+
+.panelInner {
+  z-index: 2;
+  inset-inline-start: auto;
+  width: min(380px, 100%);
+  padding: 0;
+  pointer-events: auto;
+}
+
+.panelContent {
+  position: absolute;
+  inset: 6px 6px 6px 0;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 14px;
+  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.7);
+}
+
+/* Full-height sheet on a phone, matching the notification drawer: a card inset
+   from the edges would leave slivers of page that read as a mistake. */
+@media (max-width: 48em) {
+  .panelInner {
+    width: 100%;
+  }
+
+  .panelContent {
+    inset: 0;
+    border: none;
+    border-radius: 0;
+  }
+}
+
 .drawerList {
 
   flex: 1;

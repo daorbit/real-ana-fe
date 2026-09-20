@@ -45,6 +45,15 @@ export function OrbitHistoryDrawer({
   opened: boolean;
   onClose: () => void;
 }) {
+  // The shell's panel overlay mount — same target the notification drawer uses.
+  // Rendering into it keeps the drawer inside the app panel and stops it at the
+  // panel border, so the rail stays reachable rather than being covered by a
+  // full-window sheet. Null before the shell has mounted, and on any screen
+  // with no panel, where it falls back to Mantine's own body portal.
+  const [panelRoot, setPanelRoot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setPanelRoot(document.getElementById("panel-overlay-root"));
+  }, []);
   const {
     conversations, conversationId, openConversation, deleteConversation,
     deleteConversations, renameConversation, loadingConversation, loadingConversations,
@@ -208,11 +217,31 @@ export function OrbitHistoryDrawer({
       size={380}
       padding={0}
       withCloseButton={false}
-      // The rail stays reachable behind the overlay, and the drawer is a
-      // sideshow rather than a mode — a heavy scrim would say otherwise.
-      overlayProps={{ backgroundOpacity: 0.35, blur: 2 }}
+      // Rendered into the shell's panel rather than over the window, so the
+      // rail stays reachable while the list is open — the same behaviour as the
+      // notification drawer. Falls back to Mantine's own body portal on any
+      // screen without a panel.
+      portalProps={panelRoot ? { target: panelRoot } : undefined}
+      withinPortal={Boolean(panelRoot)}
+      // Absolute against the panel rather than fixed to the viewport, and the
+      // scrim clears toward the left so the page stays legible; a plain body
+      // scrim when there is no panel.
+      overlayProps={
+        panelRoot
+          ? { blur: 2, backgroundOpacity: 0 }
+          : { backgroundOpacity: 0.35, blur: 2 }
+      }
       title={null}
-      classNames={{ content: classes.drawerContent }}
+      classNames={
+        panelRoot
+          ? {
+              root: classes.panelRoot,
+              overlay: classes.panelOverlay,
+              inner: classes.panelInner,
+              content: `${classes.panelContent} ${classes.drawerContent}`,
+            }
+          : { content: classes.drawerContent }
+      }
       // A column, so the list can take the height the header and the
       // New-conversation button leave rather than guessing at it.
       styles={{
