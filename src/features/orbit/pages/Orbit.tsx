@@ -283,11 +283,6 @@ function TurnActions({
           </ActionIcon>
         </Tooltip>
       )}
-      {isPlatformAdmin && message.modelLabel && (
-        <Text size="10px" c="dimmed" fw={600} tt="uppercase" mr={4} style={{ letterSpacing: "0.04em" }}>
-          {message.modelLabel}
-        </Text>
-      )}
     </Group>
   );
 }
