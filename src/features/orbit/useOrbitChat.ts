@@ -48,6 +48,8 @@ export type OrbitMessage = {
    * Rendered as a table under the prose — see `DataDigestTable`. */
   dataDigest?: unknown;
   digestAt?: string;
+  /** Pages a web search drew on, set only when the model actually used one. */
+  citations?: { url: string; title: string }[];
 };
 
 /**
@@ -248,6 +250,7 @@ export function useOrbitChat() {
               imageUrl: answered.imageUrl,
               suggestions: answered.suggestions,
               dataDigest: answered.dataDigest,
+              citations: answered.citations,
               // Only when it differs from what was asked for — labelling every
               // answer with the model people already chose is noise.
               modelLabel:
@@ -423,6 +426,7 @@ export function useOrbitChat() {
           failed: m.failed || undefined,
           suggestions: m.suggestions.length ? m.suggestions : undefined,
           dataDigest: m.dataDigest,
+          citations: m.citations,
           digestAt: m.createdAt,
           modelLabel: m.modelLabel,
         }));

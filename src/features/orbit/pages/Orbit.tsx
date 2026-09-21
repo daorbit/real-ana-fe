@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import {
-  ActionIcon, Alert, Box, Button, Center, Group, Loader, Menu, ScrollArea, Stack, Text, Textarea,
-  Title, Tooltip, UnstyledButton,
+  ActionIcon, Alert, Anchor, Box, Button, Center, Group, Loader, Menu, ScrollArea, Stack, Text,
+  Textarea, Title, Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
-  AlertTriangle, ArrowUp, Check, ChevronDown, ClipboardList, Copy, Download, FolderPlus, History,
-  ImagePlus, Mic, Palette, Pencil, RefreshCw, RotateCcw, Share2, Square, Volume2, VolumeX, X,
+  AlertTriangle, ArrowUp, Check, ChevronDown, ClipboardList, Copy, Download, FolderPlus, Globe,
+  History, ImagePlus, Mic, Palette, Pencil, RefreshCw, RotateCcw, Share2, Square, Volume2, VolumeX, X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -255,6 +255,31 @@ function TurnActions({
   );
 }
 
+/** The pages a web search drew on, as a compact source list under the answer.
+ * Only ever set on a Claude turn — see callAnthropic on the server. */
+function CitationsList({ citations }: { citations?: { url: string; title: string }[] }) {
+  if (!citations?.length) return null;
+
+  return (
+    <Group gap={6} mt={10} wrap="wrap" align="center">
+      <Globe size={12} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
+      {citations.map((c, i) => (
+        <Anchor
+          key={c.url}
+          href={c.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          size="xs"
+          c="dimmed"
+          underline="always"
+        >
+          {i + 1}. {c.title}
+        </Anchor>
+      ))}
+    </Group>
+  );
+}
+
 /** An answer's prose, revealed at reading speed when it has just arrived. */
 function AnswerText({
   message,
@@ -450,6 +475,7 @@ function Turn({
           <AnswerText message={message} live={Boolean(live)} onDone={onRevealed} />
         )}
         {!live && <DataDigestTable digest={message.dataDigest} takenAtIso={message.digestAt} />}
+        {!live && <CitationsList citations={message.citations} />}
         {!message.failed && !live && (
           <TurnActions
             message={message}

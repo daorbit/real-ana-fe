@@ -18,7 +18,8 @@ import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
 
-const FLY_OUT_MS = 500;
+/** Matches the `rail-orbit-fade-out` keyframes' duration in App.css. */
+const FLY_OUT_MS = 320;
 
 export function OrbitCard({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
