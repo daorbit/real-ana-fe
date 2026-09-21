@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import {
-  ActionIcon, Alert, Box, Button, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
-  Tooltip, UnstyledButton,
+  ActionIcon, Alert, Box, Button, Center, Group, Loader, Menu, ScrollArea, Stack, Text, Textarea,
+  Title, Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
-  AlertTriangle, ArrowUp, ClipboardList, Copy, Download, FolderPlus, History, ImagePlus, Mic, Palette,
-  Pencil, RefreshCw, RotateCcw, Share2, Square, Volume2, VolumeX, X,
+  AlertTriangle, ArrowUp, Check, ChevronDown, ClipboardList, Copy, Download, FolderPlus, History,
+  ImagePlus, Mic, Palette, Pencil, RefreshCw, RotateCcw, Share2, Square, Volume2, VolumeX, X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -15,6 +15,7 @@ import { RichText } from "@/features/orbit/components/RichText";
 import { DataDigestTable, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { useWorkspace } from "@/features/workspace/context";
+import { useIsPlatformAdmin } from "@/features/auth/context";
 import { pickOrbitSuggestions } from "@/features/orbit/orbitSuggestions";
 import type { OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
@@ -475,7 +476,7 @@ export default function Orbit() {
   const {
     messages, input, setInput, pendingImage, attachImage, imageMode, setImageMode,
     send, regenerateLast, editAndResend, stop, thinking, generatingImage,
-    available, started, plan,
+    available, started, plan, models, model, setModel,
   } = chat;
 
   // Orbit answers questions about a workspace's data — with none created yet
@@ -483,6 +484,13 @@ export default function Orbit() {
   // sends people to create one first instead of letting them ask into a void.
   const { workspaces } = useWorkspace();
   const noWorkspace = workspaces.length === 0;
+
+  // The model picker itself is a super-admin tool, not a user preference —
+  // `/status` already hides Claude from everyone else, so the only reason to
+  // show a switcher at all is for the admin who has more than the one model
+  // every workspace gets.
+  const isPlatformAdmin = useIsPlatformAdmin();
+  const showModelPicker = isPlatformAdmin && models.length > 1;
 
  
   const [liveId, setLiveId] = useState<string | null>(null);
@@ -848,6 +856,43 @@ export default function Orbit() {
         </span>
 
         <Group gap={2} wrap="nowrap">
+          {/* A super-admin control, not a user preference — everyone else
+              gets exactly the models `/status` sends them with nothing to
+              pick between. See `showModelPicker` above. */}
+          {showModelPicker && (
+            <Menu position="bottom-end" radius="md" withinPortal zIndex={400}>
+              <Menu.Target>
+                <UnstyledButton
+                  className="tile"
+                  aria-label="Choose Orbit model"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "5px 8px",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--text-2)",
+                  }}
+                >
+                  {models.find((m) => m.id === model)?.label ?? "Model"}
+                  <ChevronDown size={12} />
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {models.map((m) => (
+                  <Menu.Item
+                    key={m.id}
+                    onClick={() => setModel(m.id)}
+                    rightSection={m.id === model && <Check size={14} />}
+                  >
+                    <Text size="sm" fw={600}>{m.label}</Text>
+                    <Text size="xs" c="dimmed">{m.hint}</Text>
+                  </Menu.Item>
+                ))}
+              </Menu.Dropdown>
+            </Menu>
+          )}
           {/* "Start over" leaves the current thread rather than deleting it —
               it is saved, and the drawer is how you get back. */}
           {started && (
