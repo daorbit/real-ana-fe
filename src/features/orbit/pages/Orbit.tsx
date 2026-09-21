@@ -4,8 +4,9 @@ import {
   Textarea, Title, Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
-  AlertTriangle, ArrowUp, Check, ChevronDown, ClipboardList, Copy, Download, FolderPlus, Globe,
-  History, ImagePlus, Mic, Palette, Pencil, RefreshCw, RotateCcw, Share2, Square, Volume2, VolumeX, X,
+  AlertTriangle, ArrowUp, Check, ChevronDown, ClipboardList, Copy, Download, FileText, FolderPlus,
+  Globe, History, ImagePlus, Mic, Palette, Pencil, Paperclip, RefreshCw, RotateCcw, Share2, Square,
+  Volume2, VolumeX, X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -148,9 +149,6 @@ async function downloadImage(url: string) {
   }
 }
 
-/** A generated image, held back behind the skeleton until it has actually
- * decoded — otherwise the skeleton vanishes the instant the URL arrives and
- * the browser shows a blank gap while the bytes are still loading. */
 function GeneratedImage({ url }: { url: string }) {
   const [loaded, setLoaded] = useState(false);
 
@@ -198,7 +196,11 @@ function TurnActions({
 
   return (
     <Group gap={2} mt={6} wrap="nowrap" align="center">
- 
+      {isPlatformAdmin && message.modelLabel && (
+        <Text size="10px" c="dimmed" fw={600} tt="uppercase" mr={4} style={{ letterSpacing: "0.04em" }}>
+          {message.modelLabel}
+        </Text>
+      )}
       <Tooltip label={message.imageUrl ? "Copy image" : "Copy"} withArrow>
         <ActionIcon
           variant="subtle"
@@ -410,6 +412,14 @@ function UserTurn({
       {message.imageUrl && (
         <img src={message.imageUrl} alt="Attached" className={classes.userTurnImageStandalone} />
       )}
+      {message.documentName && (
+        <Group gap={6} wrap="nowrap" className={classes.userTurn} style={{ padding: "6px 10px" }}>
+          <FileText size={14} style={{ flexShrink: 0, color: "var(--mantine-color-dimmed)" }} />
+          <Text size="xs" lh={1.4} truncate maw={220}>
+            {message.documentName}
+          </Text>
+        </Group>
+      )}
       {message.content && (
         <Group justify="flex-end" wrap="nowrap" gap={4} className={classes.userTurnRow}>
 
@@ -535,8 +545,8 @@ export default function Orbit() {
   // the same conversation the bubble holds.
   const { chat } = useOrbit();
   const {
-    messages, input, setInput, pendingImage, attachImage, imageMode, setImageMode,
-    send, regenerateLast, editAndResend, stop, thinking, generatingImage,
+    messages, input, setInput, pendingImage, attachImage, pendingDocument, attachDocument,
+    imageMode, setImageMode, send, regenerateLast, editAndResend, stop, thinking, generatingImage,
     available, started, plan, models, model, setModel,
   } = chat;
 
@@ -582,8 +592,10 @@ export default function Orbit() {
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [documentError, setDocumentError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   // Change E: track whether the user manually toggled drawing for the current
   // message. A manual choice outranks the keyword guess.
   const manualToggle = useRef(false);
@@ -656,7 +668,50 @@ export default function Orbit() {
 
   const onComposerDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    acceptImage(e.dataTransfer.files?.[0]);
+    const file = e.dataTransfer.files?.[0];
+    if (file && SUPPORTED_DOCUMENT_MIME.has(file.type)) {
+      acceptDocument(file);
+    } else {
+      acceptImage(file);
+    }
+  };
+
+  const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
+
+  const SUPPORTED_DOCUMENT_MIME = new Set([
+    "application/pdf",
+    "text/csv",
+    "application/vnd.ms-excel",
+    "text/plain",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ]);
+
+  const acceptDocument = (file: File | undefined | null) => {
+    if (!file) return;
+    setDocumentError(null);
+
+    if (!SUPPORTED_DOCUMENT_MIME.has(file.type)) {
+      setDocumentError("That file type isn't supported — PDF, DOCX, CSV or plain text.");
+      return;
+    }
+    if (file.size > MAX_DOCUMENT_BYTES) {
+      setDocumentError("That file is too large — 5MB or smaller.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        attachDocument({ name: file.name, mime: file.type, data: reader.result });
+      }
+    };
+    reader.onerror = () => setDocumentError("Couldn't read that file.");
+    reader.readAsDataURL(file);
+  };
+
+  const onDocumentPicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    acceptDocument(e.currentTarget.files?.[0]);
+    e.currentTarget.value = "";
   };
 
 
@@ -719,7 +774,7 @@ export default function Orbit() {
     );
   }
 
-  const empty = !input.trim() && !pendingImage;
+  const empty = !input.trim() && !pendingImage && !pendingDocument;
 
 
   const composer = (
@@ -740,13 +795,33 @@ export default function Orbit() {
             </ActionIcon>
           </div>
         )}
+        {pendingDocument && (
+          <Group gap={6} wrap="nowrap" px="md" pt="sm">
+            <FileText size={14} style={{ flexShrink: 0, color: "var(--mantine-color-dimmed)" }} />
+            <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
+              {pendingDocument.name}
+            </Text>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="xs"
+              radius="xl"
+              onClick={() => attachDocument(null)}
+              aria-label="Remove attached file"
+            >
+              <X size={12} />
+            </ActionIcon>
+          </Group>
+        )}
         <Textarea
           placeholder={
             speech.listening
               ? "Listening — speak your question"
               : imageMode
                 ? "Describe what to draw"
-                : "Ask anything"
+                : pendingDocument
+                  ? "Ask about this file"
+                  : "Ask anything"
           }
           value={input}
           onChange={(e) => {
@@ -756,7 +831,7 @@ export default function Orbit() {
 
             // Change E: auto-light the drawing toggle on a leading draw verb,
             // unless the user already made a manual choice for this message.
-            if (!manualToggle.current && !pendingImage && plan?.imageGeneration) {
+            if (!manualToggle.current && !pendingImage && !pendingDocument && plan?.imageGeneration) {
               const match = DRAW_RE.test(val.trim());
               if (match && !imageMode) setImageMode(true);
             }
@@ -795,6 +870,11 @@ export default function Orbit() {
             {imageError}
           </Text>
         )}
+        {documentError && (
+          <Text size="10px" c="orange.5" px="md" pb={4}>
+            {documentError}
+          </Text>
+        )}
 
         <div className={classes.composerFoot}>
           <Group gap={4} wrap="nowrap">
@@ -805,17 +885,37 @@ export default function Orbit() {
               hidden
               onChange={onFilePicked}
             />
+            <input
+              ref={documentInputRef}
+              type="file"
+              accept=".pdf,.docx,.csv,.txt,application/pdf,text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              hidden
+              onChange={onDocumentPicked}
+            />
             <Tooltip label="Attach an image" withArrow>
               <ActionIcon
                 variant="subtle"
                 color="gray"
                 radius="xl"
                 size="md"
-                disabled={thinking || imageMode}
+                disabled={thinking || imageMode || !!pendingDocument}
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Attach an image"
               >
                 <ImagePlus size={15} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Attach a file" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                radius="xl"
+                size="md"
+                disabled={thinking || imageMode || !!pendingImage}
+                onClick={() => documentInputRef.current?.click()}
+                aria-label="Attach a file"
+              >
+                <Paperclip size={15} />
               </ActionIcon>
             </Tooltip>
             <Tooltip label={imageMode ? "Cancel drawing" : "Draw a picture"} withArrow>
@@ -824,7 +924,7 @@ export default function Orbit() {
                 color={imageMode ? "emerald" : "gray"}
                 radius="xl"
                 size="md"
-                disabled={thinking || !!pendingImage}
+                disabled={thinking || !!pendingImage || !!pendingDocument}
                 onClick={toggleImageMode}
                 aria-label={imageMode ? "Cancel drawing" : "Draw a picture"}
                 aria-pressed={imageMode}

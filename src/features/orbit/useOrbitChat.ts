@@ -50,7 +50,11 @@ export type OrbitMessage = {
   digestAt?: string;
   /** Pages a web search drew on, set only when the model actually used one. */
   citations?: { url: string; title: string }[];
+  /** A user turn's attached document's file name, for the chip in the thread. */
+  documentName?: string;
 };
+
+export type PendingDocument = { name: string; mime: string; data: string };
 
 /**
  * Where the chosen model is remembered.
@@ -82,6 +86,7 @@ export function useOrbitChat() {
   const [generatingImage, setGeneratingImage] = useState(false);
 
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [pendingDocument, setPendingDocument] = useState<PendingDocument | null>(null);
 
   const [imageMode, setImageMode] = useState(false);
 
@@ -199,6 +204,7 @@ export function useOrbitChat() {
     async (opts: {
       question: string;
       image?: string;
+      document?: PendingDocument;
       drawing: boolean;
       /** The transcript as it stands *before* this question's own turn. */
       history: OrbitMessage[];
@@ -211,6 +217,8 @@ export function useOrbitChat() {
           if (m.imageUrl) {
             const tag = m.role === "assistant" ? "[generated an image]" : "[attached an image]";
             content = `${tag} ${content}`;
+          } else if (m.documentName) {
+            content = `[attached ${m.documentName}] ${content}`;
           }
           return { role: m.role, content };
         });
@@ -226,6 +234,7 @@ export function useOrbitChat() {
           model: activeModel,
           image: opts.image,
           generateImage: opts.drawing,
+          document: opts.document,
 
           conversationId: conversationRef.current ?? undefined,
         });
@@ -311,8 +320,9 @@ export function useOrbitChat() {
     async (raw?: string) => {
       const question = (raw ?? input).trim();
       const image = pendingImage;
+      const document = pendingDocument;
 
-      if ((!question && !image) || thinking || !workspaceId) return;
+      if ((!question && !image && !document) || thinking || !workspaceId) return;
 
       trace(user?.id, "ask_orbit", "orbit_chat", "orbit_answer");
 
@@ -322,6 +332,7 @@ export function useOrbitChat() {
         role: "user",
         content: question,
         imageUrl: image ?? undefined,
+        documentName: document?.name,
       };
       setMessages(() => {
         const next = [...before, userTurn];
@@ -330,15 +341,22 @@ export function useOrbitChat() {
       });
       setInput("");
       setPendingImage(null);
-      const drawing = imageMode && !image;
+      setPendingDocument(null);
+      const drawing = imageMode && !image && !document;
       setImageMode(false);
 
-      await run({ question, image: image ?? undefined, drawing, history: before });
+      await run({
+        question,
+        image: image ?? undefined,
+        document: document ?? undefined,
+        drawing,
+        history: before,
+      });
     },
-    [run, input, pendingImage, imageMode, thinking, workspaceId, user?.id],
+    [run, input, pendingImage, pendingDocument, imageMode, thinking, workspaceId, user?.id],
   );
 
- 
+
   const regenerateLast = useCallback(async () => {
     const current = historyRef.current;
     const lastIndex = current.length - 1;
@@ -347,7 +365,7 @@ export function useOrbitChat() {
 
     const userTurn = current[lastIndex - 1];
     if (!userTurn || userTurn.role !== "user") return;
-    if (!userTurn.content && !userTurn.imageUrl) return;
+    if (!userTurn.content && !userTurn.imageUrl && !userTurn.documentName) return;
 
     const withoutLast = current.slice(0, lastIndex);
     setMessages(withoutLast);
@@ -477,6 +495,10 @@ export function useOrbitChat() {
     pendingImage,
     /** Stage or clear the image for the next question. */
     attachImage: setPendingImage,
+    /** A document staged for the next question. Null when none. */
+    pendingDocument,
+    /** Stage or clear the document for the next question. */
+    attachDocument: setPendingDocument,
     /** Whether the next question draws a picture instead of answering one. */
     imageMode,
     setImageMode,

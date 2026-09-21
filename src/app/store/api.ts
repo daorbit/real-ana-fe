@@ -1060,12 +1060,12 @@ export const api = createApi({
         model?: string;
         /** The thread to continue. Omitted on the first question of a new one. */
         conversationId?: string;
-        /** An attached image, as a base64 data URL. Routes to Orbit's vision
-         * model server-side regardless of `model`. */
+
         image?: string;
-        /** Draw a picture from `question` instead of answering it. Ignored
-         * when `image` is also set. */
+
         generateImage?: boolean;
+
+        document?: { name: string; mime: string; data: string };
       }
     >({
       query: ({ workspaceId, ...body }) => ({
