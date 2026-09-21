@@ -194,8 +194,11 @@ function TurnActions({
   speaking?: boolean;
   onToggleSpeech?: () => void;
 }) {
+  const isPlatformAdmin = useIsPlatformAdmin();
+
   return (
-    <Group gap={2} mt={6} wrap="nowrap">
+    <Group gap={2} mt={6} wrap="nowrap" align="center">
+ 
       <Tooltip label={message.imageUrl ? "Copy image" : "Copy"} withArrow>
         <ActionIcon
           variant="subtle"
@@ -277,6 +280,11 @@ function TurnActions({
             <RefreshCw size={13} />
           </ActionIcon>
         </Tooltip>
+      )}
+      {isPlatformAdmin && message.modelLabel && (
+        <Text size="10px" c="dimmed" fw={600} tt="uppercase" mr={4} style={{ letterSpacing: "0.04em" }}>
+          {message.modelLabel}
+        </Text>
       )}
     </Group>
   );

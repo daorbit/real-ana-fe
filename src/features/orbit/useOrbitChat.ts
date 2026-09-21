@@ -251,12 +251,7 @@ export function useOrbitChat() {
               suggestions: answered.suggestions,
               dataDigest: answered.dataDigest,
               citations: answered.citations,
-              // Only when it differs from what was asked for — labelling every
-              // answer with the model people already chose is noise.
-              modelLabel:
-                answered.model && answered.model !== activeModel
-                  ? answered.modelLabel
-                  : undefined,
+              modelLabel: answered.modelLabel,
             },
           ];
           historyRef.current = next;
