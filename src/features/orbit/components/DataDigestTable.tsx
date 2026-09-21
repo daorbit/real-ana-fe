@@ -67,6 +67,38 @@ export function formatDigestAsText(digest: DataDigest): string {
     .join("\n\n");
 }
 
+function csvCell(value: string | number): string {
+  const s = String(value);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function csvRows(label: string, domain: string, rows: DataDigestRow[]): string[] {
+  return rows.map((r) => [domain, label, r.key, r.count].map(csvCell).join(","));
+}
+
+export function csvFromDigest(digest: DataDigest): string {
+  const range = digest.rangeLabel ?? "last 7 days";
+  const header = "site,metric,label,value";
+  const lines: string[] = [header];
+
+  for (const site of digest.sites) {
+    lines.push(
+      [site.domain, "range", "", range].map(csvCell).join(","),
+      [site.domain, "visitors", "", site.visitors].map(csvCell).join(","),
+      [site.domain, "pageviews", "", site.pageviews].map(csvCell).join(","),
+      [site.domain, "sessions", "", site.sessions].map(csvCell).join(","),
+      [site.domain, "bounce_rate", "", site.bounceRate].map(csvCell).join(","),
+      [site.domain, "online_now", "", site.live].map(csvCell).join(","),
+      ...csvRows("top_page", site.domain, site.topPages),
+      ...csvRows("top_referrer", site.domain, site.topReferrers),
+      ...csvRows("country", site.domain, site.countries),
+      ...csvRows("device", site.domain, site.devices),
+    );
+  }
+
+  return lines.join("\n");
+}
+
 function Delta({ pct }: { pct: number | null }) {
   if (pct === null || !Number.isFinite(pct)) return null;
   const up = pct >= 0;

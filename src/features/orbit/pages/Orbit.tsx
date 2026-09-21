@@ -12,7 +12,7 @@ import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { RichText } from "@/features/orbit/components/RichText";
-import { DataDigestTable, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
+import { DataDigestTable, csvFromDigest, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { useWorkspace } from "@/features/workspace/context";
 import { useIsPlatformAdmin } from "@/features/auth/context";
@@ -37,6 +37,19 @@ async function copyText(text: string, successMessage = "Copied to clipboard") {
 async function copyDigestAsReport(digest: unknown) {
   if (!isDataDigest(digest)) return;
   await copyText(formatDigestAsText(digest), "Report copied to clipboard");
+}
+
+function downloadDigestAsCsv(digest: unknown) {
+  if (!isDataDigest(digest)) return;
+  const blob = new Blob([csvFromDigest(digest)], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `orbit-report-${Date.now()}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 async function copyImage(url: string) {
@@ -223,18 +236,32 @@ function TurnActions({
         </Tooltip>
       )}
       {isDataDigest(message.dataDigest) && (
-        <Tooltip label="Copy as report" withArrow>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            radius="xl"
-            onClick={() => copyDigestAsReport(message.dataDigest)}
-            aria-label="Copy as report"
-          >
-            <ClipboardList size={13} />
-          </ActionIcon>
-        </Tooltip>
+        <>
+          <Tooltip label="Copy as report" withArrow>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              radius="xl"
+              onClick={() => copyDigestAsReport(message.dataDigest)}
+              aria-label="Copy as report"
+            >
+              <ClipboardList size={13} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Download as CSV" withArrow>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              radius="xl"
+              onClick={() => downloadDigestAsCsv(message.dataDigest)}
+              aria-label="Download as CSV"
+            >
+              <Download size={13} />
+            </ActionIcon>
+          </Tooltip>
+        </>
       )}
       {onRegenerate && (
         <Tooltip label="Regenerate" withArrow>
