@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Badge,
   Box,
@@ -18,82 +18,40 @@ import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
 
-/**
- * The cards above the account tile.
- *
- * All of them are prose — an invitation, a quota, an explanation — and none of
- * it survives being squeezed into 44px. Collapsed, the two that merely inform
- * are dropped, and the two that warn shrink to an icon instead: a session
- * standing in for a real customer, and a read-only demo, are not things the
- * rail may stop saying to save space.
- */
+const FLY_OUT_MS = 500;
 
-/**
- * The way into Orbit, as a card rather than a navigation row.
- *
- * It sits with the cards at the foot of the rail because it is not one of the
- * reports — it is the thing you ask when you do not yet know which report you
- * want. As a one-row "Assistant" group at the top of the list it read as a
- * section someone had forgotten to finish filling in.
- *
- * Collapsed it falls back to the same icon row as the other rail actions, so
- * the assistant is still one click away at that width.
- */
 export function OrbitCard({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const label = t("nav.orbit", "Orbit AI");
 
   // Nothing to advertise once you are already there — on Orbit's own page the
   // card is a button that goes nowhere.
   const onOrbit = pathname.startsWith("/app/orbit");
 
-  /*
-   * Kept mounted for one beat after arriving on Orbit, so it can fly out.
-   *
-   * Unmounting on the route change would make the card vanish between frames.
-   * `leaving` runs the exit; `gone` drops it once the exit has finished.
-   *
-   * Both are seeded from the current route, and the exit only runs on an
-   * actual transition into Orbit — `wasOnOrbit` is what distinguishes that
-   * from landing on the page directly. Without it, opening /app/orbit in a
-   * fresh tab flashed the card in just to animate it straight back out.
-   */
   const [leaving, setLeaving] = useState(false);
-  const [gone, setGone] = useState(onOrbit);
-  const wasOnOrbit = useRef(onOrbit);
 
-  useEffect(() => {
-    const arriving = onOrbit && !wasOnOrbit.current;
-    wasOnOrbit.current = onOrbit;
-
-    if (!onOrbit) {
-      setLeaving(false);
-      setGone(false);
-      return;
-    }
-
-    // Already here when this mounted: stay hidden, with nothing to animate.
-    if (!arriving) {
-      setGone(true);
-      return;
-    }
-
+  const go = (e: React.MouseEvent) => {
+    // A modified click (open in new tab, open in background, middle-click) or
+    // anything but the plain left button should still behave like an ordinary
+    // link — only a normal click gets the animated hand-off.
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (leaving) return; // already on the way out — a second click does nothing new
     setLeaving(true);
-    const timer = setTimeout(() => {
-      setLeaving(false);
-      setGone(true);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [onOrbit]);
+    setTimeout(() => navigate("/app/orbit"), FLY_OUT_MS);
+  };
 
-  if (gone) return null;
+  // Nothing to fly out of on Orbit's own page — the card simply is not drawn.
+  if (onOrbit) return null;
 
   if (collapsed) {
     return (
       <UnstyledButton
         component={Link}
         to="/app/orbit"
+        onClick={go}
         className="nav-link"
         data-collapsed
         data-leaving={leaving || undefined}
@@ -116,6 +74,7 @@ export function OrbitCard({ collapsed }: { collapsed: boolean }) {
     <UnstyledButton
       component={Link}
       to="/app/orbit"
+      onClick={go}
       className="rail-orbit"
       data-leaving={leaving || undefined}
       style={{ display: "block", width: "100%", marginBottom: 8 }}
@@ -178,14 +137,7 @@ export function PendingInviteCard() {
   );
 }
 
-/**
- * Standing in for a real customer.
- *
- * Full access means an accidental delete lands on someone's live account, so
- * the session stays flagged for as long as it lasts. It sits directly above the
- * account it is standing in for — a banner over the page pushed every screen
- * down to say something that never changes.
- */
+
 export function ImpersonationCard({
   collapsed,
   email,
@@ -271,13 +223,7 @@ export function DemoCard({ collapsed, onExit }: { collapsed: boolean; onExit: ()
   );
 }
 
-/*
- * The theme and language toggles that used to ride on this row are gone with
- * it. Both are in the account menu at the foot of the rail, which is where a
- * preference belongs.
- */
 
-/** The active workspace's plan — plans are bought per workspace, not per account. */
 export function PlanCard() {
   const billing = useActiveBilling();
   if (!billing) return null;

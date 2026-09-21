@@ -15,6 +15,33 @@
   flex-direction: column;
   height: 100%;
   min-height: 520px;
+  /* The other half of the rail card's fly-out (see `.rail-orbit[data-leaving]`
+     in App.css): the card throws itself toward this page, so the page fades
+     and settles in rather than simply appearing once the route lands — the
+     two together read as one continuous motion instead of a throw followed
+     by a cut. */
+  animation: orbitPageArrive 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes orbitPageArrive {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+:global(html[data-motion='off']) .page {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
 }
 
 
