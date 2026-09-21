@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import {
-  ActionIcon, Box, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
+  ActionIcon, Alert, Box, Button, Center, Group, Loader, ScrollArea, Stack, Text, Textarea, Title,
   Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
-  AlertTriangle, ArrowUp, ClipboardList, Copy, Download, History, ImagePlus, Mic, Palette,
+  AlertTriangle, ArrowUp, ClipboardList, Copy, Download, FolderPlus, History, ImagePlus, Mic, Palette,
   Pencil, RefreshCw, RotateCcw, Share2, Square, Volume2, VolumeX, X,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { RichText } from "@/features/orbit/components/RichText";
 import { DataDigestTable, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
+import { useWorkspace } from "@/features/workspace/context";
 import { pickOrbitSuggestions } from "@/features/orbit/orbitSuggestions";
 import type { OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
@@ -476,6 +478,12 @@ export default function Orbit() {
     available, started, plan,
   } = chat;
 
+  // Orbit answers questions about a workspace's data — with none created yet
+  // there is nothing for it to look at, so the composer stays up but a banner
+  // sends people to create one first instead of letting them ask into a void.
+  const { workspaces } = useWorkspace();
+  const noWorkspace = workspaces.length === 0;
+
  
   const [liveId, setLiveId] = useState<string | null>(null);
   const wasThinking = useRef(false);
@@ -795,7 +803,32 @@ export default function Orbit() {
         </div>
       </div>
 
- 
+      {noWorkspace && (
+        <Alert
+          color="red"
+          variant="light"
+          radius="md"
+          icon={<FolderPlus size={16} />}
+          mt={10}
+        >
+          <Group justify="space-between" wrap="nowrap" gap="md">
+            <Text size="sm">
+              Create a workspace to start asking Orbit about your data.
+            </Text>
+            <Button
+              component={Link}
+              to="/app/onboarding"
+              size="xs"
+              color="red"
+              leftSection={<FolderPlus size={14} />}
+            >
+              Create workspace
+            </Button>
+          </Group>
+        </Alert>
+      )}
+
+
       <Text size="10px" c={speech.error ? "orange.5" : "dimmed"} ta="center" mt={8} lh={1.4}>
         {speech.error ?? "Orbit can't see your data and can be wrong."}
       </Text>

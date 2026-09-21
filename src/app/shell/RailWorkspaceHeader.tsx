@@ -1,5 +1,6 @@
 import { Box, Menu, UnstyledButton } from "@mantine/core";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, FolderPlus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWorkspace, useActiveBilling } from "@/features/workspace/context";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
@@ -21,7 +22,46 @@ export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
   const { workspaces, active } = useWorkspace();
   const billing = useActiveBilling();
 
-  if (collapsed || workspaces.length === 0) return null;
+  if (collapsed) return null;
+
+  // Nothing to switch between yet — the menu below needs at least one
+  // workspace to open onto, so this stands in its place until one exists,
+  // rather than leaving a blank gap at the top of the rail.
+  if (workspaces.length === 0) {
+    return (
+      <UnstyledButton
+        component={Link}
+        to="/app/onboarding"
+        className="rail-workspace"
+        aria-label={t("nav.createWorkspace", "Create a workspace")}
+      >
+        <Box
+          style={{
+            width: 34,
+            height: 34,
+            flexShrink: 0,
+            borderRadius: 8,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--surface-2)",
+            color: "var(--muted)",
+          }}
+        >
+          <FolderPlus size={16} />
+        </Box>
+
+        <Box style={{ minWidth: 0, flex: 1 }}>
+          <Box className="rail-workspace__name">
+            {t("nav.createWorkspace", "Create a workspace")}
+          </Box>
+          <Box className="rail-workspace__meta">
+            {t("nav.createWorkspaceHint", "Get started")}
+          </Box>
+        </Box>
+      </UnstyledButton>
+    );
+  }
 
   return (
     <Menu

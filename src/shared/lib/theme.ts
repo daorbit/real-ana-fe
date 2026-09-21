@@ -276,7 +276,7 @@ const DEFAULT_PREFS: ThemePrefs = {
   cta: "accent",
   accent: "blue",
   bg: "flat",
-  radius: "rounded",
+  radius: "soft",
   density: "comfortable",
   fontSize: "default",
   table: "plain",
