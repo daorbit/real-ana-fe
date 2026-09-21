@@ -4,7 +4,30 @@ import { CodeHighlight } from "@mantine/code-highlight";
 const FENCE = /```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g;
 
 const INLINE =
-  /(\[[^\]]+\]\(https?:\/\/[^\s)]+\))|(`[^`\n]+`)|(\*\*[^*\n]+\*\*)/g;
+  /(\[[^\]]+\]\(https?:\/\/[^\s)]+\))|(`[^`\n]+`)|(\*\*[^*\n]+\*\*)|(#[0-9a-fA-F]{6}\b)/g;
+
+const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
+function ColorSwatch({ hex }: { hex: string }) {
+  return (
+    <Text span inherit style={{ whiteSpace: "nowrap" }}>
+      <span
+        aria-hidden
+        style={{
+          display: "inline-block",
+          width: 11,
+          height: 11,
+          borderRadius: 3,
+          marginRight: 4,
+          verticalAlign: "middle",
+          background: hex,
+          border: "1px solid color-mix(in srgb, var(--mantine-color-text) 25%, transparent)",
+        }}
+      />
+      <Code style={{ fontSize: "0.85em" }}>{hex}</Code>
+    </Text>
+  );
+}
 
 function renderInline(text: string, keyBase: number): React.ReactNode[] {
   const out: React.ReactNode[] = [];
@@ -15,7 +38,7 @@ function renderInline(text: string, keyBase: number): React.ReactNode[] {
     const at = match.index ?? 0;
     if (at > cursor) out.push(text.slice(cursor, at));
 
-    const [token, link, code, bold] = match;
+    const [token, link, code, bold, hex] = match;
 
     if (link) {
       const close = link.indexOf("](");
@@ -35,13 +58,16 @@ function renderInline(text: string, keyBase: number): React.ReactNode[] {
         </Anchor>,
       );
     } else if (code) {
+
+      const inner = code.slice(1, -1);
       out.push(
-        <Code
-          key={key++}
-          style={{ fontSize: "0.85em", wordBreak: "break-all" }}
-        >
-          {code.slice(1, -1)}
-        </Code>,
+        HEX_RE.test(inner) ? (
+          <ColorSwatch key={key++} hex={inner} />
+        ) : (
+          <Code key={key++} style={{ fontSize: "0.85em", wordBreak: "break-all" }}>
+            {inner}
+          </Code>
+        ),
       );
     } else if (bold) {
       out.push(
@@ -49,6 +75,8 @@ function renderInline(text: string, keyBase: number): React.ReactNode[] {
           {bold.slice(2, -2)}
         </Text>,
       );
+    } else if (hex) {
+      out.push(<ColorSwatch key={key++} hex={hex} />);
     }
 
     cursor = at + token.length;
@@ -62,8 +90,61 @@ function renderInline(text: string, keyBase: number): React.ReactNode[] {
 const HEADING = /^(#{1,3})\s+(.+)$/;
 
 const HEADING_ORDER = [3, 4, 5] as const;
-const BULLET = /^[-*]\s+(.+)$/;
-const NUMBERED = /^\d+[.)]\s+(.+)$/;
+
+const BULLET = /^([ \t]*)[-*]\s+(.+)$/;
+const NUMBERED = /^([ \t]*)\d+[.)]\s+(.+)$/;
+
+function isListLine(line: string): boolean {
+  return BULLET.test(line) || NUMBERED.test(line);
+}
+
+function renderList(
+  lines: string[],
+  start: number,
+  keyBase: number,
+): { node: React.ReactNode; next: number; key: number } {
+  const first = BULLET.exec(lines[start]) ?? NUMBERED.exec(lines[start]);
+  if (!first) return { node: null, next: start + 1, key: keyBase };
+
+  const ordered = NUMBERED.test(lines[start]);
+  const indent = first[1].length;
+  let key = keyBase;
+  let i = start;
+  const items: { text: string; children: React.ReactNode }[] = [];
+
+  while (i < lines.length) {
+    const m = ordered ? NUMBERED.exec(lines[i]) : BULLET.exec(lines[i]);
+    if (!m || m[1].length !== indent) break;
+    i++;
+
+
+    let children: React.ReactNode = null;
+    if (i < lines.length && isListLine(lines[i])) {
+      const nestedIndent = (BULLET.exec(lines[i]) ?? NUMBERED.exec(lines[i]))![1].length;
+      if (nestedIndent > indent) {
+        const nested = renderList(lines, i, key * 1000);
+        children = nested.node;
+        i = nested.next;
+        key = nested.key;
+      }
+    }
+
+    items.push({ text: m[2], children });
+  }
+
+  const node = (
+    <List key={key++} type={ordered ? "ordered" : "unordered"} size="sm" spacing={4} mt={4} mb={4}>
+      {items.map((item, idx) => (
+        <List.Item key={idx}>
+          {renderInline(item.text, key * 1000 + idx)}
+          {item.children}
+        </List.Item>
+      ))}
+    </List>
+  );
+
+  return { node, next: i, key };
+}
 
 function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
   const lines = text.split("\n");
@@ -92,33 +173,11 @@ function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
       continue;
     }
 
-    const bulletMatch = BULLET.exec(line);
-    const numberedMatch = NUMBERED.exec(line);
-    if (bulletMatch || numberedMatch) {
-      const ordered = Boolean(numberedMatch);
-      const items: string[] = [];
-      while (i < lines.length) {
-        const m = ordered ? NUMBERED.exec(lines[i]) : BULLET.exec(lines[i]);
-        if (!m) break;
-        items.push(m[1]);
-        i++;
-      }
-      out.push(
-        <List
-          key={key++}
-          type={ordered ? "ordered" : "unordered"}
-          size="sm"
-          spacing={4}
-          mt={4}
-          mb={4}
-        >
-          {items.map((item, idx) => (
-            <List.Item key={idx}>
-              {renderInline(item, key * 1000 + idx)}
-            </List.Item>
-          ))}
-        </List>,
-      );
+    if (isListLine(line)) {
+      const list = renderList(lines, i, key);
+      out.push(list.node);
+      i = list.next;
+      key = list.key;
       continue;
     }
 
@@ -127,13 +186,7 @@ function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
       continue;
     }
     const start = i;
-    while (
-      i < lines.length &&
-      lines[i].trim() &&
-      !HEADING.test(lines[i]) &&
-      !BULLET.test(lines[i]) &&
-      !NUMBERED.test(lines[i])
-    ) {
+    while (i < lines.length && lines[i].trim() && !HEADING.test(lines[i]) && !isListLine(lines[i])) {
       i++;
     }
     const paragraph = lines.slice(start, i).join("\n");
