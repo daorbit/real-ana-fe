@@ -4,6 +4,7 @@ import { Anchor } from "@mantine/core";
 import { Wordmark } from "@/shared/ui/Brand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
 import { AppearanceStep } from "@/features/auth/components/onboarding/AppearanceStep";
+import { BillingStep } from "@/features/auth/components/onboarding/BillingStep";
 import { Stepper } from "@/features/auth/components/onboarding/Stepper";
 import { ReferralStepBody, ReferralStepFooter } from "@/features/auth/components/onboarding/ReferralStep";
 import { WorkspaceStepBody, WorkspaceStepFooter } from "@/features/auth/components/onboarding/WorkspaceStep";
@@ -63,6 +64,18 @@ const STEPS = [
     lede: "Add this to your site and the numbers start arriving.",
     wide: true,
   },
+  {
+    label: "Appearance",
+    hint: "Mode, accent, background",
+    title: "Make it yours",
+    lede: "Pick a mode, an accent, and a background — you can change any of it later from Settings.",
+  },
+  {
+    label: "Plan",
+    hint: "Upgrade or stay free",
+    title: "Pick a plan",
+    lede: "Free works forever — upgrade now or later from Billing, whenever it's useful.",
+  },
 ];
 
 const REFERRAL_STEP = 1;
@@ -74,18 +87,18 @@ const INSTALL_STEP = 5;
 /** Index into `STEPS` of the first step that may be skipped. */
 const FIRST_SKIPPABLE_STEP = 1;
 
-/** The appearance screen, which sits past the stepper and runs its own layout. */
+
 const APPEARANCE_STEP = 6;
+const BILLING_STEP = 7;
 
 
-const SLUGS = ["details", "referral", "workspace", "site", "framework", "install", "appearance"];
+const SLUGS = [
+  "details", "referral", "workspace", "site", "framework", "install", "appearance", "billing",
+];
 
 
 function furthestReachable(step: number, wsId: string | null, site: Site | null): number {
-  // The site itself isn't created until the framework step is submitted, so
-  // reaching FRAMEWORK_STEP only needs a workspace — requiring `site` here
-  // clamped the flow straight back to SITE_STEP the instant it arrived,
-  // before the site could ever be created.
+
   if (step >= INSTALL_STEP && !site) return wsId ? FRAMEWORK_STEP : WORKSPACE_STEP;
   if (step >= WORKSPACE_STEP && !wsId) return WORKSPACE_STEP;
   return step;
@@ -174,7 +187,6 @@ export default function Onboarding() {
     // `params` is the dependency that matters; `step` is derived from it.
   }, [params, step, nav]);
 
-  /** Setup is over, one way or another — the scaffolding goes with it. */
   const clearProgress = () => {
     try {
       sessionStorage.removeItem(PROGRESS_KEY);
@@ -183,11 +195,7 @@ export default function Onboarding() {
     }
   };
 
-  /**
-   * Leave setup early. The flag is what stops the route guard sending an
-   * account with no workspace straight back here — without it, "Skip for now"
-   * would be a no-op loop.
-   */
+
   const skip = () => {
     trace(user?.id, "onboarding_skipped", "onboarding", "app");
     localStorage.setItem("quantalog_onboarding_skipped", "1");
@@ -279,18 +287,15 @@ export default function Onboarding() {
     }
   };
 
-  // The appearance step runs its own full-width layout and sits past the
-  // stepper, so it returns before any of the shell below is built.
+
   if (step === APPEARANCE_STEP) {
-    return <AppearanceStep onBack={() => setStep(INSTALL_STEP)} onDone={done} />;
+    return <AppearanceStep onBack={() => setStep(INSTALL_STEP)} onDone={() => setStep(BILLING_STEP)} />;
+  }
+  if (step === BILLING_STEP) {
+    return <BillingStep onBack={() => setStep(APPEARANCE_STEP)} onDone={done} />;
   }
 
-  /**
-   * What the stepper shows. An account adding another workspace skips its
-   * own details step, so that comes out of the list as well as out of the
-   * flow — a stepper promising a step that never arrives is worse than one
-   * step shorter.
-   */
+
   const displaySteps = workspaceOnly
     ? STEPS.filter((_, i) => i !== 0 && i !== REFERRAL_STEP)
     : STEPS;
@@ -320,9 +325,7 @@ export default function Onboarding() {
         <Wordmark />
         <Stepper step={displayStep} steps={displaySteps} />
         <div className={s.barEnd}>
-          {/* Only an existing account adding a second workspace may bail out
-              early — a brand-new signup has nothing to fall back to yet, so
-              skipping would just strand it without a workspace or a site. */}
+
           {workspaceOnly && step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
             <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
               Skip for now
@@ -331,9 +334,6 @@ export default function Onboarding() {
         </div>
       </header>
 
-      {/* Short steps are centred in the viewport; a tall one starts at the top
-          and scrolls, since centring it would only push the heading off the
-          screen — and flex centring breaks the sticky footer it needs. */}
       <main className={`${s.body} ${tall ? "" : s.bodyCentred}`}>
         <div className={`${s.column} ${wide ? s.columnWide : ""}`}>
           {current && (
