@@ -1132,17 +1132,21 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   white-space: nowrap;
 }
 
-/* A workspace's initial on a colour tile — it has no logo of its own. */
+/* A workspace's identicon tile — it has no logo of its own. */
 .ws-menu__mark {
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 6px;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ws-menu__mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .ws-menu__name--active {

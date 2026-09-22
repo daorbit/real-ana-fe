@@ -93,7 +93,7 @@ export function WorkspaceMenuItems() {
         <Menu.Item
           key={w._id}
           onClick={() => setActive(w._id)}
-          leftSection={<WorkspaceMark name={w.name} />}
+          leftSection={<WorkspaceMark id={w._id} />}
           // The current one is marked rather than omitted: a list that
           // silently drops where you are makes you count to find out.
           rightSection={
@@ -126,23 +126,26 @@ export function WorkspaceMenuItems() {
   );
 }
 
+/** Identicon set a workspace's mark is picked from — stable per workspace
+ *  (hashed from its id), so the same one shows up on every visit. */
+const WORKSPACE_AVATARS = [
+  "riley", "jordan", "skyler", "olivia", "emery", "hazel", "cleo", "faye", "zia",
+].map((seed) => `/avatars/${seed}.svg`);
+
 /**
  * The square mark beside a workspace in the list.
  *
- * A workspace has no logo of its own, so this is its initial on a tile whose
- * colour is derived from the name — stable per workspace, and enough to tell
- * the rows apart at a glance without inventing branding for them.
+ * A workspace has no logo of its own, so this shows one of a fixed set of
+ * identicons instead of inventing branding for it — picked deterministically
+ * from the workspace id so it stays the same tile on every visit.
  */
-function WorkspaceMark({ name }: { name: string }) {
-  const hue = [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+function WorkspaceMark({ id }: { id: string }) {
+  const hash = [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const src = WORKSPACE_AVATARS[hash % WORKSPACE_AVATARS.length];
 
   return (
-    <span
-      aria-hidden
-      className="ws-menu__mark"
-      style={{ background: `hsl(${hue} 52% 46%)` }}
-    >
-      {(name || "?").slice(0, 1).toUpperCase()}
+    <span aria-hidden className="ws-menu__mark">
+      <img src={src} alt="" width={24} height={24} />
     </span>
   );
 }
