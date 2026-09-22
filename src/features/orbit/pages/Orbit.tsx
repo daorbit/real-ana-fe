@@ -783,9 +783,19 @@ export default function Orbit() {
       ? (last.suggestions ?? [])
       : [];
 
+  // Scroll to the bottom only when a message was actually appended at the
+  // end — a new question, a regenerated answer, a live reply streaming in.
+  // `messages` also changes when older pages are prepended (scroll-up
+  // pagination) or a saved thread is restored wholesale; the tail's own id
+  // is untouched by either, so it's what tells "appended" apart from those.
+  const lastMessageId = useRef<string | null>(null);
   useEffect(() => {
-    bottom.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, thinking]);
+    const newLastId = last?.id ?? null;
+    if (newLastId !== lastMessageId.current) {
+      lastMessageId.current = newLastId;
+      bottom.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [messages, thinking, last]);
 
  
   useEffect(() => {
