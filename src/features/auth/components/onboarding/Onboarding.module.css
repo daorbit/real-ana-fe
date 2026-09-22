@@ -53,47 +53,29 @@
   --onb-raise: rgba(16, 20, 28, 0.022);
 }
 
-/* ----------------------------------------------------------------- wash --- */
 
-/* The app's own "Classic" background: cool indigo lighting the top-left
-   corner, warm gold the top-right, both falling to nothing before they reach
-   the middle. It is the `corners` preset from `BG_STYLES` — the same pair of
-   gradients the dashboard and Orbit paint through `--bg-wash` — so setup
-   looks like the product someone is about to be handed.
- *
- * Why the figures are written out here rather than reading `--bg-wash`: that
- * variable is whichever background the *user* picked, and during first-run
- * setup there is no user preference yet — the appearance step is two screens
- * away. So onboarding states the preset it wants. The values are kept in step
- * with `buildBgValue`'s `corners` branch in `shared/lib/theme.ts`; if that
- * branch is retuned, this follows it.
- *
- * Top-lit on both sides, not one corner each end. Two diagonal sources pull
- * the eye across the screen; two along the top edge light the header and let
- * the page fall away to dark, which is what leaves the content sitting on
- * clean ground instead of on a tint.
- */
 .wash {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+
   background:
-    radial-gradient(55% 80% at 0% 0%,
-      color-mix(in srgb, #818cf8 16%, transparent), transparent 62%),
-    radial-gradient(55% 80% at 100% 0%,
-      color-mix(in srgb, #eab308 12%, transparent), transparent 62%);
+    radial-gradient(42% 62% at 0% 0%,
+      color-mix(in srgb, #818cf8 26%, transparent), transparent 66%),
+    radial-gradient(42% 62% at 100% 0%,
+      color-mix(in srgb, #eab308 20%, transparent), transparent 66%);
 }
 
 :global([data-mantine-color-scheme="light"]) .wash {
-  /* Both sources cut to roughly a third. The same mix over near-white reads
-     far stronger than over near-black — at full strength the indigo corner
-     turns into a lilac panel with a visible edge. */
+  /* Roughly a third of the dark figures. The same mix over near-white reads
+     far stronger than over near-black — at dark strength the indigo corner
+     becomes a lilac panel with a visible edge to it. */
   background:
-    radial-gradient(55% 80% at 0% 0%,
-      color-mix(in srgb, #818cf8 6%, transparent), transparent 62%),
-    radial-gradient(55% 80% at 100% 0%,
-      color-mix(in srgb, #eab308 5%, transparent), transparent 62%);
+    radial-gradient(42% 62% at 0% 0%,
+      color-mix(in srgb, #818cf8 9%, transparent), transparent 66%),
+    radial-gradient(42% 62% at 100% 0%,
+      color-mix(in srgb, #eab308 7%, transparent), transparent 66%);
 }
 
 /* The body sits above the wash. The bar is already `position: relative` for
@@ -126,26 +108,12 @@
   align-items: center;
   gap: 1rem;
   flex-shrink: 0;
-  /* Matched to the wordmark's side so the counter stays optically centred in
-     the bar rather than drifting as the skip link appears and disappears. */
+
   min-width: 7rem;
   justify-content: flex-end;
 }
 
-/* --------------------------------------------------------------- stepper --- */
 
-/* A counter and a rule, not eight dots joined by lines.
- *
- * At three steps a dot row reads at a glance. At eight it becomes a row of
- * unlabelled circles — and the labels were already dropped below 62em, which
- * is most laptops, leaving decoration that says nothing. "3 of 8" plus the
- * current step's own name says strictly more in less space, and the hairline
- * carries the proportion the dots were there for. */
-/* Deliberately left `position: static` so the rule inside it resolves against
-   `.bar` — which is the element whose bottom border the rule sits on, and
-   whose full width it measures its percentage against. Giving this a
-   `position` would shrink the rule's containing block to the width of the
-   counter text. */
 .progress {
   display: flex;
   align-items: baseline;
@@ -174,9 +142,6 @@
   text-overflow: ellipsis;
 }
 
-/* Sits on the bar's bottom border, not above it: the border is the empty part
-   of the track, so the rule needs no track of its own. Pulled down a hair so
-   it covers the border rather than stacking on top of it. */
 .progressRule {
   position: absolute;
   left: 0;
@@ -188,13 +153,7 @@
   transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ----------------------------------------------------------------- body --- */
 
-/* The scrolling middle, and the only thing that scrolls. A plain block rather
-   than a grid or flex row: both size their child to its content, which leaves
-   a sticky footer inside with no taller ancestor to stick within. The column
-   centres horizontally with `margin-inline: auto`; a short step is centred
-   vertically by `.bodyCentred`. */
 .body {
   flex: 1;
   min-height: 0;
@@ -204,24 +163,12 @@
      scrollbar across the whole step. */
   overflow-x: hidden;
   overscroll-behavior: contain;
-  /* No bottom padding: `position: sticky` bottoms out at the container's
-     padding edge, so padding here leaves the footer hovering that far above
-     the foot of the screen with content sliding under it. The steps that need
-     clearance add it themselves. */
+
   padding: 4.5rem 1.75rem 0;
   scrollbar-width: thin;
   scrollbar-color: var(--onb-line) transparent;
 }
 
-/* Only the short steps centre. On a tall one this does nothing useful and
-   flex breaks the sticky footer, so it is opt-in per step. These steps also
-   want the bottom padding the container gives up for sticky's sake.
- *
- * Centred high, not dead centre. On a 1080-tall screen a three-field form
- * centred exactly leaves roughly equal voids above and below and reads as a
- * small object adrift in a large empty one. Sitting it above the midpoint is
- * the ordinary optical correction — the eye takes the upper third as the
- * centre — and it puts the heading closer to where reading starts. */
 .bodyCentred {
   display: flex;
   flex-direction: column;
@@ -249,24 +196,15 @@
   margin-inline: auto;
 }
 
-/* The framework picker and the install snippet: a 480px column turns the tile
-   grid into a long thin scroll and wraps the snippet badly. Wider, but still a
-   readable measure — the full width of a large screen would leave the heading
-   stranded above a very long line. */
+
 .columnWide {
   max-width: 720px;
 }
 
-/* ----------------------------------------------------------------- head --- */
 
-/* No eyebrow. An accent-coloured, letter-spaced, all-caps "STEP 3 OF 8" over
-   every heading is the stock generated-layout signature, and it repeated a
-   count the bar already carries. The heading now opens the screen. */
 
 .title {
-  /* Fluid, and larger than it was. The heading is the only element on a short
-     step with any presence; at 1.75rem it sat level with the form and the
-     screen had no focal point. */
+
   font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.35rem);
   font-weight: 640;
   line-height: 1.1;

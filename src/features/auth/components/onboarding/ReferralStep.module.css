@@ -21,13 +21,17 @@
   height: 100%;
 }
 
+/* No `color` here: each icon is given its own by the component, from the
+   option's data. This only handles how present that colour is — held back a
+   little while unselected so thirteen brand hues sit behind the labels rather
+   than competing with them, full strength once picked. */
 .optionIcon {
   flex-shrink: 0;
-  color: var(--onb-ink-faint, var(--mantine-color-dimmed));
-  transition: color 0.15s ease;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
 }
 .option[data-selected="true"] .optionIcon {
-  color: var(--accent-2);
+  opacity: 1;
 }
 
 .optionLabel {

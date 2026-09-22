@@ -1,13 +1,8 @@
 import { Button, Group, Stack, TextInput } from "@mantine/core";
-import { ArrowRight, BarChart3, Share2, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Share2, Users } from "lucide-react";
 import s from "./WorkspaceStep.module.css";
 
-/**
- * What a workspace gets you. Each line is a term and its gloss rather than one
- * long sentence: three full sentences of equal weight under a form is a wall
- * that gets skipped, where a bolded lead-in gives the eye somewhere to land
- * and the rest can be read or not.
- */
+
 const WHY = [
   {
     icon: BarChart3,
@@ -51,9 +46,7 @@ export function WorkspaceStepBody({
         data-autofocus
       />
 
-      {/* Separated from the field by a hairline, not just by space: this is
-          reference material about what you are naming, not a third thing to
-          fill in, and the rule says so without a heading. */}
+  
       <ul className={s.why}>
         {WHY.map(({ icon: Icon, term, gloss }) => (
           <li key={term} className={s.whyRow}>
@@ -71,21 +64,36 @@ export function WorkspaceStepBody({
 
 export function WorkspaceStepFooter({
   loading,
+  onBack,
   onSubmit,
 }: {
   loading: boolean;
+  /** Absent on the workspace-only path, where this is the first screen. */
+  onBack?: () => void;
   onSubmit: () => void;
 }) {
   // Sized to its label, not stretched across the column: a button as wide as
   // the form reads as a banner, and there is nothing to balance it against.
   return (
-    <Group justify="flex-end">
+    <Group justify={onBack ? "space-between" : "flex-end"} wrap="nowrap">
+      {onBack && (
+        <Button
+          className="auth-btn"
+          size="sm"
+          variant="subtle"
+          color="gray"
+          leftSection={<ArrowLeft size={14} />}
+          onClick={onBack}
+        >
+          Back
+        </Button>
+      )}
       <Button
         className="auth-btn"
-        size="md"
+        size="sm"
         loading={loading}
         onClick={onSubmit}
-        rightSection={<ArrowRight size={16} />}
+        rightSection={<ArrowRight size={15} />}
       >
         Continue
       </Button>

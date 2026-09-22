@@ -317,17 +317,30 @@ export default function Onboarding() {
   const wide = current?.wide;
   const tall = current?.tall;
 
+
   const footer =
     step === REFERRAL_STEP ? (
-      <ReferralStepFooter onSkip={submitReferral} onSubmit={submitReferral} />
+      <ReferralStepFooter
+        onBack={workspaceOnly ? undefined : () => setStep(0)}
+        onSkip={submitReferral}
+        onSubmit={submitReferral}
+        selectedCount={referralSources.length}
+      />
     ) : step === WORKSPACE_STEP ? (
-      <WorkspaceStepFooter loading={creatingWs} onSubmit={submitWorkspace} />
+      <WorkspaceStepFooter
+        loading={creatingWs}
+        onBack={workspaceOnly ? undefined : () => setStep(REFERRAL_STEP)}
+        onSubmit={submitWorkspace}
+      />
     ) : step === SITE_STEP ? (
       <SiteStepFooter onBack={() => setStep(WORKSPACE_STEP)} onSubmit={submitSiteDetails} />
     ) : step === FRAMEWORK_STEP ? (
       <FrameworkStepFooter loading={creatingSite} onBack={() => setStep(SITE_STEP)} onSubmit={submitFramework} />
     ) : step === INSTALL_STEP && site ? (
-      <ReadyStepFooter onContinue={() => setStep(APPEARANCE_STEP)} />
+      <ReadyStepFooter
+        onBack={() => setStep(FRAMEWORK_STEP)}
+        onContinue={() => setStep(APPEARANCE_STEP)}
+      />
     ) : null;
 
   return (
@@ -337,8 +350,8 @@ export default function Onboarding() {
         <Wordmark />
         <Stepper step={displayStep} steps={displaySteps} />
         <div className={s.barEnd}>
-
-          {workspaceOnly && step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
+       
+          {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
             <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
               Skip for now
             </Anchor>
@@ -350,9 +363,7 @@ export default function Onboarding() {
         <div className={`${s.column} ${wide ? s.columnWide : ""}`}>
           {current && (
             <div>
-              {/* No eyebrow above the heading: the bar already carries the
-                  count, and an accent-coloured all-caps repeat of it was the
-                  same fact twice in the louder of the two places. */}
+           
               <h1 className={s.title}>
                 {step === INSTALL_STEP ? (aiCopy?.readyHeadline ?? current.title) : current.title}
               </h1>
