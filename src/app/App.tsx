@@ -12,6 +12,7 @@ import { OrbitProvider } from "@/features/orbit/components/OrbitProvider";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { NotFound } from "@/shared/ui/NotFound";
 import { AppBootSkeleton } from "@/shared/ui/Skeletons";
+import { WelcomeOverlay, consumeWelcomePending } from "@/shared/ui/WelcomeOverlay";
 import "@/app/App.css";
 import "@/polish.css";
 
@@ -59,6 +60,8 @@ function RequireSetup({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [locked, setLocked] = useState(isLocked());
 
+  const [showWelcome, setShowWelcome] = useState(consumeWelcomePending);
+
   useEffect(() => subscribeLock(setLocked), []);
 
   if (loading) return <AppBootSkeleton />;
@@ -68,14 +71,24 @@ function RequireSetup({ children }: { children: ReactNode }) {
   if (!user?.mobile && !setupExempt) {
     return <Navigate to="/app/onboarding" replace />;
   }
- 
+
   if (fetchFailed || locked) return <>{children}</>;
 
   const skipped = localStorage.getItem("quantalog_onboarding_skipped") === "1";
   if (!workspaces.length && !skipped && !setupExempt) {
     return <Navigate to="/app/onboarding" replace />;
   }
-  return <>{children}</>;
+  return (
+    <>
+      {showWelcome && (
+        <WelcomeOverlay
+          name={user?.firstName || undefined}
+          onDone={() => setShowWelcome(false)}
+        />
+      )}
+      {children}
+    </>
+  );
 }
 
 function Protected({ children }: { children: ReactNode }) {

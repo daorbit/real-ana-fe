@@ -38,7 +38,6 @@ import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { SeoScoreCard } from "@/features/seo/components/SeoScoreCard";
 import { SortableWidget, WidgetDragPreview } from "@/shared/ui/SortableWidget";
 import { Onboarding, onboardingCanShow } from "@/features/auth/components/Onboarding";
-import { WelcomeOverlay, consumeWelcomePending } from "@/shared/ui/WelcomeOverlay";
 import { useStats, useLive, useHomeWidgets, WIDGET_MAP, useLinkedInReturn, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
 import { useGetSeoReportsQuery, useGetMembersQuery } from "@/app/store";
@@ -179,10 +178,6 @@ export default function Home() {
   useTitle("Home");
   const { active, loading } = useWorkspace();
   const { user } = useAuth();
-  // Read once, synchronously, so the flag is already cleared by the first
-  // render — a fast double-mount (StrictMode, a route re-entry) must not show
-  // this twice just because state initializers run once per mount anyway.
-  const [showWelcome, setShowWelcome] = useState(consumeWelcomePending);
   // The LinkedIn OAuth callback lands back here with its outcome in the query
   // string; this raises the toast and cleans the URL.
   useLinkedInReturn();
@@ -369,12 +364,6 @@ export default function Home() {
 
   return (
     <AppShell>
-      {showWelcome && (
-        <WelcomeOverlay
-          name={user?.firstName || undefined}
-          onDone={() => setShowWelcome(false)}
-        />
-      )}
       {scopeSwitch.active && (
         <SwitchOverlay
           label={

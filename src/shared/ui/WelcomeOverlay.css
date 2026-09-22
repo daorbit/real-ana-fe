@@ -35,7 +35,7 @@
 }
 
 .welcome-overlay__art {
-  width: min(428px, 80vw);
+  width: min(640px, 92vw);
   height: auto;
   margin-bottom: 12px;
 }
