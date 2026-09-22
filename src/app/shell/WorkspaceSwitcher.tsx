@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ActionIcon, Menu, Tooltip, UnstyledButton } from "@mantine/core";
 import { Check, FolderKanban, Plus, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -60,6 +61,7 @@ export function WorkspaceMenuItems() {
   const nav = useNavigate();
   const { user } = useAuth();
   const { workspaces, active, setActive, refresh } = useWorkspace();
+  const marks = useMemo(() => marksFor(workspaces), [workspaces]);
 
   return (
     <Menu.Dropdown>
@@ -93,7 +95,7 @@ export function WorkspaceMenuItems() {
         <Menu.Item
           key={w._id}
           onClick={() => setActive(w._id)}
-          leftSection={<WorkspaceMark id={w._id} />}
+          leftSection={<WorkspaceMark src={marks.get(w._id)!} />}
           // The current one is marked rather than omitted: a list that
           // silently drops where you are makes you count to find out.
           rightSection={
@@ -126,23 +128,31 @@ export function WorkspaceMenuItems() {
   );
 }
 
-/** Identicon set a workspace's mark is picked from — stable per workspace
- *  (hashed from its id), so the same one shows up on every visit. */
+/** Avatar set a workspace's mark is picked from. */
 const WORKSPACE_AVATARS = [
   "riley", "jordan", "skyler", "olivia", "emery", "hazel", "cleo", "faye", "zia",
-].map((seed) => `/avatars/${seed}.svg`);
+  "aiden", "blair", "corey", "devon", "ellis", "frankie", "gray", "harlow", "indie",
+].map((seed) => `/avatars/shapes/${seed}.svg`);
+
+/**
+ * Which mark each workspace in the list gets — stable per id and, unlike a
+ * plain per-item hash, guaranteed not to repeat within one list. Two
+ * workspaces landing on the same tile made them indistinguishable in the
+ * menu, which defeated the point of having a mark at all.
+ */
+function marksFor(workspaces: { _id: string }[]): Map<string, string> {
+  const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const order = [...workspaces].sort((a, b) => hash(a._id) - hash(b._id));
+  return new Map(order.map((w, i) => [w._id, WORKSPACE_AVATARS[i % WORKSPACE_AVATARS.length]]));
+}
 
 /**
  * The square mark beside a workspace in the list.
  *
  * A workspace has no logo of its own, so this shows one of a fixed set of
- * identicons instead of inventing branding for it — picked deterministically
- * from the workspace id so it stays the same tile on every visit.
+ * avatars instead of inventing branding for it.
  */
-function WorkspaceMark({ id }: { id: string }) {
-  const hash = [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-  const src = WORKSPACE_AVATARS[hash % WORKSPACE_AVATARS.length];
-
+function WorkspaceMark({ src }: { src: string }) {
   return (
     <span aria-hidden className="ws-menu__mark">
       <img src={src} alt="" width={24} height={24} />
