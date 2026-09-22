@@ -298,6 +298,7 @@ export default function Onboarding() {
   if (step === APPEARANCE_STEP || step === BILLING_STEP) {
     return (
       <div className={`${s.shell} onb-form`}>
+        <div className={s.wash} aria-hidden="true" />
         <header className={s.bar}>
           <Wordmark />
           <Stepper step={displayStep} steps={displaySteps} />
@@ -331,6 +332,7 @@ export default function Onboarding() {
 
   return (
     <div className={`${s.shell} onb-form`}>
+      <div className={s.wash} aria-hidden="true" />
       <header className={s.bar}>
         <Wordmark />
         <Stepper step={displayStep} steps={displaySteps} />
@@ -348,9 +350,9 @@ export default function Onboarding() {
         <div className={`${s.column} ${wide ? s.columnWide : ""}`}>
           {current && (
             <div>
-              <span className={s.eyebrow}>
-                Step {displayStep + 1} of {displaySteps.length}
-              </span>
+              {/* No eyebrow above the heading: the bar already carries the
+                  count, and an accent-coloured all-caps repeat of it was the
+                  same fact twice in the louder of the two places. */}
               <h1 className={s.title}>
                 {step === INSTALL_STEP ? (aiCopy?.readyHeadline ?? current.title) : current.title}
               </h1>
@@ -359,8 +361,8 @@ export default function Onboarding() {
             </div>
           )}
 
-          <div style={{ marginTop: "2rem" }}>
-    
+          <div className={s.controls}>
+
             {step === 0 && (
               <ProfileStep onDone={() => (workspaces.length ? done() : setStep(REFERRAL_STEP))} />
             )}

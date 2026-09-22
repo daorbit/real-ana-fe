@@ -1,61 +1,123 @@
 /* First-run setup.
  *
- * One centred column, not the two-panel split this used to be. A brand panel
- * beside the form meant the thing being filled in got half the screen and sat
- * off to one side; centring it puts the current question where the eye already
- * is and gives the wide steps (the framework picker, the theme grids) room.
+ * Editorial, not decorative. The screen is read while being typed into, so the
+ * design is carried by type, measure and one hairline — not by colour washes,
+ * gradients or motion. Two rules hold the whole thing together:
  *
- * Structure, top to bottom: a fixed bar with the stepper, the step itself in a
- * centred column, and the actions pinned at the foot. Only the middle scrolls.
+ *   1. One flat ground. No gradient blobs behind the content: a wash under
+ *      body text lowers its contrast for decoration nobody asked for, and the
+ *      corner-glow is the most legible mark of a generated layout there is.
+ *   2. Accent appears once per screen, on the thing being acted on. Spent on
+ *      an eyebrow, a rule and a dot as well, it stops meaning anything.
  *
- * Nothing here animates. The screen is read while being typed into.
+ * Structure, top to bottom: a fixed bar carrying the wordmark, a numeric step
+ * counter and a hairline progress rule; the step in a centred column; actions
+ * at the foot. Only the middle scrolls.
  */
 
 .shell {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  /* The viewport never scrolls — only `.body` does. */
+  /* The viewport never scrolls — only `.body` does. Also clips the wash,
+     which is inset past the shell's edges on every side. */
   overflow: hidden;
   max-width: 100%;
 
-  /* Colour in the far corners, falling off to near-black across the middle
-     where the content sits — a wash behind the text greys it out. */
-  background:
-    radial-gradient(38% 34% at 0% 0%,
-      color-mix(in srgb, var(--accent-2) 22%, transparent) 0%, transparent 70%),
-    radial-gradient(34% 30% at 100% 100%,
-      color-mix(in srgb, var(--cyan) 12%, transparent) 0%, transparent 70%),
-    #0a0b0d;
+  /* The ground under the wash — the app's own, so the hand-off from the last
+     step into the dashboard is not a change of background. */
+  background: var(--bg, #0b0c0e);
 
-  --onb-ink: rgba(255, 255, 255, 0.95);
-  --onb-ink-dim: rgba(255, 255, 255, 0.62);
-  --onb-line: rgba(255, 255, 255, 0.1);
+  --onb-ink: rgba(255, 255, 255, 0.94);
+  --onb-ink-dim: rgba(255, 255, 255, 0.56);
+  /* A third weight, for the counter and other asides that should read below
+     the lede rather than level with it. */
+  --onb-ink-faint: rgba(255, 255, 255, 0.36);
+  --onb-line: rgba(255, 255, 255, 0.09);
+  /* Slightly stronger than `--onb-line`: what a field or a selected tile is
+     drawn with, where the edge is the control rather than a divider. */
+  --onb-edge: rgba(255, 255, 255, 0.16);
+  --onb-raise: rgba(255, 255, 255, 0.03);
 }
 
 :global([data-mantine-color-scheme="light"]) .shell {
-  background:
-    radial-gradient(38% 34% at 0% 0%,
-      color-mix(in srgb, var(--accent-2) 10%, transparent) 0%, transparent 70%),
-    radial-gradient(34% 30% at 100% 100%,
-      color-mix(in srgb, var(--cyan) 7%, transparent) 0%, transparent 70%),
-    #f7f8fa;
+  background: var(--bg, #f4f5f7);
 
-  --onb-ink: rgba(17, 24, 39, 0.95);
-  --onb-ink-dim: rgba(17, 24, 39, 0.62);
-  --onb-line: rgba(17, 24, 39, 0.12);
+  --onb-ink: rgba(16, 20, 28, 0.94);
+  --onb-ink-dim: rgba(16, 20, 28, 0.58);
+  --onb-ink-faint: rgba(16, 20, 28, 0.4);
+  --onb-line: rgba(16, 20, 28, 0.1);
+  --onb-edge: rgba(16, 20, 28, 0.18);
+  --onb-raise: rgba(16, 20, 28, 0.022);
+}
+
+/* ----------------------------------------------------------------- wash --- */
+
+/* The app's own "Classic" background: cool indigo lighting the top-left
+   corner, warm gold the top-right, both falling to nothing before they reach
+   the middle. It is the `corners` preset from `BG_STYLES` — the same pair of
+   gradients the dashboard and Orbit paint through `--bg-wash` — so setup
+   looks like the product someone is about to be handed.
+ *
+ * Why the figures are written out here rather than reading `--bg-wash`: that
+ * variable is whichever background the *user* picked, and during first-run
+ * setup there is no user preference yet — the appearance step is two screens
+ * away. So onboarding states the preset it wants. The values are kept in step
+ * with `buildBgValue`'s `corners` branch in `shared/lib/theme.ts`; if that
+ * branch is retuned, this follows it.
+ *
+ * Top-lit on both sides, not one corner each end. Two diagonal sources pull
+ * the eye across the screen; two along the top edge light the header and let
+ * the page fall away to dark, which is what leaves the content sitting on
+ * clean ground instead of on a tint.
+ */
+.wash {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 80% at 0% 0%,
+      color-mix(in srgb, #818cf8 16%, transparent), transparent 62%),
+    radial-gradient(55% 80% at 100% 0%,
+      color-mix(in srgb, #eab308 12%, transparent), transparent 62%);
+}
+
+:global([data-mantine-color-scheme="light"]) .wash {
+  /* Both sources cut to roughly a third. The same mix over near-white reads
+     far stronger than over near-black — at full strength the indigo corner
+     turns into a lilac panel with a visible edge. */
+  background:
+    radial-gradient(55% 80% at 0% 0%,
+      color-mix(in srgb, #818cf8 6%, transparent), transparent 62%),
+    radial-gradient(55% 80% at 100% 0%,
+      color-mix(in srgb, #eab308 5%, transparent), transparent 62%);
+}
+
+/* The body sits above the wash. The bar is already `position: relative` for
+   the progress rule's sake and takes its `z-index` in its own rule below. */
+.body {
+  position: relative;
+  z-index: 1;
 }
 
 /* ------------------------------------------------------------------ bar --- */
 
+/* Holds the wordmark, the step counter, and the skip link. The bar's own
+   bottom border doubles as the track for the progress rule below. */
 .bar {
+  /* Relative for the progress rule, which is absolutely positioned against
+     it; the z-index lifts the whole bar clear of the corner wash. */
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  padding: 1.1rem 1.75rem;
+  padding: 1.05rem 1.75rem;
   border-bottom: 1px solid var(--onb-line);
 }
 
@@ -64,90 +126,75 @@
   align-items: center;
   gap: 1rem;
   flex-shrink: 0;
+  /* Matched to the wordmark's side so the counter stays optically centred in
+     the bar rather than drifting as the skip link appears and disappears. */
+  min-width: 7rem;
+  justify-content: flex-end;
 }
 
 /* --------------------------------------------------------------- stepper --- */
 
-/* Horizontal, centred in the bar. Each step is a dot and a label, joined by a
-   rule that fills as the steps complete. Below `sm` the labels go and the
-   dots alone carry it — see the media query at the foot. */
-.steps {
+/* A counter and a rule, not eight dots joined by lines.
+ *
+ * At three steps a dot row reads at a glance. At eight it becomes a row of
+ * unlabelled circles — and the labels were already dropped below 62em, which
+ * is most laptops, leaving decoration that says nothing. "3 of 8" plus the
+ * current step's own name says strictly more in less space, and the hairline
+ * carries the proportion the dots were there for. */
+/* Deliberately left `position: static` so the rule inside it resolves against
+   `.bar` — which is the element whose bottom border the rule sits on, and
+   whose full width it measures its percentage against. Giving this a
+   `position` would shrink the rule's containing block to the width of the
+   counter text. */
+.progress {
   display: flex;
-  align-items: center;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  align-items: baseline;
+  gap: 0.6rem;
   min-width: 0;
 }
 
-.step {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.stepDot {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+/* Tabular figures: without them the counter reflows by a pixel or two on each
+   step as digit widths change, and the label beside it twitches. */
+.progressCount {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--onb-ink-faint);
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  background: transparent;
-  color: var(--onb-ink-dim);
-  border: 1px solid var(--onb-line);
-}
-.step[data-state="current"] .stepDot {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #04150e;
-}
-.step[data-state="done"] .stepDot {
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  border-color: transparent;
-  color: var(--accent);
 }
 
-.stepLabel {
-  font-size: 0.8rem;
-  font-weight: 550;
-  white-space: nowrap;
-  color: var(--onb-ink-dim);
-}
-.step[data-state="current"] .stepLabel {
+.progressLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   color: var(--onb-ink);
-  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* The joining rule. On the step's own row rather than between list items, so
-   it can be coloured by that step's state. */
-.stepLine {
-  width: 2.5rem;
-  height: 2px;
-  margin: 0 0.6rem;
-  flex-shrink: 0;
-  border-radius: 999px;
-  background: var(--onb-line);
-}
-.step[data-state="done"] + .stepLine,
-.stepLine[data-done] {
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
+/* Sits on the bar's bottom border, not above it: the border is the empty part
+   of the track, so the rule needs no track of its own. Pulled down a hair so
+   it covers the border rather than stacking on top of it. */
+.progressRule {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--accent);
+  /* Wide steps and short ones change the fill by different amounts; the ease
+     keeps every jump reading as the same gesture. */
+  transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ----------------------------------------------------------------- body --- */
 
-/* The scrolling middle, and the only thing that scrolls. `place-items: center`
-   keeps a short step in the middle of the screen; a tall one fills the space
-   and scrolls instead of being squashed. */
-/* The scroll container, and a plain block rather than a grid or a flex row:
-   both of those size their child to its content, which leaves a sticky footer
-   inside it with no taller ancestor to stick within. The column centres
-   itself horizontally with `margin-inline: auto`, and a short step is centred
-   vertically by `.bodyCentred` below. */
+/* The scrolling middle, and the only thing that scrolls. A plain block rather
+   than a grid or flex row: both size their child to its content, which leaves
+   a sticky footer inside with no taller ancestor to stick within. The column
+   centres horizontally with `margin-inline: auto`; a short step is centred
+   vertically by `.bodyCentred`. */
 .body {
   flex: 1;
   min-height: 0;
@@ -158,22 +205,36 @@
   overflow-x: hidden;
   overscroll-behavior: contain;
   /* No bottom padding: `position: sticky` bottoms out at the container's
-     padding edge, so any padding here leaves the footer hovering that far
-     above the bottom of the screen with content sliding under it. The steps
-     that need clearance add it themselves. */
-  padding: 3rem 1.75rem 0;
+     padding edge, so padding here leaves the footer hovering that far above
+     the foot of the screen with content sliding under it. The steps that need
+     clearance add it themselves. */
+  padding: 4.5rem 1.75rem 0;
   scrollbar-width: thin;
   scrollbar-color: var(--onb-line) transparent;
 }
 
-/* Only the short steps centre. On a tall one this would do nothing useful and
-   flex would break the sticky footer, so it is opt-in per step. These steps
-   also want the bottom padding the container gives up for sticky's sake. */
+/* Only the short steps centre. On a tall one this does nothing useful and
+   flex breaks the sticky footer, so it is opt-in per step. These steps also
+   want the bottom padding the container gives up for sticky's sake.
+ *
+ * Centred high, not dead centre. On a 1080-tall screen a three-field form
+ * centred exactly leaves roughly equal voids above and below and reads as a
+ * small object adrift in a large empty one. Sitting it above the midpoint is
+ * the ordinary optical correction — the eye takes the upper third as the
+ * centre — and it puts the heading closer to where reading starts. */
 .bodyCentred {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-bottom: 3rem;
+  padding-bottom: 4.5rem;
+}
+
+/* Only bites once there is room to give away: on a short viewport the margin
+   collapses to nothing and the step simply fills the screen. */
+@media (min-height: 44em) {
+  .bodyCentred .column {
+    margin-bottom: 7vh;
+  }
 }
 .body::-webkit-scrollbar { width: 8px; }
 .body::-webkit-scrollbar-thumb {
@@ -181,71 +242,79 @@
   background: var(--onb-line);
 }
 
-/* Single column, capped at a comfortable measure. The wide steps opt out with
-   `.columnWide`. */
+/* Single column, capped at a comfortable measure. Wide steps opt out. */
 .column {
   width: 100%;
-  max-width: 520px;
+  max-width: 480px;
   margin-inline: auto;
 }
 
-/* The framework picker and the install snippet: a 520px column turns the
-   tile grid into a long thin scroll and wraps the snippet badly. Wider, but
-   still a readable measure — the full width of a large screen would leave the
-   heading stranded above a very long line. */
+/* The framework picker and the install snippet: a 480px column turns the tile
+   grid into a long thin scroll and wraps the snippet badly. Wider, but still a
+   readable measure — the full width of a large screen would leave the heading
+   stranded above a very long line. */
 .columnWide {
-  max-width: 760px;
+  max-width: 720px;
 }
 
 /* ----------------------------------------------------------------- head --- */
 
-.eyebrow {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.6rem;
-}
+/* No eyebrow. An accent-coloured, letter-spaced, all-caps "STEP 3 OF 8" over
+   every heading is the stock generated-layout signature, and it repeated a
+   count the bar already carries. The heading now opens the screen. */
 
 .title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  /* Fluid, and larger than it was. The heading is the only element on a short
+     step with any presence; at 1.75rem it sat level with the form and the
+     screen had no focal point. */
+  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.35rem);
+  font-weight: 640;
+  line-height: 1.1;
+  /* Tightens as the size grows — the usual optical correction; left at the
+     small-size value a 2.35rem heading looks loose. */
+  letter-spacing: -0.028em;
   color: var(--onb-ink);
   margin: 0;
   text-wrap: balance;
 }
 
 .lede {
-  font-size: 0.94rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.58;
   color: var(--onb-ink-dim);
-  margin: 0.5rem 0 0;
-  max-width: 52ch;
+  margin: 0.7rem 0 0;
+  /* Shorter than the old 52ch. The lede is one sentence of orientation, and a
+     measure wider than the form under it makes the pair read as two columns
+     that failed to line up. */
+  max-width: 44ch;
+  text-wrap: pretty;
+}
+
+/* The gap between the head and the step's controls. Was an inline style on a
+   wrapper div; it belongs here with the rest of the rhythm. */
+.controls {
+  margin-top: 2.25rem;
 }
 
 /* ----------------------------------------------------------------- foot --- */
 
-/* Directly under the step's own content, inside the centred column — not a
-   bar across the foot of the viewport. Pinned there it sat a long way below
-   a short form, with dead space between the last field and the button that
-   submits it. */
+/* Directly under the step's own content, inside the centred column — not a bar
+   across the foot of the viewport. Pinned there it sat a long way below a short
+   form, with dead space between the last field and the button that submits it.
+ *
+ * No top border: the actions are the end of the column, not a separate region,
+ * and a rule above them boxed every short step into a card it never needed. */
 .foot {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--onb-line);
+  margin-top: 2.25rem;
 }
 
 /* Sticky on the steps tall enough to scroll: the button rides the bottom of
    the viewport while there is more content below, then settles into place at
-   the end. Without this the only way to reach Continue on the site step is to
-   scroll past the whole framework grid.
+   the end. Without this the only way to reach Continue on the framework step
+   is to scroll past the whole grid.
  *
- * The backdrop has to reach the full width of the screen, not just the
- * column, or tiles scroll through the gutters either side of it — hence the
+ * The backdrop has to reach the full width of the screen, not just the column,
+ * or tiles scroll through the gutters either side of it — hence the
  * viewport-wide pseudo-element rather than a background on the bar itself.
  * Opaque, not translucent: content sliding under a blurred bar reads as a
  * rendering fault. */
@@ -253,14 +322,23 @@
   position: sticky;
   bottom: 0;
   z-index: 2;
-  margin-top: 2rem;
-  padding: 0.85rem 0 calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  margin-top: 2.25rem;
+  /* Generous top padding: it is the run-up the backdrop's fade needs. With
+     the old hairline-and-solid-fill the bar could be tight to the button;
+     a gradient given only a few pixels to resolve in is just a hard edge
+     again. */
+  padding: 1.6rem 0 calc(0.9rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* Pulled well past the column on both sides so the backdrop reaches the edges
    of the screen. A generous fixed figure rather than viewport units: `100vw`
    counts the vertical scrollbar's width, so `-50vw` overflows the page and
-   adds a horizontal scrollbar. `.body` clips the overhang. */
+   adds a horizontal scrollbar. `.body` clips the overhang.
+ *
+ * Opaque at the foot, fading up: solid all the way to its top edge, the bar
+ * cut a hard horizontal line straight through the bottom-right corner of the
+ * wash. The fade hides that seam and gives content a gradient to disappear
+ * into as it scrolls under, rather than vanishing at a line. */
 .footSticky::before {
   content: "";
   position: absolute;
@@ -271,23 +349,41 @@
   left: -50rem;
   right: -50rem;
   z-index: -1;
-  border-top: 1px solid var(--onb-line);
-  background: #0a0b0d;
-}
-:global([data-mantine-color-scheme="light"]) .footSticky::before {
-  background: #f7f8fa;
+  /* Fades from the ground colour at zero alpha rather than from the keyword
+     `transparent`: in sRGB that keyword is transparent *black*, so over a
+     light background the gradient dips through grey on its way up — the grey
+     smear this is meant to avoid. Mixing the ground with itself keeps the hue
+     fixed and moves only the alpha, and it tracks `--bg` for free. */
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg, #0b0c0e), transparent 100%) 0%,
+    var(--bg, #0b0c0e) 56%
+  );
 }
 
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 62em) {
-  .stepLabel { display: none; }
-  .stepLine { width: 1.5rem; margin: 0 0.35rem; }
+  /* The step's name goes; the counter stays. Reversed from the old stepper,
+     which dropped its labels and kept eight anonymous dots — the label is the
+     half that carries meaning, so on a narrow bar it is the half worth the
+     room, and the counter is short enough to keep both. */
+  .progressLabel { max-width: 12ch; }
 }
 
 @media (max-width: 48em) {
-  .bar { padding: 0.9rem 1.1rem; gap: 1rem; }
-  .body { padding: 1.75rem 1.1rem; }
-  .foot { padding: 0.9rem 1.1rem calc(0.9rem + env(safe-area-inset-bottom, 0px)); }
-  .title { font-size: 1.45rem; }
+  .bar { padding: 0.85rem 1.1rem; gap: 1rem; }
+  .barEnd { min-width: 0; }
+  .body { padding: 2.5rem 1.25rem 0; }
+  .bodyCentred { padding-bottom: 2.5rem; }
+  .progressLabel { display: none; }
+  .lede { font-size: 0.95rem; }
+  .controls { margin-top: 1.75rem; }
+  .foot, .footSticky { margin-top: 1.75rem; }
+}
+
+/* ------------------------------------------------------------ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .progressRule { transition: none; }
 }

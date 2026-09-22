@@ -1,0 +1,64 @@
+/* "How did you hear about us?" — thirteen options in a grid.
+ *
+ * A row, not a centred stack. These are sentences of very different lengths
+ * ("Email", "A friend or colleague"); centred, every label sits at its own
+ * indent and thirteen tiles share no common edge. Left-aligned they read as a
+ * list, which is what they are.
+ *
+ * Colour: none of its own. The tiles are drawn by the shared `.tile` class,
+ * so selection here looks like selection everywhere else in the app.
+ */
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 12px;
+  text-align: left;
+  /* The grid's tallest tile sets the row height; without this the ones whose
+     label fits on one line come up short and the row looks ragged. */
+  height: 100%;
+}
+
+.optionIcon {
+  flex-shrink: 0;
+  color: var(--onb-ink-faint, var(--mantine-color-dimmed));
+  transition: color 0.15s ease;
+}
+.option[data-selected="true"] .optionIcon {
+  color: var(--accent-2);
+}
+
+.optionLabel {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.855rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--mantine-color-text);
+  /* Two lines at most, then ellipsis: at the 2-column mobile breakpoint the
+     longest labels would otherwise take three lines and stretch every tile in
+     their row. */
+  overflow-wrap: anywhere;
+}
+
+/* Reserved in both states so toggling never changes the label's measure. */
+.optionCheck {
+  flex-shrink: 0;
+  color: var(--accent-2);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.option[data-selected="true"] .optionCheck {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .optionIcon,
+  .optionCheck {
+    transition: none;
+  }
+}

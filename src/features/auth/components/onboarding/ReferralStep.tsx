@@ -1,24 +1,39 @@
-import { Button, Group, SimpleGrid, Text, UnstyledButton } from "@mantine/core";
+import { Button, Group, SimpleGrid, UnstyledButton } from "@mantine/core";
 import {
   ArrowRight, Search, Share2, PlayCircle, Mic, Radio, Newspaper, Users,
   Star, Megaphone, Mail, UserRound, MessageCircleMore, MoreHorizontal, Check,
 } from "lucide-react";
 import type { ReferralSource } from "@/shared/types";
+import s from "./ReferralStep.module.css";
 
-export const REFERRAL_OPTIONS: { value: ReferralSource; label: string; icon: typeof Search; color: string }[] = [
-  { value: "search", label: "Search engines", icon: Search, color: "#4285F4" },
-  { value: "social", label: "Social media", icon: Share2, color: "#E1306C" },
-  { value: "youtube", label: "YouTube", icon: PlayCircle, color: "#FF0000" },
-  { value: "podcast", label: "Podcast or radio", icon: Mic, color: "#8B5CF6" },
-  { value: "streaming", label: "Streaming platforms", icon: Radio, color: "#9146FF" },
-  { value: "blog_article", label: "A blog or article", icon: Newspaper, color: "#F59E0B" },
-  { value: "community", label: "A community", icon: Users, color: "#22C55E" },
-  { value: "review_site", label: "A review site", icon: Star, color: "#EAB308" },
-  { value: "online_ad", label: "An online ad", icon: Megaphone, color: "#F97316" },
-  { value: "email", label: "Email", icon: Mail, color: "#06B6D4" },
-  { value: "friend_colleague", label: "A friend or colleague", icon: UserRound, color: "#3B82F6" },
-  { value: "word_of_mouth", label: "Word of mouth", icon: MessageCircleMore, color: "#EC4899" },
-  { value: "other", label: "Other", icon: MoreHorizontal, color: "#6B7280" },
+/**
+ * The options, without per-option colours.
+ *
+ * Each of these used to carry a saturated brand hex — Google blue, YouTube
+ * red, Instagram pink — painting thirteen different colours across one grid.
+ * Three things were wrong with it: the colours are the *referrer's* brand on a
+ * screen that is entirely Quantalog's; thirteen competing hues give the eye no
+ * order to read them in, so the grid scans as a toy rather than a question;
+ * and colour was carrying selection at the same time, which left "selected"
+ * looking like nothing more than "this tile is pink".
+ *
+ * Selection is now the one accent on the screen, applied by `.tile` through
+ * `data-selected` like every other selectable surface in the app.
+ */
+export const REFERRAL_OPTIONS: { value: ReferralSource; label: string; icon: typeof Search }[] = [
+  { value: "search", label: "Search engines", icon: Search },
+  { value: "social", label: "Social media", icon: Share2 },
+  { value: "youtube", label: "YouTube", icon: PlayCircle },
+  { value: "podcast", label: "Podcast or radio", icon: Mic },
+  { value: "streaming", label: "Streaming platforms", icon: Radio },
+  { value: "blog_article", label: "A blog or article", icon: Newspaper },
+  { value: "community", label: "A community", icon: Users },
+  { value: "review_site", label: "A review site", icon: Star },
+  { value: "online_ad", label: "An online ad", icon: Megaphone },
+  { value: "email", label: "Email", icon: Mail },
+  { value: "friend_colleague", label: "A friend or colleague", icon: UserRound },
+  { value: "word_of_mouth", label: "Word of mouth", icon: MessageCircleMore },
+  { value: "other", label: "Other", icon: MoreHorizontal },
 ];
 
 
@@ -38,50 +53,28 @@ export function ReferralStepBody({
   };
 
   return (
-    <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
-      {REFERRAL_OPTIONS.map(({ value, label, icon: Icon, color }) => {
+    <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={8}>
+      {REFERRAL_OPTIONS.map(({ value, label, icon: Icon }) => {
         const isSelected = selected.includes(value);
         return (
           <UnstyledButton
             key={value}
-            className="tile onb-fw"
+            className={`tile ${s.option}`}
             data-selected={isSelected}
             aria-pressed={isSelected}
             onClick={() => toggle(value)}
-            style={{
-              position: "relative",
-              ...(isSelected
-                ? {
-                    borderColor: color,
-                    background: `color-mix(in srgb, ${color} 14%, transparent)`,
-                  }
-                : undefined),
-            }}
           >
-            {isSelected && (
-              <span
-                aria-hidden
-                style={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  background: color,
-                  color: "#fff",
-                }}
-              >
-                <Check size={11} strokeWidth={3} />
-              </span>
-            )}
-            <Icon size={20} color={color} />
-            <Text size="sm" fw={isSelected ? 600 : 500}>
-              {label}
-            </Text>
+            {/* Left-aligned icon and label on one row, rather than a centred
+                stack. These are thirteen sentences of varying length: centred,
+                each sits at a different indent and the column has no edge to
+                read down. */}
+            <Icon size={16} className={s.optionIcon} aria-hidden />
+            <span className={s.optionLabel}>{label}</span>
+            {/* Always in the DOM, faded when unselected: a tick that appears
+                on click reflows nothing here, but reserving the box keeps the
+                label's measure identical in both states, so text never
+                re-wraps as you toggle. */}
+            <Check size={13} strokeWidth={3} className={s.optionCheck} aria-hidden />
           </UnstyledButton>
         );
       })}

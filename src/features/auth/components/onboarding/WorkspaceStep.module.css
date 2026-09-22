@@ -1,0 +1,46 @@
+/* The "what a workspace gets you" list, under the name field.
+ *
+ * Reference material, not a second form. The hairline above it draws that
+ * line; the term/gloss split on each row gives the eye a place to land, so
+ * three lines under a text input get read instead of skimmed past.
+ */
+
+.why {
+  list-style: none;
+  margin: 0;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid var(--onb-line, rgba(255, 255, 255, 0.09));
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.whyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Nudged down onto the term's baseline. A 15px glyph aligned flush to the top
+   of a two-line block sits visibly above the text it belongs to. */
+.whyIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent-2);
+  opacity: 0.85;
+}
+
+.whyTerm {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--mantine-color-text);
+}
+
+.whyGloss {
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--mantine-color-dimmed);
+}

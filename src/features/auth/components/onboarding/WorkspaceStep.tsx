@@ -1,10 +1,29 @@
-import { Button, Group, Stack, Text, TextInput } from "@mantine/core";
+import { Button, Group, Stack, TextInput } from "@mantine/core";
 import { ArrowRight, BarChart3, Share2, Users } from "lucide-react";
+import s from "./WorkspaceStep.module.css";
 
+/**
+ * What a workspace gets you. Each line is a term and its gloss rather than one
+ * long sentence: three full sentences of equal weight under a form is a wall
+ * that gets skipped, where a bolded lead-in gives the eye somewhere to land
+ * and the rest can be read or not.
+ */
 const WHY = [
-  { icon: BarChart3, text: "Analytics, forms, SEO and scheduling, all in one place" },
-  { icon: Users, text: "Invite teammates with access to just this workspace" },
-  { icon: Share2, text: "Switch between workspaces any time from the sidebar" },
+  {
+    icon: BarChart3,
+    term: "Everything in one place",
+    gloss: "Analytics, forms, SEO and scheduling",
+  },
+  {
+    icon: Users,
+    term: "Scoped access",
+    gloss: "Invite teammates to just this workspace",
+  },
+  {
+    icon: Share2,
+    term: "Switch any time",
+    gloss: "Move between workspaces from the sidebar",
+  },
 ];
 
 /** Title and lede live on the shell — this is the step's controls only. */
@@ -32,14 +51,20 @@ export function WorkspaceStepBody({
         data-autofocus
       />
 
-      <Stack gap="sm">
-        {WHY.map(({ icon: Icon, text }) => (
-          <Group key={text} gap={10} wrap="nowrap">
-            <Icon size={16} style={{ flexShrink: 0, opacity: 0.7 }} />
-            <Text size="sm" c="dimmed">{text}</Text>
-          </Group>
+      {/* Separated from the field by a hairline, not just by space: this is
+          reference material about what you are naming, not a third thing to
+          fill in, and the rule says so without a heading. */}
+      <ul className={s.why}>
+        {WHY.map(({ icon: Icon, term, gloss }) => (
+          <li key={term} className={s.whyRow}>
+            <Icon size={15} className={s.whyIcon} aria-hidden />
+            <div>
+              <span className={s.whyTerm}>{term}</span>
+              <span className={s.whyGloss}>{gloss}</span>
+            </div>
+          </li>
         ))}
-      </Stack>
+      </ul>
     </Stack>
   );
 }
