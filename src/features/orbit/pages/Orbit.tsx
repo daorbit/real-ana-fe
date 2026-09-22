@@ -5,7 +5,7 @@ import {
 } from "@mantine/core";
 import {
   AlertTriangle, ArrowUp, Check, ChevronDown, ClipboardList, Copy, Download, FileText, FolderPlus,
-  Globe, History, ImagePlus, Mic, Palette, Pencil, Paperclip, RefreshCw, RotateCcw, Share2, Square,
+  Globe, History, Mic, Palette, Pencil, Paperclip, RefreshCw, RotateCcw, Share2, Square,
   Volume2, VolumeX, X,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -633,9 +633,7 @@ export default function Orbit() {
   const [documentError, setDocumentError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const documentInputRef = useRef<HTMLInputElement>(null);
-  // Change E: track whether the user manually toggled drawing for the current
-  // message. A manual choice outranks the keyword guess.
+
   const manualToggle = useRef(false);
  
   useEffect(() => {
@@ -784,11 +782,7 @@ export default function Orbit() {
       ? (last.suggestions ?? [])
       : [];
 
-  // Scroll to the bottom only when a message was actually appended at the
-  // end — a new question, a regenerated answer, a live reply streaming in.
-  // `messages` also changes when older pages are prepended (scroll-up
-  // pagination) or a saved thread is restored wholesale; the tail's own id
-  // is untouched by either, so it's what tells "appended" apart from those.
+
   const lastMessageId = useRef<string | null>(null);
   useEffect(() => {
     const newLastId = last?.id ?? null;
@@ -878,8 +872,6 @@ export default function Orbit() {
             setInput(val);
             if (speech.listening) dictationBase.current = val;
 
-            // Change E: auto-light the drawing toggle on a leading draw verb,
-            // unless the user already made a manual choice for this message.
             if (!manualToggle.current && !pendingImage && !pendingDocument && plan?.imageGeneration) {
               const match = DRAW_RE.test(val.trim());
               if (match && !imageMode) setImageMode(true);
@@ -927,8 +919,7 @@ export default function Orbit() {
 
         <div className={classes.composerFoot}>
           <Group gap={4} wrap="nowrap">
-            {/* One picker for both kinds of attachment — an image or a
-                document — routed by mime type in onFilePicked. */}
+
             <input
               ref={fileInputRef}
               type="file"
