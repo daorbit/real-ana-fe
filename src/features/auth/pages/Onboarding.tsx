@@ -198,10 +198,10 @@ export default function Onboarding() {
   /** Finished properly — the account has a workspace, so the guard passes. */
   const done = () => {
     localStorage.removeItem("quantalog_onboarding_skipped");
-    // Only a first-time signup gets the welcome animation on landing — this
-    // flow also runs for an existing account adding a second workspace
-    // (`workspaceOnly`), which has already seen it once.
-    if (!workspaceOnly) localStorage.setItem(WELCOME_PENDING_KEY, "1");
+    // Shown every time this flow finishes, first signup or an existing
+    // account adding another workspace — each is a "your workspace is ready"
+    // moment worth the same landing.
+    localStorage.setItem(WELCOME_PENDING_KEY, "1");
     clearProgress();
     nav(workspaceOnly ? "/app/workspaces" : "/app");
   };
