@@ -14,6 +14,19 @@ export function AppearanceStep({
 }) {
   return (
     <div className={`onb-form ${s.page}`}>
+      <div className={s.grid}>
+        <div className={s.controls}>
+          <AppearanceSection bare />
+        </div>
+
+        <aside className={s.aside}>
+          <ThemePreview />
+          <Text size="xs" c="dimmed" className={s.caption}>
+            Live preview — how the app will look.
+          </Text>
+        </aside>
+      </div>
+
       <div className={s.actionsRow}>
         <div className={s.actions}>
           <Button
@@ -28,19 +41,6 @@ export function AppearanceStep({
             Continue
           </Button>
         </div>
-      </div>
-
-      <div className={s.grid}>
-        <div className={s.controls}>
-          <AppearanceSection bare />
-        </div>
-
-        <aside className={s.aside}>
-          <ThemePreview />
-          <Text size="xs" c="dimmed" className={s.caption}>
-            Live preview — how the app will look.
-          </Text>
-        </aside>
       </div>
     </div>
   );

@@ -70,22 +70,6 @@ export function BillingStep({
 
   return (
     <div className={`onb-form ${s.page}`}>
-      <div className={s.actionsRow}>
-        <div className={s.actions}>
-          <Button
-            className="auth-btn"
-            variant="default"
-            leftSection={<ArrowLeft size={15} />}
-            onClick={onBack}
-          >
-            Back
-          </Button>
-          <Button className="auth-btn" onClick={onDone} rightSection={<ArrowRight size={16} />}>
-            Continue with Free
-          </Button>
-        </div>
-      </div>
-
       <div className={s.controls} style={{ flex: 1, overflowY: "auto" }}>
         {loading || !usage ? (
           <BillingSkeleton />
@@ -108,6 +92,22 @@ export function BillingStep({
             onPick={(plan) => { setPlanCoupon(null); setConfirmPlan(plan); }}
           />
         )}
+      </div>
+
+      <div className={s.actionsRow}>
+        <div className={s.actions}>
+          <Button
+            className="auth-btn"
+            variant="default"
+            leftSection={<ArrowLeft size={15} />}
+            onClick={onBack}
+          >
+            Back
+          </Button>
+          <Button className="auth-btn" onClick={onDone} rightSection={<ArrowRight size={16} />}>
+            Continue with Free
+          </Button>
+        </div>
       </div>
 
       <PlanCheckoutModal
