@@ -19,17 +19,9 @@ import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import type { ReferralSource, Site } from "@/shared/types";
+import { WELCOME_PENDING_KEY } from "@/shared/ui/WelcomeOverlay";
 import s from "@/features/auth/components/onboarding/Onboarding.module.css";
 
-/**
- * Copy for each step, kept beside the step list rather than inside the step
- * components: the shell renders the heading, so the two have to agree, and a
- * title living in one file with its stepper label in another is how they drift
- * apart.
- *
- * `wide` opts a step out of the 520px measure — the framework picker and the
- * install snippet both need the room.
- */
 const STEPS = [
   {
     label: "Your details",
@@ -202,6 +194,10 @@ export default function Onboarding() {
   /** Finished properly — the account has a workspace, so the guard passes. */
   const done = () => {
     localStorage.removeItem("quantalog_onboarding_skipped");
+    // Only a first-time signup gets the welcome animation on landing — this
+    // flow also runs for an existing account adding a second workspace
+    // (`workspaceOnly`), which has already seen it once.
+    if (!workspaceOnly) localStorage.setItem(WELCOME_PENDING_KEY, "1");
     clearProgress();
     nav(workspaceOnly ? "/app/workspaces" : "/app");
   };
@@ -320,7 +316,10 @@ export default function Onboarding() {
         <Wordmark />
         <Stepper step={displayStep} steps={displaySteps} />
         <div className={s.barEnd}>
-          {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
+          {/* Only an existing account adding a second workspace may bail out
+              early — a brand-new signup has nothing to fall back to yet, so
+              skipping would just strand it without a workspace or a site. */}
+          {workspaceOnly && step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
             <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
               Skip for now
             </Anchor>
