@@ -6,3 +6,5 @@ Disallow: /share/
 
 # The rest of the app is behind auth and has nothing to index either.
 Disallow: /app/
+
+Sitemap: https://quantalog.daorbit.in/sitemap.xml
