@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Avatar, Badge, Box, Button, Group, Text } from "@mantine/core";
-import { Trash2, Images, Sparkles } from "lucide-react";
+import { Trash2, Images } from "lucide-react";
 import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
 import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { useTranslation } from "react-i18next";
@@ -88,8 +88,7 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
             >
               <Button
                 size="xs"
-                variant="subtle"
-                leftSection={<Sparkles size={14} />}
+                variant="default"
                 disabled={avatarBusy}
                 onClick={() => setPresetOpen((v) => !v)}
               >

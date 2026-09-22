@@ -1,5 +1,5 @@
-import { Button, Group, Select, TextInput } from "@mantine/core";
-import { ArrowLeft, ArrowRight, Globe } from "lucide-react";
+import { Button, Group, Select, Text, TextInput } from "@mantine/core";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker";
 import type { FrameworkId } from "@/features/workspace/frameworks";
 import s from "./SiteStep.module.css";
@@ -63,8 +63,14 @@ export function SiteStepBody({
           <TextInput
             size="md"
             label="Domain"
-            placeholder="example.com"
-            leftSection={<Globe size={15} />}
+            placeholder="yoursite.com"
+
+            leftSection={
+              <Text size="sm" c="dimmed" style={{ pointerEvents: "none" }}>
+                https://
+              </Text>
+            }
+            leftSectionWidth={62}
             value={domain}
             error={domainError}
             onChange={(e) => onDomainChange(e.currentTarget.value)}

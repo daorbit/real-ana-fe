@@ -409,9 +409,14 @@ export function AddSiteWizard({
             />
             <TextInput
               label="Domain"
-              placeholder="example.com"
-              description="The site you'll install the tracker on. Paste a full URL if it's easier."
-              leftSection={<Globe size={15} />}
+              placeholder="yoursite.com"
+              description="The site you'll install the tracker on."
+              leftSection={
+                <Text size="sm" c="dimmed" style={{ pointerEvents: "none" }}>
+                  https://
+                </Text>
+              }
+              leftSectionWidth={62}
               value={domain}
               onChange={(e) => { setDomain(e.currentTarget.value); setDomainError(null); }}
               error={domainError}
@@ -462,8 +467,13 @@ export function AddSiteWizard({
             <TextInput
               label="App URL"
               placeholder="app.yourcompany.com"
-              description="Where the app is hosted. Paste a full URL if it's easier."
-              leftSection={<Globe size={15} />}
+              description="Where the app is hosted."
+              leftSection={
+                <Text size="sm" c="dimmed" style={{ pointerEvents: "none" }}>
+                  https://
+                </Text>
+              }
+              leftSectionWidth={62}
               value={domain}
               onChange={(e) => { setDomain(e.currentTarget.value); setDomainError(null); }}
               error={domainError}

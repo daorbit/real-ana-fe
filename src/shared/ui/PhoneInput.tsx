@@ -1,4 +1,5 @@
 import { Group, Text, TextInput, Select } from "@mantine/core";
+import { Search } from "lucide-react";
 import { DIAL_CODES, type DialCode } from "@/shared/lib/dialCodes";
 
 /**
@@ -61,7 +62,7 @@ export function PhoneInput({
       <Group gap="xs" align="flex-start" wrap="nowrap">
         <Select
           size="md"
-          w={104}
+          w={116}
           searchable
           allowDeselect={false}
           data={data}
@@ -90,6 +91,11 @@ export function PhoneInput({
                 o.label.replace("+", "").startsWith(q.replace("+", ""))
             );
           }}
+          // Placeholder only shows once the field is cleared for typing (i.e.
+          // the dropdown is open and search has taken over) — it's the cue
+          // that this box searches rather than just displaying the code.
+          placeholder="Search country"
+          leftSection={<Search size={14} style={{ color: "var(--muted)" }} />}
           styles={{ input: { fontWeight: 500 } }}
           comboboxProps={{ width: 280, position: "bottom-start" }}
           aria-label="Country code"

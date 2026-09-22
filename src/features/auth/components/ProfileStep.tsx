@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, Group, Text, TextInput, Stack, Avatar, ActionIcon,
 } from "@mantine/core";
-import { ArrowRight, Camera, Sparkles, Trash2, UserRound } from "lucide-react";
+import { ArrowRight, Camera, Trash2, UserRound } from "lucide-react";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { PhoneInput, joinNumber, localNumberError } from "@/shared/ui/PhoneInput";
@@ -147,14 +147,13 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
         <div style={{ minWidth: 0 }}>
           <Text size="sm" fw={500}>Profile photo</Text>
           <Text size="xs" c="dimmed" mt={2}>
-            Optional. JPG or PNG, up to 3MB — or pick one below.
+            Optional. JPG or PNG, up to 3MB.
           </Text>
           <Group gap="xs" mt={6}>
             <AvatarPresetPicker opened={presetOpen} onClose={() => setPresetOpen(false)} onPick={(src) => void pickPreset(src)}>
               <Button
                 size="compact-xs"
-                variant="light"
-                leftSection={<Sparkles size={12} />}
+                variant="default"
                 onClick={() => setPresetOpen((v) => !v)}
                 disabled={avatarBusy}
               >

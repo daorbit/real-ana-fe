@@ -95,7 +95,7 @@ export function WorkspaceMenuItems() {
         <Menu.Item
           key={w._id}
           onClick={() => setActive(w._id)}
-          leftSection={<WorkspaceMark src={marks.get(w._id)!} />}
+          leftSection={<WorkspaceMark name={w.name} color={marks.get(w._id)!} />}
           // The current one is marked rather than omitted: a list that
           // silently drops where you are makes you count to find out.
           rightSection={
@@ -128,14 +128,15 @@ export function WorkspaceMenuItems() {
   );
 }
 
-/** Avatar set a workspace's mark is picked from. */
-const WORKSPACE_AVATARS = [
-  "riley", "jordan", "skyler", "olivia", "emery", "hazel", "cleo", "faye", "zia",
-  "aiden", "blair", "corey", "devon", "ellis", "frankie", "gray", "harlow", "indie",
-].map((seed) => `/avatars/shapes/${seed}.svg`);
+/** Curated, evenly-spaced colors a workspace's tile is picked from — chosen
+ *  by eye rather than derived from a hash, so none of them land muddy. */
+const WORKSPACE_COLORS = [
+  "#e8590c", "#2f9e44", "#1971c2", "#e64980", "#7048e8",
+  "#f08c00", "#0ca678", "#4263eb", "#c2255c", "#5c940d",
+];
 
 /**
- * Which mark each workspace in the list gets — stable per id and, unlike a
+ * Which color each workspace in the list gets — stable per id and, unlike a
  * plain per-item hash, guaranteed not to repeat within one list. Two
  * workspaces landing on the same tile made them indistinguishable in the
  * menu, which defeated the point of having a mark at all.
@@ -143,19 +144,21 @@ const WORKSPACE_AVATARS = [
 function marksFor(workspaces: { _id: string }[]): Map<string, string> {
   const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
   const order = [...workspaces].sort((a, b) => hash(a._id) - hash(b._id));
-  return new Map(order.map((w, i) => [w._id, WORKSPACE_AVATARS[i % WORKSPACE_AVATARS.length]]));
+  return new Map(order.map((w, i) => [w._id, WORKSPACE_COLORS[i % WORKSPACE_COLORS.length]]));
 }
 
 /**
  * The square mark beside a workspace in the list.
  *
- * A workspace has no logo of its own, so this shows one of a fixed set of
- * avatars instead of inventing branding for it.
+ * A workspace has no logo of its own, so this is its initial on a flat color
+ * tile — the same pattern Slack and Notion fall back to, and one that stays
+ * crisp at this size instead of the illustrated avatars it replaced, which
+ * turned to mud once shrunk down this far.
  */
-function WorkspaceMark({ src }: { src: string }) {
+function WorkspaceMark({ name, color }: { name: string; color: string }) {
   return (
-    <span aria-hidden className="ws-menu__mark">
-      <img src={src} alt="" width={24} height={24} />
+    <span aria-hidden className="ws-menu__mark" style={{ background: color }}>
+      {(name || "?").trim().slice(0, 1).toUpperCase()}
     </span>
   );
 }
