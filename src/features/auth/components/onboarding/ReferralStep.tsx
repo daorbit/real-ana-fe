@@ -1,6 +1,6 @@
 import { Button, Group, SimpleGrid, Text, UnstyledButton } from "@mantine/core";
 import {
-  ArrowRight, Search, Share2, Youtube, Mic, Radio, Newspaper, Users,
+  ArrowRight, Search, Share2, PlayCircle, Mic, Radio, Newspaper, Users,
   Star, Megaphone, Mail, UserRound, MessageCircleMore, MoreHorizontal, Check,
 } from "lucide-react";
 import type { ReferralSource } from "@/shared/types";
@@ -8,7 +8,7 @@ import type { ReferralSource } from "@/shared/types";
 export const REFERRAL_OPTIONS: { value: ReferralSource; label: string; icon: typeof Search }[] = [
   { value: "search", label: "Search engines", icon: Search },
   { value: "social", label: "Social media", icon: Share2 },
-  { value: "youtube", label: "YouTube", icon: Youtube },
+  { value: "youtube", label: "YouTube", icon: PlayCircle },
   { value: "podcast", label: "Podcast or radio", icon: Mic },
   { value: "streaming", label: "Streaming platforms", icon: Radio },
   { value: "blog_article", label: "A blog or article", icon: Newspaper },
@@ -21,13 +21,7 @@ export const REFERRAL_OPTIONS: { value: ReferralSource; label: string; icon: typ
   { value: "other", label: "Other", icon: MoreHorizontal },
 ];
 
-/**
- * The "how did you hear about us" picker, as a tile grid rather than a list of
- * checkboxes — a plain checkbox list of thirteen rows read as a form to fill
- * in correctly, when the honest answer is just "tap whichever apply." Tiles
- * match the weight of the framework picker later in the same flow, so the two
- * multi/single-select steps in this flow don't look like two different apps.
- */
+
 export function ReferralStepBody({
   selected,
   onChange,
