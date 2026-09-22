@@ -80,6 +80,7 @@ export function PhoneInput({
                 justifyContent: "space-between",
                 padding: "0 10px",
                 fontWeight: 500,
+                borderRadius: "var(--mantine-radius-default)",
               }}
             >
               +{country.dial}

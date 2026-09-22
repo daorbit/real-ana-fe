@@ -1,7 +1,5 @@
 import { Button, Group, Select, Text, TextInput } from "@mantine/core";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker";
-import type { FrameworkId } from "@/features/workspace/frameworks";
 import s from "./SiteStep.module.css";
 
 export const SITE_PURPOSES = [
@@ -11,13 +9,13 @@ export const SITE_PURPOSES = [
 ];
 
 /**
- * The step that asks what is being tracked.
+ * The step that asks what is being tracked: name, domain, and what it's for.
  *
- * Two labelled sections rather than one run of four controls: the first three
- * fields describe the site, the fourth is a twenty-tile logo grid, and running
- * them together made the grid look like the answer to "what's this site for?".
- * Splitting them also lets the fields sit two-up while the grid keeps the full
- * width it needs.
+ * Framework used to live at the foot of this same step, as a second section
+ * below these three fields — but a twenty-tile logo grid sharing a screen with
+ * a name/domain form buried the grid below the fold and made the fields above
+ * it read as a preamble to it rather than their own step. It now gets a
+ * screen of its own, right after this one.
  */
 export function SiteStepBody({
   siteName,
@@ -28,8 +26,6 @@ export function SiteStepBody({
   onDomainChange,
   purpose,
   onPurposeChange,
-  framework,
-  onFrameworkChange,
 }: {
   siteName: string;
   siteError: string | null;
@@ -39,16 +35,10 @@ export function SiteStepBody({
   onDomainChange: (v: string) => void;
   purpose: string;
   onPurposeChange: (v: string) => void;
-  framework: FrameworkId;
-  onFrameworkChange: (v: FrameworkId) => void;
 }) {
   return (
     <div className={s.root}>
       <section className={s.section}>
-        <div className={s.sectionHead}>
-          <h3 className={s.sectionTitle}>About the site</h3>
-        </div>
-
         <div className={s.fields}>
           <TextInput
             size="md"
@@ -64,7 +54,6 @@ export function SiteStepBody({
             size="md"
             label="Domain"
             placeholder="yoursite.com"
-
             leftSection={
               <Text size="sm" c="dimmed" style={{ pointerEvents: "none" }}>
                 https://
@@ -89,33 +78,17 @@ export function SiteStepBody({
           mt="md"
         />
       </section>
-
-      <section className={s.section}>
-        <div className={s.sectionHead}>
-          <h3 className={s.sectionTitle}>Built with</h3>
-          <p className={s.sectionNote}>
-            Only changes the install snippet you get next — pick the closest
-            match.
-          </p>
-        </div>
-
-        <FrameworkPicker value={framework} onChange={onFrameworkChange} />
-      </section>
     </div>
   );
 }
 
 export function SiteStepFooter({
-  loading,
   onBack,
   onSubmit,
 }: {
-  loading: boolean;
   onBack: () => void;
   onSubmit: () => void;
 }) {
-  // `sm`, not `md`: this footer is pinned to the bottom of the screen, and
-  // every pixel it takes is a pixel of the picker above it.
   return (
     <Group justify="space-between" wrap="nowrap">
       <Button
@@ -131,7 +104,6 @@ export function SiteStepFooter({
       <Button
         className="auth-btn"
         size="sm"
-        loading={loading}
         onClick={onSubmit}
         rightSection={<ArrowRight size={15} />}
       >

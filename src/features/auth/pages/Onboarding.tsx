@@ -5,8 +5,10 @@ import { Wordmark } from "@/shared/ui/Brand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
 import { AppearanceStep } from "@/features/auth/components/onboarding/AppearanceStep";
 import { Stepper } from "@/features/auth/components/onboarding/Stepper";
+import { ReferralStepBody, ReferralStepFooter } from "@/features/auth/components/onboarding/ReferralStep";
 import { WorkspaceStepBody, WorkspaceStepFooter } from "@/features/auth/components/onboarding/WorkspaceStep";
 import { SiteStepBody, SiteStepFooter } from "@/features/auth/components/onboarding/SiteStep";
+import { FrameworkStepBody, FrameworkStepFooter } from "@/features/auth/components/onboarding/FrameworkStep";
 import { ReadyStepBody, ReadyStepFooter } from "@/features/auth/components/onboarding/ReadyStep";
 import { useCreateWorkspaceMutation, useCreateSiteMutation, useGenerateOnboardingCopyMutation } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
@@ -16,7 +18,7 @@ import * as v from "@/shared/lib/validate";
 import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
-import type { Site } from "@/shared/types";
+import type { ReferralSource, Site } from "@/shared/types";
 import s from "@/features/auth/components/onboarding/Onboarding.module.css";
 
 /**
@@ -36,6 +38,12 @@ const STEPS = [
     lede: "This is the name your teammates see on reports and comments.",
   },
   {
+    label: "About you",
+    hint: "How you found us",
+    title: "How did you hear about us?",
+    lede: "Pick everything that applies — it helps us know where to focus.",
+  },
+  {
     label: "Workspace",
     hint: "Where your work lives",
     title: "Name your workspace",
@@ -46,6 +54,12 @@ const STEPS = [
     hint: "What Quantalog watches",
     title: "Add your first site",
     lede: "The site Quantalog watches — its traffic, its SEO, and where your forms get embedded.",
+  },
+  {
+    label: "Built with",
+    hint: "For the install snippet",
+    title: "What's it built with?",
+    lede: "Only changes the install snippet you get next — pick the closest match.",
     wide: true,
     /** Taller than the viewport: it scrolls, so its footer sticks. */
     tall: true,
@@ -59,21 +73,25 @@ const STEPS = [
   },
 ];
 
-const INSTALL_STEP = 3;
+const REFERRAL_STEP = 1;
+const WORKSPACE_STEP = 2;
+const SITE_STEP = 3;
+const FRAMEWORK_STEP = 4;
+const INSTALL_STEP = 5;
 
 /** Index into `STEPS` of the first step that may be skipped. */
 const FIRST_SKIPPABLE_STEP = 1;
 
 /** The appearance screen, which sits past the stepper and runs its own layout. */
-const APPEARANCE_STEP = 4;
+const APPEARANCE_STEP = 6;
 
 
-const SLUGS = ["details", "workspace", "site", "install", "appearance"];
+const SLUGS = ["details", "referral", "workspace", "site", "framework", "install", "appearance"];
 
 
 function furthestReachable(step: number, wsId: string | null, site: Site | null): number {
-  if (step >= INSTALL_STEP && !site) return wsId ? 2 : 1;
-  if (step >= 2 && !wsId) return 1;
+  if (step >= FRAMEWORK_STEP && !site) return wsId ? SITE_STEP : WORKSPACE_STEP;
+  if (step >= WORKSPACE_STEP && !wsId) return WORKSPACE_STEP;
   return step;
 }
 
@@ -96,7 +114,7 @@ function readProgress(): Progress {
 export default function Onboarding() {
   const nav = useNavigate();
   const { setActive, workspaces } = useWorkspace();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [params] = useSearchParams();
 
 
@@ -108,7 +126,7 @@ export default function Onboarding() {
 
 
   const slugStep = SLUGS.indexOf(params.get("step") ?? "");
-  const urlStep = slugStep >= 0 ? slugStep : workspaceOnly ? 1 : 0;
+  const urlStep = slugStep >= 0 ? slugStep : workspaceOnly ? WORKSPACE_STEP : 0;
 
   const setStep = (next: number) => {
     const search = new URLSearchParams(params);
@@ -119,12 +137,15 @@ export default function Onboarding() {
   const [createSite, { isLoading: creatingSite }] = useCreateSiteMutation();
   const [generateOnboardingCopy] = useGenerateOnboardingCopyMutation();
 
-  // step 1
+  // step 1 (referral)
+  const [referralSources, setReferralSources] = useState<ReferralSource[]>([]);
+
+  // step 2 (workspace)
   const [wsName, setWsName] = useState("");
   const [wsId, setWsId] = useState<string | null>(restored.wsId);
   const [wsError, setWsError] = useState<string | null>(null);
 
-  // step 2
+  // steps 3-4 (site, framework)
   const [siteName, setSiteName] = useState("");
   const [domain, setDomain] = useState("");
   const [framework, setFramework] = useState<FrameworkId>("html");
@@ -132,7 +153,7 @@ export default function Onboarding() {
   const [siteError, setSiteError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
-  // step 3
+  // step 5 (install)
   const [site, setSite] = useState<Site | null>(restored.site);
   const [aiCopy, setAiCopy] = useState<{ readyHeadline: string; readyDescription: string } | null>(null);
 
@@ -185,6 +206,17 @@ export default function Onboarding() {
     nav(workspaceOnly ? "/app/workspaces" : "/app");
   };
 
+  const submitReferral = async () => {
+    trace(user?.id, "onboarding_referral_saved", "onboarding", "referral");
+    try {
+      if (referralSources.length) await updateProfile({ referralSources });
+    } catch {
+      // Not worth blocking setup over — the account still gets everything
+      // else it needs regardless of whether this saved.
+    }
+    setStep(WORKSPACE_STEP);
+  };
+
   const submitWorkspace = async () => {
     const err = v.all(
       v.required("Workspace name"),
@@ -198,18 +230,23 @@ export default function Onboarding() {
       const ws = await createWorkspace({ name: wsName.trim() }).unwrap();
       setWsId(ws._id);
       setActive(ws._id);
-      setStep(2);
+      setStep(SITE_STEP);
     } catch (e) {
       notifyError(e, "Could not create the workspace.");
     }
   };
 
-  const submitSite = async () => {
+  const submitSiteDetails = () => {
     const nErr = v.all(v.required("Site name"), v.maxLength("Site name", 60))(siteName);
     const dErr = v.domain(domain);
     setSiteError(nErr);
     setDomainError(dErr);
-    if (nErr || dErr || !wsId) return;
+    if (nErr || dErr) return;
+    setStep(FRAMEWORK_STEP);
+  };
+
+  const submitFramework = async () => {
+    if (!wsId) return;
 
     trace(user?.id, "onboarding_site_created", "onboarding", "site");
     try {
@@ -254,19 +291,25 @@ export default function Onboarding() {
    * flow — a stepper promising a step that never arrives is worse than one
    * step shorter.
    */
-  const displaySteps = workspaceOnly ? STEPS.filter((_, i) => i !== 0) : STEPS;
+  const displaySteps = workspaceOnly
+    ? STEPS.filter((_, i) => i !== 0 && i !== REFERRAL_STEP)
+    : STEPS;
   const displayStep = workspaceOnly
-    ? STEPS.slice(0, step).filter((_, i) => i !== 0).length
+    ? STEPS.slice(0, step).filter((_, i) => i !== 0 && i !== REFERRAL_STEP).length
     : step;
   const current = STEPS[step];
   const wide = current?.wide;
   const tall = current?.tall;
 
   const footer =
-    step === 1 ? (
+    step === REFERRAL_STEP ? (
+      <ReferralStepFooter onSkip={submitReferral} onSubmit={submitReferral} />
+    ) : step === WORKSPACE_STEP ? (
       <WorkspaceStepFooter loading={creatingWs} onSubmit={submitWorkspace} />
-    ) : step === 2 ? (
-      <SiteStepFooter loading={creatingSite} onBack={() => setStep(1)} onSubmit={submitSite} />
+    ) : step === SITE_STEP ? (
+      <SiteStepFooter onBack={() => setStep(WORKSPACE_STEP)} onSubmit={submitSiteDetails} />
+    ) : step === FRAMEWORK_STEP ? (
+      <FrameworkStepFooter loading={creatingSite} onBack={() => setStep(SITE_STEP)} onSubmit={submitFramework} />
     ) : step === INSTALL_STEP && site ? (
       <ReadyStepFooter onContinue={() => setStep(APPEARANCE_STEP)} />
     ) : null;
@@ -306,10 +349,14 @@ export default function Onboarding() {
           <div style={{ marginTop: "2rem" }}>
     
             {step === 0 && (
-              <ProfileStep onDone={() => (workspaces.length ? done() : setStep(1))} />
+              <ProfileStep onDone={() => (workspaces.length ? done() : setStep(REFERRAL_STEP))} />
             )}
 
-            {step === 1 && (
+            {step === REFERRAL_STEP && (
+              <ReferralStepBody selected={referralSources} onChange={setReferralSources} />
+            )}
+
+            {step === WORKSPACE_STEP && (
               <WorkspaceStepBody
                 wsName={wsName}
                 wsError={wsError}
@@ -321,7 +368,7 @@ export default function Onboarding() {
               />
             )}
 
-            {step === 2 && (
+            {step === SITE_STEP && (
               <SiteStepBody
                 siteName={siteName}
                 siteError={siteError}
@@ -337,9 +384,11 @@ export default function Onboarding() {
                 }}
                 purpose={purpose}
                 onPurposeChange={setPurpose}
-                framework={framework}
-                onFrameworkChange={setFramework}
               />
+            )}
+
+            {step === FRAMEWORK_STEP && (
+              <FrameworkStepBody framework={framework} onFrameworkChange={setFramework} />
             )}
 
             {step === INSTALL_STEP && site && (

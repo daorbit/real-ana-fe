@@ -2,6 +2,13 @@ import type { TrackerOptions } from "@/features/workspace/tracker";
 
 export type Role = "super_admin" | "admin" | "user";
 
+export const REFERRAL_SOURCES = [
+  "search", "social", "podcast", "streaming", "email", "word_of_mouth",
+  "friend_colleague", "youtube", "blog_article", "community", "online_ad",
+  "review_site", "other",
+] as const;
+export type ReferralSource = (typeof REFERRAL_SOURCES)[number];
+
 export type User = {
   id: string;
   email: string;
@@ -13,6 +20,9 @@ export type User = {
   dateLocale: string;
   /** IANA zone, e.g. "Asia/Kolkata". Empty means "follow the browser". */
   timezone: string;
+  /** Where this signup says they heard about the product. Asked once, in
+   *  onboarding — multi-select, so more than one channel can be true. */
+  referralSources?: ReferralSource[];
   role: Role;
   /** True once the account has signed in with Google at least once. */
   googleLinked?: boolean;
@@ -57,7 +67,7 @@ export type User = {
 
 /** Fields the settings form can change. Email and role are not among them. */
 export type ProfileUpdate = Partial<
-  Pick<User, "firstName" | "lastName" | "mobile" | "avatarUrl" | "dateLocale" | "timezone">
+  Pick<User, "firstName" | "lastName" | "mobile" | "avatarUrl" | "dateLocale" | "timezone" | "referralSources">
 >;
 
 /** Which panels a public shared dashboard shows. */
