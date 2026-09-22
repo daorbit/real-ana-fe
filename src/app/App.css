@@ -877,11 +877,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   cursor: pointer;
 }
 
-
-/* The rail rows.
-   Held to the pattern the rest of the category settled on: one row height, a
-   quiet hover, and an active row marked by an accent wash that fades out to
-   the right, plus an accent icon. */
 .nav-link {
   position: relative;
   border-radius: 8px;
@@ -905,9 +900,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--text);
 }
 
-/* The current row is marked by a flat neutral pill rather than an accent wash:
-   with this many rows on screen a coloured band on one of them reads as a
-   status, not as "you are here". */
+
 .nav-link[data-active="true"] {
   color: var(--text);
   font-weight: 600;
@@ -918,8 +911,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--text);
 }
 
-/* Counts and other trailing marks on a row — pushed to the far edge and kept
-   quiet so they never compete with the label. */
 .nav-link-meta {
   margin-left: auto;
   flex-shrink: 0;
@@ -972,20 +963,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-/* The Orbit banner at the foot of the rail.
 
-   Promotional rather than navigational — this is our own assistant being put
-   forward, not another destination in the list — so it carries a moving wash
-   the flat nav rows deliberately do not. */
 .rail-orbit {
-  /*
-   * Orbit's own ramp, on the border only — the same treatment its composer
-   * uses on its page (`orbitPage.module.css`), so the two read as one product.
-   *
-   * Hard-coded rather than built from `--violet`: the theme redefines that
-   * token to the workspace accent, green here, so a token-built version came
-   * out as a flat green slab.
-   */
+
   --rail-orbit-edge: linear-gradient(
     90deg,
     #8b5cf6 0%,
@@ -1009,9 +989,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: 12px;
   color: var(--text);
 
-  /* The fill stays the rail's own surface and only the edge is painted: two
-     layers, the inner one clipped to the padding box and the ramp to the
-     border box. */
+
   border: 1.5px solid transparent;
   background:
     linear-gradient(var(--surface), var(--surface)) padding-box,
@@ -1020,9 +998,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   animation: rail-orbit-drift 9s linear infinite;
 }
 
-/* Only the edge moves; the fill underneath stays put. No blurred glow layer
-   behind the card — that bled onto the rail around it regardless of theme,
-   which read as a stray light rather than an accent on the card itself. */
+ 
 @keyframes rail-orbit-drift {
   from { background-position: 0 0, 0% 50%; }
   to { background-position: 0 0, 100% 50%; }
@@ -1056,9 +1032,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   margin-bottom: 8px !important;
 }
 
-/* The `!important` here is not emphasis — it is what lets these values beat
-   the same-property declarations on the element above, which themselves exist
-   to beat the card's inline style. */
+ 
 @keyframes rail-orbit-fade-out {
   0% {
     opacity: 1;
@@ -1087,12 +1061,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-/* A plan card's button in a state that cannot be pressed — the plan you are
-   already on, or one whose features a higher plan already includes.
-
-   Mantine drops the variant's fill when a button is disabled, which left these
-   as floating text with no edge. The outline gives the button its shape back
-   while staying visibly inert. */
 .plan-cta--resting:disabled,
 .plan-cta--resting[data-disabled] {
   background: transparent;
@@ -1132,36 +1100,35 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   white-space: nowrap;
 }
 
-/* A workspace's initial on a flat color tile — it has no logo of its own. */
+/* A workspace's robot mark — a fixed asset, not a colour tile, so nothing
+   here depends on the workspace's name or id beyond picking which file. */
 .ws-menu__mark {
   display: grid;
   place-items: center;
   width: 24px;
   height: 24px;
   border-radius: 6px;
+  overflow: hidden;
   flex-shrink: 0;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
+  background: var(--surface-2);
+}
+
+.ws-menu__mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .ws-menu__name--active {
   font-weight: 600;
 }
 
-/* The shortcut that reaches this row. Quiet: it is a reminder for next time,
-   not something to read while choosing. */
 .ws-menu__hint {
   font-size: 11px;
   color: var(--muted);
   white-space: nowrap;
 }
 
-
-/* The palette opener, drawn as a filled field rather than an outlined one:
-   the rail carries no borders now, and an outline here would be the only rule
-   on the whole surface. */
 .rail-search {
   padding: 6px 8px;
   border-radius: 8px;
@@ -1174,15 +1141,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-/* The workspace row at the top of the rail: mark, name, member count, and the
-   control that opens the switcher — the reference's header block. */
 .rail-workspace {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  /* Sized to the reference's header block: the mark plus a two-line stack of
-     name and role, which lands at ~40px of content. */
   min-height: 40px;
   padding: 4px 8px;
   border-radius: 8px;
