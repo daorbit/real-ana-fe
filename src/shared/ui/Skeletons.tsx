@@ -568,6 +568,67 @@ export function CompareSkeleton() {
   );
 }
 
+export function BrandingSkeleton() {
+  return (
+    <Grid gap="lg" mt="md">
+      <Grid.Col span={{ base: 12, lg: 8 }}>
+        <Stack gap="lg">
+          <Card withBorder radius="md" padding="lg">
+            <Stack gap="md">
+              <Skeleton height={15} width={110} radius="sm" />
+
+              <div>
+                <Skeleton height={12} width={40} radius="sm" />
+                <Skeleton height={10} width={220} mt={8} radius="sm" />
+                <Skeleton height={36} mt={8} radius="sm" />
+              </div>
+
+              <div>
+                <Skeleton height={12} width={40} radius="sm" />
+                <Skeleton height={10} width={260} mt={8} radius="sm" />
+                <Skeleton height={36} width={170} mt={8} radius="md" />
+              </div>
+
+              <div>
+                <Skeleton height={12} width={90} radius="sm" />
+                <Skeleton height={10} width={210} mt={8} radius="sm" />
+                <Skeleton height={36} mt={8} radius="sm" />
+              </div>
+            </Stack>
+          </Card>
+
+          <Card withBorder radius="md" padding="lg">
+            <Stack gap="md">
+              <Skeleton height={15} width={90} radius="sm" />
+              <Skeleton height={1} />
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Group key={i} justify="space-between" wrap="nowrap" gap="md">
+                  <div style={{ flex: 1 }}>
+                    <Skeleton height={12} width="45%" radius="sm" />
+                    <Skeleton height={10} width="80%" mt={8} radius="sm" />
+                  </div>
+                  <Skeleton height={20} width={36} radius="xl" />
+                </Group>
+              ))}
+            </Stack>
+          </Card>
+        </Stack>
+      </Grid.Col>
+
+      <Grid.Col span={{ base: 12, lg: 4 }}>
+        <Card withBorder radius="md" padding="md">
+          <Group justify="center" gap={0} mb="md">
+            <Skeleton height={30} width="50%" radius="sm" />
+            <Skeleton height={30} width="50%" radius="sm" />
+          </Group>
+          <Skeleton height={10} width={90} radius="sm" mx="auto" mb="md" />
+          <Skeleton height={420} radius="lg" mx="auto" style={{ maxWidth: 240 }} />
+        </Card>
+      </Grid.Col>
+    </Grid>
+  );
+}
+
 /** Full-screen boot state, shown while the session is being restored. */
 export function AppBootSkeleton() {
   return <SwitchVisual sublabel="Restoring your session…" />;

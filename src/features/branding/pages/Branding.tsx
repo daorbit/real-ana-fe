@@ -13,15 +13,9 @@ import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
 import { BrandingPreview } from "../components/BrandingPreview";
 import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
+import { BrandingSkeleton } from "@/shared/ui/Skeletons";
 
-/**
- * What the people a workspace collects from actually see.
- *
- * One screen rather than a setting per surface: the name on a payment window,
- * the caption under a public form and the footer of a notification email are
- * the same claim about who is asking, and splitting them is how a workspace
- * ends up half-rebranded.
- */
+
 export default function BrandingPage() {
   useTitle("Branding");
   const { active } = useWorkspace();
@@ -36,14 +30,10 @@ export default function BrandingPage() {
   const [accentColor, setAccentColor] = useState("");
   const [hidePoweredBy, setHidePoweredBy] = useState(false);
   const [watermarkAiImages, setWatermarkAiImages] = useState(true);
-  // Whether the logo URL actually resolves. A broken link is worth saying here
-  // rather than leaving someone to find a missing image on a payment window.
+
   const [logoBroken, setLogoBroken] = useState(false);
   const [picking, setPicking] = useState(false);
 
-  // Seeded from what the workspace stored, not from the resolved values: a free
-  // workspace's fields would otherwise fill with our own name, and saving would
-  // silently adopt it as theirs.
   useEffect(() => {
     if (!data) return;
     setName(data.stored.name ?? "");
@@ -99,6 +89,9 @@ export default function BrandingPage() {
         }
       />
 
+      {isLoading ? (
+        <BrandingSkeleton />
+      ) : (
       <Grid gap="lg" mt="md">
         <Grid.Col span={{ base: 12, lg: 8 }}>
       <Stack gap="lg">
@@ -157,17 +150,13 @@ export default function BrandingPage() {
               maxLength={60}
             />
 
-            {/* Picked from the library rather than typed: a logo is a file the
-                workspace owns, and a pasted URL is one nobody can re-find when
-                it breaks. */}
             <Input.Wrapper
               label="Logo"
               description="A square image. Razorpay loads it from the payer's browser."
               error={logoUrl && logoBroken ? "That image could not be loaded." : undefined}
             >
               <Group gap="sm" mt={6}>
-                {/* The chosen file, at the size it is actually used. The phone
-                    mock shows it in context; this says which file it is. */}
+           
                 {logoUrl && !logoBroken && (
                   <Box
                     style={{
@@ -211,9 +200,6 @@ export default function BrandingPage() {
               </Group>
             </Input.Wrapper>
 
-            {/* A hidden <img> rather than a visible thumbnail: the phone mock
-                beside these fields already shows the logo, but it only reports a
-                failure if something is watching for one. */}
             {logoUrl && (
               <img
                 src={logoUrl}
@@ -260,16 +246,12 @@ export default function BrandingPage() {
       </Stack>
         </Grid.Col>
 
-        {/* The preview is sticky: the fields below it are what change it, and
-            scrolling to a colour picker should not scroll the thing it
-            colours off the screen. */}
         <Grid.Col span={{ base: 12, lg: 4 }}>
           <Card
             withBorder
             radius="md"
             padding="md"
-            // Tall enough for the phone and no taller: a fixed height left a
-            // band of empty card under it on wide screens.
+
             style={{ position: "sticky", top: 16, height: "fit-content" }}
           >
             <BrandingPreview
@@ -284,6 +266,7 @@ export default function BrandingPage() {
           </Card>
         </Grid.Col>
       </Grid>
+      )}
 
       <MediaPickerModal
         opened={picking}

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActionIcon, Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
+  ActionIcon, Anchor, Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
+import { Link } from "react-router-dom";
 import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
@@ -15,13 +16,10 @@ import {
   useDeleteSentPostMutation, useGetScheduledPostsQuery, useGetSentPostsQuery,
   useGetWorkspaceUsageQuery,
 } from "@/app/store";
-import { useLinkedInConnect } from "@/features/social/useLinkedInConnect";
-import { useInstagramConnect } from "@/features/social/useInstagramConnect";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth, useCanUseInstagram } from "@/features/auth/context";
 import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
-import { ConnectPrompt } from "@/features/social/components/ConnectPrompt";
 import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
@@ -96,13 +94,6 @@ export default function SocialPosts() {
   );
   /** A post that just changed time, so its row can say so where someone is looking. */
   const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
-
-  // Connecting happens in a popup, so this page — and any half-written draft —
-  // survives the round trip. Disconnecting is not offered here: it lives with
-  // the connection's own settings rather than on the page that depends on it.
-  const { connect, connecting } = useLinkedInConnect(refetch);
-  const { connect: connectInstagram, connecting: connectingInstagram } =
-    useInstagramConnect(refetch);
 
   // The zone the schedule is written in. Taken from the browser so "9am" means
   // 9am where the author is, which is what the server stores and honours.
@@ -396,22 +387,22 @@ export default function SocialPosts() {
 
       {/* Not on the Sent shelf: it reads history, which stands whether or not
           the connection is currently live, and a prompt to reconnect above a
-          list of posts that plainly went out reads as though they had not. */}
+          list of posts that plainly went out reads as though they had not.
+          Connecting itself lives on Settings → Connections, not here — this
+          is just a pointer to it. */}
       {!isLoading && !ready && !onSent && (
-        <ConnectPrompt
-          linkedin={linkedin}
-          instagram={instagram}
-          showInstagram={canUseInstagram}
-          connecting={connecting || connectingInstagram}
-          onConnect={() => {
-            trace(user?.id, "connect_linkedin", "social_posts", "linkedin_oauth_popup");
-            connect();
-          }}
-          onConnectInstagram={() => {
-            trace(user?.id, "connect_instagram", "social_posts", "instagram_oauth_popup");
-            connectInstagram();
-          }}
-        />
+        <Text size="sm" c="dimmed" mb="lg">
+          No account connected yet.{" "}
+          <Anchor
+            component={Link}
+            to="/app/settings?tab=connections"
+            size="sm"
+            onClick={() => trace(user?.id, "connect_account_from_social_posts", "social_posts", "settings_connections")}
+          >
+            Connect LinkedIn or Instagram
+          </Anchor>{" "}
+          to publish from here.
+        </Text>
       )}
 
       {/* Checked before the loader and the empty state, both of which speak for

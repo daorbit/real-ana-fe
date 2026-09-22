@@ -698,8 +698,14 @@ export default function Orbit() {
     reader.readAsDataURL(file);
   };
 
+
   const onFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
-    acceptImage(e.currentTarget.files?.[0]);
+    const file = e.currentTarget.files?.[0];
+    if (file && SUPPORTED_DOCUMENT_MIME.has(file.type)) {
+      acceptDocument(file);
+    } else {
+      acceptImage(file);
+    }
     // Cleared so picking the same file twice in a row still fires onChange.
     e.currentTarget.value = "";
   };
@@ -745,11 +751,6 @@ export default function Orbit() {
     };
     reader.onerror = () => setDocumentError("Couldn't read that file.");
     reader.readAsDataURL(file);
-  };
-
-  const onDocumentPicked = (e: React.ChangeEvent<HTMLInputElement>) => {
-    acceptDocument(e.currentTarget.files?.[0]);
-    e.currentTarget.value = "";
   };
 
 
@@ -926,41 +927,23 @@ export default function Orbit() {
 
         <div className={classes.composerFoot}>
           <Group gap={4} wrap="nowrap">
+            {/* One picker for both kinds of attachment — an image or a
+                document — routed by mime type in onFilePicked. */}
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,.pdf,.docx,.csv,.txt,application/pdf,text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               hidden
               onChange={onFilePicked}
             />
-            <input
-              ref={documentInputRef}
-              type="file"
-              accept=".pdf,.docx,.csv,.txt,application/pdf,text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              hidden
-              onChange={onDocumentPicked}
-            />
-            <Tooltip label="Attach an image" withArrow>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                radius="xl"
-                size="md"
-                disabled={thinking || imageMode || !!pendingDocument}
-                onClick={() => fileInputRef.current?.click()}
-                aria-label="Attach an image"
-              >
-                <ImagePlus size={15} />
-              </ActionIcon>
-            </Tooltip>
             <Tooltip label="Attach a file" withArrow>
               <ActionIcon
                 variant="subtle"
                 color="gray"
                 radius="xl"
                 size="md"
-                disabled={thinking || imageMode || !!pendingImage}
-                onClick={() => documentInputRef.current?.click()}
+                disabled={thinking || imageMode || !!pendingImage || !!pendingDocument}
+                onClick={() => fileInputRef.current?.click()}
                 aria-label="Attach a file"
               >
                 <Paperclip size={15} />
