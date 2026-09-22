@@ -1,19 +1,11 @@
-import { Group, Text, TextInput, Select } from "@mantine/core";
-import { Search } from "lucide-react";
+import { useState } from "react";
+import {
+  Combobox, Group, Text, TextInput, UnstyledButton, useCombobox,
+} from "@mantine/core";
+import { ChevronDown, Search } from "lucide-react";
 import { DIAL_CODES, type DialCode } from "@/shared/lib/dialCodes";
 
-/**
- * A phone field with an explicit country.
- *
- * The country is a separate control rather than something parsed out of what
- * the user types: a number saved without a country code is unusable for
- * WhatsApp delivery, and asking people to remember to type "+91" reliably
- * produces numbers that are missing it.
- *
- * The two halves are stored separately and only joined on save, so a local
- * number that starts with 0 (as most people write theirs) can be stripped in
- * one place instead of guessed at later.
- */
+
 export function PhoneInput({
   country,
   onCountry,
@@ -33,19 +25,23 @@ export function PhoneInput({
   description?: string;
   autoFocus?: boolean;
 }) {
-  /**
-   * Keyed by ISO rather than dial code — US and CA are both "1", and a value
-   * that isn't unique leaves the Select unable to show which one is picked.
-   *
-   * The label is the dial code alone, because Mantine echoes it into the closed
-   * input: a label carrying the country name too would truncate to "+1 U…" at
-   * the width a phone field can spare, which reads as a rendering fault. The
-   * name is put back in `renderOption` for the dropdown, and searching is
-   * widened to cover it below.
-   */
-  const data = DIAL_CODES.map((c) => ({ value: c.iso, label: `+${c.dial}` }));
-
+ 
   const nameFor = (iso: string) => DIAL_CODES.find((c) => c.iso === iso)?.name ?? "";
+
+  const combobox = useCombobox({
+    onDropdownClose: () => combobox.resetSelectedOption(),
+  });
+  const [search, setSearch] = useState("");
+
+  const results = (() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return DIAL_CODES;
+    return DIAL_CODES.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        `${c.dial}`.startsWith(q.replace("+", ""))
+    );
+  })();
 
   return (
     <div>
@@ -60,46 +56,60 @@ export function PhoneInput({
         </Text>
       )}
       <Group gap="xs" align="flex-start" wrap="nowrap">
-        <Select
-          size="md"
-          w={116}
-          searchable
-          allowDeselect={false}
-          data={data}
-          value={country.iso}
-          onChange={(v) => {
-            const hit = DIAL_CODES.find((c) => c.iso === v);
+        <Combobox
+          store={combobox}
+          width={280}
+          position="bottom-start"
+          onOptionSubmit={(iso) => {
+            const hit = DIAL_CODES.find((c) => c.iso === iso);
             if (hit) onCountry(hit);
+            setSearch("");
+            combobox.closeDropdown();
           }}
-          // The dropdown gets the country name back; the closed input keeps the
-          // bare dial code from `data`.
-          renderOption={({ option }) => (
-            <Group gap={8} wrap="nowrap" justify="space-between" w="100%">
-              <Text size="sm">{nameFor(option.value)}</Text>
-              <Text size="sm" c="dimmed" fw={500}>{option.label}</Text>
-            </Group>
-          )}
-          // Searching has to cover the name too, since it is no longer in the
-          // label Mantine filters on — typing "india" would otherwise find
-          // nothing unless you knew the code already.
-          filter={({ options, search }) => {
-            const q = search.trim().toLowerCase();
-            if (!q) return options;
-            return (options as { value: string; label: string }[]).filter(
-              (o) =>
-                nameFor(o.value).toLowerCase().includes(q) ||
-                o.label.replace("+", "").startsWith(q.replace("+", ""))
-            );
-          }}
-          // Placeholder only shows once the field is cleared for typing (i.e.
-          // the dropdown is open and search has taken over) — it's the cue
-          // that this box searches rather than just displaying the code.
-          placeholder="Search country"
-          leftSection={<Search size={14} style={{ color: "var(--muted)" }} />}
-          styles={{ input: { fontWeight: 500 } }}
-          comboboxProps={{ width: 280, position: "bottom-start" }}
-          aria-label="Country code"
-        />
+        >
+          <Combobox.Target>
+            <UnstyledButton
+              className="mantine-Input-input"
+              onClick={() => combobox.toggleDropdown()}
+              aria-label="Country code"
+              style={{
+                width: 84,
+                height: "var(--input-height, 2.625rem)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 10px",
+                fontWeight: 500,
+              }}
+            >
+              +{country.dial}
+              <ChevronDown size={14} style={{ color: "var(--muted)", flexShrink: 0 }} />
+            </UnstyledButton>
+          </Combobox.Target>
+
+          <Combobox.Dropdown>
+            <Combobox.Search
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
+              placeholder="Search country"
+              leftSection={<Search size={14} style={{ color: "var(--muted)" }} />}
+            />
+            <Combobox.Options mah={260} style={{ overflowY: "auto" }}>
+              {results.length === 0 ? (
+                <Combobox.Empty>No matches</Combobox.Empty>
+              ) : (
+                results.map((c) => (
+                  <Combobox.Option value={c.iso} key={c.iso} active={c.iso === country.iso}>
+                    <Group gap={8} wrap="nowrap" justify="space-between" w="100%">
+                      <Text size="sm">{nameFor(c.iso)}</Text>
+                      <Text size="sm" c="dimmed" fw={500}>+{c.dial}</Text>
+                    </Group>
+                  </Combobox.Option>
+                ))
+              )}
+            </Combobox.Options>
+          </Combobox.Dropdown>
+        </Combobox>
         <TextInput
           size="md"
           style={{ flex: 1 }}
@@ -108,9 +118,6 @@ export function PhoneInput({
           autoComplete="tel-national"
           value={local}
           error={error}
-          // Digits and spaces only: everything else is punctuation people add
-          // out of habit, and stripping it here means the value is already
-          // clean by the time it is saved.
           onChange={(e) => onLocal(e.currentTarget.value.replace(/[^\d\s]/g, ""))}
           data-autofocus={autoFocus || undefined}
         />
@@ -119,15 +126,11 @@ export function PhoneInput({
   );
 }
 
-/** Digits only, country code first — the shape the API and WhatsApp both want. */
 export function joinNumber(country: DialCode, local: string): string {
-  // A leading 0 is a domestic trunk prefix, not part of the number: "098765..."
-  // dialled internationally is wrong, and users type it constantly.
   const digits = local.replace(/[^\d]/g, "").replace(/^0+/, "");
   return `${country.dial}${digits}`;
 }
 
-/** Length is checked, not format — numbering plans vary too much to validate properly. */
 export function localNumberError(local: string): string | null {
   const digits = local.replace(/[^\d]/g, "").replace(/^0+/, "");
   if (!digits) return "Enter your mobile number";
