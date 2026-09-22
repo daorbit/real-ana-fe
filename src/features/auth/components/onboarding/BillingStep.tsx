@@ -95,7 +95,7 @@ export function BillingStep({
           </div>
         </div>
 
-        <div className={s.controls} style={{ overflowY: "auto" }}>
+        <div className={s.controls} style={{ flex: 1, overflowY: "auto" }}>
           {loading || !usage ? (
             <BillingSkeleton />
           ) : (
