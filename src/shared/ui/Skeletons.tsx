@@ -380,6 +380,63 @@ export function ReportsSkeleton() {
 }
 
 /**
+ * The pricing grid on its own: the heading and its controls, then the plan
+ * cards. This is everything `PlansTab` draws, and nothing else.
+ *
+ * Shared by the Billing page's skeleton and onboarding's, so the placeholder
+ * cannot drift from the real grid in one place and not the other.
+ */
+export function PlansGridSkeleton() {
+  return (
+    <div>
+      <Group justify="space-between" align="flex-start" wrap="nowrap" mb="lg">
+        <div>
+          <Skeleton height={19} width={80} radius="sm" />
+          <Skeleton height={11} width={300} mt={9} radius="sm" />
+        </div>
+        {/* Currency, billing cycle, and the refresh button. */}
+        <Group gap="sm" wrap="nowrap" visibleFrom="sm">
+          <Skeleton height={34} width={92} radius="md" />
+          <Skeleton height={34} width={210} radius="md" />
+          <Skeleton height={30} width={30} radius="md" />
+        </Group>
+      </Group>
+
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
+        {Array.from({ length: 3 }).map((_, i) => (
+          /*
+           * Sized to the plan card it stands in for, which carries an icon, a
+           * name and tagline, a price, a CTA, and a quota line above eight
+           * features. A shorter placeholder would be honest about knowing
+           * less, but it collapses to a fraction of the real height and the
+           * page jumps when the plans land — so the shape here tracks the real
+           * card's rather than being decorative.
+           */
+          <Card key={i} withBorder radius="lg" padding="lg">
+            <Skeleton height={34} width={34} radius="md" />
+            <Skeleton height={17} width="42%" mt="md" radius="sm" />
+            <Skeleton height={11} width="85%" mt={10} radius="sm" />
+            <Skeleton height={40} width="55%" mt={22} radius="sm" />
+            <Skeleton height={42} mt={26} radius="md" />
+
+            {/* The plan's headline quota, above the rule and the check list. */}
+            <Skeleton height={12} width="52%" mt={28} radius="sm" />
+            <Stack gap={13} mt={16}>
+              {Array.from({ length: 8 }).map((__, r) => (
+                <Group key={r} gap={10} wrap="nowrap" align="center">
+                  <Skeleton height={13} width={13} radius="sm" />
+                  <Skeleton height={10} width={`${84 - (r % 4) * 12}%`} radius="sm" />
+                </Group>
+              ))}
+            </Stack>
+          </Card>
+        ))}
+      </SimpleGrid>
+    </div>
+  );
+}
+
+/**
  * The Billing page while usage and the plan catalogue load.
  *
  * The usage panel is one wide card of side-by-side meters rather than separate
@@ -429,55 +486,7 @@ export function BillingSkeleton() {
         ))}
       </Group>
 
-      <div>
-        <Group justify="space-between" align="flex-start" wrap="nowrap" mb="lg">
-          <div>
-            <Skeleton height={19} width={80} radius="sm" />
-            <Skeleton height={11} width={300} mt={9} radius="sm" />
-          </div>
-          {/* Currency, billing cycle, and the refresh button. */}
-          <Group gap="sm" wrap="nowrap" visibleFrom="sm">
-            <Skeleton height={34} width={92} radius="md" />
-            <Skeleton height={34} width={210} radius="md" />
-            <Skeleton height={30} width={30} radius="md" />
-          </Group>
-        </Group>
-
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-          {Array.from({ length: 3 }).map((_, i) => (
-            /*
-             * Sized to the plan card it stands in for, which carries an icon, a
-             * name and tagline, a price, a CTA, and a quota line above eight
-             * features. A shorter placeholder would be honest about knowing
-             * less, but it collapses to a fraction of the real height and the
-             * page jumps when the plans land — so the shape here tracks the real
-             * card's rather than being decorative.
-             */
-            <Card key={i} withBorder radius="lg" padding="lg">
-              <Skeleton height={34} width={34} radius="md" />
-              <Skeleton height={17} width="42%" mt="md" radius="sm" />
-              <Skeleton height={11} width="85%" mt={10} radius="sm" />
-              <Skeleton height={40} width="55%" mt={22} radius="sm" />
-              <Skeleton height={42} mt={26} radius="md" />
-
-              {/* The plan's headline quota, above the rule and the check list. */}
-              <Skeleton height={12} width="52%" mt={28} radius="sm" />
-              <Stack gap={13} mt={16}>
-                {Array.from({ length: 8 }).map((__, r) => (
-                  <Group key={r} gap={10} wrap="nowrap" align="center">
-                    <Skeleton height={13} width={13} radius="sm" />
-                    <Skeleton
-                      height={10}
-                      width={`${84 - (r % 4) * 12}%`}
-                      radius="sm"
-                    />
-                  </Group>
-                ))}
-              </Stack>
-            </Card>
-          ))}
-        </SimpleGrid>
-      </div>
+      <PlansGridSkeleton />
     </Stack>
   );
 }

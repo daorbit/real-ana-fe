@@ -296,14 +296,33 @@ export default function Onboarding() {
     : step;
 
   if (step === APPEARANCE_STEP || step === BILLING_STEP) {
+    const wide = STEPS[step];
     return (
       <div className={`${s.shell} onb-form`}>
         <div className={s.wash} aria-hidden="true" />
         <header className={s.bar}>
           <Wordmark />
           <Stepper step={displayStep} steps={displaySteps} />
-          <div className={s.barEnd} />
+          <div className={s.barEnd}>
+            <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
+              Skip for now
+            </Anchor>
+          </div>
         </header>
+
+        {/* These two steps are full-bleed — a theme picker beside a preview, a
+            three-across pricing grid — so they cannot use the centred column
+            the other steps put their heading in, and until now they simply had
+            no heading at all. Every other screen in the flow says what it is
+            asking; landing on a wall of plan cards with nothing above it was
+            the one place that did not. */}
+        {wide && (
+          <div className={s.wideHead}>
+            <h1 className={s.wideTitle}>{wide.title}</h1>
+            <p className={s.wideLede}>{wide.lede}</p>
+          </div>
+        )}
+
         {step === APPEARANCE_STEP ? (
           <AppearanceStep onBack={() => setStep(INSTALL_STEP)} onDone={() => setStep(BILLING_STEP)} />
         ) : (

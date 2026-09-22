@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@mantine/core";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { BillingSkeleton } from "@/shared/ui/Skeletons";
+import { PlansGridSkeleton } from "@/shared/ui/Skeletons";
 import { useGetPlansQuery, useGetAddonPacksQuery, useGetWorkspaceUsageQuery } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
 import { priceIn } from "@/shared/lib/currency";
@@ -71,8 +71,12 @@ export function BillingStep({
   return (
     <div className={`onb-form ${s.page}`}>
       <div className={s.controls} style={{ flex: 1, overflowY: "auto" }}>
+        {/* The plans grid alone, not the whole Billing page's skeleton: that
+            one leads with a usage card and a row of three tabs, and this step
+            renders neither — so the placeholder promised two panels that never
+            arrived, then dropped them when the plans landed. */}
         {loading || !usage ? (
-          <BillingSkeleton />
+          <PlansGridSkeleton />
         ) : (
           <PlansTab
             plans={plans}

@@ -234,6 +234,49 @@
   margin-top: 2.25rem;
 }
 
+/* ------------------------------------------------------- wide step head --- */
+
+/* The heading for the two full-bleed steps, Appearance and Plan.
+ *
+ * Those lay out edge to edge — a picker beside a live preview, a three-across
+ * pricing grid — so they cannot sit in the 480px column the other steps put
+ * their heading in, and they were rendering with no heading at all.
+ *
+ * Smaller than `.title` and flush left with the content below it rather than
+ * centred: this is a label on a working screen, not the opening line of a
+ * short one, and at full size it would push the plan cards below the fold. */
+.wideHead {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 1.75rem 2.5rem 0;
+}
+
+.wideTitle {
+  font-size: 1.5rem;
+  font-weight: 640;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  color: var(--onb-ink);
+  margin: 0;
+}
+
+.wideLede {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--onb-ink-dim);
+  margin: 0.4rem 0 0;
+  max-width: 62ch;
+}
+
+/* Matched to `.page`'s own gutter in AppearanceStep.module.css, which both
+   wide steps share — the heading has to line up with the content under it. */
+@media (max-width: 48em) {
+  .wideHead { padding: 1.25rem 1.1rem 0; }
+  .wideTitle { font-size: 1.25rem; }
+  .wideLede { font-size: 0.88rem; }
+}
+
 /* ----------------------------------------------------------------- foot --- */
 
 /* Directly under the step's own content, inside the centred column — not a bar

@@ -6,7 +6,10 @@
   flex-direction: column;
   width: 100%;
   min-height: 0;
-  padding: 1.5rem 2.5rem 0;
+  /* Tighter at the top than the sides: the step's heading sits directly above
+     this (`.wideHead` in Onboarding.module.css) and brings its own spacing, so
+     a full gutter here opened a gap between the two. */
+  padding: 1.25rem 2.5rem 0;
 
   --auth-ink: rgba(255, 255, 255, 0.95);
   --auth-ink-dim: rgba(255, 255, 255, 0.72);
