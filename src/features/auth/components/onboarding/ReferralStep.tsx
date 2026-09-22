@@ -5,20 +5,20 @@ import {
 } from "lucide-react";
 import type { ReferralSource } from "@/shared/types";
 
-export const REFERRAL_OPTIONS: { value: ReferralSource; label: string; icon: typeof Search }[] = [
-  { value: "search", label: "Search engines", icon: Search },
-  { value: "social", label: "Social media", icon: Share2 },
-  { value: "youtube", label: "YouTube", icon: PlayCircle },
-  { value: "podcast", label: "Podcast or radio", icon: Mic },
-  { value: "streaming", label: "Streaming platforms", icon: Radio },
-  { value: "blog_article", label: "A blog or article", icon: Newspaper },
-  { value: "community", label: "A community", icon: Users },
-  { value: "review_site", label: "A review site", icon: Star },
-  { value: "online_ad", label: "An online ad", icon: Megaphone },
-  { value: "email", label: "Email", icon: Mail },
-  { value: "friend_colleague", label: "A friend or colleague", icon: UserRound },
-  { value: "word_of_mouth", label: "Word of mouth", icon: MessageCircleMore },
-  { value: "other", label: "Other", icon: MoreHorizontal },
+export const REFERRAL_OPTIONS: { value: ReferralSource; label: string; icon: typeof Search; color: string }[] = [
+  { value: "search", label: "Search engines", icon: Search, color: "#4285F4" },
+  { value: "social", label: "Social media", icon: Share2, color: "#E1306C" },
+  { value: "youtube", label: "YouTube", icon: PlayCircle, color: "#FF0000" },
+  { value: "podcast", label: "Podcast or radio", icon: Mic, color: "#8B5CF6" },
+  { value: "streaming", label: "Streaming platforms", icon: Radio, color: "#9146FF" },
+  { value: "blog_article", label: "A blog or article", icon: Newspaper, color: "#F59E0B" },
+  { value: "community", label: "A community", icon: Users, color: "#22C55E" },
+  { value: "review_site", label: "A review site", icon: Star, color: "#EAB308" },
+  { value: "online_ad", label: "An online ad", icon: Megaphone, color: "#F97316" },
+  { value: "email", label: "Email", icon: Mail, color: "#06B6D4" },
+  { value: "friend_colleague", label: "A friend or colleague", icon: UserRound, color: "#3B82F6" },
+  { value: "word_of_mouth", label: "Word of mouth", icon: MessageCircleMore, color: "#EC4899" },
+  { value: "other", label: "Other", icon: MoreHorizontal, color: "#6B7280" },
 ];
 
 
@@ -39,7 +39,7 @@ export function ReferralStepBody({
 
   return (
     <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
-      {REFERRAL_OPTIONS.map(({ value, label, icon: Icon }) => {
+      {REFERRAL_OPTIONS.map(({ value, label, icon: Icon, color }) => {
         const isSelected = selected.includes(value);
         return (
           <UnstyledButton
@@ -48,7 +48,15 @@ export function ReferralStepBody({
             data-selected={isSelected}
             aria-pressed={isSelected}
             onClick={() => toggle(value)}
-            style={{ position: "relative" }}
+            style={{
+              position: "relative",
+              ...(isSelected
+                ? {
+                    borderColor: color,
+                    background: `color-mix(in srgb, ${color} 14%, transparent)`,
+                  }
+                : undefined),
+            }}
           >
             {isSelected && (
               <span
@@ -63,14 +71,14 @@ export function ReferralStepBody({
                   width: 16,
                   height: 16,
                   borderRadius: "50%",
-                  background: "var(--accent-2)",
+                  background: color,
                   color: "#fff",
                 }}
               >
                 <Check size={11} strokeWidth={3} />
               </span>
             )}
-            <Icon size={20} />
+            <Icon size={20} color={color} />
             <Text size="sm" fw={isSelected ? 600 : 500}>
               {label}
             </Text>

@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
-import welcomeSrc from "@/assets/banners/Welcome.svg";
+import { Lottie } from "lottie-react";
+import welcomeAnimation from "@/assets/banners/Welcome.json";
 import "@/shared/ui/WelcomeOverlay.css";
 
 export const WELCOME_PENDING_KEY = "quantalog_welcome_pending";
 
-const DURATION = 3800;
+
+const HOLD_AFTER_FINISH = 900;
 
 export function consumeWelcomePending(): boolean {
   try {
@@ -20,20 +22,23 @@ export function consumeWelcomePending(): boolean {
 export function WelcomeOverlay({ name, onDone }: { name?: string; onDone: () => void }) {
   const [leaving, setLeaving] = useState(false);
 
-  useEffect(() => {
-    const leaveAt = setTimeout(() => setLeaving(true), DURATION - 400);
-    const doneAt = setTimeout(onDone, DURATION);
-    return () => {
-      clearTimeout(leaveAt);
-      clearTimeout(doneAt);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+  const finish = () => {
+    setLeaving(true);
+    setTimeout(onDone, 400);
+  };
 
   return createPortal(
     <div className="welcome-overlay" data-leaving={leaving || undefined} role="status" aria-live="polite">
       <div className="welcome-overlay__body">
-        <img src={welcomeSrc} alt="" className="welcome-overlay__art" aria-hidden />
+        <Lottie
+          src={welcomeAnimation}
+          loop={false}
+          autoplay
+          subscriptions={{ complete: () => setTimeout(finish, HOLD_AFTER_FINISH) }}
+          className="welcome-overlay__art"
+          aria-hidden
+        />
         <h1 className="welcome-overlay__title">
           {name ? `Welcome, ${name}.` : "Welcome."}
         </h1>
