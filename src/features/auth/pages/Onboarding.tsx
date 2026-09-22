@@ -82,7 +82,11 @@ const SLUGS = ["details", "referral", "workspace", "site", "framework", "install
 
 
 function furthestReachable(step: number, wsId: string | null, site: Site | null): number {
-  if (step >= FRAMEWORK_STEP && !site) return wsId ? SITE_STEP : WORKSPACE_STEP;
+  // The site itself isn't created until the framework step is submitted, so
+  // reaching FRAMEWORK_STEP only needs a workspace — requiring `site` here
+  // clamped the flow straight back to SITE_STEP the instant it arrived,
+  // before the site could ever be created.
+  if (step >= INSTALL_STEP && !site) return wsId ? FRAMEWORK_STEP : WORKSPACE_STEP;
   if (step >= WORKSPACE_STEP && !wsId) return WORKSPACE_STEP;
   return step;
 }

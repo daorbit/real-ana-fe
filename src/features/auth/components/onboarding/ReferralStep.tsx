@@ -1,24 +1,33 @@
-import { Button, Checkbox, Group, Stack } from "@mantine/core";
-import { ArrowRight } from "lucide-react";
+import { Button, Group, SimpleGrid, Text, UnstyledButton } from "@mantine/core";
+import {
+  ArrowRight, Search, Share2, Youtube, Mic, Radio, Newspaper, Users,
+  Star, Megaphone, Mail, UserRound, MessageCircleMore, MoreHorizontal, Check,
+} from "lucide-react";
 import type { ReferralSource } from "@/shared/types";
 
-export const REFERRAL_OPTIONS: { value: ReferralSource; label: string }[] = [
-  { value: "search", label: "Search engines (Google, Bing, etc.)" },
-  { value: "social", label: "Social media (X, LinkedIn, Instagram, etc.)" },
-  { value: "youtube", label: "YouTube" },
-  { value: "podcast", label: "Podcast or radio" },
-  { value: "streaming", label: "Streaming platforms (Twitch, YouTube Live, etc.)" },
-  { value: "blog_article", label: "A blog or article" },
-  { value: "community", label: "A community (Reddit, Discord, Slack, etc.)" },
-  { value: "review_site", label: "A review site (G2, Capterra, etc.)" },
-  { value: "online_ad", label: "An online ad" },
-  { value: "email", label: "Email" },
-  { value: "friend_colleague", label: "A friend or colleague" },
-  { value: "word_of_mouth", label: "Word of mouth" },
-  { value: "other", label: "Other" },
+export const REFERRAL_OPTIONS: { value: ReferralSource; label: string; icon: typeof Search }[] = [
+  { value: "search", label: "Search engines", icon: Search },
+  { value: "social", label: "Social media", icon: Share2 },
+  { value: "youtube", label: "YouTube", icon: Youtube },
+  { value: "podcast", label: "Podcast or radio", icon: Mic },
+  { value: "streaming", label: "Streaming platforms", icon: Radio },
+  { value: "blog_article", label: "A blog or article", icon: Newspaper },
+  { value: "community", label: "A community", icon: Users },
+  { value: "review_site", label: "A review site", icon: Star },
+  { value: "online_ad", label: "An online ad", icon: Megaphone },
+  { value: "email", label: "Email", icon: Mail },
+  { value: "friend_colleague", label: "A friend or colleague", icon: UserRound },
+  { value: "word_of_mouth", label: "Word of mouth", icon: MessageCircleMore },
+  { value: "other", label: "Other", icon: MoreHorizontal },
 ];
 
-/** Title and lede live on the shell — this is the step's controls only. */
+/**
+ * The "how did you hear about us" picker, as a tile grid rather than a list of
+ * checkboxes — a plain checkbox list of thirteen rows read as a form to fill
+ * in correctly, when the honest answer is just "tap whichever apply." Tiles
+ * match the weight of the framework picker later in the same flow, so the two
+ * multi/single-select steps in this flow don't look like two different apps.
+ */
 export function ReferralStepBody({
   selected,
   onChange,
@@ -35,17 +44,46 @@ export function ReferralStepBody({
   };
 
   return (
-    <Stack gap="xs">
-      {REFERRAL_OPTIONS.map((opt) => (
-        <Checkbox
-          key={opt.value}
-          label={opt.label}
-          checked={selected.includes(opt.value)}
-          onChange={() => toggle(opt.value)}
-          size="md"
-        />
-      ))}
-    </Stack>
+    <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
+      {REFERRAL_OPTIONS.map(({ value, label, icon: Icon }) => {
+        const isSelected = selected.includes(value);
+        return (
+          <UnstyledButton
+            key={value}
+            className="tile onb-fw"
+            data-selected={isSelected}
+            aria-pressed={isSelected}
+            onClick={() => toggle(value)}
+            style={{ position: "relative" }}
+          >
+            {isSelected && (
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  background: "var(--accent-2)",
+                  color: "#fff",
+                }}
+              >
+                <Check size={11} strokeWidth={3} />
+              </span>
+            )}
+            <Icon size={20} />
+            <Text size="sm" fw={isSelected ? 600 : 500}>
+              {label}
+            </Text>
+          </UnstyledButton>
+        );
+      })}
+    </SimpleGrid>
   );
 }
 
@@ -59,7 +97,7 @@ export function ReferralStepFooter({
   return (
     <Group justify="flex-end" gap="sm">
       <Button variant="subtle" color="gray" onClick={onSkip}>
-        Skip
+        Prefer not to say
       </Button>
       <Button
         className="auth-btn"
