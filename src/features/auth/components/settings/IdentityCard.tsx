@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Avatar, Badge, Box, Button, Group, Text } from "@mantine/core";
-import { Trash2, Images } from "lucide-react";
+import { Trash2, Images, Sparkles } from "lucide-react";
 import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
+import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { useTranslation } from "react-i18next";
 import type { ProfileForm } from "./useProfileForm";
 
@@ -19,6 +20,7 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
     clearAvatar,
   } = form;
   const [picking, setPicking] = useState(false);
+  const [presetOpen, setPresetOpen] = useState(false);
 
   if (!user) return null;
 
@@ -76,6 +78,24 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
             >
               {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
             </Button>
+            <AvatarPresetPicker
+              opened={presetOpen}
+              onClose={() => setPresetOpen(false)}
+              onPick={(src) => {
+                setPresetOpen(false);
+                void pickAvatarFromLibrary(src, "avatar");
+              }}
+            >
+              <Button
+                size="xs"
+                variant="subtle"
+                leftSection={<Sparkles size={14} />}
+                disabled={avatarBusy}
+                onClick={() => setPresetOpen((v) => !v)}
+              >
+                Choose an avatar
+              </Button>
+            </AvatarPresetPicker>
             {avatarUrl && (
               <Button
                 size="xs"

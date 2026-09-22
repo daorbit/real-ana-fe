@@ -1,12 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Button, Group, Text, TextInput, Stack, Avatar, ActionIcon,
 } from "@mantine/core";
-import { ArrowRight, Camera, Trash2, UserRound } from "lucide-react";
+import { ArrowRight, Camera, Sparkles, Trash2, UserRound } from "lucide-react";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
+import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { PhoneInput, joinNumber, localNumberError } from "@/shared/ui/PhoneInput";
 import { useAuth } from "@/features/auth/context";
 import { guessCountry, splitNumber, type DialCode } from "@/shared/lib/dialCodes";
+import { randomPresetAvatar, fetchPresetAvatarBlob } from "@/shared/lib/presetAvatars";
 import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 
@@ -30,12 +32,44 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
 
   const [pending, setPending] = useState<File | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
+  const [presetOpen, setPresetOpen] = useState(false);
 
   const pickAvatar = (file: File | null) => {
     if (file) setPending(file);
     // Cleared so picking the same file twice still reopens the cropper — the
     // input fires no change event when the value hasn't moved.
     if (fileInput.current) fileInput.current.value = "";
+  };
+
+  // A brand-new account gets a random preset rather than a blank initial —
+  // this step is the first place any avatar could exist, so a fresh signup
+  // (no avatar yet, nothing chosen already this session) is the one case
+  // that means "just created."
+  const defaultedRef = useRef(false);
+  useEffect(() => {
+    if (defaultedRef.current || user?.avatarUrl) return;
+    defaultedRef.current = true;
+    void (async () => {
+      try {
+        const blob = await fetchPresetAvatarBlob(randomPresetAvatar());
+        await uploadAvatar(blob);
+      } catch {
+        // Silent: a missing default avatar is not worth interrupting signup for.
+      }
+    })();
+  }, [user?.avatarUrl, uploadAvatar]);
+
+  const pickPreset = async (src: string) => {
+    setPresetOpen(false);
+    setAvatarBusy(true);
+    try {
+      const blob = await fetchPresetAvatarBlob(src);
+      await uploadAvatar(blob);
+    } catch (e) {
+      notifyError(e, "Could not use that avatar.");
+    } finally {
+      setAvatarBusy(false);
+    }
   };
 
   const confirmAvatar = async (cropped: Blob) => {
@@ -113,21 +147,33 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
         <div style={{ minWidth: 0 }}>
           <Text size="sm" fw={500}>Profile photo</Text>
           <Text size="xs" c="dimmed" mt={2}>
-            Optional. JPG or PNG, up to 3MB.
+            Optional. JPG or PNG, up to 3MB — or pick one below.
           </Text>
-          {user?.avatarUrl && (
-            <Button
-              size="compact-xs"
-              variant="subtle"
-              color="red"
-              mt={6}
-              leftSection={<Trash2 size={12} />}
-              onClick={clearAvatar}
-              disabled={avatarBusy}
-            >
-              Remove
-            </Button>
-          )}
+          <Group gap="xs" mt={6}>
+            <AvatarPresetPicker opened={presetOpen} onClose={() => setPresetOpen(false)} onPick={(src) => void pickPreset(src)}>
+              <Button
+                size="compact-xs"
+                variant="light"
+                leftSection={<Sparkles size={12} />}
+                onClick={() => setPresetOpen((v) => !v)}
+                disabled={avatarBusy}
+              >
+                Choose an avatar
+              </Button>
+            </AvatarPresetPicker>
+            {user?.avatarUrl && (
+              <Button
+                size="compact-xs"
+                variant="subtle"
+                color="red"
+                leftSection={<Trash2 size={12} />}
+                onClick={clearAvatar}
+                disabled={avatarBusy}
+              >
+                Remove
+              </Button>
+            )}
+          </Group>
         </div>
       </Group>
 
