@@ -1,53 +1,34 @@
-/* The appearance step is the one onboarding screen that isn't a narrow form
-   column, so it owns its layout here rather than borrowing `.onb-col` — that
-   class carries a 460px cap meant for the steps before it, which collapsed
-   this screen's two columns to nothing. */
 
-.shell {
-  display: block;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  padding: 0;
 
-  /* `.auth-split` defines these on itself, and this step sits outside it. */
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  padding: 1.5rem 2.5rem 0;
+
   --auth-ink: rgba(255, 255, 255, 0.95);
   --auth-ink-dim: rgba(255, 255, 255, 0.72);
   --auth-line: rgba(255, 255, 255, 0.12);
   --auth-line-strong: rgba(255, 255, 255, 0.32);
 }
 
-:global([data-mantine-color-scheme="light"]) .shell {
+:global([data-mantine-color-scheme="light"]) .page {
   --auth-ink: rgba(17, 24, 39, 0.95);
   --auth-ink-dim: rgba(17, 24, 39, 0.72);
   --auth-line: #d7dbe2;
   --auth-line-strong: #8b93a3;
 }
 
-.page {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  padding: 2rem 2.5rem 0;
-}
-
-/* Pinned. The controls scroll underneath it — choosing a background halfway
-   down the list is pointless if the buttons have scrolled off the screen. */
-.head {
+.actionsRow {
   flex-shrink: 0;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 2rem;
   padding-bottom: 1.25rem;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--auth-line);
-}
-
-.headText {
-  min-width: 0;
 }
 
 .actions {
@@ -56,10 +37,7 @@
   flex-shrink: 0;
 }
 
-/* The controls take the larger share: the swatch grids are the widest thing
-   here and wrap badly when squeezed. The preview is capped rather than left
-   to grow — past ~760px the laptop mock is larger than it needs to be and
-   only steals width from the controls. */
+
 .grid {
   flex: 1;
   min-height: 0;
@@ -84,8 +62,6 @@
 }
 .controls::-webkit-scrollbar-thumb:hover { background: var(--auth-line-strong); }
 
-/* `useFitScale` measures the preview box, so this column has to be bounded in
-   both axes — an auto height leaves the mock nothing to fit against. */
 .aside {
   min-width: 0;
   min-height: 0;
@@ -100,8 +76,6 @@
   margin-top: 0.75rem;
 }
 
-/* Side by side, neither half gets usable width — the preview moves above the
-   controls and the whole column scrolls as one. */
 @media (max-width: 62em) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
@@ -123,9 +97,8 @@
 
 @media (max-width: 48em) {
   .page { padding: 1.25rem 1.1rem 0; }
-  .head {
-    flex-direction: column;
-    align-items: stretch;
+  .actionsRow {
+    justify-content: stretch;
     gap: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;

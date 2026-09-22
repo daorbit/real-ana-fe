@@ -288,20 +288,30 @@ export default function Onboarding() {
   };
 
 
-  if (step === APPEARANCE_STEP) {
-    return <AppearanceStep onBack={() => setStep(INSTALL_STEP)} onDone={() => setStep(BILLING_STEP)} />;
-  }
-  if (step === BILLING_STEP) {
-    return <BillingStep onBack={() => setStep(APPEARANCE_STEP)} onDone={done} />;
-  }
-
-
   const displaySteps = workspaceOnly
     ? STEPS.filter((_, i) => i !== 0 && i !== REFERRAL_STEP)
     : STEPS;
   const displayStep = workspaceOnly
     ? STEPS.slice(0, step).filter((_, i) => i !== 0 && i !== REFERRAL_STEP).length
     : step;
+
+  if (step === APPEARANCE_STEP || step === BILLING_STEP) {
+    return (
+      <div className={`${s.shell} onb-form`}>
+        <header className={s.bar}>
+          <Wordmark />
+          <Stepper step={displayStep} steps={displaySteps} />
+          <div className={s.barEnd} />
+        </header>
+        {step === APPEARANCE_STEP ? (
+          <AppearanceStep onBack={() => setStep(INSTALL_STEP)} onDone={() => setStep(BILLING_STEP)} />
+        ) : (
+          <BillingStep onBack={() => setStep(APPEARANCE_STEP)} onDone={done} />
+        )}
+      </div>
+    );
+  }
+
   const current = STEPS[step];
   const wide = current?.wide;
   const tall = current?.tall;
