@@ -45,7 +45,7 @@ export function LogoutDialog({
           </Text>
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onStay}>Stay</Button>
-            <Button color="emerald" onClick={onLogout}>Log out</Button>
+            <Button color="#c1443c" onClick={onLogout}>Log out</Button>
           </Group>
         </Stack>
       </Stack>
