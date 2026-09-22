@@ -1124,7 +1124,7 @@ export const api = createApi({
       providesTags: ["OrbitConversation"],
     }),
 
-    /** One saved conversation and its turns, for restoring it into the panel. */
+
     getOrbitConversation: build.query<
       {
         id: string;
@@ -1132,18 +1132,15 @@ export const api = createApi({
         messageCount: number;
         lastMessageAt: string;
         createdAt: string;
+        hasMore: boolean;
+        nextBefore: number | null;
         messages: {
           id: string;
           seq: number;
           role: "user" | "assistant";
           content: string;
-          /** Set on a user turn that attached an image — its Cloudinary URL. */
           imageUrl?: string;
           suggestions: string[];
-          /**
-           * The analytics snapshot the answer was based on, when it pulled one.
-           * Shape is validated by `isDataDigest` before rendering.
-           */
           dataDigest?: unknown;
           /** Pages a web search drew on, when the turn used one. */
           citations?: { url: string; title: string }[];
@@ -1153,10 +1150,12 @@ export const api = createApi({
           createdAt: string;
         }[];
       },
-      { workspaceId: string; conversationId: string }
+      { workspaceId: string; conversationId: string; before?: number }
     >({
-      query: ({ workspaceId, conversationId }) =>
-        `/api/workspaces/${workspaceId}/orbit/conversations/${conversationId}`,
+      query: ({ workspaceId, conversationId, before }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/conversations/${conversationId}`,
+        params: typeof before === "number" ? { before } : undefined,
+      }),
       providesTags: ["OrbitConversation"],
     }),
 

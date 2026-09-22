@@ -13,6 +13,8 @@ import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 
+const HISTORY_WINDOW = 30;
+
 type OrbitConversationSummary = {
   id: string;
   title: string;
@@ -34,18 +36,10 @@ export type OrbitMessage = {
   imageUrl?: string;
   /** Set when a send failed, so the bubble can render as an error. */
   failed?: boolean;
-  /**
-   * Set when the question was abandoned rather than answered.
-   *
-   * Distinct from `failed`: nothing went wrong, so it is not shown as a
-   * problem — but it is also not an answer, so it is kept out of the history
-   * posted to the model for the same reason a failure is.
-   */
+
   stopped?: boolean;
   suggestions?: string[];
   modelLabel?: string;
-  /** The tenant's 7-day figures as data, set only when this answer used them.
-   * Rendered as a table under the prose — see `DataDigestTable`. */
   dataDigest?: unknown;
   digestAt?: string;
   /** Pages a web search drew on, set only when the model actually used one. */
@@ -56,14 +50,6 @@ export type OrbitMessage = {
 
 export type PendingDocument = { name: string; mime: string; data: string };
 
-/**
- * Where the chosen model is remembered.
- *
- * The conversation itself is deliberately not persisted, but a preference is a
- * different thing: it is a setting, not content, and re-picking a model on
- * every page load is the kind of small friction that makes a feature feel
- * unfinished.
- */
 export const MODEL_KEY = "orbit.model";
 
 /** The model this browser picked, for callers outside the chat panel. */
@@ -209,8 +195,9 @@ export function useOrbitChat() {
       /** The transcript as it stands *before* this question's own turn. */
       history: OrbitMessage[];
     }) => {
-      const history = opts.history
 
+      const history = opts.history
+        .slice(-HISTORY_WINDOW)
         .filter((m) => !m.failed && !m.stopped)
         .map((m) => {
           let content = m.content;
@@ -423,30 +410,52 @@ export function useOrbitChat() {
     historyRef.current = [];
     conversationRef.current = null;
     setConversationId(null);
+    setOlderMessagesCursor(undefined);
   }, []);
 
+
+  /** Cursor for the next (older) page of the open conversation's messages;
+   * null once there is nothing further back, undefined before one is loaded. */
+  const [olderMessagesCursor, setOlderMessagesCursor] = useState<number | null | undefined>(
+    undefined,
+  );
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
+
+  const toOrbitMessage = (m: {
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+    imageUrl?: string;
+    failed: boolean;
+    suggestions: string[];
+    dataDigest?: unknown;
+    citations?: { url: string; title: string }[];
+    createdAt: string;
+    modelLabel?: string;
+  }): OrbitMessage => ({
+    id: m.id,
+    role: m.role,
+    content: m.content,
+    imageUrl: m.imageUrl,
+    failed: m.failed || undefined,
+    suggestions: m.suggestions.length ? m.suggestions : undefined,
+    dataDigest: m.dataDigest,
+    citations: m.citations,
+    digestAt: m.createdAt,
+    modelLabel: m.modelLabel,
+  });
 
   const openConversation = useCallback(
     async (id: string) => {
       if (!workspaceId) return;
       try {
         const convo = await fetchConversation({ workspaceId, conversationId: id }).unwrap();
-        const restored: OrbitMessage[] = convo.messages.map((m) => ({
-          id: m.id,
-          role: m.role,
-          content: m.content,
-          imageUrl: m.imageUrl,
-          failed: m.failed || undefined,
-          suggestions: m.suggestions.length ? m.suggestions : undefined,
-          dataDigest: m.dataDigest,
-          citations: m.citations,
-          digestAt: m.createdAt,
-          modelLabel: m.modelLabel,
-        }));
+        const restored = convo.messages.map(toOrbitMessage);
         setMessages(restored);
         historyRef.current = restored;
         conversationRef.current = convo.id;
         setConversationId(convo.id);
+        setOlderMessagesCursor(convo.hasMore ? convo.nextBefore : null);
         setInput("");
         setPendingImage(null);
       } catch {
@@ -456,6 +465,30 @@ export function useOrbitChat() {
     },
     [fetchConversation, workspaceId],
   );
+
+  const loadOlderMessages = useCallback(async () => {
+    const id = conversationRef.current;
+    if (!workspaceId || !id || !olderMessagesCursor || loadingOlderMessages) return;
+    setLoadingOlderMessages(true);
+    try {
+      const page = await fetchConversation({
+        workspaceId,
+        conversationId: id,
+        before: olderMessagesCursor,
+      }).unwrap();
+      const older = page.messages.map(toOrbitMessage);
+      setMessages((prev) => {
+        const next = [...older, ...prev];
+        historyRef.current = next;
+        return next;
+      });
+      setOlderMessagesCursor(page.hasMore ? page.nextBefore : null);
+    } catch {
+      // Leaves the cursor as-is — scrolling up again retries the same page.
+    } finally {
+      setLoadingOlderMessages(false);
+    }
+  }, [fetchConversation, workspaceId, olderMessagesCursor, loadingOlderMessages]);
 
   const removeSaved = useCallback(
     async (id: string) => {
@@ -539,5 +572,12 @@ export function useOrbitChat() {
     /** Remove several saved threads at once. */
     deleteConversations: bulkRemoveSaved,
     renameConversation: renameSaved,
+
+    /** True once the open thread has older turns beyond what's loaded. */
+    hasOlderMessages: olderMessagesCursor != null,
+    /** True while an older page is being fetched, for a top-of-thread spinner. */
+    loadingOlderMessages,
+    /** Fetch and prepend the previous page of the open thread's messages. */
+    loadOlderMessages,
   };
 }

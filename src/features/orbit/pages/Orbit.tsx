@@ -8,7 +8,7 @@ import {
   Globe, History, ImagePlus, Mic, Palette, Pencil, Paperclip, RefreshCw, RotateCcw, Share2, Square,
   Volume2, VolumeX, X,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
@@ -543,6 +543,8 @@ export default function Orbit() {
     messages, input, setInput, pendingImage, attachImage, pendingDocument, attachDocument,
     imageMode, setImageMode, send, regenerateLast, editAndResend, stop, thinking, generatingImage,
     available, started, plan, models, model, setModel,
+    hasOlderMessages, loadingOlderMessages, loadOlderMessages,
+    conversationId, openConversation,
   } = chat;
 
   // Orbit answers questions about a workspace's data — with none created yet
@@ -562,6 +564,47 @@ export default function Orbit() {
   const [liveId, setLiveId] = useState<string | null>(null);
   const wasThinking = useRef(false);
   const tts = useSpeech();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // "pending": the URL named a conversation and its restore is still in
+  // flight — the write-back effect below must not run yet, or it would wipe
+  // the param out of the URL before `openConversation`'s response lands.
+  const urlRestore = useRef<"pending" | "done">(
+    searchParams.get("conversationId") ? "pending" : "done",
+  );
+  useEffect(() => {
+    if (urlRestore.current !== "pending") return;
+    const fromUrl = searchParams.get("conversationId");
+    if (!fromUrl) {
+      urlRestore.current = "done";
+      return;
+    }
+    void openConversation(fromUrl).finally(() => {
+      urlRestore.current = "done";
+    });
+    // Deliberately empty deps — this is a one-time restore on mount, not a
+    // sync that should re-fire as `openConversation` or params change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the URL in step with the active thread the other direction too — a
+  // new conversation getting its server-assigned id, or one opened from the
+  // history drawer, both land here as `conversationId` changing. Skipped
+  // while a URL-driven restore is still pending, so it never races that
+  // restore's own write.
+  useEffect(() => {
+    if (urlRestore.current === "pending") return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (conversationId) next.set("conversationId", conversationId);
+        else next.delete("conversationId");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [conversationId, setSearchParams]);
 
   // Picked once per visit, not on every render: reshuffling on each keystroke
   // would make the chips jump around while the composer is still empty.
@@ -1114,9 +1157,23 @@ export default function Orbit() {
           </div>
         ) : (
           <>
-            <ScrollArea className={classes.scroll} type="hover" scrollbarSize={7}>
+            <ScrollArea
+              className={classes.scroll}
+              type="hover"
+              scrollbarSize={7}
+              onScrollPositionChange={({ y }) => {
+                if (y < 80 && hasOlderMessages && !loadingOlderMessages) {
+                  void loadOlderMessages();
+                }
+              }}
+            >
               <div className={classes.column}>
                 <Stack gap={26}>
+                  {loadingOlderMessages && (
+                    <Group justify="center" py={4}>
+                      <Loader size={13} type="dots" color="var(--mantine-color-emerald-5)" />
+                    </Group>
+                  )}
                   {messages.map((m, i) => (
                     <Turn
                       key={m.id}
