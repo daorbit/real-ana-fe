@@ -20,15 +20,16 @@ import { ActivityPanelProvider } from "@/features/activity/ActivityPanelContext"
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 
-/** True while the chosen background preset is one of the starfield ones. */
 function useStarfieldPreset(): boolean {
   const [on, setOn] = useState(
-    () => BG_STYLES.find((b) => b.id === readThemePrefs().bg)?.kind === "stars"
+    () => BG_STYLES.find((b) => b.id === readThemePrefs().bg)?.kind === "stars",
   );
   useEffect(() => {
     const sync = () =>
-      setOn(BG_STYLES.find((b) => b.id === readThemePrefs().bg)?.kind === "stars");
-    // applyTheme fires this on every preference change.
+      setOn(
+        BG_STYLES.find((b) => b.id === readThemePrefs().bg)?.kind === "stars",
+      );
+
     window.addEventListener("quantalog-theme-change", sync);
     return () => window.removeEventListener("quantalog-theme-change", sync);
   }, []);
@@ -36,7 +37,8 @@ function useStarfieldPreset(): boolean {
 }
 
 function useRouteMotionOff(): boolean {
-  const osReduced = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  const osReduced = () =>
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const [off, setOff] = useState(() => !readThemePrefs().motion || osReduced());
   useEffect(() => {
     const sync = () => setOff(!readThemePrefs().motion || osReduced());
@@ -51,41 +53,32 @@ function useRouteMotionOff(): boolean {
   return off;
 }
 
- 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { active } = useWorkspace();
   const { demo } = useDemo();
   const loc = useLocation();
- 
+
   const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
-  const { collapsed, toggleRail, adminOpen, toggleAdmin } = useRailState(mobile);
+  const { collapsed, toggleRail, adminOpen, toggleAdmin } =
+    useRailState(mobile);
 
- 
   const wsSwitch = useSwitchOverlay(active?._id ?? null);
   const stars = useStarfieldPreset();
   const motionOff = useRouteMotionOff();
-  // The page scrolls inside the panel, not the window, so the parallax has to
-  // listen there or the field never moves.
+
   const scroller = useRef<HTMLDivElement>(null);
 
-   useSyncWorkspaceTheme(active?._id);
-  const [navOpen, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
+  useSyncWorkspaceTheme(active?._id);
+  const [navOpen, { toggle: toggleNav, close: closeNav }] =
+    useDisclosure(false);
   useEffect(() => {
     closeNav();
   }, [loc.pathname, closeNav]);
 
   return (
-    // Wraps the whole authenticated shell, so the one activity drawer is
-    // reachable from the rail's bell and from the bell in every page header
-    // without either of them owning it.
     <ActivityPanelProvider>
-      {/* First tab stop on every screen: jump straight past the rail to the
-          page content. Off-screen until focused. */}
-      <a href="#main-content" className="skip-link">
-        Skip to content
-      </a>
       <OfflineBar />
       <FetchProgress />
       <CommandPalette />
@@ -108,10 +101,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         <MantineShell.Header
           px="md"
           hiddenFrom="sm"
-          style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)" }}
+          style={{
+            background: "var(--bg)",
+            borderBottom: "1px solid var(--border)",
+          }}
         >
           <Group h="100%" gap="sm">
-            <Burger opened={navOpen} onClick={toggleNav} size="sm" aria-label={t("nav.toggleNav")} />
+            <Burger
+              opened={navOpen}
+              onClick={toggleNav}
+              size="sm"
+              aria-label={t("nav.toggleNav")}
+            />
             <Box component={Link} to="/app" display="flex">
               <Wordmark />
             </Box>
@@ -127,7 +128,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           onToggleAdmin={toggleAdmin}
         />
 
-        <MantineShell.Main id="main-content" className="app-main" style={{ position: "relative" }}>
+        <MantineShell.Main
+          id="main-content"
+          className="app-main"
+          style={{ position: "relative" }}
+        >
           {demo && (
             <Box
               aria-hidden
@@ -145,9 +150,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="app-panel">
             {/* Inside the panel so it is clipped to the panel's radius and
                 bounded by its border, exactly like the other backgrounds. */}
-            {stars && <Starfield variant="app" count={70} scrollTarget={scroller} />}
+            {stars && (
+              <Starfield variant="app" count={70} scrollTarget={scroller} />
+            )}
             <div className="app-panel__scroll" ref={scroller}>
-        
               <PlanExpiryNotice />
               <QuotaNudge />
               <AnimatePresence mode="popLayout" initial={false}>
@@ -157,19 +163,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                   initial={motionOff ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={motionOff ? undefined : { opacity: 0, y: -6 }}
-                  transition={motionOff ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  transition={
+                    motionOff
+                      ? { duration: 0 }
+                      : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }
+                  }
                 >
                   {children}
                 </motion.div>
               </AnimatePresence>
-
             </div>
-            {/* Where a full-surface overlay (the media preview) mounts, so it
-                fills the panel and stops at its border rather than covering
-                the rail — the rail is how someone gets back out. Inside the
-                panel so it is clipped to the same radius. */}
-            <div id="panel-overlay-root" />
 
+            <div id="panel-overlay-root" />
           </div>
         </MantineShell.Main>
       </MantineShell>
