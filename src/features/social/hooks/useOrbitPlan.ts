@@ -35,10 +35,12 @@ export function useOrbitPlan({
   workspaceId,
   draft,
   onPlan,
+  onAddImage,
 }: {
   workspaceId: string | undefined;
   draft: Draft;
   onPlan: (patch: Partial<Draft>) => void;
+  onAddImage: (url: string) => void;
 }) {
   const [turns, setTurns] = useState<PlanTurn[]>([]);
   const [input, setInput] = useState("");
@@ -212,7 +214,7 @@ export function useOrbitPlan({
   const approveImage = (turnIndex: number) => {
     const turn = turns[turnIndex];
     if (!turn?.image || turn.image.status !== "ready") return;
-    onPlan({ images: [...draft.images, turn.image.url] });
+    onAddImage(turn.image.url);
     setTurns((t) =>
       t.map((turn, i) => (i === turnIndex && turn.image ? { ...turn, image: { ...turn.image, status: "approved" } } : turn)),
     );

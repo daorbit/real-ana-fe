@@ -16,32 +16,12 @@ import { useOrbitPlan } from "../hooks/useOrbitPlan";
 import { DiscardDialog } from "./DiscardDialog";
 import { captionLimit, isDirty, type Draft } from "./draft";
 
-/**
- * A new post in progress is stashed to sessionStorage on every change and
- * restored if the composer is reopened in the same tab — an accidental close
- * or a refresh mid-compose no longer loses the caption. Scoped per workspace,
- * and never used while editing an existing post: that already has a saved
- * source of truth on the server.
- */
 const DRAFT_KEY = (workspaceId: string | undefined) =>
   `quantalog_post_draft_${workspaceId ?? "none"}`;
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import type { ScheduledPost } from "@/shared/types";
 
-/**
- * The scheduled-post composer.
- *
- * A full-screen split rather than a dialog, for the same reason the share panel
- * is one: someone writing a post that will go out under their own name, on
- * repeat, unattended, needs to see it as LinkedIn will render it — where the
- * caption folds, how the image crops — while they write.
- *
- * Two steps, because writing a post and deciding when it goes out are separate
- * decisions and nobody makes the second one first. The same component creates
- * and edits: the fields are identical, and one surface means an existing post
- * is corrected where it was written.
- */
 export function PostComposer({
   opened,
   onClose,
@@ -91,17 +71,17 @@ export function PostComposer({
 
   const patch = (next: Partial<Draft>) => setDraft((d) => ({ ...d, ...next }));
 
+  const addImage = (url: string) =>
+    setDraft((d) => (d.images.includes(url) ? d : { ...d, images: [...d.images, url] }));
+
   // Orbit asking for the post rather than being told it. Its answers land in
   // the same fields the author types into, so nothing it settles is hidden
   // from them — and nothing it settles is saved until a Schedule press.
-  const planner = useOrbitPlan({ workspaceId, draft, onPlan: patch });
+  const planner = useOrbitPlan({ workspaceId, draft, onPlan: patch, onAddImage: addImage });
 
-  // Seed from `initial` on open, so editing an existing post loads it and a new
-  // one starts blank — without wiping what is being typed on every re-render.
   useEffect(() => {
     if (opened) {
-      // Restore a stashed draft only for a fresh new post — never over an edit,
-      // and never once the user has started this session's post.
+
       let seed = initial;
       if (!editing) {
         try {
@@ -114,8 +94,7 @@ export function PostComposer({
       setDraft(seed);
       setStep("content");
       onPane("preview");
-      // A new post starts a new conversation — carrying the last one over would
-      // have Orbit answering about a post that is no longer on screen.
+
       planner.reset();
       setConfirmingClose(false);
     }
@@ -130,9 +109,7 @@ export function PostComposer({
   // A story publishes no text, so an empty caption is correct rather than
   // unfinished — what it cannot go out without is the image.
   const empty = draft.format !== "story" && !draft.caption.trim();
-  // Instagram builds its post around a media container, so there is no
-  // text-only post to publish. Blocked here rather than at save, so the reason
-  // sits beside the image field instead of arriving as a toast.
+
   const needsImage = draft.provider === "instagram" && draft.images.length === 0;
   // A one-off in the past would be refused by the server anyway; catching it
   // here keeps the message beside the field that caused it.
