@@ -93,7 +93,7 @@ function renderInline(text: string, keyBase: number): React.ReactNode[] {
     } else if (bold) {
       out.push(
         <Text key={key++} span fw={600} c="var(--mantine-color-text)" inherit>
-          {bold.slice(2, -2)}
+          {renderInline(bold.slice(2, -2), key * 1000)}
         </Text>,
       );
     } else if (hex) {
