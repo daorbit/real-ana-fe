@@ -112,12 +112,11 @@ export function ActivityDrawer({
   const [deleteNotifications, { isLoading: deleting }] = useDeleteNotificationsMutation();
 
   /*
-   * Opening the panel clears the badge but marks nothing read.
-   *
-   * This is the whole reason the backend keeps `seenAt` apart from `readAt`: a
-   * reader who opens the panel has been shown what is waiting, so the count is
-   * answered — but the individual rows they did not click are still theirs to
-   * come back to.
+   * Opening the panel records that these rows were shown, but the badge only
+   * clears once a row is actually read — clicked, or "Mark all as read".
+   * `seenAt` is kept for that record even though the count no longer reads it,
+   * so opening the panel alone never resets a count the reader has not acted
+   * on.
    */
   useEffect(() => {
     if (opened && unreadCount > 0 && !demo) void markSeen();
