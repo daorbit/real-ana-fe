@@ -1,14 +1,19 @@
+import { useRef } from "react";
 import { Button, Center, Loader, Stack, Tabs } from "@mantine/core";
 import { RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { useGetDbStatsQuery } from "@/app/store";
 import { StorageTab } from "@/features/admin/components/database/StorageTab";
-import { WorkersAiTrendCard } from "@/features/admin/components/database/WorkersAiTrendCard";
+import {
+  WorkersAiTrendCard,
+  type WorkersAiTrendCardHandle,
+} from "@/features/admin/components/database/WorkersAiTrendCard";
 import { WorkersAiCard } from "@/features/admin/components/database/WorkersAiCard";
 
 export default function AdminDatabase() {
   const { data, isFetching, refetch } = useGetDbStatsQuery();
+  const trendCardRef = useRef<WorkersAiTrendCardHandle>(null);
 
   const refreshButton = (
     <Button
@@ -16,7 +21,10 @@ export default function AdminDatabase() {
       size="sm"
       leftSection={<RefreshCw size={14} />}
       loading={isFetching}
-      onClick={() => refetch()}
+      onClick={() => {
+        refetch();
+        trendCardRef.current?.refetch();
+      }}
     >
       Refresh
     </Button>
@@ -52,7 +60,7 @@ export default function AdminDatabase() {
         {data.workersAi.length > 0 && (
           <Tabs.Panel value="ai">
             <Stack gap="lg">
-              <WorkersAiTrendCard />
+              <WorkersAiTrendCard ref={trendCardRef} />
               <WorkersAiCard accounts={data.workersAi} />
             </Stack>
           </Tabs.Panel>

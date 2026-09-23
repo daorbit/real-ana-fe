@@ -1,13 +1,17 @@
-import { useMemo, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Box, Card, Center, Group, Loader, SegmentedControl, Text, useMantineColorScheme } from "@mantine/core";
 import {
   CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip as ChartTooltip, XAxis, YAxis,
 } from "recharts";
 import { useGetWorkersAiTrendQuery } from "@/app/store";
 
-export function WorkersAiTrendCard() {
+export type WorkersAiTrendCardHandle = { refetch: () => void };
+
+export const WorkersAiTrendCard = forwardRef<WorkersAiTrendCardHandle>(function WorkersAiTrendCard(_props, ref) {
   const [range, setRange] = useState<"today" | "7d">("today");
-  const { data, isFetching } = useGetWorkersAiTrendQuery({ range });
+  const { data, isFetching, refetch } = useGetWorkersAiTrendQuery({ range });
+
+  useImperativeHandle(ref, () => ({ refetch }), [refetch]);
   const { colorScheme } = useMantineColorScheme();
   const dark = colorScheme === "dark";
   const axis = dark ? "#8b929e" : "#5f6673";
@@ -91,4 +95,4 @@ export function WorkersAiTrendCard() {
       </Box>
     </Card>
   );
-}
+});
