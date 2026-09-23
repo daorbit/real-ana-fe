@@ -1,5 +1,6 @@
 import { Anchor, Code, List, Text, Title } from "@mantine/core";
 import { CodeHighlight } from "@mantine/code-highlight";
+import classes from "./richText.module.css";
 
 const FENCE = /```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g;
 
@@ -239,6 +240,7 @@ export function RichText({ text }: { text: string }) {
         radius="md"
         my={8}
         withCopyButton
+        className={classes.codeBlock}
         style={{
           fontSize: "0.85em",
           border: "1px solid var(--mantine-color-default-border)",
