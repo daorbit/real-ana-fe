@@ -51,24 +51,8 @@
 }
 
  
-/* Softens the swap between pages.
-   Short, and opacity only. The slide this used to carry moved the whole page
-   body on every navigation, which against a washed or gradient background
-   reads as the screen flashing rather than as one page replacing another. */
 .route-fade {
-  animation: route-in 140ms ease-out forwards;
-}
-
-@keyframes route-in {
-  from { opacity: 0.45; }
-  to   { opacity: 1; }
-}
-
-/* The app's own motion switch, alongside the OS-level one further down — the
-   page swap is the most visible animation in the product, so turning motion
-   off has to reach it. */
-[data-motion="off"] .route-fade {
-  animation: none;
+  width: 100%;
 }
 
  

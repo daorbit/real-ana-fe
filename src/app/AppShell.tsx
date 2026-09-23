@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { AppShell as MantineShell, Box, Burger, Group } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
@@ -34,6 +35,22 @@ function useStarfieldPreset(): boolean {
   return on;
 }
 
+function useRouteMotionOff(): boolean {
+  const osReduced = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  const [off, setOff] = useState(() => !readThemePrefs().motion || osReduced());
+  useEffect(() => {
+    const sync = () => setOff(!readThemePrefs().motion || osReduced());
+    window.addEventListener("quantalog-theme-change", sync);
+    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    mq?.addEventListener("change", sync);
+    return () => {
+      window.removeEventListener("quantalog-theme-change", sync);
+      mq?.removeEventListener("change", sync);
+    };
+  }, []);
+  return off;
+}
+
  
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -48,6 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
  
   const wsSwitch = useSwitchOverlay(active?._id ?? null);
   const stars = useStarfieldPreset();
+  const motionOff = useRouteMotionOff();
   // The page scrolls inside the panel, not the window, so the parallax has to
   // listen there or the field never moves.
   const scroller = useRef<HTMLDivElement>(null);
@@ -132,9 +150,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         
               <PlanExpiryNotice />
               <QuotaNudge />
-              <div key={loc.pathname} className="route-fade">
-                {children}
-              </div>
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.div
+                  key={loc.pathname}
+                  className="route-fade"
+                  initial={motionOff ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={motionOff ? undefined : { opacity: 0, y: -6 }}
+                  transition={motionOff ? { duration: 0 } : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
 
             </div>
             {/* Where a full-surface overlay (the media preview) mounts, so it

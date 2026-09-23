@@ -161,7 +161,7 @@ function RouteFrame({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   return (
     <ErrorBoundary variant="route" resetKey={pathname}>
-      <Suspense fallback={<AppBootSkeleton />}>{children}</Suspense>
+      <Suspense fallback={null}>{children}</Suspense>
     </ErrorBoundary>
   );
 }
