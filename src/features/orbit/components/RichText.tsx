@@ -1,4 +1,4 @@
-import { Anchor, Code, List, Text, Title } from "@mantine/core";
+import { Anchor, Code, List, Table, Text, Title } from "@mantine/core";
 import { CodeHighlight } from "@mantine/code-highlight";
 import classes from "./richText.module.css";
 
@@ -116,6 +116,68 @@ const HEADING_ORDER = [3, 4, 5] as const;
 const BULLET = /^([ \t]*)[-*]\s+(.+)$/;
 const NUMBERED = /^([ \t]*)\d+[.)]\s+(.+)$/;
 
+const TABLE_ROW = /^\s*\|(.+)\|\s*$/;
+const TABLE_SEPARATOR = /^\s*\|?(?:\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?\s*$/;
+
+/** Split one `| a | b |` row into its cells, dropping the outer empty edges
+ * a leading/trailing `|` produces. */
+function tableCells(line: string): string[] {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isTableStart(lines: string[], i: number): boolean {
+  return (
+    TABLE_ROW.test(lines[i]) &&
+    i + 1 < lines.length &&
+    TABLE_SEPARATOR.test(lines[i + 1]) &&
+    tableCells(lines[i]).length === tableCells(lines[i + 1]).length
+  );
+}
+
+function renderTable(
+  lines: string[],
+  start: number,
+  keyBase: number,
+): { node: React.ReactNode; next: number; key: number } {
+  const header = tableCells(lines[start]);
+  let key = keyBase;
+  let i = start + 2; // past the header row and its --- separator
+
+  const rows: string[][] = [];
+  while (i < lines.length && TABLE_ROW.test(lines[i])) {
+    rows.push(tableCells(lines[i]));
+    i++;
+  }
+
+  const node = (
+    <Table key={key++} striped withTableBorder withColumnBorders mt={4} mb={4} fz="sm">
+      <Table.Thead>
+        <Table.Tr>
+          {header.map((cell, ci) => (
+            <Table.Th key={ci}>{renderInline(cell, key * 1000 + ci)}</Table.Th>
+          ))}
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
+        {rows.map((row, ri) => (
+          <Table.Tr key={ri}>
+            {row.map((cell, ci) => (
+              <Table.Td key={ci}>{renderInline(cell, key * 1000 + ri * 100 + ci)}</Table.Td>
+            ))}
+          </Table.Tr>
+        ))}
+      </Table.Tbody>
+    </Table>
+  );
+
+  return { node, next: i, key };
+}
+
 function isListLine(line: string): boolean {
   return BULLET.test(line) || NUMBERED.test(line);
 }
@@ -203,12 +265,26 @@ function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
       continue;
     }
 
+    if (isTableStart(lines, i)) {
+      const table = renderTable(lines, i, key);
+      out.push(table.node);
+      i = table.next;
+      key = table.key;
+      continue;
+    }
+
     if (!line.trim()) {
       i++;
       continue;
     }
     const start = i;
-    while (i < lines.length && lines[i].trim() && !HEADING.test(lines[i]) && !isListLine(lines[i])) {
+    while (
+      i < lines.length &&
+      lines[i].trim() &&
+      !HEADING.test(lines[i]) &&
+      !isListLine(lines[i]) &&
+      !isTableStart(lines, i)
+    ) {
       i++;
     }
     const paragraph = lines.slice(start, i).join("\n");
