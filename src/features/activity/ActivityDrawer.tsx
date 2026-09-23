@@ -140,6 +140,7 @@ export function ActivityDrawer({
   }, [opened]);
 
   const items = data?.items ?? [];
+  const hasUnread = items.some((item) => !item.readAt);
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -471,7 +472,7 @@ export function ActivityDrawer({
             <Button
               size="xs"
               leftSection={<CheckCheck size={14} />}
-              disabled={unreadCount === 0 || markingAll || demo}
+              disabled={!hasUnread || markingAll || demo}
               loading={markingAll}
               onClick={() => void markAllRead()}
             >
