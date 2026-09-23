@@ -18,6 +18,17 @@ function linkifyBareUrls(text: string): string {
   );
 }
 
+
+export function toPlainText(text: string): string {
+  return text
+    .replace(FENCE, (_match, _lang: string, code: string) => code.replace(/\n$/, ""))
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1 ($2)")
+    .replace(/`([^`\n]+)`/g, "$1")
+    .replace(/\*\*([^*\n]+)\*\*/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .trim();
+}
+
 function ColorSwatch({ hex }: { hex: string }) {
   return (
     <Text span inherit style={{ whiteSpace: "nowrap" }}>

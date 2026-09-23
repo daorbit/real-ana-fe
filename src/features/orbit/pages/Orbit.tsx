@@ -12,7 +12,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
-import { RichText } from "@/features/orbit/components/RichText";
+import { RichText, toPlainText } from "@/features/orbit/components/RichText";
 import { DataDigestTable, csvFromDigest, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { useWorkspace } from "@/features/workspace/context";
@@ -67,9 +67,10 @@ async function copyImage(url: string) {
 }
 
 async function shareTurn(message: OrbitMessage) {
+  const plain = toPlainText(message.content);
   const shareData: ShareData = message.imageUrl
-    ? { title: "Orbit AI", text: message.content || undefined, url: message.imageUrl }
-    : { title: "Orbit AI", text: message.content };
+    ? { title: "Orbit AI", text: plain || undefined, url: message.imageUrl }
+    : { title: "Orbit AI", text: plain };
 
   if (navigator.share) {
     try {
@@ -80,7 +81,7 @@ async function shareTurn(message: OrbitMessage) {
     return;
   }
 
-  await copyText(message.imageUrl ?? message.content);
+  await copyText(message.imageUrl ?? plain);
   notify.info("Sharing isn't available here — copied instead.");
 }
 
@@ -207,7 +208,9 @@ function TurnActions({
           color="gray"
           size="sm"
           radius="xl"
-          onClick={() => (message.imageUrl ? copyImage(message.imageUrl) : copyText(message.content))}
+          onClick={() =>
+            message.imageUrl ? copyImage(message.imageUrl) : copyText(toPlainText(message.content))
+          }
           aria-label="Copy"
         >
           <Copy size={13} />
@@ -1171,7 +1174,7 @@ export default function Orbit() {
                       regenerating={thinking}
                       speaking={tts.speakingId === m.id}
                       onToggleSpeech={
-                        tts.supported ? () => tts.toggle(m.id, m.content) : undefined
+                        tts.supported ? () => tts.toggle(m.id, toPlainText(m.content)) : undefined
                       }
                     />
                   ))}
