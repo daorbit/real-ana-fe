@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActionIcon, Anchor, Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
+  ActionIcon, Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
-import { Link } from "react-router-dom";
 import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
@@ -288,20 +287,28 @@ export default function SocialPosts() {
     filters.setFilter(next);
   };
 
+  // The sticky header has no bottom padding of its own: normally the filter
+  // tab bar sits flush against its edge and supplies the border there, and the
+  // header row's own mb="md" is what separates the two. With nothing
+  // connected yet there is no list to filter, so that bar is absent — without
+  // this, the header row's mb="md" would collapse against the box's own zero
+  // padding and the buttons would sit flush against the edge.
+  const showFilters = (isLoading || posts.length > 0 || onSent || onFailed) && view === "list";
+
   return (
     <AppShell>
 
-      <Box className="page-header--sticky">
+      <Box className="page-header--sticky" pb={showFilters ? 0 : 1}>
       <Group justify="space-between" align="center" wrap="wrap" gap="md" mb="md">
         <div style={{ minWidth: 0 }}>
           <Title order={2} lh={1.2}>Social posts</Title>
-          <Text size="sm" c="dimmed" mt={4}>
-            {onSent
-              ? "Everything you've published from here"
-              : ready
-                ? `Publishing to ${connectedNames} · ${timezone}`
-                : "No account connected yet"}
-          </Text>
+          {(onSent || ready) && (
+            <Text size="sm" c="dimmed" mt={4}>
+              {onSent
+                ? "Everything you've published from here"
+                : `Publishing to ${connectedNames} · ${timezone}`}
+            </Text>
+          )}
         </div>
 
         <Group gap="sm" wrap="nowrap" align="center">
@@ -376,7 +383,7 @@ export default function SocialPosts() {
           every shelf. A tab bar that appears only once the list lands pushes
           the whole timeline down at the moment it arrives, which is the jump
           the skeleton exists to prevent. */}
-      {(isLoading || posts.length > 0 || onSent || onFailed) && view === "list" && (
+      {showFilters && (
         <PostFilters
           filter={filters.filter}
           onFilter={onFilter}
@@ -384,26 +391,6 @@ export default function SocialPosts() {
         />
       )}
       </Box>
-
-      {/* Not on the Sent shelf: it reads history, which stands whether or not
-          the connection is currently live, and a prompt to reconnect above a
-          list of posts that plainly went out reads as though they had not.
-          Connecting itself lives on Settings → Connections, not here — this
-          is just a pointer to it. */}
-      {!isLoading && !ready && !onSent && (
-        <Text size="sm" c="dimmed" mb="lg">
-          No account connected yet.{" "}
-          <Anchor
-            component={Link}
-            to="/app/settings?tab=connections"
-            size="sm"
-            onClick={() => trace(user?.id, "connect_account_from_social_posts", "social_posts", "settings_connections")}
-          >
-            Connect LinkedIn or Instagram
-          </Anchor>{" "}
-          to publish from here.
-        </Text>
-      )}
 
       {/* Checked before the loader and the empty state, both of which speak for
           the schedule list: history is its own collection, and an account with
@@ -474,7 +461,11 @@ export default function SocialPosts() {
       ) : isLoading ? (
         <SocialPostsSkeleton />
       ) : posts.length === 0 ? (
-        <PostsEmptyState disabled={!ready} onCreate={() => openNew()} />
+        <PostsEmptyState
+          connected={ready}
+          onCreate={() => openNew()}
+          onConnect={() => trace(user?.id, "connect_account_from_social_posts", "social_posts", "settings_connections")}
+        />
       ) : view === "calendar" ? (
         <Box className="post-calendar-scroll">
           <PostCalendar posts={posts} onOpen={openEdit} onCreateOn={openNew} />

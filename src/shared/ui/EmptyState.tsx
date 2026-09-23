@@ -68,6 +68,7 @@ export function EmptyState({
           loading={action.loading}
           component={Link}
           to={action.to}
+          onClick={action.onClick}
         >
           {action.label}
         </Button>

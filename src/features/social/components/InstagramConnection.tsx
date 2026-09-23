@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Anchor, Box, Button, Group, Loader, Text } from "@mantine/core";
 import { Check } from "lucide-react";
+import { modals } from "@mantine/modals";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { getToken } from "@/shared/lib/http";
 import {
@@ -126,6 +127,29 @@ export function InstagramConnection() {
     }
   };
 
+  // Kept out of the card body, same as LinkedIn's: worth explaining, not
+  // worth the height it costs on every visit.
+  const showDetails = () => {
+    modals.open({
+      title: (
+        <Group gap={8} wrap="nowrap">
+          <InstagramMark size={15} />
+          <Text size="sm" fw={600}>Instagram</Text>
+        </Group>
+      ),
+      centered: true,
+      radius: "lg",
+      children: (
+        <Text size="sm" c="dimmed" style={{ lineHeight: 1.6 }}>
+          {t(
+            "settings.instagramScopeNote",
+            "Quantalog only reads your username and publishes the posts you schedule here. It cannot read your messages, comments, or followers.",
+          )}
+        </Text>
+      ),
+    });
+  };
+
   if (isLoading) {
     return (
       <Group gap={8} mt="md">
@@ -164,39 +188,38 @@ export function InstagramConnection() {
 
   return (
     <Box mt="md">
-      <Text size="xs" c="dimmed" mb={10}>
-        {status?.configured === false
-          ? t(
-              "settings.instagramNotConfigured",
-              "Instagram is not set up on this deployment yet.",
-            )
-          : needsPostingPermission
+      <Group gap={6} align="baseline" wrap="wrap" mb={10}>
+        <Text size="xs" c="dimmed">
+          {status?.configured === false
             ? t(
-                "settings.instagramNeedsPosting",
-                "Connected, but publishing was not allowed. Reconnect to grant it.",
+                "settings.instagramNotConfigured",
+                "Instagram is not set up on this deployment yet.",
               )
-            : needsReconnect
+            : needsPostingPermission
               ? t(
-                  "settings.instagramExpired",
-                  "Your Instagram connection has expired. Reconnect to keep publishing.",
+                  "settings.instagramNeedsPosting",
+                  "Connected, but publishing was not allowed. Reconnect to grant it.",
                 )
-              : t(
-                  "settings.instagramConnectHint",
-                  "Connect an Instagram Business or Creator account to publish scheduled posts.",
-                )}
-      </Text>
-
-      {/* Said before the consent screen rather than after it: someone reading
-          Meta's permission wording cold deserves to already know what this app
-          does with it. Only shown while the decision is still ahead of them. */}
-      {status?.configured !== false && !needsReconnect && (
-        <Text size="xs" c="dimmed" mb={10} style={{ lineHeight: 1.5 }}>
-          {t(
-            "settings.instagramScopeNote",
-            "Quantalog only reads your username and publishes the posts you schedule here. It cannot read your messages, comments, or followers.",
-          )}
+              : needsReconnect
+                ? t(
+                    "settings.instagramExpired",
+                    "Your Instagram connection has expired. Reconnect to keep publishing.",
+                  )
+                : t(
+                    "settings.instagramConnectHint",
+                    "Connect an Instagram Business or Creator account to publish scheduled posts.",
+                  )}
         </Text>
-      )}
+
+        {/* Said before the consent screen rather than after it: someone
+            reading Meta's permission wording cold deserves to already know
+            what this app does with it — a click away rather than inline. */}
+        {status?.configured !== false && !needsReconnect && (
+          <Anchor component="button" type="button" size="xs" onClick={showDetails}>
+            {t("settings.instagramSeeMore", "See more")}
+          </Anchor>
+        )}
+      </Group>
 
       <Button
         size="sm"

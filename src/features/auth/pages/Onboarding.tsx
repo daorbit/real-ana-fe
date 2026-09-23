@@ -199,6 +199,11 @@ export default function Onboarding() {
   const skip = () => {
     trace(user?.id, "onboarding_skipped", "onboarding", "app");
     localStorage.setItem("quantalog_onboarding_skipped", "1");
+    // The overlay says "your workspace is ready" — true, and worth the same
+    // landing, whenever skipping still leaves one behind. Skipping out of the
+    // referral step, before the workspace step has run, leaves none, so the
+    // flag stays unset rather than promising something that isn't there yet.
+    if (wsId) localStorage.setItem(WELCOME_PENDING_KEY, "1");
     clearProgress();
     nav(workspaceOnly ? "/app/workspaces" : "/app");
   };

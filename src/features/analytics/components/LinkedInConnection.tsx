@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Anchor, Box, Button, Group, Loader, Text } from "@mantine/core";
 import { Check } from "lucide-react";
+import { modals } from "@mantine/modals";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
@@ -106,6 +107,29 @@ export function LinkedInConnection() {
     }
   };
 
+  // The full explanation of what publishing asks for and why — worth having,
+  // but not worth the card height it took reading on every visit to this
+  // panel. A dialog keeps it one click away instead.
+  const showDetails = () => {
+    modals.open({
+      title: (
+        <Group gap={8} wrap="nowrap">
+          <Box style={{ color: `#${LINKEDIN_ICON.hex}`, display: "flex" }}>
+            <PlatformGlyph icon={LINKEDIN_ICON} size={15} />
+          </Box>
+          <Text size="sm" fw={600}>LinkedIn</Text>
+        </Group>
+      ),
+      centered: true,
+      radius: "lg",
+      children: (
+        <Text size="sm" c="dimmed" style={{ lineHeight: 1.6 }}>
+          {t("sharePost.linkedinScopeNote")}
+        </Text>
+      ),
+    });
+  };
+
   if (isLoading) {
     return (
       <Group gap={8} mt="md">
@@ -149,44 +173,29 @@ export function LinkedInConnection() {
   }
 
   return (
-    <Box
-      mt="md"
-      p="sm"
-      style={{
-        border: "1px solid var(--mantine-color-default-border)",
-        borderRadius: "var(--mantine-radius-md)",
-      }}
-    >
-      <Group gap={8} mb={8} wrap="nowrap">
-        <Box style={{ color: `#${LINKEDIN_ICON.hex}`, display: "flex" }}>
-          <PlatformGlyph icon={LINKEDIN_ICON} size={15} />
-        </Box>
-        <Text size="sm" fw={600}>LinkedIn</Text>
-      </Group>
-
+    <Box mt="md">
       {(
         <>
-          <Text size="xs" c="dimmed" mb={10}>
-            {status?.configured === false
-              ? t("sharePost.linkedinNotConfigured")
-              : needsPostingPermission
-                ? t("sharePost.linkedinNeedsPosting")
-                : needsReconnect
-                  ? t("sharePost.linkedinExpired")
-                  : t("sharePost.linkedinConnectHint")}
-          </Text>
-
-          {/* Said before the consent screen, not after it.
-              LinkedIn describes `w_member_social` as create/modify/delete —
-              the full reach of the only permission it offers for publishing,
-              not what this app does with it. Someone who reads that wording
-              cold is right to hesitate, so what we actually do is stated here
-              first, while they can still decide. */}
-          {status?.configured !== false && !needsReconnect && (
-            <Text size="xs" c="dimmed" mb={10} style={{ lineHeight: 1.5 }}>
-              {t("sharePost.linkedinScopeNote")}
+          <Group gap={6} align="baseline" wrap="wrap" mb={10}>
+            <Text size="xs" c="dimmed">
+              {status?.configured === false
+                ? t("sharePost.linkedinNotConfigured")
+                : needsPostingPermission
+                  ? t("sharePost.linkedinNeedsPosting")
+                  : needsReconnect
+                    ? t("sharePost.linkedinExpired")
+                    : t("sharePost.linkedinConnectHint")}
             </Text>
-          )}
+
+            {/* The scope explanation now lives in a dialog rather than inline
+                — said before the consent screen still, just a click away
+                instead of a fixed cost on every visit to this panel. */}
+            {status?.configured !== false && !needsReconnect && (
+              <Anchor component="button" type="button" size="xs" onClick={showDetails}>
+                {t("sharePost.linkedinSeeMore", "See more")}
+              </Anchor>
+            )}
+          </Group>
           <Button
             size="sm"
             // Offering the button when the server has no credentials would only
