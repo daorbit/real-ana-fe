@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Badge, Box, Group, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
 import { InstagramConnection } from "@/features/social/components/InstagramConnection";
 import { useCanUseInstagram } from "@/features/auth/context";
@@ -58,6 +59,7 @@ function ConnectionCard({
 export function ConnectionsPanel() {
   const { t } = useTranslation();
   const canUseInstagram = useCanUseInstagram();
+  const nav = useNavigate();
 
   return (
     <>
@@ -80,7 +82,7 @@ export function ConnectionsPanel() {
           name="LinkedIn"
           hint="Publishing account for scheduled social posts."
         >
-          <LinkedInConnection />
+          <LinkedInConnection onConnected={() => nav("/app/social")} />
         </ConnectionCard>
 
         <ConnectionCard
@@ -90,7 +92,7 @@ export function ConnectionsPanel() {
           hint="Feed posts from the same composer."
           soon={!canUseInstagram}
         >
-          {canUseInstagram && <InstagramConnection />}
+          {canUseInstagram && <InstagramConnection onConnected={() => nav("/app/social")} />}
         </ConnectionCard>
 
         <ConnectionCard

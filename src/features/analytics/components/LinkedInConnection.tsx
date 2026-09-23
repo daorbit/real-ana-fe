@@ -55,7 +55,7 @@ function startLinkedInConnect(): Window | null {
  * Getting connected only — publishing lives in the panel footer, next to every
  * other action, so this component no longer holds a post button or its state.
  */
-export function LinkedInConnection() {
+export function LinkedInConnection({ onConnected }: { onConnected?: () => void }) {
   const { t } = useTranslation();
   const { data: status, isLoading, refetch } = useGetLinkedInStatusQuery();
   const [disconnect, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
@@ -76,6 +76,7 @@ export function LinkedInConnection() {
       if (e.data.status === "connected") {
         notify.success(t("sharePost.linkedinConnected"));
         refetch();
+        onConnected?.();
       } else if (e.data.status === "cancelled") {
         notify.info(t("sharePost.linkedinConnectCancelled"));
       } else {
@@ -84,7 +85,7 @@ export function LinkedInConnection() {
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [t, refetch]);
+  }, [t, refetch, onConnected]);
   // A connection that exists but cannot be used reads as disconnected for the
   // purpose of the primary action: the user must go back through consent.
   // Expired, or connected for sign-in only: both need another trip through

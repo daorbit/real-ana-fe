@@ -69,7 +69,7 @@ function startInstagramConnect(): Window | null {
  * collapses to one quiet line naming it, and everything else is the work of
  * getting connected.
  */
-export function InstagramConnection() {
+export function InstagramConnection({ onConnected }: { onConnected?: () => void }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: status, isLoading, refetch } = useGetInstagramStatusQuery();
@@ -90,6 +90,7 @@ export function InstagramConnection() {
       if (e.data.status === "connected") {
         notify.success(t("settings.instagramConnected", "Instagram connected"));
         refetch();
+        onConnected?.();
       } else if (e.data.status === "cancelled") {
         notify.info(t("settings.instagramCancelled", "Instagram connection cancelled"));
       } else {
@@ -104,7 +105,7 @@ export function InstagramConnection() {
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [t, refetch]);
+  }, [t, refetch, onConnected]);
 
   // Expired, or connected without the publishing grant: both need another trip
   // through consent before anything can be published.
