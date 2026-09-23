@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { AppShell as MantineShell, Box, Burger, Group } from "@mantine/core";
+import { AppShell as MantineShell, Box, Burger, Group, Overlay } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { Wordmark } from "@/shared/ui/Brand";
@@ -126,7 +126,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           onToggleRail={toggleRail}
           adminOpen={adminOpen}
           onToggleAdmin={toggleAdmin}
+          onCloseNav={closeNav}
         />
+
+        {navOpen && (
+          <Overlay
+            hiddenFrom="sm"
+            onClick={closeNav}
+            zIndex={190}
+            color="#000"
+            backgroundOpacity={0.35}
+          />
+        )}
 
         <MantineShell.Main
           id="main-content"

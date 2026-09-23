@@ -1,4 +1,5 @@
-import { AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core";
+import { ActionIcon, AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core";
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
@@ -22,6 +23,7 @@ export function Rail({
   onToggleRail,
   adminOpen,
   onToggleAdmin,
+  onCloseNav,
 }: {
   pathname: string;
   collapsed: boolean;
@@ -29,6 +31,7 @@ export function Rail({
   onToggleRail: () => void;
   adminOpen: boolean;
   onToggleAdmin: () => void;
+  onCloseNav: () => void;
 }) {
   const { t } = useTranslation();
   const { user, logout, exitImpersonation, isDemo } = useAuth();
@@ -64,15 +67,10 @@ export function Rail({
 
   return (
     <MantineShell.Navbar p="md">
-      {/* The workspace row carries the product mark, so the two sit on one
-          line: mark and name on the left, the collapse control on the right.
-          A separate wordmark row above them would say the product's name
-          twice. On mobile the wordmark is already in the top bar. */}
+
       <MantineShell.Section visibleFrom="sm" mb="md">
         <Group gap={4} wrap="nowrap" align="center">
-          {/* Collapsed the workspace row draws nothing, so the spacer it would
-              sit in is left out too — otherwise it would hold width and push
-              the toggle out of the icon column. */}
+      
           {!collapsed && (
             <Box style={{ minWidth: 0, flex: 1 }}>
               <RailWorkspaceHeader collapsed={collapsed} />
@@ -83,18 +81,28 @@ export function Rail({
       </MantineShell.Section>
 
       {/* In the mobile drawer there is no collapse control to share a line
-          with, so the workspace row stands on its own. */}
+          with, so the workspace row gets a close button in its place. */}
       <MantineShell.Section hiddenFrom="sm" mb="md">
-        <RailWorkspaceHeader collapsed={collapsed} />
+        <Group gap={4} wrap="nowrap" align="center">
+          <Box style={{ minWidth: 0, flex: 1 }}>
+            <RailWorkspaceHeader collapsed={collapsed} />
+          </Box>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="md"
+            onClick={onCloseNav}
+            aria-label={t("nav.closeNav", "Close navigation")}
+          >
+            <X size={18} />
+          </ActionIcon>
+        </Group>
       </MantineShell.Section>
 
       <MantineShell.Section mb="lg">
         <SearchButton collapsed={collapsed} />
       </MantineShell.Section>
 
-      {/* `type="never"` hides the scrollbar without disabling the scrolling —
-          the rail still scrolls by wheel and trackpad, it just stops drawing a
-          track down the middle of the navigation. */}
       <MantineShell.Section grow component={ScrollArea} type="never">
         <NavGroups
           groups={groups}
