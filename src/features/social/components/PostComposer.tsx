@@ -62,8 +62,8 @@ export function PostComposer({
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<PreviewDevice>("desktop");
   const [confirmingClose, setConfirmingClose] = useState(false);
-  // Content first, always: nobody arrives already knowing when they want to
-  // post before they have written what they are posting.
+  
+  
   const [step, setStep] = useState<Step>("content");
   /** Which footer button is mid-save, so only that one shows a spinner. */
   const [pending, setPending] = useState<"draft" | "another" | "save" | null>(null);
@@ -74,9 +74,9 @@ export function PostComposer({
   const addImage = (url: string) =>
     setDraft((d) => (d.images.includes(url) ? d : { ...d, images: [...d.images, url] }));
 
-  // Orbit asking for the post rather than being told it. Its answers land in
-  // the same fields the author types into, so nothing it settles is hidden
-  // from them — and nothing it settles is saved until a Schedule press.
+  
+  
+  
   const planner = useOrbitPlan({ workspaceId, draft, onPlan: patch, onAddImage: addImage });
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function PostComposer({
           const raw = sessionStorage.getItem(DRAFT_KEY(workspaceId));
           if (raw) seed = { ...initial, ...(JSON.parse(raw) as Partial<Draft>) };
         } catch {
-          /* corrupt stash — fall back to the blank draft */
+         
         }
       }
       setDraft(seed);
@@ -98,27 +98,27 @@ export function PostComposer({
       planner.reset();
       setConfirmingClose(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [opened, initial]);
 
   const chars = draft.caption.length;
   const tags = countHashtags(draft.caption);
-  // The cap follows the network: Instagram's is 2200, LinkedIn's 3000.
+  
   const limit = captionLimit(draft.provider);
   const overLimit = chars > limit;
-  // A story publishes no text, so an empty caption is correct rather than
-  // unfinished — what it cannot go out without is the image.
+  
+  
   const empty = draft.format !== "story" && !draft.caption.trim();
 
   const needsImage = draft.provider === "instagram" && draft.images.length === 0;
-  // A one-off in the past would be refused by the server anyway; catching it
-  // here keeps the message beside the field that caused it.
+  
+  
   const past = draft.mode === "once"
     && new Date(`${draft.date}T${draft.time}`).getTime() < Date.now();
   const blocked = empty || overLimit || past || needsImage;
 
-  // Closing is guarded only when something would actually be lost — a confirm
-  // on an untouched form is one people learn to click through.
+  
+  
   const dirty = isDirty(draft, initial);
   const requestClose = () => (dirty ? setConfirmingClose(true) : onClose());
 
@@ -126,12 +126,12 @@ export function PostComposer({
     try {
       sessionStorage.removeItem(DRAFT_KEY(workspaceId));
     } catch {
-      /* nothing to clear */
+     
     }
   };
 
-  // Mirror a dirty new-post draft to sessionStorage as it changes; clear the
-  // moment it stops being dirty or the composer is closed.
+  
+  
   useEffect(() => {
     if (editing || !opened) return;
     if (!dirty) {
@@ -141,9 +141,9 @@ export function PostComposer({
     try {
       sessionStorage.setItem(DRAFT_KEY(workspaceId), JSON.stringify(draft));
     } catch {
-      /* quota or private mode — losing the autosave is acceptable */
+     
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [draft, dirty, editing, opened, workspaceId]);
 
   const discard = () => {
@@ -154,17 +154,17 @@ export function PostComposer({
   };
 
   const save = async (andAnother: boolean, asDraft = false) => {
-    // Which button was pressed, so only that one spins.
+    
     setPending(asDraft ? "draft" : andAnother ? "another" : "save");
     const ok = await onSave(draft, asDraft);
-    // Cleared on the way out either way: a failed save leaves the composer
-    // open, and a button that kept spinning could never be pressed again.
+    
+    
     setPending(null);
     if (!ok) return;
     clearStash();
     if (andAnother) {
-      // The cadence is the part people keep across a batch — only the content
-      // changes from one post to the next.
+      
+      
       patch({ name: "", caption: "", images: [] });
       setStep("content");
       editor.current?.focus();
@@ -212,9 +212,9 @@ export function PostComposer({
                   overLimit={overLimit}
                   limit={limit}
                   needsImage={needsImage}
-                  // The network is fixed once a post exists: its caption and
-                  // image were written against one set of rules, and switching
-                  // would silently invalidate them.
+                  
+                  
+                  
                   lockProvider={!!editing}
                 />
               ) : (
@@ -275,11 +275,11 @@ export function PostComposer({
               onApproveImage={planner.approveImage}
               generatingImage={planner.generatingImage}
               onApproveCaption={planner.approveCaption}
-              // "Edit first" leaves the filled fields behind and returns to the
-              // post, which is the point of filling them.
+              
+              
               onEdit={() => onPane("preview")}
-              // Same save path as the footer, so one place decides what a valid
-              // scheduled post is.
+              
+              
               onSchedule={() => void save(false)}
               scheduling={pending === "save"}
               blockedReason={
