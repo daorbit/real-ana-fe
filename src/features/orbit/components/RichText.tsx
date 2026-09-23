@@ -8,6 +8,16 @@ const INLINE =
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
+const BARE_URL_LABEL =
+  /(^|[^[])\b([A-Za-z0-9][\w .'-]{0,80}?)\s*\((https?:\/\/[^\s()]+)\)/g;
+
+function linkifyBareUrls(text: string): string {
+  return text.replace(
+    BARE_URL_LABEL,
+    (_match, before: string, label: string, url: string) => `${before}[${label.trim()}](${url})`,
+  );
+}
+
 function ColorSwatch({ hex }: { hex: string }) {
   return (
     <Text span inherit style={{ whiteSpace: "nowrap" }}>
@@ -147,7 +157,7 @@ function renderList(
 }
 
 function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
-  const lines = text.split("\n");
+  const lines = linkifyBareUrls(text).split("\n");
   const out: React.ReactNode[] = [];
   let key = keyBase;
   let i = 0;
