@@ -14,6 +14,8 @@ export type TrackerOptions = {
   clicks?: boolean;
   /** Turn off JavaScript error tracking. */
   errors?: boolean;
+  /** Capture click position and scroll depth for pixel-level heatmaps. */
+  heatmap?: boolean;
   /** Path globs to never report, e.g. `["/admin/*"]`. */
   ignorePages?: string[];
   /** Query params to keep on the reported path. All others are dropped. */
@@ -35,6 +37,7 @@ function attributes(siteId: string, o: TrackerOptions = {}): [string, string][] 
   if (o.hash) attrs.push(["data-hash", "on"]);
   if (o.clicks === false) attrs.push(["data-clicks", "off"]);
   if (o.errors === false) attrs.push(["data-errors", "off"]);
+  if (o.heatmap) attrs.push(["data-heatmap", "on"]);
 
   const ignore = (o.ignorePages ?? []).map((s) => s.trim()).filter(Boolean);
   if (ignore.length) attrs.push(["data-ignore-pages", ignore.join(",")]);

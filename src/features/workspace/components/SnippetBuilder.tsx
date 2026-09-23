@@ -21,6 +21,7 @@ const DEFAULTS: Required<TrackerOptions> = {
   hash: false,
   clicks: true,
   errors: true,
+  heatmap: false,
   ignorePages: [],
   allowParams: [],
   domain: "",
@@ -58,6 +59,7 @@ export function SnippetBuilder({
   const [hash, setHash] = useState(initial.hash);
   const [clicks, setClicks] = useState(initial.clicks);
   const [errors, setErrors] = useState(initial.errors);
+  const [heatmap, setHeatmap] = useState(initial.heatmap);
   const [ignorePages, setIgnorePages] = useState(initial.ignorePages.join(", "));
   const [allowParams, setAllowParams] = useState(initial.allowParams.join(", "));
   const [domain, setDomain] = useState(initial.domain);
@@ -70,6 +72,7 @@ export function SnippetBuilder({
     setHash(s.hash);
     setClicks(s.clicks);
     setErrors(s.errors);
+    setHeatmap(s.heatmap);
     setIgnorePages(s.ignorePages.join(", "));
     setAllowParams(s.allowParams.join(", "));
     setDomain(s.domain);
@@ -80,6 +83,7 @@ export function SnippetBuilder({
     hash,
     clicks,
     errors,
+    heatmap,
     ignorePages: list(ignorePages),
     allowParams: list(allowParams),
     domain,
@@ -93,6 +97,7 @@ export function SnippetBuilder({
     hash !== initial.hash ||
     clicks !== initial.clicks ||
     errors !== initial.errors ||
+    heatmap !== initial.heatmap ||
     !same(list(ignorePages), initial.ignorePages) ||
     !same(list(allowParams), initial.allowParams) ||
     domain.trim() !== initial.domain;
@@ -100,7 +105,7 @@ export function SnippetBuilder({
   // How many options differ from the tracker's defaults — shown so a long
   // snippet never looks unexplained.
   const set =
-    (dnt ? 1 : 0) + (hash ? 1 : 0) + (clicks ? 0 : 1) + (errors ? 0 : 1) +
+    (dnt ? 1 : 0) + (hash ? 1 : 0) + (clicks ? 0 : 1) + (errors ? 0 : 1) + (heatmap ? 1 : 0) +
     (list(ignorePages).length ? 1 : 0) + (list(allowParams).length ? 1 : 0) +
     (domain.trim() ? 1 : 0);
 
@@ -172,6 +177,13 @@ export function SnippetBuilder({
             color="emerald"
             label="Track JavaScript errors"
             description="Surfaces uncaught errors and failed promises by page."
+          />
+          <Switch
+            checked={heatmap}
+            onChange={(e) => setHeatmap(e.currentTarget.checked)}
+            color="emerald"
+            label="Capture heatmap data"
+            description="Records click position and scroll depth for pixel-level heatmaps."
           />
 
           <Divider />
