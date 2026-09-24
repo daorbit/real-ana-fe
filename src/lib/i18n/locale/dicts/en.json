@@ -980,6 +980,8 @@
     "openPlayground": "Open playground",
     "workspaceId": "Workspace ID",
     "baseUrl": "API base URL",
+    "docsUrl": "API docs (Swagger)",
+    "openInNewTab": "Open in new tab",
     "playStepAuthorize": "Press Authorize and paste your secret key.",
     "playStepMe": "Run GET /v1/me to confirm the key works.",
     "playStepWid": "Paste your workspace ID into wid for Orbit AI endpoints."

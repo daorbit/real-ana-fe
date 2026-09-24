@@ -38,6 +38,7 @@ export function PlaygroundPanel({ workspaceId }: { workspaceId: string }) {
         <Box className={classes.copyFields}>
           <CopyField label={t("developers.workspaceId")} value={workspaceId} />
           <CopyField label={t("developers.baseUrl")} value={apiBaseUrl()} />
+          <CopyField label={t("developers.docsUrl")} value={playgroundUrl()} href={playgroundUrl()} />
         </Box>
         <ol className={classes.playSteps}>
           {steps.map((step, i) => (

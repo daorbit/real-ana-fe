@@ -356,6 +356,15 @@
   color: var(--text);
 }
 
+.copyLink {
+  color: var(--accent-2);
+  text-decoration: none;
+}
+
+.copyLink:hover {
+  text-decoration: underline;
+}
+
 .playSteps {
   display: flex;
   flex-direction: column;
