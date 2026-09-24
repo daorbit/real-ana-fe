@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Anchor } from "@mantine/core";
+import { ActionIcon, Anchor } from "@mantine/core";
+import { ChevronLeft } from "lucide-react";
 import { Wordmark } from "@/shared/ui/Brand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
 import { AppearanceStep } from "@/features/auth/components/onboarding/AppearanceStep";
@@ -118,6 +119,57 @@ function readProgress(): Progress {
     // back to a step whose data it does have.
   }
   return { wsId: null, site: null };
+}
+
+/**
+ * The bar across the top of setup. On a phone it reads like an app's
+ * navigation bar: a back chevron, the progress pills, and Skip — the wordmark
+ * drops out to give the pills the room.
+ */
+function SetupBar({
+  step,
+  steps,
+  onBack,
+  onSkip,
+}: {
+  step: number;
+  steps: typeof STEPS;
+  onBack?: () => void;
+  onSkip?: () => void;
+}) {
+  return (
+    <header className={s.bar}>
+      <div className={s.barStart}>
+        {onBack ? (
+          <ActionIcon
+            className={s.barBack}
+            variant="subtle"
+            color="gray"
+            size={40}
+            radius="xl"
+            onClick={onBack}
+            aria-label="Back"
+          >
+            <ChevronLeft size={22} />
+          </ActionIcon>
+        ) : (
+          <span className={s.barBack} aria-hidden="true" />
+        )}
+        <div className={s.barBrand}>
+          <Wordmark />
+        </div>
+      </div>
+      <Stepper step={step} steps={steps} />
+      <div className={s.barEnd}>
+        {onSkip && (
+          <Anchor component="button" type="button" c="dimmed" size="sm" onClick={onSkip}>
+            <span className={s.skipLong}>Skip for now</span>
+            <span className={s.skipShort}>Skip</span>
+          </Anchor>
+        )}
+      </div>
+    </header>
+  );
 }
 
 export default function Onboarding() {
@@ -293,6 +345,20 @@ export default function Onboarding() {
   };
 
 
+  /** Where the header's back chevron goes — the same place each step's own
+   *  Back button does. Absent on the first screen of either path. */
+  const PREV: Record<number, number | undefined> = {
+    [REFERRAL_STEP]: workspaceOnly ? undefined : 0,
+    [WORKSPACE_STEP]: workspaceOnly ? undefined : REFERRAL_STEP,
+    [SITE_STEP]: WORKSPACE_STEP,
+    [FRAMEWORK_STEP]: SITE_STEP,
+    [INSTALL_STEP]: FRAMEWORK_STEP,
+    [APPEARANCE_STEP]: INSTALL_STEP,
+    [BILLING_STEP]: APPEARANCE_STEP,
+  };
+  const prev = PREV[step];
+  const goBack = prev === undefined ? undefined : () => setStep(prev);
+
   const displaySteps = workspaceOnly
     ? STEPS.filter((_, i) => i !== 0 && i !== REFERRAL_STEP)
     : STEPS;
@@ -305,15 +371,7 @@ export default function Onboarding() {
     return (
       <div className={`${s.shell} onb-form`}>
         <div className={s.wash} aria-hidden="true" />
-        <header className={s.bar}>
-          <Wordmark />
-          <Stepper step={displayStep} steps={displaySteps} />
-          <div className={s.barEnd}>
-            <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
-              Skip for now
-            </Anchor>
-          </div>
-        </header>
+        <SetupBar step={displayStep} steps={displaySteps} onBack={goBack} onSkip={skip} />
 
         {/* These two steps are full-bleed — a theme picker beside a preview, a
             three-across pricing grid — so they cannot use the centred column
@@ -370,18 +428,12 @@ export default function Onboarding() {
   return (
     <div className={`${s.shell} onb-form`}>
       <div className={s.wash} aria-hidden="true" />
-      <header className={s.bar}>
-        <Wordmark />
-        <Stepper step={displayStep} steps={displaySteps} />
-        <div className={s.barEnd}>
-       
-          {step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 && (
-            <Anchor component="button" type="button" c="dimmed" size="sm" onClick={skip}>
-              Skip for now
-            </Anchor>
-          )}
-        </div>
-      </header>
+      <SetupBar
+        step={displayStep}
+        steps={displaySteps}
+        onBack={goBack}
+        onSkip={step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 ? skip : undefined}
+      />
 
       <main className={`${s.body} ${tall ? "" : s.bodyCentred}`}>
         <div className={`${s.column} ${wide ? s.columnWide : ""}`}>

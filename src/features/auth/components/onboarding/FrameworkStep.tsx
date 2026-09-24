@@ -1,5 +1,4 @@
-import { Button, Group } from "@mantine/core";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { StepFooter } from "./StepFooter";
 import { FrameworkPicker } from "@/features/workspace/components/FrameworkPicker";
 import type { FrameworkId } from "@/features/workspace/frameworks";
 
@@ -28,27 +27,5 @@ export function FrameworkStepFooter({
   onBack: () => void;
   onSubmit: () => void;
 }) {
-  return (
-    <Group justify="space-between" wrap="nowrap">
-      <Button
-        className="auth-btn"
-        size="sm"
-        variant="subtle"
-        color="gray"
-        leftSection={<ArrowLeft size={14} />}
-        onClick={onBack}
-      >
-        Back
-      </Button>
-      <Button
-        className="auth-btn"
-        size="sm"
-        loading={loading}
-        onClick={onSubmit}
-        rightSection={<ArrowRight size={15} />}
-      >
-        Continue
-      </Button>
-    </Group>
-  );
+  return <StepFooter onBack={onBack} onSubmit={onSubmit} loading={loading} />;
 }

@@ -38,6 +38,13 @@ export function Stepper({ step, steps }: { step: number; steps: StepDef[] }) {
           {current.label}
         </span>
       )}
+      {/* Phone only: one pill per step, the way app setup flows show it. The
+          counter and hairline above stay for wider screens. */}
+      <span className={s.segments} aria-hidden="true">
+        {steps.map((_, i) => (
+          <span key={i} className={s.segment} data-state={i < step ? "done" : i === step ? "current" : "todo"} />
+        ))}
+      </span>
       <span
         className={s.progressRule}
         style={{ width: `${pct}%` }}

@@ -1,5 +1,6 @@
-import { Button, Group, Stack, Text } from "@mantine/core";
-import { ArrowLeft, ArrowRight, Zap } from "lucide-react";
+import { Group, Stack, Text } from "@mantine/core";
+import { Zap } from "lucide-react";
+import { StepFooter } from "./StepFooter";
 import { BrandIcon } from "@/shared/ui/BrandIcon";
 import { CodeBlock } from "@/shared/ui/CodeBlock";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
@@ -64,27 +65,5 @@ export function ReadyStepFooter({
   onBack: () => void;
   onContinue: () => void;
 }) {
-  return (
-    <Group justify="space-between" wrap="nowrap">
-    
-      <Button
-        className="auth-btn"
-        size="sm"
-        variant="subtle"
-        color="gray"
-        leftSection={<ArrowLeft size={14} />}
-        onClick={onBack}
-      >
-        Back
-      </Button>
-      <Button
-        className="auth-btn"
-        size="sm"
-        onClick={onContinue}
-        rightSection={<ArrowRight size={15} />}
-      >
-        Continue
-      </Button>
-    </Group>
-  );
+  return <StepFooter onBack={onBack} onSubmit={onContinue} />;
 }

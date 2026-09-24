@@ -1,6 +1,7 @@
-import { Button, Group, SimpleGrid, UnstyledButton } from "@mantine/core";
+import { Button, SimpleGrid, UnstyledButton } from "@mantine/core";
+import { StepFooter } from "./StepFooter";
 import {
-  ArrowLeft, ArrowRight, Search, Share2, PlayCircle, Mic, Radio, Newspaper, Users,
+  Search, Share2, PlayCircle, Mic, Radio, Newspaper, Users,
   Star, Megaphone, Mail, UserRound, MessageCircleMore, MoreHorizontal, Check,
 } from "lucide-react";
 import type { ReferralSource } from "@/shared/types";
@@ -90,43 +91,19 @@ export function ReferralStepFooter({
   selectedCount: number;
 }) {
   return (
-    <Group justify="space-between" wrap="nowrap">
-      {onBack ? (
-        <Button
-          className="auth-btn"
-          size="sm"
-          variant="subtle"
-          color="gray"
-          leftSection={<ArrowLeft size={14} />}
-          onClick={onBack}
-        >
-          Back
-        </Button>
-      ) : (
-        // Holds the left end of the row so Continue stays hard right whether
-        // or not there is a Back to balance it.
-        <span />
-      )}
-
-      <Group gap="sm" wrap="nowrap">
-        {/* Only while nothing is picked. Once an answer is selected, an
-            opt-out sitting beside Continue is a second button that throws the
-            answer away — and the one that reads as the quieter, safer choice
-            of the two. */}
-        {selectedCount === 0 && (
+    <StepFooter
+      onBack={onBack}
+      onSubmit={onSubmit}
+      // Only while nothing is picked. Once an answer is selected, an opt-out
+      // sitting beside Continue is a second button that throws the answer
+      // away — and the one that reads as the quieter, safer choice of the two.
+      secondary={
+        selectedCount === 0 && (
           <Button size="sm" variant="subtle" color="gray" onClick={onSkip}>
             Prefer not to say
           </Button>
-        )}
-        <Button
-          className="auth-btn"
-          size="sm"
-          onClick={onSubmit}
-          rightSection={<ArrowRight size={15} />}
-        >
-          Continue
-        </Button>
-      </Group>
-    </Group>
+        )
+      }
+    />
   );
 }

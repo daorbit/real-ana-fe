@@ -9,7 +9,7 @@ import {
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { trace } from "@/shared/lib/analytics";
-import { AuthBrand } from "@/features/auth/components/AuthBrand";
+import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
 import { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
@@ -142,6 +142,7 @@ export default function Login() {
     <div className="auth-split">
       <AuthBrand onDemo={enterDemo} demoBusy={demoBusy} />
       <div className="auth-panel">
+        <AuthMobileBrand />
         <motion.form
           className="auth-form"
           onSubmit={submit}

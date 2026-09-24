@@ -342,6 +342,36 @@
   );
 }
 
+/* -------------------------------------------------------------- actions --- */
+
+/* `StepFooter`'s row: Back at one end, the primary action (and an optional
+   quiet secondary) at the other. */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.actionsMain {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* Phone-only pieces of the bar, hidden until the breakpoint below. */
+.barStart {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.barBack,
+.segments,
+.skipShort {
+  display: none;
+}
+
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 62em) {
@@ -361,6 +391,133 @@
   .lede { font-size: 0.95rem; }
   .controls { margin-top: 1.75rem; }
   .foot, .footSticky { margin-top: 1.75rem; }
+}
+
+/* ------------------------------------------------------------ phone app --- */
+
+/* Below a tablet the flow stops being a centred web form and behaves like a
+ * native setup screen:
+ *
+ *   - a navigation bar with a back chevron, one pill per step, and Skip;
+ *   - content starting at the top, not floating in the middle of the screen;
+ *   - the primary action pinned to the bottom as a full-width thumb target,
+ *     clear of the home indicator.
+ */
+@media (max-width: 48em) {
+  .bar {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    padding: calc(0.5rem + env(safe-area-inset-top, 0px)) 0.75rem 0.5rem;
+    border-bottom: 0;
+  }
+
+  .barBrand { display: none; }
+  .barBack {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+  }
+  .barEnd {
+    min-width: 40px;
+    justify-content: flex-end;
+  }
+  .skipLong { display: none; }
+  .skipShort { display: inline; font-weight: 600; }
+
+  .progress { justify-content: center; }
+  .progressCount,
+  .progressLabel,
+  .progressRule { display: none; }
+
+  .segments {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+    max-width: 240px;
+  }
+  .segment {
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--onb-edge);
+    transition: background-color 300ms ease;
+  }
+  .segment[data-state="done"],
+  .segment[data-state="current"] {
+    background: var(--accent);
+  }
+
+  /* Top-aligned, and a flex column so the actions can sink to the bottom of
+     a short step instead of sitting straight under its last field. */
+  .body,
+  .bodyCentred {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 1.25rem 1.25rem 0;
+  }
+  .column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .bodyCentred .column { margin-bottom: 0; }
+
+  .title { font-size: 1.75rem; }
+  .lede { font-size: 0.95rem; margin-top: 0.5rem; }
+  .controls { margin-top: 1.5rem; }
+
+  /* The profile step carries its own Continue inside its form; let that
+     form fill the column so the button can sink to the foot as well. */
+  .controls:has(.actionsBar) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .controls:has(.actionsBar) > * { flex: 1; }
+
+  .foot,
+  .footSticky,
+  .actionsBar {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: auto;
+    padding: 1.5rem 0 calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+  .foot::before,
+  .actionsBar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: -1px;
+    left: -50rem;
+    right: -50rem;
+    z-index: -1;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--bg, #0b0c0e), transparent 100%) 0%,
+      var(--bg, #0b0c0e) 45%
+    );
+  }
+  /* Spacing between the last control and the bar, which `margin-top: auto`
+     would otherwise collapse to nothing on a step that fills the screen. */
+  .controls { padding-bottom: 0.5rem; }
+
+  /* Back lives in the header now; the bar is the forward action alone. */
+  .actionsBack { display: none; }
+  .actionsMain { flex: 1; }
+  .actionsPrimary {
+    flex: 1;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 48em) and (prefers-reduced-motion: reduce) {
+  .segment { transition: none; }
 }
 
 /* ------------------------------------------------------------ reduced motion */

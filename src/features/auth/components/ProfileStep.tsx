@@ -11,6 +11,7 @@ import { guessCountry, splitNumber, type DialCode } from "@/shared/lib/dialCodes
 import { randomPresetAvatar, fetchPresetAvatarBlob } from "@/shared/lib/presetAvatars";
 import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
+import onb from "@/features/auth/components/onboarding/Onboarding.module.css";
 
  
 export function ProfileStep({ onDone }: { onDone: () => void }) {
@@ -220,16 +221,20 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
 
  
 
-      <Button
-        className="auth-btn"
-        size="md"
-        fullWidth
-        loading={saving}
-        onClick={submit}
-        rightSection={<ArrowRight size={16} />}
-      >
-        Continue
-      </Button>
+      {/* Rides the foot of the screen on a phone, like every other step's
+          actions — see `.actionsBar` in Onboarding.module.css. */}
+      <div className={onb.actionsBar}>
+        <Button
+          className={`auth-btn ${onb.actionsPrimary}`}
+          size="md"
+          fullWidth
+          loading={saving}
+          onClick={submit}
+          rightSection={<ArrowRight size={16} />}
+        >
+          Continue
+        </Button>
+      </div>
 
       <AvatarCropper
         file={pending}
