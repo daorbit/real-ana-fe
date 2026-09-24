@@ -17,6 +17,7 @@ import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
+import { isPlainLeftClick, supportsViewTransitions, transitionTo } from "@/app/viewTransition";
 
 /** Matches the `rail-orbit-fade-out` keyframes' duration in App.css. */
 const FLY_OUT_MS = 320;
@@ -37,9 +38,13 @@ export function OrbitCard({ collapsed }: { collapsed: boolean }) {
     // A modified click (open in new tab, open in background, middle-click) or
     // anything but the plain left button should still behave like an ordinary
     // link — only a normal click gets the animated hand-off.
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (!isPlainLeftClick(e)) return;
     e.preventDefault();
     if (leaving) return; // already on the way out — a second click does nothing new
+    if (supportsViewTransitions()) {
+      transitionTo(navigate, "/app/orbit", "orbit");
+      return;
+    }
     setLeaving(true);
     setTimeout(() => navigate("/app/orbit"), FLY_OUT_MS);
   };
@@ -53,7 +58,7 @@ export function OrbitCard({ collapsed }: { collapsed: boolean }) {
         component={Link}
         to="/app/orbit"
         onClick={go}
-        className="nav-link"
+        className="nav-link rail-orbit-mini"
         data-collapsed
         data-leaving={leaving || undefined}
         aria-label={label}

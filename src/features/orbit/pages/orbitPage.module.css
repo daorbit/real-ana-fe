@@ -34,8 +34,13 @@
   }
 }
 
-:global(html[data-motion='off']) .page {
+:global(html[data-motion='off']) .page,
+:global(html[data-vt]) .page {
   animation: none;
+}
+
+:global(html[data-vt='orbit']) .page {
+  view-transition-name: orbit-hero;
 }
 
 @media (prefers-reduced-motion: reduce) {

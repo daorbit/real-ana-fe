@@ -38,14 +38,22 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/billing": () => import("@/features/billing/pages/Billing"),
 };
 
-const done = new Set<string>();
+const pending = new Map<string, Promise<void>>();
 
-export function prefetchRoute(to: string): void {
-  if (done.has(to)) return;
-  const load = importers[to];
-  if (!load) return;
-  done.add(to);
+export function prefetchRoute(to: string): Promise<void> {
+  const path = to.split(/[?#]/)[0];
+  const existing = pending.get(path);
+  if (existing) return existing;
+  const load = importers[path];
+  if (!load) return Promise.resolve();
   // Swallow: a failed prefetch is not a user-facing error — the real
   // navigation will retry the import and surface any problem then.
-  void load().catch(() => done.delete(to));
+  const promise = load().then(
+    () => undefined,
+    () => {
+      pending.delete(path);
+    },
+  );
+  pending.set(path, promise);
+  return promise;
 }

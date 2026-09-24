@@ -15,6 +15,7 @@ import { AppBootSkeleton } from "@/shared/ui/Skeletons";
 import { WelcomeOverlay, consumeWelcomePending } from "@/shared/ui/WelcomeOverlay";
 import "@/app/App.css";
 import "@/polish.css";
+import "@/app/viewTransitions.css";
 
 // Auth screens load eagerly: they are the first thing a signed-out visitor
 // sees, and a chunk fetch there would show a blank frame before the form.
