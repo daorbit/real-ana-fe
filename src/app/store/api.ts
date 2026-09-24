@@ -262,6 +262,13 @@ export const api = createApi({
       query: (body) => ({ url: "/api/notifications/push/unsubscribe", method: "POST", body }),
     }),
 
+    sendTestPush: build.mutation<
+      { subscriptions: number; sent: number; failed: number; errors: string[] },
+      void
+    >({
+      query: () => ({ url: "/api/notifications/push/test", method: "POST" }),
+    }),
+
     getWorkspaceUsage: build.query<QuotaSummary, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/usage`,
       providesTags: ["Usage"],
@@ -2313,4 +2320,5 @@ export const {
   useUpdateNotificationPreferenceMutation,
   useSubscribeToPushMutation,
   useUnsubscribeFromPushMutation,
+  useSendTestPushMutation,
 } = api;

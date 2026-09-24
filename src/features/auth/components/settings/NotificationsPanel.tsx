@@ -17,7 +17,7 @@ export function NotificationsPanel() {
   const { data, isLoading, isError, isFetching, refetch } = useGetNotificationPreferencesQuery();
   const [update] = useUpdateNotificationPreferenceMutation();
 
-  const { state: pushState, enable, disable } = usePush(
+  const { state: pushState, enable, disable, sendTest, testing } = usePush(
     data?.vapidPublicKey ?? "",
     data?.pushConfigured ?? false,
   );
@@ -55,6 +55,21 @@ export function NotificationsPanel() {
     );
   }
 
+  const test = async () => {
+    try {
+      await sendTest();
+      notify.success(
+        t(
+          "activity.push.testSent",
+          "Sent. If nothing pops up within a few seconds, your computer is blocking Chrome's notifications. On Windows, check Settings › System › Notifications and turn off Do not disturb.",
+        ),
+        t("activity.push.testSentTitle", "Test notification sent"),
+      );
+    } catch (e) {
+      notify.error(errMessage(e, t("activity.push.testFailed", "Couldn't send a test notification.")));
+    }
+  };
+
   const pushOn = pushState === "on";
   const onChange = (type: string, channel: "inApp" | "push", value: boolean) =>
     void change(type, channel, value);
@@ -79,7 +94,13 @@ export function NotificationsPanel() {
           {renderGroup("billing")}
         </Box>
         <Box className={classes.column}>
-          <PushCard state={pushState} onEnable={() => void enable()} onDisable={() => void disable()} />
+          <PushCard
+            state={pushState}
+            onEnable={() => void enable()}
+            onDisable={() => void disable()}
+            onTest={() => void test()}
+            testing={testing}
+          />
           {renderGroup("activity")}
         </Box>
       </Box>

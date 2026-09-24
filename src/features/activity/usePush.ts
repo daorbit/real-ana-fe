@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   useSubscribeToPushMutation,
   useUnsubscribeFromPushMutation,
+  useSendTestPushMutation,
 } from "@/app/store";
 
 /**
@@ -68,13 +69,26 @@ async function registration(): Promise<ServiceWorkerRegistration> {
   return navigator.serviceWorker.register("/sw.js", { scope: "/" });
 }
 
+function sameServerKey(sub: PushSubscription, vapidPublicKey: string): boolean {
+  const current = sub.options?.applicationServerKey;
+  if (!current) return true;
+  const a = new Uint8Array(current);
+  const b = urlBase64ToUint8Array(vapidPublicKey);
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+function subscriptionBody(sub: PushSubscription) {
+  const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
+  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return null;
+  return { endpoint: json.endpoint, keys: { p256dh: json.keys.p256dh, auth: json.keys.auth } };
+}
+
 export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
   const [state, setState] = useState<PushState>("unsupported");
   const [subscribe] = useSubscribeToPushMutation();
   const [unsubscribe] = useUnsubscribeFromPushMutation();
+  const [sendTestPush, { isLoading: testing }] = useSendTestPushMutation();
 
-  // Resolve the current state on mount, and whenever the server's answer about
-  // whether push is configured arrives.
   useEffect(() => {
     let cancelled = false;
 
@@ -85,8 +99,23 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
 
       try {
         const reg = await registration();
-        const existing = await reg.pushManager.getSubscription();
-        if (!cancelled) setState(existing ? "on" : "off");
+        let existing = await reg.pushManager.getSubscription();
+
+        if (existing && !sameServerKey(existing, vapidPublicKey)) {
+          await existing.unsubscribe();
+          existing =
+            Notification.permission === "granted"
+              ? await reg.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
+                })
+              : null;
+        }
+
+        const body = existing ? subscriptionBody(existing) : null;
+        if (body) await subscribe(body).unwrap().catch(() => {});
+
+        if (!cancelled) setState(body ? "on" : "off");
       } catch {
         // A worker that will not register means push cannot work here, whatever
         // the reason — treat it as unsupported rather than offering a switch
@@ -98,7 +127,7 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
     return () => {
       cancelled = true;
     };
-  }, [pushConfigured, vapidPublicKey]);
+  }, [pushConfigured, vapidPublicKey, subscribe]);
 
   const enable = useCallback(async () => {
     if (!supported() || !vapidPublicKey) return;
@@ -122,19 +151,13 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
       });
 
-      const json = sub.toJSON() as {
-        endpoint?: string;
-        keys?: { p256dh?: string; auth?: string };
-      };
-      if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+      const body = subscriptionBody(sub);
+      if (!body) {
         setState("off");
         return;
       }
 
-      await subscribe({
-        endpoint: json.endpoint,
-        keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-      }).unwrap();
+      await subscribe(body).unwrap();
 
       setState("on");
     } catch {
@@ -162,5 +185,7 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
     }
   }, [unsubscribe]);
 
-  return { state, enable, disable };
+  const sendTest = useCallback(() => sendTestPush().unwrap(), [sendTestPush]);
+
+  return { state, enable, disable, sendTest, testing };
 }

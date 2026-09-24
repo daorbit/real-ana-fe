@@ -1,5 +1,5 @@
-import { Alert, Badge, Box, Group, Switch, Text } from "@mantine/core";
-import { BellRing, Info, MonitorSmartphone } from "lucide-react";
+import { Alert, Badge, Box, Button, Group, Switch, Text } from "@mantine/core";
+import { BellRing, Info, MonitorSmartphone, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { PushState } from "@/features/activity/usePush";
 import { SettingsCard } from "./SettingsCard";
@@ -36,9 +36,11 @@ interface Props {
   state: PushState;
   onEnable: () => void;
   onDisable: () => void;
+  onTest: () => void;
+  testing: boolean;
 }
 
-export function PushCard({ state, onEnable, onDisable }: Props) {
+export function PushCard({ state, onEnable, onDisable, onTest, testing }: Props) {
   const { t } = useTranslation();
   const status = STATUS[state];
   const help = HELP[state];
@@ -80,6 +82,20 @@ export function PushCard({ state, onEnable, onDisable }: Props) {
         <Alert color={help.color} variant="light" mt="md" icon={<Info size={15} />}>
           {t(help.key, help.text)}
         </Alert>
+      )}
+
+      {state === "on" && (
+        <Group justify="space-between" wrap="wrap" gap="sm" mt="md" className={classes.testRow}>
+          <Text size="xs" c="dimmed" className={classes.testHint}>
+            {t(
+              "activity.push.scope",
+              "Push is used for urgent alerts only. Rows marked — below are shown in the app but never pushed.",
+            )}
+          </Text>
+          <Button size="xs" variant="default" leftSection={<Send size={13} />} loading={testing} onClick={onTest}>
+            {t("activity.push.test", "Send test notification")}
+          </Button>
+        </Group>
       )}
     </SettingsCard>
   );
