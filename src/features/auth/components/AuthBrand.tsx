@@ -101,3 +101,18 @@ export function AuthBrand({ onDemo, demoBusy = false }: Props) {
     </div>
   );
 }
+
+/**
+ * The brand at the top of the auth form on a phone, where the side panel
+ * (`AuthBrand`) is hidden — an app icon and wordmark, the way a native app's
+ * sign-in screen opens. Hidden above the breakpoint by `.auth-mobile-brand`.
+ */
+export function AuthMobileBrand() {
+  return (
+    <div className="auth-mobile-brand" aria-hidden="true">
+      {/* The same mark the sidebar and favicon use. */}
+      <img src="/brand-mark.png" alt="" width={56} height={56} className="auth-mobile-mark" />
+      <Wordmark />
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
-import { Button, Group, Stack, TextInput } from "@mantine/core";
-import { ArrowLeft, ArrowRight, BarChart3, Share2, Users } from "lucide-react";
+import { Stack, TextInput } from "@mantine/core";
+import { BarChart3, Share2, Users } from "lucide-react";
+import { StepFooter } from "./StepFooter";
 import s from "./WorkspaceStep.module.css";
 
 
@@ -72,31 +73,5 @@ export function WorkspaceStepFooter({
   onBack?: () => void;
   onSubmit: () => void;
 }) {
-  // Sized to its label, not stretched across the column: a button as wide as
-  // the form reads as a banner, and there is nothing to balance it against.
-  return (
-    <Group justify={onBack ? "space-between" : "flex-end"} wrap="nowrap">
-      {onBack && (
-        <Button
-          className="auth-btn"
-          size="sm"
-          variant="subtle"
-          color="gray"
-          leftSection={<ArrowLeft size={14} />}
-          onClick={onBack}
-        >
-          Back
-        </Button>
-      )}
-      <Button
-        className="auth-btn"
-        size="sm"
-        loading={loading}
-        onClick={onSubmit}
-        rightSection={<ArrowRight size={15} />}
-      >
-        Continue
-      </Button>
-    </Group>
-  );
+  return <StepFooter onBack={onBack} onSubmit={onSubmit} loading={loading} />;
 }

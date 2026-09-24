@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { motion } from "framer-motion";
+import { AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import {
   PinInput, Button, Title, Text, Alert, Stack, Group, Anchor, Center,
 } from "@mantine/core";
@@ -111,6 +112,7 @@ export function VerifyEmailStep({
 
   return (
     <div className="auth-panel">
+      <AuthMobileBrand />
       <motion.form
         className="auth-form"
         onSubmit={onFormSubmit}

@@ -1,5 +1,5 @@
-import { Button, Group, Select, Text, TextInput } from "@mantine/core";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Select, Text, TextInput } from "@mantine/core";
+import { StepFooter } from "./StepFooter";
 import s from "./SiteStep.module.css";
 
 export const SITE_PURPOSES = [
@@ -89,26 +89,5 @@ export function SiteStepFooter({
   onBack: () => void;
   onSubmit: () => void;
 }) {
-  return (
-    <Group justify="space-between" wrap="nowrap">
-      <Button
-        className="auth-btn"
-        size="sm"
-        variant="subtle"
-        color="gray"
-        leftSection={<ArrowLeft size={14} />}
-        onClick={onBack}
-      >
-        Back
-      </Button>
-      <Button
-        className="auth-btn"
-        size="sm"
-        onClick={onSubmit}
-        rightSection={<ArrowRight size={15} />}
-      >
-        Continue
-      </Button>
-    </Group>
-  );
+  return <StepFooter onBack={onBack} onSubmit={onSubmit} />;
 }

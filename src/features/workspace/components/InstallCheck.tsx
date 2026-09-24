@@ -37,7 +37,7 @@ export function InstallCheck({
                   <Text size="xs" c="dimmed">Paste the snippet, open {site}, then check.</Text>
                 </div>
               </Group>
-              <Button size="xs" onClick={onStart}>Check now</Button>
+              <Button size="xs" onClick={onStart} style={{ flexShrink: 0 }}>Check now</Button>
             </Group>
           </motion.div>
         )}
@@ -94,7 +94,7 @@ export function InstallCheck({
                   <Text size="xs" c="dimmed">The snippet hasn't reported a pageview. Check the points below.</Text>
                 </div>
               </Group>
-              <Button size="xs" variant="light" leftSection={<RotateCw size={13} />} onClick={onStart}>Retry</Button>
+              <Button size="xs" variant="light" leftSection={<RotateCw size={13} />} onClick={onStart} style={{ flexShrink: 0 }}>Retry</Button>
             </Group>
             <Collapse expanded>
               <List size="xs" spacing={4} c="dimmed" pl="xs">

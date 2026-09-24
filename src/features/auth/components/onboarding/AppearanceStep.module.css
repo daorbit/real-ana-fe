@@ -111,4 +111,12 @@
   .actions > * {
     flex: 1;
   }
+  /* The header's back chevron covers this on a phone. */
+  .back { display: none; }
+  .primary {
+    height: 52px;
+    border-radius: 14px;
+    font-size: 1rem;
+  }
+  .actionsRow { border-top: 0; }
 }

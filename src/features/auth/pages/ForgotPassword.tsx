@@ -8,7 +8,7 @@ import {
 } from "@mantine/core";
 import { ArrowLeft, MailCheck } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
-import { AuthBrand } from "@/features/auth/components/AuthBrand";
+import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { notify, errMessage } from "@/shared/lib/notify";
 import type { ApiError } from "@/shared/lib/http";
@@ -142,6 +142,7 @@ export default function ForgotPassword() {
       <AuthBrand />
 
       <div className="auth-panel">
+        <AuthMobileBrand />
         <motion.form
           className="auth-form"
           noValidate

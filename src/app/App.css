@@ -2099,6 +2099,57 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   .auth-demo-fallback { display: flex; }
 }
 
+/* The phone sign-in screen: the side panel is gone, so the form opens with an
+   app icon and wordmark, and its controls grow to native touch sizes. */
+.auth-mobile-brand { display: none; }
+
+@media (max-width: 900px) {
+  .auth-panel {
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: calc(2.5rem + env(safe-area-inset-top, 0px));
+  }
+  .auth-mobile-brand {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+    gap: 0.6rem;
+    margin-bottom: 1.75rem;
+  }
+  .auth-mobile-brand .wordmark-text { font-size: 1.2rem; }
+  /* The PNG has a white ground; rounded and lifted it reads as an app icon
+     rather than a pasted square. */
+  .auth-mobile-mark {
+    border-radius: 14px;
+    box-shadow: 0 6px 18px -8px rgba(17, 24, 39, 0.35), 0 0 0 1px rgba(17, 24, 39, 0.06);
+  }
+}
+
+@media (max-width: 48em) {
+  .auth-panel {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-top: calc(2rem + env(safe-area-inset-top, 0px));
+  }
+  .auth-form .mantine-Title-root { font-size: 2rem; }
+  .auth-form .mantine-Input-input {
+    min-height: 50px;
+    border-radius: 12px;
+  }
+  .auth-form .mantine-Button-root[data-variant="default"] {
+    height: 50px;
+    border-radius: 12px;
+  }
+  .auth-submit {
+    height: 52px;
+    border-radius: 14px;
+    font-size: 1rem;
+  }
+}
+
 
 .mantine-Checkbox-label,
 .mantine-Switch-label,

@@ -101,14 +101,14 @@ export function BillingStep({
       <div className={s.actionsRow}>
         <div className={s.actions}>
           <Button
-            className="auth-btn"
+            className={`auth-btn ${s.back}`}
             variant="default"
             leftSection={<ArrowLeft size={15} />}
             onClick={onBack}
           >
             Back
           </Button>
-          <Button className="auth-btn" onClick={onDone} rightSection={<ArrowRight size={16} />}>
+          <Button className={`auth-btn ${s.primary}`} onClick={onDone} rightSection={<ArrowRight size={16} />}>
             Continue with Free
           </Button>
         </div>
