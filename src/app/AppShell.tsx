@@ -129,11 +129,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           onCloseNav={closeNav}
         />
 
+        {/* Under the drawer, not over it: Mantine puts the navbar at 101, and
+            this used to sit at 190 — a dim layer above the open menu that
+            swallowed every tap on its links. */}
         {navOpen && (
           <Overlay
             hiddenFrom="sm"
             onClick={closeNav}
-            zIndex={190}
+            zIndex={100}
             color="#000"
             backgroundOpacity={0.35}
           />
