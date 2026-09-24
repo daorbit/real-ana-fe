@@ -30,6 +30,11 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/lead-capture": () => import("@/features/leadCapture/pages/LeadCapture"),
   "/app/developers": () => import("@/features/support/pages/Developers"),
   "/app/settings": () => import("@/features/auth/pages/Settings"),
+  "/app/settings/profile": () => import("@/features/auth/pages/Settings"),
+  "/app/settings/appearance": () => import("@/features/auth/pages/Settings"),
+  "/app/settings/connections": () => import("@/features/auth/pages/Settings"),
+  "/app/settings/notifications": () => import("@/features/auth/pages/Settings"),
+  "/app/settings/security": () => import("@/features/auth/pages/Settings"),
   "/app/billing": () => import("@/features/billing/pages/Billing"),
 };
 

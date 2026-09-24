@@ -200,12 +200,12 @@ export default function AvatarCropper({ file, onCancel, onConfirm, busy }: Props
                 label={(v) => `${v.toFixed(1)}×`}
               />
               <Tooltip label="Rotate left">
-                <ActionIcon variant="default" onClick={() => rotate(-90)}>
+                <ActionIcon variant="default" onClick={() => rotate(-90)} aria-label="Rotate left">
                   <RotateCcw size={15} />
                 </ActionIcon>
               </Tooltip>
               <Tooltip label="Rotate right">
-                <ActionIcon variant="default" onClick={() => rotate(90)}>
+                <ActionIcon variant="default" onClick={() => rotate(90)} aria-label="Rotate right">
                   <RotateCw size={15} />
                 </ActionIcon>
               </Tooltip>

@@ -78,6 +78,7 @@ export function PlansTab({
             radius="md"
             loading={refetching}
             onClick={refetchPrices}
+            aria-label={t("billing.refetchPrices")}
           >
             <RefreshCw size={15} />
           </ActionIcon>

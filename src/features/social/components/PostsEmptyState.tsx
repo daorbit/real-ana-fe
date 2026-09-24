@@ -19,7 +19,7 @@ export function PostsEmptyState({
         action={{
           label: "Connect LinkedIn or Instagram",
           icon: Share2,
-          to: "/app/settings?tab=connections",
+          to: "/app/settings/connections",
           onClick: onConnect,
         }}
       />

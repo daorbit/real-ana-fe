@@ -100,6 +100,7 @@ export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onC
                         radius="md"
                         loading={isGranting}
                         onClick={() => grantSlot(ws.workspaceId)}
+                        aria-label="Grant one extra site slot"
                       >
                         <Plus size={14} />
                       </ActionIcon>

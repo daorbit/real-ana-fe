@@ -107,6 +107,7 @@ export function DeliveryStep({
                   variant="transparent"
                   color="gray"
                   onClick={() => removeEmail(email)}
+                  aria-label={`Remove ${email}`}
                 >
                   ×
                 </ActionIcon>

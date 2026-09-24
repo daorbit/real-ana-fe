@@ -13,9 +13,13 @@ import type { ApiKey } from "@/shared/types";
 export function useApiKeys(workspaceId: string) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { currentData: keys = [], isLoading } = useGetApiKeysQuery(workspaceId, {
-    skip: !workspaceId,
-  });
+  const {
+    currentData: keys = [],
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useGetApiKeysQuery(workspaceId, { skip: !workspaceId });
   const [createMutation, { isLoading: creating }] = useCreateApiKeyMutation();
   const [renameMutation, { isLoading: renaming }] = useRenameApiKeyMutation();
   const [revokeMutation] = useRevokeApiKeyMutation();
@@ -62,5 +66,16 @@ export function useApiKeys(workspaceId: string) {
     });
   };
 
-  return { keys, isLoading, creating, renaming, create, rename, revoke };
+  return {
+    keys,
+    isLoading,
+    loadFailed: isError && keys.length === 0,
+    retrying: isFetching,
+    retry: refetch,
+    creating,
+    renaming,
+    create,
+    rename,
+    revoke,
+  };
 }

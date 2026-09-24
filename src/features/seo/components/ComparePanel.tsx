@@ -154,6 +154,7 @@ export function ComparePanel({
                                   variant="subtle"
                                   color="gray"
                                   onClick={() => onRefresh(c.id)}
+                                  aria-label="Re-fetch"
                                 >
                                   <RefreshCw size={12} />
                                 </ActionIcon>
@@ -164,6 +165,7 @@ export function ComparePanel({
                                   variant="subtle"
                                   color="red"
                                   onClick={() => onDelete(c.id)}
+                                  aria-label="Remove"
                                 >
                                   <Trash2 size={12} />
                                 </ActionIcon>

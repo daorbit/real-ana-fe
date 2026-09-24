@@ -229,6 +229,7 @@ function HistoryPanel({
                         variant="subtle"
                         color="red"
                         size="sm"
+                        aria-label="Delete audit"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDelete(h._id);

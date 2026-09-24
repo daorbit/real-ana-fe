@@ -124,10 +124,6 @@ export function AccountMenu({
               reads as an account identity block rather than a billing panel. */}
         </Box>
 
-        {/* Settings, Members, Branding and the rest moved to the sidebar's
-            Manage / Workspace groups — this menu is now appearance, language
-            and the account itself, plus the admin rows below for super-admins. */}
-
         {isAdmin && (
           <>
             <Menu.Label>{t("nav.groupAdmin", "Admin")}</Menu.Label>

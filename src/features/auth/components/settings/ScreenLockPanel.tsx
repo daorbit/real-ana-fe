@@ -190,6 +190,7 @@ export function ScreenLockPanel() {
             color="gray"
             size="sm"
             onClick={() => setDisableOpen(false)}
+            aria-label="Close"
             style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
           >
             <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />
@@ -235,6 +236,7 @@ export function ScreenLockPanel() {
             color="gray"
             size="sm"
             onClick={() => setPinOpen(false)}
+            aria-label="Close"
             style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
           >
             <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />

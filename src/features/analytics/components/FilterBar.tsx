@@ -169,6 +169,7 @@ export function FilterBar({
                               loading={busyId === segment.id}
                               disabled={Boolean(busyId) && busyId !== segment.id}
                               onClick={() => onTogglePin(segment)}
+                              aria-label={segment.pinned ? "Unpin" : "Pin"}
                             >
                               <Pin size={12} />
                             </ActionIcon>
@@ -183,6 +184,7 @@ export function FilterBar({
                               loading={busyId === segment.id}
                               disabled={Boolean(busyId) && busyId !== segment.id}
                               onClick={() => onDeleteSegment(segment)}
+                              aria-label="Delete"
                             >
                               <Trash2 size={12} />
                             </ActionIcon>

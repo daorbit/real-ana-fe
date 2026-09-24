@@ -3,6 +3,7 @@ import { Palette } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { BrandingSkeleton } from "@/shared/ui/Skeletons";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace } from "@/features/workspace/context";
@@ -42,6 +43,12 @@ export default function BrandingPage() {
 
         {form.isLoading ? (
           <BrandingSkeleton />
+        ) : form.loadFailed ? (
+          <ErrorState
+            title="Couldn't load branding"
+            onRetry={() => void form.retry()}
+            retrying={form.retrying}
+          />
         ) : (
           <Box className={classes.layout}>
             <Box className={classes.main}>

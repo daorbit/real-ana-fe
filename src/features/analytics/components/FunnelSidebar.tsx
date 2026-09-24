@@ -58,7 +58,7 @@ export function FunnelSidebar({
                 </UnstyledButton>
                 <Menu withinPortal position="bottom-end">
                   <Menu.Target>
-                    <ActionIcon variant="subtle" color="gray" size="sm">
+                    <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Funnel actions">
                       <MoreVertical size={13} />
                     </ActionIcon>
                   </Menu.Target>

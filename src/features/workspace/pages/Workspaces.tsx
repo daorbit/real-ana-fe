@@ -46,7 +46,7 @@ function IdRow({ label, value }: { label: string; value: string }) {
       <CopyButton value={value}>
         {({ copied, copy }) => (
           <Tooltip label={copied ? t("workspaces.copied") : t("workspaces.copy")} withArrow>
-            <ActionIcon variant="subtle" color="gray" size="xs" onClick={copy}>
+            <ActionIcon variant="subtle" color="gray" size="xs" onClick={copy} aria-label={t("workspaces.copy")}>
               {copied ? <Check size={12} /> : <Copy size={12} />}
             </ActionIcon>
           </Tooltip>
@@ -155,7 +155,7 @@ function SiteRow({
           </CopyButton>
           {onDelete && (
             <Tooltip label={t("workspaces.deleteSite")} withArrow>
-              <ActionIcon variant="subtle" color="gray" size="lg" onClick={onDelete}>
+              <ActionIcon variant="subtle" color="gray" size="lg" onClick={onDelete} aria-label={t("workspaces.deleteSite")}>
                 <Trash2 size={15} />
               </ActionIcon>
             </Tooltip>
@@ -438,6 +438,7 @@ export default function Workspaces() {
                         onClick={saveRename}
                         disabled={!!renameError}
                         title={t("common.saveShort")}
+                        aria-label={t("common.saveShort")}
                       >
                         <Check size={15} />
                       </ActionIcon>
@@ -446,6 +447,7 @@ export default function Workspaces() {
                         color="gray"
                         onClick={() => setEditing(false)}
                         title={t("common.cancel")}
+                        aria-label={t("common.cancel")}
                       >
                         <X size={15} />
                       </ActionIcon>
@@ -466,6 +468,7 @@ export default function Workspaces() {
                       {canAdmin && (
                         <ActionIcon
                           className="ws-rename"
+                          aria-label={t("workspaces.rename")}
                           variant="subtle"
                           color="gray"
                           size="sm"
@@ -514,6 +517,7 @@ export default function Workspaces() {
                       size="lg"
                       onClick={() => removeWorkspace(active)}
                       title={t("workspaces.deleteWorkspace")}
+                      aria-label={t("workspaces.deleteWorkspace")}
                     >
                       <Trash2 size={16} />
                     </ActionIcon>

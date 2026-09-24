@@ -143,14 +143,14 @@ export function ReportCard({
           <Group gap={4} wrap="nowrap">
             {s.channels.email && (
               <Tooltip label={t("reports.testEmailTooltip")} withArrow>
-                <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest}>
+                <ActionIcon variant="light" size="lg" radius="md" loading={testing} onClick={onTest} aria-label={t("reports.testEmailTooltip")}>
                   <Send size={15} />
                 </ActionIcon>
               </Tooltip>
             )}
             <Menu position="bottom-end" withArrow>
               <Menu.Target>
-                <ActionIcon variant="subtle" size="lg" radius="md" color="gray">
+                <ActionIcon variant="subtle" size="lg" radius="md" color="gray" aria-label="Report actions">
                   <MoreVertical size={16} />
                 </ActionIcon>
               </Menu.Target>

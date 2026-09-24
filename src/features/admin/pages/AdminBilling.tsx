@@ -66,7 +66,7 @@ function CurrencyPriceInputs({
 function RefetchButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
   return (
     <Tooltip label="Refetch">
-      <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={loading} onClick={onClick}>
+      <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={loading} onClick={onClick} aria-label="Refetch">
         <RefreshCw size={15} />
       </ActionIcon>
     </Tooltip>
@@ -235,7 +235,7 @@ function PlansTab() {
                 <Table.Td>{p.monthlyAuditQuota}</Table.Td>
                 <Table.Td>{p.monthlyCrawlQuota}</Table.Td>
                 <Table.Td>
-                  <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(p)}>
+                  <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`}>
                     <Pencil size={14} />
                   </ActionIcon>
                 </Table.Td>
@@ -378,10 +378,10 @@ function AddonsTab() {
                 </Table.Td>
                 <Table.Td>
                   <Group gap={4} wrap="nowrap">
-                    <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(a)}>
+                    <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(a)} aria-label="Edit add-on">
                       <Pencil size={14} />
                     </ActionIcon>
-                    <ActionIcon variant="subtle" size="sm" color="red" onClick={() => remove_(a)}>
+                    <ActionIcon variant="subtle" size="sm" color="red" onClick={() => remove_(a)} aria-label="Delete add-on">
                       <Trash2 size={14} />
                     </ActionIcon>
                   </Group>
@@ -512,13 +512,13 @@ function CouponsTab() {
                 </Table.Td>
                 <Table.Td>
                   <Group gap={4} wrap="nowrap">
-                    <ActionIcon variant="subtle" size="sm" onClick={() => setPreview(c)}>
+                    <ActionIcon variant="subtle" size="sm" onClick={() => setPreview(c)} aria-label="Preview coupon">
                       <Eye size={14} />
                     </ActionIcon>
-                    <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(c)}>
+                    <ActionIcon variant="subtle" size="sm" onClick={() => openEdit(c)} aria-label="Edit coupon">
                       <Pencil size={14} />
                     </ActionIcon>
-                    <ActionIcon variant="subtle" size="sm" color="red" onClick={() => remove_(c)}>
+                    <ActionIcon variant="subtle" size="sm" color="red" onClick={() => remove_(c)} aria-label="Delete coupon">
                       <Trash2 size={14} />
                     </ActionIcon>
                   </Group>

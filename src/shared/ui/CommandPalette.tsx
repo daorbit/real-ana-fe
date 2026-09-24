@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Modal, TextInput, ScrollArea, Text, Box, UnstyledButton } from "@mantine/core";
 import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import {
-  Home, BarChart3, FolderKanban, Code2, Share2, CalendarClock, Users, Settings as SettingsIcon,
+  Home, BarChart3, FolderKanban, Code2, Share2, CalendarClock, Users,
   Search, Moon, Sun, BookOpen, CornerDownLeft,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useWorkspace } from "@/features/workspace/context";
 import { useIsPlatformAdmin } from "@/features/auth/context";
+import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
 
 type Command = {
   id: string;
@@ -85,7 +86,13 @@ export function CommandPalette() {
       { id: "share", label: "Public dashboard", section: "Go to", icon: Share2, run: go("/app/share") },
       { id: "reports", label: "Reports", section: "Go to", icon: CalendarClock, run: go("/app/reports") },
       { id: "developers", label: "Developers", section: "Go to", icon: Code2, run: go("/app/developers") },
-      { id: "settings", label: "Settings", section: "Go to", icon: SettingsIcon, run: go("/app/settings") },
+      ...SETTINGS_SECTIONS.map((s) => ({
+        id: `settings-${s.id}`,
+        label: `Settings: ${s.label}`,
+        section: "Go to",
+        icon: s.icon,
+        run: go(settingsPath(s.id)),
+      })),
     ];
 
     if (isAdmin) {

@@ -1,9 +1,9 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images,
-  Settings,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
+import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
 
 
 export type NavItem = {
@@ -48,33 +48,36 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    headingKey: "nav.groupManage",
-    heading: "Manage",
+    headingKey: "nav.groupEngage",
+    heading: "Engage",
     items: [
-      { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
-      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
-      { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
-      // Beside Reports: both are "write it once, it goes out on a schedule".
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
-      // Beside the outbound channels rather than under Analyze: reviews are
-      // customer-facing content to publish and reply to, not a metric to read.
-      // { to: "/app/reviews", labelKey: "nav.reviews", label: "Google Reviews", icon: Star },
-      // Beside the other outbound channels: a lead form is another way traffic
-      // turns into something you can act on.
-      { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Leads Capture", icon: LeadMagnetIcon },
-      { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
+      { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon },
+      { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
     ],
   },
   {
     headingKey: "nav.groupWorkspace",
     heading: "Workspace",
     items: [
+      { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
+      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
       { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette },
-      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images },
-      { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: Settings },
+      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
+      { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
     ],
+  },
+  {
+    headingKey: "nav.settings",
+    heading: "Settings",
+    items: SETTINGS_SECTIONS.map((s) => ({
+      to: settingsPath(s.id),
+      labelKey: s.labelKey,
+      label: s.label,
+      icon: s.icon,
+    })),
   },
 ];
 

@@ -3,6 +3,7 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolk
 import { getToken, isDemoToken } from "@/shared/lib/http";
 import { notify, errMessage, isPlanLimit, quotaLimitInfo, planLimitReason } from "@/shared/lib/notify";
 import { resolveDemoRequest } from "@/features/demo/demoResolver";
+import { reportLoadFailure } from "@/shared/lib/loadFailure";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
@@ -88,6 +89,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
       await new Promise((r) => setTimeout(r, attempt * 400));
       result = await rawBaseQuery(args, apiArg, extra);
     }
+    if (result.error) reportLoadFailure(apiArg.signal);
   }
 
   // An expired token surfaces here as a 401 on any authed request. One shared

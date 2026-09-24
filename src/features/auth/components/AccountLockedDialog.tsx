@@ -57,6 +57,7 @@ export function AccountLockedDialog({
           color="gray"
           size="sm"
           onClick={onClose}
+          aria-label="Close"
           style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
         >
           <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />

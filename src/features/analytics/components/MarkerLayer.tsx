@@ -299,6 +299,7 @@ export function MarkerDialog({
                             variant="subtle"
                             color="gray"
                             loading={deletingId === marker.id}
+                            aria-label="Delete marker"
                             // Deleting one row disables the others: two
                             // overlapping deletes would leave the list
                             // reordering under the cursor.
@@ -330,7 +331,7 @@ export function MarkerDialog({
 export function MarkerButton({ onClick, count }: { onClick: () => void; count: number }) {
   return (
     <Tooltip label={count ? `${count} marker${count === 1 ? "" : "s"} on this range` : "Add a deploy or campaign marker"}>
-      <ActionIcon variant="subtle" color="gray" size="sm" onClick={onClick}>
+      <ActionIcon variant="subtle" color="gray" size="sm" onClick={onClick} aria-label="Markers">
         <Flag size={14} />
       </ActionIcon>
     </Tooltip>

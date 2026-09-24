@@ -252,7 +252,7 @@ export default function App() {
               <Route path="/app/reviews" element={<Protected><RouteFrame><Reviews /></RouteFrame></Protected>} />
               <Route path="/app/lead-capture" element={<Protected><RouteFrame><LeadCapture /></RouteFrame></Protected>} />
               <Route path="/app/developers" element={<Protected><RouteFrame><Developers /></RouteFrame></Protected>} />
-              <Route path="/app/settings" element={<Protected><RouteFrame><Settings /></RouteFrame></Protected>} />
+              <Route path="/app/settings/:section?" element={<Protected><RouteFrame><Settings /></RouteFrame></Protected>} />
               <Route path="/app/billing" element={<Protected><RouteFrame><Billing /></RouteFrame></Protected>} />
               {/* Admin-only, enforced by the page and by every /api/admin route. */}
               <Route path="/app/impersonate" element={<Protected><RouteFrame><Impersonate /></RouteFrame></Protected>} />

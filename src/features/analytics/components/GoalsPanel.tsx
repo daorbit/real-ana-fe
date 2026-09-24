@@ -128,7 +128,7 @@ export function GoalsPanel({
                   <Text size="sm" fw={700}>{g.conversionRate}%</Text>
                   <Text size="xs" c="dimmed">{g.conversions} conv.</Text>
                   <Tooltip label="Delete goal" withArrow>
-                    <ActionIcon variant="subtle" color="red" size="sm" onClick={() => del(g)}>
+                    <ActionIcon variant="subtle" color="red" size="sm" onClick={() => del(g)} aria-label="Delete goal">
                       <Trash2 size={14} />
                     </ActionIcon>
                   </Tooltip>

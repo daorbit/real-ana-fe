@@ -371,6 +371,7 @@ export default function Members() {
                                 variant="subtle"
                                 color="red"
                                 onClick={() => remove(m.id, m.name || m.email, m.isSelf)}
+                                aria-label={m.isSelf ? "Leave workspace" : `Remove ${m.name || m.email}`}
                               >
                                 {m.isSelf ? <LogOut size={15} /> : <Trash2 size={15} />}
                               </ActionIcon>
@@ -423,6 +424,7 @@ export default function Members() {
                               <ActionIcon
                                 variant="subtle"
                                 color="red"
+                                aria-label="Withdraw invitation"
                                 onClick={async () => {
                                   trace(user?.id, "revoke_invite", "members", "members");
                                   try {

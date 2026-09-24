@@ -82,7 +82,7 @@ export function SortableWidget({
               />
             </Tooltip>
             <Tooltip label="Remove" withArrow>
-              <ActionIcon variant="subtle" color="red" size="sm" onClick={onRemove}>
+              <ActionIcon variant="subtle" color="red" size="sm" onClick={onRemove} aria-label="Remove">
                 <X size={14} />
               </ActionIcon>
             </Tooltip>

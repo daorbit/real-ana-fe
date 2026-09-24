@@ -107,7 +107,7 @@ export function demoNotifications(): NotificationPage {
       {
         type: "quota.exceeded",
         data: { workspaceName: "Acme Growth", limit: 100000 },
-        link: "/app/settings?tab=billing",
+        link: "/app/billing",
         workspaceId: "demo-workspace",
         actorId: null,
       },
@@ -119,7 +119,7 @@ export function demoNotifications(): NotificationPage {
       {
         type: "payment.received",
         data: { amountLabel: "$49.00" },
-        link: "/app/settings?tab=billing",
+        link: "/app/billing",
         workspaceId: "demo-workspace",
         actorId: null,
       },
@@ -131,7 +131,7 @@ export function demoNotifications(): NotificationPage {
       {
         type: "payment.failed",
         data: { amountLabel: "$49.00", reason: "card expired" },
-        link: "/app/settings?tab=billing",
+        link: "/app/billing",
         workspaceId: "demo-workspace",
         actorId: null,
       },
@@ -183,7 +183,7 @@ export function demoNotifications(): NotificationPage {
       {
         type: "plan.ending",
         data: { workspaceName: "Acme Growth", daysLeft: 3 },
-        link: "/app/settings?tab=billing",
+        link: "/app/billing",
         workspaceId: "demo-workspace",
         actorId: null,
       },
@@ -231,7 +231,7 @@ export function demoNotifications(): NotificationPage {
       {
         type: "security.alert",
         data: { what: "A new sign-in from Chrome on Windows, from Pune, India." },
-        link: "/app/settings?tab=security",
+        link: "/app/settings/security",
         workspaceId: null,
         actorId: null,
       },

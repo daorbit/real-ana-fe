@@ -30,6 +30,7 @@ export function DiscardDialog({
           color="gray"
           size="sm"
           onClick={onKeep}
+          aria-label="Close"
           style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
         >
           <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />

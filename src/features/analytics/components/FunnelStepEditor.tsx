@@ -82,6 +82,7 @@ export function FunnelStepEditor({
               onClick={() => onRemoveStep(i)}
               disabled={steps.length <= 2}
               title="Remove step"
+              aria-label="Remove step"
             >
               <Trash2 size={15} />
             </ActionIcon>

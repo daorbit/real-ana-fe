@@ -3,6 +3,7 @@ import { Box, Button, Skeleton, Stack, Text, TextInput } from "@mantine/core";
 import { KeyRound, Plus, Search, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import type { ApiKey } from "@/shared/types";
 import { useApiKeys } from "../../hooks/useApiKeys";
 import { ApiKeysTable } from "./ApiKeysTable";
@@ -14,7 +15,9 @@ import classes from "./Developers.module.css";
 
 export function ApiKeysPanel({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
   const { t } = useTranslation();
-  const { keys, isLoading, creating, renaming, create, rename, revoke } = useApiKeys(workspaceId);
+  const {
+    keys, isLoading, loadFailed, retrying, retry, creating, renaming, create, rename, revoke,
+  } = useApiKeys(workspaceId);
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [renamingKey, setRenamingKey] = useState<ApiKey | null>(null);
   const [query, setQuery] = useState("");
@@ -64,6 +67,15 @@ export function ApiKeysPanel({ workspaceId, workspaceName }: { workspaceId: stri
             <Skeleton key={i} height={40} radius="sm" />
           ))}
         </Stack>
+      ) : loadFailed ? (
+        <Box className={classes.emptyWrap}>
+          <ErrorState
+            compact
+            title={t("developers.loadError")}
+            onRetry={() => void retry()}
+            retrying={retrying}
+          />
+        </Box>
       ) : keys.length === 0 ? (
         <Box className={classes.emptyWrap}>
           <EmptyState

@@ -72,6 +72,7 @@ export function Receipts({ workspaceId }: { workspaceId: string }) {
             radius="md"
             loading={isFetching}
             onClick={() => refetch()}
+            aria-label={t("billing.refetchReceipts")}
           >
             <RefreshCw size={15} />
           </ActionIcon>
@@ -134,6 +135,7 @@ export function Receipts({ workspaceId }: { workspaceId: string }) {
                           radius="md"
                           loading={downloading === inv.id}
                           onClick={() => download(inv)}
+                          aria-label={t("billing.downloadPdf")}
                         >
                           <Download size={15} />
                         </ActionIcon>

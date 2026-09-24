@@ -67,7 +67,7 @@ export function PlanMessage({
               <Text size="xs" c="red">Couldn't draw that.</Text>
               {onRetryImage && (
                 <Tooltip label="Try again" withArrow>
-                  <ActionIcon size="sm" variant="subtle" color="gray" onClick={onRetryImage} disabled={generating}>
+                  <ActionIcon size="sm" variant="subtle" color="gray" onClick={onRetryImage} disabled={generating} aria-label="Try again">
                     <RotateCcw size={14} />
                   </ActionIcon>
                 </Tooltip>

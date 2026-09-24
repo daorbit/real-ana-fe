@@ -293,7 +293,7 @@ export function ActivityDrawer({
                       <Menu.Item
                         leftSection={<Settings2 size={14} />}
                         onClick={() => {
-                          navigate("/app/settings?tab=notifications");
+                          navigate("/app/settings/notifications");
                           onClose();
                         }}
                       >

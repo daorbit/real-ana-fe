@@ -8,7 +8,9 @@ import { FALLBACK_BRAND_NAME, FALLBACK_POWERED_BY } from "../constants";
 
 export function useBrandingForm(workspaceId: string) {
   const { canAdmin } = usePermissions();
-  const { data, isLoading } = useGetBrandingQuery(workspaceId, { skip: !workspaceId });
+  const { data, isLoading, isError, isFetching, refetch } = useGetBrandingQuery(workspaceId, {
+    skip: !workspaceId,
+  });
   const [save, { isLoading: saving }] = useUpdateBrandingMutation();
 
   const [name, setName] = useState("");
@@ -66,6 +68,9 @@ export function useBrandingForm(workspaceId: string) {
   return {
     data,
     isLoading,
+    loadFailed: isError && !data,
+    retrying: isFetching,
+    retry: refetch,
     saving,
     editable,
     canAdmin,

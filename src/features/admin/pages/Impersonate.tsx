@@ -199,7 +199,7 @@ export default function Impersonate() {
           {/* The total lives in the table footer now, next to the range it
               belongs with — two copies of the same number was one too many. */}
           <Tooltip label="Refetch">
-            <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={isFetching} onClick={refetch}>
+            <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={isFetching} onClick={refetch} aria-label="Refetch">
               <RefreshCw size={15} />
             </ActionIcon>
           </Tooltip>
@@ -396,6 +396,7 @@ export default function Impersonate() {
                                 color="gray"
                                 size="lg"
                                 radius="md"
+                                aria-label="Plan details"
                                 onClick={() => {
                                   trace(user?.id, "view_user_plan_clicked", "impersonate", "plan_dialog");
                                   setPlanUser(u);
@@ -411,6 +412,7 @@ export default function Impersonate() {
                                 size="lg"
                                 radius="md"
                                 disabled={rowBusy}
+                                aria-label={`Email ${u.email}`}
                                 onClick={() => {
                                   trace(user?.id, "message_user_clicked", "impersonate", "email_composer");
                                   setMessaging(u);
@@ -435,6 +437,7 @@ export default function Impersonate() {
                                   radius="md"
                                   disabled={!u.totpEnabled || resetting2fa}
                                   onClick={() => resetTwoFactor(u)}
+                                  aria-label={`Reset two-factor for ${u.email}`}
                                 >
                                   <ShieldOff size={16} />
                                 </ActionIcon>
@@ -456,6 +459,7 @@ export default function Impersonate() {
                                   radius="md"
                                   disabled={!u.screenLockEnabled || resettingLock}
                                   onClick={() => resetScreenLockFor(u)}
+                                  aria-label={`Reset screen lock for ${u.email}`}
                                 >
                                   <LockKeyholeOpen size={16} />
                                 </ActionIcon>
@@ -480,6 +484,7 @@ export default function Impersonate() {
                                 radius="md"
                                 disabled={!isSuperAdmin || admin || isSelf || rowBusy}
                                 onClick={() => remove(u)}
+                                aria-label={`Delete ${u.email}`}
                               >
                                 {deleting === u.id ? <Loader size={14} color="red" /> : <Trash2 size={16} />}
                               </ActionIcon>
