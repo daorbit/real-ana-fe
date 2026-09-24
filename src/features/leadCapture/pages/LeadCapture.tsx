@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useComputedColorScheme } from "@mantine/core";
 import { FolderOpen } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
@@ -7,6 +7,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
 import { leadFormsUrl, LEAD_FORMS_BASE } from "../themeParams";
 import { useEmbeddedPlanLimit } from "../useEmbeddedPlanLimit";
+import { useFrameUnreadCount } from "../useFrameUnreadCount";
 import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
 import { api } from "@/shared/lib/http";
@@ -137,13 +138,17 @@ export default function LeadCapture() {
  
 function LeadCaptureFrame({ src }: { src: string }) {
   useEmbeddedPlanLimit();
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const sendUnreadCount = useFrameUnreadCount(frameRef);
   return (
     <iframe
+      ref={frameRef}
       key={src}
       src={src}
       title="Lead forms"
       className="lead-capture__frame"
       allow="clipboard-write"
+      onLoad={() => sendUnreadCount()}
     />
   );
 }

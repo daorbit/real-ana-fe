@@ -35,7 +35,6 @@ export function useEmbeddedPlanLimit() {
         return;
       }
       if (event.data.type === OPEN_NOTIFICATIONS) {
-        console.log(event.data.type,OPEN_NOTIFICATIONS,"ajay")
         openActivityPanel();
         return;
       }
