@@ -1025,6 +1025,8 @@ export type ApiKey = {
   prefix: string;
   lastUsedAt?: string;
   createdAt: string;
+  createdBy?: { name?: string; email?: string } | null;
+  expiresAt?: string | null;
   key?: string; // only present right after creation
 };
 

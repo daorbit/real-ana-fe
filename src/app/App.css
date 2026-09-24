@@ -1742,10 +1742,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-.dev-hero {
-  background: var(--surface-2) !important;
-  border-color: var(--border-strong) !important;
-}
 .step-num {
   flex-shrink: 0;
   width: 30px; height: 30px;

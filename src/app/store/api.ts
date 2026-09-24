@@ -1321,10 +1321,25 @@ export const api = createApi({
       providesTags: ["ApiKey"],
     }),
 
-    createApiKey: build.mutation<ApiKey, { workspaceId: string; name: string }>({
-      query: ({ workspaceId, name }) => ({
+    createApiKey: build.mutation<
+      ApiKey,
+      { workspaceId: string; name: string; expiresInDays: number | null }
+    >({
+      query: ({ workspaceId, name, expiresInDays }) => ({
         url: `/api/workspaces/${workspaceId}/keys`,
         method: "POST",
+        body: { name, expiresInDays },
+      }),
+      invalidatesTags: ["ApiKey"],
+    }),
+
+    renameApiKey: build.mutation<
+      Pick<ApiKey, "id" | "name">,
+      { workspaceId: string; keyId: string; name: string }
+    >({
+      query: ({ workspaceId, keyId, name }) => ({
+        url: `/api/workspaces/${workspaceId}/keys/${keyId}`,
+        method: "PATCH",
         body: { name },
       }),
       invalidatesTags: ["ApiKey"],
@@ -2208,6 +2223,7 @@ export const {
   useDeleteGoalMutation,
   useGetApiKeysQuery,
   useCreateApiKeyMutation,
+  useRenameApiKeyMutation,
   useRevokeApiKeyMutation,
   useAnalyzeSeoMutation,
   useGetSeoReportsQuery,

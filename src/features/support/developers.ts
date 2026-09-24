@@ -1,0 +1,75 @@
+import type { ApiKey } from "@/shared/types";
+
+export const DOCS_URL = "https://quantalog.daorbit.in/docs/platform-api";
+
+export const KEY_ENV_VAR = "QUANTALOG_API_KEY";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const EXPIRING_SOON_DAYS = 7;
+
+export const EXPIRY_OPTIONS = ["never", "7", "30", "60", "90", "180", "365"] as const;
+export type ExpiryOption = (typeof EXPIRY_OPTIONS)[number];
+
+export function expiryDays(option: ExpiryOption): number | null {
+  return option === "never" ? null : Number(option);
+}
+
+export function expiryDate(option: ExpiryOption): Date | null {
+  const days = expiryDays(option);
+  return days === null ? null : new Date(Date.now() + days * DAY_MS);
+}
+
+export type KeyStatus = "active" | "expiring" | "expired";
+
+export function keyStatus(key: Pick<ApiKey, "expiresAt">): KeyStatus {
+  if (!key.expiresAt) return "active";
+  const left = new Date(key.expiresAt).getTime() - Date.now();
+  if (left <= 0) return "expired";
+  if (left <= EXPIRING_SOON_DAYS * DAY_MS) return "expiring";
+  return "active";
+}
+
+export function apiBaseUrl(): string {
+  const base = (import.meta.env.VITE_API_BASE as string | undefined) || window.location.origin;
+  return base.replace(/\/$/, "");
+}
+
+export function maskedKey(prefix: string): string {
+  return `${prefix}${"•".repeat(12)}`;
+}
+
+export type SnippetLang = "curl" | "node" | "python";
+
+export interface Snippet {
+  id: SnippetLang;
+  label: string;
+  filename: string;
+  code: string;
+}
+
+export function quickStartSnippets(base: string): Snippet[] {
+  const url = `${base}/v1/projects`;
+  return [
+    {
+      id: "curl",
+      label: "cURL",
+      filename: "terminal",
+      code: `curl ${url} \\\n  -H "Authorization: Bearer $${KEY_ENV_VAR}"`,
+    },
+    {
+      id: "node",
+      label: "Node.js",
+      filename: "index.js",
+      code: `const res = await fetch("${url}", {\n  headers: {\n    Authorization: \`Bearer \${process.env.${KEY_ENV_VAR}}\`,\n  },\n});\n\nconst projects = await res.json();\nconsole.log(projects);`,
+    },
+    {
+      id: "python",
+      label: "Python",
+      filename: "main.py",
+      code: `import os\nimport requests\n\nres = requests.get(\n    "${url}",\n    headers={"Authorization": f"Bearer {os.environ['${KEY_ENV_VAR}']}"},\n)\n\nprint(res.json())`,
+    },
+  ];
+}
+
+export const SAMPLE_RESPONSE = `[\n  {\n    "_id": "66f1c2a9e4b0a1d2c3f4e5a6",\n    "workspaceId": "66e0b1a8d3c2f1e0a9b8c7d6",\n    "name": "Acme storefront",\n    "extUserId": "user_1042",\n    "createdAt": "2026-09-01T10:24:00.000Z"\n  }\n]`;
