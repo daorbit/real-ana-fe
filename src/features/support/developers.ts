@@ -39,7 +39,7 @@ export function apiBaseUrl(): string {
 }
 
 export function playgroundUrl(): string {
-  return `${apiBaseUrl()}/docs`;
+  return `${apiBaseUrl()}/docs/`;
 }
 
 export function maskedKey(prefix: string): string {
