@@ -465,10 +465,9 @@ body { overflow-wrap: break-word; }
   max-width: 100%;
 }
 
-@media (max-width: 48em) {
-
-  .recharts-wrapper, .recharts-surface { max-width: 100% !important; }
-}
+/* No phone-only width cap on charts: `ResponsiveContainer` already sizes them
+   to their card, and a `max-width: 100%` on the SVG resolved against a
+   shrink-to-fit wrapper collapsed every chart to 0px wide on phones. */
 
 
 @media (max-width: 48em) {

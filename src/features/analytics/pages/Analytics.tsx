@@ -995,7 +995,7 @@ export default function Analytics() {
       {/* Detail views for the active section. One tidy row of pills — a handful
           per section, so nothing scrolls off-screen. */}
       <Group justify="space-between" align="center" mb="md" wrap="wrap" gap="sm">
-        <Group gap={6} wrap="wrap">
+        <Group gap={6} wrap="wrap" className="an-subtabs">
           {activeSection.tabs.map((t) => {
             const active = tab === t.value;
             const Icon = t.icon;
