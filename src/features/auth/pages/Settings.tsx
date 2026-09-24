@@ -1,5 +1,5 @@
 import { Navigate, useLocation, useParams } from "react-router-dom";
-import { Divider } from "@mantine/core";
+import { Box } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -14,6 +14,8 @@ import { ScreenLockPanel } from "@/features/auth/components/settings/ScreenLockP
 import { PasswordPanel } from "@/features/auth/components/settings/PasswordPanel";
 import { NotificationsPanel } from "@/features/auth/components/settings/NotificationsPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
+import { SecurityOverview } from "@/features/auth/components/settings/SecurityOverview";
+import securityClasses from "@/features/auth/components/settings/Security.module.css";
 import {
   findSettingsSection,
   settingsRedirectTarget,
@@ -34,13 +36,12 @@ function SectionBody({ id, form }: { id: SettingsSectionId; form: ProfileForm })
       return <NotificationsPanel />;
     case "security":
       return (
-        <>
+        <Box className={securityClasses.stack}>
+          <SecurityOverview />
           <PasswordPanel />
-          <Divider my="xl" />
           <TwoFactorPanel />
-          <Divider my="xl" />
           <ScreenLockPanel />
-        </>
+        </Box>
       );
   }
 }

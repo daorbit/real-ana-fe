@@ -14,6 +14,11 @@
   border-bottom: 1px solid var(--border);
 }
 
+.head[data-alone] {
+  align-items: center;
+  border-bottom: 0;
+}
+
 .headIcon {
   flex-shrink: 0;
   display: grid;

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import {
-  ActionIcon, Alert, Badge, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
+  ActionIcon, Alert, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
-import { LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
+import { KeyRound, LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
+import { SettingsCard } from "./SettingsCard";
+import { StatusBadge } from "./StatusBadge";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 import lockBannerSrc from "@/assets/banners/lock-inactivity-banner.svg";
@@ -90,46 +92,36 @@ export function ScreenLockPanel() {
   };
 
   return (
-    <Box>
-      <Group justify="space-between" wrap="nowrap">
-        <div>
-          <Group gap={8}>
-            <Text fw={600}>Lock on inactivity</Text>
-            {user.screenLockEnabled ? (
-              <Badge color="teal" variant="light" size="sm">On</Badge>
-            ) : (
-              <Badge color="gray" variant="light" size="sm">Off</Badge>
-            )}
-          </Group>
-          <Text size="sm" c="dimmed" mt={4}>
-            Show a lock screen after 5 minutes of inactivity. Unlock with your PIN
-            {user.totpEnabled ? " or your authenticator app" : ""}.
-          </Text>
-        </div>
-
-        {user.screenLockEnabled ? (
-          <Button
-            variant="light"
-            color="red"
-            leftSection={<LockKeyholeOpen size={15} />}
-            onClick={() => setDisableOpen(true)}
-          >
-            Turn off
-          </Button>
-        ) : (
-          <Button variant="light" leftSection={<LockKeyhole size={15} />} onClick={openEnable}>
-            Turn on
-          </Button>
-        )}
-      </Group>
-
-      {user.screenLockEnabled && (
-        <Group mt="sm">
-          <Button variant="light" color="teal" size="xs" onClick={() => setPinOpen(true)}>
-            {user.hasPin ? "Change PIN" : "Set a PIN"}
-          </Button>
-        </Group>
-      )}
+    <>
+      <SettingsCard
+        icon={LockKeyhole}
+        title="Lock on inactivity"
+        badge={<StatusBadge on={Boolean(user.screenLockEnabled)} />}
+        description={`Show a lock screen after 5 minutes without activity. Unlock with your PIN${
+          user.totpEnabled ? " or your authenticator app" : ""
+        }.`}
+        action={
+          user.screenLockEnabled ? (
+            <Group gap="xs" wrap="nowrap">
+              <Button variant="default" leftSection={<KeyRound size={15} />} onClick={() => setPinOpen(true)}>
+                {user.hasPin ? "Change PIN" : "Set a PIN"}
+              </Button>
+              <Button
+                variant="default"
+                color="red"
+                leftSection={<LockKeyholeOpen size={15} />}
+                onClick={() => setDisableOpen(true)}
+              >
+                Turn off
+              </Button>
+            </Group>
+          ) : (
+            <Button leftSection={<LockKeyhole size={15} />} onClick={openEnable}>
+              Turn on
+            </Button>
+          )
+        }
+      />
 
       <Modal
         opened={enableOpen}
@@ -273,6 +265,6 @@ export function ScreenLockPanel() {
           </Stack>
         </Stack>
       </Modal>
-    </Box>
+    </>
   );
 }

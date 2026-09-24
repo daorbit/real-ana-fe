@@ -59,3 +59,18 @@ export function isTextLike(asset: MediaAsset): boolean {
 
 /** Cap on how much of a text file the preview fetches and renders. */
 export const TEXT_PREVIEW_MAX_BYTES = 200 * 1024;
+
+export async function downloadAsset(asset: MediaAsset): Promise<void> {
+  try {
+    const res = await fetch(asset.url);
+    if (!res.ok) throw new Error(String(res.status));
+    const href = URL.createObjectURL(await res.blob());
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = asset.name;
+    a.click();
+    URL.revokeObjectURL(href);
+  } catch {
+    window.open(asset.url, "_blank", "noopener,noreferrer");
+  }
+}

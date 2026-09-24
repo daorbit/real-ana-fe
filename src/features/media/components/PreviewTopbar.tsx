@@ -1,34 +1,103 @@
-import { ActionIcon, Badge, Group, Text, Tooltip } from "@mantine/core";
-import { X } from "lucide-react";
+import { ActionIcon, Box, Tooltip } from "@mantine/core";
+import { Download, ExternalLink, Info, Link2, X } from "lucide-react";
+import type { MediaAsset } from "@/shared/types";
+import { FileTypeIcon } from "./FileTypeIcon";
 import classes from "./MediaPreviewModal.module.css";
 
 interface Props {
-  title: string;
-  /** Kind, size and dimensions — the facts worth reading without opening the panel. */
-  meta: string[];
+  asset: MediaAsset;
+  meta: string;
+  position: { index: number; total: number } | null;
+  detailsOpen: boolean;
+  onToggleDetails: () => void;
+  onCopyLink: () => void;
+  onDownload: () => void;
   onClose: () => void;
 }
 
-/** The preview's chrome: what is on the stage, and the way out. */
-export function PreviewTopbar({ title, meta, onClose }: Props) {
+function Tool({
+  label,
+  onClick,
+  active,
+  children,
+  href,
+}: {
+  label: string;
+  onClick?: () => void;
+  active?: boolean;
+  children: React.ReactNode;
+  href?: string;
+}) {
+  const shared = {
+    variant: "subtle" as const,
+    size: "lg" as const,
+    className: classes.tool,
+    "aria-label": label,
+    "data-active": active || undefined,
+  };
   return (
-    <Group justify="space-between" className={classes.topbar} wrap="nowrap">
-      <Group gap={10} wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-        <Text fw={600} size="sm" truncate className={classes.topbarTitle} title={title}>
-          {title}
-        </Text>
-        {meta.map((m) => (
-          <Badge key={m} variant="light" color="gray" size="sm" visibleFrom="md">
-            {m}
-          </Badge>
-        ))}
-      </Group>
-
-      <Tooltip label="Close preview" withArrow>
-        <ActionIcon variant="subtle" color="gray" size="lg" onClick={onClose} aria-label="Close">
-          <X size={19} />
+    <Tooltip label={label} withArrow>
+      {href ? (
+        <ActionIcon {...shared} component="a" href={href} target="_blank" rel="noopener noreferrer">
+          {children}
         </ActionIcon>
-      </Tooltip>
-    </Group>
+      ) : (
+        <ActionIcon {...shared} onClick={onClick}>
+          {children}
+        </ActionIcon>
+      )}
+    </Tooltip>
+  );
+}
+
+export function PreviewTopbar({
+  asset,
+  meta,
+  position,
+  detailsOpen,
+  onToggleDetails,
+  onCopyLink,
+  onDownload,
+  onClose,
+}: Props) {
+  return (
+    <Box className={classes.topbar}>
+      <span className={classes.fileIcon}>
+        <FileTypeIcon fileName={asset.name} size={18} />
+      </span>
+      <Box className={classes.titleBlock}>
+        <div className={classes.title} title={asset.name}>
+          {asset.name}
+        </div>
+        <div className={classes.meta}>{meta}</div>
+      </Box>
+
+      <Box className={classes.toolbar}>
+        {position && (
+          <>
+            <span className={`${classes.counter} ${classes.hideMobile}`}>
+              {position.index + 1} of {position.total}
+            </span>
+            <span className={`${classes.divider} ${classes.hideMobile}`} />
+          </>
+        )}
+        <Tool label="Copy link" onClick={onCopyLink}>
+          <Link2 size={18} />
+        </Tool>
+        <Tool label="Download" onClick={onDownload}>
+          <Download size={18} />
+        </Tool>
+        <Tool label="Open original" href={asset.url}>
+          <ExternalLink size={18} />
+        </Tool>
+        <Tool label={detailsOpen ? "Hide details" : "Show details"} onClick={onToggleDetails} active={detailsOpen}>
+          <Info size={18} />
+        </Tool>
+        <span className={classes.divider} />
+        <Tool label="Close (Esc)" onClick={onClose}>
+          <X size={19} />
+        </Tool>
+      </Box>
+    </Box>
   );
 }

@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Alert, Box, Button, Group, PasswordInput, Stack, Text } from "@mantine/core";
+import { Alert, Box, Button, Group, PasswordInput } from "@mantine/core";
 import { KeyRound } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { SettingsCard } from "./SettingsCard";
+import { StatusBadge } from "./StatusBadge";
+import classes from "./Security.module.css";
 
  
 export function PasswordPanel() {
@@ -51,38 +54,39 @@ export function PasswordPanel() {
   };
 
   return (
-    <Box>
-      <Group justify="space-between" wrap="nowrap" align="flex-start">
-        <div>
-          <Text fw={600}>{user.hasPassword ? "Password" : "Set a password"}</Text>
-          <Text size="sm" c="dimmed" mt={4}>
-            {user.hasPassword
-              ? "Change the password used to log in with email."
-              : "This account signs in with Google or LinkedIn only. Set a password to also log in with email."}
-          </Text>
-        </div>
-
-        {!open && (
-          <Button variant="light" leftSection={<KeyRound size={15} />} onClick={() => setOpen(true)}>
-            {user.hasPassword ? "Change" : "Set password"}
+    <SettingsCard
+      icon={KeyRound}
+      title={user.hasPassword ? "Password" : "Set a password"}
+      badge={<StatusBadge on={Boolean(user.hasPassword)} onLabel="Set" offLabel="Not set" />}
+      description={
+        user.hasPassword
+          ? "Change the password you use to log in with email."
+          : "This account signs in with Google or LinkedIn only. Set a password to also log in with email."
+      }
+      action={
+        !open && (
+          <Button variant="default" onClick={() => setOpen(true)}>
+            {user.hasPassword ? "Change password" : "Set password"}
           </Button>
-        )}
-      </Group>
-
+        )
+      }
+    >
       {open && (
-        <Stack gap="sm" mt="md" maw={360}>
+        <Box className={classes.form}>
           {error && (
-            <Alert color="red" variant="light">
+            <Alert color="red" variant="light" className={classes.formFull}>
               {error}
             </Alert>
           )}
 
           {user.hasPassword && (
             <PasswordInput
+              className={classes.formFull}
               label="Current password"
               value={current}
               onChange={(e) => setCurrent(e.currentTarget.value)}
               disabled={busy}
+              autoComplete="current-password"
             />
           )}
           <PasswordInput
@@ -90,24 +94,26 @@ export function PasswordPanel() {
             value={next}
             onChange={(e) => setNext(e.currentTarget.value)}
             disabled={busy}
+            autoComplete="new-password"
           />
           <PasswordInput
             label="Confirm new password"
             value={confirm}
             onChange={(e) => setConfirm(e.currentTarget.value)}
             disabled={busy}
+            autoComplete="new-password"
           />
 
-          <Group gap="xs">
+          <Group gap="xs" className={classes.formFull}>
             <Button loading={busy} disabled={!next || !confirm} onClick={() => void submit()}>
-              Save
+              Save password
             </Button>
             <Button variant="subtle" color="gray" disabled={busy} onClick={reset}>
               Cancel
             </Button>
           </Group>
-        </Stack>
+        </Box>
       )}
-    </Box>
+    </SettingsCard>
   );
 }

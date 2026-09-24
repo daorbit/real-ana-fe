@@ -1,11 +1,3 @@
-/* Chrome colours follow the app's colour scheme; the stage stays its own
-   deliberate surface (see .stage). */
-
-/* The preview fills the shell's panel and stops at its border, rather than
-   covering the window: the rail beside the panel is how someone gets back out,
-   so it stays reachable. Everything here is absolute against
-   `#panel-overlay-root`'s offset parent — the panel — instead of fixed to the
-   viewport, which is what would swallow the rail. */
 .root,
 .overlay,
 .inner {
@@ -13,18 +5,11 @@
   inset: 0;
 }
 
-/* Spans the panel like the mount point does, so it stays transparent to clicks
-   and lets its two painted children opt back in. */
 .root {
   pointer-events: none;
 }
 
-/* `#panel-overlay-root` spans the whole panel and so takes no pointer events of
-   its own — otherwise it would swallow every click meant for the page beneath
-   it, even with no preview open. These two are what is actually painted while
-   the preview is up, so they take events back. */
 .overlay {
-  /* Under the content, above the page it is covering. */
   z-index: 1;
   pointer-events: auto;
 }
@@ -38,14 +23,14 @@
 }
 
 .content {
-  --preview-chrome: #16181d;
-  --preview-border: #24272e;
-  --preview-text: #f1f3f5;
-  --preview-dimmed: #868e96;
-  --preview-track: #22252c;
-  --preview-scrollbar: #3a3f48;
-  --preview-stage: radial-gradient(circle at 50% 0%, #1c2029 0%, #0f1115 60%);
-  --preview-heading: #ced4da;
+  --pv-chrome: #111317;
+  --pv-border: #22252c;
+  --pv-text: #f1f3f5;
+  --pv-dimmed: #8b93a1;
+  --pv-hover: rgba(255, 255, 255, 0.06);
+  --pv-stage: #0a0b0e;
+  --pv-check-a: #16181d;
+  --pv-check-b: #1c1f25;
 
   position: absolute;
   inset: 0;
@@ -58,98 +43,188 @@
   overflow: hidden !important;
   display: flex;
   flex-direction: column;
-  background-color: #0f1115;
+  background-color: var(--pv-stage);
+  color: var(--pv-text);
 }
 
 :global(html[data-mantine-color-scheme="light"]) .content {
-  --preview-chrome: #ffffff;
-  --preview-border: var(--mantine-color-gray-3);
-  --preview-text: var(--mantine-color-gray-9);
-  --preview-dimmed: var(--mantine-color-gray-6);
-  --preview-track: var(--mantine-color-gray-1);
-  --preview-scrollbar: var(--mantine-color-gray-4);
-  --preview-stage: radial-gradient(
-    circle at 50% 0%,
-    var(--mantine-color-gray-0) 0%,
-    var(--mantine-color-gray-2) 60%
-  );
-  --preview-heading: var(--mantine-color-gray-7);
-
-  background-color: var(--mantine-color-gray-0);
+  --pv-chrome: #ffffff;
+  --pv-border: var(--mantine-color-gray-3);
+  --pv-text: var(--mantine-color-gray-9);
+  --pv-dimmed: var(--mantine-color-gray-6);
+  --pv-hover: var(--mantine-color-gray-1);
+  --pv-stage: var(--mantine-color-gray-1);
+  --pv-check-a: #ffffff;
+  --pv-check-b: #eef0f3;
 }
 
-/* Sticky rather than merely first-in-flow: whatever a column does with its own
-   overflow, the device switcher and close button stay reachable. */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  height: 56px;
-  flex-shrink: 0;
-  padding: 0 16px;
-  background-color: var(--preview-chrome);
-  border-bottom: 1px solid var(--preview-border);
-}
-
-.topbarTitle {
-  color: var(--preview-text);
-}
-
-/* The row under the topbar takes exactly the height the panel has left. The fit
-   scale measures the stage's `clientHeight`, so an unbounded height here makes
-   it measure a stage taller than the panel and choose a scale whose frame then
-   overflows — the device gets cut off at the bottom. */
 .body {
   flex: 1;
   min-height: 0;
-  height: calc(100% - 56px);
+  height: 100%;
   display: flex;
-  position: relative;
+  flex-direction: column;
   overflow: hidden;
 }
 
-/* The workbench the hardware sits on — a neutral surface a shade away from the
-   chrome so the file's own colours read as the file's and not the chrome's. */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 60px;
+  flex-shrink: 0;
+  padding: 0 12px 0 16px;
+  background-color: var(--pv-chrome);
+  border-bottom: 1px solid var(--pv-border);
+}
+
+.fileIcon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--pv-border);
+  background-color: var(--pv-hover);
+}
+
+.titleBlock {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pv-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--pv-dimmed);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.divider {
+  width: 1px;
+  height: 22px;
+  margin: 0 6px;
+  background-color: var(--pv-border);
+}
+
+.counter {
+  min-width: 56px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--pv-dimmed);
+}
+
+.tool {
+  color: var(--pv-dimmed) !important;
+}
+
+.tool:hover:not(:disabled) {
+  color: var(--pv-text) !important;
+  background-color: var(--pv-hover) !important;
+}
+
+.tool[data-active] {
+  color: var(--pv-text) !important;
+  background-color: var(--pv-hover) !important;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
 .stage {
+  position: relative;
   flex: 1;
   min-width: 0;
   min-height: 0;
-  /* The frame is scaled to fit, so normally nothing overflows; on a short or
-     narrow screen the fit bottoms out and the stage scrolls rather than
-     clipping the device. */
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--preview-scrollbar) transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: var(--preview-stage);
+  padding: 32px 72px;
+  background-color: var(--pv-stage);
 }
 
-/* The device's screen: a dark surface rather than the page white, so the file
-   is what the eye lands on and a transparent PNG still reads against something.
-   `min-height: 0` so a flex child cannot push it past the screen's height. */
-.screen {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
+.navButton {
+  position: absolute;
+  top: calc(50% - 22px);
+  z-index: 2;
+  transform: none !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--pv-border) !important;
+  background-color: var(--pv-chrome) !important;
+  color: var(--pv-text) !important;
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+}
+
+.navButton:disabled {
+  opacity: 0.35;
+}
+
+.navPrev {
+  left: 16px;
+}
+
+.navNext {
+  right: 16px;
+}
+
+.canvas {
+  max-width: 100%;
+  max-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: #101317;
+  border-radius: 10px;
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.8);
 }
 
-/* Fills the screen it is given, in both axes, whatever the file's own aspect
-   ratio — `max-*` alone leaves a band of empty screen under a wide image, which
-   reads as the preview being broken rather than as the file's shape. `contain`
-   keeps the whole file visible and uncropped inside that. */
-.media {
-  display: block;
+.canvas[data-checker] {
+  background-color: var(--pv-check-a);
+  background-image:
+    linear-gradient(45deg, var(--pv-check-b) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--pv-check-b) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--pv-check-b) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--pv-check-b) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+.canvas[data-document] {
   width: 100%;
   height: 100%;
+  max-width: 1100px;
+  border: 1px solid var(--pv-border);
+  background-color: var(--mantine-color-body);
+}
+
+.media {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 200px);
   object-fit: contain;
 }
 
@@ -161,119 +236,126 @@
   background: var(--mantine-color-body);
 }
 
-/* A text or document preview wants the whole screen, not a centred block. */
-.screen:has(.frame),
-.screen:has([data-text-preview]) {
-  align-items: stretch;
-  justify-content: stretch;
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  padding: 32px;
+  text-align: center;
+  color: var(--pv-dimmed);
 }
 
 .panel {
   display: flex;
   flex-direction: column;
-  width: 268px;
+  width: 320px;
   flex-shrink: 0;
-  min-height: 0;
-  overflow: hidden;
-  background-color: var(--preview-chrome);
-  border-right: 1px solid var(--preview-border);
-}
-
-/* Stays put while the details scroll under it. */
-.panelHeader {
-  flex-shrink: 0;
-  padding: 14px 14px 10px;
-  background-color: var(--preview-chrome);
-  border-bottom: 1px solid var(--preview-border);
-}
-
-.panelScroll {
-  flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 12px 14px 16px;
+  background-color: var(--pv-chrome);
+  border-left: 1px solid var(--pv-border);
   scrollbar-width: thin;
-  scrollbar-color: var(--preview-scrollbar) transparent;
 }
 
-.stage::-webkit-scrollbar,
-.panelScroll::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.panelSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 18px;
+  border-bottom: 1px solid var(--pv-border);
 }
 
-.stage::-webkit-scrollbar-thumb,
-.panelScroll::-webkit-scrollbar-thumb {
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background-clip: content-box;
-  background-color: var(--preview-scrollbar);
+.panelSection:last-child {
+  border-bottom: 0;
 }
 
-.panelHeading {
-  color: var(--preview-heading);
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--pv-dimmed);
 }
 
-.panelDimmed {
-  color: var(--preview-dimmed);
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 16px;
+  margin: 0;
+  font-size: 13px;
 }
 
-.panelValue {
-  color: var(--preview-text);
-  max-width: 60%;
+.factLabel {
+  color: var(--pv-dimmed);
 }
 
-.panelToggle {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  z-index: 2;
+.factValue {
+  margin: 0;
+  min-width: 0;
+  text-align: right;
+  color: var(--pv-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linkRow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 48px;
-  padding: 0;
-  transform: translateY(-50%);
-  border: 1px solid var(--preview-border);
-  border-left: none;
-  border-radius: 0 6px 6px 0;
-  background-color: var(--preview-chrome);
-  color: var(--preview-dimmed);
-  cursor: pointer;
-  transition: left 160ms ease;
-  /* Above the stage it sits on, below nothing else in here. */
-  z-index: 2;
+  gap: 6px;
+  padding: 6px 6px 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--pv-border);
+  background-color: var(--pv-hover);
 }
 
-.panelToggle[data-open="true"] {
-  left: 268px;
+.linkValue {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 12px;
+  color: var(--pv-dimmed);
 }
 
-.panelToggle:hover {
-  color: var(--preview-text);
+.danger {
+  margin-top: auto;
+}
+
+@media (max-width: 62em) {
+  .panel {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    box-shadow: -20px 0 40px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  .stage {
+    padding: 20px 56px;
+  }
 }
 
 @media (max-width: 48em) {
-  .inner {
-    inset-inline-start: 0;
-  }
-
-  /* No room for a column beside the stage on a phone, but rename and delete
-     live in here — so the panel goes under the stage rather than away. */
-  .body {
-    flex-direction: column;
-  }
-
   .panel {
     width: 100%;
-    max-height: 45%;
-    border-right: 0;
-    border-bottom: 1px solid var(--preview-border);
   }
 
-  .panelToggle {
+  .stage {
+    padding: 16px;
+  }
+
+  .navButton {
+    display: none;
+  }
+
+  .hideMobile {
     display: none;
   }
 }

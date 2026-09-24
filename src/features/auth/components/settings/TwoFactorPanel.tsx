@@ -1,8 +1,10 @@
 import { useState } from "react";
 import {
-  ActionIcon, Alert, Badge, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
+  ActionIcon, Alert, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
-import { ShieldCheck, ShieldOff, Download, X } from "lucide-react";
+import { ShieldCheck, ShieldOff, Download, X, Smartphone } from "lucide-react";
+import { SettingsCard } from "./SettingsCard";
+import { StatusBadge } from "./StatusBadge";
 import { api } from "@/shared/lib/http";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -111,42 +113,29 @@ export function TwoFactorPanel() {
   };
 
   return (
-    <Box>
-      <Group justify="space-between" wrap="nowrap">
-        <div>
-          <Group gap={8}>
-            <Text fw={600}>Two-factor authentication</Text>
-            {user.totpEnabled ? (
-              <Badge color="teal" variant="light" size="sm">On</Badge>
-            ) : (
-              <Badge color="gray" variant="light" size="sm">Off</Badge>
-            )}
-          </Group>
-          <Text size="sm" c="dimmed" mt={4}>
-            Require a code from an authenticator app when logging in with a password.
-          </Text>
-        </div>
-
-        {user.totpEnabled ? (
-          <Button
-            variant="light"
-            color="red"
-            leftSection={<ShieldOff size={15} />}
-            onClick={() => setDisableOpen(true)}
-          >
-            Turn off
-          </Button>
-        ) : (
-          <Button
-            variant="light"
-            leftSection={<ShieldCheck size={15} />}
-            loading={starting}
-            onClick={startSetup}
-          >
-            Turn on
-          </Button>
-        )}
-      </Group>
+    <>
+      <SettingsCard
+        icon={Smartphone}
+        title="Two-factor authentication"
+        badge={<StatusBadge on={Boolean(user.totpEnabled)} />}
+        description="Ask for a code from an authenticator app, like Google Authenticator or 1Password, every time you log in with a password."
+        action={
+          user.totpEnabled ? (
+            <Button
+              variant="default"
+              color="red"
+              leftSection={<ShieldOff size={15} />}
+              onClick={() => setDisableOpen(true)}
+            >
+              Turn off
+            </Button>
+          ) : (
+            <Button leftSection={<ShieldCheck size={15} />} loading={starting} onClick={startSetup}>
+              Turn on
+            </Button>
+          )
+        }
+      />
 
       <Modal
         opened={setup !== null}
@@ -268,6 +257,6 @@ export function TwoFactorPanel() {
           </Button>
         </Stack>
       </Modal>
-    </Box>
+    </>
   );
 }

@@ -335,6 +335,11 @@ export default function MediaLibraryPage() {
 
       <MediaPreviewModal
         asset={viewing}
+        items={items}
+        onNavigate={(asset) => {
+          setViewing(asset);
+          setRenaming(asset.name);
+        }}
         renaming={renaming}
         onRenamingChange={setRenaming}
         onClose={() => setViewing(null)}

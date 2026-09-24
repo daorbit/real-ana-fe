@@ -56,13 +56,7 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
   return output;
 }
 
-/**
- * Register the worker, or reuse the existing registration.
- *
- * `/sw.js` is served from the site root so its scope covers the whole app —
- * a worker registered from a subdirectory could only receive pushes for pages
- * beneath it.
- */
+
 const SW_URL = "/sw.js";
 
 function isOurWorker(reg: ServiceWorkerRegistration): boolean {
