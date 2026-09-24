@@ -96,6 +96,22 @@
   object-fit: cover;
 }
 
+.switch input:disabled + :global(.mantine-Switch-track) {
+  cursor: not-allowed;
+  opacity: 1;
+  border-color: var(--border-strong);
+  background-color: var(--surface-2);
+}
+
+.switch input:disabled:checked + :global(.mantine-Switch-track) {
+  border-color: color-mix(in srgb, var(--mantine-color-emerald-6) 55%, transparent);
+  background-color: color-mix(in srgb, var(--mantine-color-emerald-6) 35%, var(--surface-2));
+}
+
+.switch input:disabled + :global(.mantine-Switch-track) :global(.mantine-Switch-thumb) {
+  opacity: 0.85;
+}
+
 .dash {
   color: var(--text-2);
 }
