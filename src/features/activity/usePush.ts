@@ -63,10 +63,22 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
  * a worker registered from a subdirectory could only receive pushes for pages
  * beneath it.
  */
+const SW_URL = "/sw.js";
+
+function isOurWorker(reg: ServiceWorkerRegistration): boolean {
+  const worker = reg.active ?? reg.waiting ?? reg.installing;
+  return Boolean(worker && new URL(worker.scriptURL).pathname === SW_URL);
+}
+
 async function registration(): Promise<ServiceWorkerRegistration> {
   const existing = await navigator.serviceWorker.getRegistration("/");
-  if (existing) return existing;
-  return navigator.serviceWorker.register("/sw.js", { scope: "/" });
+  if (existing && isOurWorker(existing)) {
+    void existing.update().catch(() => {});
+    return existing;
+  }
+  if (existing) await existing.unregister();
+  await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+  return navigator.serviceWorker.ready;
 }
 
 function sameServerKey(sub: PushSubscription, vapidPublicKey: string): boolean {
