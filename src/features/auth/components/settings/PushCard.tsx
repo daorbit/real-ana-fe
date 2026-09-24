@@ -89,7 +89,7 @@ export function PushCard({ state, onEnable, onDisable, onTest, testing }: Props)
           <Text size="xs" c="dimmed" className={classes.testHint}>
             {t(
               "activity.push.scope",
-              "Push is used for urgent alerts only. Rows marked — below are shown in the app but never pushed.",
+              "Use the Push column below to choose which notifications pop up on this device.",
             )}
           </Text>
           <Button size="xs" variant="default" leftSection={<Send size={13} />} loading={testing} onClick={onTest}>
