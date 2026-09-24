@@ -802,7 +802,7 @@ export default function Analytics() {
               </ActionIcon>
             </MTooltip>
 
-            <DocsButton path="/analytics" />
+            <DocsButton path="/overview" />
           </Group>
           <Group gap="xs" wrap="nowrap" className="an-range">
             {(statsLoading || refetching) && (
