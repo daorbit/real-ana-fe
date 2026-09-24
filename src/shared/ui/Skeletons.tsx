@@ -178,42 +178,38 @@ export function WorkspacesSkeleton() {
         <Skeleton height={36} width={160} radius="md" />
       </Group>
 
-      <Card withBorder radius="lg" padding="xl" mb="xl">
-        <Skeleton height={20} width={200} radius="sm" />
-        <Skeleton height={11} width={280} mt={10} radius="sm" />
-        <Skeleton height={1} mt="xl" mb="lg" />
-        <Skeleton height={12} width={140} mb="md" radius="sm" />
-        <Stack gap="sm">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <Card key={i} withBorder radius="md" padding="md">
-              <Group justify="space-between" wrap="nowrap">
-                <Group gap="md" wrap="nowrap" style={{ flex: 1 }}>
-                  <Skeleton height={38} width={38} radius="md" />
-                  <div style={{ flex: 1 }}>
-                    <Skeleton height={12} width="35%" radius="sm" />
-                    <Skeleton height={10} width="55%" mt={8} radius="sm" />
-                  </div>
+      <Grid gap="xl">
+        <Grid.Col span={{ base: 12, md: 3 }}>
+          <Skeleton height={260} radius="md" />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 9 }}>
+          <Stack gap="lg">
+            <Skeleton height={170} radius="md" />
+            <SimpleGrid cols={{ base: 2, lg: 4 }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} height={104} radius="md" />
+              ))}
+            </SimpleGrid>
+            <Card withBorder radius="md" padding={0}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Group key={i} justify="space-between" wrap="nowrap" p="md">
+                  <Group gap="md" wrap="nowrap" flex={1}>
+                    <Skeleton height={40} width={40} radius="md" />
+                    <Box flex={1}>
+                      <Skeleton height={12} width="35%" radius="sm" />
+                      <Skeleton height={10} width="25%" mt={8} radius="sm" />
+                    </Box>
+                  </Group>
+                  <Group gap={6}>
+                    <Skeleton height={28} width={72} radius="md" />
+                    <Skeleton height={28} width={78} radius="md" />
+                  </Group>
                 </Group>
-                <Group gap={6}>
-                  <Skeleton height={28} width={72} radius="md" />
-                  <Skeleton height={28} width={78} radius="md" />
-                </Group>
-              </Group>
+              ))}
             </Card>
-          ))}
-        </Stack>
-      </Card>
-
-      <Skeleton height={12} width={140} mb="md" radius="sm" />
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-        {Array.from({ length: 2 }).map((_, i) => (
-          <Card key={i} withBorder radius="lg" padding="lg">
-            <Skeleton height={14} width="50%" radius="sm" />
-            <Skeleton height={10} width="80%" mt={10} radius="sm" />
-            <Skeleton height={34} mt="md" radius="md" />
-          </Card>
-        ))}
-      </SimpleGrid>
+          </Stack>
+        </Grid.Col>
+      </Grid>
     </>
   );
 }
