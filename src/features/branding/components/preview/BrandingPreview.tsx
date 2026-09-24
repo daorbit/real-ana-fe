@@ -11,16 +11,12 @@ const SURFACES = [
   { value: "payment", label: "Payment window" },
 ];
 
-const ADDRESS: Record<PreviewSurface, string> = {
-  form: "Your public form",
-  payment: "Checkout",
-};
-
 export function BrandingPreview({ form }: { form: BrandingForm }) {
   const [surface, setSurface] = useState<PreviewSurface>("form");
 
-  const name = form.name.trim() || form.defaultName;
-  const logo = (!form.logoBroken && form.logoUrl.trim()) || form.defaultLogo;
+  const ownName = form.name.trim();
+  const ownLogo = form.logoBroken ? "" : form.logoUrl.trim();
+  const hasHeader = form.editable && Boolean(ownName || ownLogo);
   const accent = form.accentColor.trim() || DEFAULT_ACCENT;
 
   return (
@@ -37,23 +33,26 @@ export function BrandingPreview({ form }: { form: BrandingForm }) {
         data={SURFACES}
       />
       <Box className={classes.window} __vars={{ "--brand-accent": accent }}>
-        <Box className={classes.chrome}>
-          <span className={classes.dot} />
-          <span className={classes.dot} />
-          <span className={classes.dot} />
-          <span className={classes.address}>{ADDRESS[surface]}</span>
-        </Box>
         {surface === "form" ? (
           <FormMock
-            name={name}
-            logo={logo}
+            header={hasHeader ? { name: ownName, logo: ownLogo } : null}
             showPoweredBy={form.showPoweredBy}
             poweredByLabel={form.poweredByLabel}
           />
         ) : (
-          <PaymentMock name={name} logo={logo} />
+          <PaymentMock
+            name={ownName || form.defaultName}
+            logo={ownLogo || form.defaultLogo}
+          />
         )}
       </Box>
+      {surface === "form" && !hasHeader && (
+        <Text size="xs" c="dimmed">
+          {form.editable
+            ? "Add a name or logo to show it at the top of your forms."
+            : "Forms show only the footer until you add your own brand on Pro."}
+        </Text>
+      )}
     </Box>
   );
 }

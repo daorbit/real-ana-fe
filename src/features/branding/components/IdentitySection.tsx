@@ -15,7 +15,7 @@ export function IdentitySection({ form }: { form: BrandingForm }) {
     >
       <Field
         label="Business name"
-        hint={`Shown at the top of your forms and on the payment window. Leave empty to use "${defaultName}".`}
+        hint={`Shown at the top of your forms and on the payment window. Leave empty to keep forms unbranded and show "${defaultName}" when people pay.`}
       >
         <TextInput
           placeholder={defaultName}
@@ -33,7 +33,7 @@ export function IdentitySection({ form }: { form: BrandingForm }) {
       </Field>
       <Field
         label="Brand colour"
-        hint="Colours the submit button and the payment window header."
+        hint="Colours the payment window. Each form keeps the colours from its own theme."
         last
       >
         <ColorInput
