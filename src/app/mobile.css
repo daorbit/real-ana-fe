@@ -1,0 +1,251 @@
+/* Phone layout for the signed-in app.
+ *
+ * Below a tablet the app stops being a desktop dashboard squeezed into a
+ * narrow window and behaves like a native app:
+ *
+ *   - the page runs edge to edge — no framed panel inside a gutter;
+ *   - a bottom tab bar holds the main destinations under the thumb;
+ *   - toolbars are one swipeable row of chips instead of wrapping into stacks;
+ *   - stat cards sit two to a row, compact, with the trend under the number.
+ *
+ * Everything here is inside the one breakpoint Mantine's shell already uses
+ * for its mobile layout (`sm`, 48em), so desktop is untouched.
+ */
+
+:root {
+  --m-tabbar-h: 62px;
+}
+
+/* Hidden above the breakpoint; the component only mounts on phones anyway. */
+.m-tabbar { display: none; }
+
+@media (max-width: 48em) {
+  /* ------------------------------------------------------------ frame --- */
+
+  .mantine-AppShell-root { --app-shell-padding: 0px; }
+
+  .app-panel {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .app-panel__scroll {
+    padding: 16px 16px calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 20px);
+  }
+
+  /* The drawer runs the full height, so its last rows need to clear the tab
+     bar that stays on top of it. */
+  .mantine-AppShell-navbar {
+    padding-bottom: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px) !important;
+  }
+
+  /* --------------------------------------------------------- tab bar --- */
+
+  .m-tabbar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    /* Above the drawer (101) so "More" can close what it opened. */
+    z-index: 102;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(18px);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    border-top: 1px solid var(--border);
+  }
+
+  .m-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 0;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 150ms ease;
+  }
+  .m-tab span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .m-tab[data-active="true"] { color: var(--accent); }
+  .m-tab:active svg { transform: scale(0.9); }
+  .m-tab svg { transition: transform 120ms ease; }
+
+  /* -------------------------------------------------- toolbars as chips --- */
+
+  /* One row that scrolls sideways, like a native filter strip. Pulled to the
+     screen edges so chips slide off the side rather than stopping short. */
+  .home-toolbar,
+  .an-toolbar {
+    width: auto;
+    /* Analytics' toolbar shares a wrapping row with the page title; this
+       gives it a line of its own, the width of the screen. */
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: calc(100% + 32px);
+    margin-inline: -16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .home-toolbar-btns,
+  .an-toolbar-btns,
+  .an-range {
+    /* Capped at the screen, so the row scrolls instead of growing to fit
+       its chips and being clipped. */
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    align-self: stretch;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding: 2px 16px;
+    scroll-padding-inline: 16px;
+  }
+  .home-toolbar-btns::-webkit-scrollbar,
+  .an-toolbar-btns::-webkit-scrollbar,
+  .an-range::-webkit-scrollbar { display: none; }
+
+  .home-toolbar-btns > *,
+  .an-toolbar-btns > *,
+  .an-range > * { flex-shrink: 0; }
+
+  .home-toolbar-btns .mantine-Button-root,
+  .an-toolbar-btns .mantine-Button-root,
+  .an-range .mantine-Button-root {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .home-toolbar-btns .mantine-ActionIcon-root,
+  .an-toolbar-btns .mantine-ActionIcon-root,
+  .an-range .mantine-ActionIcon-root {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 999px;
+  }
+  .an-range .mantine-SegmentedControl-root {
+    flex: 0 0 auto;
+    border-radius: 999px;
+  }
+  .an-range .mantine-SegmentedControl-indicator { border-radius: 999px; }
+
+  /* "Full analytics" is a tab now; a second way in is noise on a phone. */
+  .home-toolbar-btns a[href="/app/analytics"] { display: none; }
+
+  /* ------------------------------------------------------ page heads --- */
+
+  .app-panel__scroll .mantine-Title-root[data-order="1"] {
+    font-size: 1.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  /* ------------------------------------------------------- stat cards --- */
+
+  .stat-card-body { padding: 14px !important; }
+  .stat-card-body > .mantine-Group-root:first-child {
+    margin-bottom: 6px;
+  }
+
+  /* The trend badge moves under the number, so the label keeps the full
+     width of the card instead of being cut to "Vis…" by the badge beside it. */
+  .stat-card-body {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .stat-card-body > .mantine-Group-root:first-child {
+    display: contents;
+  }
+  .stat-card-body > .mantine-Group-root:first-child > :first-child {
+    order: 1;
+    margin-bottom: 6px;
+  }
+  .stat-card-body > .mantine-Group-root:first-child > :last-child {
+    order: 3;
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
+  .stat-card-body > .stat-card-value { order: 2; }
+
+  .stat-card-value { font-size: 1.6rem !important; }
+
+  /* ------------------------------------------------------------ home --- */
+
+  /* Two across: stat cards pair up, everything else takes the full row. */
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .home-grid > * { grid-column: span 2 !important; }
+  .home-grid > :has(> div > .stat-card) { grid-column: span 1 !important; }
+
+  /* The hero: the trend gets its own strip under the numbers instead of
+     running through them, the two totals pair up, and the "Period" tag goes —
+     the page is always the last 24 hours. */
+  .hero-band { margin-bottom: 16px !important; }
+  .hero-pad { padding: 18px 18px 64px !important; }
+  .hero-spark {
+    height: 56px;
+    opacity: 0.9;
+    mask-image: none;
+  }
+  .hero-pad > .mantine-Group-root { gap: 18px !important; }
+  .hero-pad > .mantine-Group-root > .mantine-Group-root {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .hero-pad > .mantine-Group-root > .mantine-Group-root > :nth-child(3) { display: none; }
+
+  /* -------------------------------------------------------- analytics --- */
+
+  /* The section switcher scrolls sideways too, to the screen edges. */
+  .section-rail {
+    margin-inline: -16px;
+    padding-inline: 16px;
+    scroll-padding-inline: 16px;
+  }
+
+  /* Detail-tab pills in the non-overview sections: one swipeable row. */
+  .an-subtabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: -16px;
+    padding: 2px 16px;
+  }
+  .an-subtabs::-webkit-scrollbar { display: none; }
+  .an-subtabs > * { flex-shrink: 0; }
+  .an-subtabs .mantine-Button-root { border-radius: 999px; }
+
+  /* Tighter rhythm between stacked cards than the desktop's `lg` gaps. */
+  .app-panel__scroll .mantine-SimpleGrid-root {
+    --sg-spacing-x: 12px !important;
+    --sg-spacing-y: 12px !important;
+  }
+}
+
+@media (max-width: 48em) and (prefers-reduced-motion: reduce) {
+  .m-tab,
+  .m-tab svg { transition: none; }
+}

@@ -19,6 +19,7 @@ import { BG_STYLES, readThemePrefs } from "@/shared/lib/theme";
 import { ActivityPanelProvider } from "@/features/activity/ActivityPanelContext";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
+import { MobileTabBar } from "./shell/MobileTabBar";
 
 function useStarfieldPreset(): boolean {
   const [on, setOn] = useState(
@@ -191,6 +192,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div id="panel-overlay-root" />
           </div>
         </MantineShell.Main>
+
+        {mobile && (
+          <MobileTabBar pathname={loc.pathname} moreOpen={navOpen} onMore={toggleNav} />
+        )}
       </MantineShell>
     </ActivityPanelProvider>
   );
