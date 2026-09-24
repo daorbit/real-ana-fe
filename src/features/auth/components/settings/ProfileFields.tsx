@@ -1,8 +1,10 @@
-import { TextInput } from "@mantine/core";
+import { Box, TextInput } from "@mantine/core";
+import { Lock, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Section, Field } from "@/shared/ui/Page";
 import { mobileError } from "./constants";
+import { SettingsCard } from "./SettingsCard";
 import type { ProfileForm } from "./useProfileForm";
+import classes from "./Profile.module.css";
 
 export function ProfileFields({ form }: { form: ProfileForm }) {
   const { t } = useTranslation();
@@ -25,9 +27,11 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
   if (!user) return null;
 
   return (
-    <Section title={t("settings.profile")} description={t("settings.profileDesc")}>
-      <Field label={t("settings.firstName")} hint={t("common.required")}>
+    <SettingsCard icon={UserRound} title={t("settings.profile")} description={t("settings.profileDesc")}>
+      <Box className={classes.grid}>
         <TextInput
+          label={t("settings.firstName")}
+          withAsterisk
           value={firstName}
           onChange={(e) => {
             const v = e.currentTarget.value;
@@ -37,18 +41,21 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
           onBlur={(e) => validateOnBlur("firstName", nameRequired, e.currentTarget.value)}
           error={errText(errors.firstName)}
         />
-      </Field>
-      <Field label={t("settings.lastName")}>
         <TextInput
+          label={t("settings.lastName")}
           value={lastName}
           onChange={(e) => setLastName(e.currentTarget.value)}
         />
-      </Field>
-      <Field label={t("settings.email")} hint={t("settings.emailHint")}>
-        <TextInput value={user.email} disabled />
-      </Field>
-      <Field label={t("settings.mobile")} hint={t("common.optional")} last>
         <TextInput
+          label={t("settings.email")}
+          description={t("settings.emailHint")}
+          value={user.email}
+          disabled
+          rightSection={<Lock size={14} />}
+        />
+        <TextInput
+          label={t("settings.mobile")}
+          description={t("common.optional")}
           placeholder="+91 98765 43210"
           value={mobile}
           onChange={(e) => {
@@ -59,7 +66,7 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
           onBlur={(e) => validateOnBlur("mobile", mobileError, e.currentTarget.value)}
           error={errText(errors.mobile)}
         />
-      </Field>
-    </Section>
+      </Box>
+    </SettingsCard>
   );
 }

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Avatar, Badge, Box, Button, Group, Text } from "@mantine/core";
-import { Trash2, Images } from "lucide-react";
+import { Trash2, Images, Smile } from "lucide-react";
 import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
 import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { useTranslation } from "react-i18next";
 import type { ProfileForm } from "./useProfileForm";
+import classes from "./Profile.module.css";
 
 export function IdentityCard({ form }: { form: ProfileForm }) {
   const { t } = useTranslation();
@@ -27,96 +28,90 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
   const initials =
     `${firstName} ${lastName}`.trim().slice(0, 2).toUpperCase() ||
     user.name.slice(0, 2).toUpperCase();
+  const isAdmin = user.role === "admin" || user.role === "super_admin";
 
   return (
-    <Box className="surface-card" p="lg">
-      <Group gap="lg" wrap="nowrap">
-        <Avatar
-          src={avatarBroken ? null : avatarUrl || null}
-          color="emerald"
-          radius="md"
-          size={72}
-          imageProps={{
-            onError: () => setAvatarBroken(true),
-            referrerPolicy: "no-referrer",
-          }}
-        >
-          {initials}
-        </Avatar>
-        <Box style={{ minWidth: 0 }}>
-          <Group gap="xs">
-            <Text fw={700} size="lg" truncate style={{ letterSpacing: "-0.01em" }}>
+    <Box component="section" className={classes.identity}>
+      <Box className={classes.cover} />
+      <Box className={classes.identityBody}>
+        <Box className={classes.avatarWrap}>
+          <Avatar
+            src={avatarBroken ? null : avatarUrl || null}
+            color="emerald"
+            radius={16}
+            size={84}
+            imageProps={{
+              onError: () => setAvatarBroken(true),
+              referrerPolicy: "no-referrer",
+            }}
+          >
+            {initials}
+          </Avatar>
+        </Box>
+
+        <Box className={classes.who}>
+          <Group gap="xs" wrap="nowrap">
+            <Text fw={700} size="lg" truncate>
               {`${firstName} ${lastName}`.trim() || user.name}
             </Text>
-            <Badge
-              size="sm"
-              variant="light"
-              color={
-                user.role === "admin" || user.role === "super_admin"
-                  ? "grape"
-                  : "gray"
-              }
-            >
-              {user.role}
+            <Badge size="sm" variant="light" color={isAdmin ? "grape" : "gray"} tt="capitalize">
+              {user.role.replace("_", " ")}
             </Badge>
           </Group>
           <Text size="sm" c="dimmed" truncate>
             {user.email}
           </Text>
+        </Box>
 
-          <Group gap="xs" mt="sm">
-            {/* The media library is the only way a file enters the product, so
-                an avatar is chosen from it rather than uploaded here. It still
-                goes through the cropper — an avatar is square wherever it is
-                shown. */}
+        <Box className={classes.actions}>
+          <Button
+            size="xs"
+            variant="default"
+            leftSection={<Images size={14} />}
+            loading={avatarBusy}
+            onClick={() => setPicking(true)}
+          >
+            {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
+          </Button>
+          <AvatarPresetPicker
+            opened={presetOpen}
+            onClose={() => setPresetOpen(false)}
+            onPick={(src) => {
+              setPresetOpen(false);
+              void pickAvatarFromLibrary(src, "avatar");
+            }}
+          >
             <Button
               size="xs"
-              variant="light"
-              leftSection={<Images size={14} />}
-              loading={avatarBusy}
-              onClick={() => setPicking(true)}
+              variant="default"
+              leftSection={<Smile size={14} />}
+              disabled={avatarBusy}
+              onClick={() => setPresetOpen((v) => !v)}
             >
-              {avatarUrl ? t("settings.avatarChange") : t("settings.avatarUpload")}
+              {t("settings.avatarPreset", "Choose an avatar")}
             </Button>
-            <AvatarPresetPicker
-              opened={presetOpen}
-              onClose={() => setPresetOpen(false)}
-              onPick={(src) => {
-                setPresetOpen(false);
-                void pickAvatarFromLibrary(src, "avatar");
-              }}
+          </AvatarPresetPicker>
+          {avatarUrl && (
+            <Button
+              size="xs"
+              variant="subtle"
+              color="red"
+              leftSection={<Trash2 size={14} />}
+              disabled={avatarBusy}
+              onClick={() => void clearAvatar()}
             >
-              <Button
-                size="xs"
-                variant="default"
-                disabled={avatarBusy}
-                onClick={() => setPresetOpen((v) => !v)}
-              >
-                Choose an avatar
-              </Button>
-            </AvatarPresetPicker>
-            {avatarUrl && (
-              <Button
-                size="xs"
-                variant="subtle"
-                color="red"
-                leftSection={<Trash2 size={14} />}
-                disabled={avatarBusy}
-                onClick={() => void clearAvatar()}
-              >
-                {t("settings.avatarRemove")}
-              </Button>
-            )}
-          </Group>
+              {t("settings.avatarRemove")}
+            </Button>
+          )}
         </Box>
-      </Group>
+      </Box>
 
       <MediaPickerModal
         opened={picking}
         onClose={() => setPicking(false)}
         onPick={(asset) => void pickAvatarFromLibrary(asset.url, asset.name)}
         kind="image"
-        title="Choose a profile photo"
+        title={t("settings.avatarPickerTitle", "Choose a profile photo")}
       />
     </Box>
   );
