@@ -1,0 +1,195 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-md);
+}
+
+.window {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d1d5db;
+}
+
+.address {
+  flex: 1;
+  margin-left: 8px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.screen {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #111827;
+}
+
+.formScreen {
+  justify-content: center;
+  padding: 24px 20px;
+  background: #f5f6f8;
+}
+
+.formCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.brandLogo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #f3f4f6;
+}
+
+.brandName {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fieldLabel {
+  margin-bottom: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.fieldBox {
+  height: 34px;
+  border-radius: 7px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.submit {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--brand-accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.poweredBy {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.payScreen {
+  background: #fff;
+}
+
+.payHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 20px 20px;
+  background: var(--brand-accent);
+  color: #fff;
+}
+
+.payLogo {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+  color: var(--brand-accent);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.payName {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.payAmount {
+  padding: 4px 14px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.payBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+}
+
+.payHeading {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.payMethod {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+}
+
+.paySecured {
+  margin-top: auto;
+  padding-top: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: #9ca3af;
+}

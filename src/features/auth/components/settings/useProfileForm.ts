@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/features/auth/context";
-import { useUnsavedGuard } from "@/shared/hooks";
+import { useUnsavedGuard, useEscapeDiscard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { mobileError } from "./constants";
@@ -71,18 +71,7 @@ export function useProfileForm() {
       timezone !== (user.timezone ?? ""));
 
   useUnsavedGuard(dirty, t("settings.unsavedGuard"));
-
-  useEffect(() => {
-    if (!dirty || saving) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (document.querySelector('[role="listbox"]')) return;
-      e.preventDefault();
-      seedFromUser();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [dirty, saving, seedFromUser]);
+  useEscapeDiscard(dirty && !saving, seedFromUser);
 
   const preview = (() => {
     try {
