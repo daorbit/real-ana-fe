@@ -30,9 +30,16 @@ export function keyStatus(key: Pick<ApiKey, "expiresAt">): KeyStatus {
   return "active";
 }
 
+const LOCAL_API = "http://localhost:4000";
+
 export function apiBaseUrl(): string {
-  const base = (import.meta.env.VITE_API_BASE as string | undefined) || window.location.origin;
+  const configured = import.meta.env.VITE_API_BASE as string | undefined;
+  const base = configured || (import.meta.env.DEV ? LOCAL_API : window.location.origin);
   return base.replace(/\/$/, "");
+}
+
+export function playgroundUrl(): string {
+  return `${apiBaseUrl()}/docs`;
 }
 
 export function maskedKey(prefix: string): string {

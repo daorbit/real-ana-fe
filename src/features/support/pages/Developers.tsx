@@ -8,6 +8,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
 import { ApiKeysPanel } from "../components/developers/ApiKeysPanel";
 import { QuickStartPanel } from "../components/developers/QuickStartPanel";
+import { PlaygroundPanel } from "../components/developers/PlaygroundPanel";
 
 export default function Developers() {
   useTitle("Developers");
@@ -27,6 +28,7 @@ export default function Developers() {
         {active && (
           <Stack gap="xl">
             <ApiKeysPanel workspaceId={active._id} workspaceName={active.name} />
+            <PlaygroundPanel workspaceId={active._id} />
             <QuickStartPanel />
           </Stack>
         )}

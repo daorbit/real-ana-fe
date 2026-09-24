@@ -301,6 +301,76 @@
   background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 40%, transparent), var(--border));
 }
 
+.playGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--mantine-spacing-xl);
+  padding: var(--mantine-spacing-lg);
+}
+
+@media (min-width: 62em) {
+  .playGrid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.copyFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+}
+
+.copyField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.copyLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.copyRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.copyValue {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.playSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.playStep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .stepNum {
   flex-shrink: 0;
   display: grid;

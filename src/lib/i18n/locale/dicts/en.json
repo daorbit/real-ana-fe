@@ -974,7 +974,15 @@
     "expiresOn": "This key will expire on {{date}}.",
     "expiresNeverHint": "This key won't expire. You can revoke it at any time.",
     "copyCode": "Copy",
-    "response": "Response"
+    "response": "Response",
+    "playgroundTitle": "API playground",
+    "playgroundDesc": "Try every endpoint from your browser with your own key. Requests run against your live workspace.",
+    "openPlayground": "Open playground",
+    "workspaceId": "Workspace ID",
+    "baseUrl": "API base URL",
+    "playStepAuthorize": "Press Authorize and paste your secret key.",
+    "playStepMe": "Run GET /v1/me to confirm the key works.",
+    "playStepWid": "Paste your workspace ID into wid for Orbit AI endpoints."
   },
   "workspaces": {
     "title": "Workspaces",
