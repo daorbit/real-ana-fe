@@ -329,35 +329,6 @@
   /* Wide tables scroll inside their card rather than pushing the page. */
   .seo-report .mantine-Table-table { font-size: 12px; }
 
-  .report-stats { --sg-spacing-x: 8px !important; }
-  .report-stat { padding: 10px !important; min-width: 0; }
-  .report-stat svg { display: none; }
-  .report-stat .mantine-Group-root .mantine-Text-root {
-    font-size: 9.5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .report-stat__value {
-    font-size: 17px !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .report-stat__hint {
-    font-size: 10.5px !important;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .report-card { padding: 14px !important; }
-  .report-card__title { flex-wrap: wrap !important; row-gap: 4px; }
-  .report-card__title > .mantine-Text-root { flex: 1 1 100%; white-space: normal; }
-  .report-card__title > .mantine-Badge-root { flex-shrink: 0; }
-  .report-card .mantine-Divider-root[data-orientation="horizontal"] { margin-block: 10px !important; }
-
   .page-header--sticky {
     top: -12px;
     margin-inline: -12px;

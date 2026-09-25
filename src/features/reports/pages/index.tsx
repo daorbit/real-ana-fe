@@ -1,42 +1,35 @@
-import {
-  Text, Button, Stack, Alert, Box, ThemeIcon, SimpleGrid,
-} from "@mantine/core";
-import {
-  Plus, Mail, MailWarning, CalendarClock, BarChart3, FileSpreadsheet, Clock, Users,
-} from "lucide-react";
+import { Alert, Button } from "@mantine/core";
+import { CalendarClock, MailWarning, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
+import { useAuth } from "@/features/auth/context";
+import { useWorkspace } from "@/features/workspace/context";
 import { PageHeader, PageStack } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { ReportsSkeleton } from "@/shared/ui/Skeletons";
-import { StatTile, ReportCard } from "@/features/reports/pages/ReportCard";
 import { ReportDialog } from "@/features/reports/pages/ReportDialog";
 import { useReportsPage, useReportDialog } from "@/features/reports/pages/hooks";
 import { nextSendLabel } from "@/features/reports/pages/utils";
+import { ReportsTable } from "@/features/reports/components/ReportsTable";
+import classes from "@/features/reports/components/Reports.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * Reports.
  *
- * The two things this screen has to make obvious, because getting either wrong
- * is what turns a useful report into an embarrassing one:
+ * A table of scheduled reports, with a slim strip of totals above it. Creating
+ * or editing opens a full-screen editor with the email a recipient will get
+ * drawn next to the form.
  *
- *  - who receives it. Recipients are usually people outside the account — a
- *    client, a manager — so addresses are listed rather than counted, and
- *    anyone who unsubscribed stays visible instead of quietly vanishing.
- *  - that the live dashboard link is public. Including it publishes the
- *    workspace to anyone holding the link, which the UI says in those words.
- *
- * Laid out as cards rather than table rows: a report is a configuration with
- * five or six facets, and a row forces each of them into a column too narrow to
- * say anything useful.
- *
- * The page itself is a shell — data and actions live in `hooks.tsx`, the card
- * and the dialog in their own files.
+ * The page is a shell — data and actions live in `hooks.tsx`, the table and the
+ * editor in their own files.
  */
 export default function Reports() {
   useTitle("Reports");
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { active } = useWorkspace();
   const page = useReportsPage();
   const dialog = useReportDialog({
     waEntitled: page.waEntitled,
@@ -44,9 +37,10 @@ export default function Reports() {
     persist: page.persist,
   });
 
+  const paused = page.schedules.length - page.enabled.length;
+
   return (
     <AppShell>
-     
       <PageStack maxWidth="100%">
         <PageHeader
           title={t("reports.title")}
@@ -54,7 +48,7 @@ export default function Reports() {
           docsPath="/email-reports"
           actions={
             <>
-              {page.canEdit && (
+              {page.canEdit && page.schedules.length > 0 && (
                 <Button leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
                   {t("reports.newReport")}
                 </Button>
@@ -65,7 +59,7 @@ export default function Reports() {
         />
 
         {!page.mailReady && (
-          <Alert color="orange" icon={<MailWarning size={16} />} radius="md">
+          <Alert color="orange" variant="light" icon={<MailWarning size={16} />} radius="md">
             {t("reports.mailNotConfigured")}
           </Alert>
         )}
@@ -73,84 +67,56 @@ export default function Reports() {
         {page.isLoading ? (
           <ReportsSkeleton />
         ) : !page.schedules.length ? (
-          <Box className="surface-card" py={64} px="xl">
-            <Stack align="center" gap={6}>
-              <ThemeIcon size={56} radius="xl" variant="light" color="emerald" mb="xs">
-                <CalendarClock size={26} />
-              </ThemeIcon>
-              <Text fw={650} size="lg">{t("reports.emptyTitle")}</Text>
-              <Text size="sm" c="dimmed" ta="center" maw={460} lh={1.6}>
-                {t("reports.emptyBody")}
-              </Text>
-
-              <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mt="xl" w="100%" maw={620}>
-                {[
-                  { id: "traffic", icon: BarChart3, title: t("reports.emptyFeatureTrafficTitle"), body: t("reports.emptyFeatureTrafficBody") },
-                  { id: "sheet", icon: FileSpreadsheet, title: t("reports.emptyFeatureSheetTitle"), body: t("reports.emptyFeatureSheetBody") },
-                  { id: "anyone", icon: Users, title: t("reports.emptyFeatureAnyoneTitle"), body: t("reports.emptyFeatureAnyoneBody") },
-                ].map((f) => (
-                  <Stack key={f.id} gap={4} align="center">
-                    <ThemeIcon size={34} radius="md" variant="default">
-                      <f.icon size={16} />
-                    </ThemeIcon>
-                    <Text size="sm" fw={600} mt={2}>{f.title}</Text>
-                    <Text size="xs" c="dimmed" ta="center" lh={1.5}>{f.body}</Text>
-                  </Stack>
-                ))}
-              </SimpleGrid>
-
-              {page.canEdit && (
-                <Button mt="xl" leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
-                  {t("reports.emptyCta")}
-                </Button>
-              )}
-            </Stack>
-          </Box>
+          <div className={classes.card}>
+            <EmptyState
+              compact
+              icon={CalendarClock}
+              title={t("reports.emptyTitle")}
+              description={t("reports.emptyBodyShort")}
+              action={
+                page.canEdit
+                  ? { label: t("reports.emptyCta"), icon: Plus, onClick: dialog.openNew, disabled: !page.workspaceId }
+                  : undefined
+              }
+            />
+          </div>
         ) : (
-          <Stack gap="lg">
-            <SimpleGrid cols={3} spacing="md" className="report-stats">
-              <StatTile
-                icon={CalendarClock}
-                label={t("reports.statActive")}
-                value={String(page.enabled.length)}
-                hint={
-                  page.schedules.length > page.enabled.length
-                    ? t("reports.statActivePaused", { count: page.schedules.length - page.enabled.length })
-                    : t("reports.statActiveAllRunning")
-                }
-              />
-              <StatTile
-                icon={Clock}
-                label={t("reports.statNext")}
-                value={page.nextUp ? nextSendLabel(page.nextUp) : "—"}
-                hint={page.nextUp ? page.nextUp.name : t("reports.statNextNone")}
-              />
-              <StatTile
-                icon={Mail}
-                label={t("reports.statReach")}
-                value={String(page.reach)}
-                hint={t("reports.statReachHint")}
-              />
-            </SimpleGrid>
+          <>
+            <div className={classes.metrics}>
+              <div className={classes.metric}>
+                <span className={classes.metricLabel}>{t("reports.statActive")}</span>
+                <span className={classes.metricValue}>{page.enabled.length}</span>
+                <span className={classes.metricHint}>
+                  {paused ? t("reports.statActivePaused", { count: paused }) : t("reports.statActiveAllRunning")}
+                </span>
+              </div>
+              <div className={classes.metric}>
+                <span className={classes.metricLabel}>{t("reports.statNext")}</span>
+                <span className={classes.metricValue}>{page.nextUp ? nextSendLabel(page.nextUp) : "—"}</span>
+                <span className={classes.metricHint}>{page.nextUp ? page.nextUp.name : t("reports.statNextNone")}</span>
+              </div>
+              <div className={classes.metric}>
+                <span className={classes.metricLabel}>{t("reports.statReach")}</span>
+                <span className={classes.metricValue}>{page.reach}</span>
+                <span className={classes.metricHint}>{t("reports.statReachHint")}</span>
+              </div>
+            </div>
 
-            <Stack gap="md">
-              {page.schedules.map((s) => (
-                <ReportCard
-                  key={s.id}
-                  s={s}
-                  siteNames={page.siteNameFor(s)}
-                  testing={page.testing && page.testingId === s.id}
-                  waEntitled={page.waEntitled}
-                  onEdit={() => dialog.openEdit(s)}
-                  onTest={() => page.runTest(s)}
-                  onTestWhatsApp={() => page.runWhatsAppTest(s)}
-                  onDelete={() => page.destroy(s)}
-                  onToggle={() => page.toggleEnabled(s)}
-                  canEdit={page.canEdit}
-                />
-              ))}
-            </Stack>
-          </Stack>
+            <div className={classes.card}>
+              <ReportsTable
+                schedules={page.schedules}
+                siteNameFor={page.siteNameFor}
+                canEdit={page.canEdit}
+                waEntitled={page.waEntitled}
+                testingId={page.testing ? page.testingId : null}
+                onEdit={dialog.openEdit}
+                onTest={page.runTest}
+                onTestWhatsApp={page.runWhatsAppTest}
+                onToggle={page.toggleEnabled}
+                onDelete={page.destroy}
+              />
+            </div>
+          </>
         )}
       </PageStack>
 
@@ -165,9 +131,7 @@ export default function Reports() {
         addEmail={dialog.addEmail}
         removeEmail={dialog.removeEmail}
         tab={dialog.tab}
-        setTab={dialog.setTab}
-        tabIndex={dialog.tabIndex}
-        isLastTab={dialog.isLastTab}
+        focusTick={dialog.focusTick}
         submit={dialog.submit}
         saving={page.saving}
         sites={page.sites}
@@ -175,7 +139,9 @@ export default function Reports() {
         wa={page.wa}
         waReady={page.waReady}
         waEntitled={page.waEntitled}
+        ownerEmail={user?.email ?? ""}
         ownerMobile={page.ownerMobile}
+        workspace={active?.name ?? ""}
       />
     </AppShell>
   );

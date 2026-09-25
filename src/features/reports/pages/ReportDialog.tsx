@@ -1,30 +1,24 @@
-import {
-  Text, Group, Button, Modal, ActionIcon, Divider, Box, Badge, Tooltip,
-} from "@mantine/core";
-import { ChevronRight, ChevronLeft, X } from "lucide-react";
+import { useCallback, useEffect, useRef } from "react";
+import { ActionIcon, Button, Modal } from "@mantine/core";
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Site, ShareState, WhatsAppStatus } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
-import { TAB_ORDER } from "@/features/reports/pages/utils";
-import { ReportSteps } from "@/features/reports/components/ReportSteps";
-import { ReportFlowPreview } from "@/features/reports/components/flow/ReportFlowPreview";
-import { ScheduleStep } from "@/features/reports/components/ScheduleStep";
-import { DeliveryStep } from "@/features/reports/components/DeliveryStep";
-import { ContentStep } from "@/features/reports/components/ContentStep";
+import { frequencyLabel, nextRunLabel } from "@/features/reports/pages/utils";
+import { ReportForm, type FormSection } from "@/features/reports/components/ReportForm";
+import { EmailPreview } from "@/features/reports/components/EmailPreview";
+import classes from "@/features/reports/components/Reports.module.css";
 
 /**
- * The create/edit dialog.
+ * The create/edit screen.
  *
- * Presentational: every piece of state and each action is passed in, so the
- * page owns the draft and this file only decides how it looks. That keeps the
- * validation (which needs to move tabs) in one place rather than split across
- * the boundary.
+ * Full-screen, with the form on the left and the email a recipient will get on
+ * the right, updating as the form changes. The whole form is one page — no
+ * wizard — and Save sits in the top bar, so it is reachable from anywhere.
  *
- * Full-screen with a live preview, matching the share composer — the form is
- * long enough that a centred `size="lg"` box scrolled its own save button out
- * of reach, and none of the choices showed their effect until the first report
- * actually arrived. This file is the shell only; each step and the preview live
- * in `../components`.
+ * Presentational: the draft and every action are passed in from `hooks.tsx`,
+ * which also owns the validation. A failed check names a section; this file
+ * scrolls to it.
  */
 export function ReportDialog({
   opened,
@@ -37,9 +31,7 @@ export function ReportDialog({
   addEmail,
   removeEmail,
   tab,
-  setTab,
-  tabIndex,
-  isLastTab,
+  focusTick,
   submit,
   saving,
   sites,
@@ -47,7 +39,9 @@ export function ReportDialog({
   wa,
   waReady,
   waEntitled,
+  ownerEmail,
   ownerMobile,
+  workspace,
 }: {
   opened: boolean;
   onClose: () => void;
@@ -59,9 +53,7 @@ export function ReportDialog({
   addEmail: () => void;
   removeEmail: (email: string) => void;
   tab: string;
-  setTab: (t: string) => void;
-  tabIndex: number;
-  isLastTab: boolean;
+  focusTick: number;
   submit: () => void;
   saving: boolean;
   sites: Site[];
@@ -69,9 +61,30 @@ export function ReportDialog({
   wa?: WhatsAppStatus;
   waReady: boolean;
   waEntitled: boolean;
+  ownerEmail: string;
   ownerMobile: string;
+  workspace: string;
 }) {
   const { t } = useTranslation();
+  const sections = useRef<Partial<Record<FormSection, HTMLElement | null>>>({});
+  const sectionRef = useCallback(
+    (id: FormSection) => (el: HTMLElement | null) => {
+      sections.current[id] = el;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!focusTick) return;
+    sections.current[tab as FormSection]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [tab, focusTick]);
+
+  const recipients = 1 + draft.recipients.length;
+  const summary = [
+    frequencyLabel(draft.frequency),
+    draft.enabled ? t("reports.previewNextSend", { when: nextRunLabel(draft.frequency) }) : t("reports.paused"),
+    t("reports.recipientCount", { count: recipients }),
+  ].join(" · ");
 
   return (
     <Modal
@@ -86,121 +99,56 @@ export function ReportDialog({
         body: { flex: 1, minHeight: 0, overflow: "hidden" },
       }}
     >
-      <Group h="100%" gap={0} align="stretch" wrap="nowrap" className="share-post-shell">
-        {/* ---- Form ---- */}
-        <Box className="share-post-composer">
-          <Group
-            gap="sm"
-            px={20}
-            py="md"
-            wrap="nowrap"
-            style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
-          >
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="lg"
-              onClick={onClose}
-              aria-label={t("common.cancel")}
-            >
-              <X size={18} />
-            </ActionIcon>
-            <Divider orientation="vertical" my={6} />
-            <Text fw={600}>
+      <div className={classes.editor}>
+        <header className={classes.topbar}>
+          <ActionIcon variant="subtle" color="gray" size="lg" onClick={onClose} aria-label={t("common.cancel")}>
+            <X size={18} />
+          </ActionIcon>
+          <div className={classes.topTitle}>
+            <div className={classes.topName}>
               {editingId ? t("reports.dialogEditTitle") : t("reports.dialogNewTitle")}
-            </Text>
-          </Group>
+              {draft.name.trim() && ` · ${draft.name.trim()}`}
+            </div>
+            <div className={classes.topSummary}>{summary}</div>
+          </div>
+          <Button variant="default" onClick={onClose} visibleFrom="xs">
+            {t("common.cancel")}
+          </Button>
+          <Button loading={saving} onClick={submit}>
+            {editingId ? t("common.save") : t("reports.createReport")}
+          </Button>
+        </header>
 
-          <ReportSteps tab={tab} tabIndex={tabIndex} setTab={setTab} />
-
-          <Box style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-            <Box className="share-post-body">
-              {tab === "schedule" && (
-                <ScheduleStep draft={draft} setDraft={setDraft} sites={sites} />
-              )}
-              {tab === "delivery" && (
-                <DeliveryStep
-                  draft={draft}
-                  setDraft={setDraft}
-                  emailInput={emailInput}
-                  setEmailInput={setEmailInput}
-                  addEmail={addEmail}
-                  removeEmail={removeEmail}
-                  wa={wa}
-                  waReady={waReady}
-                  waEntitled={waEntitled}
-                  ownerMobile={ownerMobile}
-                />
-              )}
-              {tab === "content" && (
-                <ContentStep draft={draft} setDraft={setDraft} share={share} />
-              )}
-            </Box>
-          </Box>
-
-          {/* Action bar, pinned so Save stays reachable however long the form.
-              Next rather than Save on the first two steps, so a new report walks
-              through all three — a Save offered on step one invites submitting a
-              half-filled form. Editing skips the walkthrough: the reason for
-              opening is usually one known field, so Save is available from
-              wherever that field is. */}
-          <Group
-            justify="space-between"
-            px={20}
-            py="md"
-            wrap="nowrap"
-            style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
-          >
-            {tabIndex > 0 ? (
-              <Button
-                variant="subtle"
-                color="gray"
-                onClick={() => setTab(TAB_ORDER[tabIndex - 1])}
-                leftSection={<ChevronLeft size={15} />}
-              >
-                {t("common.back")}
-              </Button>
-            ) : (
-              <Button variant="subtle" color="gray" onClick={onClose}>
-                {t("common.cancel")}
-              </Button>
-            )}
-
-            {isLastTab || editingId ? (
-              <Button loading={saving} onClick={submit}>
-                {editingId ? t("common.save") : t("reports.scheduleReport")}
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setTab(TAB_ORDER[tabIndex + 1])}
-                rightSection={<ChevronRight size={15} />}
-              >
-                {t("common.next")}
-              </Button>
-            )}
-          </Group>
-        </Box>
-
-        {/* ---- Preview ---- */}
-        <Box className="share-post-preview">
-          <Group justify="space-between" align="center" mb="xl" wrap="nowrap">
-            <Text fw={700} size="lg">{t("reports.previewTitle")}</Text>
-            <Tooltip label={t("reports.previewHint")} withArrow multiline w={240}>
-              <Badge variant="light" color="gray">{t("reports.previewBadge")}</Badge>
-            </Tooltip>
-          </Group>
-
-          <Box style={{ flex: 1, display: "flex", minHeight: 0 }}>
-            <ReportFlowPreview
+        <div className={classes.split}>
+          <div className={classes.formPane}>
+            <ReportForm
+              draft={draft}
+              setDraft={setDraft}
+              sites={sites}
+              emailInput={emailInput}
+              setEmailInput={setEmailInput}
+              addEmail={addEmail}
+              removeEmail={removeEmail}
+              ownerEmail={ownerEmail}
+              ownerMobile={ownerMobile}
+              wa={wa}
+              waReady={waReady}
+              waEntitled={waEntitled}
+              share={share}
+              sectionRef={sectionRef}
+            />
+          </div>
+          <aside className={classes.previewPane}>
+            <EmailPreview
               draft={draft}
               sites={sites}
+              ownerEmail={ownerEmail}
               shareEnabled={Boolean(share?.enabled)}
-              ownerMobile={ownerMobile}
-              onNavigate={setTab}
+              workspace={workspace}
             />
-          </Box>
-        </Box>
-      </Group>
+          </aside>
+        </div>
+      </div>
     </Modal>
   );
 }
