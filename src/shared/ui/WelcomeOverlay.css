@@ -42,7 +42,8 @@
   padding: 0 24px;
 }
 
-/* Three blurred blobs in the lettering's colours, drifting slowly. */
+/* Three blurred blobs in the lettering's colours, drifting slowly. Kept
+   faint: a hint of colour behind the lettering, not a wash over the page. */
 .welcome-overlay__glow {
   position: absolute;
   inset: 0;
@@ -57,7 +58,7 @@
   width: 42vmax;
   height: 42vmax;
   border-radius: 50%;
-  opacity: 0.22;
+  opacity: 0.07;
 }
 
 .welcome-overlay__glow span:nth-child(1) {
@@ -82,7 +83,7 @@
 }
 
 [data-mantine-color-scheme="light"] .welcome-overlay__glow span {
-  opacity: 0.16;
+  opacity: 0.06;
 }
 
 /* A faint dot grid, faded out towards the edges. */
@@ -91,7 +92,7 @@
   inset: 0;
   pointer-events: none;
   background-image: radial-gradient(
-    color-mix(in srgb, var(--text) 14%, transparent) 1px,
+    color-mix(in srgb, var(--text) 8%, transparent) 1px,
     transparent 1px
   );
   background-size: 26px 26px;
