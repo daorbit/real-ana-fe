@@ -9,7 +9,7 @@ import { useSites } from "@/features/workspace";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { AddSiteWizard } from "@/features/workspace/components/AddSiteWizard";
 import { useWorkspaceActions } from "@/features/workspace/hooks/useWorkspaceActions";
-import { WorkspaceGrid } from "@/features/workspace/components/workspaces/WorkspaceGrid";
+import { WorkspaceSwitcher } from "@/features/workspace/components/workspaces/WorkspaceSwitcher";
 import { WorkspaceHero } from "@/features/workspace/components/workspaces/WorkspaceHero";
 import { SitesPanel } from "@/features/workspace/components/workspaces/SitesPanel";
 import classes from "@/features/workspace/components/workspaces/Workspaces.module.css";
@@ -91,10 +91,11 @@ export default function Workspaces() {
         />
       ) : (
         <Box className={classes.layout}>
-          <WorkspaceGrid
+          <WorkspaceSwitcher
             workspaces={shownWorkspaces}
             activeId={active._id}
             onSelect={setActive}
+            onCreate={createWorkspace}
           />
 
           <motion.div
@@ -106,6 +107,7 @@ export default function Workspaces() {
           >
             <WorkspaceHero
               workspace={active}
+              siteCount={sites.length}
               canEdit={canEdit}
               canAdmin={canAdmin}
               canDelete={canDelete}

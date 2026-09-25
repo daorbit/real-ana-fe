@@ -5,3 +5,4 @@ export function workspaceInitial(name: string): string {
   const first = name.trim().split(/\s+/).find((w) => !SUFFIXES.has(w.toLowerCase().replace(/[.,]/g, "")));
   return (first ?? name.trim() ?? "?").charAt(0).toUpperCase() || "?";
 }
+
