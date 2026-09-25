@@ -20,6 +20,8 @@ import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
 import { RailWorkspaceHeader } from "./shell/RailWorkspaceHeader";
+import { ActivityBellIcon } from "@/features/activity/ActivityBell";
+import { HeaderDocsButton } from "@/shared/ui/DocsButton";
 
 function useStarfieldPreset(): boolean {
   const [on, setOn] = useState(
@@ -114,6 +116,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Group h="100%" gap="sm" wrap="nowrap">
             <Box style={{ minWidth: 0, flex: 1 }}>
               <RailWorkspaceHeader collapsed={false} />
+            </Box>
+            <Box className="m-header__bell">
+              <HeaderDocsButton />
+              <ActivityBellIcon variant="subtle" size="lg" iconSize={19} withTooltip={false} />
             </Box>
           </Group>
         </MantineShell.Header>

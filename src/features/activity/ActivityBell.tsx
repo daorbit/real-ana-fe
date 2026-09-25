@@ -18,11 +18,13 @@ export function ActivityBellIcon({
   variant = "default",
   size = "lg",
   iconSize = 17,
+  withTooltip = true,
 }: {
   /** Matches whatever `ActionIcon` variant the host toolbar already uses. */
   variant?: "default" | "subtle";
   size?: "md" | "lg";
   iconSize?: number;
+  withTooltip?: boolean;
 }) {
   const { t } = useTranslation();
   const { count, open } = useActivityPanel();
@@ -33,9 +35,10 @@ export function ActivityBellIcon({
   const badge = count > 99 ? "99+" : String(count);
 
   return (
-    <Tooltip label={count > 0 ? `${label} · ${badge}` : label} withArrow>
+    <Tooltip label={count > 0 ? `${label} · ${badge}` : label} withArrow disabled={!withTooltip}>
       <Indicator
         inline
+        className="activity-bell"
         disabled={count === 0}
         label={badge}
         size={16}
