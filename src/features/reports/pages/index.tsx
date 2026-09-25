@@ -108,7 +108,7 @@ export default function Reports() {
           </Box>
         ) : (
           <Stack gap="lg">
-            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+            <SimpleGrid cols={3} spacing="md" className="report-stats">
               <StatTile
                 icon={CalendarClock}
                 label={t("reports.statActive")}
