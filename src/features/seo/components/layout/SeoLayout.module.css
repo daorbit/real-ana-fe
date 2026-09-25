@@ -8,22 +8,40 @@
   overflow-x: auto;
   scrollbar-width: none;
   border-bottom: 1px solid var(--border);
-  background: var(--bg);
 }
 
 .tabbar::-webkit-scrollbar {
   display: none;
 }
 
-/* Pinned under the page's own scroll. The page's scroll area has padding above
-   its content that a pinned bar doesn't cover, so the shadow paints over it and
-   text doesn't show through above the tabs. */
+/* Pinned under the page's scroll, the same way `.page-header--sticky` is: it
+   sticks at minus the scroll area's padding and pads that much back, so
+   nothing shows through above it. Transparent at rest so the page background
+   runs behind it; it only takes a background once it is actually pinned. */
 .tabbarWrap {
   position: sticky;
-  top: 0;
+  top: calc(var(--mantine-spacing-md) * -1);
   z-index: 5;
-  background: var(--bg);
-  box-shadow: 0 -24px 0 var(--bg);
+  margin-inline: calc(var(--mantine-spacing-md) * -1);
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-md) 0;
+  transition: background-color 150ms ease;
+}
+
+.tabbarWrap[data-stuck] {
+  background: var(--shell);
+}
+
+:global([data-bg-style="textured"]) .tabbarWrap[data-stuck] {
+  background: color-mix(in srgb, var(--shell) 82%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 48em) {
+  .tabbarWrap {
+    top: calc(var(--mantine-spacing-sm) * -1);
+    margin-inline: calc(var(--mantine-spacing-sm) * -1);
+    padding: var(--mantine-spacing-sm) var(--mantine-spacing-sm) 0;
+  }
 }
 
 .tab {
@@ -90,7 +108,8 @@
 }
 
 .anchor {
-  scroll-margin-top: 0;
+  height: 1px;
+  margin-bottom: -1px;
 }
 
 .intro {
@@ -174,30 +193,105 @@
 
 .inspect {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--mantine-spacing-sm);
-  padding: 10px;
-  border-radius: var(--radius-sm);
+  gap: 4px;
+  max-width: 860px;
+  min-height: 46px;
+  padding: 4px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.inspect:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .siteSelect {
-  flex: 0 0 220px;
-}
-
-.urlInput {
-  flex: 1 1 320px;
+  flex: 0 0 210px;
   min-width: 0;
 }
 
+/* The app's global input styles draw a border even on the unstyled variant;
+   inside the joined field the outer border is the only one. */
+.siteSelect input {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.inspectDivider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+}
+
+.address {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  cursor: text;
+}
+
+.addressIcon {
+  flex-shrink: 0;
+  color: var(--text-2);
+}
+
+.domain {
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--text-2);
+}
+
+.pathInput {
+  flex: 1;
+  min-width: 40px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--mantine-font-size-sm);
+}
+
+.inspectButton {
+  flex-shrink: 0;
+  border-radius: 9px;
+}
+
 @media (max-width: 36em) {
-  .siteSelect,
-  .urlInput {
+  .inspect {
+    flex-wrap: wrap;
+  }
+  .siteSelect {
     flex: 1 1 100%;
   }
-  .inspect > button {
+  .inspectDivider {
+    display: none;
+  }
+  .address {
+    flex: 1 1 100%;
+    border-top: 1px solid var(--border);
+  }
+  .inspectButton {
     flex: 1 1 100%;
   }
 }
