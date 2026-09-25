@@ -1,4 +1,4 @@
-import { BarChart3, Share2, Users } from "lucide-react";
+import { BarChart3, Building2, Share2, Users } from "lucide-react";
 import { StepFooter } from "./StepFooter";
 import f from "./FormSteps.module.css";
 
@@ -46,9 +46,10 @@ export function WorkspaceStepBody({
     <div>
       <div className={f.wsHero}>
         <div className={f.monogram} aria-hidden>
-          {/* Re-keyed so each change of initials pops in. */}
+          {/* Re-keyed so each change of initials pops in. A building until
+              there is a name to take initials from. */}
           <span key={initials} className={f.monogramText}>
-            {initials || "?"}
+            {initials || <Building2 size={28} strokeWidth={1.75} />}
           </span>
         </div>
 

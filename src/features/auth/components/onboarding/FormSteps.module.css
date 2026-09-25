@@ -233,6 +233,8 @@
 /* Re-keyed on every change of initials, so each new letter lands with a
    small pop. */
 .monogramText {
+  display: grid;
+  place-items: center;
   animation: pop 0.22s ease-out;
 }
 
