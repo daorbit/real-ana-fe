@@ -299,7 +299,7 @@ export default function SocialPosts() {
     <AppShell>
 
       <Box className="page-header--sticky" pb={showFilters ? 0 : 1}>
-      <Group justify="space-between" align="center" wrap="wrap" gap="md" mb="md">
+      <Group justify="space-between" align="center" wrap="wrap" gap="md" mb="md" className="social-head">
         <div style={{ minWidth: 0 }}>
           <Title order={2} lh={1.2}>Social posts</Title>
           {(onSent || ready) && (
@@ -311,7 +311,7 @@ export default function SocialPosts() {
           )}
         </div>
 
-        <Group gap="sm" wrap="nowrap" align="center">
+        <Group gap="sm" wrap="nowrap" align="center" className="social-toolbar">
 
           {scheduledPosts && scheduledPosts.used >= scheduledPosts.quota - 1 && (
             <Text size="xs" c={postsFull ? "orange" : "dimmed"} ta="right">

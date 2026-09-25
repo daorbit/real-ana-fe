@@ -23,15 +23,15 @@ export function StatTile({
   hint?: string;
 }) {
   return (
-    <Box className="surface-card" p="md">
-      <Group gap={8} mb={6}>
+    <Box className="surface-card report-stat" p="md">
+      <Group gap={8} mb={6} wrap="nowrap">
         <Icon size={14} style={{ opacity: 0.6 }} />
         <Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.04em" }}>
           {label}
         </Text>
       </Group>
-      <Text fw={700} size="24px" lh={1.1}>{value}</Text>
-      {hint && <Text size="xs" c="dimmed" mt={4}>{hint}</Text>}
+      <Text fw={700} size="24px" lh={1.1} className="report-stat__value">{value}</Text>
+      {hint && <Text size="xs" c="dimmed" mt={4} className="report-stat__hint">{hint}</Text>}
     </Box>
   );
 }
@@ -120,10 +120,10 @@ export function ReportCard({
 }) {
   const { t } = useTranslation();
   return (
-    <Box className="surface-card" p="lg" style={{ opacity: s.enabled ? 1 : 0.72 }}>
+    <Box className="surface-card report-card" p="lg" style={{ opacity: s.enabled ? 1 : 0.72 }}>
       <Group justify="space-between" align="flex-start" wrap="nowrap" mb="sm">
         <div style={{ minWidth: 0 }}>
-          <Group gap={8} wrap="nowrap">
+          <Group gap={8} wrap="nowrap" className="report-card__title">
             <Text fw={650} size="md" truncate>{s.name}</Text>
             {s.enabled ? (
               <Badge size="sm" variant="light" color="emerald">{frequencyLabel(s.frequency)}</Badge>
