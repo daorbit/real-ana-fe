@@ -1,4 +1,4 @@
-import { Badge, Card, Center, Group, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Card, Center, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { AlertTriangle, CheckCircle2, Info, XCircle, FileSearch } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -9,11 +9,17 @@ export const SEVERITY = {
   info: { color: "blue", icon: Info, label: "Suggestion", rail: "#3b82f6" },
 } as const;
 
-/** A titled panel — the house card, with a neutral icon so tabs stay calm. */
+/**
+ * A titled panel — the house card.
+ *
+ * Title and one line of description, no icon chip: the section headings above
+ * already say what a panel is about, and an icon on every card was noise.
+ * `icon`, `color` and `semantic` are still accepted so call sites stay as they
+ * are; a `semantic` panel shows a small status dot in its colour.
+ */
 export function Panel({
   title,
   description,
-  icon: Icon,
   color = "emerald",
   semantic = false,
   right,
@@ -22,9 +28,8 @@ export function Panel({
 }: {
   title: string;
   description?: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   color?: string;
-  /** When true, the icon keeps `color` because it signals status; otherwise neutral. */
   semantic?: boolean;
   right?: React.ReactNode;
   children: React.ReactNode;
@@ -32,33 +37,31 @@ export function Panel({
 }) {
   return (
     <Card withBorder radius="md" padding={padding} className="seo-panel">
-      <Group
-        justify="space-between"
-        align="flex-start"
-        wrap="nowrap"
-        className="seo-panel-head"
-        mb="md"
-        pb="sm"
-      >
-        <Group gap="sm" wrap="nowrap">
-          {/* One neutral icon treatment across every panel — a tinted chip per
-              section was the rainbow that made the page read as unfinished. The
-              `color` prop is still accepted so callers stay unchanged, but only
-              a genuinely semantic panel (set via `semantic`) shows colour. */}
-          <ThemeIcon size={32} radius="md" variant="light" color={semantic ? color : "gray"} className="seo-panel-ic">
-            <Icon size={16} />
-          </ThemeIcon>
-          <div style={{ minWidth: 0 }}>
-            <Text fw={650} size="sm" style={{ letterSpacing: "-0.01em" }}>
+      <Group justify="space-between" align="flex-start" wrap="nowrap" className="seo-panel-head" mb="md">
+        <div style={{ minWidth: 0 }}>
+          <Group gap={8} wrap="nowrap">
+            {semantic && (
+              <span
+                aria-hidden
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                  background: `var(--mantine-color-${color}-6)`,
+                }}
+              />
+            )}
+            <Text fw={600} size="sm" style={{ letterSpacing: "-0.01em" }}>
               {title}
             </Text>
-            {description && (
-              <Text size="xs" c="dimmed" mt={1}>
-                {description}
-              </Text>
-            )}
-          </div>
-        </Group>
+          </Group>
+          {description && (
+            <Text size="xs" c="dimmed" mt={2}>
+              {description}
+            </Text>
+          )}
+        </div>
         {right}
       </Group>
       {children}
@@ -71,18 +74,21 @@ export function CheckRow({
   ok,
   label,
   detail,
-  icon: Icon,
 }: {
   ok: boolean;
   label: string;
   detail?: string;
+  /** Accepted for call-site compatibility; the row shows its status instead. */
   icon?: LucideIcon;
 }) {
+  const StatusIcon = ok ? CheckCircle2 : XCircle;
   return (
-    <Group gap="sm" wrap="nowrap" py={9}>
-      <ThemeIcon size={26} radius="xl" variant="light" color={ok ? "teal" : "red"}>
-        {Icon ? <Icon size={13} /> : ok ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
-      </ThemeIcon>
+    <Group gap="sm" wrap="nowrap" py={9} className="seo-check">
+      <StatusIcon
+        size={16}
+        style={{ flexShrink: 0 }}
+        color={ok ? "var(--mantine-color-teal-6)" : "var(--mantine-color-red-6)"}
+      />
       <div style={{ minWidth: 0, flex: 1 }}>
         <Text size="sm" fw={500}>
           {label}
@@ -93,9 +99,9 @@ export function CheckRow({
           </Text>
         )}
       </div>
-      <Badge size="xs" variant="light" color={ok ? "teal" : "red"}>
+      <Text size="xs" fw={500} c={ok ? "teal.6" : "red.6"}>
         {ok ? "Pass" : "Fail"}
-      </Badge>
+      </Text>
     </Group>
   );
 }

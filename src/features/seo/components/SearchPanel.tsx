@@ -1,8 +1,8 @@
 import {
   Alert, Badge, Box, Card, Center, Group, Loader, Progress, ScrollArea, SimpleGrid,
-  Stack, Table, Text, ThemeIcon,
+  Stack, Table, Text,
 } from "@mantine/core";
-import { Info, Search, TrendingUp, Users, FileText, Globe } from "lucide-react";
+import { Info, Search, TrendingUp, Users, Globe } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SeoSearchTraffic } from "@/shared/types";
 import { num } from "@/shared/lib";
@@ -77,9 +77,6 @@ export function SearchPanel({
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
         <Card withBorder radius="md" padding="lg">
           <Group gap="sm" mb="md">
-            <ThemeIcon size={32} radius="md" variant="light" color="emerald">
-              <Globe size={16} />
-            </ThemeIcon>
             <div>
               <Text fw={650} size="sm">
                 Search engines
@@ -114,9 +111,6 @@ export function SearchPanel({
 
         <Card withBorder radius="md" padding="lg">
           <Group gap="sm" mb="md">
-            <ThemeIcon size={32} radius="md" variant="light" color="cyan">
-              <FileText size={16} />
-            </ThemeIcon>
             <div>
               <Text fw={650} size="sm">
                 Landing pages
@@ -164,9 +158,6 @@ export function SearchPanel({
       {traffic.hasTerms && (
         <Card withBorder radius="md" padding="lg">
           <Group gap="sm" mb="md">
-            <ThemeIcon size={32} radius="md" variant="light" color="yellow">
-              <Search size={16} />
-            </ThemeIcon>
             <div>
               <Text fw={650} size="sm">
                 Search terms
@@ -220,24 +211,20 @@ function NotProvidedNote() {
 function Tile({
   label,
   value,
-  icon: Icon,
-  color,
 }: {
   label: string;
   value: string;
-  icon: LucideIcon;
-  color: string;
+  /** Accepted for call-site compatibility; tiles show no icon. */
+  icon?: LucideIcon;
+  color?: string;
 }) {
   return (
-    <Box className="seo-tile" p="md">
-      <ThemeIcon size={30} radius="md" variant="light" color={color} mb="sm">
-        <Icon size={15} />
-      </ThemeIcon>
-      <Text fz={26} fw={750} lh={1.1} style={{ letterSpacing: "-0.03em" }}>
-        {value}
-      </Text>
-      <Text size="xs" c="dimmed" mt={2} truncate>
+    <Box className="seo-tile" px="md" py={12}>
+      <Text size="xs" c="dimmed" truncate>
         {label}
+      </Text>
+      <Text fz={22} fw={650} lh={1.2} mt={4} truncate style={{ letterSpacing: "-0.02em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}>
+        {value}
       </Text>
     </Box>
   );

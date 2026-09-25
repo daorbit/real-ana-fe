@@ -15,7 +15,7 @@ export function ContentPanel({ content }: { content: SeoContent }) {
 
   return (
     <Stack gap="lg">
-      <SimpleGrid cols={{ base: 2, sm: 4, lg: 8 }} spacing="md">
+      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
         <Tile label="Words" value={num(content.wordCount)} icon={FileText} hint="300+ is a reasonable floor for a page meant to rank." />
         <Tile
           label="H1 headings"

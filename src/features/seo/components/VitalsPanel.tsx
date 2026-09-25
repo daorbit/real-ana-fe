@@ -1,8 +1,8 @@
 import {
-  Alert, Badge, Box, Card, Group, ScrollArea, SimpleGrid, Table, Text, ThemeIcon,
+  Alert, Badge, Box, Card, Group, ScrollArea, SimpleGrid, Table, Text,
   Tooltip,
 } from "@mantine/core";
-import { Activity, Info, Users } from "lucide-react";
+import { Info, Users } from "lucide-react";
 import type { SeoFieldVitals, SeoVitalKey, SeoVitalSummary } from "@/shared/types";
 import { num } from "@/shared/lib";
 
@@ -85,9 +85,6 @@ export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
     return (
       <Card withBorder radius="md" padding="lg">
         <Group gap="sm" mb="md">
-          <ThemeIcon size={32} radius="md" variant="light" color="grape">
-            <Activity size={16} />
-          </ThemeIcon>
           <div>
             <Text fw={650} size="sm">
               Real-user vitals
@@ -135,9 +132,6 @@ export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
     <Card withBorder radius="md" padding="lg">
       <Group justify="space-between" mb="md" wrap="nowrap">
         <Group gap="sm">
-          <ThemeIcon size={32} radius="md" variant="light" color="grape">
-            <Activity size={16} />
-          </ThemeIcon>
           <div>
             <Text fw={650} size="sm">
               Real-user vitals
