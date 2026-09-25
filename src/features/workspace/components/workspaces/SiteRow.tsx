@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {
-  ActionIcon, Badge, Box, Button, Collapse, CopyButton, Divider, Menu, Text, Tooltip,
+  ActionIcon, Box, Button, Collapse, CopyButton, Divider, Menu, Tooltip,
 } from "@mantine/core";
-import { Check, Copy, ExternalLink, MoreHorizontal, Radar, Trash2 } from "lucide-react";
+import { Check, ChevronDown, Code2, Copy, ExternalLink, MoreHorizontal, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
 import { SnippetBuilder } from "@/features/workspace/components/SnippetBuilder";
@@ -29,46 +29,38 @@ export function SiteRow({ site, workspaceId, onDelete }: Props) {
   const frameworkLabel = guide.id === "other" ? null : guide.label;
 
   return (
-    <Box className={classes.site}>
+    <Box className={classes.site} data-open={open || undefined}>
       <Box className={classes.siteRow}>
         <span className={classes.siteFavicon}>
-          <SiteFavicon domain={site.domain} framework={site.framework} size={20} />
+          <SiteFavicon domain={site.domain} framework={site.framework} size={22} />
         </span>
 
         <Box className={classes.siteText}>
-          <Box className={classes.siteName}>
-            <Text fw={600} size="sm" truncate>
-              {site.name}
-            </Text>
+          <div className={classes.siteName}>{site.name}</div>
+          <div className={classes.siteMeta}>
+            <a
+              className={classes.siteDomain}
+              href={`https://${site.domain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {site.domain}
+              <ExternalLink size={11} />
+            </a>
             {frameworkLabel && (
-              <Badge
-                size="xs"
-                variant="default"
-                radius="sm"
-                tt="none"
-                fw={500}
-                leftSection={<BrandIcon framework={site.framework as FrameworkId} size={10} />}
-              >
+              <span className={classes.siteTag}>
+                <BrandIcon framework={site.framework as FrameworkId} size={11} />
                 {frameworkLabel}
-              </Badge>
+              </span>
             )}
-          </Box>
-          <a
-            className={classes.siteDomain}
-            href={`https://${site.domain}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {site.domain}
-            <ExternalLink size={11} />
-          </a>
+          </div>
         </Box>
 
         {installed !== null && (
           <Tooltip label={installed ? t("workspaces.receivingData") : t("workspaces.waitingFirstView")} withArrow>
             <span className={classes.status} data-live={installed || undefined}>
               <span className={classes.statusDot} />
-              {installed ? t("workspaces.statusLive", "Live") : t("workspaces.statusNoData", "No data yet")}
+              {installed ? t("workspaces.statusLive", "Live") : t("workspaces.statusWaiting", "Waiting for data")}
             </span>
           </Tooltip>
         )}
@@ -77,30 +69,33 @@ export function SiteRow({ site, workspaceId, onDelete }: Props) {
           <Tooltip label={t("workspaces.verifyTooltip")} withArrow>
             <Button
               size="xs"
-              variant={open ? "light" : "default"}
-              leftSection={<Radar size={13} />}
+              variant="default"
+              className={classes.verifyBtn}
+              data-open={open || undefined}
+              rightSection={<ChevronDown size={13} className={classes.chev} />}
               onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
             >
-              {t("workspaces.verify")}
+              {t("workspaces.installVerify", "Install & verify")}
             </Button>
           </Tooltip>
           <CopyButton value={snippet}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? t("workspaces.copied") : t("workspaces.copySnippet")} withArrow>
-                <Button
-                  size="xs"
+                <ActionIcon
                   variant="default"
+                  size={30}
                   onClick={copy}
-                  leftSection={copied ? <Check size={13} /> : <Copy size={13} />}
+                  aria-label={t("workspaces.copySnippet")}
                 >
-                  {t("workspaces.snippet")}
-                </Button>
+                  {copied ? <Check size={14} /> : <Code2 size={14} />}
+                </ActionIcon>
               </Tooltip>
             )}
           </CopyButton>
           <Menu position="bottom-end" withinPortal shadow="md" width={190}>
             <Menu.Target>
-              <ActionIcon variant="subtle" color="gray" aria-label={t("workspaces.siteActions", "Site actions")}>
+              <ActionIcon variant="subtle" color="gray" size={30} aria-label={t("workspaces.siteActions", "Site actions")}>
                 <MoreHorizontal size={16} />
               </ActionIcon>
             </Menu.Target>

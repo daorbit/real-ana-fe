@@ -1,14 +1,29 @@
-import { Folder } from "lucide-react";
+import { workspaceInitials } from "@/features/workspace/workspaceMarks";
 import classes from "./Workspaces.module.css";
 
-export function WorkspaceMark({ color, size = "sm" }: { color?: string; size?: "sm" | "lg" }) {
+const SIZE = { sm: classes.markSm, md: classes.markMd, lg: classes.markLg };
+
+/**
+ * A workspace's monogram: its initials on a tile in the workspace's colour.
+ * Initials tell five workspaces apart at a glance; five identical folder
+ * icons in different tints did not.
+ */
+export function WorkspaceMark({
+  name,
+  color,
+  size = "sm",
+}: {
+  name: string;
+  color?: string;
+  size?: keyof typeof SIZE;
+}) {
   return (
     <span
       aria-hidden
-      className={`${classes.mark} ${size === "lg" ? classes.markLg : classes.markSm}`}
+      className={`${classes.mark} ${SIZE[size]}`}
       style={color ? { ["--mark" as string]: color } : undefined}
     >
-      <Folder size={size === "lg" ? 22 : 15} strokeWidth={2} />
+      {workspaceInitials(name)}
     </span>
   );
 }

@@ -1105,16 +1105,20 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   place-items: center;
   width: 24px;
   height: 24px;
-  border-radius: 6px;
-  overflow: hidden;
+  border-radius: 7px;
   flex-shrink: 0;
-  border: 1px solid color-mix(in srgb, var(--mark) 32%, transparent);
-  background: color-mix(in srgb, var(--mark) 14%, transparent);
-  color: var(--mark);
-}
-
-.ws-menu__mark svg {
-  fill: color-mix(in srgb, var(--mark) 28%, transparent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--mark) 78%, #fff) 0%,
+    var(--mark) 55%,
+    color-mix(in oklab, var(--mark) 75%, #000) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .ws-menu__name--active {

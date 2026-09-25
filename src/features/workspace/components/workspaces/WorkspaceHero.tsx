@@ -2,7 +2,9 @@ import { useState } from "react";
 import {
   ActionIcon, Box, Button, CopyButton, Group, Menu, TextInput, Tooltip, UnstyledButton,
 } from "@mantine/core";
-import { Check, Copy, MoreHorizontal, Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  CalendarDays, Check, Copy, Crown, MoreHorizontal, Pencil, Plus, ShieldCheck, Trash2, UserRound, X,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { shortDate } from "@/shared/lib";
 import type { Workspace } from "@/shared/types";
@@ -50,10 +52,20 @@ export function WorkspaceHero({
     if (await onRename(name)) setEditing(false);
   };
 
+  const RoleIcon = workspace.role === "owner" ? Crown : workspace.role === "admin" ? ShieldCheck : UserRound;
+  const plan = workspace.billing?.plan?.name;
+  const paid = Boolean(plan && plan.toLowerCase() !== "free");
+
   return (
-    <Box component="section" className={classes.card}>
+    <Box
+      component="section"
+      className={`${classes.card} ${classes.hero}`}
+      style={mark ? { ["--mark" as string]: mark } : undefined}
+    >
+      {/* A soft wash of the workspace's own colour along the top. */}
+      <div className={classes.heroCover} aria-hidden />
       <Box className={classes.heroBody}>
-        <WorkspaceMark color={mark} size="lg" />
+        <WorkspaceMark name={workspace.name} color={mark} size="lg" />
 
         <Box className={classes.heroText}>
           {editing ? (
@@ -90,23 +102,31 @@ export function WorkspaceHero({
               </ActionIcon>
             </Group>
           ) : (
-            <h2 className={classes.heroName} title={workspace.name}>
-              {workspace.name}
-            </h2>
+            <div className={classes.heroTitleRow}>
+              <h2 className={classes.heroName} title={workspace.name}>
+                {workspace.name}
+              </h2>
+              {plan && (
+                <span className={classes.planPill} data-paid={paid || undefined}>
+                  {plan}
+                </span>
+              )}
+            </div>
           )}
 
           <Box className={classes.heroMeta}>
-            <span className={classes.metaItem}>{roleLabel(workspace.role)}</span>
-            {workspace.billing?.plan?.name && (
-              <span className={classes.metaItem}>{workspace.billing.plan.name} plan</span>
-            )}
-            <span className={classes.metaItem}>
+            <span className={classes.chip}>
+              <RoleIcon size={12} />
+              {roleLabel(workspace.role)}
+            </span>
+            <span className={classes.chip}>
+              <CalendarDays size={12} />
               {t("workspaces.statCreated")} {shortDate(workspace.createdAt)}
             </span>
             <CopyButton value={workspace._id} timeout={1600}>
               {({ copied, copy }) => (
                 <Tooltip label={copied ? t("workspaces.copied") : t("workspaces.copyId", "Copy workspace ID")} withArrow>
-                  <UnstyledButton className={`${classes.metaItem} ${classes.idButton}`} onClick={copy}>
+                  <UnstyledButton className={`${classes.chip} ${classes.idButton}`} onClick={copy}>
                     ID {workspace._id.slice(-8)}
                     {copied ? <Check size={11} /> : <Copy size={11} />}
                   </UnstyledButton>

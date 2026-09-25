@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Badge, Box, Button, Text, TextInput } from "@mantine/core";
+import { ActionIcon, Box, TextInput, UnstyledButton } from "@mantine/core";
 import { Globe, Plus, Search, SearchX, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RefreshButton } from "@/shared/ui/Refresh";
@@ -41,12 +41,15 @@ export function SitesPanel({
     <Box component="section" className={classes.card}>
       <Box className={classes.sitesHead}>
         <Box className={classes.sitesTitle}>
-          <Text fw={650} size="sm">
-            {t("workspaces.sites")}
-          </Text>
-          <Badge variant="default" size="sm" radius="sm">
-            {q ? t("workspaces.shownOf", { shown: shown.length, total: sites.length }) : sites.length}
-          </Badge>
+          <div className={classes.sitesTitleRow}>
+            <h3 className={classes.sectionTitle}>{t("workspaces.sites")}</h3>
+            <span className={classes.listCount}>
+              {q ? t("workspaces.shownOf", { shown: shown.length, total: sites.length }) : sites.length}
+            </span>
+          </div>
+          <div className={classes.sectionSub}>
+            {t("workspaces.sitesSub", "The domains this workspace tracks, and whether each one is sending data.")}
+          </div>
         </Box>
         <Box className={classes.sitesTools}>
           {sites.length >= 3 && (
@@ -108,9 +111,12 @@ export function SitesPanel({
           ))}
           {canEdit && (
             <Box className={classes.footer}>
-              <Button variant="subtle" color="gray" size="sm" leftSection={<Plus size={15} />} onClick={onAddSite}>
+              <UnstyledButton className={classes.addRow} onClick={onAddSite}>
+                <span className={classes.newIcon}>
+                  <Plus size={14} />
+                </span>
                 {t("workspaces.addAnother")}
-              </Button>
+              </UnstyledButton>
             </Box>
           )}
         </>
