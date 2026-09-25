@@ -806,7 +806,17 @@
     "closeCard": "Close",
     "noWorkspaceTitle": "No workspace selected",
     "noWorkspaceBody": "Public dashboards are published per workspace. Create or pick one first, then come back here to share it.",
-    "noWorkspaceCta": "Go to workspaces"
+    "noWorkspaceCta": "Go to workspaces",
+    "tabAnalyticsLong": "Analytics dashboard",
+    "tabSeoLong": "SEO reports",
+    "analyticsLinkTitle": "Public analytics dashboard",
+    "offIntro": "Share a read-only view of this workspace's traffic with clients or your team. No account needed.",
+    "turnOn": "Turn on public link",
+    "lastOpenedShort": "last opened {{ago}}",
+    "notOpenedShort": "not opened yet",
+    "replaceLinkShort": "Replace link",
+    "cardLiveDesc": "Anyone with the link can view these numbers.",
+    "cardOffDesc": "The link returns 404 until you turn this on."
   },
   "sharePost": {
     "title": "Share Post",

@@ -310,17 +310,6 @@
   .seo-report { --seo-gap: 12px; }
   .seo-bento { gap: 10px; }
 
-  /* The tab strip bleeds to the screen edges, matching the scroller's 12px. */
-  .seo-tabbar { margin: 0 -12px; }
-  .seo-tabbar > .seo-tab { padding-left: 16px; padding-right: 10px; }
-  .seo-tab-help { margin-right: 12px; }
-  .seo-tab {
-    gap: 5px;
-    padding: 8px 9px 9px;
-    font-size: 12.5px;
-  }
-  .seo-tab-icon { width: 14px; height: 14px; }
-
   /* Audit summary: the score ring centred on its own line and the four
      category bars under it at full width, instead of a row that ran off the
      card's right edge. */

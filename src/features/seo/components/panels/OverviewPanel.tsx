@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Alert, Badge, Box, Card, Center, Group, SegmentedControl, SimpleGrid, Stack, Text, ThemeIcon,
+  Alert, Anchor, Badge, Box, Card, Center, Group, SegmentedControl, SimpleGrid, Stack, Text, ThemeIcon,
 } from "@mantine/core";
 import {
   AlertTriangle, CheckCircle2, XCircle, FileText, Image as ImageIcon, Share2, Bot,
@@ -25,6 +25,7 @@ import { AREA_LABEL, bandHex, pageSize, severityHex } from "@/features/seo/compo
 export function OverviewPanel({
   data,
   history,
+  onViewIssues,
 }: {
   data: {
     score: number;
@@ -35,6 +36,8 @@ export function OverviewPanel({
     siteFiles: SeoSiteFiles;
   };
   history: SeoReportSummary[];
+  /** Jump to the Issues section from the critical-issues banner. */
+  onViewIssues?: () => void;
 }) {
   const { score, performance, issues, content, technical, siteFiles } = data;
   const breakdown = useIssueBreakdown(issues);
@@ -42,9 +45,23 @@ export function OverviewPanel({
   return (
     <Stack gap="md">
       {breakdown.critical > 0 && (
-        <Alert color="red" variant="light" radius="md" icon={<AlertTriangle size={16} />}>
-          {breakdown.critical} critical issue{breakdown.critical === 1 ? "" : "s"}{" "}
-          {breakdown.critical === 1 ? "is" : "are"} holding this page back. Fix those first.
+        <Alert
+          color="red"
+          variant="default"
+          radius="md"
+          icon={<AlertTriangle size={16} color="var(--mantine-color-red-6)" />}
+        >
+          <Group justify="space-between" gap="xs" wrap="wrap">
+            <span>
+              {breakdown.critical} critical issue{breakdown.critical === 1 ? "" : "s"}{" "}
+              {breakdown.critical === 1 ? "is" : "are"} holding this page back. Fix those first.
+            </span>
+            {onViewIssues && (
+              <Anchor component="button" type="button" size="sm" fw={500} onClick={onViewIssues}>
+                Review issues
+              </Anchor>
+            )}
+          </Group>
         </Alert>
       )}
 
