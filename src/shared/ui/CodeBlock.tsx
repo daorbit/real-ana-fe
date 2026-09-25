@@ -106,6 +106,8 @@ export function CodeBlock({
               size="compact-xs"
               variant="subtle"
               color={copied ? "teal" : "gray"}
+              className="cb-copy"
+              data-copied={copied || undefined}
               onClick={copy}
               leftSection={copied ? <Check size={12} /> : <Copy size={12} />}
             >

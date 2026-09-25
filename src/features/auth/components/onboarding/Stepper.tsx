@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+import type { ReactNode } from "react";
 import s from "./Onboarding.module.css";
 
 export type StepDef = { label: string; hint: string };
@@ -51,5 +53,65 @@ export function Stepper({ step, steps }: { step: number; steps: StepDef[] }) {
         aria-hidden="true"
       />
     </div>
+  );
+}
+
+/**
+ * The step list down the left edge on desktop.
+ *
+ * Eight steps are too many to hold in your head from "4 / 8" alone, so the
+ * whole run is listed: what is done, where you are, and what is still to
+ * come, each with its one-line hint. Display only — Back and Continue move
+ * through the flow, because several steps create things (a workspace, a site)
+ * and jumping around them would create duplicates.
+ */
+export function SetupRail({
+  step,
+  steps,
+  onSkip,
+  brand,
+}: {
+  step: number;
+  steps: StepDef[];
+  onSkip?: () => void;
+  brand: ReactNode;
+}) {
+  return (
+    <aside className={s.rail} aria-label="Setup progress">
+      <div className={s.railBrand}>{brand}</div>
+
+      <div className={s.railIntro}>
+        <div className={s.railTitle}>Set up your account</div>
+        <div className={s.railMeta}>
+          Step {step + 1} of {steps.length}
+        </div>
+      </div>
+
+      <ol className={s.railList}>
+        {steps.map((def, i) => {
+          const state = i < step ? "done" : i === step ? "current" : "todo";
+          return (
+            <li key={def.label} className={s.railItem} data-state={state} aria-current={state === "current" ? "step" : undefined}>
+              <span className={s.railMarker} aria-hidden="true">
+                {state === "done" ? <Check size={12} strokeWidth={3} /> : i + 1}
+              </span>
+              <span className={s.railText}>
+                <span className={s.railLabel}>{def.label}</span>
+                <span className={s.railHint}>{def.hint}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className={s.railFoot}>
+        {onSkip && (
+          <button type="button" className={s.railSkip} onClick={onSkip}>
+            Skip setup for now
+          </button>
+        )}
+        <span className={s.railNote}>You can change all of this later in Settings.</span>
+      </div>
+    </aside>
   );
 }

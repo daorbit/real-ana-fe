@@ -6,7 +6,7 @@ import { Wordmark } from "@/shared/ui/Brand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
 import { AppearanceStep } from "@/features/auth/components/onboarding/AppearanceStep";
 import { BillingStep } from "@/features/auth/components/onboarding/BillingStep";
-import { Stepper } from "@/features/auth/components/onboarding/Stepper";
+import { Stepper, SetupRail } from "@/features/auth/components/onboarding/Stepper";
 import { ReferralStepBody, ReferralStepFooter } from "@/features/auth/components/onboarding/ReferralStep";
 import { WorkspaceStepBody, WorkspaceStepFooter } from "@/features/auth/components/onboarding/WorkspaceStep";
 import { SiteStepBody, SiteStepFooter } from "@/features/auth/components/onboarding/SiteStep";
@@ -371,6 +371,8 @@ export default function Onboarding() {
     return (
       <div className={`${s.shell} onb-form`}>
         <div className={s.wash} aria-hidden="true" />
+        <SetupRail step={displayStep} steps={displaySteps} onSkip={skip} brand={<Wordmark />} />
+        <div className={s.main}>
         <SetupBar step={displayStep} steps={displaySteps} onBack={goBack} onSkip={skip} />
 
         {/* These two steps are full-bleed — a theme picker beside a preview, a
@@ -391,10 +393,12 @@ export default function Onboarding() {
         ) : (
           <BillingStep onBack={() => setStep(APPEARANCE_STEP)} onDone={done} />
         )}
+        </div>
       </div>
     );
   }
 
+  const canSkip = step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1;
   const current = STEPS[step];
   const wide = current?.wide;
   const tall = current?.tall;
@@ -428,11 +432,13 @@ export default function Onboarding() {
   return (
     <div className={`${s.shell} onb-form`}>
       <div className={s.wash} aria-hidden="true" />
+      <SetupRail step={displayStep} steps={displaySteps} onSkip={canSkip ? skip : undefined} brand={<Wordmark />} />
+      <div className={s.main}>
       <SetupBar
         step={displayStep}
         steps={displaySteps}
         onBack={goBack}
-        onSkip={step >= FIRST_SKIPPABLE_STEP && step < STEPS.length - 1 ? skip : undefined}
+        onSkip={canSkip ? skip : undefined}
       />
 
       <main className={`${s.body} ${tall ? "" : s.bodyCentred}`}>
@@ -509,6 +515,7 @@ export default function Onboarding() {
           )}
         </div>
       </main>
+      </div>
     </div>
   );
 }

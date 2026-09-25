@@ -2,6 +2,7 @@ import { Stack, TextInput } from "@mantine/core";
 import { BarChart3, Share2, Users } from "lucide-react";
 import { StepFooter } from "./StepFooter";
 import s from "./WorkspaceStep.module.css";
+import onb from "./Onboarding.module.css";
 
 
 const WHY = [
@@ -35,9 +36,8 @@ export function WorkspaceStepBody({
   onSubmit: () => void;
 }) {
   return (
-    <Stack gap="xl">
+    <Stack gap="lg" className={onb.card}>
       <TextInput
-        size="md"
         label="Workspace name"
         placeholder="Acme Inc"
         value={wsName}
@@ -47,7 +47,6 @@ export function WorkspaceStepBody({
         data-autofocus
       />
 
-  
       <ul className={s.why}>
         {WHY.map(({ icon: Icon, term, gloss }) => (
           <li key={term} className={s.whyRow}>
