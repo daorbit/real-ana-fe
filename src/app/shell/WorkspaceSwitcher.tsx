@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ActionIcon, Menu, Tooltip, UnstyledButton } from "@mantine/core";
-import { Check, FolderKanban, Plus, RefreshCw } from "lucide-react";
+import { Check, Folder, FolderKanban, Plus, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
@@ -96,7 +96,7 @@ export function WorkspaceMenuItems() {
         <Menu.Item
           key={w._id}
           onClick={() => setActive(w._id)}
-          leftSection={<WorkspaceMark src={marks.get(w._id)!} />}
+          leftSection={<WorkspaceMark color={marks.get(w._id)!} />}
           // The current one is marked rather than omitted: a list that
           // silently drops where you are makes you count to find out.
           rightSection={
@@ -129,16 +129,10 @@ export function WorkspaceMenuItems() {
   );
 }
 
-/**
- * The square mark beside a workspace in the list.
- *
- * A workspace has no logo of its own, so this shows one of a fixed set of
- * robot avatars instead of inventing branding for it.
- */
-function WorkspaceMark({ src }: { src: string }) {
+function WorkspaceMark({ color }: { color: string }) {
   return (
-    <span aria-hidden className="ws-menu__mark">
-      <img src={src} alt="" width={24} height={24} />
+    <span aria-hidden className="ws-menu__mark" style={{ ["--mark" as string]: color }}>
+      <Folder size={14} strokeWidth={2} />
     </span>
   );
 }
