@@ -1024,10 +1024,30 @@ export type ApiKey = {
   name: string;
   prefix: string;
   lastUsedAt?: string;
+  requestCount?: number;
   createdAt: string;
   createdBy?: { name?: string; email?: string } | null;
   expiresAt?: string | null;
   key?: string; // only present right after creation
+};
+
+export type ApiKeyUsageWindow = 7 | 30 | 90;
+
+export type ApiKeyUsageTotals = { requests: number; failures: number };
+
+export type ApiKeyUsageDay = ApiKeyUsageTotals & { date: string };
+
+export type ApiKeyUsageEntry = ApiKeyUsageTotals & {
+  keyId: string;
+  previous: ApiKeyUsageTotals;
+  series: { requests: number[]; failures: number[] };
+};
+
+export type ApiKeyUsage = {
+  windowDays: ApiKeyUsageWindow;
+  days: ApiKeyUsageDay[];
+  keys: ApiKeyUsageEntry[];
+  previous: ApiKeyUsageTotals;
 };
 
 export type Bucket = { key: string; count: number };

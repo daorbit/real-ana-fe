@@ -1,5 +1,5 @@
 import {
-  demoWorkspaces, demoSites, demoGoals, demoApiKeys, demoShare, demoSeoReport,
+  demoWorkspaces, demoSites, demoGoals, demoApiKeys, demoApiKeyUsage, demoShare, demoSeoReport,
   demoSeoHistory, demoSeoShare, demoCrawl, demoSearchTraffic, demoVitals,
   demoCompetitors, demoInstallStatus, demoStats, demoUserFlow, DEMO_WORKSPACE_ID,
 } from "@/features/demo/demoData";
@@ -41,6 +41,10 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   // goals, keys, sharing
   if (/\/goals$/.test(path)) return demoGoals;
   if (/\/keys$/.test(path)) return demoApiKeys;
+  if (/\/keys\/usage$/.test(path)) {
+    const days = Number(params.get("days"));
+    return demoApiKeyUsage(days === 7 || days === 90 ? days : 30);
+  }
   if (/\/share$/.test(path)) {
     // The SEO report's share settings live under a report path; the workspace's
     // are at the top level. Same suffix, different shape.

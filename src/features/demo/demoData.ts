@@ -1,19 +1,11 @@
 import type {
-  Workspace, Site, Goal, ApiKey, ShareState, SeoReport,
+  Workspace, Site, Goal, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, ShareState, SeoReport,
   SeoReportSummary, SeoCrawlReport, SeoCrawlPage, SeoSearchTraffic, SeoFieldVitals,
   SeoCompetitor, SeoShareState,
 } from "@/shared/types";
 import { demoStats, demoUserFlow } from "@/features/demo/demoStats";
 
-/**
- * Everything the demo session shows, generated in the browser.
- *
- * The demo has no server presence at all: the backend only issues the token.
- * Every workspace, site, report and number below is fabricated here, so a
- * visitor exploring the product costs no database queries and can touch no real
- * data. Ids are stable so RTK's cache keys and the app's "active workspace"
- * memory behave exactly as they would against a real account.
- */
+
 
 export const DEMO_WORKSPACE_ID = "demo-workspace";
 export const DEMO_SITE_ID = "demo-site-acme";
@@ -92,9 +84,41 @@ export const demoApiKeys: ApiKey[] = [
     // A prefix only — the demo shows the shape of a key, never a usable one.
     prefix: "qk_demo",
     lastUsedAt: iso(2 * 3_600_000),
+    requestCount: 48_213,
     createdAt: iso(60 * DAY),
   },
 ];
+
+export function demoApiKeyUsage(windowDays: ApiKeyUsageWindow): ApiKeyUsage {
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+
+  const days = Array.from({ length: windowDays }, (_, i) => {
+    const requests = Math.round(820 + 360 * Math.sin(i / 2.6) + ((i * 37) % 170));
+    const failures = Math.round(requests * 0.011) + (i % 6 === 0 ? 9 : 0);
+    const date = new Date(today - (windowDays - 1 - i) * DAY).toISOString().slice(0, 10);
+    return { date, requests, failures };
+  });
+
+  const requests = days.reduce((sum, d) => sum + d.requests, 0);
+  const failures = days.reduce((sum, d) => sum + d.failures, 0);
+  const previous = { requests: Math.round(requests * 0.87), failures: Math.round(failures * 1.2) };
+
+  return {
+    windowDays,
+    days,
+    previous,
+    keys: [
+      {
+        keyId: "demo-key-1",
+        requests,
+        failures,
+        previous,
+        series: { requests: days.map((d) => d.requests), failures: days.map((d) => d.failures) },
+      },
+    ],
+  };
+}
 
 export const demoShare: ShareState = {
   enabled: false,

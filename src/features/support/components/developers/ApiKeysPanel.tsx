@@ -4,20 +4,29 @@ import { KeyRound, Plus, Search, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
-import type { ApiKey } from "@/shared/types";
+import type { ApiKey, ApiKeyUsageWindow } from "@/shared/types";
 import { useApiKeys } from "../../hooks/useApiKeys";
+import { useKeyUsage } from "../../hooks/useKeyUsage";
 import { ApiKeysTable } from "./ApiKeysTable";
 import { CreateKeyModal } from "./CreateKeyModal";
 import { RenameKeyModal } from "./RenameKeyModal";
-import { KeyStats } from "./KeyStats";
 import { PanelHeader } from "./PanelHeader";
 import classes from "./Developers.module.css";
 
-export function ApiKeysPanel({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
+interface Props {
+  workspaceId: string;
+  workspaceName: string;
+  windowDays: ApiKeyUsageWindow;
+  focusKeyId: string | null;
+  onFocusKey: (keyId: string) => void;
+}
+
+export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, focusKeyId, onFocusKey }: Props) {
   const { t } = useTranslation();
   const {
     keys, isLoading, loadFailed, retrying, retry, creating, renaming, create, rename, revoke,
   } = useApiKeys(workspaceId);
+  const { byKey } = useKeyUsage(workspaceId, windowDays, null);
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [renamingKey, setRenamingKey] = useState<ApiKey | null>(null);
   const [query, setQuery] = useState("");
@@ -42,8 +51,6 @@ export function ApiKeysPanel({ workspaceId, workspaceName }: { workspaceId: stri
           </Button>
         }
       />
-
-      {keys.length > 0 && <KeyStats keys={keys} />}
 
       {keys.length > 0 && (
         <Box className={classes.toolbar}>
@@ -91,7 +98,15 @@ export function ApiKeysPanel({ workspaceId, workspaceName }: { workspaceId: stri
           {t("developers.noMatches", { query })}
         </Text>
       ) : (
-        <ApiKeysTable keys={filtered} onRename={setRenamingKey} onRevoke={revoke} />
+        <ApiKeysTable
+          keys={filtered}
+          usage={byKey}
+          windowDays={windowDays}
+          focusKeyId={focusKeyId}
+          onFocusKey={onFocusKey}
+          onRename={setRenamingKey}
+          onRevoke={revoke}
+        />
       )}
 
       <Box className={classes.footnote}>

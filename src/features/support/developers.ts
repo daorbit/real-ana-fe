@@ -1,4 +1,4 @@
-import type { ApiKey } from "@/shared/types";
+import type { ApiKey, ApiKeyUsageWindow } from "@/shared/types";
 
 export const DOCS_URL = "https://quantalog.daorbit.in/docs/platform-api";
 
@@ -28,6 +28,39 @@ export function keyStatus(key: Pick<ApiKey, "expiresAt">): KeyStatus {
   if (left <= 0) return "expired";
   if (left <= EXPIRING_SOON_DAYS * DAY_MS) return "expiring";
   return "active";
+}
+
+export function latestUse(keys: Pick<ApiKey, "lastUsedAt">[]): string | undefined {
+  return keys.reduce<string | undefined>(
+    (latest, k) =>
+      k.lastUsedAt && (!latest || new Date(k.lastUsedAt) > new Date(latest)) ? k.lastUsedAt : latest,
+    undefined,
+  );
+}
+
+export function daysUntil(date: string): number {
+  return Math.max(0, Math.ceil((new Date(date).getTime() - Date.now()) / DAY_MS));
+}
+
+export const USAGE_WINDOWS: ApiKeyUsageWindow[] = [7, 30, 90];
+
+export function percentDelta(current: number, previous: number): number | null {
+  if (!previous) return null;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+export function successRate(requests: number, failures: number): string {
+  if (!requests) return "—";
+  const rate = ((requests - failures) / requests) * 100;
+  return `${rate >= 99.95 ? "100" : rate.toFixed(1)}%`;
+}
+
+export function usageDayLabel(date: string): string {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 const LOCAL_API = "http://localhost:4000";

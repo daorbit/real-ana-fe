@@ -5,7 +5,7 @@ import { notify, errMessage, isPlanLimit, quotaLimitInfo, planLimitReason } from
 import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import { reportLoadFailure } from "@/shared/lib/loadFailure";
 import type {
-  AdminUserPage, AdminUserBilling, ApiKey, Site, Stats, Workspace,
+  AdminUserPage, AdminUserBilling, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout, Branding, BrandingInput,
@@ -92,28 +92,16 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     if (result.error) reportLoadFailure(apiArg.signal);
   }
 
-  // An expired token surfaces here as a 401 on any authed request. One shared
-  // handler prompts a re-login and remembers the current page — a call site
-  // never has to notice. Auth endpoints are exempt: their 401s are normal
-  // form-level failures.
   if (result.error?.status === 401 && getToken() && !url.includes("/auth/")) {
     void import("@/shared/lib/session").then((m) => m.handleSessionExpired());
   }
 
-  // The screen lock is enforced server-side on every workspace/data route, so
-  // any of these RTK calls can come back 423 the moment the idle timer's own
-  // `/lock` call lands — this is what brings the overlay up for a caller that
-  // didn't trigger the lock itself.
+
   if (result.error?.status === 423) {
     void import("@/shared/lib/lockState").then((m) => m.showLock());
   }
 
-  // A plan/quota limit hit anywhere in the app — workspace, site, audit,
-  // crawl, analytics range, whatever comes next — surfaces the same upgrade
-  // dialog automatically. This is the one place every request passes
-  // through, so a call site doesn't have to remember to check for a plan
-  // limit itself; it only has to set the code server-side. A route that also
-  // sends a `limit` block gets the cap named in the dialog's heading.
+
   if (isPlanLimit(result.error)) {
     notify.quotaLimit(
       errMessage(result.error, "Upgrade your plan to continue."),
@@ -1330,6 +1318,11 @@ export const api = createApi({
       providesTags: ["ApiKey"],
     }),
 
+    getApiKeyUsage: build.query<ApiKeyUsage, { workspaceId: string; days: ApiKeyUsageWindow }>({
+      query: ({ workspaceId, days }) => `/api/workspaces/${workspaceId}/keys/usage?days=${days}`,
+      providesTags: ["ApiKey"],
+    }),
+
     createApiKey: build.mutation<
       ApiKey,
       { workspaceId: string; name: string; expiresInDays: number | null }
@@ -2231,6 +2224,7 @@ export const {
   useCreateGoalMutation,
   useDeleteGoalMutation,
   useGetApiKeysQuery,
+  useGetApiKeyUsageQuery,
   useCreateApiKeyMutation,
   useRenameApiKeyMutation,
   useRevokeApiKeyMutation,
