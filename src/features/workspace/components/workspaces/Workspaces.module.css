@@ -101,19 +101,19 @@
 }
 
 .mark {
+  --mark: var(--mantine-color-dimmed);
   flex-shrink: 0;
   overflow: hidden;
   display: grid;
   place-items: center;
   border-radius: 7px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  border: 1px solid color-mix(in srgb, var(--mark) 32%, transparent);
+  background: color-mix(in srgb, var(--mark) 14%, transparent);
+  color: var(--mark);
 }
 
-.mark img {
-  display: block;
-  width: 100%;
-  height: 100%;
+.mark svg {
+  fill: color-mix(in srgb, var(--mark) 28%, transparent);
 }
 
 .markSm {

@@ -53,7 +53,7 @@ export function WorkspaceHero({
   return (
     <Box component="section" className={classes.card}>
       <Box className={classes.heroBody}>
-        <WorkspaceMark src={mark} size="lg" />
+        <WorkspaceMark color={mark} size="lg" />
 
         <Box className={classes.heroText}>
           {editing ? (

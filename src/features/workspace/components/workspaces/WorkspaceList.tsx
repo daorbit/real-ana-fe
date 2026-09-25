@@ -41,7 +41,7 @@ export function WorkspaceList({ workspaces, activeId, marks, onSelect, onCreate 
               aria-current={isActive ? "true" : undefined}
               onClick={() => onSelect(w._id)}
             >
-              <WorkspaceMark src={marks.get(w._id)} />
+              <WorkspaceMark color={marks.get(w._id)} />
               <Box className={classes.itemText}>
                 <div className={classes.itemName}>{w.name}</div>
                 <div className={classes.itemMeta}>
