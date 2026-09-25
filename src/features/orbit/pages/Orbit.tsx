@@ -335,7 +335,7 @@ function AnswerText({
       c={message.failed ? "dimmed" : undefined}
       style={{ whiteSpace: "pre-wrap" }}
     >
-      <RichText text={shown} />
+      <RichText text={shown} animate={live} />
     </Text>
   );
 }

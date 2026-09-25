@@ -186,6 +186,7 @@ function renderList(
   lines: string[],
   start: number,
   keyBase: number,
+  animate: boolean,
 ): { node: React.ReactNode; next: number; key: number } {
   const first = BULLET.exec(lines[start]) ?? NUMBERED.exec(lines[start]);
   if (!first) return { node: null, next: start + 1, key: keyBase };
@@ -201,12 +202,11 @@ function renderList(
     if (!m || m[1].length !== indent) break;
     i++;
 
-
     let children: React.ReactNode = null;
     if (i < lines.length && isListLine(lines[i])) {
       const nestedIndent = (BULLET.exec(lines[i]) ?? NUMBERED.exec(lines[i]))![1].length;
       if (nestedIndent > indent) {
-        const nested = renderList(lines, i, key * 1000);
+        const nested = renderList(lines, i, key * 1000, animate);
         children = nested.node;
         i = nested.next;
         key = nested.key;
@@ -219,7 +219,7 @@ function renderList(
   const node = (
     <List key={key++} type={ordered ? "ordered" : "unordered"} size="sm" spacing={4} mt={4} mb={4}>
       {items.map((item, idx) => (
-        <List.Item key={idx}>
+        <List.Item key={idx} className={animate ? classes.fadeIn : undefined}>
           {renderInline(item.text, key * 1000 + idx)}
           {item.children}
         </List.Item>
@@ -230,9 +230,10 @@ function renderList(
   return { node, next: i, key };
 }
 
-function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
+function renderBlocks(text: string, keyBase: number, animate: boolean): React.ReactNode[] {
   const lines = linkifyBareUrls(text).split("\n");
   const out: React.ReactNode[] = [];
+  const fadeClass = animate ? classes.fadeIn : undefined;
   let key = keyBase;
   let i = 0;
 
@@ -249,6 +250,7 @@ function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
           fw={700}
           mt={i > 0 ? 10 : 0}
           mb={2}
+          className={fadeClass}
         >
           {renderInline(heading[2], key * 1000)}
         </Title>,
@@ -258,7 +260,7 @@ function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
     }
 
     if (isListLine(line)) {
-      const list = renderList(lines, i, key);
+      const list = renderList(lines, i, key, animate);
       out.push(list.node);
       i = list.next;
       key = list.key;
@@ -289,7 +291,7 @@ function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
     }
     const paragraph = lines.slice(start, i).join("\n");
     out.push(
-      <Text key={key++} span display="block" mb={start > 0 ? 6 : 0}>
+      <Text key={key++} span display="block" mb={start > 0 ? 6 : 0} className={fadeClass}>
         {renderInline(paragraph, key * 1000)}
       </Text>,
     );
@@ -298,14 +300,14 @@ function renderBlocks(text: string, keyBase: number): React.ReactNode[] {
   return out;
 }
 
-export function RichText({ text }: { text: string }) {
+export function RichText({ text, animate = false }: { text: string; animate?: boolean }) {
   const out: React.ReactNode[] = [];
   let cursor = 0;
   let key = 0;
 
   for (const match of text.matchAll(FENCE)) {
     const at = match.index ?? 0;
-    if (at > cursor) out.push(...renderBlocks(text.slice(cursor, at), key));
+    if (at > cursor) out.push(...renderBlocks(text.slice(cursor, at), key, animate));
 
     const [whole, lang, code] = match;
     out.push(
@@ -316,7 +318,7 @@ export function RichText({ text }: { text: string }) {
         radius="md"
         my={8}
         withCopyButton
-        className={classes.codeBlock}
+        className={[classes.codeBlock, animate ? classes.fadeIn : undefined].filter(Boolean).join(" ")}
         style={{
           fontSize: "0.85em",
           border: "1px solid var(--mantine-color-default-border)",
@@ -329,7 +331,7 @@ export function RichText({ text }: { text: string }) {
     key += 1000;
   }
 
-  if (cursor < text.length) out.push(...renderBlocks(text.slice(cursor), key));
+  if (cursor < text.length) out.push(...renderBlocks(text.slice(cursor), key, animate));
 
   return <>{out}</>;
 }
