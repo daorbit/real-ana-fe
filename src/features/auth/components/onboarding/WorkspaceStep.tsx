@@ -1,4 +1,4 @@
-import { BarChart3, Building2, Share2, Users } from "lucide-react";
+import { BarChart3, Share2, Users } from "lucide-react";
 import { StepFooter } from "./StepFooter";
 import f from "./FormSteps.module.css";
 
@@ -20,14 +20,6 @@ const WHY = [
   },
 ];
 
-/** Up to two initials from the name, for the monogram tile. */
-function initialsOf(name: string) {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return "";
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
 /** Title and lede live on the shell — this is the step's controls only. */
 export function WorkspaceStepBody({
   wsName,
@@ -40,38 +32,26 @@ export function WorkspaceStepBody({
   onChange: (v: string) => void;
   onSubmit: () => void;
 }) {
-  const initials = initialsOf(wsName);
-
   return (
     <div>
-      <div className={f.wsHero}>
-        <div className={f.monogram} aria-hidden>
-          {/* Re-keyed so each change of initials pops in. A building until
-              there is a name to take initials from. */}
-          <span key={initials} className={f.monogramText}>
-            {initials || <Building2 size={28} strokeWidth={1.75} />}
-          </span>
-        </div>
-
-        <div className={f.wsField}>
-          <label className={f.eyebrow} htmlFor="onb-ws-name">
-            Workspace name
-          </label>
-          <input
-            id="onb-ws-name"
-            className={f.bigInput}
-            placeholder="Acme Inc"
-            value={wsName}
-            aria-invalid={Boolean(wsError)}
-            aria-describedby="onb-ws-hint"
-            onChange={(e) => onChange(e.currentTarget.value)}
-            onKeyDown={(e) => e.key === "Enter" && onSubmit()}
-            autoComplete="organization"
-            data-autofocus
-          />
-          <div id="onb-ws-hint" className={wsError ? f.error : f.hint}>
-            {wsError ?? "Usually your company or team. You can rename it later."}
-          </div>
+      <div>
+        <label className={f.eyebrow} htmlFor="onb-ws-name">
+          Workspace name
+        </label>
+        <input
+          id="onb-ws-name"
+          className={f.bigInput}
+          placeholder="Acme Inc"
+          value={wsName}
+          aria-invalid={Boolean(wsError)}
+          aria-describedby="onb-ws-hint"
+          onChange={(e) => onChange(e.currentTarget.value)}
+          onKeyDown={(e) => e.key === "Enter" && onSubmit()}
+          autoComplete="organization"
+          data-autofocus
+        />
+        <div id="onb-ws-hint" className={wsError ? f.error : f.hint}>
+          {wsError ?? "Usually your company or team. You can rename it later."}
         </div>
       </div>
 
