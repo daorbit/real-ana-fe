@@ -1828,8 +1828,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: 10px;
   height: 46px;
 }
-/* Setup's forms sit in a card with several fields to a screen, so they use
-   the regular field height rather than the sign-in page's tall one. */
+/* Setup's forms have several fields to a screen, so they use the regular
+   field height rather than the sign-in page's tall one. */
 .onb-form .mantine-InputWrapper-root .mantine-Input-input {
   height: 40px;
   border-radius: 9px;
@@ -1845,6 +1845,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .onb-form .mantine-Input-input:focus-within {
   border-color: var(--auth-line-strong);
   background: var(--auth-surface-hover);
+}
+/* Setup's fields light up in the accent while in use. */
+.onb-form .mantine-Input-input:focus,
+.onb-form .mantine-Input-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
 }
 
 .auth-submit {
