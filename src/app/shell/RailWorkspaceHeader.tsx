@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Box, Menu, UnstyledButton } from "@mantine/core";
 import { ChevronDown, FolderPlus } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -21,6 +22,7 @@ export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
   const { workspaces, active } = useWorkspace();
   const billing = useActiveBilling();
+  const iconUid = `rail-header-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
   if (collapsed) return null;
 
@@ -101,7 +103,7 @@ export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
                 card of its own at the foot of the rail to say so. */}
             {billing?.plan && (
               <Box className="rail-workspace__meta" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <PlanIcon slug={billing.plan.slug} size={12} uid="rail-header" />
+                <PlanIcon slug={billing.plan.slug} size={12} uid={iconUid} />
                 {t("nav.planName", "{{plan}} plan", { plan: billing.plan.name })}
               </Box>
             )}
