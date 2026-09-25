@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Anchor, Badge, Box, Button, Card, Drawer, Group, SegmentedControl, Select, Stack,
-  Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
+  Table, Text, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
   Pagination,
 } from "@mantine/core";
 import {
@@ -542,8 +542,12 @@ export default function Seo() {
         }
       />
 
+      {/* One field, like a search bar: which site, which page on it, go. The
+          domain is fixed text in front of the path, so the thing being
+          audited reads as one address. */}
       <div className={layout.inspect}>
         <Select
+          variant="unstyled"
           className={layout.siteSelect}
           aria-label="Site"
           data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
@@ -555,33 +559,25 @@ export default function Seo() {
           }}
           allowDeselect={false}
           leftSection={<Globe size={15} />}
+          comboboxProps={{ withinPortal: true, width: 260, position: "bottom-start" }}
         />
         {canEdit && (
           <>
-            {/* The domain is a fixed prefix inside the path field, so the
-                thing being audited reads as one address. */}
-            <TextInput
-              className={layout.urlInput}
-              aria-label="Page to audit"
-              value={path}
-              onChange={(e) => setPath(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === "Enter" && !analyzing && run(false)}
-              placeholder="/"
-              leftSectionWidth={domainLabel ? Math.min(280, domainLabel.length * 7.4 + 40) : 36}
-              leftSectionPointerEvents="none"
-              leftSection={
-                <Group gap={8} wrap="nowrap" pl="sm" style={{ maxWidth: 260 }}>
-                  <Search size={15} style={{ flexShrink: 0, opacity: 0.6 }} />
-                  {domainLabel && (
-                    <Text size="sm" c="dimmed" truncate>
-                      {domainLabel}
-                    </Text>
-                  )}
-                </Group>
-              }
-              styles={{ section: { justifyContent: "flex-start" } }}
-            />
-            <Button disabled={analyzing} onClick={() => run(false)}>
+            <span className={layout.inspectDivider} aria-hidden />
+            <label className={layout.address}>
+              <Search size={15} className={layout.addressIcon} />
+              {domainLabel && <span className={layout.domain}>{domainLabel}</span>}
+              <input
+                className={layout.pathInput}
+                aria-label="Page to audit"
+                value={path}
+                onChange={(e) => setPath(e.currentTarget.value)}
+                onKeyDown={(e) => e.key === "Enter" && !analyzing && run(false)}
+                placeholder="/"
+                spellCheck={false}
+              />
+            </label>
+            <Button size="sm" disabled={analyzing} onClick={() => run(false)} className={layout.inspectButton}>
               Inspect page
             </Button>
           </>
@@ -631,7 +627,7 @@ export default function Seo() {
         </div>
       )}
 
-      <Box mt="xl">
+      <Box mt="xs">
         {!report && !loading && (
           <EmptyState
             icon={Search}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Anchor } from "@mantine/core";
 import { SEO_TABS, type SeoSubId, type SeoTab, type SeoTabId } from "../sections";
 import classes from "./SeoLayout.module.css";
@@ -14,6 +14,26 @@ interface Props {
 /** The report's six tabs, in one row that stays pinned while the page scrolls. */
 export function SeoTabs({ active, counts, onChange }: Props) {
   const bar = useRef<HTMLDivElement>(null);
+  const sentinel = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+
+  // The bar only takes a background while it is pinned; at rest the page
+  // background runs behind it. A 1px marker just above it leaves the top of
+  // the scroll area at the moment the bar pins.
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const root = el.closest<HTMLElement>(".app-panel__scroll");
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const top = entry.rootBounds?.top ?? 0;
+        setStuck(!entry.isIntersecting && entry.boundingClientRect.top < top);
+      },
+      { root, threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // On a narrow screen the row scrolls sideways; keep the active tab in view.
   useEffect(() => {
@@ -27,7 +47,9 @@ export function SeoTabs({ active, counts, onChange }: Props) {
   }, [active]);
 
   return (
-    <div className={classes.tabbarWrap}>
+    <>
+    <div ref={sentinel} className={classes.anchor} aria-hidden />
+    <div className={classes.tabbarWrap} data-stuck={stuck || undefined}>
     <div ref={bar} className={classes.tabbar} role="tablist" aria-label="SEO report">
       {SEO_TABS.map((t) => {
         const c = counts[t.id];
@@ -55,6 +77,7 @@ export function SeoTabs({ active, counts, onChange }: Props) {
       })}
     </div>
     </div>
+    </>
   );
 }
 

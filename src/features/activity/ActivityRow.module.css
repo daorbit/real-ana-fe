@@ -1,36 +1,36 @@
 /*
- * One notification in the panel.
+ * One notification: a flat row in a divided list.
  *
- * The row is a single button rather than a container with a link inside it:
- * everywhere in this panel the whole row is the target, and nesting an anchor
- * in a clickable div gives two overlapping hit areas that disagree about what
- * a click does.
+ * [dot] [chip] title ............ time      [✓ on hover]
+ *              body (two lines)
+ *              category
  */
 .row {
-  display: block;
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: transparent;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px 12px 8px;
+  border-top: 1px solid var(--border);
   text-align: left;
   cursor: pointer;
-  /* Only what actually changes. Transitioning `all` here would animate the
-     unread wash on first paint, so every row would fade in on open. */
-  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+  transition: background-color 120ms ease;
 }
 
 .row:hover {
-  background: var(--hover, rgba(128, 128, 128, 0.08));
+  background: color-mix(in srgb, var(--text) 4%, transparent);
 }
 
-.row:active {
-  transform: scale(0.995);
+.row:focus-visible {
+  outline: 2px solid var(--accent-2, #059669);
+  outline-offset: -2px;
 }
 
-/* A settled invite (accepted / declined): the row stays in the feed as
-   history, but no longer navigates anywhere.  Kill every interactive cue
-   so the reader isn't tempted to click. */
+.row[data-selected] {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* A settled invite stays as history but goes nowhere. */
 .row[data-settled] {
   cursor: default;
 }
@@ -39,51 +39,146 @@
   background: transparent;
 }
 
-.row[data-settled]:active {
-  transform: none;
+/* Unread: a dot in the gutter. Critical rows use red so they stand out
+   without tinting the whole row. */
+.dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin: 15px 0 0;
+  border-radius: 50%;
+  background: transparent;
 }
 
-.row:focus-visible {
-  outline: 2px solid var(--accent-2, #059669);
-  outline-offset: -2px;
+.row[data-unread] .dot {
+  background: var(--accent);
 }
 
-/*
- * Unread.
- *
- * A faint wash plus the dot, rather than bold text: a panel of twenty rows in
- * bold is a panel with no emphasis left to spend, and the weight change also
- * shifts the layout as rows are read.
- */
-.row[data-unread="true"] {
-  background: var(--unread-wash, color-mix(in srgb, var(--accent) 12%, transparent));
-  border-color: var(--unread-border, color-mix(in srgb, var(--accent) 34%, transparent));
+.row[data-severity="warning"] .dot {
+  background: var(--mantine-color-orange-6);
 }
 
-.row[data-unread="true"]:hover {
-  background: var(--unread-wash-hover, color-mix(in srgb, var(--accent) 18%, transparent));
+.row[data-severity="critical"] .dot {
+  background: var(--mantine-color-red-6);
 }
 
+.check {
+  flex-shrink: 0;
+  margin-top: 7px;
+}
 
-/* The chip holding either the type icon or the actor's avatar. Circular, like
-   an avatar always reads, rather than a rounded square that looks like a
-   placeholder icon that never got replaced with a real image. */
 .chip {
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
-  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  background-size: cover;
+  background-position: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
 }
 
-/* The chevron that signals the row opens something. Always visible — unlike
-   the old hover-only menu, there is nothing here that needs discovering. */
-.chevron {
+.chip[data-kind="image"] {
+  border: 0;
+  background: transparent;
+}
+
+.chip img {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-2);
+  word-break: break-word;
+}
+
+.title[data-unread] {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.time {
   flex-shrink: 0;
-  align-self: center;
-  color: var(--muted, #9ca3af);
+  font-size: 11.5px;
+  color: var(--text-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+  word-break: break-word;
+}
+
+.meta {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-2);
+  opacity: 0.8;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Revealed on hover or keyboard focus, in the time's place. */
+.markRead {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.row:hover .markRead,
+.row:focus-within .markRead {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .row[data-can-mark]:hover .time,
+  .row[data-can-mark]:focus-within .time {
+    visibility: hidden;
+  }
+}
+
+@media (hover: none) {
+  .markRead {
+    display: none;
+  }
 }
 
 /* A submission's answers in `SubmissionDetailModal` — a bordered label/value
@@ -115,20 +210,15 @@
    sat on whatever scrolled under it, so the first heading looked like a
    selected section rather than a label. */
 .groupLabel {
-  margin: 0 8px;
-  padding: 12px 6px 6px;
-  font-size: 10.5px;
+  padding: 14px 16px 6px;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted, #6b7280);
+  color: var(--text-2);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .row {
+  .row,
+  .markRead {
     transition: none;
-  }
-  .row:active {
-    transform: none;
   }
 }
