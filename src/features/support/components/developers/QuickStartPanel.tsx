@@ -1,27 +1,44 @@
 import { useMemo } from "react";
-import { Code } from "@mantine/core";
-import { ArrowUpRight, BookOpen, FlaskConical } from "lucide-react";
+import { Button } from "@mantine/core";
+import { ArrowUpRight, BookOpen, FlaskConical, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   DOCS_URL, KEY_ENV_VAR, SAMPLE_RESPONSE, apiBaseUrl, playgroundUrl, quickStartSnippets,
 } from "../../developers";
 import { CodeWindow } from "./CodeWindow";
-import { CopyField } from "./CopyField";
+import { CopyField, CopyInline } from "./CopyField";
 import { SectionHeader } from "./SectionHeader";
 import classes from "./Developers.module.css";
 
-export function QuickStartPanel({ workspaceId }: { workspaceId: string }) {
+interface Props {
+  workspaceId: string;
+  onCreateKey: () => void;
+}
+
+export function QuickStartPanel({ workspaceId, onCreateKey }: Props) {
   const { t } = useTranslation();
   const snippets = useMemo(() => quickStartSnippets(apiBaseUrl()), []);
 
+  const exportLine = `export ${KEY_ENV_VAR}="qk_..."`;
+
   const steps = [
-    { title: t("developers.stepCreateT"), body: t("developers.stepCreateD") },
+    {
+      title: t("developers.stepCreateT"),
+      body: t("developers.stepCreateD"),
+      extra: (
+        <Button size="xs" variant="default" leftSection={<Plus size={13} />} onClick={onCreateKey}>
+          {t("developers.createKey")}
+        </Button>
+      ),
+    },
     {
       title: t("developers.stepStoreT"),
-      body: (
-        <>
-          {t("developers.stepStoreD")} <Code>{KEY_ENV_VAR}</Code>
-        </>
+      body: t("developers.stepStoreEnv"),
+      extra: (
+        <div className={classes.inlineCode}>
+          <code>{exportLine}</code>
+          <CopyInline value={exportLine} />
+        </div>
       ),
     },
     { title: t("developers.stepCallT"), body: t("developers.stepCallD") },
@@ -54,6 +71,7 @@ export function QuickStartPanel({ workspaceId }: { workspaceId: string }) {
                 <div>
                   <div className={classes.stepTitle}>{s.title}</div>
                   <div className={classes.stepBody}>{s.body}</div>
+                  {s.extra && <div className={classes.stepExtra}>{s.extra}</div>}
                 </div>
               </li>
             ))}

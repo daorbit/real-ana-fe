@@ -8,6 +8,28 @@ interface Props {
   value: string;
 }
 
+export function CopyInline({ value }: { value: string }) {
+  const { t } = useTranslation();
+
+  return (
+    <CopyButton value={value} timeout={1600}>
+      {({ copied, copy }) => (
+        <Tooltip label={copied ? t("developers.copied") : t("developers.copyCode")} withArrow>
+          <ActionIcon
+            size="sm"
+            variant="subtle"
+            color={copied ? "teal" : "gray"}
+            onClick={copy}
+            aria-label={t("developers.copyCode")}
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+          </ActionIcon>
+        </Tooltip>
+      )}
+    </CopyButton>
+  );
+}
+
 export function CopyField({ label, value }: Props) {
   const { t } = useTranslation();
 

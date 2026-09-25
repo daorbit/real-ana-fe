@@ -1,5 +1,5 @@
-import { Skeleton } from "@mantine/core";
-import { Activity, Plus } from "lucide-react";
+import { ActionIcon, Group, Skeleton, Tooltip } from "@mantine/core";
+import { Activity, Plus, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useGetApiKeysQuery } from "@/app/store";
 import { num, timeAgo } from "@/shared/lib/format";
@@ -38,7 +38,7 @@ export function UsageOverview({
   workspaceId, windowDays, onWindowChange, focusKeyId, onFocusKey, onCreateKey,
 }: Props) {
   const { t } = useTranslation();
-  const { data: keys = [], isLoading: keysLoading } = useGetApiKeysQuery(workspaceId, { skip: !workspaceId });
+  const { data: keys = [], isLoading: keysLoading, isFetching: keysFetching, refetch: refetchKeys } = useGetApiKeysQuery(workspaceId, { skip: !workspaceId });
   const focusKey = keys.find((k) => k.id === focusKeyId);
   const activeFocus = focusKey ? focusKey.id : null;
   const { view, isLoading, isFetching, loadFailed, retry } = useKeyUsage(workspaceId, windowDays, activeFocus);
@@ -57,6 +57,12 @@ export function UsageOverview({
     );
   }
 
+  const refreshing = isFetching || keysFetching;
+  const refresh = () => {
+    void retry();
+    void refetchKeys();
+  };
+
   const lastUsed = focusKey ? focusKey.lastUsedAt : latestUse(keys);
 
   return (
@@ -64,19 +70,32 @@ export function UsageOverview({
       <SectionHeader
         description={t("developers.usageDesc")}
         action={
-          <UsageControls
-            keys={keys}
-            windowDays={windowDays}
-            onWindowChange={onWindowChange}
-            focusKeyId={activeFocus}
-            onFocusKey={onFocusKey}
-          />
+          <Group gap="xs" wrap="nowrap">
+            <UsageControls
+              keys={keys}
+              windowDays={windowDays}
+              onWindowChange={onWindowChange}
+              focusKeyId={activeFocus}
+              onFocusKey={onFocusKey}
+            />
+            <Tooltip label={t("developers.refreshUsage")} withArrow>
+              <ActionIcon
+                variant="default"
+                size={30}
+                onClick={refresh}
+                disabled={refreshing}
+                aria-label={t("developers.refreshUsage")}
+              >
+                <RotateCw size={14} className={refreshing ? "spin" : undefined} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
         }
       />
 
       {loadFailed ? (
         <div className={classes.card}>
-          <ErrorState compact title={t("developers.usageLoadError")} onRetry={() => void retry()} retrying={isFetching} />
+          <ErrorState compact title={t("developers.usageLoadError")} onRetry={refresh} retrying={refreshing} />
         </div>
       ) : isLoading || !view ? (
         <>

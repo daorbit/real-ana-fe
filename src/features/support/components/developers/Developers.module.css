@@ -456,7 +456,7 @@
 
 @media (min-width: 62em) {
   .quickGrid {
-    grid-template-columns: minmax(220px, 0.7fr) minmax(0, 2fr);
+    grid-template-columns: minmax(280px, 0.85fr) minmax(0, 2fr);
   }
 }
 
@@ -469,9 +469,18 @@
   list-style: none;
 }
 
+.steps {
+  min-width: 0;
+}
+
 .step {
   display: flex;
   gap: 12px;
+}
+
+.step > div {
+  flex: 1;
+  min-width: 0;
 }
 
 .stepNum {
@@ -611,5 +620,30 @@
 
 .resource:hover .resourceArrow {
   transform: translate(1px, -1px);
+  color: var(--text);
+}
+
+.stepExtra {
+  margin-top: 10px;
+}
+
+.inlineCode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.inlineCode code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 12px;
   color: var(--text);
 }

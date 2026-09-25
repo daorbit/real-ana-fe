@@ -1022,7 +1022,10 @@
     "connectionTitle": "Connection details",
     "connectionDesc": "Values you'll need when configuring a client.",
     "resourcesTitle": "Resources",
-    "playgroundShort": "Try every endpoint in the browser with your own key."
+    "playgroundShort": "Try every endpoint in the browser with your own key.",
+    "refreshUsage": "Refresh usage",
+    "snippetLanguage": "Snippet language",
+    "stepStoreEnv": "Keep it in an environment variable on your server, never in client code."
   },
   "workspaces": {
     "title": "Workspaces",

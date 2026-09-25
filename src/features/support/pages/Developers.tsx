@@ -96,7 +96,7 @@ export default function Developers() {
             </Tabs.Panel>
 
             <Tabs.Panel value="quickstart" className={classes.tabPanel}>
-              <QuickStartPanel workspaceId={active._id} />
+              <QuickStartPanel workspaceId={active._id} onCreateKey={() => update({ tab: "keys" })} />
             </Tabs.Panel>
           </Tabs>
         )}
