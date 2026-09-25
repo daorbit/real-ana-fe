@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import type { Site } from "@/shared/types";
-import { SiteRow } from "./SiteRow";
+import { SiteCard } from "./SiteCard";
 import classes from "./Workspaces.module.css";
 
 interface Props {
@@ -38,22 +38,27 @@ export function SitesPanel({
     : sites;
 
   return (
-    <Box component="section" className={classes.card}>
+    <Box component="section" className={classes.sites}>
       <Box className={classes.sitesHead}>
-        <span className={classes.sitesCount}>
-          {q
-            ? t("workspaces.shownOf", { shown: shown.length, total: sites.length })
-            : t("workspaces.siteCount", { count: sites.length, defaultValue_one: "{{count}} site", defaultValue_other: "{{count}} sites" })}
-        </span>
+        <div>
+          <h3 className={classes.sitesTitle}>
+            {t("workspaces.sites")}
+            <span className={classes.countBadge}>
+              {q ? t("workspaces.shownOf", { shown: shown.length, total: sites.length }) : sites.length}
+            </span>
+          </h3>
+          <div className={classes.sitesSub}>
+            {t("workspaces.sitesSub", "The domains this workspace tracks, and whether each one is sending data.")}
+          </div>
+        </div>
         <Box className={classes.sitesTools}>
           {sites.length >= 3 && (
             <TextInput
-              size="xs"
-              w={220}
+              className={classes.filter}
               placeholder={t("workspaces.filterPlaceholder")}
               value={query}
               onChange={(e) => setQuery(e.currentTarget.value)}
-              leftSection={<Search size={13} />}
+              leftSection={<Search size={14} />}
               rightSection={
                 query ? (
                   <ActionIcon
@@ -94,26 +99,27 @@ export function SitesPanel({
           />
         </Box>
       ) : (
-        <>
+        <div className={classes.siteGrid}>
           {shown.map((s) => (
-            <SiteRow
+            <SiteCard
               key={s._id}
               site={s}
               workspaceId={workspaceId}
               onDelete={canEdit ? () => onDeleteSite(s) : null}
             />
           ))}
-          {canEdit && (
-            <Box className={classes.footer}>
-              <UnstyledButton className={classes.addRow} onClick={onAddSite}>
-                <span className={classes.newIcon}>
-                  <Plus size={14} />
-                </span>
-                {t("workspaces.addAnother")}
-              </UnstyledButton>
-            </Box>
+          {canEdit && !q && (
+            <UnstyledButton className={classes.addTile} onClick={onAddSite}>
+              <span className={classes.addTileIcon}>
+                <Plus size={18} />
+              </span>
+              <span className={classes.addTileTitle}>{t("workspaces.addAnother")}</span>
+              <span className={classes.addTileSub}>
+                {t("workspaces.addTileSub", "Websites or mobile apps — we'll hand you the snippet.")}
+              </span>
+            </UnstyledButton>
           )}
-        </>
+        </div>
       )}
     </Box>
   );

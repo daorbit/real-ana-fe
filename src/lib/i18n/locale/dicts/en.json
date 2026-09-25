@@ -1096,7 +1096,21 @@
     "deleteSiteConsequenceLink": "The site's public dashboard link stops working",
     "deleteSiteConsequenceSnippet": "Any app still running the snippet stops reporting",
     "deletedSiteToast": "Site \"{{name}}\" deleted.",
-    "deleteSiteError": "Could not delete the site."
+    "deleteSiteError": "Could not delete the site.",
+    "switchLabel": "Switch workspace",
+    "currentWorkspace": "Current workspace",
+    "members": "Members",
+    "expired": "Expired",
+    "statPlan": "Plan",
+    "statRole": "Your role",
+    "planExpired": "Lapsed — renew to keep tracking",
+    "renews": "Renews {{date}}",
+    "noRenewal": "No renewal date",
+    "roleFull": "Full access to settings",
+    "roleEdit": "Can add and edit sites",
+    "roleView": "Read-only access",
+    "eventsSeen": "{{count}} events",
+    "addTileSub": "Websites or mobile apps — we'll hand you the snippet."
   },
   "validate": {
     "required": "{{label}} is required",

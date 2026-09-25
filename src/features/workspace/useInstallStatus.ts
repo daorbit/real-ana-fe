@@ -12,6 +12,12 @@ export function useSiteInstalled(workspaceId: string, siteId: string) {
   return data ? data.installed : null;
 }
 
+/** The full install status — installed, event count and last event — or null while it loads. */
+export function useSiteStatus(workspaceId: string, siteId: string) {
+  const { data } = useGetInstallStatusQuery({ workspaceId, siteId });
+  return data ?? null;
+}
+
 /**
  * Drives the "is my snippet working?" checker: polls the install-status
  * endpoint for 30 seconds and resolves as soon as the first event lands.
