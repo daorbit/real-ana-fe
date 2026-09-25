@@ -20,6 +20,38 @@
 .m-tabbar { display: none; }
 
 @media (max-width: 48em) {
+  /* ------------------------------------------------------------- type --- */
+
+  /* One step down across the app on a phone. The theme writes the font sizes
+     onto <html> (scaled by the user's own text-size preference, carried in
+     --font-scale), so they are redefined a level below, on <body>, which also
+     covers menus and modals portalled outside the shell. --mantine-scale
+     shrinks Mantine's control heights, paddings and icon boxes to match. */
+  body {
+    --mantine-scale: 0.9;
+    --mantine-font-size-xs: calc(11px * var(--font-scale, 1));
+    --mantine-font-size-sm: calc(12.5px * var(--font-scale, 1));
+    --mantine-font-size-md: calc(14px * var(--font-scale, 1));
+    --mantine-font-size-lg: calc(16px * var(--font-scale, 1));
+    --mantine-font-size-xl: calc(18px * var(--font-scale, 1));
+    --mantine-h1-font-size: 1.5rem;
+    --mantine-h2-font-size: 1.3rem;
+    --mantine-h3-font-size: 1.12rem;
+    --mantine-h4-font-size: 1rem;
+    /* Tighter gutters, so cards and stacks stop eating the narrow width. */
+    --mantine-spacing-xs: 8px;
+    --mantine-spacing-sm: 10px;
+    --mantine-spacing-md: 12px;
+    --mantine-spacing-lg: 16px;
+    --mantine-spacing-xl: 22px;
+  }
+
+  /* Text fields stay at 16px: below that iOS zooms the page on focus. */
+  input:not([type="checkbox"]):not([type="radio"]):not([readonly]),
+  textarea {
+    font-size: 16px !important;
+  }
+
   /* ------------------------------------------------------------ frame --- */
 
   .mantine-AppShell-root { --app-shell-padding: 0px; }
@@ -30,7 +62,7 @@
   }
 
   .app-panel__scroll {
-    padding: 16px 16px calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 20px);
+    padding: 12px 12px calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 16px);
   }
 
   /* The drawer runs the full height, so its last rows need to clear the tab
@@ -110,8 +142,8 @@
        gives it a line of its own, the width of the screen. */
     flex: 1 1 100%;
     min-width: 0;
-    max-width: calc(100% + 32px);
-    margin-inline: -16px;
+    max-width: calc(100% + 24px);
+    margin-inline: -12px;
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
@@ -131,8 +163,8 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
-    padding: 2px 16px;
-    scroll-padding-inline: 16px;
+    padding: 2px 12px;
+    scroll-padding-inline: 12px;
   }
   .home-toolbar-btns::-webkit-scrollbar,
   .an-toolbar-btns::-webkit-scrollbar,
@@ -145,17 +177,17 @@
   .home-toolbar-btns .mantine-Button-root,
   .an-toolbar-btns .mantine-Button-root,
   .an-range .mantine-Button-root {
-    height: 36px;
-    padding: 0 14px;
+    height: 30px;
+    padding: 0 12px;
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 12px;
   }
   .home-toolbar-btns .mantine-ActionIcon-root,
   .an-toolbar-btns .mantine-ActionIcon-root,
   .an-range .mantine-ActionIcon-root {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
     border-radius: 999px;
   }
   .an-range .mantine-SegmentedControl-root {
@@ -163,6 +195,13 @@
     border-radius: 999px;
   }
   .an-range .mantine-SegmentedControl-indicator { border-radius: 999px; }
+  /* The range and compare pickers' own segmented rows. */
+  .range-segmented { padding: 2px; flex-shrink: 0; }
+  .range-seg-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .an-range .mantine-Button-root { height: 30px !important; }
 
   /* "Full analytics" is a tab now; a second way in is noise on a phone. */
   .home-toolbar-btns a[href="/app/analytics"] { display: none; }
@@ -170,13 +209,13 @@
   /* ------------------------------------------------------ page heads --- */
 
   .app-panel__scroll .mantine-Title-root[data-order="1"] {
-    font-size: 1.75rem;
+    font-size: 1.4rem;
     letter-spacing: -0.02em;
   }
 
   /* ------------------------------------------------------- stat cards --- */
 
-  .stat-card-body { padding: 14px !important; }
+  .stat-card-body { padding: 12px !important; }
   .stat-card-body > .mantine-Group-root:first-child {
     margin-bottom: 6px;
   }
@@ -201,7 +240,7 @@
   }
   .stat-card-body > .stat-card-value { order: 2; }
 
-  .stat-card-value { font-size: 1.6rem !important; }
+  .stat-card-value { font-size: 1.3rem !important; }
 
   /* ------------------------------------------------------------ home --- */
 
@@ -217,6 +256,7 @@
      running through them, the two totals pair up, and the "Period" tag goes —
      the page is always the last 24 hours. */
   .hero-band { margin-bottom: 16px !important; }
+  .hero-figure { font-size: 40px; }
   .hero-pad { padding: 18px 18px 64px !important; }
   .hero-spark {
     height: 56px;
@@ -238,22 +278,64 @@
 
   /* The section switcher scrolls sideways too, to the screen edges. */
   .section-rail {
-    margin-inline: -16px;
-    padding-inline: 16px;
-    scroll-padding-inline: 16px;
+    margin-inline: -12px;
+    padding-inline: 12px;
+    scroll-padding-inline: 12px;
+    border-radius: 0;
   }
+  .section-tab {
+    gap: 5px;
+    padding: 5px 10px;
+    font-size: 12.5px;
+  }
+  .section-tab svg { width: 14px; height: 14px; }
 
   /* Detail-tab pills in the non-overview sections: one swipeable row. */
   .an-subtabs {
     flex-wrap: nowrap !important;
     overflow-x: auto;
     scrollbar-width: none;
-    margin-inline: -16px;
-    padding: 2px 16px;
+    margin-inline: -12px;
+    padding: 2px 12px;
   }
   .an-subtabs::-webkit-scrollbar { display: none; }
   .an-subtabs > * { flex-shrink: 0; }
   .an-subtabs .mantine-Button-root { border-radius: 999px; }
+
+  /* ------------------------------------------------------------- seo --- */
+
+  .seo-report { --seo-gap: 12px; }
+  .seo-bento { gap: 10px; }
+
+  /* The tab strip bleeds to the screen edges, matching the scroller's 12px. */
+  .seo-tabbar { margin: 0 -12px; }
+  .seo-tabbar > .seo-tab { padding-left: 16px; padding-right: 10px; }
+  .seo-tab-help { margin-right: 12px; }
+  .seo-tab {
+    gap: 5px;
+    padding: 8px 9px 9px;
+    font-size: 12.5px;
+  }
+  .seo-tab-icon { width: 14px; height: 14px; }
+
+  /* Audit summary: the score ring centred on its own line and the four
+     category bars under it at full width, instead of a row that ran off the
+     card's right edge. */
+  .mantine-Group-root:has(> .seo-cats) {
+    justify-content: center;
+    gap: 18px !important;
+  }
+  .seo-cats {
+    flex: 1 1 100%;
+    gap: 12px 18px;
+  }
+  .seo-cat .top .v { font-size: 15px; }
+
+  .seo-mstrip .mv { font-size: 18px; }
+  .seo-hbar { grid-template-columns: 76px 1fr 22px; gap: 10px; }
+
+  /* Wide tables scroll inside their card rather than pushing the page. */
+  .seo-report .mantine-Table-table { font-size: 12px; }
 
   /* Tighter rhythm between stacked cards than the desktop's `lg` gaps. */
   .app-panel__scroll .mantine-SimpleGrid-root {

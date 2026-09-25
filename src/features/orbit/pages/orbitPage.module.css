@@ -760,9 +760,6 @@
   .page {
     height: 100%;
     min-height: 0;
-    /* One size step down for everything on the page. */
-    --mantine-font-size-sm: 13px;
-    --mantine-font-size-xs: 11.5px;
   }
 
   .header {
@@ -770,14 +767,17 @@
     margin-bottom: 4px;
   }
 
+  /* `overflow-x` explicitly: with only `overflow-y` set it computes to auto,
+     and the composer's glow bleeding past the edge drew a scrollbar. */
   .body[data-state='empty'] {
     padding-bottom: 0;
+    overflow-x: hidden;
     overflow-y: auto;
   }
 
   .hero {
-    gap: 18px;
-    padding: 12px 0;
+    gap: 16px;
+    padding: 12px 4px;
   }
 
   .heroHead {
@@ -793,6 +793,7 @@
      pills of uneven width — easier to read and to hit with a thumb. */
   .starters {
     flex-direction: column;
+    flex-wrap: nowrap;
     align-items: stretch;
     gap: 6px;
     min-height: 0;
