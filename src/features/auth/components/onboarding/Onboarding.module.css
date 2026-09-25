@@ -18,7 +18,7 @@
 .shell {
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   height: 100dvh;
   /* The viewport never scrolls — only `.body` does. Also clips the wash,
@@ -83,6 +83,199 @@
 .body {
   position: relative;
   z-index: 1;
+}
+
+/* ----------------------------------------------------------- rail + main --- */
+
+/* Everything right of the rail: the phone/tablet bar, a wide step's heading,
+   and the scrolling body. */
+.main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The step list down the left on desktop. Below 62em the bar across the top
+   carries progress instead, and the rail is hidden. */
+.rail {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 300px;
+  display: none;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.6rem 1.5rem 1.5rem;
+  border-right: 1px solid var(--onb-line);
+  background: var(--onb-raise);
+  overflow-y: auto;
+}
+
+@media (min-width: 62em) {
+  .rail {
+    display: flex;
+  }
+  .bar {
+    display: none !important;
+  }
+}
+
+.railBrand {
+  flex-shrink: 0;
+}
+
+.railIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.railTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--onb-ink);
+}
+
+.railMeta {
+  font-size: 0.8rem;
+  color: var(--onb-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.railList {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.railItem {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 10px;
+}
+
+/* The line joining one marker to the next. */
+.railItem:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 21px;
+  top: 34px;
+  bottom: -9px;
+  width: 1px;
+  background: var(--onb-line);
+}
+
+.railItem[data-state="done"]:not(:last-child)::after {
+  background: color-mix(in srgb, var(--accent) 45%, var(--onb-line));
+}
+
+.railItem[data-state="current"] {
+  background: color-mix(in srgb, var(--onb-ink) 5%, transparent);
+}
+
+.railMarker {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  border: 1px solid var(--onb-edge);
+  background: var(--bg, #0b0c0e);
+  color: var(--onb-ink-faint);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.railItem[data-state="done"] .railMarker {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.railItem[data-state="current"] .railMarker {
+  border-color: var(--accent);
+  color: var(--onb-ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.railText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.railLabel {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--onb-ink-dim);
+}
+
+.railItem[data-state="current"] .railLabel {
+  font-weight: 600;
+  color: var(--onb-ink);
+}
+
+.railItem[data-state="done"] .railLabel {
+  color: var(--onb-ink);
+}
+
+.railHint {
+  font-size: 0.76rem;
+  color: var(--onb-ink-faint);
+}
+
+.railFoot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding-top: 1rem;
+  border-top: 1px solid var(--onb-line);
+}
+
+.railSkip {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--onb-ink-dim);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.railSkip:hover {
+  color: var(--onb-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.railSkip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.railNote {
+  font-size: 0.75rem;
+  color: var(--onb-ink-faint);
 }
 
 /* ------------------------------------------------------------------ bar --- */
@@ -308,7 +501,7 @@
      the old hairline-and-solid-fill the bar could be tight to the button;
      a gradient given only a few pixels to resolve in is just a hard edge
      again. */
-  padding: 1.6rem 0 calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  padding: 2.25rem 0 calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* Pulled well past the column on both sides so the backdrop reaches the edges
@@ -338,7 +531,7 @@
   background: linear-gradient(
     to bottom,
     color-mix(in srgb, var(--bg, #0b0c0e), transparent 100%) 0%,
-    var(--bg, #0b0c0e) 56%
+    var(--bg, #0b0c0e) 40%
   );
 }
 

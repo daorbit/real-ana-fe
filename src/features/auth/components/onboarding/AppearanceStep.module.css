@@ -45,8 +45,10 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 760px);
-  gap: 3rem;
+  /* The controls keep enough width for three mode buttons and two preset
+     cards per row; the preview takes what is left. */
+  grid-template-columns: minmax(380px, 1fr) minmax(320px, 1.35fr);
+  gap: 2.5rem;
 }
 
 .controls {

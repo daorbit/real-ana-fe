@@ -1,4 +1,4 @@
-import { Button, SimpleGrid, UnstyledButton } from "@mantine/core";
+import { Button, UnstyledButton } from "@mantine/core";
 import { StepFooter } from "./StepFooter";
 import {
   Search, Share2, PlayCircle, Mic, Radio, Newspaper, Users,
@@ -45,7 +45,7 @@ export function ReferralStepBody({
   };
 
   return (
-    <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={8}>
+    <div className={s.chips}>
       {REFERRAL_OPTIONS.map(({ value, label, icon: Icon, color }) => {
         const isSelected = selected.includes(value);
         return (
@@ -74,7 +74,7 @@ export function ReferralStepBody({
           </UnstyledButton>
         );
       })}
-    </SimpleGrid>
+    </div>
   );
 }
 

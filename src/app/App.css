@@ -1631,6 +1631,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 [data-mantine-color-scheme="light"] .cb-bar { background: #181818; border-bottom-color: #2a2a2a; }
 
+/* The block is dark in both themes, so its Copy button can't take the theme's
+   grey text — in light mode that is dark on dark. */
+.cb .cb-copy:not([data-copied]) { color: rgba(255, 255, 255, 0.7); }
+.cb .cb-copy:not([data-copied]):hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+
 .cb-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .cb-dot.r { background: #ff5f57; }
 .cb-dot.y { background: #febc2e; }
