@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { AppShell as MantineShell, Box, Burger, Group, Overlay } from "@mantine/core";
+import { AppShell as MantineShell, Box, Group, Overlay } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { Wordmark } from "@/shared/ui/Brand";
@@ -107,13 +107,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             borderBottom: "1px solid var(--border)",
           }}
         >
+          {/* No burger: the tab bar's "More" opens the drawer on a phone. */}
           <Group h="100%" gap="sm">
-            <Burger
-              opened={navOpen}
-              onClick={toggleNav}
-              size="sm"
-              aria-label={t("nav.toggleNav")}
-            />
             <Box component={Link} to="/app" display="flex">
               <Wordmark />
             </Box>
