@@ -1,14 +1,14 @@
-import { Folder } from "lucide-react";
+import { workspaceInitial } from "@/features/workspace/workspaceMarks";
 import classes from "./Workspaces.module.css";
 
-export function WorkspaceMark({ color, size = "sm" }: { color?: string; size?: "sm" | "lg" }) {
+/**
+ * A workspace's logo tile: its first letter, in the page's own neutral
+ * colours. Plain on purpose — a colour per workspace read as decoration.
+ */
+export function WorkspaceMark({ name, size = "sm" }: { name: string; size?: "sm" | "md" }) {
   return (
-    <span
-      aria-hidden
-      className={`${classes.mark} ${size === "lg" ? classes.markLg : classes.markSm}`}
-      style={color ? { ["--mark" as string]: color } : undefined}
-    >
-      <Folder size={size === "lg" ? 22 : 15} strokeWidth={2} />
+    <span aria-hidden className={classes.mark} data-size={size}>
+      {workspaceInitial(name)}
     </span>
   );
 }

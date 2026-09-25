@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Badge, Box, Button, Text, TextInput } from "@mantine/core";
+import { ActionIcon, Box, TextInput, UnstyledButton } from "@mantine/core";
 import { Globe, Plus, Search, SearchX, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RefreshButton } from "@/shared/ui/Refresh";
@@ -40,14 +40,11 @@ export function SitesPanel({
   return (
     <Box component="section" className={classes.card}>
       <Box className={classes.sitesHead}>
-        <Box className={classes.sitesTitle}>
-          <Text fw={650} size="sm">
-            {t("workspaces.sites")}
-          </Text>
-          <Badge variant="default" size="sm" radius="sm">
-            {q ? t("workspaces.shownOf", { shown: shown.length, total: sites.length }) : sites.length}
-          </Badge>
-        </Box>
+        <span className={classes.sitesCount}>
+          {q
+            ? t("workspaces.shownOf", { shown: shown.length, total: sites.length })
+            : t("workspaces.siteCount", { count: sites.length, defaultValue_one: "{{count}} site", defaultValue_other: "{{count}} sites" })}
+        </span>
         <Box className={classes.sitesTools}>
           {sites.length >= 3 && (
             <TextInput
@@ -108,9 +105,12 @@ export function SitesPanel({
           ))}
           {canEdit && (
             <Box className={classes.footer}>
-              <Button variant="subtle" color="gray" size="sm" leftSection={<Plus size={15} />} onClick={onAddSite}>
+              <UnstyledButton className={classes.addRow} onClick={onAddSite}>
+                <span className={classes.newIcon}>
+                  <Plus size={14} />
+                </span>
                 {t("workspaces.addAnother")}
-              </Button>
+              </UnstyledButton>
             </Box>
           )}
         </>
