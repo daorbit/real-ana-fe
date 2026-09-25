@@ -9,6 +9,7 @@ import {
   Volume2, VolumeX, X,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useMediaQuery } from "@mantine/hooks";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
@@ -542,6 +543,7 @@ export default function Orbit() {
   // The page reads the provider's chat rather than calling the hook, so it is
   // the same conversation the bubble holds.
   const { chat } = useOrbit();
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
   const {
     messages, input, setInput, pendingImage, attachImage, pendingDocument, attachDocument,
     imageMode, setImageMode, send, regenerateLast, editAndResend, stop, thinking, generatingImage,
@@ -891,7 +893,7 @@ export default function Orbit() {
           variant="unstyled"
           autosize
 
-          minRows={started ? 1 : 3}
+          minRows={started ? 1 : mobile ? 2 : 3}
           maxRows={started ? 8 : 10}
           px="md"
           pt="sm"
