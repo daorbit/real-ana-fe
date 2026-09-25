@@ -1,11 +1,10 @@
-import { useMemo } from "react";
 import { ActionIcon, Menu, Tooltip, UnstyledButton } from "@mantine/core";
 import { Check, FolderKanban, Plus, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
-import { marksFor, workspaceInitials } from "@/features/workspace/workspaceMarks";
+import { workspaceInitial } from "@/features/workspace/workspaceMarks";
 
 /**
  * Which workspace everything on screen belongs to, as a rail-width icon row.
@@ -62,7 +61,6 @@ export function WorkspaceMenuItems() {
   const nav = useNavigate();
   const { user } = useAuth();
   const { workspaces, active, setActive, refresh } = useWorkspace();
-  const marks = useMemo(() => marksFor(workspaces), [workspaces]);
 
   return (
     <Menu.Dropdown>
@@ -96,7 +94,7 @@ export function WorkspaceMenuItems() {
         <Menu.Item
           key={w._id}
           onClick={() => setActive(w._id)}
-          leftSection={<WorkspaceMark name={w.name} color={marks.get(w._id)!} />}
+          leftSection={<WorkspaceMark name={w.name} />}
           // The current one is marked rather than omitted: a list that
           // silently drops where you are makes you count to find out.
           rightSection={
@@ -129,10 +127,10 @@ export function WorkspaceMenuItems() {
   );
 }
 
-function WorkspaceMark({ name, color }: { name: string; color: string }) {
+function WorkspaceMark({ name }: { name: string }) {
   return (
-    <span aria-hidden className="ws-menu__mark" style={{ ["--mark" as string]: color }}>
-      {workspaceInitials(name)}
+    <span aria-hidden className="ws-menu__mark">
+      {workspaceInitial(name)}
     </span>
   );
 }

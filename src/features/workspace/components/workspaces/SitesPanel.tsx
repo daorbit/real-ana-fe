@@ -40,17 +40,11 @@ export function SitesPanel({
   return (
     <Box component="section" className={classes.card}>
       <Box className={classes.sitesHead}>
-        <Box className={classes.sitesTitle}>
-          <div className={classes.sitesTitleRow}>
-            <h3 className={classes.sectionTitle}>{t("workspaces.sites")}</h3>
-            <span className={classes.listCount}>
-              {q ? t("workspaces.shownOf", { shown: shown.length, total: sites.length }) : sites.length}
-            </span>
-          </div>
-          <div className={classes.sectionSub}>
-            {t("workspaces.sitesSub", "The domains this workspace tracks, and whether each one is sending data.")}
-          </div>
-        </Box>
+        <span className={classes.sitesCount}>
+          {q
+            ? t("workspaces.shownOf", { shown: shown.length, total: sites.length })
+            : t("workspaces.siteCount", { count: sites.length, defaultValue_one: "{{count}} site", defaultValue_other: "{{count}} sites" })}
+        </span>
         <Box className={classes.sitesTools}>
           {sites.length >= 3 && (
             <TextInput

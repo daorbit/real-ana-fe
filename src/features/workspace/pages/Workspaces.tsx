@@ -1,18 +1,16 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button } from "@mantine/core";
+import { Box, Button, TextInput } from "@mantine/core";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { FolderKanban, Plus } from "lucide-react";
+import { FolderKanban, Plus, Search } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSites } from "@/features/workspace";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { AddSiteWizard } from "@/features/workspace/components/AddSiteWizard";
 import { useWorkspaceActions } from "@/features/workspace/hooks/useWorkspaceActions";
-import { marksFor } from "@/features/workspace/workspaceMarks";
-import { WorkspaceList } from "@/features/workspace/components/workspaces/WorkspaceList";
+import { WorkspaceGrid } from "@/features/workspace/components/workspaces/WorkspaceGrid";
 import { WorkspaceHero } from "@/features/workspace/components/workspaces/WorkspaceHero";
-import { WorkspaceStats } from "@/features/workspace/components/workspaces/WorkspaceStats";
 import { SitesPanel } from "@/features/workspace/components/workspaces/SitesPanel";
 import classes from "@/features/workspace/components/workspaces/Workspaces.module.css";
 import { trace } from "@/shared/lib/analytics";
@@ -24,6 +22,8 @@ import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { useTitle } from "@/shared/lib/useTitle";
 
 const NEW_WORKSPACE_PATH = "/app/onboarding?mode=workspace";
+/** Past this many workspaces, the header gets a search box. */
+const SEARCH_FROM = 4;
 
 export default function Workspaces() {
   useTitle("Workspaces");
@@ -36,7 +36,9 @@ export default function Workspaces() {
 
   const { sites, refresh, refreshing, lastUpdated } = useSites(active?._id);
   const actions = useWorkspaceActions(active ?? null, sites.length);
-  const marks = useMemo(() => marksFor(workspaces), [workspaces]);
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const shownWorkspaces = q ? workspaces.filter((w) => w.name.toLowerCase().includes(q)) : workspaces;
 
   const createWorkspace = () => nav(NEW_WORKSPACE_PATH);
   const openAddSite = () => {
@@ -53,6 +55,16 @@ export default function Workspaces() {
         description={t("workspaces.description")}
         actions={
           <>
+            {workspaces.length >= SEARCH_FROM && (
+              <TextInput
+                className={classes.search}
+                placeholder={t("workspaces.findWorkspace", "Search workspaces")}
+                leftSection={<Search size={14} />}
+                value={query}
+                onChange={(e) => setQuery(e.currentTarget.value)}
+                aria-label={t("workspaces.findWorkspace", "Search workspaces")}
+              />
+            )}
             <Button variant="default" leftSection={<Plus size={16} />} onClick={createWorkspace}>
               {t("workspaces.newWorkspace")}
             </Button>
@@ -79,24 +91,21 @@ export default function Workspaces() {
         />
       ) : (
         <Box className={classes.layout}>
-          <WorkspaceList
-            workspaces={workspaces}
+          <WorkspaceGrid
+            workspaces={shownWorkspaces}
             activeId={active._id}
-            marks={marks}
             onSelect={setActive}
-            onCreate={createWorkspace}
           />
 
           <motion.div
             key={active._id}
             className={classes.main}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18 }}
           >
             <WorkspaceHero
               workspace={active}
-              mark={marks.get(active._id)}
               canEdit={canEdit}
               canAdmin={canAdmin}
               canDelete={canDelete}
@@ -106,7 +115,6 @@ export default function Workspaces() {
               onAddSite={openAddSite}
               onDelete={() => actions.removeWorkspace(active)}
             />
-            <WorkspaceStats workspace={active} siteCount={sites.length} />
             <SitesPanel
               sites={sites}
               workspaceId={active._id}

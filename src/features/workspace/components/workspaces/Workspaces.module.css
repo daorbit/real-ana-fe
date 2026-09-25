@@ -1,20 +1,15 @@
-.layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--mantine-spacing-xl);
-  align-items: start;
-}
+/* ---------------------------------------------------------------- page --- */
 
-@media (min-width: 62em) {
-  .layout {
-    grid-template-columns: 260px minmax(0, 1fr);
-  }
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
 }
 
 .main {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-lg);
+  gap: var(--mantine-spacing-md);
   min-width: 0;
 }
 
@@ -25,130 +20,164 @@
   background: var(--surface);
 }
 
-/* ------------------------------------------------------------ the list --- */
-
-/* A flat column, not a boxed card: it is navigation, like a sidebar. */
-.list {
-  position: sticky;
-  top: var(--mantine-spacing-xl);
+.search {
+  width: 220px;
 }
 
-.listHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 10px 10px;
+/* ---------------------------------------------------------- workspaces --- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
 }
 
-.listTitle {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text-2);
-}
-
-.listCount {
-  padding: 0 7px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 18px;
-  color: var(--text-2);
-  font-variant-numeric: tabular-nums;
-}
-
-.listFilter {
-  margin: 0 4px 8px;
-}
-
-.listItems {
+.wsCard {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 18px;
+  min-width: 0;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
-.item {
-  --mark: var(--mantine-color-dimmed);
-  position: relative;
+.wsCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 6px 20px -12px rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
+}
+
+.wsCard:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The current workspace: a full, slightly stronger outline — not an accent
+   stripe down one side. */
+.wsCard[data-active] {
+  border-color: color-mix(in srgb, var(--text) 32%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 55%, var(--surface));
+}
+
+.wsCardTop {
   display: flex;
   align-items: center;
-  gap: 11px;
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  color: var(--text);
-  transition: background-color 120ms ease, border-color 120ms ease;
+  gap: 12px;
+  min-width: 0;
 }
 
-.item:hover {
-  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
-}
-
-.item[data-active] {
-  background: var(--surface);
-  border-color: var(--border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-
-/* The active workspace's colour, as a short bar at the edge. */
-.item[data-active]::before {
-  content: "";
-  position: absolute;
-  left: -1px;
-  top: 10px;
-  bottom: 10px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--mark);
-}
-
-.itemText {
+.wsCardText {
   flex: 1;
   min-width: 0;
 }
 
-.itemName {
-  font-size: 13px;
-  font-weight: 550;
+.wsCardName {
+  font-size: 14px;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.item[data-active] .itemName {
-  font-weight: 650;
-}
-
-.itemMeta {
-  font-size: 11.5px;
+.wsCardMeta {
+  margin-top: 1px;
+  font-size: 12.5px;
   color: var(--text-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.newItem {
+.current {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--text);
+}
+
+.wsCardFoot {
   display: flex;
   align-items: center;
-  gap: 11px;
-  margin-top: 6px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px dashed var(--border-strong);
-  font-size: 13px;
-  font-weight: 550;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
   color: var(--text-2);
-  transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
 }
 
-.newItem:hover {
+.wsCardFoot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* Logo tile: the first letter, neutral. */
+.mark {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
   color: var(--text);
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+  user-select: none;
+}
+
+.mark[data-size="md"] {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+/* ------------------------------------------------------- sites heading --- */
+
+.hero {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-md);
+}
+
+.heroText {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.heroName {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heroSub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .newIcon {
@@ -160,309 +189,6 @@
   background: var(--surface-2);
 }
 
-/* Plan, as a small pill. Paid plans take the accent; Free stays neutral. */
-.planPill {
-  flex-shrink: 0;
-  padding: 1px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 10.5px;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-  line-height: 17px;
-  color: var(--text-2);
-  background: var(--surface-2);
-}
-
-.planPill[data-paid] {
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent-2);
-}
-
-/* ------------------------------------------------------------ monogram --- */
-
-.mark {
-  --mark: var(--mantine-color-dimmed);
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(
-    145deg,
-    color-mix(in oklab, var(--mark) 78%, #fff) 0%,
-    var(--mark) 55%,
-    color-mix(in oklab, var(--mark) 75%, #000) 100%
-  );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 2px rgba(0, 0, 0, 0.18);
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  user-select: none;
-}
-
-.markSm {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  font-size: 11.5px;
-}
-
-.markMd {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
-  font-size: 14px;
-}
-
-.markLg {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  font-size: 22px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 0 0 4px var(--surface),
-    0 10px 24px -12px color-mix(in oklab, var(--mark) 70%, transparent);
-}
-
-/* ---------------------------------------------------------------- hero --- */
-
-.hero {
-  --mark: var(--accent);
-  position: relative;
-}
-
-.heroCover {
-  height: 64px;
-  background:
-    radial-gradient(90% 180% at 0% 0%, color-mix(in srgb, var(--mark) 16%, transparent), transparent 65%),
-    linear-gradient(180deg, color-mix(in srgb, var(--mark) 6%, transparent), transparent);
-}
-
-.heroBody {
-  display: flex;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: var(--mantine-spacing-md);
-  margin-top: -32px;
-  padding: 0 var(--mantine-spacing-lg) 18px;
-}
-
-.heroText {
-  flex: 1 1 280px;
-  min-width: 0;
-}
-
-.heroTitleRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.heroName {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.heroMeta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-2);
-}
-
-.chip svg {
-  flex-shrink: 0;
-}
-
-.idButton {
-  font-family: var(--mantine-font-family-monospace);
-  font-size: 11.5px;
-  cursor: pointer;
-  transition: color 120ms ease, border-color 120ms ease;
-}
-
-.idButton:hover {
-  color: var(--text);
-  border-color: var(--border-strong);
-}
-
-.heroActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* --------------------------------------------------------------- usage --- */
-
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-@media (min-width: 75em) {
-  .tiles {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.tile {
-  --tone: var(--accent);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  padding: 14px 16px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  transition: border-color 150ms ease;
-}
-
-.tile:hover {
-  border-color: var(--border-strong);
-}
-
-.tile[data-tone="warn"] {
-  --tone: var(--mantine-color-yellow-6);
-}
-
-.tile[data-tone="danger"] {
-  --tone: var(--mantine-color-red-6);
-}
-
-.tileHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.tileIcon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--tone) 14%, transparent);
-  color: var(--tone);
-}
-
-.tileLabel {
-  flex: 1;
-  min-width: 0;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tilePct {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-2);
-  font-variant-numeric: tabular-nums;
-}
-
-.tile[data-tone="warn"] .tilePct,
-.tile[data-tone="danger"] .tilePct {
-  color: var(--tone);
-}
-
-.tileValue {
-  margin-top: 4px;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tileTotal {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: var(--text-2);
-}
-
-.meter {
-  height: 6px;
-  margin-top: 2px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--text-2) 14%, transparent);
-}
-
-.meter span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--tone);
-  transition: width 400ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.tileFoot {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-2);
-}
-
-.tile[data-tone="danger"] .tileFoot {
-  color: var(--tone);
-}
-
-.planTile .tileValue {
-  margin-bottom: 0;
-}
-
-.planLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-top: auto;
-  padding-top: 4px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--accent-2);
-  text-decoration: none;
-}
-
-.planLink:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 /* --------------------------------------------------------------- sites --- */
 
 .sitesHead {
@@ -471,30 +197,13 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--mantine-spacing-sm);
-  padding: 16px var(--mantine-spacing-lg);
+  padding: 10px var(--mantine-spacing-lg);
   border-bottom: 1px solid var(--border);
 }
 
-.sitesTitle {
-  min-width: 0;
-}
-
-.sitesTitleRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sectionTitle {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.sectionSub {
-  margin-top: 2px;
-  font-size: 12.5px;
+.sitesCount {
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text-2);
 }
 
@@ -693,27 +402,11 @@
   }
 }
 
-@media (max-width: 62em) {
-  .list {
-    position: static;
-  }
-
-  .listItems {
-    flex-direction: row;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-  }
-
-  .item,
-  .newItem {
-    width: auto;
-    flex-shrink: 0;
-    margin-top: 0;
-  }
-}
-
 @media (max-width: 48em) {
+  .search {
+    width: 100%;
+  }
+
   .siteRow {
     flex-wrap: wrap;
   }
