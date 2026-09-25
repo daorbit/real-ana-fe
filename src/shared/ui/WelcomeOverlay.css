@@ -117,16 +117,6 @@
   animation: welcome-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) 1.6s forwards;
 }
 
-/* The name in the same sweep of colour as the lettering above it. */
-.welcome-overlay__name {
-  background: linear-gradient(90deg, #22c55e, #eab308, #f97316, #ec4899, #38bdf8);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: welcome-sheen 4s linear infinite;
-}
-
 .welcome-overlay__sub {
   margin: 0;
   font-size: 15px;
@@ -190,10 +180,6 @@
   to   { transform: translate(-5vw, 6vh) scale(0.95); }
 }
 
-@keyframes welcome-sheen {
-  to { background-position: 200% 0; }
-}
-
 @keyframes welcome-run {
   from { transform: translateX(-100%); }
   to   { transform: translateX(260%); }
@@ -212,7 +198,6 @@
     animation-delay: 0s;
   }
   .welcome-overlay__glow span,
-  .welcome-overlay__name,
   .welcome-overlay__progress span {
     animation: none;
   }

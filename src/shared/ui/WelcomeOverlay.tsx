@@ -48,13 +48,7 @@ export function WelcomeOverlay({ name, onDone }: { name?: string; onDone: () => 
           aria-hidden
         />
         <h1 className="welcome-overlay__title">
-          {name ? (
-            <>
-              Welcome, <span className="welcome-overlay__name">{name}</span>.
-            </>
-          ) : (
-            "Welcome."
-          )}
+          {name ? `Welcome, ${name}.` : "Welcome."}
         </h1>
         <p className="welcome-overlay__sub">Your workspace is ready.</p>
         <div className="welcome-overlay__progress" aria-hidden>
