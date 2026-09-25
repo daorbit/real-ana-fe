@@ -1,20 +1,16 @@
 import {
-  Text, Group, Button, Switch, TextInput, Tooltip, ActionIcon,
-  Badge, Checkbox, SimpleGrid, Stack, Box, Center, ThemeIcon, Alert, Skeleton,
-  Divider, Tabs, Select,
+  Text, Button, Stack, Center, ThemeIcon, Skeleton, Tabs, Select,
 } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  RefreshCw, ExternalLink, Eye, ShieldCheck, Link2Off,
-  BarChart3, Search, Globe, Share2,
-} from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { ChevronRight, Globe, Link2Off, Share2 } from "lucide-react";
 import { SharePostModal } from "@/features/analytics/components/SharePostModal";
 import type { ShareCardStats } from "@/features/analytics/components/shareCard";
 import { AppShell } from "@/app/AppShell";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
-import { PageHeader, Section, Field, PageStack } from "@/shared/ui/Page";
+import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { RoleGate } from "@/features/billing/components/RoleGate";
 import {
@@ -23,11 +19,28 @@ import {
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace } from "@/features/workspace/context";
-import { num, timeAgo } from "@/shared/lib";
+import { timeAgo } from "@/shared/lib";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { SeoSharePanel } from "@/features/seo/components/SeoSharePanel";
 import { SaveBarProvider, useSaveRegistration } from "@/shared/ui/SaveBar";
 import type { SharePanels } from "@/shared/types";
+import { ShareLinkCard } from "@/features/analytics/components/share/ShareLinkCard";
+import { PanelSwitchList, type PanelGroup } from "@/features/analytics/components/share/PanelSwitchList";
+import { LayoutPreview } from "@/features/analytics/components/share/LayoutPreview";
+import { ShareFootnote } from "@/features/analytics/components/share/ShareFootnote";
+import classes from "@/features/analytics/components/share/Share.module.css";
+
+function SectionHead({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
+  return (
+    <div className={classes.sectionHead}>
+      <div className={classes.sectionIntro}>
+        <h2 className={classes.sectionTitle}>{title}</h2>
+        {description && <p className={classes.sectionDesc}>{description}</p>}
+      </div>
+      {actions && <div className={classes.sectionActions}>{actions}</div>}
+    </div>
+  );
+}
 import { useTitle } from "@/shared/lib/useTitle";
 
 // Panel `key` doubles as the i18n stem: label is `share.panel.<key>`, hint is
@@ -223,127 +236,71 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
     });
   };
 
+  const groups: PanelGroup<keyof SharePanels>[] = PANEL_GROUPS.map((g) => ({
+    heading: t(g.headingKey),
+    note: g.noteKey ? t(g.noteKey) : undefined,
+    panels: g.panels.map((p) => ({
+      key: p.key,
+      label: t(`share.panel.${p.key}`),
+      hint: t(`share.panel.${p.key}Hint`),
+    })),
+  }));
+
   if (isLoading) {
     return (
-      <PageStack maxWidth={1080}>
-        <Skeleton height={132} radius="lg" />
-        <Skeleton height={180} radius="lg" />
-      </PageStack>
+      <div className={classes.stack}>
+        <Skeleton height={132} radius="md" />
+        <Skeleton height={320} radius="md" />
+      </div>
     );
   }
 
   return (
-    <PageStack maxWidth={1080}>
-      <Section
-        title={t("share.publicLink")}
-        description={t("share.publicLinkDesc")}
-      >
-        <Field
-          label={t("share.publicDashboard")}
-          hint={enabled ? t("share.liveHint") : t("share.offHint")}
-          last={!enabled}
-        >
-          <Group justify="flex-end" gap="sm" wrap="nowrap">
-            {enabled && (
-              <Badge size="sm" variant="light" color="emerald" radius="sm">
-                {t("share.live")}
-              </Badge>
-            )}
-            <Switch
-              checked={enabled}
-              onChange={(e) => toggle(e.currentTarget.checked)}
-              color="emerald"
-              disabled={linkBusy}
-              aria-label={t("share.enableAria")}
-            />
-          </Group>
-        </Field>
-
-        {enabled && token && (
-          <>
-            {/* The link gets a full-width row of its own rather than a Field:
-                a share URL is long, and a truncated one can't be read back to
-                check it before sending. */}
-            <Box px="lg" py="md">
-              <Text size="sm" fw={500}>{t("share.link")}</Text>
-              <Text size="xs" c="dimmed" mt={3} mb="sm">
-                {t("share.linkWarning")}
-              </Text>
-              <Group gap="xs" wrap="nowrap">
-                <TextInput
-                  value={url}
-                  readOnly
-                  size="sm"
-                  style={{ flex: 1, minWidth: 0 }}
-                  styles={{ input: { fontFamily: "var(--mono, monospace)", fontSize: 13 } }}
-                  onFocus={(e) => e.currentTarget.select()}
-                  aria-label={t("share.linkAria")}
-                />
-                {/* Share, not Copy: copying is still one click away inside the
-                    composer, and the thing an owner does with a fresh public
-                    link is post it somewhere. */}
-                <Button
-                  size="sm"
-                  color="emerald"
-                  onClick={() => {
-                    trace(user?.id, "share_composer_opened", "share", "composer");
-                    setComposerOpen(true);
-                  }}
-                  leftSection={<Share2 size={14} />}
-                  style={{ flexShrink: 0 }}
-                >
-                  {t("share.share")}
-                </Button>
-                <Tooltip label={t("share.openNewTab")} withArrow>
-                  <ActionIcon
-                    component="a"
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    variant="default"
-                    size="lg"
-                    aria-label={t("share.openAria")}
-                  >
-                    <ExternalLink size={15} />
-                  </ActionIcon>
-                </Tooltip>
-              </Group>
-            </Box>
-            <Divider />
-
-            <Field
-              label={t("share.replaceLink")}
-              hint={t("share.replaceHint")}
-              last
-            >
-              <Group justify="flex-end">
-                <Button
-                  size="sm"
-                  variant="default"
-                  leftSection={<RefreshCw size={14} />}
-                  onClick={rotate}
-                  loading={linkBusy}
-                >
-                  {t("share.newLink")}
-                </Button>
-              </Group>
-            </Field>
-          </>
-        )}
-      </Section>
+    <div className={classes.stack}>
+      <ShareLinkCard
+        title={t("share.analyticsLinkTitle")}
+        description={enabled ? t("share.liveHint") : t("share.offHint")}
+        enabled={enabled}
+        busy={linkBusy}
+        onToggle={toggle}
+        url={enabled && token ? url : ""}
+        views={views}
+        lastViewedAt={data?.lastViewedAt}
+        onReplace={rotate}
+        primaryAction={
+          // Share, not Copy: copying is already on the link itself, and the
+          // thing an owner does with a fresh public link is post it somewhere.
+          <Button
+            onClick={() => {
+              trace(user?.id, "share_composer_opened", "share", "composer");
+              setComposerOpen(true);
+            }}
+            leftSection={<Share2 size={14} />}
+            style={{ flexShrink: 0 }}
+          >
+            {t("share.share")}
+          </Button>
+        }
+        offContent={
+          <div className={classes.offBody}>
+            <span>{t("share.offIntro")}</span>
+            <Button size="sm" onClick={() => toggle(true)} loading={linkBusy}>
+              {t("share.turnOn")}
+            </Button>
+          </div>
+        }
+      />
 
       {enabled && token && (
-        <>
-          {/* What the viewer sees is the owner's call — page paths in particular
-              can carry internal URLs they never meant to publish. */}
-          <Section
+        // What the viewer sees is the owner's call — page paths in particular
+        // can carry internal URLs they never meant to publish.
+        <section>
+          <SectionHead
             title={t("share.whatVisitorsSee")}
             description={t("share.whatVisitorsSeeDesc")}
             actions={
-              <Group gap="xs" wrap="nowrap">
-                <Text size="xs" c="dimmed">
-                  {t("share.onOf", { on: onCount, total: ALL_PANELS.length })}
-                </Text>
+              <>
+                <span>{t("share.onOf", { on: onCount, total: ALL_PANELS.length })}</span>
                 <Button
                   size="compact-xs"
                   variant="subtle"
@@ -362,75 +319,23 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
                 >
                   {t("share.none")}
                 </Button>
-              </Group>
+              </>
             }
-          >
-            <Stack gap={0}>
-              {PANEL_GROUPS.map((g, i) => (
-                <Box key={g.headingKey}>
-                  {i > 0 && <Divider />}
-                  <Box p="lg">
-                    <Text size="xs" fw={650} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.04em" }}>
-                      {t(g.headingKey)}
-                    </Text>
-                    {g.noteKey && (
-                      <Text size="xs" c="dimmed" mt={4}>
-                        {t(g.noteKey)}
-                      </Text>
-                    )}
-                    <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md" mt="md">
-                      {g.panels.map((p) => (
-                        <Checkbox
-                          key={p.key}
-                          size="sm"
-                          color="emerald"
-                          label={t(`share.panel.${p.key}`)}
-                          description={t(`share.panel.${p.key}Hint`)}
-                          checked={panels[p.key]}
-                          onChange={(e) => togglePanel(p.key, e.currentTarget.checked)}
-                        />
-                      ))}
-                    </SimpleGrid>
-                  </Box>
-                </Box>
-              ))}
-            </Stack>
-          </Section>
-
-          <Section title={t("share.activity")} description={t("share.activityDesc")}>
-            <Box p="lg">
-              <Group gap="sm" wrap="nowrap">
-                <ThemeIcon variant="light" color="emerald" radius="md" size="lg">
-                  <Eye size={17} />
-                </ThemeIcon>
-                <div>
-                  <Text fw={650}>
-                    {views === 1
-                      ? t("share.opensOne", { count: num(views) })
-                      : t("share.opensOther", { count: num(views) })}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {data?.lastViewedAt
-                      ? t("share.lastOpened", { ago: timeAgo(data.lastViewedAt) })
-                      : t("share.notOpened")}
-                  </Text>
-                </div>
-              </Group>
-            </Box>
-          </Section>
-        </>
+          />
+          <div className={classes.visibility}>
+            <PanelSwitchList groups={groups} values={panels} onToggle={togglePanel} />
+            <div className={classes.previewCol}>
+              <div className={classes.previewHead}>
+                <span className={classes.groupTitle}>{t("share.previewTitle")}</span>
+                <span className={classes.switchHint}>{t("share.previewDesc")}</span>
+              </div>
+              <LayoutPreview panels={panels} workspace={active?.name ?? ""} />
+            </div>
+          </div>
+        </section>
       )}
 
-      <Alert
-        variant="light"
-        color="gray"
-        icon={<ShieldCheck size={16} />}
-        title={t("share.neverShared")}
-      >
-        <Text size="sm">
-          {t("share.neverSharedBody")}
-        </Text>
-      </Alert>
+      <ShareFootnote title={t("share.neverShared")} body={t("share.neverSharedBody")} />
 
       {token && (
         <SharePostModal
@@ -448,7 +353,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
           }}
         />
       )}
-    </PageStack>
+    </div>
   );
 }
 
@@ -486,69 +391,41 @@ function AuditShareCard({
   url: string;
   score: number;
   createdAt: string;
-  /** The first card starts open so the controls are visible without a click. */
+  /** Starts open when it is the only audit, so its controls need no click. */
   defaultOpen?: boolean;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(defaultOpen);
   const { data } = useGetSeoShareQuery({ workspaceId, siteId, reportId });
   const live = Boolean(data?.enabled);
+  const tone = `var(--mantine-color-${scoreColor(score)}-6)`;
 
   return (
-    <Box
-      style={{
-        border: "1px solid var(--mantine-color-default-border)",
-        borderRadius: "var(--mantine-radius-md)",
-        overflow: "hidden",
-      }}
-    >
-      <Group justify="space-between" wrap="nowrap" p="md" gap="sm">
-        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-          <Badge size="lg" variant="light" color={scoreColor(score)} radius="sm">
-            {score}
-          </Badge>
-          <div style={{ minWidth: 0 }}>
-            <Text size="sm" fw={600} truncate>
-              {prettyUrl(url)}
-            </Text>
-            <Text size="xs" c="dimmed">
-              {t("share.auditedAgo", { when: timeAgo(createdAt) })}
-            </Text>
-          </div>
-        </Group>
-
-        <Group gap="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
-          <Badge
-            size="sm"
-            variant={live ? "light" : "outline"}
-            color={live ? "emerald" : "gray"}
-            radius="sm"
-          >
-            {live ? t("share.live") : t("share.off")}
-          </Badge>
-          <Button
-            size="compact-sm"
-            variant={open ? "light" : "default"}
-            onClick={() => setOpen((o) => !o)}
-          >
-            {open ? t("share.closeCard") : t("share.manage")}
-          </Button>
-        </Group>
-      </Group>
+    <div className={classes.auditRow}>
+      <button type="button" className={classes.auditHead} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <span
+          className={classes.score}
+          style={{ color: tone, background: `color-mix(in srgb, ${tone} 14%, transparent)` }}
+        >
+          {score}
+        </span>
+        <span className={classes.auditText}>
+          <span className={classes.auditUrl}>{prettyUrl(url)}</span>
+          <span className={classes.auditMeta}>{t("share.auditedAgo", { when: timeAgo(createdAt) })}</span>
+        </span>
+        <span className={classes.statusPill} data-live={live || undefined}>
+          <span className={classes.statusDot} />
+          {live ? t("share.live") : t("share.off")}
+        </span>
+        <ChevronRight size={16} className={classes.chevron} data-open={open || undefined} />
+      </button>
 
       {/* Kept mounted while collapsed so an unsaved draft and its Save-bar
-          registration survive closing the card. */}
-      <Box
-        p="lg"
-        display={open ? undefined : "none"}
-        style={{
-          borderTop: "1px solid var(--mantine-color-default-border)",
-          background: "var(--mantine-color-body)",
-        }}
-      >
+          registration survive closing the row. */}
+      <div className={classes.auditBody} style={{ display: open ? undefined : "none" }}>
         <SeoSharePanel workspaceId={workspaceId} siteId={siteId} reportId={reportId} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 
@@ -584,65 +461,61 @@ function SeoShareTab({ workspaceId }: { workspaceId: string }) {
 
   if (sitesLoading) {
     return (
-      <PageStack maxWidth={1080}>
-        <Skeleton height={80} radius="lg" />
-        <Skeleton height={200} radius="lg" />
-      </PageStack>
+      <div className={classes.stack}>
+        <Skeleton height={80} radius="md" />
+        <Skeleton height={200} radius="md" />
+      </div>
     );
   }
 
   if (!sites.length) {
     return (
-      <PageStack maxWidth={1080}>
-        <Center py={48}>
-          <Stack align="center" gap={8} maw={400}>
-            <ThemeIcon variant="light" color="gray" size={48} radius="md">
-              <Globe size={22} />
-            </ThemeIcon>
-            <Text fw={650} mt={4}>{t("share.seoNoSitesTitle")}</Text>
-            <Text c="dimmed" size="sm" ta="center">
-              {t("share.seoNoSitesBody")}
-            </Text>
-          </Stack>
-        </Center>
-      </PageStack>
+      <Center py={48}>
+        <Stack align="center" gap={8} maw={400}>
+          <ThemeIcon variant="light" color="gray" size={48} radius="md">
+            <Globe size={22} />
+          </ThemeIcon>
+          <Text fw={650} mt={4}>{t("share.seoNoSitesTitle")}</Text>
+          <Text c="dimmed" size="sm" ta="center">
+            {t("share.seoNoSitesBody")}
+          </Text>
+        </Stack>
+      </Center>
     );
   }
 
   return (
-    <PageStack maxWidth={1080}>
-      <Section
-        title={t("share.seoSectionTitle")}
-        description={t("share.seoSectionDesc")}
-        actions={
-          sites.length > 1 && (
-            <Select
-              data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-              value={activeSiteId}
-              onChange={(v) => v && setSiteId(v)}
-              allowDeselect={false}
-              size="sm"
-              w={220}
-              leftSection={<Globe size={15} />}
-              radius="md"
-              comboboxProps={{ radius: "md" }}
-            />
-          )
-        }
-      >
+    <div className={classes.stack}>
+      <section>
+        <SectionHead
+          title={t("share.seoSectionTitle")}
+          description={t("share.seoSectionDesc")}
+          actions={
+            sites.length > 1 && (
+              <Select
+                data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
+                value={activeSiteId}
+                onChange={(v) => v && setSiteId(v)}
+                allowDeselect={false}
+                size="sm"
+                w={220}
+                leftSection={<Globe size={15} />}
+                aria-label="Site"
+              />
+            )
+          }
+        />
         {reportsLoading ? (
-          <Box p="lg">
-            <Skeleton height={120} radius="md" />
-          </Box>
+          <Skeleton height={120} radius="md" />
         ) : latestPerUrl.length === 0 ? (
-          <Box p="lg">
-            <Text size="sm" c="dimmed">
+          <div className={classes.card}>
+            <Text size="sm" c="dimmed" p="lg">
               {t("share.seoNoAudits")}
             </Text>
-          </Box>
+          </div>
         ) : (
-          <Stack gap="md" p="lg">
-            {latestPerUrl.map((r, i) => (
+          <div className={classes.card}>
+            {latestPerUrl.map((r) => (
               <AuditShareCard
                 key={r._id}
                 workspaceId={workspaceId}
@@ -651,24 +524,15 @@ function SeoShareTab({ workspaceId }: { workspaceId: string }) {
                 url={r.url}
                 score={r.score}
                 createdAt={r.createdAt}
-                defaultOpen={i === 0}
+                defaultOpen={latestPerUrl.length === 1}
               />
             ))}
-          </Stack>
+          </div>
         )}
-      </Section>
+      </section>
 
-      <Alert
-        variant="light"
-        color="gray"
-        icon={<ShieldCheck size={16} />}
-        title={t("share.seoNeverTitle")}
-      >
-        <Text size="sm">
-          {t("share.seoNeverBody")}
-        </Text>
-      </Alert>
-    </PageStack>
+      <ShareFootnote title={t("share.seoNeverTitle")} body={t("share.seoNeverBody")} />
+    </div>
   );
 }
 
@@ -697,6 +561,20 @@ export default function Share() {
   useTitle("Public dashboard");
   const { t } = useTranslation();
   const { active } = useWorkspace();
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") === "seo" ? "seo" : "analytics";
+  const { data: share } = useGetShareQuery(active?._id ?? "", { skip: !active });
+
+  const setTab = (next: string | null) =>
+    setParams(
+      (prev) => {
+        const out = new URLSearchParams(prev);
+        if (next === "seo") out.set("tab", "seo");
+        else out.delete("tab");
+        return out;
+      },
+      { replace: true },
+    );
 
   return (
     <AppShell>
@@ -708,14 +586,19 @@ export default function Share() {
       />
       {active ? (
         <RoleGate minimum="admin" what="Only admins can manage public sharing.">
-          <Tabs key={active._id} defaultValue="analytics" keepMounted={false}>
-            <Tabs.List mb="xl">
-              <Tabs.Tab value="analytics" leftSection={<BarChart3 size={15} />}>
-                {t("share.tabAnalytics")}
+          <Tabs
+            key={active._id}
+            value={tab}
+            onChange={setTab}
+            keepMounted={false}
+            classNames={{ list: classes.tabList, tab: classes.tab }}
+          >
+            <Tabs.List>
+              <Tabs.Tab value="analytics">
+                {t("share.tabAnalyticsLong")}
+                {share?.enabled && <span className={classes.tabDot} aria-label={t("share.live")} />}
               </Tabs.Tab>
-              <Tabs.Tab value="seo" leftSection={<Search size={15} />}>
-                {t("share.tabSeo")}
-              </Tabs.Tab>
+              <Tabs.Tab value="seo">{t("share.tabSeoLong")}</Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="analytics">
