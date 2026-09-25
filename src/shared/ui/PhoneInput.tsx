@@ -45,84 +45,91 @@ export function PhoneInput({
 
   return (
     <div>
+      {/* Mantine's own label/description classes, so this reads exactly like
+          the TextInputs around it, whatever styles the page gives those. */}
       {label && (
-        <Text size="sm" fw={500} mb={2}>
+        <Text component="div" size="sm" fw={500} className="mantine-InputWrapper-label">
           {label}
         </Text>
       )}
       {description && (
-        <Text size="xs" c="dimmed" mb={8}>
+        <Text size="xs" c="dimmed" mb={6} className="mantine-InputWrapper-description">
           {description}
         </Text>
       )}
-      <Group gap="xs" align="flex-start" wrap="nowrap">
-        <Combobox
-          store={combobox}
-          width={280}
-          position="bottom-start"
-          onOptionSubmit={(iso) => {
-            const hit = DIAL_CODES.find((c) => c.iso === iso);
-            if (hit) onCountry(hit);
-            setSearch("");
-            combobox.closeDropdown();
-          }}
-        >
-          <Combobox.Target>
-            <UnstyledButton
-              className="mantine-Input-input"
-              onClick={() => combobox.toggleDropdown()}
-              aria-label="Country code"
-              style={{
-                width: 84,
-                height: "var(--input-height, 2.625rem)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0 10px",
-                fontWeight: 500,
-                borderRadius: "var(--mantine-radius-default)",
-              }}
-            >
-              +{country.dial}
-              <ChevronDown size={14} style={{ color: "var(--muted)", flexShrink: 0 }} />
-            </UnstyledButton>
-          </Combobox.Target>
+      {/* One field: the country code sits inside it, behind a divider, so
+          the pair reads as a single phone number rather than two controls. */}
+      <TextInput
+        placeholder="98765 43210"
+        inputMode="tel"
+        autoComplete="tel-national"
+        value={local}
+        error={error}
+        onChange={(e) => onLocal(e.currentTarget.value.replace(/[^\d\s]/g, ""))}
+        data-autofocus={autoFocus || undefined}
+        leftSectionWidth={78}
+        leftSectionPointerEvents="all"
+        leftSection={
+          <Combobox
+            store={combobox}
+            width={280}
+            position="bottom-start"
+            onOptionSubmit={(iso) => {
+              const hit = DIAL_CODES.find((c) => c.iso === iso);
+              if (hit) onCountry(hit);
+              setSearch("");
+              combobox.closeDropdown();
+            }}
+          >
+            <Combobox.Target>
+              <UnstyledButton
+                onClick={() => combobox.toggleDropdown()}
+                aria-label={`Country code: +${country.dial}`}
+                style={{
+                  alignSelf: "stretch",
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 4,
+                  padding: "0 10px 0 12px",
+                  borderRight: "1px solid var(--mantine-color-default-border)",
+                  fontSize: "var(--mantine-font-size-sm)",
+                  fontWeight: 500,
+                  color: "var(--mantine-color-text)",
+                }}
+              >
+                +{country.dial}
+                <ChevronDown size={13} style={{ color: "var(--muted)", flexShrink: 0 }} />
+              </UnstyledButton>
+            </Combobox.Target>
 
-          <Combobox.Dropdown>
-            <Combobox.Search
-              value={search}
-              onChange={(e) => setSearch(e.currentTarget.value)}
-              placeholder="Search country"
-              leftSection={<Search size={14} style={{ color: "var(--muted)" }} />}
-            />
-            <Combobox.Options mah={260} style={{ overflowY: "auto" }}>
-              {results.length === 0 ? (
-                <Combobox.Empty>No matches</Combobox.Empty>
-              ) : (
-                results.map((c) => (
-                  <Combobox.Option value={c.iso} key={c.iso} active={c.iso === country.iso}>
-                    <Group gap={8} wrap="nowrap" justify="space-between" w="100%">
-                      <Text size="sm">{nameFor(c.iso)}</Text>
-                      <Text size="sm" c="dimmed" fw={500}>+{c.dial}</Text>
-                    </Group>
-                  </Combobox.Option>
-                ))
-              )}
-            </Combobox.Options>
-          </Combobox.Dropdown>
-        </Combobox>
-        <TextInput
-          size="md"
-          style={{ flex: 1 }}
-          placeholder="98765 43210"
-          inputMode="tel"
-          autoComplete="tel-national"
-          value={local}
-          error={error}
-          onChange={(e) => onLocal(e.currentTarget.value.replace(/[^\d\s]/g, ""))}
-          data-autofocus={autoFocus || undefined}
-        />
-      </Group>
+            <Combobox.Dropdown>
+              <Combobox.Search
+                value={search}
+                onChange={(e) => setSearch(e.currentTarget.value)}
+                placeholder="Search country"
+                leftSection={<Search size={14} style={{ color: "var(--muted)" }} />}
+              />
+              <Combobox.Options mah={260} style={{ overflowY: "auto" }}>
+                {results.length === 0 ? (
+                  <Combobox.Empty>No matches</Combobox.Empty>
+                ) : (
+                  results.map((c) => (
+                    <Combobox.Option value={c.iso} key={c.iso} active={c.iso === country.iso}>
+                      <Group gap={8} wrap="nowrap" justify="space-between" w="100%">
+                        <Text size="sm">{nameFor(c.iso)}</Text>
+                        <Text size="sm" c="dimmed" fw={500}>+{c.dial}</Text>
+                      </Group>
+                    </Combobox.Option>
+                  ))
+                )}
+              </Combobox.Options>
+            </Combobox.Dropdown>
+          </Combobox>
+        }
+        styles={{ section: { alignItems: "stretch" }, input: { paddingLeft: 90 } }}
+      />
     </div>
   );
 }

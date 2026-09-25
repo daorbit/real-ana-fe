@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Button, Group, Text, TextInput, Stack, Avatar, ActionIcon,
+  Button, TextInput, Stack, Avatar, Loader, UnstyledButton,
 } from "@mantine/core";
-import { ArrowRight, Camera, Trash2, UserRound } from "lucide-react";
+import { ArrowRight, Trash2, Upload, UserRound } from "lucide-react";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { PhoneInput, joinNumber, localNumberError } from "@/shared/ui/PhoneInput";
@@ -120,120 +120,118 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <Stack gap="xl">
- 
-      <Group gap="lg" wrap="nowrap">
-        <div style={{ position: "relative" }}>
-          <Avatar
-            src={user?.avatarUrl || undefined}
-            size={76}
-            radius="50%"
-            color="emerald"
-          >
-            <UserRound size={30} />
-          </Avatar>
-          <ActionIcon
-            size="sm"
-            radius="xl"
-            variant="filled"
-            loading={avatarBusy}
+    <Stack gap="lg">
+      <div className={onb.card}>
+        <div className={onb.photoRow}>
+          <UnstyledButton
             onClick={() => fileInput.current?.click()}
-            style={{ position: "absolute", right: 0, bottom: 0 }}
+            disabled={avatarBusy}
             aria-label="Upload a photo"
+            style={{ borderRadius: "50%", flexShrink: 0 }}
           >
-            <Camera size={13} />
-          </ActionIcon>
-        </div>
+            <Avatar src={user?.avatarUrl || undefined} size={56} radius="50%" color="emerald">
+              {avatarBusy ? <Loader size="xs" /> : <UserRound size={24} />}
+            </Avatar>
+          </UnstyledButton>
 
-        <div style={{ minWidth: 0 }}>
-          <Text size="sm" fw={500}>Profile photo</Text>
-          <Text size="xs" c="dimmed" mt={2}>
-            Optional. JPG or PNG, up to 3MB.
-          </Text>
-          <Group gap="xs" mt={6}>
-            <AvatarPresetPicker opened={presetOpen} onClose={() => setPresetOpen(false)} onPick={(src) => void pickPreset(src)}>
+          <div className={onb.photoText}>
+            <div className={onb.photoTitle}>Profile photo</div>
+            <div className={onb.photoHint}>Optional · JPG or PNG, up to 3MB</div>
+            <div className={onb.photoActions}>
               <Button
-                size="compact-xs"
+                size="compact-sm"
                 variant="default"
-                onClick={() => setPresetOpen((v) => !v)}
+                leftSection={<Upload size={13} />}
+                onClick={() => fileInput.current?.click()}
                 disabled={avatarBusy}
               >
-                Choose an avatar
+                Upload
               </Button>
-            </AvatarPresetPicker>
-            {user?.avatarUrl && (
-              <Button
-                size="compact-xs"
-                variant="subtle"
-                color="red"
-                leftSection={<Trash2 size={12} />}
-                onClick={clearAvatar}
-                disabled={avatarBusy}
-              >
-                Remove
-              </Button>
-            )}
-          </Group>
+              <AvatarPresetPicker opened={presetOpen} onClose={() => setPresetOpen(false)} onPick={(src) => void pickPreset(src)}>
+                <Button
+                  size="compact-sm"
+                  variant="subtle"
+                  color="gray"
+                  onClick={() => setPresetOpen((v) => !v)}
+                  disabled={avatarBusy}
+                >
+                  Choose an avatar
+                </Button>
+              </AvatarPresetPicker>
+              {user?.avatarUrl && (
+                <Button
+                  size="compact-sm"
+                  variant="subtle"
+                  color="red"
+                  leftSection={<Trash2 size={12} />}
+                  onClick={clearAvatar}
+                  disabled={avatarBusy}
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-      </Group>
 
-      <input
-        ref={fileInput}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(e) => pickAvatar(e.currentTarget.files?.[0] ?? null)}
-      />
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => pickAvatar(e.currentTarget.files?.[0] ?? null)}
+        />
 
-      <Group grow align="flex-start">
-        <TextInput
-          size="md"
-          label="First name"
-          placeholder="Ada"
-          value={firstName}
-          error={firstError}
-          onChange={(e) => {
-            setFirstName(e.currentTarget.value);
-            setFirstError(null);
+        <div className={onb.cardDivider} />
+
+        <div className={onb.cardRow}>
+          <TextInput
+            label="First name"
+            placeholder="Ada"
+            value={firstName}
+            error={firstError}
+            onChange={(e) => {
+              setFirstName(e.currentTarget.value);
+              setFirstError(null);
+            }}
+          />
+          <TextInput
+            label="Last name"
+            placeholder="Lovelace"
+            value={lastName}
+            onChange={(e) => setLastName(e.currentTarget.value)}
+          />
+        </div>
+
+        <PhoneInput
+          autoFocus
+          country={country}
+          onCountry={setCountry}
+          local={local}
+          onLocal={(v) => {
+            setLocal(v);
+            setPhoneError(null);
           }}
+          error={phoneError}
+          description="Used for WhatsApp report delivery. We never share it."
         />
-        <TextInput
-          size="md"
-          label="Last name"
-          placeholder="Lovelace"
-          value={lastName}
-          onChange={(e) => setLastName(e.currentTarget.value)}
-        />
-      </Group>
-
-      <PhoneInput
-        autoFocus
-        country={country}
-        onCountry={setCountry}
-        local={local}
-        onLocal={(v) => {
-          setLocal(v);
-          setPhoneError(null);
-        }}
-        error={phoneError}
-        description="Used for WhatsApp report delivery. We never share it."
-      />
-
- 
+      </div>
 
       {/* Rides the foot of the screen on a phone, like every other step's
           actions — see `.actionsBar` in Onboarding.module.css. */}
-      <div className={onb.actionsBar}>
-        <Button
-          className={`auth-btn ${onb.actionsPrimary}`}
-          size="md"
-          fullWidth
-          loading={saving}
-          onClick={submit}
-          rightSection={<ArrowRight size={16} />}
-        >
-          Continue
-        </Button>
+      <div className={`${onb.actionsBar} ${onb.actions}`}>
+        <span className={onb.actionsBack} />
+        <div className={onb.actionsMain}>
+          <Button
+            className={`auth-btn ${onb.actionsPrimary}`}
+            size="sm"
+            loading={saving}
+            onClick={submit}
+            rightSection={<ArrowRight size={15} />}
+          >
+            Continue
+          </Button>
+        </div>
       </div>
 
       <AvatarCropper

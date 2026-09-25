@@ -1,6 +1,6 @@
 import { Select, Text, TextInput } from "@mantine/core";
 import { StepFooter } from "./StepFooter";
-import s from "./SiteStep.module.css";
+import onb from "./Onboarding.module.css";
 
 export const SITE_PURPOSES = [
   "Company website", "Blog", "SaaS product", "E-commerce store",
@@ -37,11 +37,9 @@ export function SiteStepBody({
   onPurposeChange: (v: string) => void;
 }) {
   return (
-    <div className={s.root}>
-      <section className={s.section}>
-        <div className={s.fields}>
+    <div className={onb.card}>
+        <div className={onb.cardRow}>
           <TextInput
-            size="md"
             label="Site name"
             placeholder="Marketing site"
             value={siteName}
@@ -51,7 +49,6 @@ export function SiteStepBody({
           />
 
           <TextInput
-            size="md"
             label="Domain"
             placeholder="yoursite.com"
             leftSection={
@@ -67,7 +64,6 @@ export function SiteStepBody({
         </div>
 
         <Select
-          size="md"
           label="What's this site for?"
           description="Optional — we use it to tailor the next screens"
           placeholder="Choose one"
@@ -75,9 +71,7 @@ export function SiteStepBody({
           value={purpose || null}
           onChange={(v) => onPurposeChange(v ?? "")}
           clearable
-          mt="md"
         />
-      </section>
     </div>
   );
 }

@@ -44,15 +44,13 @@
 .grid {
   flex: 1;
   min-height: 0;
-  display: grid;
-  /* The controls keep enough width for three mode buttons and two preset
-     cards per row; the preview takes what is left. */
-  grid-template-columns: minmax(380px, 1fr) minmax(320px, 1.35fr);
-  gap: 2.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .controls {
   min-width: 0;
+  flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 4px 16px 4px 4px;
@@ -60,44 +58,19 @@
   scrollbar-width: thin;
   scrollbar-color: var(--auth-line) transparent;
 }
+/* Appearance only: a readable column rather than controls spread edge to edge.
+   The plan step shares `.controls` and keeps the full width for its grid. */
+.narrow {
+  width: 100%;
+  max-width: 640px;
+}
+
 .controls::-webkit-scrollbar { width: 8px; }
 .controls::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: var(--auth-line);
 }
 .controls::-webkit-scrollbar-thumb:hover { background: var(--auth-line-strong); }
-
-.aside {
-  min-width: 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.caption {
-  flex-shrink: 0;
-  text-align: center;
-  margin-top: 0.75rem;
-}
-
-@media (max-width: 62em) {
-  .grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  .controls {
-    overflow: visible;
-    margin: 0;
-    padding: 0 0 2.5rem;
-  }
-  .aside {
-    order: -1;
-    min-height: 260px;
-    padding-bottom: 0;
-  }
-}
 
 @media (max-width: 48em) {
   .page { padding: 1.25rem 1.1rem 0; }
@@ -116,9 +89,9 @@
   /* The header's back chevron covers this on a phone. */
   .back { display: none; }
   .primary {
-    height: 52px;
-    border-radius: 14px;
-    font-size: 1rem;
+    height: 44px;
+    border-radius: 10px;
+    font-size: 0.95rem;
   }
   .actionsRow { border-top: 0; }
 }

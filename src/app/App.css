@@ -1828,6 +1828,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: 10px;
   height: 46px;
 }
+/* Setup's forms sit in a card with several fields to a screen, so they use
+   the regular field height rather than the sign-in page's tall one. */
+.onb-form .mantine-InputWrapper-root .mantine-Input-input {
+  height: 40px;
+  border-radius: 9px;
+  font-size: var(--mantine-font-size-sm);
+}
 .auth-form .mantine-InputWrapper-root .mantine-Input-input::placeholder,
 .onb-form .mantine-InputWrapper-root .mantine-Input-input::placeholder {
   color: var(--auth-ink-ghost);
