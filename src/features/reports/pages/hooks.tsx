@@ -184,9 +184,9 @@ export function useReportDialog(opts: {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [emailInput, setEmailInput] = useState("");
   const [tab, setTab] = useState<string>(TAB_ORDER[0]);
-
-  const tabIndex = Math.max(0, TAB_ORDER.indexOf(tab));
-  const isLastTab = tabIndex === TAB_ORDER.length - 1;
+  /** Bumped on every failed save, so the editor scrolls to the section even
+   *  when it is the one it scrolled to last time. */
+  const [focusTick, setFocusTick] = useState(0);
 
   const openNew = () => {
     setEditingId(null);
@@ -223,11 +223,12 @@ export function useReportDialog(opts: {
     setDraft({ ...draft, recipients: draft.recipients.filter((r) => r !== email) });
 
   const submit = async () => {
-    // Each check names its tab: with the fields split across three panels, a
-    // message about a control the user cannot currently see reads as the save
-    // silently failing. Switch to the tab, then say what is wrong on it.
+    // Each check names its section: a message about a control scrolled out of
+    // view reads as the save silently failing. Scroll to it, then say what is
+    // wrong there.
     const fail = (tabName: string, message: string) => {
       setTab(tabName);
+      setFocusTick((n) => n + 1);
       notify.error(message);
     };
 
@@ -265,7 +266,7 @@ export function useReportDialog(opts: {
   return {
     opened, close: () => setOpened(false), openNew, openEdit,
     editingId, draft, setDraft, emailInput, setEmailInput,
-    tab, setTab, tabIndex, isLastTab,
+    tab, focusTick,
     addEmail, removeEmail, submit,
   };
 }
