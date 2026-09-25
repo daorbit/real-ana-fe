@@ -42,7 +42,7 @@ export function WorkspaceSwitcher({ workspaces, activeId, onSelect, onCreate }: 
               aria-current={isActive ? "true" : undefined}
               onClick={() => onSelect(w._id)}
             >
-              <WorkspaceMark name={w.name} />
+              <WorkspaceMark />
               <span className={classes.tabText}>
                 <span className={classes.tabName}>{w.name}</span>
                 <span className={classes.tabMeta}>

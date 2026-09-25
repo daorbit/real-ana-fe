@@ -1,13 +1,13 @@
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { ActionIcon, Box, Button, Group, Menu, TextInput } from "@mantine/core";
 import {
-  CalendarDays, Check, Copy, Crown, Globe, MoreHorizontal, Pencil, Plus, ShieldCheck, Trash2, Users, X,
+  CalendarDays, Check, Copy, Globe, MoreHorizontal, Pencil, Plus, ShieldCheck, Trash2, Users, X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { shortDate } from "@/shared/lib";
 import type { Workspace } from "@/shared/types";
-import { workspaceHue } from "@/features/workspace/workspaceMarks";
+import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { WorkspaceMark } from "./WorkspaceMark";
 import { roleLabel } from "./format";
 import classes from "./Workspaces.module.css";
@@ -61,15 +61,10 @@ export function WorkspaceHero({
   };
 
   return (
-    <Box
-      component="header"
-      className={classes.hero}
-      style={{ "--hue": workspaceHue(workspace.name) } as CSSProperties}
-    >
-      <div className={classes.heroGlow} aria-hidden />
+    <Box component="header" className={classes.hero}>
 
       <Box className={classes.heroTop}>
-        <WorkspaceMark name={workspace.name} size="lg" />
+        <WorkspaceMark size="lg" />
 
         <Box className={classes.heroText}>
           <div className={classes.heroEyebrow}>{t("workspaces.currentWorkspace", "Current workspace")}</div>
@@ -112,8 +107,8 @@ export function WorkspaceHero({
               {roleLabel(workspace.role)}
             </span>
             {billing?.plan?.name && (
-              <span className={classes.chip} data-tone={expired ? "warn" : "plan"}>
-                <Crown size={13} />
+              <span className={classes.chip} data-tone={expired ? "warn" : undefined}>
+                <PlanIcon slug={billing.plan.slug} size={13} uid="ws-hero-chip" />
                 {billing.plan.name}
                 {expired ? ` · ${t("workspaces.expired", "Expired")}` : ""}
               </span>
@@ -179,7 +174,10 @@ export function WorkspaceHero({
             </div>
           )}
         </Stat>
-        <Stat icon={<Crown size={14} />} label={t("workspaces.statPlan", "Plan")}>
+        <Stat
+          icon={billing?.plan ? <PlanIcon slug={billing.plan.slug} size={14} uid="ws-hero-stat" /> : null}
+          label={t("workspaces.statPlan", "Plan")}
+        >
           <span className={classes.statValue}>{billing?.plan?.name ?? "—"}</span>
           <span className={classes.statHint}>
             {expired

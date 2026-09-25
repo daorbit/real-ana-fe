@@ -1,20 +1,13 @@
-import type { CSSProperties } from "react";
-import { workspaceHue, workspaceInitial } from "@/features/workspace/workspaceMarks";
+import { FolderClosed } from "lucide-react";
 import classes from "./Workspaces.module.css";
 
-/**
- * A workspace's logo tile: its first letter on a gradient in the workspace's
- * own hue, so each workspace is recognisable at a glance.
- */
-export function WorkspaceMark({ name, size = "sm" }: { name: string; size?: "sm" | "md" | "lg" }) {
+const ICON = { sm: 15, md: 18, lg: 26 } as const;
+
+/** A workspace's tile: a folder, in the page's own neutral colours. */
+export function WorkspaceMark({ size = "sm" }: { size?: "sm" | "md" | "lg" }) {
   return (
-    <span
-      aria-hidden
-      className={classes.mark}
-      data-size={size}
-      style={{ "--hue": workspaceHue(name) } as CSSProperties}
-    >
-      {workspaceInitial(name)}
+    <span aria-hidden className={classes.mark} data-size={size}>
+      <FolderClosed size={ICON[size]} strokeWidth={1.8} />
     </span>
   );
 }
