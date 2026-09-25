@@ -18,7 +18,7 @@ export function UsageControls({ keys, windowDays, onWindowChange, focusKeyId, on
   const { t } = useTranslation();
 
   return (
-    <Group gap="xs" wrap="wrap" className={classes.usageControls}>
+    <Group gap="xs" wrap="wrap">
       <Select
         size="xs"
         className={classes.keySelect}
