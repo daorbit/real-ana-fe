@@ -10,14 +10,11 @@ export function HighlightedCode({ code, lang }: { code: string; lang: HighlightL
         <code>
           {lines.map((line, i) => (
             <div className={classes.line} key={i}>
-              <span className={classes.ln}>{i + 1}</span>
-              <span className={classes.code}>
-                {highlightLine(line, lang).map((t, j) => (
-                  <span key={j} className={classes[t.kind]}>
-                    {t.text}
-                  </span>
-                ))}
-              </span>
+              {highlightLine(line, lang).map((t, j) => (
+                <span key={j} className={classes[t.kind]}>
+                  {t.text}
+                </span>
+              ))}
             </div>
           ))}
         </code>

@@ -1,70 +1,110 @@
 import { useMemo } from "react";
-import { Anchor, Box, Code, Text } from "@mantine/core";
-import { ArrowUpRight, Rocket } from "lucide-react";
+import { Button } from "@mantine/core";
+import { ArrowUpRight, BookOpen, FlaskConical, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
-  DOCS_URL, KEY_ENV_VAR, SAMPLE_RESPONSE, apiBaseUrl, quickStartSnippets,
+  DOCS_URL, KEY_ENV_VAR, SAMPLE_RESPONSE, apiBaseUrl, playgroundUrl, quickStartSnippets,
 } from "../../developers";
 import { CodeWindow } from "./CodeWindow";
-import { PanelHeader } from "./PanelHeader";
+import { CopyField, CopyInline } from "./CopyField";
+import { SectionHeader } from "./SectionHeader";
 import classes from "./Developers.module.css";
 
-export function QuickStartPanel() {
+interface Props {
+  workspaceId: string;
+  onCreateKey: () => void;
+}
+
+export function QuickStartPanel({ workspaceId, onCreateKey }: Props) {
   const { t } = useTranslation();
   const snippets = useMemo(() => quickStartSnippets(apiBaseUrl()), []);
 
+  const exportLine = `export ${KEY_ENV_VAR}="qk_..."`;
+
   const steps = [
-    { title: t("developers.stepCreateT"), body: t("developers.stepCreateD") },
+    {
+      title: t("developers.stepCreateT"),
+      body: t("developers.stepCreateD"),
+      extra: (
+        <Button size="xs" variant="default" leftSection={<Plus size={13} />} onClick={onCreateKey}>
+          {t("developers.createKey")}
+        </Button>
+      ),
+    },
     {
       title: t("developers.stepStoreT"),
-      body: (
-        <>
-          {t("developers.stepStoreD")} <Code>{KEY_ENV_VAR}</Code>
-        </>
+      body: t("developers.stepStoreEnv"),
+      extra: (
+        <div className={classes.inlineCode}>
+          <code>{exportLine}</code>
+          <CopyInline value={exportLine} />
+        </div>
       ),
     },
     { title: t("developers.stepCallT"), body: t("developers.stepCallD") },
   ];
 
-  return (
-    <Box className={classes.panel}>
-      <PanelHeader
-        icon={Rocket}
-        title={t("developers.quickStartTitle")}
-        description={t("developers.quickStartDesc")}
-        action={
-          <Anchor
-            href={DOCS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            size="sm"
-            fw={500}
-            className={classes.docsLink}
-          >
-            {t("developers.fullReference")}
-            <ArrowUpRight size={14} />
-          </Anchor>
-        }
-      />
+  const resources = [
+    {
+      icon: BookOpen,
+      title: t("developers.fullReference"),
+      body: t("developers.docsDesc"),
+      href: DOCS_URL,
+    },
+    {
+      icon: FlaskConical,
+      title: t("developers.playgroundTitle"),
+      body: t("developers.playgroundShort"),
+      href: playgroundUrl(),
+    },
+  ];
 
-      <Box className={classes.quickGrid}>
-        <ol className={classes.steps}>
-          {steps.map((s, i) => (
-            <li key={i} className={classes.step}>
-              <span className={classes.stepNum}>{i + 1}</span>
-              <Box>
-                <Text size="sm" fw={600}>
-                  {s.title}
-                </Text>
-                <Text size="xs" c="dimmed" mt={3} lh={1.55}>
-                  {s.body}
-                </Text>
-              </Box>
-            </li>
-          ))}
-        </ol>
-        <CodeWindow snippets={snippets} method="GET" path="/v1/projects" response={SAMPLE_RESPONSE} />
-      </Box>
-    </Box>
+  return (
+    <div className={classes.quickLayout}>
+      <section>
+        <SectionHeader title={t("developers.quickStartTitle")} description={t("developers.quickStartDesc")} />
+        <div className={classes.quickGrid}>
+          <ol className={classes.steps}>
+            {steps.map((s, i) => (
+              <li key={i} className={classes.step}>
+                <span className={classes.stepNum}>{i + 1}</span>
+                <div>
+                  <div className={classes.stepTitle}>{s.title}</div>
+                  <div className={classes.stepBody}>{s.body}</div>
+                  {s.extra && <div className={classes.stepExtra}>{s.extra}</div>}
+                </div>
+              </li>
+            ))}
+          </ol>
+          <CodeWindow snippets={snippets} method="GET" path="/v1/projects" response={SAMPLE_RESPONSE} />
+        </div>
+      </section>
+
+      <div className={classes.sideGrid}>
+        <section>
+          <SectionHeader title={t("developers.connectionTitle")} description={t("developers.connectionDesc")} />
+          <div className={`${classes.card} ${classes.fieldList}`}>
+            <CopyField label={t("developers.workspaceId")} value={workspaceId} />
+            <CopyField label={t("developers.baseUrl")} value={apiBaseUrl()} />
+          </div>
+        </section>
+
+        <section>
+          <SectionHeader title={t("developers.resourcesTitle")} />
+          <div className={classes.resources}>
+            {resources.map(({ icon: Icon, title, body, href }) => (
+              <a key={href} className={classes.resource} href={href} target="_blank" rel="noopener noreferrer">
+                <Icon size={16} className={classes.resourceIcon} />
+                <span className={classes.resourceText}>
+                  <span className={classes.resourceTitle}>{title}</span>
+                  <span className={classes.resourceBody}>{body}</span>
+                </span>
+                <ArrowUpRight size={15} className={classes.resourceArrow} />
+              </a>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

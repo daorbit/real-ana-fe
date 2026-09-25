@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Box, Button, Skeleton, Stack, Text, TextInput } from "@mantine/core";
-import { KeyRound, Plus, Search, ShieldCheck } from "lucide-react";
+import { Button, Skeleton, Stack, Text, TextInput } from "@mantine/core";
+import { KeyRound, Plus, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
@@ -10,18 +10,17 @@ import { useKeyUsage } from "../../hooks/useKeyUsage";
 import { ApiKeysTable } from "./ApiKeysTable";
 import { CreateKeyModal } from "./CreateKeyModal";
 import { RenameKeyModal } from "./RenameKeyModal";
-import { PanelHeader } from "./PanelHeader";
+import { SectionHeader } from "./SectionHeader";
 import classes from "./Developers.module.css";
 
 interface Props {
   workspaceId: string;
   workspaceName: string;
   windowDays: ApiKeyUsageWindow;
-  focusKeyId: string | null;
-  onFocusKey: (keyId: string) => void;
+  onViewUsage: (keyId: string) => void;
 }
 
-export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, focusKeyId, onFocusKey }: Props) {
+export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, onViewUsage }: Props) {
   const { t } = useTranslation();
   const {
     keys, isLoading, loadFailed, retrying, retry, creating, renaming, create, rename, revoke,
@@ -40,51 +39,39 @@ export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, focusKeyI
   const openCreate = () => setCreatingOpen(true);
 
   return (
-    <Box className={classes.panel}>
-      <PanelHeader
-        icon={KeyRound}
-        title={t("developers.keysTitle")}
+    <div>
+      <SectionHeader
         description={t("developers.keysIntro", { workspace: workspaceName })}
         action={
-          <Button leftSection={<Plus size={16} />} onClick={openCreate}>
-            {t("developers.createSecretKey")}
-          </Button>
+          <>
+            {keys.length > 0 && (
+              <TextInput
+                className={classes.search}
+                size="sm"
+                leftSection={<Search size={14} />}
+                placeholder={t("developers.searchPlaceholder")}
+                aria-label={t("developers.searchPlaceholder")}
+                value={query}
+                onChange={(e) => setQuery(e.currentTarget.value)}
+              />
+            )}
+            <Button size="sm" leftSection={<Plus size={15} />} onClick={openCreate}>
+              {t("developers.createKey")}
+            </Button>
+          </>
         }
       />
 
-      {keys.length > 0 && (
-        <Box className={classes.toolbar}>
-          <TextInput
-            className={classes.search}
-            size="sm"
-            leftSection={<Search size={14} />}
-            placeholder={t("developers.searchPlaceholder")}
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-          />
-          <Text size="xs" c="dimmed">
-            {t("developers.keyCount", { count: keys.length })}
-          </Text>
-        </Box>
-      )}
-
-      {isLoading ? (
-        <Stack gap="xs" p="lg">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} height={40} radius="sm" />
-          ))}
-        </Stack>
-      ) : loadFailed ? (
-        <Box className={classes.emptyWrap}>
-          <ErrorState
-            compact
-            title={t("developers.loadError")}
-            onRetry={() => void retry()}
-            retrying={retrying}
-          />
-        </Box>
-      ) : keys.length === 0 ? (
-        <Box className={classes.emptyWrap}>
+      <div className={classes.card}>
+        {isLoading ? (
+          <Stack gap="xs" p="md">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} height={36} radius="sm" />
+            ))}
+          </Stack>
+        ) : loadFailed ? (
+          <ErrorState compact title={t("developers.loadError")} onRetry={() => void retry()} retrying={retrying} />
+        ) : keys.length === 0 ? (
           <EmptyState
             compact
             icon={KeyRound}
@@ -92,27 +79,23 @@ export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, focusKeyI
             description={t("developers.emptyBody")}
             action={{ label: t("developers.emptyCta"), icon: Plus, onClick: openCreate }}
           />
-        </Box>
-      ) : filtered.length === 0 ? (
-        <Text size="sm" c="dimmed" ta="center" py="xl" className={classes.emptyWrap}>
-          {t("developers.noMatches", { query })}
-        </Text>
-      ) : (
-        <ApiKeysTable
-          keys={filtered}
-          usage={byKey}
-          windowDays={windowDays}
-          focusKeyId={focusKeyId}
-          onFocusKey={onFocusKey}
-          onRename={setRenamingKey}
-          onRevoke={revoke}
-        />
-      )}
+        ) : filtered.length === 0 ? (
+          <Text size="sm" c="dimmed" ta="center" py="xl">
+            {t("developers.noMatches", { query })}
+          </Text>
+        ) : (
+          <ApiKeysTable
+            keys={filtered}
+            usage={byKey}
+            windowDays={windowDays}
+            onViewUsage={onViewUsage}
+            onRename={setRenamingKey}
+            onRevoke={revoke}
+          />
+        )}
+      </div>
 
-      <Box className={classes.footnote}>
-        <ShieldCheck size={14} className={classes.footnoteIcon} />
-        <span>{t("developers.securityNote")}</span>
-      </Box>
+      <p className={classes.note}>{t("developers.securityNote")}</p>
 
       <CreateKeyModal
         opened={creatingOpen}
@@ -127,6 +110,6 @@ export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, focusKeyI
         onClose={() => setRenamingKey(null)}
         onSave={rename}
       />
-    </Box>
+    </div>
   );
 }

@@ -1,58 +1,59 @@
 import { ActionIcon, CopyButton, Tooltip } from "@mantine/core";
-import { Check, Copy, ExternalLink } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import classes from "./Developers.module.css";
 
 interface Props {
   label: string;
   value: string;
-  href?: string;
 }
 
-export function CopyField({ label, value, href }: Props) {
+export function CopyInline({ value }: { value: string }) {
   const { t } = useTranslation();
 
   return (
-    <div className={classes.copyField}>
-      <span className={classes.copyLabel}>{label}</span>
-      <div className={classes.copyRow}>
-        {href ? (
-          <a className={`${classes.copyValue} ${classes.copyLink}`} href={href} target="_blank" rel="noopener noreferrer">
-            {value}
-          </a>
-        ) : (
-          <code className={classes.copyValue}>{value}</code>
-        )}
-        {href && (
-          <Tooltip label={t("developers.openInNewTab")} withArrow>
+    <CopyButton value={value} timeout={1600}>
+      {({ copied, copy }) => (
+        <Tooltip label={copied ? t("developers.copied") : t("developers.copyCode")} withArrow>
+          <ActionIcon
+            size="sm"
+            variant="subtle"
+            color={copied ? "teal" : "gray"}
+            onClick={copy}
+            aria-label={t("developers.copyCode")}
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+          </ActionIcon>
+        </Tooltip>
+      )}
+    </CopyButton>
+  );
+}
+
+export function CopyField({ label, value }: Props) {
+  const { t } = useTranslation();
+
+  return (
+    <div className={classes.field}>
+      <span className={classes.fieldLabel}>{label}</span>
+      <code className={classes.fieldValue} title={value}>
+        {value}
+      </code>
+      <CopyButton value={value} timeout={1600}>
+        {({ copied, copy }) => (
+          <Tooltip label={copied ? t("developers.copied") : t("developers.copyCode")} withArrow>
             <ActionIcon
-              component="a"
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
+              size="sm"
               variant="subtle"
-              color="gray"
-              aria-label={`${t("developers.openInNewTab")}: ${label}`}
+              color={copied ? "teal" : "gray"}
+              onClick={copy}
+              aria-label={`${t("developers.copyCode")} ${label}`}
             >
-              <ExternalLink size={14} />
+              {copied ? <Check size={14} /> : <Copy size={14} />}
             </ActionIcon>
           </Tooltip>
         )}
-        <CopyButton value={value} timeout={1600}>
-          {({ copied, copy }) => (
-            <Tooltip label={copied ? t("developers.copied") : t("developers.copyCode")} withArrow>
-              <ActionIcon
-                variant="subtle"
-                color={copied ? "teal" : "gray"}
-                onClick={copy}
-                aria-label={`${t("developers.copyCode")} ${label}`}
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
-              </ActionIcon>
-            </Tooltip>
-          )}
-        </CopyButton>
-      </div>
+      </CopyButton>
     </div>
   );
 }

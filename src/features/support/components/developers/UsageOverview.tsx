@@ -1,14 +1,14 @@
-import { Box, SimpleGrid, Skeleton } from "@mantine/core";
-import { Activity, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { ActionIcon, Group, Skeleton, Tooltip } from "@mantine/core";
+import { Activity, Plus, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useGetApiKeysQuery } from "@/app/store";
-import { timeAgo } from "@/shared/lib/format";
+import { num, timeAgo } from "@/shared/lib/format";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
-import { StatCard } from "@/shared/ui/StatCard";
 import type { ApiKeyUsageWindow } from "@/shared/types";
 import { latestUse, successRate } from "../../developers";
 import { useKeyUsage } from "../../hooks/useKeyUsage";
-import { PanelHeader } from "./PanelHeader";
+import { SectionHeader } from "./SectionHeader";
 import { UsageChart } from "./UsageChart";
 import { UsageControls } from "./UsageControls";
 import classes from "./Developers.module.css";
@@ -19,86 +19,115 @@ interface Props {
   onWindowChange: (days: ApiKeyUsageWindow) => void;
   focusKeyId: string | null;
   onFocusKey: (keyId: string | null) => void;
+  onCreateKey: () => void;
 }
 
-export function UsageOverview({ workspaceId, windowDays, onWindowChange, focusKeyId, onFocusKey }: Props) {
+function Delta({ value, inverse }: { value: number | null; inverse?: boolean }) {
   const { t } = useTranslation();
-  const { data: keys = [] } = useGetApiKeysQuery(workspaceId, { skip: !workspaceId });
+  if (value === null) return null;
+  const good = inverse ? value <= 0 : value >= 0;
+  return (
+    <span className={classes.delta} data-tone={value === 0 ? "flat" : good ? "up" : "down"}>
+      {value > 0 ? "+" : ""}
+      {value}% <span className={classes.deltaHint}>{t("developers.vsPrevious")}</span>
+    </span>
+  );
+}
+
+export function UsageOverview({
+  workspaceId, windowDays, onWindowChange, focusKeyId, onFocusKey, onCreateKey,
+}: Props) {
+  const { t } = useTranslation();
+  const { data: keys = [], isLoading: keysLoading, isFetching: keysFetching, refetch: refetchKeys } = useGetApiKeysQuery(workspaceId, { skip: !workspaceId });
   const focusKey = keys.find((k) => k.id === focusKeyId);
   const activeFocus = focusKey ? focusKey.id : null;
   const { view, isLoading, isFetching, loadFailed, retry } = useKeyUsage(workspaceId, windowDays, activeFocus);
 
-  if (!keys.length) return null;
+  if (!keysLoading && !keys.length) {
+    return (
+      <div className={classes.card}>
+        <EmptyState
+          compact
+          icon={Activity}
+          title={t("developers.usageNoKeysTitle")}
+          description={t("developers.usageNoKeysBody")}
+          action={{ label: t("developers.createKey"), icon: Plus, onClick: onCreateKey }}
+        />
+      </div>
+    );
+  }
+
+  const refreshing = isFetching || keysFetching;
+  const refresh = () => {
+    void retry();
+    void refetchKeys();
+  };
 
   const lastUsed = focusKey ? focusKey.lastUsedAt : latestUse(keys);
 
   return (
-    <Box className={classes.panel}>
-      <PanelHeader
-        icon={Activity}
-        title={t("developers.usageTitle")}
+    <div>
+      <SectionHeader
         description={t("developers.usageDesc")}
         action={
-          <UsageControls
-            keys={keys}
-            windowDays={windowDays}
-            onWindowChange={onWindowChange}
-            focusKeyId={activeFocus}
-            onFocusKey={onFocusKey}
-          />
+          <Group gap="xs" wrap="nowrap">
+            <UsageControls
+              keys={keys}
+              windowDays={windowDays}
+              onWindowChange={onWindowChange}
+              focusKeyId={activeFocus}
+              onFocusKey={onFocusKey}
+            />
+            <Tooltip label={t("developers.refreshUsage")} withArrow>
+              <ActionIcon
+                variant="default"
+                size={30}
+                onClick={refresh}
+                disabled={refreshing}
+                aria-label={t("developers.refreshUsage")}
+              >
+                <RotateCw size={14} className={refreshing ? "spin" : undefined} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
         }
       />
 
       {loadFailed ? (
-        <Box className={classes.emptyWrap}>
-          <ErrorState compact title={t("developers.usageLoadError")} onRetry={() => void retry()} retrying={isFetching} />
-        </Box>
+        <div className={classes.card}>
+          <ErrorState compact title={t("developers.usageLoadError")} onRetry={refresh} retrying={refreshing} />
+        </div>
       ) : isLoading || !view ? (
-        <Box className={classes.usageBody}>
-          <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} height={112} radius="md" />
-            ))}
-          </SimpleGrid>
-          <Skeleton height={260} radius="md" mt="md" />
-        </Box>
+        <>
+          <Skeleton height={92} radius="md" />
+          <Skeleton height={300} radius="md" mt="md" />
+        </>
       ) : (
-        <Box className={classes.usageBody}>
-          <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
-            <StatCard
-              icon={Activity}
-              label={t("developers.statRequests")}
-              hint={t("developers.statRequestsHint")}
-              value={view.totals.requests}
-              delta={view.requestsDelta}
-              spark={view.points}
-              sparkKey="requests"
-            />
-            <StatCard
-              icon={AlertTriangle}
-              label={t("developers.statFailed")}
-              hint={t("developers.statFailedHint")}
-              value={view.totals.failures}
-              delta={view.failuresDelta}
-              inverseDelta
-              spark={view.points}
-              sparkKey="failures"
-            />
-            <StatCard
-              icon={CheckCircle2}
-              label={t("developers.statSuccessRate")}
-              value={successRate(view.totals.requests, view.totals.failures)}
-            />
-            <StatCard
-              icon={Clock}
-              label={t("developers.statLastRequest")}
-              value={lastUsed ? timeAgo(lastUsed) : t("developers.neverUsed")}
-            />
-          </SimpleGrid>
+        <>
+          <div className={classes.metrics}>
+            <div className={classes.metric}>
+              <span className={classes.metricLabel}>{t("developers.statRequests")}</span>
+              <span className={classes.metricValue}>{num(view.totals.requests)}</span>
+              <Delta value={view.requestsDelta} />
+            </div>
+            <div className={classes.metric}>
+              <span className={classes.metricLabel}>{t("developers.statFailed")}</span>
+              <span className={classes.metricValue}>{num(view.totals.failures)}</span>
+              <Delta value={view.failuresDelta} inverse />
+            </div>
+            <div className={classes.metric}>
+              <span className={classes.metricLabel}>{t("developers.statSuccessRate")}</span>
+              <span className={classes.metricValue}>{successRate(view.totals.requests, view.totals.failures)}</span>
+            </div>
+            <div className={classes.metric}>
+              <span className={classes.metricLabel}>{t("developers.statLastRequest")}</span>
+              <span className={classes.metricValue}>{lastUsed ? timeAgo(lastUsed) : t("developers.neverUsed")}</span>
+            </div>
+          </div>
 
           <UsageChart points={view.points} windowDays={windowDays} loading={isFetching} />
-        </Box>
+        </>
       )}
-    </Box>
+    </div>
   );
 }
