@@ -747,17 +747,97 @@
 /* -------------------------------------------------------------- mobile --- */
 
 @media (max-width: 48em) {
-  .page {
-    height: calc(100vh - 104px);
+  /* The shell pads its scroller to clear the bottom tab bar. Orbit keeps that
+     bottom clearance — it is what lifts the composer above the tab bar — but
+     trims the rest, since the chat is its own full-height layout. */
+  :global(body[data-page='orbit']) :global(.app-panel__scroll) {
+    padding: 8px 12px calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 6px);
   }
 
-  .column,
-  .composerWrap {
-    padding-left: 14px;
-    padding-right: 14px;
+  /* Fill exactly what the scroller leaves, rather than a viewport sum that
+     ignored the tab bar (and used `vh`, which on a phone is taller than the
+     visible screen) and pushed the composer underneath it. */
+  .page {
+    height: 100%;
+    min-height: 0;
+    /* One size step down for everything on the page. */
+    --mantine-font-size-sm: 13px;
+    --mantine-font-size-xs: 11.5px;
+  }
+
+  .header {
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .body[data-state='empty'] {
+    padding-bottom: 0;
+    overflow-y: auto;
+  }
+
+  .hero {
+    gap: 18px;
+    padding: 12px 0;
   }
 
   .heroHead {
     gap: 12px;
+  }
+
+  .heroTitle {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+  }
+
+  .starters {
+    gap: 6px;
+    min-height: 0;
+  }
+
+  .starter {
+    padding: 6px 12px;
+  }
+
+  .followUps {
+    gap: 6px;
+    padding-left: 0;
+  }
+
+  .column {
+    padding: 12px 2px 8px;
+  }
+
+  .composerWrap {
+    padding: 6px 0 0;
+  }
+
+  .composer {
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 16px is the floor below which iOS zooms the page on focus — and a zoomed
+     page is the one thing worse than a slightly larger input. */
+  .composer textarea {
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+  }
+
+  .composerFoot {
+    padding: 0 8px 8px;
+  }
+
+  .userTurn {
+    padding: 8px 12px;
+  }
+
+  .generatedImageSkeleton,
+  .generatingImage {
+    width: min(300px, 100%);
+  }
+
+  .generatedImage,
+  .generatedImageWrap {
+    max-width: min(300px, 100%);
   }
 }

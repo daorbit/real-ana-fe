@@ -14,7 +14,7 @@ const TABS = [
 /**
  * The phone's bottom tab bar — what a native app puts under the thumb in place
  * of a side menu. The rest of the navigation is one tap away under "More",
- * which opens the same drawer as the header's burger.
+ * which opens the navigation drawer (the header has no burger on phones).
  */
 export function MobileTabBar({
   pathname,
