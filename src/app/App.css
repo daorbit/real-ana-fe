@@ -2359,11 +2359,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .seo-panel-head {
-  border-bottom: 1px solid var(--seo-hairline, var(--border));
-  margin-left: calc(var(--mantine-spacing-lg) * -1);
-  margin-right: calc(var(--mantine-spacing-lg) * -1);
-  padding-left: var(--mantine-spacing-lg);
-  padding-right: var(--mantine-spacing-lg);
+  padding-bottom: 0;
 }
 
 

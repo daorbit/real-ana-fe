@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  Anchor, Badge, Box, Button, Card, Group, SegmentedControl, Select, Stack,
+  Anchor, Badge, Box, Button, Card, Drawer, Group, SegmentedControl, Select, Stack,
   Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
   Pagination,
 } from "@mantine/core";
@@ -38,9 +38,10 @@ import {
   SuggestionsPanel, AiSearchPanel, IssuesPanel, collectIssues,
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
-import { SEO_SECTIONS, normalizeSeoSection, type SeoSectionId } from "@/features/seo/components/sections";
-import { SeoNav, type SeoNavCount } from "@/features/seo/components/layout/SeoNav";
-import { SeoSectionHeader } from "@/features/seo/components/layout/SectionHeader";
+import {
+  SEO_TABS, resolveSeoSection, type SeoSubId, type SeoTabId,
+} from "@/features/seo/components/sections";
+import { SeoTabs, SeoTabIntro, type SeoTabCount } from "@/features/seo/components/layout/SeoTabs";
 import layout from "@/features/seo/components/layout/SeoLayout.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useSiteScope } from "@/features/analytics";
@@ -238,6 +239,20 @@ function HistoryPanel({
 }
 
 
+/** One block of a grouped tab, with its own heading and a jump-link target. */
+function Block({ id, children }: { id: SeoSubId; children: ReactNode }) {
+  const sub = SEO_TABS.flatMap((x) => x.subs ?? []).find((x) => x.id === id);
+  return (
+    <section id={`seo-block-${id}`} className={layout.block} aria-labelledby={`seo-block-${id}-title`}>
+      <header className={layout.blockHead}>
+        <h3 id={`seo-block-${id}-title`} className={layout.blockTitle}>{sub?.label}</h3>
+        {sub?.description && <p className={layout.blockDesc}>{sub.description}</p>}
+      </header>
+      {children}
+    </section>
+  );
+}
+
 export default function Seo() {
   useTitle("SEO");
   const { t } = useTranslation();
@@ -259,8 +274,29 @@ export default function Seo() {
   }, [siteScope]);
   const [path, setPath] = useState("/");
   const [params, setParams] = useSearchParams();
-  const tab = normalizeSeoSection(params.get("section"));
-  const setTab = (next: SeoSectionId) =>
+  const resolved = resolveSeoSection(params.get("section"));
+  const tab = resolved.tab;
+  const tabDef = SEO_TABS.find((x) => x.id === tab) ?? SEO_TABS[0];
+
+  // Tabs stay mounted once opened, so switching back is instant and keeps
+  // whatever was expanded or scrolled inside them.
+  const [visited, setVisited] = useState<Set<SeoTabId>>(() => new Set([tab]));
+  useEffect(() => {
+    setVisited((v) => (v.has(tab) ? v : new Set(v).add(tab)));
+  }, [tab]);
+
+  /** Sits just above the tab bar: where the page scrolls back to on a switch. */
+  const tabsTop = useRef<HTMLDivElement>(null);
+  const [historyOpen, setHistoryOpen] = useState(Boolean(resolved.history));
+
+  const jumpTo = (sub: SeoSubId) => {
+    // After the tab's content is on screen, for a jump that also switched tab.
+    requestAnimationFrame(() =>
+      document.getElementById(`seo-block-${sub}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    );
+  };
+
+  const setTab = (next: SeoTabId) => {
     setParams(
       (prev) => {
         const out = new URLSearchParams(prev);
@@ -270,6 +306,12 @@ export default function Seo() {
       },
       { replace: true },
     );
+    // Only when the reader is below the tabs: the new tab then starts right
+    // under them instead of halfway down, and a switch near the top of the
+    // page doesn't move anything at all.
+    const top = tabsTop.current;
+    if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: "start" });
+  };
   const [speedView, setSpeedView] = useState<"metrics" | "opportunities">("metrics");
   /** Set when the user opens an older report from history. */
   const [viewingId, setViewingId] = useState<string | null>(null);
@@ -342,25 +384,31 @@ export default function Seo() {
   // tab's badge counts the same list the tab itself renders.
   const allIssues = useMemo(() => (data ? collectIssues(data) : []), [data]);
 
-  const section = SEO_SECTIONS.find((s) => s.id === tab) ?? SEO_SECTIONS[0];
-
   // Counts that flag a problem (broken links, schema errors, critical issues)
   // read red; neutral tallies stay grey.
-  const navCounts: Partial<Record<SeoSectionId, SeoNavCount>> = data
+  const tabCounts: Partial<Record<SeoTabId, SeoTabCount>> = data
     ? {
         issues: {
           value: allIssues.length,
           alarm: allIssues.some((i) => i.severity === "critical"),
         },
+        onpage: { value: data.schema?.errorCount ?? 0, alarm: true },
         performance: { value: data.performance.suggestions.length },
-        links: {
+        site: {
           value: (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0),
           alarm: true,
         },
-        schema: { value: data.schema?.errorCount ?? 0, alarm: true },
-        history: { value: history.length },
       }
     : {};
+
+  // A link to an old single section (?section=images) lands on its block.
+  const initialSub = useRef(resolved.sub);
+  useEffect(() => {
+    if (data && initialSub.current) {
+      jumpTo(initialSub.current);
+      initialSub.current = undefined;
+    }
+  }, [data]);
 
   /** The site's bare hostname, shown as a fixed prefix on the path field. */
   const domainLabel = useMemo(
@@ -557,6 +605,17 @@ export default function Seo() {
           <Tooltip label={dateTime(report.createdAt)} withArrow>
             <span>Audited {timeAgo(report.createdAt)}</span>
           </Tooltip>
+          {history.length > 0 && (
+            <>
+              <span className={layout.metaDot} />
+              <Anchor component="button" type="button" size="xs" onClick={() => setHistoryOpen(true)}>
+                <Group gap={4} wrap="nowrap" component="span">
+                  <History size={12} />
+                  View history ({history.length})
+                </Group>
+              </Anchor>
+            </>
+          )}
           {viewingId && latest && viewingId !== latest._id && (
             <>
               <span className={layout.metaDot} />
@@ -593,94 +652,117 @@ export default function Seo() {
         )}
 
         {data && report && (
-          <div className={layout.layout}>
-            <SeoNav active={tab} counts={navCounts} onChange={setTab} />
+          <>
+            <div ref={tabsTop} className={layout.anchor} />
+            <SeoTabs active={tab} counts={tabCounts} onChange={setTab} />
+            <SeoTabIntro tab={tabDef} onHelp={() => setHelpOpen(true)} onJump={jumpTo} />
 
-            <Stack className={`seo-report ${layout.main}`} gap={0}>
-              <SeoSectionHeader section={section} onHelp={() => setHelpOpen(true)} />
+            <HelpDrawer
+              opened={helpOpen}
+              onClose={() => setHelpOpen(false)}
+              title={t("help.seo.title")}
+              sections={getSeoHelp(t)}
+              initialId={tab === "performance" && speedView === "opportunities" ? "suggestions" : tabDef.helpId}
+            />
 
-              <HelpDrawer
-                opened={helpOpen}
-                onClose={() => setHelpOpen(false)}
-                title={t("help.seo.title")}
-                sections={getSeoHelp(t)}
-                initialId={tab === "performance" && speedView === "opportunities" ? "suggestions" : tab}
-              />
-
-              {tab === "overview" && (
-                <OverviewPanel
-                  data={{
-                    score: data.score,
-                    performance: data.performance,
-                    issues: data.issues,
-                    content: data.content,
-                    technical: data.technical,
-                    siteFiles: data.siteFiles,
-                  }}
-                  history={history}
-                  onViewIssues={() => setTab("issues")}
-                />
-              )}
-              {tab === "issues" && <IssuesPanel data={data} />}
-              {tab === "meta" && <MetaPanel meta={data.meta} url={data.finalUrl} />}
-              {tab === "content" && <ContentPanel content={data.content} />}
-              {tab === "images" && <ImagesPanel content={data.content} />}
-              {tab === "technical" && (
-                <TechnicalPanel technical={data.technical} siteFiles={data.siteFiles} />
-              )}
-              {tab === "performance" && (
-                <Stack gap="lg">
-                  <SegmentedControl
-                    value={speedView}
-                    onChange={(v) => setSpeedView(v as "metrics" | "opportunities")}
-                    data={[
-                      { value: "metrics", label: "Metrics" },
-                      {
-                        value: "opportunities",
-                        label: data.performance.suggestions.length
-                          ? `Opportunities (${data.performance.suggestions.length})`
-                          : "Opportunities",
-                      },
-                    ]}
-                    style={{ alignSelf: "flex-start" }}
-                  />
-                  {speedView === "metrics" ? (
-                    <PerformancePanel
-                      performance={data.performance}
-                      vitals={<VitalsPanel vitals={fieldVitals} />}
+            <div className="seo-report">
+              {SEO_TABS.filter((x) => visited.has(x.id)).map((x) => (
+                <div
+                  key={x.id}
+                  role="tabpanel"
+                  id={`seo-panel-${x.id}`}
+                  aria-labelledby={`seo-tab-${x.id}`}
+                  hidden={x.id !== tab}
+                >
+                  {x.id === "overview" && (
+                    <OverviewPanel
+                      data={{
+                        score: data.score,
+                        performance: data.performance,
+                        issues: data.issues,
+                        content: data.content,
+                        technical: data.technical,
+                        siteFiles: data.siteFiles,
+                      }}
+                      history={history}
+                      onViewIssues={() => setTab("issues")}
                     />
-                  ) : (
-                    <SuggestionsPanel performance={data.performance} />
                   )}
-                </Stack>
-              )}
-              {tab === "links" && <LinksPanel links={data.links} />}
-              {tab === "schema" && <SchemaPanel schema={data.schema} />}
-              {tab === "ai" && <AiSearchPanel aiSearch={data.aiSearch} />}
-              {tab === "crawl" && (
-                <CrawlPanel
-                  report={crawlReport}
-                  running={crawling}
-                  onCrawl={canEdit ? startCrawl : null}
-                />
-              )}
-              {tab === "search" && (
-                <SearchPanel traffic={searchTraffic} loading={searchLoading} />
-              )}
-              {tab === "history" && (
-                <HistoryPanel
-                  history={history}
-                  loading={historyLoading}
-                  openId={report._id}
-                  onOpen={(id) => {
-                    setViewingId(id);
-                    setTab("overview");
-                  }}
-                  onDelete={canEdit ? remove : null}
-                />
-              )}
-            </Stack>
-          </div>
+                  {x.id === "issues" && <IssuesPanel data={data} />}
+                  {x.id === "onpage" && (
+                    <>
+                      <Block id="meta"><MetaPanel meta={data.meta} url={data.finalUrl} /></Block>
+                      <Block id="content"><ContentPanel content={data.content} /></Block>
+                      <Block id="images"><ImagesPanel content={data.content} /></Block>
+                      <Block id="schema"><SchemaPanel schema={data.schema} /></Block>
+                    </>
+                  )}
+                  {x.id === "performance" && (
+                    <Stack gap="lg">
+                      <SegmentedControl
+                        value={speedView}
+                        onChange={(v) => setSpeedView(v as "metrics" | "opportunities")}
+                        data={[
+                          { value: "metrics", label: "Metrics" },
+                          {
+                            value: "opportunities",
+                            label: data.performance.suggestions.length
+                              ? `Opportunities (${data.performance.suggestions.length})`
+                              : "Opportunities",
+                          },
+                        ]}
+                        style={{ alignSelf: "flex-start" }}
+                      />
+                      {speedView === "metrics" ? (
+                        <PerformancePanel
+                          performance={data.performance}
+                          vitals={<VitalsPanel vitals={fieldVitals} />}
+                        />
+                      ) : (
+                        <SuggestionsPanel performance={data.performance} />
+                      )}
+                    </Stack>
+                  )}
+                  {x.id === "site" && (
+                    <>
+                      <Block id="technical">
+                        <TechnicalPanel technical={data.technical} siteFiles={data.siteFiles} />
+                      </Block>
+                      <Block id="links"><LinksPanel links={data.links} /></Block>
+                      <Block id="crawl">
+                        <CrawlPanel report={crawlReport} running={crawling} onCrawl={canEdit ? startCrawl : null} />
+                      </Block>
+                      <Block id="ai"><AiSearchPanel aiSearch={data.aiSearch} /></Block>
+                    </>
+                  )}
+                  {x.id === "search" && <SearchPanel traffic={searchTraffic} loading={searchLoading} />}
+                </div>
+              ))}
+            </div>
+
+            <Drawer
+              opened={historyOpen}
+              onClose={() => setHistoryOpen(false)}
+              position="right"
+              size="xl"
+              title={<Text fw={600}>Audit history</Text>}
+            >
+              <Text size="sm" c="dimmed" mb="md">
+                Every past audit of this site. Open one to see how the page scored then.
+              </Text>
+              <HistoryPanel
+                history={history}
+                loading={historyLoading}
+                openId={report._id}
+                onOpen={(id) => {
+                  setViewingId(id);
+                  setHistoryOpen(false);
+                  setTab("overview");
+                }}
+                onDelete={canEdit ? remove : null}
+              />
+            </Drawer>
+          </>
         )}
       </Box>
       <Box h="xl" />

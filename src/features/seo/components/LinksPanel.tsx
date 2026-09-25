@@ -247,35 +247,40 @@ function LinkRow({ result }: { result: SeoLinkResult }) {
 function Tile({
   label,
   value,
-  icon: Icon,
   color,
   onClick,
 }: {
   label: string;
   value: number;
-  icon: LucideIcon;
+  /** Accepted for call-site compatibility; tiles show no icon. */
+  icon?: LucideIcon;
   color: string;
   onClick: () => void;
 }) {
-  // Count colours are a status signal here (broken=red, working=teal), so they
-  // stay — but a zero is not a problem, so it reads neutral regardless of tone.
-  const live = value > 0 ? color : "gray";
+  // Count colours are a status signal here (broken=red, working=teal), but a
+  // zero is not a problem, so it reads neutral regardless of tone.
   return (
-    <Box className="seo-tile" p="md" onClick={onClick} style={{ cursor: "pointer" }}>
-      <ThemeIcon size={28} radius="md" variant="light" color={live} mb="sm">
-        <Icon size={14} />
-      </ThemeIcon>
+    <Box
+      component="button"
+      type="button"
+      className="seo-tile"
+      px="md"
+      py={12}
+      onClick={onClick}
+      style={{ cursor: "pointer", textAlign: "left", width: "100%", border: 0, color: "inherit", font: "inherit" }}
+    >
+      <Text size="xs" c="dimmed" truncate>
+        {label}
+      </Text>
       <Text
-        fz={26}
-        fw={700}
-        lh={1.1}
-        c={value > 0 && color !== "gray" ? `${color}.5` : undefined}
-        style={{ letterSpacing: "-0.03em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}
+        fz={22}
+        fw={650}
+        lh={1.2}
+        mt={4}
+        c={value > 0 && color !== "gray" ? `${color}.6` : undefined}
+        style={{ letterSpacing: "-0.02em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}
       >
         {value}
-      </Text>
-      <Text size="xs" c="dimmed" mt={2} truncate>
-        {label}
       </Text>
     </Box>
   );

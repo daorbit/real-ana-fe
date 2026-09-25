@@ -151,11 +151,9 @@ function FindingGroup({
     <Card withBorder radius="md" padding={0}>
       <Box p="lg" pb="sm">
         <Group gap="sm" wrap="nowrap">
-          <ThemeIcon size={32} radius="md" variant="light" color={color}>
-            <Icon size={16} />
-          </ThemeIcon>
           <div>
             <Text fw={650} size="sm">
+              <Icon size={14} color={`var(--mantine-color-${color}-6)`} style={{ verticalAlign: "-2px", marginRight: 6 }} />
               {title}
               <Text span c="dimmed" fw={400}>
                 {" "}
@@ -247,14 +245,6 @@ export function CrawlerFilesPanel({
       <Card withBorder radius="md" padding="lg">
         <Group justify="space-between" mb="md" wrap="nowrap">
           <Group gap="sm">
-            <ThemeIcon
-              size={32}
-              radius="md"
-              variant="light"
-              color={robots?.present ? "teal" : "yellow"}
-            >
-              <Braces size={16} />
-            </ThemeIcon>
             <div>
               <Text fw={650} size="sm">
                 robots.txt
@@ -329,14 +319,6 @@ export function CrawlerFilesPanel({
       <Card withBorder radius="md" padding="lg">
         <Group justify="space-between" mb="md" wrap="nowrap">
           <Group gap="sm">
-            <ThemeIcon
-              size={32}
-              radius="md"
-              variant="light"
-              color={sitemap?.present ? "teal" : "yellow"}
-            >
-              <Braces size={16} />
-            </ThemeIcon>
             <div>
               <Text fw={650} size="sm">
                 Sitemap

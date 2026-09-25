@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Alert, Badge, Box, Button, Card, Code, Group, ScrollArea, SimpleGrid,
-  Stack, Table, Text, ThemeIcon, Tooltip,
+  Stack, Table, Text, Tooltip,
 } from "@mantine/core";
 import {
   AlertTriangle, CheckCircle2, FileStack, Info, Play, Layers, XCircle,
@@ -103,9 +103,7 @@ export function CrawlPanel({
             return (
               <Card key={i} withBorder radius="md" padding="md">
                 <Group gap="sm" align="flex-start" wrap="nowrap">
-                  <ThemeIcon size={28} radius="md" variant="light" color={s.color}>
-                    <Icon size={15} />
-                  </ThemeIcon>
+                  <Icon size={16} color={`var(--mantine-color-${s.color}-6)`} style={{ flexShrink: 0, marginTop: 2 }} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <Text size="sm" fw={600} mb={2}>
                       {f.title}
@@ -237,24 +235,20 @@ function Len({ value, min, max }: { value: number; min: number; max: number }) {
 function Tile({
   label,
   value,
-  icon: Icon,
-  color,
 }: {
   label: string;
   value: string;
-  icon: LucideIcon;
-  color: string;
+  /** Accepted for call-site compatibility; tiles show no icon. */
+  icon?: LucideIcon;
+  color?: string;
 }) {
   return (
-    <Box className="seo-tile" p="md">
-      <ThemeIcon size={30} radius="md" variant="light" color={color} mb="sm">
-        <Icon size={15} />
-      </ThemeIcon>
-      <Text fz={26} fw={750} lh={1.1} style={{ letterSpacing: "-0.03em" }}>
-        {value}
-      </Text>
-      <Text size="xs" c="dimmed" mt={2} truncate>
+    <Box className="seo-tile" px="md" py={12}>
+      <Text size="xs" c="dimmed" truncate>
         {label}
+      </Text>
+      <Text fz={22} fw={650} lh={1.2} mt={4} truncate style={{ letterSpacing: "-0.02em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}>
+        {value}
       </Text>
     </Box>
   );
