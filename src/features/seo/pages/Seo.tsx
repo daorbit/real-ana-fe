@@ -1,15 +1,13 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
-  Anchor, Badge, Box, Button, Card, Group, Select, Stack,
+  Anchor, Badge, Box, Button, Card, Group, SegmentedControl, Select, Stack,
   Table, Text, TextInput, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
-  UnstyledButton, Pagination,
+  Pagination,
 } from "@mantine/core";
 import {
-  Search, RefreshCw, Globe, History, Trash2, Trophy,
-  ListChecks, Tags, FileText, Wrench, Lightbulb, ExternalLink, Gauge,
-  Image as ImageIcon,
-  TrendingUp, TrendingDown, Minus, Braces, Link2, Layers, Printer,
-  HelpCircle, Bot, AlertTriangle,
+  Search, RefreshCw, Globe, History, Trash2, Trophy, ExternalLink,
+  TrendingUp, TrendingDown, Minus, Printer, Clock,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
@@ -40,40 +38,12 @@ import {
   SuggestionsPanel, AiSearchPanel, IssuesPanel, collectIssues,
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
+import { SEO_SECTIONS, normalizeSeoSection, type SeoSectionId } from "@/features/seo/components/sections";
+import { SeoNav, type SeoNavCount } from "@/features/seo/components/layout/SeoNav";
+import { SeoSectionHeader } from "@/features/seo/components/layout/SectionHeader";
+import layout from "@/features/seo/components/layout/SeoLayout.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useSiteScope } from "@/features/analytics";
-
-/**
- * Report tabs, in four groups.
- *
- * `group` is the first tab of a run, and the bar draws a divider before it —
- * fourteen tabs read as four short runs rather than one long strip. Overview is
- * pinned outside the scrolling track, so the tab people return to is always one
- * click away however far along the bar they have scrolled.
- */
-const TABS = [
-  { value: "overview", label: "Overview", icon: ListChecks, pinned: true },
-
-  { value: "issues", label: "Issues", icon: AlertTriangle, group: "Fix" },
-  { value: "suggestions", label: "Suggestions", icon: Lightbulb },
-
-  { value: "meta", label: "Meta tags", icon: Tags, group: "Page" },
-  { value: "content", label: "Content", icon: FileText },
-  { value: "images", label: "Images", icon: ImageIcon },
-  { value: "schema", label: "Schema", icon: Braces },
-
-  { value: "technical", label: "Technical", icon: Wrench, group: "Site" },
-  { value: "performance", label: "Performance", icon: Gauge },
-  { value: "links", label: "Links", icon: Link2 },
-  { value: "crawl", label: "Crawl", icon: Layers },
-  { value: "ai", label: "AI search", icon: Bot },
-
-  { value: "search", label: "Search", icon: Search, group: "Results" },
-  { value: "history", label: "History", icon: History },
-] as const;
-
-type TabValue = (typeof TABS)[number]["value"];
-
 
 const HISTORY_LIMIT = 200;
 const HISTORY_PAGE_SIZE = 15;
@@ -288,7 +258,19 @@ export default function Seo() {
     setPicked(siteScope[0] ?? "");
   }, [siteScope]);
   const [path, setPath] = useState("/");
-  const [tab, setTab] = useState<TabValue>("overview");
+  const [params, setParams] = useSearchParams();
+  const tab = normalizeSeoSection(params.get("section"));
+  const setTab = (next: SeoSectionId) =>
+    setParams(
+      (prev) => {
+        const out = new URLSearchParams(prev);
+        if (next === "overview") out.delete("section");
+        else out.set("section", next);
+        return out;
+      },
+      { replace: true },
+    );
+  const [speedView, setSpeedView] = useState<"metrics" | "opportunities">("metrics");
   /** Set when the user opens an older report from history. */
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -359,6 +341,26 @@ export default function Seo() {
   // Every finding from every checker, not just the on-page ones — the Issues
   // tab's badge counts the same list the tab itself renders.
   const allIssues = useMemo(() => (data ? collectIssues(data) : []), [data]);
+
+  const section = SEO_SECTIONS.find((s) => s.id === tab) ?? SEO_SECTIONS[0];
+
+  // Counts that flag a problem (broken links, schema errors, critical issues)
+  // read red; neutral tallies stay grey.
+  const navCounts: Partial<Record<SeoSectionId, SeoNavCount>> = data
+    ? {
+        issues: {
+          value: allIssues.length,
+          alarm: allIssues.some((i) => i.severity === "critical"),
+        },
+        performance: { value: data.performance.suggestions.length },
+        links: {
+          value: (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0),
+          alarm: true,
+        },
+        schema: { value: data.schema?.errorCount ?? 0, alarm: true },
+        history: { value: history.length },
+      }
+    : {};
 
   /** The site's bare hostname, shown as a fixed prefix on the path field. */
   const domainLabel = useMemo(
@@ -479,8 +481,7 @@ export default function Seo() {
               </Button>
               {canEdit && (
                 <Button
-                  variant="light"
-                  color="emerald"
+                  variant="default"
                   leftSection={<RefreshCw size={15} />}
                   disabled={analyzing}
                   onClick={() => run(true)}
@@ -493,91 +494,93 @@ export default function Seo() {
         }
       />
 
-      <Stack gap="lg">
-        <Card withBorder radius="md" padding="lg">
-          {/* Labels sit on one baseline and the domain is a fixed prefix inside
-              the path field, so the thing being audited reads as one address
-              rather than three controls that happen to be adjacent. */}
-          <Group gap="md" align="flex-end" wrap="wrap">
-            <Select
-              label="Site"
-              data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-              value={siteId}
-              onChange={(v) => {
-                if (!v) return;
-                setPicked(v);
-                setSiteScope([v]);
-              }}
-              allowDeselect={false}
-              w={{ base: "100%", sm: 240 }}
-              leftSection={<Globe size={15} />}
-              comboboxProps={{ radius: "md" }}
-              radius="md"
-            />
-
-            {canEdit && (
-            <Box style={{ flex: "1 1 320px", minWidth: 240 }}>
-              <Text component="label" htmlFor="seo-path" size="sm" fw={500} display="block" mb={4}>
-                Page to audit
-              </Text>
-              <TextInput
-                id="seo-path"
-                value={path}
-                onChange={(e) => setPath(e.currentTarget.value)}
-                onKeyDown={(e) => e.key === "Enter" && !analyzing && run(false)}
-                placeholder="/"
-                radius="md"
-                leftSectionWidth={domainLabel ? Math.min(260, domainLabel.length * 7.4 + 22) : 0}
-                leftSectionPointerEvents="none"
-                leftSection={
-                  domainLabel ? (
-                    <Text size="sm" c="dimmed" pl="sm" truncate style={{ maxWidth: 240 }}>
+      <div className={layout.inspect}>
+        <Select
+          className={layout.siteSelect}
+          aria-label="Site"
+          data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
+          value={siteId}
+          onChange={(v) => {
+            if (!v) return;
+            setPicked(v);
+            setSiteScope([v]);
+          }}
+          allowDeselect={false}
+          leftSection={<Globe size={15} />}
+        />
+        {canEdit && (
+          <>
+            {/* The domain is a fixed prefix inside the path field, so the
+                thing being audited reads as one address. */}
+            <TextInput
+              className={layout.urlInput}
+              aria-label="Page to audit"
+              value={path}
+              onChange={(e) => setPath(e.currentTarget.value)}
+              onKeyDown={(e) => e.key === "Enter" && !analyzing && run(false)}
+              placeholder="/"
+              leftSectionWidth={domainLabel ? Math.min(280, domainLabel.length * 7.4 + 40) : 36}
+              leftSectionPointerEvents="none"
+              leftSection={
+                <Group gap={8} wrap="nowrap" pl="sm" style={{ maxWidth: 260 }}>
+                  <Search size={15} style={{ flexShrink: 0, opacity: 0.6 }} />
+                  {domainLabel && (
+                    <Text size="sm" c="dimmed" truncate>
                       {domainLabel}
                     </Text>
-                  ) : undefined
-                }
-                styles={{ section: { justifyContent: "flex-start" } }}
-              />
-            </Box>
-            )}
+                  )}
+                </Group>
+              }
+              styles={{ section: { justifyContent: "flex-start" } }}
+            />
+            <Button disabled={analyzing} onClick={() => run(false)}>
+              Inspect page
+            </Button>
+          </>
+        )}
+      </div>
 
-            {canEdit && (
-              <Button
-                color="emerald"
-                leftSection={<Search size={15} />}
-                disabled={analyzing}
-                onClick={() => run(false)}
-                radius="md"
-                w={{ base: "100%", sm: "auto" }}
-              >
-                Analyze
-              </Button>
-            )}
-          </Group>
-
-          {/* Spell out the URL that will actually be fetched, so a typo in the
-              path is visible before spending a minute on the audit. */}
-          {canEdit && targetUrl && !analyzing && (
-            <Group gap={6} mt="sm" wrap="nowrap">
-              <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
-                Audits
-              </Text>
-              <Text size="xs" c="dimmed" fw={500} truncate>
-                {targetUrl}
-              </Text>
-            </Group>
+      {data && report && (
+        <div className={layout.reportMeta}>
+          <a className={layout.reportUrl} href={data.finalUrl} target="_blank" rel="noopener noreferrer">
+            <span>{data.finalUrl}</span>
+            <ExternalLink size={12} style={{ flexShrink: 0, opacity: 0.6 }} />
+          </a>
+          {data.finalUrl !== data.url && (
+            <Tooltip label={`Redirected from ${data.url}`} withArrow>
+              <Badge size="xs" variant="light" color="yellow">
+                redirected
+              </Badge>
+            </Tooltip>
           )}
+          <span className={layout.metaDot} />
+          <Tooltip label={dateTime(report.createdAt)} withArrow>
+            <span>Audited {timeAgo(report.createdAt)}</span>
+          </Tooltip>
+          {viewingId && latest && viewingId !== latest._id && (
+            <>
+              <span className={layout.metaDot} />
+              <span className={layout.viewingOld}>
+                <Clock size={12} />
+                Viewing an older audit
+              </span>
+              <Anchor component="button" type="button" size="xs" onClick={() => setViewingId(null)}>
+                Back to latest
+              </Anchor>
+            </>
+          )}
+        </div>
+      )}
 
-        </Card>
-
+      <Box mt="xl">
         {!report && !loading && (
           <EmptyState
             icon={Search}
             title="No audit yet"
             description={
               canEdit
-                ? "Run an analysis to see meta tags, content quality, technical checks and Lighthouse scores for this page."
-                : "Nobody has audited this site yet. An editor can run the first analysis."
+                ? "Inspect a page to see meta tags, content quality, technical checks and Lighthouse scores."
+                : "Nobody has audited this site yet. An editor can run the first audit."
             }
           />
         )}
@@ -590,172 +593,96 @@ export default function Seo() {
         )}
 
         {data && report && (
-          <Stack className="seo-report" gap="lg">
-            <Group justify="space-between" wrap="wrap" gap="xs">
-              <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
-                <Anchor
-                  href={data.finalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  size="sm"
-                  truncate
-                  maw={420}
-                >
-                  {data.finalUrl}
-                </Anchor>
-                <ExternalLink size={13} style={{ opacity: 0.5, flexShrink: 0 }} />
-                {data.finalUrl !== data.url && (
-                  <Tooltip label={`Redirected from ${data.url}`} withArrow>
-                    <Badge size="xs" variant="light" color="yellow">
-                      redirected
-                    </Badge>
-                  </Tooltip>
-                )}
-              </Group>
-              <Tooltip label={dateTime(report.createdAt)} withArrow>
-                <Text size="xs" c="dimmed">
-                  Audited {timeAgo(report.createdAt)}
-                </Text>
-              </Tooltip>
-            </Group>
+          <div className={layout.layout}>
+            <SeoNav active={tab} counts={navCounts} onChange={setTab} />
 
-            <Box className="seo-tabbar">
-              {(() => {
-                const countFor = (value: TabValue) =>
-                  value === "overview"
-                    ? data.issues.length
-                    : value === "issues"
-                    ? allIssues.length
-                    : value === "suggestions"
-                    ? data.performance.suggestions.length
-                    : value === "links"
-                    ? (data.links?.broken ?? 0) + (data.links?.serverErrors ?? 0)
-                    : value === "schema"
-                    ? data.schema?.errorCount ?? 0
-                    : value === "history"
-                    ? history.length
-                    : 0;
+            <Stack className={`seo-report ${layout.main}`} gap={0}>
+              <SeoSectionHeader section={section} onHelp={() => setHelpOpen(true)} />
 
-                const renderTab = (t: (typeof TABS)[number]) => {
-                  const Icon = t.icon;
-                  const count = countFor(t.value);
-                  // Counts that flag a problem (broken links, schema errors,
-                  // critical issues) read red; neutral tallies stay grey.
-                  const alarm =
-                    ((t.value === "links" || t.value === "schema") && count > 0) ||
-                    (t.value === "issues" &&
-                      allIssues.some((i) => i.severity === "critical"));
-                  return (
-                    <UnstyledButton
-                      key={t.value}
-                      className="seo-tab"
-                      data-active={tab === t.value || undefined}
-                      onClick={() => setTab(t.value)}
-                    >
-                      <Icon size={15} className="seo-tab-icon" />
-                      <span className="seo-tab-label">{t.label}</span>
-                      {count > 0 && (
-                        <span className="seo-tab-count" data-alarm={alarm || undefined}>
-                          {count}
-                        </span>
-                      )}
-                    </UnstyledButton>
-                  );
-                };
-
-                const pinned = TABS.filter((t) => "pinned" in t && t.pinned);
-                const scrolling = TABS.filter((t) => !("pinned" in t && t.pinned));
-
-                return (
-                  <>
-                    {pinned.map(renderTab)}
-                    <Box className="seo-tabbar-track">
-                      {scrolling.map((t) => (
-                        <Fragment key={t.value}>
-                          {"group" in t && t.group && <span className="seo-tab-sep" />}
-                          {renderTab(t)}
-                        </Fragment>
-                      ))}
-                    </Box>
-                  </>
-                );
-              })()}
-              {/* Help for the current tab. Opens the shared drawer selected to
-                  whatever tab you're on, so the relevant explanation is already
-                  on screen. */}
-              <Tooltip label={t("help.seo.tabTooltip")} withArrow position="left">
-                <ActionIcon
-                  className="seo-tab-help"
-                  variant="subtle"
-                  color="gray"
-                  onClick={() => setHelpOpen(true)}
-                  aria-label={t("help.seo.tabAria")}
-                >
-                  <HelpCircle size={17} />
-                </ActionIcon>
-              </Tooltip>
-            </Box>
-
-            <HelpDrawer
-              opened={helpOpen}
-              onClose={() => setHelpOpen(false)}
-              title={t("help.seo.title")}
-              sections={getSeoHelp(t)}
-              initialId={tab}
-            />
-
-            {tab === "overview" && (
-              <OverviewPanel
-                data={{
-                  score: data.score,
-                  performance: data.performance,
-                  issues: data.issues,
-                  content: data.content,
-                  technical: data.technical,
-                  siteFiles: data.siteFiles,
-                }}
-                history={history}
+              <HelpDrawer
+                opened={helpOpen}
+                onClose={() => setHelpOpen(false)}
+                title={t("help.seo.title")}
+                sections={getSeoHelp(t)}
+                initialId={tab === "performance" && speedView === "opportunities" ? "suggestions" : tab}
               />
-            )}
-            {tab === "issues" && <IssuesPanel data={data} />}
-            {tab === "meta" && <MetaPanel meta={data.meta} url={data.finalUrl} />}
-            {tab === "content" && <ContentPanel content={data.content} />}
-            {tab === "images" && <ImagesPanel content={data.content} />}
-            {tab === "technical" && (
-              <TechnicalPanel technical={data.technical} siteFiles={data.siteFiles} />
-            )}
-            {tab === "performance" && (
-              <PerformancePanel
-                performance={data.performance}
-                vitals={<VitalsPanel vitals={fieldVitals} />}
-              />
-            )}
-            {tab === "links" && <LinksPanel links={data.links} />}
-            {tab === "schema" && <SchemaPanel schema={data.schema} />}
-            {tab === "ai" && <AiSearchPanel aiSearch={data.aiSearch} />}
-            {tab === "crawl" && (
-              <CrawlPanel
-                report={crawlReport}
-                running={crawling}
-                onCrawl={canEdit ? startCrawl : null}
-              />
-            )}
-            {tab === "search" && (
-              <SearchPanel traffic={searchTraffic} loading={searchLoading} />
-            )}
-            {tab === "suggestions" && <SuggestionsPanel performance={data.performance} />}
-            {tab === "history" && (
-              <HistoryPanel
-                history={history}
-                loading={historyLoading}
-                openId={report._id}
-                onOpen={setViewingId}
-                onDelete={canEdit ? remove : null}
-              />
-            )}
-          </Stack>
+
+              {tab === "overview" && (
+                <OverviewPanel
+                  data={{
+                    score: data.score,
+                    performance: data.performance,
+                    issues: data.issues,
+                    content: data.content,
+                    technical: data.technical,
+                    siteFiles: data.siteFiles,
+                  }}
+                  history={history}
+                  onViewIssues={() => setTab("issues")}
+                />
+              )}
+              {tab === "issues" && <IssuesPanel data={data} />}
+              {tab === "meta" && <MetaPanel meta={data.meta} url={data.finalUrl} />}
+              {tab === "content" && <ContentPanel content={data.content} />}
+              {tab === "images" && <ImagesPanel content={data.content} />}
+              {tab === "technical" && (
+                <TechnicalPanel technical={data.technical} siteFiles={data.siteFiles} />
+              )}
+              {tab === "performance" && (
+                <Stack gap="lg">
+                  <SegmentedControl
+                    value={speedView}
+                    onChange={(v) => setSpeedView(v as "metrics" | "opportunities")}
+                    data={[
+                      { value: "metrics", label: "Metrics" },
+                      {
+                        value: "opportunities",
+                        label: data.performance.suggestions.length
+                          ? `Opportunities (${data.performance.suggestions.length})`
+                          : "Opportunities",
+                      },
+                    ]}
+                    style={{ alignSelf: "flex-start" }}
+                  />
+                  {speedView === "metrics" ? (
+                    <PerformancePanel
+                      performance={data.performance}
+                      vitals={<VitalsPanel vitals={fieldVitals} />}
+                    />
+                  ) : (
+                    <SuggestionsPanel performance={data.performance} />
+                  )}
+                </Stack>
+              )}
+              {tab === "links" && <LinksPanel links={data.links} />}
+              {tab === "schema" && <SchemaPanel schema={data.schema} />}
+              {tab === "ai" && <AiSearchPanel aiSearch={data.aiSearch} />}
+              {tab === "crawl" && (
+                <CrawlPanel
+                  report={crawlReport}
+                  running={crawling}
+                  onCrawl={canEdit ? startCrawl : null}
+                />
+              )}
+              {tab === "search" && (
+                <SearchPanel traffic={searchTraffic} loading={searchLoading} />
+              )}
+              {tab === "history" && (
+                <HistoryPanel
+                  history={history}
+                  loading={historyLoading}
+                  openId={report._id}
+                  onOpen={(id) => {
+                    setViewingId(id);
+                    setTab("overview");
+                  }}
+                  onDelete={canEdit ? remove : null}
+                />
+              )}
+            </Stack>
+          </div>
         )}
-      </Stack>
+      </Box>
       <Box h="xl" />
     </AppShell>
   );
