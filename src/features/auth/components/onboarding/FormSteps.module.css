@@ -1,0 +1,450 @@
+/* The three form steps — Your details, Workspace, Your site.
+ *
+ * Each gets a shape that fits what it asks for, rather than the same stack of
+ * labelled boxes three times: an identity header that fills in as you type, one
+ * large workspace name field, and the domain typed into
+ * an address bar. Nothing here is boxed — the step already sits in the panel,
+ * and a bordered card inside it reads as a card within a card.
+ */
+
+/* ------------------------------------------------------------- shared --- */
+
+.eyebrow {
+  display: block;
+  margin-bottom: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--onb-ink-faint);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.error {
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--mantine-color-error);
+}
+
+@media (max-width: 36em) {
+  .grid2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ------------------------------------------------------ your details --- */
+
+.identity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-bottom: 1.75rem;
+}
+
+/* A slow conic ring in the accent: the one bit of colour on the screen, and
+   it sits on the thing that is most "you". */
+.ring {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  padding: 3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from var(--ring-angle, 0deg),
+    var(--accent),
+    color-mix(in oklab, var(--accent) 40%, #7c5cff),
+    color-mix(in oklab, var(--accent) 30%, #22d3ee),
+    var(--accent)
+  );
+  animation: ring-spin 8s linear infinite;
+}
+
+@property --ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes ring-spin {
+  to {
+    --ring-angle: 360deg;
+  }
+}
+
+.ringInner {
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--mantine-color-body);
+}
+
+.avatarBtn {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatarBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--mantine-color-body);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.badge:hover {
+  transform: scale(1.08);
+}
+
+.identityText {
+  min-width: 0;
+  flex: 1;
+}
+
+.identityName {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--onb-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identityName[data-empty] {
+  color: var(--onb-ink-faint);
+}
+
+.identityMeta {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--onb-ink-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 8px;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 550;
+  color: var(--accent-2);
+  cursor: pointer;
+}
+
+.link:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.link[data-danger] {
+  color: var(--mantine-color-red-5);
+}
+
+@media (max-width: 36em) {
+  .ring {
+    width: 68px;
+    height: 68px;
+  }
+  .identityName {
+    font-size: 1.08rem;
+  }
+}
+
+/* --------------------------------------------------------- workspace --- */
+
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* One large field, underlined rather than boxed: it is the whole screen. */
+.bigInput {
+  display: block;
+  width: 100%;
+  padding: 0.2rem 0 0.45rem;
+  border: 0;
+  border-bottom: 2px solid var(--onb-edge);
+  background: transparent;
+  color: var(--onb-ink);
+  font: inherit;
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.bigInput::placeholder {
+  color: var(--onb-ink-faint);
+  opacity: 0.6;
+}
+
+.bigInput:focus {
+  border-bottom-color: var(--accent);
+}
+
+.bigInput[aria-invalid="true"] {
+  border-bottom-color: var(--mantine-color-error);
+}
+
+.hint {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--onb-ink-faint);
+}
+
+.perks {
+  list-style: none;
+  padding: 0;
+  margin: 2.25rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.perkIcon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 0.7rem;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  color: var(--accent-2);
+}
+
+.perkTerm {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--onb-ink);
+}
+
+.perkGloss {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--onb-ink-dim);
+}
+
+@media (max-width: 36em) {
+  .bigInput {
+    font-size: 1.3rem;
+  }
+  .perks {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    margin-top: 1.75rem;
+  }
+  .perk {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    column-gap: 0.8rem;
+    align-items: center;
+  }
+  .perkIcon {
+    grid-row: span 2;
+    margin-bottom: 0;
+  }
+}
+
+/* ---------------------------------------------------------- your site --- */
+
+/* The domain, typed into an address bar. */
+.urlBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  padding: 0 8px 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--auth-line, var(--onb-edge));
+  background: var(--auth-surface, var(--onb-raise));
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.urlBar:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+
+.urlBar[data-error] {
+  border-color: var(--mantine-color-error);
+}
+
+.dots {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--onb-edge);
+}
+
+.urlBar:focus-within .dots i:nth-child(1) {
+  background: #ff5f57;
+}
+.urlBar:focus-within .dots i:nth-child(2) {
+  background: #febc2e;
+}
+.urlBar:focus-within .dots i:nth-child(3) {
+  background: #28c840;
+}
+
+.urlField {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: color-mix(in oklab, var(--onb-ink) 5%, transparent);
+  color: var(--onb-ink-faint);
+}
+
+.scheme {
+  font-size: 0.9rem;
+  color: var(--onb-ink-faint);
+}
+
+.urlInput {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--onb-ink);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  outline: none;
+}
+
+.urlInput::placeholder {
+  color: var(--onb-ink-faint);
+  opacity: 0.7;
+}
+
+.urlOk {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  animation: pop 0.2s ease-out;
+}
+
+.purposes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.purpose {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--onb-edge);
+  background: transparent;
+  color: var(--onb-ink-dim);
+  font: inherit;
+  font-size: 0.83rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.purpose:hover {
+  border-color: color-mix(in oklab, var(--onb-ink) 30%, transparent);
+  color: var(--onb-ink);
+}
+
+.purpose[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  color: var(--onb-ink);
+}
+
+.purpose:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 36em) {
+  .dots {
+    display: none;
+  }
+  .urlBar {
+    padding-left: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring,
+  .urlOk {
+    animation: none;
+  }
+}

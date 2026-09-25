@@ -25,13 +25,80 @@
   animation: welcome-out 380ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
+/* On the way out the content zooms gently towards the viewer, like walking
+   through a door. */
+.welcome-overlay[data-leaving] .welcome-overlay__body {
+  animation: welcome-through 380ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
 .welcome-overlay__body {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   text-align: center;
   padding: 0 24px;
+}
+
+/* Three blurred blobs in the lettering's colours, drifting slowly. Kept
+   faint: a hint of colour behind the lettering, not a wash over the page. */
+.welcome-overlay__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  filter: blur(90px);
+  opacity: 0;
+  animation: welcome-glow-in 1.6s ease-out 0.2s forwards;
+}
+
+.welcome-overlay__glow span {
+  position: absolute;
+  width: 42vmax;
+  height: 42vmax;
+  border-radius: 50%;
+  opacity: 0.07;
+}
+
+.welcome-overlay__glow span:nth-child(1) {
+  left: 8%;
+  top: 18%;
+  background: #22c55e;
+  animation: welcome-drift-a 14s ease-in-out infinite alternate;
+}
+
+.welcome-overlay__glow span:nth-child(2) {
+  right: 6%;
+  top: 8%;
+  background: #ec4899;
+  animation: welcome-drift-b 16s ease-in-out infinite alternate;
+}
+
+.welcome-overlay__glow span:nth-child(3) {
+  left: 34%;
+  bottom: -14%;
+  background: #38bdf8;
+  animation: welcome-drift-a 18s ease-in-out infinite alternate-reverse;
+}
+
+[data-mantine-color-scheme="light"] .welcome-overlay__glow span {
+  opacity: 0.06;
+}
+
+/* A faint dot grid, faded out towards the edges. */
+.welcome-overlay__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--text) 8%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 0%, transparent 75%);
+  opacity: 0;
+  animation: welcome-glow-in 1.2s ease-out 0.4s forwards;
 }
 
 .welcome-overlay__art {
@@ -46,12 +113,38 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
+  opacity: 0;
+  animation: welcome-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) 1.6s forwards;
 }
 
 .welcome-overlay__sub {
   margin: 0;
   font-size: 15px;
   color: var(--text-2);
+  opacity: 0;
+  animation: welcome-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
+}
+
+/* A thin sliver of light running along a hairline: "on its way". */
+.welcome-overlay__progress {
+  position: relative;
+  width: 160px;
+  height: 2px;
+  margin-top: 22px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  opacity: 0;
+  animation: welcome-glow-in 600ms ease-out 2.1s forwards;
+}
+
+.welcome-overlay__progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, #22c55e, #ec4899, #38bdf8, transparent);
+  animation: welcome-run 1.4s ease-in-out infinite;
 }
 
 @keyframes welcome-in {
@@ -64,9 +157,48 @@
   to   { opacity: 0; }
 }
 
+@keyframes welcome-through {
+  to { transform: scale(1.06); filter: blur(6px); }
+}
+
+@keyframes welcome-rise {
+  from { opacity: 0; transform: translateY(10px); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes welcome-glow-in {
+  to { opacity: 1; }
+}
+
+@keyframes welcome-drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(6vw, -4vh) scale(1.12); }
+}
+
+@keyframes welcome-drift-b {
+  from { transform: translate(0, 0) scale(1.05); }
+  to   { transform: translate(-5vw, 6vh) scale(0.95); }
+}
+
+@keyframes welcome-run {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(260%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .welcome-overlay,
-  .welcome-overlay[data-leaving] {
+  .welcome-overlay[data-leaving],
+  .welcome-overlay[data-leaving] .welcome-overlay__body,
+  .welcome-overlay__title,
+  .welcome-overlay__sub,
+  .welcome-overlay__glow,
+  .welcome-overlay__grid,
+  .welcome-overlay__progress {
     animation-duration: 1ms;
+    animation-delay: 0s;
+  }
+  .welcome-overlay__glow span,
+  .welcome-overlay__progress span {
+    animation: none;
   }
 }

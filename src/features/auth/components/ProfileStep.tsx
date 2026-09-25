@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, TextInput, Stack, Avatar, Loader, UnstyledButton,
 } from "@mantine/core";
-import { ArrowRight, Trash2, Upload, UserRound } from "lucide-react";
+import { ArrowRight, Camera, Sparkles, Trash2, Upload, UserRound } from "lucide-react";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { PhoneInput, joinNumber, localNumberError } from "@/shared/ui/PhoneInput";
@@ -12,6 +12,7 @@ import { randomPresetAvatar, fetchPresetAvatarBlob } from "@/shared/lib/presetAv
 import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import onb from "@/features/auth/components/onboarding/Onboarding.module.css";
+import f from "@/features/auth/components/onboarding/FormSteps.module.css";
 
  
 export function ProfileStep({ onDone }: { onDone: () => void }) {
@@ -119,61 +120,75 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
     }
   };
 
+  const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ");
+
   return (
-    <Stack gap="lg">
-      <div className={onb.card}>
-        <div className={onb.photoRow}>
+    <Stack gap={0}>
+      {/* Who you are, as teammates will see it — fills in as you type. */}
+      <div className={f.identity}>
+        <div className={f.ring}>
+          <div className={f.ringInner}>
+            <UnstyledButton
+              className={f.avatarBtn}
+              onClick={() => fileInput.current?.click()}
+              disabled={avatarBusy}
+              aria-label="Upload a photo"
+            >
+              <Avatar src={user?.avatarUrl || undefined} size="100%" radius="50%" color="gray">
+                {avatarBusy ? <Loader size="xs" /> : <UserRound size={26} />}
+              </Avatar>
+            </UnstyledButton>
+          </div>
           <UnstyledButton
+            className={f.badge}
             onClick={() => fileInput.current?.click()}
             disabled={avatarBusy}
             aria-label="Upload a photo"
-            style={{ borderRadius: "50%", flexShrink: 0 }}
           >
-            <Avatar src={user?.avatarUrl || undefined} size={56} radius="50%" color="emerald">
-              {avatarBusy ? <Loader size="xs" /> : <UserRound size={24} />}
-            </Avatar>
+            <Camera size={13} />
           </UnstyledButton>
-
-          <div className={onb.photoText}>
-            <div className={onb.photoTitle}>Profile photo</div>
-            <div className={onb.photoHint}>Optional · JPG or PNG, up to 3MB</div>
-            <div className={onb.photoActions}>
-              <Button
-                size="compact-sm"
-                variant="default"
-                leftSection={<Upload size={13} />}
-                onClick={() => fileInput.current?.click()}
-                disabled={avatarBusy}
-              >
-                Upload
-              </Button>
-              <AvatarPresetPicker opened={presetOpen} onClose={() => setPresetOpen(false)} onPick={(src) => void pickPreset(src)}>
-                <Button
-                  size="compact-sm"
-                  variant="subtle"
-                  color="gray"
-                  onClick={() => setPresetOpen((v) => !v)}
-                  disabled={avatarBusy}
-                >
-                  Choose an avatar
-                </Button>
-              </AvatarPresetPicker>
-              {user?.avatarUrl && (
-                <Button
-                  size="compact-sm"
-                  variant="subtle"
-                  color="red"
-                  leftSection={<Trash2 size={12} />}
-                  onClick={clearAvatar}
-                  disabled={avatarBusy}
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-          </div>
         </div>
 
+        <div className={f.identityText}>
+          <div className={f.identityName} data-empty={fullName ? undefined : true}>
+            {fullName || "Your name"}
+          </div>
+          {user?.email && <div className={f.identityMeta}>{user.email}</div>}
+          <div className={f.links}>
+            <button
+              type="button"
+              className={f.link}
+              onClick={() => fileInput.current?.click()}
+              disabled={avatarBusy}
+            >
+              <Upload size={12} /> Upload photo
+            </button>
+            <AvatarPresetPicker opened={presetOpen} onClose={() => setPresetOpen(false)} onPick={(src) => void pickPreset(src)}>
+              <button
+                type="button"
+                className={f.link}
+                onClick={() => setPresetOpen((v) => !v)}
+                disabled={avatarBusy}
+              >
+                <Sparkles size={12} /> Pick an avatar
+              </button>
+            </AvatarPresetPicker>
+            {user?.avatarUrl && (
+              <button
+                type="button"
+                className={f.link}
+                data-danger
+                onClick={clearAvatar}
+                disabled={avatarBusy}
+              >
+                <Trash2 size={12} /> Remove
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className={f.fields}>
         <input
           ref={fileInput}
           type="file"
@@ -182,9 +197,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
           onChange={(e) => pickAvatar(e.currentTarget.files?.[0] ?? null)}
         />
 
-        <div className={onb.cardDivider} />
-
-        <div className={onb.cardRow}>
+        <div className={f.grid2}>
           <TextInput
             label="First name"
             placeholder="Ada"
@@ -219,7 +232,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
 
       {/* Rides the foot of the screen on a phone, like every other step's
           actions — see `.actionsBar` in Onboarding.module.css. */}
-      <div className={`${onb.actionsBar} ${onb.actions}`}>
+      <div className={`${onb.actionsBar} ${onb.actions}`} style={{ marginTop: "1.75rem" }}>
         <span className={onb.actionsBack} />
         <div className={onb.actionsMain}>
           <Button

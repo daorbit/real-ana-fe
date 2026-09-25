@@ -17,7 +17,7 @@ export function AppearanceStep({
         {/* No mock preview: the choices apply to the whole screen as they
             are made, so the page itself is the preview. */}
         <div className={`${s.controls} ${s.narrow}`}>
-          <AppearanceSection bare />
+          <AppearanceSection bare split />
         </div>
       </div>
 

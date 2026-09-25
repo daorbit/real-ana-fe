@@ -58,11 +58,25 @@
   scrollbar-width: thin;
   scrollbar-color: var(--auth-line) transparent;
 }
-/* Appearance only: a readable column rather than controls spread edge to edge.
-   The plan step shares `.controls` and keeps the full width for its grid. */
+/* Appearance only. One readable column on narrower screens; from 75em the
+   backgrounds move into a second column beside the other controls, so the
+   step uses the width instead of leaving the right half empty. The plan step
+   shares `.controls` and keeps the full width for its grid. */
 .narrow {
   width: 100%;
   max-width: 640px;
+}
+
+@media (min-width: 75em) {
+  .narrow {
+    max-width: 1240px;
+  }
+  .narrow :global(.appearance-split) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    column-gap: 3rem;
+    align-items: start;
+  }
 }
 
 .controls::-webkit-scrollbar { width: 8px; }

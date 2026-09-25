@@ -54,8 +54,13 @@ export function AppearanceSection({
    *  page/tab, where the page header already carries the title and boxing
    *  the content again would waste the width it's meant to spread across. */
   bare = false,
+  split = false,
 }: {
   bare?: boolean;
+  /** Mode, preset and accent in one column, backgrounds in a second one
+      beside it (from wide screens up) — for the onboarding step, which has
+      the whole width to itself. */
+  split?: boolean;
 } = {}) {
   const { t } = useTranslation();
   const [prefs, setPrefs] = useState(readThemePrefs);
@@ -106,7 +111,8 @@ export function AppearanceSection({
   };
 
   const body = (
-      <Box px={bare ? 0 : "lg"} py={bare ? 0 : "lg"}>
+      <Box px={bare ? 0 : "lg"} py={bare ? 0 : "lg"} className={split ? "appearance-split" : undefined}>
+        <div>
         <GroupBlock>
           <GroupLabel>{t("settings.mode", "Mode")}</GroupLabel>
           <Group gap="sm">
@@ -211,6 +217,9 @@ export function AppearanceSection({
           </Box>
         </GroupBlock>
 
+        </div>
+
+        <div>
         <GroupBlock>
           <GroupLabel>{t("settings.background", "Background")}</GroupLabel>
           {/* Wide enough for the full label — "Mesh — Aurora" truncated to
@@ -254,7 +263,7 @@ export function AppearanceSection({
             })}
           </Box>
         </GroupBlock>
-
+        </div>
       </Box>
   );
 
