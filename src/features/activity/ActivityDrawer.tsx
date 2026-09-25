@@ -6,7 +6,6 @@ import {
   Group,
   Menu,
   ScrollArea,
-  SegmentedControl,
   Skeleton,
   Stack,
   Text,
@@ -250,27 +249,33 @@ export function ActivityDrawer({
           short feed. */}
       <Stack gap={0} className={styles.body}>
         <Box className={styles.header}>
-          <Group justify="space-between" align="center" wrap="nowrap">
+          <Group justify="space-between" align="center" wrap="nowrap" className={styles.titleRow}>
             <Group gap={8} wrap="nowrap" align="center">
-              <Text fw={680} fz="lg" className={styles.title}>
+              <Text fw={650} fz="md" className={styles.title}>
                 {t("activity.title", "Activity")}
               </Text>
               {/* Opening the panel clears the bell's badge, so without this
                   the count vanishes at the moment it becomes readable. */}
               {unreadCount > 0 && (
-                <span className={styles.count}>
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
+                <span className={styles.count}>{unreadCount > 99 ? "99+" : unreadCount}</span>
               )}
             </Group>
 
-            <Group gap={4} wrap="nowrap">
+            <Group gap={2} wrap="nowrap">
               {!selecting && (
                 <>
-                  {/* The title row keeps only what is not a primary action:
-                      marking everything read and closing both live in the
-                      footer bar, where they stay reachable at any scroll
-                      position. */}
+                  <Button
+                    variant="subtle"
+                    color="gray"
+                    size="compact-sm"
+                    leftSection={<CheckCheck size={14} />}
+                    disabled={!hasUnread || markingAll || demo}
+                    loading={markingAll}
+                    onClick={() => void markAllRead()}
+                    className={styles.markAll}
+                  >
+                    {t("activity.markAllReadShort", "Mark all read")}
+                  </Button>
                   <Menu position="bottom-end" withArrow radius="md" width={210} withinPortal>
                     <Menu.Target>
                       <ActionIcon
@@ -278,7 +283,7 @@ export function ActivityDrawer({
                         color="gray"
                         aria-label={t("activity.moreActions", "More actions")}
                       >
-                        <MoreHorizontal size={18} />
+                        <MoreHorizontal size={17} />
                       </ActionIcon>
                     </Menu.Target>
                     <Menu.Dropdown>
@@ -303,20 +308,19 @@ export function ActivityDrawer({
                   </Menu>
                 </>
               )}
-
               <ActionIcon
                 variant="subtle"
                 color="gray"
                 onClick={onClose}
                 aria-label={t("activity.close", "Close")}
               >
-                <X size={18} />
+                <X size={17} />
               </ActionIcon>
             </Group>
           </Group>
 
           {selecting ? (
-            <Group justify="space-between" align="center" mt="sm" wrap="nowrap">
+            <Group justify="space-between" align="center" wrap="nowrap" className={styles.selectBar}>
               <Text fz="sm" c="dimmed">
                 {t("activity.selectedCount", "{{count}} selected", { count: selected.size })}
               </Text>
@@ -324,7 +328,7 @@ export function ActivityDrawer({
                 <Button
                   variant="subtle"
                   color="gray"
-                  size="xs"
+                  size="compact-sm"
                   onClick={() => {
                     setSelecting(false);
                     setSelected(new Set());
@@ -335,7 +339,7 @@ export function ActivityDrawer({
                 <Button
                   variant="light"
                   color="red"
-                  size="xs"
+                  size="compact-sm"
                   leftSection={<Trash2 size={14} />}
                   disabled={selected.size === 0 || deleting}
                   loading={deleting}
@@ -346,25 +350,24 @@ export function ActivityDrawer({
               </Group>
             </Group>
           ) : (
-            <SegmentedControl
-              fullWidth
-              size="xs"
-              radius="md"
-              mt={12}
-              className={styles.tabs}
-              value={tab}
-              onChange={(value) => setTab(value as "all" | "unread")}
-              data={[
-                { value: "all", label: t("activity.tabAll", "All") },
-                {
-                  value: "unread",
-                  label:
-                    unreadCount > 0
-                      ? `${t("activity.tabUnread", "Unread")} · ${unreadCount > 99 ? "99+" : unreadCount}`
-                      : t("activity.tabUnread", "Unread"),
-                },
-              ]}
-            />
+            <div className={styles.tabs} role="tablist" aria-label={t("activity.title", "Activity")}>
+              {(["all", "unread"] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === value}
+                  data-active={tab === value || undefined}
+                  className={styles.tab}
+                  onClick={() => setTab(value)}
+                >
+                  {value === "all" ? t("activity.tabAll", "All") : t("activity.tabUnread", "Unread")}
+                  {value === "unread" && unreadCount > 0 && (
+                    <span className={styles.tabCount}>{unreadCount > 99 ? "99+" : unreadCount}</span>
+                  )}
+                </button>
+              ))}
+            </div>
           )}
         </Box>
 
@@ -414,7 +417,7 @@ export function ActivityDrawer({
                     says where one ends and the next begins, and a line under
                     it as well read as a band across the panel. */}
                 <div className={classes.groupLabel}>{dateGroupLabel(group, t)}</div>
-                <Stack gap={6} px={8} pb={10}>
+                <div>
                   {rows.map((notification) => (
                     <ActivityRow
                       key={notification.id}
@@ -441,7 +444,7 @@ export function ActivityDrawer({
                       onToggleSelect={toggleSelect}
                     />
                   ))}
-                </Stack>
+                </div>
               </div>
             ))}
 
@@ -459,26 +462,6 @@ export function ActivityDrawer({
           )}
         </ScrollArea>
 
-        {/* Pinned under the feed rather than riding the title row: both of
-            these act on the whole panel, and at the bottom they stay put
-            however far down the list someone has scrolled. Hidden while
-            selecting — that mode has its own Cancel and Delete. */}
-        {!selecting && (
-          <Group className={styles.footer} justify="space-between" wrap="nowrap">
-            <Button variant="default" size="xs" onClick={onClose}>
-              {t("activity.close", "Close")}
-            </Button>
-            <Button
-              size="xs"
-              leftSection={<CheckCheck size={14} />}
-              disabled={!hasUnread || markingAll || demo}
-              loading={markingAll}
-              onClick={() => void markAllRead()}
-            >
-              {t("activity.markAllRead", "Mark all as read")}
-            </Button>
-          </Group>
-        )}
       </Stack>
       <SubmissionDetailModal notification={detail} onClose={() => setDetail(null)} />
     </Drawer>
