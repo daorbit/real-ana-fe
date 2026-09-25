@@ -42,7 +42,7 @@ export function MobileTabBar({
             data-active={active}
             aria-current={active ? "page" : undefined}
           >
-            <Icon size={22} strokeWidth={active ? 2.3 : 1.8} />
+            <Icon size={19} strokeWidth={active ? 2.3 : 1.8} />
             <span>{t(labelKey, label)}</span>
           </Link>
         );
@@ -55,7 +55,7 @@ export function MobileTabBar({
         aria-expanded={moreOpen}
         onClick={onMore}
       >
-        <Menu size={22} strokeWidth={moreOpen || !anyTab ? 2.3 : 1.8} />
+        <Menu size={19} strokeWidth={moreOpen || !anyTab ? 2.3 : 1.8} />
         <span>{t("nav.more", "More")}</span>
       </UnstyledButton>
     </nav>

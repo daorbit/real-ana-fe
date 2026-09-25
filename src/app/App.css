@@ -3272,7 +3272,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 @media (max-width: 48em) {
-  .app-main { height: calc(100dvh - 56px); }
+  .app-main { height: calc(100dvh - 48px); }
 }
 
 /* The shell's own corners are fixed at 16px rather than following the

@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { AppShell as MantineShell, Box, Group, Overlay } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
-import { Wordmark } from "@/shared/ui/Brand";
 import { useWorkspace } from "@/features/workspace/context";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { useSyncWorkspaceTheme } from "@/features/auth/components/useSyncWorkspaceTheme";
@@ -20,6 +19,7 @@ import { ActivityPanelProvider } from "@/features/activity/ActivityPanelContext"
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
+import { RailWorkspaceHeader } from "./shell/RailWorkspaceHeader";
 
 function useStarfieldPreset(): boolean {
   const [on, setOn] = useState(
@@ -91,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
       )}
       <MantineShell
-        header={{ height: { base: 56, sm: 0 } }}
+        header={{ height: { base: 48, sm: 0 } }}
         navbar={{
           width: collapsed ? 72 : 264,
           breakpoint: "sm",
@@ -100,17 +100,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         padding="sm"
       >
         <MantineShell.Header
-          px="md"
+          px="xs"
           hiddenFrom="sm"
+          className="m-header"
           style={{
             background: "var(--bg)",
             borderBottom: "1px solid var(--border)",
           }}
         >
-          {/* No burger: the tab bar's "More" opens the drawer on a phone. */}
-          <Group h="100%" gap="sm">
-            <Box component={Link} to="/app" display="flex">
-              <Wordmark />
+          {/* No burger: the tab bar's "More" opens the drawer on a phone. The
+              workspace row takes the wordmark's place, so the mark, the
+              workspace and its plan are on screen here as they are in the rail. */}
+          <Group h="100%" gap="sm" wrap="nowrap">
+            <Box style={{ minWidth: 0, flex: 1 }}>
+              <RailWorkspaceHeader collapsed={false} />
             </Box>
           </Group>
         </MantineShell.Header>
