@@ -26,7 +26,6 @@ import { SaveBarProvider, useSaveRegistration } from "@/shared/ui/SaveBar";
 import type { SharePanels } from "@/shared/types";
 import { ShareLinkCard } from "@/features/analytics/components/share/ShareLinkCard";
 import { PanelSwitchList, type PanelGroup } from "@/features/analytics/components/share/PanelSwitchList";
-import { LayoutPreview } from "@/features/analytics/components/share/LayoutPreview";
 import { ShareFootnote } from "@/features/analytics/components/share/ShareFootnote";
 import classes from "@/features/analytics/components/share/Share.module.css";
 
@@ -259,7 +258,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
     <div className={classes.stack}>
       <ShareLinkCard
         title={t("share.analyticsLinkTitle")}
-        description={enabled ? t("share.liveHint") : t("share.offHint")}
+        description={enabled ? t("share.cardLiveDesc") : t("share.cardOffDesc")}
         enabled={enabled}
         busy={linkBusy}
         onToggle={toggle}
@@ -322,16 +321,7 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
               </>
             }
           />
-          <div className={classes.visibility}>
-            <PanelSwitchList groups={groups} values={panels} onToggle={togglePanel} />
-            <div className={classes.previewCol}>
-              <div className={classes.previewHead}>
-                <span className={classes.groupTitle}>{t("share.previewTitle")}</span>
-                <span className={classes.switchHint}>{t("share.previewDesc")}</span>
-              </div>
-              <LayoutPreview panels={panels} workspace={active?.name ?? ""} />
-            </div>
-          </div>
+          <PanelSwitchList groups={groups} values={panels} onToggle={togglePanel} />
         </section>
       )}
 
@@ -413,7 +403,7 @@ function AuditShareCard({
           <span className={classes.auditUrl}>{prettyUrl(url)}</span>
           <span className={classes.auditMeta}>{t("share.auditedAgo", { when: timeAgo(createdAt) })}</span>
         </span>
-        <span className={classes.statusPill} data-live={live || undefined}>
+        <span className={classes.status} data-live={live || undefined}>
           <span className={classes.statusDot} />
           {live ? t("share.live") : t("share.off")}
         </span>

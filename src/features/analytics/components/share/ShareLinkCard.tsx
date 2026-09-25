@@ -34,12 +34,14 @@ export function ShareLinkCard({
   return (
     <div className={classes.card}>
       <div className={classes.linkHead}>
-        <span className={classes.statusPill} data-live={enabled || undefined}>
-          <span className={classes.statusDot} />
-          {enabled ? t("share.live") : t("share.off")}
-        </span>
         <div className={classes.linkIntro}>
-          <div className={classes.linkTitle}>{title}</div>
+          <div className={classes.linkTitle}>
+            {title}
+            <span className={classes.status} data-live={enabled || undefined}>
+              <span className={classes.statusDot} />
+              {enabled ? t("share.live") : t("share.off")}
+            </span>
+          </div>
           <div className={classes.linkDesc}>{description}</div>
         </div>
         <Switch

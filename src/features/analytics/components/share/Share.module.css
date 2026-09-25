@@ -121,6 +121,10 @@
 }
 
 .linkTitle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   font-size: var(--mantine-font-size-sm);
   font-weight: 600;
   color: var(--text);
@@ -133,39 +137,31 @@
   color: var(--text-2);
 }
 
-.statusPill {
-  flex-shrink: 0;
+.status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-2);
+  flex-shrink: 0;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap;
 }
 
-.statusPill[data-live] {
-  border-color: color-mix(in srgb, var(--mantine-color-green-6) 35%, transparent);
-  background: color-mix(in srgb, var(--mantine-color-green-6) 12%, transparent);
-  color: var(--mantine-color-green-5);
+.status[data-live] {
+  color: var(--mantine-color-green-6);
 }
 
 .statusDot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--text-2);
-  opacity: 0.6;
+  background: currentColor;
+  opacity: 0.55;
 }
 
-.statusPill[data-live] .statusDot {
-  background: var(--mantine-color-green-5);
+.status[data-live] .statusDot {
   opacity: 1;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mantine-color-green-5) 25%, transparent);
 }
 
 .linkBody {
@@ -252,25 +248,19 @@
   color: var(--text-2);
 }
 
-/* ---------- Panel switches + preview ---------- */
+/* ---------- Panel switches ---------- */
 
-.visibility {
+.groups {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--mantine-spacing-xl);
+  gap: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
   align-items: start;
 }
 
 @media (min-width: 62em) {
-  .visibility {
-    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 1fr);
+  .groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-.groups {
-  display: flex;
-  flex-direction: column;
-  gap: var(--mantine-spacing-lg);
 }
 
 .groupHead {
@@ -323,150 +313,6 @@
 }
 
 .switchHint {
-  font-size: var(--mantine-font-size-xs);
-  color: var(--text-2);
-}
-
-.previewCol {
-  position: sticky;
-  top: 16px;
-}
-
-.previewHead {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 8px;
-}
-
-.preview {
-  overflow: hidden;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.previewChrome {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
-}
-
-.previewChrome > span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--border-strong);
-}
-
-.previewAddr {
-  flex: 1;
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: 5px;
-  background: var(--surface);
-  color: var(--text-2);
-  font-size: 10.5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.previewPage {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px;
-  min-height: 220px;
-}
-
-.previewRow {
-  display: flex;
-  gap: 6px;
-}
-
-.block {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 7px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  animation: pop 180ms ease;
-}
-
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.blockLabel {
-  font-size: 9.5px;
-  font-weight: 600;
-  color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tiles {
-  display: flex;
-  gap: 4px;
-}
-
-.tiles i {
-  flex: 1;
-  height: 14px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
-.spark {
-  width: 100%;
-  height: 26px;
-}
-
-.spark polyline {
-  fill: none;
-  stroke: var(--accent-2);
-  stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
-}
-
-.bars {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.bars i {
-  height: 4px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--text-2) 30%, transparent);
-}
-
-.block[data-kind="small"] {
-  min-height: 28px;
-}
-
-.previewEmpty {
-  display: grid;
-  flex: 1;
-  place-items: center;
-  padding: 24px;
-  text-align: center;
   font-size: var(--mantine-font-size-xs);
   color: var(--text-2);
 }

@@ -815,9 +815,8 @@
     "lastOpenedShort": "last opened {{ago}}",
     "notOpenedShort": "not opened yet",
     "replaceLinkShort": "Replace link",
-    "previewTitle": "Layout preview",
-    "previewDesc": "Updates as you switch panels on and off.",
-    "previewEmpty": "Nothing is shared yet. Turn on at least one panel."
+    "cardLiveDesc": "Anyone with the link can view these numbers.",
+    "cardOffDesc": "The link returns 404 until you turn this on."
   },
   "sharePost": {
     "title": "Share Post",
