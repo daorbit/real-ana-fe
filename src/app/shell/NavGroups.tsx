@@ -5,15 +5,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "./NavLink";
 import type { NavGroup } from "./navItems";
 
-/**
- * One titled block of rail rows.
- *
- * Every group folds, not only the ones marked `collapsible` — the heading is
- * the fold control, so a heading that did nothing when clicked would be the
- * odd one out. `collapsible` still decides where the open/closed state lives:
- * the admin group answers to the rail so its state survives a remount, the
- * rest keep their own and start open.
- */
+
 function NavGroupBlock({
   group,
   pathname,
@@ -32,9 +24,7 @@ function NavGroupBlock({
   const { t } = useTranslation();
   const [ownOpen, setOwnOpen] = useState(true);
 
-  // A folded group still shows its rows when one of them is the page you are
-  // on — hiding the item that is currently highlighted leaves the navigation
-  // with nothing marked.
+
   const holdsCurrent = group.items.some((n) => n.to === pathname);
   const open = group.collapsible
     ? adminOpen || holdsCurrent
@@ -71,11 +61,7 @@ function NavGroupBlock({
         </UnstyledButton>
       )}
 
-      {/* Rendered outright rather than through an animated container: the rows
-          are the rail's whole purpose, and a height animation that mismeasures
-          leaves the navigation empty. Collapsed there is no heading to fold
-          with, so they always show — otherwise a group could be shut with no
-          visible way to reopen it. */}
+   
       {(collapsed || open) && <div>{rows}</div>}
     </Box>
   );

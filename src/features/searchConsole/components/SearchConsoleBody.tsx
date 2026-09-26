@@ -62,7 +62,7 @@ export function SearchConsoleBody({
         busy={overview.isFetching}
       />
 
-      <div className={classes.tabbar} role="tablist" aria-label="Search Console reports">
+      <div className={classes.tabbar} role="tablist" aria-label="Search visibility reports">
         {SEARCH_CONSOLE_TABS.map((t) => {
           const Icon = t.icon;
           const on = t.id === tab;
@@ -86,7 +86,7 @@ export function SearchConsoleBody({
       {tab === "overview" &&
         (overview.error && !overview.data ? (
           <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-            {errMessage(overview.error, "Search Console data could not be loaded.")}
+            {errMessage(overview.error, "Search visibility data could not be loaded.")}
           </Alert>
         ) : overview.data ? (
           <SearchOverviewTab

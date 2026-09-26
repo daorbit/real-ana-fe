@@ -8,23 +8,23 @@ export type ConnectVariant = "connect" | "ask-admin" | "upgrade" | "not-configur
 
 const COPY: Record<ConnectVariant, { title: string; body: string }> = {
   connect: {
-    title: "Connect Google Search Console",
-    body: "See the clicks, impressions, average position and exact search queries Google reports for this site. Read-only — Quantalog can't change anything in your Search Console.",
+    title: "Connect Google Search visibility",
+    body: "See the clicks, impressions, average position and exact search queries Google reports for this site. Read-only — Quantalog can't change anything in Google Search Console.",
   },
   "ask-admin": {
-    title: "Search Console isn't connected",
+    title: "Search visibility isn't connected",
     body: "A workspace admin can connect Google Search Console to show clicks, impressions and the queries people search for.",
   },
   upgrade: {
-    title: "Search Console is on paid plans",
+    title: "Search visibility is on paid plans",
     body: "Upgrade this workspace to see Google's clicks, impressions, average position and top queries for your sites.",
   },
   "not-configured": {
-    title: "Search Console isn't available yet",
+    title: "Search visibility isn't available yet",
     body: "Google Search Console hasn't been set up on this deployment. An administrator needs to add the Google credentials.",
   },
   reconnect: {
-    title: "Reconnect Search Console",
+    title: "Reconnect Search visibility",
     body: "Google access for this workspace stopped working. Reconnect to keep seeing search data.",
   },
 };

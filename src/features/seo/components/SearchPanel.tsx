@@ -219,18 +219,18 @@ function NotProvidedNote() {
         Google has withheld search terms from referrers since 2011, and the other major
         engines followed. No tool can recover keyword data from analytics referrers — what
         you get instead is which engines send traffic and which pages they land on. For
-        actual queries, impressions and average position, use Search Console.
+        actual queries, impressions and average position, use Search visibility.
       </Text>
       <Button
         component={Link}
-        to="/app/search-console"
+        to="/app/search-visibility"
         size="xs"
         variant="default"
         mt="sm"
         leftSection={<GoogleMark size={14} />}
         rightSection={<ArrowRight size={13} />}
       >
-        Open Search Console
+        Open Search visibility
       </Button>
     </Alert>
   );

@@ -6,16 +6,12 @@ import { Home, BarChart3, Search, CalendarClock, Menu } from "lucide-react";
 /** The four destinations people open most, straight from the thumb. */
 const TABS = [
   { to: "/app", labelKey: "nav.home", label: "Home", icon: Home, exact: true },
-  { to: "/app/analytics", labelKey: "nav.analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
   { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
   { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
 ];
 
-/**
- * The phone's bottom tab bar — what a native app puts under the thumb in place
- * of a side menu. The rest of the navigation is one tap away under "More",
- * which opens the navigation drawer (the header has no burger on phones).
- */
+
 export function MobileTabBar({
   pathname,
   moreOpen,

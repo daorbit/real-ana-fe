@@ -36,7 +36,7 @@ export function SearchDevicesTab({
   if (error || !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-        {errMessage(error, "Search Console data could not be loaded.")}
+        {errMessage(error, "Search visibility data could not be loaded.")}
       </Alert>
     );
   }

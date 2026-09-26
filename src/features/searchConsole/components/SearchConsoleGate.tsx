@@ -79,7 +79,7 @@ export function SearchConsoleGate({
     ) : (
       <SearchConsoleConnectCard
         variant="ask-admin"
-        message="Search Console is connected, but no property is linked to this site yet. A workspace admin can link one."
+        message="Search visibility is connected, but no property is linked to this site yet. A workspace admin can link one."
       />
     );
   }
@@ -94,15 +94,15 @@ export function SearchConsoleGate({
 
   const disconnectAll = () =>
     confirmDelete({
-      title: "Disconnect Search Console?",
-      body: "Quantalog will stop reading search data for every site in this workspace, and the saved Search Console data is deleted. You can reconnect at any time.",
+      title: "Disconnect Search visibility?",
+      body: "Quantalog will stop reading search data for every site in this workspace, and the saved Search visibility data is deleted. You can reconnect at any time.",
       confirmLabel: "Disconnect",
       onConfirm: async () => {
         try {
           await disconnect(workspaceId).unwrap();
-          notify.success("Search Console disconnected");
+          notify.success("Search visibility disconnected");
         } catch (e) {
-          notify.error(errMessage(e, "Could not disconnect Search Console."));
+          notify.error(errMessage(e, "Could not disconnect Search visibility."));
         }
       },
     });

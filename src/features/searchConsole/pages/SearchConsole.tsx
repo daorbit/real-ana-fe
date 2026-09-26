@@ -14,7 +14,7 @@ import { resolveTab, type SearchConsoleTabId } from "../searchConsoleTabs";
 import classes from "../components/searchConsole.module.css";
 
 export default function SearchConsole() {
-  useTitle("Search Console");
+  useTitle("Search visibility");
   const { active, loading } = useWorkspace();
   const workspaceId = active?._id ?? "";
 
@@ -45,7 +45,7 @@ export default function SearchConsole() {
         <EmptyState
           icon={FolderKanban}
           title="No workspace selected"
-          description="Search Console data belongs to the sites inside a workspace. Pick one — or create your first."
+          description="Search visibility data belongs to the sites inside a workspace. Pick one — or create your first."
           action={{ label: "Go to Workspaces", to: "/app/workspaces" }}
         />
       </AppShell>
@@ -55,8 +55,8 @@ export default function SearchConsole() {
   return (
     <AppShell>
       <PageHeader
-        title="Search Console"
-        description="How your sites perform in Google Search — clicks, impressions, queries, pages and sitemaps, straight from Google."
+        title="Search visibility"
+        description="How your sites appear in Google Search — clicks, impressions, queries, pages and sitemaps, straight from Google."
         actions={
           webSites.length > 0 && (
             <Select
@@ -78,7 +78,7 @@ export default function SearchConsole() {
         <EmptyState
           icon={Globe}
           title="Add a website first"
-          description="Search Console data is shown per website. Add a site to this workspace, then link its Search Console property here."
+          description="Search visibility data is shown per website. Add a site to this workspace, then link its Google Search property here."
           action={{ label: "Manage sites", to: "/app/workspaces" }}
         />
       ) : (

@@ -238,6 +238,7 @@ export default function App() {
               <Route path="/app" element={<Protected><ErrorBoundary variant="route" resetKey="/app"><Home /></ErrorBoundary></Protected>} />
               <Route path="/app/analytics" element={<Protected><RouteFrame><Analytics /></RouteFrame></Protected>} />
               <Route path="/app/seo" element={<Protected><RouteFrame><Seo /></RouteFrame></Protected>} />
+              <Route path="/app/search-visibility" element={<Protected><RouteFrame><SearchConsole /></RouteFrame></Protected>} />
               <Route path="/app/search-console" element={<Protected><RouteFrame><SearchConsole /></RouteFrame></Protected>} />
               <Route path="/app/compare" element={<Protected><RouteFrame><Compare /></RouteFrame></Protected>} />
               <Route

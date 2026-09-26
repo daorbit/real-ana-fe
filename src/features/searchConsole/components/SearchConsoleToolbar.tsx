@@ -92,7 +92,7 @@ export function SearchConsoleToolbar({
         {(link.onChangeProperty || link.onDisconnect) && (
           <Menu position="bottom-end" withArrow width={230}>
             <Menu.Target>
-              <ActionIcon variant="default" size="lg" aria-label="Search Console settings">
+              <ActionIcon variant="default" size="lg" aria-label="Search visibility settings">
                 <MoreHorizontal size={15} />
               </ActionIcon>
             </Menu.Target>
@@ -104,7 +104,7 @@ export function SearchConsoleToolbar({
               )}
               {link.onDisconnect && (
                 <Menu.Item color="red" leftSection={<Unplug size={14} />} onClick={link.onDisconnect}>
-                  Disconnect Search Console
+                  Disconnect Search visibility
                 </Menu.Item>
               )}
             </Menu.Dropdown>

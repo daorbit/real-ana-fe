@@ -18,33 +18,22 @@ export type NavGroup = {
   headingKey: string;
   heading: string;
   items: NavItem[];
-  /**
-   * Whether the group can be folded away.
-   *
-   * Only worth it for a group reached occasionally. A collapsible group that
-   * someone opens on every visit is a click added to every visit.
-   */
   collapsible?: boolean;
 };
 
-// Orbit is not in here. It is not one of the reports — it is the way into all
-// of them for anyone who does not yet know which report they want — and as a
-// one-row group at the top it read as a section someone forgot to fill. It has
-// its own card at the foot of the rail instead; see `OrbitCard`.
+
 export const NAV_GROUPS: NavGroup[] = [
   {
     headingKey: "nav.groupAnalyze",
     heading: "Analyze",
     items: [
       { to: "/app", labelKey: "nav.home", label: "Home", icon: Home },
-      { to: "/app/analytics", labelKey: "nav.analytics", label: "Analytics", icon: BarChart3 },
-      // Beside Analytics: this is per-user, not aggregate — the two answer
-      // different questions about the same events.
+      { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
+
       { to: "/app/journey", labelKey: "nav.journey", label: "User journeys", icon: Route },
-      { to: "/app/search-console", labelKey: "nav.searchConsole", label: "Search Console", icon: ScanSearch },
+      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: ScanSearch },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
-      // Beside SEO rather than inside it: an audit is a snapshot of one URL,
-      // while a comparison is a set of rivals watched over time.
+
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords },
     ],
   },
