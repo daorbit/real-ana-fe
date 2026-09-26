@@ -2218,6 +2218,41 @@ export type SearchPerformance = {
   fetchedAt: string;
 };
 
+export type SearchBreakdownDimension = "query" | "page" | "country" | "device";
+
+export type SearchBreakdownRow = SearchMetrics & {
+  key: string;
+  previousClicks: number | null;
+  previousPosition: number | null;
+};
+
+export type SearchBreakdown = {
+  dimension: SearchBreakdownDimension;
+  days: number;
+  startDate: string;
+  endDate: string;
+  rows: SearchBreakdownRow[];
+  fetchedAt: string;
+};
+
+export type SearchSitemap = {
+  path: string;
+  type: string;
+  isIndex: boolean;
+  isPending: boolean;
+  lastSubmitted: string | null;
+  lastDownloaded: string | null;
+  errors: number;
+  warnings: number;
+  submitted: number;
+  indexed: number;
+};
+
+export type SearchSitemaps = {
+  sitemaps: SearchSitemap[];
+  fetchedAt: string;
+};
+
 /** A business the connected Google account can see, offered in the picker. */
 export type GoogleAvailableLocation = {
   googleAccountId: string;

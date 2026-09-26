@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { ScrollArea, Table, Text, TextInput } from "@mantine/core";
-import { Search } from "lucide-react";
+import { Button, ScrollArea, Table, Text, TextInput } from "@mantine/core";
+import { ArrowRight, Search } from "lucide-react";
 import type { SearchMetrics } from "@/shared/types";
-import { METRICS } from "./searchMetrics";
+import { METRICS } from "../searchMetrics";
 import classes from "./searchConsole.module.css";
 
 export type TopRow = SearchMetrics & { label: string; href?: string };
@@ -13,12 +13,14 @@ export function SearchTopTable({
   labelHeader,
   rows,
   emptyText,
+  onViewAll,
 }: {
   title: string;
   description: string;
   labelHeader: string;
   rows: TopRow[];
   emptyText: string;
+  onViewAll?: () => void;
 }) {
   const [filter, setFilter] = useState("");
 
@@ -38,15 +40,21 @@ export function SearchTopTable({
             {description}
           </Text>
         </div>
-        {rows.length > 8 && (
-          <TextInput
-            size="xs"
-            placeholder="Filter"
-            leftSection={<Search size={13} />}
-            value={filter}
-            onChange={(e) => setFilter(e.currentTarget.value)}
-            aria-label={`Filter ${title.toLowerCase()}`}
-          />
+        {onViewAll ? (
+          <Button variant="subtle" size="compact-sm" rightSection={<ArrowRight size={13} />} onClick={onViewAll}>
+            View all
+          </Button>
+        ) : (
+          rows.length > 12 && (
+            <TextInput
+              size="xs"
+              placeholder="Filter"
+              leftSection={<Search size={13} />}
+              value={filter}
+              onChange={(e) => setFilter(e.currentTarget.value)}
+              aria-label={`Filter ${title.toLowerCase()}`}
+            />
+          )
         )}
       </div>
 

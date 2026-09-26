@@ -4,7 +4,7 @@ import {
 } from "recharts";
 import dayjs from "dayjs";
 import type { SearchPerformance } from "@/shared/types";
-import type { MetricDef } from "./searchMetrics";
+import type { MetricDef } from "../searchMetrics";
 import classes from "./searchConsole.module.css";
 
 type Point = SearchPerformance["daily"][number];

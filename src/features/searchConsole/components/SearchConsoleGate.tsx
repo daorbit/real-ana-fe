@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Skeleton } from "@mantine/core";
 import {
   useDisconnectSearchConsoleMutation,
@@ -8,10 +9,24 @@ import { useActiveBilling, usePermissions } from "@/features/workspace/context";
 import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
 import { SearchConsoleConnectCard } from "./SearchConsoleConnectCard";
 import { SearchConsolePropertyPicker } from "./SearchConsolePropertyPicker";
-import { SearchPerformancePanel } from "./SearchPerformancePanel";
-import { useSearchConsoleConnect } from "./useSearchConsoleConnect";
+import { useSearchConsoleConnect } from "../useSearchConsoleConnect";
 
-export function SearchConsoleSection({ workspaceId, siteId }: { workspaceId: string; siteId: string }) {
+export type SearchConsoleLink = {
+  propertyUrl: string;
+  googleEmail: string;
+  onChangeProperty?: () => void;
+  onDisconnect?: () => void;
+};
+
+export function SearchConsoleGate({
+  workspaceId,
+  siteId,
+  children,
+}: {
+  workspaceId: string;
+  siteId: string;
+  children: (link: SearchConsoleLink) => ReactNode;
+}) {
   const { canAdmin } = usePermissions();
   const billing = useActiveBilling();
   const onFreePlan = billing?.plan?.slug === "free";
@@ -23,7 +38,7 @@ export function SearchConsoleSection({ workspaceId, siteId }: { workspaceId: str
   const [unlink] = useUnlinkSearchConsolePropertyMutation();
   const [disconnect] = useDisconnectSearchConsoleMutation();
 
-  if (isLoading) return <Skeleton height={220} radius="md" />;
+  if (isLoading) return <Skeleton height={260} radius="md" />;
   if (!status) return null;
 
   if (onFreePlan) return <SearchConsoleConnectCard variant="upgrade" />;
@@ -93,13 +108,13 @@ export function SearchConsoleSection({ workspaceId, siteId }: { workspaceId: str
     });
 
   return (
-    <SearchPerformancePanel
-      workspaceId={workspaceId}
-      siteId={siteId}
-      propertyUrl={link.propertyUrl}
-      googleEmail={status.connection.googleEmail}
-      onChangeProperty={canAdmin ? () => void changeProperty() : undefined}
-      onDisconnect={canAdmin ? disconnectAll : undefined}
-    />
+    <>
+      {children({
+        propertyUrl: link.propertyUrl,
+        googleEmail: status.connection.googleEmail,
+        onChangeProperty: canAdmin ? () => void changeProperty() : undefined,
+        onDisconnect: canAdmin ? disconnectAll : undefined,
+      })}
+    </>
   );
 }

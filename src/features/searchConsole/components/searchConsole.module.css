@@ -198,6 +198,142 @@
   text-underline-offset: 3px;
 }
 
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.sortButton[data-active] {
+  color: var(--text);
+}
+
+.deviceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: var(--mantine-spacing-md);
+}
+
+.deviceHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deviceIcon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--accent-2);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.deviceStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin: var(--mantine-spacing-md) 0 var(--mantine-spacing-sm);
+}
+
+.deviceStats dt {
+  font-size: var(--mantine-font-size-xs);
+  color: var(--text-2);
+}
+
+.deviceStats dd {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-lg);
+}
+
+.tabbar {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabbar::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 4px;
+  margin-right: 18px;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
+.tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+}
+
+.tab[data-active] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.tab[data-active]::after {
+  background: var(--accent);
+}
+
+.tab[data-active] svg {
+  color: var(--accent);
+}
+
+.siteSelect {
+  width: 240px;
+}
+
+.countryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .connect {
   display: flex;
   flex-direction: column;
@@ -318,5 +454,18 @@
 
   .labelCell {
     max-width: 170px;
+  }
+
+  .siteSelect {
+    width: 100%;
+  }
+
+  .tab {
+    margin-right: 14px;
+  }
+
+  .headerActions {
+    width: 100%;
+    flex-wrap: wrap;
   }
 }

@@ -6,7 +6,7 @@ import {
   useLinkSearchConsolePropertyMutation,
 } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
-import { propertyLabel } from "./searchMetrics";
+import { propertyLabel } from "../searchMetrics";
 import classes from "./searchConsole.module.css";
 
 const PERMISSION_LABEL: Record<string, string> = {
