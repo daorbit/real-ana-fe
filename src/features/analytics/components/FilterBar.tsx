@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Group, Badge, Text, Button, Menu, Modal, TextInput, Stack, ActionIcon, Tooltip,
+  type MantineSpacing,
 } from "@mantine/core";
 import { Filter, X, Bookmark, BookmarkPlus, Trash2, Pin, ChevronDown } from "lucide-react";
 import type { StatsFilter, Segment } from "@/shared/types";
@@ -58,7 +59,9 @@ export function FilterBar({
   onTogglePin,
   saving = false,
   busyId = null,
+  mb = "lg",
 }: {
+  mb?: MantineSpacing | number;
   filter: StatsFilter;
   onRemove: (key: keyof StatsFilter) => void;
   onClear: () => void;
@@ -110,7 +113,7 @@ export function FilterBar({
 
   return (
     <>
-      <Group gap="xs" mb="lg" wrap="wrap">
+      <Group gap="xs" mb={mb} wrap="wrap">
         {segments.length > 0 && (
           <>
             <Group gap={6} wrap="nowrap">

@@ -100,6 +100,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           collapsed: { mobile: !navOpen },
         }}
         padding="sm"
+        data-nav-open={navOpen || undefined}
       >
         <MantineShell.Header
           px="xs"

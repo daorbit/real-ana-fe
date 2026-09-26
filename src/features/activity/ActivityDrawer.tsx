@@ -12,6 +12,7 @@ import {
   ActionIcon,
 } from "@mantine/core";
 import { BellOff, CheckCheck, ListChecks, MoreHorizontal, Settings2, Trash2, X } from "lucide-react";
+import { useMediaQuery } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -54,6 +55,7 @@ export function ActivityDrawer({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { demo } = useDemo();
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
   const [tab, setTab] = useState<"all" | "unread">("all");
   const [cursor, setCursor] = useState<string | null>(null);
@@ -241,7 +243,11 @@ export function ActivityDrawer({
           ? { blur: 2, backgroundOpacity: 0 }
           : { backgroundOpacity: 0.35, blur: 2 }
       }
-      transitionProps={{ duration: 180, transition: "slide-left" }}
+      transitionProps={
+        mobile
+          ? { duration: 280, transition: "slide-up", timingFunction: "cubic-bezier(0.32, 0.72, 0, 1)" }
+          : { duration: 180, transition: "slide-left" }
+      }
       aria-label={t("activity.title", "Activity")}
     >
       {/* Grows to the sheet's full height rather than to its content, so the

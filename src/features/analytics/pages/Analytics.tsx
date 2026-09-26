@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import {
-  Title, Text, Group, Button, SimpleGrid, Card, Progress,
-  Stack, Center, ThemeIcon, Badge, Tabs, Box, Loader, UnstyledButton,
+  Text, Group, Button, SimpleGrid, Card, Progress,
+  Stack, Center, ThemeIcon, Badge, Tabs, Box,
   ActionIcon, Tooltip as MTooltip,
 } from "@mantine/core";
 import {
@@ -14,8 +14,7 @@ import {
 import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow, Zap, Filter, GitBranch, Repeat,
-  Split, Target, AlertTriangle, LayoutDashboard, HelpCircle, GitCompareArrows, Waypoints,
+  ArrowDownWideNarrow, Zap, Filter, Split, Target, GitCompareArrows,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { trace } from "@/shared/lib/analytics";
@@ -36,7 +35,6 @@ import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
 import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitPanel";
 import { FilterBar } from "@/features/analytics/components/FilterBar";
-import { RefreshButton } from "@/shared/ui/Refresh";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { RangePicker, type RangeState } from "@/features/analytics/components/RangePicker";
@@ -44,8 +42,10 @@ import { ComparePicker, type CompareState } from "@/features/analytics/component
 import { ExportMenu } from "@/shared/ui/ExportMenu";
 import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
-import { DocsButton } from "@/shared/ui/DocsButton";
-import { ActivityBellIcon } from "@/features/activity/ActivityBell";
+import { AnalyticsHeader } from "@/features/analytics/components/layout/AnalyticsHeader";
+import { AnalyticsControlDeck } from "@/features/analytics/components/layout/AnalyticsControlDeck";
+import { AnalyticsSubTabs } from "@/features/analytics/components/layout/AnalyticsSubTabs";
+import { getAnalyticsSections } from "@/features/analytics/components/layout/analyticsSections";
 import { getAnalyticsHelp } from "@/features/analytics/components/analyticsHelp";
 import { useStats, useSiteScope } from "@/features/analytics";
 import { useSites } from "@/features/workspace";
@@ -684,45 +684,9 @@ export default function Analytics() {
       hint: "How many pages a typical visit touches. Higher means people explore more." },
   ] as const;
 
-  // Top-level sections. "Overview" is just the headline widgets; the rest each
-  // hold a small set of detail views, so nothing is buried in a long scroll.
-  type SubTab = { value: string; label: string; icon: any };
-  const SECTIONS: { value: string; label: string; icon: any; tabs: SubTab[] }[] = [
-    { value: "overview", label: t("analytics.sec.overview"), icon: LayoutDashboard, tabs: [] },
-    {
-      value: "behavior",
-      label: t("analytics.sec.behavior"),
-      icon: ArrowDownWideNarrow,
-      tabs: [
-        { value: "pages", label: t("analytics.tab.pages"), icon: Eye },
-        { value: "engagement", label: t("analytics.tab.engagement"), icon: ArrowDownWideNarrow },
-        { value: "clicks", label: t("analytics.tab.clicks"), icon: MousePointerClick },
-      ],
-    },
-    {
-      value: "acquisition",
-      label: t("analytics.sec.acquisition"),
-      icon: Tag,
-      tabs: [
-        { value: "sources", label: t("analytics.tab.sources"), icon: Tag },
-        { value: "geo", label: t("analytics.tab.geo"), icon: Globe2 },
-        { value: "tech", label: t("analytics.tab.tech"), icon: AppWindow },
-      ],
-    },
-    {
-      value: "conversion",
-      label: t("analytics.sec.conversion"),
-      icon: Target,
-      tabs: [
-        { value: "flow", label: t("analytics.tab.flow"), icon: Waypoints },
-        { value: "funnel", label: t("analytics.tab.funnel"), icon: GitBranch },
-        { value: "goals", label: t("analytics.tab.goals"), icon: Target },
-        { value: "events", label: t("analytics.tab.events"), icon: Zap },
-        { value: "retention", label: t("analytics.tab.retention"), icon: Repeat },
-        { value: "errors", label: t("analytics.tab.errors"), icon: AlertTriangle },
-      ],
-    },
-  ];
+  const SECTIONS = getAnalyticsSections(t);
+  const hasChips = Object.values(filter).some(Boolean) || segments.length > 0;
+  const updating = statsLoading || refetching;
 
   const activeSection = SECTIONS.find((s) => s.value === section) ?? SECTIONS[0];
 
@@ -765,103 +729,62 @@ export default function Analytics() {
         deletingId={deletingMarker}
       />
 
-      <Group justify="space-between" align="flex-start" mb="lg" gap="md" wrap="wrap">
-        <div style={{ flex: "1 1 240px", minWidth: 0 }}>
-          <Title order={1}>{t("analytics.title")}</Title>
-          <Text c="dimmed" size="sm" mt={6}>
+      <AnalyticsHeader
+        subtitle={
+          <>
             Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
- 
             {view?.comparison?.mode === "yoy"
               ? " Changes compare to the same period last year."
               : view?.comparison?.mode === "custom"
                 ? ` Changes compare to the ${range} from ${dayjs(view.comparison.since).format("MMM D, YYYY")}.`
                 : ` Changes compare to the previous ${range}.`}
-          </Text>
-        </div>
-        <Group gap="sm" wrap="wrap" justify="flex-end" className="an-toolbar">
-          <Group gap="sm" wrap="wrap" justify="flex-end" className="an-toolbar-btns">
-            <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+          </>
+        }
+        onRefresh={refresh}
+        refreshing={refreshing}
+        lastUpdated={lastUpdated}
+        onHelp={() => setHelpOpen(true)}
+        exportMenu={
+          <ExportMenu
+            workspaceId={active?._id}
+            range={range}
+            from={rangeState.from}
+            to={rangeState.to}
+            filter={serializeFilter(filter)}
+            sites={siteScope}
+          />
+        }
+      />
+
+      <AnalyticsControlDeck
+        controls={
+          <>
             <SiteFilter sites={sites} selected={siteScope} onChange={setPickedSites} />
-            <ExportMenu
-              workspaceId={active?._id}
-              range={range}
-              from={rangeState.from}
-              to={rangeState.to}
-              filter={serializeFilter(filter)}
-              sites={siteScope}
+            <RangePicker value={rangeState} onChange={setRangeState} disabled={updating} />
+            <ComparePicker value={compareState} onChange={setCompareState} disabled={updating} />
+          </>
+        }
+        updating={updating}
+        chips={
+          hasChips ? (
+            <FilterBar
+              mb={0}
+              filter={filter}
+              onRemove={removeFilter}
+              onClear={clearFilter}
+              segments={segments}
+              onApplySegment={(s) => setFilter(s.filter)}
+              onSaveSegment={canEdit ? handleSaveSegment : undefined}
+              onDeleteSegment={canEdit ? handleDeleteSegment : undefined}
+              onTogglePin={canEdit ? handleTogglePin : undefined}
+              saving={savingSegment}
+              busyId={busySegment}
             />
-        
-            <MTooltip label={t("analytics.helpTooltip")} withArrow>
-              <ActionIcon
-                variant="default"
-                size="lg"
-                onClick={() => setHelpOpen(true)}
-                aria-label={t("analytics.help")}
-              >
-                <HelpCircle size={17} />
-              </ActionIcon>
-            </MTooltip>
-
-            <DocsButton path="/overview" />
-          </Group>
-          <Group gap="xs" wrap="nowrap" className="an-range">
-            {(statsLoading || refetching) && (
-              <Loader size="xs" color="emerald" type="oval" />
-            )}
-
-            <RangePicker
-              value={rangeState}
-              onChange={setRangeState}
-              disabled={statsLoading || refetching}
-            />
-            <ComparePicker
-              value={compareState}
-              onChange={setCompareState}
-              disabled={statsLoading || refetching}
-            />
-            <ActivityBellIcon />
-          </Group>
-        </Group>
-      </Group>
-
-      {/* Primary section nav. Overview keeps the headline widgets; the rest hold
-          the detail views, grouped by the question each answers. */}
-      {/* A segmented rail rather than a row of filled buttons: eight solid
-          buttons all read as primary actions and fight the page for weight. */}
-      <Box className="section-rail" mb="lg">
-        {SECTIONS.map((s) => {
-          const isActive = section === s.value;
-          const Icon = s.icon;
-          return (
-            <UnstyledButton
-              key={s.value}
-              className="section-tab"
-              data-active={isActive}
-              onClick={() => goSection(s.value)}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <Icon size={15} />
-              <Text size="sm" fw={isActive ? 600 : 500}>
-                {s.label}
-              </Text>
-            </UnstyledButton>
-          );
-        })}
-      </Box>
-
-      {/* Active segment. Clicking any breakdown row below adds a chip here and
-          re-scopes every number to that segment. */}
-      <FilterBar
-        filter={filter}
-        onRemove={removeFilter}
-        onClear={clearFilter}
-        segments={segments}
-        onApplySegment={(s) => setFilter(s.filter)}
-        onSaveSegment={canEdit ? handleSaveSegment : undefined}
-        onDeleteSegment={canEdit ? handleDeleteSegment : undefined}
-        onTogglePin={canEdit ? handleTogglePin : undefined}
-        saving={savingSegment}
-        busyId={busySegment}
+          ) : null
+        }
+        sections={SECTIONS}
+        active={section}
+        onSection={goSection}
       />
 
       {/* The previous range stays on screen, dimmed, until the new one lands —
@@ -992,32 +915,7 @@ export default function Analytics() {
       </>}
 
       {section !== "overview" && <>
-      {/* Detail views for the active section. One tidy row of pills — a handful
-          per section, so nothing scrolls off-screen. */}
-      <Group justify="space-between" align="center" mb="md" wrap="wrap" gap="sm">
-        <Group gap={6} wrap="wrap" className="an-subtabs">
-          {activeSection.tabs.map((t) => {
-            const active = tab === t.value;
-            const Icon = t.icon;
-            return (
-              <Button
-                key={t.value}
-                size="sm"
-                radius="md"
-                variant={active ? "filled" : "light"}
-                color={active ? "emerald" : "gray"}
-                leftSection={<Icon size={14} />}
-                onClick={() => setTab(t.value)}
-              >
-                {t.label}
-              </Button>
-            );
-          })}
-        </Group>
-        <Text size="xs" c="dimmed" visibleFrom="sm">
-          Tip: click any row to filter the whole dashboard by it.
-        </Text>
-      </Group>
+      <AnalyticsSubTabs tabs={activeSection.tabs} active={tab} onChange={setTab} />
 
       <Tabs value={tab} onChange={(v) => v && setTab(v)} variant="pills" color="emerald" keepMounted={false}>
 
