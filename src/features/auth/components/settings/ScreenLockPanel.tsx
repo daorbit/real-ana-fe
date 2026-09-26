@@ -1,16 +1,14 @@
 import { useState } from "react";
 import {
-  ActionIcon, Alert, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
+  Alert, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
-import { KeyRound, Lock, LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
+import { KeyRound, Lock, LockKeyhole, LockKeyholeOpen } from "lucide-react";
 import { SettingsCard } from "./SettingsCard";
 import { StatusBadge } from "./StatusBadge";
 import { ConfirmIdentityField } from "./ConfirmIdentityField";
 import { identityProof, identityPrompt } from "./identityProof";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
-import lockBannerSrc from "@/assets/banners/lock-inactivity-banner.svg";
-import pinBannerSrc from "@/assets/banners/change-pin-banner.svg";
 
 /**
  * Turning the lock on needs a PIN set first, unless 2FA already covers
@@ -197,99 +195,57 @@ export function ScreenLockPanel() {
       <Modal
         opened={disableOpen}
         onClose={() => setDisableOpen(false)}
+        title="Turn off lock on inactivity"
         radius="lg"
-        size={440}
+        size={400}
         centered
-        padding={0}
-        withCloseButton={false}
       >
-        <Stack gap={0} className="verify-card" pos="relative">
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            onClick={() => setDisableOpen(false)}
-            aria-label="Close"
-            style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
-          >
-            <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />
-          </ActionIcon>
-          <div
-            style={{
-              height: 154,
-              backgroundImage: `url(${lockBannerSrc})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
+        <Stack gap="md" pt={4}>
+          <Text size="sm" c="dimmed">
+            {identityPrompt(user)} to turn off the screen lock for this account.
+          </Text>
+          {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
+          <ConfirmIdentityField
+            user={user}
+            value={disablePassword}
+            onChange={setDisablePassword}
+            onSubmit={() => void disable()}
           />
-          <Stack gap="md" p={26}>
-            <Text size="sm" c="dimmed">
-              {identityPrompt(user)} to turn off the screen lock for this account.
-            </Text>
-            {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
-            <ConfirmIdentityField
-              user={user}
-              value={disablePassword}
-              onChange={setDisablePassword}
-              onSubmit={() => void disable()}
-            />
-            <Button color="red" loading={disabling} disabled={!disablePassword.trim()} onClick={() => void disable()}>
-              Turn off
-            </Button>
-          </Stack>
+          <Button fullWidth size="md" color="red" loading={disabling} disabled={!disablePassword.trim()} onClick={() => void disable()}>
+            Turn off
+          </Button>
         </Stack>
       </Modal>
 
       <Modal
         opened={pinOpen}
         onClose={() => setPinOpen(false)}
+        title={user.hasPin ? "Change PIN" : "Set a PIN"}
         radius="lg"
-        size={440}
+        size={400}
         centered
-        padding={0}
-        withCloseButton={false}
       >
-        <Stack gap={0} className="verify-card" pos="relative">
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            onClick={() => setPinOpen(false)}
-            aria-label="Close"
-            style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
-          >
-            <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />
-          </ActionIcon>
-          <div
-            style={{
-              height: 154,
-              backgroundImage: `url(${pinBannerSrc})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-          <Stack gap="md" p={26}>
-            {pinError && <Alert color="red" variant="light">{pinError}</Alert>}
-            {user.hasPin && (
-              <PasswordInput
-                label="Current PIN"
-                maxLength={4}
-                value={currentPin}
-                onChange={(e) => setCurrentPin(e.currentTarget.value)}
-                disabled={pinBusy}
-              />
-            )}
+        <Stack gap="md" pt={4}>
+          {pinError && <Alert color="red" variant="light">{pinError}</Alert>}
+          {user.hasPin && (
             <PasswordInput
-              label="New PIN (4 digits)"
+              label="Current PIN"
               maxLength={4}
-              value={newPin}
-              onChange={(e) => setNewPin(e.currentTarget.value)}
+              value={currentPin}
+              onChange={(e) => setCurrentPin(e.currentTarget.value)}
               disabled={pinBusy}
             />
-            <Button fullWidth size="md" loading={pinBusy} disabled={newPin.trim().length !== 4} onClick={() => void savePin()}>
-              Save
-            </Button>
-          </Stack>
+          )}
+          <PasswordInput
+            label="New PIN (4 digits)"
+            maxLength={4}
+            value={newPin}
+            onChange={(e) => setNewPin(e.currentTarget.value)}
+            disabled={pinBusy}
+          />
+          <Button fullWidth size="md" loading={pinBusy} disabled={newPin.trim().length !== 4} onClick={() => void savePin()}>
+            Save
+          </Button>
         </Stack>
       </Modal>
     </>

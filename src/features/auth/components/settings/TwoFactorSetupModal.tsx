@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { ActionIcon, Button, CopyButton, Modal, PinInput, Text, Tooltip } from "@mantine/core";
-import { Check, Copy, Download, KeyRound, ShieldCheck, X } from "lucide-react";
+import { Check, Copy, Download, KeyRound, ShieldCheck } from "lucide-react";
 import { api } from "@/shared/lib/http";
 import { errMessage } from "@/shared/lib/notify";
-import bannerSrc from "@/assets/banners/totp-setup-banner.svg";
 import { TwoFactorSetupSteps } from "./TwoFactorSetupSteps";
 import { downloadBackupCodes, formatSecret, type TotpSetup } from "./twoFactorSetup";
 import classes from "./TwoFactorSetup.module.css";
@@ -50,19 +49,14 @@ export function TwoFactorSetupModal({
     <Modal
       opened={setup !== null}
       onClose={onClose}
+      title={done ? "Save your backup codes" : "Set up two-factor authentication"}
       radius="lg"
       size={done ? 480 : 640}
+      padding="lg"
       centered
-      padding={0}
-      withCloseButton={false}
       closeOnClickOutside={!enabling}
     >
-      <div className="verify-card">
-        <ActionIcon variant="subtle" color="gray" size="sm" onClick={onClose} aria-label="Close" className={classes.close}>
-          <X size={16} />
-        </ActionIcon>
-        <img src={bannerSrc} alt="" className={classes.banner} />
-
+      <div>
         <div className={classes.body}>
           <TwoFactorSetupSteps active={activeStep} />
 
