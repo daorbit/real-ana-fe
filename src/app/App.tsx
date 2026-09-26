@@ -32,6 +32,7 @@ const Orbit = lazy(() => import("@/features/orbit/pages/Orbit"));
 const Analytics = lazy(() => import("@/features/analytics/pages/Analytics"));
 const Seo = lazy(() => import("@/features/seo/pages/Seo"));
 const SearchConsole = lazy(() => import("@/features/searchConsole/pages/SearchConsole"));
+const SearchConsolePageDetail = lazy(() => import("@/features/searchConsole/pages/SearchConsolePageDetail"));
 const Compare = lazy(() => import("@/features/compare/pages/Compare"));
 const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"));
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
@@ -239,7 +240,9 @@ export default function App() {
               <Route path="/app/analytics" element={<Protected><RouteFrame><Analytics /></RouteFrame></Protected>} />
               <Route path="/app/seo" element={<Protected><RouteFrame><Seo /></RouteFrame></Protected>} />
               <Route path="/app/search-visibility" element={<Protected><RouteFrame><SearchConsole /></RouteFrame></Protected>} />
+              <Route path="/app/search-visibility/page/:pageKey" element={<Protected><RouteFrame><SearchConsolePageDetail /></RouteFrame></Protected>} />
               <Route path="/app/search-console" element={<Protected><RouteFrame><SearchConsole /></RouteFrame></Protected>} />
+              <Route path="/app/search-console/page/:pageKey" element={<Protected><RouteFrame><SearchConsolePageDetail /></RouteFrame></Protected>} />
               <Route path="/app/compare" element={<Protected><RouteFrame><Compare /></RouteFrame></Protected>} />
               <Route
                 path="/app/seo/:siteId/report/:reportId/print"

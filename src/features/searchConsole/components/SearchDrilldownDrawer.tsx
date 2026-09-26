@@ -78,6 +78,11 @@ export function SearchDrilldownDrawer({
         </Stack>
       ) : (
         <Stack gap="lg">
+          {target?.dimension === "page" && (
+            <Text size="xs" c="dimmed">
+              This page detail is also available as its own route with a shareable URL.
+            </Text>
+          )}
           <div className={classes.drawerTiles}>
             {METRICS.map((m) => {
               const change = metricChange(m, data.totals[m.key], data.previous?.[m.key]);

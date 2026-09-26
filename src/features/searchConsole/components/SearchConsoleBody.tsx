@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Alert, SimpleGrid, Skeleton, Stack } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchPerformanceQuery } from "@/app/store";
@@ -38,9 +39,28 @@ export function SearchConsoleBody({
   tab: SearchConsoleTabId;
   onTabChange: (tab: SearchConsoleTabId) => void;
 }) {
+  const navigate = useNavigate();
   const [days, setDays] = useState(28);
   const [type, setType] = useState<SearchType>("web");
   const [drillTarget, setDrillTarget] = useState<DrillTarget | null>(null);
+
+  const openTarget = (target: DrillTarget) => {
+    if (target.dimension === "page") {
+      const key = typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID().slice(0, 8)
+        : Math.random().toString(36).slice(2, 10);
+      const params = new URLSearchParams({
+        workspaceId,
+        siteId,
+        days: String(days),
+        type,
+        url: target.value,
+      });
+      navigate(`/app/search-visibility/page/${key}?${params.toString()}`);
+      return;
+    }
+    setDrillTarget(target);
+  };
 
   const overview = useGetSearchPerformanceQuery(
     { workspaceId, siteId, days, type },
@@ -93,7 +113,7 @@ export function SearchConsoleBody({
             data={overview.data}
             onViewQueries={() => onTabChange("queries")}
             onViewPages={() => onTabChange("pages")}
-            onOpen={(target) => setDrillTarget(target)}
+            onOpen={openTarget}
           />
         ) : (
           <Stack gap="md">
@@ -106,7 +126,7 @@ export function SearchConsoleBody({
           </Stack>
         ))}
 
-      {tab === "insights" && <SearchInsightsTab {...shared} onOpen={(target) => setDrillTarget(target)} />}
+      {tab === "insights" && <SearchInsightsTab {...shared} onOpen={openTarget} />}
 
       {tab === "queries" && (
         <SearchBreakdownTab
@@ -117,6 +137,7 @@ export function SearchConsoleBody({
           labelHeader="Query"
           renderLabel={renderQuery}
           searchLabel={queryText}
+          onOpenRow={(row) => setDrillTarget({ dimension: "query", value: row.key })}
         />
       )}
 
@@ -129,6 +150,7 @@ export function SearchConsoleBody({
           labelHeader="Page"
           renderLabel={renderPage}
           searchLabel={pageText}
+          onOpenRow={(row) => openTarget({ dimension: "page", value: row.key })}
         />
       )}
 
