@@ -8,7 +8,7 @@ import {
 import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
 import { trace } from "@/shared/lib/analytics";
-import { rememberUser } from "@/features/auth/lastUser";
+import { rememberUser, type LoginMethod } from "@/features/auth/lastUser";
 import { hideLock, showLock } from "@/shared/lib/lockState";
 import type { ProfileUpdate, User } from "@/shared/types";
 
@@ -23,9 +23,11 @@ type AuthState = {
     password: string,
     turnstileToken?: string,
   ) => Promise<{ requires2fa: false } | { requires2fa: true; pendingToken: string }>;
-  verifyTotp: (pendingToken: string, code: string) => Promise<void>;
+  verifyTotp: (pendingToken: string, code: string, method?: LoginMethod) => Promise<void>;
 
-  googleSignIn: (credential: string) => Promise<{ created: boolean }>;
+  googleSignIn: (
+    credential: string,
+  ) => Promise<{ requires2fa: false; created: boolean } | { requires2fa: true; pendingToken: string }>;
 
   adoptToken: (token: string) => Promise<void>;
   /** Starts a signup and emails a code. No account exists until `verifySignup`. */
@@ -123,20 +125,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { requires2fa: false as const };
   };
 
-  const verifyTotp = async (pendingToken: string, code: string) => {
+  const verifyTotp = async (pendingToken: string, code: string, method: LoginMethod = "password") => {
     const r = await api.post<AuthResp>("/api/auth/2fa/verify", { pendingToken, code });
     setToken(r.token);
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
-    rememberUser(r.user, "password");
+    rememberUser(r.user, method);
     trace(r.user.id, "login", "login_2fa", "app");
   };
 
   const googleSignIn = async (credential: string) => {
-    const r = await api.post<AuthResp & { created?: boolean }>(
-      "/api/auth/google",
-      { credential }
-    );
+    const r = await api.post<
+      (AuthResp & { created?: boolean }) | { requires2fa: true; pendingToken: string }
+    >("/api/auth/google", { credential });
+    if ("requires2fa" in r) return { requires2fa: true as const, pendingToken: r.pendingToken };
+
     setToken(r.token);
     dispatch(rtkApi.util.resetApiState());
     if (r.created) {
@@ -149,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(r.user);
     rememberUser(r.user, "google");
     trace(r.user.id, r.created ? "signup" : "login", "google_signin", "app");
-    return { created: Boolean(r.created) };
+    return { requires2fa: false as const, created: Boolean(r.created) };
   };
 
   const adoptToken = async (token: string) => {

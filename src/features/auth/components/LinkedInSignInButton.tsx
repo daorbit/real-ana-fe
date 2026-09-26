@@ -35,9 +35,11 @@ function LinkedInIcon() {
 export function LinkedInSignInButton({
   label = "Continue with LinkedIn",
   onError,
+  onRequires2fa,
 }: {
   label?: string;
   onError?: (message: string) => void;
+  onRequires2fa?: (pendingToken: string) => void;
 }) {
   const { adoptToken } = useAuth();
   const nav = useNavigate();
@@ -62,6 +64,14 @@ export function LinkedInSignInButton({
     const clean = () =>
       window.history.replaceState({}, "", window.location.pathname);
 
+    if (status === "2fa") {
+      const pendingToken = params.get("pendingToken");
+      clean();
+      if (pendingToken && onRequires2fa) onRequires2fa(pendingToken);
+      else onError?.("Could not sign in with LinkedIn. Please try again.");
+      return;
+    }
+
     if (status !== "ok") {
       clean();
       if (status !== "cancelled") {
@@ -85,7 +95,7 @@ export function LinkedInSignInButton({
       })
       .catch(() => onError?.("Could not sign in with LinkedIn. Please try again."))
       .finally(() => setBusy(false));
-  }, [adoptToken, nav, onError]);
+  }, [adoptToken, nav, onError, onRequires2fa]);
 
   return (
     <Button

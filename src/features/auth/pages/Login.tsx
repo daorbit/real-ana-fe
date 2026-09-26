@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -18,7 +18,7 @@ import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { AccountLockedDialog } from "@/features/auth/components/AccountLockedDialog";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { consumeReturnPath } from "@/shared/lib/session";
-import { getLastUser } from "@/features/auth/lastUser";
+import { getLastUser, type LoginMethod } from "@/features/auth/lastUser";
 import { LastUsedBadge } from "@/features/auth/components/LastUsedBadge";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
@@ -40,7 +40,7 @@ export default function Login() {
   // Set once the password check comes back asking for a second factor.
   // Distinct from `verifying` (the Turnstile challenge modal) — both can't
   // be open at once, since the challenge already ran before this exists.
-  const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [pending2fa, setPending2fa] = useState<{ token: string; method: LoginMethod } | null>(null);
   const [totpBusy, setTotpBusy] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<Date | null>(null);
 
@@ -95,7 +95,7 @@ export default function Login() {
     try {
       const r = await login(email.trim(), password, token);
       if (r.requires2fa) {
-        setPendingToken(r.pendingToken);
+        setPending2fa({ token: r.pendingToken, method: "password" });
         return;
       }
       notify.success("Welcome back!", "Logged in");
@@ -113,16 +113,21 @@ export default function Login() {
   };
 
   const submitTotp = async (code: string) => {
-    if (!pendingToken) return;
+    if (!pending2fa) return;
     setTotpBusy(true);
     try {
-      await verifyTotp(pendingToken, code);
+      await verifyTotp(pending2fa.token, code, pending2fa.method);
       notify.success("Welcome back!", "Logged in");
       goAfterLogin();
     } finally {
       setTotpBusy(false);
     }
   };
+
+  const requireLinkedIn2fa = useCallback(
+    (token: string) => setPending2fa({ token, method: "linkedin" }),
+    [],
+  );
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -180,13 +185,18 @@ export default function Login() {
                     );
                     goAfterLogin();
                   }}
+                  onRequires2fa={(token) => setPending2fa({ token, method: "google" })}
                   onError={setError}
                 />
               </div>
 
               <div className="last-used-anchor">
                 {lastUser?.method === "linkedin" && <LastUsedBadge />}
-                <LinkedInSignInButton label="LinkedIn" onError={setError} />
+                <LinkedInSignInButton
+                  label="LinkedIn"
+                  onError={setError}
+                  onRequires2fa={requireLinkedIn2fa}
+                />
               </div>
             </Group>
 
@@ -268,10 +278,10 @@ export default function Login() {
       />
 
       <TotpPrompt
-        opened={pendingToken !== null}
+        opened={pending2fa !== null}
         busy={totpBusy}
         onSubmit={submitTotp}
-        onCancel={() => setPendingToken(null)}
+        onCancel={() => setPending2fa(null)}
       />
 
       <AccountLockedDialog lockedUntil={lockedUntil} onClose={() => setLockedUntil(null)} />

@@ -3,11 +3,13 @@ import type { User } from "@/shared/types";
  
 const KEY = "quantalog_last_user";
 
+export type LoginMethod = "password" | "google" | "linkedin";
+
 export type LastUser = {
   name: string;
   email: string;
   avatarUrl: string;
-  method: "password" | "google" | "linkedin";
+  method: LoginMethod;
 };
 
 export function rememberUser(user: User, method: LastUser["method"]) {

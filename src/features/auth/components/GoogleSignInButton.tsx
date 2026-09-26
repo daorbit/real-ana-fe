@@ -74,6 +74,7 @@ type Props = {
   /** Show the One Tap card automatically on mount. Off inside modals. */
   oneTap?: boolean;
   onSuccess: (created: boolean) => void;
+  onRequires2fa: (pendingToken: string) => void;
   onError: (message: string) => void;
   onBusyChange?: (busy: boolean) => void;
 };
@@ -83,6 +84,7 @@ export default function GoogleSignInButton({
   text = "signin_with",
   oneTap = false,
   onSuccess,
+  onRequires2fa,
   onError,
   onBusyChange,
 }: Props) {
@@ -111,11 +113,12 @@ export default function GoogleSignInButton({
       setHovered(false);
       onBusyChange?.(true);
       try {
-        const { created } = await googleSignIn(response.credential);
+        const result = await googleSignIn(response.credential);
         // Close the One Tap card before the caller navigates away — otherwise it
         // lingers on the next page and prompts a second time.
         window.google?.accounts.id.cancel();
-        onSuccess(created);
+        if (result.requires2fa) onRequires2fa(result.pendingToken);
+        else onSuccess(result.created);
       } catch (err) {
         const message =
           err && typeof err === "object" && "message" in err
@@ -127,7 +130,7 @@ export default function GoogleSignInButton({
         onBusyChange?.(false);
       }
     },
-    [googleSignIn, onSuccess, onError, onBusyChange]
+    [googleSignIn, onSuccess, onRequires2fa, onError, onBusyChange]
   );
 
   const render = useCallback(() => {

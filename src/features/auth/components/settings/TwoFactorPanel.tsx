@@ -118,7 +118,7 @@ export function TwoFactorPanel() {
         icon={Smartphone}
         title="Two-factor authentication"
         badge={<StatusBadge on={Boolean(user.totpEnabled)} />}
-        description="Ask for a code from an authenticator app, like Google Authenticator or 1Password, every time you log in with a password."
+        description="Ask for a code from an authenticator app, like Google Authenticator or 1Password, every time you log in — with a password, Google or LinkedIn."
         action={
           user.totpEnabled ? (
             <Button

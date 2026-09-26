@@ -13,6 +13,7 @@ import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { VerifyEmailStep } from "@/features/auth/components/VerifyEmailStep";
+import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
@@ -23,7 +24,7 @@ import type { Currency } from "@/shared/types";
 type Touched = Record<string, boolean>;
 
 export default function Signup() {
-  const { signup, startDemo } = useAuth();
+  const { signup, startDemo, verifyTotp } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
 
@@ -47,6 +48,20 @@ export default function Signup() {
   const [googleBusy, setGoogleBusy] = useState(false);
   // Set once a code has been sent; switches this page to the verify step.
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [pending2faToken, setPending2faToken] = useState<string | null>(null);
+  const [totpBusy, setTotpBusy] = useState(false);
+
+  const submitTotp = async (code: string) => {
+    if (!pending2faToken) return;
+    setTotpBusy(true);
+    try {
+      await verifyTotp(pending2faToken, code, "google");
+      notify.success("Welcome back!", "Logged in");
+      nav("/app");
+    } finally {
+      setTotpBusy(false);
+    }
+  };
 
   const enterDemo = async () => {
     setDemoBusy(true);
@@ -191,6 +206,7 @@ export default function Signup() {
                     nav("/app");
                   }
                 }}
+                onRequires2fa={setPending2faToken}
                 onError={setError}
               />
 
@@ -298,6 +314,13 @@ export default function Signup() {
           </Stack>
         </motion.form>
       </div>
+
+      <TotpPrompt
+        opened={pending2faToken !== null}
+        busy={totpBusy}
+        onSubmit={submitTotp}
+        onCancel={() => setPending2faToken(null)}
+      />
     </div>
   );
 }
