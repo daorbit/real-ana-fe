@@ -2175,6 +2175,49 @@ export type GoogleReviewsStatus = {
   locations: GoogleReviewLocation[];
 };
 
+export type SearchConsoleStatus = {
+  configured: boolean;
+  connected: boolean;
+  connection: {
+    googleEmail: string;
+    status: "active" | "revoked" | "error";
+    statusMessage: string;
+    connectedAt?: string;
+  } | null;
+  links: { siteId: string; propertyUrl: string }[];
+};
+
+export type SearchConsolePropertyOption = {
+  propertyUrl: string;
+  permissionLevel: string;
+  matches: boolean;
+};
+
+export type SearchConsoleProperties = {
+  domain: string;
+  properties: SearchConsolePropertyOption[];
+};
+
+export type SearchMetrics = {
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+};
+
+export type SearchPerformance = {
+  propertyUrl: string;
+  days: number;
+  startDate: string;
+  endDate: string;
+  totals: SearchMetrics;
+  previous: SearchMetrics | null;
+  daily: (SearchMetrics & { date: string })[];
+  queries: (SearchMetrics & { query: string })[];
+  pages: (SearchMetrics & { page: string })[];
+  fetchedAt: string;
+};
+
 /** A business the connected Google account can see, offered in the picker. */
 export type GoogleAvailableLocation = {
   googleAccountId: string;

@@ -49,6 +49,7 @@ export function SearchPanel({
   if (traffic.visits === 0) {
     return (
       <Stack gap="lg">
+        <TrackingHead />
         <EmptyState
           compact
           icon={Search}
@@ -62,6 +63,7 @@ export function SearchPanel({
 
   return (
     <Stack gap="lg">
+      <TrackingHead />
       <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
         <Tile label="Search visits" value={num(traffic.visits)} icon={Search} color="emerald" />
         <Tile label="From search" value={num(traffic.visitors)} icon={Users} color="cyan" />
@@ -185,6 +187,19 @@ export function SearchPanel({
 
       <NotProvidedNote />
     </Stack>
+  );
+}
+
+function TrackingHead() {
+  return (
+    <div>
+      <Text fw={650} size="sm">
+        Visits from search engines
+      </Text>
+      <Text size="xs" c="dimmed" mt={2}>
+        Measured by your Quantalog tracking snippet — people who actually arrived from a search.
+      </Text>
+    </div>
   );
 }
 

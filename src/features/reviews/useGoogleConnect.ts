@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { notify } from "@/shared/lib/notify";
 import { getToken } from "@/shared/lib/http";
+import { useOAuthPopup } from "@/shared/lib/useOAuthPopup";
 
 /**
  * Starting a Google Business Profile connection.
@@ -51,76 +50,17 @@ const REASON_TEXT: Record<string, string> = {
 };
 
 export function useGoogleConnect(workspaceId: string | undefined, onConnected?: () => void) {
-  const [connecting, setConnecting] = useState(false);
-  // Held so the "did they just close it?" poll can be cleared on unmount.
-  const timer = useRef<number | null>(null);
-  const done = useRef(onConnected);
-  done.current = onConnected;
-
-  useEffect(() => {
-    return () => {
-      if (timer.current) window.clearInterval(timer.current);
-    };
-  }, []);
-
-  // The popup reports its outcome here and closes itself.
-  useEffect(() => {
-    const onMessage = (e: MessageEvent) => {
-      // Same-origin only, and only our own message shape: any page holding a
-      // handle on this window can post to it.
-      if (e.origin !== window.location.origin) return;
-      if (e.data?.source !== "quantalog-google-reviews") return;
-
-      setConnecting(false);
-      if (e.data.status === "connected") {
-        notify.success("Google connected");
-        done.current?.();
-      } else if (e.data.reason === "denied") {
-        notify.info("Google connection cancelled");
-      } else {
-        // The server names the cause; showing it beats a generic retry message,
-        // because most of these need a different action rather than another
-        // attempt — signing in again, or an admin adding credentials.
-        notify.error(REASON_TEXT[e.data.reason] ?? "Could not connect Google. Please try again.");
-      }
-    };
-
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-
-  const connect = useCallback(() => {
-    if (!workspaceId) return;
-
-    const token = getToken() ?? "";
-    const url =
-      `${API_BASE}/api/auth/google-business` +
-      `?token=${encodeURIComponent(token)}&workspaceId=${encodeURIComponent(workspaceId)}`;
-
-    setConnecting(true);
-    const popup = window.open(url, "google-oauth", "width=600,height=720,menubar=no,toolbar=no");
-
-    // Blocked popup: fall back to a full navigation so a blocker makes the flow
-    // clumsy rather than broken. Nothing is left to wait for in this window.
-    if (!popup) {
-      setConnecting(false);
-      window.location.href = url;
-      return;
-    }
-
-    // The window can also be closed by hand, which sends no message at all.
-    // Without this the button would spin for ever.
-    if (timer.current) window.clearInterval(timer.current);
-    timer.current = window.setInterval(() => {
-      if (!popup.closed) return;
-      window.clearInterval(timer.current!);
-      timer.current = null;
-      setConnecting(false);
-      // It may have closed *because* it succeeded, a moment before its message
-      // arrived; re-reading the status settles which.
-      done.current?.();
-    }, 700);
-  }, [workspaceId]);
-
-  return { connect, connecting };
+  return useOAuthPopup({
+    source: "quantalog-google-reviews",
+    buildUrl: () =>
+      workspaceId
+        ? `${API_BASE}/api/auth/google-business` +
+          `?token=${encodeURIComponent(getToken() ?? "")}&workspaceId=${encodeURIComponent(workspaceId)}`
+        : null,
+    reasonText: REASON_TEXT,
+    successMessage: "Google connected",
+    cancelledMessage: "Google connection cancelled",
+    fallbackError: "Could not connect Google. Please try again.",
+    onDone: onConnected,
+  });
 }

@@ -30,6 +30,7 @@ import type {
   JourneyUser, JourneyEvent,
   GoogleReviewsStatus, GoogleReviewLocation, GoogleAvailableLocations,
   GoogleReviewsList, GoogleSyncResult,
+  SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
   NotificationPage, NotificationPrefsResponse,
 } from "@/shared/types";
 
@@ -115,7 +116,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "Notification", "NotificationCount", "NotificationPrefs"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -2145,6 +2146,72 @@ export const api = createApi({
       }),
       invalidatesTags: ["GoogleReviews", "GoogleReviewList"],
     }),
+
+    getSearchConsoleStatus: build.query<SearchConsoleStatus, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/search-console`,
+      providesTags: ["SearchConsole"],
+    }),
+
+    getSearchConsoleProperties: build.query<
+      SearchConsoleProperties,
+      { workspaceId: string; siteId: string }
+    >({
+      query: ({ workspaceId, siteId }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/properties`,
+      keepUnusedDataFor: 0,
+    }),
+
+    linkSearchConsoleProperty: build.mutation<
+      { siteId: string; propertyUrl: string },
+      { workspaceId: string; siteId: string; propertyUrl: string }
+    >({
+      query: ({ workspaceId, siteId, propertyUrl }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console`,
+        method: "PUT",
+        body: { propertyUrl },
+      }),
+      invalidatesTags: ["SearchConsole", "SearchPerformance"],
+    }),
+
+    unlinkSearchConsoleProperty: build.mutation<
+      { unlinked: boolean },
+      { workspaceId: string; siteId: string }
+    >({
+      query: ({ workspaceId, siteId }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["SearchConsole", "SearchPerformance"],
+    }),
+
+    disconnectSearchConsole: build.mutation<{ disconnected: boolean }, string>({
+      query: (workspaceId) => ({
+        url: `/api/workspaces/${workspaceId}/search-console`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["SearchConsole", "SearchPerformance"],
+    }),
+
+    getSearchPerformance: build.query<
+      SearchPerformance,
+      { workspaceId: string; siteId: string; days: number }
+    >({
+      query: ({ workspaceId, siteId, days }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/performance?days=${days}`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
+    refreshSearchPerformance: build.mutation<
+      SearchPerformance,
+      { workspaceId: string; siteId: string; days: number }
+    >({
+      query: ({ workspaceId, siteId, days }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/performance/refresh`,
+        method: "POST",
+        body: { days },
+      }),
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
   }),
 });
 
@@ -2213,6 +2280,13 @@ export const {
   useSyncGoogleLocationMutation,
   useGetGoogleReviewsQuery,
   useDisconnectGoogleReviewsMutation,
+  useGetSearchConsoleStatusQuery,
+  useGetSearchConsolePropertiesQuery,
+  useLinkSearchConsolePropertyMutation,
+  useUnlinkSearchConsolePropertyMutation,
+  useDisconnectSearchConsoleMutation,
+  useGetSearchPerformanceQuery,
+  useRefreshSearchPerformanceMutation,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,
