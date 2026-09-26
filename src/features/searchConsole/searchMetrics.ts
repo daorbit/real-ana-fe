@@ -25,7 +25,14 @@ export const RANGES = [
   { value: "480", label: "16m" },
 ];
 
-export type MetricChange = { text: string; good: boolean; flat: boolean };
+export const SEARCH_TYPE_OPTIONS = [
+  { value: "web", label: "Web" },
+  { value: "image", label: "Image" },
+  { value: "video", label: "Video" },
+  { value: "news", label: "News" },
+];
+
+export type MetricChange ={ text: string; good: boolean; flat: boolean };
 
 export function metricChange(def: MetricDef, current: number, previous?: number): MetricChange | null {
   if (previous === undefined || previous === null) return null;

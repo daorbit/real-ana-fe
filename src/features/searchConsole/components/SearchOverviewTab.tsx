@@ -6,16 +6,19 @@ import type { SearchPerformance } from "@/shared/types";
 import { METRICS, metricChange, pagePath, type MetricKey } from "../searchMetrics";
 import { SearchPerformanceChart } from "./SearchPerformanceChart";
 import { SearchTopTable } from "./SearchTopTable";
+import type { DrillTarget } from "./SearchDrilldownDrawer";
 import classes from "./searchConsole.module.css";
 
 export function SearchOverviewTab({
   data,
   onViewQueries,
   onViewPages,
+  onOpen,
 }: {
   data: SearchPerformance;
   onViewQueries: () => void;
   onViewPages: () => void;
+  onOpen: (target: DrillTarget) => void;
 }) {
   const [metricKey, setMetricKey] = useState<MetricKey>("clicks");
   const metric = METRICS.find((m) => m.key === metricKey) ?? METRICS[0];
@@ -78,6 +81,7 @@ export function SearchOverviewTab({
           rows={data.queries.map((q) => ({ ...q, label: q.query }))}
           emptyText="No queries recorded for this period."
           onViewAll={onViewQueries}
+          onOpenRow={(row) => onOpen({ dimension: "query", value: row.label })}
         />
         <SearchTopTable
           title="Top pages"
@@ -86,6 +90,7 @@ export function SearchOverviewTab({
           rows={data.pages.map((p) => ({ ...p, label: pagePath(p.page), href: p.page }))}
           emptyText="No pages recorded for this period."
           onViewAll={onViewPages}
+          onOpenRow={(row) => row.href && onOpen({ dimension: "page", value: row.href })}
         />
       </div>
     </div>

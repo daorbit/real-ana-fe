@@ -14,6 +14,7 @@ export function SearchTopTable({
   rows,
   emptyText,
   onViewAll,
+  onOpenRow,
 }: {
   title: string;
   description: string;
@@ -21,6 +22,7 @@ export function SearchTopTable({
   rows: TopRow[];
   emptyText: string;
   onViewAll?: () => void;
+  onOpenRow?: (row: TopRow) => void;
 }) {
   const [filter, setFilter] = useState("");
 
@@ -77,10 +79,20 @@ export function SearchTopTable({
             </Table.Thead>
             <Table.Tbody>
               {shown.map((row, i) => (
-                <Table.Tr key={`${row.href ?? row.label}-${i}`}>
+                <Table.Tr
+                  key={`${row.href ?? row.label}-${i}`}
+                  className={onOpenRow ? classes.clickableRow : undefined}
+                  onClick={onOpenRow ? () => onOpenRow(row) : undefined}
+                >
                   <Table.Td className={classes.labelCell} title={row.label}>
                     {row.href ? (
-                      <a href={row.href} target="_blank" rel="noopener noreferrer" className={classes.pageLink}>
+                      <a
+                        href={row.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={classes.pageLink}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {row.label}
                       </a>
                     ) : (

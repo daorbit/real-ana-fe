@@ -2208,6 +2208,7 @@ export type SearchMetrics = {
 export type SearchPerformance = {
   propertyUrl: string;
   days: number;
+  type?: "web" | "image" | "video" | "news";
   startDate: string;
   endDate: string;
   totals: SearchMetrics;
@@ -2226,12 +2227,53 @@ export type SearchBreakdownRow = SearchMetrics & {
   previousPosition: number | null;
 };
 
+export type SearchType = "web" | "image" | "video" | "news";
+
+export type SearchBreakdownSort = "key" | "clicks" | "change" | "impressions" | "ctr" | "position";
+
 export type SearchBreakdown = {
   dimension: SearchBreakdownDimension;
   days: number;
+  type: SearchType;
   startDate: string;
   endDate: string;
   rows: SearchBreakdownRow[];
+  total: number;
+  totalAll: number;
+  page: number;
+  pageSize: number;
+  truncated: boolean;
+  fetchedAt: string;
+};
+
+export type SearchInsightRow = SearchBreakdownRow & { missedClicks?: number };
+
+export type SearchLostRow = { key: string; previousClicks: number; previousImpressions: number };
+
+export type SearchInsights = {
+  days: number;
+  type: SearchType;
+  quickWins: SearchInsightRow[];
+  lowCtr: SearchInsightRow[];
+  risingQueries: SearchInsightRow[];
+  fallingQueries: SearchInsightRow[];
+  risingPages: SearchInsightRow[];
+  fallingPages: SearchInsightRow[];
+  newQueries: SearchInsightRow[];
+  lostQueries: SearchLostRow[];
+  counts: { queries: number; pages: number; newQueries: number; lostQueries: number };
+  fetchedAt: string;
+};
+
+export type SearchDrilldown = {
+  dimension: "query" | "page";
+  value: string;
+  days: number;
+  type: SearchType;
+  totals: SearchMetrics;
+  previous: SearchMetrics | null;
+  daily: (SearchMetrics & { date: string })[];
+  related: (SearchMetrics & { key: string })[];
   fetchedAt: string;
 };
 

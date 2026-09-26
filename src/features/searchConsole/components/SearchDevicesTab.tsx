@@ -2,6 +2,7 @@ import { Alert, Progress, Skeleton, Text } from "@mantine/core";
 import { AlertTriangle, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import type { SearchType } from "@/shared/types";
 import { METRICS, metricChange } from "../searchMetrics";
 import classes from "./searchConsole.module.css";
 
@@ -15,16 +16,20 @@ export function SearchDevicesTab({
   workspaceId,
   siteId,
   days,
+  type,
 }: {
   workspaceId: string;
   siteId: string;
   days: number;
+  type: SearchType;
 }) {
   const { data, isLoading, error } = useGetSearchBreakdownQuery({
     workspaceId,
     siteId,
     dimension: "device",
     days,
+    type,
+    pageSize: 200,
   });
 
   if (isLoading) return <Skeleton height={220} radius="md" />;

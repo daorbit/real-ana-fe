@@ -1,9 +1,10 @@
-import { ActionIcon, Menu, SegmentedControl, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Menu, SegmentedControl, Select, Text, Tooltip } from "@mantine/core";
 import { Link2Off, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
 import { useRefreshSearchPerformanceMutation } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
-import { RANGES, propertyLabel } from "../searchMetrics";
+import type { SearchType } from "@/shared/types";
+import { RANGES, SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
 import type { SearchConsoleLink } from "./SearchConsoleGate";
 import classes from "./searchConsole.module.css";
 
@@ -12,6 +13,8 @@ export function SearchConsoleToolbar({
   siteId,
   days,
   onDaysChange,
+  type,
+  onTypeChange,
   link,
   busy,
 }: {
@@ -19,6 +22,8 @@ export function SearchConsoleToolbar({
   siteId: string;
   days: number;
   onDaysChange: (days: number) => void;
+  type: SearchType;
+  onTypeChange: (type: SearchType) => void;
   link: SearchConsoleLink;
   busy: boolean;
 }) {
@@ -26,7 +31,7 @@ export function SearchConsoleToolbar({
 
   const reload = async () => {
     try {
-      await refresh({ workspaceId, siteId, days }).unwrap();
+      await refresh({ workspaceId, siteId, days, type }).unwrap();
       notify.success("Fresh numbers from Google");
     } catch (e) {
       notify.error(errMessage(e, "Could not refresh from Google."));
@@ -56,6 +61,16 @@ export function SearchConsoleToolbar({
       </div>
 
       <div className={classes.headerActions}>
+        <Select
+          size="xs"
+          className={classes.typeSelect}
+          aria-label="Search type"
+          data={SEARCH_TYPE_OPTIONS}
+          value={type}
+          onChange={(v) => v && onTypeChange(v as SearchType)}
+          allowDeselect={false}
+          disabled={busy || refreshing}
+        />
         <SegmentedControl
           size="xs"
           value={String(days)}

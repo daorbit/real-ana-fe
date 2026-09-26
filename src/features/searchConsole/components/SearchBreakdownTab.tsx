@@ -1,79 +1,80 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
-  Alert, Group, Pagination, ScrollArea, Skeleton, Table, Text, TextInput, UnstyledButton,
+  Alert, Group, Loader, Pagination, ScrollArea, Select, Skeleton, Table, Text, TextInput, UnstyledButton,
 } from "@mantine/core";
+import { useDebouncedValue } from "@mantine/hooks";
 import { AlertTriangle, ArrowDown, ArrowUp, Search } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
-import type { SearchBreakdownDimension, SearchBreakdownRow } from "@/shared/types";
+import type {
+  SearchBreakdownDimension, SearchBreakdownRow, SearchBreakdownSort, SearchType,
+} from "@/shared/types";
 import { METRICS, metricChange } from "../searchMetrics";
 import classes from "./searchConsole.module.css";
 
-type SortKey = "key" | "clicks" | "change" | "impressions" | "ctr" | "position";
-
-const PAGE_SIZE = 50;
-
-function clicksChange(row: SearchBreakdownRow): number {
-  if (row.previousClicks === null) return Number.POSITIVE_INFINITY;
-  if (!row.previousClicks) return row.clicks ? Number.POSITIVE_INFINITY : 0;
-  return (row.clicks - row.previousClicks) / row.previousClicks;
-}
+const PAGE_SIZES = ["25", "50", "100", "200"];
 
 export function SearchBreakdownTab({
   workspaceId,
   siteId,
   days,
+  type,
   dimension,
   title,
   description,
   labelHeader,
   renderLabel,
   searchLabel,
+  onOpenRow,
 }: {
   workspaceId: string;
   siteId: string;
   days: number;
+  type: SearchType;
   dimension: SearchBreakdownDimension;
   title: string;
   description: string;
   labelHeader: string;
   renderLabel: (row: SearchBreakdownRow) => ReactNode;
-  searchLabel: (row: SearchBreakdownRow) => string;
+  searchLabel?: (row: SearchBreakdownRow) => string;
+  onOpenRow?: (row: SearchBreakdownRow) => void;
 }) {
-  const { data, isLoading, error } = useGetSearchBreakdownQuery({ workspaceId, siteId, dimension, days });
   const [filter, setFilter] = useState("");
-  const [sort, setSort] = useState<{ key: SortKey; desc: boolean }>({ key: "clicks", desc: true });
+  const [q] = useDebouncedValue(filter.trim(), 300);
+  const [sort, setSort] = useState<{ key: SearchBreakdownSort; desc: boolean }>({ key: "clicks", desc: true });
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const hasSearchLabel = typeof searchLabel === "function";
 
-  useEffect(() => setPage(1), [filter, sort, days, dimension]);
+  useEffect(() => setPage(1), [q, sort, days, type, dimension, pageSize]);
 
-  const rows = useMemo(() => {
-    const q = filter.trim().toLowerCase();
-    const list = (data?.rows ?? []).filter((r) => !q || searchLabel(r).toLowerCase().includes(q));
-    const value = (r: SearchBreakdownRow): number | string =>
-      sort.key === "key" ? searchLabel(r).toLowerCase() : sort.key === "change" ? clicksChange(r) : r[sort.key];
-    return [...list].sort((a, b) => {
-      const av = value(a);
-      const bv = value(b);
-      const cmp = typeof av === "string" ? av.localeCompare(String(bv)) : av - (bv as number);
-      return sort.desc ? -cmp : cmp;
-    });
-  }, [data, filter, sort, searchLabel]);
+  const { data, isLoading, isFetching, error } = useGetSearchBreakdownQuery({
+    workspaceId,
+    siteId,
+    dimension,
+    days,
+    type,
+    page,
+    pageSize,
+    sort: sort.key,
+    dir: sort.desc ? "desc" : "asc",
+    q,
+  });
 
   if (isLoading) return <Skeleton height={420} radius="md" />;
-  if (error || !data) {
+  if (error && !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
         {errMessage(error, "Search Console data could not be loaded.")}
       </Alert>
     );
   }
+  if (!data) return null;
 
-  const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  const shown = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const clicksMetric = METRICS[0];
 
-  const header = (key: SortKey, label: string, numeric = true) => (
+  const header = (key: SearchBreakdownSort, label: string, numeric = true) => (
     <Table.Th className={numeric ? classes.numCell : undefined}>
       <UnstyledButton
         className={classes.sortButton}
@@ -94,24 +95,26 @@ export function SearchBreakdownTab({
             {title}
           </Text>
           <Text size="xs" c="dimmed" mt={2}>
-            {description} {data.rows.length ? `${data.rows.length.toLocaleString()} in this period.` : ""}
+            {description} {data.totalAll ? `${data.totalAll.toLocaleString()} in this period.` : ""}
+            {data.truncated && " Google returns up to 25,000 rows per report."}
           </Text>
         </div>
-        {data.rows.length > 10 && (
+        <Group gap="xs" wrap="nowrap">
+          {isFetching && <Loader size={14} />}
           <TextInput
             size="xs"
-            placeholder={`Filter ${labelHeader.toLowerCase()}s`}
+            placeholder={`Search ${labelHeader.toLowerCase()}s`}
             leftSection={<Search size={13} />}
             value={filter}
             onChange={(e) => setFilter(e.currentTarget.value)}
-            aria-label={`Filter ${title.toLowerCase()}`}
+            aria-label={hasSearchLabel ? `Filter ${labelHeader.toLowerCase()}s` : `Search ${title.toLowerCase()}`}
           />
-        )}
+        </Group>
       </div>
 
-      {shown.length === 0 ? (
+      {data.rows.length === 0 ? (
         <Text size="sm" c="dimmed">
-          {data.rows.length ? "Nothing matches that filter." : "No data for this period yet."}
+          {data.totalAll ? "Nothing matches that search." : "No data for this period yet."}
         </Text>
       ) : (
         <ScrollArea className={classes.tableScroll}>
@@ -127,21 +130,21 @@ export function SearchBreakdownTab({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {shown.map((row, i) => {
+              {data.rows.map((row, i) => {
                 const change =
                   row.previousClicks === null
                     ? { text: "new", good: true, flat: false }
                     : metricChange(clicksMetric, row.clicks, row.previousClicks);
                 return (
-                  <Table.Tr key={`${row.key}-${i}`}>
-                    <Table.Td className={classes.labelCell} title={searchLabel(row)}>
+                  <Table.Tr
+                    key={`${row.key}-${i}`}
+                    className={onOpenRow ? classes.clickableRow : undefined}
+                    onClick={onOpenRow ? () => onOpenRow(row) : undefined}
+                  >
+                    <Table.Td className={classes.labelCell} title={row.key}>
                       {renderLabel(row)}
                     </Table.Td>
-                    {METRICS.slice(0, 1).map((m) => (
-                      <Table.Td key={m.key} className={classes.numCell}>
-                        {m.format(row[m.key])}
-                      </Table.Td>
-                    ))}
+                    <Table.Td className={classes.numCell}>{clicksMetric.format(row.clicks)}</Table.Td>
                     <Table.Td className={classes.numCell}>
                       {change ? (
                         <span className={classes.change} data-good={change.good || undefined} data-flat={change.flat || undefined}>
@@ -164,13 +167,24 @@ export function SearchBreakdownTab({
         </ScrollArea>
       )}
 
-      {pages > 1 && (
+      {data.total > 0 && (
         <Group justify="space-between" mt="md" gap="sm">
-          <Text size="xs" c="dimmed">
-            {((page - 1) * PAGE_SIZE + 1).toLocaleString()}–{Math.min(page * PAGE_SIZE, rows.length).toLocaleString()} of{" "}
-            {rows.length.toLocaleString()}
-          </Text>
-          <Pagination size="sm" total={pages} value={page} onChange={setPage} />
+          <Group gap="xs" wrap="nowrap">
+            <Text size="xs" c="dimmed">
+              {((data.page - 1) * data.pageSize + 1).toLocaleString()}–
+              {Math.min(data.page * data.pageSize, data.total).toLocaleString()} of {data.total.toLocaleString()}
+            </Text>
+            <Select
+              size="xs"
+              w={84}
+              aria-label="Rows per page"
+              data={PAGE_SIZES}
+              value={String(pageSize)}
+              onChange={(v) => v && setPageSize(Number(v))}
+              allowDeselect={false}
+            />
+          </Group>
+          {pages > 1 && <Pagination size="sm" total={pages} value={data.page} onChange={setPage} siblings={1} />}
         </Group>
       )}
     </div>

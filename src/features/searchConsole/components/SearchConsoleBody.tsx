@@ -3,15 +3,25 @@ import { Alert, SimpleGrid, Skeleton, Stack } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchPerformanceQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import type { SearchType } from "@/shared/types";
 import {
-  SEARCH_CONSOLE_TABS, countryText, pageText, queryText, renderCountry, renderPage, renderQuery,
+  SEARCH_CONSOLE_TABS,
+  countryText,
+  pageText,
+  queryText,
+  renderCountry,
+  renderPage,
+  renderQuery,
   type SearchConsoleTabId,
 } from "../searchConsoleTabs";
+import type { DrillTarget } from "./SearchDrilldownDrawer";
 import type { SearchConsoleLink } from "./SearchConsoleGate";
 import { SearchConsoleToolbar } from "./SearchConsoleToolbar";
+import { SearchDrilldownDrawer } from "./SearchDrilldownDrawer";
 import { SearchOverviewTab } from "./SearchOverviewTab";
 import { SearchBreakdownTab } from "./SearchBreakdownTab";
 import { SearchDevicesTab } from "./SearchDevicesTab";
+import { SearchInsightsTab } from "./SearchInsightsTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
 import classes from "./searchConsole.module.css";
 
@@ -29,12 +39,15 @@ export function SearchConsoleBody({
   onTabChange: (tab: SearchConsoleTabId) => void;
 }) {
   const [days, setDays] = useState(28);
+  const [type, setType] = useState<SearchType>("web");
+  const [drillTarget, setDrillTarget] = useState<DrillTarget | null>(null);
+
   const overview = useGetSearchPerformanceQuery(
-    { workspaceId, siteId, days },
+    { workspaceId, siteId, days, type },
     { skip: tab !== "overview" },
   );
 
-  const shared = { workspaceId, siteId, days };
+  const shared = { workspaceId, siteId, days, type };
 
   return (
     <div className={classes.page}>
@@ -43,6 +56,8 @@ export function SearchConsoleBody({
         siteId={siteId}
         days={days}
         onDaysChange={setDays}
+        type={type}
+        onTypeChange={setType}
         link={link}
         busy={overview.isFetching}
       />
@@ -78,6 +93,7 @@ export function SearchConsoleBody({
             data={overview.data}
             onViewQueries={() => onTabChange("queries")}
             onViewPages={() => onTabChange("pages")}
+            onOpen={(target) => setDrillTarget(target)}
           />
         ) : (
           <Stack gap="md">
@@ -89,6 +105,8 @@ export function SearchConsoleBody({
             <Skeleton height={300} radius="md" />
           </Stack>
         ))}
+
+      {tab === "insights" && <SearchInsightsTab {...shared} onOpen={(target) => setDrillTarget(target)} />}
 
       {tab === "queries" && (
         <SearchBreakdownTab
@@ -131,6 +149,16 @@ export function SearchConsoleBody({
       {tab === "sitemaps" && (
         <SearchSitemapsTab workspaceId={workspaceId} siteId={siteId} propertyUrl={link.propertyUrl} />
       )}
+
+      <SearchDrilldownDrawer
+        target={drillTarget}
+        onClose={() => setDrillTarget(null)}
+        onOpen={(target) => setDrillTarget(target)}
+        workspaceId={workspaceId}
+        siteId={siteId}
+        days={days}
+        type={type}
+      />
     </div>
   );
 }

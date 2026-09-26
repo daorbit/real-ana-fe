@@ -31,7 +31,6 @@ import { SchemaPanel } from "@/features/seo/components/SchemaPanel";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { LinksPanel } from "@/features/seo/components/LinksPanel";
 import { SearchPanel } from "@/features/seo/components/SearchPanel";
-import { SearchConsoleSection } from "@/features/seo/searchConsole/SearchConsoleSection";
 import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
 import { CrawlPanel } from "@/features/seo/components/CrawlPanel";
 import {
@@ -732,12 +731,7 @@ export default function Seo() {
                       <Block id="ai"><AiSearchPanel aiSearch={data.aiSearch} /></Block>
                     </>
                   )}
-                  {x.id === "search" && (
-                    <Stack gap="xl">
-                      <SearchConsoleSection workspaceId={workspaceId} siteId={siteId} />
-                      <SearchPanel traffic={searchTraffic} loading={searchLoading} />
-                    </Stack>
-                  )}
+                  {x.id === "search" && <SearchPanel traffic={searchTraffic} loading={searchLoading} />}
                 </div>
               ))}
             </div>

@@ -32,6 +32,7 @@ import type {
   GoogleReviewsList, GoogleSyncResult,
   SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
   SearchBreakdown, SearchBreakdownDimension, SearchSitemaps,
+  SearchType, SearchBreakdownSort, SearchInsights, SearchDrilldown,
   NotificationPage, NotificationPrefsResponse,
 } from "@/shared/types";
 
@@ -2195,19 +2196,63 @@ export const api = createApi({
 
     getSearchPerformance: build.query<
       SearchPerformance,
-      { workspaceId: string; siteId: string; days: number }
+      { workspaceId: string; siteId: string; days: number; type: SearchType }
     >({
-      query: ({ workspaceId, siteId, days }) =>
-        `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/performance?days=${days}`,
+      query: ({ workspaceId, siteId, days, type }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/performance`,
+        params: { days, type },
+      }),
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
 
     getSearchBreakdown: build.query<
       SearchBreakdown,
-      { workspaceId: string; siteId: string; dimension: SearchBreakdownDimension; days: number }
+      {
+        workspaceId: string;
+        siteId: string;
+        dimension: SearchBreakdownDimension;
+        days: number;
+        type: SearchType;
+        page?: number;
+        pageSize?: number;
+        sort?: SearchBreakdownSort;
+        dir?: "asc" | "desc";
+        q?: string;
+      }
     >({
-      query: ({ workspaceId, siteId, dimension, days }) =>
-        `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/breakdown?dimension=${dimension}&days=${days}`,
+      query: ({ workspaceId, siteId, ...params }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/breakdown`,
+        params,
+      }),
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
+    getSearchInsights: build.query<
+      SearchInsights,
+      { workspaceId: string; siteId: string; days: number; type: SearchType }
+    >({
+      query: ({ workspaceId, siteId, days, type }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/insights`,
+        params: { days, type },
+      }),
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
+    getSearchDrilldown: build.query<
+      SearchDrilldown,
+      {
+        workspaceId: string;
+        siteId: string;
+        dimension: "query" | "page";
+        value: string;
+        days: number;
+        type: SearchType;
+      }
+    >({
+      query: ({ workspaceId, siteId, ...params }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/drilldown`,
+        params,
+      }),
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
 
@@ -2219,12 +2264,12 @@ export const api = createApi({
 
     refreshSearchPerformance: build.mutation<
       SearchPerformance,
-      { workspaceId: string; siteId: string; days: number }
+      { workspaceId: string; siteId: string; days: number; type: SearchType }
     >({
-      query: ({ workspaceId, siteId, days }) => ({
+      query: ({ workspaceId, siteId, days, type }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/refresh`,
         method: "POST",
-        body: { days },
+        body: { days, type },
       }),
       invalidatesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
@@ -2305,6 +2350,8 @@ export const {
   useRefreshSearchPerformanceMutation,
   useGetSearchBreakdownQuery,
   useGetSearchSitemapsQuery,
+  useGetSearchInsightsQuery,
+  useGetSearchDrilldownQuery,
   useGetEmailStatusQuery,
   useGetEmailSegmentsQuery,
   useGetEmailTemplatesQuery,

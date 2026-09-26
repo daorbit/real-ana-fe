@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
 import {
-  Alert, Badge, Box, Card, Center, Group, Loader, Progress, ScrollArea, SimpleGrid,
+  Alert, Badge, Box, Button, Card, Center, Group, Loader, Progress, ScrollArea, SimpleGrid,
   Stack, Table, Text,
 } from "@mantine/core";
-import { Info, Search, TrendingUp, Users, Globe } from "lucide-react";
+import { ArrowRight, Info, Search, TrendingUp, Users, Globe } from "lucide-react";
+import { GoogleMark } from "@/shared/ui/GoogleMark";
 import type { LucideIcon } from "lucide-react";
 import type { SeoSearchTraffic } from "@/shared/types";
 import { num } from "@/shared/lib";
@@ -217,8 +219,19 @@ function NotProvidedNote() {
         Google has withheld search terms from referrers since 2011, and the other major
         engines followed. No tool can recover keyword data from analytics referrers — what
         you get instead is which engines send traffic and which pages they land on. For
-        actual queries, impressions and average position, connect Google Search Console.
+        actual queries, impressions and average position, use Search Console.
       </Text>
+      <Button
+        component={Link}
+        to="/app/search-console"
+        size="xs"
+        variant="default"
+        mt="sm"
+        leftSection={<GoogleMark size={14} />}
+        rightSection={<ArrowRight size={13} />}
+      >
+        Open Search Console
+      </Button>
     </Alert>
   );
 }
