@@ -70,7 +70,16 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
 export function useWorkspace(): WsState {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useWorkspace outside provider");
+  if (!ctx) {
+    return {
+      workspaces: [],
+      active: null,
+      loading: false,
+      fetchFailed: false,
+      setActive: () => undefined,
+      refresh: async () => undefined,
+    };
+  }
   return ctx;
 }
 

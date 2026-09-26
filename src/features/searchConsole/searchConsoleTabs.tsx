@@ -1,5 +1,5 @@
 import {
-  FileSearch, Globe2, LayoutDashboard, Lightbulb, ListTree, MonitorSmartphone, Search, type LucideIcon,
+  FileSearch, Globe2, LayoutDashboard, Lightbulb, ListChecks, ListTree, MonitorSmartphone, Search, type LucideIcon,
 } from "lucide-react";
 import { countryFlag, countryLabel } from "@/shared/lib";
 import { alpha3ToAlpha2 } from "@/shared/lib/countryCodes";
@@ -11,6 +11,7 @@ export type SearchConsoleTabId =
   | "insights"
   | "queries"
   | "pages"
+  | "indexing"
   | "countries"
   | "devices"
   | "sitemaps";
@@ -20,6 +21,7 @@ export const SEARCH_CONSOLE_TABS: { id: SearchConsoleTabId; label: string; icon:
   { id: "insights", label: "Insights", icon: Lightbulb },
   { id: "queries", label: "Queries", icon: Search },
   { id: "pages", label: "Pages", icon: FileSearch },
+  { id: "indexing", label: "Indexing", icon: ListChecks },
   { id: "countries", label: "Countries", icon: Globe2 },
   { id: "devices", label: "Devices", icon: MonitorSmartphone },
   { id: "sitemaps", label: "Sitemaps", icon: ListTree },

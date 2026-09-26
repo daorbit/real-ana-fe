@@ -23,6 +23,7 @@ import { SearchOverviewTab } from "./SearchOverviewTab";
 import { SearchBreakdownTab } from "./SearchBreakdownTab";
 import { SearchDevicesTab } from "./SearchDevicesTab";
 import { SearchInsightsTab } from "./SearchInsightsTab";
+import { SearchIndexingTab } from "./SearchIndexingTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
 import classes from "./searchConsole.module.css";
 
@@ -165,6 +166,8 @@ export function SearchConsoleBody({
           searchLabel={countryText}
         />
       )}
+
+      {tab === "indexing" && overview.data && <SearchIndexingTab data={overview.data} />}
 
       {tab === "devices" && <SearchDevicesTab {...shared} />}
 

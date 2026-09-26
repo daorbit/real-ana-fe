@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ActionIcon, Alert, Anchor, Badge, Group, Skeleton, Stack, Table, Text } from "@mantine/core";
-import { ArrowLeft, ExternalLink, FileSearch, Link as LinkIcon, Search, TimerReset } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ExternalLink, FileSearch, Link as LinkIcon, Search, TimerReset } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { AppShell } from "@/app/AppShell";
@@ -111,15 +111,24 @@ export default function SearchConsolePageDetail() {
                 <Badge leftSection={<TimerReset size={12} />} variant="light" color="grape" radius="sm">
                   {lastCrawled ? `Last crawled ${dayjs(lastCrawled).format("MMM D, YYYY")}` : `Fetched ${dayjs(detailQuery.data.fetchedAt).format("MMM D, YYYY")}`}
                 </Badge>
-                <Badge variant="light" color={indexStatus.includes("Indexed") ? "teal" : "gray"} radius="sm">
+                <Badge variant="light" color={indexStatus.includes("Indexed") ? "teal" : indexStatus.includes("Not indexed") ? "red" : "gray"} radius="sm">
                   {indexStatus}
                 </Badge>
               </Group>
 
+              {detailQuery.data.issues && detailQuery.data.issues.length > 0 && (
+                <Alert color="yellow" variant="light" icon={<AlertTriangle size={16} />}>
+                  <Text fw={600} size="sm" mb={4}>Indexing issue notes</Text>
+                  <Stack gap={4}>
+                    {detailQuery.data.issues.slice(0, 3).map((issue, idx) => (
+                      <Text key={`${issue.message}-${idx}`} size="sm">{issue.message}</Text>
+                    ))}
+                  </Stack>
+                </Alert>
+              )}
+
               <div className={classes.tiles}>
                 {METRICS.map((m) => {
-                  const change = detailQuery.data.previous ?
-                    (m.key === "position" ? null : undefined) : undefined;
                   const value = detailQuery.data.totals[m.key];
                   return (
                     <div key={m.key} className={classes.tile}>

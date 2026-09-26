@@ -61,10 +61,10 @@ export function SearchSitemapsTab({
       <div className={classes.cardHead}>
         <div>
           <Text fw={650} size="sm">
-            Sitemaps
+            Sitemap coverage
           </Text>
           <Text size="xs" c="dimmed" mt={2}>
-            Sitemaps submitted for this property and whether Google could read them.
+            This is sitemap coverage data, not a Google property-wide indexed-page total.
           </Text>
         </div>
         <Anchor href={consoleUrl} target="_blank" rel="noopener noreferrer" size="xs">
