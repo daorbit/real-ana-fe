@@ -30,14 +30,6 @@ export function WelcomeOverlay({ name, onDone }: { name?: string; onDone: () => 
 
   return createPortal(
     <div className="welcome-overlay" data-leaving={leaving || undefined} role="status" aria-live="polite">
-      {/* Slow glows in the lettering's own colours, behind everything. */}
-      <div className="welcome-overlay__glow" aria-hidden>
-        <span />
-        <span />
-        <span />
-      </div>
-      <div className="welcome-overlay__grid" aria-hidden />
-
       <div className="welcome-overlay__body">
         <Lottie
           src={welcomeAnimation}

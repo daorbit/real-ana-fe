@@ -1,4 +1,4 @@
-import { Box, Skeleton, Text } from "@mantine/core";
+import { Box, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import {
   useGetNotificationPreferencesQuery,
@@ -9,6 +9,7 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { PushCard } from "./PushCard";
 import { NotificationMatrix } from "./NotificationMatrix";
+import { NotificationsSkeleton } from "./NotificationsSkeleton";
 import { groupPreferences, type NotificationGroupId } from "./notificationGroups";
 import classes from "./Notifications.module.css";
 
@@ -30,17 +31,17 @@ export function NotificationsPanel() {
     }
   };
 
+  const note = (
+    <Text className={classes.note} mb="md">
+      {t("activity.pref.description", "Turning something off here stops it appearing in your activity panel.")}
+    </Text>
+  );
+
   if (isLoading) {
     return (
-      <Box className={classes.layout}>
-        <Box className={classes.column}>
-          <Skeleton height={380} radius="md" />
-          <Skeleton height={300} radius="md" />
-        </Box>
-        <Box className={classes.column}>
-          <Skeleton height={150} radius="md" />
-          <Skeleton height={440} radius="md" />
-        </Box>
+      <Box>
+        {note}
+        <NotificationsSkeleton />
       </Box>
     );
   }
@@ -85,9 +86,7 @@ export function NotificationsPanel() {
 
   return (
     <Box>
-      <Text className={classes.note} mb="md">
-        {t("activity.pref.description", "Turning something off here stops it appearing in your activity panel.")}
-      </Text>
+      {note}
       <Box className={classes.layout}>
         <Box className={classes.column}>
           {renderGroup("account")}
