@@ -8,6 +8,12 @@ body[data-page="lead-capture"] .app-panel__scroll > .route-fade {
   height: 100%;
 }
 
+@media (max-width: 48em) {
+  body[data-page="lead-capture"] .app-panel__scroll {
+    padding-bottom: calc(var(--m-tabbar-h, 54px) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .lead-capture__frame {
   display: block;
   width: 100%;
