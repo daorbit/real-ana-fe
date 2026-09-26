@@ -2,9 +2,11 @@ import { useState } from "react";
 import {
   ActionIcon, Alert, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
-import { KeyRound, LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
+import { KeyRound, Lock, LockKeyhole, LockKeyholeOpen, X } from "lucide-react";
 import { SettingsCard } from "./SettingsCard";
 import { StatusBadge } from "./StatusBadge";
+import { ConfirmIdentityField } from "./ConfirmIdentityField";
+import { identityProof, identityPrompt } from "./identityProof";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 import lockBannerSrc from "@/assets/banners/lock-inactivity-banner.svg";
@@ -16,7 +18,8 @@ import pinBannerSrc from "@/assets/banners/change-pin-banner.svg";
  * here too so the form asks for the PIN instead of just failing after submit.
  */
 export function ScreenLockPanel() {
-  const { user, enableScreenLock, disableScreenLock, setPin } = useAuth();
+  const { user, enableScreenLock, disableScreenLock, lockScreenNow, setPin } = useAuth();
+  const [locking, setLocking] = useState(false);
 
   const [enableOpen, setEnableOpen] = useState(false);
   const [enablePin, setEnablePin] = useState("");
@@ -59,16 +62,28 @@ export function ScreenLockPanel() {
     }
   };
 
+  const lockNow = async () => {
+    setLocking(true);
+    try {
+      await lockScreenNow();
+    } catch (err) {
+      notify.error(errMessage(err, "Could not lock the screen."), "Security");
+    } finally {
+      setLocking(false);
+    }
+  };
+
   const disable = async () => {
+    if (!disablePassword.trim()) return;
     setDisabling(true);
     setDisableError(null);
     try {
-      await disableScreenLock(disablePassword);
+      await disableScreenLock(identityProof(user, disablePassword));
       setDisableOpen(false);
       setDisablePassword("");
       notify.success("Screen lock turned off.", "Security");
     } catch (err) {
-      setDisableError(errMessage(err, "Incorrect password."));
+      setDisableError(errMessage(err, user.hasPassword ? "Incorrect password." : "Incorrect PIN or code."));
     } finally {
       setDisabling(false);
     }
@@ -97,12 +112,24 @@ export function ScreenLockPanel() {
         icon={LockKeyhole}
         title="Lock on inactivity"
         badge={<StatusBadge on={Boolean(user.screenLockEnabled)} />}
-        description={`Show a lock screen after 5 minutes without activity. Unlock with your PIN${
-          user.totpEnabled ? " or your authenticator app" : ""
-        }.`}
+        description={`Show a lock screen after 5 minutes without activity. Unlock with ${
+          user.hasPin && user.totpEnabled
+            ? "your PIN or your authenticator app"
+            : user.totpEnabled
+              ? "your authenticator app"
+              : "your PIN"
+        }.${user.screenLockEnabled ? " Use “Lock now” to try it." : ""}`}
         action={
           user.screenLockEnabled ? (
             <Group gap="xs" wrap="nowrap">
+              <Button
+                variant="default"
+                leftSection={<Lock size={15} />}
+                loading={locking}
+                onClick={() => void lockNow()}
+              >
+                Lock now
+              </Button>
               <Button variant="default" leftSection={<KeyRound size={15} />} onClick={() => setPinOpen(true)}>
                 {user.hasPin ? "Change PIN" : "Set a PIN"}
               </Button>
@@ -197,16 +224,16 @@ export function ScreenLockPanel() {
           />
           <Stack gap="md" p={26}>
             <Text size="sm" c="dimmed">
-              Confirm your password to turn off the screen lock for this account.
+              {identityPrompt(user)} to turn off the screen lock for this account.
             </Text>
             {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
-            <PasswordInput
-              placeholder="Current password"
+            <ConfirmIdentityField
+              user={user}
               value={disablePassword}
-              onChange={(e) => setDisablePassword(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === "Enter" && void disable()}
+              onChange={setDisablePassword}
+              onSubmit={() => void disable()}
             />
-            <Button color="red" loading={disabling} disabled={!disablePassword} onClick={() => void disable()}>
+            <Button color="red" loading={disabling} disabled={!disablePassword.trim()} onClick={() => void disable()}>
               Turn off
             </Button>
           </Stack>

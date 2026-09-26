@@ -11,6 +11,7 @@ import { trace } from "@/shared/lib/analytics";
 import { rememberUser, type LoginMethod } from "@/features/auth/lastUser";
 import { hideLock, showLock } from "@/shared/lib/lockState";
 import type { ProfileUpdate, User } from "@/shared/types";
+import type { IdentityProof } from "@/features/auth/components/settings/identityProof";
 
 type AuthState = {
   user: User | null;
@@ -47,7 +48,8 @@ type AuthState = {
   /** Turn the idle screen lock on. `pin` is required the first time unless
    * 2FA is already on. */
   enableScreenLock: (pin?: string) => Promise<void>;
-  disableScreenLock: (password: string) => Promise<void>;
+  disableScreenLock: (proof: IdentityProof) => Promise<void>;
+  lockScreenNow: () => Promise<void>;
   /** Prove the PIN or a TOTP code and clear the lock. */
   unlockScreen: (proof: { pin: string } | { totpCode: string }) => Promise<void>;
   startDemo: () => Promise<void>;
@@ -240,9 +242,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser((prev) => ({ ...updated, impersonating: prev?.impersonating }));
   };
 
-  const disableScreenLock = async (password: string) => {
-    await api.post("/api/auth/me/screen-lock/disable", { password });
+  const disableScreenLock = async (proof: IdentityProof) => {
+    await api.post("/api/auth/me/screen-lock/disable", proof);
     setUser((prev) => (prev ? { ...prev, screenLockEnabled: false } : prev));
+  };
+
+  const lockScreenNow = async () => {
+    const r = await api.post<{ ok: boolean; locked?: boolean }>("/api/auth/lock", {});
+    if (r.locked) showLock();
   };
 
   const unlockScreen = async (proof: { pin: string } | { totpCode: string }) => {
@@ -339,7 +346,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, setPin, enableScreenLock, disableScreenLock, unlockScreen, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, setPin, enableScreenLock, disableScreenLock, lockScreenNow, unlockScreen, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

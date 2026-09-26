@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
-  ActionIcon, Alert, Box, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
+  ActionIcon, Alert, Box, Button, Group, Modal, PinInput, Stack, Text,
 } from "@mantine/core";
 import { ShieldCheck, ShieldOff, Download, X, Smartphone } from "lucide-react";
 import { SettingsCard } from "./SettingsCard";
 import { StatusBadge } from "./StatusBadge";
+import { ConfirmIdentityField } from "./ConfirmIdentityField";
+import { identityProof, identityPrompt } from "./identityProof";
 import { api } from "@/shared/lib/http";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -97,16 +99,17 @@ export function TwoFactorPanel() {
   };
 
   const disable = async () => {
+    if (!disablePassword.trim()) return;
     setDisabling(true);
     setDisableError(null);
     try {
-      await api.post("/api/auth/2fa/disable", { password: disablePassword });
+      await api.post("/api/auth/2fa/disable", identityProof(user, disablePassword));
       setDisableOpen(false);
       setDisablePassword("");
       await refreshUser();
       notify.success("Two-factor authentication turned off.", "Security");
     } catch (err) {
-      setDisableError(errMessage(err, "Incorrect password."));
+      setDisableError(errMessage(err, user.hasPassword ? "Incorrect password." : "Incorrect PIN or code."));
     } finally {
       setDisabling(false);
     }
@@ -243,16 +246,16 @@ export function TwoFactorPanel() {
       >
         <Stack gap="md">
           <Text size="sm" c="dimmed">
-            Confirm your password to turn off two-factor authentication for this account.
+            {identityPrompt(user)} to turn off two-factor authentication for this account.
           </Text>
           {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
-          <PasswordInput
-            placeholder="Current password"
+          <ConfirmIdentityField
+            user={user}
             value={disablePassword}
-            onChange={(e) => setDisablePassword(e.currentTarget.value)}
-            onKeyDown={(e) => e.key === "Enter" && void disable()}
+            onChange={setDisablePassword}
+            onSubmit={() => void disable()}
           />
-          <Button color="red" loading={disabling} disabled={!disablePassword} onClick={() => void disable()}>
+          <Button color="red" loading={disabling} disabled={!disablePassword.trim()} onClick={() => void disable()}>
             Turn off
           </Button>
         </Stack>
