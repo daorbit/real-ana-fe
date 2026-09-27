@@ -4,7 +4,7 @@ import { Modal, TextInput, ScrollArea, Text, Box, UnstyledButton } from "@mantin
 import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import {
   Home, BarChart3, FolderKanban, Code2, Share2, CalendarClock, Users,
-  Search, Moon, Sun, BookOpen, CornerDownLeft,
+  Search, Moon, Sun, BookOpen, CornerDownLeft, TrendingUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useWorkspace } from "@/features/workspace/context";
@@ -81,7 +81,7 @@ export function CommandPalette() {
     const pages: Command[] = [
       { id: "home", label: "Home", section: "Go to", icon: Home, run: go("/app") },
       { id: "analytics", label: "Website analytics", section: "Go to", icon: BarChart3, run: go("/app/analytics") },
-      { id: "search-visibility", label: "Search visibility", section: "Go to", icon: Search, run: go("/app/search-visibility") },
+      { id: "search-visibility", label: "Search visibility", section: "Go to", icon: TrendingUp, run: go("/app/search-visibility") },
       { id: "seo", label: "SEO", section: "Go to", icon: Search, run: go("/app/seo") },
       { id: "workspaces", label: "Workspaces", section: "Go to", icon: FolderKanban, run: go("/app/workspaces") },
       { id: "share", label: "Public dashboard", section: "Go to", icon: Share2, run: go("/app/share") },

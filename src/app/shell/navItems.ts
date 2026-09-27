@@ -1,6 +1,6 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
-  Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, ScanSearch,
+  Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, TrendingUp,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
@@ -31,7 +31,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
 
       { to: "/app/journey", labelKey: "nav.journey", label: "User journeys", icon: Route },
-      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: ScanSearch },
+      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
 
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords },
