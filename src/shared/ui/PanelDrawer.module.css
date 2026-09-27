@@ -1,0 +1,135 @@
+.root,
+.overlay,
+.inner {
+  position: absolute;
+  inset: 0;
+}
+
+.root {
+  pointer-events: none;
+}
+
+.overlay {
+  z-index: 1;
+  pointer-events: auto;
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, #000 42%, transparent),
+    color-mix(in srgb, #000 20%, transparent) 60%,
+    transparent
+  );
+}
+
+.inner {
+  z-index: 2;
+  inset-inline-start: auto;
+  width: min(var(--drawer-size, 480px), 100%);
+  padding: 0;
+  pointer-events: auto;
+}
+
+.content,
+.plainContent {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--shell);
+  background-image: var(--bg-wash);
+}
+
+.content {
+  position: absolute;
+  inset: 6px 6px 6px 0;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.7);
+}
+
+.content > :global(.mantine-Drawer-body),
+.plainContent > :global(.mantine-Drawer-body) {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 16px 12px 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.headerMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.scroll :global(.mantine-ScrollArea-thumb) {
+  background: color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.padded {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-lg);
+  padding: 18px 20px 24px;
+}
+
+@media (max-width: 48em) {
+  .overlay {
+    background: color-mix(in srgb, #000 45%, transparent);
+  }
+
+  .inner {
+    width: 100%;
+  }
+
+  .content {
+    inset: auto 0 calc(var(--m-tabbar-h, 54px) + env(safe-area-inset-bottom, 0px)) 0;
+    height: min(86%, 780px) !important;
+    padding-top: 14px;
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -18px 40px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .content::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    z-index: 2;
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border-strong, var(--border));
+    transform: translateX(-50%);
+  }
+
+  .padded {
+    padding: 14px 16px 20px;
+  }
+}

@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { Alert, Drawer, Stack, Text } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { Alert, Text } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchDrilldownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { PanelDrawer } from "@/shared/ui/PanelDrawer";
 import type { SearchType } from "@/shared/types";
 import { pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
 import { SearchPerformanceChart } from "./SearchPerformanceChart";
 import { SearchTopTable } from "./SearchTopTable";
 import { DrawerSkeleton } from "./SearchSkeletons";
-import classes from "./searchConsole.module.css";
+import classes from "./drawer.module.css";
 
 export function SearchDrilldownDrawer({
   query,
@@ -29,55 +29,54 @@ export function SearchDrilldownDrawer({
   days: number;
   type: SearchType;
 }) {
-  const phone = useMediaQuery("(max-width: 48em)") ?? false;
   const [selected, setSelected] = useState<MetricKey[]>(["clicks", "impressions"]);
+  const [shown, setShown] = useState<string | null>(query);
 
-  useEffect(() => setSelected(["clicks", "impressions"]), [query]);
+  useEffect(() => {
+    if (query) {
+      setShown(query);
+      setSelected(["clicks", "impressions"]);
+    }
+  }, [query]);
 
   const { data, isFetching, error } = useGetSearchDrilldownQuery(
-    { workspaceId, siteId, days, type, dimension: "query", value: query ?? "" },
-    { skip: !query },
+    { workspaceId, siteId, days, type, dimension: "query", value: shown ?? "" },
+    { skip: !shown },
   );
-
-  const fresh = data && query && data.value === query && data.dimension === "query";
+  const loaded = data && data.value === shown && data.dimension === "query" && !isFetching ? data : null;
 
   return (
-    <Drawer
+    <PanelDrawer
       opened={Boolean(query)}
       onClose={onClose}
-      position={phone ? "bottom" : "right"}
-      size={phone ? "90%" : 680}
-      radius={phone ? "lg" : 0}
-      title={
+      size={760}
+      ariaLabel="Search query details"
+      header={
         <div>
-          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-            Search query
-          </Text>
-          <Text fw={700} size="lg" className={classes.drawerValue}>
-            {query}
-          </Text>
+          <Text className={classes.eyebrow}>Search query</Text>
+          <Text className={classes.title}>{shown}</Text>
         </div>
       }
     >
-      {error && !fresh ? (
+      {error && !loaded ? (
         <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
           {errMessage(error, "Could not load details from Google.")}
         </Alert>
-      ) : !fresh || isFetching ? (
+      ) : !loaded ? (
         <DrawerSkeleton />
       ) : (
-        <Stack gap="lg">
+        <>
           <SearchMetricTiles
             columns={2}
-            totals={data.totals}
-            previous={data.previous}
-            daily={data.daily}
+            totals={loaded.totals}
+            previous={loaded.previous}
+            daily={loaded.daily}
             selected={selected}
             onToggle={(key) => setSelected((s) => toggleMetric(s, key))}
           />
 
-          {data.daily.length > 1 ? (
-            <SearchPerformanceChart daily={data.daily} selected={selected} />
+          {loaded.daily.length > 1 ? (
+            <SearchPerformanceChart daily={loaded.daily} selected={selected} />
           ) : (
             <Text size="sm" c="dimmed">
               Not enough daily data to chart yet.
@@ -88,12 +87,12 @@ export function SearchDrilldownDrawer({
             title="Pages ranking for this query"
             description="Open a page to see its full search performance and index status."
             labelHeader="Page"
-            rows={data.related.map((r) => ({ ...r, label: pagePath(r.key) }))}
+            rows={loaded.related.map((r) => ({ ...r, label: pagePath(r.key) }))}
             emptyText="Nothing recorded for this period."
             onOpenRow={(row) => onOpenPage(row.key)}
           />
-        </Stack>
+        </>
       )}
-    </Drawer>
+    </PanelDrawer>
   );
 }

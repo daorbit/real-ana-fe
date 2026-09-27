@@ -393,10 +393,10 @@ export function IndexStatusSkeleton() {
 
 export function DrawerSkeleton() {
   return (
-    <div className={classes.stack}>
+    <>
       <StatTilesSkeleton columns={2} />
-      <Skeleton height={260} radius="md" />
+      <Skeleton height={300} radius="md" />
       <TableCardSkeleton rows={5} columns={4} />
-    </div>
+    </>
   );
 }
