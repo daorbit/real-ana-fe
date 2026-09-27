@@ -69,11 +69,11 @@
 
 @media (min-width: 75em) {
   .narrow {
-    max-width: 1240px;
+    max-width: none;
   }
   .narrow :global(.appearance-split) {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 2fr);
     column-gap: 3rem;
     align-items: start;
   }

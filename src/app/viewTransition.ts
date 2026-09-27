@@ -7,27 +7,11 @@ type ViewTransitionDocument = Document & {
   startViewTransition?: (update: () => Promise<void> | void) => { finished: Promise<void> };
 };
 
-const SHELL_READY_TIMEOUT_MS = 900;
-
 function motionReduced(): boolean {
   return (
     document.documentElement.dataset.motion === "off" ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
-}
-
-function waitForShell(): Promise<void> {
-  const start = performance.now();
-  return new Promise((resolve) => {
-    const tick = () => {
-      if (document.querySelector(".app-panel__scroll") || performance.now() - start > SHELL_READY_TIMEOUT_MS) {
-        resolve();
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
 }
 
 export function supportsViewTransitions(): boolean {
@@ -40,7 +24,8 @@ export function transitionTo(navigate: (to: string) => void, to: string, kind: T
   const doc = document as ViewTransitionDocument;
   const samePage = window.location.pathname === to.split(/[?#]/)[0];
 
-  if (!doc.startViewTransition || motionReduced() || samePage || inFlight) {
+  if (kind !== "orbit" || !doc.startViewTransition || motionReduced() || samePage || inFlight) {
+    void prefetchRoute(to);
     navigate(to);
     return;
   }
@@ -53,12 +38,11 @@ export function transitionTo(navigate: (to: string) => void, to: string, kind: T
     inFlight = false;
   };
 
-  void prefetchRoute(to).then(() => {
+  void prefetchRoute(to).finally(() => {
     root.dataset.vt = kind;
     try {
-      const transition = doc.startViewTransition!(async () => {
+      const transition = doc.startViewTransition!(() => {
         flushSync(() => navigate(to));
-        await waitForShell();
       });
       transition.finished.then(done, done);
     } catch {

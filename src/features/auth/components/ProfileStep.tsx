@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button, TextInput, Stack, Avatar, Loader, UnstyledButton,
 } from "@mantine/core";
-import { ArrowRight, Camera, Sparkles, Trash2, Upload, UserRound } from "lucide-react";
+import { ArrowRight, Camera, Smile, Trash2, Upload, UserRound } from "lucide-react";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
 import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
 import { PhoneInput, joinNumber, localNumberError } from "@/shared/ui/PhoneInput";
@@ -170,7 +170,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
                 onClick={() => setPresetOpen((v) => !v)}
                 disabled={avatarBusy}
               >
-                <Sparkles size={12} /> Pick an avatar
+                <Smile size={12} /> Pick an avatar
               </button>
             </AvatarPresetPicker>
             {user?.avatarUrl && (
