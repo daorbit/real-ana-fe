@@ -2205,24 +2205,6 @@ export type SearchMetrics = {
   position: number;
 };
 
-export type SearchIndexSummaryPage = {
-  url: string;
-  indexStatus: string;
-  pageFetchState?: string;
-  lastCrawled?: string | null;
-  issues: { severity: string; message: string; type?: string }[];
-};
-
-export type SearchIndexSummary = {
-  totalPages: number;
-  indexed: number;
-  notIndexed: number;
-  blocked: number;
-  issueCount: number;
-  pages: SearchIndexSummaryPage[];
-  fetchedAt: string;
-};
-
 export type SearchPerformance = {
   propertyUrl: string;
   days: number;
@@ -2234,7 +2216,6 @@ export type SearchPerformance = {
   daily: (SearchMetrics & { date: string })[];
   queries: (SearchMetrics & { query: string })[];
   pages: (SearchMetrics & { page: string })[];
-  indexingSummary?: SearchIndexSummary;
   fetchedAt: string;
 };
 
