@@ -1,9 +1,10 @@
-import { Anchor, Skeleton, Text } from "@mantine/core";
+import { Anchor, Text } from "@mantine/core";
 import { AlertTriangle, CheckCircle2, CircleSlash, ExternalLink, XCircle } from "lucide-react";
 import dayjs from "dayjs";
 import { useGetSearchInspectionQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import type { SearchInspection } from "@/shared/types";
+import { IndexStatusSkeleton } from "./SearchSkeletons";
 import classes from "./pageDetail.module.css";
 
 function humanize(value?: string) {
@@ -40,17 +41,7 @@ export function SearchIndexStatusCard({
     propertyUrl,
   )}&id=${encodeURIComponent(url)}`;
 
-  if (isLoading) {
-    return (
-      <div className={classes.status}>
-        <Text size="xs" c="dimmed">
-          Asking Google for the index status…
-        </Text>
-        <Skeleton height={26} width="60%" radius="sm" />
-        <Skeleton height={60} radius="sm" />
-      </div>
-    );
-  }
+  if (isLoading) return <IndexStatusSkeleton />;
 
   if (error || !data) {
     return (

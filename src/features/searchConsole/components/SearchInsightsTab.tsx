@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Skeleton, Text } from "@mantine/core";
+import { Alert, Text } from "@mantine/core";
 import { AlertTriangle, CheckCircle2, Target, TrendingDown, TrendingUp, type LucideIcon } from "lucide-react";
 import { useGetSearchInsightsQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
@@ -9,6 +9,7 @@ import { INSIGHTS, INSIGHT_GROUPS, type InsightDef, type InsightGroup, type Insi
 import { SearchInsightCard } from "./SearchInsightCard";
 import { SearchInsightPanel } from "./SearchInsightPanel";
 import { SelectableStat } from "./SelectableStat";
+import { InsightsSkeleton } from "./SearchSkeletons";
 import classes from "./insights.module.css";
 
 const GROUP_CARD: Record<InsightGroup, { icon: LucideIcon; color: string }> = {
@@ -36,22 +37,7 @@ export function SearchInsightsTab({
   const [group, setGroup] = useState<InsightGroup | null>(null);
   const [open, setOpen] = useState<InsightDef | null>(null);
 
-  if (isLoading) {
-    return (
-      <div className={classes.root}>
-        <div className={classes.summary}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={92} radius="md" />
-          ))}
-        </div>
-        <div className={classes.grid}>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} height={260} radius="md" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <InsightsSkeleton />;
   if (error && !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>

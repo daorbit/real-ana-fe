@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Anchor, Breadcrumbs, Select, Skeleton, Stack, Text } from "@mantine/core";
+import { Alert, Anchor, Breadcrumbs, Select, Stack, Text } from "@mantine/core";
 import { AlertTriangle, BarChart3, CalendarDays, ExternalLink, FileSearch } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
@@ -17,6 +17,12 @@ import { SearchTopTable } from "../components/SearchTopTable";
 import { SearchIndexStatusCard } from "../components/SearchIndexStatusCard";
 import { SearchPageLookup } from "../components/SearchPageLookup";
 import { SearchDrilldownDrawer } from "../components/SearchDrilldownDrawer";
+import {
+  IndexStatusSkeleton,
+  PageDetailMainSkeleton,
+  StatTileSkeleton,
+  TableCardSkeleton,
+} from "../components/SearchSkeletons";
 import classes from "../components/pageDetail.module.css";
 import cardClasses from "../components/searchConsole.module.css";
 
@@ -114,10 +120,7 @@ export default function SearchConsolePageDetail() {
                 {errMessage(error, "Could not load this page from Google.")}
               </Alert>
             ) : !fresh || isFetching ? (
-              <Stack gap="md">
-                <Skeleton height={96} radius="md" />
-                <Skeleton height={340} radius="md" />
-              </Stack>
+              <PageDetailMainSkeleton />
             ) : (
               <>
                 <SearchMetricTiles
@@ -151,7 +154,8 @@ export default function SearchConsolePageDetail() {
           </div>
 
           <aside className={classes.side}>
-            {fresh && data.views && (
+            {(!fresh || isFetching) && <StatTileSkeleton />}
+            {fresh && !isFetching && data.views && (
               <StatCard
                 icon={BarChart3}
                 label="Page views (Quantalog)"
@@ -163,6 +167,7 @@ export default function SearchConsolePageDetail() {
                 hint="Every visit to this page tracked by Quantalog in the same period, from all sources — not just Google."
               />
             )}
+            {!propertyUrl && <IndexStatusSkeleton />}
             {propertyUrl && (
               <SearchIndexStatusCard
                 workspaceId={workspaceId}
@@ -174,6 +179,7 @@ export default function SearchConsolePageDetail() {
           </aside>
         </div>
 
+        {(!fresh || isFetching) && !error && <TableCardSkeleton rows={6} columns={4} />}
         {fresh && !isFetching && (
           <SearchTopTable
             title="Queries bringing people to this page"

@@ -1,5 +1,4 @@
 import { useSearchParams } from "react-router-dom";
-import { Skeleton } from "@mantine/core";
 import { FolderKanban, Globe } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useGetSitesQuery } from "@/app/store";
@@ -10,6 +9,7 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { SearchConsoleGate } from "../components/SearchConsoleGate";
 import { SearchConsoleBody } from "../components/SearchConsoleBody";
+import { ConsoleSkeleton } from "../components/SearchSkeletons";
 import { resolveTab, type SearchConsoleTabId } from "../searchConsoleTabs";
 
 export default function SearchConsole() {
@@ -59,7 +59,7 @@ export default function SearchConsole() {
       />
 
       {loading || sitesLoading ? (
-        <Skeleton height={320} radius="md" />
+        <ConsoleSkeleton />
       ) : !site ? (
         <EmptyState
           icon={Globe}

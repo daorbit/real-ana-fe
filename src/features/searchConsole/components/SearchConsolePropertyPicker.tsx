@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { Alert, Anchor, Badge, Button, Collapse, Group, Radio, Skeleton, Stack, Text, UnstyledButton } from "@mantine/core";
-import { AlertTriangle, ChevronDown, ExternalLink, Globe, Link2, RefreshCw } from "lucide-react";
+import { Alert, Anchor, Button, Collapse, Radio, Text, UnstyledButton } from "@mantine/core";
+import { AlertTriangle, Check, ChevronDown, ExternalLink, Globe, Link2, RefreshCw } from "lucide-react";
 import {
   useGetSearchConsolePropertiesQuery,
   useLinkSearchConsolePropertyMutation,
 } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
+import { GoogleMark } from "@/shared/ui/GoogleMark";
 import type { SearchConsolePropertyOption } from "@/shared/types";
 import { propertyLabel } from "../searchMetrics";
-import classes from "./connect.module.css";
-import pickerClasses from "./picker.module.css";
+import { PropertyPickerSkeleton } from "./SearchSkeletons";
+import classes from "./picker.module.css";
 
 const PERMISSION_LABEL: Record<string, string> = {
   siteOwner: "Owner",
@@ -17,25 +18,50 @@ const PERMISSION_LABEL: Record<string, string> = {
   siteRestrictedUser: "Restricted",
 };
 
-function PropertyOption({ property, domain }: { property: SearchConsolePropertyOption; domain?: string }) {
-  const isDomain = property.propertyUrl.startsWith("sc-domain:");
+function isDomainProperty(url: string) {
+  return url.startsWith("sc-domain:");
+}
+
+function PropertyCard({ property, recommended }: { property: SearchConsolePropertyOption; recommended: boolean }) {
+  const domain = isDomainProperty(property.propertyUrl);
+  const Icon = domain ? Globe : Link2;
   return (
-    <Radio.Card value={property.propertyUrl} disabled={!property.matches} className={pickerClasses.option}>
-      <Radio.Indicator disabled={!property.matches} />
-      <span className={pickerClasses.optionIcon}>{isDomain ? <Globe size={15} /> : <Link2 size={15} />}</span>
-      <span className={pickerClasses.optionText}>
-        <Text size="sm" fw={600} truncate>
-          {propertyLabel(property.propertyUrl)}
-        </Text>
+    <Radio.Card value={property.propertyUrl} className={classes.option}>
+      <span className={classes.optionIcon}>
+        <Icon size={16} />
+      </span>
+      <span className={classes.optionText}>
+        <span className={classes.optionTitle}>
+          <Text size="sm" fw={650} truncate>
+            {propertyLabel(property.propertyUrl)}
+          </Text>
+          {recommended && <span className={classes.recommended}>Recommended</span>}
+        </span>
         <Text size="xs" c="dimmed" truncate>
-          {isDomain ? "Domain property · covers every subdomain" : "URL-prefix property"}
-          {!property.matches && ` · doesn't cover ${domain}`}
+          {domain ? "Domain property · includes every subdomain" : "URL-prefix property"} ·{" "}
+          {PERMISSION_LABEL[property.permissionLevel] ?? property.permissionLevel}
         </Text>
       </span>
-      <Badge size="sm" variant="light" color={property.matches ? "teal" : "gray"}>
-        {PERMISSION_LABEL[property.permissionLevel] ?? property.permissionLevel}
-      </Badge>
+      <Radio.Indicator className={classes.indicator} />
     </Radio.Card>
+  );
+}
+
+function Stepper() {
+  return (
+    <ol className={classes.stepper}>
+      <li data-done>
+        <span className={classes.stepDot}>
+          <Check size={11} strokeWidth={3} />
+        </span>
+        Google connected
+      </li>
+      <li className={classes.stepLine} aria-hidden />
+      <li data-current>
+        <span className={classes.stepDot}>2</span>
+        Link property
+      </li>
+    </ol>
   );
 }
 
@@ -63,6 +89,7 @@ export function SearchConsolePropertyPicker({
   const properties = data?.properties ?? [];
   const matching = properties.filter((p) => p.matches);
   const others = properties.filter((p) => !p.matches);
+  const domain = data?.domain ?? "this site";
 
   useEffect(() => {
     setSelected(matching[0]?.propertyUrl ?? null);
@@ -78,14 +105,7 @@ export function SearchConsolePropertyPicker({
     }
   };
 
-  if (isLoading) {
-    return (
-      <Stack gap="sm">
-        <Skeleton height={120} radius="md" />
-        <Skeleton height={64} radius="md" />
-      </Stack>
-    );
-  }
+  if (isLoading) return <PropertyPickerSkeleton />;
 
   if (error) {
     return (
@@ -96,85 +116,85 @@ export function SearchConsolePropertyPicker({
   }
 
   return (
-    <div className={classes.card}>
-      <div className={pickerClasses.body}>
-        <div className={pickerClasses.head}>
-          <div>
-            <Text className={pickerClasses.step}>Step 2 of 2</Text>
-            <Text fw={700} size="lg">
-              Link a property to {data?.domain}
-            </Text>
-            <Text size="sm" c="dimmed" mt={4}>
-              Signed in as <b>{googleEmail || "your Google account"}</b>. Pick the Search Console property that
-              covers this site.
-            </Text>
-          </div>
-          <Button
-            variant="default"
-            size="xs"
-            leftSection={<RefreshCw size={13} />}
-            loading={isFetching}
-            onClick={() => refetch()}
-          >
-            Refresh list
-          </Button>
+    <div className={classes.wrap}>
+      <Stepper />
+
+      <div className={classes.panel}>
+        <div className={classes.account}>
+          <GoogleMark size={16} />
+          <span className={classes.accountEmail}>{googleEmail || "Google account"}</span>
+          <UnstyledButton className={classes.switch} onClick={onSwitchAccount} disabled={switching}>
+            Switch
+          </UnstyledButton>
         </div>
 
-        {properties.length === 0 ? (
-          <Alert color="gray" variant="light">
-            <Text size="sm">
-              This Google account has no Search Console properties yet. Add and verify <b>{data?.domain}</b> in{" "}
-              <Anchor href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">
-                Search Console <ExternalLink size={11} />
-              </Anchor>
-              , then press Refresh list — or connect a different Google account.
-            </Text>
-          </Alert>
-        ) : (
-          <Radio.Group value={selected} onChange={setSelected}>
-            <Stack gap="sm">
-              {matching.length > 0 ? (
-                <div className={pickerClasses.options}>
-                  {matching.map((p) => (
-                    <PropertyOption key={p.propertyUrl} property={p} domain={data?.domain} />
-                  ))}
-                </div>
-              ) : (
-                <Alert color="yellow" variant="light" icon={<AlertTriangle size={16} />}>
-                  None of this account's properties cover {data?.domain}. Verify it in Search Console under this
-                  account, or connect the Google account that owns it.
-                </Alert>
-              )}
+        <div className={classes.head}>
+          <Text className={classes.title}>Choose a property for {domain}</Text>
+          <Text size="sm" c="dimmed">
+            Quantalog will read search data for {domain} from this Search Console property.
+          </Text>
+        </div>
 
-              {others.length > 0 && (
-                <>
-                  <UnstyledButton className={pickerClasses.toggle} onClick={() => setShowOthers((v) => !v)}>
-                    <ChevronDown size={14} className={pickerClasses.chevron} data-open={showOthers || undefined} />
-                    {showOthers ? "Hide" : "Show"} {others.length} other propert{others.length === 1 ? "y" : "ies"} on
-                    this account
-                  </UnstyledButton>
-                  <Collapse expanded={showOthers}>
-                    <div className={pickerClasses.options}>
-                      {others.map((p) => (
-                        <PropertyOption key={p.propertyUrl} property={p} domain={data?.domain} />
-                      ))}
-                    </div>
-                  </Collapse>
-                </>
-              )}
-            </Stack>
+        {matching.length > 0 ? (
+          <Radio.Group value={selected} onChange={setSelected}>
+            <div className={classes.options}>
+              {matching.map((p, i) => (
+                <PropertyCard key={p.propertyUrl} property={p} recommended={i === 0 && matching.length > 1} />
+              ))}
+            </div>
           </Radio.Group>
+        ) : (
+          <div className={classes.empty}>
+            <AlertTriangle size={18} />
+            <Text size="sm" fw={600}>
+              {properties.length ? `No property covers ${domain}` : "No Search Console properties yet"}
+            </Text>
+            <Text size="xs" c="dimmed">
+              Add and verify {domain} in Search Console with this Google account, then refresh — or switch to the
+              account that owns it.
+            </Text>
+            <Button
+              variant="default"
+              size="xs"
+              mt={6}
+              leftSection={<RefreshCw size={13} />}
+              loading={isFetching}
+              onClick={() => refetch()}
+            >
+              Refresh list
+            </Button>
+          </div>
+        )}
+
+        {others.length > 0 && (
+          <div className={classes.others}>
+            <UnstyledButton className={classes.othersToggle} onClick={() => setShowOthers((v) => !v)}>
+              {others.length} other propert{others.length === 1 ? "y" : "ies"} on this account don't cover {domain}
+              <ChevronDown size={13} className={classes.chevron} data-open={showOthers || undefined} />
+            </UnstyledButton>
+            <Collapse expanded={showOthers}>
+              <ul className={classes.othersList}>
+                {others.map((p) => (
+                  <li key={p.propertyUrl}>{propertyLabel(p.propertyUrl)}</li>
+                ))}
+              </ul>
+            </Collapse>
+          </div>
+        )}
+
+        {matching.length > 0 && (
+          <Button size="md" fullWidth disabled={!selected} loading={linking} onClick={() => void save()}>
+            Link {selected ? propertyLabel(selected) : "property"}
+          </Button>
         )}
       </div>
 
-      <Group justify="space-between" gap="sm" className={pickerClasses.footer}>
-        <Button variant="subtle" color="gray" loading={switching} onClick={onSwitchAccount}>
-          Use a different Google account
-        </Button>
-        <Button disabled={!selected} loading={linking} onClick={() => void save()}>
-          Link property
-        </Button>
-      </Group>
+      <Text className={classes.help}>
+        Don't see your site?{" "}
+        <Anchor href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" size="xs">
+          Add it in Search Console <ExternalLink size={11} />
+        </Anchor>
+      </Text>
     </div>
   );
 }

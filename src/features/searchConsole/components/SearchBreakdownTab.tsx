@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  Alert, Group, Loader, Pagination, ScrollArea, Select, Skeleton, Table, Text, TextInput, UnstyledButton,
+  Alert, Group, Loader, Pagination, ScrollArea, Select, Table, Text, TextInput, UnstyledButton,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { AlertTriangle, ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
@@ -11,6 +11,7 @@ import type {
 } from "@/shared/types";
 import { METRIC_BY_KEY } from "../searchMetrics";
 import { ClickChange, PositionChip, ShareBar } from "./SearchCells";
+import { BreakdownSkeleton } from "./SearchSkeletons";
 import classes from "./searchConsole.module.css";
 
 const PAGE_SIZES = ["25", "50", "100", "200"];
@@ -62,7 +63,7 @@ export function SearchBreakdownTab({
     q,
   });
 
-  if (isLoading) return <Skeleton height={420} radius="md" />;
+  if (isLoading) return <BreakdownSkeleton columns={dimension === "page" ? 6 : 5} />;
   if (error && !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>

@@ -1,9 +1,10 @@
-import { Alert, Anchor, Badge, ScrollArea, Skeleton, Table, Text } from "@mantine/core";
+import { Alert, Anchor, Badge, ScrollArea, Table, Text } from "@mantine/core";
 import { AlertTriangle, CheckCircle2, Clock, ExternalLink, XCircle } from "lucide-react";
 import { useGetSearchSitemapsQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { num, timeAgo } from "@/shared/lib";
 import type { SearchSitemap } from "@/shared/types";
+import { SitemapsSkeleton } from "./SearchSkeletons";
 import classes from "./searchConsole.module.css";
 
 function SitemapStatus({ sitemap }: { sitemap: SearchSitemap }) {
@@ -47,7 +48,7 @@ export function SearchSitemapsTab({
   const { data, isLoading, error } = useGetSearchSitemapsQuery({ workspaceId, siteId });
   const consoleUrl = `https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(propertyUrl)}`;
 
-  if (isLoading) return <Skeleton height={240} radius="md" />;
+  if (isLoading) return <SitemapsSkeleton />;
   if (error || !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>

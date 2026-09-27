@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Drawer, Stack, Skeleton, Text } from "@mantine/core";
+import { Alert, Drawer, Stack, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchDrilldownQuery } from "@/app/store";
@@ -9,6 +9,7 @@ import { pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
 import { SearchPerformanceChart } from "./SearchPerformanceChart";
 import { SearchTopTable } from "./SearchTopTable";
+import { DrawerSkeleton } from "./SearchSkeletons";
 import classes from "./searchConsole.module.css";
 
 export function SearchDrilldownDrawer({
@@ -63,11 +64,7 @@ export function SearchDrilldownDrawer({
           {errMessage(error, "Could not load details from Google.")}
         </Alert>
       ) : !fresh || isFetching ? (
-        <Stack gap="md">
-          <Skeleton height={90} radius="md" />
-          <Skeleton height={240} radius="md" />
-          <Skeleton height={200} radius="md" />
-        </Stack>
+        <DrawerSkeleton />
       ) : (
         <Stack gap="lg">
           <SearchMetricTiles

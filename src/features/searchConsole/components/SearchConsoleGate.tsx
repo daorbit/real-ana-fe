@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Skeleton } from "@mantine/core";
 import {
   useDisconnectSearchConsoleMutation,
   useGetSearchConsoleStatusQuery,
@@ -9,6 +8,8 @@ import { useActiveBilling, usePermissions } from "@/features/workspace/context";
 import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
 import { SearchConsoleConnectCard } from "./SearchConsoleConnectCard";
 import { SearchConsolePropertyPicker } from "./SearchConsolePropertyPicker";
+import { ConsoleSkeleton } from "./SearchSkeletons";
+import { OAuthWaitingModal } from "@/shared/ui/OAuthWaitingModal";
 import { useSearchConsoleConnect } from "../useSearchConsoleConnect";
 
 export type SearchConsoleLink = {
@@ -34,11 +35,13 @@ export function SearchConsoleGate({
   const { data: status, isLoading, refetch } = useGetSearchConsoleStatusQuery(workspaceId, {
     skip: !workspaceId,
   });
-  const { connect, connecting } = useSearchConsoleConnect(workspaceId, () => void refetch());
+  const { connect, connecting, focus, cancel } = useSearchConsoleConnect(workspaceId, () => void refetch());
   const [unlink] = useUnlinkSearchConsolePropertyMutation();
   const [disconnect] = useDisconnectSearchConsoleMutation();
 
-  if (isLoading) return <Skeleton height={260} radius="md" />;
+  const waiting = <OAuthWaitingModal opened={connecting} onFocus={focus} onCancel={cancel} />;
+
+  if (isLoading) return <ConsoleSkeleton />;
   if (!status) return null;
 
   if (onFreePlan) return <SearchConsoleConnectCard variant="upgrade" />;
@@ -46,7 +49,10 @@ export function SearchConsoleGate({
 
   if (!status.connected || !status.connection) {
     return canAdmin ? (
-      <SearchConsoleConnectCard variant="connect" onConnect={connect} connecting={connecting} />
+      <>
+        <SearchConsoleConnectCard variant="connect" onConnect={connect} connecting={connecting} />
+        {waiting}
+      </>
     ) : (
       <SearchConsoleConnectCard variant="ask-admin" />
     );
@@ -54,12 +60,15 @@ export function SearchConsoleGate({
 
   if (status.connection.status !== "active") {
     return canAdmin ? (
-      <SearchConsoleConnectCard
-        variant="reconnect"
-        message={status.connection.statusMessage}
-        onConnect={connect}
-        connecting={connecting}
-      />
+      <>
+        <SearchConsoleConnectCard
+          variant="reconnect"
+          message={status.connection.statusMessage}
+          onConnect={connect}
+          connecting={connecting}
+        />
+        {waiting}
+      </>
     ) : (
       <SearchConsoleConnectCard variant="ask-admin" message={status.connection.statusMessage} />
     );
@@ -69,13 +78,16 @@ export function SearchConsoleGate({
 
   if (!link) {
     return canAdmin ? (
-      <SearchConsolePropertyPicker
-        workspaceId={workspaceId}
-        siteId={siteId}
-        googleEmail={status.connection.googleEmail}
-        onSwitchAccount={connect}
-        switching={connecting}
-      />
+      <>
+        <SearchConsolePropertyPicker
+          workspaceId={workspaceId}
+          siteId={siteId}
+          googleEmail={status.connection.googleEmail}
+          onSwitchAccount={connect}
+          switching={connecting}
+        />
+        {waiting}
+      </>
     ) : (
       <SearchConsoleConnectCard
         variant="ask-admin"

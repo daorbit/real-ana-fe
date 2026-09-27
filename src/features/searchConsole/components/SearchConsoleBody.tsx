@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Skeleton, Stack } from "@mantine/core";
+import { Alert } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchPerformanceQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
@@ -24,21 +24,7 @@ import { SearchDevicesTab } from "./SearchDevicesTab";
 import { SearchInsightsTab } from "./SearchInsightsTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
 import classes from "./searchConsole.module.css";
-import metricClasses from "./metrics.module.css";
-
-function OverviewSkeleton() {
-  return (
-    <Stack gap="md">
-      <Skeleton height={76} radius="md" />
-      <div className={metricClasses.tiles}>
-        {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} height={96} radius="md" />
-        ))}
-      </div>
-      <Skeleton height={360} radius="md" />
-    </Stack>
-  );
-}
+import { OverviewSkeleton } from "./SearchSkeletons";
 
 export function SearchConsoleBody({
   workspaceId,

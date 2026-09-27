@@ -11,9 +11,19 @@ export type OAuthPopupOptions = {
   onDone?: () => void;
 };
 
+const POPUP_WIDTH = 520;
+const POPUP_HEIGHT = 680;
+
+function centeredFeatures(width: number, height: number): string {
+  const left = Math.round(window.screenX + (window.outerWidth - width) / 2);
+  const top = Math.round(window.screenY + (window.outerHeight - height) / 2);
+  return `popup=yes,width=${width},height=${height},left=${left},top=${top}`;
+}
+
 export function useOAuthPopup(options: OAuthPopupOptions) {
   const [connecting, setConnecting] = useState(false);
   const timer = useRef<number | null>(null);
+  const popupRef = useRef<Window | null>(null);
   const latest = useRef(options);
   latest.current = options;
 
@@ -30,6 +40,7 @@ export function useOAuthPopup(options: OAuthPopupOptions) {
       if (e.data?.source !== opts.source) return;
 
       setConnecting(false);
+      popupRef.current = null;
       if (e.data.status === "connected") {
         notify.success(opts.successMessage);
         opts.onDone?.();
@@ -49,7 +60,8 @@ export function useOAuthPopup(options: OAuthPopupOptions) {
     if (!url) return;
 
     setConnecting(true);
-    const popup = window.open(url, "google-oauth", "width=600,height=720,menubar=no,toolbar=no");
+    const popup = window.open(url, "google-oauth", centeredFeatures(POPUP_WIDTH, POPUP_HEIGHT));
+    popupRef.current = popup;
 
     if (!popup) {
       setConnecting(false);
@@ -62,10 +74,23 @@ export function useOAuthPopup(options: OAuthPopupOptions) {
       if (!popup.closed) return;
       window.clearInterval(timer.current!);
       timer.current = null;
+      popupRef.current = null;
       setConnecting(false);
       latest.current.onDone?.();
     }, 700);
   }, []);
 
-  return { connect, connecting };
+  const focus = useCallback(() => {
+    popupRef.current?.focus();
+  }, []);
+
+  const cancel = useCallback(() => {
+    if (timer.current) window.clearInterval(timer.current);
+    timer.current = null;
+    popupRef.current?.close();
+    popupRef.current = null;
+    setConnecting(false);
+  }, []);
+
+  return { connect, connecting, focus, cancel };
 }

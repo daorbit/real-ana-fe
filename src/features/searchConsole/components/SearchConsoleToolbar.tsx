@@ -103,7 +103,7 @@ export function SearchConsoleToolbar({
             <RefreshCw size={15} />
           </ActionIcon>
         </Tooltip>
-        <Menu position="bottom-end" withArrow width={240}>
+        <Menu position="bottom-end" withArrow width={280}>
           <Menu.Target>
             <ActionIcon variant="default" size={36} aria-label="Search visibility settings">
               <MoreHorizontal size={15} />

@@ -1,10 +1,11 @@
-import { Alert, Progress, Skeleton, Text } from "@mantine/core";
+import { Alert, Progress, Text } from "@mantine/core";
 import { AlertTriangle, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import type { SearchType } from "@/shared/types";
 import { METRICS, metricChange } from "../searchMetrics";
 import { ChangeText } from "./SearchCells";
+import { DevicesSkeleton } from "./SearchSkeletons";
 import classes from "./searchConsole.module.css";
 
 const DEVICES: Record<string, { label: string; icon: LucideIcon }> = {
@@ -33,7 +34,7 @@ export function SearchDevicesTab({
     pageSize: 200,
   });
 
-  if (isLoading) return <Skeleton height={220} radius="md" />;
+  if (isLoading) return <DevicesSkeleton />;
   if (error || !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
