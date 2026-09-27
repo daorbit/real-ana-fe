@@ -2187,12 +2187,12 @@ export const api = createApi({
 
     linkSearchConsoleProperty: build.mutation<
       { siteId: string; propertyUrl: string },
-      { workspaceId: string; siteId: string; propertyUrl: string }
+      { workspaceId: string; siteId: string; propertyUrl: string; allowMismatch?: boolean }
     >({
-      query: ({ workspaceId, siteId, propertyUrl }) => ({
+      query: ({ workspaceId, siteId, propertyUrl, allowMismatch }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console`,
         method: "PUT",
-        body: { propertyUrl },
+        body: { propertyUrl, allowMismatch },
       }),
       invalidatesTags: ["SearchConsole", "SearchPerformance"],
     }),

@@ -10,6 +10,7 @@ import { GoogleMark } from "@/shared/ui/GoogleMark";
 import type { SearchConsolePropertyOption } from "@/shared/types";
 import { propertyLabel } from "../searchMetrics";
 import { PropertyPickerSkeleton } from "./SearchSkeletons";
+import { PickerTopBar } from "./PickerTopBar";
 import classes from "./picker.module.css";
 
 const PERMISSION_LABEL: Record<string, string> = {
@@ -18,15 +19,11 @@ const PERMISSION_LABEL: Record<string, string> = {
   siteRestrictedUser: "Restricted",
 };
 
-function isDomainProperty(url: string) {
-  return url.startsWith("sc-domain:");
-}
-
-function PropertyCard({ property, recommended }: { property: SearchConsolePropertyOption; recommended: boolean }) {
-  const domain = isDomainProperty(property.propertyUrl);
+function PropertyCard({ property, recommended }: { property: SearchConsolePropertyOption; recommended?: boolean }) {
+  const domain = property.propertyUrl.startsWith("sc-domain:");
   const Icon = domain ? Globe : Link2;
   return (
-    <Radio.Card value={property.propertyUrl} className={classes.option}>
+    <Radio.Card value={property.propertyUrl} className={classes.option} data-mismatch={!property.matches || undefined}>
       <span className={classes.optionIcon}>
         <Icon size={16} />
       </span>
@@ -36,6 +33,7 @@ function PropertyCard({ property, recommended }: { property: SearchConsoleProper
             {propertyLabel(property.propertyUrl)}
           </Text>
           {recommended && <span className={classes.recommended}>Recommended</span>}
+          {!property.matches && <span className={classes.mismatch}>Different domain</span>}
         </span>
         <Text size="xs" c="dimmed" truncate>
           {domain ? "Domain property · includes every subdomain" : "URL-prefix property"} ·{" "}
@@ -50,14 +48,14 @@ function PropertyCard({ property, recommended }: { property: SearchConsoleProper
 function Stepper() {
   return (
     <ol className={classes.stepper}>
-      <li data-done>
+      <li className={classes.stepDone}>
         <span className={classes.stepDot}>
           <Check size={11} strokeWidth={3} />
         </span>
         Google connected
       </li>
       <li className={classes.stepLine} aria-hidden />
-      <li data-current>
+      <li className={classes.stepCurrent}>
         <span className={classes.stepDot}>2</span>
         Link property
       </li>
@@ -90,15 +88,19 @@ export function SearchConsolePropertyPicker({
   const matching = properties.filter((p) => p.matches);
   const others = properties.filter((p) => !p.matches);
   const domain = data?.domain ?? "this site";
+  const chosen = properties.find((p) => p.propertyUrl === selected) ?? null;
+  const mismatch = Boolean(chosen && !chosen.matches);
+  const othersOpen = showOthers || matching.length === 0;
 
   useEffect(() => {
     setSelected(matching[0]?.propertyUrl ?? null);
+    setShowOthers(false);
   }, [data]);
 
   const save = async () => {
-    if (!selected) return;
+    if (!chosen) return;
     try {
-      await link({ workspaceId, siteId, propertyUrl: selected }).unwrap();
+      await link({ workspaceId, siteId, propertyUrl: chosen.propertyUrl, allowMismatch: mismatch }).unwrap();
       notify.success("Search Console property linked");
     } catch (e) {
       notify.error(errMessage(e, "Could not link that property."));
@@ -109,14 +111,18 @@ export function SearchConsolePropertyPicker({
 
   if (error) {
     return (
-      <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-        {errMessage(error, "Could not load your Search Console properties.")}
-      </Alert>
+      <div className={classes.wrap}>
+        <PickerTopBar workspaceId={workspaceId} siteId={siteId} />
+        <Alert color="red" variant="light" icon={<AlertTriangle size={16} />} w="100%">
+          {errMessage(error, "Could not load your Search Console properties.")}
+        </Alert>
+      </div>
     );
   }
 
   return (
     <div className={classes.wrap}>
+      <PickerTopBar workspaceId={workspaceId} siteId={siteId} />
       <Stepper />
 
       <div className={classes.panel}>
@@ -135,56 +141,78 @@ export function SearchConsolePropertyPicker({
           </Text>
         </div>
 
-        {matching.length > 0 ? (
-          <Radio.Group value={selected} onChange={setSelected}>
-            <div className={classes.options}>
-              {matching.map((p, i) => (
-                <PropertyCard key={p.propertyUrl} property={p} recommended={i === 0 && matching.length > 1} />
-              ))}
-            </div>
-          </Radio.Group>
-        ) : (
-          <div className={classes.empty}>
-            <AlertTriangle size={18} />
-            <Text size="sm" fw={600}>
-              {properties.length ? `No property covers ${domain}` : "No Search Console properties yet"}
+        <Radio.Group value={selected} onChange={setSelected}>
+          <div className={classes.options}>
+            {matching.map((p, i) => (
+              <PropertyCard key={p.propertyUrl} property={p} recommended={i === 0 && matching.length > 1} />
+            ))}
+
+            {matching.length === 0 && (
+              <div className={classes.empty}>
+                <AlertTriangle size={18} />
+                <Text size="sm" fw={600}>
+                  {properties.length ? `No property matches ${domain}` : "No Search Console properties yet"}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  {properties.length
+                    ? `Verify ${domain} in Search Console, switch to the Google account that owns it, or pick another property below.`
+                    : `Add and verify ${domain} in Search Console with this Google account, then refresh.`}
+                </Text>
+                <Button
+                  variant="default"
+                  size="xs"
+                  mt={6}
+                  leftSection={<RefreshCw size={13} />}
+                  loading={isFetching}
+                  onClick={() => refetch()}
+                >
+                  Refresh list
+                </Button>
+              </div>
+            )}
+
+            {others.length > 0 && (
+              <>
+                {matching.length > 0 ? (
+                  <UnstyledButton className={classes.othersToggle} onClick={() => setShowOthers((v) => !v)}>
+                    {others.length} other propert{others.length === 1 ? "y" : "ies"} on this account
+                    <ChevronDown size={13} className={classes.chevron} data-open={othersOpen || undefined} />
+                  </UnstyledButton>
+                ) : (
+                  <Text className={classes.othersLabel}>Other properties on this account</Text>
+                )}
+                <Collapse expanded={othersOpen}>
+                  <div className={classes.options}>
+                    {others.map((p) => (
+                      <PropertyCard key={p.propertyUrl} property={p} />
+                    ))}
+                  </div>
+                </Collapse>
+              </>
+            )}
+          </div>
+        </Radio.Group>
+
+        {mismatch && chosen && (
+          <div className={classes.warning}>
+            <AlertTriangle size={15} />
+            <Text size="xs">
+              <b>{propertyLabel(chosen.propertyUrl)}</b> is a different domain from {domain}. Search visibility will
+              show that property's Google data for this site.
             </Text>
-            <Text size="xs" c="dimmed">
-              Add and verify {domain} in Search Console with this Google account, then refresh — or switch to the
-              account that owns it.
-            </Text>
-            <Button
-              variant="default"
-              size="xs"
-              mt={6}
-              leftSection={<RefreshCw size={13} />}
-              loading={isFetching}
-              onClick={() => refetch()}
-            >
-              Refresh list
-            </Button>
           </div>
         )}
 
-        {others.length > 0 && (
-          <div className={classes.others}>
-            <UnstyledButton className={classes.othersToggle} onClick={() => setShowOthers((v) => !v)}>
-              {others.length} other propert{others.length === 1 ? "y" : "ies"} on this account don't cover {domain}
-              <ChevronDown size={13} className={classes.chevron} data-open={showOthers || undefined} />
-            </UnstyledButton>
-            <Collapse expanded={showOthers}>
-              <ul className={classes.othersList}>
-                {others.map((p) => (
-                  <li key={p.propertyUrl}>{propertyLabel(p.propertyUrl)}</li>
-                ))}
-              </ul>
-            </Collapse>
-          </div>
-        )}
-
-        {matching.length > 0 && (
-          <Button size="md" fullWidth disabled={!selected} loading={linking} onClick={() => void save()}>
-            Link {selected ? propertyLabel(selected) : "property"}
+        {properties.length > 0 && (
+          <Button
+            size="md"
+            fullWidth
+            color={mismatch ? "yellow" : undefined}
+            disabled={!chosen}
+            loading={linking}
+            onClick={() => void save()}
+          >
+            {chosen ? `${mismatch ? "Link anyway" : "Link"} ${propertyLabel(chosen.propertyUrl)}` : "Choose a property"}
           </Button>
         )}
       </div>

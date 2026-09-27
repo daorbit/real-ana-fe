@@ -40,12 +40,15 @@ export function useOAuthPopup(options: OAuthPopupOptions) {
       if (e.data?.source !== opts.source) return;
 
       setConnecting(false);
+      if (e.data.status !== "connected") popupRef.current?.close();
       popupRef.current = null;
       if (e.data.status === "connected") {
         notify.success(opts.successMessage);
         opts.onDone?.();
       } else if (e.data.reason === "denied") {
         notify.info(opts.cancelledMessage);
+      } else if (e.data.reason === "plan_required") {
+        notify.quotaLimit(opts.reasonText.plan_required ?? opts.fallbackError, undefined, "plan_required");
       } else {
         notify.error(opts.reasonText[e.data.reason] ?? opts.fallbackError);
       }

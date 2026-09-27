@@ -9,7 +9,7 @@ const REASON_TEXT: Record<string, string> = {
     "Search visibility is not set up on this deployment yet. Ask an administrator to add the Google credentials.",
   demo: "Search visibility cannot be connected from a demo session.",
   no_access: "You need admin access to this workspace to connect Search visibility.",
-  plan_required: "Search visibility needs this workspace on a paid plan.",
+  plan_required: "This workspace has no active plan. Choose a plan to connect Search visibility.",
   invalid_state: "That connection attempt expired. Please try again.",
   missing_code: "Google did not return an authorisation code. Please try again.",
   denied: "You cancelled the Google authorisation.",
