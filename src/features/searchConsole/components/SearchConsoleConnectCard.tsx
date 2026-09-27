@@ -1,41 +1,28 @@
 import { Button, Text } from "@mantine/core";
-import { Check, Lock, RefreshCcw, ShieldCheck } from "lucide-react";
+import { Lock, RefreshCcw, ShieldCheck } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
-import { SearchConsolePreview } from "./SearchConsolePreview";
 import classes from "./connect.module.css";
 
 export type ConnectVariant = "connect" | "ask-admin" | "not-configured" | "reconnect";
 
-const COPY: Record<ConnectVariant, { eyebrow: string; title: string; body: string }> = {
+const COPY: Record<ConnectVariant, { title: string; body: string }> = {
   connect: {
-    eyebrow: "Google Search Console",
-    title: "Know exactly how people find you on Google",
-    body: "See the searches that bring visitors, the pages that rank, where you're climbing or slipping — and whether each page is even on Google.",
+    title: "Connect Google Search Console",
+    body: "See the searches that bring visitors, the pages that rank, and where you're climbing or slipping — straight from Google.",
   },
   "ask-admin": {
-    eyebrow: "Google Search Console",
     title: "Search visibility isn't connected yet",
     body: "A workspace admin can connect Google Search Console to show clicks, impressions, rankings and the queries people search for.",
   },
   "not-configured": {
-    eyebrow: "Google Search Console",
     title: "Search visibility isn't available yet",
     body: "Google Search Console hasn't been set up on this deployment. An administrator needs to add the Google credentials.",
   },
   reconnect: {
-    eyebrow: "Connection lost",
-    title: "Reconnect Google to keep your data flowing",
+    title: "Reconnect Google",
     body: "Google access for this workspace stopped working. Reconnect to keep seeing search data — nothing you've set up is lost.",
   },
 };
-
-const BENEFITS = [
-  "Clicks, impressions, CTR and position — up to 16 months",
-  "Opportunities: queries one push away from page 1",
-  "Index status for any page, with Google's reason",
-];
-
-const STEPS = ["Sign in with Google", "Pick your property", "See your data instantly"];
 
 export function SearchConsoleConnectCard({
   variant,
@@ -54,9 +41,8 @@ export function SearchConsoleConnectCard({
   return (
     <div className={classes.hero}>
       <div className={classes.pitch}>
-        <span className={classes.eyebrow}>
-          <GoogleMark size={14} />
-          {copy.eyebrow}
+        <span className={classes.mark} aria-hidden>
+          <GoogleMark size={30} />
         </span>
 
         <Text component="h2" className={classes.title}>
@@ -64,50 +50,25 @@ export function SearchConsoleConnectCard({
         </Text>
         <Text className={classes.body}>{message || copy.body}</Text>
 
-        {variant !== "not-configured" && (
-          <ul className={classes.benefits}>
-            {BENEFITS.map((b) => (
-              <li key={b}>
-                <span className={classes.benefitCheck}>
-                  <Check size={12} strokeWidth={3} />
-                </span>
-                {b}
-              </li>
-            ))}
-          </ul>
+        {canConnect && (
+          <Button
+            size="md"
+            variant="default"
+            leftSection={variant === "reconnect" ? <RefreshCcw size={16} /> : <GoogleMark size={18} />}
+            loading={connecting}
+            onClick={onConnect}
+            className={`${classes.cta} ${classes.googleButton}`}
+            classNames={{ label: classes.googleLabel }}
+          >
+            {variant === "reconnect" ? "Reconnect Google" : "Connect with Google"}
+          </Button>
         )}
 
-        <div className={classes.actions}>
-          {canConnect && (
-            <Button
-              size="md"
-              variant="default"
-              leftSection={variant === "reconnect" ? <RefreshCcw size={16} /> : <GoogleMark size={18} />}
-              loading={connecting}
-              onClick={onConnect}
-              className={`${classes.cta} ${classes.googleButton}`}
-              classNames={{ label: classes.googleLabel }}
-            >
-              {variant === "reconnect" ? "Reconnect Google" : "Connect with Google"}
-            </Button>
-          )}
-          {canConnect && (
-            <span className={classes.trust}>
-              <ShieldCheck size={14} />
-              Read-only · Disconnect anytime
-            </span>
-          )}
-        </div>
-
-        {canConnect && variant === "connect" && (
-          <ol className={classes.steps}>
-            {STEPS.map((step, i) => (
-              <li key={step}>
-                <span className={classes.stepNum}>{i + 1}</span>
-                {step}
-              </li>
-            ))}
-          </ol>
+        {canConnect && (
+          <span className={classes.trust}>
+            <ShieldCheck size={13} />
+            Read-only · Disconnect anytime
+          </span>
         )}
 
         {variant === "ask-admin" && (
@@ -116,10 +77,6 @@ export function SearchConsoleConnectCard({
             Only workspace admins can connect Google accounts.
           </span>
         )}
-      </div>
-
-      <div className={classes.visual}>
-        <SearchConsolePreview />
       </div>
     </div>
   );
