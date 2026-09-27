@@ -8,6 +8,7 @@ import type { SearchType } from "@/shared/types";
 import { RANGES, SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
 import type { SearchConsoleLink } from "./SearchConsoleGate";
 import { PageFinder } from "./PageFinder";
+import { AskOrbitSearchButton } from "./AskOrbitSearchButton";
 import classes from "./searchConsole.module.css";
 
 export function SearchConsoleToolbar({
@@ -21,6 +22,7 @@ export function SearchConsoleToolbar({
   busy,
   fetchedAt,
   onOpenPage,
+  onAskOrbit,
 }: {
   workspaceId: string;
   siteId: string;
@@ -32,6 +34,7 @@ export function SearchConsoleToolbar({
   busy: boolean;
   fetchedAt?: string;
   onOpenPage: (url: string) => void;
+  onAskOrbit?: () => void;
 }) {
   const [refresh, { isLoading: refreshing }] = useRefreshSearchPerformanceMutation();
   const consoleUrl = `https://search.google.com/search-console?resource_id=${encodeURIComponent(link.propertyUrl)}`;
@@ -74,6 +77,7 @@ export function SearchConsoleToolbar({
       </div>
 
       <div className={classes.headerActions}>
+        {onAskOrbit && <AskOrbitSearchButton onClick={onAskOrbit} />}
         <PageFinder
           workspaceId={workspaceId}
           siteId={siteId}

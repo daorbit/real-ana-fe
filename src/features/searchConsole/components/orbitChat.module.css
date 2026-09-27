@@ -1,0 +1,558 @@
+.page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(70% 40% at 0% 0%, color-mix(in srgb, #8b5cf6 6%, transparent), transparent 70%),
+    radial-gradient(70% 40% at 100% 0%, color-mix(in srgb, #fbbf24 6%, transparent), transparent 70%);
+}
+
+:global([data-mantine-color-scheme='dark']) .page {
+  background:
+    radial-gradient(70% 40% at 0% 0%, color-mix(in srgb, #a78bfa 8%, transparent), transparent 70%),
+    radial-gradient(70% 40% at 100% 0%, color-mix(in srgb, #fcd34d 8%, transparent), transparent 70%);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 52px;
+  padding: 0 10px 0 14px;
+  flex-shrink: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--mantine-color-default-border) 70%, transparent);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.brandName {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.context {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.body[data-state='empty'] {
+  overflow-y: auto;
+  padding: 9vh 0 20px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 22px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.heroHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.heroMark {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 6px;
+}
+
+.heroMark::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: 50%;
+  background: conic-gradient(from 90deg, #a78bfa, #fcd34d, #34d399, #a78bfa);
+  filter: blur(18px);
+  opacity: 0.35;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.heroSub {
+  max-width: 340px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mantine-color-dimmed);
+}
+
+.heroSub b {
+  font-weight: 600;
+  color: var(--mantine-color-text);
+}
+
+.starters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.startersLabel,
+.followUpsLabel {
+  margin: 0 2px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mantine-color-dimmed);
+}
+
+.starter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--mantine-color-default-border);
+  background: color-mix(in srgb, var(--mantine-color-default) 50%, transparent);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--mantine-color-text);
+  text-align: left;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.starter:hover {
+  border-color: color-mix(in srgb, var(--mantine-color-emerald-5) 45%, var(--mantine-color-default-border));
+  background: color-mix(in srgb, var(--mantine-color-emerald-5) 6%, var(--mantine-color-default));
+}
+
+.starterIcon {
+  flex-shrink: 0;
+  color: var(--mantine-color-dimmed);
+}
+
+.starterText {
+  flex: 1;
+  min-width: 0;
+}
+
+.starterArrow {
+  flex-shrink: 0;
+  color: var(--mantine-color-dimmed);
+  opacity: 0;
+  transform: translate(-2px, 2px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.starter:hover .starterArrow {
+  opacity: 1;
+  transform: none;
+  color: var(--mantine-color-emerald-5);
+}
+
+.followUps {
+  display: flex;
+  flex-direction: column;
+}
+
+.followUp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 2px;
+  border-top: 1px solid var(--mantine-color-default-border);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--mantine-color-text);
+  text-align: left;
+  transition: color 120ms ease;
+}
+
+.followUp:last-child {
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.followUp:hover,
+.followUp:hover .starterIcon {
+  color: var(--mantine-color-emerald-5);
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.column {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  padding: 18px 18px 8px;
+}
+
+.answer {
+  min-width: 0;
+}
+
+.answerHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.answerName {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.answerBody {
+  min-width: 0;
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.7;
+}
+
+.answerBody[data-failed] {
+  color: var(--mantine-color-dimmed);
+}
+
+.thinking {
+  font-size: 13px;
+  font-weight: 550;
+  background: linear-gradient(
+    90deg,
+    var(--mantine-color-dimmed) 0%,
+    var(--mantine-color-dimmed) 35%,
+    var(--mantine-color-text) 50%,
+    var(--mantine-color-dimmed) 65%,
+    var(--mantine-color-dimmed) 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: orbitThinking 1.6s linear infinite;
+}
+
+@keyframes orbitThinking {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
+}
+
+.markPulse {
+  animation: orbitMarkPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes orbitMarkPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(0.92);
+  }
+}
+
+.userTurnRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+
+.userTurn {
+  max-width: 88%;
+  padding: 9px 14px;
+  border-radius: 16px;
+  border-bottom-right-radius: 4px;
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.userTurnEdit {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.userTurnRow:hover .userTurnEdit,
+.userTurnEdit:focus-visible {
+  opacity: 1;
+}
+
+.userTurnEditing {
+  width: 100%;
+  max-width: 92%;
+  margin-left: auto;
+  padding: 6px 12px 8px;
+  border-radius: 16px;
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.editCancel,
+.editSave {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: var(--mantine-font-size-xs);
+  transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+.editCancel {
+  color: var(--mantine-color-dimmed);
+}
+
+.editCancel:hover {
+  background: var(--mantine-color-default-hover);
+}
+
+.editSave {
+  font-weight: 600;
+  background: var(--mantine-color-emerald-6);
+  color: #fff;
+}
+
+.editSave:hover {
+  background: var(--mantine-color-emerald-7);
+}
+
+.editSave:disabled {
+  opacity: 0.5;
+}
+
+.stopped {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-dimmed);
+}
+
+.askAgain {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  color: var(--mantine-color-emerald-5);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.composerWrap {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  padding: 8px 14px 12px;
+}
+
+.hero .composerWrap {
+  padding: 0;
+  width: 100%;
+}
+
+.composer {
+  --composer-edge: linear-gradient(
+    90deg,
+    #8b5cf6 0%,
+    #a855f7 9%,
+    #f0abfc 16%,
+    #fbbf24 27%,
+    #a3e635 39%,
+    #22c55e 50%,
+    #a855f7 59%,
+    #f0abfc 66%,
+    #fbbf24 77%,
+    #a3e635 89%,
+    #8b5cf6 100%
+  );
+  position: relative;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--mantine-color-body), var(--mantine-color-body)) padding-box,
+    var(--composer-edge) border-box;
+  background-size: 100% 100%, 300% 100%;
+  animation: composerDrift 9s linear infinite;
+}
+
+@keyframes composerDrift {
+  from {
+    background-position: 0 0, 0% 50%;
+  }
+  to {
+    background-position: 0 0, 100% 50%;
+  }
+}
+
+.composer::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--composer-edge);
+  background-size: 300% 100%;
+  animation: glowDrift 9s linear infinite;
+  filter: blur(14px);
+  opacity: 0.28;
+  transition: opacity 220ms ease, filter 220ms ease;
+}
+
+@keyframes glowDrift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+.composer:focus-within::before {
+  opacity: 0.45;
+  filter: blur(18px);
+}
+
+:global([data-mantine-color-scheme='dark']) .composer {
+  --composer-edge: linear-gradient(
+    90deg,
+    #a78bfa 0%,
+    #c084fc 9%,
+    #f5b8fb 16%,
+    #fcd34d 27%,
+    #bef264 39%,
+    #34d399 50%,
+    #c084fc 59%,
+    #f5b8fb 66%,
+    #fcd34d 77%,
+    #bef264 89%,
+    #a78bfa 100%
+  );
+}
+
+:global([data-mantine-color-scheme='dark']) .composer::before {
+  opacity: 0.18;
+}
+
+:global([data-mantine-color-scheme='dark']) .composer:focus-within::before {
+  opacity: 0.32;
+}
+
+.composer textarea {
+  background: transparent;
+}
+
+.composer textarea.composerInput,
+.composer textarea.composerInput:focus,
+.composer textarea.composerInput:disabled {
+  padding: 0;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  color: var(--mantine-color-text);
+  font-size: 15px;
+  line-height: 1.5;
+  scrollbar-width: none;
+}
+
+.composer textarea.composerInput:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.composerInput::-webkit-scrollbar {
+  display: none;
+}
+
+.composerFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 8px 8px;
+}
+
+.composerHint {
+  padding-left: 8px;
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+}
+
+.send[data-disabled] {
+  background: var(--mantine-color-default-hover);
+  color: var(--mantine-color-dimmed);
+}
+
+.disclaimer {
+  margin-top: 8px;
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--mantine-color-dimmed);
+  opacity: 0.8;
+}
+
+.hero .disclaimer {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer,
+  .composer::before,
+  .thinking,
+  .markPulse {
+    animation: none;
+  }
+
+  .thinking {
+    color: var(--mantine-color-dimmed);
+  }
+}

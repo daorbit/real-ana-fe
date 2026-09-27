@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Text } from "@mantine/core";
 import dayjs from "dayjs";
 import type { SearchPerformance } from "@/shared/types";
 import { pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
+import type { ExplainProps } from "../useSearchOrbitExplain";
 import { SearchPerformanceChart } from "./SearchPerformanceChart";
 import { SearchTopTable } from "./SearchTopTable";
 import classes from "./searchConsole.module.css";
@@ -14,18 +15,24 @@ export function SearchOverviewTab({
   onViewPages,
   onOpenQuery,
   onOpenPage,
+  orbitSummary,
+  explain,
 }: {
   data: SearchPerformance;
   onViewQueries: () => void;
   onViewPages: () => void;
   onOpenQuery: (query: string) => void;
   onOpenPage: (url: string) => void;
+  orbitSummary?: ReactNode;
+  explain?: (key: MetricKey) => ExplainProps;
 }) {
   const [selected, setSelected] = useState<MetricKey[]>(["clicks", "impressions"]);
 
   return (
     <div className={classes.section}>
+      {orbitSummary}
       <SearchMetricTiles
+        explain={explain}
         totals={data.totals}
         previous={data.previous}
         daily={data.daily}

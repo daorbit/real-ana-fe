@@ -5,6 +5,7 @@ import type { SearchType } from "@/shared/types";
 import { RANGES, pagePath } from "../searchMetrics";
 import { IndexStatusPill } from "./IndexStatusPill";
 import { PageFinder } from "./PageFinder";
+import { AskOrbitSearchButton } from "./AskOrbitSearchButton";
 import classes from "./pageDetail.module.css";
 
 const BACK_TO = "/app/search-visibility?tab=pages";
@@ -18,6 +19,7 @@ export function PageDetailHeader({
   type,
   onDaysChange,
   onOpenPage,
+  onAskOrbit,
 }: {
   workspaceId: string;
   siteId: string;
@@ -27,6 +29,7 @@ export function PageDetailHeader({
   type: SearchType;
   onDaysChange: (days: number) => void;
   onOpenPage: (url: string) => void;
+  onAskOrbit?: () => void;
 }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,6 +75,7 @@ export function PageDetailHeader({
         </div>
 
         <div className={classes.titleActions}>
+          {onAskOrbit && <AskOrbitSearchButton onClick={onAskOrbit} />}
           {propertyUrl && (
             <PageFinder
               workspaceId={workspaceId}

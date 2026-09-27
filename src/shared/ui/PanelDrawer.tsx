@@ -8,13 +8,17 @@ export function PanelDrawer({
   opened,
   onClose,
   header,
+  footer,
+  bare = false,
   children,
   ariaLabel,
   size = 480,
 }: {
   opened: boolean;
   onClose: () => void;
-  header: ReactNode;
+  header?: ReactNode;
+  footer?: ReactNode;
+  bare?: boolean;
   children: ReactNode;
   ariaLabel: string;
   size?: number;
@@ -50,17 +54,22 @@ export function PanelDrawer({
       }
       aria-label={ariaLabel}
     >
-      <div className={styles.body}>
-        <header className={styles.header}>
-          <div className={styles.headerMain}>{header}</div>
-          <ActionIcon variant="subtle" color="gray" onClick={onClose} aria-label="Close">
-            <X size={17} />
-          </ActionIcon>
-        </header>
-        <ScrollArea className={styles.scroll} type="hover" scrollbarSize={8}>
-          <div className={styles.padded}>{children}</div>
-        </ScrollArea>
-      </div>
+      {bare ? (
+        <div className={styles.body}>{children}</div>
+      ) : (
+        <div className={styles.body}>
+          <header className={styles.header}>
+            <div className={styles.headerMain}>{header}</div>
+            <ActionIcon variant="subtle" color="gray" onClick={onClose} aria-label="Close">
+              <X size={17} />
+            </ActionIcon>
+          </header>
+          <ScrollArea className={styles.scroll} type="hover" scrollbarSize={8}>
+            <div className={styles.padded}>{children}</div>
+          </ScrollArea>
+          {footer && <footer className={styles.footer}>{footer}</footer>}
+        </div>
+      )}
     </Drawer>
   );
 }

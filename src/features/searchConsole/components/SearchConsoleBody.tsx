@@ -23,6 +23,11 @@ import { SearchBreakdownTab } from "./SearchBreakdownTab";
 import { SearchDevicesTab } from "./SearchDevicesTab";
 import { SearchInsightsTab } from "./SearchInsightsTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
+import { SearchOrbitSummary } from "./SearchOrbitSummary";
+import { SearchOrbitPanel } from "./SearchOrbitPanel";
+import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
+import { useSearchOrbitExplain } from "../useSearchOrbitExplain";
+import { useSearchOrbitChat } from "../useSearchOrbitChat";
 import classes from "./searchConsole.module.css";
 import { OverviewSkeleton } from "./SearchSkeletons";
 
@@ -43,6 +48,10 @@ export function SearchConsoleBody({
   const [type, setType] = useState<SearchType>("web");
   const [query, setQuery] = useState<string | null>(null);
   const openPage = useOpenSearchPage(workspaceId, siteId, days, type);
+  const orbitAvailable = Boolean(useOrbitOptional()?.chat.available);
+  const [orbitOpen, setOrbitOpen] = useState(false);
+  const explain = useSearchOrbitExplain({ workspaceId, siteId, days, type });
+  const orbitChat = useSearchOrbitChat({ workspaceId, siteId, days, type });
 
   const overview = useGetSearchPerformanceQuery(
     { workspaceId, siteId, days, type },
@@ -64,6 +73,7 @@ export function SearchConsoleBody({
         busy={overview.isFetching}
         fetchedAt={overview.data?.fetchedAt}
         onOpenPage={openPage}
+        onAskOrbit={orbitAvailable ? () => setOrbitOpen(true) : undefined}
       />
 
       <div className={classes.tabbar} role="tablist" aria-label="Search visibility reports">
@@ -99,6 +109,18 @@ export function SearchConsoleBody({
             onViewPages={() => onTabChange("pages")}
             onOpenQuery={setQuery}
             onOpenPage={openPage}
+            explain={explain}
+            orbitSummary={
+              orbitAvailable && (
+                <SearchOrbitSummary
+                  days={days}
+                  onSummarize={() => {
+                    setOrbitOpen(true);
+                    orbitChat.summarize();
+                  }}
+                />
+              )
+            }
           />
         ) : (
           <OverviewSkeleton />
@@ -148,6 +170,16 @@ export function SearchConsoleBody({
 
       {tab === "sitemaps" && (
         <SearchSitemapsTab workspaceId={workspaceId} siteId={siteId} propertyUrl={link.propertyUrl} />
+      )}
+
+      {orbitAvailable && (
+        <SearchOrbitPanel
+          opened={orbitOpen}
+          onClose={() => setOrbitOpen(false)}
+          chat={orbitChat}
+          days={days}
+          propertyUrl={link.propertyUrl}
+        />
       )}
 
       <SearchDrilldownDrawer

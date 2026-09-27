@@ -1100,6 +1100,28 @@ export const api = createApi({
     }),
 
 
+    askSearchOrbit: build.mutation<
+      { reply: string },
+      {
+        workspaceId: string;
+        siteId: string;
+        days: number;
+        type: SearchType;
+        mode: "summary" | "metric" | "question";
+        metric?: string;
+        question?: string;
+        history?: { role: "user" | "assistant"; content: string }[];
+        pageUrl?: string;
+      }
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/search`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Usage"],
+    }),
+
     getOrbitConversations: build.query<
       {
         conversations: {
@@ -2359,6 +2381,7 @@ export const {
   useGetSearchBreakdownQuery,
   useGetSearchSitemapsQuery,
   useGetSearchInspectionQuery,
+  useAskSearchOrbitMutation,
   useGetSearchInsightsQuery,
   useGetSearchDrilldownQuery,
   useGetEmailStatusQuery,

@@ -17,6 +17,10 @@ import { SearchPerformanceChart } from "../components/SearchPerformanceChart";
 import { SearchTopTable } from "../components/SearchTopTable";
 import { SearchIndexStatusCard } from "../components/SearchIndexStatusCard";
 import { SearchDrilldownDrawer } from "../components/SearchDrilldownDrawer";
+import { SearchOrbitPanel } from "../components/SearchOrbitPanel";
+import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
+import { useSearchOrbitExplain } from "../useSearchOrbitExplain";
+import { useSearchOrbitChat } from "../useSearchOrbitChat";
 import {
   ChartCardSkeleton,
   IndexStatusSkeleton,
@@ -36,6 +40,10 @@ export default function SearchConsolePageDetail() {
   const type = (search.get("type") as SearchType | null) ?? "web";
   const [selected, setSelected] = useState<MetricKey[]>(["clicks", "impressions"]);
   const [query, setQuery] = useState<string | null>(null);
+  const [orbitOpen, setOrbitOpen] = useState(false);
+  const orbitAvailable = Boolean(useOrbitOptional()?.chat.available);
+  const explain = useSearchOrbitExplain({ workspaceId, siteId, days, type, pageUrl });
+  const orbitChat = useSearchOrbitChat({ workspaceId, siteId, days, type, pageUrl });
 
   useTitle(pageUrl ? `${pagePath(pageUrl)} · Search visibility` : "Search visibility");
 
@@ -82,6 +90,7 @@ export default function SearchConsolePageDetail() {
           type={type}
           onDaysChange={setDays}
           onOpenPage={openPage}
+          onAskOrbit={orbitAvailable ? () => setOrbitOpen(true) : undefined}
         />
 
         {error && !loaded ? (
@@ -91,6 +100,7 @@ export default function SearchConsolePageDetail() {
         ) : loaded ? (
           <SearchMetricTiles
             columns={5}
+            explain={explain}
             totals={loaded.totals}
             previous={loaded.previous}
             daily={loaded.daily}
@@ -164,6 +174,17 @@ export default function SearchConsolePageDetail() {
           !error && <TableCardSkeleton rows={6} columns={4} />
         )}
       </Stack>
+
+      {orbitAvailable && (
+        <SearchOrbitPanel
+          opened={orbitOpen}
+          onClose={() => setOrbitOpen(false)}
+          chat={orbitChat}
+          days={days}
+          propertyUrl={propertyUrl}
+          pageUrl={pageUrl}
+        />
+      )}
 
       <SearchDrilldownDrawer
         query={query}

@@ -15,9 +15,13 @@ export function SelectableStat({
       aria-checked={active}
       aria-label={card.label}
       className={classes.selectable}
-      onClick={onSelect}
+      onClick={(e) => {
+        const target = e.target as HTMLElement;
+        if (!e.currentTarget.contains(target) || target.closest("button, a")) return;
+        onSelect();
+      }}
       onKeyDown={(e) => {
-        if (e.key === " " || e.key === "Enter") {
+        if (e.target === e.currentTarget && (e.key === " " || e.key === "Enter")) {
           e.preventDefault();
           onSelect();
         }

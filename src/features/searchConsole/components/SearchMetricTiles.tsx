@@ -3,6 +3,7 @@ import { Eye, Hash, MousePointerClick, Percent, type LucideIcon } from "lucide-r
 import type { SearchMetrics, SearchPerformance } from "@/shared/types";
 import { METRICS, percentDelta, type MetricKey } from "../searchMetrics";
 import { SelectableStat } from "./SelectableStat";
+import type { ExplainProps } from "../useSearchOrbitExplain";
 import classes from "./metrics.module.css";
 
 const ICONS: Record<MetricKey, LucideIcon> = {
@@ -27,6 +28,7 @@ export function SearchMetricTiles({
   onToggle,
   columns = 4,
   children,
+  explain,
 }: {
   totals: SearchMetrics;
   previous: SearchMetrics | null;
@@ -35,6 +37,7 @@ export function SearchMetricTiles({
   onToggle: (key: MetricKey) => void;
   columns?: 2 | 4 | 5;
   children?: ReactNode;
+  explain?: (key: MetricKey) => ExplainProps;
 }) {
   return (
     <div className={classes.tiles} data-columns={columns} role="group" aria-label="Chart metrics">
@@ -52,6 +55,7 @@ export function SearchMetricTiles({
           spark={daily && daily.length > 1 ? daily : undefined}
           sparkKey={m.key}
           hint={HINTS[m.key]}
+          {...explain?.(m.key)}
         />
       ))}
       {children}
