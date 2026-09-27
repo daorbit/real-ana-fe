@@ -682,6 +682,13 @@ export type QuotaSummary = {
     fileUploads: boolean;
   };
   maxSitesPerWorkspace: number;
+  search?: {
+    maxDays: number;
+    rowLimit: number | null;
+    insights: "none" | "limited" | "full";
+    pageViews: boolean;
+    inspections: { planQuota: number; used: number; addonCredits: number };
+  };
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
   /** Comparison baselines this plan may pick. Every tier keeps "previous". */
@@ -2244,6 +2251,7 @@ export type SearchBreakdown = {
   page: number;
   pageSize: number;
   truncated: boolean;
+  limitedTo?: number | null;
   fetchedAt: string;
 };
 
@@ -2263,6 +2271,7 @@ export type SearchInsights = {
   newQueries: SearchInsightRow[];
   lostQueries: SearchLostRow[];
   counts: { queries: number; pages: number; newQueries: number; lostQueries: number };
+  limited?: boolean;
   fetchedAt: string;
 };
 

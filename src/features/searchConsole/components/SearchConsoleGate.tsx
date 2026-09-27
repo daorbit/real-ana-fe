@@ -4,7 +4,7 @@ import {
   useGetSearchConsoleStatusQuery,
   useUnlinkSearchConsolePropertyMutation,
 } from "@/app/store";
-import { useActiveBilling, usePermissions } from "@/features/workspace/context";
+import { usePermissions } from "@/features/workspace/context";
 import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
 import { SearchConsoleConnectCard } from "./SearchConsoleConnectCard";
 import { SearchConsolePropertyPicker } from "./SearchConsolePropertyPicker";
@@ -29,8 +29,6 @@ export function SearchConsoleGate({
   children: (link: SearchConsoleLink) => ReactNode;
 }) {
   const { canAdmin } = usePermissions();
-  const billing = useActiveBilling();
-  const onFreePlan = billing?.plan?.slug === "free";
 
   const { data: status, isLoading, refetch } = useGetSearchConsoleStatusQuery(workspaceId, {
     skip: !workspaceId,
@@ -44,7 +42,6 @@ export function SearchConsoleGate({
   if (isLoading) return <ConsoleSkeleton />;
   if (!status) return null;
 
-  if (onFreePlan) return <SearchConsoleConnectCard variant="upgrade" />;
   if (!status.configured) return <SearchConsoleConnectCard variant="not-configured" />;
 
   if (!status.connected || !status.connection) {

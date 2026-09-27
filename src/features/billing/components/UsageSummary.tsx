@@ -3,7 +3,7 @@ import {
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import {
-  Activity, Search, Globe2, Layers, Info, Clock, ClipboardList,
+  Activity, Search, Globe2, Layers, Info, Clock, ClipboardList, FileSearch,
 } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
@@ -22,6 +22,7 @@ export function UsageSummary({
   expired: boolean;
 }) {
   const { t } = useTranslation();
+  const showInspections = Boolean(usage.search && usage.search.inspections.planQuota > 0);
   return (
     <Card
       withBorder
@@ -102,7 +103,7 @@ export function UsageSummary({
           many as it pays for — so the panel reports this workspace's own audits,
           crawls, sites, and the Orbit questions its plan includes. */}
       <SimpleGrid
-        cols={{ base: 1, sm: 2, md: 4 + (usage.orbit ? 1 : 0) + (usage.forms ? 1 : 0) }}
+        cols={{ base: 1, sm: 2, md: 4 + (usage.orbit ? 1 : 0) + (usage.forms ? 1 : 0) + (showInspections ? 1 : 0) }}
         spacing={0}
       >
         {/* First: it is the meter that decides whether tracking keeps working,
@@ -124,6 +125,15 @@ export function UsageSummary({
             used={usage.forms.submissionsUsed}
             quota={usage.forms.submissionQuota}
             credits={usage.forms.addonCredits}
+          />
+        )}
+        {showInspections && usage.search && (
+          <UsageCell
+            icon={FileSearch}
+            label={t("billing.usageIndexChecks", "Google index checks")}
+            used={usage.search.inspections.used}
+            quota={usage.search.inspections.planQuota}
+            credits={usage.search.inspections.addonCredits}
           />
         )}
       </SimpleGrid>

@@ -1,11 +1,12 @@
 import { ActionIcon, Menu, Select, Text, Tooltip } from "@mantine/core";
-import { CalendarDays, ExternalLink, Link2Off, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
+import { ExternalLink, Link2Off, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
 import { useRefreshSearchPerformanceMutation } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { timeAgo } from "@/shared/lib";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import type { SearchType } from "@/shared/types";
-import { RANGES, SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
+import { SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
+import { SearchRangeSelect } from "./SearchRangeSelect";
 import type { SearchConsoleLink } from "./SearchConsoleGate";
 import { PageFinder } from "./PageFinder";
 import { AskOrbitSearchButton } from "./AskOrbitSearchButton";
@@ -96,15 +97,10 @@ export function SearchConsoleToolbar({
           allowDeselect={false}
           disabled={refreshing}
         />
-        <Select
-          size="sm"
+        <SearchRangeSelect
           className={classes.rangeSelect}
-          aria-label="Date range"
-          leftSection={<CalendarDays size={14} />}
-          data={RANGES.map((r) => ({ value: r.value, label: `Last ${r.label}` }))}
-          value={String(days)}
-          onChange={(v) => v && onDaysChange(Number(v))}
-          allowDeselect={false}
+          days={days}
+          onChange={onDaysChange}
           disabled={refreshing}
         />
         <Tooltip label="Fetch the latest from Google" withArrow>

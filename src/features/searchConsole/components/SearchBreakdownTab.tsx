@@ -12,6 +12,8 @@ import type {
 import { METRIC_BY_KEY } from "../searchMetrics";
 import { ClickChange, PositionChip, ShareBar } from "./SearchCells";
 import { BreakdownSkeleton } from "./SearchSkeletons";
+import { SearchUpgradeNote } from "./SearchUpgradeNote";
+import { useSearchEntitlements } from "../useSearchEntitlements";
 import classes from "./searchConsole.module.css";
 
 const PAGE_SIZES = ["25", "50", "100", "200"];
@@ -47,6 +49,7 @@ export function SearchBreakdownTab({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const hasSearchLabel = typeof searchLabel === "function";
+  const ent = useSearchEntitlements();
 
   useEffect(() => setPage(1), [q, sort, days, type, dimension, pageSize]);
 
@@ -63,7 +66,7 @@ export function SearchBreakdownTab({
     q,
   });
 
-  if (isLoading) return <BreakdownSkeleton labelHeader={labelHeader} showViews={dimension === "page"} />;
+  if (isLoading) return <BreakdownSkeleton labelHeader={labelHeader} showViews={dimension === "page" && ent.pageViews} />;
   if (error && !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
@@ -76,7 +79,7 @@ export function SearchBreakdownTab({
   const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const maxClicks = Math.max(0, ...data.rows.map((r) => r.clicks));
   const offset = (data.page - 1) * data.pageSize;
-  const showViews = dimension === "page";
+  const showViews = dimension === "page" && ent.pageViews;
 
   const header = (key: SearchBreakdownSort, label: string, numeric = true) => (
     <Table.Th className={numeric ? classes.numCell : undefined}>
@@ -178,6 +181,13 @@ export function SearchBreakdownTab({
           </Table>
         </ScrollArea>
       )}
+
+      {data.limitedTo ? (
+        <SearchUpgradeNote>
+          Showing your top {data.limitedTo} {labelHeader.toLowerCase()}s by clicks, out of{" "}
+          {data.totalAll.toLocaleString()}. Upgrade to see and search every {labelHeader.toLowerCase()}.
+        </SearchUpgradeNote>
+      ) : null}
 
       {data.total > 0 && (
         <Group justify="space-between" mt="md" gap="sm">

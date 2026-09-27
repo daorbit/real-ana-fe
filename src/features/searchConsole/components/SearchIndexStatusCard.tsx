@@ -1,9 +1,10 @@
-import { Anchor, Text } from "@mantine/core";
-import { AlertTriangle, ExternalLink } from "lucide-react";
+import { Anchor, Button, Text } from "@mantine/core";
+import { AlertTriangle, ArrowRight, ExternalLink, Lock } from "lucide-react";
 import dayjs from "dayjs";
 import { useGetSearchInspectionQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { verdictOf } from "../inspectionVerdict";
+import { useSearchEntitlements, useSearchUpgrade } from "../useSearchEntitlements";
 import { IndexStatusSkeleton } from "./SearchSkeletons";
 import classes from "./pageDetail.module.css";
 
@@ -25,10 +26,39 @@ export function SearchIndexStatusCard({
   propertyUrl: string;
   url: string;
 }) {
-  const { data, isLoading, error } = useGetSearchInspectionQuery({ workspaceId, siteId, url });
+  const ent = useSearchEntitlements();
+  const { goToPlans } = useSearchUpgrade();
+  const { data, isLoading, error } = useGetSearchInspectionQuery(
+    { workspaceId, siteId, url },
+    { skip: !ent.canInspect },
+  );
   const inspectUrl = `https://search.google.com/search-console/inspect?resource_id=${encodeURIComponent(
     propertyUrl,
   )}&id=${encodeURIComponent(url)}`;
+
+  if (!ent.canInspect) {
+    return (
+      <div className={classes.status}>
+        <div className={classes.statusHead}>
+          <Lock size={18} />
+          <Text fw={650} size="sm">
+            {ent.inspectionQuota > 0 ? "No index checks left this month" : "Check if this page is on Google"}
+          </Text>
+        </div>
+        <Text size="xs" c="dimmed">
+          {ent.inspectionQuota > 0
+            ? `You've used all ${ent.inspectionQuota} Google index checks on the ${ent.planName} plan. Upgrade for more, or check it directly in Search Console.`
+            : "See whether Google has indexed this page, when it was last crawled, and why not if it isn't. Included from the Starter plan."}
+        </Text>
+        <Button size="xs" color="emerald" rightSection={<ArrowRight size={13} />} onClick={goToPlans}>
+          See plans
+        </Button>
+        <Anchor href={inspectUrl} target="_blank" rel="noopener noreferrer" size="xs">
+          Inspect in Search Console <ExternalLink size={11} />
+        </Anchor>
+      </div>
+    );
+  }
 
   if (isLoading) return <IndexStatusSkeleton />;
 

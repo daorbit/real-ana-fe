@@ -1,11 +1,10 @@
 import { Button, Text } from "@mantine/core";
-import { Link } from "react-router-dom";
-import { ArrowRight, Check, Lock, RefreshCcw, ShieldCheck } from "lucide-react";
+import { Check, Lock, RefreshCcw, ShieldCheck } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import { SearchConsolePreview } from "./SearchConsolePreview";
 import classes from "./connect.module.css";
 
-export type ConnectVariant = "connect" | "ask-admin" | "upgrade" | "not-configured" | "reconnect";
+export type ConnectVariant = "connect" | "ask-admin" | "not-configured" | "reconnect";
 
 const COPY: Record<ConnectVariant, { eyebrow: string; title: string; body: string }> = {
   connect: {
@@ -17,11 +16,6 @@ const COPY: Record<ConnectVariant, { eyebrow: string; title: string; body: strin
     eyebrow: "Google Search Console",
     title: "Search visibility isn't connected yet",
     body: "A workspace admin can connect Google Search Console to show clicks, impressions, rankings and the queries people search for.",
-  },
-  upgrade: {
-    eyebrow: "Paid plans",
-    title: "Unlock your Google search performance",
-    body: "Upgrade this workspace to see Google's clicks, impressions, rankings, top queries and page index status for every site.",
   },
   "not-configured": {
     eyebrow: "Google Search Console",
@@ -95,11 +89,6 @@ export function SearchConsoleConnectCard({
               classNames={{ label: classes.googleLabel }}
             >
               {variant === "reconnect" ? "Reconnect Google" : "Connect with Google"}
-            </Button>
-          )}
-          {variant === "upgrade" && (
-            <Button size="md" component={Link} to="/app/billing" rightSection={<ArrowRight size={16} />} className={classes.cta}>
-              See plans
             </Button>
           )}
           {canConnect && (

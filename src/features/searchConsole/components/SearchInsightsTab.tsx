@@ -8,6 +8,8 @@ import { InsightsSummary } from "./InsightsSummary";
 import { InsightActionList } from "./InsightActionList";
 import { InsightMovers } from "./InsightMovers";
 import { InsightsSkeleton } from "./SearchSkeletons";
+import { SearchLockedFeature, SearchUpgradeNote } from "./SearchUpgradeNote";
+import { useSearchEntitlements } from "../useSearchEntitlements";
 import classes from "./insights.module.css";
 
 export function SearchInsightsTab({
@@ -25,7 +27,22 @@ export function SearchInsightsTab({
   onOpenQuery: (query: string) => void;
   onOpenPage: (url: string) => void;
 }) {
-  const { data, isLoading, error } = useGetSearchInsightsQuery({ workspaceId, siteId, days, type });
+  const ent = useSearchEntitlements();
+  const locked = ent.insights === "none";
+  const { data, isLoading, error } = useGetSearchInsightsQuery(
+    { workspaceId, siteId, days, type },
+    { skip: locked },
+  );
+
+  if (locked) {
+    return (
+      <SearchLockedFeature
+        title="See what to fix first"
+        description="Search insights turn your Google data into a ranked to-do list: quick wins close to page 1, pages losing clicks, and queries with weak click-through. Included from the Starter plan."
+        preview={<InsightsSkeleton />}
+      />
+    );
+  }
 
   if (isLoading) return <InsightsSkeleton />;
   if (error && !data) {
@@ -44,6 +61,11 @@ export function SearchInsightsTab({
   return (
     <div className={classes.root}>
       <InsightsSummary actions={actions} days={days} queries={data.counts.queries} pages={data.counts.pages} />
+      {data.limited && (
+        <SearchUpgradeNote>
+          The {ent.planName} plan shows the top 5 items in each insight. Upgrade to Pro to see every action and mover.
+        </SearchUpgradeNote>
+      )}
       <div className={classes.layout}>
         <InsightActionList actions={actions} onOpen={(a) => open(a.dimension, a.target)} />
         <InsightMovers data={data} onOpen={open} />

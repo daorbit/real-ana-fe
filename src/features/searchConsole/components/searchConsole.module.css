@@ -242,6 +242,87 @@
   min-width: 0;
 }
 
+.rangeOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.rangeOption[data-locked] {
+  color: var(--text-2);
+}
+
+.upgradeNote {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: var(--mantine-spacing-md);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: var(--accent-soft);
+}
+
+.upgradeIcon,
+.lockedIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.upgradeIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.upgradeText {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+}
+
+.locked {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.lockedPreview {
+  filter: blur(6px);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lockedOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--mantine-spacing-xl);
+  text-align: center;
+  background: radial-gradient(ellipse 60% 60% at 50% 45%, color-mix(in srgb, var(--bg) 85%, transparent), transparent 80%);
+}
+
+.lockedIcon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 4px;
+}
+
+.lockedText {
+  max-width: 420px;
+  margin-bottom: 6px;
+}
+
 @media (max-width: 62em) {
   .tables {
     grid-template-columns: minmax(0, 1fr);
@@ -282,6 +363,10 @@
 
   .headerActions {
     width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .upgradeNote {
     flex-wrap: wrap;
   }
 

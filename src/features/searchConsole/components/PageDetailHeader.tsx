@@ -1,8 +1,9 @@
-import { ActionIcon, Anchor, Breadcrumbs, Button, Select, Text, Tooltip } from "@mantine/core";
-import { ArrowLeft, CalendarDays, ExternalLink, FileText, Home } from "lucide-react";
+import { ActionIcon, Anchor, Breadcrumbs, Button, Text, Tooltip } from "@mantine/core";
+import { ArrowLeft, ExternalLink, FileText, Home } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { SearchType } from "@/shared/types";
-import { RANGES, pagePath } from "../searchMetrics";
+import { pagePath } from "../searchMetrics";
+import { SearchRangeSelect } from "./SearchRangeSelect";
 import { IndexStatusPill } from "./IndexStatusPill";
 import { PageFinder } from "./PageFinder";
 import { AskOrbitSearchButton } from "./AskOrbitSearchButton";
@@ -86,16 +87,7 @@ export function PageDetailHeader({
               onOpen={onOpenPage}
             />
           )}
-          <Select
-            size="sm"
-            className={classes.range}
-            aria-label="Date range"
-            leftSection={<CalendarDays size={14} />}
-            data={RANGES.map((r) => ({ value: r.value, label: `Last ${r.label}` }))}
-            value={String(days)}
-            onChange={(v) => v && onDaysChange(Number(v))}
-            allowDeselect={false}
-          />
+          <SearchRangeSelect className={classes.range} days={days} onChange={onDaysChange} />
           <Button
             component="a"
             href={pageUrl}

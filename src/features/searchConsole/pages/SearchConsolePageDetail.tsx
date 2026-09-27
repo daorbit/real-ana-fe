@@ -21,6 +21,7 @@ import { SearchOrbitPanel } from "../components/SearchOrbitPanel";
 import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
 import { useSearchOrbitExplain } from "../useSearchOrbitExplain";
 import { useSearchOrbitChat } from "../useSearchOrbitChat";
+import { useSearchEntitlements } from "../useSearchEntitlements";
 import {
   ChartCardSkeleton,
   IndexStatusSkeleton,
@@ -36,7 +37,8 @@ export default function SearchConsolePageDetail() {
   const pageUrl = search.get("url") ?? "";
   const workspaceId = search.get("workspaceId") ?? "";
   const siteId = search.get("siteId") ?? "";
-  const days = Number(search.get("days") ?? "28") || 28;
+  const { maxDays } = useSearchEntitlements();
+  const days = Math.min(Number(search.get("days") ?? "28") || 28, maxDays);
   const type = (search.get("type") as SearchType | null) ?? "web";
   const [selected, setSelected] = useState<MetricKey[]>(["clicks", "impressions"]);
   const [query, setQuery] = useState<string | null>(null);

@@ -28,6 +28,7 @@ import { SearchOrbitPanel } from "./SearchOrbitPanel";
 import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
 import { useSearchOrbitExplain } from "../useSearchOrbitExplain";
 import { useSearchOrbitChat } from "../useSearchOrbitChat";
+import { useSearchEntitlements } from "../useSearchEntitlements";
 import classes from "./searchConsole.module.css";
 import { OverviewSkeleton } from "./SearchSkeletons";
 
@@ -44,7 +45,8 @@ export function SearchConsoleBody({
   tab: SearchConsoleTabId;
   onTabChange: (tab: SearchConsoleTabId) => void;
 }) {
-  const [days, setDays] = useState(28);
+  const { maxDays } = useSearchEntitlements();
+  const [days, setDays] = useState(() => Math.min(28, maxDays));
   const [type, setType] = useState<SearchType>("web");
   const [query, setQuery] = useState<string | null>(null);
   const openPage = useOpenSearchPage(workspaceId, siteId, days, type);
