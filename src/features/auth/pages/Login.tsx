@@ -12,8 +12,7 @@ import { trace } from "@/shared/lib/analytics";
 import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
-import { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
-import { VerifyDialog } from "@/features/auth/components/VerifyDialog";
+import TurnstileWidget, { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { AccountLockedDialog } from "@/features/auth/components/AccountLockedDialog";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -33,13 +32,10 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
-  // Whether the challenge modal is open. The token itself is never held in
-  // state: it goes straight from the widget's callback into the login call,
-  // and the widget unmounts with the modal, so each attempt gets a fresh one.
-  const [verifying, setVerifying] = useState(false);
-  // Set once the password check comes back asking for a second factor.
-  // Distinct from `verifying` (the Turnstile challenge modal) — both can't
-  // be open at once, since the challenge already ran before this exists.
+  const needsCaptcha = turnstileConfigured();
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
+  const [awaitingCaptcha, setAwaitingCaptcha] = useState(false);
   const [pending2fa, setPending2fa] = useState<{ token: string; method: LoginMethod } | null>(null);
   const [totpBusy, setTotpBusy] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<Date | null>(null);
@@ -88,8 +84,13 @@ export default function Login() {
     setTouched((t) => ({ ...t, [field]: true }));
 
 
+  const renewCaptcha = () => {
+    setCaptcha(null);
+    setCaptchaKey((k) => k + 1);
+  };
+
   const finishLogin = async (token?: string) => {
-    setVerifying(false);
+    setAwaitingCaptcha(false);
     setBusy(true);
     setError(null);
     try {
@@ -109,7 +110,13 @@ export default function Login() {
       }
     } finally {
       setBusy(false);
+      if (needsCaptcha) renewCaptcha();
     }
+  };
+
+  const onCaptcha = (token: string) => {
+    setCaptcha(token);
+    if (awaitingCaptcha) void finishLogin(token);
   };
 
   const submitTotp = async (code: string) => {
@@ -136,11 +143,15 @@ export default function Login() {
     if (Object.values(errors).some(Boolean)) return;
 
     setError(null);
-    if (!turnstileConfigured()) {
+    if (!needsCaptcha) {
       void finishLogin();
       return;
     }
-    setVerifying(true);
+    if (captcha) {
+      void finishLogin(captcha);
+      return;
+    }
+    setAwaitingCaptcha(true);
   };
 
   return (
@@ -240,9 +251,9 @@ export default function Login() {
             <button
               type="submit"
               className="auth-submit"
-              disabled={busy || verifying || googleBusy}
+              disabled={busy || awaitingCaptcha || googleBusy}
             >
-              {busy || verifying ? <span className="auth-submit-spinner" /> : "Log in"}
+              {busy || awaitingCaptcha ? <span className="auth-submit-spinner" /> : "Log in"}
             </button>
 
             {/* The demo's real home is the brand panel now. That panel is
@@ -267,16 +278,14 @@ export default function Login() {
                 Sign up free
               </Anchor>
             </Text>
+
+            {needsCaptcha && (
+              <TurnstileWidget key={captchaKey} onVerify={onCaptcha} onExpire={() => setCaptcha(null)} />
+            )}
           </Stack>
         </motion.form>
       </div>
  
-      <VerifyDialog
-        opened={verifying}
-        onCancel={() => setVerifying(false)}
-        onVerify={(token) => void finishLogin(token)}
-      />
-
       <TotpPrompt
         opened={pending2fa !== null}
         busy={totpBusy}
