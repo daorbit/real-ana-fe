@@ -1,15 +1,15 @@
 import { Button, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { RefreshCcw, Sparkles } from "lucide-react";
+import { BarChart3, FileSearch, Lock, RefreshCcw, Search, Sparkles, type LucideIcon } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
-import classes from "./searchConsole.module.css";
+import classes from "./connect.module.css";
 
 export type ConnectVariant = "connect" | "ask-admin" | "upgrade" | "not-configured" | "reconnect";
 
 const COPY: Record<ConnectVariant, { title: string; body: string }> = {
   connect: {
-    title: "Connect Google Search visibility",
-    body: "See the clicks, impressions, average position and exact search queries Google reports for this site. Read-only — Quantalog can't change anything in Google Search Console.",
+    title: "See how Google shows your site",
+    body: "Connect Google Search Console to bring clicks, impressions, rankings and index status into Quantalog.",
   },
   "ask-admin": {
     title: "Search visibility isn't connected",
@@ -29,6 +29,12 @@ const COPY: Record<ConnectVariant, { title: string; body: string }> = {
   },
 };
 
+const FEATURES: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: BarChart3, title: "Performance", text: "Clicks, impressions, CTR and position over 16 months." },
+  { icon: Search, title: "Queries & pages", text: "What people search and which pages Google shows." },
+  { icon: FileSearch, title: "Index status", text: "Check any page is on Google, and why not if it isn't." },
+];
+
 export function SearchConsoleConnectCard({
   variant,
   message,
@@ -41,33 +47,64 @@ export function SearchConsoleConnectCard({
   connecting?: boolean;
 }) {
   const copy = COPY[variant];
+  const canConnect = (variant === "connect" || variant === "reconnect") && onConnect;
 
   return (
-    <div className={classes.connect}>
-      <span className={classes.connectMark}>
-        <GoogleMark size={24} />
-      </span>
-      <Text fw={650} size="md">
-        {copy.title}
-      </Text>
-      <Text className={classes.connectText}>{message || copy.body}</Text>
+    <div className={classes.card}>
+      <div className={classes.hero}>
+        <span className={classes.mark}>
+          <GoogleMark size={26} />
+        </span>
+        <Text className={classes.title}>{copy.title}</Text>
+        <Text className={classes.body}>{message || copy.body}</Text>
 
-      {(variant === "connect" || variant === "reconnect") && onConnect && (
-        <Button
-          mt={6}
-          variant="default"
-          leftSection={variant === "reconnect" ? <RefreshCcw size={15} /> : <GoogleMark size={16} />}
-          loading={connecting}
-          onClick={onConnect}
-        >
-          {variant === "reconnect" ? "Reconnect Google" : "Connect with Google"}
-        </Button>
-      )}
+        {canConnect && (
+          <Button
+            size="md"
+            mt={4}
+            leftSection={variant === "reconnect" ? <RefreshCcw size={16} /> : <GoogleMark size={17} />}
+            loading={connecting}
+            onClick={onConnect}
+            className={classes.cta}
+          >
+            {variant === "reconnect" ? "Reconnect Google" : "Connect with Google"}
+          </Button>
+        )}
 
-      {variant === "upgrade" && (
-        <Button mt={6} component={Link} to="/app/billing" leftSection={<Sparkles size={15} />}>
-          See plans
-        </Button>
+        {variant === "upgrade" && (
+          <Button size="md" mt={4} component={Link} to="/app/billing" leftSection={<Sparkles size={16} />}>
+            See plans
+          </Button>
+        )}
+
+        {canConnect && (
+          <Text className={classes.note}>
+            <Lock size={12} /> Read-only access. Quantalog can't change anything in Search Console.
+          </Text>
+        )}
+      </div>
+
+      {variant === "connect" && (
+        <div className={classes.features}>
+          {FEATURES.map((f) => {
+            const Icon = f.icon;
+            return (
+              <div key={f.title} className={classes.feature}>
+                <span className={classes.featureIcon}>
+                  <Icon size={16} />
+                </span>
+                <div>
+                  <Text fw={650} size="sm">
+                    {f.title}
+                  </Text>
+                  <Text size="xs" c="dimmed" mt={2}>
+                    {f.text}
+                  </Text>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

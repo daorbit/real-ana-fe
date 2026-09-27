@@ -31,7 +31,7 @@ import type {
   GoogleReviewsStatus, GoogleReviewLocation, GoogleAvailableLocations,
   GoogleReviewsList, GoogleSyncResult,
   SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
-  SearchBreakdown, SearchBreakdownDimension, SearchSitemaps,
+  SearchBreakdown, SearchBreakdownDimension, SearchSitemaps, SearchInspection,
   SearchType, SearchBreakdownSort, SearchInsights, SearchDrilldown,
   NotificationPage, NotificationPrefsResponse,
 } from "@/shared/types";
@@ -2256,6 +2256,14 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
 
+    getSearchInspection: build.query<SearchInspection, { workspaceId: string; siteId: string; url: string }>({
+      query: ({ workspaceId, siteId, url }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/inspection`,
+        params: { url },
+      }),
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
     getSearchSitemaps: build.query<SearchSitemaps, { workspaceId: string; siteId: string }>({
       query: ({ workspaceId, siteId }) =>
         `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/sitemaps`,
@@ -2350,6 +2358,7 @@ export const {
   useRefreshSearchPerformanceMutation,
   useGetSearchBreakdownQuery,
   useGetSearchSitemapsQuery,
+  useGetSearchInspectionQuery,
   useGetSearchInsightsQuery,
   useGetSearchDrilldownQuery,
   useGetEmailStatusQuery,

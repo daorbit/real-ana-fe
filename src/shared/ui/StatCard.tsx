@@ -7,7 +7,7 @@ import { useCountUp } from "@/shared/hooks/useCountUp";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 
 
-const ACCENT: Record<string, string> = {
+export const ACCENT: Record<string, string> = {
   emerald: "var(--accent)",
   violet: "var(--accent)",
   green: "#34d399",

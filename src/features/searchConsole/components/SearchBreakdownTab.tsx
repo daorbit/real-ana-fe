@@ -3,13 +3,14 @@ import {
   Alert, Group, Loader, Pagination, ScrollArea, Select, Skeleton, Table, Text, TextInput, UnstyledButton,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { AlertTriangle, ArrowDown, ArrowUp, Search } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import type {
   SearchBreakdownDimension, SearchBreakdownRow, SearchBreakdownSort, SearchType,
 } from "@/shared/types";
-import { METRICS, metricChange } from "../searchMetrics";
+import { METRIC_BY_KEY } from "../searchMetrics";
+import { ClickChange, PositionChip, ShareBar } from "./SearchCells";
 import classes from "./searchConsole.module.css";
 
 const PAGE_SIZES = ["25", "50", "100", "200"];
@@ -72,7 +73,8 @@ export function SearchBreakdownTab({
   if (!data) return null;
 
   const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
-  const clicksMetric = METRICS[0];
+  const maxClicks = Math.max(0, ...data.rows.map((r) => r.clicks));
+  const offset = (data.page - 1) * data.pageSize;
 
   const header = (key: SearchBreakdownSort, label: string, numeric = true) => (
     <Table.Th className={numeric ? classes.numCell : undefined}>
@@ -93,18 +95,24 @@ export function SearchBreakdownTab({
         <div>
           <Text fw={650} size="sm">
             {title}
+            {data.totalAll > 0 && (
+              <Text span size="xs" c="dimmed" fw={500} ml={8}>
+                {data.totalAll.toLocaleString()} total
+              </Text>
+            )}
           </Text>
           <Text size="xs" c="dimmed" mt={2}>
-            {description} {data.totalAll ? `${data.totalAll.toLocaleString()} in this period.` : ""}
+            {description}
             {data.truncated && " Google returns up to 25,000 rows per report."}
           </Text>
         </div>
-        <Group gap="xs" wrap="nowrap">
+        <Group gap="xs" wrap="nowrap" className={classes.searchGroup}>
           {isFetching && <Loader size={14} />}
           <TextInput
-            size="xs"
-            placeholder={`Search ${labelHeader.toLowerCase()}s`}
-            leftSection={<Search size={13} />}
+            size="sm"
+            className={classes.searchInput}
+            placeholder={`Search ${labelHeader.toLowerCase()}s…`}
+            leftSection={<Search size={14} />}
             value={filter}
             onChange={(e) => setFilter(e.currentTarget.value)}
             aria-label={hasSearchLabel ? `Filter ${labelHeader.toLowerCase()}s` : `Search ${title.toLowerCase()}`}
@@ -118,50 +126,48 @@ export function SearchBreakdownTab({
         </Text>
       ) : (
         <ScrollArea className={classes.tableScroll}>
-          <Table verticalSpacing={8} fz="xs" className={classes.table} highlightOnHover>
+          <Table verticalSpacing={9} fz="xs" className={classes.table} highlightOnHover>
             <Table.Thead>
               <Table.Tr>
+                <Table.Th className={classes.rankCell}>#</Table.Th>
                 {header("key", labelHeader, false)}
                 {header("clicks", "Clicks")}
                 {header("change", "Change")}
                 {header("impressions", "Impressions")}
                 {header("ctr", "CTR")}
-                {header("position", "Pos.")}
+                {header("position", "Position")}
+                {onOpenRow && <Table.Th />}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {data.rows.map((row, i) => {
-                const change =
-                  row.previousClicks === null
-                    ? { text: "new", good: true, flat: false }
-                    : metricChange(clicksMetric, row.clicks, row.previousClicks);
-                return (
-                  <Table.Tr
-                    key={`${row.key}-${i}`}
-                    className={onOpenRow ? classes.clickableRow : undefined}
-                    onClick={onOpenRow ? () => onOpenRow(row) : undefined}
-                  >
-                    <Table.Td className={classes.labelCell} title={row.key}>
-                      {renderLabel(row)}
+              {data.rows.map((row, i) => (
+                <Table.Tr
+                  key={`${row.key}-${i}`}
+                  className={onOpenRow ? classes.clickableRow : undefined}
+                  onClick={onOpenRow ? () => onOpenRow(row) : undefined}
+                >
+                  <Table.Td className={classes.rankCell}>{offset + i + 1}</Table.Td>
+                  <Table.Td className={classes.labelCell} title={row.key}>
+                    {renderLabel(row)}
+                  </Table.Td>
+                  <Table.Td className={classes.numCell}>
+                    <ShareBar value={row.clicks} max={maxClicks} label={METRIC_BY_KEY.clicks.format(row.clicks)} />
+                  </Table.Td>
+                  <Table.Td className={classes.numCell}>
+                    <ClickChange clicks={row.clicks} previousClicks={row.previousClicks} />
+                  </Table.Td>
+                  <Table.Td className={classes.numCell}>{METRIC_BY_KEY.impressions.format(row.impressions)}</Table.Td>
+                  <Table.Td className={classes.numCell}>{METRIC_BY_KEY.ctr.format(row.ctr)}</Table.Td>
+                  <Table.Td className={classes.numCell}>
+                    <PositionChip position={row.position} />
+                  </Table.Td>
+                  {onOpenRow && (
+                    <Table.Td className={classes.chevronCell}>
+                      <ChevronRight size={14} />
                     </Table.Td>
-                    <Table.Td className={classes.numCell}>{clicksMetric.format(row.clicks)}</Table.Td>
-                    <Table.Td className={classes.numCell}>
-                      {change ? (
-                        <span className={classes.change} data-good={change.good || undefined} data-flat={change.flat || undefined}>
-                          {change.text}
-                        </span>
-                      ) : (
-                        "—"
-                      )}
-                    </Table.Td>
-                    {METRICS.slice(1).map((m) => (
-                      <Table.Td key={m.key} className={classes.numCell}>
-                        {m.format(row[m.key])}
-                      </Table.Td>
-                    ))}
-                  </Table.Tr>
-                );
-              })}
+                  )}
+                </Table.Tr>
+              ))}
             </Table.Tbody>
           </Table>
         </ScrollArea>

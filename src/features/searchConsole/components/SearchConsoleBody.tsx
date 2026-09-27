@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Alert, SimpleGrid, Skeleton, Stack } from "@mantine/core";
+import { Alert, Skeleton, Stack } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchPerformanceQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
@@ -15,7 +14,7 @@ import {
   renderQuery,
   type SearchConsoleTabId,
 } from "../searchConsoleTabs";
-import type { DrillTarget } from "./SearchDrilldownDrawer";
+import { useOpenSearchPage } from "../useOpenSearchPage";
 import type { SearchConsoleLink } from "./SearchConsoleGate";
 import { SearchConsoleToolbar } from "./SearchConsoleToolbar";
 import { SearchDrilldownDrawer } from "./SearchDrilldownDrawer";
@@ -25,6 +24,21 @@ import { SearchDevicesTab } from "./SearchDevicesTab";
 import { SearchInsightsTab } from "./SearchInsightsTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
 import classes from "./searchConsole.module.css";
+import metricClasses from "./metrics.module.css";
+
+function OverviewSkeleton() {
+  return (
+    <Stack gap="md">
+      <Skeleton height={76} radius="md" />
+      <div className={metricClasses.tiles}>
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton key={i} height={96} radius="md" />
+        ))}
+      </div>
+      <Skeleton height={360} radius="md" />
+    </Stack>
+  );
+}
 
 export function SearchConsoleBody({
   workspaceId,
@@ -39,28 +53,10 @@ export function SearchConsoleBody({
   tab: SearchConsoleTabId;
   onTabChange: (tab: SearchConsoleTabId) => void;
 }) {
-  const navigate = useNavigate();
   const [days, setDays] = useState(28);
   const [type, setType] = useState<SearchType>("web");
-  const [drillTarget, setDrillTarget] = useState<DrillTarget | null>(null);
-
-  const openTarget = (target: DrillTarget) => {
-    if (target.dimension === "page") {
-      const key = typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID().slice(0, 8)
-        : Math.random().toString(36).slice(2, 10);
-      const params = new URLSearchParams({
-        workspaceId,
-        siteId,
-        days: String(days),
-        type,
-        url: target.value,
-      });
-      navigate(`/app/search-visibility/page/${key}?${params.toString()}`);
-      return;
-    }
-    setDrillTarget(target);
-  };
+  const [query, setQuery] = useState<string | null>(null);
+  const openPage = useOpenSearchPage(workspaceId, siteId, days, type);
 
   const overview = useGetSearchPerformanceQuery(
     { workspaceId, siteId, days, type },
@@ -80,6 +76,7 @@ export function SearchConsoleBody({
         onTypeChange={setType}
         link={link}
         busy={overview.isFetching}
+        fetchedAt={overview.data?.fetchedAt}
       />
 
       <div className={classes.tabbar} role="tablist" aria-label="Search visibility reports">
@@ -110,34 +107,29 @@ export function SearchConsoleBody({
           </Alert>
         ) : overview.data ? (
           <SearchOverviewTab
+            {...shared}
             data={overview.data}
             onViewQueries={() => onTabChange("queries")}
             onViewPages={() => onTabChange("pages")}
-            onOpen={openTarget}
+            onOpenQuery={setQuery}
+            onOpenPage={openPage}
           />
         ) : (
-          <Stack gap="md">
-            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
-              {[0, 1, 2, 3].map((i) => (
-                <Skeleton key={i} height={84} radius="md" />
-              ))}
-            </SimpleGrid>
-            <Skeleton height={300} radius="md" />
-          </Stack>
+          <OverviewSkeleton />
         ))}
 
-      {tab === "insights" && <SearchInsightsTab {...shared} onOpen={openTarget} />}
+      {tab === "insights" && <SearchInsightsTab {...shared} onOpenQuery={setQuery} onOpenPage={openPage} />}
 
       {tab === "queries" && (
         <SearchBreakdownTab
           {...shared}
           dimension="query"
           title="Queries"
-          description="Searches that showed your site in Google results."
+          description="Searches that showed your site in Google results. Click a query for its trend and ranking pages."
           labelHeader="Query"
           renderLabel={renderQuery}
           searchLabel={queryText}
-          onOpenRow={(row) => setDrillTarget({ dimension: "query", value: row.key })}
+          onOpenRow={(row) => setQuery(row.key)}
         />
       )}
 
@@ -146,11 +138,11 @@ export function SearchConsoleBody({
           {...shared}
           dimension="page"
           title="Pages"
-          description="Your pages that appeared in Google results."
+          description="Your pages that appeared in Google results. Click a page for its queries and index status."
           labelHeader="Page"
           renderLabel={renderPage}
           searchLabel={pageText}
-          onOpenRow={(row) => openTarget({ dimension: "page", value: row.key })}
+          onOpenRow={(row) => openPage(row.key)}
         />
       )}
 
@@ -173,13 +165,13 @@ export function SearchConsoleBody({
       )}
 
       <SearchDrilldownDrawer
-        target={drillTarget}
-        onClose={() => setDrillTarget(null)}
-        onOpen={(target) => setDrillTarget(target)}
-        workspaceId={workspaceId}
-        siteId={siteId}
-        days={days}
-        type={type}
+        {...shared}
+        query={query}
+        onClose={() => setQuery(null)}
+        onOpenPage={(url) => {
+          setQuery(null);
+          openPage(url);
+        }}
       />
     </div>
   );

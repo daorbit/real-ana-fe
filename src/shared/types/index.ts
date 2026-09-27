@@ -2274,12 +2274,18 @@ export type SearchDrilldown = {
   previous: SearchMetrics | null;
   daily: (SearchMetrics & { date: string })[];
   related: (SearchMetrics & { key: string })[];
-  indexStatus?: string;
+  fetchedAt: string;
+};
+
+export type SearchInspection = {
+  url: string;
+  indexStatus: string;
+  verdict?: string;
   coverageState?: string;
   pageFetchState?: string;
   robotsTxtState?: string;
   lastCrawled?: string | null;
-  issues?: { severity: string; message: string; type?: string }[];
+  issues: { severity: string; message: string; type?: string }[];
   fetchedAt: string;
 };
 

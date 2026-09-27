@@ -1,7 +1,8 @@
-import { ActionIcon, Menu, SegmentedControl, Select, Text, Tooltip } from "@mantine/core";
-import { Link2Off, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
+import { ActionIcon, Menu, Select, Text, Tooltip } from "@mantine/core";
+import { CalendarDays, ExternalLink, Link2Off, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
 import { useRefreshSearchPerformanceMutation } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
+import { timeAgo } from "@/shared/lib";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import type { SearchType } from "@/shared/types";
 import { RANGES, SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
@@ -17,6 +18,7 @@ export function SearchConsoleToolbar({
   onTypeChange,
   link,
   busy,
+  fetchedAt,
 }: {
   workspaceId: string;
   siteId: string;
@@ -26,8 +28,10 @@ export function SearchConsoleToolbar({
   onTypeChange: (type: SearchType) => void;
   link: SearchConsoleLink;
   busy: boolean;
+  fetchedAt?: string;
 }) {
   const [refresh, { isLoading: refreshing }] = useRefreshSearchPerformanceMutation();
+  const consoleUrl = `https://search.google.com/search-console?resource_id=${encodeURIComponent(link.propertyUrl)}`;
 
   const reload = async () => {
     try {
@@ -39,13 +43,13 @@ export function SearchConsoleToolbar({
   };
 
   return (
-    <div className={classes.header}>
+    <div className={classes.toolbar}>
       <div className={classes.headerText}>
         <span className={classes.brandMark}>
           <GoogleMark size={18} />
         </span>
-        <div>
-          <Text fw={650} size="sm">
+        <div className={classes.propertyText}>
+          <Text fw={650} size="sm" truncate>
             {propertyLabel(link.propertyUrl)}
           </Text>
           <div className={classes.meta}>
@@ -56,60 +60,80 @@ export function SearchConsoleToolbar({
                 <span>{link.googleEmail}</span>
               </>
             )}
+            {fetchedAt && (
+              <>
+                <span className={classes.metaDot} />
+                <span>Updated {timeAgo(fetchedAt)}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       <div className={classes.headerActions}>
         <Select
-          size="xs"
+          size="sm"
           className={classes.typeSelect}
           aria-label="Search type"
           data={SEARCH_TYPE_OPTIONS}
           value={type}
           onChange={(v) => v && onTypeChange(v as SearchType)}
           allowDeselect={false}
-          disabled={busy || refreshing}
+          disabled={refreshing}
         />
-        <SegmentedControl
-          size="xs"
+        <Select
+          size="sm"
+          className={classes.rangeSelect}
+          aria-label="Date range"
+          leftSection={<CalendarDays size={14} />}
+          data={RANGES.map((r) => ({ value: r.value, label: `Last ${r.label}` }))}
           value={String(days)}
-          onChange={(v) => onDaysChange(Number(v))}
-          data={RANGES}
-          disabled={busy || refreshing}
+          onChange={(v) => v && onDaysChange(Number(v))}
+          allowDeselect={false}
+          disabled={refreshing}
         />
         <Tooltip label="Fetch the latest from Google" withArrow>
           <ActionIcon
             variant="default"
-            size="lg"
-            loading={refreshing}
+            size={36}
+            loading={refreshing || busy}
             onClick={() => void reload()}
             aria-label="Refresh"
           >
             <RefreshCw size={15} />
           </ActionIcon>
         </Tooltip>
-        {(link.onChangeProperty || link.onDisconnect) && (
-          <Menu position="bottom-end" withArrow width={230}>
-            <Menu.Target>
-              <ActionIcon variant="default" size="lg" aria-label="Search visibility settings">
-                <MoreHorizontal size={15} />
-              </ActionIcon>
-            </Menu.Target>
-            <Menu.Dropdown>
-              {link.onChangeProperty && (
-                <Menu.Item leftSection={<Link2Off size={14} />} onClick={link.onChangeProperty}>
-                  Change property
-                </Menu.Item>
-              )}
-              {link.onDisconnect && (
+        <Menu position="bottom-end" withArrow width={240}>
+          <Menu.Target>
+            <ActionIcon variant="default" size={36} aria-label="Search visibility settings">
+              <MoreHorizontal size={15} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              component="a"
+              href={consoleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              leftSection={<ExternalLink size={14} />}
+            >
+              Open in Google Search Console
+            </Menu.Item>
+            {link.onChangeProperty && (
+              <Menu.Item leftSection={<Link2Off size={14} />} onClick={link.onChangeProperty}>
+                Change property
+              </Menu.Item>
+            )}
+            {link.onDisconnect && (
+              <>
+                <Menu.Divider />
                 <Menu.Item color="red" leftSection={<Unplug size={14} />} onClick={link.onDisconnect}>
                   Disconnect Search visibility
                 </Menu.Item>
-              )}
-            </Menu.Dropdown>
-          </Menu>
-        )}
+              </>
+            )}
+          </Menu.Dropdown>
+        </Menu>
       </div>
     </div>
   );

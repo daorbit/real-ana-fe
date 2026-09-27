@@ -1,0 +1,151 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crumbs {
+  flex-wrap: wrap;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-md);
+  flex-wrap: wrap;
+}
+
+.titleText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+.url {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-2);
+  word-break: break-all;
+}
+
+.range {
+  width: 190px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--mantine-spacing-md);
+  align-items: start;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+}
+
+.status {
+  --status-color: var(--text-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-lg);
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--status-color) 35%, var(--border));
+  background: color-mix(in srgb, var(--status-color) 7%, var(--surface));
+}
+
+.status[data-tone="good"] {
+  --status-color: var(--mantine-color-teal-5);
+}
+
+.status[data-tone="warn"] {
+  --status-color: var(--mantine-color-yellow-5);
+}
+
+.status[data-tone="bad"] {
+  --status-color: var(--mantine-color-red-5);
+}
+
+.statusHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.statusHead > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--status-color);
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0;
+  padding-top: var(--mantine-spacing-sm);
+  border-top: 1px solid var(--border);
+}
+
+.facts dt {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.facts dd {
+  margin: 2px 0 0;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--text);
+}
+
+.issues {
+  margin: 0;
+  padding-left: 18px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+@media (max-width: 62em) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    order: -1;
+  }
+}
+
+@media (max-width: 48em) {
+  .title {
+    font-size: 21px;
+  }
+
+  .range {
+    width: 100%;
+  }
+}

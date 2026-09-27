@@ -4,6 +4,7 @@ import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import type { SearchType } from "@/shared/types";
 import { METRICS, metricChange } from "../searchMetrics";
+import { ChangeText } from "./SearchCells";
 import classes from "./searchConsole.module.css";
 
 const DEVICES: Record<string, { label: string; icon: LucideIcon }> = {
@@ -77,20 +78,16 @@ export function SearchDevicesTab({
                 </Text>
               </div>
             </div>
-            <Progress value={share} size="sm" radius="xl" mt="md" aria-label={`${device.label} share of clicks`} />
+            <Progress value={share} size="sm" radius="xl" mt="md" color="blue" aria-label={`${device.label} share of clicks`} />
             <dl className={classes.deviceStats}>
               {METRICS.map((m) => (
                 <div key={m.key}>
-                  <dt>{m.label}</dt>
+                  <dt>{m.short}</dt>
                   <dd>{m.format(row[m.key])}</dd>
                 </div>
               ))}
             </dl>
-            {change && (
-              <span className={classes.change} data-good={change.good || undefined} data-flat={change.flat || undefined}>
-                {change.text} clicks vs previous
-              </span>
-            )}
+            {change && <ChangeText change={change} note="clicks vs previous" />}
           </div>
         );
       })}

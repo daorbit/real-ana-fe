@@ -4,14 +4,6 @@
   gap: var(--mantine-spacing-lg);
 }
 
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--mantine-spacing-sm) var(--mantine-spacing-md);
-}
-
 .headerText {
   display: flex;
   align-items: center;
@@ -27,7 +19,7 @@
   height: 36px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface-2);
 }
 
 .meta {
@@ -53,74 +45,6 @@
   gap: 8px;
 }
 
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--mantine-spacing-md);
-}
-
-.tile {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  padding: 14px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
-}
-
-.tile:hover {
-  border-color: var(--border-strong, var(--border));
-}
-
-.tile:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.tile[data-active] {
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
-  box-shadow: inset 0 -2px 0 var(--accent);
-}
-
-.tileLabel {
-  font-size: var(--mantine-font-size-xs);
-  color: var(--text-2);
-}
-
-.tileValue {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 650;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-
-.change {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: var(--mantine-font-size-xs);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--mantine-color-red-5);
-}
-
-.change[data-good] {
-  color: var(--mantine-color-teal-5);
-}
-
-.change[data-flat] {
-  color: var(--text-2);
-}
-
 .card {
   padding: var(--mantine-spacing-lg);
   border-radius: var(--radius);
@@ -135,18 +59,6 @@
   justify-content: space-between;
   gap: 8px 16px;
   margin-bottom: var(--mantine-spacing-md);
-}
-
-.chart {
-  height: 260px;
-}
-
-.tooltip {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .tables {
@@ -336,64 +248,6 @@
   cursor: pointer;
 }
 
-.insightGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--mantine-spacing-lg);
-}
-
-.insightSummary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--mantine-spacing-md);
-}
-
-.insightBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  border-radius: 9px;
-  color: var(--accent-2);
-  background: var(--accent-soft);
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-.insightBadge[data-tone="warn"] {
-  color: var(--mantine-color-yellow-5);
-  background: color-mix(in srgb, var(--mantine-color-yellow-6) 12%, transparent);
-  border-color: color-mix(in srgb, var(--mantine-color-yellow-6) 30%, transparent);
-}
-
-.insightBadge[data-tone="bad"] {
-  color: var(--mantine-color-red-5);
-  background: color-mix(in srgb, var(--mantine-color-red-6) 12%, transparent);
-  border-color: color-mix(in srgb, var(--mantine-color-red-6) 30%, transparent);
-}
-
-.insightTitle {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.drawerTiles {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--mantine-spacing-sm);
-}
-
-.drawerTiles .tile {
-  cursor: default;
-  padding: 10px 12px;
-}
-
-.drawerTiles .tileValue {
-  font-size: 18px;
-}
-
 .drawerValue {
   word-break: break-all;
 }
@@ -404,108 +258,49 @@
   gap: 8px;
 }
 
-.connect {
+.toolbar {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: calc(var(--mantine-spacing-xl) * 1.2) var(--mantine-spacing-lg);
-  border-radius: var(--radius);
-  border: 1px dashed var(--border);
-  background: var(--surface);
-  text-align: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm) var(--mantine-spacing-lg);
 }
 
-.connectMark {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 4px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+.propertyText {
+  min-width: 0;
 }
 
-.connectText {
-  max-width: 460px;
-  color: var(--text-2);
-  font-size: var(--mantine-font-size-sm);
-  line-height: 1.55;
+.rangeSelect {
+  width: 180px;
 }
 
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.rankCell {
+  width: 36px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 120ms ease, background-color 120ms ease;
+.chevronCell {
+  width: 28px;
+  color: var(--muted);
 }
 
-.option:hover:not(:disabled) {
-  border-color: var(--border-strong, var(--border));
+.searchGroup {
+  flex: 0 1 300px;
 }
 
-.option:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.option[data-checked] {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.option:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.optionText {
+.searchInput {
   flex: 1;
   min-width: 0;
 }
 
 @media (max-width: 62em) {
-  .tables,
-  .insightGrid {
+  .tables {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .insightSummary,
-  .drawerTiles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 48em) {
-  .tiles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--mantine-spacing-sm);
-  }
-
-  .tile {
-    padding: 12px;
-  }
-
-  .tileValue {
-    font-size: 19px;
-  }
-
   .card {
     padding: var(--mantine-spacing-md);
   }
@@ -524,16 +319,14 @@
     padding-right: var(--mantine-spacing-md);
   }
 
-  .chart {
-    height: 210px;
-  }
-
   .labelCell {
     max-width: 170px;
   }
 
-  .siteSelect {
+  .siteSelect,
+  .searchGroup {
     width: 100%;
+    flex-basis: 100%;
   }
 
   .tab {
@@ -543,5 +336,11 @@
   .headerActions {
     width: 100%;
     flex-wrap: wrap;
+  }
+
+  .typeSelect,
+  .rangeSelect {
+    flex: 1;
+    width: auto;
   }
 }

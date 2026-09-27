@@ -1,4 +1,5 @@
 import { num } from "@/shared/lib";
+import { ACCENT } from "@/shared/ui/StatCard";
 import type { SearchMetrics } from "@/shared/types";
 
 export type MetricKey = keyof SearchMetrics;
@@ -6,23 +7,60 @@ export type MetricKey = keyof SearchMetrics;
 export type MetricDef = {
   key: MetricKey;
   label: string;
+  short: string;
+  tone: "emerald" | "cyan" | "amber" | "pink";
+  color: string;
   format: (value: number) => string;
   lowerIsBetter: boolean;
 };
 
 export const METRICS: MetricDef[] = [
-  { key: "clicks", label: "Clicks", format: (v) => num(Math.round(v)), lowerIsBetter: false },
-  { key: "impressions", label: "Impressions", format: (v) => num(Math.round(v)), lowerIsBetter: false },
-  { key: "ctr", label: "CTR", format: (v) => `${(v * 100).toFixed(1)}%`, lowerIsBetter: false },
-  { key: "position", label: "Avg. position", format: (v) => (v ? v.toFixed(1) : "—"), lowerIsBetter: true },
+  {
+    key: "clicks",
+    label: "Total clicks",
+    short: "Clicks",
+    tone: "emerald",
+    color: ACCENT.emerald,
+    format: (v) => num(Math.round(v)),
+    lowerIsBetter: false,
+  },
+  {
+    key: "impressions",
+    label: "Total impressions",
+    short: "Impressions",
+    tone: "cyan",
+    color: ACCENT.cyan,
+    format: (v) => num(Math.round(v)),
+    lowerIsBetter: false,
+  },
+  {
+    key: "ctr",
+    label: "Average CTR",
+    short: "CTR",
+    tone: "amber",
+    color: ACCENT.amber,
+    format: (v) => `${(v * 100).toFixed(1)}%`,
+    lowerIsBetter: false,
+  },
+  {
+    key: "position",
+    label: "Average position",
+    short: "Position",
+    tone: "pink",
+    color: ACCENT.pink,
+    format: (v) => (v ? v.toFixed(1) : "—"),
+    lowerIsBetter: true,
+  },
 ];
 
+export const METRIC_BY_KEY = Object.fromEntries(METRICS.map((m) => [m.key, m])) as Record<MetricKey, MetricDef>;
+
 export const RANGES = [
-  { value: "7", label: "7d" },
-  { value: "28", label: "28d" },
-  { value: "90", label: "3m" },
-  { value: "180", label: "6m" },
-  { value: "480", label: "16m" },
+  { value: "7", label: "7 days" },
+  { value: "28", label: "28 days" },
+  { value: "90", label: "3 months" },
+  { value: "180", label: "6 months" },
+  { value: "480", label: "16 months" },
 ];
 
 export const SEARCH_TYPE_OPTIONS = [
@@ -32,9 +70,9 @@ export const SEARCH_TYPE_OPTIONS = [
   { value: "news", label: "News" },
 ];
 
-export type MetricChange ={ text: string; good: boolean; flat: boolean };
+export type MetricChange = { text: string; good: boolean; flat: boolean };
 
-export function metricChange(def: MetricDef, current: number, previous?: number): MetricChange | null {
+export function metricChange(def: MetricDef, current: number, previous?: number | null): MetricChange | null {
   if (previous === undefined || previous === null) return null;
 
   if (def.key === "position") {
@@ -66,4 +104,30 @@ export function pagePath(url: string): string {
 
 export function propertyLabel(propertyUrl: string): string {
   return propertyUrl.replace(/^sc-domain:/, "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+export function propertyOrigin(propertyUrl: string): string {
+  if (propertyUrl.startsWith("sc-domain:")) return `https://${propertyUrl.slice("sc-domain:".length)}`;
+  return propertyUrl.replace(/\/$/, "");
+}
+
+export function resolvePageUrl(propertyUrl: string, input: string): string {
+  const value = input.trim();
+  if (/^https?:\/\//i.test(value)) return value;
+  const host = propertyLabel(propertyUrl);
+  const withoutHost = value.startsWith(host) ? value.slice(host.length) : value;
+  const path = withoutHost.startsWith("/") ? withoutHost : `/${withoutHost}`;
+  return `${propertyOrigin(propertyUrl)}${path}`;
+}
+
+export function positionTone(position: number): "top" | "first" | "near" | "far" {
+  if (position <= 3) return "top";
+  if (position <= 10) return "first";
+  if (position <= 20) return "near";
+  return "far";
+}
+
+export function percentDelta(current: number, previous?: number | null): number | null {
+  if (previous === undefined || previous === null || !previous) return null;
+  return Math.round(((current - previous) / previous) * 1000) / 10;
 }
