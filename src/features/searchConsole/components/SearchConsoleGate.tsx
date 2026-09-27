@@ -37,7 +37,14 @@ export function SearchConsoleGate({
   const [unlink] = useUnlinkSearchConsolePropertyMutation();
   const [disconnect] = useDisconnectSearchConsoleMutation();
 
-  const waiting = <OAuthWaitingModal opened={connecting} onFocus={focus} onCancel={cancel} />;
+  const waiting = (
+    <OAuthWaitingModal
+      opened={connecting}
+      onFocus={focus}
+      onCancel={cancel}
+      description="Choose your Google account, then tick “View Search Console data for your verified sites” before pressing Continue."
+    />
+  );
 
   if (isLoading) return <ConsoleSkeleton />;
   if (!status) return null;

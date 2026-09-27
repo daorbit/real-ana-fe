@@ -1,90 +1,91 @@
-import { Text } from "@mantine/core";
-import { ArrowUpRight, CheckCircle2, Target } from "lucide-react";
-import classes from "./connect.module.css";
+import { ArrowUpRight, CheckCircle2, TrendingUp } from "lucide-react";
+import { OrbitMark } from "@/features/orbit/components/OrbitMark";
+import classes from "./preview.module.css";
 
 const METRICS = [
   { label: "Clicks", value: "12.4K", delta: "+18%", tone: "clicks" },
   { label: "Impressions", value: "486K", delta: "+32%", tone: "impressions" },
+  { label: "CTR", value: "2.6%", delta: "+0.4", tone: "ctr" },
+  { label: "Position", value: "8.4", delta: "+2.1", tone: "position" },
 ];
 
-const CLICKS_LINE = "M0,86 C30,80 50,84 80,70 S130,60 160,62 S210,44 240,40 S290,30 320,22";
-const IMPRESSIONS_LINE = "M0,70 C30,66 50,72 80,58 S130,50 160,44 S210,40 240,30 S290,18 320,12";
+const LINE = "M0,120 C40,112 70,118 110,100 S170,86 210,90 S270,60 310,58 S370,40 410,34 S470,22 520,14";
+const AREA = `${LINE} L520,160 L0,160 Z`;
+const SECOND = "M0,138 C40,134 70,138 110,128 S170,120 210,122 S270,104 310,102 S370,92 410,86 S470,78 520,70";
 
 export function SearchConsolePreview() {
   return (
-    <div className={classes.preview} aria-hidden>
-      <div className={classes.panel}>
-        <div className={classes.panelHead}>
-          <Text size="sm" fw={650}>
-            Performance
-          </Text>
-          <Text size="xs" c="dimmed">
-            Last 28 days
-          </Text>
+    <div className={classes.stage} aria-hidden>
+      <div className={classes.glow} />
+
+      <div className={classes.dashboard}>
+        <div className={classes.dashHead}>
+          <span className={classes.dashTitle}>Search performance</span>
+          <span className={classes.dashRange}>Last 28 days</span>
         </div>
 
         <div className={classes.metrics}>
           {METRICS.map((m) => (
-            <div key={m.label} className={classes.metric}>
+            <div key={m.label} className={classes.metric} data-tone={m.tone}>
               <span className={classes.metricLabel}>
-                <span className={classes.legend} data-tone={m.tone} />
+                <i className={classes.dot} />
                 {m.label}
               </span>
               <span className={classes.metricValue}>{m.value}</span>
-              <span className={classes.delta}>
-                <ArrowUpRight size={12} />
+              <span className={classes.metricDelta}>
+                <ArrowUpRight size={11} />
                 {m.delta}
               </span>
             </div>
           ))}
         </div>
 
-        <svg viewBox="0 0 320 100" preserveAspectRatio="none" className={classes.chartSvg}>
-          <defs>
-            <linearGradient id="gsc-preview-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" className={classes.fillStart} />
-              <stop offset="100%" className={classes.fillEnd} />
-            </linearGradient>
-          </defs>
-          {[25, 50, 75].map((y) => (
-            <line key={y} x1="0" x2="320" y1={y} y2={y} className={classes.gridLine} />
-          ))}
-          <path d={`${IMPRESSIONS_LINE} L320,100 L0,100 Z`} fill="url(#gsc-preview-fill)" />
-          <path d={IMPRESSIONS_LINE} className={classes.lineImpressions} />
-          <path d={CLICKS_LINE} className={classes.lineClicks} />
-        </svg>
+        <div className={classes.chart}>
+          <svg viewBox="0 0 520 160" preserveAspectRatio="none" className={classes.svg}>
+            <defs>
+              <linearGradient id="gsc-hero-area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" className={classes.areaTop} />
+                <stop offset="100%" className={classes.areaBottom} />
+              </linearGradient>
+            </defs>
+            {[40, 80, 120].map((y) => (
+              <line key={y} x1="0" x2="520" y1={y} y2={y} className={classes.grid} />
+            ))}
+            <path d={AREA} fill="url(#gsc-hero-area)" className={classes.area} />
+            <path d={SECOND} className={classes.lineSecond} pathLength={1} />
+            <path d={LINE} className={classes.linePrimary} pathLength={1} />
+            <circle cx="410" cy="34" r="5" className={classes.point} />
+          </svg>
+          <div className={classes.tooltip}>
+            <span className={classes.tooltipDate}>Sep 21</span>
+            <span className={classes.tooltipValue}>1,240 clicks</span>
+          </div>
+        </div>
       </div>
 
-      <div className={classes.miniGrid}>
-        <div className={classes.panel}>
-          <span className={classes.miniHead}>
-            <span className={classes.miniIcon} data-tone="good">
-              <CheckCircle2 size={14} />
-            </span>
-            Index status
+      <div className={`${classes.float} ${classes.floatQuery}`}>
+        <span className={classes.rank}>#1</span>
+        <div className={classes.floatText}>
+          <span className={classes.floatTitle}>real time analytics</span>
+          <span className={classes.floatMeta}>
+            <TrendingUp size={11} /> Position 6.2 → 2.1
           </span>
-          <Text size="sm" fw={650} mt={10}>
-            Page is on Google
-          </Text>
-          <Text size="xs" c="dimmed" mt={2} truncate>
-            /pricing · Submitted and indexed
-          </Text>
         </div>
+      </div>
 
-        <div className={classes.panel}>
-          <span className={classes.miniHead}>
-            <span className={classes.miniIcon} data-tone="info">
-              <Target size={14} />
-            </span>
-            Quick win
-          </span>
-          <Text size="sm" fw={650} mt={10} truncate>
-            website visitor tracking
-          </Text>
-          <Text size="xs" c="dimmed" mt={2} truncate>
-            Position 7.2 · 3.4K impressions
-          </Text>
+      <div className={`${classes.float} ${classes.floatOrbit}`}>
+        <span className={classes.orbitMark}>
+          <OrbitMark size={18} />
+        </span>
+        <div className={classes.floatText}>
+          <span className={classes.floatTitle}>Orbit suggests</span>
+          <span className={classes.floatBody}>“pricing” is 3 spots from page 1 — add an FAQ section.</span>
         </div>
+      </div>
+
+      <div className={`${classes.float} ${classes.floatIndex}`}>
+        <CheckCircle2 size={15} className={classes.indexIcon} />
+        <span className={classes.floatTitle}>/pricing is on Google</span>
       </div>
     </div>
   );

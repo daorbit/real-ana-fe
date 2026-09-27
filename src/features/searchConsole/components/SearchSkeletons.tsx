@@ -336,34 +336,46 @@ export function ConsoleSkeleton() {
 
 export function PropertyPickerSkeleton() {
   return (
-    <div className={picker.wrap}>
-      <div className={classes.inline}>
-        <Skeleton height={20} width={130} radius="xl" />
-        <Skeleton height={1} width={40} />
-        <Skeleton height={20} width={110} radius="xl" />
+    <div className={picker.layout}>
+      <div className={picker.intro}>
+        <Skeleton height={12} width={140} radius="sm" />
+        <Skeleton height={20} width={260} radius="xl" />
+        <div>
+          <Skeleton height={30} width="90%" radius="sm" />
+          <Skeleton height={30} width="60%" mt={8} radius="sm" />
+          <Skeleton height={12} width="80%" mt={14} radius="sm" />
+        </div>
+        <Skeleton height={58} radius="md" />
+        <Skeleton height={110} radius="md" />
       </div>
       <div className={picker.panel}>
-        <Skeleton height={30} width={240} radius="xl" />
-        <div>
-          <Skeleton height={20} width="70%" radius="sm" />
-          <Skeleton height={11} width="85%" mt={10} radius="sm" />
+        <div className={picker.panelHead}>
+          <div>
+            <Skeleton height={13} width={200} radius="sm" />
+            <Skeleton height={10} width={140} mt={8} radius="sm" />
+          </div>
+          <Skeleton height={24} width={80} radius="sm" />
         </div>
-        <div className={classes.stack}>
-          {range(1).map((i) => (
-            <div key={i} className={classes.option}>
-              <Skeleton height={34} width={34} radius="md" />
-              <div className={classes.grow}>
-                <Skeleton height={12} width="40%" radius="sm" />
-                <Skeleton height={10} width="60%" mt={8} radius="sm" />
+        <div className={picker.sections}>
+          <div className={picker.grid}>
+            {range(4).map((i) => (
+              <div key={i} className={picker.tile}>
+                <div className={picker.tileTop}>
+                  <Skeleton height={40} width={40} radius="md" />
+                  <Skeleton height={18} width={18} radius="xl" />
+                </div>
+                <Skeleton height={12} width="70%" radius="sm" />
+                <Skeleton height={10} width="55%" mt={6} radius="sm" />
+                <Skeleton height={16} width={90} mt={8} radius="xl" />
               </div>
-              <Skeleton height={18} width={18} radius="xl" />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        <Skeleton height={10} width={260} radius="sm" />
-        <Skeleton height={42} radius="sm" />
+        <div className={picker.panelFoot}>
+          <Skeleton height={10} width={220} radius="sm" />
+          <Skeleton height={42} width={160} radius="sm" />
+        </div>
       </div>
-      <Skeleton height={10} width={220} radius="sm" />
     </div>
   );
 }
