@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, Anchor, Breadcrumbs, Select, Skeleton, Stack, Text } from "@mantine/core";
-import { AlertTriangle, CalendarDays, ExternalLink, FileSearch } from "lucide-react";
+import { AlertTriangle, BarChart3, CalendarDays, ExternalLink, FileSearch } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { AppShell } from "@/app/AppShell";
@@ -8,7 +8,8 @@ import { useGetSearchConsoleStatusQuery, useGetSearchDrilldownQuery } from "@/ap
 import { errMessage } from "@/shared/lib/notify";
 import { useTitle } from "@/shared/lib/useTitle";
 import type { SearchType } from "@/shared/types";
-import { RANGES, pagePath, type MetricKey } from "../searchMetrics";
+import { RANGES, pagePath, percentDelta, type MetricKey } from "../searchMetrics";
+import { StatCard } from "@/shared/ui/StatCard";
 import { searchPageHref } from "../useOpenSearchPage";
 import { SearchMetricTiles, toggleMetric } from "../components/SearchMetricTiles";
 import { SearchPerformanceChart } from "../components/SearchPerformanceChart";
@@ -150,6 +151,18 @@ export default function SearchConsolePageDetail() {
           </div>
 
           <aside className={classes.side}>
+            {fresh && data.views && (
+              <StatCard
+                icon={BarChart3}
+                label="Page views (Quantalog)"
+                value={data.views.total}
+                color="green"
+                delta={percentDelta(data.views.total, data.views.previous)}
+                spark={data.views.daily.length > 1 ? data.views.daily : undefined}
+                sparkKey="views"
+                hint="Every visit to this page tracked by Quantalog in the same period, from all sources — not just Google."
+              />
+            )}
             {propertyUrl && (
               <SearchIndexStatusCard
                 workspaceId={workspaceId}

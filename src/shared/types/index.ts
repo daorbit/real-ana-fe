@@ -2215,7 +2215,7 @@ export type SearchPerformance = {
   previous: SearchMetrics | null;
   daily: (SearchMetrics & { date: string })[];
   queries: (SearchMetrics & { query: string })[];
-  pages: (SearchMetrics & { page: string })[];
+  pages: (SearchMetrics & { page: string; views?: number })[];
   fetchedAt: string;
 };
 
@@ -2225,11 +2225,12 @@ export type SearchBreakdownRow = SearchMetrics & {
   key: string;
   previousClicks: number | null;
   previousPosition: number | null;
+  views?: number;
 };
 
 export type SearchType = "web" | "image" | "video" | "news";
 
-export type SearchBreakdownSort = "key" | "clicks" | "change" | "impressions" | "ctr" | "position";
+export type SearchBreakdownSort = "key" | "clicks" | "change" | "impressions" | "ctr" | "position" | "views";
 
 export type SearchBreakdown = {
   dimension: SearchBreakdownDimension;
@@ -2274,6 +2275,7 @@ export type SearchDrilldown = {
   previous: SearchMetrics | null;
   daily: (SearchMetrics & { date: string })[];
   related: (SearchMetrics & { key: string })[];
+  views?: { total: number; previous: number; daily: { date: string; views: number }[] };
   fetchedAt: string;
 };
 

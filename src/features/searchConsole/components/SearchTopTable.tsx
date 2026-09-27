@@ -5,7 +5,7 @@ import { METRIC_BY_KEY } from "../searchMetrics";
 import { PositionChip, ShareBar } from "./SearchCells";
 import classes from "./searchConsole.module.css";
 
-export type TopRow = SearchMetrics & { key: string; label: string };
+export type TopRow = SearchMetrics & { key: string; label: string; views?: number };
 
 export function SearchTopTable({
   title,
@@ -25,6 +25,7 @@ export function SearchTopTable({
   onOpenRow?: (row: TopRow) => void;
 }) {
   const maxClicks = Math.max(0, ...rows.map((r) => r.clicks));
+  const showViews = rows.some((r) => r.views !== undefined);
 
   return (
     <div className={classes.card}>
@@ -56,6 +57,7 @@ export function SearchTopTable({
                 <Table.Th className={classes.rankCell}>#</Table.Th>
                 <Table.Th>{labelHeader}</Table.Th>
                 <Table.Th className={classes.numCell}>Clicks</Table.Th>
+                {showViews && <Table.Th className={classes.numCell}>Views</Table.Th>}
                 <Table.Th className={classes.numCell}>Impr.</Table.Th>
                 <Table.Th className={classes.numCell}>Position</Table.Th>
                 {onOpenRow && <Table.Th />}
@@ -75,6 +77,9 @@ export function SearchTopTable({
                   <Table.Td className={classes.numCell}>
                     <ShareBar value={row.clicks} max={maxClicks} label={METRIC_BY_KEY.clicks.format(row.clicks)} />
                   </Table.Td>
+                  {showViews && (
+                    <Table.Td className={classes.numCell}>{METRIC_BY_KEY.clicks.format(row.views ?? 0)}</Table.Td>
+                  )}
                   <Table.Td className={classes.numCell}>{METRIC_BY_KEY.impressions.format(row.impressions)}</Table.Td>
                   <Table.Td className={classes.numCell}>
                     <PositionChip position={row.position} />

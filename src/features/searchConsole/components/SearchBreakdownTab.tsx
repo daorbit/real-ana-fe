@@ -75,6 +75,7 @@ export function SearchBreakdownTab({
   const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const maxClicks = Math.max(0, ...data.rows.map((r) => r.clicks));
   const offset = (data.page - 1) * data.pageSize;
+  const showViews = dimension === "page";
 
   const header = (key: SearchBreakdownSort, label: string, numeric = true) => (
     <Table.Th className={numeric ? classes.numCell : undefined}>
@@ -133,6 +134,7 @@ export function SearchBreakdownTab({
                 {header("key", labelHeader, false)}
                 {header("clicks", "Clicks")}
                 {header("change", "Change")}
+                {showViews && header("views", "Views")}
                 {header("impressions", "Impressions")}
                 {header("ctr", "CTR")}
                 {header("position", "Position")}
@@ -156,6 +158,9 @@ export function SearchBreakdownTab({
                   <Table.Td className={classes.numCell}>
                     <ClickChange clicks={row.clicks} previousClicks={row.previousClicks} />
                   </Table.Td>
+                  {showViews && (
+                    <Table.Td className={classes.numCell}>{METRIC_BY_KEY.clicks.format(row.views ?? 0)}</Table.Td>
+                  )}
                   <Table.Td className={classes.numCell}>{METRIC_BY_KEY.impressions.format(row.impressions)}</Table.Td>
                   <Table.Td className={classes.numCell}>{METRIC_BY_KEY.ctr.format(row.ctr)}</Table.Td>
                   <Table.Td className={classes.numCell}>
