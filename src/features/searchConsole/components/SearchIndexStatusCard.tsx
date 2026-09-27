@@ -1,9 +1,9 @@
 import { Anchor, Text } from "@mantine/core";
-import { AlertTriangle, CheckCircle2, CircleSlash, ExternalLink, XCircle } from "lucide-react";
+import { AlertTriangle, ExternalLink } from "lucide-react";
 import dayjs from "dayjs";
 import { useGetSearchInspectionQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
-import type { SearchInspection } from "@/shared/types";
+import { verdictOf } from "../inspectionVerdict";
 import { IndexStatusSkeleton } from "./SearchSkeletons";
 import classes from "./pageDetail.module.css";
 
@@ -12,17 +12,6 @@ function humanize(value?: string) {
   if (!/^[A-Z_]+$/.test(value)) return value;
   const text = value.replace(/_/g, " ").toLowerCase();
   return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-function verdictOf(data: SearchInspection) {
-  const coverage = (data.coverageState ?? "").toLowerCase();
-  if (data.verdict === "PASS" || (coverage.includes("indexed") && !coverage.includes("not indexed"))) {
-    return { tone: "good", icon: CheckCircle2, title: "Page is on Google" };
-  }
-  if (/blocked|noindex|robots/.test(coverage)) {
-    return { tone: "warn", icon: CircleSlash, title: "Page is blocked from Google" };
-  }
-  return { tone: "bad", icon: XCircle, title: "Page is not on Google" };
 }
 
 export function SearchIndexStatusCard({

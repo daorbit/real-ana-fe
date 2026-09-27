@@ -31,10 +31,10 @@ export function StatTileSkeleton({ spark = true }: { spark?: boolean }) {
   );
 }
 
-export function StatTilesSkeleton({ twoColumns = false }: { twoColumns?: boolean }) {
+export function StatTilesSkeleton({ columns = 4 }: { columns?: 2 | 4 | 5 }) {
   return (
-    <div className={`${metrics.tiles} ${twoColumns ? metrics.twoColumns : ""}`}>
-      {range(4).map((i) => (
+    <div className={metrics.tiles} data-columns={columns}>
+      {range(columns === 5 ? 5 : 4).map((i) => (
         <StatTileSkeleton key={i} />
       ))}
     </div>
@@ -391,19 +391,10 @@ export function IndexStatusSkeleton() {
   );
 }
 
-export function PageDetailMainSkeleton() {
-  return (
-    <>
-      <StatTilesSkeleton />
-      <ChartCardSkeleton />
-    </>
-  );
-}
-
 export function DrawerSkeleton() {
   return (
     <div className={classes.stack}>
-      <StatTilesSkeleton twoColumns />
+      <StatTilesSkeleton columns={2} />
       <Skeleton height={260} radius="md" />
       <TableCardSkeleton rows={5} columns={4} />
     </div>

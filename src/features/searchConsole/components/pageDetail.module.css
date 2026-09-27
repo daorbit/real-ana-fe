@@ -1,19 +1,54 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--mantine-spacing-md);
+}
+
+.crumbRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .crumbs {
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.crumbCurrent {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
 }
 
 .titleRow {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: var(--mantine-spacing-md);
   flex-wrap: wrap;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.pageIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  color: var(--accent-2);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .titleText {
@@ -23,21 +58,50 @@
   min-width: 0;
 }
 
+.titleLine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
 .title {
   font-family: var(--font-display);
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.2;
+  color: var(--text);
   word-break: break-all;
 }
 
 .url {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  font-size: var(--mantine-font-size-sm);
   color: var(--text-2);
   word-break: break-all;
+}
+
+.pill {
+  --pill: var(--mantine-color-red-5);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 650;
+  color: var(--pill);
+  background: color-mix(in srgb, var(--pill) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pill) 30%, transparent);
+}
+
+.pill[data-tone="good"] {
+  --pill: var(--mantine-color-teal-5);
+}
+
+.pill[data-tone="warn"] {
+  --pill: var(--mantine-color-yellow-5);
 }
 
 .titleActions {
@@ -48,7 +112,15 @@
 }
 
 .range {
-  width: 190px;
+  width: 180px;
+}
+
+.noData {
+  display: grid;
+  place-items: center;
+  height: 300px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
 }
 
 .layout {
@@ -56,13 +128,6 @@
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: var(--mantine-spacing-md);
   align-items: start;
-}
-
-.main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--mantine-spacing-md);
-  min-width: 0;
 }
 
 .side {
@@ -153,6 +218,16 @@
   }
 
   .range {
+    flex: 1;
+    width: auto;
+  }
+
+  .titleActions {
     width: 100%;
+  }
+
+  .pageIcon {
+    width: 40px;
+    height: 40px;
   }
 }

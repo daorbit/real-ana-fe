@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Eye, Hash, MousePointerClick, Percent, type LucideIcon } from "lucide-react";
 import type { SearchMetrics, SearchPerformance } from "@/shared/types";
 import { METRICS, percentDelta, type MetricKey } from "../searchMetrics";
@@ -24,17 +25,19 @@ export function SearchMetricTiles({
   daily,
   selected,
   onToggle,
-  twoColumns = false,
+  columns = 4,
+  children,
 }: {
   totals: SearchMetrics;
   previous: SearchMetrics | null;
   daily?: SearchPerformance["daily"];
   selected: MetricKey[];
   onToggle: (key: MetricKey) => void;
-  twoColumns?: boolean;
+  columns?: 2 | 4 | 5;
+  children?: ReactNode;
 }) {
   return (
-    <div className={`${classes.tiles} ${twoColumns ? classes.twoColumns : ""}`} role="group" aria-label="Chart metrics">
+    <div className={classes.tiles} data-columns={columns} role="group" aria-label="Chart metrics">
       {METRICS.map((m) => (
         <SelectableStat
           key={m.key}
@@ -51,6 +54,7 @@ export function SearchMetricTiles({
           hint={HINTS[m.key]}
         />
       ))}
+      {children}
     </div>
   );
 }

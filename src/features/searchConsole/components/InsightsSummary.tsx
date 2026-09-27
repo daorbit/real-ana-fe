@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import { Sparkles } from "lucide-react";
+import { ListChecks } from "lucide-react";
 import { num } from "@/shared/lib";
 import { ACTION_KINDS, type ActionKind, type InsightAction } from "../insightActions";
 import classes from "./insights.module.css";
@@ -22,7 +22,7 @@ export function InsightsSummary({
     <div className={classes.summary}>
       <div className={classes.summaryMain}>
         <span className={classes.summaryIcon}>
-          <Sparkles size={18} />
+          <ListChecks size={18} />
         </span>
         <div>
           <Text className={classes.summaryTitle}>

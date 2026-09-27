@@ -1,6 +1,6 @@
 import { Button, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { Check, Lock, RefreshCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Lock, RefreshCcw, ShieldCheck } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import { SearchConsolePreview } from "./SearchConsolePreview";
 import classes from "./connect.module.css";
@@ -98,7 +98,7 @@ export function SearchConsoleConnectCard({
             </Button>
           )}
           {variant === "upgrade" && (
-            <Button size="md" component={Link} to="/app/billing" leftSection={<Sparkles size={16} />} className={classes.cta}>
+            <Button size="md" component={Link} to="/app/billing" rightSection={<ArrowRight size={16} />} className={classes.cta}>
               See plans
             </Button>
           )}

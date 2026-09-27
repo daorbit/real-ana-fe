@@ -4,8 +4,12 @@
   gap: var(--mantine-spacing-lg);
 }
 
-.tiles.twoColumns {
+.tiles[data-columns="2"] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tiles[data-columns="5"] {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .selectable {
@@ -150,8 +154,15 @@
   background: var(--mantine-color-blue-5);
 }
 
+@media (max-width: 75em) {
+  .tiles[data-columns="5"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 62em) {
-  .tiles {
+  .tiles,
+  .tiles[data-columns="5"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

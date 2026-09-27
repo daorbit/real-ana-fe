@@ -68,7 +68,7 @@ export function SearchDrilldownDrawer({
       ) : (
         <Stack gap="lg">
           <SearchMetricTiles
-            twoColumns
+            columns={2}
             totals={data.totals}
             previous={data.previous}
             daily={data.daily}
