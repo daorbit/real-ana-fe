@@ -1,4 +1,5 @@
-import type { ComponentProps, CSSProperties } from "react";
+import type { ComponentProps } from "react";
+import { Checkbox } from "@mantine/core";
 import { ACCENT, StatCard } from "@/shared/ui/StatCard";
 import classes from "./metrics.module.css";
 
@@ -8,15 +9,34 @@ export function SelectableStat({
   ...card
 }: ComponentProps<typeof StatCard> & { active: boolean; onSelect: () => void }) {
   return (
-    <button
-      type="button"
+    <div
+      role="checkbox"
+      tabIndex={0}
+      aria-checked={active}
+      aria-label={card.label}
       className={classes.selectable}
-      data-active={active || undefined}
-      aria-pressed={active}
       onClick={onSelect}
-      style={{ "--ring": ACCENT[card.color ?? "emerald"] ?? ACCENT.emerald } as CSSProperties}
+      onKeyDown={(e) => {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
-      <StatCard {...card} />
-    </button>
+      <StatCard
+        {...card}
+        leading={
+          <Checkbox
+            size="xs"
+            checked={active}
+            readOnly
+            tabIndex={-1}
+            aria-hidden
+            color={ACCENT[card.color ?? "emerald"] ?? ACCENT.emerald}
+            className={classes.check}
+          />
+        }
+      />
+    </div>
   );
 }

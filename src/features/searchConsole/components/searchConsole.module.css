@@ -236,10 +236,6 @@
   color: var(--accent);
 }
 
-.siteSelect {
-  width: 240px;
-}
-
 .typeSelect {
   width: 104px;
 }
@@ -323,7 +319,6 @@
     max-width: 170px;
   }
 
-  .siteSelect,
   .searchGroup {
     width: 100%;
     flex-basis: 100%;

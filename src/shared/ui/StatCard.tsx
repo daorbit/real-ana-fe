@@ -2,7 +2,7 @@ import { Group, Text, Badge, Tooltip, Box, Popover, Loader, ActionIcon, CloseBut
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useCountUp } from "@/shared/hooks/useCountUp";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 
@@ -62,6 +62,7 @@ export function StatCard({
   explaining,
   explanation,
   explainError,
+  leading,
 }: {
   icon: LucideIcon;
   label: string;
@@ -83,6 +84,7 @@ export function StatCard({
   explaining?: boolean;
   explanation?: string | null;
   explainError?: string | null;
+  leading?: ReactNode;
 }) {
   const accent = ACCENT[color] ?? ACCENT.emerald;
   const sparkId = `spark-${String(label).replace(/\W/g, "")}`;
@@ -95,6 +97,7 @@ export function StatCard({
             40px icon block made every card look identical at a glance. */}
         <Group justify="space-between" align="center" wrap="nowrap" mb="sm">
           <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+            {leading}
             <Icon size={14} style={{ color: "var(--muted)", flexShrink: 0 }} />
             <Text size="xs" c="dimmed" fw={500} truncate style={{ letterSpacing: "0.01em" }}>
               {label}

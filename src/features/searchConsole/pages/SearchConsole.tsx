@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { Select, Skeleton } from "@mantine/core";
+import { Skeleton } from "@mantine/core";
 import { FolderKanban, Globe } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useGetSitesQuery } from "@/app/store";
@@ -11,7 +11,6 @@ import { useTitle } from "@/shared/lib/useTitle";
 import { SearchConsoleGate } from "../components/SearchConsoleGate";
 import { SearchConsoleBody } from "../components/SearchConsoleBody";
 import { resolveTab, type SearchConsoleTabId } from "../searchConsoleTabs";
-import classes from "../components/searchConsole.module.css";
 
 export default function SearchConsole() {
   useTitle("Search visibility");
@@ -23,7 +22,7 @@ export default function SearchConsole() {
   });
   const webSites = sites.filter((s) => s.platform !== "app");
 
-  const [siteScope, setSiteScope] = useSiteScope(workspaceId || undefined);
+  const [siteScope] = useSiteScope(workspaceId || undefined);
   const site = webSites.find((s) => s.siteId === siteScope[0]) ?? webSites[0] ?? null;
 
   const [params, setParams] = useSearchParams();
@@ -57,19 +56,6 @@ export default function SearchConsole() {
       <PageHeader
         title="Search visibility"
         description="How your sites appear in Google Search — clicks, impressions, queries, pages and sitemaps, straight from Google."
-        actions={
-          webSites.length > 0 && (
-            <Select
-              className={classes.siteSelect}
-              aria-label="Site"
-              data={webSites.map((s) => ({ value: s.siteId, label: s.name }))}
-              value={site?.siteId ?? null}
-              onChange={(v) => v && setSiteScope([v])}
-              allowDeselect={false}
-              leftSection={<Globe size={15} />}
-            />
-          )
-        }
       />
 
       {loading || sitesLoading ? (
