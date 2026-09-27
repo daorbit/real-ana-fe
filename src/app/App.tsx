@@ -12,6 +12,7 @@ import { OrbitProvider } from "@/features/orbit/components/OrbitProvider";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { NotFound } from "@/shared/ui/NotFound";
 import { AppBootSkeleton } from "@/shared/ui/Skeletons";
+import { ShellLayout } from "@/app/shell/ShellLayout";
 import { WelcomeOverlay, consumeWelcomePending } from "@/shared/ui/WelcomeOverlay";
 import "@/app/App.css";
 import "@/polish.css";
@@ -236,39 +237,41 @@ export default function App() {
               <Route path="/seo-report/:token" element={<RouteFrame><PublicSeoReport /></RouteFrame>} />
               <Route path="/data-deletion" element={<RouteFrame><DataDeletion /></RouteFrame>} />
               <Route path="/app/onboarding" element={<ProtectedRaw><RouteFrame><Onboarding /></RouteFrame></ProtectedRaw>} />
-              <Route path="/app" element={<Protected><ErrorBoundary variant="route" resetKey="/app"><Home /></ErrorBoundary></Protected>} />
-              <Route path="/app/analytics" element={<Protected><RouteFrame><Analytics /></RouteFrame></Protected>} />
-              <Route path="/app/seo" element={<Protected><RouteFrame><Seo /></RouteFrame></Protected>} />
-              <Route path="/app/search-visibility" element={<Protected><RouteFrame><SearchConsole /></RouteFrame></Protected>} />
-              <Route path="/app/search-visibility/page/:pageKey" element={<Protected><RouteFrame><SearchConsolePageDetail /></RouteFrame></Protected>} />
-              <Route path="/app/search-console" element={<Protected><RouteFrame><SearchConsole /></RouteFrame></Protected>} />
-              <Route path="/app/search-console/page/:pageKey" element={<Protected><RouteFrame><SearchConsolePageDetail /></RouteFrame></Protected>} />
-              <Route path="/app/compare" element={<Protected><RouteFrame><Compare /></RouteFrame></Protected>} />
               <Route
                 path="/app/seo/:siteId/report/:reportId/print"
                 element={<ProtectedRaw><RouteFrame><SeoReportPrint /></RouteFrame></ProtectedRaw>}
               />
-              <Route path="/app/workspaces" element={<Protected><RouteFrame><Workspaces /></RouteFrame></Protected>} />
-              <Route path="/app/members" element={<Protected><RouteFrame><Members /></RouteFrame></Protected>} />
-              <Route path="/app/orbit" element={<Protected><RouteFrame><Orbit /></RouteFrame></Protected>} />
-              <Route path="/app/branding" element={<Protected><RouteFrame><Branding /></RouteFrame></Protected>} />
-              <Route path="/app/media" element={<Protected><RouteFrame><MediaLibrary /></RouteFrame></Protected>} />
-              <Route path="/app/share" element={<Protected><RouteFrame><Share /></RouteFrame></Protected>} />
-              <Route path="/app/reports" element={<Protected><RouteFrame><Reports /></RouteFrame></Protected>} />
-              <Route path="/app/journey" element={<Protected><RouteFrame><Journey /></RouteFrame></Protected>} />
-              <Route path="/app/journey/:appUserId" element={<Protected><RouteFrame><JourneyTimeline /></RouteFrame></Protected>} />
-              <Route path="/app/social" element={<Protected><RouteFrame><SocialPosts /></RouteFrame></Protected>} />
-              <Route path="/app/reviews" element={<Protected><RouteFrame><Reviews /></RouteFrame></Protected>} />
-              <Route path="/app/lead-capture" element={<Protected><RouteFrame><LeadCapture /></RouteFrame></Protected>} />
-              <Route path="/app/developers" element={<Protected><RouteFrame><Developers /></RouteFrame></Protected>} />
-              <Route path="/app/settings/:section?" element={<Protected><RouteFrame><Settings /></RouteFrame></Protected>} />
-              <Route path="/app/billing" element={<Protected><RouteFrame><Billing /></RouteFrame></Protected>} />
-              {/* Admin-only, enforced by the page and by every /api/admin route. */}
-              <Route path="/app/impersonate" element={<Protected><RouteFrame><Impersonate /></RouteFrame></Protected>} />
-              <Route path="/app/demo-usage" element={<Protected><RouteFrame><DemoUsage /></RouteFrame></Protected>} />
-              <Route path="/app/admin/billing" element={<Protected><RouteFrame><AdminBilling /></RouteFrame></Protected>} />
-              <Route path="/app/admin/broadcast" element={<Protected><RouteFrame><AdminBroadcast /></RouteFrame></Protected>} />
-              <Route path="/app/admin/database" element={<Protected><RouteFrame><AdminDatabase /></RouteFrame></Protected>} />
+              <Route element={<Protected><ShellLayout /></Protected>}>
+                <Route path="/app" element={<Home />} />
+                <Route path="/app/analytics" element={<Analytics />} />
+                <Route path="/app/seo" element={<Seo />} />
+                <Route path="/app/search-visibility" element={<SearchConsole />} />
+                <Route path="/app/search-visibility/page/:pageKey" element={<SearchConsolePageDetail />} />
+                <Route path="/app/search-console" element={<SearchConsole />} />
+                <Route path="/app/search-console/page/:pageKey" element={<SearchConsolePageDetail />} />
+                <Route path="/app/compare" element={<Compare />} />
+                <Route path="/app/workspaces" element={<Workspaces />} />
+                <Route path="/app/members" element={<Members />} />
+                <Route path="/app/orbit" element={<Orbit />} />
+                <Route path="/app/branding" element={<Branding />} />
+                <Route path="/app/media" element={<MediaLibrary />} />
+                <Route path="/app/share" element={<Share />} />
+                <Route path="/app/reports" element={<Reports />} />
+                <Route path="/app/journey" element={<Journey />} />
+                <Route path="/app/journey/:appUserId" element={<JourneyTimeline />} />
+                <Route path="/app/social" element={<SocialPosts />} />
+                <Route path="/app/reviews" element={<Reviews />} />
+                <Route path="/app/lead-capture" element={<LeadCapture />} />
+                <Route path="/app/developers" element={<Developers />} />
+                <Route path="/app/settings/:section?" element={<Settings />} />
+                <Route path="/app/billing" element={<Billing />} />
+                {/* Admin-only, enforced by the page and by every /api/admin route. */}
+                <Route path="/app/impersonate" element={<Impersonate />} />
+                <Route path="/app/demo-usage" element={<DemoUsage />} />
+                <Route path="/app/admin/billing" element={<AdminBilling />} />
+                <Route path="/app/admin/broadcast" element={<AdminBroadcast />} />
+                <Route path="/app/admin/database" element={<AdminDatabase />} />
+              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

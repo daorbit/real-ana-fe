@@ -9,7 +9,6 @@ import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
 import { SearchConsoleConnectCard } from "./SearchConsoleConnectCard";
 import { SearchConsolePropertyPicker } from "./SearchConsolePropertyPicker";
 import { ConsoleSkeleton } from "./SearchSkeletons";
-import { OAuthWaitingModal } from "@/shared/ui/OAuthWaitingModal";
 import { useSearchConsoleConnect } from "../useSearchConsoleConnect";
 
 export type SearchConsoleLink = {
@@ -33,18 +32,9 @@ export function SearchConsoleGate({
   const { data: status, isLoading, refetch } = useGetSearchConsoleStatusQuery(workspaceId, {
     skip: !workspaceId,
   });
-  const { connect, connecting, focus, cancel } = useSearchConsoleConnect(workspaceId, () => void refetch());
+  const { connect, connecting } = useSearchConsoleConnect(workspaceId, () => void refetch());
   const [unlink] = useUnlinkSearchConsolePropertyMutation();
   const [disconnect] = useDisconnectSearchConsoleMutation();
-
-  const waiting = (
-    <OAuthWaitingModal
-      opened={connecting}
-      onFocus={focus}
-      onCancel={cancel}
-      description="Choose your Google account, then tick “View Search Console data for your verified sites” before pressing Continue."
-    />
-  );
 
   if (isLoading) return <ConsoleSkeleton />;
   if (!status) return null;
@@ -53,10 +43,7 @@ export function SearchConsoleGate({
 
   if (!status.connected || !status.connection) {
     return canAdmin ? (
-      <>
-        <SearchConsoleConnectCard variant="connect" onConnect={connect} connecting={connecting} />
-        {waiting}
-      </>
+      <SearchConsoleConnectCard variant="connect" onConnect={connect} connecting={connecting} />
     ) : (
       <SearchConsoleConnectCard variant="ask-admin" />
     );
@@ -64,15 +51,12 @@ export function SearchConsoleGate({
 
   if (status.connection.status !== "active") {
     return canAdmin ? (
-      <>
-        <SearchConsoleConnectCard
-          variant="reconnect"
-          message={status.connection.statusMessage}
-          onConnect={connect}
-          connecting={connecting}
-        />
-        {waiting}
-      </>
+      <SearchConsoleConnectCard
+        variant="reconnect"
+        message={status.connection.statusMessage}
+        onConnect={connect}
+        connecting={connecting}
+      />
     ) : (
       <SearchConsoleConnectCard variant="ask-admin" message={status.connection.statusMessage} />
     );
@@ -82,16 +66,13 @@ export function SearchConsoleGate({
 
   if (!link) {
     return canAdmin ? (
-      <>
-        <SearchConsolePropertyPicker
-          workspaceId={workspaceId}
-          siteId={siteId}
-          googleEmail={status.connection.googleEmail}
-          onSwitchAccount={connect}
-          switching={connecting}
-        />
-        {waiting}
-      </>
+      <SearchConsolePropertyPicker
+        workspaceId={workspaceId}
+        siteId={siteId}
+        googleEmail={status.connection.googleEmail}
+        onSwitchAccount={connect}
+        switching={connecting}
+      />
     ) : (
       <SearchConsoleConnectCard
         variant="ask-admin"

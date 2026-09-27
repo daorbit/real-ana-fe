@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { AppShell as MantineShell, Box, Group, Overlay } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,7 @@ import { MobileTabBar } from "./shell/MobileTabBar";
 import { RailWorkspaceHeader } from "./shell/RailWorkspaceHeader";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { HeaderDocsButton } from "@/shared/ui/DocsButton";
+import { ShellMountedContext } from "./shell/ShellContext";
 
 function useStarfieldPreset(): boolean {
   const [on, setOn] = useState(
@@ -57,6 +58,12 @@ function useRouteMotionOff(): boolean {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const mounted = useContext(ShellMountedContext);
+  if (mounted) return <>{children}</>;
+  return <ShellFrame>{children}</ShellFrame>;
+}
+
+export function ShellFrame({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { active } = useWorkspace();
   const { demo } = useDemo();
@@ -78,6 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     useDisclosure(false);
   useEffect(() => {
     closeNav();
+    scroller.current?.scrollTo({ top: 0 });
   }, [loc.pathname, closeNav]);
 
   return (
@@ -176,22 +184,21 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="app-panel__scroll" ref={scroller}>
               <PlanExpiryNotice />
               <QuotaNudge />
-              <AnimatePresence mode="popLayout" initial={false}>
-                <motion.div
-                  key={loc.pathname}
-                  className="route-fade"
-                  initial={motionOff ? false : { opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={motionOff ? undefined : { opacity: 0, y: -6 }}
-                  transition={
-                    motionOff
-                      ? { duration: 0 }
-                      : { duration: 0.22, ease: [0.16, 1, 0.3, 1] }
-                  }
-                >
+              <motion.div
+                key={loc.pathname}
+                className="route-fade"
+                initial={motionOff ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={
+                  motionOff
+                    ? { duration: 0 }
+                    : { duration: 0.18, ease: [0.16, 1, 0.3, 1] }
+                }
+              >
+                <ShellMountedContext.Provider value>
                   {children}
-                </motion.div>
-              </AnimatePresence>
+                </ShellMountedContext.Provider>
+              </motion.div>
             </div>
 
             <div id="panel-overlay-root" />
