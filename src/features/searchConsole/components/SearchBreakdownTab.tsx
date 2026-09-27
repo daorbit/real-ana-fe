@@ -45,7 +45,7 @@ export function SearchBreakdownTab({
   const [q] = useDebouncedValue(filter.trim(), 300);
   const [sort, setSort] = useState<{ key: SearchBreakdownSort; desc: boolean }>({ key: "clicks", desc: true });
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(25);
   const hasSearchLabel = typeof searchLabel === "function";
 
   useEffect(() => setPage(1), [q, sort, days, type, dimension, pageSize]);
@@ -63,7 +63,7 @@ export function SearchBreakdownTab({
     q,
   });
 
-  if (isLoading) return <BreakdownSkeleton columns={dimension === "page" ? 6 : 5} />;
+  if (isLoading) return <BreakdownSkeleton labelHeader={labelHeader} showViews={dimension === "page"} />;
   if (error && !data) {
     return (
       <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>

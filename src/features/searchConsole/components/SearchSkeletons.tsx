@@ -1,10 +1,11 @@
-import { Skeleton } from "@mantine/core";
+import { ScrollArea, Skeleton, Table } from "@mantine/core";
 import classes from "./skeleton.module.css";
 import layout from "./searchConsole.module.css";
 import metrics from "./metrics.module.css";
 import insights from "./insights.module.css";
 import detail from "./pageDetail.module.css";
 import picker from "./picker.module.css";
+import devices from "./devices.module.css";
 
 const LABEL_WIDTHS = ["62%", "48%", "71%", "55%", "40%", "66%", "52%", "44%", "58%", "37%"];
 
@@ -110,28 +111,9 @@ export function ChartCardSkeleton() {
   );
 }
 
-function LookupSkeleton() {
-  return (
-    <div className={classes.lookup}>
-      <div className={classes.inline}>
-        <Skeleton height={38} width={38} radius="md" />
-        <div>
-          <Skeleton height={12} width={110} radius="sm" />
-          <Skeleton height={10} width={260} mt={8} radius="sm" />
-        </div>
-      </div>
-      <div className={classes.lookupForm}>
-        <Skeleton height={36} radius="sm" />
-        <Skeleton height={36} width={110} radius="sm" />
-      </div>
-    </div>
-  );
-}
-
 export function OverviewSkeleton() {
   return (
     <div className={layout.section}>
-      <LookupSkeleton />
       <StatTilesSkeleton />
       <ChartCardSkeleton />
       <div className={layout.tables}>
@@ -142,26 +124,60 @@ export function OverviewSkeleton() {
   );
 }
 
-export function BreakdownSkeleton({ columns = 5 }: { columns?: number }) {
-  return <TableCardSkeleton rows={10} columns={columns} action="search" pagination />;
-}
+export function BreakdownSkeleton({ labelHeader, showViews = false }: { labelHeader: string; showViews?: boolean }) {
+  const headers = ["Clicks", "Change", ...(showViews ? ["Views"] : []), "Impressions", "CTR", "Position"];
 
-function InsightCardSkeleton() {
   return (
-    <div className={insights.card}>
-      <div className={classes.insightHead}>
-        <Skeleton height={32} width={32} radius="md" />
-        <div className={classes.grow}>
-          <Skeleton height={12} width="40%" radius="sm" />
-          <Skeleton height={10} width="75%" mt={8} radius="sm" />
+    <div className={layout.card}>
+      <CardHeadSkeleton action="search" />
+      <ScrollArea className={layout.tableScroll}>
+        <Table verticalSpacing={9} fz="xs" className={layout.table}>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th className={layout.rankCell}>#</Table.Th>
+              <Table.Th>{labelHeader}</Table.Th>
+              {headers.map((h) => (
+                <Table.Th key={h} className={layout.numCell}>
+                  {h}
+                </Table.Th>
+              ))}
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {range(10).map((i) => (
+              <Table.Tr key={i}>
+                <Table.Td className={layout.rankCell}>{i + 1}</Table.Td>
+                <Table.Td>
+                  <Skeleton height={11} width={LABEL_WIDTHS[i % LABEL_WIDTHS.length]} radius="sm" />
+                </Table.Td>
+                {headers.map((h) => (
+                  <Table.Td key={h} className={layout.numCell}>
+                    {h === "Clicks" ? (
+                      <div className={classes.clicksCell}>
+                        <Skeleton height={4} width={56} radius="xl" className={classes.shareBar} />
+                        <Skeleton height={11} width={18} radius="sm" />
+                      </div>
+                    ) : (
+                      <Skeleton
+                        height={h === "Position" ? 18 : 11}
+                        width={h === "Position" ? 38 : h === "Change" ? 34 : 28}
+                        radius={h === "Position" ? "xl" : "sm"}
+                        ml="auto"
+                      />
+                    )}
+                  </Table.Td>
+                ))}
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </ScrollArea>
+      <div className={classes.footer}>
+        <div className={classes.inline}>
+          <Skeleton height={10} width={90} radius="sm" />
+          <Skeleton height={30} width={84} radius="sm" />
         </div>
-        <Skeleton height={20} width={28} radius="xl" />
-      </div>
-      <div className={classes.insightRows}>
-        <TableRowsSkeleton rows={5} columns={2} />
-      </div>
-      <div className={classes.insightFoot}>
-        <Skeleton height={22} width={120} radius="sm" />
+        <Skeleton height={30} width={180} radius="sm" />
       </div>
     </div>
   );
@@ -170,16 +186,68 @@ function InsightCardSkeleton() {
 export function InsightsSkeleton() {
   return (
     <div className={insights.root}>
-      <Skeleton height={12} width={420} maw="100%" radius="sm" />
       <div className={insights.summary}>
-        {range(3).map((i) => (
-          <StatTileSkeleton key={i} spark={false} />
-        ))}
+        <div className={insights.summaryMain}>
+          <Skeleton height={40} width={40} radius="md" />
+          <div>
+            <Skeleton height={20} width={380} maw="100%" radius="sm" />
+            <Skeleton height={11} width={320} maw="100%" mt={10} radius="sm" />
+            <div className={insights.kindCounts}>
+              {range(3).map((i) => (
+                <Skeleton key={i} height={24} width={110} radius="xl" />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className={insights.highlight}>
+          <Skeleton height={9} width={120} radius="sm" />
+          <Skeleton height={26} width={140} mt={8} radius="sm" />
+          <Skeleton height={10} width="90%" mt={8} radius="sm" />
+        </div>
       </div>
-      <div className={insights.grid}>
-        {range(4).map((i) => (
-          <InsightCardSkeleton key={i} />
-        ))}
+      <div className={insights.layout}>
+        <div className={insights.panel}>
+          <div className={insights.panelHead}>
+            <div>
+              <Skeleton height={13} width={150} radius="sm" />
+              <Skeleton height={10} width={280} mt={8} radius="sm" />
+            </div>
+            <Skeleton height={30} width={300} radius="md" />
+          </div>
+          <div className={insights.actions}>
+            {range(5).map((i) => (
+              <div key={i} className={classes.actionRow}>
+                <Skeleton height={34} width={34} radius="md" />
+                <div className={classes.grow}>
+                  <Skeleton height={12} width={LABEL_WIDTHS[i]} radius="sm" />
+                  <Skeleton height={10} width="85%" mt={8} radius="sm" />
+                </div>
+                <Skeleton height={22} width={96} radius="xl" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={insights.panel}>
+          <div className={insights.panelHead}>
+            <div>
+              <Skeleton height={13} width={100} radius="sm" />
+              <Skeleton height={10} width={180} mt={8} radius="sm" />
+            </div>
+            <Skeleton height={26} width={120} radius="md" />
+          </div>
+          {range(2).map((g) => (
+            <div key={g} className={insights.moverGroup}>
+              <Skeleton height={9} width={60} mb={6} radius="sm" />
+              {range(4).map((i) => (
+                <div key={i} className={classes.moverRow}>
+                  <Skeleton height={10} width={LABEL_WIDTHS[i + g]} radius="sm" />
+                  <Skeleton height={8} radius="xl" />
+                  <Skeleton height={10} width={30} ml="auto" radius="sm" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -187,27 +255,48 @@ export function InsightsSkeleton() {
 
 export function DevicesSkeleton() {
   return (
-    <div className={layout.deviceGrid}>
-      {range(3).map((i) => (
-        <div key={i} className={layout.card}>
-          <div className={classes.inline}>
-            <Skeleton height={36} width={36} radius="md" />
-            <div>
-              <Skeleton height={12} width={80} radius="sm" />
-              <Skeleton height={10} width={64} mt={8} radius="sm" />
-            </div>
-          </div>
-          <Skeleton height={8} mt="md" radius="xl" />
-          <div className={layout.deviceStats}>
-            {range(4).map((s) => (
-              <div key={s}>
-                <Skeleton height={10} width={60} radius="sm" />
-                <Skeleton height={18} width={50} mt={8} radius="sm" />
-              </div>
-            ))}
-          </div>
+    <div className={devices.layout}>
+      <div className={devices.card}>
+        <div>
+          <Skeleton height={13} width={120} radius="sm" />
+          <Skeleton height={10} width={220} mt={8} radius="sm" />
         </div>
-      ))}
+        <div className={devices.donut}>
+          <Skeleton height="100%" circle />
+        </div>
+        <div>
+          {range(3).map((i) => (
+            <div key={i} className={classes.row}>
+              <Skeleton height={30} width={30} radius="md" />
+              <div className={classes.grow}>
+                <Skeleton height={11} width={70} radius="sm" />
+              </div>
+              <Skeleton height={11} width={34} radius="sm" />
+              <Skeleton height={11} width={44} radius="sm" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className={devices.card}>
+        <div>
+          <Skeleton height={13} width={140} radius="sm" />
+          <Skeleton height={10} width={360} maw="100%" mt={8} radius="sm" />
+        </div>
+        <div className={devices.metrics}>
+          {range(4).map((m) => (
+            <div key={m} className={devices.metric}>
+              <Skeleton height={9} width={90} radius="sm" />
+              {range(3).map((i) => (
+                <div key={i} className={classes.deviceBar}>
+                  <Skeleton height={10} width={50} radius="sm" />
+                  <Skeleton height={10} width={`${90 - i * 25}%`} radius="xl" />
+                  <Skeleton height={10} width={40} ml="auto" radius="sm" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -228,6 +317,7 @@ export function ConsoleSkeleton() {
           </div>
         </div>
         <div className={classes.controls}>
+          <Skeleton height={36} width={36} radius="sm" />
           <Skeleton height={36} width={104} radius="sm" />
           <Skeleton height={36} width={180} radius="sm" />
           <Skeleton height={36} width={36} radius="sm" />

@@ -63,6 +63,7 @@ export function SearchConsoleBody({
         link={link}
         busy={overview.isFetching}
         fetchedAt={overview.data?.fetchedAt}
+        onOpenPage={openPage}
       />
 
       <div className={classes.tabbar} role="tablist" aria-label="Search visibility reports">
@@ -93,7 +94,6 @@ export function SearchConsoleBody({
           </Alert>
         ) : overview.data ? (
           <SearchOverviewTab
-            {...shared}
             data={overview.data}
             onViewQueries={() => onTabChange("queries")}
             onViewPages={() => onTabChange("pages")}

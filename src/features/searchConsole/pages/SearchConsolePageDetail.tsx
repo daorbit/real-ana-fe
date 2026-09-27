@@ -15,7 +15,7 @@ import { SearchMetricTiles, toggleMetric } from "../components/SearchMetricTiles
 import { SearchPerformanceChart } from "../components/SearchPerformanceChart";
 import { SearchTopTable } from "../components/SearchTopTable";
 import { SearchIndexStatusCard } from "../components/SearchIndexStatusCard";
-import { SearchPageLookup } from "../components/SearchPageLookup";
+import { PageFinder } from "../components/PageFinder";
 import { SearchDrilldownDrawer } from "../components/SearchDrilldownDrawer";
 import {
   IndexStatusSkeleton,
@@ -89,29 +89,30 @@ export default function SearchConsolePageDetail() {
                 {pageUrl} <ExternalLink size={11} />
               </Anchor>
             </div>
-            <Select
-              size="sm"
-              className={classes.range}
-              aria-label="Date range"
-              leftSection={<CalendarDays size={14} />}
-              data={RANGES.map((r) => ({ value: r.value, label: `Last ${r.label}` }))}
-              value={String(days)}
-              onChange={(v) => v && setDays(Number(v))}
-              allowDeselect={false}
-            />
+            <div className={classes.titleActions}>
+              {propertyUrl && (
+                <PageFinder
+                  workspaceId={workspaceId}
+                  siteId={siteId}
+                  propertyUrl={propertyUrl}
+                  days={days}
+                  type={type}
+                  onOpen={openPage}
+                />
+              )}
+              <Select
+                size="sm"
+                className={classes.range}
+                aria-label="Date range"
+                leftSection={<CalendarDays size={14} />}
+                data={RANGES.map((r) => ({ value: r.value, label: `Last ${r.label}` }))}
+                value={String(days)}
+                onChange={(v) => v && setDays(Number(v))}
+                allowDeselect={false}
+              />
+            </div>
           </div>
         </div>
-
-        {propertyUrl && (
-          <SearchPageLookup
-            workspaceId={workspaceId}
-            siteId={siteId}
-            propertyUrl={propertyUrl}
-            days={days}
-            type={type}
-            onOpen={openPage}
-          />
-        )}
 
         <div className={classes.layout}>
           <div className={classes.main}>

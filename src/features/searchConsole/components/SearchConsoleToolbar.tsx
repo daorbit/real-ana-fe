@@ -7,6 +7,7 @@ import { GoogleMark } from "@/shared/ui/GoogleMark";
 import type { SearchType } from "@/shared/types";
 import { RANGES, SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
 import type { SearchConsoleLink } from "./SearchConsoleGate";
+import { PageFinder } from "./PageFinder";
 import classes from "./searchConsole.module.css";
 
 export function SearchConsoleToolbar({
@@ -19,6 +20,7 @@ export function SearchConsoleToolbar({
   link,
   busy,
   fetchedAt,
+  onOpenPage,
 }: {
   workspaceId: string;
   siteId: string;
@@ -29,6 +31,7 @@ export function SearchConsoleToolbar({
   link: SearchConsoleLink;
   busy: boolean;
   fetchedAt?: string;
+  onOpenPage: (url: string) => void;
 }) {
   const [refresh, { isLoading: refreshing }] = useRefreshSearchPerformanceMutation();
   const consoleUrl = `https://search.google.com/search-console?resource_id=${encodeURIComponent(link.propertyUrl)}`;
@@ -71,6 +74,14 @@ export function SearchConsoleToolbar({
       </div>
 
       <div className={classes.headerActions}>
+        <PageFinder
+          workspaceId={workspaceId}
+          siteId={siteId}
+          propertyUrl={link.propertyUrl}
+          days={days}
+          type={type}
+          onOpen={onOpenPage}
+        />
         <Select
           size="sm"
           className={classes.typeSelect}

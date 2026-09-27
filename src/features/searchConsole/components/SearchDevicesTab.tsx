@@ -1,18 +1,12 @@
-import { Alert, Progress, Text } from "@mantine/core";
-import { AlertTriangle, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
+import { Alert, Text } from "@mantine/core";
+import { AlertTriangle } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import type { SearchType } from "@/shared/types";
-import { METRICS, metricChange } from "../searchMetrics";
-import { ChangeText } from "./SearchCells";
+import { DeviceShareDonut } from "./DeviceShareDonut";
+import { DeviceComparison } from "./DeviceComparison";
 import { DevicesSkeleton } from "./SearchSkeletons";
-import classes from "./searchConsole.module.css";
-
-const DEVICES: Record<string, { label: string; icon: LucideIcon }> = {
-  DESKTOP: { label: "Desktop", icon: Monitor },
-  MOBILE: { label: "Mobile", icon: Smartphone },
-  TABLET: { label: "Tablet", icon: Tablet },
-};
+import classes from "./devices.module.css";
 
 export function SearchDevicesTab({
   workspaceId,
@@ -53,45 +47,12 @@ export function SearchDevicesTab({
     );
   }
 
-  const totalClicks = data.rows.reduce((sum, r) => sum + r.clicks, 0);
+  const rows = [...data.rows].sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions);
 
   return (
-    <div className={classes.deviceGrid}>
-      {data.rows.map((row) => {
-        const device = DEVICES[row.key.toUpperCase()] ?? { label: row.key, icon: Monitor };
-        const Icon = device.icon;
-        const share = totalClicks ? (row.clicks / totalClicks) * 100 : 0;
-        const change =
-          row.previousClicks === null ? null : metricChange(METRICS[0], row.clicks, row.previousClicks);
-
-        return (
-          <div key={row.key} className={classes.card}>
-            <div className={classes.deviceHead}>
-              <span className={classes.deviceIcon}>
-                <Icon size={17} />
-              </span>
-              <div>
-                <Text fw={650} size="sm">
-                  {device.label}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {share.toFixed(0)}% of clicks
-                </Text>
-              </div>
-            </div>
-            <Progress value={share} size="sm" radius="xl" mt="md" color="blue" aria-label={`${device.label} share of clicks`} />
-            <dl className={classes.deviceStats}>
-              {METRICS.map((m) => (
-                <div key={m.key}>
-                  <dt>{m.short}</dt>
-                  <dd>{m.format(row[m.key])}</dd>
-                </div>
-              ))}
-            </dl>
-            {change && <ChangeText change={change} note="clicks vs previous" />}
-          </div>
-        );
-      })}
+    <div className={classes.layout}>
+      <DeviceShareDonut rows={rows} />
+      <DeviceComparison rows={rows} />
     </div>
   );
 }

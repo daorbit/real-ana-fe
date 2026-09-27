@@ -40,6 +40,13 @@
   word-break: break-all;
 }
 
+.titleActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .range {
   width: 190px;
 }

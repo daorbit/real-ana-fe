@@ -1,30 +1,21 @@
 import { useState } from "react";
 import { Text } from "@mantine/core";
 import dayjs from "dayjs";
-import type { SearchPerformance, SearchType } from "@/shared/types";
+import type { SearchPerformance } from "@/shared/types";
 import { pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
 import { SearchPerformanceChart } from "./SearchPerformanceChart";
-import { SearchPageLookup } from "./SearchPageLookup";
 import { SearchTopTable } from "./SearchTopTable";
 import classes from "./searchConsole.module.css";
 
 export function SearchOverviewTab({
   data,
-  workspaceId,
-  siteId,
-  days,
-  type,
   onViewQueries,
   onViewPages,
   onOpenQuery,
   onOpenPage,
 }: {
   data: SearchPerformance;
-  workspaceId: string;
-  siteId: string;
-  days: number;
-  type: SearchType;
   onViewQueries: () => void;
   onViewPages: () => void;
   onOpenQuery: (query: string) => void;
@@ -34,15 +25,6 @@ export function SearchOverviewTab({
 
   return (
     <div className={classes.section}>
-      <SearchPageLookup
-        workspaceId={workspaceId}
-        siteId={siteId}
-        propertyUrl={data.propertyUrl}
-        days={days}
-        type={type}
-        onOpen={onOpenPage}
-      />
-
       <SearchMetricTiles
         totals={data.totals}
         previous={data.previous}
