@@ -38,15 +38,16 @@ export default function Billing() {
   const { user: _user, isDemo } = useAuth();
   const { tab, setTab, cycle, setCycle, currency, changeCurrency, money } = useBillingView();
 
-  const {
-    data: plans = [], isLoading: plansLoading, isFetching: plansFetching, refetch: refetchPlans,
-  } = useGetPlansQuery({ currency }, { refetchOnMountOrArgChange: true });
-  const {
-    data: addons = [], isLoading: addonsLoading, isFetching: addonsFetching, refetch: refetchAddons,
-  } = useGetAddonPacksQuery({ currency }, { refetchOnMountOrArgChange: true });
   // The workspace being bought for is the one selected in the sidebar.
   const { workspaces, active, loading: billingLoading } = useWorkspace();
   const selectedWorkspaceId = active?._id ?? null;
+
+  const {
+    data: plans = [], isLoading: plansLoading, isFetching: plansFetching, refetch: refetchPlans,
+  } = useGetPlansQuery({ currency, workspaceId: selectedWorkspaceId }, { refetchOnMountOrArgChange: true });
+  const {
+    data: addons = [], isLoading: addonsLoading, isFetching: addonsFetching, refetch: refetchAddons,
+  } = useGetAddonPacksQuery({ currency }, { refetchOnMountOrArgChange: true });
 
   const {
     data: liveUsage, isFetching: usageFetching, refetch: refetchUsage,

@@ -1891,8 +1891,9 @@ export const api = createApi({
     }),
 
 
-    getPlans: build.query<Plan[], { currency: Currency }>({
-      query: ({ currency }) => `/api/billing/plans?currency=${currency}`,
+    getPlans: build.query<Plan[], { currency: Currency; workspaceId?: string | null }>({
+      query: ({ currency, workspaceId }) =>
+        `/api/billing/plans?currency=${currency}${workspaceId ? `&workspaceId=${workspaceId}` : ""}`,
       providesTags: ["Plan"],
     }),
 
