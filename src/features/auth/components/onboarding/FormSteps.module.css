@@ -338,16 +338,15 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--onb-edge);
 }
 
-.urlBar:focus-within .dots i:nth-child(1) {
+.dots i:nth-child(1) {
   background: #ff5f57;
 }
-.urlBar:focus-within .dots i:nth-child(2) {
+.dots i:nth-child(2) {
   background: #febc2e;
 }
-.urlBar:focus-within .dots i:nth-child(3) {
+.dots i:nth-child(3) {
   background: #28c840;
 }
 
@@ -405,7 +404,10 @@
 }
 
 .purpose {
-  padding: 7px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px 7px 11px;
   border-radius: 999px;
   border: 1px solid var(--onb-edge);
   background: transparent;
@@ -415,6 +417,17 @@
   font-weight: 500;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.purposeIcon {
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.purpose[aria-pressed="true"] .purposeIcon,
+.purpose:hover .purposeIcon {
+  opacity: 1;
 }
 
 .purpose:hover {
@@ -446,5 +459,9 @@
   .ring,
   .urlOk {
     animation: none;
+  }
+  .purpose,
+  .purposeIcon {
+    transition: none;
   }
 }

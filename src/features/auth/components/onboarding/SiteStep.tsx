@@ -1,12 +1,23 @@
 import { TextInput } from "@mantine/core";
-import { Check, Lock } from "lucide-react";
+import {
+  Check, Lock, Building2, PenLine, Boxes, ShoppingCart, Megaphone,
+  UserRound, BookText, Rocket, Wrench, MoreHorizontal,
+} from "lucide-react";
 import { StepFooter } from "./StepFooter";
 import f from "./FormSteps.module.css";
 
-export const SITE_PURPOSES = [
-  "Company website", "Blog", "SaaS product", "E-commerce store",
-  "Marketing site", "Portfolio", "Documentation", "Landing page",
-  "Internal tool", "Other",
+
+export const SITE_PURPOSES: { label: string; icon: typeof Building2; color: string }[] = [
+  { label: "Company website", icon: Building2, color: "#3B82F6" },
+  { label: "Blog", icon: PenLine, color: "#F59E0B" },
+  { label: "SaaS product", icon: Boxes, color: "#8B5CF6" },
+  { label: "E-commerce store", icon: ShoppingCart, color: "#22C55E" },
+  { label: "Marketing site", icon: Megaphone, color: "#F97316" },
+  { label: "Portfolio", icon: UserRound, color: "#EC4899" },
+  { label: "Documentation", icon: BookText, color: "#06B6D4" },
+  { label: "Landing page", icon: Rocket, color: "#EF4444" },
+  { label: "Internal tool", icon: Wrench, color: "#64748B" },
+  { label: "Other", icon: MoreHorizontal, color: "#94A3B8" },
 ];
 
 /** Loose: enough to light the check in the address bar, not a validator. */
@@ -97,15 +108,16 @@ export function SiteStepBody({
           What's it for? <span style={{ textTransform: "none", letterSpacing: 0 }}>· optional</span>
         </div>
         <div className={f.purposes} role="group" aria-labelledby="onb-site-purpose">
-          {SITE_PURPOSES.map((p) => (
+          {SITE_PURPOSES.map(({ label, icon: Icon, color }) => (
             <button
-              key={p}
+              key={label}
               type="button"
               className={f.purpose}
-              aria-pressed={purpose === p}
-              onClick={() => onPurposeChange(purpose === p ? "" : p)}
+              aria-pressed={purpose === label}
+              onClick={() => onPurposeChange(purpose === label ? "" : label)}
             >
-              {p}
+              <Icon size={15} color={color} className={f.purposeIcon} aria-hidden />
+              {label}
             </button>
           ))}
         </div>
