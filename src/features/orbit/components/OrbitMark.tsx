@@ -3,15 +3,9 @@ import { useComputedColorScheme } from "@mantine/core";
 /**
  * The Orbit mark.
  *
- * Two files rather than one, because the artwork is not transparent — each is
- * drawn on its own ground, and using the dark one on a light panel would put a
- * black square in the corner of the page. `useComputedColorScheme` resolves
- * "auto" to whichever the user is actually seeing, which is the thing that has
- * to match.
- *
- * Rounded and clipped here rather than in the files: the square edge is what
- * makes a raster logo look pasted on, and the radius has to follow the size it
- * is rendered at.
+ * Two files rather than one, because each render is lit for its own theme.
+ * `useComputedColorScheme` resolves "auto" to whichever the user is actually
+ * seeing, which is the thing that has to match.
  */
 export function OrbitMark({
   size = 20,
@@ -27,7 +21,7 @@ export function OrbitMark({
 
   return (
     <img
-      src={scheme === "dark" ? "/da-ai-dark-mode.png" : "/da-ai-light-mode.png"}
+      src={scheme === "dark" ? "/orbit-ai-dark.webp" : "/orbit-ai-light.webp"}
       alt=""
       // Decorative in every place it is used — each one already has a text
       // label or an aria-label, and "Orbit AI Orbit AI" is what a screen reader
@@ -39,10 +33,9 @@ export function OrbitMark({
       style={{
         width: size,
         height: size,
-        borderRadius: Math.round(size * 0.28),
         display: "block",
         flexShrink: 0,
-        objectFit: "cover",
+        objectFit: "contain",
       }}
     />
   );
