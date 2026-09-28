@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Info, Layers, ShoppingCart, Receipt } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { BillingSkeleton } from "@/shared/ui/Skeletons";
 import { useGetPlansQuery, useGetAddonPacksQuery, useGetWorkspaceUsageQuery } from "@/app/store";
@@ -111,6 +112,7 @@ export default function Billing() {
       <PageHeader
         title={t("billing.title")}
         description={t("billing.description")}
+        docsPath={DOCS_SLUGS.billing}
         actions={<PageHelpButton />}
       />
 

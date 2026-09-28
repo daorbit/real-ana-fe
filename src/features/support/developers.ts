@@ -1,6 +1,7 @@
 import type { ApiKey, ApiKeyUsageWindow } from "@/shared/types";
+import { docsUrl, DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 
-export const DOCS_URL = "https://quantalog.daorbit.in/docs/platform-api";
+export const DOCS_URL = docsUrl(DOCS_SLUGS.platformApi);
 
 export const KEY_ENV_VAR = "QUANTALOG_API_KEY";
 

@@ -6,6 +6,7 @@ import {
 import { HelpCircle, Plus, Swords, Target } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { COMPARE_HELP } from "@/features/compare/components/help";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
@@ -183,7 +184,7 @@ export default function Compare() {
       <PageHeader
         title="Compare"
         description="How your pages stack up against your competitors', and what would close the gap."
-        docsPath="/comparisons"
+        docsPath={DOCS_SLUGS.comparisons}
         actions={
           <Group gap="sm" wrap="nowrap">
             <Tooltip label="How comparison scoring works" withArrow>

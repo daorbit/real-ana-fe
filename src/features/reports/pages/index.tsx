@@ -5,6 +5,7 @@ import { AppShell } from "@/app/AppShell";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 import { PageHeader, PageStack } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ReportsSkeleton } from "@/shared/ui/Skeletons";
@@ -45,7 +46,7 @@ export default function Reports() {
         <PageHeader
           title={t("reports.title")}
           description={t("reports.description")}
-          docsPath="/email-reports"
+          docsPath={DOCS_SLUGS.emailReports}
           actions={
             <>
               {page.canEdit && page.schedules.length > 0 && (

@@ -2,6 +2,7 @@ import { Box } from "@mantine/core";
 import { Palette } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { BrandingSkeleton } from "@/shared/ui/Skeletons";
@@ -39,6 +40,7 @@ export default function BrandingPage() {
         <PageHeader
           title="Branding"
           description={`Choose the name, logo and colour people see on ${active.name}'s forms and payment windows.`}
+          docsPath={DOCS_SLUGS.branding}
         />
 
         {form.isLoading ? (

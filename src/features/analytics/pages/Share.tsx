@@ -11,6 +11,7 @@ import { AppShell } from "@/app/AppShell";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { RoleGate } from "@/features/billing/components/RoleGate";
 import {
@@ -571,7 +572,7 @@ export default function Share() {
       <PageHeader
         title={t("share.pageTitle")}
         description={t("share.pageDescription")}
-        docsPath="/public-dashboards"
+        docsPath={DOCS_SLUGS.publicDashboards}
         actions={<PageHelpButton />}
       />
       {active ? (

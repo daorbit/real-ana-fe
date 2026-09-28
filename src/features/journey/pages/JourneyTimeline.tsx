@@ -11,6 +11,7 @@ import {
 import { useGetJourneyTimelineQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import classes from "./JourneyTimeline.module.css";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -82,7 +83,7 @@ export default function JourneyTimeline() {
     <AppShell>
       <PageHeader
         title={appUserId}
-        docsPath="/funnels"
+        docsPath={DOCS_SLUGS.funnels}
         description={
           events.length
             ? `${events.length} steps over ${gapLabel(span)} · first seen ${dateTime(events[0].ts)}`

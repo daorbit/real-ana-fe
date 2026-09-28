@@ -14,6 +14,7 @@ import {
 } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
@@ -195,6 +196,7 @@ export default function MediaLibraryPage() {
       <PageHeader
         title="Media"
         description={`Files ${active.name} can use on posts, forms and payment windows.`}
+        docsPath={DOCS_SLUGS.mediaLibrary}
         actions={
           <Group gap="xs" wrap="nowrap">
             {selecting && (

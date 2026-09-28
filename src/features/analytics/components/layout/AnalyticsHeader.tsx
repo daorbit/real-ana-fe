@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import classes from "./AnalyticsLayout.module.css";
 
 export function AnalyticsHeader({
@@ -39,7 +40,7 @@ export function AnalyticsHeader({
             <HelpCircle size={17} />
           </ActionIcon>
         </Tooltip>
-        <DocsButton path="/overview" />
+        <DocsButton path={DOCS_SLUGS.overview} />
         <ActivityBellIcon />
       </div>
     </header>

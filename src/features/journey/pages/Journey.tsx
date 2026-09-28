@@ -8,6 +8,7 @@ import { Search, Users, ArrowRight, RotateCw, Copy, Check, Fingerprint } from "l
 import { useGetJourneyUsersQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
@@ -19,24 +20,12 @@ const PAGE_SIZE = 10;
 
 type SortKey = "recent" | "events" | "new";
 
-/**
- * A user id is a database key, not a name — an opaque hex string that is
- * unreadable at full length and unrecognisable at a glance. Showing the head
- * and tail keeps it identifiable (that is how anyone reads one: first few, last
- * few) while letting the column stay narrow enough for the signals beside it.
- */
+
 function shortId(id: string): string {
   return id.length <= 18 ? id : `${id.slice(0, 8)}…${id.slice(-6)}`;
 }
 
-/**
- * Identified users traced from a real web or mobile app via the workspace's
- * Platform API key — not the anonymous landing-page tracker.
- *
- * Built as a lookup tool rather than a dashboard: the job it serves is "someone
- * wrote in, show me what they did", so search is first, the rows are dense and
- * comparable, and every row is a way into that user's timeline.
- */
+
 export default function Journey() {
   useTitle("User journeys");
   const navigate = useNavigate();
@@ -46,9 +35,6 @@ export default function Journey() {
   const [sort, setSort] = useState<SortKey>("recent");
   const [filter, setFilter] = useState<"all" | "active">("all");
 
-  // A new search or a different ordering narrows or reorders the result set,
-  // so paging resets to the top rather than landing on a page that may no
-  // longer exist.
   useEffect(() => setPage(1), [q, sort, filter]);
 
   const { data, isFetching, refetch } = useGetJourneyUsersQuery(
@@ -65,7 +51,7 @@ export default function Journey() {
       <PageHeader
         title="User journeys"
         description="Look up a signed-in user and replay what they did, step by step — traced via the Platform API, not the anonymous site tracker."
-        docsPath="/funnels"
+        docsPath={DOCS_SLUGS.funnels}
         actions={
           <Group gap="sm" wrap="nowrap">
             <Tooltip label="Refresh" withArrow>
@@ -84,8 +70,6 @@ export default function Journey() {
         }
       />
 
-      {/* Three numbers, not a chart: they answer "is anything arriving, and is
-          it arriving now" — the two questions worth asking before searching. */}
       <Group gap="xl" mb="md" wrap="wrap">
         {[
           { label: "Traced users", value: summary?.users },
@@ -183,9 +167,7 @@ export default function Journey() {
                       <Text fw={500} size="sm" ff="monospace" title={u.appUserId} className={classes.id}>
                         {shortId(u.appUserId)}
                       </Text>
-                      {/* Copying the id is what someone does next when they are
-                          cross-referencing it against their own database, and
-                          the shortened form cannot be selected by hand. */}
+
                       <CopyButton value={u.appUserId}>
                         {({ copied, copy }) => (
                           <Tooltip label={copied ? "Copied" : "Copy full id"} withArrow>

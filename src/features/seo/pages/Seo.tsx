@@ -15,6 +15,7 @@ import { RunningDialog } from "@/shared/ui/RunningDialog";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { getSeoHelp } from "@/features/seo/components/help";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
@@ -465,7 +466,7 @@ export default function Seo() {
   if (sitesLoading) {
     return (
       <AppShell>
-        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath="/seo" />
+        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath={DOCS_SLUGS.seo} />
         <Stack gap="lg">
           <Skeleton height={92} radius="md" />
           <Skeleton height={220} radius="md" />
@@ -477,7 +478,7 @@ export default function Seo() {
   if (!sites.length) {
     return (
       <AppShell>
-        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath="/seo" />
+        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath={DOCS_SLUGS.seo} />
         <EmptyState
           icon={Globe}
           title="No sites yet"
@@ -514,7 +515,7 @@ export default function Seo() {
       <PageHeader
         title="SEO"
         description="Audit a tracked site's meta tags, content, technical setup and Lighthouse scores."
-        docsPath="/seo"
+        docsPath={DOCS_SLUGS.seo}
         actions={
           report && (
             <Group gap="sm">

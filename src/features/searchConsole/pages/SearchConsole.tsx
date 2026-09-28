@@ -5,6 +5,7 @@ import { useGetSitesQuery } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
 import { useSiteScope } from "@/features/analytics";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { SearchConsoleGate } from "../components/SearchConsoleGate";
@@ -56,6 +57,7 @@ export default function SearchConsole() {
       <PageHeader
         title="Search visibility"
         description="How your sites appear in Google Search — clicks, impressions, queries, pages and sitemaps, straight from Google."
+        docsPath={DOCS_SLUGS.searchVisibility}
       />
 
       {loading || sitesLoading ? (

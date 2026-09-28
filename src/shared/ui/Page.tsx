@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Box, Group, Text, Title, Stack, Divider } from "@mantine/core";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
+import type { DocsSlug } from "@/shared/lib/docsSlugs";
 
 
 export function PageHeader({
@@ -17,8 +18,8 @@ export function PageHeader({
   actions?: ReactNode;
   /** Anything that belongs under the header — filters, tabs. */
   children?: ReactNode;
-  /** Path suffix appended to the hosted docs base URL, e.g. "/analytics". */
-  docsPath?: string;
+  /** Path suffix appended to the hosted docs base URL, e.g. "/overview". */
+  docsPath?: DocsSlug;
 }) {
   return (
     <Box mb="xl">

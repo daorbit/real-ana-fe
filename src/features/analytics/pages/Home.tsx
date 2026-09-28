@@ -26,6 +26,7 @@ import { AnalyticsArt } from "@/shared/ui/Brand";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { WorldMap } from "@/shared/ui/WorldMap";
@@ -134,11 +135,6 @@ function TrafficCard({ stats }: { stats: Stats | null }) {
   );
 }
 
-/**
- * Everything on this card is the five-minute window, so it reads from the live
- * poll rather than the stats payload — the same numbers arrive in `stats`, but
- * a minute behind.
- */
 function LivePagesCard({
   live,
   pages,
@@ -178,17 +174,11 @@ export default function Home() {
   useTitle("Home");
   const { active, loading } = useWorkspace();
   const { user } = useAuth();
-  // The LinkedIn OAuth callback lands back here with its outcome in the query
-  // string; this raises the toast and cleans the URL.
+
   useLinkedInReturn();
-  // Empty = all sites in the workspace. Remembered per workspace, so the
-  // scope survives a reload and matches what Analytics is showing.
+
   const [siteScope, setSiteScope] = useSiteScope(active?._id);
 
-  // Narrowing the site scope swaps every number on the page, same as a
-  // workspace switch — cover it with the same transition. Null until the
-  // workspace is known: on a reload the scope resolves from undefined to the
-  // saved selection, and that first settle is not a switch to announce.
   const scopeSwitch = useSwitchOverlay(
     active?._id ? siteScope.join(",") || "all" : null,
   );
@@ -199,21 +189,11 @@ export default function Home() {
     undefined,
     siteScope,
   );
-  // The hero figure, on its own faster cycle — `stats.live` is the same number
-  // but only as fresh as the 60s stats poll.
+
   const { live, livePages, liveCountries } = useLive(active?._id, undefined, siteScope);
   const { sites } = useSites(active?._id);
   const { demo } = useDemo();
 
-  /*
-   * Extra signals for the getting-started checklist, and only for it.
-   *
-   * The checklist removes itself once every step is done or someone dismisses
-   * it, which for an established workspace is always — so fetching these on
-   * every visit to Home bought two requests to fill in a panel that then
-   * renders nothing. Both are skipped unless the checklist can actually
-   * appear, on top of the existing guards.
-   */
   const onboardingVisible = onboardingCanShow();
   const firstSiteId = sites[0]?._id ?? "";
   const { data: seoReports } = useGetSeoReportsQuery(
@@ -269,10 +249,7 @@ export default function Home() {
     setEditing(false);
   };
 
-  // Show the page shape immediately: while the workspace list loads, and again
-  // while the first stats payload is in flight. The layout is waited on too —
-  // rendering the defaults first would visibly reshuffle the grid a moment
-  // later, once the saved arrangement arrives.
+
   if (loading || layoutLoading || (active && !stats)) {
     return <AppShell><HomeSkeleton /></AppShell>;
   }
@@ -396,23 +373,17 @@ export default function Home() {
       />
 
 
-      {/* Controls first, then the hero band — the toolbar is chrome, so it
-          stays compact above the thing people actually came to read. */}
       <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap" className="home-toolbar">
         <Group gap="sm" wrap="wrap" justify="flex-end" className="home-toolbar-btns">
-          {/* The overview is fixed to the last 24h — range and export live on
-              the full analytics page, which is where people go to slice data. */}
+
           {!editing && !dirty && (
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
           {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           )}
-          {!editing && !dirty && <DocsButton path="/overview" />}
+          {!editing && !dirty && <DocsButton path={DOCS_SLUGS.overview} />}
 
-          {/* Widths and widget choices are edited in the drawer, order in edit
-              mode — either can leave unsaved work, so Save follows `dirty`
-              rather than the mode. */}
           {dirty && (
             <>
               <Button variant="subtle" color="gray" onClick={onDiscard} disabled={saving}>

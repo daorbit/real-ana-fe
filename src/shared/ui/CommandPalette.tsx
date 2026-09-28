@@ -10,6 +10,7 @@ import type { LucideIcon } from "lucide-react";
 import { useWorkspace } from "@/features/workspace/context";
 import { useIsPlatformAdmin } from "@/features/auth/context";
 import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
+import { DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
 
 type Command = {
   id: string;
@@ -139,7 +140,7 @@ export function CommandPalette() {
         section: "Actions",
         icon: BookOpen,
         run: () => {
-          window.open("https://quantalog.daorbit.in/docs", "_blank", "noreferrer");
+          window.open(DOCS_BASE_URL, "_blank", "noreferrer");
           close();
         },
       },

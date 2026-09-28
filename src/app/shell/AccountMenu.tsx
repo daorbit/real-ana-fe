@@ -9,6 +9,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
+import { DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
 import { ADMIN_ITEMS } from "./navItems";
 import { RequestFeatureModal } from "./RequestFeatureModal";
 import { SupportRequestModal } from "./SupportRequestModal";
@@ -181,7 +182,7 @@ export function AccountMenu({
 
         <Menu.Item
           component="a"
-          href="https://quantalog.daorbit.in/docs"
+          href={DOCS_BASE_URL}
           target="_blank"
           rel="noreferrer"
           leftSection={<BookOpen size={15} />}

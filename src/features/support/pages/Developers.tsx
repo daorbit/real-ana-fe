@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { RoleGate } from "@/features/billing/components/RoleGate";
 import { useWorkspace } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -57,7 +58,7 @@ export default function Developers() {
       <PageHeader
         title={t("developers.title")}
         description={t("developers.description")}
-        docsPath="/platform-api"
+        docsPath={DOCS_SLUGS.platformApi}
         actions={<PageHelpButton />}
       />
 

@@ -21,6 +21,7 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { PageHeader } from "@/shared/ui/Page";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { trace } from "@/shared/lib/analytics";
@@ -246,6 +247,7 @@ export default function Members() {
       <PageHeader
         title="Members"
         description={`Who can reach ${active.name}, and what they can do.`}
+        docsPath={DOCS_SLUGS.workspaceMembers}
         actions={
           <Group gap="xs" wrap="nowrap">
             {canAdmin && (

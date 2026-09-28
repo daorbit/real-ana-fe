@@ -6,6 +6,7 @@ import { AlertTriangle, MoreVertical, RefreshCw, Star, Unlink } from "lucide-rea
 import { modals } from "@mantine/modals";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -125,6 +126,7 @@ export default function Reviews() {
       <PageHeader
         title="Google Reviews"
         description="Sync reviews from your Google Business Profile and serve them through the Quantalog API."
+        docsPath={DOCS_SLUGS.reviews}
         actions={
           connected && canAdmin ? (
             <Menu position="bottom-end" withinPortal>
