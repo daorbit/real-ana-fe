@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import {
-  ActionIcon, Alert, Anchor, Box, Button, Center, Group, Loader, Menu, ScrollArea, Stack, Text,
+  ActionIcon, Alert, Anchor, Box, Button, Center, Group, Loader, ScrollArea, Stack, Text,
   Textarea, Title, Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
-  AlertTriangle, ArrowUp, Check, ChevronDown, ClipboardList, Copy, Download, FileText, FolderPlus,
+  AlertTriangle, ArrowUp, ClipboardList, Copy, Download, FileText, FolderPlus,
   Globe, History, Mic, Palette, Pencil, Paperclip, RefreshCw, RotateCcw, Share2, Square,
   Volume2, VolumeX, X,
 } from "lucide-react";
@@ -13,6 +13,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
+import { OrbitModelPicker } from "@/features/orbit/components/OrbitModelPicker";
 import { RichText, toPlainText } from "@/features/orbit/components/RichText";
 import { DataDigestTable, csvFromDigest, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
 import { useOrbit } from "@/features/orbit/components/OrbitProvider";
@@ -547,7 +548,7 @@ export default function Orbit() {
   const {
     messages, input, setInput, pendingImage, attachImage, pendingDocument, attachDocument,
     imageMode, setImageMode, send, regenerateLast, editAndResend, stop, thinking, generatingImage,
-    available, started, plan, models, model, setModel,
+    available, started, plan, models, model, setModel, imageModels, imageModel, setImageModel,
     hasOlderMessages, loadingOlderMessages, loadOlderMessages,
     conversationId, openConversation,
   } = chat;
@@ -563,7 +564,7 @@ export default function Orbit() {
   // show a switcher at all is for the admin who has more than the one model
   // every workspace gets.
   const isPlatformAdmin = useIsPlatformAdmin();
-  const showModelPicker = isPlatformAdmin && models.length > 1;
+  const showModelPicker = isPlatformAdmin && (models.length > 1 || imageModels.length > 1);
 
  
   const [liveId, setLiveId] = useState<string | null>(null);
@@ -1048,38 +1049,15 @@ export default function Orbit() {
               gets exactly the models `/status` sends them with nothing to
               pick between. See `showModelPicker` above. */}
           {showModelPicker && (
-            <Menu position="bottom-end" radius="md" withinPortal zIndex={400}>
-              <Menu.Target>
-                <UnstyledButton
-                  className="tile"
-                  aria-label="Choose Orbit model"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 4,
-                    padding: "5px 8px",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "var(--text-2)",
-                  }}
-                >
-                  {models.find((m) => m.id === model)?.label ?? "Model"}
-                  <ChevronDown size={12} />
-                </UnstyledButton>
-              </Menu.Target>
-              <Menu.Dropdown>
-                {models.map((m) => (
-                  <Menu.Item
-                    key={m.id}
-                    onClick={() => setModel(m.id)}
-                    rightSection={m.id === model && <Check size={14} />}
-                  >
-                    <Text size="sm" fw={600}>{m.label}</Text>
-                    <Text size="xs" c="dimmed">{m.hint}</Text>
-                  </Menu.Item>
-                ))}
-              </Menu.Dropdown>
-            </Menu>
+            <OrbitModelPicker
+              models={models}
+              model={model}
+              onModel={setModel}
+              imageModels={imageModels}
+              imageModel={imageModel}
+              onImageModel={setImageModel}
+              drawing={imageMode}
+            />
           )}
           {/* "Start over" leaves the current thread rather than deleting it —
               it is saved, and the drawer is how you get back. */}

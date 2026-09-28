@@ -51,6 +51,7 @@ export type OrbitMessage = {
 export type PendingDocument = { name: string; mime: string; data: string };
 
 export const MODEL_KEY = "orbit.model";
+export const IMAGE_MODEL_KEY = "orbit.imageModel";
 
 /** The model this browser picked, for callers outside the chat panel. */
 export function readPreferredModel(): string | undefined {
@@ -159,6 +160,27 @@ export function useOrbitChat() {
     }
   });
 
+  const [imageModel, setImageModelState] = useState<string>(() => {
+    try {
+      return localStorage.getItem(IMAGE_MODEL_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
+
+  const imageModels = status?.imageModels ?? [];
+  const activeImageModel =
+    imageModel && imageModels.some((m) => m.id === imageModel) ? imageModel : imageModels[0]?.id ?? "";
+
+  const setImageModel = useCallback((id: string) => {
+    setImageModelState(id);
+    try {
+      localStorage.setItem(IMAGE_MODEL_KEY, id);
+    } catch {
+      return;
+    }
+  }, []);
+
   /** Questions left this cycle. Null until the first answer reports it. */
   const [remaining, setRemaining] = useState<number | null>(null);
 
@@ -221,6 +243,7 @@ export function useOrbitChat() {
           model: activeModel,
           image: opts.image,
           generateImage: opts.drawing,
+          imageModel: opts.drawing && activeImageModel ? activeImageModel : undefined,
           document: opts.document,
 
           conversationId: conversationRef.current ?? undefined,
@@ -293,7 +316,7 @@ export function useOrbitChat() {
         setGeneratingImage(false);
       }
     },
-    [ask, activeModel, workspaceId, loadFirstConversationsPage],
+    [ask, activeModel, activeImageModel, workspaceId, loadFirstConversationsPage],
   );
 
 
@@ -549,6 +572,9 @@ export function useOrbitChat() {
     models,
     model: activeModel,
     setModel,
+    imageModels,
+    imageModel: activeImageModel,
+    setImageModel,
 
     /** The workspace's Orbit plan, for the quota line and the upgrade prompt. */
     plan: status?.plan ?? null,

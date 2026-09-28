@@ -486,7 +486,13 @@ export type Plan = {
   features: string[];
 };
 
- 
+export type OrbitImageModelOption = {
+  id: string;
+  label: string;
+  hint: string;
+};
+
+
 export type OrbitPlan = {
   slug: string;
   name: string;

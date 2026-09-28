@@ -20,7 +20,7 @@ import type {
   SeoShareState, SeoSharePanels, PublicSeoReport,
   DemoUsage, DbStats, WorkersAiTrendPoint, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
-  Plan, OrbitPlan, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
+  Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
   Coupon, CouponCheckResult, Invoice, QuotaSummary,
@@ -997,6 +997,7 @@ export const api = createApi({
           /** The tier that unlocks it, for the upgrade hint. */
           tier: "basic" | "standard" | "advanced";
         }[];
+        imageModels?: OrbitImageModelOption[];
       },
       string
     >({
@@ -1064,6 +1065,8 @@ export const api = createApi({
         image?: string;
 
         generateImage?: boolean;
+
+        imageModel?: string;
 
         document?: { name: string; mime: string; data: string };
       }
