@@ -72,7 +72,6 @@ export function NotificationMatrix({ group, items, pushOn, onChange }: Props) {
 
               <Box className={classes.cell} role="cell">
                 <Switch
-                  className={classes.switch}
                   checked={item.inApp}
                   disabled={!item.optional}
                   onChange={(e) => onChange(item.type, "inApp", e.currentTarget.checked)}
@@ -83,7 +82,6 @@ export function NotificationMatrix({ group, items, pushOn, onChange }: Props) {
               <Box className={classes.cell} role="cell">
                 {item.pushable ? (
                   <Switch
-                    className={classes.switch}
                     checked={item.push && pushOn}
                     disabled={!item.optional || !pushOn}
                     onChange={(e) => onChange(item.type, "push", e.currentTarget.checked)}

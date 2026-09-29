@@ -1,7 +1,7 @@
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Wordmark } from "@/shared/ui/Brand";
 
-const PROOF = ["No credit card", "GDPR-friendly", "Cancel anytime"];
+// const PROOF = ["No credit card", "GDPR-friendly", "Cancel anytime"];
 
 type Props = {
   onDemo?: () => void;
@@ -20,14 +20,14 @@ export function AuthBrand({ onDemo, demoBusy = false }: Props) {
           </button>
         )}
       </header>
-      <footer className="auth-foot">
+      {/* <footer className="auth-foot">
         {PROOF.map((p) => (
           <span key={p} className="auth-foot-item">
             <Check size={13} />
             {p}
           </span>
         ))}
-      </footer>
+      </footer> */}
     </>
   );
 }
