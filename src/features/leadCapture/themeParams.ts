@@ -26,6 +26,9 @@ export function leadFormsUrl(
     mode,
     radius: prefs.radius,
     density: prefs.density,
+    font: prefs.fontSize,
+    table: prefs.table,
+    motion: prefs.motion ? "on" : "off",
     embedded: "1",
   });
   params.set("accent", FIXED_ACCENT[mode]);
