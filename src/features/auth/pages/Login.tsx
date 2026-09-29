@@ -12,6 +12,7 @@ import { trace } from "@/shared/lib/analytics";
 import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
+import GitHubSignInButton from "@/features/auth/components/GitHubSignInButton";
 import TurnstileWidget, { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { AccountLockedDialog } from "@/features/auth/components/AccountLockedDialog";
@@ -136,6 +137,11 @@ export default function Login() {
     [],
   );
 
+  const requireGitHub2fa = useCallback(
+    (token: string) => setPending2fa({ token, method: "github" }),
+    [],
+  );
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
 
@@ -181,7 +187,7 @@ export default function Login() {
               </Alert>
             )}
 
-            <Group grow align="stretch" gap="sm" wrap="nowrap">
+            <div className="auth-providers">
               <div className="last-used-anchor">
                 {lastUser?.method === "google" && <LastUsedBadge />}
                 <GoogleSignInButton
@@ -209,7 +215,16 @@ export default function Login() {
                   onRequires2fa={requireLinkedIn2fa}
                 />
               </div>
-            </Group>
+
+              <div className="last-used-anchor">
+                {lastUser?.method === "github" && <LastUsedBadge />}
+                <GitHubSignInButton
+                  label="GitHub"
+                  onError={setError}
+                  onRequires2fa={requireGitHub2fa}
+                />
+              </div>
+            </div>
 
             <Divider label="or use your email" labelPosition="center" />
 

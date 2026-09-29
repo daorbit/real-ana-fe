@@ -30,7 +30,7 @@ type AuthState = {
     credential: string,
   ) => Promise<{ requires2fa: false; created: boolean } | { requires2fa: true; pendingToken: string }>;
 
-  adoptToken: (token: string) => Promise<void>;
+  adoptToken: (token: string, method?: LoginMethod, created?: boolean) => Promise<void>;
   /** Starts a signup and emails a code. No account exists until `verifySignup`. */
   signup: (email: string, password: string, name: string) => Promise<void>;
   /** Proves the code and creates the account, signing the user in. */
@@ -157,13 +157,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { requires2fa: false as const, created: Boolean(r.created) };
   };
 
-  const adoptToken = async (token: string) => {
+  const adoptToken = async (token: string, method: LoginMethod = "linkedin", created = false) => {
     setToken(token);
     dispatch(rtkApi.util.resetApiState());
+    if (created) {
+      localStorage.removeItem("quantalog_onboarding_skipped");
+      localStorage.removeItem("quantalog_onboarding_dismissed");
+      localStorage.removeItem("rta_active_ws");
+    }
     const me = await api.get<AuthResp["user"]>("/api/auth/me");
     setUser(me);
-    rememberUser(me, "linkedin");
-    trace(me.id, "login", "linkedin_signin", "app");
+    rememberUser(me, method);
+    trace(me.id, created ? "signup" : "login", `${method}_signin`, "app");
   };
 
   const startDemo = async () => {

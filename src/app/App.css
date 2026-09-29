@@ -2205,6 +2205,26 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transform: none;
 }
 
+.auth-providers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.auth-providers .mantine-Button-root {
+  --button-padding-x: 0.75rem;
+}
+
+@media (max-width: 26em) {
+  .auth-form .auth-providers .mantine-Button-label {
+    display: none;
+  }
+
+  .auth-form .auth-providers .mantine-Button-root[data-variant="default"] .mantine-Button-section {
+    margin-inline-end: 0;
+  }
+}
+
 .auth-form .mantine-Divider-root { --divider-color: var(--auth-line); }
 
 .auth-demo-fallback { display: none; }

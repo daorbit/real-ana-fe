@@ -1,11 +1,11 @@
 import { Button } from "@mantine/core";
-import { LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { GitHubMark } from "@/shared/ui/GitHubMark";
 import { useOAuthLoginReturn } from "@/features/auth/useOAuthLoginReturn";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
-export function LinkedInSignInButton({
-  label = "Continue with LinkedIn",
+export function GitHubSignInButton({
+  label = "Continue with GitHub",
   onError,
   onRequires2fa,
 }: {
@@ -14,9 +14,9 @@ export function LinkedInSignInButton({
   onRequires2fa?: (pendingToken: string) => void;
 }) {
   const [busy, setBusy] = useOAuthLoginReturn({
-    param: "linkedinLogin",
-    method: "linkedin",
-    provider: "LinkedIn",
+    param: "githubLogin",
+    method: "github",
+    provider: "GitHub",
     onError,
     onRequires2fa,
   });
@@ -27,11 +27,11 @@ export function LinkedInSignInButton({
       size="md"
       fullWidth
       loading={busy}
-      aria-label="Continue with LinkedIn"
-      leftSection={<LinkedInMark />}
+      aria-label="Continue with GitHub"
+      leftSection={<GitHubMark />}
       onClick={() => {
         setBusy(true);
-        window.location.href = `${API_BASE}/api/auth/linkedin?mode=login`;
+        window.location.href = `${API_BASE}/api/auth/github`;
       }}
     >
       {label}
@@ -39,4 +39,4 @@ export function LinkedInSignInButton({
   );
 }
 
-export default LinkedInSignInButton;
+export default GitHubSignInButton;

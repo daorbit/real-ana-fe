@@ -11,6 +11,7 @@ import { trace } from "@/shared/lib/analytics";
 import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
+import GitHubSignInButton from "@/features/auth/components/GitHubSignInButton";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { VerifyEmailStep } from "@/features/auth/components/VerifyEmailStep";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
@@ -190,7 +191,7 @@ export default function Signup() {
             {/* The providers come first, and by a wider margin than on login:
                 they skip five fields *and* the emailed code, because the
                 address is already verified. Paired in a row, as on login. */}
-            <Group grow align="stretch" gap="sm" wrap="nowrap">
+            <div className="auth-providers">
               <GoogleSignInButton
                 label="Google"
                 text="signup_with"
@@ -211,7 +212,9 @@ export default function Signup() {
               />
 
               <LinkedInSignInButton label="LinkedIn" onError={setError} />
-            </Group>
+
+              <GitHubSignInButton label="GitHub" onError={setError} />
+            </div>
 
             <Divider label="or sign up with email" labelPosition="center" />
 

@@ -28,6 +28,7 @@ export type User = {
   googleLinked?: boolean;
   /** True once the account has signed in with LinkedIn at least once. */
   linkedinLinked?: boolean;
+  githubLinked?: boolean;
   /** False on social-only accounts, which have never set a password. */
   hasPassword?: boolean;
   /** Whether login requires a TOTP code after the password check. */
@@ -45,7 +46,7 @@ export type User = {
    * Derived on the server from what is actually linked, so it stays right for
    * accounts that predate the field.
    */
-  signupSource?: "email" | "google" | "linkedin";
+  signupSource?: "email" | "google" | "linkedin" | "github";
   /** True when this session is an admin acting as someone else. */
   impersonating?: boolean;
   /** True on the read-only public demo session. */

@@ -3,7 +3,7 @@ import type { User } from "@/shared/types";
  
 const KEY = "quantalog_last_user";
 
-export type LoginMethod = "password" | "google" | "linkedin";
+export type LoginMethod = "password" | "google" | "linkedin" | "github";
 
 export type LastUser = {
   name: string;
