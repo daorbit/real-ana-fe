@@ -39,7 +39,7 @@ export function useOAuthLoginReturn({ param, method, provider, onError, onRequir
     if (!status) return;
 
     handled.current = true;
-    window.history.replaceState({}, "", window.location.pathname);
+    nav(window.location.pathname, { replace: true });
 
     const fail = () => onError?.(failureMessage(provider, params.get("reason")));
 
