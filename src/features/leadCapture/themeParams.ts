@@ -1,4 +1,4 @@
-import { ACCENT_PRESETS, BG_STYLES, readThemePrefs } from "@/shared/lib/theme";
+import { BG_STYLES, FIXED_ACCENT, readThemePrefs } from "@/shared/lib/theme";
 
 export const LEAD_FORMS_BASE =
   import.meta.env.VITE_LEAD_FORMS_URL ?? "https://forms.daorbit.in";
@@ -15,7 +15,6 @@ export function leadFormsUrl(
   workspaceToken?: string,
 ): string {
   const prefs = readThemePrefs();
-  const accent = ACCENT_PRESETS.find((preset) => preset.id === prefs.accent);
   const documentMode = document.documentElement.getAttribute("data-mantine-color-scheme");
   const mode = currentMode ?? (prefs.mode === "system"
     ? (documentMode === "dark" || documentMode === "light"
@@ -29,7 +28,7 @@ export function leadFormsUrl(
     density: prefs.density,
     embedded: "1",
   });
-  if (accent) params.set("accent", accent.hex);
+  params.set("accent", FIXED_ACCENT[mode]);
   // A textured background (gradient, mesh, grid, stars) is painted on the
   // panel behind the frame; this tells the forms app to leave its own page
   // ground transparent so that background shows through.

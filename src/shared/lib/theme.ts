@@ -419,7 +419,7 @@ export function buildBgValue(
   return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
 }
 
-const FIXED_ACCENT = { light: "#0d9488", dark: "#14b8a6" };
+export const FIXED_ACCENT = { light: "#0d9488", dark: "#14b8a6" };
 
 const FIXED_CTA = {
   light: { bg: "#171717", bgHover: "#333333", fg: "#ffffff" },
