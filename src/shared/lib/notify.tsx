@@ -6,21 +6,24 @@ import { TriangleAlert } from "lucide-react";
 import { navigateTo } from "@/app/navigation";
 import { UpgradeDialog } from "@/shared/ui/UpgradeDialog";
 import type { ReactNode } from "react";
+import toastClasses from "@/shared/ui/Toast.module.css";
 
 /**
  * Collapse a burst of identical toasts into one.
  *
  * A network flap fails five in-flight requests at once, each raising the same
  * red bar — a stack of five copies of one message reads as five separate
- * problems. Keyed on `color + title + message`, so genuinely different toasts
+ * problems. Keyed on `tone + message`, so genuinely different toasts
  * still stack; a repeat inside the window is dropped, and a repeat after it
  * shows again (the condition is still live).
  */
 const DEDUPE_MS = 4000;
 const recent = new Map<string, number>();
 
-function showDeduped(opts: Parameters<typeof notifications.show>[0]) {
-  const key = `${opts?.color ?? ""}|${String(opts?.title ?? "")}|${String(opts?.message ?? "")}`;
+type ToastTone = "neutral" | "error";
+
+function showDeduped(message: ReactNode, tone: ToastTone, autoClose: number) {
+  const key = `${tone}|${String(message ?? "")}`;
   const now = Date.now();
   const last = recent.get(key);
   if (last && now - last < DEDUPE_MS) return;
@@ -29,7 +32,16 @@ function showDeduped(opts: Parameters<typeof notifications.show>[0]) {
   if (recent.size > 50) {
     for (const [k, t] of recent) if (now - t > DEDUPE_MS) recent.delete(k);
   }
-  notifications.show(opts);
+  notifications.show({
+    message,
+    autoClose,
+    withCloseButton: false,
+    classNames: {
+      root: tone === "error" ? `${toastClasses.toast} ${toastClasses.error}` : toastClasses.toast,
+      body: toastClasses.body,
+      description: toastClasses.message,
+    },
+  });
 }
 
 /**
@@ -50,19 +62,11 @@ export interface QuotaLimitInfo {
 }
 
 export const notify = {
-  /**
-   * `emerald` rather than a literal colour: that is the alias the theme
-   * remaps onto whichever accent the user picked, so a success toast is their
-   * colour. A fixed `teal` here left a green bar on a crimson theme.
-   */
-  success: (message: ReactNode, title = "Success") =>
-    showDeduped({ title, message, color: "emerald", autoClose: 3000 }),
+  success: (message: ReactNode, title?: string) => showDeduped(message || title, "neutral", 3000),
 
-  error: (message: ReactNode, title = "Something went wrong") =>
-    showDeduped({ title, message, color: "red", autoClose: 5000 }),
+  error: (message: ReactNode, title?: string) => showDeduped(message || title, "error", 5000),
 
-  info: (message: ReactNode, title?: string) =>
-    showDeduped({ title, message, color: "emerald", autoClose: 3000 }),
+  info: (message: ReactNode, title?: string) => showDeduped(message || title, "neutral", 3000),
 
   /**
    * A plan/quota limit was hit (workspace, site, audit, crawl, or analytics

@@ -44,7 +44,7 @@ createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <MantineProvider theme={theme} defaultColorScheme={mantineScheme}>
         <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>
-          <Notifications position="top-right" />
+          <Notifications position="top-center" limit={3} />
           <ModalsProvider>
             <ErrorBoundary>
               <App />
