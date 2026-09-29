@@ -123,11 +123,13 @@ export function VerifyEmailStep({
       >
         <Stack gap="lg">
           <div>
-            <Group gap="sm" mb={6}>
-              <MailCheck size={22} />
+            <Stack gap="md" align="center" mb={8}>
+              <span className="auth-badge">
+                <MailCheck size={26} />
+              </span>
               <Title order={2}>Check your email</Title>
-            </Group>
-            <Text c="dimmed" size="sm">
+            </Stack>
+            <Text c="dimmed" size="sm" ta="center">
               We sent a 6-digit code to <b>{email}</b>. Enter it below to finish
               creating your account.
             </Text>
@@ -158,15 +160,9 @@ export function VerifyEmailStep({
             />
           </Center>
 
-          <Button
-            type="submit"
-            loading={busy}
-            disabled={code.length !== 6}
-            fullWidth
-            size="md"
-          >
-            Verify and continue
-          </Button>
+          <button type="submit" className="auth-submit" disabled={busy || code.length !== 6}>
+            {busy ? <span className="auth-submit-spinner" /> : "Verify and continue"}
+          </button>
 
           <Group justify="center" gap={6}>
             <Text c="dimmed" size="sm">Didn't get it?</Text>

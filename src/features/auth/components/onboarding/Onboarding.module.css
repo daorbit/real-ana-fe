@@ -28,54 +28,36 @@
 
   /* The ground under the wash — the app's own, so the hand-off from the last
      step into the dashboard is not a change of background. */
-  background: var(--bg, #0b0c0e);
+  background: #000000;
+  --onb-ground: #000000;
 
-  --onb-ink: rgba(255, 255, 255, 0.94);
-  --onb-ink-dim: rgba(255, 255, 255, 0.56);
+  --onb-ink: #f5f5f7;
+  --onb-ink-dim: #a1a1a6;
   /* A third weight, for the counter and other asides that should read below
      the lede rather than level with it. */
-  --onb-ink-faint: rgba(255, 255, 255, 0.36);
-  --onb-line: rgba(255, 255, 255, 0.09);
+  --onb-ink-faint: #86868b;
+  --onb-line: rgba(255, 255, 255, 0.1);
   /* Slightly stronger than `--onb-line`: what a field or a selected tile is
      drawn with, where the edge is the control rather than a divider. */
   --onb-edge: rgba(255, 255, 255, 0.16);
-  --onb-raise: rgba(255, 255, 255, 0.03);
+  --onb-raise: transparent;
 }
 
 :global([data-mantine-color-scheme="light"]) .shell {
-  background: var(--bg, #f4f5f7);
+  background: #fbfbfd;
+  --onb-ground: #fbfbfd;
 
-  --onb-ink: rgba(16, 20, 28, 0.94);
-  --onb-ink-dim: rgba(16, 20, 28, 0.58);
-  --onb-ink-faint: rgba(16, 20, 28, 0.4);
-  --onb-line: rgba(16, 20, 28, 0.1);
-  --onb-edge: rgba(16, 20, 28, 0.18);
-  --onb-raise: rgba(16, 20, 28, 0.022);
+  --onb-ink: #1d1d1f;
+  --onb-ink-dim: #6e6e73;
+  --onb-ink-faint: #86868b;
+  --onb-line: rgba(0, 0, 0, 0.1);
+  --onb-edge: rgba(0, 0, 0, 0.18);
+  --onb-raise: transparent;
 }
 
 
 .wash {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-
-  background:
-    radial-gradient(42% 62% at 0% 0%,
-      color-mix(in srgb, #818cf8 26%, transparent), transparent 66%),
-    radial-gradient(42% 62% at 100% 0%,
-      color-mix(in srgb, #eab308 20%, transparent), transparent 66%);
-}
-
-:global([data-mantine-color-scheme="light"]) .wash {
-  /* Roughly a third of the dark figures. The same mix over near-white reads
-     far stronger than over near-black — at dark strength the indigo corner
-     becomes a lilac panel with a visible edge to it. */
-  background:
-    radial-gradient(42% 62% at 0% 0%,
-      color-mix(in srgb, #818cf8 9%, transparent), transparent 66%),
-    radial-gradient(42% 62% at 100% 0%,
-      color-mix(in srgb, #eab308 7%, transparent), transparent 66%);
+  display: none;
 }
 
 /* The body sits above the wash. The bar is already `position: relative` for
@@ -116,10 +98,7 @@
 
 @media (min-width: 62em) {
   .rail {
-    display: flex;
-  }
-  .bar {
-    display: none !important;
+    display: none;
   }
 }
 
@@ -193,7 +172,7 @@
   height: 23px;
   border-radius: 50%;
   border: 1px solid var(--onb-edge);
-  background: var(--bg, #0b0c0e);
+  background: var(--onb-ground);
   color: var(--onb-ink-faint);
   font-size: 11px;
   font-weight: 600;
@@ -398,22 +377,22 @@
 
 .title {
 
-  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.35rem);
-  font-weight: 640;
-  line-height: 1.1;
+  font-size: clamp(2rem, 1.5rem + 1.8vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.08;
   /* Tightens as the size grows — the usual optical correction; left at the
      small-size value a 2.35rem heading looks loose. */
-  letter-spacing: -0.028em;
+  letter-spacing: -0.035em;
   color: var(--onb-ink);
   margin: 0;
   text-wrap: balance;
 }
 
 .lede {
-  font-size: 1rem;
-  line-height: 1.58;
+  font-size: 1.1rem;
+  line-height: 1.5;
   color: var(--onb-ink-dim);
-  margin: 0.7rem 0 0;
+  margin: 0.8rem 0 0;
   /* Shorter than the old 52ch. The lede is one sentence of orientation, and a
      measure wider than the form under it makes the pair read as two columns
      that failed to line up. */
@@ -530,8 +509,8 @@
      fixed and moves only the alpha, and it tracks `--bg` for free. */
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg, #0b0c0e), transparent 100%) 0%,
-    var(--bg, #0b0c0e) 40%
+    color-mix(in srgb, var(--onb-ground), transparent 100%) 0%,
+    var(--onb-ground) 40%
   );
 }
 

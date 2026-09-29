@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  TextInput, PasswordInput, PinInput, Button, Title, Text, Alert, Stack,
+  TextInput, PasswordInput, PinInput, Title, Text, Alert, Stack,
   Anchor, Group, Center,
 } from "@mantine/core";
 import { ArrowLeft, MailCheck } from "lucide-react";
@@ -169,7 +169,7 @@ export default function ForgotPassword() {
               <>
                 <div>
                   <Title order={2}>Reset your password</Title>
-                  <Text c="dimmed" size="sm" mt={4}>
+                  <Text c="dimmed" size="sm" mt={4} ta="center">
                     Enter the address you signed up with and we&apos;ll send you a
                     6-digit code.
                   </Text>
@@ -181,7 +181,6 @@ export default function ForgotPassword() {
                   label="Email"
                   placeholder="you@company.com"
                   size="md"
-                  withAsterisk
                   autoComplete="email"
                   autoFocus
                   value={email}
@@ -195,24 +194,20 @@ export default function ForgotPassword() {
                   onBlur={() => email && setTouched(true)}
                 />
 
-                <Button
-                  className="auth-btn"
-                  type="submit"
-                  loading={busy}
-                  fullWidth
-                  size="md"
-                >
-                  Send reset code
-                </Button>
+                <button type="submit" className="auth-submit" disabled={busy}>
+                  {busy ? <span className="auth-submit-spinner" /> : "Send reset code"}
+                </button>
               </>
             ) : (
               <>
                 <div>
-                  <Group gap={8} mb={4}>
-                    <MailCheck size={22} />
+                  <Stack gap="md" align="center" mb={8}>
+                    <span className="auth-badge">
+                      <MailCheck size={26} />
+                    </span>
                     <Title order={2}>Check your email</Title>
-                  </Group>
-                  <Text c="dimmed" size="sm">
+                  </Stack>
+                  <Text c="dimmed" size="sm" ta="center">
                     If <b>{email}</b> has an account, a 6-digit code is on its way.
                     Enter it below with your new password.
                   </Text>
@@ -229,8 +224,7 @@ export default function ForgotPassword() {
                     label="New password"
                     placeholder="••••••••"
                     size="md"
-                    withAsterisk
-                    autoComplete="new-password"
+                      autoComplete="new-password"
                     autoFocus
                     value={password}
                     error={passwordError}
@@ -273,16 +267,13 @@ export default function ForgotPassword() {
                   </Center>
                 </div>
 
-                <Button
-                  className="auth-btn"
+                <button
                   type="submit"
-                  loading={busy}
-                  disabled={code.length !== 6 || Boolean(v.password(password))}
-                  fullWidth
-                  size="md"
+                  className="auth-submit"
+                  disabled={busy || code.length !== 6 || Boolean(v.password(password))}
                 >
-                  Set new password
-                </Button>
+                  {busy ? <span className="auth-submit-spinner" /> : "Set new password"}
+                </button>
 
                 {/* Both escape hatches together, tight — spread across the
                     stack's gap they read as two unrelated afterthoughts. */}

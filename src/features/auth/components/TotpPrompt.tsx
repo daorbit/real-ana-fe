@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { ActionIcon, Box, Button, Modal, PinInput, Stack, Text, TextInput } from "@mantine/core";
-import { X } from "lucide-react";
+import { ShieldCheck, X } from "lucide-react";
 import { errMessage } from "@/shared/lib/notify";
 import { SupportRequestModal } from "@/app/shell/SupportRequestModal";
-import bannerSrc from "@/assets/banners/totp-verify-banner.png";
+import classes from "./totpPrompt.module.css";
 
 
 export function TotpPrompt({
@@ -59,56 +59,49 @@ export function TotpPrompt({
     <Modal
       opened={opened}
       onClose={onCancel}
-      radius="lg"
-      size={440}
+      size={420}
       centered
       padding={0}
       withCloseButton={false}
-      overlayProps={{ backgroundOpacity: 0.65, blur: 6 }}
+      classNames={{ content: classes.content }}
+      overlayProps={{ backgroundOpacity: 0.55, blur: 8 }}
       transitionProps={{ transition: "pop", duration: 200 }}
     >
-      <Stack gap={0} className="verify-card" pos="relative">
+      <Stack gap={0} className={classes.card} pos="relative">
         <ActionIcon
-          variant="subtle"
-          color="gray"
-          size="sm"
+          variant="transparent"
+          size={32}
+          radius="xl"
           onClick={onCancel}
           aria-label="Close"
-          style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}
+          className={classes.close}
         >
-          <X size={16} style={{ pointerEvents: "none", color: "#fff" }} />
+          <X size={16} />
         </ActionIcon>
 
-        <div
-          className="verify-rise"
-          style={{
-            height: 154,
-            backgroundImage: `url(${bannerSrc})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-
-        <Stack gap={3} px={26} pt={18} className="verify-rise">
-          <Text size="xs" c="dimmed" lh={1.5}>
+        <Stack gap="md" align="center" className="verify-rise">
+          <span className={classes.badge}>
+            <ShieldCheck size={26} />
+          </span>
+          <h2 className={classes.title}>Two-step verification</h2>
+          <Text className={classes.lede}>
             {useBackup
               ? "Enter one of the backup codes you saved when you turned on two-factor authentication."
               : "Open your authenticator app and enter the 6-digit code for Quantalog."}
           </Text>
         </Stack>
 
-        <Stack gap={14} mt={22} px={26} align="center" className="verify-rise" style={{ animationDelay: "90ms" }}>
+        <Stack gap={16} mt={26} align="center" className="verify-rise" style={{ animationDelay: "90ms" }}>
           {useBackup ? (
             <TextInput
               ref={backupRef}
               w="100%"
               placeholder="XXXX-XXXX"
-              size="md"
               value={code}
               onChange={(e) => setCode(e.currentTarget.value)}
               onKeyDown={(e) => e.key === "Enter" && void submit()}
               disabled={busy}
-              styles={{ input: { textAlign: "center", letterSpacing: 2 } }}
+              classNames={{ input: `${classes.pin} ${classes.backup}` }}
             />
           ) : (
             <PinInput
@@ -116,17 +109,17 @@ export function TotpPrompt({
               length={6}
               type="number"
               size="lg"
-              radius="md"
               value={code}
               onChange={setCode}
               onComplete={(value) => void submit(value)}
               disabled={busy}
+              classNames={{ input: classes.pin }}
             />
           )}
 
           <Button
             fullWidth
-            size="md"
+            className={classes.verify}
             loading={busy}
             onClick={() => void submit()}
             disabled={!code.trim()}
@@ -135,7 +128,7 @@ export function TotpPrompt({
           </Button>
         </Stack>
 
-        <Box px={26} pb={24}>
+        <Box>
           {error && (
             <Text mt={12} size="xs" c="red" ta="center" className="verify-rise" style={{ animationDelay: "110ms" }}>
               {error}
@@ -149,7 +142,7 @@ export function TotpPrompt({
               onClick={switchMode}
               size="xs"
               fw={500}
-              className="verify-cancel"
+              className={classes.link}
             >
               {useBackup ? "Use an authenticator code instead" : "Use a backup code instead"}
             </Text>
@@ -162,7 +155,7 @@ export function TotpPrompt({
               onClick={() => setSupportOpen(true)}
               size="xs"
               fw={500}
-              className="verify-cancel"
+              className={classes.link}
             >
               Lost access to both? Contact support
             </Text>
