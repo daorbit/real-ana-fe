@@ -140,6 +140,7 @@ export function PlanInput({
           size="md"
           radius="xl"
           color="emerald"
+          className={classes.send}
           variant="filled"
           loading={thinking || drawing}
           disabled={!value.trim()}

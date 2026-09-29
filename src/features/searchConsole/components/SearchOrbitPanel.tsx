@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ActionIcon, ScrollArea, Stack, Title, Tooltip, UnstyledButton } from "@mantine/core";
-import { ArrowUpRight, BarChart3, CornerDownRight, MessageSquareText, SquarePen, X } from "lucide-react";
+import { ArrowUpRight, BarChart3, CornerDownRight, MessageSquareText, RotateCcw, X } from "lucide-react";
 import { PanelDrawer } from "@/shared/ui/PanelDrawer";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { pagePath, propertyLabel } from "../searchMetrics";
@@ -21,14 +21,6 @@ const PAGE_SUGGESTIONS = [
   "Which queries could this page rank higher for?",
   "Why did this page's traffic change?",
 ];
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 5) return "Working late?";
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
 
 export function SearchOrbitPanel({
   opened,
@@ -76,26 +68,40 @@ export function SearchOrbitPanel({
   );
 
   return (
-    <PanelDrawer opened={opened} onClose={onClose} size={620} ariaLabel="Orbit AI" bare>
+    <PanelDrawer opened={opened} onClose={onClose} size={480} ariaLabel="Orbit AI" bare>
       <div className={classes.page}>
         <header className={classes.header}>
           <div className={classes.brand} role="heading" aria-level={2} aria-label="Orbit AI">
-            <OrbitMark size={24} />
-            <span className={classes.brandName}>Orbit</span>
-            <span className={classes.context}>
-              {subject} Â· {days}d
+            <OrbitMark size={32} />
+            <span className={classes.brandText}>
+              <span className={classes.brandName}>Orbit AI</span>
+              <span className={classes.context}>
+                {subject} · {days}d
+              </span>
             </span>
           </div>
           <div className={classes.brand}>
-            {chat.started && (
-              <Tooltip label="New chat" withArrow>
-                <ActionIcon variant="subtle" color="gray" size={30} onClick={chat.reset} aria-label="New chat">
-                  <SquarePen size={15} />
-                </ActionIcon>
-              </Tooltip>
-            )}
+            <Tooltip label="Start over" withArrow>
+              <ActionIcon
+                variant="transparent"
+                className={classes.headerBtn}
+                size={36}
+                radius="xl"
+                onClick={chat.reset}
+                aria-label="Start over"
+              >
+                <RotateCcw size={16} />
+              </ActionIcon>
+            </Tooltip>
             <Tooltip label="Close" withArrow>
-              <ActionIcon variant="subtle" color="gray" size={30} onClick={onClose} aria-label="Close">
+              <ActionIcon
+                variant="transparent"
+                className={classes.headerBtn}
+                size={36}
+                radius="xl"
+                onClick={onClose}
+                aria-label="Close"
+              >
                 <X size={16} />
               </ActionIcon>
             </Tooltip>
@@ -104,21 +110,21 @@ export function SearchOrbitPanel({
 
         <div className={classes.body} data-state={chat.started ? "started" : "empty"}>
           {!chat.started ? (
+            <>
+            <div className={classes.heroArea}>
             <div className={classes.hero}>
               <div className={classes.heroHead}>
                 <div className={classes.heroMark}>
-                  <OrbitMark size={44} />
+                  <OrbitMark size={80} />
                 </div>
                 <Title order={2} className={classes.heroTitle}>
-                  {greeting()}
+                  Hi, I&apos;m Orbit.
                 </Title>
                 <div className={classes.heroSub}>
                   Ask anything about <b>{subject}</b> in Google Search. Orbit reads your real clicks, queries and
                   rankings for the last {days} days.
                 </div>
               </div>
-
-              {composer}
 
               <div className={classes.starters}>
                 <div className={classes.startersLabel}>Try asking</div>
@@ -138,6 +144,9 @@ export function SearchOrbitPanel({
                 ))}
               </div>
             </div>
+            </div>
+            {composer}
+            </>
           ) : (
             <>
               <ScrollArea className={classes.scroll} type="hover" scrollbarSize={7}>

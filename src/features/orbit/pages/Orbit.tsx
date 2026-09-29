@@ -987,6 +987,7 @@ export default function Orbit() {
             <Tooltip label={thinking ? "Stop" : "Send"} withArrow>
               <ActionIcon
                 color={thinking ? "red" : "emerald"}
+                className={thinking ? undefined : classes.send}
                 radius="xl"
                 size="lg"
                 disabled={!thinking && empty}
@@ -1040,8 +1041,8 @@ export default function Orbit() {
         {/* The mark alone — the rail row that got here already said the name,
             and the page it opens is only ever Orbit. The mark itself is
             decorative, so the heading carries the name for a screen reader. */}
-        <span role="heading" aria-level={1} aria-label="Orbit AI" style={{ display: "inline-flex" }}>
-          <OrbitMark size={26} />
+        <span role="heading" aria-level={1} aria-label="Orbit AI" style={{ display: "inline-flex", minHeight: 26 }}>
+          {started && <OrbitMark size={26} />}
         </span>
 
         <Group gap={2} wrap="nowrap">
@@ -1096,6 +1097,7 @@ export default function Orbit() {
         {!started ? (
           <div className={classes.hero}>
             <div className={classes.heroHead}>
+              <OrbitMark size={80} />
               <Title order={2} fw={500} className={classes.heroTitle}>
                 How can Orbit help today?
               </Title>

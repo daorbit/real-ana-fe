@@ -3,9 +3,13 @@ import { prefetchRoute } from "@/app/routePrefetch";
 
 export type TransitionKind = "page" | "orbit";
 
+type ActiveTransition = { finished: Promise<void>; skipTransition?: () => void };
+
 type ViewTransitionDocument = Document & {
-  startViewTransition?: (update: () => Promise<void> | void) => { finished: Promise<void> };
+  startViewTransition?: (update: () => Promise<void> | void) => ActiveTransition;
 };
+
+const SAFETY_MS = 1500;
 
 function motionReduced(): boolean {
   return (
@@ -19,12 +23,14 @@ export function supportsViewTransitions(): boolean {
 }
 
 let inFlight = false;
+let active: ActiveTransition | null = null;
 
 export function transitionTo(navigate: (to: string) => void, to: string, kind: TransitionKind = "page") {
   const doc = document as ViewTransitionDocument;
   const samePage = window.location.pathname === to.split(/[?#]/)[0];
 
   if (kind !== "orbit" || !doc.startViewTransition || motionReduced() || samePage || inFlight) {
+    active?.skipTransition?.();
     void prefetchRoute(to);
     navigate(to);
     return;
@@ -33,9 +39,12 @@ export function transitionTo(navigate: (to: string) => void, to: string, kind: T
   inFlight = true;
   const root = document.documentElement;
 
+  let safety = 0;
   const done = () => {
+    window.clearTimeout(safety);
     delete root.dataset.vt;
     inFlight = false;
+    active = null;
   };
 
   void prefetchRoute(to).finally(() => {
@@ -44,6 +53,8 @@ export function transitionTo(navigate: (to: string) => void, to: string, kind: T
       const transition = doc.startViewTransition!(() => {
         flushSync(() => navigate(to));
       });
+      active = transition;
+      safety = window.setTimeout(() => transition.skipTransition?.(), SAFETY_MS);
       transition.finished.then(done, done);
     } catch {
       done();

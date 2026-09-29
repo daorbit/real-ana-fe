@@ -221,7 +221,8 @@ function Intro({
 
   return (
     <Stack gap={24} align="center" justify="center" h="100%" px={8} py={20}>
-      <Stack gap={4} align="center">
+      <Stack gap={8} align="center">
+        <OrbitMark size={80} />
         <Text size="md" fw={500} ta="center">Let's plan a post</Text>
         <Text size="xs" c="dimmed" ta="center" maw={360}>
           Say what you want to share — Orbit writes it, asks for anything it's missing, and

@@ -258,13 +258,10 @@ body { overflow-wrap: break-word; }
 
 
 .orbit-bubble-user {
-  background: var(--mantine-color-emerald-9);
-  color: #fff;
-}
-[data-mantine-color-scheme="light"] .orbit-bubble-user {
-
-  background: var(--mantine-color-emerald-1);
-  color: var(--mantine-color-emerald-9);
+  background: var(--q-cta);
+  color: var(--q-cta-fg);
+  --mantine-color-text: var(--q-cta-fg);
+  --mantine-color-dimmed: var(--q-cta-fg);
 }
 
 
@@ -309,16 +306,19 @@ body { overflow-wrap: break-word; }
 
 
 .orbit-plan-starter {
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid var(--mantine-color-default-border);
-  background: color-mix(in srgb, var(--mantine-color-default) 45%, transparent);
-  color: var(--mantine-color-text);
-  transition: border-color 140ms ease, background-color 140ms ease;
+  border: 0;
+  background: var(--q-bg-subtle);
+  color: var(--q-fg);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+[data-mantine-color-scheme="dark"] .orbit-plan-starter {
+  background: var(--q-surface);
 }
 .orbit-plan-starter:hover {
-  border-color: color-mix(in srgb, var(--mantine-color-emerald-5) 50%, transparent);
-  background: color-mix(in srgb, var(--mantine-color-emerald-5) 8%, transparent);
+  background: color-mix(in srgb, var(--q-accent) 12%, var(--q-bg-subtle));
+  color: var(--q-accent);
 }
 .orbit-plan-starter:disabled {
   opacity: 0.5;
@@ -3548,4 +3548,30 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     background-image: none;
     animation: none !important;
   }
+}
+
+:root {
+  --q-bg-subtle: #f5f5f5;
+  --q-surface: #ffffff;
+  --q-border: #e5e5e5;
+  --q-fg: #171717;
+  --q-fg-muted: #636363;
+  --q-fg-faint: #737373;
+  --q-accent: #0d9488;
+  --q-cta: #171717;
+  --q-cta-hover: #333333;
+  --q-cta-fg: #ffffff;
+}
+
+[data-mantine-color-scheme="dark"] {
+  --q-bg-subtle: #111111;
+  --q-surface: #161616;
+  --q-border: #292929;
+  --q-fg: #f5f5f5;
+  --q-fg-muted: #a3a3a3;
+  --q-fg-faint: #8f8f8f;
+  --q-accent: #14b8a6;
+  --q-cta: #fafafa;
+  --q-cta-hover: #e5e5e5;
+  --q-cta-fg: #0a0a0a;
 }

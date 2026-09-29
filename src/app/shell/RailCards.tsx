@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Badge,
@@ -33,6 +33,10 @@ export function OrbitCard({ collapsed }: { collapsed: boolean }) {
   const onOrbit = pathname.startsWith("/app/orbit");
 
   const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    setLeaving(false);
+  }, [pathname]);
 
   const go = (e: React.MouseEvent) => {
     // A modified click (open in new tab, open in background, middle-click) or
