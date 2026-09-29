@@ -78,3 +78,28 @@
     grid-column: 1 / -1;
   }
 }
+
+.sessionList {
+  margin: 0 calc(var(--mantine-spacing-lg) * -1);
+}
+
+.sessionRow {
+  padding: 12px var(--mantine-spacing-lg);
+  border-top: 1px solid var(--border);
+}
+
+.sessionRow:first-child {
+  border-top: 0;
+}
+
+.sessionIcon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  color: var(--mantine-color-gray-5);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}

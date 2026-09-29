@@ -11,6 +11,7 @@ import { InfoPanel } from "@/features/auth/components/settings/InfoPanel";
 import { ConnectionsPanel } from "@/features/auth/components/settings/ConnectionsPanel";
 import { TwoFactorPanel } from "@/features/auth/components/settings/TwoFactorPanel";
 import { ScreenLockPanel } from "@/features/auth/components/settings/ScreenLockPanel";
+import { SessionsPanel } from "@/features/auth/components/settings/SessionsPanel";
 import { PasswordPanel } from "@/features/auth/components/settings/PasswordPanel";
 import { NotificationsPanel } from "@/features/auth/components/settings/NotificationsPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
@@ -41,6 +42,7 @@ function SectionBody({ id, form }: { id: SettingsSectionId; form: ProfileForm })
           <PasswordPanel />
           <TwoFactorPanel />
           <ScreenLockPanel />
+          <SessionsPanel />
         </Box>
       );
   }
