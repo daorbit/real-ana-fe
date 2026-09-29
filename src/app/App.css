@@ -21,19 +21,19 @@
 
 :root {
 
-  --bg: #0b0c0e;
-  --bg-2: #101214;
+  --bg: #000000;
+  --bg-2: #0a0a0a;
 
-  --shell: #0b0c0e;
-  --rail: #0b0c0e;
+  --shell: #000000;
+  --rail: #000000;
 
-  --surface: #16181b;
-  --surface-2: #1c1f23;
-  --border: #26292e;
-  --border-strong: #34383e;
-  --text: #f2f4f6;
-  --text-2: #a9afba;
-  --muted: #6d737e;
+  --surface: #161616;
+  --surface-2: #1c1c1c;
+  --border: #292929;
+  --border-strong: #3a3a3a;
+  --text: #f5f5f5;
+  --text-2: #a3a3a3;
+  --muted: #8f8f8f;
 
 
   --violet: #047857;
@@ -64,17 +64,17 @@
 }
 
 [data-mantine-color-scheme="light"] {
-  --bg: #f4f5f7;
+  --bg: #f5f5f5;
   --bg-2: #ffffff;
-  --shell: #f4f5f7;
-  --rail: #ffffff;
+  --shell: #f5f5f5;
+  --rail: #f5f5f5;
   --surface: #ffffff;
-  --surface-2: #f1f3f5;
-  --border: #e5e7eb;
-  --border-strong: #d1d5db;
-  --text: #111418;
-  --text-2: #4b5563;
-  --muted: #9ca3af;
+  --surface-2: #f5f5f5;
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+  --text: #171717;
+  --text-2: #525252;
+  --muted: #737373;
   --violet: #059669;
   --violet-2: #047857;
   --violet-soft: rgba(5, 150, 105, 0.09);
@@ -2378,6 +2378,60 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .rail-workspace {
   border-radius: 12px;
+}
+
+.mantine-Modal-content {
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+}
+
+.mantine-Modal-header {
+  padding: 20px 24px 8px;
+  background: transparent;
+}
+
+.mantine-Modal-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.mantine-Modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text-2);
+}
+
+.mantine-Modal-close:hover {
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+  color: var(--text);
+}
+
+.mantine-Popover-dropdown {
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
+
+.mantine-Menu-dropdown {
+  padding: 6px;
+}
+
+.mantine-Menu-item {
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.mantine-Menu-divider {
+  margin-block: 6px;
+}
+
+.mantine-Menu-label {
+  padding: 6px 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .mantine-Checkbox-label,

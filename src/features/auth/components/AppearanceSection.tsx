@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Group, Text, UnstyledButton, useMantineColorScheme } from "@mantine/core";
-import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { Starfield } from "@/shared/ui/Starfield";
@@ -9,13 +8,12 @@ import { useAuth } from "@/features/auth/context";
 import { trace } from "@/shared/lib/analytics";
 import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
-  ACCENT_PRESETS, BG_STYLES, THEME_PRESETS,
+  BG_STYLES,
   // Appearance offers mode, preset, accent and background only. Radius,
   // density, font size, table rows and motion were pulled back out: they are
   // fine-tuning nobody asked for, and each one is another way for the app to
   // look wrong. Their defaults in `theme.ts` still apply.
   applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
-  contrastOn,
 } from "@/shared/lib/theme";
 import type { ThemeMode, ThemePrefs } from "@/shared/lib/theme";
 
@@ -130,91 +128,6 @@ export function AppearanceSection({
               </UnstyledButton>
             ))}
           </Group>
-        </GroupBlock>
-
-        <GroupBlock>
-          <GroupLabel>{t("settings.themePreset", "Theme preset")}</GroupLabel>
-          <Box
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(132px, 1fr))",
-              gap: 14,
-            }}
-          >
-            {THEME_PRESETS.map((p) => {
-              const selected = prefs.preset === p.id;
-              return (
-                <UnstyledButton
-                  key={p.id}
-                  className="tile"
-                  data-selected={selected}
-                  onClick={() =>
-                    update(
-                      p.apply
-                        ? { preset: p.id, ...p.apply }
-                        : { preset: p.id }
-                    )
-                  }
-                  p={0}
-                  style={{ overflow: "hidden" }}
-                >
-                  <div style={{ height: 56, background: p.swatch }} />
-                  <Text size="xs" fw={550} px={10} py={8} truncate>
-                    {p.label}
-                  </Text>
-                </UnstyledButton>
-              );
-            })}
-          </Box>
-          <Text size="xs" c="dimmed" mt={8}>
-            {t(
-              "settings.themePresetHint",
-              "A preset sets accent, background and CTA style at once. Adjust any control below to fine-tune."
-            )}
-          </Text>
-        </GroupBlock>
-
-        <GroupBlock>
-          <GroupLabel>{t("settings.accentColor", "Accent color")}</GroupLabel>
-          {/* Auto-fill rather than fixed counts: this block is rendered both
-              full-width in Settings and in the onboarding step's narrower
-              control column, where a fixed 14 columns overflowed sideways. */}
-          <Box
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(38px, 1fr))",
-              gap: 14,
-              justifyItems: "center",
-            }}
-          >
-            {ACCENT_PRESETS.map((preset) => {
-              const active = prefs.accent === preset.id;
-              return (
-                <UnstyledButton
-                  key={preset.id}
-                  onClick={() => update({ accent: preset.id })}
-                  aria-label={preset.label}
-                  title={preset.label}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: "50%",
-                    background: preset.hex,
-                    display: "grid",
-                    placeItems: "center",
-                    boxShadow: active
-                      ? `0 0 0 2px var(--surface), 0 0 0 4px ${preset.hex}`
-                      : "0 0 0 1px var(--border)",
-                    transition: "box-shadow 0.12s ease",
-                  }}
-                >
-                  {active && (
-                    <Check size={15} color={contrastOn(preset.hex)} strokeWidth={3} />
-                  )}
-                </UnstyledButton>
-              );
-            })}
-          </Box>
         </GroupBlock>
 
         </div>

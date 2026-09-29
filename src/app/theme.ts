@@ -1,4 +1,4 @@
-import { createTheme, rem, ThemeIcon } from "@mantine/core";
+import { ActionIcon, Button, createTheme, rem, ThemeIcon } from "@mantine/core";
 
 export const theme = createTheme({
   primaryColor: "emerald",
@@ -93,8 +93,51 @@ export const theme = createTheme({
           ? { root: { "--ti-color": "var(--accent-contrast)" } }
           : { root: {} },
     }),
+    Modal: {
+      defaultProps: {
+        radius: 24,
+        centered: true,
+        overlayProps: { backgroundOpacity: 0.5, blur: 8 },
+        transitionProps: { transition: "pop", duration: 200 },
+      },
+    },
+    Menu: {
+      defaultProps: {
+        radius: 14,
+        shadow: "lg",
+        transitionProps: { transition: "pop", duration: 140 },
+      },
+    },
+    Popover: { defaultProps: { radius: 14, shadow: "lg" } },
     Card: { defaultProps: { radius: "md" } },
-    Button: { defaultProps: { radius: "md" } },
+    Button: Button.extend({
+      defaultProps: { radius: "md" },
+      vars: (_theme, props) =>
+        (props.variant === undefined || props.variant === "filled") &&
+        (!props.color || props.color === "emerald")
+          ? {
+              root: {
+                "--button-bg": "var(--cta)",
+                "--button-hover": "var(--cta-hover)",
+                "--button-color": "var(--cta-fg)",
+                "--button-hover-color": "var(--cta-fg)",
+              },
+            }
+          : { root: {} },
+    }),
+    ActionIcon: ActionIcon.extend({
+      vars: (_theme, props) =>
+        props.variant === "filled" && (!props.color || props.color === "emerald")
+          ? {
+              root: {
+                "--ai-bg": "var(--cta)",
+                "--ai-hover": "var(--cta-hover)",
+                "--ai-color": "var(--cta-fg)",
+                "--ai-hover-color": "var(--cta-fg)",
+              },
+            }
+          : { root: {} },
+    }),
     Paper: { defaultProps: { radius: "md" } },
     Input: { defaultProps: { radius: 8 } },
     TextInput: { defaultProps: { radius: 8 } },

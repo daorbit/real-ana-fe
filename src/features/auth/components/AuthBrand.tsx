@@ -15,7 +15,7 @@ export function AuthBrand({ onDemo, demoBusy = false }: Props) {
         <Wordmark />
         {onDemo && (
           <button type="button" className="auth-top-link" onClick={onDemo} disabled={demoBusy}>
-            {demoBusy ? "Starting demo…" : "Live demo"}
+            {demoBusy ? "Starting demoâ€¦" : "Live demo"}
             <ArrowRight size={13} />
           </button>
         )}

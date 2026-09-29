@@ -60,7 +60,7 @@ export function PanelDrawer({
         <div className={styles.body}>
           <header className={styles.header}>
             <div className={styles.headerMain}>{header}</div>
-            <ActionIcon variant="subtle" color="gray" onClick={onClose} aria-label="Close">
+            <ActionIcon variant="transparent" className={styles.close} onClick={onClose} aria-label="Close">
               <X size={17} />
             </ActionIcon>
           </header>

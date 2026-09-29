@@ -46,8 +46,8 @@
   max-height: none !important;
   margin: 0;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.7);
+  border-radius: 22px;
+  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.6);
 }
 
 .content > :global(.mantine-Drawer-body),
@@ -73,8 +73,21 @@
   justify-content: space-between;
   gap: 12px;
   flex-shrink: 0;
-  padding: 16px 12px 14px 20px;
+  padding: 18px 16px 14px 24px;
   border-bottom: 1px solid var(--border);
+}
+
+.close {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text-2);
+}
+
+.close:hover {
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+  color: var(--text);
 }
 
 .headerMain {
@@ -118,7 +131,7 @@
     height: min(86%, 780px) !important;
     padding-top: 14px;
     border-bottom: 0;
-    border-radius: 20px 20px 0 0;
+    border-radius: 24px 24px 0 0;
     box-shadow: 0 -18px 40px -12px rgba(0, 0, 0, 0.5);
   }
 

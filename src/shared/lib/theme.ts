@@ -419,6 +419,13 @@ export function buildBgValue(
   return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
 }
 
+const FIXED_ACCENT = { light: "#0d9488", dark: "#14b8a6" };
+
+const FIXED_CTA = {
+  light: { bg: "#171717", bgHover: "#333333", fg: "#ffffff" },
+  dark: { bg: "#fafafa", bgHover: "#e5e5e5", fg: "#0a0a0a" },
+};
+
 export function applyTheme(prefs: ThemePrefs) {
   const root = document.documentElement;
 
@@ -428,12 +435,12 @@ export function applyTheme(prefs: ThemePrefs) {
     root.setAttribute("data-theme-mode", prefs.mode);
   }
 
-  const preset =
-    ACCENT_PRESETS.find((p) => p.id === prefs.accent) ?? ACCENT_PRESETS[0];
   const dark =
     prefs.mode === "dark" ||
     (prefs.mode === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const preset = { hex: dark ? FIXED_ACCENT.dark : FIXED_ACCENT.light };
+  const cta = dark ? FIXED_CTA.dark : FIXED_CTA.light;
 
   const accent = preset.hex;
 
@@ -462,10 +469,10 @@ export function applyTheme(prefs: ThemePrefs) {
   scale.forEach((c, i) => {
     root.style.setProperty(`--mantine-color-emerald-${i}`, c);
   });
-  const filled = scale[primaryShadeIdx];
-  const filledHover = scale[Math.min(primaryShadeIdx + 1, 9)];
+  const filled = cta.bg;
+  const filledHover = cta.bgHover;
 
-  const filledText = contrastOn(filled);
+  const filledText = cta.fg;
   root.style.setProperty("--tabs-text-color", filledText);
 
   root.style.setProperty("--button-color", filledText);
@@ -504,16 +511,6 @@ export function applyTheme(prefs: ThemePrefs) {
   );
   root.toggleAttribute("data-bg-animated", bgPreset.kind === "stars");
 
-  const cta =
-    prefs.cta === "neutral"
-      ? dark
-        ? { bg: "#ffffff", bgHover: "#e9eaec", fg: "#0a0b0d" }
-        : { bg: "#4f46e5", bgHover: "#4338ca", fg: "#ffffff" }
-      : {
-          bg: "var(--accent)",
-          bgHover: "var(--accent-2)",
-          fg: contrastOn(accent),
-        };
   root.style.setProperty("--cta", cta.bg);
   root.style.setProperty("--cta-hover", cta.bgHover);
   root.style.setProperty("--cta-fg", cta.fg);

@@ -76,7 +76,7 @@ export function SearchOrbitPanel({
             <span className={classes.brandText}>
               <span className={classes.brandName}>Orbit AI</span>
               <span className={classes.context}>
-                {subject} · {days}d
+                {subject} Â· {days}d
               </span>
             </span>
           </div>

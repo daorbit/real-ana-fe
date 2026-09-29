@@ -4,7 +4,6 @@ import { ActionIcon, Anchor } from "@mantine/core";
 import { ChevronLeft } from "lucide-react";
 import { Wordmark } from "@/shared/ui/Brand";
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
-import { AppearanceStep } from "@/features/auth/components/onboarding/AppearanceStep";
 import { BillingStep } from "@/features/auth/components/onboarding/BillingStep";
 import { Stepper, SetupRail } from "@/features/auth/components/onboarding/Stepper";
 import { ReferralStepBody, ReferralStepFooter } from "@/features/auth/components/onboarding/ReferralStep";
@@ -66,12 +65,6 @@ const STEPS = [
     wide: true,
   },
   {
-    label: "Appearance",
-    hint: "Mode, accent, background",
-    title: "Make it yours",
-    lede: "Pick a mode, an accent, and a background — you can change any of it later from Settings.",
-  },
-  {
     label: "Plan",
     hint: "Upgrade or stay free",
     title: "Pick a plan",
@@ -89,12 +82,11 @@ const INSTALL_STEP = 5;
 const FIRST_SKIPPABLE_STEP = 1;
 
 
-const APPEARANCE_STEP = 6;
-const BILLING_STEP = 7;
+const BILLING_STEP = 6;
 
 
 const SLUGS = [
-  "details", "referral", "workspace", "site", "framework", "install", "appearance", "billing",
+  "details", "referral", "workspace", "site", "framework", "install", "billing",
 ];
 
 
@@ -353,8 +345,7 @@ export default function Onboarding() {
     [SITE_STEP]: WORKSPACE_STEP,
     [FRAMEWORK_STEP]: SITE_STEP,
     [INSTALL_STEP]: FRAMEWORK_STEP,
-    [APPEARANCE_STEP]: INSTALL_STEP,
-    [BILLING_STEP]: APPEARANCE_STEP,
+    [BILLING_STEP]: INSTALL_STEP,
   };
   const prev = PREV[step];
   const goBack = prev === undefined ? undefined : () => setStep(prev);
@@ -366,7 +357,7 @@ export default function Onboarding() {
     ? STEPS.slice(0, step).filter((_, i) => i !== 0 && i !== REFERRAL_STEP).length
     : step;
 
-  if (step === APPEARANCE_STEP || step === BILLING_STEP) {
+  if (step === BILLING_STEP) {
     const wide = STEPS[step];
     return (
       <div className={`${s.shell} onb-form`}>
@@ -388,11 +379,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {step === APPEARANCE_STEP ? (
-          <AppearanceStep onBack={() => setStep(INSTALL_STEP)} onDone={() => setStep(BILLING_STEP)} />
-        ) : (
-          <BillingStep onBack={() => setStep(APPEARANCE_STEP)} onDone={done} />
-        )}
+        <BillingStep onBack={() => setStep(INSTALL_STEP)} onDone={done} />
         </div>
       </div>
     );
@@ -425,7 +412,7 @@ export default function Onboarding() {
     ) : step === INSTALL_STEP && site ? (
       <ReadyStepFooter
         onBack={() => setStep(FRAMEWORK_STEP)}
-        onContinue={() => setStep(APPEARANCE_STEP)}
+        onContinue={() => setStep(BILLING_STEP)}
       />
     ) : null;
 
