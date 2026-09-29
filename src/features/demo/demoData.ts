@@ -526,6 +526,8 @@ export const demoInstallStatus = {
   installed: true,
   eventCount: 128_400,
   lastEventAt: iso(4 * 60_000),
+  trackerVersion: 9,
+  latestTrackerVersion: 9,
 };
 
 /** Stats come from the existing generator, which already produces a full payload. */

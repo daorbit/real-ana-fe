@@ -791,7 +791,13 @@ export const api = createApi({
     }),
 
     getInstallStatus: build.query<
-      { installed: boolean; eventCount: number; lastEventAt: string | null },
+      {
+        installed: boolean;
+        eventCount: number;
+        lastEventAt: string | null;
+        trackerVersion: number;
+        latestTrackerVersion: number;
+      },
       { workspaceId: string; siteId: string }
     >({
       query: ({ workspaceId, siteId }) =>

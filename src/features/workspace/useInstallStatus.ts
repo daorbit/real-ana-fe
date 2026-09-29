@@ -19,6 +19,22 @@ export function useSiteStatus(workspaceId: string, siteId: string) {
 }
 
 /**
+ * Which tracker version a site last reported, against the one the server now
+ * serves. `recheck` bypasses the cache so a visit made moments ago shows up.
+ */
+export function useTrackerVersion(workspaceId: string, siteId: string) {
+  const { data, refetch, isFetching } = useGetInstallStatusQuery({ workspaceId, siteId });
+  if (!data?.installed) return null;
+  return {
+    current: data.trackerVersion,
+    latest: data.latestTrackerVersion,
+    upToDate: data.trackerVersion >= data.latestTrackerVersion,
+    recheck: refetch,
+    checking: isFetching,
+  };
+}
+
+/**
  * Drives the "is my snippet working?" checker: polls the install-status
  * endpoint for 30 seconds and resolves as soon as the first event lands.
  *

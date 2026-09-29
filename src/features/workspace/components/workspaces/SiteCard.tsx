@@ -12,6 +12,7 @@ import { compact, timeAgo } from "@/shared/lib/format";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
 import { BrandIcon } from "@/shared/ui/BrandIcon";
 import type { Site } from "@/shared/types";
+import { TrackerStatus } from "./TrackerStatus";
 import classes from "./Workspaces.module.css";
 
 interface Props {
@@ -102,6 +103,7 @@ export function SiteCard({ site, workspaceId, onDelete }: Props) {
             {status.lastEventAt && <> · {timeAgo(status.lastEventAt)}</>}
           </span>
         )}
+        <TrackerStatus workspaceId={workspaceId} siteId={site.siteId} />
       </Box>
 
       <Box className={classes.siteFoot}>
