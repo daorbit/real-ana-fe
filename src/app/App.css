@@ -2334,6 +2334,52 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--auth-ink);
 }
 
+.mantine-AppShell-navbar {
+  border-right: 1px solid var(--border);
+}
+
+.nav-link {
+  border-radius: 10px;
+  padding: 7px 10px !important;
+}
+
+.nav-link[data-collapsed] {
+  padding: 8px 0 !important;
+}
+
+.nav-link[data-active="true"],
+.nav-link[data-active="true"]:hover {
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+  color: var(--text);
+}
+
+.nav-link[data-active="true"] .nav-link-icon,
+.nav-link[data-active="true"]:hover .nav-link-icon {
+  color: var(--accent-2);
+}
+
+.nav-heading {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  margin-bottom: 4px;
+}
+
+.nav-heading__chevron {
+  width: 12px;
+  height: 12px;
+}
+
+.rail-search {
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.rail-workspace {
+  border-radius: 12px;
+}
+
 .mantine-Checkbox-label,
 .mantine-Switch-label,
 .mantine-Radio-label,
