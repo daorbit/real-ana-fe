@@ -1,5 +1,5 @@
 import { Badge, Button, Group, Loader, Stack, Text } from "@mantine/core";
-import { Laptop, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
+import { Laptop, LogOut, Monitor, MonitorSmartphone, Smartphone, Tablet, type LucideIcon } from "lucide-react";
 import { SettingsCard } from "./SettingsCard";
 import { useSessions, type Session } from "./useSessions";
 import { timeAgo } from "@/shared/lib/format";
@@ -32,24 +32,24 @@ function SessionRow({
   const Icon = deviceIcon(session.device);
 
   return (
-    <Group justify="space-between" wrap="nowrap" className={classes.sessionRow}>
-      <Group gap={12} wrap="nowrap">
-        <span className={classes.sessionIcon}>
-          <Icon size={18} />
+    <Group justify="space-between" wrap="nowrap" className={classes.sessionRow} data-current={session.current || undefined}>
+      <Group gap={12} wrap="nowrap" style={{ minWidth: 0 }}>
+        <span className={classes.sessionIcon} data-current={session.current || undefined}>
+          <Icon size={17} />
         </span>
-        <Stack gap={2}>
-          <Group gap={8}>
-            <Text size="sm" fw={600}>
+        <Stack gap={2} style={{ minWidth: 0 }}>
+          <Group gap={8} wrap="nowrap">
+            <Text size="sm" fw={600} truncate>
               {deviceLabel(session)}
             </Text>
             {session.current && (
-              <Badge size="xs" variant="light" color="green">
-                Current session
+              <Badge size="xs" variant="light" color="green" radius="sm">
+                This device
               </Badge>
             )}
           </Group>
-          <Text size="xs" c="dimmed">
-            {[session.location, session.current ? "Active now" : timeAgo(session.lastSeenAt)]
+          <Text size="xs" c="dimmed" truncate>
+            {[session.location, session.current ? "Active now" : `Active ${timeAgo(session.lastSeenAt)}`]
               .filter(Boolean)
               .join(" · ")}
           </Text>
@@ -72,7 +72,7 @@ export function SessionsPanel() {
   const confirmRevokeOthers = () => {
     confirmDelete({
       title: "Sign out of all other sessions?",
-      body: "Every other device currently signed in to your account will be signed out immediately.",
+      body: "Every other device currently signed in to your account will be signed out immediately. You'll stay signed in here.",
       confirmLabel: "Sign out others",
       confirmColor: "red",
       onConfirm: revokeOthers,
@@ -81,20 +81,39 @@ export function SessionsPanel() {
 
   return (
     <SettingsCard
+      icon={MonitorSmartphone}
       title="Active sessions"
-      description="Devices currently signed in to your account."
+      badge={
+        !loading && (
+          <Badge size="sm" variant="light" color="gray" radius="sm">
+            {sessions.length}
+          </Badge>
+        )
+      }
+      description="Devices and browsers currently signed in to your account."
       action={
         hasOthers && (
-          <Button variant="default" size="xs" loading={revokingOthers} onClick={confirmRevokeOthers}>
-            Sign out of all other sessions
+          <Button
+            variant="default"
+            color="red"
+            size="sm"
+            leftSection={<LogOut size={15} />}
+            loading={revokingOthers}
+            onClick={confirmRevokeOthers}
+          >
+            Sign out others
           </Button>
         )
       }
     >
       {loading ? (
-        <Group justify="center" py="md">
+        <Group justify="center" py="lg">
           <Loader size="sm" />
         </Group>
+      ) : sessions.length === 0 ? (
+        <Text size="sm" c="dimmed" ta="center" py="lg">
+          No active sessions found.
+        </Text>
       ) : (
         <Stack gap={0} className={classes.sessionList}>
           {sessions.map((session) => (
