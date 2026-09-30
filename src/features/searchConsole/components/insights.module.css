@@ -9,17 +9,10 @@
 
 .summary {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--mantine-spacing-lg);
-  padding: var(--mantine-spacing-lg);
-  border-radius: var(--radius);
-  background:
-    radial-gradient(ellipse 50% 120% at 100% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
-    var(--surface);
-  box-shadow:
-    inset 0 0 0 1px var(--border),
-    var(--shadow-sm);
+  gap: var(--mantine-spacing-xl);
+  padding: 4px 2px 8px;
 }
 
 .summaryMain {
@@ -43,8 +36,8 @@
 
 .summaryTitle {
   font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.25;
   color: var(--text);
@@ -61,12 +54,11 @@
   --kind: var(--kind-opportunity);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: 7px;
+  padding: 5px 12px;
   border-radius: 999px;
-  border: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: var(--mantine-font-size-xs);
+  font-size: 12.5px;
   color: var(--text-2);
 }
 
@@ -98,9 +90,10 @@
   flex-direction: column;
   justify-content: center;
   gap: 2px;
-  flex: 0 0 240px;
-  padding-left: var(--mantine-spacing-lg);
-  border-left: 1px solid var(--border);
+  flex: 0 0 250px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--kind-opportunity) 8%, var(--surface));
 }
 
 .highlightLabel {
@@ -113,8 +106,8 @@
 
 .highlightValue {
   font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--kind-opportunity);
 }
@@ -131,8 +124,8 @@
   flex-direction: column;
   gap: var(--mantine-spacing-md);
   min-width: 0;
-  padding: var(--mantine-spacing-lg);
-  border-radius: var(--radius);
+  padding: 22px var(--mantine-spacing-lg) var(--mantine-spacing-lg);
+  border-radius: 22px;
   background: var(--surface);
   box-shadow:
     inset 0 0 0 1px var(--border),
@@ -149,10 +142,11 @@
 
 .filters {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   padding: 3px;
-  border-radius: 10px;
+  border-radius: 999px;
   background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .filter {
@@ -160,11 +154,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: var(--mantine-font-size-xs);
-  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 550;
   color: var(--text-2);
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 .filter[data-kind="opportunity"] {
@@ -176,25 +171,21 @@
 }
 
 .filter[data-active] {
-  background: var(--surface);
+  background: var(--tab-on, var(--surface));
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .filterCount {
-  min-width: 18px;
-  padding: 0 5px;
-  border-radius: 999px;
-  font-size: 10px;
-  text-align: center;
-  color: var(--kind);
-  background: color-mix(in srgb, var(--kind) 14%, transparent);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  margin-inline: -8px;
 }
 
 .action {
@@ -203,16 +194,33 @@
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
+  padding: 13px 8px;
+  border-radius: 14px;
   color: var(--text);
-  transition: border-color 120ms ease, background-color 120ms ease;
+  transition: background-color 140ms ease;
+}
+
+.action {
+  position: relative;
+}
+
+.action + .action::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 1px;
+  background: var(--border);
 }
 
 .action:hover {
-  border-color: color-mix(in srgb, var(--kind) 45%, var(--border));
-  background: color-mix(in srgb, var(--kind) 5%, transparent);
+  background: var(--surface-2);
+}
+
+.action:hover::before,
+.action:hover + .action::before {
+  opacity: 0;
 }
 
 .action:focus-visible {
@@ -226,9 +234,9 @@
   width: 34px;
   height: 34px;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: 50%;
   color: var(--kind);
-  background: color-mix(in srgb, var(--kind) 14%, transparent);
+  background: color-mix(in srgb, var(--kind) 13%, transparent);
 }
 
 .actionText {
@@ -259,14 +267,11 @@
 
 .impact {
   flex-shrink: 0;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: var(--mantine-font-size-xs);
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   color: var(--kind);
-  background: color-mix(in srgb, var(--kind) 12%, transparent);
 }
 
 .actionChevron {
@@ -336,7 +341,7 @@
 
 .moverTrack {
   display: flex;
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   background: var(--surface-2);
   overflow: hidden;
@@ -377,8 +382,8 @@
 
 .bandBar {
   display: flex;
-  gap: 3px;
-  height: 12px;
+  gap: 4px;
+  height: 8px;
   border-radius: 999px;
   overflow: hidden;
   background: var(--surface-2);
@@ -443,8 +448,8 @@
 
 .bandValue {
   font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;

@@ -30,9 +30,10 @@ export function DeviceShareDonut({ rows }: { rows: SearchBreakdownRow[] }) {
               data={rows}
               dataKey={useImpressions ? "impressions" : "clicks"}
               nameKey="key"
-              innerRadius="68%"
+              innerRadius="80%"
               outerRadius="100%"
-              paddingAngle={rows.length > 1 ? 3 : 0}
+              paddingAngle={rows.length > 1 ? 4 : 0}
+              cornerRadius={6}
               stroke="none"
               isAnimationActive={false}
             >

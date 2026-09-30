@@ -18,6 +18,8 @@ import classes from "./searchConsole.module.css";
 
 const PAGE_SIZES = ["25", "50", "100", "200"];
 
+const plural = (word: string) => (word.endsWith("y") ? `${word.slice(0, -1)}ies` : `${word}s`);
+
 export function SearchBreakdownTab({
   workspaceId,
   siteId,
@@ -116,11 +118,11 @@ export function SearchBreakdownTab({
           <TextInput
             size="sm"
             className={classes.searchInput}
-            placeholder={`Search ${labelHeader.toLowerCase()}s…`}
+            placeholder={`Search ${plural(labelHeader.toLowerCase())}…`}
             leftSection={<Search size={14} />}
             value={filter}
             onChange={(e) => setFilter(e.currentTarget.value)}
-            aria-label={hasSearchLabel ? `Filter ${labelHeader.toLowerCase()}s` : `Search ${title.toLowerCase()}`}
+            aria-label={hasSearchLabel ? `Filter ${plural(labelHeader.toLowerCase())}` : `Search ${title.toLowerCase()}`}
           />
         </Group>
       </div>
@@ -206,7 +208,7 @@ export function SearchBreakdownTab({
               allowDeselect={false}
             />
           </Group>
-          {pages > 1 && <Pagination size="sm" total={pages} value={data.page} onChange={setPage} siblings={1} />}
+          {pages > 1 && <Pagination size="sm" radius="xl" className={classes.pager} total={pages} value={data.page} onChange={setPage} siblings={1} />}
         </Group>
       )}
     </div>

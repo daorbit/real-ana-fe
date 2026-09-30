@@ -14,7 +14,7 @@ export function InsightActionItem({ action, onOpen }: { action: InsightAction; o
   return (
     <UnstyledButton className={classes.action} data-kind={action.kind} onClick={onOpen}>
       <span className={classes.actionIcon}>
-        <Icon size={16} />
+        <Icon size={15} />
       </span>
       <span className={classes.actionText}>
         <span className={classes.actionTitle}>{action.title}</span>

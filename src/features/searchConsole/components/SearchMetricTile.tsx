@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Tooltip } from "@mantine/core";
-import { Info } from "lucide-react";
+import { Check, Info } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import type { MetricChange } from "../searchMetrics";
 import type { ExplainProps } from "../useSearchOrbitExplain";
@@ -57,7 +57,9 @@ export function SearchMetricTile({
     >
       <div className={classes.body}>
         <div className={classes.head}>
-          <span className={classes.swatch} aria-hidden />
+          <span className={classes.swatch} aria-hidden>
+            <Check size={10} strokeWidth={3.5} />
+          </span>
           <span className={classes.label}>{label}</span>
           <Tooltip label={hint} multiline w={240} withArrow events={{ hover: true, focus: true, touch: true }}>
             <Info size={13} className={classes.hint} aria-label={hint} />

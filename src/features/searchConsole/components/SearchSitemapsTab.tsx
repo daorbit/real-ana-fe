@@ -77,7 +77,7 @@ export function SearchSitemapsTab({
           </Text>
         </div>
       ) : (
-        <div>
+        <div className={classes.listCard}>
           <div className={classes.listHead}>
             <span className={classes.eyebrow}>Submitted sitemaps</span>
             <span className={classes.listCount}>
