@@ -1,5 +1,23 @@
 import { ActionIcon, Button, createTheme, rem, ThemeIcon } from "@mantine/core";
 
+const DROPDOWN_DEFAULTS = {
+  checkIconPosition: "right" as const,
+  maxDropdownHeight: 340,
+  comboboxProps: {
+    radius: 12,
+    shadow: "lg",
+    offset: 6,
+    transitionProps: { transition: "pop" as const, duration: 140 },
+  },
+};
+
+const DROPDOWN_CLASSES = {
+  dropdown: "app-combobox-dropdown",
+  option: "app-combobox-option",
+  group: "app-combobox-group",
+  groupLabel: "app-combobox-group-label",
+};
+
 export const theme = createTheme({
   primaryColor: "emerald",
   primaryShade: { light: 6, dark: 7 },
@@ -142,6 +160,9 @@ export const theme = createTheme({
     Input: { defaultProps: { radius: 8 } },
     TextInput: { defaultProps: { radius: 8 } },
     PasswordInput: { defaultProps: { radius: 8 } },
-    Select: { defaultProps: { radius: 8 } },
+    Select: { defaultProps: { radius: 8, ...DROPDOWN_DEFAULTS }, classNames: DROPDOWN_CLASSES },
+    MultiSelect: { defaultProps: DROPDOWN_DEFAULTS, classNames: DROPDOWN_CLASSES },
+    Autocomplete: { defaultProps: { comboboxProps: DROPDOWN_DEFAULTS.comboboxProps }, classNames: DROPDOWN_CLASSES },
+    TagsInput: { defaultProps: { comboboxProps: DROPDOWN_DEFAULTS.comboboxProps }, classNames: DROPDOWN_CLASSES },
   },
 });

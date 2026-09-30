@@ -175,6 +175,8 @@
 }
 
 .tableScroll {
+  max-width: none;
+  width: calc(100% + var(--mantine-spacing-lg) * 2);
   margin-inline: calc(var(--mantine-spacing-lg) * -1);
 }
 
@@ -319,9 +321,5 @@
 
   .heroNumber {
     font-size: 32px;
-  }
-
-  .tableScroll {
-    margin-inline: calc(var(--mantine-spacing-md) * -1);
   }
 }

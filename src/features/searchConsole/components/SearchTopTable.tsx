@@ -1,5 +1,5 @@
 import { Button, ScrollArea, Table, Text } from "@mantine/core";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { SearchMetrics } from "@/shared/types";
 import { METRIC_BY_KEY } from "../searchMetrics";
 import { PositionChip, ShareBar } from "./SearchCells";
@@ -60,7 +60,6 @@ export function SearchTopTable({
                 {showViews && <Table.Th className={classes.numCell}>Views</Table.Th>}
                 <Table.Th className={classes.numCell}>Impr.</Table.Th>
                 <Table.Th className={classes.numCell}>Position</Table.Th>
-                {onOpenRow && <Table.Th />}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -71,7 +70,7 @@ export function SearchTopTable({
                   onClick={onOpenRow ? () => onOpenRow(row) : undefined}
                 >
                   <Table.Td className={classes.rankCell}>{i + 1}</Table.Td>
-                  <Table.Td className={classes.labelCell} title={row.key}>
+                  <Table.Td className={classes.topLabelCell} title={row.key}>
                     {row.label}
                   </Table.Td>
                   <Table.Td className={classes.numCell}>
@@ -84,11 +83,6 @@ export function SearchTopTable({
                   <Table.Td className={classes.numCell}>
                     <PositionChip position={row.position} />
                   </Table.Td>
-                  {onOpenRow && (
-                    <Table.Td className={classes.chevronCell}>
-                      <ChevronRight size={14} />
-                    </Table.Td>
-                  )}
                 </Table.Tr>
               ))}
             </Table.Tbody>

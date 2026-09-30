@@ -12,32 +12,6 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
-.selectable {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.selectable:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
-.selectable :global(.stat-card) {
-  height: 100%;
-}
-
-.check {
-  pointer-events: none;
-}
-
 .change {
   display: inline-flex;
   align-items: center;
@@ -63,7 +37,30 @@
 }
 
 .chart {
-  height: 300px;
+  height: 280px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 550;
+  color: var(--text-2);
+}
+
+.legendLine {
+  width: 14px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--metric);
 }
 
 .tooltip {

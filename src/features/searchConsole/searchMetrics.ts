@@ -1,5 +1,4 @@
 import { num } from "@/shared/lib";
-import { ACCENT } from "@/shared/ui/StatCard";
 import type { SearchMetrics, SearchType } from "@/shared/types";
 
 export type MetricKey = keyof SearchMetrics;
@@ -20,7 +19,7 @@ export const METRICS: MetricDef[] = [
     label: "Total clicks",
     short: "Clicks",
     tone: "emerald",
-    color: ACCENT.emerald,
+    color: "#059669",
     format: (v) => num(Math.round(v)),
     lowerIsBetter: false,
   },
@@ -29,7 +28,7 @@ export const METRICS: MetricDef[] = [
     label: "Total impressions",
     short: "Impressions",
     tone: "cyan",
-    color: ACCENT.cyan,
+    color: "#3b82f6",
     format: (v) => num(Math.round(v)),
     lowerIsBetter: false,
   },
@@ -38,7 +37,7 @@ export const METRICS: MetricDef[] = [
     label: "Average CTR",
     short: "CTR",
     tone: "amber",
-    color: ACCENT.amber,
+    color: "#d97706",
     format: (v) => `${(v * 100).toFixed(1)}%`,
     lowerIsBetter: false,
   },
@@ -47,7 +46,7 @@ export const METRICS: MetricDef[] = [
     label: "Average position",
     short: "Position",
     tone: "pink",
-    color: ACCENT.pink,
+    color: "#ec4899",
     format: (v) => (v ? v.toFixed(1) : "—"),
     lowerIsBetter: true,
   },

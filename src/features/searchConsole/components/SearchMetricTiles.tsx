@@ -1,17 +1,9 @@
 import type { ReactNode } from "react";
-import { Eye, Hash, MousePointerClick, Percent, type LucideIcon } from "lucide-react";
 import type { SearchMetrics, SearchPerformance } from "@/shared/types";
-import { METRICS, percentDelta, type MetricKey } from "../searchMetrics";
-import { SelectableStat } from "./SelectableStat";
+import { METRICS, metricChange, type MetricKey } from "../searchMetrics";
+import { SearchMetricTile } from "./SearchMetricTile";
 import type { ExplainProps } from "../useSearchOrbitExplain";
 import classes from "./metrics.module.css";
-
-const ICONS: Record<MetricKey, LucideIcon> = {
-  clicks: MousePointerClick,
-  impressions: Eye,
-  ctr: Percent,
-  position: Hash,
-};
 
 const HINTS: Record<MetricKey, string> = {
   clicks: "How many times someone clicked through to your site from Google Search.",
@@ -42,20 +34,19 @@ export function SearchMetricTiles({
   return (
     <div className={classes.tiles} data-columns={columns} role="group" aria-label="Chart metrics">
       {METRICS.map((m) => (
-        <SelectableStat
+        <SearchMetricTile
           key={m.key}
-          active={selected.includes(m.key)}
-          onSelect={() => onToggle(m.key)}
-          icon={ICONS[m.key]}
+          id={m.key}
           label={m.label}
-          value={m.key === "clicks" || m.key === "impressions" ? Math.round(totals[m.key]) : m.format(totals[m.key])}
-          color={m.tone}
-          delta={percentDelta(totals[m.key], previous?.[m.key])}
-          inverseDelta={m.lowerIsBetter}
-          spark={daily && daily.length > 1 ? daily : undefined}
+          color={m.color}
+          value={m.format(totals[m.key])}
+          change={metricChange(m, totals[m.key], previous?.[m.key])}
+          spark={daily}
           sparkKey={m.key}
           hint={HINTS[m.key]}
-          {...explain?.(m.key)}
+          active={selected.includes(m.key)}
+          onToggle={() => onToggle(m.key)}
+          explain={explain?.(m.key)}
         />
       ))}
       {children}

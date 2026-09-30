@@ -1,0 +1,155 @@
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.tile[data-static] {
+  cursor: default;
+}
+
+.tile[data-static] .swatch {
+  background: var(--metric);
+}
+
+.tile[data-static] .spark {
+  opacity: 1;
+}
+
+.tile:not([data-static]):hover {
+  border-color: color-mix(in srgb, var(--metric) 35%, var(--border));
+}
+
+.tile[aria-checked="true"] {
+  border-color: color-mix(in srgb, var(--metric) 55%, var(--border));
+  background: color-mix(in srgb, var(--metric) 6%, var(--surface));
+  box-shadow: inset 0 2px 0 var(--metric);
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--metric);
+  outline-offset: 2px;
+}
+
+.body {
+  padding: 16px 18px 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 2px solid var(--metric);
+  background: transparent;
+  transition: background-color 160ms ease;
+}
+
+.tile[aria-checked="true"] .swatch {
+  background: var(--metric);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text-2);
+}
+
+.hint {
+  flex: none;
+  color: var(--muted);
+  cursor: help;
+}
+
+.explain {
+  flex: none;
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 10px;
+}
+
+.value {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--mantine-color-teal-5);
+  background: color-mix(in srgb, var(--mantine-color-teal-5) 12%, transparent);
+}
+
+.delta[data-bad] {
+  color: var(--mantine-color-red-5);
+  background: color-mix(in srgb, var(--mantine-color-red-5) 12%, transparent);
+}
+
+.delta[data-flat] {
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+
+.vs {
+  width: 100%;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.spark {
+  height: 44px;
+  margin-top: 10px;
+  opacity: 0.55;
+  transition: opacity 160ms ease;
+}
+
+.tile[aria-checked="true"] .spark {
+  opacity: 1;
+}
+
+@media (max-width: 48em) {
+  .body {
+    padding: 14px 14px 0;
+  }
+
+  .value {
+    font-size: 24px;
+  }
+}

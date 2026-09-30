@@ -6,6 +6,7 @@ import { pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
 import type { ExplainProps } from "../useSearchOrbitExplain";
 import { SearchPerformanceChart } from "./SearchPerformanceChart";
+import { MetricLegend } from "./MetricLegend";
 import { SearchTopTable } from "./SearchTopTable";
 import classes from "./searchConsole.module.css";
 
@@ -51,10 +52,11 @@ export function SearchOverviewTab({
               Performance over time
             </Text>
             <Text size="xs" c="dimmed" mt={2}>
-              {dayjs(data.startDate).format("MMM D")} – {dayjs(data.endDate).format("MMM D, YYYY")} · Select the
-              cards above to compare metrics. The latest 2–3 days may still rise as Google finalises data.
+              {dayjs(data.startDate).format("MMM D")} – {dayjs(data.endDate).format("MMM D, YYYY")} · Tap a card
+              above to add or remove it. The last 2–3 days can still rise.
             </Text>
           </div>
+          <MetricLegend selected={selected} />
         </div>
         {data.daily.length ? (
           <SearchPerformanceChart daily={data.daily} selected={selected} />

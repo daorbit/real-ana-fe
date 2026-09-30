@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Alert, Stack, Text } from "@mantine/core";
-import { AlertTriangle, BarChart3, FileSearch } from "lucide-react";
+import { AlertTriangle, FileSearch } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { AppShell } from "@/app/AppShell";
 import { useGetSearchConsoleStatusQuery, useGetSearchDrilldownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { useTitle } from "@/shared/lib/useTitle";
-import { StatCard } from "@/shared/ui/StatCard";
+import { num } from "@/shared/lib";
 import type { SearchType } from "@/shared/types";
-import { pagePath, percentDelta, type MetricKey } from "../searchMetrics";
+import { METRIC_BY_KEY, metricChange, pagePath, type MetricKey } from "../searchMetrics";
+import { SearchMetricTile } from "../components/SearchMetricTile";
 import { searchPageHref } from "../useOpenSearchPage";
 import { PageDetailHeader } from "../components/PageDetailHeader";
 import { SearchMetricTiles, toggleMetric } from "../components/SearchMetricTiles";
@@ -110,13 +111,13 @@ export default function SearchConsolePageDetail() {
             onToggle={(key) => setSelected((s) => toggleMetric(s, key))}
           >
             {loaded.views && (
-              <StatCard
-                icon={BarChart3}
+              <SearchMetricTile
+                id="views"
                 label="Page views"
-                value={loaded.views.total}
-                color="green"
-                delta={percentDelta(loaded.views.total, loaded.views.previous)}
-                spark={loaded.views.daily.length > 1 ? loaded.views.daily : undefined}
+                color="#8b5cf6"
+                value={num(loaded.views.total)}
+                change={metricChange(METRIC_BY_KEY.clicks, loaded.views.total, loaded.views.previous)}
+                spark={loaded.views.daily}
                 sparkKey="views"
                 hint="Every visit to this page tracked by Quantalog in the same period, from all sources — not just Google."
               />

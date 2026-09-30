@@ -17,6 +17,7 @@ import { WelcomeOverlay, consumeWelcomePending } from "@/shared/ui/WelcomeOverla
 import "@/app/App.css";
 import "@/polish.css";
 import "@/app/viewTransitions.css";
+import "@/app/dropdown.css";
 // Last, so the phone layout wins over the desktop rules it adjusts.
 import "@/app/mobile.css";
 
