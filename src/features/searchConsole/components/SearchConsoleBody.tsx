@@ -25,7 +25,6 @@ import { SearchInsightsTab } from "./SearchInsightsTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
 import { SearchHourlyCard } from "./SearchHourlyCard";
 import { typeHasQueries } from "../searchMetrics";
-import { SearchOrbitSummary } from "./SearchOrbitSummary";
 import { SearchOrbitPanel } from "./SearchOrbitPanel";
 import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
 import { useSearchOrbitExplain } from "../useSearchOrbitExplain";
@@ -121,16 +120,6 @@ export function SearchConsoleBody({
             onOpenQuery={setQuery}
             onOpenPage={openPage}
             explain={explain}
-            orbitSummary={
-              orbitAvailable && (
-                <SearchOrbitSummary
-                  onSummarize={() => {
-                    setOrbitOpen(true);
-                    orbitChat.summarize();
-                  }}
-                />
-              )
-            }
           />
         ) : (
           <OverviewSkeleton />

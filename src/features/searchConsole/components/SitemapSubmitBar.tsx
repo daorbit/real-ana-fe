@@ -92,11 +92,6 @@ export function SitemapSubmitBar({
         Add a sitemap
       </label>
       <form className={classes.urlBar} onSubmit={(e) => void handleSubmit(e)}>
-        <span className={classes.dots} aria-hidden>
-          <i />
-          <i />
-          <i />
-        </span>
         <label className={classes.urlField} htmlFor="sitemap-url">
           <Lock size={13} aria-hidden />
           {!full && (

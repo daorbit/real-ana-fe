@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
   gap: var(--mantine-spacing-lg);
-  align-items: stretch;
+  align-items: start;
 }
 
 .card {
@@ -10,8 +10,8 @@
   flex-direction: column;
   gap: var(--mantine-spacing-lg);
   min-width: 0;
-  padding: var(--mantine-spacing-lg);
-  border-radius: var(--radius);
+  padding: 22px var(--mantine-spacing-lg) var(--mantine-spacing-lg);
+  border-radius: 22px;
   background: var(--surface);
   box-shadow:
     inset 0 0 0 1px var(--border),
@@ -20,7 +20,11 @@
 
 .legendRow,
 .bar {
-  --device: #f472b6;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 56px;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--mantine-font-size-xs);
 }
 
 .legendRow[data-device="MOBILE"],
@@ -58,8 +62,8 @@
 
 .donutValue {
   font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 600;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   color: var(--text);
@@ -93,7 +97,7 @@
   width: 30px;
   height: 30px;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: 50%;
   color: var(--device);
   background: color-mix(in srgb, var(--device) 14%, transparent);
 }
@@ -149,7 +153,7 @@
 }
 
 .barTrack {
-  height: 10px;
+  height: 6px;
   border-radius: 999px;
   background: var(--surface-2);
   overflow: hidden;
@@ -172,8 +176,14 @@
   color: var(--text);
 }
 
-.best {
-  color: #f59e0b;
+.barValue {
+  color: var(--text-2);
+  font-weight: 550;
+}
+
+.barValue[data-best] {
+  color: var(--text);
+  font-weight: 700;
 }
 
 @media (max-width: 62em) {

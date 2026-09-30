@@ -1,5 +1,4 @@
 import { Text } from "@mantine/core";
-import { ListChecks } from "lucide-react";
 import { num } from "@/shared/lib";
 import { ACTION_KINDS, type ActionKind, type InsightAction } from "../insightActions";
 import classes from "./insights.module.css";
@@ -21,9 +20,6 @@ export function InsightsSummary({
   return (
     <div className={classes.summary}>
       <div className={classes.summaryMain}>
-        <span className={classes.summaryIcon}>
-          <ListChecks size={18} />
-        </span>
         <div>
           <Text className={classes.summaryTitle}>
             {actions.length

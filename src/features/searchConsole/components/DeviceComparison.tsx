@@ -1,5 +1,4 @@
 import { Text } from "@mantine/core";
-import { Trophy } from "lucide-react";
 import type { SearchBreakdownRow } from "@/shared/types";
 import { METRICS } from "../searchMetrics";
 import { deviceMeta } from "../deviceMeta";
@@ -55,8 +54,7 @@ export function DeviceComparison({ rows }: { rows: SearchBreakdownRow[] }) {
                     <span className={classes.barTrack}>
                       <span className={classes.barFill} style={{ width: `${width}%` }} />
                     </span>
-                    <span className={classes.barValue}>
-                      {isBest && <Trophy size={11} className={classes.best} />}
+                    <span className={classes.barValue} data-best={isBest || undefined}>
                       {m.format(value)}
                     </span>
                   </div>

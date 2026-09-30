@@ -14,7 +14,7 @@ function plural(n: number, word: string) {
   return `${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`;
 }
 
-function Headline({ data, action }: { data: SearchPerformance; action?: ReactNode }) {
+function Headline({ data }: { data: SearchPerformance }) {
   const { totals, previous, days } = data;
   const clicks = Math.round(totals.clicks);
   const impressions = Math.round(totals.impressions);
@@ -45,7 +45,6 @@ function Headline({ data, action }: { data: SearchPerformance; action?: ReactNod
           {ranking && <>You typically rank {ranking}.</>}
         </p>
       </div>
-      {action}
     </div>
   );
 }
@@ -56,7 +55,6 @@ export function SearchOverviewTab({
   onViewPages,
   onOpenQuery,
   onOpenPage,
-  orbitSummary,
   explain,
   hasQueries = true,
   hourly,
@@ -68,14 +66,13 @@ export function SearchOverviewTab({
   onViewPages: () => void;
   onOpenQuery: (query: string) => void;
   onOpenPage: (url: string) => void;
-  orbitSummary?: ReactNode;
   explain?: (key: MetricKey) => ExplainProps;
 }) {
   const [selected, setSelected] = useState<MetricKey[]>(["clicks", "impressions"]);
 
   return (
     <div className={classes.section}>
-      <Headline data={data} action={orbitSummary} />
+      <Headline data={data} />
       <SearchMetricTiles
         explain={explain}
         totals={data.totals}
