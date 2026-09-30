@@ -39,14 +39,15 @@
 
 .content {
   position: absolute;
-  inset: 6px 6px 6px 0;
+  inset: 0;
   width: auto !important;
   max-width: none !important;
   height: auto !important;
   max-height: none !important;
   margin: 0;
-  border: 1px solid var(--border);
-  border-radius: 22px;
+  border: 0;
+  border-inline-start: 1px solid var(--border);
+  border-radius: 0;
   box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.6);
 }
 
@@ -73,7 +74,7 @@
   justify-content: space-between;
   gap: 12px;
   flex-shrink: 0;
-  padding: 18px 16px 14px 24px;
+  padding: 20px 20px 16px 24px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -114,7 +115,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--mantine-spacing-lg);
-  padding: 18px 20px 24px;
+  padding: 20px 24px 28px;
 }
 
 @media (max-width: 48em) {

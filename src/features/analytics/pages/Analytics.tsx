@@ -60,7 +60,8 @@ import {
   markerLines, MarkerLegend, MarkerDialog, MarkerButton,
 } from "@/features/analytics/components/MarkerLayer";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { countryFlag, countryLabel, duration, share, num } from "@/shared/lib";
+import { countryLabel, duration, share, num } from "@/shared/lib";
+import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
 import type {
   Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind, BreakdownComparisonRow,
@@ -989,7 +990,7 @@ export default function Analytics() {
                 onFilter={addFilter}
                 format={(k) => (
                   <span>
-                    <span style={{ marginRight: 6 }}>{countryFlag(k)}</span>
+                    <span style={{ marginRight: 8, display: "inline-flex", verticalAlign: "middle" }}><CountryFlag code={k} size={14} /></span>
                     {countryLabel(k)}
                   </span>
                 )}

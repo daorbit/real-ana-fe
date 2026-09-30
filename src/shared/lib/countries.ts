@@ -38,5 +38,11 @@ export function countryFlag(code: string): string {
 /** Human label for a country bucket key. */
 export function countryLabel(code: string): string {
   if (!code || code === "unknown") return "Unknown";
-  return NAMES[code.toUpperCase()] ?? code.toUpperCase();
+  const up = code.toUpperCase();
+  if (NAMES[up]) return NAMES[up];
+  try {
+    return new Intl.DisplayNames(["en"], { type: "region" }).of(up) ?? up;
+  } catch {
+    return up;
+  }
 }

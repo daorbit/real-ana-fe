@@ -1,7 +1,8 @@
 import {
   FileSearch, Globe2, LayoutDashboard, Lightbulb, ListTree, MonitorSmartphone, Search, type LucideIcon,
 } from "lucide-react";
-import { countryFlag, countryLabel } from "@/shared/lib";
+import { countryLabel } from "@/shared/lib";
+import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { alpha3ToAlpha2 } from "@/shared/lib/countryCodes";
 import { pagePath } from "./searchMetrics";
 import classes from "./components/searchConsole.module.css";
@@ -64,7 +65,7 @@ export function renderCountry(row: { key: string }) {
   const code = alpha3ToAlpha2(row.key);
   return (
     <span className={classes.countryLabel}>
-      <span aria-hidden>{countryFlag(code)}</span>
+      <CountryFlag code={code} />
       {countryLabel(code)}
     </span>
   );
