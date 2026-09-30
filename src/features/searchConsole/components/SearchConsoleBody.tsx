@@ -89,7 +89,6 @@ export function SearchConsoleBody({
 
       <div className={classes.tabbar} role="tablist" aria-label="Search visibility reports">
         {tabs.map((t) => {
-          const Icon = t.icon;
           const on = t.id === tab;
           return (
             <button
@@ -101,7 +100,6 @@ export function SearchConsoleBody({
               className={classes.tab}
               onClick={() => onTabChange(t.id)}
             >
-              <Icon size={15} />
               {t.label}
             </button>
           );
@@ -126,7 +124,6 @@ export function SearchConsoleBody({
             orbitSummary={
               orbitAvailable && (
                 <SearchOrbitSummary
-                  days={days}
                   onSummarize={() => {
                     setOrbitOpen(true);
                     orbitChat.summarize();

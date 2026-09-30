@@ -46,8 +46,8 @@
 }
 
 .card {
-  padding: var(--mantine-spacing-lg);
-  border-radius: var(--radius);
+  padding: 22px var(--mantine-spacing-lg) var(--mantine-spacing-lg);
+  border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--surface);
 }
@@ -157,11 +157,21 @@
 }
 
 .tabbar {
-  display: flex;
-  gap: 4px;
+  --tab-on: color-mix(in srgb, var(--text) 11%, var(--surface-2));
+  display: inline-flex;
+  align-self: flex-start;
+  max-width: 100%;
+  gap: 2px;
+  padding: 4px;
   overflow-x: auto;
   scrollbar-width: none;
-  border-bottom: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+:global([data-mantine-color-scheme="light"]) .tabbar {
+  --tab-on: #ffffff;
 }
 
 .tabbar::-webkit-scrollbar {
@@ -169,20 +179,18 @@
 }
 
 .tab {
-  position: relative;
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 11px 4px;
-  margin-right: 18px;
+  padding: 7px 16px;
   border: 0;
+  border-radius: 999px;
   background: transparent;
   color: var(--text-2);
   font: inherit;
-  font-size: var(--mantine-font-size-sm);
+  font-size: 13.5px;
   font-weight: 500;
+  letter-spacing: -0.005em;
   cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
 .tab:hover {
@@ -191,32 +199,44 @@
 
 .tab:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: -2px;
-  border-radius: 6px;
-}
-
-.tab::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: transparent;
+  outline-offset: 1px;
 }
 
 .tab[data-active] {
+  background: var(--tab-on);
   color: var(--text);
   font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28), 0 0 0 0.5px color-mix(in srgb, var(--text) 10%, transparent);
 }
 
-.tab[data-active]::after {
+.pager {
+  --pagination-control-size: 32px;
+  --pagination-active-bg: var(--accent);
+  --pagination-active-color: #fff;
+  gap: 4px;
+}
+
+.pager button {
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager button:hover:not([data-active]):not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.pager button[data-active] {
   background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-.tab[data-active] svg {
-  color: var(--accent);
+.pager button:disabled {
+  opacity: 0.35;
 }
 
 .typeSelect {
@@ -385,10 +405,6 @@
     flex-basis: 100%;
   }
 
-  .tab {
-    margin-right: 14px;
-  }
-
   .headerActions {
     width: 100%;
     flex-wrap: wrap;
@@ -403,4 +419,51 @@
     flex: 1;
     width: auto;
   }
+}
+
+.headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding: 4px 2px 2px;
+}
+
+.headlineText {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.headlineTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--text-2);
+  text-wrap: balance;
+}
+
+.headlineTitle b {
+  font-weight: 650;
+  color: var(--text);
+}
+
+.headlineSub {
+  margin: 8px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.headlineUp {
+  color: var(--mantine-color-teal-4);
+  font-weight: 600;
+}
+
+.headlineDown {
+  color: var(--mantine-color-red-4);
+  font-weight: 600;
 }

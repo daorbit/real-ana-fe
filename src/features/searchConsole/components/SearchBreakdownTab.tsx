@@ -206,7 +206,7 @@ export function SearchBreakdownTab({
               allowDeselect={false}
             />
           </Group>
-          {pages > 1 && <Pagination size="sm" total={pages} value={data.page} onChange={setPage} siblings={1} />}
+          {pages > 1 && <Pagination size="sm" radius="xl" className={classes.pager} total={pages} value={data.page} onChange={setPage} siblings={1} />}
         </Group>
       )}
     </div>
