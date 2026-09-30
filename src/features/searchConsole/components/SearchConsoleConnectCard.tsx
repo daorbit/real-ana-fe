@@ -1,5 +1,5 @@
 import { Button, Text } from "@mantine/core";
-import { Lock, RefreshCcw, ShieldCheck } from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import classes from "./connect.module.css";
 
@@ -19,8 +19,8 @@ const COPY: Record<ConnectVariant, { title: string; body: string }> = {
     body: "Google Search Console hasn't been set up on this deployment. An administrator needs to add the Google credentials.",
   },
   reconnect: {
-    title: "Reconnect Google",
-    body: "Google access for this workspace stopped working. Reconnect to keep seeing search data — nothing you've set up is lost.",
+    title: "Sign in to Google again",
+    body: "Your Google Search Console sign-in has expired. Sign in again to keep seeing search data — your linked properties and settings are kept.",
   },
 };
 
@@ -54,13 +54,13 @@ export function SearchConsoleConnectCard({
           <Button
             size="md"
             variant="default"
-            leftSection={variant === "reconnect" ? <RefreshCcw size={16} /> : <GoogleMark size={18} />}
+            leftSection={<GoogleMark size={18} />}
             loading={connecting}
             onClick={onConnect}
             className={`${classes.cta} ${classes.googleButton}`}
             classNames={{ label: classes.googleLabel }}
           >
-            {variant === "reconnect" ? "Reconnect Google" : "Connect with Google"}
+            {variant === "reconnect" ? "Sign in with Google" : "Connect with Google"}
           </Button>
         )}
 

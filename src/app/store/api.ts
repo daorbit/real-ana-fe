@@ -4,6 +4,7 @@ import { getToken, isDemoToken } from "@/shared/lib/http";
 import { notify, errMessage, isPlanLimit, quotaLimitInfo, planLimitReason } from "@/shared/lib/notify";
 import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import { reportLoadFailure } from "@/shared/lib/loadFailure";
+import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
@@ -99,6 +100,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     void import("@/shared/lib/session").then((m) => m.handleSessionExpired());
   }
 
+
+  if (isSearchConsoleSignedOut(url, result.error)) {
+    apiArg.dispatch(api.util.invalidateTags(["SearchConsole"]));
+  }
 
   if (result.error?.status === 423) {
     void import("@/shared/lib/lockState").then((m) => m.showLock());

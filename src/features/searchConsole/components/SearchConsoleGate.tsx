@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import { useDispatch } from "react-redux";
 import {
+  api,
   useDisconnectSearchConsoleMutation,
   useGetSearchConsoleStatusQuery,
   useUnlinkSearchConsolePropertyMutation,
@@ -29,10 +31,14 @@ export function SearchConsoleGate({
 }) {
   const { canAdmin } = usePermissions();
 
-  const { data: status, isLoading, refetch } = useGetSearchConsoleStatusQuery(workspaceId, {
+  const dispatch = useDispatch();
+  const { data: status, isLoading, isFetching } = useGetSearchConsoleStatusQuery(workspaceId, {
     skip: !workspaceId,
   });
-  const { connect, connecting } = useSearchConsoleConnect(workspaceId, () => void refetch());
+  const { connect, connecting: popupOpen } = useSearchConsoleConnect(workspaceId, () =>
+    dispatch(api.util.invalidateTags(["SearchConsole", "SearchPerformance"])),
+  );
+  const connecting = popupOpen || isFetching;
   const [unlink] = useUnlinkSearchConsolePropertyMutation();
   const [disconnect] = useDisconnectSearchConsoleMutation();
 
@@ -53,7 +59,6 @@ export function SearchConsoleGate({
     return canAdmin ? (
       <SearchConsoleConnectCard
         variant="reconnect"
-        message={status.connection.statusMessage}
         onConnect={connect}
         connecting={connecting}
       />
