@@ -2266,9 +2266,19 @@ export type SearchInsightRow = SearchBreakdownRow & { missedClicks?: number };
 
 export type SearchLostRow = { key: string; previousClicks: number; previousImpressions: number };
 
+export type SearchPositionBand = {
+  band: "1-3" | "4-10" | "11-20" | "21+";
+  queries: number;
+  clicks: number;
+  impressions: number;
+  netMoved: number;
+};
+
 export type SearchInsights = {
   days: number;
   type: SearchType;
+  positionBands: SearchPositionBand[];
+  questionQueries: SearchInsightRow[];
   quickWins: SearchInsightRow[];
   lowCtr: SearchInsightRow[];
   risingQueries: SearchInsightRow[];
@@ -2277,7 +2287,7 @@ export type SearchInsights = {
   fallingPages: SearchInsightRow[];
   newQueries: SearchInsightRow[];
   lostQueries: SearchLostRow[];
-  counts: { queries: number; pages: number; newQueries: number; lostQueries: number };
+  counts: { queries: number; pages: number; newQueries: number; lostQueries: number; questionQueries: number };
   limited?: boolean;
   fetchedAt: string;
 };
@@ -2304,7 +2314,19 @@ export type SearchInspection = {
   robotsTxtState?: string;
   lastCrawled?: string | null;
   issues: { severity: string; message: string; type?: string }[];
+  googleCanonical?: string;
+  userCanonical?: string;
+  crawledAs?: string;
+  sitemaps?: string[];
+  referringUrls?: string[];
+  richResults?: SearchRichResult[];
   fetchedAt: string;
+};
+
+export type SearchRichResult = {
+  type: string;
+  items: number;
+  issues: { severity: string; message: string }[];
 };
 
 export type SearchSitemap = {
@@ -2320,9 +2342,15 @@ export type SearchSitemap = {
   indexed: number;
 };
 
+export type SearchSitemapAccess = {
+  canSubmit: boolean;
+  blockedBy: "scope" | "permission" | null;
+};
+
 export type SearchSitemaps = {
   sitemaps: SearchSitemap[];
   fetchedAt: string;
+  access: SearchSitemapAccess;
 };
 
 /** A business the connected Google account can see, offered in the picker. */

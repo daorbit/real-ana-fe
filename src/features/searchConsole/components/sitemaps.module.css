@@ -1,0 +1,123 @@
+.submit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  cursor: text;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.field:hover {
+  border-color: color-mix(in srgb, var(--text) 24%, var(--border-strong));
+}
+
+.field:focus-within {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.base {
+  flex: 0 1 auto;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.input {
+  flex: 1;
+  min-width: 80px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.input::placeholder {
+  color: color-mix(in srgb, var(--text) 32%, transparent);
+}
+
+.submitButton {
+  flex: none;
+  height: 38px;
+  padding-inline: 18px;
+  font-weight: 600;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--mantine-spacing-md);
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.noticeIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.noticeText {
+  flex: 1;
+  min-width: 0;
+}
+
+.noticeAction {
+  flex: none;
+  font-weight: 600;
+}
+
+.actionsCell {
+  width: 44px;
+  text-align: right;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
+  text-align: center;
+}
+
+@media (max-width: 48em) {
+  .notice {
+    flex-wrap: wrap;
+  }
+
+  .noticeAction {
+    width: 100%;
+  }
+
+  .base {
+    max-width: 50%;
+  }
+}

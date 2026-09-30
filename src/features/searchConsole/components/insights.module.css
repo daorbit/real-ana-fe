@@ -368,9 +368,158 @@
   color: var(--kind-declining);
 }
 
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-lg);
+  min-width: 0;
+}
+
+.bandBar {
+  display: flex;
+  gap: 3px;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.bandSegment,
+.band {
+  --band: var(--mantine-color-gray-5);
+}
+
+.bandSegment[data-band="1-3"],
+.band[data-band="1-3"] {
+  --band: var(--mantine-color-teal-5);
+}
+
+.bandSegment[data-band="4-10"],
+.band[data-band="4-10"] {
+  --band: var(--mantine-color-blue-5);
+}
+
+.bandSegment[data-band="11-20"],
+.band[data-band="11-20"] {
+  --band: var(--mantine-color-yellow-5);
+}
+
+.bandSegment {
+  flex: 0 0 var(--share);
+  min-width: 4px;
+  background: var(--band);
+  transition: flex-basis 400ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.bandGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--mantine-spacing-md);
+}
+
+.band {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.bandLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.bandDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--band);
+}
+
+.bandValue {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.bandMeta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.bandMove {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+
+.bandMove[data-dir="up"] {
+  color: var(--kind-growing);
+  background: color-mix(in srgb, var(--kind-growing) 12%, transparent);
+}
+
+.bandMove[data-dir="down"] {
+  color: var(--kind-declining);
+  background: color-mix(in srgb, var(--kind-declining) 12%, transparent);
+}
+
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.question {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--text);
+}
+
+.question:hover {
+  background: var(--surface-2);
+}
+
+.questionIcon {
+  color: var(--kind-opportunity);
+}
+
+.questionText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.questionMeta {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 @media (max-width: 62em) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bandGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

@@ -2302,6 +2302,38 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
 
+    submitSearchSitemap: build.mutation<SearchSitemaps, { workspaceId: string; siteId: string; url: string }>({
+      query: ({ workspaceId, siteId, url }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/sitemaps`,
+        method: "POST",
+        body: { url },
+      }),
+      async onQueryStarted({ workspaceId, siteId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getSearchSitemaps", { workspaceId, siteId }, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    removeSearchSitemap: build.mutation<SearchSitemaps, { workspaceId: string; siteId: string; url: string }>({
+      query: ({ workspaceId, siteId, url }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/sitemaps`,
+        method: "DELETE",
+        params: { url },
+      }),
+      async onQueryStarted({ workspaceId, siteId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getSearchSitemaps", { workspaceId, siteId }, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
     refreshSearchPerformance: build.mutation<
       SearchPerformance,
       { workspaceId: string; siteId: string; days: number; type: SearchType }
@@ -2390,6 +2422,8 @@ export const {
   useRefreshSearchPerformanceMutation,
   useGetSearchBreakdownQuery,
   useGetSearchSitemapsQuery,
+  useSubmitSearchSitemapMutation,
+  useRemoveSearchSitemapMutation,
   useGetSearchInspectionQuery,
   useAskSearchOrbitMutation,
   useGetSearchInsightsQuery,

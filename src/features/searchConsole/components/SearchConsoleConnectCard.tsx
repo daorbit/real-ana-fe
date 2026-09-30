@@ -67,7 +67,7 @@ export function SearchConsoleConnectCard({
         {canConnect && (
           <span className={classes.trust}>
             <ShieldCheck size={13} />
-            Read-only · Disconnect anytime
+            Only sitemaps you submit are changed · Disconnect anytime
           </span>
         )}
 

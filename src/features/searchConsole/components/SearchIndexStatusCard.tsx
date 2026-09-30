@@ -6,6 +6,7 @@ import { errMessage } from "@/shared/lib/notify";
 import { verdictOf } from "../inspectionVerdict";
 import { useSearchEntitlements, useSearchUpgrade } from "../useSearchEntitlements";
 import { IndexStatusSkeleton } from "./SearchSkeletons";
+import { IndexInspectionDetails } from "./IndexInspectionDetails";
 import classes from "./pageDetail.module.css";
 
 function humanize(value?: string) {
@@ -88,6 +89,7 @@ export function SearchIndexStatusCard({
     { label: "Last crawl", value: data.lastCrawled ? dayjs(data.lastCrawled).format("MMM D, YYYY · HH:mm") : "Never" },
     { label: "Page fetch", value: humanize(data.pageFetchState) },
     { label: "Crawl allowed", value: humanize(data.robotsTxtState) },
+    ...(data.crawledAs ? [{ label: "Crawled as", value: humanize(data.crawledAs) }] : []),
   ];
 
   return (
@@ -120,6 +122,8 @@ export function SearchIndexStatusCard({
           ))}
         </ul>
       )}
+
+      <IndexInspectionDetails data={data} />
 
       <Anchor href={inspectUrl} target="_blank" rel="noopener noreferrer" size="xs">
         Inspect in Search Console <ExternalLink size={11} />

@@ -202,6 +202,67 @@
   line-height: 1.5;
 }
 
+.inspectWarn {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--mantine-color-yellow-5) 40%, var(--border));
+  background: color-mix(in srgb, var(--mantine-color-yellow-5) 10%, var(--surface));
+}
+
+.inspectWarn > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--mantine-color-yellow-6);
+}
+
+.inspectWarn b {
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.inspectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: var(--mantine-spacing-sm);
+  border-top: 1px solid var(--border);
+}
+
+.inspectLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.inspectPath {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.richResult {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.richResult > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--mantine-color-yellow-6);
+}
+
+.richResult[data-ok] > svg {
+  color: var(--mantine-color-teal-5);
+}
+
 @media (max-width: 62em) {
   .layout {
     grid-template-columns: minmax(0, 1fr);

@@ -7,6 +7,8 @@ import { buildActions } from "../insightActions";
 import { InsightsSummary } from "./InsightsSummary";
 import { InsightActionList } from "./InsightActionList";
 import { InsightMovers } from "./InsightMovers";
+import { InsightPositionBands } from "./InsightPositionBands";
+import { InsightQuestions } from "./InsightQuestions";
 import { InsightsSkeleton } from "./SearchSkeletons";
 import { SearchLockedFeature, SearchUpgradeNote } from "./SearchUpgradeNote";
 import { useSearchEntitlements } from "../useSearchEntitlements";
@@ -66,9 +68,13 @@ export function SearchInsightsTab({
           The {ent.planName} plan shows the top 5 items in each insight. Upgrade to Pro to see every action and mover.
         </SearchUpgradeNote>
       )}
+      <InsightPositionBands bands={data.positionBands} />
       <div className={classes.layout}>
         <InsightActionList actions={actions} onOpen={(a) => open(a.dimension, a.target)} />
-        <InsightMovers data={data} onOpen={open} />
+        <div className={classes.side}>
+          <InsightMovers data={data} onOpen={open} />
+          <InsightQuestions rows={data.questionQueries} total={data.counts.questionQueries} onOpen={onOpenQuery} />
+        </div>
       </div>
     </div>
   );
