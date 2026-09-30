@@ -61,6 +61,11 @@ const AdminDatabase = lazy(() => import("@/features/admin/pages/AdminDatabase"))
 const Onboarding = lazy(() => import("@/features/auth/pages/Onboarding"));
 const PublicDashboard = lazy(() => import("@/features/analytics/pages/PublicDashboard"));
 const PublicSeoReport = lazy(() => import("@/features/seo/pages/PublicSeoReport"));
+const Dashboards = lazy(() => import("@/features/dashboards/pages/Dashboards"));
+const DashboardTemplates = lazy(() => import("@/features/dashboards/pages/DashboardTemplates"));
+const DashboardView = lazy(() => import("@/features/dashboards/pages/DashboardView"));
+const Goals = lazy(() => import("@/features/goals/pages/Goals"));
+const EmbedWidget = lazy(() => import("@/features/embed/pages/EmbedWidget"));
 
 function RequireSetup({ children }: { children: ReactNode }) {
   const { workspaces, loading, fetchFailed } = useWorkspace();
@@ -234,6 +239,7 @@ export default function App() {
               <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
               <Route path="/forgot-password" element={<PublicOnly><ForgotPassword /></PublicOnly>} />
               <Route path="/share/:token" element={<RouteFrame><PublicDashboard /></RouteFrame>} />
+              <Route path="/embed/:token" element={<RouteFrame><EmbedWidget /></RouteFrame>} />
               <Route path="/invite/:token" element={<RouteFrame><AcceptInvite /></RouteFrame>} />
               <Route path="/seo-report/:token" element={<RouteFrame><PublicSeoReport /></RouteFrame>} />
               <Route path="/data-deletion" element={<RouteFrame><DataDeletion /></RouteFrame>} />
@@ -245,6 +251,10 @@ export default function App() {
               <Route element={<Protected><ShellLayout /></Protected>}>
                 <Route path="/app" element={<Home />} />
                 <Route path="/app/analytics" element={<Analytics />} />
+                <Route path="/app/dashboards" element={<Dashboards />} />
+                <Route path="/app/dashboards/new" element={<DashboardTemplates />} />
+                <Route path="/app/dashboards/:id" element={<DashboardView />} />
+                <Route path="/app/goals" element={<Goals />} />
                 <Route path="/app/seo" element={<Seo />} />
                 <Route path="/app/search-visibility" element={<SearchConsole />} />
                 <Route path="/app/search-visibility/page/:pageKey" element={<SearchConsolePageDetail />} />

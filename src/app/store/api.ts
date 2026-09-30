@@ -12,7 +12,7 @@ import type {
   MailLayout, Branding, BrandingInput,
   MediaAsset, MediaListResult, MediaKind, MediaUploadInput,
 } from "@/shared/types";
-import type { Placed } from "@/features/analytics/hooks/useHomeWidgets";
+import type { Placed } from "@/features/analytics/widgetCatalog";
 import type { TrackerOptions } from "@/features/workspace/tracker";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,

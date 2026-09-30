@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import confetti from "canvas-confetti";
+import { celebrate } from "@/shared/lib/confetti";
 import {
   useStartSubscriptionMutation,
   useStartAddonPurchaseMutation,
@@ -59,12 +59,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
    */
   const [cancelled, setCancelled] = useState<string | null>(null);
 
-  const fireConfetti = () => {
-    const colors = ["#10b981", "#059669", "#34d399", "#fbbf24"];
-    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, colors });
-    confetti({ particleCount: 60, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors, angle: 60, decay: 0.9 });
-    confetti({ particleCount: 60, spread: 100, startVelocity: 45, origin: { y: 0.5 }, colors, angle: 120, decay: 0.9 });
-  };
+  const fireConfetti = celebrate;
 
   /**
    * Safety net for Cashfree payment methods that force a full-page redirect

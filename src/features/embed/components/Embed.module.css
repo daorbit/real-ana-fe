@@ -1,0 +1,42 @@
+:global(body.quantalog-embed) {
+  background: transparent !important;
+  min-height: 0;
+}
+
+:global(body.quantalog-embed #root) {
+  min-height: 0;
+}
+
+.root {
+  padding: 2px;
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 6px 0;
+}
+
+.brand {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.brand:hover {
+  color: var(--text-2);
+}
+
+.state {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: var(--mantine-font-size-sm);
+  text-align: center;
+}

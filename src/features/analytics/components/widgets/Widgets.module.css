@@ -1,0 +1,18 @@
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.flag {
+  display: inline-flex;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.fill {
+  height: 100%;
+}
+
+.liveDot {
+  background: var(--mantine-color-teal-6);
+}

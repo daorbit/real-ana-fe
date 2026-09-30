@@ -3,6 +3,7 @@ import {
   demoSeoHistory, demoSeoShare, demoCrawl, demoSearchTraffic, demoVitals,
   demoCompetitors, demoInstallStatus, demoStats, demoUserFlow, DEMO_WORKSPACE_ID,
 } from "@/features/demo/demoData";
+import { demoDashboards, demoTargets } from "@/features/demo/demoDashboards";
 
 /**
  * Answer a dashboard request from the demo fixtures.
@@ -59,6 +60,14 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   if (/\/seo\/search-traffic$/.test(path)) return demoSearchTraffic;
   if (/\/seo\/vitals$/.test(path)) return demoVitals;
   if (/\/seo\/competitors$/.test(path)) return demoCompetitors;
+
+  if (/\/dashboards$/.test(path)) return demoDashboards;
+  if (/\/dashboards\/[^/]+$/.test(path)) {
+    const id = path.split("/").pop();
+    return demoDashboards.find((d) => d.id === id) ?? demoDashboards[0];
+  }
+  if (/\/targets$/.test(path)) return demoTargets();
+  if (/\/embeds$/.test(path)) return [];
 
   // admin
   // The demo account is a plain user, so these are never reached in practice.

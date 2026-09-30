@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   Drawer, Text, Stack, Group, Button, Checkbox, Card, Badge, Divider, Anchor,
@@ -28,7 +28,13 @@ export function CustomizeDrawer({
   dirty,
   saving,
   onSave,
+  title = "Customize your home page",
+  intro,
+  showReset = true,
 }: {
+  title?: string;
+  intro?: ReactNode;
+  showReset?: boolean;
   opened: boolean;
   onClose: () => void;
   /** How many widgets are currently on the home page. */
@@ -87,7 +93,7 @@ export function CustomizeDrawer({
       title={
         <Group justify="space-between" wrap="nowrap" w="100%">
           <Group gap="sm" wrap="nowrap">
-            <Text fw={650}>Customize your home page</Text>
+            <Text fw={650}>{title}</Text>
             <Badge variant="light" color="emerald" size="sm">{count} on your page</Badge>
           </Group>
 
@@ -109,8 +115,12 @@ export function CustomizeDrawer({
       }
     >
       <Text size="sm" c="dimmed" mb="md">
-        Pick any widget from Analytics to pin here. The complete breakdown always lives in{" "}
-        <Anchor component={Link} to="/app/analytics" size="sm">Analytics</Anchor>.
+        {intro ?? (
+          <>
+            Pick any widget from Analytics to pin here. The complete breakdown always lives in{" "}
+            <Anchor component={Link} to="/app/analytics" size="sm">Analytics</Anchor>.
+          </>
+        )}
       </Text>
 
       <TextInput
@@ -235,17 +245,19 @@ export function CustomizeDrawer({
         >
           Clear all
         </Button>
-        <Button
-          variant="light"
-          size="xs"
-          leftSection={<RotateCcw size={13} />}
-          onClick={() => {
-            trace(user?.id, "widget_layout_reset", "widget_drawer", "home");
-            reset();
-          }}
-        >
-          Reset to default
-        </Button>
+        {showReset && (
+          <Button
+            variant="light"
+            size="xs"
+            leftSection={<RotateCcw size={13} />}
+            onClick={() => {
+              trace(user?.id, "widget_layout_reset", "widget_drawer", "home");
+              reset();
+            }}
+          >
+            Reset to default
+          </Button>
+        )}
       </Group>
     </Drawer>
   );

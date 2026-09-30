@@ -37,7 +37,7 @@ function NavGroupBlock({
       to={n.to}
       label={t(n.labelKey, n.label)}
       icon={n.icon}
-      active={pathname === n.to}
+      active={pathname === n.to || (n.to !== "/app" && pathname.startsWith(`${n.to}/`))}
       collapsed={collapsed}
     />
   ));
