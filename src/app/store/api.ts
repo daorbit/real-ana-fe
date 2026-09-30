@@ -23,7 +23,7 @@ import type {
   Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
-  Coupon, CouponCheckResult, Invoice, QuotaSummary,
+  Coupon, CouponCheckResult, Invoice, QuotaSummary, UsageHistory,
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
@@ -262,6 +262,11 @@ export const api = createApi({
 
     getWorkspaceUsage: build.query<QuotaSummary, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/usage`,
+      providesTags: ["Usage"],
+    }),
+
+    getWorkspaceUsageHistory: build.query<UsageHistory, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/usage/history`,
       providesTags: ["Usage"],
     }),
 
@@ -2351,6 +2356,7 @@ export const api = createApi({
 export const {
   useGetWorkspacesQuery,
   useGetWorkspaceUsageQuery,
+  useGetWorkspaceUsageHistoryQuery,
   useCreateWorkspaceMutation,
   useRenameWorkspaceMutation,
   useDeleteWorkspaceMutation,

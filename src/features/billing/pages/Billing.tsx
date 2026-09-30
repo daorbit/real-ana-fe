@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Text, Stack, Alert, Tabs } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Info, Layers, ShoppingCart, Receipt } from "lucide-react";
+import { Activity, Info, Layers, ShoppingCart, Receipt } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
@@ -19,6 +19,7 @@ import { UsageSummary } from "../components/UsageSummary";
 import { PlansTab } from "../components/PlansTab";
 import { AddonsTab } from "../components/AddonsTab";
 import { Receipts } from "../components/Receipts";
+import { UsageOverviewTab } from "../components/usage/UsageOverviewTab";
 import { PlanCheckoutModal } from "../components/PlanCheckoutModal";
 import { AddonCheckoutModal } from "../components/AddonCheckoutModal";
 import { CheckoutOutcome } from "../components/CheckoutOutcome";
@@ -164,6 +165,7 @@ export default function Billing() {
           >
             <Tabs.List mb="xl">
               <Tabs.Tab value="plans" leftSection={<Layers size={15} />}>{t("billing.tabPlans")}</Tabs.Tab>
+              <Tabs.Tab value="usage" leftSection={<Activity size={15} />}>{t("billing.tabUsage", "Usage")}</Tabs.Tab>
               <Tabs.Tab value="addons" leftSection={<ShoppingCart size={15} />}>{t("billing.tabAddons")}</Tabs.Tab>
               <Tabs.Tab value="history" leftSection={<Receipt size={15} />}>
                 {t("billing.tabHistory")}
@@ -188,6 +190,16 @@ export default function Billing() {
                 subscribing={subscribing}
                 onPick={(plan) => { setPlanCoupon(null); setConfirmPlan(plan); }}
               />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="usage">
+              {selectedWorkspaceId ? (
+                <UsageOverviewTab workspaceId={selectedWorkspaceId} />
+              ) : (
+                <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
+                  <Text size="sm">Create a workspace to see its usage here.</Text>
+                </Alert>
+              )}
             </Tabs.Panel>
 
             <Tabs.Panel value="addons">

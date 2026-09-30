@@ -1,47 +1,16 @@
-import { Alert, Anchor, Badge, ScrollArea, Table, Text } from "@mantine/core";
-import { AlertTriangle, CheckCircle2, Clock, ExternalLink, XCircle } from "lucide-react";
+import { Alert, Text } from "@mantine/core";
+import { AlertTriangle, ExternalLink, FileText } from "lucide-react";
 import { useGetSearchSitemapsQuery } from "@/app/store";
 import { usePermissions } from "@/features/workspace/context";
 import { errMessage } from "@/shared/lib/notify";
-import { num, timeAgo } from "@/shared/lib";
-import type { SearchSitemap } from "@/shared/types";
+import { num } from "@/shared/lib";
 import { useSearchConsoleConnect } from "../useSearchConsoleConnect";
 import { useSitemapActions } from "../useSitemapActions";
-import { sitemapBase, sitemapPath } from "../sitemapUrl";
+import { sitemapBase } from "../sitemapUrl";
 import { SitemapsSkeleton } from "./SearchSkeletons";
 import { SitemapSubmitBar } from "./SitemapSubmitBar";
-import { SitemapRowActions } from "./SitemapRowActions";
-import classes from "./searchConsole.module.css";
-import sitemapClasses from "./sitemaps.module.css";
-
-function SitemapStatus({ sitemap }: { sitemap: SearchSitemap }) {
-  if (sitemap.errors > 0) {
-    return (
-      <Badge color="red" variant="light" leftSection={<XCircle size={11} />}>
-        {sitemap.errors} error{sitemap.errors === 1 ? "" : "s"}
-      </Badge>
-    );
-  }
-  if (sitemap.isPending) {
-    return (
-      <Badge color="gray" variant="light" leftSection={<Clock size={11} />}>
-        Pending
-      </Badge>
-    );
-  }
-  if (sitemap.warnings > 0) {
-    return (
-      <Badge color="yellow" variant="light" leftSection={<AlertTriangle size={11} />}>
-        {sitemap.warnings} warning{sitemap.warnings === 1 ? "" : "s"}
-      </Badge>
-    );
-  }
-  return (
-    <Badge color="teal" variant="light" leftSection={<CheckCircle2 size={11} />}>
-      Success
-    </Badge>
-  );
-}
+import { SitemapRow } from "./SitemapRow";
+import classes from "./sitemaps.module.css";
 
 export function SearchSitemapsTab({
   workspaceId,
@@ -68,22 +37,19 @@ export function SearchSitemapsTab({
   }
 
   const manage = canAdmin && data.access.canSubmit;
+  const pages = data.sitemaps.reduce((sum, s) => sum + s.submitted, 0);
 
   return (
-    <div className={classes.card}>
-      <div className={classes.cardHead}>
+    <div className={classes.root}>
+      <header className={classes.head}>
         <div>
-          <Text fw={650} size="sm">
-            Sitemaps
-          </Text>
-          <Text size="xs" c="dimmed" mt={2}>
-            Tell Google where your pages are. Coverage here is per sitemap, not a property-wide index total.
-          </Text>
+          <div className={classes.title}>Sitemaps</div>
+          <div className={classes.subtitle}>Tell Google where your pages are, and see when it last read them.</div>
         </div>
-        <Anchor href={consoleUrl} target="_blank" rel="noopener noreferrer" size="xs">
-          Open in Search Console <ExternalLink size={11} />
-        </Anchor>
-      </div>
+        <a href={consoleUrl} target="_blank" rel="noopener noreferrer" className={classes.consoleLink}>
+          Open in Search Console <ExternalLink size={12} />
+        </a>
+      </header>
 
       {canAdmin && (
         <SitemapSubmitBar
@@ -97,62 +63,41 @@ export function SearchSitemapsTab({
       )}
 
       {data.sitemaps.length === 0 ? (
-        <div className={sitemapClasses.empty}>
+        <div className={classes.empty}>
+          <span className={classes.emptyIcon}>
+            <FileText size={20} />
+          </span>
           <Text size="sm" fw={600}>
             No sitemaps yet
           </Text>
           <Text size="xs" c="dimmed">
             {manage
-              ? "Submit one above so Google can find every page on your site."
+              ? "Add one above so Google can find every page on your site."
               : "Submitting a sitemap helps Google find every page on your site."}
           </Text>
         </div>
       ) : (
-        <ScrollArea className={classes.tableScroll}>
-          <Table verticalSpacing={10} fz="xs" className={classes.table} highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Sitemap</Table.Th>
-                <Table.Th>Status</Table.Th>
-                <Table.Th className={classes.numCell}>Pages submitted</Table.Th>
-                <Table.Th>Last submitted</Table.Th>
-                <Table.Th>Last read by Google</Table.Th>
-                {manage && <Table.Th className={sitemapClasses.actionsCell} aria-label="Actions" />}
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {data.sitemaps.map((s) => (
-                <Table.Tr key={s.path}>
-                  <Table.Td className={classes.labelCell} title={s.path}>
-                    <a href={s.path} target="_blank" rel="noopener noreferrer" className={classes.pageLink}>
-                      {sitemapPath(s.path)}
-                    </a>
-                    {s.isIndex && (
-                      <Badge size="xs" variant="light" color="gray" ml={6}>
-                        Index
-                      </Badge>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    <SitemapStatus sitemap={s} />
-                  </Table.Td>
-                  <Table.Td className={classes.numCell}>{s.submitted ? num(s.submitted) : "—"}</Table.Td>
-                  <Table.Td>{s.lastSubmitted ? timeAgo(s.lastSubmitted) : "—"}</Table.Td>
-                  <Table.Td>{s.lastDownloaded ? timeAgo(s.lastDownloaded) : "Not yet"}</Table.Td>
-                  {manage && (
-                    <Table.Td className={sitemapClasses.actionsCell}>
-                      <SitemapRowActions
-                        busy={actions.pendingUrl === s.path}
-                        onResubmit={() => void actions.submit(s.path, true)}
-                        onRemove={() => actions.remove(s.path)}
-                      />
-                    </Table.Td>
-                  )}
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </ScrollArea>
+        <div>
+          <div className={classes.listHead}>
+            <span className={classes.eyebrow}>Submitted sitemaps</span>
+            <span className={classes.listCount}>
+              {data.sitemaps.length} sitemap{data.sitemaps.length === 1 ? "" : "s"}
+              {pages ? ` · ${num(pages)} pages` : ""}
+            </span>
+          </div>
+          <ul className={classes.list}>
+            {data.sitemaps.map((s) => (
+              <SitemapRow
+                key={s.path}
+                sitemap={s}
+                manage={manage}
+                busy={actions.pendingUrl === s.path}
+                onResubmit={() => void actions.submit(s.path, true)}
+                onRemove={() => actions.remove(s.path)}
+              />
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

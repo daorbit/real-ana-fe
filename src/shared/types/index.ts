@@ -628,6 +628,33 @@ export type AddonPack = {
  */
 export const MAX_SITES_PER_WORKSPACE = 2;
 
+export type UsageHistoryMonth = {
+  month: string;
+  current: boolean;
+  plan: { slug: string; name: string };
+  eventQuota: number;
+  events: number;
+  audits: number;
+  crawls: number;
+  inspections: number;
+  formSubmissions: number;
+  orbit: number;
+};
+
+export type UsagePlanEvent = {
+  ladder: "analytics" | "orbit";
+  planSlug: string;
+  planName: string;
+  cycle: BillingCycle;
+  purchasedAt: string | null;
+};
+
+export type UsageHistory = {
+  resetsAt: string;
+  months: UsageHistoryMonth[];
+  plans: UsagePlanEvent[];
+};
+
 export type QuotaSummary = {
   workspaceId: string;
   plan: { slug: string; name: string };
@@ -636,6 +663,8 @@ export type QuotaSummary = {
   cycle: BillingCycle;
   status: "active" | "expired";
   currentPeriodEnd: string | null;
+  usageMonth?: string;
+  usageResetsAt?: string;
   audits: { planQuota: number; used: number; addonCredits: number };
   crawls: { planQuota: number; used: number; addonCredits: number };
   sites: { quota: number; used: number; addonSlots?: number };
