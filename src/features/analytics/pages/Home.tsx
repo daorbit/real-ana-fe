@@ -44,7 +44,8 @@ import { useSites } from "@/features/workspace";
 import { useGetSeoReportsQuery, useGetMembersQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import type { WidgetId, Span } from "@/features/analytics";
-import { countryFlag, countryLabel, duration, num } from "@/shared/lib";
+import { countryLabel, duration, num } from "@/shared/lib";
+import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 import type { Bucket, Stats } from "@/shared/types";
@@ -284,7 +285,7 @@ export default function Home() {
 
   const flag = (k: string) => (
     <span>
-      <span style={{ marginRight: 6 }}>{countryFlag(k)}</span>
+      <span style={{ marginRight: 8, display: "inline-flex", verticalAlign: "middle" }}><CountryFlag code={k} size={14} /></span>
       {countryLabel(k)}
     </span>
   );

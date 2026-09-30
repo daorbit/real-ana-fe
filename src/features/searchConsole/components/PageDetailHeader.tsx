@@ -44,7 +44,7 @@ export function PageDetailHeader({
     <header className={classes.header}>
       <div className={classes.crumbRow}>
         <Tooltip label="Back" withArrow>
-          <ActionIcon variant="default" size={32} radius="md" onClick={goBack} aria-label="Back">
+          <ActionIcon variant="default" size={34} radius="xl" onClick={goBack} aria-label="Back">
             <ArrowLeft size={16} />
           </ActionIcon>
         </Tooltip>
