@@ -32,7 +32,7 @@ import type {
   GoogleReviewsList, GoogleSyncResult,
   SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
   SearchBreakdown, SearchBreakdownDimension, SearchSitemaps, SearchInspection,
-  SearchType, SearchBreakdownSort, SearchInsights, SearchDrilldown,
+  SearchType, SearchBreakdownSort, SearchInsights, SearchDrilldown, SearchHourly,
   NotificationPage, NotificationPrefsResponse,
 } from "@/shared/types";
 
@@ -2301,6 +2301,14 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
     }),
 
+    getSearchHourly: build.query<SearchHourly, { workspaceId: string; siteId: string; type: SearchType }>({
+      query: ({ workspaceId, siteId, type }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/hourly`,
+        params: { type },
+      }),
+      providesTags: (_r, _e, { siteId }) => [{ type: "SearchPerformance", id: siteId }],
+    }),
+
     getSearchSitemaps: build.query<SearchSitemaps, { workspaceId: string; siteId: string }>({
       query: ({ workspaceId, siteId }) =>
         `/api/workspaces/${workspaceId}/sites/${siteId}/search-console/sitemaps`,
@@ -2428,6 +2436,7 @@ export const {
   useRefreshSearchPerformanceMutation,
   useGetSearchBreakdownQuery,
   useGetSearchSitemapsQuery,
+  useGetSearchHourlyQuery,
   useSubmitSearchSitemapMutation,
   useRemoveSearchSitemapMutation,
   useGetSearchInspectionQuery,

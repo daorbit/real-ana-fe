@@ -23,6 +23,8 @@ import { SearchBreakdownTab } from "./SearchBreakdownTab";
 import { SearchDevicesTab } from "./SearchDevicesTab";
 import { SearchInsightsTab } from "./SearchInsightsTab";
 import { SearchSitemapsTab } from "./SearchSitemapsTab";
+import { SearchHourlyCard } from "./SearchHourlyCard";
+import { typeHasQueries } from "../searchMetrics";
 import { SearchOrbitSummary } from "./SearchOrbitSummary";
 import { SearchOrbitPanel } from "./SearchOrbitPanel";
 import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
@@ -61,6 +63,13 @@ export function SearchConsoleBody({
   );
 
   const shared = { workspaceId, siteId, days, type };
+  const hasQueries = typeHasQueries(type);
+  const tabs = SEARCH_CONSOLE_TABS.filter((t) => hasQueries || t.id !== "queries");
+
+  const changeType = (next: SearchType) => {
+    setType(next);
+    if (!typeHasQueries(next) && tab === "queries") onTabChange("overview");
+  };
 
   return (
     <div className={classes.page}>
@@ -70,7 +79,7 @@ export function SearchConsoleBody({
         days={days}
         onDaysChange={setDays}
         type={type}
-        onTypeChange={setType}
+        onTypeChange={changeType}
         link={link}
         busy={overview.isFetching}
         fetchedAt={overview.data?.fetchedAt}
@@ -79,7 +88,7 @@ export function SearchConsoleBody({
       />
 
       <div className={classes.tabbar} role="tablist" aria-label="Search visibility reports">
-        {SEARCH_CONSOLE_TABS.map((t) => {
+        {tabs.map((t) => {
           const Icon = t.icon;
           const on = t.id === tab;
           return (
@@ -107,6 +116,8 @@ export function SearchConsoleBody({
         ) : overview.data ? (
           <SearchOverviewTab
             data={overview.data}
+            hasQueries={hasQueries}
+            hourly={<SearchHourlyCard workspaceId={workspaceId} siteId={siteId} type={type} />}
             onViewQueries={() => onTabChange("queries")}
             onViewPages={() => onTabChange("pages")}
             onOpenQuery={setQuery}
@@ -130,7 +141,7 @@ export function SearchConsoleBody({
 
       {tab === "insights" && <SearchInsightsTab {...shared} onOpenQuery={setQuery} onOpenPage={openPage} />}
 
-      {tab === "queries" && (
+      {tab === "queries" && hasQueries && (
         <SearchBreakdownTab
           {...shared}
           dimension="query"

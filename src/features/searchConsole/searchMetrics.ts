@@ -1,6 +1,6 @@
 import { num } from "@/shared/lib";
 import { ACCENT } from "@/shared/ui/StatCard";
-import type { SearchMetrics } from "@/shared/types";
+import type { SearchMetrics, SearchType } from "@/shared/types";
 
 export type MetricKey = keyof SearchMetrics;
 
@@ -64,11 +64,29 @@ export const RANGES = [
 ];
 
 export const SEARCH_TYPE_OPTIONS = [
-  { value: "web", label: "Web" },
-  { value: "image", label: "Image" },
-  { value: "video", label: "Video" },
-  { value: "news", label: "News" },
+  {
+    group: "Google Search",
+    items: [
+      { value: "web", label: "Web" },
+      { value: "image", label: "Image" },
+      { value: "video", label: "Video" },
+      { value: "news", label: "News tab" },
+    ],
+  },
+  {
+    group: "Other surfaces",
+    items: [
+      { value: "discover", label: "Discover" },
+      { value: "googleNews", label: "Google News" },
+    ],
+  },
 ];
+
+const TYPES_WITHOUT_QUERIES: SearchType[] = ["discover", "googleNews"];
+
+export function typeHasQueries(type: SearchType): boolean {
+  return !TYPES_WITHOUT_QUERIES.includes(type);
+}
 
 export type MetricChange = { text: string; good: boolean; flat: boolean };
 

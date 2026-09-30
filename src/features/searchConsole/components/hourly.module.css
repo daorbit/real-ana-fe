@@ -1,0 +1,125 @@
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 32px;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.statValue {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.change {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--mantine-font-family);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0;
+  color: var(--mantine-color-teal-5);
+  background: color-mix(in srgb, var(--mantine-color-teal-5) 12%, transparent);
+}
+
+.change[data-bad] {
+  color: var(--mantine-color-red-5);
+  background: color-mix(in srgb, var(--mantine-color-red-5) 12%, transparent);
+}
+
+.change[data-flat] {
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+
+.legend {
+  display: flex;
+  gap: 14px;
+  margin-left: auto;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--text-2);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--metric);
+}
+
+.swatch[data-faded] {
+  background: color-mix(in srgb, var(--metric) 40%, var(--surface));
+}
+
+.chart {
+  height: 220px;
+}
+
+.tooltip {
+  min-width: 150px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 12px;
+}
+
+.tooltipTitle {
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-2);
+}
+
+.tooltipValue {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.empty {
+  padding: var(--mantine-spacing-lg) 0;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--text-2);
+}
+
+@media (max-width: 48em) {
+  .legend {
+    margin-left: 0;
+    width: 100%;
+  }
+}

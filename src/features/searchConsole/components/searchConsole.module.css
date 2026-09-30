@@ -67,6 +67,10 @@
   gap: var(--mantine-spacing-lg);
 }
 
+.tables[data-single] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .tableScroll {
   margin-inline: calc(var(--mantine-spacing-lg) * -1);
 }
@@ -193,7 +197,7 @@
 }
 
 .typeSelect {
-  width: 104px;
+  width: 136px;
 }
 
 .clickableRow {

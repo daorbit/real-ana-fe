@@ -2251,7 +2251,7 @@ export type SearchMetrics = {
 export type SearchPerformance = {
   propertyUrl: string;
   days: number;
-  type?: "web" | "image" | "video" | "news";
+  type?: SearchType;
   startDate: string;
   endDate: string;
   totals: SearchMetrics;
@@ -2271,7 +2271,15 @@ export type SearchBreakdownRow = SearchMetrics & {
   views?: number;
 };
 
-export type SearchType = "web" | "image" | "video" | "news";
+export type SearchType = "web" | "image" | "video" | "news" | "discover" | "googleNews";
+
+export type SearchHourly = {
+  type: SearchType;
+  hours: (SearchMetrics & { hour: string })[];
+  last24: SearchMetrics;
+  previous24: SearchMetrics | null;
+  fetchedAt: string;
+};
 
 export type SearchBreakdownSort = "key" | "clicks" | "change" | "impressions" | "ctr" | "position" | "views";
 

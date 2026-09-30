@@ -17,8 +17,12 @@ export function SearchOverviewTab({
   onOpenPage,
   orbitSummary,
   explain,
+  hasQueries = true,
+  hourly,
 }: {
   data: SearchPerformance;
+  hasQueries?: boolean;
+  hourly?: ReactNode;
   onViewQueries: () => void;
   onViewPages: () => void;
   onOpenQuery: (query: string) => void;
@@ -61,16 +65,20 @@ export function SearchOverviewTab({
         )}
       </div>
 
-      <div className={classes.tables}>
-        <SearchTopTable
-          title="Top queries"
-          description="What people searched before seeing your site."
-          labelHeader="Query"
-          rows={data.queries.map((q) => ({ ...q, key: q.query, label: q.query }))}
-          emptyText="No queries recorded for this period."
-          onViewAll={onViewQueries}
-          onOpenRow={(row) => onOpenQuery(row.key)}
-        />
+      {hourly}
+
+      <div className={classes.tables} data-single={!hasQueries || undefined}>
+        {hasQueries && (
+          <SearchTopTable
+            title="Top queries"
+            description="What people searched before seeing your site."
+            labelHeader="Query"
+            rows={data.queries.map((q) => ({ ...q, key: q.query, label: q.query }))}
+            emptyText="No queries recorded for this period."
+            onViewAll={onViewQueries}
+            onOpenRow={(row) => onOpenQuery(row.key)}
+          />
+        )}
         <SearchTopTable
           title="Top pages"
           description="Your pages that appeared in Google results."
