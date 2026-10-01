@@ -1,26 +1,10 @@
-import {
-  Box, Card, Group, Progress, Stack, Text, Tooltip, UnstyledButton,
-} from "@mantine/core";
-import { ChevronRight, Info, Trophy } from "lucide-react";
+import type { CSSProperties } from "react";
+import { Tooltip, UnstyledButton } from "@mantine/core";
+import { ChevronRight, Info } from "lucide-react";
 import type { SeoCompetitivePosition } from "@/shared/types";
+import classes from "./Compare.module.css";
 
-/**
- * Where you stand across the whole tracked field.
- *
- * The rest of the page answers "how do I compare to this one rival", which
- * stops being the question the moment someone tracks a second. A page made
- * entirely of pairwise deltas can tell you that three competitors each lead by
- * a few points without ever saying the thing that follows from it — that you
- * are last.
- *
- * Leads with the rank rather than the score because the score alone is not
- * self-evaluating: 72 is good or bad depending entirely on who else is in the
- * field, and the field is right here.
- */
-
-/** Ordinal suffix, so the rank reads as a placing rather than a quantity. */
 function ordinal(n: number): string {
-  // 11th/12th/13th break the last-digit rule and have to be special-cased.
   const tens = n % 100;
   if (tens >= 11 && tens <= 13) return `${n}th`;
   switch (n % 10) {
@@ -42,123 +26,66 @@ export function StandingsCard({
 }: {
   position: SeoCompetitivePosition;
   myScore: number;
-  /** Jumps the detail pane to a rival named here, so the line is actionable. */
   onSelectCompetitor: (competitorId: string) => void;
 }) {
   const { rank, fieldSize, percentile, leader, gapToLeader, nextUp, closestBehind } = position;
   const leading = rank === 1;
-
-  // Three bands rather than a continuous scale: the colour is answering "is
-  // this fine", which has no meaningful gradient between "you lead" and "you
-  // are mid-table".
-  const tone = leading ? "teal" : percentile >= 50 ? "yellow" : "red";
+  const tone = leading ? undefined : percentile >= 50 ? "mid" : "low";
 
   return (
-    <Card withBorder radius="md" padding="lg">
-      <Group justify="space-between" align="flex-start" wrap="nowrap" mb="md">
-        <Group gap="sm" wrap="nowrap">
-          <Box
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 9,
-              display: "grid",
-              placeItems: "center",
-              flexShrink: 0,
-              background: `var(--mantine-color-${tone}-light)`,
-            }}
-          >
-            <Trophy size={17} color={`var(--mantine-color-${tone}-filled)`} />
-          </Box>
-          <Box>
-            <Group gap={8} align="baseline">
-              <Text fz={24} fw={700} lh={1.1} c={tone}>
-                {ordinal(rank)}
-              </Text>
-              <Text size="sm" c="dimmed">
-                of {fieldSize}
-              </Text>
-            </Group>
-            <Text size="xs" c="dimmed">
-              {leading
-                ? "You lead the field you are tracking"
-                : `Behind ${leader}, who leads by ${gapToLeader}`}
-            </Text>
-          </Box>
-        </Group>
+    <section className={classes.banner} data-tone={tone}>
+      <div>
+        <div className={classes.rank}>
+          <span className={classes.rankValue}>{ordinal(rank)}</span>
+          <span className={classes.rankOf}>of {fieldSize}</span>
+        </div>
+        <p className={classes.rankText}>
+          {leading ? "You lead the field you are tracking" : `Behind ${leader}, who leads by ${gapToLeader}`}
+        </p>
+      </div>
 
-        <Box style={{ textAlign: "right" }}>
-          <Text size="xs" c="dimmed" mb={2}>
-            Your score
-          </Text>
-          <Text fz={24} fw={700} lh={1.1} style={{ fontVariantNumeric: "tabular-nums" }}>
-            {myScore}
-          </Text>
-        </Box>
-      </Group>
+      <div className={classes.stat}>
+        <span className={classes.eyebrow}>Your score</span>
+        <div className={classes.statValue}>{myScore}</div>
+      </div>
 
-      {/* Labelled inline, not by tooltip alone. An unlabelled progress bar under
-          a rank reads as a completion meter — "66% done" — and a tooltip is not
-          an answer for touch, where it never opens. */}
-      <Group justify="space-between" gap="sm" mb={6}>
-        <Text size="xs" c="dimmed">
-          You beat{" "}
-          <Text span fw={650} c={tone}>
-            {percentile}%
-          </Text>{" "}
-          of the competitors you track
-        </Text>
-        <Tooltip
-          label="The set you track here, not the whole search results page."
-          withArrow
-          multiline
-          w={240}
-        >
-          <Info size={13} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
-        </Tooltip>
-      </Group>
-      <Progress value={percentile} color={tone} size="sm" radius="xl" mb="md" />
+      <div className={classes.stat}>
+        <span className={classes.eyebrow}>
+          You beat
+          <Tooltip label="The set you track here, not the whole search results page." withArrow multiline w={240}>
+            <Info size={11} className={classes.infoIcon} />
+          </Tooltip>
+        </span>
+        <div className={classes.statValue}>{percentile}%</div>
+        <div className={classes.statBar}>
+          <span className={classes.statFill} style={{ "--share": `${percentile}%` } as CSSProperties} />
+        </div>
+      </div>
 
-      <Stack gap={4}>
-        {/* The winnable fight, stated as one specific move. "You rank 3rd" is a
-            fact; "you are 4 points from passing Acme" is a thing to go and do.
-
-            Real buttons, not text with a pointer cursor: these open the rival in
-            the detail pane, which makes them the most useful controls on the
-            card — and as bare `<Text onClick>` they were unreachable by keyboard
-            and gave no hover or focus feedback at all. */}
+      <div className={classes.moves}>
         {nextUp && (
-          <UnstyledButton
-            className="standings-line"
-            onClick={() => onSelectCompetitor(nextUp.competitorId)}
-          >
-            <Text size="sm">
-              <Text span fw={700} c="orange">
+          <UnstyledButton className={classes.move} onClick={() => onSelectCompetitor(nextUp.competitorId)}>
+            <span>
+              <span className={classes.moveGap}>
                 {nextUp.gap} {nextUp.gap === 1 ? "point" : "points"}
-              </Text>{" "}
-              from passing <Text span fw={600}>{nextUp.label}</Text>
-            </Text>
-            <ChevronRight size={14} className="standings-line__go" />
+              </span>{" "}
+              from passing <b>{nextUp.label}</b>
+            </span>
+            <ChevronRight size={14} className={classes.moveIcon} />
           </UnstyledButton>
         )}
         {closestBehind && (
-          <UnstyledButton
-            className="standings-line"
-            onClick={() => onSelectCompetitor(closestBehind.competitorId)}
-          >
-            <Text size="sm" c="dimmed">
-              <Text span fw={600}>{closestBehind.label}</Text> is{" "}
-              {closestBehind.gap} behind you
-            </Text>
-            <ChevronRight size={14} className="standings-line__go" />
+          <UnstyledButton className={classes.move} onClick={() => onSelectCompetitor(closestBehind.competitorId)}>
+            <span>
+              <b>{closestBehind.label}</b> is {closestBehind.gap} behind you
+            </span>
+            <ChevronRight size={14} className={classes.moveIcon} />
           </UnstyledButton>
         )}
         {!nextUp && !closestBehind && (
-          <Text size="sm" c="dimmed">
-            Every competitor you track scores level with you.
-          </Text>
+          <span className={classes.move}>Every competitor you track scores level with you.</span>
         )}
-      </Stack>
-    </Card>
+      </div>
+    </section>
   );
 }

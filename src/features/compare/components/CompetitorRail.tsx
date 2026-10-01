@@ -1,18 +1,15 @@
-import { Box, Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import type { ReactNode } from "react";
+import { UnstyledButton } from "@mantine/core";
 import type { SeoCompetitorComparison } from "@/shared/types";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
+import classes from "./Compare.module.css";
 
-/**
- * The list of tracked competitors, and the selector for the detail beside it.
- *
- * Your own site sits at the top as a fixed reference row rather than a
- * selectable one: it is the baseline every competitor is measured against, and
- * making it selectable would imply there is a "your page vs your page" view.
- *
- * Each row carries the standing rather than only the score, because "95" alone
- * does not say whether that is ahead or behind — which is the only thing the
- * rail is being scanned for.
- */
+function standing(scoreGap: number): { tone: string; text: string } {
+  if (scoreGap > 0) return { tone: "ahead", text: `${scoreGap} ahead of you` };
+  if (scoreGap < 0) return { tone: "behind", text: `${Math.abs(scoreGap)} behind you` };
+  return { tone: "level", text: "Level" };
+}
+
 export function CompetitorRail({
   competitors,
   selectedId,
@@ -21,127 +18,75 @@ export function CompetitorRail({
   myDomain,
   myFramework,
   toughestId,
+  count,
+  max,
+  addForm,
 }: {
   competitors: SeoCompetitorComparison[];
   selectedId: string | null;
   onSelect: (competitorId: string) => void;
   myScore: number;
   myDomain: string;
-  /**
-   * The site's framework, for the fallback mark.
-   *
-   * Plenty of sites — this one included — declare their icon with
-   * `<link rel="icon">` and serve nothing at /favicon.ico, so the fetch misses
-   * and the fallback is what actually renders. A framework logo says more than
-   * a generic globe.
-   */
   myFramework?: string;
-  /** Whoever leads by the most, marked so the rail has an obvious entry point. */
   toughestId: string | null;
+  count: number;
+  max: number;
+  addForm?: ReactNode;
 }) {
-  // Worst standing first: the competitor beating you by the most is the one
-  // worth opening, so it should not be buried under the ones you already beat.
   const ordered = [...competitors].sort((a, b) => b.gap.scoreGap - a.gap.scoreGap);
 
   return (
-    <Stack gap={2}>
-      {/* Deliberately not a button, and deliberately not shaped like the rows
-          below: this is the baseline every competitor is measured against, not
-          the first entry in a selectable list. A dashed edge and the "Baseline"
-          label mark it as a reference, so a click that does nothing reads as
-          "not a control" rather than "broken". */}
-      <Box
-        px="sm"
-        py={10}
-        style={{
-          borderRadius: 8,
-          border: "1px dashed var(--mantine-color-emerald-filled)",
-          background: "color-mix(in srgb, var(--mantine-color-emerald-filled) 7%, transparent)",
-        }}
-      >
-        <Group gap="sm" wrap="nowrap">
-          <SiteFavicon domain={myDomain} framework={myFramework} size={18} />
-          <Box style={{ minWidth: 0, flex: 1 }}>
-            <Text size="sm" fw={600} truncate>
-              {myDomain}
-            </Text>
-            <Text size="xs" c="emerald">
-              Your page · baseline
-            </Text>
-          </Box>
-          <Text size="sm" fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
-            {myScore}
-          </Text>
-        </Group>
-      </Box>
+    <div className={classes.panel}>
+      <div className={classes.railHead}>
+        <h3 className={classes.railTitle}>Competitors</h3>
+        <span className={classes.railCount}>
+          {count} / {max}
+        </span>
+      </div>
 
-      {/* The order is deliberate and not obvious — without saying so, a list
-          that reorders itself after every refresh looks unstable rather than
-          ranked. */}
-      <Group justify="space-between" align="baseline" mt="md" mb={4} px="sm" wrap="nowrap">
-        <Text size="xs" c="dimmed" fw={650}>
-          Competitors
-        </Text>
-        <Text size="xs" c="dimmed">
-          Toughest first
-        </Text>
-      </Group>
+      {addForm && <div className={classes.addForm}>{addForm}</div>}
 
-      {ordered.map((c) => {
-        const selected = c.competitorId === selectedId;
-        const theyLead = c.gap.scoreGap > 0;
-        return (
-          <UnstyledButton
-            key={c.competitorId}
-            onClick={() => onSelect(c.competitorId)}
-            px="sm"
-            py={10}
-            style={{
-              borderRadius: 8,
-              border: "1px solid transparent",
-              background: selected ? "var(--mantine-color-default-hover)" : undefined,
-              borderColor: selected ? "var(--mantine-color-default-border)" : "transparent",
-            }}
-          >
-            <Group gap="sm" wrap="nowrap">
+      <div className={classes.baseline}>
+        <SiteFavicon domain={myDomain} framework={myFramework} size={18} />
+        <div className={classes.itemText}>
+          <div className={classes.itemLabel}>{myDomain}</div>
+          <div className={classes.itemStatus} data-tone="you">
+            Your page · baseline
+          </div>
+        </div>
+        <span className={classes.itemScore}>{myScore}</span>
+      </div>
+
+      <div className={classes.listLabel}>
+        <span>Tracked</span>
+        <span>Toughest first</span>
+      </div>
+
+      <div className={classes.list}>
+        {ordered.map((c) => {
+          const { tone, text } = standing(c.gap.scoreGap);
+          return (
+            <UnstyledButton
+              key={c.competitorId}
+              className={classes.item}
+              data-active={c.competitorId === selectedId || undefined}
+              onClick={() => onSelect(c.competitorId)}
+            >
               <SiteFavicon domain={c.url} size={18} />
-              <Box style={{ minWidth: 0, flex: 1 }}>
-                <Group gap={5} wrap="nowrap">
-                  <Text size="sm" fw={selected ? 600 : 500} truncate>
-                    {c.label}
-                  </Text>
-                  {c.competitorId === toughestId && (
-                    <Box
-                      w={5}
-                      h={5}
-                      style={{
-                        borderRadius: "50%",
-                        background: "var(--mantine-color-orange-5)",
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
-                </Group>
-                <Text size="xs" c={theyLead ? "red" : c.gap.scoreGap === 0 ? "dimmed" : "teal"}>
-                  {theyLead
-                    ? `${c.gap.scoreGap} ahead`
-                    : c.gap.scoreGap === 0
-                    ? "Level"
-                    : `${Math.abs(c.gap.scoreGap)} behind`}
-                </Text>
-              </Box>
-              <Text
-                size="sm"
-                fw={700}
-                c={selected ? undefined : "dimmed"}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {c.snapshot.score}
-              </Text>
-            </Group>
-          </UnstyledButton>
-        );
-      })}
-    </Stack>
+              <div className={classes.itemText}>
+                <div className={classes.itemLabel}>
+                  {c.label}
+                  {c.competitorId === toughestId && <span className={classes.toughDot} aria-label="Furthest ahead" />}
+                </div>
+                <div className={classes.itemStatus} data-tone={tone}>
+                  {text}
+                </div>
+              </div>
+              <span className={classes.itemScore}>{c.snapshot.score}</span>
+            </UnstyledButton>
+          );
+        })}
+      </div>
+    </div>
   );
 }

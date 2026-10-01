@@ -63,7 +63,7 @@ function TodayStanding({
   const axis = dark ? "#8b929e" : "#5f6673";
 
   return (
-    <Card withBorder radius="md" padding="lg">
+    <Card withBorder radius="lg" padding="lg" className="static-card">
       <Text fw={650} size="sm" mb={4}>
         Where everyone stands today
       </Text>
@@ -191,7 +191,7 @@ export function ScoreTrendChart({
   const grid = dark ? "#2b2f38" : "#e9ecef";
 
   return (
-    <Card withBorder radius="md" padding="lg">
+    <Card withBorder radius="lg" padding="lg" className="static-card">
       <Text fw={650} size="sm" mb={4}>
         Score over time
       </Text>

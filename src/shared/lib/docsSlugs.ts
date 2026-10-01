@@ -1,5 +1,7 @@
 export const DOCS_BASE_URL = "https://quantalog.daorbit.in/docs";
 
+export const CONTACT_URL = "https://quantalog.daorbit.in/contact";
+
 export const DOCS_SLUGS = {
   overview: "/overview",
   demo: "/demo",

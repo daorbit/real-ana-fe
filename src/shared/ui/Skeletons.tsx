@@ -215,53 +215,6 @@ export function WorkspacesSkeleton() {
 }
 
 /**
- * The Members page while its list loads.
- *
- * Mirrors the real layout — two summary cards, then a row per person — so the
- * page doesn't reflow when the data lands. Three rows because that is a
- * plausible team; more would promise a crowd that usually isn't there.
- */
-export function MembersSkeleton() {
-  return (
-    <Stack gap="xl">
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <Card key={i} withBorder radius="md" padding="md">
-            <Group gap="sm" wrap="nowrap">
-              <Skeleton height={38} width={38} radius="md" />
-              <div style={{ flex: 1 }}>
-                <Skeleton height={18} width="35%" radius="sm" />
-                <Skeleton height={10} width="70%" mt={8} radius="sm" />
-              </div>
-            </Group>
-          </Card>
-        ))}
-      </SimpleGrid>
-
-      <div>
-        <Skeleton height={12} width={60} mb="sm" radius="sm" />
-        <Stack gap="xs">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} withBorder radius="md" padding="sm">
-              <Group justify="space-between" wrap="nowrap" gap="sm">
-                <Group gap="sm" wrap="nowrap" style={{ flex: 1 }}>
-                  <Skeleton height={40} width={40} radius="xl" />
-                  <div style={{ flex: 1 }}>
-                    <Skeleton height={12} width={`${45 - i * 6}%`} radius="sm" />
-                    <Skeleton height={10} width={`${65 - i * 6}%`} mt={8} radius="sm" />
-                  </div>
-                </Group>
-                <Skeleton height={22} width={74} radius="xl" />
-              </Group>
-            </Card>
-          ))}
-        </Stack>
-      </div>
-    </Stack>
-  );
-}
-
-/**
  * The Scheduled posts page while its list loads.
  *
  * Built from the timeline's own classes rather than from plain stacked cards,
@@ -469,61 +422,6 @@ export function BillingSkeleton() {
 
       <PlansGridSkeleton />
     </Stack>
-  );
-}
-
-/**
- * The Compare page while its competitor set loads.
- *
- * Mirrors the master-detail the page settles into — a narrow rail of tracked
- * competitors beside the detail panel — rather than a centred block that the
- * real layout immediately replaces with two columns.
- */
-export function CompareSkeleton() {
-  return (
-    <Grid gap="lg">
-      <Grid.Col span={{ base: 12, md: 4, lg: 3 }}>
-        <Stack gap="xs">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} withBorder radius="md" padding="sm">
-              <Group gap="sm" wrap="nowrap">
-                <Skeleton height={32} width={32} radius="md" />
-                <div style={{ flex: 1 }}>
-                  <Skeleton height={11} width={`${70 - i * 8}%`} radius="sm" />
-                  <Skeleton height={9} width="50%" mt={7} radius="sm" />
-                </div>
-                <Skeleton height={26} width={34} radius="sm" />
-              </Group>
-            </Card>
-          ))}
-        </Stack>
-      </Grid.Col>
-
-      <Grid.Col span={{ base: 12, md: 8, lg: 9 }}>
-        <Stack gap="lg">
-          <Card withBorder radius="lg" padding="lg">
-            <Group justify="space-between" wrap="nowrap" mb="lg">
-              <div style={{ flex: 1 }}>
-                <Skeleton height={14} width="35%" radius="sm" />
-                <Skeleton height={10} width="55%" mt={8} radius="sm" />
-              </div>
-              <Skeleton height={54} width={54} radius="xl" />
-            </Group>
-            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i}>
-                  <Skeleton height={10} width="55%" radius="sm" />
-                  <Skeleton height={20} width="40%" mt={8} radius="sm" />
-                </div>
-              ))}
-            </SimpleGrid>
-          </Card>
-
-          <ChartSkeleton height={200} />
-          <ListSkeleton rows={4} />
-        </Stack>
-      </Grid.Col>
-    </Grid>
   );
 }
 

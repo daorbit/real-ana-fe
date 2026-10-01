@@ -1,183 +1,85 @@
 import { useEffect, useState } from "react";
-import {
-  Box, Button, Card, Grid, Group, Select, Stack,
-  Text, TextInput, Tooltip, ActionIcon,
-} from "@mantine/core";
-import { HelpCircle, Plus, Swords, Target } from "lucide-react";
+import { ActionIcon, Box, Button, Group, Select, Tooltip } from "@mantine/core";
+import { HelpCircle, Swords, Target } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
-import { COMPARE_HELP } from "@/features/compare/components/help";
+import { EmptyState } from "@/shared/ui/EmptyState";
+import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import {
   useGetSitesQuery, useGetCompetitorsQuery, useGetCompetitorAnalysisQuery,
   useGetCompetitorHistoryQuery, useGetCompetitorBriefAvailabilityQuery,
-  useAddCompetitorMutation,
-  useRefreshCompetitorMutation, useRefreshAllCompetitorsMutation,
-  useDeleteCompetitorMutation,
 } from "@/app/store";
-import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
-import { CompetitorRail } from "@/features/compare/components/CompetitorRail";
-import { CompetitorDetail } from "@/features/compare/components/CompetitorDetail";
-import { StandingsCard } from "@/features/compare/components/StandingsCard";
-import { ScoreTrendChart } from "@/features/compare/components/ScoreTrendChart";
-import { EmptyState } from "@/shared/ui/EmptyState";
-import { CompareSkeleton } from "@/shared/ui/Skeletons";
-import { useTitle } from "@/shared/lib/useTitle";
+import { COMPARE_HELP } from "../components/help";
+import { useCompetitorActions } from "../hooks/useCompetitorActions";
+import { CompetitorRail } from "../components/CompetitorRail";
+import { CompetitorDetail } from "../components/CompetitorDetail";
+import { StandingsCard } from "../components/StandingsCard";
+import { ScoreTrendChart } from "../components/ScoreTrendChart";
+import { AddCompetitorForm } from "../components/AddCompetitorForm";
+import { CompareSkeleton } from "../components/CompareSkeleton";
+import classes from "../components/Compare.module.css";
 
-/**
- * How your pages compare to your competitors'.
- *
- * Its own page rather than a tab inside the SEO report, because the question is
- * ongoing rather than per-audit: a report is a snapshot of one URL, while this
- * is a set of rivals watched over time.
- *
- * Everything shown is derived from one fetch of a publicly reachable page.
- * Lighthouse is never run against a competitor — it costs quota that belongs to
- * the customer's own sites — so both sides are scored on on-page signals alone
- * and the page says so rather than leaving the reader to assume otherwise.
- */
-
-/** Matches the server's ceiling; the input disables itself here rather than 400ing. */
 const MAX_COMPETITORS = 10;
 
 export default function Compare() {
   useTitle("Compare");
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
-  const { user } = useAuth();
   const workspaceId = active?._id ?? "";
 
-  // `currentData` rather than `data`: the latter holds the previous
-  // workspace's sites across a switch, offering a picker full of properties
-  // this workspace does not own.
   const { currentData: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
 
   const [picked, setPicked] = useState("");
-  const [url, setUrl] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
   const [pickedCompetitor, setPickedCompetitor] = useState<string | null>(null);
-  /** Which competitor's re-fetch is in flight, so only its button spins. */
-  const [refreshingId, setRefreshingId] = useState<string | null>(null);
 
-  // Derived during render rather than stored, so the first render after a
-  // workspace switch already targets a real site instead of firing a request
-  // at the previous workspace's.
   const site = sites.find((s) => s.siteId === picked) ?? sites[0] ?? null;
   const siteId = site?.siteId ?? "";
 
-  // A different site means a different competitive set; nothing from the last
-  // one applies.
   useEffect(() => {
-    setUrl("");
     setPickedCompetitor(null);
   }, [siteId]);
 
   const skip = !workspaceId || !siteId;
 
-  const { data: competitors = [], isLoading: listLoading } = useGetCompetitorsQuery(
-    { workspaceId, siteId },
-    { skip }
-  );
+  const { data: competitors = [], isLoading: listLoading } = useGetCompetitorsQuery({ workspaceId, siteId }, { skip });
   const {
     data: analysis,
     isLoading: analysisLoading,
     error: analysisError,
   } = useGetCompetitorAnalysisQuery({ workspaceId, siteId }, { skip });
   const { data: history = [] } = useGetCompetitorHistoryQuery({ workspaceId, siteId }, { skip });
-  // Asked once per site rather than per competitor: whether the deployment has
-  // model credentials is a property of the server, not of who is being compared.
-  const { data: briefAvailable } = useGetCompetitorBriefAvailabilityQuery(
-    { workspaceId, siteId },
-    { skip }
-  );
+  const { data: briefAvailable } = useGetCompetitorBriefAvailabilityQuery({ workspaceId, siteId }, { skip });
 
-  const [addCompetitor, { isLoading: adding }] = useAddCompetitorMutation();
-  const [refreshCompetitor] = useRefreshCompetitorMutation();
-  const [refreshAll, { isLoading: refreshingAll }] = useRefreshAllCompetitorsMutation();
-  const [deleteCompetitor] = useDeleteCompetitorMutation();
+  const { add, adding, refreshOne, refreshingId, refreshEveryone, refreshingAll, remove } =
+    useCompetitorActions(workspaceId, siteId, site?.domain);
 
-  const atLimit = competitors.length >= MAX_COMPETITORS;
-
-  /**
-   * The competitor on screen, derived rather than stored.
-   *
-   * A pick only counts while it names a competitor still in the list; removing
-   * the selected one, or switching site, falls back to whoever leads by the
-   * most. Storing the resolved id in state instead would render one frame with
-   * a competitor that no longer exists.
-   */
   const selected =
     analysis?.competitors.find((c) => c.competitorId === pickedCompetitor) ??
     analysis?.competitors.find((c) => c.competitorId === analysis.toughest) ??
     analysis?.competitors[0] ??
     null;
 
-  const add = async () => {
-    const trimmed = url.trim();
-    if (!trimmed) return;
-    trace(user?.id, "add_competitor", "compare", "competitor_added");
-    try {
-      await addCompetitor({ workspaceId, siteId, url: trimmed }).unwrap();
-      setUrl("");
-      notify.success(`Fetched and compared against ${site?.domain ?? "your site"}.`, "Competitor added");
-    } catch (e) {
-      notifyError(e, "Could not add competitor");
-    }
-  };
+  const needsOwnAudit = analysisError && "status" in analysisError && analysisError.status === 404;
+  const hasComparison = Boolean(analysis && analysis.competitors.length > 0);
 
-  const refreshOne = async (competitorId: string) => {
-    trace(user?.id, "refresh_competitor", "compare", "competitor_analysis");
-    setRefreshingId(competitorId);
-    try {
-      await refreshCompetitor({ workspaceId, siteId, competitorId }).unwrap();
-    } catch (e) {
-      notifyError(e, "Refresh failed");
-    } finally {
-      setRefreshingId(null);
-    }
-  };
-
-  const refreshEveryone = async () => {
-    trace(user?.id, "refresh_all_competitors", "compare", "competitor_analysis");
-    try {
-      const result = await refreshAll({ workspaceId, siteId }).unwrap();
-      notify.success(
-        result.failed > 0
-          ? `${result.refreshed} re-fetched, ${result.failed} could not be reached.`
-          : `${result.refreshed} re-fetched against ${site?.domain ?? "your site"}.`,
-        "Comparison updated"
-      );
-    } catch (e) {
-      notifyError(e, "Refresh failed");
-    }
-  };
-
-  const remove = (competitorId: string, label: string) => {
-    confirmDelete({
-      title: "Remove competitor",
-      body: `Stop tracking ${label}? Their recorded score history goes too.`,
-      onConfirm: async () => {
-        trace(user?.id, "remove_competitor", "compare", "competitor_removed");
-        try {
-          await deleteCompetitor({ workspaceId, siteId, competitorId }).unwrap();
-        } catch (e) {
-          notifyError(e, "Could not remove competitor");
-        }
-      },
-    });
-  };
-
-  // A 404 here means the site has no audit of its own, which is a different
-  // problem from a broken request and needs a different answer.
-  const needsOwnAudit =
-    analysisError && "status" in analysisError && analysisError.status === 404;
+  const addForm = (size: "sm" | "md" = "sm") =>
+    canEdit ? (
+      <AddCompetitorForm
+        key={siteId}
+        size={size}
+        count={competitors.length}
+        max={MAX_COMPETITORS}
+        adding={adding}
+        onAdd={add}
+      />
+    ) : null;
 
   return (
     <AppShell>
@@ -209,7 +111,7 @@ export default function Compare() {
                 allowDeselect={false}
               />
             )}
-            {analysis && analysis.competitors.length > 0 && (
+            {hasComparison && (
               <AskOrbitButton
                 size="sm"
                 label="Ask Orbit"
@@ -217,11 +119,6 @@ export default function Compare() {
               />
             )}
             {canEdit && competitors.length > 0 && (
-              /* Labelled for the job, not the mechanism: this re-fetches every
-                 tracked page and rebuilds the comparison from it, and "compare
-                 again" is what someone is actually asking for. The tooltip
-                 carries the mechanism, since the detail pane has an identical
-                 icon scoped to one competitor. */
               <Tooltip label="Re-fetch every tracked competitor and rebuild the comparison" withArrow>
                 <Button
                   variant="default"
@@ -238,14 +135,9 @@ export default function Compare() {
         }
       />
 
-      <HelpDrawer
-        opened={helpOpen}
-        onClose={() => setHelpOpen(false)}
-        title="Compare"
-        sections={COMPARE_HELP}
-      />
+      <HelpDrawer opened={helpOpen} onClose={() => setHelpOpen(false)} title="Compare" sections={COMPARE_HELP} />
 
-      {sitesLoading ? (
+      {sitesLoading || (site && (listLoading || analysisLoading)) ? (
         <CompareSkeleton />
       ) : !site ? (
         <EmptyState
@@ -253,72 +145,29 @@ export default function Compare() {
           title="No sites yet"
           description="Add a site and run an audit on it first — a comparison needs a baseline of your own to measure against."
         />
+      ) : needsOwnAudit ? (
+        <EmptyState
+          icon={Target}
+          title="Run an audit on your own site first"
+          description={`A comparison measures competitors against your page. Until ${site.domain} has been audited there is no baseline to compare them to — open the SEO page and run one.`}
+        />
+      ) : !hasComparison || !analysis || !selected ? (
+        <div className={classes.emptyAdd}>
+          <EmptyState
+            icon={Swords}
+            title="Nothing to compare yet"
+            minHeight="auto"
+            description={
+              canEdit
+                ? "Track a competitor's page to see where they beat you — the sections they cover, the schema they mark up, and the terms your page never mentions."
+                : "Nobody has tracked a competitor for this site yet. An editor can add one."
+            }
+          />
+          {canEdit && <div className={classes.emptyForm}>{addForm("md")}</div>}
+        </div>
       ) : (
-        <Stack gap="lg">
-          {canEdit && (
-            <Card withBorder radius="md" padding="lg">
-              <Group gap="sm" align="flex-end" wrap="wrap">
-                <Box style={{ flex: "1 1 320px", minWidth: 240 }}>
-                  <Text component="label" htmlFor="competitor-url" size="sm" fw={500} display="block" mb={4}>
-                    Competitor URL
-                  </Text>
-                  <TextInput
-                    id="competitor-url"
-                    placeholder="https://competitor.com/page"
-                    value={url}
-                    onChange={(e) => setUrl(e.currentTarget.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !adding && add()}
-                    radius="md"
-                    disabled={atLimit}
-                  />
-                </Box>
-                <Button
-                  color="emerald"
-                  radius="md"
-                  leftSection={<Plus size={15} />}
-                  loading={adding}
-                  onClick={add}
-                  disabled={atLimit}
-                >
-                  Track
-                </Button>
-              </Group>
-              <Text size="xs" c="dimmed" mt="sm">
-                {atLimit
-                  ? `You are tracking the maximum of ${MAX_COMPETITORS}. Remove one to add another.`
-                  : `${competitors.length} of ${MAX_COMPETITORS} tracked. Only publicly reachable pages can be fetched — a page behind a login or a firewall cannot be compared.`}
-              </Text>
-            </Card>
-          )}
-
-          {(listLoading || analysisLoading) && <CompareSkeleton />}
-
-          {needsOwnAudit && (
-            <EmptyState
-              icon={Target}
-              title="Run an audit on your own site first"
-              description={`A comparison measures competitors against your page. Until ${site.domain} has been audited there is no baseline to compare them to — open the SEO page and run one.`}
-            />
-          )}
-
-          {!listLoading && !needsOwnAudit && competitors.length === 0 && (
-            <EmptyState
-              icon={Swords}
-              title="Nothing to compare yet"
-              description={
-                canEdit
-                  ? "Track a competitor's page to see where they beat you — the sections they cover, the schema they mark up, and the terms they rank for that your page never mentions."
-                  : "Nobody has tracked a competitor for this site yet. An editor can add one."
-              }
-            />
-          )}
-
-          {/* Above the master-detail because it is the only part of the page
-              about the field as a whole: everything below answers "versus this
-              one rival", which is the second question, not the first.
-              Guarded on `position` so a client running against a server that
-              predates it renders the rest of the page rather than crashing. */}
-          {analysis && analysis.competitors.length > 0 && analysis.position && (
+        <>
+          {analysis.position && (
             <StandingsCard
               position={analysis.position}
               myScore={analysis.mine.score}
@@ -326,71 +175,36 @@ export default function Compare() {
             />
           )}
 
-          {analysis && analysis.competitors.length > 0 && selected && (
-            // Master-detail rather than four stacked blocks: showing every
-            // competitor's full comparison at once restated the same data four
-            // times over and left nothing leading the page.
-            <Grid gap="lg">
-              <Grid.Col span={{ base: 12, md: 4, lg: 3 }}>
-                {/* Sticky from the medium breakpoint up, where the two columns
-                    sit side by side: the detail pane is much taller than the
-                    rail, so scrolling it otherwise leaves the selector behind.
-                    Stacked on narrow screens the rail is above the detail, and
-                    pinning it there would eat the viewport. */}
-                <Box
-                  style={{
-                    position: "sticky",
-                    top: 0,
-                    // Its own scrollbar rather than the page's, so ten
-                    // competitors plus the trend cannot exceed the container and
-                    // strand the last row out of reach. `dvh` rather than `vh`
-                    // so a mobile browser's collapsing toolbar does not leave
-                    // the rail taller than the space it actually has, and the
-                    // subtraction covers the shell's own padding around the
-                    // scroll container.
-                    maxHeight: "calc(100dvh - var(--mantine-spacing-md) * 2)",
-                    overflowY: "auto",
-                  }}
-                  className="compare-rail"
-                >
-                <Stack gap="lg">
-                  <CompetitorRail
-                    competitors={analysis.competitors}
-                    selectedId={selected.competitorId}
-                    onSelect={setPickedCompetitor}
-                    myScore={analysis.mine.score}
-                    myDomain={site.domain}
-                    myFramework={site.framework}
-                    toughestId={analysis.toughest}
-                  />
-                  {/* Under the rail rather than across the page: the trend is
-                      context for the set, and it reads fine narrow. */}
-                  <ScoreTrendChart
-                    history={history}
-                    competitors={analysis.competitors}
-                    myScore={analysis.mine.score}
-                  />
-                </Stack>
-                </Box>
-              </Grid.Col>
+          <div className={classes.workspace}>
+            <aside className={classes.rail}>
+              <CompetitorRail
+                competitors={analysis.competitors}
+                selectedId={selected.competitorId}
+                onSelect={setPickedCompetitor}
+                myScore={analysis.mine.score}
+                myDomain={site.domain}
+                myFramework={site.framework}
+                toughestId={analysis.toughest}
+                count={competitors.length}
+                max={MAX_COMPETITORS}
+                addForm={addForm()}
+              />
+              <ScoreTrendChart history={history} competitors={analysis.competitors} myScore={analysis.mine.score} />
+            </aside>
 
-              <Grid.Col span={{ base: 12, md: 8, lg: 9 }}>
-                <CompetitorDetail
-                  comparison={selected}
-                  myDomain={site.domain}
-                  myAuditedAt={analysis.auditedAt ?? null}
-                  workspaceId={workspaceId}
-                  siteId={siteId}
-                  briefAvailable={briefAvailable?.available ?? false}
-                  canEdit={canEdit}
-                  refreshing={refreshingId === selected.competitorId}
-                  onRefresh={() => refreshOne(selected.competitorId)}
-                  onDelete={() => remove(selected.competitorId, selected.label)}
-                />
-              </Grid.Col>
-            </Grid>
-          )}
-        </Stack>
+            <CompetitorDetail
+              comparison={selected}
+              myAuditedAt={analysis.auditedAt ?? null}
+              workspaceId={workspaceId}
+              siteId={siteId}
+              briefAvailable={briefAvailable?.available ?? false}
+              canEdit={canEdit}
+              refreshing={refreshingId === selected.competitorId}
+              onRefresh={() => refreshOne(selected.competitorId)}
+              onDelete={() => remove(selected.competitorId, selected.label)}
+            />
+          </div>
+        </>
       )}
       <Box h="xl" />
     </AppShell>

@@ -7,13 +7,12 @@ import {
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
-import { DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
+import { CONTACT_URL, DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
 import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import type { ThemeMode } from "@/shared/lib/theme";
 import { ADMIN_ITEMS } from "./navItems";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { RequestFeatureModal } from "./RequestFeatureModal";
-import { SupportRequestModal } from "./SupportRequestModal";
 import classes from "./Rail.module.css";
 
 export function AccountMenu({
@@ -47,7 +46,6 @@ export function AccountMenu({
 }) {
   const { t } = useTranslation();
   const [featureOpen, setFeatureOpen] = useState(false);
-  const [supportOpen, setSupportOpen] = useState(false);
   const [opened, setOpened] = useState(false);
 
   const trigger = (
@@ -75,7 +73,6 @@ export function AccountMenu({
   return (
     <>
       <RequestFeatureModal opened={featureOpen} onClose={() => setFeatureOpen(false)} />
-      <SupportRequestModal opened={supportOpen} onClose={() => setSupportOpen(false)} />
       <Menu
         opened={opened}
         onChange={setOpened}
@@ -152,7 +149,7 @@ export function AccountMenu({
           <Menu.Item leftSection={<Lightbulb size={15} />} onClick={() => setFeatureOpen(true)}>
             {t("nav.requestFeature", "Request a feature")}
           </Menu.Item>
-          <Menu.Item leftSection={<LifeBuoy size={15} />} onClick={() => setSupportOpen(true)}>
+          <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<LifeBuoy size={15} />}>
             {t("nav.contactSupport", "Contact support")}
           </Menu.Item>
 

@@ -102,9 +102,9 @@ export function CompetitorBriefCard({
   return (
     <Card
       withBorder
-      radius="md"
+      radius="lg"
       padding="lg"
-      className="orbit-brief"
+      className="orbit-brief static-card"
       // The wash is inset well past the card's edges and has to be clipped by
       // it; `position: relative` is what the absolutely-positioned wash layer
       // resolves against.
