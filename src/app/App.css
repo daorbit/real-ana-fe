@@ -497,6 +497,31 @@ body { overflow-wrap: break-word; }
   background: var(--surface);
 }
 
+[data-mantine-color-scheme="light"] .mantine-Input-input {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: #1d1d1f;
+}
+
+[data-mantine-color-scheme="light"] .mantine-Input-input::placeholder {
+  color: #86868b;
+}
+
+[data-mantine-color-scheme="light"] .auth-form .mantine-InputWrapper-root .mantine-Input-input,
+[data-mantine-color-scheme="light"] .onb-form .mantine-InputWrapper-root .mantine-Input-input {
+  border-color: #d2d2d7;
+  background: #ffffff;
+  color: #1d1d1f;
+}
+
+[data-mantine-color-scheme="light"] .auth-form .mantine-Input-input:focus,
+[data-mantine-color-scheme="light"] .auth-form .mantine-Input-input:focus-within,
+[data-mantine-color-scheme="light"] .onb-form .mantine-Input-input:focus,
+[data-mantine-color-scheme="light"] .onb-form .mantine-Input-input:focus-within {
+  border-color: var(--accent);
+  background: #ffffff;
+}
+
 
 .mantine-InputWrapper-label,
 .mantine-Input-label {
@@ -550,8 +575,22 @@ body { overflow-wrap: break-word; }
 .react-flow__edge-text {
   font-weight: 600;
 }
-[data-mantine-color-scheme="dark"] .mantine-SegmentedControl-indicator {
-  background: var(--surface-2);
+.mantine-SegmentedControl-indicator {
+  display: none;
+}
+
+.mantine-SegmentedControl-label {
+  position: relative;
+  z-index: 0;
+}
+
+.mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active]::before {
+  display: block;
+  z-index: -1;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active]::before {
+  background-color: var(--surface-2);
   box-shadow: var(--shadow-sm);
 }
 

@@ -1,31 +1,29 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Button, Tabs, UnstyledButton } from "@mantine/core";
-import { Plus, FolderKanban, Code2 } from "lucide-react";
-import { ActivityBellIcon } from "@/features/activity/ActivityBell";
-import { AnimatePresence } from "framer-motion";
+import type { ReactNode } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Button } from "@mantine/core";
+import { Plus, FolderKanban, LayoutGrid } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useGetDashboardsQuery, useGetEmbedsQuery } from "@/features/dashboards/api";
-import { useDashboardActions } from "@/features/dashboards/hooks/useDashboardActions";
-import { DashboardCard } from "@/features/dashboards/components/DashboardCard";
-import { DashboardsWelcome } from "@/features/dashboards/components/DashboardsWelcome";
+import { ViewSwitch } from "@/features/dashboards/components/home/ViewSwitch";
+import { DashboardLibrary } from "@/features/dashboards/components/home/DashboardLibrary";
+import { StartPanel } from "@/features/dashboards/components/home/StartPanel";
 import { DashboardListSkeleton, DashboardWelcomeSkeleton } from "@/features/dashboards/components/DashboardsSkeletons";
 import { useHasDashboardsHint } from "@/features/dashboards/hooks/useHasDashboardsHint";
-import { EmbedsPanel } from "@/features/dashboards/components/EmbedsPanel";
-import { EmbedModal } from "@/features/dashboards/components/EmbedModal";
-import classes from "@/features/dashboards/components/Dashboards.module.css";
+import { EmbedsPanel } from "@/features/dashboards/components/embeds/EmbedsPanel";
+import { EmbedModal } from "@/features/dashboards/components/embeds/EmbedModal";
+import type { DashboardsView } from "@/features/dashboards/components/home/ViewSwitch";
 
 type EmbedTarget = { id: string | null } | null;
 
 export default function Dashboards() {
   useTitle("Dashboards");
-  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") === "embeds" ? "embeds" : "dashboards";
+  const tab: DashboardsView = params.get("tab") === "embeds" ? "embeds" : "dashboards";
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
   const workspaceId = active?._id;
@@ -34,7 +32,6 @@ export default function Dashboards() {
   const { data: embeds = [], isLoading: embedsLoading } = useGetEmbedsQuery(workspaceId ?? "", { skip: !workspaceId });
   const isLoading = dashboardsLoading || embedsLoading;
   const expectsList = useHasDashboardsHint(workspaceId, !isLoading, dashboards.length + embeds.length > 0);
-  const { duplicateDashboard, deleteDashboard, busy } = useDashboardActions(workspaceId);
   const [embedTarget, setEmbedTarget] = useState<EmbedTarget>(null);
 
   if (!active) {
@@ -58,24 +55,21 @@ export default function Dashboards() {
     );
   }
 
-  const firstRun = tab === "dashboards" && dashboards.length === 0 && embeds.length === 0;
+  const newEmbed = () => setEmbedTarget({ id: null });
+  const switchTo = (view: DashboardsView) => setParams(view === "embeds" ? { tab: "embeds" } : {}, { replace: true });
 
-  if (firstRun) {
-    return (
-      <AppShell>
-        <div className={classes.firstRunBar}>
-          <Button
-            variant="subtle"
-            color="gray"
-            leftSection={<Code2 size={15} />}
-            onClick={() => setParams({ tab: "embeds" }, { replace: true })}
-          >
-            Embed a single widget
-          </Button>
-          <ActivityBellIcon />
-        </div>
-        <DashboardsWelcome workspaceId={active._id} canEdit={canEdit} />
-      </AppShell>
+  let action: ReactNode = null;
+  if (canEdit && tab === "dashboards" && dashboards.length > 0) {
+    action = (
+      <Button component={Link} to="/app/dashboards/new" color="emerald" leftSection={<Plus size={15} />}>
+        New dashboard
+      </Button>
+    );
+  } else if (canEdit && tab === "embeds" && embeds.length > 0) {
+    action = (
+      <Button color="emerald" leftSection={<Plus size={15} />} onClick={newEmbed}>
+        New embed
+      </Button>
     );
   }
 
@@ -83,66 +77,38 @@ export default function Dashboards() {
     <AppShell>
       <PageHeader
         title="Dashboards"
-        description="Focused views built from any widget, and single charts you can embed anywhere."
-        actions={
-          canEdit && tab === "dashboards" && dashboards.length > 0 ? (
-            <Button component={Link} to="/app/dashboards/new" color="emerald" leftSection={<Plus size={15} />}>
-              New dashboard
-            </Button>
-          ) : undefined
+        description={
+          tab === "dashboards"
+            ? "Focused views built from any widget, arranged the way you work."
+            : "Single live charts and numbers you can put on any website."
         }
-      />
-
-      <Tabs
-        value={tab}
-        onChange={(v) => setParams(v === "embeds" ? { tab: "embeds" } : {}, { replace: true })}
-        classNames={{ list: classes.tabList, tab: classes.tab }}
+        actions={action}
       >
-        <Tabs.List>
-          <Tabs.Tab value="dashboards">
-            Dashboards<span className={classes.tabCount}>{dashboards.length}</span>
-          </Tabs.Tab>
-          <Tabs.Tab value="embeds">
-            Embedded widgets<span className={classes.tabCount}>{embeds.length}</span>
-          </Tabs.Tab>
-        </Tabs.List>
-      </Tabs>
+        <ViewSwitch value={tab} dashboards={dashboards.length} embeds={embeds.length} onChange={switchTo} />
+      </PageHeader>
 
-      {tab === "dashboards" &&
-        (dashboards.length === 0 ? (
-          <DashboardsWelcome workspaceId={active._id} canEdit={canEdit} />
-        ) : (
-          <div className={classes.grid}>
-            <AnimatePresence>
-              {dashboards.map((d, i) => (
-                <DashboardCard
-                  key={d.id}
-                  dashboard={d}
-                  index={i}
-                  canEdit={canEdit}
-                  busy={busy[d.id] ?? null}
-                  onOpen={() => navigate(`/app/dashboards/${d.id}`)}
-                  onDuplicate={() => duplicateDashboard(d)}
-                  onDelete={() => deleteDashboard(d)}
-                />
-              ))}
-            </AnimatePresence>
-            {canEdit && (
-              <UnstyledButton component={Link} to="/app/dashboards/new" className={classes.newCard}>
-                <span className={classes.newIcon}><Plus size={20} /></span>
-                New dashboard
-                <span className={classes.newHint}>Browse templates or start blank</span>
-              </UnstyledButton>
-            )}
-          </div>
-        ))}
+      {tab === "dashboards" && dashboards.length > 0 && (
+        <DashboardLibrary workspaceId={active._id} dashboards={dashboards} canEdit={canEdit} />
+      )}
+
+      {tab === "dashboards" && dashboards.length === 0 && (canEdit ? (
+        <StartPanel workspaceId={active._id} onEmbed={newEmbed} />
+      ) : (
+        <EmptyState
+          icon={LayoutGrid}
+          title="No dashboards yet"
+          description="Ask an editor in this workspace to create one."
+          minHeight="44vh"
+        />
+      ))}
 
       {tab === "embeds" && (
         <EmbedsPanel
           workspaceId={active._id}
+          embeds={embeds}
           canEdit={canEdit}
           onOpen={(e) => setEmbedTarget({ id: e.id })}
-          onNew={() => setEmbedTarget({ id: null })}
+          onNew={newEmbed}
         />
       )}
 

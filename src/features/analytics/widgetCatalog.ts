@@ -6,7 +6,7 @@ export type Widget = {
   id: string;
   label: string;
   description: string;
-  group: "Metrics" | "Charts" | "Breakdowns";
+  group: "Metrics" | "Charts" | "Breakdowns" | "Search";
   kind: WidgetKind;
   defaultSpan: Span;
 };
@@ -47,13 +47,23 @@ export const WIDGETS = [
   { id: "goals", label: "Conversions", description: "Goal conversion rates", group: "Breakdowns", kind: "list", defaultSpan: 2 },
   { id: "outbound", label: "Outbound & downloads", description: "Where visitors leave to", group: "Breakdowns", kind: "list", defaultSpan: 1 },
   { id: "errors", label: "JS errors", description: "Broken pages and failed scripts", group: "Breakdowns", kind: "list", defaultSpan: 1 },
+
+  { id: "searchClicks", label: "Google clicks", description: "Clicks from Google Search results", group: "Search", kind: "metric", defaultSpan: 1 },
+  { id: "searchImpressions", label: "Google impressions", description: "Times your site appeared in Google", group: "Search", kind: "metric", defaultSpan: 1 },
+  { id: "searchCtr", label: "Search CTR", description: "Share of impressions that became clicks", group: "Search", kind: "metric", defaultSpan: 1 },
+  { id: "searchPosition", label: "Avg. position", description: "Average ranking in Google results", group: "Search", kind: "metric", defaultSpan: 1 },
+  { id: "searchTrend", label: "Search performance", description: "Google clicks and impressions over time", group: "Search", kind: "chart", defaultSpan: 4 },
+  { id: "searchQueries", label: "Top search queries", description: "What people searched before finding you", group: "Search", kind: "list", defaultSpan: 2 },
+  { id: "searchPages", label: "Top pages in Google", description: "Your pages that earn the most search clicks", group: "Search", kind: "list", defaultSpan: 2 },
+  { id: "searchRankings", label: "Ranking positions", description: "How many queries rank top 3, page 1 and beyond", group: "Search", kind: "chart", defaultSpan: 2 },
+  { id: "searchOpportunities", label: "Quick wins", description: "Queries close to page one worth improving", group: "Search", kind: "list", defaultSpan: 2 },
 ] as const satisfies readonly Widget[];
 
 export type WidgetId = (typeof WIDGETS)[number]["id"];
 
 export type Placed = { id: WidgetId; span: Span };
 
-export const WIDGET_GROUPS = ["Metrics", "Charts", "Breakdowns"] as const;
+export const WIDGET_GROUPS = ["Metrics", "Charts", "Breakdowns", "Search"] as const;
 
 export const WIDGET_MAP: Record<string, Widget> = Object.fromEntries(
   WIDGETS.map((w) => [w.id, w as Widget])
@@ -65,6 +75,10 @@ export const EMBEDDABLE_WIDGETS: WidgetId[] = [
   "topPages", "entryPages", "exitPages", "topReferrers", "topCountries", "browsers",
   "operatingSystems", "devices", "languages", "channels", "utmSources", "utmCampaigns",
 ];
+
+export function isSearchWidget(id: string): boolean {
+  return WIDGET_MAP[id]?.group === "Search";
+}
 
 export function isEmbeddable(id: string): id is WidgetId {
   return (EMBEDDABLE_WIDGETS as string[]).includes(id);

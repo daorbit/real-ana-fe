@@ -12,6 +12,9 @@ import { errMessage, notify } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useSites } from "@/features/workspace";
 import { useStats, useLive, useSiteScope, isEmbeddable } from "@/features/analytics";
+import { isSearchWidget } from "@/features/analytics/widgetCatalog";
+import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
+import { SearchConnectionBanner } from "@/features/searchConsole/widgets/SearchConnectionBanner";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { CustomizeDrawer } from "@/features/analytics/components/CustomizeDrawer";
 import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
@@ -24,7 +27,7 @@ import { useDashboardActions } from "@/features/dashboards/hooks/useDashboardAct
 import { DashboardTitle } from "@/features/dashboards/components/DashboardTitle";
 import { RangeControl } from "@/features/dashboards/components/RangeControl";
 import { WidgetFrame } from "@/features/dashboards/components/WidgetFrame";
-import { EmbedModal } from "@/features/dashboards/components/EmbedModal";
+import { EmbedModal } from "@/features/dashboards/components/embeds/EmbedModal";
 import { rangeLong } from "@/features/dashboards/types";
 import { TEMPLATE_MAP } from "@/features/dashboards/templates";
 import type { WidgetId } from "@/features/analytics";
@@ -103,7 +106,13 @@ export default function DashboardView() {
   };
 
   const rename = (name: string) =>
-    layout.patch({ name }).catch((e) => notify.error(errMessage(e, "Could not rename the dashboard.")));
+    layout
+      .patch({ name })
+      .then(() => true)
+      .catch((e) => {
+        notify.error(errMessage(e, "Could not rename the dashboard."));
+        return false;
+      });
 
   const widgetData = {
     stats,
@@ -114,7 +123,9 @@ export default function DashboardView() {
     siteScope,
     workspaceId,
     trafficTitle: `Traffic — ${rangeLong(range)}`,
+    range,
   };
+  const hasSearch = layout.layout.some((p) => isSearchWidget(p.id));
 
   const quiet = !editing && !layout.dirty;
   const template = TEMPLATE_MAP[dashboard.template] ?? TEMPLATE_MAP.blank;
@@ -146,7 +157,7 @@ export default function DashboardView() {
           <Link to="/app/dashboards" className={classes.crumb}>
             <ChevronLeft size={14} /> Dashboards
           </Link>
-          <DashboardTitle key={dashboard.name} name={dashboard.name} icon={template.icon} canEdit={canEdit} onRename={rename} />
+          <DashboardTitle name={dashboard.name} icon={template.icon} canEdit={canEdit} onRename={rename} />
           <div className={classes.subtitle}>
             {dashboard.description || `${layout.layout.length} widgets · ${rangeLong(range)}`}
           </div>
@@ -227,18 +238,23 @@ export default function DashboardView() {
           )}
         </div>
       ) : (
-        <WidgetGrid
-          layout={layout.layout}
-          editing={editing}
-          onMove={layout.move}
-          onSpan={layout.setSpan}
-          onRemove={layout.remove}
-          render={(wid) => (
-            <WidgetFrame onEmbed={canEdit && !editing && isEmbeddable(wid) ? () => setEmbedWidget(wid) : undefined}>
-              <WidgetRenderer id={wid} data={widgetData} />
-            </WidgetFrame>
+        <SearchWidgetsProvider workspaceId={workspaceId}>
+          {hasSearch && !editing && (
+            <SearchConnectionBanner workspaceId={workspaceId} sites={sites} siteScope={siteScope} range={range} />
           )}
-        />
+          <WidgetGrid
+            layout={layout.layout}
+            editing={editing}
+            onMove={layout.move}
+            onSpan={layout.setSpan}
+            onRemove={layout.remove}
+            render={(wid) => (
+              <WidgetFrame onEmbed={canEdit && !editing && isEmbeddable(wid) ? () => setEmbedWidget(wid) : undefined}>
+                <WidgetRenderer id={wid} data={widgetData} />
+              </WidgetFrame>
+            )}
+          />
+        </SearchWidgetsProvider>
       )}
 
       <EmbedModal

@@ -16,6 +16,7 @@ import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
 import { CustomizeDrawer } from "@/features/analytics/components/CustomizeDrawer";
 import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
 import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRenderer";
+import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
 import { LayoutEditControls } from "@/features/analytics/components/widgets/LayoutEditControls";
 import { Onboarding, onboardingCanShow } from "@/features/auth/components/Onboarding";
 import { useStats, useLive, useHomeWidgets, useLinkedInReturn, useSiteScope } from "@/features/analytics";
@@ -233,14 +234,16 @@ export default function Home() {
           </Stack>
         </Center>
       ) : (
-        <WidgetGrid
-          layout={layout}
-          editing={editing}
-          onMove={move}
-          onSpan={setSpan}
-          onRemove={remove}
-          render={(id) => <WidgetRenderer id={id} data={widgetData} />}
-        />
+        <SearchWidgetsProvider workspaceId={active._id}>
+          <WidgetGrid
+            layout={layout}
+            editing={editing}
+            onMove={move}
+            onSpan={setSpan}
+            onRemove={remove}
+            render={(id) => <WidgetRenderer id={id} data={widgetData} />}
+          />
+        </SearchWidgetsProvider>
       )}
     </AppShell>
   );

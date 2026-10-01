@@ -7,7 +7,9 @@ import { errMessage, notify } from "@/shared/lib/notify";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
 import type { DashboardRange, EmbedInput, EmbedTheme } from "@/features/dashboards/types";
 
-type Draft = { name: string; widget: WidgetId; range: DashboardRange; theme: EmbedTheme; sites: string[] };
+export type EmbedDraft = { name: string; widget: WidgetId; range: DashboardRange; theme: EmbedTheme; sites: string[] };
+
+type Draft = EmbedDraft;
 
 export function useEmbedEditor({
   workspaceId,

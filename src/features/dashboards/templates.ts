@@ -1,16 +1,17 @@
-import {
-  LayoutGrid, ShoppingBag, Gauge, Briefcase, Presentation, Store, Megaphone, Magnet,
-  Newspaper, Search, Activity, MousePointerClick,
-} from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { WIDGET_GROUPS, WIDGET_MAP, isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { Placed } from "@/features/analytics/widgetCatalog";
 import type { DashboardRange } from "@/features/dashboards/types";
+import { TEMPLATE_LIBRARY } from "@/features/dashboards/templateData";
 
 export type TemplateAccent = "emerald" | "amber" | "cyan" | "pink" | "violet" | "blue" | "orange" | "teal";
 
-export type TemplateCategory = "Business" | "Marketing" | "Content" | "Product";
+export type TemplateCategory = "Business" | "Marketing" | "Search" | "Content" | "Product";
 
-export const TEMPLATE_CATEGORIES: TemplateCategory[] = ["Business", "Marketing", "Content", "Product"];
+export type WidgetGroup = (typeof WIDGET_GROUPS)[number];
+
+export const TEMPLATE_CATEGORIES: TemplateCategory[] = ["Business", "Marketing", "Search", "Content", "Product"];
 
 export type DashboardTemplate = {
   id: string;
@@ -36,273 +37,42 @@ export const BLANK_TEMPLATE: DashboardTemplate = {
   layout: [],
 };
 
-export const TEMPLATES: DashboardTemplate[] = [
-  {
-    id: "ecommerce",
-    name: "E-commerce",
-    tagline: "Traffic, campaigns and what converts",
-    description: "Sessions, bounce and conversions next to the channels and campaigns that drive them.",
-    icon: ShoppingBag,
-    accent: "amber",
-    category: "Business",
-    range: "7d",
-    layout: [
-      { id: "visitors", span: 1 },
-      { id: "sessions", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "avgSession", span: 1 },
-      { id: "traffic", span: 4 },
-      { id: "goals", span: 2 },
-      { id: "channels", span: 1 },
-      { id: "utmCampaigns", span: 1 },
-      { id: "landingPages", span: 2 },
-      { id: "utmSources", span: 1 },
-      { id: "devices", span: 1 },
-      { id: "worldMap", span: 2 },
-      { id: "topPages", span: 1 },
-      { id: "topReferrers", span: 1 },
-    ],
-  },
-  {
-    id: "saas",
-    name: "SaaS metrics",
-    tagline: "Activation, engagement and reliability",
-    description: "How deep visits go, which goals convert, what breaks, and when people show up.",
-    icon: Gauge,
-    accent: "cyan",
-    category: "Product",
-    range: "30d",
-    layout: [
-      { id: "visitors", span: 1 },
-      { id: "sessions", span: 1 },
-      { id: "avgSession", span: 1 },
-      { id: "pagesPerSession", span: 1 },
-      { id: "traffic", span: 3 },
-      { id: "live", span: 1 },
-      { id: "targets", span: 2 },
-      { id: "goals", span: 2 },
-      { id: "entryPages", span: 1 },
-      { id: "exitPages", span: 1 },
-      { id: "channels", span: 1 },
-      { id: "errors", span: 1 },
-      { id: "heatmap", span: 4 },
-    ],
-  },
-  {
-    id: "agency",
-    name: "Agency client",
-    tagline: "A clean monthly story for a client",
-    description: "Headline numbers, SEO health and where the audience comes from, ready to screen-share.",
-    icon: Briefcase,
-    accent: "pink",
-    category: "Business",
-    range: "30d",
-    layout: [
-      { id: "visitors", span: 1 },
-      { id: "pageviews", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "avgSession", span: 1 },
-      { id: "traffic", span: 4 },
-      { id: "seoScore", span: 2 },
-      { id: "targets", span: 2 },
-      { id: "topReferrers", span: 1 },
-      { id: "channels", span: 1 },
-      { id: "topCountries", span: 1 },
-      { id: "devices", span: 1 },
-      { id: "worldMap", span: 2 },
-      { id: "topPages", span: 2 },
-    ],
-  },
-  {
-    id: "executive",
-    name: "Executive summary",
-    tagline: "The five numbers leadership asks about",
-    description: "Growth, targets and conversions on one calm screen — no breakdowns to wade through.",
-    icon: Presentation,
-    accent: "violet",
-    category: "Business",
-    range: "30d",
-    layout: [
-      { id: "visitors", span: 1 },
-      { id: "pageviews", span: 1 },
-      { id: "sessions", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "traffic", span: 4 },
-      { id: "targets", span: 2 },
-      { id: "goals", span: 2 },
-      { id: "channels", span: 2 },
-      { id: "seoScore", span: 2 },
-    ],
-  },
-  {
-    id: "local",
-    name: "Local business",
-    tagline: "Who's nearby, and what they tap",
-    description: "Phone-first visitors, calls and directions clicks, and where your audience actually lives.",
-    icon: Store,
-    accent: "teal",
-    category: "Business",
-    range: "7d",
-    layout: [
-      { id: "visitors", span: 1 },
-      { id: "live", span: 1 },
-      { id: "avgSession", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "traffic", span: 3 },
-      { id: "livePages", span: 1 },
-      { id: "clicks", span: 2 },
-      { id: "worldMap", span: 2 },
-      { id: "devices", span: 1 },
-      { id: "topReferrers", span: 1 },
-      { id: "outbound", span: 2 },
-    ],
-  },
-  {
-    id: "campaigns",
-    name: "Campaign performance",
-    tagline: "Which campaigns earn their budget",
-    description: "UTM sources and campaigns side by side with the landing pages and goals they feed.",
-    icon: Megaphone,
-    accent: "orange",
-    category: "Marketing",
-    range: "7d",
-    layout: [
-      { id: "sessions", span: 1 },
-      { id: "visitors", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "avgSession", span: 1 },
-      { id: "utmCampaigns", span: 2 },
-      { id: "utmSources", span: 2 },
-      { id: "traffic", span: 4 },
-      { id: "landingPages", span: 2 },
-      { id: "goals", span: 2 },
-      { id: "channels", span: 2 },
-      { id: "topReferrers", span: 2 },
-    ],
-  },
-  {
-    id: "leadgen",
-    name: "Lead generation",
-    tagline: "From first click to filled-in form",
-    description: "Targets for leads, the pages that convert, and the CTAs people actually press.",
-    icon: Magnet,
-    accent: "emerald",
-    category: "Marketing",
-    range: "30d",
-    layout: [
-      { id: "visitors", span: 1 },
-      { id: "sessions", span: 1 },
-      { id: "pagesPerSession", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "targets", span: 2 },
-      { id: "goals", span: 2 },
-      { id: "landingPages", span: 2 },
-      { id: "clicks", span: 2 },
-      { id: "channels", span: 1 },
-      { id: "utmSources", span: 1 },
-      { id: "entryPages", span: 2 },
-    ],
-  },
-  {
-    id: "content",
-    name: "Content & blog",
-    tagline: "What people read, and how far",
-    description: "Top articles, reading depth and time on page, plus where readers come from.",
-    icon: Newspaper,
-    accent: "blue",
-    category: "Content",
-    range: "30d",
-    layout: [
-      { id: "pageviews", span: 1 },
-      { id: "visitors", span: 1 },
-      { id: "avgSession", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "traffic", span: 4 },
-      { id: "topPages", span: 2 },
-      { id: "scrollDepth", span: 2 },
-      { id: "topReferrers", span: 1 },
-      { id: "entryPages", span: 1 },
-      { id: "languages", span: 1 },
-      { id: "topCountries", span: 1 },
-    ],
-  },
-  {
-    id: "seo",
-    name: "SEO performance",
-    tagline: "Health, rankings and organic landings",
-    description: "Audit score and ranking goals next to the pages search engines send people to.",
-    icon: Search,
-    accent: "violet",
-    category: "Content",
-    range: "30d",
-    layout: [
-      { id: "seoScore", span: 2 },
-      { id: "targets", span: 2 },
-      { id: "visitors", span: 1 },
-      { id: "pageviews", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "avgSession", span: 1 },
-      { id: "landingPages", span: 2 },
-      { id: "topPages", span: 2 },
-      { id: "channels", span: 1 },
-      { id: "topReferrers", span: 1 },
-      { id: "topCountries", span: 1 },
-      { id: "languages", span: 1 },
-    ],
-  },
-  {
-    id: "live",
-    name: "Live operations",
-    tagline: "A wall screen for launch day",
-    description: "Who's on the site right now, where they are, what they're viewing and what's breaking.",
-    icon: Activity,
-    accent: "teal",
-    category: "Product",
-    range: "24h",
-    layout: [
-      { id: "live", span: 1 },
-      { id: "visitors", span: 1 },
-      { id: "pageviews", span: 1 },
-      { id: "sessions", span: 1 },
-      { id: "worldMap", span: 2 },
-      { id: "livePages", span: 2 },
-      { id: "traffic", span: 4 },
-      { id: "errors", span: 2 },
-      { id: "outbound", span: 2 },
-    ],
-  },
-  {
-    id: "ux",
-    name: "UX & engagement",
-    tagline: "Where people scroll, click and leave",
-    description: "Scroll depth, click maps, exit pages and device mix to find friction fast.",
-    icon: MousePointerClick,
-    accent: "blue",
-    category: "Product",
-    range: "7d",
-    layout: [
-      { id: "avgSession", span: 1 },
-      { id: "pagesPerSession", span: 1 },
-      { id: "bounce", span: 1 },
-      { id: "sessions", span: 1 },
-      { id: "scrollDepth", span: 2 },
-      { id: "clicks", span: 2 },
-      { id: "exitPages", span: 1 },
-      { id: "screenSizes", span: 1 },
-      { id: "devices", span: 1 },
-      { id: "browsers", span: 1 },
-      { id: "heatmap", span: 4 },
-      { id: "errors", span: 2 },
-    ],
-  },
-];
+export const TEMPLATES: DashboardTemplate[] = TEMPLATE_LIBRARY;
 
 export const CATEGORY_DESCRIPTIONS: Record<TemplateCategory, string> = {
   Business: "For owners, leadership and client reporting",
   Marketing: "Campaigns, channels and lead flow",
+  Search: "Google rankings, queries and SEO health",
   Content: "Reading, ranking and organic reach",
   Product: "Engagement, reliability and live usage",
 };
+
+export const CATEGORY_ACCENT: Record<TemplateCategory, TemplateAccent> = {
+  Business: "violet",
+  Marketing: "orange",
+  Search: "emerald",
+  Content: "blue",
+  Product: "cyan",
+};
+
+export const FEATURED_TEMPLATE_IDS = ["executive", "search", "ecommerce"];
+
+export function layoutMix(layout: Placed[]): { group: WidgetGroup; count: number }[] {
+  return WIDGET_GROUPS.map((group) => ({
+    group,
+    count: layout.filter((p) => WIDGET_MAP[p.id]?.group === group).length,
+  })).filter((g) => g.count > 0);
+}
+
+export function usesSearch(layout: Placed[]): boolean {
+  return layout.some((p) => isSearchWidget(p.id));
+}
+
+export function matchesTemplate(t: DashboardTemplate, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return [t.name, t.tagline, t.description, t.category ?? ""].some((s) => s.toLowerCase().includes(q));
+}
 
 export const ALL_TEMPLATES: DashboardTemplate[] = [BLANK_TEMPLATE, ...TEMPLATES];
 

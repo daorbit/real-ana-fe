@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Eye } from "lucide-react";
 import { embedHeight, embedUrl } from "@/features/dashboards/embedSnippets";
-import classes from "@/features/dashboards/components/Dashboards.module.css";
+import classes from "@/features/dashboards/components/embeds/Embeds.module.css";
 
 export function EmbedPreview({ token, widget, version }: { token: string | null; widget: string; version: string }) {
   const ref = useRef<HTMLIFrameElement>(null);
@@ -33,7 +34,8 @@ export function EmbedPreview({ token, widget, version }: { token: string | null;
         />
       ) : (
         <div className={classes.previewPlaceholder}>
-          Create the embed to see a live preview and get the code.
+          <span className={classes.placeholderIcon}><Eye size={20} /></span>
+          Create the embed to see it live with your numbers.
         </div>
       )}
     </div>

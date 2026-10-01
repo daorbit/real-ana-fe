@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCreateDashboardMutation } from "@/features/dashboards/api";
 import { TEMPLATE_MAP } from "@/features/dashboards/templates";
 import { errMessage, notify } from "@/shared/lib/notify";
+import type { DashboardRange } from "@/features/dashboards/types";
 
 const MIN_BUILD_MS = 1900;
 
@@ -16,7 +17,7 @@ export function useCreateDashboard(workspaceId: string | undefined) {
   const [create] = useCreateDashboardMutation();
   const [creating, setCreating] = useState<{ templateId: string; name: string } | null>(null);
 
-  const createFromTemplate = async (templateId: string, name?: string) => {
+  const createFromTemplate = async (templateId: string, name?: string, range?: DashboardRange) => {
     if (!workspaceId || creating) return false;
     const template = TEMPLATE_MAP[templateId] ?? TEMPLATE_MAP.blank;
     const finalName = name?.trim() || defaultDashboardName(template.id);
@@ -29,7 +30,7 @@ export function useCreateDashboard(workspaceId: string | undefined) {
           name: finalName,
           description: template.id === "blank" ? "" : template.description,
           template: template.id,
-          range: template.range,
+          range: range ?? template.range,
           layout: template.layout,
         }).unwrap(),
         new Promise((r) => setTimeout(r, MIN_BUILD_MS)),

@@ -1,14 +1,27 @@
-import { Skeleton } from "@mantine/core";
-import classes from "@/features/dashboards/components/Dashboards.module.css";
+import { Box, Skeleton } from "@mantine/core";
+import home from "@/features/dashboards/components/home/Home.module.css";
+import templates from "@/features/dashboards/components/templates/Templates.module.css";
 
-function CardSkeleton({ preview }: { preview: number }) {
+function HeaderSkeleton() {
   return (
-    <div className={classes.skeletonCard}>
-      <Skeleton height={preview} radius={0} />
-      <div className={classes.skeletonBody}>
-        <Skeleton height={14} width="55%" radius="sm" />
-        <Skeleton height={10} width="80%" radius="sm" />
-        <Skeleton height={10} width="40%" radius="sm" />
+    <Box mb="xl">
+      <Skeleton height={30} width={210} radius="sm" />
+      <Skeleton height={12} width={380} maw="100%" radius="sm" mt={12} />
+      <Skeleton height={42} width={330} maw="100%" radius={12} mt="lg" />
+    </Box>
+  );
+}
+
+function CardSkeleton() {
+  return (
+    <div className={home.skeletonCard}>
+      <Skeleton height={180} radius={0} />
+      <div className={home.skeletonBody}>
+        <Skeleton height={38} width={38} radius={11} />
+        <div className={home.skeletonLines}>
+          <Skeleton height={14} width="60%" radius="sm" />
+          <Skeleton height={10} width="85%" radius="sm" />
+        </div>
       </div>
     </div>
   );
@@ -17,18 +30,17 @@ function CardSkeleton({ preview }: { preview: number }) {
 export function DashboardListSkeleton() {
   return (
     <>
-      <div className={classes.skeletonHeader}>
-        <Skeleton height={30} width={210} radius="sm" />
-        <Skeleton height={12} width={380} radius="sm" />
-      </div>
-      <div className={classes.skeletonTabs}>
-        <Skeleton height={14} width={110} radius="sm" />
-        <Skeleton height={14} width={140} radius="sm" />
-      </div>
-      <div className={classes.grid}>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <CardSkeleton key={i} preview={172} />
-        ))}
+      <HeaderSkeleton />
+      <div className={home.library}>
+        <Skeleton height={300} radius={20} />
+        <div>
+          <Skeleton height={18} width={180} radius="sm" mb="md" />
+          <div className={home.grid}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
       </div>
     </>
   );
@@ -36,33 +48,23 @@ export function DashboardListSkeleton() {
 
 export function DashboardWelcomeSkeleton() {
   return (
-    <div className={classes.gallery}>
-      <div className={classes.skeletonIntro}>
-        <Skeleton height={36} width={420} maw="100%" radius="sm" />
-        <Skeleton height={12} width={480} maw="100%" radius="sm" />
-        <Skeleton height={12} width={320} maw="100%" radius="sm" />
-      </div>
-      <div className={classes.browser}>
-        <div className={classes.side}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} height={36} radius={10} mb={4} />
+    <>
+      <HeaderSkeleton />
+      <div className={home.start}>
+        <div className={home.options}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} height={176} radius={20} />
           ))}
-          <Skeleton height={112} radius={14} mt={14} />
         </div>
-        <div className={classes.sections}>
-          <section>
-            <div className={classes.sectionHead}>
-              <Skeleton height={16} width={100} radius="sm" />
-              <Skeleton height={12} width={240} radius="sm" />
-            </div>
-            <div className={classes.galleryGrid}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <CardSkeleton key={i} preview={168} />
-              ))}
-            </div>
-          </section>
+        <div>
+          <Skeleton height={18} width={180} radius="sm" mb="md" />
+          <div className={templates.grid}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

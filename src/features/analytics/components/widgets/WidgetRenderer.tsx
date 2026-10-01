@@ -11,6 +11,8 @@ import { MiniList } from "@/features/analytics/components/widgets/MiniList";
 import { TrafficCard } from "@/features/analytics/components/widgets/TrafficCard";
 import { LivePagesCard } from "@/features/analytics/components/widgets/LivePagesCard";
 import { listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
+import { SearchWidget } from "@/features/searchConsole/widgets/SearchWidget";
+import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
 import type { Bucket, Site, Stats } from "@/shared/types";
 
@@ -24,6 +26,7 @@ export type WidgetData = {
   workspaceId?: string;
   trafficTitle?: string;
   embedded?: boolean;
+  range?: string;
 };
 
 export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData }) {
@@ -58,6 +61,10 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
   }
 
   if (!workspaceId) return null;
+
+  if (isSearchWidget(id)) {
+    return <SearchWidget id={id} workspaceId={workspaceId} sites={sites} siteScope={siteScope} range={data.range} />;
+  }
 
   if (id === "goals") return <GoalsPanel workspaceId={workspaceId} goals={stats?.goals ?? []} />;
   if (id === "targets") return <TargetsWidget workspaceId={workspaceId} />;

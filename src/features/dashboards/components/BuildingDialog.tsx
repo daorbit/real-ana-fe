@@ -1,6 +1,6 @@
 import { Loader, Modal } from "@mantine/core";
 import { Check } from "lucide-react";
-import { LayoutThumb } from "@/features/dashboards/components/LayoutThumb";
+import { MiniWindow } from "@/features/dashboards/components/MiniWindow";
 import { useBuildProgress } from "@/features/dashboards/hooks/useBuildProgress";
 import type { DashboardTemplate } from "@/features/dashboards/templates";
 import classes from "@/features/dashboards/components/Dashboards.module.css";
@@ -47,7 +47,7 @@ export function BuildingDialog({
       {template && (
         <div className={`${classes.build} ${classes.accent}`} data-accent={template.accent} aria-live="polite">
           <div className={classes.buildStage}>
-            <LayoutThumb layout={template.layout} revealed={revealed} />
+            <MiniWindow layout={template.layout} title={name} revealed={revealed} />
           </div>
           <div className={classes.buildBody}>
             <div>

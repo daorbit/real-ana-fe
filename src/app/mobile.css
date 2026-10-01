@@ -268,7 +268,8 @@
     flex: 0 0 auto;
     border-radius: 999px;
   }
-  .an-range .mantine-SegmentedControl-indicator { border-radius: 999px; }
+  .an-range .mantine-SegmentedControl-label,
+  .an-range .mantine-SegmentedControl-label[data-active]::before { border-radius: 999px; }
   /* The range and compare pickers' own segmented rows. */
   .range-segmented { padding: 2px; flex-shrink: 0; }
   .range-seg-btn {
