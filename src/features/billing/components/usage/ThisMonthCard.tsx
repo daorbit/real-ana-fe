@@ -3,14 +3,8 @@ import { Badge, Text } from "@mantine/core";
 import { CalendarClock, Layers, ShoppingCart } from "lucide-react";
 import { compact, num } from "@/shared/lib";
 import type { UsageHistoryMonth } from "@/shared/types";
-import { daysUntil, monthLabel, usageShare } from "../../lib/usageMonth";
+import { daysUntil, meterState, monthLabel, usageShare } from "../../lib/usageMonth";
 import classes from "./UsageOverview.module.css";
-
-function meterState(share: number): "over" | "near" | undefined {
-  if (share >= 100) return "over";
-  if (share >= 80) return "near";
-  return undefined;
-}
 
 export function ThisMonthCard({ month, resetsAt }: { month: UsageHistoryMonth; resetsAt: string }) {
   const share = usageShare(month.events, month.eventQuota);

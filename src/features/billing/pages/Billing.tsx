@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Text, Stack, Alert, Tabs } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Activity, Info, Layers, ShoppingCart, Receipt } from "lucide-react";
+import { Info } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
@@ -13,9 +13,10 @@ import { useWorkspace } from "@/features/workspace/context";
 import { priceIn } from "@/shared/lib/currency";
 import type { Plan, AddonPack, CouponCheckResult } from "@/shared/types";
 
-import { useBillingView, type BillingTab } from "../hooks/useBillingView";
+import { useBillingView } from "../hooks/useBillingView";
 import { useCheckout } from "../hooks/useCheckout";
-import { UsageSummary } from "../components/UsageSummary";
+import { PlanOverview } from "../components/overview/PlanOverview";
+import { BillingTabs } from "../components/BillingTabs";
 import { PlansTab } from "../components/PlansTab";
 import { AddonsTab } from "../components/AddonsTab";
 import { Receipts } from "../components/Receipts";
@@ -120,8 +121,15 @@ export default function Billing() {
       {loading ? (
         <BillingSkeleton />
       ) : (
-        <Stack gap={40}>
-          {usage && <UsageSummary usage={usage} expired={expired} />}
+        <Stack gap={32}>
+          {usage && (
+            <PlanOverview
+              usage={usage}
+              expired={expired}
+              onChangePlan={() => setTab("plans")}
+              onBuyAddons={() => setTab("addons")}
+            />
+          )}
 
           {/* The demo has no account behind it, so it has no plan either —
               saying "you don't have a plan yet" would read as a problem to fix
@@ -156,22 +164,7 @@ export default function Billing() {
               looking up a past payment — split so the page answers one question
               at a time. The usage panel stays above them because "what am I on"
               is context for all three. */}
-          <Tabs
-            value={tab}
-            onChange={(v) => v && setTab(v as BillingTab)}
-            variant="pills"
-            color="emerald"
-            keepMounted={false}
-          >
-            <Tabs.List mb="xl">
-              <Tabs.Tab value="plans" leftSection={<Layers size={15} />}>{t("billing.tabPlans")}</Tabs.Tab>
-              <Tabs.Tab value="usage" leftSection={<Activity size={15} />}>{t("billing.tabUsage", "Usage")}</Tabs.Tab>
-              <Tabs.Tab value="addons" leftSection={<ShoppingCart size={15} />}>{t("billing.tabAddons")}</Tabs.Tab>
-              <Tabs.Tab value="history" leftSection={<Receipt size={15} />}>
-                {t("billing.tabHistory")}
-              </Tabs.Tab>
-            </Tabs.List>
-
+          <BillingTabs value={tab} onChange={setTab}>
             <Tabs.Panel value="plans">
               <PlansTab
                 plans={plans}
@@ -194,7 +187,7 @@ export default function Billing() {
 
             <Tabs.Panel value="usage">
               {selectedWorkspaceId ? (
-                <UsageOverviewTab workspaceId={selectedWorkspaceId} />
+                <UsageOverviewTab workspaceId={selectedWorkspaceId} usage={usage} />
               ) : (
                 <Alert variant="light" color="gray" icon={<Info size={16} />} radius="md">
                   <Text size="sm">Create a workspace to see its usage here.</Text>
@@ -232,7 +225,7 @@ export default function Billing() {
                 <Receipts workspaceId={selectedWorkspaceId ?? ""} />
               )}
             </Tabs.Panel>
-          </Tabs>
+          </BillingTabs>
         </Stack>
       )}
 

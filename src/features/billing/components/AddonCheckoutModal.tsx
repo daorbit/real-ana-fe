@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
-import {
-  Modal, Text, Group, Button, Stack, Divider, ThemeIcon, SegmentedControl, TextInput,
-} from "@mantine/core";
+import { Button, CloseButton, Modal } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, Tag, Phone } from "lucide-react";
-import { useAuth } from "@/features/auth/context";
+import { ShieldCheck, ShoppingCart } from "lucide-react";
 import { PackIcon, creditType } from "../lib/credits";
 import { MIN_CHARGE } from "../lib/constants";
+import { useGatewayChoice } from "../hooks/useGatewayChoice";
 import { PackStepper } from "./PackStepper";
 import { CouponField } from "./CouponField";
-import { GatewayOption } from "./GatewayLogos";
+import { CheckoutProduct } from "./checkout/CheckoutProduct";
+import { OrderTotals } from "./checkout/OrderTotals";
+import { GatewayPicker } from "./checkout/GatewayPicker";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
 import type { AddonPack, CouponCheckResult, Currency, PaymentGateway } from "@/shared/types";
+import classes from "./checkout/Checkout.module.css";
 
-/**
- * Buying one credit pack, in whatever quantity.
- *
- * Same quantity model as the plan dialog, so the two agree on what "× 3" means
- * and on the cap.
- */
 export function AddonCheckoutModal({
   pack,
   currency,
@@ -42,21 +37,12 @@ export function AddonCheckoutModal({
   ) => void;
 }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [packs, setPacks] = useState(1);
-  const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
-  const [phone, setPhone] = useState(user?.mobile ?? "");
-
-  // Cashfree's account collects INR only for now — see PlanCheckoutModal.
-  const cashfreeDisabled = currency !== "INR";
+  const gatewayChoice = useGatewayChoice(currency);
 
   useEffect(() => {
     if (pack) setPacks(1);
   }, [pack?._id]);
-
-  useEffect(() => {
-    if (cashfreeDisabled && gateway === "cashfree") setGateway("razorpay");
-  }, [cashfreeDisabled, gateway]);
 
   if (!pack) return <Modal opened={false} onClose={onClose} children={null} />;
 
@@ -65,161 +51,84 @@ export function AddonCheckoutModal({
   const subtotal = unit * packs;
   const percentOff = coupon?.coupon?.percentOff ?? 0;
   const total = percentOff ? Math.floor((subtotal * (100 - percentOff)) / 100) : subtotal;
-  // Same Razorpay floor the server applies — see MIN_CHARGE.
   const chargeable = Math.max(total, MIN_CHARGE);
+  const credits = pack.quantity * packs;
 
   return (
     <Modal
       opened
       onClose={onClose}
-      title={<Text fw={700}>{t("billing.confirmPurchase")}</Text>}
+      withCloseButton={false}
       centered
       radius="lg"
+      size={480}
+      padding={0}
+      classNames={{ content: classes.modal, body: classes.body }}
     >
-      <Stack gap="lg">
-        <Group justify="space-between" wrap="nowrap">
-          <Group gap={10} wrap="nowrap">
-            <ThemeIcon size={38} radius="md" variant="light" color="emerald">
-              <PackIcon type={pack.type} size={17} />
-            </ThemeIcon>
-            <div>
-              <Text fw={650}>{pack.name}</Text>
-              <Text size="xs" c="dimmed">
-                {t("billing.packUnitPerPack", {
-                  n: pack.quantity,
-                  type: creditType(t, pack.type, pack.quantity),
-                  price: money(unit),
-                })}
-              </Text>
-            </div>
-          </Group>
-        </Group>
+      <CloseButton className={classes.close} onClick={onClose} disabled={busy} aria-label={t("common.cancel")} />
 
-        <Group justify="space-between">
+      <div className={classes.single}>
+        <div className={classes.top}>
+          <span className={classes.eyebrow}>{t("billing.confirmPurchase")}</span>
+        </div>
+
+        <CheckoutProduct
+          mark={<PackIcon type={pack.type} size={22} />}
+          name={pack.name}
+          meta={t("billing.packUnitPerPack", {
+            n: pack.quantity,
+            type: creditType(t, pack.type, pack.quantity),
+            price: money(unit),
+          })}
+        />
+
+        <div className={classes.quantity}>
           <div>
-            <Text size="sm" fw={600}>{t("billing.howManyPacks")}</Text>
-            <Text size="xs" c="emerald" fw={600}>
-              {t("billing.packTotal", {
-                n: pack.quantity * packs,
-                type: creditType(t, pack.type, pack.quantity * packs),
-              })}
-            </Text>
+            <p className={classes.quantityLabel}>{t("billing.howManyPacks")}</p>
+            <p className={classes.quantityHint}>
+              {t("billing.packTotal", { n: credits, type: creditType(t, pack.type, credits) })}
+            </p>
           </div>
-          <PackStepper
-            value={packs}
-            disabled={busy}
-            // At least one — this dialog exists to buy something, and a zero
-            // here would leave the confirm button doing nothing.
-            min={1}
-            onChange={setPacks}
-          />
-        </Group>
+          <PackStepper value={packs} disabled={busy} min={1} onChange={setPacks} />
+        </div>
+
+        <OrderTotals
+          lines={[{ key: pack._id, label: t("billing.packTimes", { name: pack.name, packs }), value: subtotal }]}
+          subtotal={subtotal}
+          total={total}
+          chargeable={chargeable}
+          percentOff={percentOff}
+          couponCode={coupon?.coupon?.code}
+          money={money}
+        />
 
         <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />
 
-        <Divider />
+        <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />
 
-        <Stack gap={6}>
-          <Group justify="space-between">
-            <Text size="sm" c="dimmed">{t("billing.packTimes", { name: pack.name, packs })}</Text>
-            <Text size="sm">{money(subtotal)}</Text>
-          </Group>
-
-          {percentOff > 0 && (
-            <Group justify="space-between">
-              <Group gap={6}>
-                <Tag size={12} />
-                <Text size="sm" c="dimmed">
-                  {t("billing.couponOff", { code: coupon?.coupon?.code, percent: percentOff })}
-                </Text>
-              </Group>
-              <Text size="sm" c="emerald">− {money(subtotal - total)}</Text>
-            </Group>
-          )}
-
-          <Divider my={4} />
-
-          <Group justify="space-between">
-            <Text fw={700}>Total</Text>
-            <Text fz={24} fw={800} style={{ letterSpacing: "-0.02em" }}>{money(chargeable)}</Text>
-          </Group>
-
-          {chargeable > total && (
-            <Text size="xs" c="dimmed">
-              {t("billing.minimumCharge", { amount: money(MIN_CHARGE) })}
-            </Text>
-          )}
-        </Stack>
-
-        <Text size="xs" c="dimmed">
-          {t("billing.addonOneTime")}
-        </Text>
-
-        <Stack gap={4}>
-          <Text size="xs" fw={700} c="dimmed" tt="uppercase">
-            {t("billing.payWith", "Pay with")}
-          </Text>
-          <SegmentedControl
-            fullWidth
-            value={gateway}
-            onChange={(v) => setGateway(v as PaymentGateway)}
-            disabled={busy}
-            styles={{ label: { paddingTop: 10, paddingBottom: 10 } }}
-            data={[
-              { value: "razorpay", label: <GatewayOption gateway="razorpay" /> },
-              {
-                value: "cashfree",
-                label: <GatewayOption gateway="cashfree" soon={cashfreeDisabled} />,
-                disabled: cashfreeDisabled,
-              },
-            ]}
-          />
-          {cashfreeDisabled && (
-            <Text size="xs" c="dimmed">
-              {t(
-                "billing.cashfreeCurrencySoon",
-                "Cashfree does not take {{currency}} payments yet — coming soon.",
-                { currency },
-              )}
-            </Text>
-          )}
-          {gateway === "cashfree" && !cashfreeDisabled && (
-            <TextInput
-              mt={6}
-              label={t("billing.mobileForReceipt", "Mobile number")}
-              description={t(
-                "billing.mobileCashfreeHint",
-                "Cashfree sends the payment receipt here.",
-              )}
-              placeholder="9876543210"
-              leftSection={<Phone size={15} />}
-              value={phone}
-              onChange={(e) => setPhone(e.currentTarget.value)}
-              disabled={busy}
-            />
-          )}
-        </Stack>
-
-        <Group justify="flex-end">
-          <Button variant="subtle" onClick={onClose} disabled={busy}>{t("common.cancel")}</Button>
+        <div className={classes.actions}>
           <Button
+            fullWidth
+            size="lg"
+            radius="md"
             color="emerald"
-            leftSection={<ShoppingCart size={15} />}
+            leftSection={<ShoppingCart size={17} />}
             loading={busy}
-            disabled={
-              gateway === "cashfree" &&
-              (cashfreeDisabled ||
-                phone.replace(/\D/g, "").replace(/^(0|91)(?=\d{10}$)/, "").length !== 10)
-            }
-            onClick={() =>
-              onConfirm(pack, packs, gateway, gateway === "cashfree" ? phone : undefined)
-            }
+            disabled={!gatewayChoice.canPay}
+            onClick={() => onConfirm(pack, packs, gatewayChoice.gateway, gatewayChoice.phoneForGateway)}
           >
             {t("billing.payAmount", { amount: money(chargeable) })}
           </Button>
-        </Group>
-      </Stack>
+          <Button fullWidth variant="subtle" color="gray" radius="md" onClick={onClose} disabled={busy}>
+            {t("common.cancel")}
+          </Button>
+        </div>
+
+        <p className={classes.footnote}>
+          <ShieldCheck size={14} />
+          <span>{t("billing.addonOneTime")}</span>
+        </p>
+      </div>
     </Modal>
   );
 }
- 

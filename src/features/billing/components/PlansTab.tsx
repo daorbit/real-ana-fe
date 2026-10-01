@@ -1,29 +1,18 @@
-import {
-  Title, Text, Group, Button, Card, SimpleGrid, Stack, SegmentedControl,
-  Divider, ActionIcon, Tooltip,
-} from "@mantine/core";
+import { SegmentedControl } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { CreditCard, RefreshCw } from "lucide-react";
-import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "@/features/billing/components/PlanIcons";
-import { CornerRibbon } from "./CornerRibbon";
-import { FeatureLine } from "./FeatureLine";
-import { RIBBON_FALLBACK } from "../lib/constants";
-import { CURRENCIES, priceIn } from "@/shared/lib/currency";
-import { MAX_SITES_PER_WORKSPACE } from "@/shared/types";
+import { BadgeCheck, Layers, Receipt } from "lucide-react";
 import type { BillingCycle, Plan, QuotaSummary, Currency } from "@/shared/types";
-
- 
-const RENEW_WITHIN_DAYS = 7;
-
-function daysUntil(iso: string): number {
-  return Math.ceil((new Date(iso).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
-}
+import { SectionHeader } from "./common/SectionHeader";
+import { CurrencyControl } from "./common/CurrencyControl";
+import { RefetchButton } from "./common/RefetchButton";
+import { FactList } from "./common/FactList";
+import { PlanCard } from "./plans/PlanCard";
+import classes from "./plans/Plans.module.css";
 
 interface Props {
   plans: Plan[];
   usage: QuotaSummary;
   expired: boolean;
-  /** The plan one tier up, called out on the grid. */
   featuredSlug: string | null;
   cycle: BillingCycle;
   setCycle: (cycle: BillingCycle) => void;
@@ -38,224 +27,78 @@ interface Props {
   onPick: (plan: Plan) => void;
 }
 
-/** The pricing grid: every plan, at the chosen cycle and currency. */
 export function PlansTab({
   plans, usage, expired, featuredSlug, cycle, setCycle, currency, changeCurrency,
   money, refetching, refetchPrices, isDemo, selectedWorkspaceId, subscribing, onPick,
 }: Props) {
   const { t } = useTranslation();
+  const currentIndex = plans.findIndex((p) => p.slug === usage?.plan.slug);
 
   return (
     <div>
-    <Group justify="space-between" align="center" mb="lg" wrap="wrap">
-      <div>
-        <Title order={3} style={{ letterSpacing: "-0.01em" }}>{t("billing.plansTitle")}</Title>
-        <Text size="sm" c="dimmed" mt={2}>{t("billing.plansSubtitle")}</Text>
-      </div>
-      <Group gap="sm" wrap="wrap">
-        <SegmentedControl
-          size="sm"
-          radius="md"
-          value={currency}
-          onChange={(v) => changeCurrency(v as Currency)}
-          data={CURRENCIES.map((c) => ({ label: c, value: c }))}
-        />
-        <SegmentedControl
-          size="sm"
-          radius="md"
-          value={cycle}
-          onChange={(v) => setCycle(v as BillingCycle)}
-          data={[
-            { label: t("billing.cycleMonthly"), value: "monthly" },
-            { label: t("billing.cycleYearly"), value: "yearly" },
-          ]}
-        />
-        <Tooltip label={t("billing.refetchPrices")}>
-          <ActionIcon
-            variant="light"
-            color="gray"
-            size="lg"
-            radius="md"
-            loading={refetching}
-            onClick={refetchPrices}
-            aria-label={t("billing.refetchPrices")}
-          >
-            <RefreshCw size={15} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
-    </Group>
-
-    <SimpleGrid cols={{ base: 1, sm: 2, lg: Math.min(plans.length, 4) || 1 }} spacing="lg">
-      {plans.map((plan, index) => {
-        const planAccent = PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK;
-        const price = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
-        // Free (or any zero-price plan) is assigned directly, not
-        // bought — it stays "current" once assigned and never expires,
-        // so there's nothing to re-buy.
-        const buyable = price > 0;
-        const current = usage?.plan.slug === plan.slug && !expired;
-        const featured = plan.slug === featuredSlug && !current;
-        const currentIndex = plans.findIndex((p) => p.slug === usage?.plan.slug);
-        const lower = !expired && currentIndex > -1 && index < currentIndex;
-
-        // The current plan, on its own cycle, close enough to expiry to renew.
-        // Renewing on a *different* cycle is a plan change, not a renewal, and
-        // goes through the normal subscribe path — so it is gated on the cycle
-        // matching what the workspace is actually on.
-        const daysLeft = usage?.currentPeriodEnd ? daysUntil(usage.currentPeriodEnd) : null;
-        const renewable =
-          current &&
-          buyable &&
-          usage?.cycle === cycle &&
-          daysLeft !== null &&
-          daysLeft > 0 &&
-          daysLeft <= RENEW_WITHIN_DAYS;
-        return (
-          <Card
-            key={plan.slug}
-            withBorder
-            radius="lg"
-            padding="lg"
-            className={`plan-card${featured || current ? " plan-card--featured" : ""}`}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-              overflow: "visible",
-              borderColor: featured || current
-                ? PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK
-                : undefined,
-              // Read by both the beam and the top-edge hairline in polish.css.
-              ["--beam" as string]: PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK,
-            }}
-          >
-
-            {(featured || current) && <span className="plan-card__beam" aria-hidden="true" />}
-
-            {(featured || current) && (
-              <CornerRibbon
-                label={
-                  renewable
-                    ? t("billing.ribbonRenewSoon", "Renew soon")
-                    : current
-                      ? t("billing.ribbonCurrent")
-                      : t("billing.ribbonRecommended")
-                }
-                color={PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK}
-                background={PLAN_GRADIENTS[plan.slug]}
-                fg={PLAN_ON_ACCENT[plan.slug] ?? "#fff"}
-              />
-            )}
-
-            {/* The mark leads the card on its own line rather than sitting
-                beside the name — it reads as the tier's badge that way, and
-                the name and description get the full card width. */}
-            <PlanIcon slug={plan.slug} size={42} uid={`card-${plan.slug}`} />
-
-            <Text fw={700} fz={17} mt={12} style={{ letterSpacing: "-0.01em" }}>
-              {plan.name}
-            </Text>
-            {plan.description && (
-              <Text size="xs" c="dimmed" lh={1.4} lineClamp={2} mt={2}>
-                {plan.description}
-              </Text>
-            )}
-
-            <Group gap={5} align="baseline" mt="lg">
-              <Text fz={40} fw={700} style={{ letterSpacing: "-0.045em" }}>
-                {money(price)}
-              </Text>
-              {buyable && (
-                <Text size="sm" c="dimmed">/ {cycle === "yearly" ? t("billing.perYear") : t("billing.perMonth")}</Text>
-              )}
-            </Group>
-
-            {/* What yearly actually saves, in money rather than in "save 2
-                months" — the toggle already says that, and a figure is what
-                makes the case. Reserved at a fixed height rather than with a
-                blank line of text, so the row of cards keeps a shared baseline
-                without opening a gap under the price. */}
-            <div style={{ minHeight: 18, marginTop: 4 }}>
-              {buyable && cycle === "yearly" && (
-                <Text size="xs" c="emerald" fw={600}>
-                  {t("billing.savesPerYear", {
-                    amount: money(priceIn(plan.priceMonthly, currency) * 12 - price),
-                  })}
-                </Text>
-              )}
-            </div>
-
-            <Button
-              mt="md"
-              fullWidth
-              size="md"
+      <SectionHeader
+        title={t("billing.plansTitle")}
+        description={t("billing.plansSubtitle")}
+        actions={
+          <>
+            <CurrencyControl value={currency} onChange={changeCurrency} />
+            <SegmentedControl
+              size="sm"
               radius="md"
-              color="emerald"
-              variant={renewable || featured ? "filled" : "light"}
-              disabled={(current && !renewable) || lower || !buyable || isDemo || !selectedWorkspaceId}
-              loading={subscribing === plan.slug}
-              leftSection={buyable && !current && !lower ? <CreditCard size={15} /> : undefined}
+              value={cycle}
+              onChange={(v) => setCycle(v as BillingCycle)}
+              data={[
+                { label: t("billing.cycleMonthly"), value: "monthly" },
+                { label: t("billing.cycleYearly"), value: "yearly" },
+              ]}
+            />
+            <RefetchButton label={t("billing.refetchPrices")} loading={refetching} onClick={refetchPrices} />
+          </>
+        }
+      />
 
-              style={
-                featured
-                  ? {
-                      background:
-                        PLAN_GRADIENTS[plan.slug] ??
-                        PLAN_ACCENTS[plan.slug] ??
-                        RIBBON_FALLBACK,
-                      // The gold ramp is too light for white text — the label
-                      // has to follow the fill.
-                      color: PLAN_ON_ACCENT[plan.slug] ?? "#fff",
-                      border: "none",
-                    }
-                  : undefined
-              }
+      <div className={classes.grid}>
+        {plans.map((plan, index) => {
+          const current = usage?.plan.slug === plan.slug && !expired;
+          return (
+            <PlanCard
+              key={plan.slug}
+              plan={plan}
+              usage={usage}
+              expired={expired}
+              featured={plan.slug === featuredSlug && !current}
+              lower={!expired && currentIndex > -1 && index < currentIndex}
+              cycle={cycle}
+              currency={currency}
+              money={money}
+              isDemo={isDemo}
+              selectedWorkspaceId={selectedWorkspaceId}
+              subscribing={subscribing}
+              onPick={onPick}
+            />
+          );
+        })}
+      </div>
 
-              // A disabled Mantine button drops its variant's fill whichever
-              // variant is asked for, so "Current plan" and "Included in your
-              // plan" were left as bare text with no edge — a caption floating
-              // on the card rather than the button's own resting state. This
-              // puts an outline back on exactly those states, without implying
-              // the button can be pressed.
-              classNames={
-                !featured &&
-                ((current && !renewable) || lower || !buyable)
-                  ? { root: "plan-cta--resting" }
-                  : undefined
-              }
-              onClick={() => onPick(plan)}
-            >
-              {isDemo ? t("billing.ctaSignUpSubscribe")
-                : renewable ? t("billing.ctaRenew")
-                : current ? t("billing.ctaCurrentPlan")
-                : lower ? t("billing.ctaIncludedInPlan")
-                : !buyable ? t("billing.ctaIncludedFree")
-                : usage?.plan.slug === plan.slug ? t("billing.ctaRenew")
-                : t("billing.ctaSubscribe")}
-            </Button>
-
-            <Divider my="md" />
-
-            <Stack gap={9} style={{ flex: 1 }}>
-              {/* The headline quota leads the list in the plan's own colour —
-                  it is the number the tiers actually differ by. The tier mark
-                  is not repeated here; it is already at the top of the card. */}
-              <Text fz={13} fw={700} c={planAccent}>
-                {t("billing.featureAudits", { count: plan.monthlyAuditQuota })}
-              </Text>
-              {/* Every tick carries the plan's own accent so the column reads
-                  as part of that tier's card, not one shared green run. */}
-              <FeatureLine color={planAccent} text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
-              <FeatureLine color={planAccent} text={t("billing.featureAudits", { count: plan.monthlyAuditQuota })} />
-              <FeatureLine color={planAccent} text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
-              <FeatureLine color={planAccent} text={t("billing.featureRecipients", { count: plan.maxReportRecipients })} />
-              {plan.features.map((f) => <FeatureLine key={f} color={planAccent} text={f} />)}
-            </Stack>
-          </Card>
-        );
-      })}
-    </SimpleGrid>
+      <FactList
+        facts={[
+          {
+            icon: BadgeCheck,
+            title: t("billing.factNoAutoRenewT", "No auto-renew"),
+            text: t("billing.factNoAutoRenewD", "Every plan is a one-time payment for its cycle. Nothing is charged again unless you renew."),
+          },
+          {
+            icon: Layers,
+            title: t("billing.factKeepUsageT", "Upgrade any time"),
+            text: t("billing.factKeepUsageD", "The new limit applies straight away, and this month's usage carries over."),
+          },
+          {
+            icon: Receipt,
+            title: t("billing.factReceiptT", "Receipts by email"),
+            text: t("billing.factReceiptD", "A receipt lands in your inbox after every payment and stays under Payment history."),
+          },
+        ]}
+      />
     </div>
   );
 }

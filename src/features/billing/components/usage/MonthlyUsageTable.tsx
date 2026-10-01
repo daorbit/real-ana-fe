@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { Badge, ScrollArea, Table, Text } from "@mantine/core";
 import { num } from "@/shared/lib";
 import type { UsageHistoryMonth } from "@/shared/types";
-import { monthLabel, usageShare } from "../../lib/usageMonth";
+import { meterState, monthLabel, usageShare } from "../../lib/usageMonth";
 import classes from "./UsageOverview.module.css";
 
 type Column = { key: keyof Pick<UsageHistoryMonth, "audits" | "crawls" | "inspections" | "formSubmissions" | "orbit">; label: string };
@@ -66,7 +66,7 @@ export function MonthlyUsageTable({ months }: { months: UsageHistoryMonth[] }) {
                       <span className={classes.miniMeter}>
                         <span
                           className={classes.meterFill}
-                          data-state={share >= 100 ? "over" : share >= 80 ? "near" : undefined}
+                          data-state={meterState(share)}
                           style={{ "--share": `${share}%` } as CSSProperties}
                         />
                       </span>

@@ -1,14 +1,14 @@
-import {
-  Title, Text, Group, Button, Card, SimpleGrid, SegmentedControl, Divider,
-  ThemeIcon, ActionIcon, Tooltip,
-} from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { RefreshCw, Search, Globe2, ClipboardList } from "lucide-react";
+import { Search, Globe2, ClipboardList, Infinity as InfinityIcon, Layers, Receipt } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
-import { CreditBalance } from "./CreditBalance";
-import { PackIcon, creditType } from "../lib/credits";
-import { CURRENCIES, priceIn } from "@/shared/lib/currency";
 import type { AddonPack, QuotaSummary, Currency } from "@/shared/types";
+import { CreditBalance } from "./CreditBalance";
+import { SectionHeader } from "./common/SectionHeader";
+import { CurrencyControl } from "./common/CurrencyControl";
+import { RefetchButton } from "./common/RefetchButton";
+import { FactList } from "./common/FactList";
+import { AddonPackCard } from "./addons/AddonPackCard";
+import classes from "./addons/Addons.module.css";
 
 interface Props {
   addons: AddonPack[];
@@ -24,7 +24,6 @@ interface Props {
   onPick: (pack: AddonPack) => void;
 }
 
-/** Credit packs, above the balances they top up. */
 export function AddonsTab({
   addons, usage, currency, changeCurrency, money, refetching, refetchPrices,
   isDemo, selectedWorkspaceId, buying, onPick,
@@ -33,114 +32,92 @@ export function AddonsTab({
 
   return (
     <div>
-    <Group justify="space-between" align="center" mb="lg" wrap="wrap">
-      <div>
-        <Title order={3} style={{ letterSpacing: "-0.01em" }}>{t("billing.addonsTitle")}</Title>
-        <Text size="sm" c="dimmed" mt={2}>
-          {t("billing.addonsSubtitle")}
-        </Text>
-      </div>
-      <Group gap="sm" wrap="wrap">
-        <SegmentedControl
-          size="sm"
-          radius="md"
-          value={currency}
-          onChange={(v) => changeCurrency(v as Currency)}
-          data={CURRENCIES.map((c) => ({ label: c, value: c }))}
-        />
-        {/* Refetches the packs *and* the usage behind the credit
-            balances below — someone who just spent a credit in another
-            tab expects this to move both numbers, not only the price. */}
-        <Tooltip label={t("billing.refetchPrices")}>
-          <ActionIcon
-            variant="light"
-            color="gray"
-            size="lg"
-            radius="md"
-            loading={refetching}
-            onClick={refetchPrices}
-            aria-label={t("billing.refetchPrices")}
-          >
-            <RefreshCw size={15} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
-    </Group>
+      <SectionHeader
+        title={t("billing.addonsTitle")}
+        description={t("billing.addonsSubtitle")}
+        actions={
+          <>
+            <CurrencyControl value={currency} onChange={changeCurrency} />
+            <RefetchButton label={t("billing.refetchPrices")} loading={refetching} onClick={refetchPrices} />
+          </>
+        }
+      />
 
-    {/* Credits on hand, shown here rather than only in the usage panel
-        above: on the tab where someone is deciding whether to buy more,
-        what they already have is the deciding number. */}
-    {usage && (
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md" mb="lg">
-        <CreditBalance
-          icon={Search}
-          label={t("billing.auditCredits")}
-          planLeft={Math.max(0, usage.audits.planQuota - usage.audits.used)}
-          addonCredits={usage.audits.addonCredits}
-        />
-        <CreditBalance
-          icon={Globe2}
-          label={t("billing.crawlCredits")}
-          planLeft={Math.max(0, usage.crawls.planQuota - usage.crawls.used)}
-          addonCredits={usage.crawls.addonCredits}
-        />
-        {usage.orbit && (
-          <CreditBalance
-            icon={OrbitMark}
-            label={t("billing.orbitCredits")}
-            planLeft={Math.max(0, usage.orbit.planQuota - usage.orbit.used)}
-            addonCredits={usage.orbit.addonCredits}
-          />
-        )}
-        {usage.forms && (
-          <CreditBalance
-            icon={ClipboardList}
-            label={t("billing.formSubmissionCredits")}
-            planLeft={Math.max(0, usage.forms.submissionQuota - usage.forms.submissionsUsed)}
-            addonCredits={usage.forms.addonCredits}
-          />
-        )}
-      </SimpleGrid>
-    )}
+      {usage && (
+        <>
+          <p className={classes.sectionLabel}>{t("billing.yourBalance", "Your balance")}</p>
+          <div className={classes.balances}>
+            <CreditBalance
+              icon={Search}
+              label={t("billing.auditCredits")}
+              planLeft={Math.max(0, usage.audits.planQuota - usage.audits.used)}
+              addonCredits={usage.audits.addonCredits}
+            />
+            <CreditBalance
+              icon={Globe2}
+              label={t("billing.crawlCredits")}
+              planLeft={Math.max(0, usage.crawls.planQuota - usage.crawls.used)}
+              addonCredits={usage.crawls.addonCredits}
+            />
+            {usage.orbit && (
+              <CreditBalance
+                icon={OrbitMark}
+                label={t("billing.orbitCredits")}
+                planLeft={Math.max(0, usage.orbit.planQuota - usage.orbit.used)}
+                addonCredits={usage.orbit.addonCredits}
+              />
+            )}
+            {usage.forms && (
+              <CreditBalance
+                icon={ClipboardList}
+                label={t("billing.formSubmissionCredits")}
+                planLeft={Math.max(0, usage.forms.submissionQuota - usage.forms.submissionsUsed)}
+                addonCredits={usage.forms.addonCredits}
+              />
+            )}
+          </div>
+        </>
+      )}
 
-    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-      {addons.map((pack) => (
-        <Card key={pack._id} withBorder radius="lg" padding="lg">
-          <Group justify="space-between" align="flex-start" wrap="nowrap">
-            <div>
-              <Text fw={650} size="md">{pack.name}</Text>
-              <Text size="sm" c="dimmed" mt={2}>
-                {t("billing.packQuantity", {
-                  n: pack.quantity,
-                  type: creditType(t, pack.type, pack.quantity),
-                })}
-              </Text>
-            </div>
-            <ThemeIcon size={38} radius="md" variant="light" color="emerald">
-              <PackIcon type={pack.type} size={17} />
-            </ThemeIcon>
-          </Group>
-          <Divider my="md" />
-          <Group justify="space-between" align="center">
-            <Text fz={22} fw={700} style={{ letterSpacing: "-0.02em" }}>{money(priceIn(pack.price, currency))}</Text>
-            <Button
-              size="sm"
-              radius="md"
-              variant="outline"
-              color="emerald"
+      <p className={classes.sectionLabel}>{t("billing.packsLabel", "Packs")}</p>
+      {addons.length ? (
+        <div className={classes.packs}>
+          {addons.map((pack) => (
+            <AddonPackCard
+              key={pack._id}
+              pack={pack}
+              currency={currency}
+              money={money}
+              isDemo={isDemo}
               disabled={isDemo || !selectedWorkspaceId}
               loading={buying === pack._id}
-              onClick={() => onPick(pack)}
-            >
-              {isDemo ? t("billing.ctaSignUpBuy") : t("billing.ctaBuy")}
-            </Button>
-          </Group>
-        </Card>
-      ))}
-      {!addons.length && (
-        <Text size="sm" c="dimmed">{t("billing.noAddons")}</Text>
+              onPick={onPick}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className={classes.empty}>{t("billing.noAddons")}</div>
       )}
-    </SimpleGrid>
+
+      <FactList
+        facts={[
+          {
+            icon: InfinityIcon,
+            title: t("billing.factNeverExpireT", "Credits never expire"),
+            text: t("billing.factNeverExpireD", "Bought credits carry across months and renewals until you use them."),
+          },
+          {
+            icon: Layers,
+            title: t("billing.factPlanFirstT", "Plan allowance first"),
+            text: t("billing.factPlanFirstD", "Credits are only drawn on once the month's plan allowance runs out."),
+          },
+          {
+            icon: Receipt,
+            title: t("billing.factOneTimeT", "One-time payment"),
+            text: t("billing.factOneTimeD", "Credits are added as soon as payment is confirmed, with a receipt by email."),
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -171,7 +171,7 @@ export function renderShareCard(input: ShareCardInput): string {
   ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
   const font = (weight: number, size: number) =>
-    `${weight} ${size}px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    `${weight} ${size}px "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
 
   // Header: mark, wordmark, and the "public dashboard" badge.
   drawLogo(ctx, 72, 64, 56);

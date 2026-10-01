@@ -57,10 +57,10 @@
 
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 4px 14px -8px rgba(0,0,0,0.5);
   --shadow: 0 2px 6px rgba(0,0,0,0.35), 0 20px 48px -20px rgba(0,0,0,0.6);
-  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font: "Google Sans Flex", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font);
 
-  --font-auth-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-auth-display: var(--font);
 }
 
 [data-mantine-color-scheme="light"] {
@@ -718,7 +718,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .wordmark { display: inline-flex; align-items: center; }
 .wordmark-text {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: var(--font-display);
   font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; color: var(--text);
 }
 .wordmark-dot { color: var(--violet); }
@@ -1745,11 +1745,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .auth-form .mantine-Title-root {
   font-family: var(--font-auth-display);
-  font-weight: 400;
+  font-weight: 600;
 
   font-size: 2.1rem;
   line-height: 1.1;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.025em;
   text-align: center;
   color: var(--auth-ink);
 }
@@ -2030,7 +2030,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   --auth-solid-ink: #1d1d1f;
   --auth-solid-hover: #ffffff;
   background: #000000;
-  font-family: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  font-family: var(--font);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -2466,7 +2466,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   --seo-radius: 16px;
   --seo-radius-sm: 11px;
   --seo-gap: 20px;
-  --seo-display: "Space Grotesk", "Inter", sans-serif;
+  --seo-display: var(--font-display);
 
 
   --seo-elev: 0 1px 2px rgba(0, 0, 0, 0.28), 0 6px 20px -10px rgba(0, 0, 0, 0.45);

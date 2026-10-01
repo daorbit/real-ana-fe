@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Group, Badge, Button, TextInput, Loader } from "@mantine/core";
+import { CloseButton, TextInput, Loader } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Tag, X } from "lucide-react";
+import { Tag } from "lucide-react";
 import { useCheckCouponMutation } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import type { CouponCheckResult } from "@/shared/types";
+import classes from "./checkout/Checkout.module.css";
 
 export function CouponField({
   amount,
@@ -42,19 +43,17 @@ export function CouponField({
 
   if (applied) {
     return (
-      <Group gap={6} wrap="nowrap">
-        <Badge size="sm" variant="light" color="emerald" leftSection={<Tag size={11} />}>
+      <div className={classes.coupon}>
+        <span className={classes.couponCode}>
+          <Tag size={13} />
           {t("billing.couponOff", { code: applied.code, percent: applied.percentOff })}
-        </Badge>
-        <Button
-          size="compact-xs"
-          variant="subtle"
-          color="gray"
+        </span>
+        <CloseButton
+          size="sm"
+          aria-label={t("billing.removeCoupon", "Remove coupon")}
           onClick={() => { setCode(""); onChange(null); }}
-        >
-          <X size={12} />
-        </Button>
-      </Group>
+        />
+      </div>
     );
   }
 
@@ -62,6 +61,7 @@ export function CouponField({
     <TextInput
       placeholder={t("billing.couponPlaceholder")}
       size="sm"
+      radius="md"
       value={code}
       onChange={(e) => setCode(e.currentTarget.value.toUpperCase())}
       leftSection={<Tag size={14} />}

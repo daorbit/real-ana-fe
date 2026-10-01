@@ -444,76 +444,30 @@ export function BillingSkeleton() {
     <Stack gap={28}>
       {/* The usage card: the plan and its renewal date across the top, then the
           cycle's six meters in one row. */}
-      <Card withBorder radius="lg" padding={0}>
-        <Group gap="sm" wrap="nowrap" p="lg">
-          <Skeleton height={38} width={38} radius="md" />
-          <div style={{ flex: 1 }}>
-            <Group gap="xs" wrap="nowrap">
-              <Skeleton height={15} width={110} radius="sm" />
-              <Skeleton height={13} width={52} radius="sm" />
-            </Group>
-            <Skeleton height={10} width={230} mt={8} radius="sm" />
-          </div>
-        </Group>
-        <SimpleGrid cols={{ base: 2, sm: 3, lg: 6 }} spacing={0}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "16px 20px 20px",
-                borderTop: "1px solid var(--mantine-color-default-border)",
-              }}
-            >
-              <Group gap={7} wrap="nowrap">
-                <Skeleton height={13} width={13} radius="sm" />
-                <Skeleton height={9} width="62%" radius="sm" />
-              </Group>
-              <Skeleton height={24} width="55%" mt={12} radius="sm" />
-              <Skeleton height={4} mt={14} radius="xl" />
+      <Card withBorder radius="lg" padding={28}>
+        <Group justify="space-between" wrap="wrap" gap="lg">
+          <Group gap={18} wrap="nowrap">
+            <Skeleton height={64} width={64} radius={18} />
+            <div>
+              <Skeleton height={9} width={80} radius="sm" />
+              <Skeleton height={26} width={150} mt={10} radius="sm" />
+              <Skeleton height={11} width={240} mt={10} radius="sm" />
             </div>
-          ))}
-        </SimpleGrid>
+          </Group>
+          <Group gap={10}>
+            <Skeleton height={36} width={130} radius="md" />
+            <Skeleton height={36} width={130} radius="md" />
+          </Group>
+        </Group>
       </Card>
 
-      {/* Plans / Add-ons / Billing history. */}
-      <Group gap="xs">
-        {[86, 96, 116].map((w) => (
-          <Skeleton key={w} height={34} width={w} radius="md" />
+      <Group gap={28}>
+        {[70, 70, 84, 130].map((w, i) => (
+          <Skeleton key={i} height={14} width={w} radius="sm" />
         ))}
       </Group>
 
       <PlansGridSkeleton />
-    </Stack>
-  );
-}
-
-/**
- * Rows for the receipts table while it loads.
- *
- * Drawn as plain rows rather than cards: this sits inside a bordered card that
- * is already on screen, and a second border inside it reads as a nested panel.
- */
-export function InvoiceTableSkeleton({ rows = 4 }: { rows?: number }) {
-  return (
-    <Stack gap={0} p="lg">
-      {Array.from({ length: rows }).map((_, i) => (
-        <Group
-          key={i}
-          justify="space-between"
-          wrap="nowrap"
-          gap="lg"
-          py="sm"
-          style={{
-            borderTop: i === 0 ? undefined : "1px solid var(--mantine-color-default-border)",
-          }}
-        >
-          <Skeleton height={11} width={110} radius="sm" />
-          <Skeleton height={11} width={90} radius="sm" />
-          <Skeleton height={11} width={`${130 - i * 10}px`} radius="sm" />
-          <Skeleton height={11} width={64} radius="sm" />
-          <Skeleton height={24} width={24} radius="sm" />
-        </Group>
-      ))}
     </Stack>
   );
 }

@@ -59,11 +59,11 @@ export function MonthlyEventsChart({ months }: { months: UsageHistoryMonth[] }) 
               tickFormatter={compact}
             />
             <Tooltip cursor={{ fill: "var(--surface-2)" }} content={<MonthTooltip />} isAnimationActive={false} />
-            <Bar dataKey="events" radius={[4, 4, 0, 0]} maxBarSize={44} animationDuration={500}>
+            <Bar dataKey="events" radius={[6, 6, 0, 0]} maxBarSize={40} animationDuration={500}>
               {points.map((p) => (
                 <Cell
                   key={p.month}
-                  fill={p.current ? "var(--accent)" : "color-mix(in srgb, var(--accent) 42%, var(--surface))"}
+                  fill={p.current ? "var(--violet-2)" : "color-mix(in srgb, var(--violet-2) 38%, var(--surface))"}
                 />
               ))}
             </Bar>

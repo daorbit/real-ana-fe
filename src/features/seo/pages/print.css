@@ -25,7 +25,7 @@
   min-height: 100vh;
   padding: 32px 20px 72px;
   color: var(--ink);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: "Google Sans Flex", ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   /* The document is a centred column; guard against any child forcing the page
      wider than the viewport, which would pin it left and clip the right side. */
@@ -79,7 +79,7 @@
 }
 .print-header h1 {
   margin: 0;
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
   font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -109,7 +109,7 @@
 .print-score[data-band="ok"]   { border-color: #f59e0b; color: #b45309; }
 .print-score[data-band="poor"] { border-color: #ef4444; color: #b91c1c; }
 .print-score-value {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
   font-size: 32px;
   font-weight: 700;
   line-height: 1;
@@ -168,7 +168,7 @@
   border-radius: 10px;
 }
 .print-metric-value {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
   font-size: 24px;
   font-weight: 700;
   line-height: 1.1;
