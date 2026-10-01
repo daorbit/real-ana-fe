@@ -1,17 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Button,
-  Drawer,
-  Group,
-  Menu,
-  ScrollArea,
-  Skeleton,
-  Stack,
-  Text,
-  ActionIcon,
-} from "@mantine/core";
-import { BellOff, CheckCheck, ListChecks, MoreHorizontal, Settings2, Trash2, X } from "lucide-react";
+import { Button, Drawer, ScrollArea } from "@mantine/core";
+import { BellOff, Settings2 } from "lucide-react";
 import { useMediaQuery } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -27,6 +16,9 @@ import type { AppNotification } from "@/shared/types";
 import { useDemo } from "@/features/demo/context";
 import { demoNotifications } from "@/features/demo/demoNotifications";
 import { ActivityRow } from "./ActivityRow";
+import { ActivityHeader } from "./ActivityHeader";
+import { ActivitySkeleton } from "./ActivitySkeleton";
+import type { ActivityTab } from "./ActivityHeader";
 import { SubmissionDetailModal } from "./SubmissionDetailModal";
 import { dateGroup, dateGroupLabel, type DateGroup } from "./copy";
 import classes from "./ActivityRow.module.css";
@@ -57,7 +49,7 @@ export function ActivityDrawer({
   const { demo } = useDemo();
   const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
-  const [tab, setTab] = useState<"all" | "unread">("all");
+  const [tab, setTab] = useState<ActivityTab>("all");
   const [cursor, setCursor] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -250,151 +242,29 @@ export function ActivityDrawer({
       }
       aria-label={t("activity.title", "Activity")}
     >
-      {/* Grows to the sheet's full height rather than to its content, so the
-          footer is pinned to the bottom edge and not left floating under a
-          short feed. */}
-      <Stack gap={0} className={styles.body}>
-        <Box className={styles.header}>
-          <Group justify="space-between" align="center" wrap="nowrap" className={styles.titleRow}>
-            <Group gap={8} wrap="nowrap" align="center">
-              <Text fw={650} fz="md" className={styles.title}>
-                {t("activity.title", "Activity")}
-              </Text>
-              {/* Opening the panel clears the bell's badge, so without this
-                  the count vanishes at the moment it becomes readable. */}
-              {unreadCount > 0 && (
-                <span className={styles.count}>{unreadCount > 99 ? "99+" : unreadCount}</span>
-              )}
-            </Group>
+      <div className={styles.body}>
+        <ActivityHeader
+          tab={tab}
+          unreadCount={unreadCount}
+          canMarkAll={hasUnread && !markingAll && !demo}
+          markingAll={markingAll}
+          canSelect={items.length > 0}
+          selecting={selecting}
+          selectedCount={selected.size}
+          deleting={deleting}
+          onTab={setTab}
+          onMarkAll={() => void markAllRead()}
+          onSelect={() => setSelecting(true)}
+          onCancelSelect={() => {
+            setSelecting(false);
+            setSelected(new Set());
+          }}
+          onDelete={() => void deleteSelected()}
+          onClose={onClose}
+        />
 
-            <Group gap={2} wrap="nowrap">
-              {!selecting && (
-                <>
-                  <Button
-                    variant="subtle"
-                    color="gray"
-                    size="compact-sm"
-                    leftSection={<CheckCheck size={14} />}
-                    disabled={!hasUnread || markingAll || demo}
-                    loading={markingAll}
-                    onClick={() => void markAllRead()}
-                    className={styles.markAll}
-                  >
-                    {t("activity.markAllReadShort", "Mark all read")}
-                  </Button>
-                  <Menu position="bottom-end" withArrow radius="md" width={210} withinPortal>
-                    <Menu.Target>
-                      <ActionIcon
-                        variant="subtle"
-                        color="gray"
-                        aria-label={t("activity.moreActions", "More actions")}
-                      >
-                        <MoreHorizontal size={17} />
-                      </ActionIcon>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                      <Menu.Item
-                        leftSection={<ListChecks size={14} />}
-                        disabled={items.length === 0}
-                        onClick={() => setSelecting(true)}
-                      >
-                        {t("activity.select", "Select notifications")}
-                      </Menu.Item>
-                      <Menu.Divider />
-                      <Menu.Item
-                        leftSection={<Settings2 size={14} />}
-                        onClick={() => {
-                          navigate("/app/settings/notifications");
-                          onClose();
-                        }}
-                      >
-                        {t("activity.preferences", "Notification settings")}
-                      </Menu.Item>
-                    </Menu.Dropdown>
-                  </Menu>
-                </>
-              )}
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                onClick={onClose}
-                aria-label={t("activity.close", "Close")}
-              >
-                <X size={17} />
-              </ActionIcon>
-            </Group>
-          </Group>
-
-          {selecting ? (
-            <Group justify="space-between" align="center" wrap="nowrap" className={styles.selectBar}>
-              <Text fz="sm" c="dimmed">
-                {t("activity.selectedCount", "{{count}} selected", { count: selected.size })}
-              </Text>
-              <Group gap="xs" wrap="nowrap">
-                <Button
-                  variant="subtle"
-                  color="gray"
-                  size="compact-sm"
-                  onClick={() => {
-                    setSelecting(false);
-                    setSelected(new Set());
-                  }}
-                >
-                  {t("activity.cancel", "Cancel")}
-                </Button>
-                <Button
-                  variant="light"
-                  color="red"
-                  size="compact-sm"
-                  leftSection={<Trash2 size={14} />}
-                  disabled={selected.size === 0 || deleting}
-                  loading={deleting}
-                  onClick={() => void deleteSelected()}
-                >
-                  {t("activity.deleteSelected", "Delete")}
-                </Button>
-              </Group>
-            </Group>
-          ) : (
-            <div className={styles.tabs} role="tablist" aria-label={t("activity.title", "Activity")}>
-              {(["all", "unread"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === value}
-                  data-active={tab === value || undefined}
-                  className={styles.tab}
-                  onClick={() => setTab(value)}
-                >
-                  {value === "all" ? t("activity.tabAll", "All") : t("activity.tabUnread", "Unread")}
-                  {value === "unread" && unreadCount > 0 && (
-                    <span className={styles.tabCount}>{unreadCount > 99 ? "99+" : unreadCount}</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </Box>
-
-        {/* No rule here: the header carries its own bottom border. */}
         <ScrollArea className={styles.scroll} type="hover" offsetScrollbars={false}>
-          {isLoading && (
-            // Skeleton rows rather than a spinner: the panel's shape is known
-            // before its contents are, and showing it settles the layout
-            // instead of making it jump when the data lands.
-            <Stack gap={4} p="sm">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Group key={i} gap={10} wrap="nowrap" p={10}>
-                  <Skeleton height={34} width={34} radius={10} />
-                  <Stack gap={6} style={{ flex: 1 }}>
-                    <Skeleton height={9} width="55%" radius="xl" />
-                    <Skeleton height={8} width="85%" radius="xl" />
-                  </Stack>
-                </Group>
-              ))}
-            </Stack>
-          )}
+          {isLoading && <ActivitySkeleton />}
 
           {showEmpty && (
             <EmptyState
@@ -418,57 +288,63 @@ export function ActivityDrawer({
 
           {!isLoading &&
             grouped.map(({ group, items: rows }) => (
-              <div key={group}>
-                {/* No rule between groups: the sticky date heading already
-                    says where one ends and the next begins, and a line under
-                    it as well read as a band across the panel. */}
-                <div className={classes.groupLabel}>{dateGroupLabel(group, t)}</div>
-                <div>
-                  {rows.map((notification) => (
-                    <ActivityRow
-                      key={notification.id}
-                      notification={notification}
-                      actorName={
-                        typeof notification.data?.actorName === "string"
-                          ? notification.data.actorName
-                          : typeof notification.data?.inviterName === "string"
-                            ? notification.data.inviterName
-                            : undefined
-                      }
-                      actorAvatarUrl={
-                        typeof notification.data?.actorAvatarUrl === "string" &&
-                        notification.data.actorAvatarUrl
-                          ? notification.data.actorAvatarUrl
-                          : undefined
-                      }
-                      onOpen={open}
-                      onMarkRead={(id) => {
-                        if (!demo) void markRead({ ids: [id] });
-                      }}
-                      selectable={selecting}
-                      selected={selected.has(notification.id)}
-                      onToggleSelect={toggleSelect}
-                    />
-                  ))}
+              <section key={group} className={styles.group}>
+                <div className={classes.groupLabel}>
+                  {dateGroupLabel(group, t)}
+                  <span className={classes.groupCount}>{rows.length}</span>
                 </div>
-              </div>
+                {rows.map((notification) => (
+                  <ActivityRow
+                    key={notification.id}
+                    notification={notification}
+                    actorName={
+                      typeof notification.data?.actorName === "string"
+                        ? notification.data.actorName
+                        : typeof notification.data?.inviterName === "string"
+                          ? notification.data.inviterName
+                          : undefined
+                    }
+                    actorAvatarUrl={
+                      typeof notification.data?.actorAvatarUrl === "string" && notification.data.actorAvatarUrl
+                        ? notification.data.actorAvatarUrl
+                        : undefined
+                    }
+                    onOpen={open}
+                    onMarkRead={(id) => {
+                      if (!demo) void markRead({ ids: [id] });
+                    }}
+                    selectable={selecting}
+                    selected={selected.has(notification.id)}
+                    onToggleSelect={toggleSelect}
+                  />
+                ))}
+              </section>
             ))}
 
           {data?.nextCursor && (
-            <Group justify="center" p="sm">
-              <Button
-                variant="subtle"
-                size="xs"
-                loading={isFetching}
-                onClick={() => setCursor(data.nextCursor)}
-              >
+            <div className={styles.more}>
+              <Button variant="default" size="xs" radius="xl" loading={isFetching} onClick={() => setCursor(data.nextCursor)}>
                 {t("activity.loadMore", "Load older")}
               </Button>
-            </Group>
+            </div>
           )}
         </ScrollArea>
 
-      </Stack>
+        <div className={styles.footer}>
+          <Button
+            variant="subtle"
+            color="gray"
+            size="compact-sm"
+            leftSection={<Settings2 size={14} />}
+            onClick={() => {
+              navigate("/app/settings/notifications");
+              onClose();
+            }}
+          >
+            {t("activity.preferences", "Notification settings")}
+          </Button>
+        </div>
+      </div>
       <SubmissionDetailModal notification={detail} onClose={() => setDetail(null)} />
     </Drawer>
   );

@@ -57,11 +57,11 @@ export const CATEGORY_ACCENT: Record<TemplateCategory, TemplateAccent> = {
 
 export const FEATURED_TEMPLATE_IDS = ["executive", "search", "ecommerce"];
 
-export function layoutMix(layout: Placed[]): { group: WidgetGroup; count: number }[] {
+export function layoutGroups(layout: Placed[]): { group: WidgetGroup; ids: string[] }[] {
   return WIDGET_GROUPS.map((group) => ({
     group,
-    count: layout.filter((p) => WIDGET_MAP[p.id]?.group === group).length,
-  })).filter((g) => g.count > 0);
+    ids: layout.filter((p) => WIDGET_MAP[p.id]?.group === group).map((p) => p.id),
+  })).filter((g) => g.ids.length > 0);
 }
 
 export function usesSearch(layout: Placed[]): boolean {

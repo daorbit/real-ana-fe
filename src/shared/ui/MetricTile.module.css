@@ -16,6 +16,23 @@
   cursor: default;
 }
 
+.tile[data-tinted] {
+  border-color: color-mix(in srgb, var(--metric) 18%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--metric) 9%, transparent) 0%, transparent 70%),
+    var(--surface);
+}
+
+.liveDot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin: 0 3px;
+  border-radius: 50%;
+  background: var(--metric);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--metric) 22%, transparent);
+}
+
 .tile[data-static] .swatch {
   background: var(--metric);
   border-color: var(--metric);

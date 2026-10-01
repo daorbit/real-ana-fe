@@ -594,6 +594,15 @@ body { overflow-wrap: break-word; }
   box-shadow: var(--shadow-sm);
 }
 
+[data-mantine-color-scheme="light"] .mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active]::before {
+  background-color: var(--surface);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 0 0 1px var(--border);
+}
+
+.mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active] {
+  color: var(--text);
+}
+
 
 * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }

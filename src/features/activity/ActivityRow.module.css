@@ -1,24 +1,33 @@
-/*
- * One notification: a flat row in a divided list.
- *
- * [dot] [chip] title ............ time      [✓ on hover]
- *              body (two lines)
- *              category
- */
 .row {
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px 12px 8px;
-  border-top: 1px solid var(--border);
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
   text-align: left;
   cursor: pointer;
   transition: background-color 120ms ease;
 }
 
+.row + .row {
+  margin-top: 2px;
+}
+
 .row:hover {
-  background: color-mix(in srgb, var(--text) 4%, transparent);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.row[data-unread] {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.row[data-unread]:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.row[data-severity="critical"] {
+  background: color-mix(in srgb, var(--mantine-color-red-6) 7%, transparent);
 }
 
 .row:focus-visible {
@@ -27,10 +36,9 @@
 }
 
 .row[data-selected] {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
-/* A settled invite stays as history but goes nowhere. */
 .row[data-settled] {
   cursor: default;
 }
@@ -39,19 +47,60 @@
   background: transparent;
 }
 
-/* Unread: a dot in the gutter. Critical rows use red so they stand out
-   without tinting the whole row. */
-.dot {
+.check {
   flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  margin: 15px 0 0;
+  margin-top: 9px;
+}
+
+.chipWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.chip {
+  --chip: var(--text-2);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--chip) 14%, transparent);
+  background-size: cover;
+  background-position: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--chip);
+}
+
+.chip[data-kind="avatar"] {
   border-radius: 50%;
+  border: 1px solid var(--border);
+  background-color: var(--surface-2);
+  color: var(--text-2);
+}
+
+.chip[data-kind="image"] {
   background: transparent;
 }
 
-.row[data-unread] .dot {
-  background: var(--accent);
+.chip img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--accent-2);
 }
 
 .row[data-severity="warning"] .dot {
@@ -60,41 +109,6 @@
 
 .row[data-severity="critical"] .dot {
   background: var(--mantine-color-red-6);
-}
-
-.check {
-  flex-shrink: 0;
-  margin-top: 7px;
-}
-
-.chip {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  background-size: cover;
-  background-position: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-2);
-}
-
-.chip[data-kind="image"] {
-  border: 0;
-  background: transparent;
-}
-
-.chip img {
-  display: block;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
 }
 
 .main {
@@ -119,20 +133,20 @@
 }
 
 .title[data-unread] {
-  font-weight: 600;
+  font-weight: 650;
   color: var(--text);
 }
 
 .time {
   flex-shrink: 0;
   font-size: 11.5px;
-  color: var(--text-2);
+  color: var(--muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 .body {
-  margin-top: 2px;
+  margin-top: 3px;
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--text-2);
@@ -141,11 +155,19 @@
 
 .meta {
   display: flex;
-  gap: 4px;
-  margin-top: 4px;
-  font-size: 11px;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tag {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 10.5px;
+  font-weight: 600;
   color: var(--text-2);
-  opacity: 0.8;
 }
 
 .actions {
@@ -154,10 +176,9 @@
   margin-top: 10px;
 }
 
-/* Revealed on hover or keyboard focus, in the time's place. */
 .markRead {
   position: absolute;
-  top: 9px;
+  top: 10px;
   right: 10px;
   opacity: 0;
   transition: opacity 120ms ease;
@@ -181,9 +202,6 @@
   }
 }
 
-/* A submission's answers in `SubmissionDetailModal` — a bordered label/value
-   list, matching `answerList`/`answerRow` in the forms app's own
-   NotificationsModal.module.css for the same kind of data. */
 .answerList {
   border: 1px solid var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-md);
@@ -203,17 +221,26 @@
   border-bottom: none;
 }
 
-/* A date heading inside the list.
-
-   It scrolls with the rows rather than sticking, and carries no fill of its
-   own: any background here reads as a band across the panel, and a sticky one
-   sat on whatever scrolled under it, so the first heading looked like a
-   selected section rather than a label. */
 .groupLabel {
-  padding: 14px 16px 6px;
-  font-size: 11.5px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px 8px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.groupCount {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 10.5px;
+  letter-spacing: 0;
   color: var(--text-2);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {

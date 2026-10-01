@@ -2,6 +2,7 @@ import { ActionIcon, Indicator, Tooltip } from "@mantine/core";
 import { Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useActivityPanel } from "./ActivityPanelContext";
+import classes from "./ActivityBell.module.css";
 
 /**
  * The bell, pinned to the top-right of the app panel.
@@ -41,11 +42,11 @@ export function ActivityBellIcon({
         className="activity-bell"
         disabled={count === 0}
         label={badge}
-        size={16}
+        size={20}
         offset={size === "md" ? 4 : 6}
         color="red"
         withBorder
-        styles={{ indicator: { fontSize: 10, fontWeight: 700, paddingInline: 4 } }}
+        classNames={{ root: classes.root, indicator: count > 99 ? classes.badgeWide : classes.badge }}
       >
         <ActionIcon
           variant={variant}

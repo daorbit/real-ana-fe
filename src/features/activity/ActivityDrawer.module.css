@@ -1,8 +1,3 @@
-/* The activity panel sits inside the shell's panel and stops at its border,
-   rather than covering the window: the rail beside the panel is how someone
-   gets back out, so it stays reachable. Everything here is absolute against
-   `#panel-overlay-root`'s offset parent — the panel — instead of fixed to the
-   viewport, which is what would swallow the rail. */
 .root,
 .overlay,
 .inner {
@@ -10,8 +5,6 @@
   inset: 0;
 }
 
-/* Spans the panel like the mount point does, so it stays transparent to clicks
-   and lets its painted children opt back in. */
 .root {
   pointer-events: none;
 }
@@ -19,8 +12,6 @@
 .overlay {
   z-index: 1;
   pointer-events: auto;
-  /* Darkest under the sheet and clearing toward the left, so the page stays
-     legible where the sheet is furthest away. */
   background: linear-gradient(
     to left,
     color-mix(in srgb, #000 42%, transparent),
@@ -29,8 +20,6 @@
   );
 }
 
-/* The sheet itself: pinned to the panel's right edge, inset a little so the
-   panel's own rounded corner still reads behind it. */
 .inner {
   z-index: 2;
   inset-inline-start: auto;
@@ -51,41 +40,11 @@
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  /* The app's own background wash over the shell colour — the same pair the
-     panel behind it uses, so the sheet reads as part of the app rather than a
-     grey slab dropped on top of it. `--bg-wash` is set on :root by
-     `applyTheme`, and is `none` for the plain presets. */
-  background-color: var(--shell);
-  background-image: var(--bg-wash);
-  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.7);
+  border-radius: 16px;
+  background-color: var(--surface);
+  box-shadow: -24px 0 60px -20px rgba(0, 0, 0, 0.6);
 }
 
-/* Transparent: the sheet's own gradient is lit from up here, and a second
-   wash layered on top of it only muddied the corner. */
-.header {
-  flex-shrink: 0;
-  padding: 12px 12px 0 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.titleRow {
-  min-height: 32px;
-}
-
-.markAll {
-  font-weight: 500;
-}
-
-.selectBar {
-  padding: 10px 0 10px;
-}
-
-/* Mantine wraps the drawer's children in its own body element, which is a
-   plain block with padding. Left alone it sizes to its content, so the column
-   inside it could never reach the sheet's bottom edge and the footer floated
-   under a short feed. Made a flex column that fills the sheet, it passes the
-   height through to `.body` below. */
 .content > :global(.mantine-Drawer-body) {
   flex: 1;
   min-height: 0;
@@ -95,97 +54,143 @@
   overflow: hidden;
 }
 
-/* The column inside the sheet. It is a flex child of the body above, so it
-   takes its height by growing into the line rather than from a percentage —
-   which would resolve against the line and leave the footer mid-sheet. */
 .body {
+  display: flex;
   flex: 1;
+  flex-direction: column;
   min-height: 0;
 }
 
-.title {
-  letter-spacing: -0.01em;
-}
-
-/* The unread tally beside the title, so the count is still answerable once the
-   badge on the bell has been cleared by opening this panel. */
-.count {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 7px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--accent-2);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-/* All / Unread as underline tabs sitting on the header's bottom border. */
-.tabs {
+.header {
+  flex-shrink: 0;
   display: flex;
-  gap: 18px;
-  margin-top: 6px;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border);
 }
 
-.tab {
-  position: relative;
-  display: inline-flex;
+.headTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headIcon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--violet-2);
+}
+
+.headText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.headActions {
+  display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 0 10px;
+}
+
+.switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.switchTab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 32px;
   border: 0;
+  border-radius: 9px;
   background: transparent;
-  color: var(--text-2);
   font-size: var(--mantine-font-size-sm);
   font-weight: 500;
+  color: var(--text-2);
   cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
 }
 
-.tab:hover {
+.switchTab:hover {
   color: var(--text);
 }
 
-.tab:focus-visible {
+.switchTab:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline-offset: 1px;
 }
 
-.tab::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: transparent;
-}
-
-.tab[data-active] {
+.switchTab[data-active] {
+  background: var(--surface);
   color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--border);
 }
 
-.tab[data-active]::after {
-  background: var(--text);
-}
-
-.tabCount {
+.switchCount {
+  display: inline-grid;
+  place-items: center;
   min-width: 18px;
+  height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--text) 10%, transparent);
-  color: var(--text-2);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 17px;
-  text-align: center;
+  background: var(--mantine-color-red-6);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Takes whatever height is left between the header and the footer, and scrolls
-   inside it — `min-height: 0` is what stops a long feed from growing the
-   column and pushing the footer off the bottom. */
+.selectBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.selectCount {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.selectActions {
+  display: flex;
+  gap: 6px;
+}
+
 .scroll {
   flex: 1;
   min-height: 0;
@@ -195,8 +200,6 @@
   height: 100%;
 }
 
-/* A thin thumb on no track. The default draws a light grey bar down the edge
-   of the sheet, which on this surface is the brightest thing in the panel. */
 .scroll :global(.mantine-ScrollArea-scrollbar) {
   background: transparent;
   padding: 2px;
@@ -214,8 +217,51 @@
   background: color-mix(in srgb, var(--text) 28%, transparent);
 }
 
-/* Full-height sheet on a phone: at that width a 440px card inset from the
-   edges would leave slivers of page around it that read as a mistake. */
+.group {
+  padding: 4px 8px 6px;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 16px;
+}
+
+.footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 8px;
+}
+
+.skeletonLabel {
+  margin: 4px 10px 10px;
+}
+
+.skeletonRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+}
+
+.skeletonLines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 2px;
+}
+
 @media (max-width: 48em) {
   .overlay {
     background: color-mix(in srgb, #000 45%, transparent);

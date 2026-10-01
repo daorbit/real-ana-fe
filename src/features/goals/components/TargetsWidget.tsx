@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Button, Card, Center, Group, Stack, Text } from "@mantine/core";
+import { Button, Card, Center, Group, Skeleton, Stack, Text } from "@mantine/core";
 import { ArrowUpRight, Flag, Plus } from "lucide-react";
 import { Rings } from "@/features/goals/components/ProgressRing";
 import { TargetBar } from "@/features/goals/components/TargetBar";
@@ -9,7 +9,7 @@ import { RING_PALETTE } from "@/features/goals/tones";
 import classes from "@/features/goals/components/Goals.module.css";
 
 export function TargetsWidget({ workspaceId }: { workspaceId: string }) {
-  const { targets } = useTargets(workspaceId);
+  const { targets, loading } = useTargets(workspaceId);
   const achieved = targets.filter((t) => t.achieved).length;
   const featured = targets.slice(0, 3);
 
@@ -26,7 +26,22 @@ export function TargetsWidget({ workspaceId }: { workspaceId: string }) {
         </Button>
       </Group>
 
-      {targets.length === 0 ? (
+      {loading ? (
+        <div className={classes.widgetRings}>
+          <Skeleton height={104} width={104} circle />
+          <div className={classes.widgetList}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Stack key={i} gap={6}>
+                <Group justify="space-between" wrap="nowrap">
+                  <Skeleton height={12} width="50%" radius="sm" />
+                  <Skeleton height={12} width={56} radius="sm" />
+                </Group>
+                <Skeleton height={6} radius="xl" />
+              </Stack>
+            ))}
+          </div>
+        </div>
+      ) : targets.length === 0 ? (
         <Center py="md">
           <Stack align="center" gap={10}>
             <Rings

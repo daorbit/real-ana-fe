@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Card, Group, Text, Stack, Button, TextInput, SegmentedControl, ActionIcon,
-  Center, ThemeIcon, Progress, Badge, Tooltip,
+  Center, ThemeIcon, Progress, Badge, Tooltip, Skeleton,
 } from "@mantine/core";
 import { Target, Plus, Trash2, Inbox } from "lucide-react";
 import { useCreateGoalMutation, useDeleteGoalMutation } from "@/app/store";
@@ -14,9 +14,11 @@ import type { GoalResult } from "@/shared/types";
 export function GoalsPanel({
   workspaceId,
   goals,
+  loading = false,
 }: {
   workspaceId: string;
   goals: GoalResult[];
+  loading?: boolean;
 }) {
   const [name, setName] = useState("");
   const [kind, setKind] = useState<"page" | "event">("page");
@@ -106,7 +108,19 @@ export function GoalsPanel({
       </Stack>
 
       {/* Results */}
-      {goals.length === 0 ? (
+      {loading ? (
+        <Stack gap="md">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Stack key={i} gap={6}>
+              <Group justify="space-between">
+                <Skeleton height={12} width="45%" radius="sm" />
+                <Skeleton height={12} width={40} radius="sm" />
+              </Group>
+              <Skeleton height={6} radius="xl" />
+            </Stack>
+          ))}
+        </Stack>
+      ) : goals.length === 0 ? (
         <Center py="xl" mih={120}>
           <Stack align="center" gap={4}>
             <ThemeIcon variant="light" color="gray" size="md" radius="md"><Inbox size={16} /></ThemeIcon>

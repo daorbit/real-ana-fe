@@ -22,18 +22,12 @@ export function useDashboardList(dashboards: Dashboard[]) {
   const [sort, setSort] = useState<DashboardSort>("edited");
   const searching = query.trim().length > 0;
 
-  const featured = useMemo(
-    () => (dashboards.length ? [...dashboards].sort(COMPARE.edited)[0] : null),
-    [dashboards]
-  );
-
   const items = useMemo(() => {
     const q = query.trim().toLowerCase();
     return dashboards
       .filter((d) => !q || d.name.toLowerCase().includes(q) || d.description.toLowerCase().includes(q))
-      .filter((d) => searching || d.id !== featured?.id)
       .sort(COMPARE[sort]);
-  }, [dashboards, query, sort, searching, featured]);
+  }, [dashboards, query, sort]);
 
-  return { query, setQuery, sort, setSort, searching, featured: searching ? null : featured, items };
+  return { query, setQuery, sort, setSort, searching, items };
 }

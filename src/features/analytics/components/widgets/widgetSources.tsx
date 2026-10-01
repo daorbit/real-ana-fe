@@ -21,6 +21,14 @@ export type MetricSource = {
   sparkKey?: string;
 };
 
+export const METRIC_TONE: Record<string, string> = {
+  emerald: "#059669",
+  green: "#10b981",
+  cyan: "#0ea5e9",
+  amber: "#d97706",
+  pink: "#ec4899",
+};
+
 export type ListSource = {
   title: string;
   icon: LucideIcon;

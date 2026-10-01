@@ -1,7 +1,7 @@
 import { Card } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
-import { StatCard } from "@/shared/ui/StatCard";
-import { METRIC_BY_KEY, percentDelta, type MetricKey } from "@/features/searchConsole/searchMetrics";
+import { MetricTile } from "@/shared/ui/MetricTile";
+import { METRIC_BY_KEY, metricChange, type MetricKey } from "@/features/searchConsole/searchMetrics";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
 import { SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
 import { useSearchPerformanceData } from "@/features/searchConsole/widgets/useSearchWidgetData";
@@ -33,16 +33,16 @@ export function SearchKpiWidget({
   if (source.kind === "ready" && data && !failure) {
     const current = data.totals[metric];
     return (
-      <StatCard
-        icon={icon}
+      <MetricTile
+        id={`search-${metric}`}
         label={label}
+        color={def.color}
         value={def.format(current)}
-        color={def.tone}
-        delta={percentDelta(current, data.previous?.[metric])}
-        inverseDelta={def.lowerIsBetter}
+        change={metricChange(def, current, data.previous?.[metric])}
         spark={data.daily}
         sparkKey={metric}
         hint={`${HINTS[metric]} Last ${data.days} days.`}
+        tinted
       />
     );
   }

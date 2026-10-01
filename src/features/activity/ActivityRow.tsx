@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 import { ActionIcon, Button, Checkbox, Text, Tooltip, useMantineTheme } from "@mantine/core";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -90,29 +90,28 @@ export function ActivityRow({
           className={classes.check}
           aria-label={t("activity.selectRow", "Select notification")}
         />
-      ) : (
-        <span className={classes.dot} aria-hidden />
-      )}
+      ) : null}
 
-      <div
-        className={classes.chip}
-        data-kind={withAvatar ? "avatar" : visual.image ? "image" : "icon"}
-        style={
-          withAvatar && actorAvatarUrl
-            ? { backgroundImage: `url(${actorAvatarUrl})` }
-            : { color: accent }
-        }
-        aria-hidden
-      >
-        {withAvatar ? (
-          // Initials behind the image, so a broken or missing avatar still
-          // reads as a person rather than an empty circle.
-          !actorAvatarUrl && (actorName?.trim() || "?").slice(0, 1).toUpperCase()
-        ) : visual.image ? (
-          <img src={visual.image} alt="" width={32} height={32} />
-        ) : (
-          <Icon size={16} strokeWidth={2} />
-        )}
+      <div className={classes.chipWrap}>
+        <div
+          className={classes.chip}
+          data-kind={withAvatar ? "avatar" : visual.image ? "image" : "icon"}
+          style={
+            withAvatar && actorAvatarUrl
+              ? { backgroundImage: `url(${actorAvatarUrl})` }
+              : ({ "--chip": accent } as CSSProperties)
+          }
+          aria-hidden
+        >
+          {withAvatar ? (
+            !actorAvatarUrl && (actorName?.trim() || "?").slice(0, 1).toUpperCase()
+          ) : visual.image ? (
+            <img src={visual.image} alt="" width={36} height={36} />
+          ) : (
+            <Icon size={17} strokeWidth={2} />
+          )}
+        </div>
+        {unread && !selectable && <span className={classes.dot} aria-hidden />}
       </div>
 
       <div className={classes.main}>
@@ -135,9 +134,9 @@ export function ActivityRow({
         )}
 
         <div className={classes.meta}>
-          <span>{notificationTypeLabel(notification.type, t)}</span>
+          <span className={classes.tag}>{notificationTypeLabel(notification.type, t)}</span>
           {isSettledInvite && !selectable && (
-            <span>· {t("activity.inviteHandled", "Responded")}</span>
+            <span className={classes.tag}>{t("activity.inviteHandled", "Responded")}</span>
           )}
         </div>
 

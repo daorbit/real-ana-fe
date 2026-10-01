@@ -1,4 +1,6 @@
-import { StatCard } from "@/shared/ui/StatCard";
+import { MetricTile } from "@/shared/ui/MetricTile";
+import { percentChange } from "@/shared/lib/metricChange";
+import { num } from "@/shared/lib";
 import { WorldMap } from "@/shared/ui/WorldMap";
 import { Heatmap } from "@/shared/ui/Heatmap";
 import { ClicksPanel } from "@/features/analytics/components/ClicksPanel";
@@ -10,7 +12,7 @@ import { TargetsWidget } from "@/features/goals/components/TargetsWidget";
 import { MiniList } from "@/features/analytics/components/widgets/MiniList";
 import { TrafficCard } from "@/features/analytics/components/widgets/TrafficCard";
 import { LivePagesCard } from "@/features/analytics/components/widgets/LivePagesCard";
-import { listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
+import { METRIC_TONE, listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
 import { SearchWidget } from "@/features/searchConsole/widgets/SearchWidget";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
@@ -33,8 +35,22 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
   const { stats, sites = [], siteScope = [], workspaceId, embedded = false } = data;
   const live = data.live ?? stats?.live ?? 0;
 
-  const metrics = metricSources(stats, live, sites.length);
-  if (metrics[id]) return <StatCard {...metrics[id]} />;
+  const metric = metricSources(stats, live, sites.length)[id];
+  if (metric) {
+    return (
+      <MetricTile
+        id={id}
+        label={metric.label}
+        color={METRIC_TONE[metric.color] ?? METRIC_TONE.emerald}
+        value={typeof metric.value === "number" ? num(metric.value) : metric.value}
+        change={percentChange(metric.delta, metric.inverseDelta)}
+        spark={metric.spark}
+        sparkKey={metric.sparkKey ?? "views"}
+        live={metric.live}
+        tinted
+      />
+    );
+  }
 
   const lists = listSources(stats);
   if (lists[id]) return <MiniList {...lists[id]} />;
@@ -66,7 +82,7 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
     return <SearchWidget id={id} workspaceId={workspaceId} sites={sites} siteScope={siteScope} range={data.range} />;
   }
 
-  if (id === "goals") return <GoalsPanel workspaceId={workspaceId} goals={stats?.goals ?? []} />;
+  if (id === "goals") return <GoalsPanel workspaceId={workspaceId} goals={stats?.goals ?? []} loading={!stats} />;
   if (id === "targets") return <TargetsWidget workspaceId={workspaceId} />;
   if (id === "seoScore") {
     const seoSite = (siteScope.length === 1 && sites.find((s) => s.siteId === siteScope[0])) || sites[0];

@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Button, CloseButton, Input, Modal, SegmentedControl, TextInput } from "@mantine/core";
-import { ArrowRight } from "lucide-react";
-import { WIDGET_MAP } from "@/features/analytics/widgetCatalog";
+import { ArrowRight, CalendarRange, LayoutGrid } from "lucide-react";
 import { MiniWindow } from "@/features/dashboards/components/MiniWindow";
 import { SearchRequirementNote } from "@/features/dashboards/components/templates/SearchRequirementNote";
+import { TemplateWidgetGroups } from "@/features/dashboards/components/templates/TemplateWidgetGroups";
 import { defaultDashboardName } from "@/features/dashboards/hooks/useCreateDashboard";
-import { widgetIcon } from "@/features/dashboards/widgetIcons";
-import { layoutMix } from "@/features/dashboards/templates";
-import { DASHBOARD_RANGES } from "@/features/dashboards/types";
+import { isSearchWidget } from "@/features/analytics/widgetCatalog";
+import { DASHBOARD_RANGES, rangeLong } from "@/features/dashboards/types";
 import type { DashboardRange } from "@/features/dashboards/types";
 import type { DashboardTemplate } from "@/features/dashboards/templates";
 import shared from "@/features/dashboards/components/Dashboards.module.css";
@@ -36,16 +35,16 @@ export function TemplatePreviewModal({
   if (!template) return <Modal opened={false} onClose={onClose} />;
 
   const Icon = template.icon;
-  const blank = template.layout.length === 0;
-  const mix = layoutMix(template.layout);
-  const searchCount = mix.find((m) => m.group === "Search")?.count ?? 0;
+  const count = template.layout.length;
+  const blank = count === 0;
+  const searchCount = template.layout.filter((p) => isSearchWidget(p.id)).length;
   const submit = () => name.trim() && onCreate(template, name, range);
 
   return (
     <Modal
       opened
       onClose={onClose}
-      size={1080}
+      size={1040}
       radius="lg"
       padding={0}
       centered
@@ -58,46 +57,35 @@ export function TemplatePreviewModal({
         </div>
 
         <div className={classes.previewBody}>
-          <CloseButton className={classes.previewClose} onClick={onClose} aria-label="Close" />
-
-          <span className={classes.eyebrow}>
-            <span className={classes.eyebrowIcon}><Icon size={15} /></span>
-            {template.category ?? "Start fresh"}
-          </span>
-          <h2 className={classes.previewTitle}>{blank ? "Blank canvas" : template.name}</h2>
-          <p className={classes.previewDesc}>{template.description}</p>
-
-          {mix.length > 0 && (
-            <div className={classes.mix}>
-              {mix.map((m) => (
-                <div key={m.group} className={classes.mixItem}>
-                  <span className={classes.mixValue}>{m.count}</span>
-                  <span className={classes.mixLabel}>{m.group}</span>
-                </div>
-              ))}
+          <div className={classes.previewScroll}>
+            <div className={classes.previewHead}>
+              <span className={classes.eyebrow}>
+                <span className={classes.eyebrowIcon}><Icon size={15} /></span>
+                {template.category ?? "Start fresh"}
+              </span>
+              <CloseButton onClick={onClose} aria-label="Close" />
             </div>
-          )}
 
-          {!blank && (
             <div>
-              <div className={classes.sectionLabel}>Included widgets</div>
-              <div className={classes.widgetList}>
-                {template.layout.map((p) => {
-                  const WidgetIcon = widgetIcon(p.id);
-                  return (
-                    <span key={p.id} className={classes.widgetChip}>
-                      <WidgetIcon size={12} />
-                      {WIDGET_MAP[p.id]?.label ?? p.id}
-                    </span>
-                  );
-                })}
+              <h2 className={classes.previewTitle}>{blank ? "Blank canvas" : template.name}</h2>
+              <p className={classes.previewDesc}>{template.description}</p>
+              <div className={classes.previewFacts}>
+                <span><LayoutGrid size={13} />{blank ? "Pick your own widgets" : `${count} widgets`}</span>
+                <span><CalendarRange size={13} />Starts on {rangeLong(template.range)}</span>
               </div>
             </div>
-          )}
 
-          {searchCount > 0 && <SearchRequirementNote count={searchCount} />}
+            {!blank && (
+              <div>
+                <div className={classes.sectionLabel}>What's inside</div>
+                <TemplateWidgetGroups layout={template.layout} />
+              </div>
+            )}
 
-          <div className={classes.form}>
+            {searchCount > 0 && <SearchRequirementNote count={searchCount} />}
+          </div>
+
+          <div className={classes.previewFooter}>
             <TextInput
               label="Dashboard name"
               value={name}
