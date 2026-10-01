@@ -1,5 +1,5 @@
 import { UnstyledButton } from "@mantine/core";
-import { CodeXml, Plus } from "lucide-react";
+import { CodeXml, Lock, Plus } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { EmbedCard } from "@/features/dashboards/components/embeds/EmbedCard";
 import { useEmbedActions } from "@/features/dashboards/hooks/useEmbedActions";
@@ -10,16 +10,32 @@ export function EmbedsPanel({
   workspaceId,
   embeds,
   canEdit,
+  locked,
+  planName,
   onOpen,
   onNew,
 }: {
   workspaceId: string;
   embeds: Embed[];
   canEdit: boolean;
+  locked: boolean;
+  planName: string;
   onOpen: (embed: Embed) => void;
   onNew: () => void;
 }) {
   const { toggleEmbed, deleteEmbed } = useEmbedActions(workspaceId);
+
+  if (embeds.length === 0 && locked) {
+    return (
+      <EmptyState
+        icon={Lock}
+        title="Embedded widgets are on Starter and up"
+        description={`The ${planName} plan doesn't include embeds. Upgrade to put live charts and KPIs on your website, a client portal or a Notion page.`}
+        action={{ label: "See plans", to: "/app/billing" }}
+        minHeight="44vh"
+      />
+    );
+  }
 
   if (embeds.length === 0) {
     return (
@@ -45,7 +61,7 @@ export function EmbedsPanel({
           onDelete={() => deleteEmbed(e)}
         />
       ))}
-      {canEdit && (
+      {canEdit && !locked && (
         <UnstyledButton className={classes.newTile} onClick={onNew}>
           <span className={classes.newTileIcon}><Plus size={20} /></span>
           <span className={classes.newTileTitle}>Embed a widget</span>

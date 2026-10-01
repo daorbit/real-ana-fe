@@ -5,7 +5,8 @@ import {
 } from "@mantine/core";
 import { Target, Plus, Trash2, Inbox } from "lucide-react";
 import { useCreateGoalMutation, useDeleteGoalMutation } from "@/app/store";
-import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
+import { notify, notifyError, errMessage, confirmDelete } from "@/shared/lib/notify";
+import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import type { GoalResult } from "@/shared/types";
@@ -27,11 +28,16 @@ export function GoalsPanel({
   const [create, { isLoading: creating }] = useCreateGoalMutation();
   const [remove] = useDeleteGoalMutation();
   const { user } = useAuth();
+  const allowance = useFeatureAllowance("conversionGoals", goals.length);
 
   const add = async () => {
     const n = name.trim();
     const m = match.trim();
     if (!n || !m) return;
+    if (!loading && allowance.atLimit) {
+      allowance.prompt();
+      return;
+    }
     trace(user?.id, "goal_added", "goals_panel", kind);
     try {
       await create({ workspaceId, name: n, kind, match: m }).unwrap();
@@ -39,7 +45,7 @@ export function GoalsPanel({
       setMatch("");
       notify.success("Goal added.", "Goals");
     } catch (e) {
-      notify.error(errMessage(e, "Could not add the goal."));
+      notifyError(e, "Could not add the goal.");
     }
   };
 
@@ -64,6 +70,7 @@ export function GoalsPanel({
       <Group gap={8} mb="md">
         <Target size={15} className="sect-ic" />
         <Text fw={600} c="dimmed" size="sm">Conversion goals</Text>
+        {allowance.usage && !loading && <Text size="xs" c="dimmed">{allowance.usage}</Text>}
       </Group>
 
       {/* Add a goal */}

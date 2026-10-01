@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@mantine/core";
 import { Plus, FolderKanban, LayoutGrid } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
@@ -14,6 +14,7 @@ import { DashboardLibrary } from "@/features/dashboards/components/home/Dashboar
 import { StartPanel } from "@/features/dashboards/components/home/StartPanel";
 import { DashboardListSkeleton, DashboardWelcomeSkeleton } from "@/features/dashboards/components/DashboardsSkeletons";
 import { useHasDashboardsHint } from "@/features/dashboards/hooks/useHasDashboardsHint";
+import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
 import { EmbedsPanel } from "@/features/dashboards/components/embeds/EmbedsPanel";
 import { EmbedModal } from "@/features/dashboards/components/embeds/EmbedModal";
 import type { DashboardsView } from "@/features/dashboards/components/home/ViewSwitch";
@@ -33,6 +34,9 @@ export default function Dashboards() {
   const isLoading = dashboardsLoading || embedsLoading;
   const expectsList = useHasDashboardsHint(workspaceId, !isLoading, dashboards.length + embeds.length > 0);
   const [embedTarget, setEmbedTarget] = useState<EmbedTarget>(null);
+  const navigate = useNavigate();
+  const dashboardAllowance = useFeatureAllowance("dashboards", dashboards.length);
+  const embedAllowance = useFeatureAllowance("embeds", embeds.length);
 
   if (!active) {
     return (
@@ -55,17 +59,18 @@ export default function Dashboards() {
     );
   }
 
-  const newEmbed = () => setEmbedTarget({ id: null });
+  const newEmbed = () => embedAllowance.guard(() => setEmbedTarget({ id: null }));
+  const newDashboard = () => dashboardAllowance.guard(() => navigate("/app/dashboards/new"));
   const switchTo = (view: DashboardsView) => setParams(view === "embeds" ? { tab: "embeds" } : {}, { replace: true });
 
   let action: ReactNode = null;
   if (canEdit && tab === "dashboards" && dashboards.length > 0) {
     action = (
-      <Button component={Link} to="/app/dashboards/new" color="emerald" leftSection={<Plus size={15} />}>
+      <Button color="emerald" leftSection={<Plus size={15} />} onClick={newDashboard}>
         New dashboard
       </Button>
     );
-  } else if (canEdit && tab === "embeds" && embeds.length > 0) {
+  } else if (canEdit && tab === "embeds" && embeds.length > 0 && !embedAllowance.locked) {
     action = (
       <Button color="emerald" leftSection={<Plus size={15} />} onClick={newEmbed}>
         New embed
@@ -88,7 +93,13 @@ export default function Dashboards() {
       </PageHeader>
 
       {tab === "dashboards" && dashboards.length > 0 && (
-        <DashboardLibrary workspaceId={active._id} dashboards={dashboards} canEdit={canEdit} />
+        <DashboardLibrary
+          workspaceId={active._id}
+          dashboards={dashboards}
+          canEdit={canEdit}
+          usage={dashboardAllowance.usage}
+          onNew={newDashboard}
+        />
       )}
 
       {tab === "dashboards" && dashboards.length === 0 && (canEdit ? (
@@ -107,6 +118,8 @@ export default function Dashboards() {
           workspaceId={active._id}
           embeds={embeds}
           canEdit={canEdit}
+          locked={embedAllowance.locked}
+          planName={embedAllowance.plan}
           onOpen={(e) => setEmbedTarget({ id: e.id })}
           onNew={newEmbed}
         />

@@ -3,7 +3,7 @@ import {
   useCreateEmbedMutation, useGetEmbedsQuery, useUpdateEmbedMutation,
 } from "@/features/dashboards/api";
 import { WIDGET_MAP } from "@/features/analytics/widgetCatalog";
-import { errMessage, notify } from "@/shared/lib/notify";
+import { errMessage, notify, notifyError } from "@/shared/lib/notify";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
 import type { DashboardRange, EmbedInput, EmbedTheme } from "@/features/dashboards/types";
 
@@ -75,7 +75,7 @@ export function useEmbedEditor({
       setCurrentId(created.id);
       notify.success("Embed created. Copy the code below.", "Embeds");
     } catch (e) {
-      notify.error(errMessage(e, "Could not create the embed."));
+      notifyError(e, "Could not create the embed.");
     }
   };
 

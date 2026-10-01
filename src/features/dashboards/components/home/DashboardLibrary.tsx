@@ -15,10 +15,14 @@ export function DashboardLibrary({
   workspaceId,
   dashboards,
   canEdit,
+  usage,
+  onNew,
 }: {
   workspaceId: string;
   dashboards: Dashboard[];
   canEdit: boolean;
+  usage: string | null;
+  onNew: () => void;
 }) {
   const navigate = useNavigate();
   const { duplicateDashboard, deleteDashboard, busy } = useDashboardActions(workspaceId);
@@ -38,6 +42,7 @@ export function DashboardLibrary({
     <div className={classes.library}>
       <LibraryToolbar
         count={dashboards.length}
+        usage={usage}
         query={list.query}
         sort={list.sort}
         view={view}
@@ -50,7 +55,7 @@ export function DashboardLibrary({
       ) : view === "list" ? (
         <DashboardTable {...props} />
       ) : (
-        <DashboardGrid {...props} showNew={canEdit && !list.searching} />
+        <DashboardGrid {...props} showNew={canEdit && !list.searching} onNew={onNew} />
       )}
     </div>
   );

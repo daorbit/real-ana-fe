@@ -655,6 +655,8 @@ export type UsageHistory = {
   plans: UsagePlanEvent[];
 };
 
+export type FeatureAllowance = { quota: number; used: number };
+
 export type QuotaSummary = {
   workspaceId: string;
   plan: { slug: string; name: string };
@@ -725,6 +727,10 @@ export type QuotaSummary = {
     pageViews: boolean;
     inspections: { planQuota: number; used: number; addonCredits: number };
   };
+  dashboards?: FeatureAllowance;
+  embeds?: FeatureAllowance;
+  goalTargets?: FeatureAllowance;
+  conversionGoals?: FeatureAllowance;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
   /** Comparison baselines this plan may pick. Every tier keeps "previous". */

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCreateDashboardMutation } from "@/features/dashboards/api";
+import { useCreateDashboardMutation, useGetDashboardsQuery } from "@/features/dashboards/api";
+import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
 import { TEMPLATE_MAP } from "@/features/dashboards/templates";
-import { errMessage, notify } from "@/shared/lib/notify";
+import { notifyError } from "@/shared/lib/notify";
 import type { DashboardRange } from "@/features/dashboards/types";
 
 const MIN_BUILD_MS = 1900;
@@ -16,9 +17,15 @@ export function useCreateDashboard(workspaceId: string | undefined) {
   const navigate = useNavigate();
   const [create] = useCreateDashboardMutation();
   const [creating, setCreating] = useState<{ templateId: string; name: string } | null>(null);
+  const { data: dashboards = [] } = useGetDashboardsQuery(workspaceId ?? "", { skip: !workspaceId });
+  const allowance = useFeatureAllowance("dashboards", dashboards.length);
 
   const createFromTemplate = async (templateId: string, name?: string, range?: DashboardRange) => {
     if (!workspaceId || creating) return false;
+    if (allowance.atLimit) {
+      allowance.prompt();
+      return false;
+    }
     const template = TEMPLATE_MAP[templateId] ?? TEMPLATE_MAP.blank;
     const finalName = name?.trim() || defaultDashboardName(template.id);
     setCreating({ templateId: template.id, name: finalName });
@@ -38,7 +45,7 @@ export function useCreateDashboard(workspaceId: string | undefined) {
       navigate(`/app/dashboards/${dashboard.id}${template.layout.length ? "" : "?customize=1"}`);
       return true;
     } catch (e) {
-      notify.error(errMessage(e, "Could not create the dashboard."));
+      notifyError(e, "Could not create the dashboard.");
       return false;
     } finally {
       setCreating(null);

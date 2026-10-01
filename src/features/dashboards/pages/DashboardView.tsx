@@ -20,7 +20,8 @@ import { CustomizeDrawer } from "@/features/analytics/components/CustomizeDrawer
 import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
 import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRenderer";
 import { LayoutEditControls } from "@/features/analytics/components/widgets/LayoutEditControls";
-import { useGetDashboardQuery } from "@/features/dashboards/api";
+import { useGetDashboardQuery, useGetEmbedsQuery } from "@/features/dashboards/api";
+import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
 import { useDashboardLayout } from "@/features/dashboards/hooks/useDashboardLayout";
 import { useDashboardRange } from "@/features/dashboards/hooks/useDashboardRange";
 import { useDashboardActions } from "@/features/dashboards/hooks/useDashboardActions";
@@ -61,6 +62,9 @@ export default function DashboardView() {
   const [editing, setEditing] = useState(false);
   const [customizing, setCustomizing] = useState(false);
   const [embedWidget, setEmbedWidget] = useState<WidgetId | null>(null);
+  const { data: embeds = [] } = useGetEmbedsQuery(workspaceId ?? "", { skip: !workspaceId });
+  const embedAllowance = useFeatureAllowance("embeds", embeds.length);
+  const embedWidgetOf = (wid: WidgetId) => embedAllowance.guard(() => setEmbedWidget(wid));
 
   useEffect(() => {
     if (params.get("customize") !== "1" || !dashboard || !canEdit) return;
@@ -194,9 +198,11 @@ export default function DashboardView() {
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item leftSection={<Code2 size={14} />} onClick={() => setEmbedWidget(layout.layout.find((p) => isEmbeddable(p.id))?.id ?? "visitors")}>
-                  Embed a widget
-                </Menu.Item>
+                {!embedAllowance.locked && (
+                  <Menu.Item leftSection={<Code2 size={14} />} onClick={() => embedWidgetOf(layout.layout.find((p) => isEmbeddable(p.id))?.id ?? "visitors")}>
+                    Embed a widget
+                  </Menu.Item>
+                )}
                 <Menu.Item leftSection={<Copy size={14} />} onClick={() => duplicateDashboard(dashboard, true)}>
                   Duplicate
                 </Menu.Item>
@@ -249,7 +255,7 @@ export default function DashboardView() {
             onSpan={layout.setSpan}
             onRemove={layout.remove}
             render={(wid) => (
-              <WidgetFrame onEmbed={canEdit && !editing && isEmbeddable(wid) ? () => setEmbedWidget(wid) : undefined}>
+              <WidgetFrame onEmbed={canEdit && !editing && !embedAllowance.locked && isEmbeddable(wid) ? () => embedWidgetOf(wid) : undefined}>
                 <WidgetRenderer id={wid} data={widgetData} />
               </WidgetFrame>
             )}

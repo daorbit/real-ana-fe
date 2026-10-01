@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCreateTargetMutation, useDeleteTargetMutation, useUpdateTargetMutation } from "@/features/goals/api";
-import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
+import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/notify";
 import type { TargetInput, TargetProgress } from "@/features/goals/types";
 
 type Editing = { id: string | null; initial: Partial<TargetInput> | null };
@@ -30,7 +30,7 @@ export function useTargetEditor(workspaceId: string | undefined) {
       notify.success(editing.id ? "Goal updated." : "Goal created — progress is live.", "Goals");
       setEditing(null);
     } catch (e) {
-      notify.error(errMessage(e, "Could not save the goal."));
+      notifyError(e, "Could not save the goal.");
     }
   };
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeleteDashboardMutation, useDuplicateDashboardMutation } from "@/features/dashboards/api";
-import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
+import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/notify";
 import type { CardBusy } from "@/features/dashboards/components/home/DashboardCard";
 import type { Dashboard } from "@/features/dashboards/types";
 
@@ -27,7 +27,7 @@ export function useDashboardActions(workspaceId: string | undefined) {
       notify.success(`“${copy.name}” is ready.`, "Dashboard duplicated");
       if (open) navigate(`/app/dashboards/${copy.id}`);
     } catch (e) {
-      notify.error(errMessage(e, "Could not duplicate the dashboard."));
+      notifyError(e, "Could not duplicate the dashboard.");
     } finally {
       mark(d.id, null);
     }

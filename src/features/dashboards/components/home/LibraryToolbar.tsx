@@ -13,6 +13,7 @@ const VIEWS = [
 
 export function LibraryToolbar({
   count,
+  usage,
   query,
   sort,
   view,
@@ -21,6 +22,7 @@ export function LibraryToolbar({
   onView,
 }: {
   count: number;
+  usage: string | null;
   query: string;
   sort: DashboardSort;
   view: LibraryView;
@@ -31,7 +33,7 @@ export function LibraryToolbar({
   return (
     <div className={classes.libraryHead}>
       <span className={classes.libraryCount}>
-        All dashboards<span>{count}</span>
+        All dashboards<span>{usage ?? count}</span>
       </span>
       <div className={classes.libraryControls}>
         <TextInput

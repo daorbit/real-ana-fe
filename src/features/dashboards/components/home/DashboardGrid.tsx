@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { UnstyledButton } from "@mantine/core";
 import { Plus } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
@@ -11,6 +10,7 @@ export function DashboardGrid({
   dashboards,
   canEdit,
   showNew,
+  onNew,
   busy,
   onOpen,
   onDuplicate,
@@ -19,6 +19,7 @@ export function DashboardGrid({
   dashboards: Dashboard[];
   canEdit: boolean;
   showNew: boolean;
+  onNew: () => void;
   busy: Record<string, CardBusy>;
   onOpen: (d: Dashboard) => void;
   onDuplicate: (d: Dashboard) => void;
@@ -41,7 +42,7 @@ export function DashboardGrid({
         ))}
       </AnimatePresence>
       {showNew && (
-        <UnstyledButton component={Link} to="/app/dashboards/new" className={classes.newTile}>
+        <UnstyledButton className={classes.newTile} onClick={onNew}>
           <span className={classes.newTileIcon}><Plus size={18} /></span>
           <span className={classes.newTileTitle}>New dashboard</span>
           <span className={classes.newTileText}>From a template or a blank canvas</span>
