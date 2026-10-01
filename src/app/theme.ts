@@ -145,7 +145,8 @@ export const theme = createTheme({
     }),
     ActionIcon: ActionIcon.extend({
       vars: (_theme, props) =>
-        props.variant === "filled" && (!props.color || props.color === "emerald")
+        (props.variant === undefined || props.variant === "filled") &&
+        (!props.color || props.color === "emerald")
           ? {
               root: {
                 "--ai-bg": "var(--cta)",

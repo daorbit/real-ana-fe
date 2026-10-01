@@ -422,6 +422,27 @@
   --ai-bg: var(--q-cta);
   --ai-hover: var(--q-cta-hover);
   --ai-color: var(--q-cta-fg);
+  background: var(--q-cta) !important;
+  color: var(--q-cta-fg) !important;
+  transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease;
+}
+
+.send svg {
+  color: currentColor;
+  stroke: currentColor;
+}
+
+.send:hover:not(:disabled):not([data-disabled]) {
+  background: var(--q-cta-hover) !important;
+  color: var(--q-cta-fg) !important;
+}
+
+.send:disabled,
+.send[data-disabled] {
+  background: var(--q-border) !important;
+  color: var(--q-fg-faint) !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
 }
 
 .composer textarea {
