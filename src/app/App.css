@@ -1011,53 +1011,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 
-.rail-orbit {
-
-  --rail-orbit-edge: linear-gradient(
-    90deg,
-    #8b5cf6 0%,
-    #a855f7 9%,
-    #f0abfc 16%,
-    #fbbf24 27%,
-    #a3e635 39%,
-    #22c55e 50%,
-    #a855f7 59%,
-    #f0abfc 66%,
-    #fbbf24 77%,
-    #a3e635 89%,
-    #8b5cf6 100%
-  );
-
-  position: relative;
-  /* Its own stacking context, so the glow behind it sits under the card but
-     still above the rail rather than disappearing through it. */
-  isolation: isolate;
-  padding: 11px 12px;
-  border-radius: 12px;
-  color: var(--text);
-
-
-  border: 1.5px solid transparent;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    var(--rail-orbit-edge) border-box;
-  background-size: 100% 100%, 300% 100%;
-  animation: rail-orbit-drift 9s linear infinite;
-}
-
- 
-@keyframes rail-orbit-drift {
-  from { background-position: 0 0, 0% 50%; }
-  to { background-position: 0 0, 100% 50%; }
-}
-
-.rail-orbit:hover {
-  background:
-    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
-    var(--rail-orbit-edge) border-box;
-  background-size: 100% 100%, 300% 100%;
-}
-
 /*
  * Leaving for Orbit's page: the card fades and settles out in place rather
  * than blinking away, and the row collapses behind it so the cards below
@@ -1094,19 +1047,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
     max-height: 0;
   }
 }
-
-/* A decorative loop is exactly what someone turning motion down is asking to
-   be spared, and the card reads the same standing still. */
-[data-motion="off"] .rail-orbit {
-  animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rail-orbit {
-    animation: none;
-  }
-}
-
 
 .plan-cta--resting:disabled,
 .plan-cta--resting[data-disabled] {
@@ -3518,16 +3458,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 [data-motion="off"] .empty-state__icon,
 [data-motion="off"] .empty-state__icon::before { animation: none; }
-
-
-.account-menu__header {
-  padding: 12px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-
-  margin: -4px -4px 6px;
-  border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
-}
 
 
 .account-menu .mantine-Menu-item {

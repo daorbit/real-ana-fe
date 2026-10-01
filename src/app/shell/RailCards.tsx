@@ -8,6 +8,7 @@ import {
   Progress,
   Text,
   ThemeIcon,
+  Tooltip,
   UnstyledButton,
 } from "@mantine/core";
 import { ArrowUpRight, Eye, LogOut, PlayCircle, UserPlus } from "lucide-react";
@@ -18,6 +19,7 @@ import { useAuth } from "@/features/auth/context";
 import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
 import { isPlainLeftClick, supportsViewTransitions, transitionTo } from "@/app/viewTransition";
+import classes from "./Rail.module.css";
 
 /** Matches the `rail-orbit-fade-out` keyframes' duration in App.css. */
 const FLY_OUT_MS = 320;
@@ -58,25 +60,19 @@ export function OrbitCard({ collapsed }: { collapsed: boolean }) {
 
   if (collapsed) {
     return (
-      <UnstyledButton
-        component={Link}
-        to="/app/orbit"
-        onClick={go}
-        className="nav-link rail-orbit-mini"
-        data-collapsed
-        data-leaving={leaving || undefined}
-        aria-label={label}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          padding: "8px 10px",
-          marginBottom: 8,
-        }}
-      >
-        <OrbitMark size={18} />
-      </UnstyledButton>
+      <Tooltip label={label} position="right" withArrow openDelay={200}>
+        <UnstyledButton
+          component={Link}
+          to="/app/orbit"
+          onClick={go}
+          className={`rail-orbit-mini ${classes.orbit}`}
+          data-collapsed
+          data-leaving={leaving || undefined}
+          aria-label={label}
+        >
+          <span className={classes.orbitIcon}><OrbitMark size={22} /></span>
+        </UnstyledButton>
+      </Tooltip>
     );
   }
 
@@ -85,25 +81,15 @@ export function OrbitCard({ collapsed }: { collapsed: boolean }) {
       component={Link}
       to="/app/orbit"
       onClick={go}
-      className="rail-orbit"
+      className={`rail-orbit ${classes.orbit}`}
       data-leaving={leaving || undefined}
-      style={{ display: "block", width: "100%", marginBottom: 8 }}
     >
-      <Group gap={9} wrap="nowrap" align="flex-start">
-        <Box mt={1} style={{ flexShrink: 0 }}>
-          <OrbitMark size={20} />
-        </Box>
-        <Box style={{ minWidth: 0, flex: 1 }}>
-          <Text size="xs" fw={700} lh={1.3} truncate>
-            {label}
-          </Text>
-          {/* Says what it does rather than naming the page — the row it
-              replaced in the navigation list already said the name twice. */}
-          <Text size="xs" lh={1.35} mt={1} c="dimmed">
-            {t("nav.orbitHint", "Ask anything about your analytics")}
-          </Text>
-        </Box>
-      </Group>
+      <span className={classes.orbitIcon}><OrbitMark size={22} /></span>
+      <span className={classes.orbitText}>
+        <span className={classes.orbitTitle}>{label}</span>
+        <span className={classes.orbitHint}>{t("nav.orbitHint", "Ask anything about your analytics")}</span>
+      </span>
+      <span className={classes.orbitKbd}>AI</span>
     </UnstyledButton>
   );
 }

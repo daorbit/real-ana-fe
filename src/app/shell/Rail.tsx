@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import { useState } from "react";
+import { useThemeMode } from "./useThemeMode";
+import { ThemeToggleButton } from "./ThemeSwitch";
+import classes from "./Rail.module.css";
 import { RailBrand } from "./RailBrand";
 import { SearchButton } from "./SearchButton";
 import { NavGroups } from "./NavGroups";
@@ -35,9 +37,7 @@ export function Rail({
 }) {
   const { t } = useTranslation();
   const { user, logout, exitImpersonation, isDemo } = useAuth();
-  const { setColorScheme } = useMantineColorScheme();
-  const scheme = useComputedColorScheme("light");
-  const dark = scheme === "dark";
+  const { mode, setMode } = useThemeMode();
 
   const { demo, available: demoAvailable, toggle: toggleDemo } = useDemo();
 
@@ -123,40 +123,31 @@ export function Rail({
           />
         )}
 
-        {/* No invite card here: an invitation arrives as a notification with
-            Accept and Decline on it, so the rail was a second copy of the same
-            thing with fewer controls.
-
-            The plan is dropped rather than abbreviated when the rail is
-            narrow — it is prose, and still one click away in the account
-            menu. */}
-        {/* Orbit sits with the cards rather than in the navigation list — see
-            `OrbitCard`. First of them, so the assistant stays above the
-            warnings that come and go beneath it. */}
-        <OrbitCard collapsed={collapsed} />
-
         {!isDemo && !collapsed && <PlanCard />}
 
-        {/* No workspace switch down here: the header at the top of the rail
-            names the active workspace and opens the same menu, so a second
-            way in at the other end of the column is just a duplicate. */}
         {isDemo && <DemoCard collapsed={collapsed} onExit={logout} />}
 
-        <AccountMenu
-          collapsed={collapsed}
-          mobile={mobile}
-          name={user?.name ?? ""}
-          email={user?.email ?? ""}
-          avatarUrl={user?.avatarUrl}
-          initials={initials}
-          isAdmin={isAdmin}
-          dark={dark}
-          onToggleScheme={() => setColorScheme(dark ? "light" : "dark")}
-          demo={demo}
-          demoAvailable={demoAvailable}
-          onToggleDemo={toggleDemo}
-          onLogout={() => setLogoutOpen(true)}
-        />
+        <div className={classes.foot} data-collapsed={collapsed || undefined}>
+          <OrbitCard collapsed={collapsed} />
+          <div className={classes.accountRow}>
+            <AccountMenu
+              collapsed={collapsed}
+              mobile={mobile}
+              name={user?.name ?? ""}
+              email={user?.email ?? ""}
+              avatarUrl={user?.avatarUrl}
+              initials={initials}
+              isAdmin={isAdmin}
+              mode={mode}
+              onMode={setMode}
+              demo={demo}
+              demoAvailable={demoAvailable}
+              onToggleDemo={toggleDemo}
+              onLogout={() => setLogoutOpen(true)}
+            />
+            <ThemeToggleButton onChange={setMode} />
+          </div>
+        </div>
       </MantineShell.Section>
 
       <LogoutDialog
