@@ -1,27 +1,39 @@
-.root .badge,
-.root .badgeWide {
+.bell {
+  position: relative;
+  display: inline-flex;
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  height: 20px;
-  min-width: 20px;
-  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--mantine-color-red-6);
+  box-shadow: 0 0 0 2px var(--shell);
+  color: #ffffff;
+  font-size: 8.5px;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  pointer-events: none;
 }
 
-.root .badge {
-  width: 20px;
-  padding: 0;
-  border-radius: 50%;
-}
-
-.root .badgeWide {
+.badge[data-wide] {
   width: auto;
-  padding: 0 5px;
-  border-radius: 999px;
+  min-width: 16px;
+  padding: 0 4px;
+}
+
+.bell[data-size="md"] .badge {
+  top: -4px;
+  right: -4px;
 }

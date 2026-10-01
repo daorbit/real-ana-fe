@@ -1,4 +1,4 @@
-import { ActionIcon, Indicator, Tooltip } from "@mantine/core";
+import { ActionIcon, Tooltip } from "@mantine/core";
 import { Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useActivityPanel } from "./ActivityPanelContext";
@@ -37,17 +37,7 @@ export function ActivityBellIcon({
 
   return (
     <Tooltip label={count > 0 ? `${label} · ${badge}` : label} withArrow disabled={!withTooltip}>
-      <Indicator
-        inline
-        className="activity-bell"
-        disabled={count === 0}
-        label={badge}
-        size={20}
-        offset={size === "md" ? 4 : 6}
-        color="red"
-        withBorder
-        classNames={{ root: classes.root, indicator: count > 99 ? classes.badgeWide : classes.badge }}
-      >
+      <span className={`activity-bell ${classes.bell}`} data-size={size}>
         <ActionIcon
           variant={variant}
           color={variant === "subtle" ? "gray" : undefined}
@@ -58,7 +48,12 @@ export function ActivityBellIcon({
         >
           <Bell size={iconSize} />
         </ActionIcon>
-      </Indicator>
+        {count > 0 && (
+          <span className={classes.badge} data-wide={badge.length > 2 || undefined} aria-hidden>
+            {badge}
+          </span>
+        )}
+      </span>
     </Tooltip>
   );
 }

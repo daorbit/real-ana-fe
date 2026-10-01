@@ -15,19 +15,7 @@
 }
 
 .row:hover {
-  background: color-mix(in srgb, var(--text) 5%, transparent);
-}
-
-.row[data-unread] {
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
-}
-
-.row[data-unread]:hover {
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.row[data-severity="critical"] {
-  background: color-mix(in srgb, var(--mantine-color-red-6) 7%, transparent);
+  background: var(--surface-2);
 }
 
 .row:focus-visible {
@@ -36,7 +24,8 @@
 }
 
 .row[data-selected] {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
 }
 
 .row[data-settled] {
