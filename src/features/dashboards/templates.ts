@@ -55,8 +55,6 @@ export const CATEGORY_ACCENT: Record<TemplateCategory, TemplateAccent> = {
   Product: "cyan",
 };
 
-export const FEATURED_TEMPLATE_IDS = ["executive", "search", "ecommerce"];
-
 export function layoutGroups(layout: Placed[]): { group: WidgetGroup; ids: string[] }[] {
   return WIDGET_GROUPS.map((group) => ({
     group,

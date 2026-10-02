@@ -146,6 +146,10 @@
   gap: 8px;
 }
 
+.pills[data-align="start"] {
+  justify-content: flex-start;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

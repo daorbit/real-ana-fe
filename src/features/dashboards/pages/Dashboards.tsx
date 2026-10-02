@@ -111,7 +111,7 @@ export default function Dashboards() {
       )}
 
       {tab === "dashboards" && dashboards.length === 0 && (canEdit ? (
-        <StartPanel onTemplate={openTemplate} onOrbit={() => openStudio()} />
+        <StartPanel onTemplate={openTemplate} onOrbit={openStudio} />
       ) : (
         <EmptyState
           icon={LayoutGrid}

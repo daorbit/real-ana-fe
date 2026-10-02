@@ -8,41 +8,36 @@ export function StartOption({
   icon,
   title,
   text,
-  cta,
-  badge,
   to,
   onClick,
-  primary = false,
 }: {
   icon: ReactNode;
   title: string;
   text: string;
-  cta: string;
-  badge?: string;
   to?: string;
   onClick?: () => void;
-  primary?: boolean;
 }) {
   const content = (
     <>
-      {badge && <span className={classes.optionBadge}>{badge}</span>}
-      <span className={classes.optionIcon}>{icon}</span>
-      <span className={classes.optionTitle}>{title}</span>
-      <span className={classes.optionText}>{text}</span>
-      <span className={classes.optionCta}>{cta} <ArrowRight size={14} /></span>
+      <span className={classes.altIcon}>{icon}</span>
+      <span className={classes.altBody}>
+        <span className={classes.altTitle}>{title}</span>
+        <span className={classes.altText}>{text}</span>
+      </span>
+      <ArrowRight size={16} className={classes.altArrow} />
     </>
   );
 
   if (to) {
     return (
-      <UnstyledButton component={Link} to={to} className={classes.option} data-primary={primary || undefined}>
+      <UnstyledButton component={Link} to={to} className={classes.alt}>
         {content}
       </UnstyledButton>
     );
   }
 
   return (
-    <UnstyledButton className={classes.option} data-primary={primary || undefined} onClick={onClick}>
+    <UnstyledButton className={classes.alt} onClick={onClick}>
       {content}
     </UnstyledButton>
   );

@@ -6,14 +6,16 @@ export function StudioSuggestions({
   starters,
   onPick,
   variant = "pills",
+  align = "center",
 }: {
   starters: OrbitStarter[];
   onPick: (prompt: string) => void;
   variant?: "pills" | "list";
+  align?: "center" | "start";
 }) {
   if (variant === "pills") {
     return (
-      <div className={classes.pills}>
+      <div className={classes.pills} data-align={align}>
         {starters.map(({ text, short, icon: Icon }) => (
           <Tooltip key={text} label={text} withArrow openDelay={300}>
             <UnstyledButton className={classes.pill} onClick={() => onPick(text)}>

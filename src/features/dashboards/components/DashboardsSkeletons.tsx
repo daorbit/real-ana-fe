@@ -1,6 +1,5 @@
 import { Skeleton } from "@mantine/core";
 import home from "@/features/dashboards/components/home/Home.module.css";
-import templates from "@/features/dashboards/components/templates/Templates.module.css";
 
 function HeaderSkeleton() {
   return (
@@ -77,18 +76,10 @@ export function DashboardWelcomeSkeleton() {
     <>
       <HeaderSkeleton />
       <div className={home.start}>
-        <div className={home.options}>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} height={188} radius={20} />
-          ))}
-        </div>
-        <div>
-          <Skeleton height={18} width={180} radius="sm" mb="md" />
-          <div className={templates.grid}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <CardSkeleton key={i} />
-            ))}
-          </div>
+        <Skeleton height={300} radius={20} />
+        <div className={home.alts}>
+          <Skeleton height={78} radius={20} />
+          <Skeleton height={78} radius={20} />
         </div>
       </div>
     </>

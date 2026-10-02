@@ -463,137 +463,155 @@
 .start {
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 32px;
   padding-bottom: 48px;
 }
 
-.options {
+.banner {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.option {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 188px;
-  padding: 22px;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: center;
+  gap: 32px;
+  padding: 36px 40px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  text-align: left;
-  text-decoration: none;
-  overflow: hidden;
-  transition: border-color 180ms ease;
 }
 
-.option:hover {
+.bannerMain {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  max-width: 760px;
+}
+
+.bannerTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.bannerText {
+  margin: -10px 0 4px;
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+.bannerComposer {
+  width: 100%;
+}
+
+.bannerArt {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 220px;
+  border-left: 1px solid var(--border);
+}
+
+.altHeading {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.alts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.alt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+
+.alt:hover {
   border-color: var(--border-strong);
 }
 
-.option:focus-visible {
+.alt:focus-visible {
   outline: 2px solid var(--accent-2);
   outline-offset: 2px;
 }
 
-.option[data-primary] {
-  border-color: color-mix(in srgb, var(--accent-2) 45%, var(--border));
-}
-
-.option[data-primary]:hover {
-  border-color: var(--accent-2);
-}
-
-.optionIcon {
+.altIcon {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  margin-bottom: 12px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 11px;
   background: var(--surface-2);
   color: var(--text);
 }
 
-.optionBadge {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--violet-2);
+.altBody {
+  flex: 1;
+  min-width: 0;
 }
 
-.optionTitle {
-  font-size: 16px;
-  font-weight: 650;
+.altTitle {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text);
 }
 
-.optionText {
-  font-size: var(--mantine-font-size-sm);
-  line-height: 1.5;
-  color: var(--text-2);
+.altText {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-.optionCta {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: auto;
-  padding-top: 14px;
-  font-size: var(--mantine-font-size-sm);
-  font-weight: 600;
-  color: var(--text);
-}
-
-.option[data-primary] .optionCta {
-  color: var(--violet-2);
-}
-
-.sectionHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.sectionTitle {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: -0.015em;
-  color: var(--text);
-}
-
-.sectionText {
-  margin: 4px 0 0;
-  font-size: var(--mantine-font-size-sm);
-  color: var(--text-2);
-}
-
-.seeAll {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.altArrow {
   flex-shrink: 0;
-  font-size: var(--mantine-font-size-sm);
-  font-weight: 600;
-  color: var(--text-2);
-  text-decoration: none;
+  color: var(--muted);
   transition: color 150ms ease;
 }
 
-.seeAll:hover {
+.alt:hover .altArrow {
   color: var(--text);
+}
+
+@media (max-width: 1000px) {
+  .banner {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px;
+  }
+
+  .bannerArt {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .banner {
+    padding: 20px;
+  }
+
+  .bannerTitle {
+    font-size: 21px;
+  }
+
+  .alts {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .skeletonCard {
@@ -688,10 +706,6 @@
 }
 
 @media (max-width: 900px) {
-  .options {
-    grid-template-columns: 1fr;
-  }
-
   .librarySearch {
     width: 100%;
   }
@@ -720,9 +734,5 @@
   .tableRow > :nth-child(2),
   .tableRow > :nth-child(3) {
     display: none;
-  }
-
-  .option {
-    min-height: 0;
   }
 }
