@@ -503,3 +503,32 @@
     color: var(--mantine-color-dimmed);
   }
 }
+
+.composerWrap[data-variant='hero'] {
+  width: min(760px, 100%);
+  padding: 0;
+}
+
+.composerWrap[data-variant='hero'] .composer {
+  border: 1px solid var(--q-border);
+  box-shadow:
+    -10px -6px 24px -12px color-mix(in srgb, #8b5cf6 35%, transparent),
+    10px 6px 24px -12px color-mix(in srgb, var(--q-accent) 35%, transparent);
+}
+
+:global([data-mantine-color-scheme='dark']) .composerWrap[data-variant='hero'] .composer {
+  box-shadow:
+    -10px -6px 24px -12px color-mix(in srgb, #8b5cf6 25%, transparent),
+    10px 6px 24px -12px color-mix(in srgb, var(--q-accent) 25%, transparent);
+}
+
+.composerWrap[data-variant='hero'] .composer:focus-within {
+  border-color: var(--q-accent);
+  box-shadow:
+    -10px -6px 28px -10px color-mix(in srgb, #8b5cf6 45%, transparent),
+    10px 6px 28px -10px color-mix(in srgb, var(--q-accent) 45%, transparent);
+}
+
+.composerWrap[data-variant='hero'] .composerFoot {
+  padding: 2px 10px 10px;
+}

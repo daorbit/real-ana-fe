@@ -353,12 +353,60 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
-  backdrop-filter: blur(6px);
+  gap: 12px;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(5px);
+}
+
+.busyBadge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.busy[data-state="deleting"] .busyBadge {
+  background: color-mix(in srgb, #f43f5e 14%, var(--surface));
+  color: #f43f5e;
+}
+
+.busyRing {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: busySpin 0.9s linear infinite;
+}
+
+.busyLabel {
   font-size: var(--mantine-font-size-sm);
   font-weight: 600;
   color: var(--text);
+}
+
+.card[data-busy] .cardPreview,
+.card[data-busy] .cardBody,
+.card[data-busy] .cardFoot {
+  filter: grayscale(0.6);
+  transition: filter 200ms ease;
+}
+
+@keyframes busySpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .busyRing {
+    animation-duration: 2.4s;
+  }
 }
 
 .newTile {

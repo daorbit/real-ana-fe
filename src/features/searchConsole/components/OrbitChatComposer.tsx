@@ -11,6 +11,7 @@ export function OrbitChatComposer({
   started,
   placeholder,
   disclaimer = "Orbit answers from your Google Search data and can be wrong.",
+  variant = "default",
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -20,11 +21,12 @@ export function OrbitChatComposer({
   started: boolean;
   placeholder: string;
   disclaimer?: string;
+  variant?: "default" | "hero";
 }) {
   const empty = !value.trim();
 
   return (
-    <div className={classes.composerWrap}>
+    <div className={classes.composerWrap} data-variant={variant}>
       <div className={classes.composer}>
         <Textarea
           placeholder={placeholder}
@@ -38,7 +40,7 @@ export function OrbitChatComposer({
           }}
           variant="unstyled"
           autosize
-          minRows={started ? 1 : 2}
+          minRows={variant === "hero" ? 3 : started ? 1 : 2}
           maxRows={started ? 8 : 6}
           px="md"
           pt={10}

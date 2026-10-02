@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDeleteDashboardMutation, useDuplicateDashboardMutation } from "@/features/dashboards/api";
 import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/notify";
-import type { CardBusy } from "@/features/dashboards/components/home/DashboardCard";
+import type { CardBusy } from "@/features/dashboards/components/home/cardBusy";
 import type { Dashboard } from "@/features/dashboards/types";
 
 export function useDashboardActions(workspaceId: string | undefined) {

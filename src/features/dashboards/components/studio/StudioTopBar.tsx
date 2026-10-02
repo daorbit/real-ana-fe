@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button, Tooltip } from "@mantine/core";
 import { ArrowLeft, Check, Plus } from "lucide-react";
-import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import type { DashboardStudio } from "@/features/dashboards/hooks/useDashboardStudio";
 import classes from "@/features/dashboards/components/studio/Studio.module.css";
 
@@ -25,10 +24,6 @@ export function StudioTopBar({
           <ArrowLeft size={16} />
         </Link>
         <div className={classes.topTitles}>
-          <div className={classes.topEyebrow}>
-            <OrbitMark size={14} />
-            {edit ? "Edit with Orbit" : "Build with Orbit"}
-          </div>
           <h1 className={classes.topTitle}>{title}</h1>
         </div>
       </div>

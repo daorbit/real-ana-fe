@@ -1,8 +1,8 @@
 import { UnstyledButton } from "@mantine/core";
 import { Plus } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { DashboardCard } from "@/features/dashboards/components/home/DashboardCard";
-import type { CardBusy } from "@/features/dashboards/components/home/DashboardCard";
+import type { CardBusy } from "@/features/dashboards/components/home/cardBusy";
 import type { Dashboard } from "@/features/dashboards/types";
 import classes from "@/features/dashboards/components/home/Home.module.css";
 
@@ -42,11 +42,13 @@ export function DashboardGrid({
         ))}
       </AnimatePresence>
       {showNew && (
-        <UnstyledButton className={classes.newTile} onClick={onNew}>
-          <span className={classes.newTileIcon}><Plus size={18} /></span>
-          <span className={classes.newTileTitle}>New dashboard</span>
-          <span className={classes.newTileText}>From a template or a blank canvas</span>
-        </UnstyledButton>
+        <motion.div layout transition={{ layout: { duration: 0.38, ease: [0.22, 1, 0.36, 1] } }}>
+          <UnstyledButton className={classes.newTile} onClick={onNew}>
+            <span className={classes.newTileIcon}><Plus size={18} /></span>
+            <span className={classes.newTileTitle}>New dashboard</span>
+            <span className={classes.newTileText}>From a template or a blank canvas</span>
+          </UnstyledButton>
+        </motion.div>
       )}
     </div>
   );

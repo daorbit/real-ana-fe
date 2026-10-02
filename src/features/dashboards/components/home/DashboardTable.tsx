@@ -1,10 +1,10 @@
 import { Loader } from "@mantine/core";
 import { timeAgo } from "@/shared/lib";
 import { DashboardMenu } from "@/features/dashboards/components/home/DashboardMenu";
-import { BUSY_LABEL } from "@/features/dashboards/components/home/DashboardCard";
+import { BUSY_LABEL } from "@/features/dashboards/components/home/cardBusy";
 import { TEMPLATE_MAP } from "@/features/dashboards/templates";
 import { rangeLong } from "@/features/dashboards/types";
-import type { CardBusy } from "@/features/dashboards/components/home/DashboardCard";
+import type { CardBusy } from "@/features/dashboards/components/home/cardBusy";
 import type { Dashboard } from "@/features/dashboards/types";
 import shared from "@/features/dashboards/components/Dashboards.module.css";
 import classes from "@/features/dashboards/components/home/Home.module.css";

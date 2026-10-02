@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { TemplateCard } from "@/features/dashboards/components/templates/TemplateCard";
 import {
-  BLANK_TEMPLATE, CATEGORY_ACCENT, TEMPLATES, TEMPLATE_CATEGORIES, matchesTemplate,
+  CATEGORY_ACCENT, TEMPLATES, TEMPLATE_CATEGORIES, matchesTemplate,
 } from "@/features/dashboards/templates";
 import type { DashboardTemplate, TemplateCategory } from "@/features/dashboards/templates";
 import shared from "@/features/dashboards/components/Dashboards.module.css";
@@ -23,7 +23,6 @@ export function TemplateGallery({ onOpen }: { onOpen: (template: DashboardTempla
   const [query, setQuery] = useState("");
 
   const items = TEMPLATES.filter((t) => (filter === "All" || t.category === filter) && matchesTemplate(t, query));
-  const showBlank = filter === "All" && !query.trim();
 
   return (
     <>
@@ -54,19 +53,17 @@ export function TemplateGallery({ onOpen }: { onOpen: (template: DashboardTempla
         />
       </div>
 
-      {items.length === 0 && !showBlank ? (
+      {items.length === 0 ? (
         <EmptyState
           compact
           icon={Search}
           title="No templates match"
-          description="Try another word, or start from a blank canvas."
-          action={{ label: "Start blank", onClick: () => onOpen(BLANK_TEMPLATE) }}
+          description="Try another word or a different category."
         />
       ) : (
         <div className={classes.grid}>
-          {showBlank && <TemplateCard template={BLANK_TEMPLATE} index={0} onOpen={() => onOpen(BLANK_TEMPLATE)} />}
           {items.map((t, i) => (
-            <TemplateCard key={t.id} template={t} index={i + 1} onOpen={() => onOpen(t)} />
+            <TemplateCard key={t.id} template={t} index={i} onOpen={() => onOpen(t)} />
           ))}
         </div>
       )}

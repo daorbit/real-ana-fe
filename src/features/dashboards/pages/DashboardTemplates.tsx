@@ -6,8 +6,6 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { TemplateGallery } from "@/features/dashboards/components/templates/TemplateGallery";
-import { OrbitTemplateBanner } from "@/features/dashboards/components/templates/OrbitTemplateBanner";
-import { useOpenStudio } from "@/features/dashboards/hooks/useOpenStudio";
 import { useTemplateFlow } from "@/features/dashboards/hooks/useTemplateFlow";
 import classes from "@/features/dashboards/components/Dashboards.module.css";
 
@@ -16,7 +14,6 @@ export default function DashboardTemplates() {
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
   const { openTemplate, dialogs } = useTemplateFlow(active?._id);
-  const openStudio = useOpenStudio(active?._id);
 
   return (
     <AppShell>
@@ -35,9 +32,8 @@ export default function DashboardTemplates() {
         <>
           <PageHeader
             title="New dashboard"
-            description="Start from a layout built for the job, or a blank canvas. Preview anything before you create it."
+            description="Layouts built for the job. Preview any of them before you create it."
           />
-          <OrbitTemplateBanner onStart={() => openStudio()} />
           <TemplateGallery onOpen={openTemplate} />
           {dialogs}
         </>

@@ -13,15 +13,15 @@ export function StudioLanding({ studio }: { studio: DashboardStudio }) {
     <div className={classes.landing}>
       <div className={classes.landingInner}>
         <div className={classes.landingHead}>
-          <OrbitMark size={52} />
+          <OrbitMark size={80} />
           <h2 className={classes.landingTitle}>What should your dashboard show?</h2>
           <p className={classes.landingText}>
-            Describe who it's for and what you want to track. Orbit chooses the widgets and lays them out with
-            your live data, and nothing is created until you say so.
+            Describe it in a sentence. Orbit picks the widgets and lays them out with your live data.
           </p>
         </div>
 
         <OrbitChatComposer
+          variant="hero"
           value={orbit.input}
           onChange={orbit.setInput}
           onSend={() => orbit.send()}
@@ -29,7 +29,7 @@ export function StudioLanding({ studio }: { studio: DashboardStudio }) {
           thinking={orbit.thinking}
           started={false}
           placeholder="e.g. A weekly report on organic traffic and Google rankings for a client"
-          disclaimer="Orbit uses one question from your plan for each request."
+          disclaimer="Nothing is created until you say so."
         />
 
         <StudioSuggestions starters={ORBIT_STARTERS.create} onPick={(p) => orbit.send(p)} />
