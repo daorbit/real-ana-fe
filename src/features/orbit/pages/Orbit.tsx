@@ -906,6 +906,7 @@ export default function Orbit() {
               fontSize: 15,
               lineHeight: 1.6,
               background: "transparent",
+              color: "var(--q-fg)",
               border: "none",
               boxShadow: "none",
             },
