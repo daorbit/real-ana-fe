@@ -1,5 +1,12 @@
 import { api } from "@/app/store/api";
-import type { Dashboard, DashboardInput, Embed, EmbedInput } from "@/features/dashboards/types";
+import type {
+  Dashboard,
+  DashboardInput,
+  DashboardOrbitReply,
+  DashboardOrbitRequest,
+  Embed,
+  EmbedInput,
+} from "@/features/dashboards/types";
 
 const queries = api.enhanceEndpoints({ addTagTypes: ["Dashboard", "Embed"] }).injectEndpoints({
   endpoints: (build) => ({
@@ -84,6 +91,15 @@ export const dashboardsApi = queries.injectEndpoints({
       },
     }),
 
+    designDashboard: build.mutation<DashboardOrbitReply, DashboardOrbitRequest>({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/orbit/dashboard`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Usage"],
+    }),
+
     createEmbed: build.mutation<Embed, EmbedInput & { workspaceId: string }>({
       query: ({ workspaceId, ...body }) => ({
         url: `/api/workspaces/${workspaceId}/embeds`,
@@ -142,6 +158,7 @@ export const {
   useUpdateDashboardMutation,
   useDuplicateDashboardMutation,
   useDeleteDashboardMutation,
+  useDesignDashboardMutation,
   useCreateEmbedMutation,
   useUpdateEmbedMutation,
   useDeleteEmbedMutation,

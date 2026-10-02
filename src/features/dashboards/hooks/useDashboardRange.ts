@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { useActiveBilling } from "@/features/workspace/context";
+import { useEffect, useState } from "react";
+import { useRangeAllowed } from "@/features/dashboards/hooks/useRangeAllowed";
 import type { Dashboard, DashboardRange } from "@/features/dashboards/types";
 
 export function useDashboardRange(
@@ -7,15 +7,10 @@ export function useDashboardRange(
   canEdit: boolean,
   persist: (range: DashboardRange) => void,
 ) {
-  const billing = useActiveBilling();
+  const allowed = useRangeAllowed();
   const [local, setLocal] = useState<DashboardRange | null>(null);
 
   useEffect(() => setLocal(null), [dashboard?.id]);
-
-  const allowed = useCallback(
-    (range: DashboardRange) => !billing?.allowedRanges || billing.allowedRanges.includes(range as never),
-    [billing]
-  );
 
   const chosen = local ?? dashboard?.range ?? "7d";
   const effective: DashboardRange = allowed(chosen) ? chosen : "24h";

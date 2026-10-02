@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ActionIcon, Alert, Button, Loader, Menu, Text } from "@mantine/core";
+import { ActionIcon, Alert, Button, Group, Loader, Menu, Text } from "@mantine/core";
 import { ChevronLeft, Code2, Copy, LayoutGrid, MoreHorizontal, Move, SearchX, SlidersHorizontal, Trash2 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -10,8 +10,7 @@ import { HomeSkeleton } from "@/shared/ui/Skeletons";
 import { useTitle } from "@/shared/lib/useTitle";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
-import { useSites } from "@/features/workspace";
-import { useStats, useLive, useSiteScope, isEmbeddable } from "@/features/analytics";
+import { isEmbeddable } from "@/features/analytics";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
 import { SearchConnectionBanner } from "@/features/searchConsole/widgets/SearchConnectionBanner";
@@ -29,6 +28,10 @@ import { DashboardTitle } from "@/features/dashboards/components/DashboardTitle"
 import { RangeControl } from "@/features/dashboards/components/RangeControl";
 import { WidgetFrame } from "@/features/dashboards/components/WidgetFrame";
 import { EmbedModal } from "@/features/dashboards/components/embeds/EmbedModal";
+import { useFreshWidgets } from "@/features/dashboards/hooks/useFreshWidgets";
+import { useDashboardData } from "@/features/dashboards/hooks/useDashboardData";
+import { AskOrbitSearchButton } from "@/features/searchConsole/components/AskOrbitSearchButton";
+import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { rangeLong } from "@/features/dashboards/types";
 import { TEMPLATE_MAP } from "@/features/dashboards/templates";
 import type { WidgetId } from "@/features/analytics";
@@ -49,14 +52,14 @@ export default function DashboardView() {
   useTitle(dashboard?.name ?? "Dashboard");
 
   const layout = useDashboardLayout(workspaceId, dashboard);
+  const fresh = useFreshWidgets();
+  const openStudio = () => navigate(`/app/dashboards/${id}/studio`);
   const { range, chosen, limited, allowed, change } = useDashboardRange(dashboard, canEdit, (r) => {
     layout.patch({ range: r }).catch((e) => notify.error(errMessage(e, "Could not save the range.")));
   });
 
-  const [siteScope, setSiteScope] = useSiteScope(workspaceId);
-  const { stats, refresh, refreshing, refetching, lastUpdated } = useStats(workspaceId, range, undefined, siteScope);
-  const { live, livePages, liveCountries } = useLive(workspaceId, undefined, siteScope);
-  const { sites } = useSites(workspaceId);
+  const { widgetData, sites, siteScope, setSiteScope, refresh, refreshing, refetching, lastUpdated } =
+    useDashboardData(workspaceId, range);
   const { duplicateDashboard, deleteDashboard } = useDashboardActions(workspaceId);
 
   const [editing, setEditing] = useState(false);
@@ -118,17 +121,6 @@ export default function DashboardView() {
         return false;
       });
 
-  const widgetData = {
-    stats,
-    live,
-    livePages,
-    liveCountries,
-    sites,
-    siteScope,
-    workspaceId,
-    trafficTitle: `Traffic — ${rangeLong(range)}`,
-    range,
-  };
   const hasSearch = layout.layout.some((p) => isSearchWidget(p.id));
 
   const quiet = !editing && !layout.dirty;
@@ -179,6 +171,7 @@ export default function DashboardView() {
           {quiet && <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />}
           {quiet && <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />}
           {quiet && <RangeControl value={range} allowed={allowed} onChange={change} />}
+          {canEdit && !editing && <AskOrbitSearchButton label="Edit with Orbit" onClick={openStudio} />}
           {canEdit && (
             <LayoutEditControls
               editing={editing}
@@ -235,12 +228,17 @@ export default function DashboardView() {
           <span className={classes.newIcon}><SlidersHorizontal size={18} /></span>
           <Text fw={600}>This dashboard is empty</Text>
           <Text size="sm" c="dimmed" maw={360}>
-            Add charts, KPIs and breakdowns. Everything on Home and in Analytics is available here.
+            Describe what you want to Orbit, or pick widgets yourself. Everything on Home and in Analytics is available here.
           </Text>
           {canEdit && (
-            <Button color="emerald" mt={6} leftSection={<SlidersHorizontal size={15} />} onClick={() => setCustomizing(true)}>
-              Add widgets
-            </Button>
+            <Group gap="sm" mt={6}>
+              <Button variant="light" color="emerald" leftSection={<OrbitMark size={15} />} onClick={openStudio}>
+                Build it with Orbit
+              </Button>
+              <Button color="emerald" leftSection={<SlidersHorizontal size={15} />} onClick={() => setCustomizing(true)}>
+                Add widgets
+              </Button>
+            </Group>
           )}
         </div>
       ) : (
@@ -255,7 +253,7 @@ export default function DashboardView() {
             onSpan={layout.setSpan}
             onRemove={layout.remove}
             render={(wid) => (
-              <WidgetFrame onEmbed={canEdit && !editing && !embedAllowance.locked && isEmbeddable(wid) ? () => embedWidgetOf(wid) : undefined}>
+              <WidgetFrame fresh={fresh.has(wid)} onEmbed={canEdit && !editing && !embedAllowance.locked && isEmbeddable(wid) ? () => embedWidgetOf(wid) : undefined}>
                 <WidgetRenderer id={wid} data={widgetData} />
               </WidgetFrame>
             )}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "@mantine/core";
+import { Button, Group } from "@mantine/core";
 import { Plus, FolderKanban, LayoutGrid } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -17,6 +17,9 @@ import { useHasDashboardsHint } from "@/features/dashboards/hooks/useHasDashboar
 import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
 import { EmbedsPanel } from "@/features/dashboards/components/embeds/EmbedsPanel";
 import { EmbedModal } from "@/features/dashboards/components/embeds/EmbedModal";
+import { AskOrbitSearchButton } from "@/features/searchConsole/components/AskOrbitSearchButton";
+import { useTemplateFlow } from "@/features/dashboards/hooks/useTemplateFlow";
+import { useOpenStudio } from "@/features/dashboards/hooks/useOpenStudio";
 import type { DashboardsView } from "@/features/dashboards/components/home/ViewSwitch";
 
 type EmbedTarget = { id: string | null } | null;
@@ -37,6 +40,8 @@ export default function Dashboards() {
   const navigate = useNavigate();
   const dashboardAllowance = useFeatureAllowance("dashboards", dashboards.length);
   const embedAllowance = useFeatureAllowance("embeds", embeds.length);
+  const { openTemplate, dialogs } = useTemplateFlow(workspaceId);
+  const openStudio = useOpenStudio(workspaceId);
 
   if (!active) {
     return (
@@ -66,9 +71,12 @@ export default function Dashboards() {
   let action: ReactNode = null;
   if (canEdit && tab === "dashboards" && dashboards.length > 0) {
     action = (
-      <Button color="emerald" leftSection={<Plus size={15} />} onClick={newDashboard}>
-        New dashboard
-      </Button>
+      <Group gap="sm">
+        <AskOrbitSearchButton label="Build with Orbit" onClick={() => openStudio()} />
+        <Button color="emerald" leftSection={<Plus size={15} />} onClick={newDashboard}>
+          New dashboard
+        </Button>
+      </Group>
     );
   } else if (canEdit && tab === "embeds" && embeds.length > 0 && !embedAllowance.locked) {
     action = (
@@ -103,7 +111,7 @@ export default function Dashboards() {
       )}
 
       {tab === "dashboards" && dashboards.length === 0 && (canEdit ? (
-        <StartPanel workspaceId={active._id} onEmbed={newEmbed} />
+        <StartPanel onTemplate={openTemplate} onOrbit={() => openStudio()} />
       ) : (
         <EmptyState
           icon={LayoutGrid}
@@ -132,6 +140,8 @@ export default function Dashboards() {
         initialWidget={null}
         onClose={() => setEmbedTarget(null)}
       />
+
+      {canEdit && dialogs}
     </AppShell>
   );
 }

@@ -225,12 +225,12 @@ export function OrbitChatTurn({
   );
 }
 
-export function OrbitThinkingRow() {
+export function OrbitThinkingRow({ label = "Reading your search data" }: { label?: string }) {
   return (
     <div className={classes.answer}>
       <div className={classes.answerHead}>
         <OrbitMark size={20} className={classes.markPulse} />
-        <span className={classes.thinking}>Reading your search data</span>
+        <span className={classes.thinking}>{label}</span>
       </div>
     </div>
   );

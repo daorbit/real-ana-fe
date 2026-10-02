@@ -1,4 +1,4 @@
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, Orbit } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { WIDGET_GROUPS, WIDGET_MAP, isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { Placed } from "@/features/analytics/widgetCatalog";
@@ -74,6 +74,20 @@ export function matchesTemplate(t: DashboardTemplate, query: string): boolean {
   return [t.name, t.tagline, t.description, t.category ?? ""].some((s) => s.toLowerCase().includes(q));
 }
 
+export const ORBIT_TEMPLATE: DashboardTemplate = {
+  id: "orbit",
+  name: "Built with Orbit",
+  tagline: "Designed by Orbit AI from your description",
+  description: "A layout Orbit put together from what you asked for.",
+  icon: Orbit,
+  accent: "emerald",
+  category: null,
+  range: "7d",
+  layout: [],
+};
+
 export const ALL_TEMPLATES: DashboardTemplate[] = [BLANK_TEMPLATE, ...TEMPLATES];
 
-export const TEMPLATE_MAP = Object.fromEntries(ALL_TEMPLATES.map((t) => [t.id, t])) as Record<string, DashboardTemplate>;
+export const TEMPLATE_MAP = Object.fromEntries(
+  [...ALL_TEMPLATES, ORBIT_TEMPLATE].map((t) => [t.id, t])
+) as Record<string, DashboardTemplate>;

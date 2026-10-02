@@ -10,6 +10,7 @@ export function OrbitChatComposer({
   thinking,
   started,
   placeholder,
+  disclaimer = "Orbit answers from your Google Search data and can be wrong.",
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -18,6 +19,7 @@ export function OrbitChatComposer({
   thinking: boolean;
   started: boolean;
   placeholder: string;
+  disclaimer?: string;
 }) {
   const empty = !value.trim();
 
@@ -63,7 +65,7 @@ export function OrbitChatComposer({
           </Tooltip>
         </div>
       </div>
-      <Text className={classes.disclaimer}>Orbit answers from your Google Search data and can be wrong.</Text>
+      <Text className={classes.disclaimer}>{disclaimer}</Text>
     </div>
   );
 }

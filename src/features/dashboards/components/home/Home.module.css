@@ -430,7 +430,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 176px;
+  min-height: 188px;
   padding: 22px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -443,6 +443,11 @@
 
 .option:hover {
   border-color: var(--border-strong);
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
 }
 
 .option[data-primary] {
@@ -459,14 +464,10 @@
   width: 42px;
   height: 42px;
   margin-bottom: 12px;
+  border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface-2);
   color: var(--text);
-}
-
-.option[data-primary] .optionIcon {
-  background: var(--accent);
-  color: #ffffff;
 }
 
 .optionBadge {

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { TemplatePreviewModal } from "@/features/dashboards/components/templates/TemplatePreviewModal";
 import { BuildingDialog } from "@/features/dashboards/components/BuildingDialog";
 import { useCreateDashboard } from "@/features/dashboards/hooks/useCreateDashboard";
-import { TEMPLATE_MAP } from "@/features/dashboards/templates";
 import type { DashboardTemplate } from "@/features/dashboards/templates";
 
 export function useTemplateFlow(workspaceId: string | undefined) {
@@ -19,10 +18,7 @@ export function useTemplateFlow(workspaceId: string | undefined) {
           void createFromTemplate(t.id, name, range);
         }}
       />
-      <BuildingDialog
-        template={creating ? TEMPLATE_MAP[creating.templateId] : null}
-        name={creating?.name ?? ""}
-      />
+      <BuildingDialog template={creating?.template ?? null} name={creating?.name ?? ""} />
     </>
   );
 

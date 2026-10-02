@@ -64,6 +64,7 @@ const PublicSeoReport = lazy(() => import("@/features/seo/pages/PublicSeoReport"
 const Dashboards = lazy(() => import("@/features/dashboards/pages/Dashboards"));
 const DashboardTemplates = lazy(() => import("@/features/dashboards/pages/DashboardTemplates"));
 const DashboardView = lazy(() => import("@/features/dashboards/pages/DashboardView"));
+const DashboardStudio = lazy(() => import("@/features/dashboards/pages/DashboardStudio"));
 const Goals = lazy(() => import("@/features/goals/pages/Goals"));
 const EmbedWidget = lazy(() => import("@/features/embed/pages/EmbedWidget"));
 
@@ -253,7 +254,9 @@ export default function App() {
                 <Route path="/app/analytics" element={<Analytics />} />
                 <Route path="/app/dashboards" element={<Dashboards />} />
                 <Route path="/app/dashboards/new" element={<DashboardTemplates />} />
+                <Route path="/app/dashboards/studio" element={<DashboardStudio />} />
                 <Route path="/app/dashboards/:id" element={<DashboardView />} />
+                <Route path="/app/dashboards/:id/studio" element={<DashboardStudio />} />
                 <Route path="/app/goals" element={<Goals />} />
                 <Route path="/app/seo" element={<Seo />} />
                 <Route path="/app/search-visibility" element={<SearchConsole />} />

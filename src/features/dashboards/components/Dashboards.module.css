@@ -12,9 +12,7 @@
   height: 100%;
   padding: 20px 20px 0;
   overflow: hidden;
-  background:
-    radial-gradient(110% 85% at 50% 0%, var(--tpl-soft, var(--accent-soft)) 0%, transparent 68%),
-    var(--surface-2);
+  background: var(--surface-2);
 }
 
 .stage::before {
@@ -196,8 +194,8 @@
   display: block;
   height: 4px;
   border-radius: 2px;
-  background: linear-gradient(90deg, var(--tpl), color-mix(in srgb, var(--tpl) 30%, transparent));
-  opacity: 0.8;
+  background: var(--tpl);
+  opacity: 0.55;
 }
 
 .bRow[data-w="1"] { width: 92%; }
@@ -418,6 +416,53 @@
 .frame {
   position: relative;
   height: 100%;
+}
+
+.frame[data-fresh] {
+  animation: widgetArrive 620ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.frame[data-fresh]::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: 4;
+  border: 2px solid var(--accent-2);
+  border-radius: calc(var(--radius-lg) + 3px);
+  pointer-events: none;
+  animation: widgetRing 2600ms ease forwards;
+}
+
+@keyframes widgetArrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes widgetRing {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame[data-fresh] {
+    animation: none;
+  }
 }
 
 .embedBtn {

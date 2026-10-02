@@ -79,7 +79,7 @@ export function DashboardWelcomeSkeleton() {
       <div className={home.start}>
         <div className={home.options}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} height={176} radius={20} />
+            <Skeleton key={i} height={188} radius={20} />
           ))}
         </div>
         <div>

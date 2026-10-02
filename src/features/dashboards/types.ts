@@ -22,6 +22,29 @@ export type DashboardInput = {
   layout?: Placed[];
 };
 
+export type DashboardDraft = {
+  name: string;
+  description: string;
+  range: DashboardRange;
+  layout: Placed[];
+};
+
+export type DashboardOrbitMode = "create" | "edit";
+
+export type DashboardOrbitRequest = {
+  workspaceId: string;
+  prompt: string;
+  mode: DashboardOrbitMode;
+  current?: DashboardDraft;
+  history?: { role: "user" | "assistant"; content: string }[];
+};
+
+export type DashboardOrbitReply = {
+  reply: string;
+  draft: DashboardDraft;
+  suggestions: string[];
+};
+
 export type EmbedTheme = "auto" | "light" | "dark";
 
 export type Embed = {

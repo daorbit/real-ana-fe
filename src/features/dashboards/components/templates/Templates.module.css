@@ -470,3 +470,48 @@
     font-size: 24px;
   }
 }
+
+.orbitBanner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 14px 16px 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.orbitBannerMark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-2);
+}
+
+.orbitBannerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.orbitBannerTitle {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.orbitBannerSub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+@media (max-width: 640px) {
+  .orbitBanner {
+    flex-wrap: wrap;
+  }
+}
