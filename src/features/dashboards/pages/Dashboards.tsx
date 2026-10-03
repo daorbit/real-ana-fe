@@ -68,6 +68,10 @@ export default function Dashboards() {
   const newDashboard = () => dashboardAllowance.guard(() => navigate("/app/dashboards/new"));
   const switchTo = (view: DashboardsView) => setParams(view === "embeds" ? { tab: "embeds" } : {}, { replace: true });
 
+  // A workspace with nothing built yet opens on the start screen alone: no
+  // tabs to switch between and no blurb above them.
+  const nothingYet = tab === "dashboards" && dashboards.length === 0 && embeds.length === 0;
+
   let action: ReactNode = null;
   if (canEdit && tab === "dashboards" && dashboards.length > 0) {
     action = (
@@ -91,13 +95,17 @@ export default function Dashboards() {
       <PageHeader
         title="Dashboards"
         description={
-          tab === "dashboards"
-            ? "Focused views built from any widget, arranged the way you work."
-            : "Single live charts and numbers you can put on any website."
+          nothingYet
+            ? undefined
+            : tab === "dashboards"
+              ? "Focused views built from any widget, arranged the way you work."
+              : "Single live charts and numbers you can put on any website."
         }
         actions={action}
       >
-        <ViewSwitch value={tab} dashboards={dashboards.length} embeds={embeds.length} onChange={switchTo} />
+        {!nothingYet && (
+          <ViewSwitch value={tab} dashboards={dashboards.length} embeds={embeds.length} onChange={switchTo} />
+        )}
       </PageHeader>
 
       {tab === "dashboards" && dashboards.length > 0 && (
