@@ -403,7 +403,7 @@
   position: relative;
   border-radius: 24px;
   background: var(--q-bg-subtle);
-  box-shadow: inset 0 0 0 1px var(--q-border);
+  box-shadow: inset 0 0 0 1px var(--q-border), var(--orbit-glow);
   transition: box-shadow 200ms ease, background-color 200ms ease;
 }
 
@@ -413,7 +413,7 @@
 
 .composer:focus-within {
   background: var(--q-surface);
-  box-shadow: inset 0 0 0 1.5px var(--q-accent);
+  box-shadow: inset 0 0 0 1.5px var(--q-accent), var(--orbit-glow-focus);
 }
 
 .composer textarea {
@@ -511,22 +511,12 @@
 
 .composerWrap[data-variant='hero'] .composer {
   border: 1px solid var(--q-border);
-  box-shadow:
-    -10px -6px 24px -12px color-mix(in srgb, #8b5cf6 35%, transparent),
-    10px 6px 24px -12px color-mix(in srgb, var(--q-accent) 35%, transparent);
-}
-
-:global([data-mantine-color-scheme='dark']) .composerWrap[data-variant='hero'] .composer {
-  box-shadow:
-    -10px -6px 24px -12px color-mix(in srgb, #8b5cf6 25%, transparent),
-    10px 6px 24px -12px color-mix(in srgb, var(--q-accent) 25%, transparent);
+  box-shadow: var(--orbit-glow);
 }
 
 .composerWrap[data-variant='hero'] .composer:focus-within {
   border-color: var(--q-accent);
-  box-shadow:
-    -10px -6px 28px -10px color-mix(in srgb, #8b5cf6 45%, transparent),
-    10px 6px 28px -10px color-mix(in srgb, var(--q-accent) 45%, transparent);
+  box-shadow: var(--orbit-glow-focus);
 }
 
 .composerWrap[data-variant='hero'] .composerFoot {

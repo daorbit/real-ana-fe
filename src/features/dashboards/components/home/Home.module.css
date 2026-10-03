@@ -543,16 +543,6 @@
   text-align: left;
 }
 
-/* The shared hero composer carries a two-colour glow; here it gets a plain lift. */
-.bannerComposer.bannerComposer [data-variant="hero"] > div:first-child,
-.bannerComposer.bannerComposer [data-variant="hero"] > div:first-child:focus-within {
-  box-shadow: var(--shadow-sm);
-}
-
-.bannerComposer.bannerComposer [data-variant="hero"] > div:first-child:focus-within {
-  border-color: var(--border-strong);
-}
-
 /* ---- Starts without AI ---- */
 
 .altHeader {
