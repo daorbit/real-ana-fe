@@ -7,6 +7,7 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useGetDashboardsQuery, useGetEmbedsQuery } from "@/features/dashboards/api";
 import { ViewSwitch } from "@/features/dashboards/components/home/ViewSwitch";
@@ -102,6 +103,7 @@ export default function Dashboards() {
               : "Single live charts and numbers you can put on any website."
         }
         actions={action}
+        docsPath={DOCS_SLUGS.dashboards}
       >
         {!nothingYet && (
           <ViewSwitch value={tab} dashboards={dashboards.length} embeds={embeds.length} onChange={switchTo} />

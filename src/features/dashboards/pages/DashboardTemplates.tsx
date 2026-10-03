@@ -4,6 +4,7 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { TemplateGallery } from "@/features/dashboards/components/templates/TemplateGallery";
 import { useTemplateFlow } from "@/features/dashboards/hooks/useTemplateFlow";
@@ -33,6 +34,7 @@ export default function DashboardTemplates() {
           <PageHeader
             title="New dashboard"
             description="Layouts built for the job. Preview any of them before you create it."
+            docsPath={DOCS_SLUGS.dashboards}
           />
           <TemplateGallery onOpen={openTemplate} />
           {dialogs}

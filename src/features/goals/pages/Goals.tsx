@@ -5,6 +5,7 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { useTitle } from "@/shared/lib/useTitle";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useTargets } from "@/features/goals/hooks/useTargets";
 import { useTargetEditor } from "@/features/goals/hooks/useTargetEditor";
@@ -32,6 +33,7 @@ export default function Goals() {
       <PageHeader
         title="Goals"
         description="Monthly and quarterly targets that track themselves."
+        docsPath={DOCS_SLUGS.goals}
         actions={
           hasTargets ? (
             <>

@@ -8,6 +8,8 @@ import { RefreshButton } from "@/shared/ui/Refresh";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { HomeSkeleton } from "@/shared/ui/Skeletons";
 import { useTitle } from "@/shared/lib/useTitle";
+import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
+import { DocsButton } from "@/shared/ui/DocsButton";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { isEmbeddable } from "@/features/analytics";
@@ -210,6 +212,7 @@ export default function DashboardView() {
               </Menu.Dropdown>
             </Menu>
           )}
+          <DocsButton path={DOCS_SLUGS.dashboards} />
           <ActivityBellIcon />
         </div>
       </div>
