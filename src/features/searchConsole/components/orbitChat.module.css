@@ -401,17 +401,19 @@
 
 .composer {
   position: relative;
+  border: 1px solid var(--q-border);
   border-radius: 24px;
   background: var(--q-bg-subtle);
   /* box-shadow: inset 0 0 0 1px var(--q-border), var(--orbit-glow); */
-  transition: box-shadow 200ms ease, background-color 200ms ease;
+  transition: border-color 200ms ease, background-color 200ms ease;
 }
 
 :global([data-mantine-color-scheme='dark']) .composer {
-  background: var(--q-surface);
+  background: var(--q-bg-subtle);
 }
 
 .composer:focus-within {
+  border-color: var(--q-accent);
   background: var(--q-surface);
   /* box-shadow: inset 0 0 0 1.5px var(--q-accent), var(--orbit-glow-focus); */
 }
@@ -507,16 +509,6 @@
 .composerWrap[data-variant='hero'] {
   width: min(760px, 100%);
   padding: 0;
-}
-
-.composerWrap[data-variant='hero'] .composer {
-  border: 1px solid var(--q-border);
-  /* box-shadow: var(--orbit-glow); */
-}
-
-.composerWrap[data-variant='hero'] .composer:focus-within {
-  border-color: var(--q-accent);
-  /* box-shadow: var(--orbit-glow-focus); */
 }
 
 .composerWrap[data-variant='hero'] .composerFoot {
