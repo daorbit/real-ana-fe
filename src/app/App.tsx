@@ -36,6 +36,7 @@ const Seo = lazy(() => import("@/features/seo/pages/Seo"));
 const SearchConsole = lazy(() => import("@/features/searchConsole/pages/SearchConsole"));
 const SearchConsolePageDetail = lazy(() => import("@/features/searchConsole/pages/SearchConsolePageDetail"));
 const Compare = lazy(() => import("@/features/compare/pages/Compare"));
+const Backlinks = lazy(() => import("@/features/backlinks/pages/Backlinks"));
 const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"));
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
 const Developers = lazy(() => import("@/features/support/pages/Developers"));
@@ -264,6 +265,7 @@ export default function App() {
                 <Route path="/app/search-console" element={<SearchConsole />} />
                 <Route path="/app/search-console/page/:pageKey" element={<SearchConsolePageDetail />} />
                 <Route path="/app/compare" element={<Compare />} />
+                <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/workspaces" element={<Workspaces />} />
                 <Route path="/app/members" element={<Members />} />
                 <Route path="/app/orbit" element={<Orbit />} />

@@ -37,8 +37,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
 
-      { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords },
-    ],
+      { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords },    ],
   },
   {
     headingKey: "nav.groupEngage",
