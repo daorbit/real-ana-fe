@@ -76,10 +76,11 @@ export function DashboardWelcomeSkeleton() {
     <>
       <HeaderSkeleton />
       <div className={home.start}>
-        <Skeleton height={300} radius={20} />
+        <Skeleton height={440} radius={20} />
         <div className={home.alts}>
-          <Skeleton height={78} radius={20} />
-          <Skeleton height={78} radius={20} />
+          {Array.from({ length: 4 }, (_, i) => (
+            <Skeleton key={i} height={236} radius={16} />
+          ))}
         </div>
       </div>
     </>
