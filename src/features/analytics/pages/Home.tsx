@@ -48,7 +48,7 @@ export default function Home() {
     siteScope,
   );
 
-  const { live, livePages, liveCountries } = useLive(active?._id, undefined, siteScope);
+  const { live, livePages, liveCountries, audience } = useLive(active?._id, undefined, siteScope);
   const { sites } = useSites(active?._id);
   const { demo } = useDemo();
 
@@ -189,6 +189,7 @@ export default function Home() {
         <HomeHero
           workspaceName={active.name}
           live={live}
+          audience={audience}
           visitors={stats?.visitors ?? 0}
           pageviews={stats?.pageviews ?? 0}
           series={stats?.timeseries ?? []}

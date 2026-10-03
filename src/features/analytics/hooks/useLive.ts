@@ -33,6 +33,7 @@ export function useLive(
     live: data?.live ?? 0,
     livePages: data?.livePages ?? [],
     liveCountries: data?.liveCountries ?? [],
+    audience: data?.audience ?? null,
     isFetching,
   };
 }

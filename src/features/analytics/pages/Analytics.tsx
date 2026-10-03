@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import {
   Text, Group, Button, SimpleGrid, Card, Progress,
-  Stack, Center, ThemeIcon, Badge, Tabs, Box,
+  Stack, Center, ThemeIcon, Tabs, Box,
   ActionIcon, Tooltip as MTooltip,
 } from "@mantine/core";
 import {
@@ -47,7 +47,8 @@ import { AnalyticsControlDeck } from "@/features/analytics/components/layout/Ana
 import { AnalyticsSubTabs } from "@/features/analytics/components/layout/AnalyticsSubTabs";
 import { getAnalyticsSections } from "@/features/analytics/components/layout/analyticsSections";
 import { getAnalyticsHelp } from "@/features/analytics/components/analyticsHelp";
-import { useStats, useSiteScope } from "@/features/analytics";
+import { useStats, useSiteScope, useLive } from "@/features/analytics";
+import { LiveNowCard } from "@/features/analytics/components/liveAudience/LiveNowCard";
 import { useSites } from "@/features/workspace";
 import {
   useGetSegmentsQuery, useSaveSegmentMutation,
@@ -64,7 +65,7 @@ import { countryLabel, duration, share, num } from "@/shared/lib";
 import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
 import type {
-  Stats, Bucket, StatsFilter, Segment, Marker, MarkerKind, BreakdownComparisonRow,
+   Bucket, StatsFilter, Segment, Marker, MarkerKind, BreakdownComparisonRow,
 } from "@/shared/types";
 import { serializeFilter } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -101,13 +102,7 @@ function LegendDot({ color, children }: { color: string; children: React.ReactNo
   );
 }
 
-/**
- * One breakdown row's movement against the baseline.
- *
- * Shows the previous count alongside the percentage, because a percentage
- * without its base is unreadable at this scale — "+300%" on a row that went
- * from 1 to 4 is noise, and the reader can only tell by seeing the 1.
- */
+
 function BreakdownDelta({ row }: { row?: BreakdownComparisonRow }) {
   if (!row) return null;
   const { delta: pct, previous } = row;
@@ -129,14 +124,7 @@ function BreakdownDelta({ row }: { row?: BreakdownComparisonRow }) {
   );
 }
 
-/**
- * Stand-in for the comparison hook on cards that were not given one.
- *
- * Module-level so it is the same function object on every render: a card either
- * always has a real `useCompare` or always has this one, and the hook call
- * inside `BarList` stays a single unconditional call either way. Calls no hooks
- * itself, so substituting it adds nothing to the order.
- */
+
 const NO_COMPARE = () => ({ rows: undefined, loading: false });
 
 function BarList({
@@ -161,17 +149,9 @@ function BarList({
   /** When set, each row filters the dashboard by this dimension on click. */
   filterKey?: keyof StatsFilter;
   onFilter?: (key: keyof StatsFilter, value: string) => void;
-  /**
-   * Stretch to the height of the grid row. Correct inside a SimpleGrid, wrong
-   * inside a `.masonry` column — there is no row there to fill, so a card asked
-   * to be 100% tall collapses instead.
-   */
+
   fill?: boolean;
-  /**
-   * The dimension name this list breaks down by, as the compare endpoint knows
-   * it. Supplying it puts a compare toggle on the card; omitting it leaves the
-   * card exactly as it was.
-   */
+
   dimension?: string;
   /** Fetches this dimension's rows across both periods, when the toggle is on. */
   useCompare?: (dimension: string, enabled: boolean) => {
@@ -183,13 +163,9 @@ function BarList({
   const emptyText = empty ?? t("analytics.waitingForData");
   const clickable = Boolean(filterKey && onFilter);
 
-  // Off by default and per card: the comparison costs a request, and a user
-  // reading "top pages" usually wants the ranking, not the movement.
   const [compareOn, setCompareOn] = useState(false);
   const canCompare = Boolean(dimension && useCompare);
-  // `useCompare` is a hook, so it has to be called unconditionally and in the
-  // same order every render. Cards that were given one always have one; cards
-  // that weren't get this no-op, which calls nothing and always reports idle.
+
   const compareHook = useCompare ?? NO_COMPARE;
   const { rows: compareRows, loading: compareLoading } = compareHook(
     dimension ?? "",
@@ -300,45 +276,6 @@ function ChartTip({ active, payload, label }: any) {
   );
 }
 
-/** Who is on the site right now. */
-function LiveNow({ stats }: { stats: Stats | null }) {
-  const { t } = useTranslation();
-  const pages = stats?.livePages ?? [];
-  const live = stats?.live ?? 0;
-
-  return (
-    <Card withBorder radius="lg" padding="lg" h="100%">
-      <Group justify="space-between" mb="md">
-        <Group gap={8}>
-          <span className="status-dot live" style={{ background: "var(--mantine-color-teal-6)" }} />
-          <Text fw={600} c="dimmed" size="sm">{t("analytics.rightNow")}</Text>
-        </Group>
-        <Badge variant="light" color="teal" size="sm">
-          {live} visitor{live === 1 ? "" : "s"}
-        </Badge>
-      </Group>
-
-      {pages.length === 0 ? (
-        <Center py="lg">
-          <Text c="dimmed" size="xs">{t("analytics.nobodyOnSite")}</Text>
-        </Center>
-      ) : (
-        <Stack gap="xs">
-          <Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.04em" }}>
-            Active pages
-          </Text>
-          {pages.map((p) => (
-            <Group key={p.key} justify="space-between" gap="xs" wrap="nowrap">
-              <Text size="sm" truncate style={{ flex: 1 }}>{p.key}</Text>
-              <Badge variant="light" color="gray" size="sm">{p.count}</Badge>
-            </Group>
-          ))}
-        </Stack>
-      )}
-    </Card>
-  );
-}
-
 export default function Analytics() {
   useTitle("Analytics");
   const { t } = useTranslation();
@@ -359,33 +296,18 @@ export default function Analytics() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [section, setSection] = useState<string>("overview");
   const [tab, setTab] = useState<string>("pages");
-  /**
-   * Empty = all sites.
-   *
-   * Only the raw selection is stored; the scope actually queried is derived
-   * below. Clearing this in an effect instead let one render go out with the
-   * previous workspace's site ids attached, which the server answers with a
-   * 404 — the request is asking this workspace about somebody else's sites.
-   */
+
   const [pickedSites, setPickedSites] = useSiteScope(active?._id);
 
   const { sites } = useSites(active?._id);
 
-  /**
-   * The selection, narrowed to sites that exist in the workspace currently
-   * loaded. Computed during render, so the very first render after a switch
-   * already carries a valid scope rather than a stale one.
-   */
   const siteScope = useMemo(() => {
     if (!pickedSites.length) return [];
     const owned = new Set(sites.map((s) => s.siteId));
     return pickedSites.filter((id) => owned.has(id));
   }, [pickedSites, sites]);
 
-  // Narrowing the site scope swaps every number on the page — cover the swap
-  // with the same transition the workspace switcher uses. Null until the
-  // workspace is known: on a reload the scope resolves from undefined to the
-  // saved selection, and that first settle is not a switch to announce.
+
   const scopeSwitch = useSwitchOverlay(
     active?._id ? siteScope.join(",") || "all" : null,
   );
@@ -400,6 +322,7 @@ export default function Analytics() {
       compareState.mode,
       compareState.from,
     );
+  const { audience: liveAudience } = useLive(active?._id, serializeFilter(filter), siteScope);
 
   const addFilter = (key: keyof StatsFilter, value: string) => {
     trace(user?.id, "filter_added", "analytics", String(key));
@@ -413,11 +336,6 @@ export default function Analytics() {
     });
   const clearFilter = () => setFilter({});
 
-  // The visible window, as ISO bounds, so markers can be fetched for exactly
-  // what is on screen. A preset carries no explicit bounds, so its start is
-  // derived from its length; "custom" already has both.
-  // Memoised on the range alone: computing `Date.now()` inline would produce a
-  // new query argument on every render and refetch forever.
   const markerWindow = useMemo(() => {
     if (rangeState.preset === "custom" && rangeState.from && rangeState.to)
       return { from: rangeState.from, to: rangeState.to };
@@ -533,26 +451,11 @@ export default function Analytics() {
     }
   };
 
-  // The last payload we successfully rendered. Switching range empties `stats`
-  // until the new one arrives, and blanking the whole page to a skeleton each
-  // time would tear the header and range switcher out from under the cursor —
-  // so keep showing the previous numbers, dimmed, while the new range loads.
   const shown = useRef(stats);
   if (stats) shown.current = stats;
   const view = stats ?? shown.current;
 
-  /**
-   * The chart series, with the comparison period folded in as extra keys on the
-   * same points.
-   *
-   * Joined by position rather than by bucket label: the baseline's labels are
-   * its own dates ("03-14"), so matching on them would line nothing up. The
-   * server buckets both windows by the current window's rule, which makes the
-   * n-th baseline bucket the counterpart of the n-th current one.
-   *
-   * Sits above the early returns below, because a hook cannot be called
-   * conditionally.
-   */
+
   const series = useMemo(() => {
     const current = view?.timeseries ?? [];
     const baseline = view?.comparison?.timeseries;
@@ -567,10 +470,7 @@ export default function Analytics() {
     }));
   }, [view?.timeseries, view?.comparison?.timeseries]);
 
-  // The one site "why did this change" would explain — only when exactly one
-  // is unambiguously in view, whether from an explicit pick or because the
-  // workspace only has one site. Ambiguous across a multi-site aggregate, so
-  // the button is hidden rather than guessing which site's story to tell.
+
   const explainSiteId =
     siteScope.length === 1 ? siteScope[0] : sites.length === 1 ? sites[0].siteId : null;
 
@@ -670,8 +570,10 @@ export default function Analytics() {
       hint: "Every page load, including SPA route changes. One visitor can rack up many pageviews." },
     { metric: "sessions", icon: Layers, label: t("analytics.stat.sessions"), value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null,
       hint: "A visit — one or more pageviews with no 30-minute gap. A returning visitor later in the day starts a fresh session." },
-    { metric: null, icon: Radio, label: t("analytics.stat.live"), value: view?.live ?? 0, color: "green", live: true,
-      hint: "Distinct visitors active in the last 5 minutes, updated as the page refreshes." },
+    { metric: null, icon: Radio, label: t("analytics.stat.live"), value: liveAudience ? liveAudience.humans : view?.live ?? 0, color: "green", live: true,
+      hint: liveAudience
+        ? `Real people active in the last 5 minutes. ${liveAudience.bots + liveAudience.suspect} bots, AI agents and suspicious visitors are left out.`
+        : "Distinct visitors active in the last 5 minutes, updated as the page refreshes." },
   ] as const;
 
   const engagement = [
@@ -911,7 +813,7 @@ export default function Analytics() {
             )}
           </Card>
         </div>
-        <LiveNow stats={view} />
+        <LiveNowCard pages={view?.livePages ?? []} total={view?.live ?? 0} audience={liveAudience} />
       </SimpleGrid>
       </>}
 

@@ -34,7 +34,7 @@ import type {
   SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
   SearchBreakdown, SearchBreakdownDimension, SearchSitemaps, SearchInspection,
   SearchType, SearchBreakdownSort, SearchInsights, SearchDrilldown, SearchHourly,
-  NotificationPage, NotificationPrefsResponse,
+  NotificationPage, NotificationPrefsResponse, LiveAudience,
 } from "@/shared/types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -750,6 +750,7 @@ export const api = createApi({
         live: number;
         livePages: { key: string; count: number }[];
         liveCountries: { key: string; count: number }[];
+        audience?: LiveAudience;
       },
       { workspaceId: string; filter?: string; sites?: string[] }
     >({

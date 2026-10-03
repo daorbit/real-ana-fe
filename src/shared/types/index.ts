@@ -1997,6 +1997,37 @@ export type SeoCompetitorBriefResponse = {
   generatedAt: string;
 };
 
+export type TrafficKind = "human" | "ai" | "crawler" | "automation" | "suspect";
+
+export type LiveVisitor = {
+  id: string;
+  kind: TrafficKind;
+  verified: boolean;
+  name: string;
+  signals: string[];
+  path: string;
+  country: string;
+  device: string;
+  browser: string;
+  os: string;
+  pageviews: number;
+  firstSeen: string;
+  lastSeen: string;
+};
+
+export type LiveAudience = {
+  total: number;
+  humans: number;
+  confirmedHumans: number;
+  likelyHumans: number;
+  bots: number;
+  ai: number;
+  crawlers: number;
+  automation: number;
+  suspect: number;
+  visitors: LiveVisitor[];
+};
+
 /** One recorded refresh, for plotting a competitor's score over time. */
 export type SeoCompetitorHistoryPoint = {
   competitorId: string;

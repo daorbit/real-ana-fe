@@ -1,7 +1,8 @@
 import { Box, Group, Text, Badge } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { num } from "@/shared/lib";
-import type { Point } from "@/shared/types";
+import type { LiveAudience, Point } from "@/shared/types";
+import { AudienceSummary } from "./liveAudience/AudienceSummary";
 
 /**
  * The band at the top of Home.
@@ -16,17 +17,21 @@ import type { Point } from "@/shared/types";
 export function HomeHero({
   workspaceName,
   live,
+  audience,
   visitors,
   pageviews,
   series,
 }: {
   workspaceName: string;
   live: number;
+  audience: LiveAudience | null;
   visitors: number;
   pageviews: number;
   series: Point[];
 }) {
   const hasShape = series.length > 1;
+  const people = audience ? audience.humans : live;
+  const unit = audience ? (people === 1 ? "person" : "people") : people === 1 ? "visitor" : "visitors";
 
   return (
     <Box className="hero-band" mb="xl">
@@ -75,12 +80,13 @@ export function HomeHero({
                 lh={1}
                 style={{ letterSpacing: "-0.04em", color: "var(--text)" }}
               >
-                {num(live)}
+                {num(people)}
               </Text>
               <Text size="sm" c="dimmed" pb={8}>
-                {live === 1 ? "visitor" : "visitors"} on {workspaceName}
+                {unit} on {workspaceName}
               </Text>
             </Group>
+            {audience && <AudienceSummary audience={audience} />}
           </div>
 
           {/* Supporting totals — deliberately small, so they read as context
