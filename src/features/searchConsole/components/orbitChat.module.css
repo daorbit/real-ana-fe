@@ -516,7 +516,7 @@
 
 .composerWrap[data-variant='hero'] .composer:focus-within {
   border-color: var(--q-accent);
-  box-shadow: var(--orbit-glow-focus);
+  /* box-shadow: var(--orbit-glow-focus); */
 }
 
 .composerWrap[data-variant='hero'] .composerFoot {
