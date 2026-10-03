@@ -13,18 +13,18 @@ export function audienceSegments(a: LiveAudience): AudienceSegment[] {
   return [
     {
       key: "confirmed",
-      label: "Confirmed people",
-      singular: "Confirmed person",
+      label: "Interacting",
+      singular: "Interacting",
       color: "var(--mantine-color-teal-6)",
-      hint: "Moved the mouse, scrolled, typed or touched the screen with real input events.",
+      hint: "Real people we have seen move the mouse, scroll, type or tap the screen. Bots almost never produce real input like this.",
       value: a.confirmedHumans,
     },
     {
       key: "likely",
-      label: "Likely people",
-      singular: "Likely person",
+      label: "Just viewing",
+      singular: "Just viewing",
       color: "var(--mantine-color-teal-3)",
-      hint: "A normal browser with no bot signals that has not interacted yet, for example someone still reading.",
+      hint: "A normal browser with no signs of a bot that has not moved or scrolled yet, such as someone who just opened the page and is reading.",
       value: a.likelyHumans,
     },
     {

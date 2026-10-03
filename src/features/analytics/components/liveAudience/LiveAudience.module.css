@@ -28,26 +28,10 @@
   background: var(--seg);
 }
 
-.bar {
-  display: flex;
-  gap: 2px;
-  height: 8px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text) 8%, transparent);
-}
-
-.segment {
-  flex: var(--weight) 1 0;
-  min-width: 6px;
-  background: var(--seg);
-}
-
 .legend {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px 16px;
-  margin-top: 12px;
 }
 
 .legendItem {
@@ -137,10 +121,5 @@
 }
 
 .heroBreakdown {
-  max-width: 420px;
   margin-top: 14px;
-}
-
-.heroBreakdown .bar {
-  margin-top: 10px;
 }

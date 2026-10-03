@@ -2,7 +2,7 @@ import { Badge, Card, Center, Group, Stack, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import type { LiveAudience } from "@/shared/types";
 import { audienceSegments } from "./audienceMeta";
-import { AudienceBar, AudienceLegend } from "./AudienceBar";
+import { AudienceLegend } from "./AudienceLegend";
 import { LiveVisitorList } from "./LiveVisitorList";
 import classes from "./LiveAudience.module.css";
 
@@ -40,7 +40,6 @@ export function LiveNowCard({
         <>
           {audience && (
             <>
-              <AudienceBar segments={segments} />
               <AudienceLegend segments={segments} />
               {audience.visitors.length > 0 && (
                 <>

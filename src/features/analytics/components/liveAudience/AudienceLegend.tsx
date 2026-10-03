@@ -3,19 +3,6 @@ import { Tooltip } from "@mantine/core";
 import type { AudienceSegment } from "./audienceMeta";
 import classes from "./LiveAudience.module.css";
 
-export function AudienceBar({ segments }: { segments: AudienceSegment[] }) {
-  const visible = segments.filter((s) => s.value > 0);
-  return (
-    <div className={classes.bar} role="img" aria-label={visible.map((s) => `${s.value} ${s.label}`).join(", ")}>
-      {visible.map((s) => (
-        <Tooltip key={s.key} label={`${s.value} ${s.label.toLowerCase()}`} withArrow>
-          <span className={classes.segment} style={{ "--weight": s.value, "--seg": s.color } as CSSProperties} />
-        </Tooltip>
-      ))}
-    </div>
-  );
-}
-
 export function AudienceLegend({ segments }: { segments: AudienceSegment[] }) {
   return (
     <div className={classes.legend}>
