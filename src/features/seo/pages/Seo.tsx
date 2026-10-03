@@ -500,7 +500,6 @@ export default function Seo() {
             {targetUrl || "This page"} — usually 20-60 seconds.
           </>
         }
-        icon={<Search size={20} />}
         minimizedLabel="Running SEO audit…"
         successMessage="SEO audit complete"
         steps={[

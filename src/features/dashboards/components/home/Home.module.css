@@ -228,10 +228,30 @@
   width: 160px;
 }
 
+.viewRoot {
+  flex: none;
+  align-items: center;
+  padding: 3px;
+}
+
 .viewLabel {
-  display: grid;
-  place-items: center;
-  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 28px;
+  padding: 0;
+}
+
+.viewInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.viewInner svg {
+  display: block;
 }
 
 .table {

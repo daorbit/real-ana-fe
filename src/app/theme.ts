@@ -1,4 +1,4 @@
-import { ActionIcon, Button, createTheme, rem, ThemeIcon } from "@mantine/core";
+import { ActionIcon, Button, createTheme, Pagination, rem, ThemeIcon } from "@mantine/core";
 
 const DROPDOWN_DEFAULTS = {
   checkIconPosition: "right" as const,
@@ -153,6 +153,17 @@ export const theme = createTheme({
                 "--ai-hover": "var(--cta-hover)",
                 "--ai-color": "var(--cta-fg)",
                 "--ai-hover-color": "var(--cta-fg)",
+              },
+            }
+          : { root: {} },
+    }),
+    Pagination: Pagination.extend({
+      vars: (_theme, props) =>
+        !props.color || props.color === "emerald"
+          ? {
+              root: {
+                "--pagination-active-bg": "var(--cta)",
+                "--pagination-active-color": "var(--cta-fg)",
               },
             }
           : { root: {} },

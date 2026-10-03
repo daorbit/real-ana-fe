@@ -57,7 +57,7 @@ export function LibraryToolbar({
           value={view}
           onChange={(v) => onView(v as LibraryView)}
           data={VIEWS}
-          classNames={{ label: classes.viewLabel }}
+          classNames={{ root: classes.viewRoot, label: classes.viewLabel, innerLabel: classes.viewInner }}
           aria-label="Layout"
         />
       </div>

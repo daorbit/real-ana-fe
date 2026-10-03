@@ -2,31 +2,16 @@ import { Modal, Stack, Text, Box, Button, Group, UnstyledButton, Portal } from "
 import { Check, Minimize2, Maximize2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { RunningSteps } from "@/shared/ui/RunningSteps";
 import "@/shared/ui/RunningDialog.css";
 
-/** How long the success pill stays up after a minimized job finishes, in ms.
- *  Matches the CSS animation budget in RunningDialog.css. */
 const SUCCESS_HOLD = 2600;
 
-/**
- * A blocking "work in progress" dialog, with an escape hatch.
- *
- * Long jobs (a Lighthouse audit takes 20-60s) used to show a spinner inside
- * whichever button was pressed. With two entry points that meant two spinners
- * racing in different corners of the page and nothing explaining the wait.
- * One centred dialog says "the app is busy" once and cycles through what it is
- * actually doing.
- *
- * A minute is long enough that people want the page back, so the dialog can be
- * collapsed to a pill docked at the bottom of the viewport. The pill is a view
- * of `opened`, not a second piece of state, so collapsing never affects the job
- * underneath; when the job finishes it flips to a success line and leaves.
- */
+
 export function RunningDialog({
   opened,
   title,
   description,
-  icon,
   steps,
   minimizable = true,
   minimizedLabel,
@@ -35,7 +20,6 @@ export function RunningDialog({
   opened: boolean;
   title: string;
   description?: ReactNode;
-  icon?: ReactNode;
   /** Optional rotating status lines, ~3s each, held on the last one. */
   steps?: string[];
   /** Show the minimize control. */
@@ -60,8 +44,6 @@ export function RunningDialog({
     return () => clearInterval(id);
   }, [opened, steps]);
 
-  // Finishing while minimized is the only case with nothing else on screen to
-  // announce it, so the pill holds a success state for a beat before leaving.
   useEffect(() => {
     if (opened) {
       // A fresh run always starts expanded.
@@ -96,20 +78,12 @@ export function RunningDialog({
         centered
         radius="lg"
         padding={0}
-        size={400}
-        overlayProps={{ blur: 6, backgroundOpacity: 0.6 }}
-        styles={{ content: { overflow: "hidden" } }}
+        size={380}
+        overlayProps={{ blur: 6, backgroundOpacity: 0.55 }}
+        classNames={{ content: "running-dialog__content" }}
       >
         <Box className="running-dialog">
-          <div className="running-dialog__aurora" aria-hidden />
-
-          <Stack align="center" gap="lg" p="xl" style={{ position: "relative" }}>
-            <div className="running-dialog__orb">
-              <div className="running-dialog__ring running-dialog__ring--outer" />
-              <div className="running-dialog__ring running-dialog__ring--inner" />
-              <div className="running-dialog__core">{icon}</div>
-            </div>
-
+          <Stack align="center" gap="md" p="lg" pt="xl">
             <Stack align="center" gap={6}>
               <Text fw={650} fz="lg" ta="center">
                 {title}
@@ -121,27 +95,11 @@ export function RunningDialog({
               )}
             </Stack>
 
-            <div className="running-dialog__bar">
-              <div className="running-dialog__bar-fill" />
-            </div>
-
-            {steps?.length ? (
-              <Text
-                key={step}
-                size="xs"
-                c="dimmed"
-                fw={500}
-                ta="center"
-                className="running-dialog__step"
-              >
-                {steps[step]}
-              </Text>
-            ) : null}
+            {steps?.length ? <RunningSteps steps={steps} active={step} /> : null}
 
             {minimizable && (
               <Button
-                variant="subtle"
-                color="gray"
+                variant="default"
                 size="xs"
                 radius="xl"
                 leftSection={<Minimize2 size={14} />}
