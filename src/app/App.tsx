@@ -9,6 +9,7 @@ import { isLocked, subscribeLock } from "@/shared/lib/lockState";
 import { WorkspaceProvider, useWorkspace } from "@/features/workspace/context";
 import { DemoProvider } from "@/features/demo/context";
 import { OrbitProvider } from "@/features/orbit/components/OrbitProvider";
+import { NotesProvider, NotesPanel } from "@/features/notes";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { NotFound } from "@/shared/ui/NotFound";
 import { AppBootSkeleton } from "@/shared/ui/Skeletons";
@@ -113,8 +114,11 @@ function Protected({ children }: { children: ReactNode }) {
   return (
     <WorkspaceProvider>
       <OrbitProvider>
-        <RequireSetup>{children}</RequireSetup>
-        <LockScreen />
+        <NotesProvider>
+          <RequireSetup>{children}</RequireSetup>
+          <NotesPanel />
+          <LockScreen />
+        </NotesProvider>
       </OrbitProvider>
     </WorkspaceProvider>
   );

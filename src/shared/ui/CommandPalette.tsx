@@ -4,10 +4,11 @@ import { Modal, TextInput, ScrollArea, Text, Box, UnstyledButton } from "@mantin
 import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import {
   Home, BarChart3, FolderKanban, Code2, Share2, CalendarClock, Users,
-  Search, Moon, Sun, BookOpen, CornerDownLeft, TrendingUp, LayoutDashboard, Flag,
+  Search, Moon, Sun, BookOpen, CornerDownLeft, TrendingUp, LayoutDashboard, Flag, StickyNote,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useWorkspace } from "@/features/workspace/context";
+import { useNotes } from "@/features/notes";
 import { useIsPlatformAdmin } from "@/features/auth/context";
 import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
 import { DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
@@ -42,6 +43,7 @@ export function CommandPalette() {
   const dark = scheme === "dark";
 
   const isAdmin = useIsPlatformAdmin();
+  const { open: openNotes } = useNotes();
 
   // Global hotkey. Bound on the window so it works from anywhere, including
   // while a field elsewhere on the page has focus.
@@ -137,6 +139,16 @@ export function CommandPalette() {
         },
       },
       {
+        id: "notes",
+        label: "Open notes",
+        section: "Actions",
+        icon: StickyNote,
+        run: () => {
+          openNotes();
+          close();
+        },
+      },
+      {
         id: "docs",
         label: "Open documentation",
         section: "Actions",
@@ -151,7 +163,7 @@ export function CommandPalette() {
     return [...pages, ...wsCommands, ...actions];
     // `close` is stable in effect: it only touches setState setters.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspaces, active?._id, isAdmin, dark, navigate, setActive, setColorScheme]);
+  }, [workspaces, active?._id, isAdmin, dark, navigate, setActive, setColorScheme, openNotes]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();

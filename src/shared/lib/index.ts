@@ -1,5 +1,5 @@
 export {
-  num, compact, duration, ratio, share, timeAgo, timeUntil, shortDate, dateTime, setDatePrefs,
+  num, compact, duration, ratio, share, timeAgo, timeUntil, shortDate, longDate, dateTime, setDatePrefs,
 } from "@/shared/lib/format";
 export { countryName, countryLabel, countryFlag } from "@/shared/lib/countries";
 export {

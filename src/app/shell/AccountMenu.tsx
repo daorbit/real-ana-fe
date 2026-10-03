@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Menu, UnstyledButton } from "@mantine/core";
 import {
-  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Settings, ShieldCheck,
+  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Settings, ShieldCheck, StickyNote,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNotes } from "@/features/notes";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { CONTACT_URL, DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
@@ -46,6 +47,7 @@ export function AccountMenu({
 }) {
   const { t } = useTranslation();
   const [featureOpen, setFeatureOpen] = useState(false);
+  const notes = useNotes();
   const [opened, setOpened] = useState(false);
 
   const trigger = (
@@ -103,6 +105,10 @@ export function AccountMenu({
 
           <Menu.Item component={Link} to={settingsPath("profile")} leftSection={<Settings size={15} />}>
             {t("nav.accountSettings", "Account settings")}
+          </Menu.Item>
+
+          <Menu.Item leftSection={<StickyNote size={15} />} onClick={() => notes.open()}>
+            {t("nav.notes", "Notes")}
           </Menu.Item>
 
           <Menu.Sub>

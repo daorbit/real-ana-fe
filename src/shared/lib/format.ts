@@ -92,6 +92,16 @@ export function shortDate(d: Date | string): string {
   });
 }
 
+export function longDate(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleDateString(datePrefs.locale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: datePrefs.timeZone,
+  });
+}
+
 /** Date and time in the user's locale/zone, e.g. "11 Jul 2026, 14:05" */
 export function dateTime(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;

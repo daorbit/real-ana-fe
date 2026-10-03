@@ -55,6 +55,7 @@
     "planName": "{{plan}} plan",
     "documentation": "Documentation",
     "requestFeature": "Request a feature",
+    "notes": "Notes",
     "contactSupport": "Contact support",
     "pageHelp": "What's on this page",
     "lightMode": "Light mode",
