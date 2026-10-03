@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { OrbitChatComposer } from "@/features/searchConsole/components/OrbitChatComposer";
 import { StudioSuggestions } from "@/features/dashboards/components/studio/StudioSuggestions";
@@ -11,17 +10,13 @@ export function OrbitBanner({ onStart }: { onStart: (prompt?: string) => void })
 
   return (
     <section className={classes.banner} aria-labelledby="orbit-banner-title">
-      <div className={classes.bannerGlow} aria-hidden />
       <div className={classes.bannerGrid} aria-hidden />
 
       <div className={classes.bannerMain}>
         <span className={classes.bannerMark} aria-hidden>
           <OrbitMark size={64} />
         </span>
-        <span className={classes.bannerEyebrow}>
-          <Sparkles size={12} />
-          Orbit AI
-        </span>
+        <span className={classes.bannerEyebrow}>Orbit AI</span>
         <h2 id="orbit-banner-title" className={classes.bannerTitle}>What do you want to keep an eye on?</h2>
         <p className={classes.bannerText}>Describe it in a sentence. Orbit picks the widgets and lays them out for you.</p>
 
