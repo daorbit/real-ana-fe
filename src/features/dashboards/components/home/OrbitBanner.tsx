@@ -16,7 +16,6 @@ export function OrbitBanner({ onStart }: { onStart: (prompt?: string) => void })
         <span className={classes.bannerMark} aria-hidden>
           <OrbitMark size={64} />
         </span>
-        <span className={classes.bannerEyebrow}>Orbit AI</span>
         <h2 id="orbit-banner-title" className={classes.bannerTitle}>What do you want to keep an eye on?</h2>
         <p className={classes.bannerText}>Describe it in a sentence. Orbit picks the widgets and lays them out for you.</p>
 
