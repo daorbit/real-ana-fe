@@ -13,6 +13,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
+import { FeedbackButtons } from "@/features/orbit/components/FeedbackButtons";
 import { OrbitModelPicker } from "@/features/orbit/components/OrbitModelPicker";
 import { RichText, toPlainText } from "@/features/orbit/components/RichText";
 import { DataDigestTable, csvFromDigest, formatDigestAsText, isDataDigest } from "@/features/orbit/components/DataDigestTable";
@@ -245,6 +246,7 @@ function TurnActions({
           </ActionIcon>
         </Tooltip>
       )}
+      <FeedbackButtons />
       {isDataDigest(message.dataDigest) && (
         <>
           <Tooltip label="Copy as report" withArrow>

@@ -1,7 +1,6 @@
-import { Box, Modal } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-
-const FORM_URL = "https://forms.daorbit.in/form/6a9566fff4f4fb14f6082131/view";
+import { FormModal } from "@/shared/ui/FormModal";
+import { FEATURE_REQUEST_FORM_URL } from "@/shared/lib/formLinks";
 
 export function RequestFeatureModal({
   opened,
@@ -11,24 +10,13 @@ export function RequestFeatureModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const title = t("nav.requestFeature", "Request a feature");
 
   return (
-    <Modal
+    <FormModal
       opened={opened}
       onClose={onClose}
-      title={title}
-      size="lg"
-      radius="md"
-      zIndex={500}
-      centered
-    >
-      <Box
-        component="iframe"
-        src={FORM_URL}
-        title={title}
-        style={{ width: "100%", height: "70vh", border: 0, borderRadius: 8 }}
-      />
-    </Modal>
+      title={t("nav.requestFeature", "Request a feature")}
+      url={FEATURE_REQUEST_FORM_URL}
+    />
   );
 }

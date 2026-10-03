@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActionIcon, Textarea, Tooltip, UnstyledButton } from "@mantine/core";
 import { AlertTriangle, Copy, Pencil, RefreshCw, Share2 } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
+import { FeedbackButtons } from "@/features/orbit/components/FeedbackButtons";
 import { RichText, toPlainText } from "@/features/orbit/components/RichText";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { notify } from "@/shared/lib/notify";
@@ -171,6 +172,7 @@ function AnswerTurn({
                     <Share2 size={13} />
                   </ActionIcon>
                 </Tooltip>
+                <FeedbackButtons />
               </>
             )}
             {isLast && (
