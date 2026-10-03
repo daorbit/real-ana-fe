@@ -24,7 +24,7 @@
   border-radius: 20px;
   padding: 8px 10px;
   background: var(--q-bg-subtle);
-  box-shadow: inset 0 0 0 1px var(--q-border), var(--orbit-glow);
+  /* box-shadow: inset 0 0 0 1px var(--q-border), var(--orbit-glow); */
   transition: box-shadow 200ms ease, background-color 200ms ease;
 }
 
@@ -34,7 +34,7 @@
 
 .composer:focus-within {
   background: var(--q-surface);
-  box-shadow: inset 0 0 0 1.5px var(--q-accent), var(--orbit-glow-focus);
+  /* box-shadow: inset 0 0 0 1.5px var(--q-accent), var(--orbit-glow-focus); */
 }
 
 .send {

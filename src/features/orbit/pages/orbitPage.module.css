@@ -406,7 +406,7 @@
   border-radius: 24px;
   background: var(--q-bg-subtle);
   border: 1px solid var(--q-border);
-  box-shadow: var(--orbit-glow);
+  /* box-shadow: var(--orbit-glow); */
   transition: box-shadow 200ms ease, background-color 200ms ease;
 }
 
@@ -417,7 +417,7 @@
 .composer:focus-within {
   background: var(--q-surface);
   border-color: var(--q-accent);
-  box-shadow: var(--orbit-glow-focus);
+  /* box-shadow: var(--orbit-glow-focus); */
 }
 
 .send {
