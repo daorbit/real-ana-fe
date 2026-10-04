@@ -22,12 +22,20 @@ import { useTitle } from "@/shared/lib/useTitle";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "../components/MediaGrid";
 import { MediaGridSkeleton } from "../components/MediaGridSkeleton";
+import { MediaStartPanel } from "../components/start/MediaStartPanel";
 import { MediaPreviewModal } from "../components/MediaPreviewModal";
 import { UploadTray, type UploadItem } from "../components/UploadTray";
 import { readAsDataUrl, MAX_ASSET_BYTES } from "../lib";
 import classes from "./MediaLibrary.module.css";
 
 const PER_PAGE = 40;
+
+const KIND_LABELS: Record<MediaKind | "all", string> = {
+  all: "files",
+  image: "images",
+  video: "videos",
+  raw: "files",
+};
 
 /**
  * The workspace's media library.
@@ -190,6 +198,7 @@ export default function MediaLibraryPage() {
   }
 
   const selecting = selected.size > 0;
+  const libraryEmpty = Boolean(data) && !debouncedQ && filter === "all" && (data?.total ?? 0) === 0;
 
   return (
     <AppShell>
@@ -214,7 +223,7 @@ export default function MediaLibraryPage() {
                 </Button>
               </>
             )}
-            {canEdit && (
+            {canEdit && !libraryEmpty && (
               <Button
                 leftSection={<Upload size={15} />}
                 onClick={() => fileInput.current?.click()}
@@ -234,6 +243,7 @@ export default function MediaLibraryPage() {
         onChange={(e) => onFiles(e.currentTarget.files)}
       />
 
+      {!libraryEmpty && (
       <Group gap="sm" mt="md" mb="md" wrap="nowrap">
         <TextInput
           flex={1}
@@ -260,6 +270,7 @@ export default function MediaLibraryPage() {
           ]}
         />
       </Group>
+      )}
 
       {/* The whole library takes a drop, not just an empty-state box: dragging
           a file onto a wall of files is the obvious gesture once there is
@@ -281,6 +292,12 @@ export default function MediaLibraryPage() {
       >
         {isLoading ? (
           <MediaGridSkeleton />
+        ) : libraryEmpty ? (
+          <MediaStartPanel
+            canEdit={canEdit}
+            workspaceName={active.name}
+            onUpload={() => fileInput.current?.click()}
+          />
         ) : items.length ? (
           <Stack gap="md">
             <MediaGrid
@@ -325,12 +342,13 @@ export default function MediaLibraryPage() {
         ) : (
           <EmptyState
             icon={debouncedQ ? Search : ImageOff}
-            title={debouncedQ ? "Nothing matches that" : "No files yet"}
+            title={debouncedQ ? "Nothing matches that" : `No ${KIND_LABELS[filter]} yet`}
             description={
               debouncedQ
                 ? "Try a different search."
                 : "Drop files here, or use Upload. Everything you add can be picked from anywhere in the product."
             }
+            action={debouncedQ ? undefined : { label: "Show all files", onClick: () => setFilter("all") }}
           />
         )}
       </Box>

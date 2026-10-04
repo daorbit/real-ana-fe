@@ -1,5 +1,6 @@
-import { SimpleGrid, UnstyledButton, Image, Popover } from "@mantine/core";
+import { UnstyledButton, Popover } from "@mantine/core";
 import { PRESET_AVATARS } from "@/shared/lib/presetAvatars";
+import classes from "./AvatarPresetPicker.module.css";
 
 /**
  * A grid of ready-made avatars, for people who'd rather pick one than upload
@@ -18,21 +19,23 @@ export function AvatarPresetPicker({
   children: React.ReactNode;
 }) {
   return (
-    <Popover opened={opened} onClose={onClose} position="bottom-start" withArrow shadow="md" width={260}>
+    <Popover opened={opened} onClose={onClose} position="bottom-start" withArrow shadow="md" width={312}>
       <Popover.Target>{children}</Popover.Target>
       <Popover.Dropdown>
-        <SimpleGrid cols={5} spacing={6}>
-          {PRESET_AVATARS.map((src) => (
-            <UnstyledButton
-              key={src}
-              onClick={() => onPick(src)}
-              aria-label="Use this avatar"
-              style={{ borderRadius: 8, overflow: "hidden", lineHeight: 0 }}
-            >
-              <Image src={src} alt="" w={40} h={40} radius={8} />
-            </UnstyledButton>
-          ))}
-        </SimpleGrid>
+        <div className={classes.scroll}>
+          <div className={classes.grid}>
+            {PRESET_AVATARS.map((src, i) => (
+              <UnstyledButton
+                key={src}
+                className={classes.option}
+                onClick={() => onPick(src)}
+                aria-label={`Use avatar ${i + 1}`}
+              >
+                <img src={src} alt="" loading="lazy" className={classes.image} />
+              </UnstyledButton>
+            ))}
+          </div>
+        </div>
       </Popover.Dropdown>
     </Popover>
   );

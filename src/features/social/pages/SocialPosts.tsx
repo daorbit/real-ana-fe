@@ -22,7 +22,7 @@ import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
 import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
-import { PostsEmptyState } from "@/features/social/components/PostsEmptyState";
+import { SocialStartPanel } from "@/features/social/components/start/SocialStartPanel";
 import { SocialPostsSkeleton } from "@/shared/ui/Skeletons";
 import { SentTimeline } from "@/features/social/components/SentTimeline";
 import {
@@ -356,22 +356,15 @@ export default function SocialPosts() {
 
           <PageHelpButton />
 
-          <Tooltip
-            label={!ready ? "Connect an account first" : "This workspace's scheduled posts are full"}
-            disabled={ready && !postsFull}
-            withArrow
-          >
-            <Box>
-
-              <Button
-                leftSection={<Plus size={16} />}
-                disabled={!ready || postsFull}
-                onClick={() => openNew()}
-              >
-                New post
-              </Button>
-            </Box>
-          </Tooltip>
+          {ready && (
+            <Tooltip label="This workspace's scheduled posts are full" disabled={!postsFull} withArrow>
+              <Box>
+                <Button leftSection={<Plus size={16} />} disabled={postsFull} onClick={() => openNew()}>
+                  New post
+                </Button>
+              </Box>
+            </Tooltip>
+          )}
 
           <Box visibleFrom="sm">
             <ActivityBellIcon />
@@ -461,9 +454,11 @@ export default function SocialPosts() {
       ) : isLoading ? (
         <SocialPostsSkeleton />
       ) : posts.length === 0 ? (
-        <PostsEmptyState
+        <SocialStartPanel
           connected={ready}
-          onCreate={() => openNew()}
+          instagramAvailable={canUseInstagram}
+          disabled={postsFull}
+          onCreate={(date) => openNew(date)}
           onConnect={() => trace(user?.id, "connect_account_from_social_posts", "social_posts", "settings_connections")}
         />
       ) : view === "calendar" ? (

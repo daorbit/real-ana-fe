@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { ActionIcon, Box, Button, Group, Select, Tooltip } from "@mantine/core";
-import { HelpCircle, Swords, Target } from "lucide-react";
+import { HelpCircle, Swords } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
-import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
-import { SitesLoadError, ADD_SITE_PATH } from "@/features/workspace";
+import { SitesLoadError } from "@/features/workspace";
+import { CompareStartPanel } from "@/features/compare/components/start/CompareStartPanel";
 import {
   useGetSitesQuery, useGetCompetitorsQuery, useGetCompetitorAnalysisQuery,
   useGetCompetitorHistoryQuery, useGetCompetitorBriefAvailabilityQuery,
@@ -145,34 +145,14 @@ export default function Compare() {
         <CompareSkeleton />
       ) : !site && sitesFailed ? (
         <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
-      ) : !site ? (
-        <EmptyState
-          icon={Swords}
-          title="No sites yet"
-          description="Add a site and run an audit on it first — a comparison needs a baseline of your own to measure against."
-          action={{ label: "Add a site", to: ADD_SITE_PATH }}
+      ) : !site || needsOwnAudit || !hasComparison || !analysis || !selected ? (
+        <CompareStartPanel
+          stage={!site ? "noSite" : needsOwnAudit ? "needsAudit" : "ready"}
+          domain={site?.domain ?? ""}
+          canEdit={canEdit}
+          addForm={addForm("md")}
+          max={MAX_COMPETITORS}
         />
-      ) : needsOwnAudit ? (
-        <EmptyState
-          icon={Target}
-          title="Run an audit on your own site first"
-          description={`A comparison measures competitors against your page. Until ${site.domain} has been audited there is no baseline to compare them to.`}
-          action={{ label: "Run an SEO audit", to: "/app/seo" }}
-        />
-      ) : !hasComparison || !analysis || !selected ? (
-        <div className={classes.emptyAdd}>
-          <EmptyState
-            icon={Swords}
-            title="Nothing to compare yet"
-            minHeight="auto"
-            description={
-              canEdit
-                ? "Track a competitor's page to see where they beat you — the sections they cover, the schema they mark up, and the terms your page never mentions."
-                : "Nobody has tracked a competitor for this site yet. An editor can add one."
-            }
-          />
-          {canEdit && <div className={classes.emptyForm}>{addForm("md")}</div>}
-        </div>
       ) : (
         <>
           {analysis.position && (

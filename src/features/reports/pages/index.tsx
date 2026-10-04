@@ -1,5 +1,5 @@
 import { Alert, Button } from "@mantine/core";
-import { CalendarClock, MailWarning, Plus } from "lucide-react";
+import { MailWarning, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { useAuth } from "@/features/auth/context";
@@ -7,7 +7,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { PageHeader, PageStack } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
-import { EmptyState } from "@/shared/ui/EmptyState";
+import { ReportsStartPanel } from "@/features/reports/components/start/ReportsStartPanel";
 import { ReportsSkeleton } from "@/shared/ui/Skeletons";
 import { ReportDialog } from "@/features/reports/pages/ReportDialog";
 import { useReportsPage, useReportDialog } from "@/features/reports/pages/hooks";
@@ -50,7 +50,7 @@ export default function Reports() {
           actions={
             <>
               {page.canEdit && page.schedules.length > 0 && (
-                <Button leftSection={<Plus size={15} />} onClick={dialog.openNew} disabled={!page.workspaceId}>
+                <Button leftSection={<Plus size={15} />} onClick={() => dialog.openNew()} disabled={!page.workspaceId}>
                   {t("reports.newReport")}
                 </Button>
               )}
@@ -68,19 +68,12 @@ export default function Reports() {
         {page.isLoading ? (
           <ReportsSkeleton />
         ) : !page.schedules.length ? (
-          <div className={classes.card}>
-            <EmptyState
-              compact
-              icon={CalendarClock}
-              title={t("reports.emptyTitle")}
-              description={t("reports.emptyBodyShort")}
-              action={
-                page.canEdit
-                  ? { label: t("reports.emptyCta"), icon: Plus, onClick: dialog.openNew, disabled: !page.workspaceId }
-                  : undefined
-              }
-            />
-          </div>
+          <ReportsStartPanel
+            canEdit={page.canEdit}
+            disabled={!page.workspaceId}
+            workspace={active?.name ?? ""}
+            onCreate={dialog.openNew}
+          />
         ) : (
           <>
             <div className={classes.metrics}>

@@ -1,9 +1,14 @@
 
 export const PRESET_AVATARS = [
-  "bottts_riley", "bottts_cameron", "bottts_sage",
-  "bottts_drew", "bottts_lucas", "bottts_reese",
-  "pixelart_jamie", "pixelart_cameron", "pixelart_casey",
+  "avataaars_felix", "avataaars_aneka", "avataaars_jasper", "avataaars_luna", "avataaars_oscar",
+  "lorelei_aria", "lorelei_leo", "lorelei_nova", "lorelei_milo", "lorelei_zara",
   "notionists_riley", "notionists_casey", "notionists_quinn", "notionists_mia",
+  "notionists_ava", "notionists_noah", "notionists_ella",
+  "openpeeps_kai", "openpeeps_ivy", "openpeeps_theo", "openpeeps_maya",
+  "thumbs_sky", "thumbs_ember", "thumbs_pip", "thumbs_juno",
+  "pixelart_jamie", "pixelart_cameron", "pixelart_casey", "pixelart_rio", "pixelart_ash", "pixelart_sam",
+  "bottts_riley", "bottts_cameron", "bottts_sage", "bottts_drew", "bottts_lucas", "bottts_reese",
+  "bottts_bolt", "bottts_gizmo", "bottts_atlas",
 ].map((id) => `/avatars/presets/${id}.svg`);
 
 export function randomPresetAvatar(): string {

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import {
-  Combobox, Group, Text, TextInput, UnstyledButton, useCombobox,
+  Combobox, Text, TextInput, UnstyledButton, useCombobox,
 } from "@mantine/core";
-import { ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 import { DIAL_CODES, type DialCode } from "@/shared/lib/dialCodes";
+import { CountryFlag } from "@/shared/ui/CountryFlag";
+import classes from "./PhoneInput.module.css";
 
 
 export function PhoneInput({
@@ -67,12 +69,12 @@ export function PhoneInput({
         error={error}
         onChange={(e) => onLocal(e.currentTarget.value.replace(/[^\d\s]/g, ""))}
         data-autofocus={autoFocus || undefined}
-        leftSectionWidth={78}
+        leftSectionWidth={100}
         leftSectionPointerEvents="all"
         leftSection={
           <Combobox
             store={combobox}
-            width={280}
+            width={300}
             position="bottom-start"
             onOptionSubmit={(iso) => {
               const hit = DIAL_CODES.find((c) => c.iso === iso);
@@ -83,24 +85,14 @@ export function PhoneInput({
           >
             <Combobox.Target>
               <UnstyledButton
+                className={classes.trigger}
+                data-open={combobox.dropdownOpened || undefined}
                 onClick={() => combobox.toggleDropdown()}
-                aria-label={`Country code: +${country.dial}`}
-                style={{
-                  alignSelf: "stretch",
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 4,
-                  padding: "0 10px 0 12px",
-                  borderRight: "1px solid var(--mantine-color-default-border)",
-                  fontSize: "var(--mantine-font-size-sm)",
-                  fontWeight: 500,
-                  color: "var(--mantine-color-text)",
-                }}
+                aria-label={`Country code: ${nameFor(country.iso)} +${country.dial}`}
               >
-                +{country.dial}
-                <ChevronDown size={13} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                <CountryFlag code={country.iso} size={14} />
+                <span className={classes.triggerCode}>+{country.dial}</span>
+                <ChevronDown size={13} className={classes.chevron} />
               </UnstyledButton>
             </Combobox.Target>
 
@@ -108,27 +100,35 @@ export function PhoneInput({
               <Combobox.Search
                 value={search}
                 onChange={(e) => setSearch(e.currentTarget.value)}
-                placeholder="Search country"
-                leftSection={<Search size={14} style={{ color: "var(--muted)" }} />}
+                placeholder="Search country or code"
+                leftSection={<Search size={14} className={classes.searchIcon} />}
               />
-              <Combobox.Options mah={260} style={{ overflowY: "auto" }}>
+              <Combobox.Options className={classes.options}>
                 {results.length === 0 ? (
                   <Combobox.Empty>No matches</Combobox.Empty>
                 ) : (
-                  results.map((c) => (
-                    <Combobox.Option value={c.iso} key={c.iso} active={c.iso === country.iso}>
-                      <Group gap={8} wrap="nowrap" justify="space-between" w="100%">
-                        <Text size="sm">{nameFor(c.iso)}</Text>
-                        <Text size="sm" c="dimmed" fw={500}>+{c.dial}</Text>
-                      </Group>
-                    </Combobox.Option>
-                  ))
+                  results.map((c) => {
+                    const selected = c.iso === country.iso;
+                    return (
+                      <Combobox.Option
+                        value={c.iso}
+                        key={c.iso}
+                        active={selected}
+                        className={classes.option}
+                      >
+                        <CountryFlag code={c.iso} size={15} />
+                        <span className={classes.optionName}>{nameFor(c.iso)}</span>
+                        <span className={classes.optionDial}>+{c.dial}</span>
+                        <span className={classes.check}>{selected && <Check size={14} />}</span>
+                      </Combobox.Option>
+                    );
+                  })
                 )}
               </Combobox.Options>
             </Combobox.Dropdown>
           </Combobox>
         }
-        styles={{ section: { alignItems: "stretch" }, input: { paddingLeft: 90 } }}
+        classNames={{ section: classes.section, input: classes.input }}
       />
     </div>
   );

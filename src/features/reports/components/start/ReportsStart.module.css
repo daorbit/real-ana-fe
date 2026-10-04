@@ -1,0 +1,293 @@
+.picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.pickerSide {
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+}
+
+.pickerTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.pickerSub {
+  margin: 6px 0 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: left;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.option:hover {
+  border-color: var(--border-strong);
+}
+
+.option[data-active] {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  background: var(--accent-soft);
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.optionIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.option[data-active] .optionIcon {
+  background: var(--surface);
+  color: var(--accent-2);
+}
+
+.optionText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.optionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.optionSub {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.optionCheck {
+  flex-shrink: 0;
+  width: 14px;
+  color: var(--accent-2);
+}
+
+.useButton {
+  align-self: flex-start;
+  margin-top: 18px;
+}
+
+.previewPane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border-left: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.email {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.emailMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.emailFrom {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.emailAvatar {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--accent-2);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--surface);
+}
+
+.emailBadge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+.emailSubject {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.emailStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.emailStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.emailStatValue {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.emailStatLabel {
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.emailChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 64px;
+}
+
+.emailBar {
+  flex: 1;
+  border-radius: 4px 4px 2px 2px;
+  background: color-mix(in srgb, var(--accent-2) 60%, transparent);
+}
+
+.emailBar[data-h="3"] { height: 30%; }
+.emailBar[data-h="4"] { height: 42%; }
+.emailBar[data-h="5"] { height: 55%; }
+.emailBar[data-h="6"] { height: 68%; }
+.emailBar[data-h="7"] { height: 82%; }
+.emailBar[data-h="8"] { height: 100%; }
+
+.emailSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.emailSummaryLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.line {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+}
+
+.line[data-width="full"] { width: 100%; }
+.line[data-width="most"] { width: 72%; }
+
+.emailFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.emailAttachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.emailButton {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--accent-2);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--surface);
+}
+
+@media (max-width: 900px) {
+  .picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .previewPane {
+    padding: 20px 16px;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .pickerSide {
+    padding: 20px 16px;
+  }
+}

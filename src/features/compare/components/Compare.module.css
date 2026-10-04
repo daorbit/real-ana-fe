@@ -598,16 +598,6 @@
   opacity: 0.5;
 }
 
-.emptyAdd {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.emptyForm {
-  width: min(480px, 100%);
-}
-
 .skelLines {
   display: flex;
   flex: 1;

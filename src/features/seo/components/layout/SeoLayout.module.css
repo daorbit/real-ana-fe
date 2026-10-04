@@ -95,6 +95,23 @@
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.inspect[data-hero] {
+  max-width: none;
+  width: 100%;
+  min-height: 58px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--shell);
+}
+
+.inspect[data-hero] .address {
+  height: 44px;
+}
+
+.inspect[data-hero] .inspectButton {
+  border-radius: 11px;
+}
+
 .siteSelect {
   flex: 0 0 210px;
   min-width: 0;

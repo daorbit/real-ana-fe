@@ -188,9 +188,9 @@ export function useReportDialog(opts: {
    *  when it is the one it scrolled to last time. */
   const [focusTick, setFocusTick] = useState(0);
 
-  const openNew = () => {
+  const openNew = (preset?: Partial<Draft>) => {
     setEditingId(null);
-    setDraft(emptyDraft());
+    setDraft({ ...emptyDraft(), ...preset });
     setEmailInput("");
     setTab(TAB_ORDER[0]);
     setOpened(true);

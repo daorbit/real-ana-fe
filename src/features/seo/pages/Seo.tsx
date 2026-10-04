@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  Anchor, Badge, Box, Button, Card, Drawer, Group, SegmentedControl, Select, Stack,
+  Anchor, Badge, Box, Button, Card, Drawer, Group, SegmentedControl, Stack,
   Table, Text, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
   Pagination,
 } from "@mantine/core";
 import {
-  Search, RefreshCw, Globe, History, Trash2, Trophy, ExternalLink,
+  RefreshCw, Globe, History, Trash2, Trophy, ExternalLink,
   TrendingUp, TrendingDown, Minus, Printer, Clock,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,8 @@ import { getSeoHelp } from "@/features/seo/components/help";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { SeoInspectBar } from "@/features/seo/components/layout/SeoInspectBar";
+import { SeoStartPanel } from "@/features/seo/components/start/SeoStartPanel";
 import { SitesLoadError, ADD_SITE_PATH } from "@/features/workspace";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
@@ -503,6 +505,25 @@ export default function Seo() {
   }
 
 
+  const showStart = !report && !loading;
+  const inspectBar = (hero: boolean) => (
+    <SeoInspectBar
+      hero={hero}
+      sites={sites}
+      siteId={siteId}
+      onSite={(v) => {
+        setPicked(v);
+        setSiteScope([v]);
+      }}
+      canEdit={canEdit}
+      domainLabel={domainLabel}
+      path={path}
+      onPath={setPath}
+      onRun={() => run(false)}
+      analyzing={analyzing}
+    />
+  );
+
   return (
     <AppShell>
       <RunningDialog
@@ -555,47 +576,17 @@ export default function Seo() {
         }
       />
 
-      {/* One field, like a search bar: which site, which page on it, go. The
-          domain is fixed text in front of the path, so the thing being
-          audited reads as one address. */}
-      <div className={layout.inspect}>
-        <Select
-          variant="unstyled"
-          className={layout.siteSelect}
-          aria-label="Site"
-          data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-          value={siteId}
-          onChange={(v) => {
-            if (!v) return;
-            setPicked(v);
-            setSiteScope([v]);
-          }}
-          allowDeselect={false}
-          leftSection={<Globe size={15} />}
-          comboboxProps={{ withinPortal: true, width: 260, position: "bottom-start" }}
+      {showStart ? (
+        <SeoStartPanel
+          domain={domainLabel}
+          canEdit={canEdit}
+          path={path}
+          onPath={setPath}
+          inspectBar={inspectBar(true)}
         />
-        {canEdit && (
-          <>
-            <span className={layout.inspectDivider} aria-hidden />
-            <label className={layout.address}>
-              <Search size={15} className={layout.addressIcon} />
-              {domainLabel && <span className={layout.domain}>{domainLabel}</span>}
-              <input
-                className={layout.pathInput}
-                aria-label="Page to audit"
-                value={path}
-                onChange={(e) => setPath(e.currentTarget.value)}
-                onKeyDown={(e) => e.key === "Enter" && !analyzing && run(false)}
-                placeholder="/"
-                spellCheck={false}
-              />
-            </label>
-            <Button size="sm" disabled={analyzing} onClick={() => run(false)} className={layout.inspectButton}>
-              Inspect page
-            </Button>
-          </>
-        )}
-      </div>
+      ) : (
+        (report || analyzing) && inspectBar(false)
+      )}
 
       {data && report && (
         <div className={layout.reportMeta}>
@@ -641,18 +632,6 @@ export default function Seo() {
       )}
 
       <Box mt="xs">
-        {!report && !loading && (
-          <EmptyState
-            icon={Search}
-            title="No audit yet"
-            description={
-              canEdit
-                ? "Inspect a page to see meta tags, content quality, technical checks and Lighthouse scores."
-                : "Nobody has audited this site yet. An editor can run the first audit."
-            }
-          />
-        )}
-
         {loading && !data && (
           <Stack gap="lg">
             <Skeleton height={180} radius="md" />

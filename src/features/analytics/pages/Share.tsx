@@ -28,6 +28,7 @@ import type { SharePanels } from "@/shared/types";
 import { ShareLinkCard } from "@/features/analytics/components/share/ShareLinkCard";
 import { PanelSwitchList, type PanelGroup } from "@/features/analytics/components/share/PanelSwitchList";
 import { ShareFootnote } from "@/features/analytics/components/share/ShareFootnote";
+import { ShareStartPanel } from "@/features/analytics/components/share/start/ShareStartPanel";
 import classes from "@/features/analytics/components/share/Share.module.css";
 
 function SectionHead({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
@@ -253,6 +254,10 @@ function ShareSettings({ workspaceId }: { workspaceId: string }) {
         <Skeleton height={320} radius="md" />
       </div>
     );
+  }
+
+  if (!enabled && !token) {
+    return <ShareStartPanel workspace={active?.name ?? ""} busy={linkBusy} onEnable={() => toggle(true)} />;
   }
 
   return (
