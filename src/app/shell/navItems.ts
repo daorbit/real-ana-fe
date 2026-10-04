@@ -35,6 +35,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/journey", labelKey: "nav.journey", label: "User journeys", icon: Route },
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
+      // Hidden from the sidebar for now; the /app/backlinks route still works.
+      // { to: "/app/backlinks", labelKey: "nav.backlinks", label: "Backlinks", icon: Link2 },
 
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords },    ],
   },
@@ -45,6 +47,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon },
+      // Hidden from the sidebar for now; the /app/reviews route still works.
+      // { to: "/app/reviews", labelKey: "nav.reviews", label: "Google reviews", icon: Star },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
     ],
   },

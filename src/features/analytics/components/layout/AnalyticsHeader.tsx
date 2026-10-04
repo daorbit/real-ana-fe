@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ActionIcon, Title, Tooltip } from "@mantine/core";
+import { ActionIcon, Group, Title, Tooltip } from "@mantine/core";
 import { HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RefreshButton } from "@/shared/ui/Refresh";
@@ -40,8 +40,10 @@ export function AnalyticsHeader({
             <HelpCircle size={17} />
           </ActionIcon>
         </Tooltip>
-        <DocsButton path={DOCS_SLUGS.overview} />
-        <ActivityBellIcon />
+        <Group gap="sm" wrap="nowrap" visibleFrom="sm">
+          <DocsButton path={DOCS_SLUGS.overview} />
+          <ActivityBellIcon />
+        </Group>
       </div>
     </header>
   );

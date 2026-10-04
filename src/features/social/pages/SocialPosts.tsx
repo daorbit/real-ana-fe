@@ -373,9 +373,9 @@ export default function SocialPosts() {
             </Box>
           </Tooltip>
 
-          {/* Placed by hand: this page builds its own header rather than using
-              `PageHeader`, which carries the bell everywhere else. */}
-          <ActivityBellIcon />
+          <Box visibleFrom="sm">
+            <ActivityBellIcon />
+          </Box>
         </Group>
       </Group>
 

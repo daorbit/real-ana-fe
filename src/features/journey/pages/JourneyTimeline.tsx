@@ -28,6 +28,7 @@ import { JourneyTimelineView } from "@/features/journey/components/JourneyTimeli
 import { JourneySankeyView } from "@/features/journey/components/JourneySankeyView";
 import { JourneyHeatmapView } from "@/features/journey/components/JourneyHeatmapView";
 import { JourneyActionsView } from "@/features/journey/components/JourneyActionsView";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * The formats a journey can be read in.
@@ -58,6 +59,7 @@ type ViewId = (typeof VIEWS)[number]["value"];
  * never silently changes what you are looking at.
  */
 export default function JourneyTimeline() {
+  useTitle("User journey");
   const { appUserId } = useParams<{ appUserId: string }>();
   const { active } = useWorkspace();
   const [view, setView] = useState<ViewId>("flow");

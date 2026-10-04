@@ -15,26 +15,12 @@ import en from "@/lib/i18n/locale/dicts/en.json";
 import es from "@/lib/i18n/locale/dicts/es.json";
 import hi from "@/lib/i18n/locale/dicts/hi.json";
 import ja from "@/lib/i18n/locale/dicts/ja.json";
-import fr from "@/lib/i18n/locale/dicts/fr.json";
-import de from "@/lib/i18n/locale/dicts/de.json";
-import pt from "@/lib/i18n/locale/dicts/pt.json";
-import zh from "@/lib/i18n/locale/dicts/zh.json";
-import ar from "@/lib/i18n/locale/dicts/ar.json";
-import ru from "@/lib/i18n/locale/dicts/ru.json";
-import id from "@/lib/i18n/locale/dicts/id.json";
 
 const resources = {
   en: { translation: en },
   es: { translation: es },
   hi: { translation: hi },
   ja: { translation: ja },
-  fr: { translation: fr },
-  de: { translation: de },
-  pt: { translation: pt },
-  zh: { translation: zh },
-  ar: { translation: ar },
-  ru: { translation: ru },
-  id: { translation: id },
 } as const;
 
 i18n.use(initReactI18next).init({

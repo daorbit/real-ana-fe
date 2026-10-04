@@ -27,6 +27,7 @@ import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { notify } from "@/shared/lib/notify";
 import classes from "./orbitPage.module.css";
+import { useTitle } from "@/shared/lib/useTitle";
 
 
 async function copyText(text: string, successMessage = "Copied to clipboard") {
@@ -543,6 +544,7 @@ function Turn({
 const DRAW_RE = /^(draw|generate|gen|create|illustrate|paint|sketch|render|make me (an? )?(image|picture|photo))\b/i;
 
 export default function Orbit() {
+  useTitle("Orbit AI");
   // The page reads the provider's chat rather than calling the hook, so it is
   // the same conversation the bubble holds.
   const { chat } = useOrbit();
@@ -1089,10 +1091,9 @@ export default function Orbit() {
               <History size={16} />
             </ActionIcon>
           </Tooltip>
-          {/* Placed by hand: Orbit's chat header is its own layout, not
-              `PageHeader`, which carries the bell on every other screen. Sized
-              to match the subtle/md icons already in this toolbar. */}
-          <ActivityBellIcon variant="subtle" size="md" iconSize={16} />
+          <Box visibleFrom="sm">
+            <ActivityBellIcon variant="subtle" size="md" iconSize={16} />
+          </Box>
         </Group>
       </div>
 

@@ -21,10 +21,12 @@ import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
 import { CURRENCIES, setStoredCurrency } from "@/shared/lib/currency";
 import type { Currency } from "@/shared/types";
+import { useTitle } from "@/shared/lib/useTitle";
 
 type Touched = Record<string, boolean>;
 
 export default function Signup() {
+  useTitle("Create account");
   const { signup, startDemo, verifyTotp } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
@@ -42,7 +44,6 @@ export default function Signup() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
@@ -104,7 +105,6 @@ export default function Signup() {
     lastName: lastName ? checkLast(lastName) : null,
     email: v.email(email),
     password: v.password(password),
-    confirm: v.confirmPassword(password)(confirm),
   };
 
   const show = (field: keyof typeof errors) =>
@@ -123,7 +123,6 @@ export default function Signup() {
       lastName: true,
       email: true,
       password: true,
-      confirm: true,
     });
     if (Object.values(errors).some(Boolean)) return;
 
@@ -272,18 +271,6 @@ export default function Signup() {
               <PasswordStrength value={password} />
             </div>
 
-            <PasswordInput
-              label="Confirm password"
-              placeholder="Re-enter your password"
-              size="md"
-              autoComplete="new-password"
-              value={confirm}
-              error={show("confirm")}
-              onChange={(e) => setConfirm(e.currentTarget.value)}
-              onBlur={blur("confirm")}
-            />
-
-         
             <button
               type="submit"
               className="auth-submit"

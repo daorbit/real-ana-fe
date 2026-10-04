@@ -13,7 +13,7 @@ import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
-import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
+import dimClasses from "@/features/analytics/components/layout/ScopeDim.module.css";
 import { CustomizeDrawer } from "@/features/analytics/components/CustomizeDrawer";
 import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
 import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRenderer";
@@ -38,11 +38,7 @@ export default function Home() {
 
   const [siteScope, setSiteScope] = useSiteScope(active?._id);
 
-  const scopeSwitch = useSwitchOverlay(
-    active?._id ? siteScope.join(",") || "all" : null,
-  );
-
-  const { stats, failed, refresh, refreshing, lastUpdated } = useStats(
+  const { stats, switching, failed, refresh, refreshing, lastUpdated } = useStats(
     active?._id,
     "24h",
     undefined,
@@ -135,19 +131,6 @@ export default function Home() {
 
   return (
     <AppShell>
-      {scopeSwitch.active && (
-        <SwitchOverlay
-          label={
-            siteScope.length === 0
-              ? "All sites"
-              : siteScope.length === 1
-              ? sites.find((s) => s.siteId === siteScope[0])?.name ?? "1 site"
-              : `${siteScope.length} sites`
-          }
-          sublabel="Updating overview"
-          onDone={scopeSwitch.dismiss}
-        />
-      )}
       <CustomizeDrawer
         opened={customizing}
         onClose={() => setCustomizing(false)}
@@ -174,7 +157,6 @@ export default function Home() {
           {!editing && !dirty && (
             <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           )}
-          {!editing && !dirty && <DocsButton path={DOCS_SLUGS.overview} />}
 
           <LayoutEditControls
             editing={editing}
@@ -193,6 +175,7 @@ export default function Home() {
             <Button
               component={Link}
               to="/app/analytics"
+              visibleFrom="sm"
               leftSection={<BarChart3 size={16} />}
               onClick={() => trace(user?.id, "open_analytics_clicked", "home", "analytics")}
             >
@@ -200,10 +183,14 @@ export default function Home() {
             </Button>
           )}
 
-          <ActivityBellIcon />
+          <Group gap="sm" wrap="nowrap" visibleFrom="sm">
+            {!editing && !dirty && <DocsButton path={DOCS_SLUGS.overview} />}
+            <ActivityBellIcon />
+          </Group>
         </Group>
       </Group>
 
+      <div className={dimClasses.dim} data-switching={switching || undefined}>
       {!editing && !dirty && (
         <HomeHero
           workspaceName={active.name}
@@ -266,6 +253,7 @@ export default function Home() {
           />
         </SearchWidgetsProvider>
       )}
+      </div>
     </AppShell>
   );
 }

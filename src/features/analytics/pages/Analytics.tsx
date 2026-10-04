@@ -37,7 +37,7 @@ import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/Outb
 import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitPanel";
 import { FilterBar } from "@/features/analytics/components/FilterBar";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
-import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
+import dimClasses from "@/features/analytics/components/layout/ScopeDim.module.css";
 import { RangePicker } from "@/features/analytics/components/RangePicker";
 import { ComparePicker } from "@/features/analytics/components/ComparePicker";
 import { ExportMenu } from "@/shared/ui/ExportMenu";
@@ -309,9 +309,6 @@ export default function Analytics() {
   }, [pickedSites, sites]);
 
 
-  const scopeSwitch = useSwitchOverlay(
-    active?._id ? siteScope.join(",") || "all" : null,
-  );
   const { stats, switching, failed, refresh, refreshing, lastUpdated } =
     useStats(
       active?._id,
@@ -615,19 +612,6 @@ export default function Analytics() {
 
   return (
     <AppShell>
-      {scopeSwitch.active && (
-        <SwitchOverlay
-          label={
-            siteScope.length === 0
-              ? "All sites"
-              : siteScope.length === 1
-              ? sites.find((s) => s.siteId === siteScope[0])?.name ?? "1 site"
-              : `${siteScope.length} sites`
-          }
-          sublabel="Updating analytics"
-          onDone={scopeSwitch.dismiss}
-        />
-      )}
       <HelpDrawer
         opened={helpOpen}
         onClose={() => setHelpOpen(false)}
@@ -722,13 +706,7 @@ export default function Analytics() {
         </Alert>
       )}
 
-      <Box
-        style={{
-          opacity: switching ? 0.45 : 1,
-          pointerEvents: switching ? "none" : undefined,
-          transition: "opacity 140ms ease",
-        }}
-      >
+      <Box className={dimClasses.dim} data-switching={switching || undefined}>
 
       {section === "overview" && <>
       {/* audience */}

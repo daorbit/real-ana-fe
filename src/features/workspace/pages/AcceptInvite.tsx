@@ -9,6 +9,7 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import { useAuth } from "@/features/auth/context";
 import { trace } from "@/shared/lib/analytics";
 import { ACTIVE_WORKSPACE_KEY } from "@/features/workspace/context";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * The landing page for a workspace invitation link.
@@ -27,6 +28,7 @@ import { ACTIVE_WORKSPACE_KEY } from "@/features/workspace/context";
  * provider" on the live page.
  */
 export default function AcceptInvite() {
+  useTitle("Join workspace");
   const { token = "" } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();

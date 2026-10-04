@@ -22,6 +22,7 @@ import { useAuth } from "@/features/auth/context";
 import type { ReferralSource, Site } from "@/shared/types";
 import { WELCOME_PENDING_KEY } from "@/shared/ui/WelcomeOverlay";
 import s from "@/features/auth/components/onboarding/Onboarding.module.css";
+import { useTitle } from "@/shared/lib/useTitle";
 
 const STEPS = [
   {
@@ -161,6 +162,7 @@ function SetupBar({
 }
 
 export default function Onboarding() {
+  useTitle("Set up");
   const nav = useNavigate();
   const { setActive, workspaces } = useWorkspace();
   const { user, updateProfile } = useAuth();

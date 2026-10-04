@@ -23,8 +23,10 @@ import { LastUsedBadge } from "@/features/auth/components/LastUsedBadge";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
+import { useTitle } from "@/shared/lib/useTitle";
 
 export default function Login() {
+  useTitle("Log in");
   const { login, verifyTotp, startDemo } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState("");

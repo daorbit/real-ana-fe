@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { confirmDelete } from "@/shared/lib/notify";
+import { navigateTo } from "@/app/navigation";
 
 /**
  * Warns before edits are lost.
@@ -48,10 +50,15 @@ export function useUnsavedGuard(dirty: boolean, message = "You have unsaved chan
       if (url.origin !== window.location.origin) return;
       if (url.pathname === window.location.pathname) return;
 
-      if (!window.confirm(`${message} Leave without saving?`)) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      e.preventDefault();
+      e.stopPropagation();
+      const destination = `${url.pathname}${url.search}${url.hash}`;
+      confirmDelete({
+        title: "Leave without saving?",
+        body: message,
+        confirmLabel: "Leave without saving",
+        onConfirm: () => navigateTo(destination),
+      });
     };
 
     // Capture phase: the router's own click handler must not run first.

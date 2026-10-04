@@ -28,13 +28,6 @@ export const LANGUAGES: Language[] = [
   { value: "es", label: "Español (Spanish)", native: "Español" },
   { value: "hi", label: "हिन्दी (Hindi)", native: "हिन्दी" },
   { value: "ja", label: "日本語 (Japanese)", native: "日本語" },
-  { value: "fr", label: "Français (French)", native: "Français" },
-  { value: "de", label: "Deutsch (German)", native: "Deutsch" },
-  { value: "pt", label: "Português (Portuguese)", native: "Português" },
-  { value: "zh", label: "中文 (Chinese)", native: "中文" },
-  { value: "ar", label: "العربية (Arabic)", native: "العربية" },
-  { value: "ru", label: "Русский (Russian)", native: "Русский" },
-  { value: "id", label: "Bahasa Indonesia (Indonesian)", native: "Bahasa Indonesia" },
 ];
 
 /** localStorage key for the saved interface-language preference. */

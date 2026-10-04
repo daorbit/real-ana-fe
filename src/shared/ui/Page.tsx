@@ -36,9 +36,10 @@ export function PageHeader({
         </div>
         <Group gap="sm" wrap="wrap" justify="flex-end">
           {actions}
-    
-          <DocsButton path={docsPath} />
-          <ActivityBellIcon />
+          <Group gap="sm" wrap="nowrap" visibleFrom="sm">
+            <DocsButton path={docsPath} />
+            <ActivityBellIcon />
+          </Group>
         </Group>
       </Group>
       {children && <Box mt="lg">{children}</Box>}

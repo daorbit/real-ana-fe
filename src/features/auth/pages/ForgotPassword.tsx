@@ -13,6 +13,7 @@ import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { notify, errMessage } from "@/shared/lib/notify";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
+import { useTitle } from "@/shared/lib/useTitle";
 
 /**
  * Password reset, in two steps on one page.
@@ -33,6 +34,7 @@ const RESEND_COOLDOWN = 60;
 type Step = "request" | "reset";
 
 export default function ForgotPassword() {
+  useTitle("Reset password");
   const { forgotPassword, resetPassword, resendResetCode } = useAuth();
   const nav = useNavigate();
 

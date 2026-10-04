@@ -212,8 +212,10 @@ export default function DashboardView() {
               </Menu.Dropdown>
             </Menu>
           )}
-          <DocsButton path={DOCS_SLUGS.dashboards} />
-          <ActivityBellIcon />
+          <Group gap="sm" wrap="nowrap" visibleFrom="sm">
+            <DocsButton path={DOCS_SLUGS.dashboards} />
+            <ActivityBellIcon />
+          </Group>
         </div>
       </div>
 

@@ -1,0 +1,8 @@
+.dim {
+  transition: opacity 140ms ease;
+}
+
+.dim[data-switching] {
+  opacity: 0.45;
+  pointer-events: none;
+}

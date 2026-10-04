@@ -1,5 +1,5 @@
-import { Button } from "@mantine/core";
-import { Check, Pencil, SlidersHorizontal } from "lucide-react";
+import { Button, Menu } from "@mantine/core";
+import { Check, ChevronDown, Pencil, Plus, SlidersHorizontal } from "lucide-react";
 
 export function LayoutEditControls({
   editing,
@@ -18,6 +18,30 @@ export function LayoutEditControls({
   onSave: () => void;
   onAdd: () => void;
 }) {
+  if (!editing && !dirty) {
+    return (
+      <Menu position="bottom-end" withinPortal shadow="md" width={200}>
+        <Menu.Target>
+          <Button
+            variant="default"
+            leftSection={<SlidersHorizontal size={15} />}
+            rightSection={<ChevronDown size={14} />}
+          >
+            Customize
+          </Button>
+        </Menu.Target>
+        <Menu.Dropdown>
+          <Menu.Item leftSection={<Pencil size={14} />} onClick={onToggleEdit}>
+            Edit layout
+          </Menu.Item>
+          <Menu.Item leftSection={<Plus size={14} />} onClick={onAdd}>
+            Add widgets
+          </Menu.Item>
+        </Menu.Dropdown>
+      </Menu>
+    );
+  }
+
   return (
     <>
       {dirty ? (
@@ -30,16 +54,11 @@ export function LayoutEditControls({
           </Button>
         </>
       ) : (
-        <Button
-          variant={editing ? "filled" : "default"}
-          color={editing ? "emerald" : undefined}
-          leftSection={editing ? <Check size={15} /> : <Pencil size={15} />}
-          onClick={onToggleEdit}
-        >
-          {editing ? "Done" : "Edit layout"}
+        <Button color="emerald" leftSection={<Check size={15} />} onClick={onToggleEdit}>
+          Done
         </Button>
       )}
-      <Button variant="default" leftSection={<SlidersHorizontal size={15} />} onClick={onAdd}>
+      <Button variant="default" leftSection={<Plus size={15} />} onClick={onAdd}>
         Add widgets
       </Button>
     </>
