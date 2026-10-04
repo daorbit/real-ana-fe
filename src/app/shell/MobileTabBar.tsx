@@ -1,16 +1,9 @@
 import { Link } from "react-router-dom";
 import { UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Home, BarChart3, Search, CalendarClock, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { prefetchRoute } from "@/app/routePrefetch";
-
-/** The four destinations people open most, straight from the thumb. */
-const TABS = [
-  { to: "/app", labelKey: "nav.home", label: "Home", icon: Home, exact: true },
-  { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
-  { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
-  { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
-];
+import { MOBILE_TABS as TABS } from "./mobileTabs";
 
 
 export function MobileTabBar({

@@ -2,18 +2,7 @@ import { Group, Text, UnstyledButton } from "@mantine/core";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavAction } from "./NavLink";
-
-/**
- * Somewhere visible that says the command palette exists.
- *
- * The palette is keyboard-driven, so without this the feature is invisible to
- * anyone who has not been told the shortcut. Clicking dispatches that same
- * shortcut rather than reaching into the palette's own state — one way in,
- * whichever way it was asked for.
- */
-function openPalette() {
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
-}
+import { openPalette } from "./openPalette";
 
 export function SearchButton({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();

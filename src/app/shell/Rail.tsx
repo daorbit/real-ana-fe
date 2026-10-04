@@ -1,5 +1,4 @@
-import { ActionIcon, AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core";
-import { X } from "lucide-react";
+import { AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
@@ -16,6 +15,7 @@ import { AccountMenu } from "./AccountMenu";
 import { DemoCard, ImpersonationCard, OrbitCard, PlanCard } from "./RailCards";
 import { NAV_GROUPS } from "./navItems";
 import { LogoutDialog } from "./LogoutDialog";
+import { MobileMoreSheet } from "./mobile/MobileMoreSheet";
 
  
 export function Rail({
@@ -65,6 +65,64 @@ export function Rail({
     }
   };
 
+  const accountMenu = (
+    <AccountMenu
+      collapsed={false}
+      mobile={mobile}
+      name={user?.name ?? ""}
+      email={user?.email ?? ""}
+      avatarUrl={user?.avatarUrl}
+      initials={initials}
+      isAdmin={isAdmin}
+      mode={mode}
+      onMode={setMode}
+      demo={demo}
+      demoAvailable={demoAvailable}
+      onToggleDemo={toggleDemo}
+      onLogout={() => setLogoutOpen(true)}
+    />
+  );
+
+  const logoutDialog = (
+    <LogoutDialog
+      opened={logoutOpen}
+      onStay={() => setLogoutOpen(false)}
+      onLogout={() => {
+        setLogoutOpen(false);
+        logout();
+        notify.info(t("nav.loggedOut"));
+      }}
+    />
+  );
+
+  if (mobile) {
+    const cards = (
+      <>
+        {impersonating && (
+          <ImpersonationCard collapsed={false} email={user?.email ?? ""} leaving={leaving} onLeave={leave} />
+        )}
+        {isDemo ? <DemoCard collapsed={false} onExit={logout} /> : <PlanCard />}
+      </>
+    );
+
+    return (
+      <MantineShell.Navbar p={0}>
+        <MobileMoreSheet
+          pathname={pathname}
+          onClose={onCloseNav}
+          cards={cards}
+          account={
+            <>
+              {accountMenu}
+              <ThemeToggleButton onChange={setMode} />
+            </>
+          }
+        />
+        {logoutDialog}
+      </MantineShell.Navbar>
+    );
+  }
+
   return (
     <MantineShell.Navbar p="md">
 
@@ -77,25 +135,6 @@ export function Rail({
             </Box>
           )}
           <RailBrand collapsed={collapsed} onToggle={onToggleRail} />
-        </Group>
-      </MantineShell.Section>
-
-      {/* In the mobile drawer there is no collapse control to share a line
-          with, so the workspace row gets a close button in its place. */}
-      <MantineShell.Section hiddenFrom="sm" mb="md">
-        <Group gap={4} wrap="nowrap" align="center">
-          <Box style={{ minWidth: 0, flex: 1 }}>
-            <RailWorkspaceHeader collapsed={collapsed} />
-          </Box>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="md"
-            onClick={onCloseNav}
-            aria-label={t("nav.closeNav", "Close navigation")}
-          >
-            <X size={18} />
-          </ActionIcon>
         </Group>
       </MantineShell.Section>
 
@@ -150,15 +189,7 @@ export function Rail({
         </div>
       </MantineShell.Section>
 
-      <LogoutDialog
-        opened={logoutOpen}
-        onStay={() => setLogoutOpen(false)}
-        onLogout={() => {
-          setLogoutOpen(false);
-          logout();
-          notify.info(t("nav.loggedOut"));
-        }}
-      />
+      {logoutDialog}
     </MantineShell.Navbar>
   );
 }
