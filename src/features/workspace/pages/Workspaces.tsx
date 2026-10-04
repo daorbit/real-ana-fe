@@ -9,6 +9,7 @@ import { useSites } from "@/features/workspace";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { AddSiteWizard } from "@/features/workspace/components/AddSiteWizard";
 import { useWorkspaceActions } from "@/features/workspace/hooks/useWorkspaceActions";
+import { useWorkspacesDeepLink } from "@/features/workspace/hooks/useWorkspacesDeepLink";
 import { WorkspaceSwitcher } from "@/features/workspace/components/workspaces/WorkspaceSwitcher";
 import { WorkspaceHero } from "@/features/workspace/components/workspaces/WorkspaceHero";
 import { SitesPanel } from "@/features/workspace/components/workspaces/SitesPanel";
@@ -45,6 +46,7 @@ export default function Workspaces() {
     trace(user?.id, "add_site_clicked", "workspaces", "add_site_wizard");
     setSiteOpen(true);
   };
+  const focusedSiteId = useWorkspacesDeepLink(!loading && Boolean(active), canEdit, openAddSite);
 
   if (loading) return <AppShell><WorkspacesSkeleton /></AppShell>;
 
@@ -126,6 +128,7 @@ export default function Workspaces() {
               onRefresh={refresh}
               refreshing={refreshing}
               lastUpdated={lastUpdated}
+              focusedSiteId={focusedSiteId}
             />
           </motion.div>
         </Box>

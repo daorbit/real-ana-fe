@@ -6,6 +6,7 @@ import { AppShell } from "@/app/AppShell";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { HomeHero } from "@/features/analytics/components/HomeHero";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { DocsButton } from "@/shared/ui/DocsButton";
@@ -20,7 +21,7 @@ import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWi
 import { LayoutEditControls } from "@/features/analytics/components/widgets/LayoutEditControls";
 import { Onboarding, onboardingCanShow } from "@/features/auth/components/Onboarding";
 import { useStats, useLive, useHomeWidgets, useLinkedInReturn, useSiteScope } from "@/features/analytics";
-import { useSites } from "@/features/workspace";
+import { useSites, useSiteInstalled } from "@/features/workspace";
 import { useGetSeoReportsQuery, useGetMembersQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import { useWorkspace } from "@/features/workspace/context";
@@ -41,7 +42,7 @@ export default function Home() {
     active?._id ? siteScope.join(",") || "all" : null,
   );
 
-  const { stats, refresh, refreshing, lastUpdated } = useStats(
+  const { stats, failed, refresh, refreshing, lastUpdated } = useStats(
     active?._id,
     "24h",
     undefined,
@@ -54,6 +55,11 @@ export default function Home() {
 
   const onboardingVisible = onboardingCanShow();
   const firstSiteId = sites[0]?._id ?? "";
+  const firstSiteKey = sites[0]?.siteId ?? "";
+  const siteInstalled = useSiteInstalled(
+    onboardingVisible && !demo ? active?._id ?? "" : "",
+    firstSiteKey,
+  );
   const { data: seoReports } = useGetSeoReportsQuery(
     { workspaceId: active?._id ?? "", siteId: firstSiteId, limit: 1 },
     { skip: !onboardingVisible || !active?._id || !firstSiteId || demo },
@@ -85,6 +91,19 @@ export default function Home() {
     revert();
     setEditing(false);
   };
+
+  if (active && !stats && failed && !layoutLoading) {
+    return (
+      <AppShell>
+        <ErrorState
+          title="Couldn't load your overview"
+          description="We couldn't reach your analytics just now. Your data is safe — check your connection and try again."
+          onRetry={() => void refresh()}
+          retrying={refreshing}
+        />
+      </AppShell>
+    );
+  }
 
   if (loading || layoutLoading || (active && !stats)) {
     return <AppShell><HomeSkeleton /></AppShell>;
@@ -200,7 +219,8 @@ export default function Home() {
         <Onboarding
           hasWorkspace={!!active}
           hasSite={sites.length > 0}
-          hasData={(stats?.pageviews ?? 0) > 0}
+          hasData={siteInstalled === true || (stats?.pageviews ?? 0) > 0}
+          snippetSiteId={firstSiteKey || undefined}
           hasAudit={(seoReports?.length ?? 0) > 0}
           hasTeammate={(memberData?.members?.length ?? 0) > 1}
         />

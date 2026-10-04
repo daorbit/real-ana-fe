@@ -8,7 +8,7 @@ const POLL_MS = 2_000;
 
 /** Whether a site has ever reported an event. Cached per site. */
 export function useSiteInstalled(workspaceId: string, siteId: string) {
-  const { data } = useGetInstallStatusQuery({ workspaceId, siteId });
+  const { data } = useGetInstallStatusQuery({ workspaceId, siteId }, { skip: !workspaceId || !siteId });
   return data ? data.installed : null;
 }
 

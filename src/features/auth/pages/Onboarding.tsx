@@ -31,12 +31,6 @@ const STEPS = [
     lede: "This is the name your teammates see on reports and comments.",
   },
   {
-    label: "About you",
-    hint: "How you found us",
-    title: "How did you hear about us?",
-    lede: "Pick everything that applies — it helps us know where to focus.",
-  },
-  {
     label: "Workspace",
     hint: "Where your work lives",
     title: "Name your workspace",
@@ -65,6 +59,12 @@ const STEPS = [
     wide: true,
   },
   {
+    label: "About you",
+    hint: "How you found us",
+    title: "One last thing — how did you hear about us?",
+    lede: "Pick everything that applies. It helps us know where to focus.",
+  },
+  {
     label: "Plan",
     hint: "Upgrade or stay free",
     title: "Pick a plan",
@@ -72,21 +72,17 @@ const STEPS = [
   },
 ];
 
-const REFERRAL_STEP = 1;
-const WORKSPACE_STEP = 2;
-const SITE_STEP = 3;
-const FRAMEWORK_STEP = 4;
-const INSTALL_STEP = 5;
-
-/** Index into `STEPS` of the first step that may be skipped. */
-const FIRST_SKIPPABLE_STEP = 1;
-
-
+const WORKSPACE_STEP = 1;
+const SITE_STEP = 2;
+const FRAMEWORK_STEP = 3;
+const INSTALL_STEP = 4;
+const REFERRAL_STEP = 5;
 const BILLING_STEP = 6;
 
+const FIRST_SKIPPABLE_STEP = 1;
 
 const SLUGS = [
-  "details", "referral", "workspace", "site", "framework", "install", "billing",
+  "details", "workspace", "site", "framework", "install", "referral", "billing",
 ];
 
 
@@ -190,15 +186,12 @@ export default function Onboarding() {
   const [createSite, { isLoading: creatingSite }] = useCreateSiteMutation();
   const [generateOnboardingCopy] = useGenerateOnboardingCopyMutation();
 
-  // step 1 (referral)
   const [referralSources, setReferralSources] = useState<ReferralSource[]>([]);
 
-  // step 2 (workspace)
   const [wsName, setWsName] = useState("");
   const [wsId, setWsId] = useState<string | null>(restored.wsId);
   const [wsError, setWsError] = useState<string | null>(null);
 
-  // steps 3-4 (site, framework)
   const [siteName, setSiteName] = useState("");
   const [domain, setDomain] = useState("");
   const [framework, setFramework] = useState<FrameworkId>("html");
@@ -206,7 +199,6 @@ export default function Onboarding() {
   const [siteError, setSiteError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
-  // step 5 (install)
   const [site, setSite] = useState<Site | null>(restored.site);
   const [aiCopy, setAiCopy] = useState<{ readyHeadline: string; readyDescription: string } | null>(null);
 
@@ -243,10 +235,6 @@ export default function Onboarding() {
   const skip = () => {
     trace(user?.id, "onboarding_skipped", "onboarding", "app");
     localStorage.setItem("quantalog_onboarding_skipped", "1");
-    // The overlay says "your workspace is ready" — true, and worth the same
-    // landing, whenever skipping still leaves one behind. Skipping out of the
-    // referral step, before the workspace step has run, leaves none, so the
-    // flag stays unset rather than promising something that isn't there yet.
     if (wsId) localStorage.setItem(WELCOME_PENDING_KEY, "1");
     clearProgress();
     nav(workspaceOnly ? "/app/workspaces" : "/app");
@@ -271,7 +259,7 @@ export default function Onboarding() {
       // Not worth blocking setup over — the account still gets everything
       // else it needs regardless of whether this saved.
     }
-    setStep(WORKSPACE_STEP);
+    setStep(BILLING_STEP);
   };
 
   const submitWorkspace = async () => {
@@ -339,13 +327,16 @@ export default function Onboarding() {
 
   /** Where the header's back chevron goes — the same place each step's own
    *  Back button does. Absent on the first screen of either path. */
+  const afterInstall = workspaceOnly ? BILLING_STEP : REFERRAL_STEP;
+  const beforeBilling = workspaceOnly ? INSTALL_STEP : REFERRAL_STEP;
+
   const PREV: Record<number, number | undefined> = {
-    [REFERRAL_STEP]: workspaceOnly ? undefined : 0,
-    [WORKSPACE_STEP]: workspaceOnly ? undefined : REFERRAL_STEP,
+    [WORKSPACE_STEP]: workspaceOnly ? undefined : 0,
     [SITE_STEP]: WORKSPACE_STEP,
     [FRAMEWORK_STEP]: SITE_STEP,
     [INSTALL_STEP]: FRAMEWORK_STEP,
-    [BILLING_STEP]: INSTALL_STEP,
+    [REFERRAL_STEP]: INSTALL_STEP,
+    [BILLING_STEP]: beforeBilling,
   };
   const prev = PREV[step];
   const goBack = prev === undefined ? undefined : () => setStep(prev);
@@ -379,7 +370,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        <BillingStep onBack={() => setStep(INSTALL_STEP)} onDone={done} />
+        <BillingStep onBack={() => setStep(beforeBilling)} onDone={done} />
         </div>
       </div>
     );
@@ -394,7 +385,7 @@ export default function Onboarding() {
   const footer =
     step === REFERRAL_STEP ? (
       <ReferralStepFooter
-        onBack={workspaceOnly ? undefined : () => setStep(0)}
+        onBack={() => setStep(INSTALL_STEP)}
         onSkip={submitReferral}
         onSubmit={submitReferral}
         selectedCount={referralSources.length}
@@ -402,7 +393,7 @@ export default function Onboarding() {
     ) : step === WORKSPACE_STEP ? (
       <WorkspaceStepFooter
         loading={creatingWs}
-        onBack={workspaceOnly ? undefined : () => setStep(REFERRAL_STEP)}
+        onBack={workspaceOnly ? undefined : () => setStep(0)}
         onSubmit={submitWorkspace}
       />
     ) : step === SITE_STEP ? (
@@ -412,7 +403,7 @@ export default function Onboarding() {
     ) : step === INSTALL_STEP && site ? (
       <ReadyStepFooter
         onBack={() => setStep(FRAMEWORK_STEP)}
-        onContinue={() => setStep(BILLING_STEP)}
+        onContinue={() => setStep(afterInstall)}
       />
     ) : null;
 
@@ -444,7 +435,7 @@ export default function Onboarding() {
           <div className={s.controls}>
 
             {step === 0 && (
-              <ProfileStep onDone={() => (workspaces.length ? done() : setStep(REFERRAL_STEP))} />
+              <ProfileStep onDone={() => (workspaces.length ? done() : setStep(WORKSPACE_STEP))} />
             )}
 
             {step === REFERRAL_STEP && (

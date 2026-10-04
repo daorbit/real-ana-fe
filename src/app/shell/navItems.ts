@@ -1,10 +1,9 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, TrendingUp,
-  LayoutDashboard, Flag,
+  LayoutDashboard, Flag, Settings,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
-import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
 
 
 export type NavItem = {
@@ -59,17 +58,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
+      { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: Settings },
     ],
-  },
-  {
-    headingKey: "nav.settings",
-    heading: "Settings",
-    items: SETTINGS_SECTIONS.map((s) => ({
-      to: settingsPath(s.id),
-      labelKey: s.labelKey,
-      label: s.label,
-      icon: s.icon,
-    })),
   },
 ];
 

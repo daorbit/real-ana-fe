@@ -17,6 +17,7 @@ import { getSeoHelp } from "@/features/seo/components/help";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { SitesLoadError, ADD_SITE_PATH } from "@/features/workspace";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
   useGetLatestSeoReportQuery, useGetSeoReportQuery, useDeleteSeoReportMutation,
@@ -262,7 +263,10 @@ export default function Seo() {
   const { user, refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
 
-  const { currentData: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
+  const {
+    currentData: sites = [], isLoading: sitesLoading, isError: sitesFailed,
+    isFetching: sitesFetching, refetch: refetchSites,
+  } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
 
@@ -475,6 +479,15 @@ export default function Seo() {
     );
   }
 
+  if (!sites.length && sitesFailed) {
+    return (
+      <AppShell>
+        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath={DOCS_SLUGS.seo} />
+        <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
+      </AppShell>
+    );
+  }
+
   if (!sites.length) {
     return (
       <AppShell>
@@ -483,7 +496,7 @@ export default function Seo() {
           icon={Globe}
           title="No sites yet"
           description="SEO audits run against the sites in this workspace. Add one first and it will show up here."
-          action={{ label: "Add a site", onClick: () => { window.location.href = "/app/workspaces"; } }}
+          action={{ label: "Add a site", to: ADD_SITE_PATH }}
         />
       </AppShell>
     );

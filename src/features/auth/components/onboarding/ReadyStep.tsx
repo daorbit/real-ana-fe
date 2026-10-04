@@ -4,6 +4,7 @@ import { StepFooter } from "./StepFooter";
 import { BrandIcon } from "@/shared/ui/BrandIcon";
 import { CodeBlock } from "@/shared/ui/CodeBlock";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
+import { SendToDeveloperButton } from "@/features/workspace/components/SendToDeveloperButton";
 import { frameworkLanguage, type FrameworkGuide } from "@/features/workspace/frameworks";
 import type { FrameworkId } from "@/features/workspace/frameworks";
 import type { Site } from "@/shared/types";
@@ -21,6 +22,8 @@ export function ReadyStepBody({
   aiCopy: { readyHeadline: string; readyDescription: string } | null;
   workspaceId: string | null;
 }) {
+  const snippet = guide.code(site.siteId, {});
+
   return (
     <Stack gap="lg">
       {/* The shell shows the step's title; this is the framework-specific
@@ -33,10 +36,17 @@ export function ReadyStepBody({
       </Group>
 
       <CodeBlock
-        code={guide.code(site.siteId, {})}
+        code={snippet}
         filename={guide.filename}
         language={frameworkLanguage(guide.id)}
       />
+
+      <Group justify="space-between" gap="sm" wrap="wrap">
+        <Text size="sm" c="dimmed">
+          Someone else looks after your site?
+        </Text>
+        <SendToDeveloperButton domain={site.domain} guide={guide} snippet={snippet} size="sm" />
+      </Group>
 
       {guide.note && (
         <Text size="xs" c="dimmed">

@@ -23,6 +23,7 @@ import { RailWorkspaceHeader } from "./shell/RailWorkspaceHeader";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { HeaderDocsButton } from "@/shared/ui/DocsButton";
 import { ShellMountedContext } from "./shell/ShellContext";
+import { routeKey } from "./routeKey";
 
 function useStarfieldPreset(): boolean {
   const [on, setOn] = useState(
@@ -83,10 +84,13 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   useSyncWorkspaceTheme(active?._id);
   const [navOpen, { toggle: toggleNav, close: closeNav }] =
     useDisclosure(false);
+  const pageKey = routeKey(loc.pathname);
   useEffect(() => {
     closeNav();
-    scroller.current?.scrollTo({ top: 0 });
   }, [loc.pathname, closeNav]);
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: 0 });
+  }, [pageKey]);
 
   return (
     <ActivityPanelProvider>
@@ -185,7 +189,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
               <PlanExpiryNotice />
               <QuotaNudge />
               <motion.div
-                key={loc.pathname}
+                key={pageKey}
                 className="route-fade"
                 initial={motionOff ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}

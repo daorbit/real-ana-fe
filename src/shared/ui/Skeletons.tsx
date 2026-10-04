@@ -98,7 +98,24 @@ export function FlowGraphSkeleton({
   );
 }
 
-/** The Home page while its data loads. */
+export function PageSkeleton() {
+  return (
+    <>
+      <Group justify="space-between" align="flex-start" mb="xl">
+        <div>
+          <Skeleton height={28} width={200} radius="sm" />
+          <Skeleton height={12} width={320} mt={10} radius="sm" />
+        </div>
+        <Skeleton height={36} width={120} radius="md" />
+      </Group>
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+        <ChartSkeleton height={160} />
+        <ListSkeleton rows={4} />
+      </SimpleGrid>
+    </>
+  );
+}
+
 export function HomeSkeleton() {
   return (
     <>

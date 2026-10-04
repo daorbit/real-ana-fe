@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState, lazy, Suspense, type ReactNode } from "react";
 import { setNavigate } from "@/app/navigation";
+import { routeKey } from "@/app/routeKey";
 import { trace } from "@/shared/lib/analytics";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 import { useIdleLock } from "@/features/auth/useIdleLock";
@@ -83,10 +84,6 @@ function RequireSetup({ children }: { children: ReactNode }) {
 
   const setupExempt = user?.demo || user?.impersonating;
 
-  if (!user?.mobile && !setupExempt) {
-    return <Navigate to="/app/onboarding" replace />;
-  }
-
   if (fetchFailed || locked) return <>{children}</>;
 
   const skipped = localStorage.getItem("quantalog_onboarding_skipped") === "1";
@@ -150,7 +147,7 @@ function NavigationCapture() {
 
  
 function FocusOnRouteChange() {
-  const { pathname } = useLocation();
+  const pathname = routeKey(useLocation().pathname);
   const first = useRef(true);
 
   useEffect(() => {

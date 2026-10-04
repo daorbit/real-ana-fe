@@ -8,6 +8,7 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { ADD_SITE_PATH } from "@/features/workspace/paths";
 import { useGetSitesQuery } from "@/app/store";
 import { useGetBacklinkOverviewQuery, useGetBacklinksQuery } from "../api";
 import { useBacklinkActions } from "../hooks/useBacklinkActions";
@@ -207,7 +208,7 @@ export default function Backlinks() {
           icon={Link2}
           title="No web sites yet"
           description="Backlinks are tracked for web sites with a domain. Add a site and install the tracker, and links start showing up as visitors arrive from them."
-          action={{ label: "Add a site", to: "/app/workspaces" }}
+          action={{ label: "Add a site", to: ADD_SITE_PATH }}
         />
       ) : (
         <>

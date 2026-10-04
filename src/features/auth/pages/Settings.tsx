@@ -1,52 +1,26 @@
-import { Navigate, useLocation, useParams } from "react-router-dom";
-import { Box } from "@mantine/core";
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
-import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
 import { useInstagramReturn } from "@/features/social/useInstagramReturn";
 import { useProfileForm } from "@/features/auth/components/settings/useProfileForm";
-import { InfoPanel } from "@/features/auth/components/settings/InfoPanel";
-import { ConnectionsPanel } from "@/features/auth/components/settings/ConnectionsPanel";
-import { TwoFactorPanel } from "@/features/auth/components/settings/TwoFactorPanel";
-import { ScreenLockPanel } from "@/features/auth/components/settings/ScreenLockPanel";
-import { SessionsPanel } from "@/features/auth/components/settings/SessionsPanel";
-import { PasswordPanel } from "@/features/auth/components/settings/PasswordPanel";
-import { NotificationsPanel } from "@/features/auth/components/settings/NotificationsPanel";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
-import { SecurityOverview } from "@/features/auth/components/settings/SecurityOverview";
-import securityClasses from "@/features/auth/components/settings/Security.module.css";
+import { SettingsSectionBody } from "@/features/auth/components/settings/SettingsSectionBody";
+import { PageTabs } from "@/shared/ui/PageTabs";
+import { pageTabId, pageTabPanelId } from "@/shared/ui/pageTabIds";
+import pageClasses from "@/features/auth/components/settings/SettingsPage.module.css";
 import {
+  SETTINGS_SECTIONS,
   findSettingsSection,
+  settingsPath,
   settingsRedirectTarget,
   type SettingsSectionId,
 } from "@/features/auth/components/settings/settingsSections";
 import { useTitle } from "@/shared/lib/useTitle";
-import type { ProfileForm } from "@/features/auth/components/settings/useProfileForm";
 
-function SectionBody({ id, form }: { id: SettingsSectionId; form: ProfileForm }) {
-  switch (id) {
-    case "profile":
-      return <InfoPanel form={form} />;
-    case "appearance":
-      return <AppearanceSection bare />;
-    case "connections":
-      return <ConnectionsPanel />;
-    case "notifications":
-      return <NotificationsPanel />;
-    case "security":
-      return (
-        <Box className={securityClasses.stack}>
-          <SecurityOverview />
-          <PasswordPanel />
-          <TwoFactorPanel />
-          <ScreenLockPanel />
-          <SessionsPanel />
-        </Box>
-      );
-  }
-}
+const TABS_ID = "settings";
 
 function LegacySettingsRedirect() {
   const { search } = useLocation();
@@ -63,11 +37,12 @@ export default function Settings() {
 
   if (!sectionId) return <LegacySettingsRedirect />;
   if (!section) return <Navigate to={settingsRedirectTarget(sectionId)} replace />;
-  return <SettingsSectionPage id={section.id} />;
+  return <SettingsPage id={section.id} />;
 }
 
-function SettingsSectionPage({ id }: { id: SettingsSectionId }) {
+function SettingsPage({ id }: { id: SettingsSectionId }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const section = findSettingsSection(id)!;
   useTitle(`${section.label} · Settings`);
   useInstagramReturn();
@@ -76,15 +51,41 @@ function SettingsSectionPage({ id }: { id: SettingsSectionId }) {
 
   if (!user) return null;
 
+  const select = (next: SettingsSectionId) => {
+    if (next !== id) navigate(settingsPath(next), { replace: true });
+  };
+
   return (
     <AppShell>
       <form onSubmit={submit}>
         <PageHeader
-          title={t(section.labelKey, section.label)}
-          description={t(section.descriptionKey, section.description)}
+          title={t("settings.title", "Settings")}
+          description={t(
+            "settings.pageDesc",
+            "Your profile, how Quantalog looks, the accounts it's linked to, what it tells you about, and how your account is protected.",
+          )}
         />
 
-        <SectionBody id={id} form={form} />
+        <PageTabs
+          items={SETTINGS_SECTIONS.map((s) => ({ id: s.id, label: t(s.labelKey, s.label) }))}
+          active={id}
+          onChange={select}
+          label={t("settings.title", "Settings")}
+          idPrefix={TABS_ID}
+        />
+
+        <motion.div
+          key={id}
+          role="tabpanel"
+          id={pageTabPanelId(TABS_ID, id)}
+          aria-labelledby={pageTabId(TABS_ID, id)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.14, ease: "easeOut" }}
+        >
+          <p className={pageClasses.intro}>{t(section.descriptionKey, section.description)}</p>
+          <SettingsSectionBody id={id} form={form} />
+        </motion.div>
 
         {dirty && <SaveBar saving={saving} onDiscard={seedFromUser} />}
       </form>

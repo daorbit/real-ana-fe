@@ -6,6 +6,7 @@ import { Plus, FolderKanban, LayoutGrid } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
@@ -33,9 +34,16 @@ export default function Dashboards() {
   const { canEdit } = usePermissions();
   const workspaceId = active?._id;
 
-  const { data: dashboards = [], isLoading: dashboardsLoading } = useGetDashboardsQuery(workspaceId ?? "", { skip: !workspaceId });
-  const { data: embeds = [], isLoading: embedsLoading } = useGetEmbedsQuery(workspaceId ?? "", { skip: !workspaceId });
+  const {
+    data: dashboards = [], isLoading: dashboardsLoading, isError: dashboardsFailed,
+    isFetching: dashboardsFetching, refetch: refetchDashboards,
+  } = useGetDashboardsQuery(workspaceId ?? "", { skip: !workspaceId });
+  const {
+    data: embeds = [], isLoading: embedsLoading, isError: embedsFailed,
+    isFetching: embedsFetching, refetch: refetchEmbeds,
+  } = useGetEmbedsQuery(workspaceId ?? "", { skip: !workspaceId });
   const isLoading = dashboardsLoading || embedsLoading;
+  const failed = (dashboardsFailed && dashboards.length === 0) || (embedsFailed && embeds.length === 0);
   const expectsList = useHasDashboardsHint(workspaceId, !isLoading, dashboards.length + embeds.length > 0);
   const [embedTarget, setEmbedTarget] = useState<EmbedTarget>(null);
   const navigate = useNavigate();
@@ -61,6 +69,23 @@ export default function Dashboards() {
     return (
       <AppShell>
         {expectsList || tab === "embeds" ? <DashboardListSkeleton /> : <DashboardWelcomeSkeleton />}
+      </AppShell>
+    );
+  }
+
+  if (failed) {
+    return (
+      <AppShell>
+        <PageHeader title="Dashboards" docsPath={DOCS_SLUGS.dashboards} />
+        <ErrorState
+          title="Couldn't load your dashboards"
+          description="Your dashboards are safe — we just couldn't reach them. Check your connection and try again."
+          onRetry={() => {
+            if (dashboardsFailed) void refetchDashboards();
+            if (embedsFailed) void refetchEmbeds();
+          }}
+          retrying={dashboardsFetching || embedsFetching}
+        />
       </AppShell>
     );
   }

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ActionIcon, Box, Button, Collapse, CopyButton, Divider, Menu, Tooltip,
+  ActionIcon, Box, Button, Collapse, CopyButton, Divider, Group, Menu, Tooltip,
 } from "@mantine/core";
+import { SendToDeveloperButton } from "@/features/workspace/components/SendToDeveloperButton";
 import { Activity, Check, ChevronDown, Code2, Copy, ExternalLink, MoreHorizontal, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
@@ -19,15 +20,26 @@ interface Props {
   site: Site;
   workspaceId: string;
   onDelete: (() => void) | null;
+  focused?: boolean;
 }
 
 /**
  * One tracked site as a card. Opening "Install & verify" widens it to the full
  * row, so the snippet builder has room to breathe.
  */
-export function SiteCard({ site, workspaceId, onDelete }: Props) {
+export function SiteCard({ site, workspaceId, onDelete, focused = false }: Props) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(focused);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!focused) return;
+    setOpen(true);
+    const frame = requestAnimationFrame(() =>
+      cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [focused]);
   const status = useSiteStatus(workspaceId, site.siteId);
   const installed = status ? status.installed : null;
 
@@ -36,7 +48,7 @@ export function SiteCard({ site, workspaceId, onDelete }: Props) {
   const frameworkLabel = guide.id === "other" ? null : guide.label;
 
   return (
-    <Box className={classes.siteCard} data-open={open || undefined} data-live={installed || undefined}>
+    <Box ref={cardRef} className={classes.siteCard} data-open={open || undefined} data-live={installed || undefined}>
       <Box className={classes.siteTop}>
         <span className={classes.siteFavicon}>
           <SiteFavicon domain={site.domain} framework={site.framework} size={24} />
@@ -139,6 +151,11 @@ export function SiteCard({ site, workspaceId, onDelete }: Props) {
         <Box className={classes.siteDetails}>
           <InstallCheck workspaceId={workspaceId} siteId={site.siteId} domain={site.domain} />
           <Divider my="lg" label={t("workspaces.installSnippet")} labelPosition="center" />
+          {site.platform !== "app" && site.domain && (
+            <Group justify="flex-end" mb="sm">
+              <SendToDeveloperButton domain={site.domain} guide={guide} snippet={snippet} />
+            </Group>
+          )}
           <SnippetBuilder
             siteId={site.siteId}
             workspaceId={workspaceId}

@@ -17,6 +17,7 @@ interface Props {
   onRefresh: () => void;
   refreshing: boolean;
   lastUpdated: Date | null;
+  focusedSiteId?: string | null;
 }
 
 export function SitesPanel({
@@ -28,6 +29,7 @@ export function SitesPanel({
   onRefresh,
   refreshing,
   lastUpdated,
+  focusedSiteId,
 }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
@@ -106,6 +108,7 @@ export function SitesPanel({
               site={s}
               workspaceId={workspaceId}
               onDelete={canEdit ? () => onDeleteSite(s) : null}
+              focused={s.siteId === focusedSiteId}
             />
           ))}
           {canEdit && !q && (

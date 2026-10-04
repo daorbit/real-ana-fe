@@ -25,7 +25,9 @@ function NavGroupBlock({
   const [ownOpen, setOwnOpen] = useState(true);
 
 
-  const holdsCurrent = group.items.some((n) => n.to === pathname);
+  const isActive = (to: string) =>
+    pathname === to || (to !== "/app" && pathname.startsWith(`${to}/`));
+  const holdsCurrent = group.items.some((n) => isActive(n.to));
   const open = group.collapsible
     ? adminOpen || holdsCurrent
     : ownOpen || holdsCurrent;
@@ -37,7 +39,7 @@ function NavGroupBlock({
       to={n.to}
       label={t(n.labelKey, n.label)}
       icon={n.icon}
-      active={pathname === n.to || (n.to !== "/app" && pathname.startsWith(`${n.to}/`))}
+      active={isActive(n.to)}
       collapsed={collapsed}
     />
   ));

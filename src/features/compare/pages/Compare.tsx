@@ -8,6 +8,7 @@ import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { SitesLoadError, ADD_SITE_PATH } from "@/features/workspace";
 import {
   useGetSitesQuery, useGetCompetitorsQuery, useGetCompetitorAnalysisQuery,
   useGetCompetitorHistoryQuery, useGetCompetitorBriefAvailabilityQuery,
@@ -31,7 +32,10 @@ export default function Compare() {
   const { canEdit } = usePermissions();
   const workspaceId = active?._id ?? "";
 
-  const { currentData: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
+  const {
+    currentData: sites = [], isLoading: sitesLoading, isError: sitesFailed,
+    isFetching: sitesFetching, refetch: refetchSites,
+  } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
 
@@ -139,17 +143,21 @@ export default function Compare() {
 
       {sitesLoading || (site && (listLoading || analysisLoading)) ? (
         <CompareSkeleton />
+      ) : !site && sitesFailed ? (
+        <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
       ) : !site ? (
         <EmptyState
           icon={Swords}
           title="No sites yet"
           description="Add a site and run an audit on it first — a comparison needs a baseline of your own to measure against."
+          action={{ label: "Add a site", to: ADD_SITE_PATH }}
         />
       ) : needsOwnAudit ? (
         <EmptyState
           icon={Target}
           title="Run an audit on your own site first"
-          description={`A comparison measures competitors against your page. Until ${site.domain} has been audited there is no baseline to compare them to — open the SEO page and run one.`}
+          description={`A comparison measures competitors against your page. Until ${site.domain} has been audited there is no baseline to compare them to.`}
+          action={{ label: "Run an SEO audit", to: "/app/seo" }}
         />
       ) : !hasComparison || !analysis || !selected ? (
         <div className={classes.emptyAdd}>

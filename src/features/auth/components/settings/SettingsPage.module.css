@@ -1,0 +1,6 @@
+.intro {
+  margin: 0 0 var(--mantine-spacing-lg);
+  max-width: 920px;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--text-2);
+}

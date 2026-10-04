@@ -98,8 +98,9 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
   };
 
   const submit = async () => {
+    const hasPhone = local.replace(/[^\d]/g, "").length > 0;
     const fErr = firstName.trim() ? null : "Enter your first name";
-    const pErr = localNumberError(local);
+    const pErr = hasPhone ? localNumberError(local) : null;
     setFirstError(fErr);
     setPhoneError(pErr);
     if (fErr || pErr) return;
@@ -110,7 +111,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
       await updateProfile({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        mobile: joinNumber(country, local),
+        ...(hasPhone ? { mobile: joinNumber(country, local) } : {}),
       });
       onDone();
     } catch (e) {
@@ -199,6 +200,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
 
         <div className={f.grid2}>
           <TextInput
+            autoFocus={!firstName}
             label="First name"
             placeholder="Ada"
             value={firstName}
@@ -217,7 +219,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
         </div>
 
         <PhoneInput
-          autoFocus
+          label="Mobile number (optional)"
           country={country}
           onCountry={setCountry}
           local={local}
@@ -226,7 +228,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
             setPhoneError(null);
           }}
           error={phoneError}
-          description="Used for WhatsApp report delivery. We never share it."
+          description="Only needed for WhatsApp report delivery — you can add it later in Settings. We never share it."
         />
       </div>
 

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Home, BarChart3, Search, CalendarClock, Menu } from "lucide-react";
+import { prefetchRoute } from "@/app/routePrefetch";
 
 /** The four destinations people open most, straight from the thumb. */
 const TABS = [
@@ -37,6 +38,8 @@ export function MobileTabBar({
             className="m-tab"
             data-active={active}
             aria-current={active ? "page" : undefined}
+            onTouchStart={() => void prefetchRoute(to)}
+            onFocus={() => void prefetchRoute(to)}
           >
             <Icon size={19} strokeWidth={active ? 2.3 : 1.8} />
             <span>{t(labelKey, label)}</span>

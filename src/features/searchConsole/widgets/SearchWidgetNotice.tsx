@@ -9,6 +9,7 @@ import { useSearchWidgetsConnect } from "@/features/searchConsole/widgets/search
 import type { SearchSource } from "@/features/searchConsole/widgets/useSearchWidgetSource";
 import type { SearchFailure } from "@/features/searchConsole/widgets/useSearchWidgetData";
 import classes from "@/features/searchConsole/widgets/searchWidgets.module.css";
+import { ADD_SITE_PATH } from "@/features/workspace/paths";
 
 const SEARCH_PAGE = "/app/search-visibility";
 
@@ -88,7 +89,7 @@ export function SearchWidgetNotice({
       action: canAdmin ? <LinkAction to={SEARCH_PAGE} label="Link property" /> : undefined,
     };
   } else if (source?.kind === "no-site") {
-    notice = { icon: Globe, title: "Add a website", text: "Search data is shown per website.", action: <LinkAction to="/app/workspaces" label="Add a site" /> };
+    notice = { icon: Globe, title: "Add a website", text: "Search data is shown per website.", action: <LinkAction to={ADD_SITE_PATH} label="Add a site" /> };
   } else if (source?.kind === "not-configured") {
     notice = { icon: SearchX, title: "Search visibility unavailable", text: "Google Search isn't set up on this deployment." };
   } else if (source?.kind === "error") {

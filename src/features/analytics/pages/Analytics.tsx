@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   Text, Group, Button, SimpleGrid, Card, Progress,
   Stack, Center, ThemeIcon, Tabs, Box,
-  ActionIcon, Tooltip as MTooltip,
+  ActionIcon, Tooltip as MTooltip, Alert,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -14,7 +14,7 @@ import {
 import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow, Zap, Filter, Split, Target, GitCompareArrows,
+  ArrowDownWideNarrow, Zap, Filter, Split, Target, GitCompareArrows, CloudOff,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { trace } from "@/shared/lib/analytics";
@@ -23,6 +23,7 @@ import { PlanGate } from "@/features/billing/components/PlanGate";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { StatCard } from "@/shared/ui/StatCard";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { WorldMap } from "@/shared/ui/WorldMap";
 import { ClicksPanel } from "@/features/analytics/components/ClicksPanel";
 import { Heatmap } from "@/shared/ui/Heatmap";
@@ -37,8 +38,8 @@ import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitP
 import { FilterBar } from "@/features/analytics/components/FilterBar";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { SwitchOverlay, useSwitchOverlay } from "@/shared/ui/SwitchOverlay";
-import { RangePicker, type RangeState } from "@/features/analytics/components/RangePicker";
-import { ComparePicker, type CompareState } from "@/features/analytics/components/ComparePicker";
+import { RangePicker } from "@/features/analytics/components/RangePicker";
+import { ComparePicker } from "@/features/analytics/components/ComparePicker";
 import { ExportMenu } from "@/shared/ui/ExportMenu";
 import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
@@ -48,6 +49,7 @@ import { AnalyticsSubTabs } from "@/features/analytics/components/layout/Analyti
 import { getAnalyticsSections } from "@/features/analytics/components/layout/analyticsSections";
 import { getAnalyticsHelp } from "@/features/analytics/components/analyticsHelp";
 import { useStats, useSiteScope, useLive } from "@/features/analytics";
+import { useAnalyticsUrlState } from "@/features/analytics/hooks/useAnalyticsUrlState";
 import { LiveNowCard } from "@/features/analytics/components/liveAudience/LiveNowCard";
 import { useSites } from "@/features/workspace";
 import {
@@ -64,6 +66,7 @@ import { notify, errMessage } from "@/shared/lib/notify";
 import { countryLabel, duration, share, num } from "@/shared/lib";
 import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
+import { ADD_SITE_PATH } from "@/features/workspace/paths";
 import type {
    Bucket, StatsFilter, Segment, Marker, MarkerKind, BreakdownComparisonRow,
 } from "@/shared/types";
@@ -285,17 +288,15 @@ export default function Analytics() {
   const { active, loading } = useWorkspace();
   const { user } = useAuth();
   const { canEdit } = usePermissions();
-  const [rangeState, setRangeState] = useState<RangeState>({ preset: "24h" });
+  const {
+    rangeState, setRangeState, compareState, setCompareState,
+    filter, setFilter, section, tab, setView, setTab,
+  } = useAnalyticsUrlState(billing?.allowedRanges);
   const range = rangeState.preset;
-  const [compareState, setCompareState] = useState<CompareState>({ mode: "previous" });
   // Demo sessions never hit the network, so the per-panel comparison — which
   // has no fixture behind it — stays off there.
   const { demo } = useDemo();
-  const [filter, setFilter] = useState<StatsFilter>({});
-  // Top-level section, and the active detail tab within a section.
   const [helpOpen, setHelpOpen] = useState(false);
-  const [section, setSection] = useState<string>("overview");
-  const [tab, setTab] = useState<string>("pages");
 
   const [pickedSites, setPickedSites] = useSiteScope(active?._id);
 
@@ -311,7 +312,7 @@ export default function Analytics() {
   const scopeSwitch = useSwitchOverlay(
     active?._id ? siteScope.join(",") || "all" : null,
   );
-  const { stats, loading: statsLoading, refetching, refresh, refreshing, lastUpdated } =
+  const { stats, switching, failed, refresh, refreshing, lastUpdated } =
     useStats(
       active?._id,
       range,
@@ -516,6 +517,19 @@ export default function Analytics() {
   );
 
   // Skeleton only on a true first load, when there is nothing to show at all.
+  if (active && !view && failed) {
+    return (
+      <AppShell>
+        <ErrorState
+          title="Couldn't load analytics"
+          description="We couldn't reach your analytics just now. Your data is safe — check your connection and try again."
+          onRetry={() => void refresh()}
+          retrying={refreshing}
+        />
+      </AppShell>
+    );
+  }
+
   if (loading || (active && !view)) {
     return <AppShell><AnalyticsSkeleton /></AppShell>;
   }
@@ -589,15 +603,14 @@ export default function Analytics() {
 
   const SECTIONS = getAnalyticsSections(t);
   const hasChips = Object.values(filter).some(Boolean) || segments.length > 0;
-  const updating = statsLoading || refetching;
+  const updating = switching;
 
   const activeSection = SECTIONS.find((s) => s.value === section) ?? SECTIONS[0];
 
   // Switch section: jump to its first detail tab so a panel is always showing.
   const goSection = (value: string) => {
-    setSection(value);
     const s = SECTIONS.find((x) => x.value === value);
-    if (s && s.tabs.length) setTab(s.tabs[0].value);
+    setView(value, s && s.tabs.length ? s.tabs[0].value : undefined);
   };
 
   return (
@@ -692,10 +705,27 @@ export default function Analytics() {
 
       {/* The previous range stays on screen, dimmed, until the new one lands —
           so the numbers visibly go stale rather than the page going blank. */}
+      {failed && (
+        <Alert
+          color="red"
+          variant="light"
+          icon={<CloudOff size={16} />}
+          mb="md"
+          title="Couldn't load this view"
+        >
+          <Group justify="space-between" gap="sm" wrap="wrap">
+            <Text size="sm">You're seeing the last numbers we loaded. They may be out of date.</Text>
+            <Button size="xs" variant="default" loading={refreshing} onClick={() => void refresh()}>
+              Try again
+            </Button>
+          </Group>
+        </Alert>
+      )}
+
       <Box
         style={{
-          opacity: statsLoading ? 0.45 : 1,
-          pointerEvents: statsLoading ? "none" : undefined,
+          opacity: switching ? 0.45 : 1,
+          pointerEvents: switching ? "none" : undefined,
           transition: "opacity 140ms ease",
         }}
       >
@@ -807,7 +837,7 @@ export default function Analytics() {
                   <Text c="dimmed" size="xs" ta="center" maw={320}>
                     Add a site in Workspaces and paste its snippet into your app.
                   </Text>
-                  <Button component={Link} to="/app/workspaces" size="xs" variant="light" mt={6}>Manage sites</Button>
+                  <Button component={Link} to={ADD_SITE_PATH} size="xs" variant="light" mt={6}>Add a site</Button>
                 </Stack>
               </Center>
             )}

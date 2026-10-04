@@ -3,6 +3,7 @@ import { FolderKanban, Globe } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useGetSitesQuery } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
+import { SitesLoadError, ADD_SITE_PATH } from "@/features/workspace";
 import { useSiteScope } from "@/features/analytics";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
@@ -18,7 +19,10 @@ export default function SearchConsole() {
   const { active, loading } = useWorkspace();
   const workspaceId = active?._id ?? "";
 
-  const { currentData: sites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, {
+  const {
+    currentData: sites = [], isLoading: sitesLoading, isError: sitesFailed,
+    isFetching: sitesFetching, refetch: refetchSites,
+  } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
   const webSites = sites.filter((s) => s.platform !== "app");
@@ -62,12 +66,14 @@ export default function SearchConsole() {
 
       {loading || sitesLoading ? (
         <ConsoleSkeleton />
+      ) : sitesFailed && !sites.length ? (
+        <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
       ) : !site ? (
         <EmptyState
           icon={Globe}
           title="Add a website first"
           description="Search visibility data is shown per website. Add a site to this workspace, then link its Google Search property here."
-          action={{ label: "Manage sites", to: "/app/workspaces" }}
+          action={{ label: "Add a site", to: ADD_SITE_PATH }}
         />
       ) : (
         <SearchConsoleGate workspaceId={workspaceId} siteId={site.siteId}>

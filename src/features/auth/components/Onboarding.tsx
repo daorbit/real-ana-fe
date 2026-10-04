@@ -4,6 +4,7 @@ import {
   Card, Group, Text, Stack, ThemeIcon, Progress, Button, ActionIcon, Badge,
 } from "@mantine/core";
 import { Check, Circle, Rocket, X, ArrowRight } from "lucide-react";
+import { ADD_SITE_PATH, WORKSPACES_PATH, siteSnippetPath } from "@/features/workspace/paths";
 
 type Step = {
   label: string;
@@ -44,6 +45,7 @@ export function Onboarding({
   hasData,
   hasAudit,
   hasTeammate,
+  snippetSiteId,
 }: {
   hasWorkspace: boolean;
   hasSite: boolean;
@@ -53,6 +55,7 @@ export function Onboarding({
   hasAudit?: boolean;
   /** Someone besides the owner is in the workspace. */
   hasTeammate?: boolean;
+  snippetSiteId?: string;
 }) {
   const [dismissed, setDismissed] = useState(
     () => localStorage.getItem(DISMISS_KEY) === "1"
@@ -63,19 +66,19 @@ export function Onboarding({
       label: "Create a workspace",
       desc: "A home for your sites and team.",
       done: hasWorkspace,
-      cta: { label: "Create workspace", to: "/app/workspaces" },
+      cta: { label: "Create workspace", to: WORKSPACES_PATH },
     },
     {
       label: "Add a site",
       desc: "Register the property you want to track.",
       done: hasSite,
-      cta: { label: "Add a site", to: "/app/workspaces" },
+      cta: { label: "Add a site", to: ADD_SITE_PATH },
     },
     {
       label: "Install the tracking snippet",
       desc: "Paste one script tag into your site's <head>.",
       done: hasData,
-      cta: { label: "Get the snippet", to: "/app/workspaces" },
+      cta: { label: "Get the snippet", to: snippetSiteId ? siteSnippetPath(snippetSiteId) : ADD_SITE_PATH },
     },
     {
       label: "Run an SEO audit",
