@@ -1,13 +1,13 @@
 import type { CSSProperties } from "react";
 import { Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { ArrowUpRight, Check, Clock, CreditCard } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Clock, CreditCard } from "lucide-react";
 import { priceIn } from "@/shared/lib/currency";
-import { MAX_SITES_PER_WORKSPACE } from "@/shared/types";
 import type { BillingCycle, Currency, Plan, QuotaSummary } from "@/shared/types";
 import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../PlanIcons";
 import { FeatureLine } from "../FeatureLine";
 import { RIBBON_FALLBACK } from "../../lib/constants";
+import { planFeatureLines } from "../../lib/planFeatures";
 import { daysUntil } from "../../lib/usageMonth";
 import classes from "./Plans.module.css";
 
@@ -26,11 +26,13 @@ interface Props {
   selectedWorkspaceId: string | null;
   subscribing: string | null;
   onPick: (plan: Plan) => void;
+  featureLimit?: number;
+  onSeeAll?: () => void;
 }
 
 export function PlanCard({
   plan, usage, expired, featured, lower, cycle, currency, money,
-  isDemo, selectedWorkspaceId, subscribing, onPick,
+  isDemo, selectedWorkspaceId, subscribing, onPick, featureLimit, onSeeAll,
 }: Props) {
   const { t } = useTranslation();
   const accent = PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK;
@@ -61,6 +63,10 @@ export function PlanCard({
     : !buyable ? t("billing.ctaIncludedFree")
     : usage?.plan.slug === plan.slug ? t("billing.ctaRenew")
     : t("billing.ctaSubscribe");
+
+  const features = planFeatureLines(plan, t);
+  const visibleFeatures = featureLimit ? features.slice(0, featureLimit) : features;
+  const hiddenCount = features.length - visibleFeatures.length;
 
   const ctaClass = [classes.cta, featured ? classes.ctaFeatured : "", resting ? "plan-cta--resting" : ""]
     .filter(Boolean)
@@ -116,14 +122,20 @@ export function PlanCard({
 
       <p className={classes.headline}>{t("billing.featureAudits", { count: plan.monthlyAuditQuota })}</p>
       <ul className={classes.features}>
-        <FeatureLine text={t("billing.featureSites", { count: MAX_SITES_PER_WORKSPACE })} />
-        <FeatureLine text={t("billing.featureAudits", { count: plan.monthlyAuditQuota })} />
-        <FeatureLine text={t("billing.featureCrawls", { count: plan.monthlyCrawlQuota })} />
-        <FeatureLine text={t("billing.featureRecipients", { count: plan.maxReportRecipients })} />
-        {plan.features.map((f) => (
-          <FeatureLine key={f} text={f} />
+        {visibleFeatures.map((f, i) => (
+          <FeatureLine key={`${i}:${f}`} text={f} />
         ))}
       </ul>
+
+      {hiddenCount > 0 && onSeeAll && (
+        <button type="button" className={classes.seeAll} onClick={onSeeAll}>
+          {t("billing.seeAllFeatures", {
+            defaultValue: "See all {{count}} features",
+            count: features.length,
+          })}
+          <ArrowRight size={14} strokeWidth={2.2} />
+        </button>
+      )}
     </article>
   );
 }

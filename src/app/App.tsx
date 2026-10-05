@@ -58,6 +58,7 @@ const DemoUsage = lazy(() => import("@/features/admin/pages/DemoUsage"));
 const Settings = lazy(() => import("@/features/auth/pages/Settings"));
 const DataDeletion = lazy(() => import("@/features/auth/pages/DataDeletion"));
 const Billing = lazy(() => import("@/features/billing/pages/Billing"));
+const ComparePlans = lazy(() => import("@/features/billing/pages/ComparePlans"));
 const AdminBilling = lazy(() => import("@/features/admin/pages/AdminBilling"));
 const AdminBroadcast = lazy(() => import("@/features/admin/pages/AdminBroadcast"));
 const AdminDatabase = lazy(() => import("@/features/admin/pages/AdminDatabase"));
@@ -282,6 +283,7 @@ export default function App() {
                 <Route path="/app/developers" element={<Developers />} />
                 <Route path="/app/settings/:section?" element={<Settings />} />
                 <Route path="/app/billing" element={<Billing />} />
+                <Route path="/app/billing/plans" element={<ComparePlans />} />
                 {/* Admin-only, enforced by the page and by every /api/admin route. */}
                 <Route path="/app/impersonate" element={<Impersonate />} />
                 <Route path="/app/demo-usage" element={<DemoUsage />} />

@@ -10,11 +10,12 @@ import { BillingSkeleton } from "@/shared/ui/Skeletons";
 import { useGetPlansQuery, useGetAddonPacksQuery, useGetWorkspaceUsageQuery } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
-import { priceIn } from "@/shared/lib/currency";
 import type { Plan, AddonPack, CouponCheckResult } from "@/shared/types";
 
 import { useBillingView } from "../hooks/useBillingView";
 import { useCheckout } from "../hooks/useCheckout";
+import { useCheckoutIntent } from "../hooks/useCheckoutIntent";
+import { featuredPlanSlug } from "../lib/planFeatures";
 import { PlanOverview } from "../components/overview/PlanOverview";
 import { BillingTabs } from "../components/BillingTabs";
 import { PlansTab } from "../components/PlansTab";
@@ -96,18 +97,10 @@ export default function Billing() {
         }
       : null;
 
-  // The plan one tier above the current one is the one worth calling out —
-  // sorted by monthly price, since that's the one axis every plan (including
-  // Free) actually has.
-  const featuredSlug = (() => {
-    if (!plans.length) return null;
-    const sorted = [...plans].sort(
-      (a, b) => priceIn(a.priceMonthly, currency) - priceIn(b.priceMonthly, currency),
-    );
-    const currentIdx = usage ? sorted.findIndex((p) => p.slug === usage.plan.slug) : -1;
-    const next = currentIdx >= 0 ? sorted[currentIdx + 1] : sorted[sorted.length - 2];
-    return next?.slug ?? sorted[sorted.length - 1]?.slug ?? null;
-  })();
+  const featuredSlug = featuredPlanSlug(plans, usage?.plan.slug ?? null, currency);
+
+  const pickPlan = (plan: Plan) => { setPlanCoupon(null); setConfirmPlan(plan); };
+  useCheckoutIntent(plans, pickPlan);
 
   return (
     <AppShell>
@@ -181,7 +174,7 @@ export default function Billing() {
                 isDemo={isDemo}
                 selectedWorkspaceId={selectedWorkspaceId}
                 subscribing={subscribing}
-                onPick={(plan) => { setPlanCoupon(null); setConfirmPlan(plan); }}
+                onPick={pickPlan}
               />
             </Tabs.Panel>
 

@@ -29,7 +29,9 @@ export function useBillingView() {
     setSearchParams(next === "plans" ? {} : { tab: next }, { replace: true });
   };
 
-  const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const [cycle, setCycle] = useState<BillingCycle>(() =>
+    searchParams.get("cycle") === "yearly" ? "yearly" : "monthly",
+  );
   const [currency, setCurrency] = useState<Currency>(() => getStoredCurrency() ?? detectCurrency());
 
   const changeCurrency = (v: Currency) => {
