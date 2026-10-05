@@ -14,7 +14,6 @@ import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButto
 import GitHubSignInButton from "@/features/auth/components/GitHubSignInButton";
 import { ProviderConnecting } from "@/features/auth/components/ProviderConnecting";
 import { useProviderAutostart } from "@/features/auth/useProviderAutostart";
-import { GoogleMark } from "@/shared/ui/GoogleMark";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { VerifyEmailStep } from "@/features/auth/components/VerifyEmailStep";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
@@ -194,17 +193,10 @@ export default function Signup() {
             {/* The providers come first, and by a wider margin than on login:
                 they skip five fields *and* the emailed code, because the
                 address is already verified. Paired in a row, as on login. */}
-            {autoProvider === "google" && (
-              <Alert color="gray" variant="light" icon={<GoogleMark size={16} />}>
-                Pick your Google account in the prompt to continue, or tap Google below.
-              </Alert>
-            )}
-
             <div className="auth-providers">
               <GoogleSignInButton
                 label="Google"
                 text="signup_with"
-                oneTap={autoProvider === "google"}
                 onBusyChange={setGoogleBusy}
                 onSuccess={(created) => {
                   if (created) {
@@ -323,7 +315,7 @@ export default function Signup() {
         onCancel={() => setPending2faToken(null)}
       />
 
-      {autoProvider && autoProvider !== "google" && <ProviderConnecting provider={autoProvider} />}
+      {autoProvider && <ProviderConnecting provider={autoProvider} />}
     </div>
   );
 }

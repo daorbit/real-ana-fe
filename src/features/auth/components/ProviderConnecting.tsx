@@ -1,15 +1,17 @@
 import type { ReactNode } from "react";
 import { GitHubMark } from "@/shared/ui/GitHubMark";
 import { LinkedInMark } from "@/shared/ui/LinkedInMark";
-import { PROVIDER_LABEL, type RedirectProvider } from "@/features/auth/oauthStart";
+import { GoogleMark } from "@/shared/ui/GoogleMark";
+import { PROVIDER_LABEL, type AutoProvider } from "@/features/auth/oauthStart";
 import "./ProviderConnecting.css";
 
-const MARKS: Record<RedirectProvider, ReactNode> = {
+const MARKS: Record<AutoProvider, ReactNode> = {
+  google: <GoogleMark size={26} />,
   github: <GitHubMark size={26} />,
   linkedin: <LinkedInMark size={26} />,
 };
 
-export function ProviderConnecting({ provider }: { provider: RedirectProvider }) {
+export function ProviderConnecting({ provider }: { provider: AutoProvider }) {
   const label = PROVIDER_LABEL[provider];
 
   return (

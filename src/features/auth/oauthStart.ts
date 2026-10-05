@@ -2,9 +2,8 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 export type AutoProvider = "google" | "linkedin" | "github";
 
-export type RedirectProvider = Exclude<AutoProvider, "google">;
-
-export const OAUTH_START_URL: Record<RedirectProvider, string> = {
+export const OAUTH_START_URL: Record<AutoProvider, string> = {
+  google: `${API_BASE}/api/auth/google-oauth`,
   github: `${API_BASE}/api/auth/github`,
   linkedin: `${API_BASE}/api/auth/linkedin?mode=login`,
 };

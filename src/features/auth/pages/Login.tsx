@@ -13,6 +13,7 @@ import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
 import GitHubSignInButton from "@/features/auth/components/GitHubSignInButton";
+import { useOAuthLoginReturn } from "@/features/auth/useOAuthLoginReturn";
 import TurnstileWidget, { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { AccountLockedDialog } from "@/features/auth/components/AccountLockedDialog";
@@ -144,6 +145,19 @@ export default function Login() {
     [],
   );
 
+  const requireGoogle2fa = useCallback(
+    (token: string) => setPending2fa({ token, method: "google" }),
+    [],
+  );
+
+  useOAuthLoginReturn({
+    param: "googleLogin",
+    method: "google",
+    provider: "Google",
+    onError: setError,
+    onRequires2fa: requireGoogle2fa,
+  });
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
 
@@ -204,7 +218,7 @@ export default function Login() {
                     );
                     goAfterLogin();
                   }}
-                  onRequires2fa={(token) => setPending2fa({ token, method: "google" })}
+                  onRequires2fa={requireGoogle2fa}
                   onError={setError}
                 />
               </div>

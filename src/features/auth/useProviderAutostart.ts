@@ -17,7 +17,6 @@ export function useProviderAutostart(): AutoProvider | null {
       setParams(next, { replace: true });
     }
 
-    if (provider === "google") return;
     const id = window.setTimeout(() => window.location.assign(OAUTH_START_URL[provider]), REDIRECT_DELAY_MS);
     return () => window.clearTimeout(id);
   }, [provider, setParams]);
