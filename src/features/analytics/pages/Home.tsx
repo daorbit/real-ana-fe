@@ -19,11 +19,8 @@ import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
 import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRenderer";
 import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
 import { LayoutEditControls } from "@/features/analytics/components/widgets/LayoutEditControls";
-import { Onboarding, onboardingCanShow } from "@/features/auth/components/Onboarding";
 import { useStats, useLive, useHomeWidgets, useLinkedInReturn, useSiteScope } from "@/features/analytics";
-import { useSites, useSiteInstalled } from "@/features/workspace";
-import { useGetSeoReportsQuery, useGetMembersQuery } from "@/app/store";
-import { useDemo } from "@/features/demo/context";
+import { useSites } from "@/features/workspace";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { HomeSkeleton } from "@/shared/ui/Skeletons";
@@ -47,22 +44,6 @@ export default function Home() {
 
   const { live, livePages, liveCountries, audience } = useLive(active?._id, undefined, siteScope);
   const { sites } = useSites(active?._id);
-  const { demo } = useDemo();
-
-  const onboardingVisible = onboardingCanShow();
-  const firstSiteId = sites[0]?._id ?? "";
-  const firstSiteKey = sites[0]?.siteId ?? "";
-  const siteInstalled = useSiteInstalled(
-    onboardingVisible && !demo ? active?._id ?? "" : "",
-    firstSiteKey,
-  );
-  const { data: seoReports } = useGetSeoReportsQuery(
-    { workspaceId: active?._id ?? "", siteId: firstSiteId, limit: 1 },
-    { skip: !onboardingVisible || !active?._id || !firstSiteId || demo },
-  );
-  const { data: memberData } = useGetMembersQuery(active?._id ?? "", {
-    skip: !onboardingVisible || !active?._id || demo,
-  });
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
     has, spanOf, toggle, remove, setSpan, move, reset, clear,
@@ -199,17 +180,6 @@ export default function Home() {
           visitors={stats?.visitors ?? 0}
           pageviews={stats?.pageviews ?? 0}
           series={stats?.timeseries ?? []}
-        />
-      )}
-
-      {!editing && !dirty && !demo && (
-        <Onboarding
-          hasWorkspace={!!active}
-          hasSite={sites.length > 0}
-          hasData={siteInstalled === true || (stats?.pageviews ?? 0) > 0}
-          snippetSiteId={firstSiteKey || undefined}
-          hasAudit={(seoReports?.length ?? 0) > 0}
-          hasTeammate={(memberData?.members?.length ?? 0) > 1}
         />
       )}
 

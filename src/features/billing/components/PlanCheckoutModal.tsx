@@ -1,25 +1,38 @@
 import { useEffect, useState } from "react";
-import { Button, CloseButton, Modal } from "@mantine/core";
+import { Button, Modal } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { CreditCard, ShieldCheck } from "lucide-react";
-import { PlanIcon, PLAN_ACCENTS } from "@/features/billing/components/PlanIcons";
-import { MIN_CHARGE, RIBBON_FALLBACK } from "../lib/constants";
+import { Lock, ShieldCheck } from "lucide-react";
+import { PlanIcon } from "@/features/billing/components/PlanIcons";
+import { MIN_CHARGE } from "../lib/constants";
+import { PackIcon, creditType } from "../lib/credits";
+import { bulkSaving, creditBalance, packDiscount, yearlySaving } from "../lib/checkoutSavings";
 import { useGatewayChoice } from "../hooks/useGatewayChoice";
 import { CouponField } from "./CouponField";
-import { CheckoutProduct } from "./checkout/CheckoutProduct";
+import { CheckoutTopBar } from "./checkout/CheckoutTopBar";
+import { CheckoutBlock } from "./checkout/CheckoutBlock";
+import { CycleOptions } from "./checkout/CycleOptions";
+import { PlanChanges } from "./checkout/PlanChanges";
+import { PlanIncludes } from "./checkout/PlanIncludes";
 import { CheckoutAddonRow } from "./checkout/CheckoutAddonRow";
+import { OrderItems, type OrderItem } from "./checkout/OrderItems";
 import { OrderTotals } from "./checkout/OrderTotals";
-import { CreditsIncluded } from "./checkout/CreditsIncluded";
 import { GatewayPicker } from "./checkout/GatewayPicker";
+import { SavingsCard } from "./checkout/SavingsCard";
+import { TrustList } from "./checkout/TrustList";
+import { num } from "@/shared/lib";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
 import type {
-  BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
+  BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway, QuotaSummary,
 } from "@/shared/types";
 import classes from "./checkout/Checkout.module.css";
+import s from "./checkout/CheckoutPage.module.css";
 
 export function PlanCheckoutModal({
   plan,
+  plans,
+  usage,
   cycle,
+  onCycleChange,
   currency,
   addons,
   coupon,
@@ -30,7 +43,10 @@ export function PlanCheckoutModal({
   onConfirm,
 }: {
   plan: Plan | null;
+  plans: Plan[];
+  usage: QuotaSummary;
   cycle: BillingCycle;
+  onCycleChange: (cycle: BillingCycle) => void;
   currency: Currency;
   addons: AddonPack[];
   coupon: CouponCheckResult | null;
@@ -75,20 +91,42 @@ export function PlanCheckoutModal({
   const noCharge = total === 0 && !chosen.length;
   const chargeable = noCharge ? 0 : Math.max(total, MIN_CHARGE);
 
-  const creditTotals = chosen.reduce<Record<string, number>>((acc, { pack, packs }) => {
-    acc[pack.type] = (acc[pack.type] ?? 0) + pack.quantity * packs;
-    return acc;
-  }, {});
-
   const planLabel = t("billing.planNamed", { plan: plan.name });
-  const lines = [
-    { key: "plan", label: planLabel, value: planPrice },
-    ...chosen.map(({ pack, packs }) => ({
-      key: pack._id,
-      label: t("billing.packTimes", { name: pack.name, packs }),
-      value: priceIn(pack.price, currency) * packs,
-    })),
+
+  const items: OrderItem[] = [
+    {
+      key: "plan",
+      mark: <PlanIcon slug={plan.slug} size={22} uid={`summary-${plan.slug}`} />,
+      name: planLabel,
+      sub: cycle === "yearly"
+        ? t("billing.billedEveryYear", "Billed once a year")
+        : t("billing.billedEveryMonth", "Billed every month"),
+      value: money(planPrice),
+    },
+    ...chosen.map(({ pack, packs }) => {
+      const credits = pack.quantity * packs;
+      return {
+        key: pack._id,
+        mark: <PackIcon type={pack.type} size={17} />,
+        name: packs > 1 ? t("billing.packTimes", { name: pack.name, packs }) : pack.name,
+        sub: t("billing.packQuantity", { n: num(credits), type: creditType(t, pack.type, credits) }),
+        value: money(priceIn(pack.price, currency) * packs),
+      };
+    }),
   ];
+
+  const savings = [
+    {
+      key: "yearly",
+      label: t("billing.saveYearly", "Yearly billing"),
+      amount: cycle === "yearly" && !isFreePlan ? yearlySaving(plan, currency).amount : 0,
+    },
+    { key: "bulk", label: t("billing.saveBulk", "Bulk packs"), amount: bulkSaving(addons, selection, currency) },
+    { key: "coupon", label: t("billing.saveCoupon", "Coupon"), amount: subtotal - total },
+  ];
+
+  const currentPlan = usage ? plans.find((p) => p.slug === usage.plan.slug) ?? null : null;
+  const showChanges = !!currentPlan && currentPlan.slug !== plan.slug;
 
   const renewalDate = renewal
     ? new Date(renewal.newPeriodEnd).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
@@ -98,106 +136,134 @@ export function PlanCheckoutModal({
     <Modal
       opened
       onClose={onClose}
+      fullScreen
       withCloseButton={false}
-      centered
-      radius="lg"
-      size={1000}
       padding={0}
-      classNames={{ content: classes.modal, body: classes.body }}
+      transitionProps={{ transition: "fade", duration: 180 }}
+      classNames={{ content: s.page, body: s.body }}
     >
-      <CloseButton className={classes.close} onClick={onClose} disabled={busy} aria-label={t("common.cancel")} />
+      <CheckoutTopBar onBack={onClose} disabled={busy} />
 
-      <div className={classes.layout}>
-        <div className={classes.main}>
-          <div className={classes.top}>
-            <span className={classes.eyebrow}>
-              {renewal ? t("billing.confirmRenewal", "Confirm renewal") : t("billing.confirmSubscription")}
-            </span>
-          </div>
-
-          <CheckoutProduct
-            mark={<PlanIcon slug={plan.slug} size={30} uid={`checkout-${plan.slug}`} />}
-            accent={PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK}
-            name={planLabel}
-            meta={t(cycle === "yearly" ? "billing.billedCycleYearly" : "billing.billedCycleMonthly", {
-              audits: plan.monthlyAuditQuota,
-              crawls: plan.monthlyCrawlQuota,
-            })}
-            price={money(planPrice)}
-            per={isFreePlan ? undefined : `/ ${cycle === "yearly" ? t("billing.perYear") : t("billing.perMonth")}`}
-          />
-
-          {addons.length > 0 && (
-            <>
-              <div className={classes.sectionHead}>
-                <h4 className={classes.sectionTitle}>{t("billing.addExtraCredits")}</h4>
-                <span className={classes.optional}>{t("billing.optional")}</span>
+      <div className={s.split}>
+        <div className={s.left}>
+          <div className={s.content}>
+            <header className={s.hero}>
+              <span className={s.heroMark}>
+                <PlanIcon slug={plan.slug} size={36} uid={`checkout-${plan.slug}`} />
+              </span>
+              <div className={s.heroText}>
+                <span className={s.eyebrow}>
+                  {renewal ? t("billing.confirmRenewal", "Confirm renewal") : t("billing.confirmSubscription")}
+                </span>
+                <h1 className={s.heroTitle}>{planLabel}</h1>
+                {plan.description && <p className={s.heroDesc}>{plan.description}</p>}
               </div>
-              <p className={classes.sectionDesc}>{t("billing.addCreditsDesc")}</p>
+            </header>
 
-              <ul className={classes.packList}>
-                {addons.map((pack) => (
-                  <CheckoutAddonRow
-                    key={pack._id}
-                    pack={pack}
-                    unit={priceIn(pack.price, currency)}
-                    packs={selection[pack.slug] ?? 0}
-                    busy={busy}
-                    money={money}
-                    onChange={(v) => setSelection((prev) => ({ ...prev, [pack.slug]: v }))}
-                  />
-                ))}
-              </ul>
-            </>
-          )}
+            {!isFreePlan && (
+              <CheckoutBlock title={t("billing.billingPeriod", "Billing period")}>
+                <CycleOptions
+                  plan={plan}
+                  cycle={cycle}
+                  currency={currency}
+                  money={money}
+                  busy={busy}
+                  onChange={onCycleChange}
+                />
+              </CheckoutBlock>
+            )}
+
+            {showChanges && currentPlan && (
+              <CheckoutBlock
+                title={t("billing.whatChanges", "What changes")}
+                description={t("billing.whatChangesDesc", "Your new allowance next to what {{plan}} gives you today.", {
+                  plan: currentPlan.name,
+                })}
+              >
+                <PlanChanges from={currentPlan} to={plan} />
+              </CheckoutBlock>
+            )}
+
+            <CheckoutBlock title={t("billing.includedTitle", "Everything in {{plan}}", { plan: plan.name })}>
+              <PlanIncludes plan={plan} />
+            </CheckoutBlock>
+
+            {addons.length > 0 && (
+              <CheckoutBlock
+                title={t("billing.addExtraCredits")}
+                hint={t("billing.optional")}
+                description={t("billing.addCreditsDesc")}
+              >
+                <ul className={s.packGrid}>
+                  {addons.map((pack) => (
+                    <CheckoutAddonRow
+                      key={pack._id}
+                      pack={pack}
+                      unit={priceIn(pack.price, currency)}
+                      packs={selection[pack.slug] ?? 0}
+                      busy={busy}
+                      money={money}
+                      savePercent={packDiscount(pack, addons, currency).percent}
+                      balance={creditBalance(usage, pack.type)}
+                      onChange={(v) => setSelection((prev) => ({ ...prev, [pack.slug]: v }))}
+                    />
+                  ))}
+                </ul>
+              </CheckoutBlock>
+            )}
+          </div>
         </div>
 
-        <aside className={classes.aside}>
-          <h4 className={classes.asideTitle}>{t("billing.orderSummary")}</h4>
+        <aside className={s.right}>
+          <div className={s.rightInner}>
+            <h4 className={s.summaryTitle}>{t("billing.orderSummary")}</h4>
+            <p className={s.summaryTotal}>{money(chargeable)}</p>
 
-          <OrderTotals
-            lines={lines}
-            subtotal={subtotal}
-            total={total}
-            chargeable={chargeable}
-            percentOff={percentOff}
-            couponCode={coupon?.coupon?.code}
-            money={money}
-          />
+            <OrderItems items={items} />
 
-          {!isFreePlan && <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />}
+            <div className={s.divider} />
 
-          <CreditsIncluded totals={creditTotals} />
+            <OrderTotals
+              lines={[]}
+              subtotal={subtotal}
+              total={total}
+              chargeable={chargeable}
+              percentOff={percentOff}
+              couponCode={coupon?.coupon?.code}
+              money={money}
+            />
 
-          {!noCharge && <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />}
+            <SavingsCard lines={savings} money={money} />
 
-          <div className={classes.actions}>
+            {!isFreePlan && <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />}
+
+            {!noCharge && <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />}
+
             <Button
               fullWidth
               size="lg"
-              radius="md"
               color="emerald"
-              leftSection={<CreditCard size={17} />}
+              className={classes.pay}
+              leftSection={<Lock size={15} />}
               loading={busy}
               disabled={!gatewayChoice.canPay}
               onClick={() => onConfirm(plan, selection, gatewayChoice.gateway, gatewayChoice.phoneForGateway)}
             >
               {noCharge ? t("billing.confirm") : t("billing.payAmount", { amount: money(chargeable) })}
             </Button>
-            <Button fullWidth variant="subtle" color="gray" radius="md" onClick={onClose} disabled={busy}>
-              {t("common.cancel")}
-            </Button>
-          </div>
 
-          <p className={classes.footnote}>
-            <ShieldCheck size={14} />
-            <span>
-              {noCharge
-                ? t("billing.planIsFree")
-                : t(cycle === "yearly" ? "billing.oneTimeChargeYear" : "billing.oneTimeChargeMonth")}
-              {renewalDate && ` ${t("billing.renewalExtendsTo", { date: renewalDate })}`}
-            </span>
-          </p>
+            <p className={classes.footnote}>
+              <ShieldCheck size={14} />
+              <span>
+                {noCharge
+                  ? t("billing.planIsFree")
+                  : t(cycle === "yearly" ? "billing.oneTimeChargeYear" : "billing.oneTimeChargeMonth")}
+                {renewalDate && ` ${t("billing.renewalExtendsTo", { date: renewalDate })}`}
+              </span>
+            </p>
+
+            <TrustList />
+          </div>
         </aside>
       </div>
     </Modal>

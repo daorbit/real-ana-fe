@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CloseButton, TextInput, Loader } from "@mantine/core";
+import { CloseButton, TextInput, Loader, UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Tag } from "lucide-react";
 import { useCheckCouponMutation } from "@/app/store";
@@ -18,6 +18,7 @@ export function CouponField({
 }) {
   const { t } = useTranslation();
   const [code, setCode] = useState("");
+  const [open, setOpen] = useState(false);
   const [checkCoupon, { isLoading }] = useCheckCouponMutation();
 
   useEffect(() => {
@@ -41,6 +42,15 @@ export function CouponField({
 
   const applied = result?.coupon;
 
+  if (!applied && !open && !code) {
+    return (
+      <UnstyledButton className={classes.couponToggle} onClick={() => setOpen(true)}>
+        <Tag size={14} />
+        {t("billing.addCoupon", "Add a coupon code")}
+      </UnstyledButton>
+    );
+  }
+
   if (applied) {
     return (
       <div className={classes.coupon}>
@@ -51,7 +61,7 @@ export function CouponField({
         <CloseButton
           size="sm"
           aria-label={t("billing.removeCoupon", "Remove coupon")}
-          onClick={() => { setCode(""); onChange(null); }}
+          onClick={() => { setCode(""); setOpen(false); onChange(null); }}
         />
       </div>
     );
@@ -62,6 +72,8 @@ export function CouponField({
       placeholder={t("billing.couponPlaceholder")}
       size="sm"
       radius="md"
+      autoFocus
+      onBlur={() => { if (!code.trim()) setOpen(false); }}
       value={code}
       onChange={(e) => setCode(e.currentTarget.value.toUpperCase())}
       leftSection={<Tag size={14} />}

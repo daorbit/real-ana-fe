@@ -2,46 +2,38 @@
   margin: 0 0 12px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-2);
 }
 
 .balances {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 36px;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .balance {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
+  gap: 8px;
+  min-width: 0;
+  padding: 20px 22px;
+  box-shadow: -1px 0 0 var(--border);
 }
 
 .balanceHead {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  color: var(--muted);
 }
 
-.balanceIcon {
+.balanceHead svg {
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  color: var(--violet-2);
-  background: color-mix(in srgb, var(--violet-2) 12%, transparent);
-}
-
-.balance[data-empty] .balanceIcon {
-  color: var(--mantine-color-red-5);
-  background: color-mix(in srgb, var(--mantine-color-red-6) 12%, transparent);
 }
 
 .balanceLabel {
@@ -57,80 +49,46 @@
 
 .outPill {
   flex: none;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--mantine-color-red-5);
-  background: color-mix(in srgb, var(--mantine-color-red-6) 12%, transparent);
 }
 
 .balanceValue {
   font-family: var(--font-display);
   font-size: 30px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
 
-.split {
-  display: flex;
-  height: 6px;
-  gap: 2px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text) 9%, transparent);
+.balance[data-empty] .balanceValue {
+  color: var(--muted);
 }
 
-.splitPlan {
-  flex: var(--plan) 0 0;
-  background: var(--violet-2);
-}
-
-.splitBought {
-  flex: var(--bought) 0 0;
-  background: var(--amber);
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  font-size: 11.5px;
+.balanceSub {
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
 
-.legendItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.legendDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--violet-2);
-}
-
-.legendDot[data-bought] {
-  background: var(--amber);
-}
-
 .packs {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .pack {
   display: flex;
   flex-direction: column;
-  padding: 22px;
-  border-radius: var(--radius-lg);
+  min-width: 0;
+  padding: 18px;
+  border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--surface);
   transition: border-color 160ms ease;
@@ -143,32 +101,47 @@
 .packTop {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .packIcon {
-  flex: none;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
-  color: var(--violet-2);
-  background: color-mix(in srgb, var(--violet-2) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--violet-2) 22%, transparent);
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
 }
 
 .packName {
   margin: 0;
-  font-size: 15px;
-  font-weight: 650;
+  overflow: hidden;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   color: var(--text);
 }
 
 .packQty {
-  margin: 2px 0 0;
-  font-size: 13px;
-  color: var(--text-2);
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.packBadge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+  color: var(--violet-2);
+  background: color-mix(in srgb, var(--violet-2) 13%, transparent);
 }
 
 .packFoot {
@@ -176,23 +149,21 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 22px;
+  margin-top: auto;
   padding-top: 18px;
-  border-top: 1px solid var(--border);
 }
 
 .packPrice {
-  font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
 
 .empty {
   padding: 40px 16px;
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   border: 1px dashed var(--border);
   font-size: 13px;
   text-align: center;

@@ -8,6 +8,7 @@ import { CurrencyControl } from "./common/CurrencyControl";
 import { RefetchButton } from "./common/RefetchButton";
 import { FactList } from "./common/FactList";
 import { AddonPackCard } from "./addons/AddonPackCard";
+import { sortPacks } from "../lib/credits";
 import classes from "./addons/Addons.module.css";
 
 interface Props {
@@ -81,11 +82,12 @@ export function AddonsTab({
 
       <p className={classes.sectionLabel}>{t("billing.packsLabel", "Packs")}</p>
       {addons.length ? (
-        <div className={classes.packs}>
-          {addons.map((pack) => (
+        <ul className={classes.packs}>
+          {sortPacks(addons).map((pack) => (
             <AddonPackCard
               key={pack._id}
               pack={pack}
+              addons={addons}
               currency={currency}
               money={money}
               isDemo={isDemo}
@@ -94,7 +96,7 @@ export function AddonsTab({
               onPick={onPick}
             />
           ))}
-        </div>
+        </ul>
       ) : (
         <div className={classes.empty}>{t("billing.noAddons")}</div>
       )}

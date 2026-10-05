@@ -26,7 +26,7 @@ export function PackStepper({
         disabled={disabled || value <= min}
         onClick={() => onChange(clamp(value - 1))}
       >
-        <Minus size={13} />
+        <Minus size={14} />
       </UnstyledButton>
       <NumberInput
         value={value}
@@ -37,7 +37,7 @@ export function PackStepper({
         hideControls
         disabled={disabled}
         size="xs"
-        classNames={{ input: classes.stepInput }}
+        classNames={{ wrapper: classes.stepField, input: classes.stepInput }}
       />
       <UnstyledButton
         className={classes.stepButton}
@@ -45,7 +45,7 @@ export function PackStepper({
         disabled={disabled || value >= MAX_PACKS}
         onClick={() => onChange(clamp(value + 1))}
       >
-        <Plus size={13} />
+        <Plus size={14} />
       </UnstyledButton>
     </div>
   );

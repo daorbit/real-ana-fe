@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { TextInput } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Check, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import type { Currency, PaymentGateway } from "@/shared/types";
 import type { GatewayChoice } from "../../hooks/useGatewayChoice";
 import { CashfreeLogo, RazorpayLogo } from "../GatewayLogos";
@@ -42,13 +42,9 @@ export function GatewayPicker({
               disabled={busy || soon}
               onClick={() => setGateway(value)}
             >
+              <span className={classes.gatewayRadio} aria-hidden />
               <span className={classes.gatewayLogo}>{logo}</span>
               {soon && <span className={classes.soon}>{t("billing.soon", "Soon")}</span>}
-              {active && (
-                <span className={classes.gatewayCheck} aria-hidden>
-                  <Check size={10} strokeWidth={3.5} />
-                </span>
-              )}
             </button>
           );
         })}

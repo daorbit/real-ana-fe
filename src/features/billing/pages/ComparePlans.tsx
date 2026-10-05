@@ -56,9 +56,13 @@ export default function ComparePlans() {
           "Every plan includes the full dashboard. What changes is how much you can run.",
         )}
         actions={
-          <Button variant="default" radius="md" leftSection={<ArrowLeft size={15} />} onClick={() => nav(BILLING_PATH)}>
-            {t("billing.backToBilling", "Back to billing")}
-          </Button>
+          <>
+            <CurrencyControl value={currency} onChange={changeCurrency} />
+            <CycleControl value={cycle} onChange={setCycle} />
+            <Button variant="default" radius="md" leftSection={<ArrowLeft size={15} />} onClick={() => nav(BILLING_PATH)}>
+              {t("billing.backToBilling", "Back to billing")}
+            </Button>
+          </>
         }
       />
 
@@ -72,17 +76,6 @@ export default function ComparePlans() {
         />
       ) : (
         <>
-          <SectionHeader
-            title={t("billing.compareCardsTitle", "Choose your plan")}
-            description={t("billing.plansSubtitle")}
-            actions={
-              <>
-                <CurrencyControl value={currency} onChange={changeCurrency} />
-                <CycleControl value={cycle} onChange={setCycle} />
-              </>
-            }
-          />
-
           <PlanGrid
             plans={plans}
             usage={usage}

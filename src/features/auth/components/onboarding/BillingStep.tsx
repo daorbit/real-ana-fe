@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@mantine/core";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { PlansGridSkeleton } from "@/shared/ui/Skeletons";
@@ -53,6 +53,14 @@ export function BillingStep({
   const {
     subscribe, subscribing, celebration, setCelebration, cancelled, setCancelled,
   } = useCheckout({ workspaceId, cycle, currency, planCoupon, addonCoupon: null });
+
+  useEffect(() => {
+    if (celebration) setConfirmPlan(null);
+  }, [celebration]);
+
+  useEffect(() => {
+    if (cancelled && confirmPlan) setCancelled(null);
+  }, [cancelled]);
 
   const expired = usage?.status === "expired";
 
@@ -116,7 +124,10 @@ export function BillingStep({
 
       <PlanCheckoutModal
         plan={confirmPlan}
+        plans={plans}
+        usage={usage}
         cycle={cycle}
+        onCycleChange={setCycle}
         currency={currency}
         addons={addons}
         coupon={planCoupon}
@@ -124,7 +135,7 @@ export function BillingStep({
         busy={!!confirmPlan && subscribing === confirmPlan.slug}
         renewal={null}
         onClose={() => setConfirmPlan(null)}
-        onConfirm={(plan, selection, gateway, phone) => { setConfirmPlan(null); subscribe(plan, selection, gateway, phone); }}
+        onConfirm={(plan, selection, gateway, phone) => subscribe(plan, selection, gateway, phone)}
       />
 
       <CheckoutOutcome

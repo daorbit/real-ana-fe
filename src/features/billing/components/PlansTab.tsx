@@ -5,9 +5,7 @@ import { SectionHeader } from "./common/SectionHeader";
 import { CurrencyControl } from "./common/CurrencyControl";
 import { CycleControl } from "./common/CycleControl";
 import { RefetchButton } from "./common/RefetchButton";
-import { FactList } from "./common/FactList";
 import { PlanGrid } from "./plans/PlanGrid";
-import { usePlanFacts } from "./plans/usePlanFacts";
 import { CARD_FEATURE_LIMIT } from "../lib/planFeatures";
 import { COMPARE_PLANS_PATH } from "../lib/constants";
 
@@ -35,7 +33,6 @@ export function PlansTab({
 }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
-  const facts = usePlanFacts();
 
   return (
     <div>
@@ -66,8 +63,6 @@ export function PlansTab({
         featureLimit={CARD_FEATURE_LIMIT}
         onSeeAll={() => nav(`${COMPARE_PLANS_PATH}?cycle=${cycle}`)}
       />
-
-      <FactList facts={facts} />
     </div>
   );
 }

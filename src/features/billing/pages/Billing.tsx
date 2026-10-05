@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, Stack, Alert, Tabs } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Info } from "lucide-react";
@@ -74,6 +74,16 @@ export default function Billing() {
     subscribe, buyAddon, subscribing, buying,
     celebration, setCelebration, cancelled, setCancelled,
   } = useCheckout({ workspaceId: selectedWorkspaceId, cycle, currency, planCoupon, addonCoupon });
+
+  useEffect(() => {
+    if (!celebration) return;
+    setConfirmPlan(null);
+    setConfirmAddon(null);
+  }, [celebration]);
+
+  useEffect(() => {
+    if (cancelled && (confirmPlan || confirmAddon)) setCancelled(null);
+  }, [cancelled]);
 
   const loading = plansLoading || addonsLoading || billingLoading;
   const expired = usage?.status === "expired";
@@ -224,7 +234,10 @@ export default function Billing() {
 
       <PlanCheckoutModal
         plan={confirmPlan}
+        plans={plans}
+        usage={usage}
         cycle={cycle}
+        onCycleChange={setCycle}
         currency={currency}
         addons={addons}
         coupon={planCoupon}
@@ -232,7 +245,7 @@ export default function Billing() {
         busy={!!confirmPlan && subscribing === confirmPlan.slug}
         renewal={renewal}
         onClose={() => setConfirmPlan(null)}
-        onConfirm={(plan, selection, gateway, phone) => { setConfirmPlan(null); subscribe(plan, selection, gateway, phone); }}
+        onConfirm={(plan, selection, gateway, phone) => subscribe(plan, selection, gateway, phone)}
       />
 
       <AddonCheckoutModal
@@ -242,7 +255,7 @@ export default function Billing() {
         onCoupon={setAddonCoupon}
         busy={!!confirmAddon && buying === confirmAddon._id}
         onClose={() => setConfirmAddon(null)}
-        onConfirm={(pack, packs, gateway, phone) => { setConfirmAddon(null); buyAddon(pack, packs, gateway, phone); }}
+        onConfirm={(pack, packs, gateway, phone) => buyAddon(pack, packs, gateway, phone)}
       />
 
       <CheckoutOutcome

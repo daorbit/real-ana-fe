@@ -24,32 +24,37 @@ export function OrderTotals({
   money: (amountMinor: number) => string;
 }) {
   const { t } = useTranslation();
+  const hasLines = lines.length > 0 || percentOff > 0;
 
   return (
     <>
-      <div className={classes.lines}>
-        {lines.map((line) => (
-          <SummaryLine key={line.key} label={line.label} value={money(line.value)} />
-        ))}
-        {percentOff > 0 && (
-          <>
-            <div className={classes.rule} />
-            <SummaryLine label={t("billing.subtotal")} value={money(subtotal)} />
-            <SummaryLine
-              tone="discount"
-              label={
-                <>
-                  <Tag size={12} />
-                  {t("billing.couponOff", { code: couponCode, percent: percentOff })}
-                </>
-              }
-              value={`− ${money(subtotal - total)}`}
-            />
-          </>
-        )}
-      </div>
+      {hasLines && (
+        <>
+          <div className={classes.lines}>
+            {lines.map((line) => (
+              <SummaryLine key={line.key} label={line.label} value={money(line.value)} />
+            ))}
+            {percentOff > 0 && (
+              <>
+                {lines.length > 0 && <div className={classes.rule} />}
+                <SummaryLine label={t("billing.subtotal")} value={money(subtotal)} />
+                <SummaryLine
+                  tone="discount"
+                  label={
+                    <>
+                      <Tag size={12} />
+                      {t("billing.couponOff", { code: couponCode, percent: percentOff })}
+                    </>
+                  }
+                  value={`− ${money(subtotal - total)}`}
+                />
+              </>
+            )}
+          </div>
 
-      <div className={classes.rule} />
+          <div className={classes.rule} />
+        </>
+      )}
 
       <div className={classes.total}>
         <span className={classes.totalLabel}>{t("billing.total")}</span>

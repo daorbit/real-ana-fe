@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { num } from "@/shared/lib";
 import type { AddonPack } from "@/shared/types";
 import { PackIcon, creditType } from "../../lib/credits";
 import { PackStepper } from "../PackStepper";
@@ -11,6 +12,8 @@ export function CheckoutAddonRow({
   busy,
   money,
   onChange,
+  savePercent = 0,
+  balance = null,
 }: {
   pack: AddonPack;
   unit: number;
@@ -18,30 +21,44 @@ export function CheckoutAddonRow({
   busy: boolean;
   money: (amountMinor: number) => string;
   onChange: (packs: number) => void;
+  savePercent?: number;
+  balance?: number | null;
 }) {
   const { t } = useTranslation();
   const picked = packs > 0;
   const credits = pack.quantity * packs;
 
   return (
-    <li className={classes.packRow} data-picked={picked || undefined}>
-      <span className={classes.packIcon}>
-        <PackIcon type={pack.type} size={17} />
-      </span>
-      <div className={classes.packText}>
-        <div className={classes.packName}>{pack.name}</div>
-        <div className={classes.packMeta}>
-          {picked
-            ? t("billing.packAdded", { n: credits, type: creditType(t, pack.type, credits) })
-            : t("billing.packUnit", {
-                n: pack.quantity,
-                type: creditType(t, pack.type, pack.quantity),
-                price: money(unit),
-              })}
-        </div>
+    <li className={classes.packTile} data-picked={picked || undefined}>
+      <div className={classes.packTileHead}>
+        <span className={classes.packIcon}>
+          <PackIcon type={pack.type} size={17} />
+        </span>
+        <PackStepper value={packs} disabled={busy} onChange={onChange} />
       </div>
-      <span className={classes.packTotal}>{money(unit * packs)}</span>
-      <PackStepper value={packs} disabled={busy} onChange={onChange} />
+      <div className={classes.packNameRow}>
+        <span className={classes.packName}>{pack.name}</span>
+        {picked && <span className={classes.packTotal}>{money(unit * packs)}</span>}
+      </div>
+      <div className={classes.packMeta}>
+        {picked
+          ? t("billing.packAdded", { n: credits, type: creditType(t, pack.type, credits) })
+          : t("billing.packUnit", {
+              n: pack.quantity,
+              type: creditType(t, pack.type, pack.quantity),
+              price: money(unit),
+            })}
+      </div>
+      {(balance !== null || savePercent > 0) && (
+        <div className={classes.packFoot}>
+          <span>{balance !== null && t("billing.balanceLeft", "You have {{n}} left", { n: num(balance) })}</span>
+          {savePercent > 0 && (
+            <span className={classes.packBadge}>
+              {t("billing.savePercent", "Save {{percent}}%", { percent: savePercent })}
+            </span>
+          )}
+        </div>
+      )}
     </li>
   );
 }

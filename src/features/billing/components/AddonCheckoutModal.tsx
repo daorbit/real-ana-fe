@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Button, CloseButton, Modal } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { ShieldCheck, ShoppingCart } from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
+import { num } from "@/shared/lib";
 import { PackIcon, creditType } from "../lib/credits";
 import { MIN_CHARGE } from "../lib/constants";
 import { useGatewayChoice } from "../hooks/useGatewayChoice";
@@ -60,20 +61,17 @@ export function AddonCheckoutModal({
       onClose={onClose}
       withCloseButton={false}
       centered
-      radius="lg"
-      size={480}
+      radius={22}
+      size={440}
       padding={0}
       classNames={{ content: classes.modal, body: classes.body }}
     >
       <CloseButton className={classes.close} onClick={onClose} disabled={busy} aria-label={t("common.cancel")} />
 
       <div className={classes.single}>
-        <div className={classes.top}>
-          <span className={classes.eyebrow}>{t("billing.confirmPurchase")}</span>
-        </div>
-
         <CheckoutProduct
           mark={<PackIcon type={pack.type} size={22} />}
+          eyebrow={t("billing.confirmPurchase")}
           name={pack.name}
           meta={t("billing.packUnitPerPack", {
             n: pack.quantity,
@@ -82,18 +80,18 @@ export function AddonCheckoutModal({
           })}
         />
 
-        <div className={classes.quantity}>
-          <div>
-            <p className={classes.quantityLabel}>{t("billing.howManyPacks")}</p>
-            <p className={classes.quantityHint}>
-              {t("billing.packTotal", { n: credits, type: creditType(t, pack.type, credits) })}
-            </p>
+        <div className={classes.quantityRow}>
+          <div className={classes.groupText}>
+            <span className={classes.groupLabel}>{t("billing.howManyPacks")}</span>
+            <span className={classes.groupValue}>
+              {t("billing.packQuantity", { n: num(credits), type: creditType(t, pack.type, credits) })}
+            </span>
           </div>
           <PackStepper value={packs} disabled={busy} min={1} onChange={setPacks} />
         </div>
 
         <OrderTotals
-          lines={[{ key: pack._id, label: t("billing.packTimes", { name: pack.name, packs }), value: subtotal }]}
+          lines={[]}
           subtotal={subtotal}
           total={total}
           chargeable={chargeable}
@@ -106,23 +104,18 @@ export function AddonCheckoutModal({
 
         <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />
 
-        <div className={classes.actions}>
-          <Button
-            fullWidth
-            size="lg"
-            radius="md"
-            color="emerald"
-            leftSection={<ShoppingCart size={17} />}
-            loading={busy}
-            disabled={!gatewayChoice.canPay}
-            onClick={() => onConfirm(pack, packs, gatewayChoice.gateway, gatewayChoice.phoneForGateway)}
-          >
-            {t("billing.payAmount", { amount: money(chargeable) })}
-          </Button>
-          <Button fullWidth variant="subtle" color="gray" radius="md" onClick={onClose} disabled={busy}>
-            {t("common.cancel")}
-          </Button>
-        </div>
+        <Button
+          fullWidth
+          size="lg"
+          color="emerald"
+          className={classes.pay}
+          leftSection={<Lock size={15} />}
+          loading={busy}
+          disabled={!gatewayChoice.canPay}
+          onClick={() => onConfirm(pack, packs, gatewayChoice.gateway, gatewayChoice.phoneForGateway)}
+        >
+          {t("billing.payAmount", { amount: money(chargeable) })}
+        </Button>
 
         <p className={classes.footnote}>
           <ShieldCheck size={14} />
