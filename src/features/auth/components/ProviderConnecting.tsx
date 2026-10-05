@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Lock } from "lucide-react";
 import { GitHubMark } from "@/shared/ui/GitHubMark";
 import { LinkedInMark } from "@/shared/ui/LinkedInMark";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
@@ -6,9 +7,9 @@ import { PROVIDER_LABEL, type AutoProvider } from "@/features/auth/oauthStart";
 import "./ProviderConnecting.css";
 
 const MARKS: Record<AutoProvider, ReactNode> = {
-  google: <GoogleMark size={26} />,
-  github: <GitHubMark size={26} />,
-  linkedin: <LinkedInMark size={26} />,
+  google: <GoogleMark size={28} />,
+  github: <GitHubMark size={28} />,
+  linkedin: <LinkedInMark size={28} />,
 };
 
 export function ProviderConnecting({ provider }: { provider: AutoProvider }) {
@@ -17,23 +18,22 @@ export function ProviderConnecting({ provider }: { provider: AutoProvider }) {
   return (
     <div className="provider-connecting" role="status" aria-live="polite">
       <div className="provider-connecting__card">
-        <div className="provider-connecting__marks" aria-hidden>
-          <span className="provider-connecting__tile">
-            <img src="/favicon.png" alt="" width={26} height={26} />
-          </span>
-          <span className="provider-connecting__link">
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="provider-connecting__tile">
-            {MARKS[provider]}
-          </span>
+        <div className="provider-connecting__mark" aria-hidden>
+          <span className="provider-connecting__ring" />
+          <span className="provider-connecting__logo">{MARKS[provider]}</span>
         </div>
-        <p className="provider-connecting__title">Connecting to {label}</p>
+
+        <p className="provider-connecting__title">Continuing with {label}</p>
         <p className="provider-connecting__detail">
-          Taking you to {label} to sign in securely. You'll be right back.
+          Redirecting you to {label} to finish signing in. This only takes a moment.
         </p>
+
+        <p className="provider-connecting__secure">
+          <Lock size={12} strokeWidth={2.2} />
+          Secure sign-in. We never see your {label} password.
+        </p>
+
+        <span className="provider-connecting__progress" aria-hidden />
       </div>
     </div>
   );

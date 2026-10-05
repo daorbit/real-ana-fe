@@ -5,80 +5,104 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
-  animation: provider-connecting-fade 220ms ease both;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  animation: provider-connecting-fade 240ms ease both;
 }
 
 .provider-connecting__card {
-  width: min(360px, 100%);
-  padding: 32px 28px 28px;
+  position: relative;
+  width: min(380px, 100%);
+  padding: 40px 32px 32px;
+  overflow: hidden;
   text-align: center;
-  border-radius: var(--radius-lg);
+  border-radius: 24px;
   border: 1px solid var(--border-strong);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  animation: provider-connecting-in 420ms cubic-bezier(0.19, 1, 0.22, 1) both;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--text) 4%, transparent), transparent 120px),
+    var(--surface);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent),
+    var(--shadow);
+  animation: provider-connecting-in 480ms cubic-bezier(0.19, 1, 0.22, 1) both;
 }
 
-.provider-connecting__marks {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-}
-
-.provider-connecting__tile {
+.provider-connecting__mark {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+}
+
+.provider-connecting__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--text);
+  animation: provider-connecting-spin 0.9s linear infinite;
+}
+
+.provider-connecting__logo {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   color: var(--text);
   background: var(--surface-2);
-  border: 1px solid var(--border);
-}
-
-.provider-connecting__tile img {
-  display: block;
-  border-radius: 6px;
-}
-
-.provider-connecting__link {
-  display: flex;
-  gap: 5px;
-}
-
-.provider-connecting__link span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--muted);
-  animation: provider-connecting-dot 1.2s ease-in-out infinite;
-}
-
-.provider-connecting__link span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.provider-connecting__link span:nth-child(3) {
-  animation-delay: 0.3s;
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .provider-connecting__title {
-  margin: 22px 0 0;
-  font-size: 16px;
+  margin: 24px 0 0;
+  font-size: 17px;
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   color: var(--text);
 }
 
 .provider-connecting__detail {
-  margin: 6px 0 0;
-  font-size: 13px;
+  max-width: 280px;
+  margin: 8px auto 0;
+  font-size: 13.5px;
   line-height: 1.5;
   color: var(--text-2);
+}
+
+.provider-connecting__secure {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 24px 0 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.provider-connecting__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.provider-connecting__progress::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+  animation: provider-connecting-sweep 1.3s ease-in-out infinite;
 }
 
 @keyframes provider-connecting-fade {
@@ -90,25 +114,33 @@
 @keyframes provider-connecting-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.97);
+    transform: translateY(12px) scale(0.96);
   }
 }
 
-@keyframes provider-connecting-dot {
-  0%,
-  100% {
-    opacity: 0.25;
+@keyframes provider-connecting-spin {
+  to {
+    transform: rotate(360deg);
   }
-  50% {
-    opacity: 1;
-    background: var(--text);
+}
+
+@keyframes provider-connecting-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .provider-connecting,
   .provider-connecting__card,
-  .provider-connecting__link span {
+  .provider-connecting__progress::after {
     animation: none;
+  }
+
+  .provider-connecting__ring {
+    animation-duration: 2.4s;
   }
 }
