@@ -116,10 +116,12 @@
 }
 
 .expiredNote {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin: 0 28px 24px;
+  margin: 16px 28px 24px;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   font-size: 13px;

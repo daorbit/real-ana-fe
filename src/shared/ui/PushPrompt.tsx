@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button } from "@mantine/core";
-import { BellRing, X } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { useGetNotificationPreferencesQuery } from "@/app/store";
 import { usePush } from "@/features/activity/usePush";
@@ -47,46 +46,40 @@ export function PushPrompt() {
       role="status"
       aria-live="polite"
     >
-      <div className="push-prompt__head">
-        <div className="push-prompt__badge" aria-hidden>
-          <BellRing size={20} strokeWidth={1.8} />
-        </div>
+      <button
+        type="button"
+        className="push-prompt__close"
+        onClick={() => dismiss(Number.MAX_SAFE_INTEGER)}
+        aria-label="Don't ask again"
+      >
+        <X size={13} strokeWidth={2} />
+      </button>
 
-        <div className="push-prompt__body">
-          <p className="push-prompt__eyebrow">Stay in the loop</p>
-          <p className="push-prompt__title">Turn on browser notifications</p>
+      <div className="push-prompt__body">
+        <Bell className="push-prompt__icon" size={17} strokeWidth={1.8} aria-hidden />
+        <div className="push-prompt__text">
+          <p className="push-prompt__title">Turn on notifications</p>
           <p className="push-prompt__detail">
-            Get notified here even when this tab is closed. You can change this anytime in Settings.
+            Know the moment something needs you, even with this tab closed.
           </p>
         </div>
-
-        <button
-          type="button"
-          className="push-prompt__close"
-          onClick={() => dismiss(Number.MAX_SAFE_INTEGER)}
-          aria-label="Don't ask again"
-        >
-          <X size={14} strokeWidth={2.2} />
-        </button>
       </div>
 
       <div className="push-prompt__actions">
-        <Button
-          radius="xl"
-          size="sm"
+        <button
+          type="button"
           className="push-prompt__btn push-prompt__btn--quiet"
           onClick={() => dismiss(Date.now() + SNOOZE_MS)}
         >
           Not now
-        </Button>
-        <Button
-          radius="xl"
-          size="sm"
+        </button>
+        <button
+          type="button"
           className="push-prompt__btn push-prompt__btn--primary"
           onClick={() => void enable()}
         >
-          Allow notifications
-        </Button>
+          Allow
+        </button>
       </div>
     </aside>
   );
