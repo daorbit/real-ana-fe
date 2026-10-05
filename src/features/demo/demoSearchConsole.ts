@@ -117,7 +117,6 @@ export function demoSearchBreakdown(dimension: SearchBreakdownDimension, days = 
   const rows = rankedRows(labels, 0x5e5 + days, 420 * days).map((r) =>
     dimension === "page" ? { ...r, key: `https://acme.example${r.key}`, views: r.clicks * 3 } : r,
   );
-  const total = rows.reduce((s, r) => s + r.clicks, 0);
 
   return {
     dimension,
