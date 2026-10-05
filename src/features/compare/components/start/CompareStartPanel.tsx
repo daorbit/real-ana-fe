@@ -4,7 +4,7 @@ import { Button, Text } from "@mantine/core";
 import { Plus, Search, Swords } from "lucide-react";
 import { StartHero, StartScreen } from "@/shared/ui/start/StartScreen";
 import { ADD_SITE_PATH } from "@/features/workspace/paths";
-import { CompareSample } from "./CompareSample";
+// import { CompareSample } from "./CompareSample";
 
 export type CompareStage = "noSite" | "needsAudit" | "ready";
 
@@ -73,7 +73,7 @@ export function CompareStartPanel({
         )}
       </StartHero>
 
-      <CompareSample domain={domain} />
+      {/* <CompareSample domain={domain} /> */}
     </StartScreen>
   );
 }

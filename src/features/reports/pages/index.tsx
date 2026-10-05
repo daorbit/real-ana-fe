@@ -71,7 +71,7 @@ export default function Reports() {
           <ReportsStartPanel
             canEdit={page.canEdit}
             disabled={!page.workspaceId}
-            workspace={active?.name ?? ""}
+            // workspace={active?.name ?? ""}
             onCreate={dialog.openNew}
           />
         ) : (

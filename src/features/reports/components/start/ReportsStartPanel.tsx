@@ -2,17 +2,17 @@ import { Button, Group, Text } from "@mantine/core";
 import { CalendarClock, Plus } from "lucide-react";
 import { StartHero, StartScreen } from "@/shared/ui/start/StartScreen";
 import type { Draft } from "@/features/reports/pages/types";
-import { ReportTemplatePicker } from "./ReportTemplatePicker";
+// import { ReportTemplatePicker } from "./ReportTemplatePicker";
 
 export function ReportsStartPanel({
   canEdit,
   disabled,
-  workspace,
+  // workspace,
   onCreate,
 }: {
   canEdit: boolean;
   disabled: boolean;
-  workspace: string;
+  // workspace: string;
   onCreate: (preset?: Partial<Draft>) => void;
 }) {
   return (
@@ -41,7 +41,7 @@ export function ReportsStartPanel({
         )}
       </StartHero>
 
-      <ReportTemplatePicker canEdit={canEdit} disabled={disabled} workspace={workspace} onCreate={onCreate} />
+      {/* <ReportTemplatePicker canEdit={canEdit} disabled={disabled} workspace={workspace} onCreate={onCreate} /> */}
     </StartScreen>
   );
 }
