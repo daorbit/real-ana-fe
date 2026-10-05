@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Alert, Group, Loader, Pagination, ScrollArea, Select, Table, Text, TextInput, UnstyledButton,
 } from "@mantine/core";
@@ -6,6 +6,8 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { AlertTriangle, ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchBreakdown } from "@/features/demo/demoSearchConsole";
 import type {
   SearchBreakdownDimension, SearchBreakdownRow, SearchBreakdownSort, SearchType,
 } from "@/shared/types";
@@ -55,7 +57,7 @@ export function SearchBreakdownTab({
 
   useEffect(() => setPage(1), [q, sort, days, type, dimension, pageSize]);
 
-  const { data, isLoading, isFetching, error } = useGetSearchBreakdownQuery({
+  const realBreakdown = useGetSearchBreakdownQuery({
     workspaceId,
     siteId,
     dimension,
@@ -67,6 +69,34 @@ export function SearchBreakdownTab({
     dir: sort.desc ? "desc" : "asc",
     q,
   });
+
+  const { demo } = useDemo();
+  const demoFull = useMemo(() => (demo ? demoSearchBreakdown(dimension, days) : null), [demo, dimension, days]);
+  const demoBreakdown = useMemo(() => {
+    if (!demoFull) return null;
+    const filtered = q
+      ? demoFull.rows.filter((r) => r.key.toLowerCase().includes(q.toLowerCase()))
+      : demoFull.rows;
+    const sorted = [...filtered].sort((a, b) => {
+      const dir = sort.desc ? -1 : 1;
+      if (sort.key === "key") return dir * a.key.localeCompare(b.key);
+      if (sort.key === "change") return dir * ((a.clicks - (a.previousClicks ?? 0)) - (b.clicks - (b.previousClicks ?? 0)));
+      return dir * ((a[sort.key] ?? 0) - (b[sort.key] ?? 0));
+    });
+    const start = (page - 1) * pageSize;
+    return {
+      ...demoFull,
+      rows: sorted.slice(start, start + pageSize),
+      total: sorted.length,
+      page,
+      pageSize,
+    };
+  }, [demoFull, q, sort, page, pageSize]);
+
+  const data = demoBreakdown ?? realBreakdown.data;
+  const isLoading = demoBreakdown ? false : realBreakdown.isLoading;
+  const isFetching = demoBreakdown ? false : realBreakdown.isFetching;
+  const error = demoBreakdown ? undefined : realBreakdown.error;
 
   if (isLoading) return <BreakdownSkeleton labelHeader={labelHeader} showViews={dimension === "page" && ent.pageViews} />;
   if (error && !data) {

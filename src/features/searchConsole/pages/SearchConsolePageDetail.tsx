@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert, Stack, Text } from "@mantine/core";
 import { AlertTriangle, FileSearch } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -8,6 +8,8 @@ import { useGetSearchConsoleStatusQuery, useGetSearchDrilldownQuery } from "@/ap
 import { errMessage } from "@/shared/lib/notify";
 import { useTitle } from "@/shared/lib/useTitle";
 import { num } from "@/shared/lib";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchConsoleStatus, demoSearchDrilldown } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
 import { METRIC_BY_KEY, metricChange, pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTile } from "../components/SearchMetricTile";
@@ -51,14 +53,22 @@ export default function SearchConsolePageDetail() {
   useTitle(pageUrl ? `${pagePath(pageUrl)} · Search visibility` : "Search visibility");
 
   const ready = Boolean(workspaceId && siteId && pageUrl);
-  const { data: status } = useGetSearchConsoleStatusQuery(workspaceId, { skip: !workspaceId });
+  const { data: realStatus } = useGetSearchConsoleStatusQuery(workspaceId, { skip: !workspaceId });
+  const { demo } = useDemo();
+  const demoStatus = useMemo(() => (demo ? demoSearchConsoleStatus(siteId) : null), [demo, siteId]);
+  const status = demoStatus ?? realStatus;
   const propertyUrl = status?.links.find((l) => l.siteId === siteId)?.propertyUrl ?? "";
 
-  const { data, isFetching, error } = useGetSearchDrilldownQuery(
+  const { data: realData, isFetching, error } = useGetSearchDrilldownQuery(
     { workspaceId, siteId, dimension: "page", value: pageUrl, days, type },
     { skip: !ready },
   );
-  const loaded = data && data.value === pageUrl && !isFetching ? data : null;
+  const demoData = useMemo(
+    () => (demo && ready ? demoSearchDrilldown("page", pageUrl, days) : null),
+    [demo, ready, pageUrl, days],
+  );
+  const data = demoData ?? realData;
+  const loaded = data && data.value === pageUrl && (demoData || !isFetching) ? data : null;
 
   const openPage = (url: string) => navigate(searchPageHref({ workspaceId, siteId, days, type, url }));
   const setDays = (next: number) =>

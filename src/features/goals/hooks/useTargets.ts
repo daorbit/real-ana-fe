@@ -1,6 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useGetTargetsQuery } from "@/features/goals/api";
 import { useCelebrateTargets } from "@/features/goals/hooks/useCelebrateTargets";
+import { useDemo } from "@/features/demo/context";
+import { demoTargets } from "@/features/demo/demoDashboards";
 import { POLL_MS } from "@/shared/hooks/usePolling";
 
 export function useTargets(workspaceId: string | undefined) {
@@ -24,6 +26,19 @@ export function useTargets(workspaceId: string | undefined) {
   }, [refetch]);
 
   useCelebrateTargets(data);
+
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo ? demoTargets() : null), [demo]);
+
+  if (sample) {
+    return {
+      targets: sample,
+      loading: false,
+      refresh,
+      refreshing: false,
+      lastUpdated: null,
+    };
+  }
 
   return {
     targets: data ?? [],

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Text } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchDrilldownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { PanelDrawer } from "@/shared/ui/PanelDrawer";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchDrilldown } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
 import { pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
@@ -39,10 +41,18 @@ export function SearchDrilldownDrawer({
     }
   }, [query]);
 
-  const { data, isFetching, error } = useGetSearchDrilldownQuery(
+  const real = useGetSearchDrilldownQuery(
     { workspaceId, siteId, days, type, dimension: "query", value: shown ?? "" },
     { skip: !shown },
   );
+  const { demo } = useDemo();
+  const sample = useMemo(
+    () => (demo && shown ? demoSearchDrilldown("query", shown, days) : null),
+    [demo, shown, days],
+  );
+  const data = sample ?? real.data;
+  const isFetching = sample ? false : real.isFetching;
+  const error = sample ? undefined : real.error;
   const loaded = data && data.value === shown && data.dimension === "query" && !isFetching ? data : null;
 
   return (

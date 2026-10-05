@@ -1,5 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useGetSitesQuery } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import { demoSites } from "@/features/demo/demoData";
 import { POLL_MS } from "@/shared/hooks/usePolling";
 import type { Site } from "@/shared/types";
 
@@ -11,10 +13,11 @@ import type { Site } from "@/shared/types";
  * automatically — callers no longer have to reload by hand.
  */
 export function useSites(workspaceId: string | undefined) {
+  const { demo } = useDemo();
   const { data, currentData, refetch, fulfilledTimeStamp, originalArgs } = useGetSitesQuery(
     workspaceId!,
     {
-      skip: !workspaceId,
+      skip: !workspaceId || demo,
       pollingInterval: POLL_MS,
       // A backgrounded tab is not being looked at, and polling it on a timer
       // is load the server carries for nobody. The refetch on focus is what
@@ -45,6 +48,21 @@ export function useSites(workspaceId: string | undefined) {
    * opened. Empty is the honest answer until the right list arrives.
    */
   const sites: Site[] = (currentData ?? (originalArgs === workspaceId ? data : undefined)) ?? [];
+
+  const sample = useMemo(
+    () => (demo ? demoSites.filter((s) => s.workspaceId === workspaceId) : null),
+    [demo, workspaceId],
+  );
+
+  if (sample) {
+    return {
+      sites: sample,
+      reload: refetch,
+      refresh,
+      refreshing: false,
+      lastUpdated: null,
+    };
+  }
 
   return {
     sites,

@@ -1,9 +1,11 @@
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { SegmentedControl, Skeleton, Text } from "@mantine/core";
 import dayjs from "dayjs";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { compact } from "@/shared/lib";
 import { useGetSearchHourlyQuery } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchHourly } from "@/features/demo/demoSearchConsole";
 import type { SearchHourly, SearchMetrics, SearchType } from "@/shared/types";
 import { METRIC_BY_KEY, metricChange } from "../searchMetrics";
 import classes from "./searchConsole.module.css";
@@ -62,7 +64,12 @@ function Stat({ metric, current, previous }: { metric: HourlyMetric; current: Se
 
 export function SearchHourlyCard({ workspaceId, siteId, type }: { workspaceId: string; siteId: string; type: SearchType }) {
   const [metric, setMetric] = useState<HourlyMetric>("clicks");
-  const { data, isLoading, error } = useGetSearchHourlyQuery({ workspaceId, siteId, type });
+  const real = useGetSearchHourlyQuery({ workspaceId, siteId, type });
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo ? demoSearchHourly(type) : null), [demo, type]);
+  const data = sample ?? real.data;
+  const isLoading = sample ? false : real.isLoading;
+  const error = sample ? undefined : real.error;
   const color = METRIC_BY_KEY[metric].color;
 
   const points: Point[] = (data?.hours ?? []).map((p, i, all) => ({ ...p, recent: i >= all.length - 24 }));

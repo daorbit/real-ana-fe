@@ -17,6 +17,10 @@ import { getSeoHelp } from "@/features/seo/components/help";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import {
+  demoSites, demoSeoReport, demoSeoHistory, demoCrawl, demoSearchTraffic, demoVitals,
+} from "@/features/demo/demoData";
 import { SeoInspectBar } from "@/features/seo/components/layout/SeoInspectBar";
 import { SeoStartPanel } from "@/features/seo/components/start/SeoStartPanel";
 import { SitesLoadError, ADD_SITE_PATH } from "@/features/workspace";
@@ -264,13 +268,17 @@ export default function Seo() {
   const { canEdit } = usePermissions();
   const { user, refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
+  const { demo } = useDemo();
 
   const {
-    currentData: sites = [], isLoading: sitesLoading, isError: sitesFailed,
+    currentData: realSites = [], isLoading: realSitesLoading, isError: realSitesFailed,
     isFetching: sitesFetching, refetch: refetchSites,
   } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
+  const sites = demo ? demoSites : realSites;
+  const sitesLoading = !demo && realSitesLoading;
+  const sitesFailed = !demo && realSitesFailed;
 
   const [siteScope, setSiteScope] = useSiteScope(workspaceId || undefined);
   const [picked, setPicked] = useState<string>(siteScope[0] ?? "");
@@ -336,23 +344,31 @@ export default function Seo() {
   const [analyze, { isLoading: analyzing }] = useAnalyzeSeoMutation();
   const [deleteReport] = useDeleteSeoReportMutation();
 
-  const { data: searchTraffic, isLoading: searchLoading } = useGetSearchTrafficQuery(
+  const { data: realSearchTraffic, isLoading: searchTrafficLoading } = useGetSearchTrafficQuery(
     { workspaceId, siteId },
     { skip: !workspaceId || !siteId }
   );
+  const searchTraffic = demo ? demoSearchTraffic : realSearchTraffic;
+  const searchLoading = !demo && searchTrafficLoading;
 
-  const { data: fieldVitals } = useGetFieldVitalsQuery(
+  const { data: realFieldVitals } = useGetFieldVitalsQuery(
     { workspaceId, siteId },
     { skip: !workspaceId || !siteId }
   );
+  const fieldVitals = demo ? demoVitals : realFieldVitals;
 
-  const { data: crawlReport } = useGetLatestCrawlQuery(
+  const { data: realCrawlReport } = useGetLatestCrawlQuery(
     { workspaceId, siteId },
     { skip: !workspaceId || !siteId }
   );
+  const crawlReport = demo ? demoCrawl : realCrawlReport;
   const [runCrawl, { isLoading: crawling }] = useRunCrawlMutation();
 
   async function startCrawl() {
+    if (demo) {
+      notify.error("Turn off demo data to run a crawl.");
+      return;
+    }
     trace(user?.id, "run_site_crawl", "seo", "crawl");
     try {
       await runCrawl({ workspaceId, siteId }).unwrap();
@@ -368,22 +384,30 @@ export default function Seo() {
 
   // The default limit is 20, which silently truncated the History tab on any
   // site audited regularly — the older runs existed but were unreachable.
-  const { data: history = [], isLoading: historyLoading } = useGetSeoReportsQuery(
+  const { data: realHistory = [], isLoading: realHistoryLoading } = useGetSeoReportsQuery(
     { workspaceId, siteId, limit: HISTORY_LIMIT },
     { skip: !workspaceId || !siteId }
   );
+  const history = demo ? demoSeoHistory : realHistory;
+  const historyLoading = !demo && realHistoryLoading;
 
-  const { data: latest, isFetching: latestFetching } = useGetLatestSeoReportQuery(
+  const { data: realLatest, isFetching: realLatestFetching } = useGetLatestSeoReportQuery(
     { workspaceId, siteId },
     { skip: !workspaceId || !siteId }
   );
+  const latest = demo ? demoSeoReport : realLatest;
+  const latestFetching = !demo && realLatestFetching;
 
-  const { data: viewed, isFetching: viewedFetching } = useGetSeoReportQuery(
+  // History beyond the latest run has no full report fixture behind it (just
+  // the summary row for the trend chart), so opening an older audit in demo
+  // mode still shows the one report fixture there is.
+  const { data: viewed, isFetching: realViewedFetching } = useGetSeoReportQuery(
     { workspaceId, siteId, reportId: viewingId ?? "" },
-    { skip: !workspaceId || !siteId || !viewingId }
+    { skip: !workspaceId || !siteId || !viewingId || demo }
   );
+  const viewedFetching = !demo && realViewedFetching;
 
-  const report: SeoReport | undefined = viewingId ? viewed : latest;
+  const report: SeoReport | undefined = demo ? demoSeoReport : viewingId ? viewed : latest;
   const data = report?.data;
   const loading = analyzing || latestFetching || viewedFetching;
 
@@ -431,6 +455,10 @@ export default function Seo() {
 
   async function run(refresh: boolean) {
     if (!site) return;
+    if (demo) {
+      notify.error("Turn off demo data to run an audit.");
+      return;
+    }
     trace(user?.id, refresh ? "rerun_seo_audit" : "run_seo_audit", "seo", "seo_report");
     try {
       const res = await analyze({
@@ -451,6 +479,10 @@ export default function Seo() {
   }
 
   function remove(id: string) {
+    if (demo) {
+      notify.error("Turn off demo data to delete a report.");
+      return;
+    }
     confirmDelete({
       title: "Delete this report?",
       body: "The stored audit is removed. It does not affect the site itself.",

@@ -7,6 +7,7 @@ import { FolderKanban, Plus, Search } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSites } from "@/features/workspace";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
 import { AddSiteWizard } from "@/features/workspace/components/AddSiteWizard";
 import { useWorkspaceActions } from "@/features/workspace/hooks/useWorkspaceActions";
 import { useWorkspacesDeepLink } from "@/features/workspace/hooks/useWorkspacesDeepLink";
@@ -32,7 +33,14 @@ export default function Workspaces() {
   const nav = useNavigate();
   const { user } = useAuth();
   const { workspaces, active, setActive, loading } = useWorkspace();
-  const { canEdit, canAdmin, canDelete } = usePermissions();
+  const { demo } = useDemo();
+  const perms = usePermissions();
+  // Demo shows every control so the page reads as the real thing, but none
+  // of them may actually write — there is no account behind the sample data
+  // for a create/rename/delete to land on.
+  const canEdit = perms.canEdit && !demo;
+  const canAdmin = perms.canAdmin && !demo;
+  const canDelete = perms.canDelete && !demo;
   const [siteOpen, setSiteOpen] = useState(false);
 
   const { sites, refresh, refreshing, lastUpdated } = useSites(active?._id);
@@ -67,7 +75,13 @@ export default function Workspaces() {
                 aria-label={t("workspaces.findWorkspace", "Search workspaces")}
               />
             )}
-            <Button variant="default" leftSection={<Plus size={16} />} onClick={createWorkspace}>
+            <Button
+              variant="default"
+              leftSection={<Plus size={16} />}
+              onClick={createWorkspace}
+              disabled={demo}
+              title={demo ? "Turn off demo data to create a workspace" : undefined}
+            >
               {t("workspaces.newWorkspace")}
             </Button>
             <PageHelpButton />

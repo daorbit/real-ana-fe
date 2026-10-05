@@ -7,6 +7,8 @@ import { AppShell } from "@/app/AppShell";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { useWorkspace } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoScheduledPostsResponse, demoSentPostsResponse } from "@/features/demo/demoSocial";
 import { modals } from "@mantine/modals";
 import { notify, notifyError } from "@/shared/lib/notify";
 import { usePostFilters } from "@/features/social/hooks/usePostFilters";
@@ -37,8 +39,13 @@ export default function SocialPosts() {
   const { active } = useWorkspace();
   const { user } = useAuth();
   const canUseInstagram = useCanUseInstagram();
-  const { data, isLoading, isFetching, refetch } = useGetScheduledPostsQuery();
- 
+  const { demo } = useDemo();
+  const { data: realData, isLoading: realLoading, isFetching: realFetching, refetch } = useGetScheduledPostsQuery();
+  const demoScheduled = useMemo(() => (demo ? demoScheduledPostsResponse() : null), [demo]);
+  const data = demoScheduled ?? realData;
+  const isLoading = demoScheduled ? false : realLoading;
+  const isFetching = demoScheduled ? false : realFetching;
+
   const { data: usage } = useGetWorkspaceUsageQuery(active?._id ?? "", { skip: !active?._id });
   const scheduledPosts = usage?.scheduledPosts;
   const postsFull = !!scheduledPosts && scheduledPosts.used >= scheduledPosts.quota;
@@ -75,9 +82,9 @@ export default function SocialPosts() {
   const [sentCursor, setSentCursor] = useState<string | undefined>(undefined);
 
   const {
-    data: sent,
-    isLoading: sentLoading,
-    isFetching: sentFetching,
+    data: realSent,
+    isLoading: realSentLoading,
+    isFetching: realSentFetching,
     refetch: refetchSent,
   } = useGetSentPostsQuery(
     {
@@ -91,6 +98,15 @@ export default function SocialPosts() {
       skip: !onSent && !onFailed,
     },
   );
+
+  const demoSent = useMemo(
+    () => (demo && (onSent || onFailed) ? demoSentPostsResponse(onFailed ? "failed" : undefined) : null),
+    [demo, onSent, onFailed],
+  );
+  const sent = demoSent ?? realSent;
+  const sentLoading = demoSent ? false : realSentLoading;
+  const sentFetching = demoSent ? false : realSentFetching;
+
   /** A post that just changed time, so its row can say so where someone is looking. */
   const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
 
@@ -153,7 +169,11 @@ export default function SocialPosts() {
   });
 
   const openNew = (date?: string) => {
- 
+
+    if (demo) {
+      notify.error("Demo data is read-only. Turn off demo mode to compose a post.");
+      return;
+    }
     if (postsFull) {
       notify.error(
         `This workspace can hold ${scheduledPosts?.quota} scheduled post${scheduledPosts?.quota === 1 ? "" : "s"} at once. Publish, delete or upgrade to add another.`,
@@ -167,6 +187,10 @@ export default function SocialPosts() {
 
   
   const openAt = (at: string) => {
+    if (demo) {
+      openNew();
+      return;
+    }
     if (postsFull) {
       openNew();
       return;
@@ -191,6 +215,10 @@ export default function SocialPosts() {
    * only thing left to decide is when.
    */
   const scheduleAgain = (run: SentPost) => {
+    if (demo) {
+      notify.error("Demo data is read-only. Turn off demo mode to compose a post.");
+      return;
+    }
     if (postsFull) {
       notify.error(
         `This workspace can hold ${scheduledPosts?.quota} scheduled post${scheduledPosts?.quota === 1 ? "" : "s"} at once. Publish, delete or upgrade to add another.`,
@@ -211,6 +239,10 @@ export default function SocialPosts() {
    * afterwards that it is still live is the worse of the two surprises.
    */
   const removeSent = (post: SentPost) => {
+    if (demo) {
+      notify.error("Demo data is read-only. Turn off demo mode to remove a post.");
+      return;
+    }
     modals.openConfirmModal({
       title: "Remove from this list?",
       centered: true,
@@ -357,9 +389,13 @@ export default function SocialPosts() {
           <PageHelpButton />
 
           {ready && (
-            <Tooltip label="This workspace's scheduled posts are full" disabled={!postsFull} withArrow>
+            <Tooltip
+              label={demo ? "Demo data is read-only" : "This workspace's scheduled posts are full"}
+              disabled={!demo && !postsFull}
+              withArrow
+            >
               <Box>
-                <Button leftSection={<Plus size={16} />} disabled={postsFull} onClick={() => openNew()}>
+                <Button leftSection={<Plus size={16} />} disabled={demo || postsFull} onClick={() => openNew()}>
                   New post
                 </Button>
               </Box>

@@ -5,7 +5,7 @@ import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/not
 import type { CardBusy } from "@/features/dashboards/components/home/cardBusy";
 import type { Dashboard } from "@/features/dashboards/types";
 
-export function useDashboardActions(workspaceId: string | undefined) {
+export function useDashboardActions(workspaceId: string | undefined, demo = false) {
   const navigate = useNavigate();
   const [duplicate] = useDuplicateDashboardMutation();
   const [remove] = useDeleteDashboardMutation();
@@ -21,6 +21,10 @@ export function useDashboardActions(workspaceId: string | undefined) {
 
   const duplicateDashboard = async (d: Dashboard, open = false) => {
     if (!workspaceId || busy[d.id]) return;
+    if (demo) {
+      notify.error("Turn off demo data to duplicate a dashboard.");
+      return;
+    }
     mark(d.id, "duplicating");
     try {
       const copy = await duplicate({ workspaceId, id: d.id }).unwrap();
@@ -35,6 +39,10 @@ export function useDashboardActions(workspaceId: string | undefined) {
 
   const deleteDashboard = (d: Dashboard, after?: () => void) => {
     if (!workspaceId) return;
+    if (demo) {
+      notify.error("Turn off demo data to delete a dashboard.");
+      return;
+    }
     confirmDelete({
       title: "Delete dashboard?",
       body: <>“{d.name}” and its layout will be removed. Your analytics data is not affected.</>,

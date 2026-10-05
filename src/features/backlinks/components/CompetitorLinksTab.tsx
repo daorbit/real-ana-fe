@@ -1,8 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import { Swords } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
+import { useDemo } from "@/features/demo/context";
+import { demoCompetitorBacklinks } from "@/features/demo/demoBacklinks";
 import { useGetCompetitorBacklinksQuery } from "../api";
 import type { BacklinkOverview } from "../types";
 import { CompetitorLinkTable } from "./CompetitorLinkTable";
@@ -31,10 +33,18 @@ export function CompetitorLinksTab({
   const selectedId = picked ?? competitors[0]?.competitorId ?? YOU;
   const selected = competitors.find((c) => c.competitorId === selectedId) ?? null;
 
-  const { data: links = [], isFetching } = useGetCompetitorBacklinksQuery(
+  const real = useGetCompetitorBacklinksQuery(
     { workspaceId, siteId, competitorId: selected?.competitorId ?? "" },
     { skip: !selected },
   );
+
+  const { demo } = useDemo();
+  const sample = useMemo(
+    () => (demo && selected ? demoCompetitorBacklinks[selected.competitorId] ?? [] : null),
+    [demo, selected],
+  );
+  const links = sample ?? real.data ?? [];
+  const isFetching = sample ? false : real.isFetching;
 
   if (competitors.length === 0) {
     return (

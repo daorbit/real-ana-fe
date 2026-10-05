@@ -1,6 +1,8 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetSearchConsoleStatusQuery } from "@/app/store";
 import { useSearchEntitlements } from "@/features/searchConsole/useSearchEntitlements";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchConsoleStatus, DEMO_PROPERTY_URL } from "@/features/demo/demoSearchConsole";
 import type { Site } from "@/shared/types";
 
 export type SearchSource =
@@ -27,10 +29,14 @@ export function searchDaysFor(range: string | undefined, maxDays: number): numbe
 
 export function useSearchWidgetSource({ workspaceId, sites, siteScope, range }: SearchSourceInput): SearchSource {
   const { maxDays } = useSearchEntitlements();
-  const { data: status, isLoading, isError } = useGetSearchConsoleStatusQuery(workspaceId ?? skipToken);
+  const { data: realStatus, isLoading, isError } = useGetSearchConsoleStatusQuery(workspaceId ?? skipToken);
 
-  if (!workspaceId || isLoading) return { kind: "loading" };
-  if (isError || !status) return { kind: "error" };
+  const { demo } = useDemo();
+  const status = demo ? demoSearchConsoleStatus() : realStatus;
+
+  if (!workspaceId || (!demo && isLoading)) return { kind: "loading" };
+  if (!demo && (isError || !status)) return { kind: "error" };
+  if (!status) return { kind: "error" };
   if (!status.configured) return { kind: "not-configured" };
 
   const webSites = sites.filter((s) => s.platform !== "app");
@@ -44,7 +50,7 @@ export function useSearchWidgetSource({ workspaceId, sites, siteScope, range }: 
   const linkFor = (siteId: string) => status.links.find((l) => l.siteId === siteId);
   const scoped = webSites.find((s) => s.siteId === siteScope[0]);
   const site = scoped ?? webSites.find((s) => linkFor(s.siteId)) ?? webSites[0];
-  const link = linkFor(site.siteId);
+  const link = demo ? { siteId: site.siteId, propertyUrl: DEMO_PROPERTY_URL } : linkFor(site.siteId);
 
   if (!link) return { kind: "link", siteName: site.name };
 

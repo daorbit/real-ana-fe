@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { useGetApiKeyUsageQuery } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import { demoApiKeyUsage } from "@/features/demo/demoData";
 import type { ApiKeyUsageEntry, ApiKeyUsageWindow } from "@/shared/types";
 import { percentDelta, usageDayLabel } from "../developers";
 
@@ -12,10 +14,16 @@ export type UsagePoint = {
 };
 
 export function useKeyUsage(workspaceId: string, windowDays: ApiKeyUsageWindow, focusKeyId: string | null) {
-  const { data, isLoading, isFetching, isError, refetch } = useGetApiKeyUsageQuery(
+  const { demo } = useDemo();
+  const {
+    data: realData, isLoading: realLoading, isFetching, isError: realError, refetch,
+  } = useGetApiKeyUsageQuery(
     { workspaceId, days: windowDays },
     { skip: !workspaceId },
   );
+  const data = demo ? demoApiKeyUsage(windowDays) : realData;
+  const isLoading = !demo && realLoading;
+  const isError = !demo && realError;
 
   const byKey = useMemo(
     () => new Map<string, ApiKeyUsageEntry>((data?.keys ?? []).map((k) => [k.keyId, k])),

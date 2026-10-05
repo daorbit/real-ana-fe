@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { useDispatch } from "react-redux";
 import {
   api,
@@ -8,6 +9,8 @@ import {
 } from "@/app/store";
 import { usePermissions } from "@/features/workspace/context";
 import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchConsoleStatus, DEMO_PROPERTY_URL } from "@/features/demo/demoSearchConsole";
 import { SearchConsoleConnectCard } from "./SearchConsoleConnectCard";
 import { SearchConsolePropertyPicker } from "./SearchConsolePropertyPicker";
 import { ConsoleSkeleton } from "./SearchSkeletons";
@@ -41,6 +44,13 @@ export function SearchConsoleGate({
   const connecting = popupOpen || isFetching;
   const [unlink] = useUnlinkSearchConsolePropertyMutation();
   const [disconnect] = useDisconnectSearchConsoleMutation();
+
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo ? demoSearchConsoleStatus(siteId) : null), [demo, siteId]);
+
+  if (sample) {
+    return <>{children({ propertyUrl: DEMO_PROPERTY_URL, googleEmail: sample.connection!.googleEmail })}</>;
+  }
 
   if (isLoading) return <ConsoleSkeleton />;
   if (!status) return null;

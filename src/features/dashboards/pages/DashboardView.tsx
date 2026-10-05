@@ -12,6 +12,8 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoDashboards } from "@/features/demo/demoDashboards";
 import { isEmbeddable } from "@/features/analytics";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
@@ -47,22 +49,28 @@ export default function DashboardView() {
   const { canEdit } = usePermissions();
   const workspaceId = active?._id;
 
-  const { data: dashboard, isLoading, isError } = useGetDashboardQuery(
+  const { demo } = useDemo();
+  const { data: realDashboard, isLoading: dashboardLoading, isError: dashboardError } = useGetDashboardQuery(
     { workspaceId: workspaceId ?? "", id },
     { skip: !workspaceId || !id }
   );
+  const sample = demo ? demoDashboards.find((d) => d.id === id) ?? demoDashboards[0] : null;
+  const dashboard = sample ?? realDashboard;
+  const isLoading = !sample && dashboardLoading;
+  const isError = !sample && dashboardError;
   useTitle(dashboard?.name ?? "Dashboard");
 
   const layout = useDashboardLayout(workspaceId, dashboard);
   const fresh = useFreshWidgets();
   const openStudio = () => navigate(`/app/dashboards/${id}/studio`);
   const { range, chosen, limited, allowed, change } = useDashboardRange(dashboard, canEdit, (r) => {
+    if (demo) return;
     layout.patch({ range: r }).catch((e) => notify.error(errMessage(e, "Could not save the range.")));
   });
 
   const { widgetData, sites, siteScope, setSiteScope, refresh, refreshing, refetching, lastUpdated } =
     useDashboardData(workspaceId, range);
-  const { duplicateDashboard, deleteDashboard } = useDashboardActions(workspaceId);
+  const { duplicateDashboard, deleteDashboard } = useDashboardActions(workspaceId, demo);
 
   const [editing, setEditing] = useState(false);
   const [customizing, setCustomizing] = useState(false);
@@ -98,6 +106,10 @@ export default function DashboardView() {
   }
 
   const save = async (): Promise<boolean> => {
+    if (demo) {
+      notify.error("Turn off demo data to save layout changes.");
+      return false;
+    }
     try {
       await layout.save();
       notify.success("Your layout is saved.", "Dashboard updated");
@@ -114,14 +126,19 @@ export default function DashboardView() {
     setEditing(false);
   };
 
-  const rename = (name: string) =>
-    layout
+  const rename = (name: string) => {
+    if (demo) {
+      notify.error("Turn off demo data to rename a dashboard.");
+      return Promise.resolve(false);
+    }
+    return layout
       .patch({ name })
       .then(() => true)
       .catch((e) => {
         notify.error(errMessage(e, "Could not rename the dashboard."));
         return false;
       });
+  };
 
   const hasSearch = layout.layout.some((p) => isSearchWidget(p.id));
 

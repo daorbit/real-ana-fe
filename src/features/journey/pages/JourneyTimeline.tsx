@@ -16,6 +16,8 @@ import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import classes from "./JourneyTimeline.module.css";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoJourneyTimeline } from "@/features/demo/demoJourney";
 import { dateTime } from "@/shared/lib";
 import {
   actionOptions, applyFilters, EMPTY_FILTERS, gapLabel,
@@ -68,10 +70,18 @@ export default function JourneyTimeline() {
   // Null means "nothing picked yet", which reads as the latest step.
   const [selected, setSelected] = useState<number | null>(null);
 
-  const { data, isFetching, refetch } = useGetJourneyTimelineQuery(
+  const { data: realData, isFetching, refetch } = useGetJourneyTimelineQuery(
     { wid: active?._id ?? "", appUserId: appUserId ?? "" },
     { skip: !active || !appUserId },
   );
+
+  const { demo } = useDemo();
+  const sample = useMemo(
+    () => (demo && appUserId ? demoJourneyTimeline(appUserId) : null),
+    [demo, appUserId],
+  );
+  const data = sample ?? realData;
+  const loading = sample ? false : isFetching;
   const events = useMemo(() => data?.events ?? [], [data]);
 
   const options = useMemo(() => actionOptions(events), [events]);
@@ -101,7 +111,7 @@ export default function JourneyTimeline() {
                 onClick={() => refetch()}
                 aria-label="Refresh"
               >
-                <RotateCw size={16} className={isFetching ? "spin" : undefined} />
+                <RotateCw size={16} className={loading ? "spin" : undefined} />
               </ActionIcon>
             </Tooltip>
             <PageHelpButton />
@@ -118,7 +128,7 @@ export default function JourneyTimeline() {
         }
       />
 
-      {isFetching ? (
+      {loading ? (
         <Stack gap="md">
           <Skeleton height={36} radius="md" />
           <Skeleton height={36} width={420} radius="md" />

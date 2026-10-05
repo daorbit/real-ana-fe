@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button, Group } from "@mantine/core";
 import { motion } from "framer-motion";
 import { UserPlus, Users } from "lucide-react";
@@ -10,6 +10,8 @@ import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoMembersResponse } from "@/features/demo/demoWorkspace";
 import { useMemberActions } from "../hooks/useMemberActions";
 import { grantableRoles } from "../components/members/roles";
 import { MembersOverview } from "../components/members/MembersOverview";
@@ -20,8 +22,17 @@ import { MembersSkeleton } from "../components/members/MembersSkeleton";
 export default function Members() {
   useTitle("Members");
   const { active } = useWorkspace();
-  const { canAdmin } = usePermissions();
-  const { data, isLoading } = useGetMembersQuery(active?._id ?? "", { skip: !active });
+  const perms = usePermissions();
+  const { demo } = useDemo();
+  // Invite/remove/role-change have no fixture behind them, so demo keeps the
+  // list read-only even for an owner.
+  const canAdmin = perms.canAdmin && !demo;
+  const { data: queried, isLoading: queryLoading } = useGetMembersQuery(active?._id ?? "", {
+    skip: !active || demo,
+  });
+  const sample = useMemo(() => (demo ? demoMembersResponse() : null), [demo]);
+  const data = sample ?? queried;
+  const isLoading = sample ? false : queryLoading;
   const { invite, inviting, changeRole, remove, revoke } = useMemberActions(active);
   const [inviteOpen, setInviteOpen] = useState(false);
 

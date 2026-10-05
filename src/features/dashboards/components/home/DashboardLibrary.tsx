@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "@mantine/hooks";
 import { Search } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { useDemo } from "@/features/demo/context";
 import { DashboardGrid } from "@/features/dashboards/components/home/DashboardGrid";
 import { DashboardTable } from "@/features/dashboards/components/home/DashboardTable";
 import { LibraryToolbar } from "@/features/dashboards/components/home/LibraryToolbar";
@@ -25,7 +26,8 @@ export function DashboardLibrary({
   onNew: () => void;
 }) {
   const navigate = useNavigate();
-  const { duplicateDashboard, deleteDashboard, busy } = useDashboardActions(workspaceId);
+  const { demo } = useDemo();
+  const { duplicateDashboard, deleteDashboard, busy } = useDashboardActions(workspaceId, demo);
   const list = useDashboardList(dashboards);
   const [view, setView] = useLocalStorage<LibraryView>({ key: "quantalog:dashboards-view", defaultValue: "grid" });
 

@@ -1,9 +1,12 @@
+import { useMemo } from "react";
 import { Alert, Text } from "@mantine/core";
 import { AlertTriangle, ExternalLink, FileText } from "lucide-react";
 import { useGetSearchSitemapsQuery } from "@/app/store";
 import { usePermissions } from "@/features/workspace/context";
 import { errMessage } from "@/shared/lib/notify";
 import { num } from "@/shared/lib";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchSitemaps } from "@/features/demo/demoSearchConsole";
 import { useSearchConsoleConnect } from "../useSearchConsoleConnect";
 import { useSitemapActions } from "../useSitemapActions";
 import { sitemapBase } from "../sitemapUrl";
@@ -22,10 +25,16 @@ export function SearchSitemapsTab({
   propertyUrl: string;
 }) {
   const { canAdmin } = usePermissions();
-  const { data, isLoading, error, refetch } = useGetSearchSitemapsQuery({ workspaceId, siteId });
-  const { connect, connecting } = useSearchConsoleConnect(workspaceId, () => void refetch());
+  const real = useGetSearchSitemapsQuery({ workspaceId, siteId });
+  const { connect, connecting } = useSearchConsoleConnect(workspaceId, () => void real.refetch());
   const actions = useSitemapActions(workspaceId, siteId);
   const consoleUrl = `https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(propertyUrl)}`;
+
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo ? demoSearchSitemaps() : null), [demo]);
+  const data = sample ?? real.data;
+  const isLoading = sample ? false : real.isLoading;
+  const error = sample ? undefined : real.error;
 
   if (isLoading) return <SitemapsSkeleton />;
   if (error || !data) {
@@ -36,7 +45,8 @@ export function SearchSitemapsTab({
     );
   }
 
-  const manage = canAdmin && data.access.canSubmit;
+  // Demo data has no backing property to submit or remove sitemaps against.
+  const manage = canAdmin && data.access.canSubmit && !demo;
   const pages = data.sitemaps.reduce((sum, s) => sum + s.submitted, 0);
 
   return (

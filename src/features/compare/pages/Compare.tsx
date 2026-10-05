@@ -13,6 +13,11 @@ import {
   useGetSitesQuery, useGetCompetitorsQuery, useGetCompetitorAnalysisQuery,
   useGetCompetitorHistoryQuery, useGetCompetitorBriefAvailabilityQuery,
 } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import {
+  demoCompetitors, demoCompetitorAnalysis, demoCompetitorHistory, demoCompetitorBriefAvailable,
+} from "@/features/demo/demoCompare";
+import { demoSites } from "@/features/demo/demoData";
 import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
 import { COMPARE_HELP } from "../components/help";
 import { useCompetitorActions } from "../hooks/useCompetitorActions";
@@ -31,13 +36,17 @@ export default function Compare() {
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
   const workspaceId = active?._id ?? "";
+  const { demo } = useDemo();
 
   const {
-    currentData: sites = [], isLoading: sitesLoading, isError: sitesFailed,
+    currentData: realSites = [], isLoading: realSitesLoading, isError: realSitesFailed,
     isFetching: sitesFetching, refetch: refetchSites,
   } = useGetSitesQuery(workspaceId, {
     skip: !workspaceId,
   });
+  const sites = demo ? demoSites : realSites;
+  const sitesLoading = !demo && realSitesLoading;
+  const sitesFailed = !demo && realSitesFailed;
 
   const [picked, setPicked] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
@@ -52,17 +61,23 @@ export default function Compare() {
 
   const skip = !workspaceId || !siteId;
 
-  const { data: competitors = [], isLoading: listLoading } = useGetCompetitorsQuery({ workspaceId, siteId }, { skip });
+  const { data: realCompetitors = [], isLoading: listLoading } = useGetCompetitorsQuery({ workspaceId, siteId }, { skip });
   const {
-    data: analysis,
-    isLoading: analysisLoading,
+    data: realAnalysis,
+    isLoading: realAnalysisLoading,
     error: analysisError,
   } = useGetCompetitorAnalysisQuery({ workspaceId, siteId }, { skip });
-  const { data: history = [] } = useGetCompetitorHistoryQuery({ workspaceId, siteId }, { skip });
-  const { data: briefAvailable } = useGetCompetitorBriefAvailabilityQuery({ workspaceId, siteId }, { skip });
+  const { data: realHistory = [] } = useGetCompetitorHistoryQuery({ workspaceId, siteId }, { skip });
+  const { data: realBriefAvailable } = useGetCompetitorBriefAvailabilityQuery({ workspaceId, siteId }, { skip });
+
+  const competitors = demo ? demoCompetitors : realCompetitors;
+  const analysis = demo ? demoCompetitorAnalysis : realAnalysis;
+  const analysisLoading = !demo && realAnalysisLoading;
+  const history = demo ? demoCompetitorHistory : realHistory;
+  const briefAvailable = demo ? demoCompetitorBriefAvailable : realBriefAvailable;
 
   const { add, adding, refreshOne, refreshingId, refreshEveryone, refreshingAll, remove } =
-    useCompetitorActions(workspaceId, siteId, site?.domain);
+    useCompetitorActions(workspaceId, siteId, site?.domain, demo);
 
   const selected =
     analysis?.competitors.find((c) => c.competitorId === pickedCompetitor) ??

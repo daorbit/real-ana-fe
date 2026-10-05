@@ -1,8 +1,11 @@
+import { useMemo } from "react";
 import { Anchor, Button, Text } from "@mantine/core";
 import { AlertTriangle, ArrowRight, ExternalLink, Lock } from "lucide-react";
 import dayjs from "dayjs";
 import { useGetSearchInspectionQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchInspection } from "@/features/demo/demoSearchConsole";
 import { verdictOf } from "../inspectionVerdict";
 import { useSearchEntitlements, useSearchUpgrade } from "../useSearchEntitlements";
 import { IndexStatusSkeleton } from "./SearchSkeletons";
@@ -29,10 +32,15 @@ export function SearchIndexStatusCard({
 }) {
   const ent = useSearchEntitlements();
   const { goToPlans } = useSearchUpgrade();
-  const { data, isLoading, error } = useGetSearchInspectionQuery(
+  const real = useGetSearchInspectionQuery(
     { workspaceId, siteId, url },
     { skip: !ent.canInspect },
   );
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo && ent.canInspect ? demoSearchInspection(url) : null), [demo, ent.canInspect, url]);
+  const data = sample ?? real.data;
+  const isLoading = sample ? false : real.isLoading;
+  const error = sample ? undefined : real.error;
   const inspectUrl = `https://search.google.com/search-console/inspect?resource_id=${encodeURIComponent(
     propertyUrl,
   )}&id=${encodeURIComponent(url)}`;

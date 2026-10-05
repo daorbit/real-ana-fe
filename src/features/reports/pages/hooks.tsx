@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useGetReportSchedulesQuery, useSaveReportScheduleMutation,
@@ -8,6 +8,9 @@ import {
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoReportSchedulesResponse } from "@/features/demo/demoReports";
+import { demoSites } from "@/features/demo/demoData";
 import { useAuth } from "@/features/auth/context";
 import { trace } from "@/shared/lib/analytics";
 import type { ReportSchedule } from "@/shared/types";
@@ -25,20 +28,32 @@ export function useReportsPage() {
   const { active } = useWorkspace();
   const { user } = useAuth();
   const billing = useActiveBilling();
+  const { demo } = useDemo();
   // Schedules are `editor` server-side. A viewer keeps the list, the summary
   // and the next-send times — only the controls that would 403 go away.
-  const { canEdit } = usePermissions();
+  // Create/edit/delete have no fixture behind them either, so demo is
+  // read-only on top of whatever the role would normally allow.
+  const canEdit = usePermissions().canEdit && !demo;
   const workspaceId = active?._id ?? "";
   // WhatsApp is delivered to the account owner's own number only, so the
   // profile mobile is both the destination and the precondition.
   const ownerMobile = (user?.mobile ?? "").replace(/[^\d]/g, "");
 
-  const { data, isLoading } = useGetReportSchedulesQuery(workspaceId, { skip: !workspaceId });
+  const { data: queried, isLoading: queryLoading } = useGetReportSchedulesQuery(workspaceId, {
+    skip: !workspaceId || demo,
+  });
+  const sample = useMemo(() => (demo ? demoReportSchedulesResponse() : null), [demo]);
+  const data = sample ?? queried;
+  const isLoading = sample ? false : queryLoading;
   // `currentData` so a workspace switch empties the list rather than briefly
-  // offering the previous workspace's sites as report targets.
-  const { currentData: sites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId });
-  const { data: share } = useGetShareQuery(workspaceId, { skip: !workspaceId });
-  const { data: wa } = useGetWhatsAppStatusQuery(workspaceId, { skip: !workspaceId });
+  // offering the previous workspace's sites as report targets. Demo's own
+  // site list is Workspaces' fixture, not fetched again here.
+  const { currentData: queriedSites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId || demo });
+  const sites = demo ? demoSites : queriedSites;
+  const { data: share } = useGetShareQuery(workspaceId, { skip: !workspaceId || demo });
+  // WhatsApp needs a real paired session, which demo has none of — reports
+  // can still show the email channel, just not a WhatsApp test send.
+  const { data: wa } = useGetWhatsAppStatusQuery(workspaceId, { skip: !workspaceId || demo });
 
   // Offered only when the gateway is both configured and actually paired —
   // enabling a channel that cannot send is a promise the product can't keep.

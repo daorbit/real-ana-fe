@@ -1,12 +1,12 @@
 import { ActionIcon, Group, Skeleton, Tooltip } from "@mantine/core";
 import { Activity, Plus, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useGetApiKeysQuery } from "@/app/store";
 import { num, timeAgo } from "@/shared/lib/format";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import type { ApiKeyUsageWindow } from "@/shared/types";
 import { latestUse, successRate } from "../../developers";
+import { useApiKeys } from "../../hooks/useApiKeys";
 import { useKeyUsage } from "../../hooks/useKeyUsage";
 import { SectionHeader } from "./SectionHeader";
 import { UsageChart } from "./UsageChart";
@@ -38,7 +38,7 @@ export function UsageOverview({
   workspaceId, windowDays, onWindowChange, focusKeyId, onFocusKey, onCreateKey,
 }: Props) {
   const { t } = useTranslation();
-  const { data: keys = [], isLoading: keysLoading, isFetching: keysFetching, refetch: refetchKeys } = useGetApiKeysQuery(workspaceId, { skip: !workspaceId });
+  const { keys, isLoading: keysLoading, retrying: keysFetching, retry: refetchKeys } = useApiKeys(workspaceId);
   const focusKey = keys.find((k) => k.id === focusKeyId);
   const activeFocus = focusKey ? focusKey.id : null;
   const { view, isLoading, isFetching, loadFailed, retry } = useKeyUsage(workspaceId, windowDays, activeFocus);

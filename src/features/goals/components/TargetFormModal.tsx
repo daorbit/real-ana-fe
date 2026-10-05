@@ -4,6 +4,8 @@ import {
 } from "@mantine/core";
 import { useGetGoalsQuery } from "@/app/store";
 import { useSites } from "@/features/workspace";
+import { useDemo } from "@/features/demo/context";
+import { demoGoals } from "@/features/demo/demoData";
 import { METRICS, METRIC_MAP, suggestName } from "@/features/goals/metrics";
 import type { TargetInput, TargetMetric, TargetPeriod } from "@/features/goals/types";
 import classes from "@/features/goals/components/Goals.module.css";
@@ -30,7 +32,9 @@ export function TargetFormModal({
   const [form, setForm] = useState<TargetInput>(EMPTY);
   const [nameTouched, setNameTouched] = useState(false);
   const { sites } = useSites(workspaceId);
-  const { data: goals = [] } = useGetGoalsQuery(workspaceId, { skip: !opened });
+  const { demo } = useDemo();
+  const { data: realGoals = [] } = useGetGoalsQuery(workspaceId, { skip: !opened });
+  const goals = demo ? demoGoals : realGoals;
 
   useEffect(() => {
     if (!opened) return;

@@ -1,7 +1,10 @@
+import { useMemo } from "react";
 import { Alert } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchInsightsQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchInsights } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
 import { buildActions } from "../insightActions";
 import { InsightsSummary } from "./InsightsSummary";
@@ -31,10 +34,16 @@ export function SearchInsightsTab({
 }) {
   const ent = useSearchEntitlements();
   const locked = ent.insights === "none";
-  const { data, isLoading, error } = useGetSearchInsightsQuery(
+  const real = useGetSearchInsightsQuery(
     { workspaceId, siteId, days, type },
     { skip: locked },
   );
+
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo && !locked ? demoSearchInsights(days) : null), [demo, locked, days]);
+  const data = sample ?? real.data;
+  const isLoading = sample ? false : real.isLoading;
+  const error = sample ? undefined : real.error;
 
   if (locked) {
     return (

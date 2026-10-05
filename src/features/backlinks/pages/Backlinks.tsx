@@ -10,6 +10,9 @@ import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { ADD_SITE_PATH } from "@/features/workspace/paths";
 import { useGetSitesQuery } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import { demoSites } from "@/features/demo/demoData";
+import { demoBacklinkOverview, demoBacklinks } from "@/features/demo/demoBacklinks";
 import { useGetBacklinkOverviewQuery, useGetBacklinksQuery } from "../api";
 import { useBacklinkActions } from "../hooks/useBacklinkActions";
 import { BACKLINKS_HELP } from "../components/help";
@@ -29,8 +32,11 @@ export default function Backlinks() {
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
   const workspaceId = active?._id ?? "";
+  const { demo } = useDemo();
 
-  const { currentData: allSites = [], isLoading: sitesLoading } = useGetSitesQuery(workspaceId, { skip: !workspaceId });
+  const { currentData: realAllSites = [], isLoading: realSitesLoading } = useGetSitesQuery(workspaceId, { skip: !workspaceId });
+  const allSites = demo ? demoSites : realAllSites;
+  const sitesLoading = !demo && realSitesLoading;
   const sites = allSites.filter((s) => s.platform !== "app" && s.domain);
 
   const [picked, setPicked] = useState("");
@@ -41,9 +47,13 @@ export default function Backlinks() {
   const siteId = site?.siteId ?? "";
   const skip = !workspaceId || !siteId;
 
-  const { data: overview, isLoading: overviewLoading } = useGetBacklinkOverviewQuery({ workspaceId, siteId }, { skip });
-  const { data: backlinks = [], isLoading: listLoading } = useGetBacklinksQuery({ workspaceId, siteId }, { skip });
-  const actions = useBacklinkActions(workspaceId, siteId);
+  const { data: realOverview, isLoading: realOverviewLoading } = useGetBacklinkOverviewQuery({ workspaceId, siteId }, { skip });
+  const { data: realBacklinks = [], isLoading: realListLoading } = useGetBacklinksQuery({ workspaceId, siteId }, { skip });
+  const overview = demo ? demoBacklinkOverview : realOverview;
+  const overviewLoading = !demo && realOverviewLoading;
+  const backlinks = demo ? demoBacklinks : realBacklinks;
+  const listLoading = !demo && realListLoading;
+  const actions = useBacklinkActions(workspaceId, siteId, demo);
   const { clearPageResult } = actions;
 
   useEffect(() => {

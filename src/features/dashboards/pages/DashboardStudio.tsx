@@ -6,6 +6,8 @@ import { EmptyState } from "@/shared/ui/EmptyState";
 import { HomeSkeleton } from "@/shared/ui/Skeletons";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoDashboards } from "@/features/demo/demoDashboards";
 import { useGetDashboardQuery } from "@/features/dashboards/api";
 import { useDashboardStudio } from "@/features/dashboards/hooks/useDashboardStudio";
 import { StudioTopBar } from "@/features/dashboards/components/studio/StudioTopBar";
@@ -24,10 +26,15 @@ export default function DashboardStudio() {
   const { canEdit } = usePermissions();
   const workspaceId = active?._id;
 
-  const { data: dashboard, isLoading, isError } = useGetDashboardQuery(
+  const { demo } = useDemo();
+  const { data: realDashboard, isLoading: studioLoading, isError: studioError } = useGetDashboardQuery(
     { workspaceId: workspaceId ?? "", id: id ?? "" },
     { skip: !workspaceId || !id }
   );
+  const sample = demo && id ? demoDashboards.find((d) => d.id === id) ?? demoDashboards[0] : null;
+  const dashboard = sample ?? realDashboard;
+  const isLoading = !sample && studioLoading;
+  const isError = !sample && studioError;
   const studio = useDashboardStudio(workspaceId, id ? dashboard : undefined);
   const kickedOff = useRef(false);
   useTitle(id ? `Edit ${dashboard?.name ?? "dashboard"} with Orbit` : "Build a dashboard with Orbit");

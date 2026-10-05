@@ -1,7 +1,10 @@
+import { useMemo } from "react";
 import { Alert, Text } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchBreakdown } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
 import { DeviceShareDonut } from "./DeviceShareDonut";
 import { DeviceComparison } from "./DeviceComparison";
@@ -19,7 +22,7 @@ export function SearchDevicesTab({
   days: number;
   type: SearchType;
 }) {
-  const { data, isLoading, error } = useGetSearchBreakdownQuery({
+  const real = useGetSearchBreakdownQuery({
     workspaceId,
     siteId,
     dimension: "device",
@@ -27,6 +30,12 @@ export function SearchDevicesTab({
     type,
     pageSize: 200,
   });
+
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo ? demoSearchBreakdown("device", days) : null), [demo, days]);
+  const data = sample ?? real.data;
+  const isLoading = sample ? false : real.isLoading;
+  const error = sample ? undefined : real.error;
 
   if (isLoading) return <DevicesSkeleton />;
   if (error || !data) {

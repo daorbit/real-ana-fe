@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader, Modal, Text } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { ArrowRight, CornerDownLeft, FileText, Search } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchBreakdown } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
 import { METRIC_BY_KEY, pagePath, propertyLabel, resolvePageUrl } from "../searchMetrics";
 import { PositionChip } from "./SearchCells";
@@ -44,10 +46,19 @@ export function PageFinderDialog({
   const slug = slugOf(propertyUrl, value);
   const [q] = useDebouncedValue(slug, 200);
 
-  const { data, isFetching } = useGetSearchBreakdownQuery(
+  const real = useGetSearchBreakdownQuery(
     { workspaceId, siteId, dimension: "page", days, type, page: 1, pageSize: 8, sort: "clicks", dir: "desc", q },
     { skip: !opened },
   );
+
+  const { demo } = useDemo();
+  const demoRows = useMemo(() => {
+    if (!demo || !opened) return null;
+    const rows = demoSearchBreakdown("page", days).rows.filter((r) => r.key.toLowerCase().includes(q.toLowerCase()));
+    return rows.slice(0, 8);
+  }, [demo, opened, days, q]);
+  const data = demoRows ? { rows: demoRows } : real.data;
+  const isFetching = demoRows ? false : real.isFetching;
 
   useEffect(() => {
     if (!opened) setValue("");

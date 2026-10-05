@@ -8,9 +8,10 @@ import {
 } from "../api";
 import type { PageCheckResult } from "../types";
 
-export function useBacklinkActions(workspaceId: string, siteId: string) {
+export function useBacklinkActions(workspaceId: string, siteId: string, demo = false) {
   const { user } = useAuth();
   const args = { workspaceId, siteId };
+  const blocked = () => notify.error("Turn off demo data to make changes.");
   const [discover, { isLoading: discovering }] = useDiscoverBacklinksMutation();
   const [recheckAll, { isLoading: recheckingAll }] = useRecheckBacklinksMutation();
   const [recheckOne] = useRecheckBacklinkMutation();
@@ -22,6 +23,7 @@ export function useBacklinkActions(workspaceId: string, siteId: string) {
   const [pageResult, setPageResult] = useState<PageCheckResult | null>(null);
 
   const findNew = async () => {
+    if (demo) return blocked();
     trace(user?.id, "discover_backlinks", "backlinks", "backlinks_discovered");
     try {
       const r = await discover(args).unwrap();
@@ -38,6 +40,7 @@ export function useBacklinkActions(workspaceId: string, siteId: string) {
   };
 
   const recheckEverything = async () => {
+    if (demo) return blocked();
     trace(user?.id, "recheck_backlinks", "backlinks", "backlinks_rechecked");
     try {
       const r = await recheckAll(args).unwrap();
@@ -51,6 +54,7 @@ export function useBacklinkActions(workspaceId: string, siteId: string) {
   };
 
   const recheck = async (backlinkId: string) => {
+    if (demo) return blocked();
     setRecheckingId(backlinkId);
     try {
       await recheckOne({ ...args, backlinkId }).unwrap();
@@ -62,6 +66,10 @@ export function useBacklinkActions(workspaceId: string, siteId: string) {
   };
 
   const add = async (url: string): Promise<boolean> => {
+    if (demo) {
+      blocked();
+      return false;
+    }
     trace(user?.id, "add_backlink", "backlinks", "backlink_added");
     try {
       const doc = await addLink({ ...args, url: url.trim() }).unwrap();
@@ -75,6 +83,10 @@ export function useBacklinkActions(workspaceId: string, siteId: string) {
   };
 
   const checkPage = async (url: string): Promise<boolean> => {
+    if (demo) {
+      blocked();
+      return false;
+    }
     trace(user?.id, "check_backlink_page", "backlinks", "backlink_page_checked");
     try {
       setPageResult(await checkPageMutation({ ...args, url: url.trim() }).unwrap());
@@ -86,6 +98,7 @@ export function useBacklinkActions(workspaceId: string, siteId: string) {
   };
 
   const importFromIndex = async () => {
+    if (demo) return blocked();
     trace(user?.id, "sync_backlink_index", "backlinks", "backlink_index_synced");
     try {
       const r = await syncIndex(args).unwrap();
@@ -101,6 +114,7 @@ export function useBacklinkActions(workspaceId: string, siteId: string) {
   };
 
   const remove = (backlinkId: string, domain: string) => {
+    if (demo) return blocked();
     confirmDelete({
       title: "Stop tracking backlink",
       body: `Stop tracking the link from ${domain}? It will reappear if visitors keep arriving from it.`,

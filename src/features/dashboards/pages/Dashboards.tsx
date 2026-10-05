@@ -10,6 +10,8 @@ import { ErrorState } from "@/shared/ui/ErrorState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoDashboards } from "@/features/demo/demoDashboards";
 import { useGetDashboardsQuery, useGetEmbedsQuery } from "@/features/dashboards/api";
 import { ViewSwitch } from "@/features/dashboards/components/home/ViewSwitch";
 import { DashboardLibrary } from "@/features/dashboards/components/home/DashboardLibrary";
@@ -34,16 +36,18 @@ export default function Dashboards() {
   const { canEdit } = usePermissions();
   const workspaceId = active?._id;
 
+  const { demo } = useDemo();
   const {
-    data: dashboards = [], isLoading: dashboardsLoading, isError: dashboardsFailed,
+    data: realDashboards = [], isLoading: dashboardsLoading, isError: dashboardsFailed,
     isFetching: dashboardsFetching, refetch: refetchDashboards,
   } = useGetDashboardsQuery(workspaceId ?? "", { skip: !workspaceId });
   const {
     data: embeds = [], isLoading: embedsLoading, isError: embedsFailed,
     isFetching: embedsFetching, refetch: refetchEmbeds,
   } = useGetEmbedsQuery(workspaceId ?? "", { skip: !workspaceId });
-  const isLoading = dashboardsLoading || embedsLoading;
-  const failed = (dashboardsFailed && dashboards.length === 0) || (embedsFailed && embeds.length === 0);
+  const dashboards = demo ? demoDashboards : realDashboards;
+  const isLoading = !demo && (dashboardsLoading || embedsLoading);
+  const failed = !demo && ((dashboardsFailed && dashboards.length === 0) || (embedsFailed && embeds.length === 0));
   const expectsList = useHasDashboardsHint(workspaceId, !isLoading, dashboards.length + embeds.length > 0);
   const [embedTarget, setEmbedTarget] = useState<EmbedTarget>(null);
   const navigate = useNavigate();

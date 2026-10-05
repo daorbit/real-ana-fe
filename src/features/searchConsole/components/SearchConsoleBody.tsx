@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert } from "@mantine/core";
 import { AlertTriangle } from "lucide-react";
 import { useGetSearchPerformanceQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchPerformance } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
 import {
   SEARCH_CONSOLE_TABS,
@@ -56,10 +58,16 @@ export function SearchConsoleBody({
   const explain = useSearchOrbitExplain({ workspaceId, siteId, days, type });
   const orbitChat = useSearchOrbitChat({ workspaceId, siteId, days, type });
 
-  const overview = useGetSearchPerformanceQuery(
+  const realOverview = useGetSearchPerformanceQuery(
     { workspaceId, siteId, days, type },
     { skip: tab !== "overview" },
   );
+
+  const { demo } = useDemo();
+  const demoOverview = useMemo(() => (demo ? demoSearchPerformance(days, type) : null), [demo, days, type]);
+  const overview = demoOverview
+    ? { data: demoOverview, isFetching: false, error: undefined }
+    : realOverview;
 
   const shared = { workspaceId, siteId, days, type };
   const hasQueries = typeHasQueries(type);

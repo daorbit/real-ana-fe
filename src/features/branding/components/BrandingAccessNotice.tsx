@@ -4,8 +4,16 @@ import { Lock, ShieldAlert } from "lucide-react";
 import type { BrandingForm } from "../hooks/useBrandingForm";
 
 export function BrandingAccessNotice({ form }: { form: BrandingForm }) {
-  const { data, editable, canAdmin, defaultName } = form;
+  const { data, editable, canAdmin, demo, defaultName } = form;
   if (!data) return null;
+
+  if (demo) {
+    return (
+      <Alert variant="light" color="gray" radius="md" icon={<ShieldAlert size={16} />}>
+        <Text size="sm">This is sample branding. Turn off demo data to change your own.</Text>
+      </Alert>
+    );
+  }
 
   if (!editable) {
     return (

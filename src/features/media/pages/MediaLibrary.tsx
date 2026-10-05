@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Group, Button, TextInput, Stack, Box,
   SegmentedControl, Pagination, ActionIcon, Tooltip,
@@ -18,6 +18,8 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoMediaResponse } from "@/features/demo/demoMedia";
 import { useTitle } from "@/shared/lib/useTitle";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "../components/MediaGrid";
@@ -46,7 +48,11 @@ const KIND_LABELS: Record<MediaKind | "all", string> = {
 export default function MediaLibraryPage() {
   useTitle("Media");
   const { active } = useWorkspace();
-  const { canEdit } = usePermissions();
+  const perms = usePermissions();
+  const { demo } = useDemo();
+  // Upload/rename/delete have no fixture behind them, so demo keeps the
+  // library browsable but read-only.
+  const canEdit = perms.canEdit && !demo;
   const workspaceId = active?._id ?? "";
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -61,7 +67,7 @@ export default function MediaLibraryPage() {
   /** What the floating tray is reporting. Cleared a moment after it settles. */
   const [tray, setTray] = useState<UploadItem[]>([]);
 
-  const { data, isLoading } = useGetMediaQuery(
+  const { data: queried, isLoading: queryLoading } = useGetMediaQuery(
     {
       workspaceId,
       q: debouncedQ || undefined,
@@ -69,8 +75,22 @@ export default function MediaLibraryPage() {
       page,
       perPage: PER_PAGE,
     },
-    { skip: !workspaceId },
+    { skip: !workspaceId || demo },
   );
+  const sample = useMemo(
+    () =>
+      demo
+        ? demoMediaResponse({
+            q: debouncedQ || undefined,
+            kind: filter === "all" ? undefined : filter,
+            page,
+            perPage: PER_PAGE,
+          })
+        : null,
+    [demo, debouncedQ, filter, page],
+  );
+  const data = sample ?? queried;
+  const isLoading = sample ? false : queryLoading;
 
   const [upload] = useUploadMediaMutation();
   const [update, { isLoading: renamingBusy }] = useUpdateMediaMutation();

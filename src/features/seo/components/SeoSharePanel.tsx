@@ -8,6 +8,8 @@ import { useGetSeoShareQuery, useSetSeoShareMutation } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
+import { useDemo } from "@/features/demo/context";
+import { demoSeoShare } from "@/features/demo/demoData";
 import { num, timeAgo } from "@/shared/lib";
 import { useSaveRegistration } from "@/shared/ui/SaveBar";
 import type { SeoSharePanels } from "@/shared/types";
@@ -68,7 +70,10 @@ export function SeoSharePanel({
   reportId: string;
 }) {
   const { user } = useAuth();
-  const { data, isLoading } = useGetSeoShareQuery({ workspaceId, siteId, reportId });
+  const { demo } = useDemo();
+  const { data: realData, isLoading: realLoading } = useGetSeoShareQuery({ workspaceId, siteId, reportId });
+  const data = demo ? demoSeoShare : realData;
+  const isLoading = !demo && realLoading;
   const [setShare] = useSetSeoShareMutation();
   // The mutation's own `isLoading` is shared across every call it makes, so a
   // panel-save would light up the link toggle and New-link spinners too. Track
@@ -97,6 +102,10 @@ export function SeoSharePanel({
 
   const savePanels = async () => {
     if (!draft) return;
+    if (demo) {
+      notify.error("Turn off demo data to change what's shared.");
+      return;
+    }
     trace(user?.id, "save_seo_share_panels", "seo_share", "seo_share");
     try {
       await setShare({ workspaceId, siteId, reportId, enabled, panels: draft }).unwrap();
@@ -114,6 +123,10 @@ export function SeoSharePanel({
   });
 
   const toggle = async (next: boolean) => {
+    if (demo) {
+      notify.error("Turn off demo data to change sharing.");
+      return;
+    }
     trace(user?.id, next ? "enable_seo_share_link" : "disable_seo_share_link", "seo_share", "seo_share");
     setLinkBusy(true);
     try {
@@ -129,7 +142,11 @@ export function SeoSharePanel({
     }
   };
 
-  const rotate = () =>
+  const rotate = () => {
+    if (demo) {
+      notify.error("Turn off demo data to generate a new link.");
+      return;
+    }
     confirmDelete({
       title: "Generate a new link?",
       confirmLabel: "Generate new link",
@@ -147,6 +164,7 @@ export function SeoSharePanel({
         }
       },
     });
+  };
 
   if (isLoading) {
     return (
@@ -178,7 +196,7 @@ export function SeoSharePanel({
             checked={enabled}
             onChange={(e) => toggle(e.currentTarget.checked)}
             color="emerald"
-            disabled={linkBusy}
+            disabled={linkBusy || demo}
             aria-label="Enable public link"
           />
         </Group>

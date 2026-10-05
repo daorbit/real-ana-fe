@@ -1,7 +1,10 @@
+import { useMemo } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { SerializedError } from "@reduxjs/toolkit";
 import { useGetSearchInsightsQuery, useGetSearchPerformanceQuery } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import { demoSearchInsights, demoSearchPerformance } from "@/features/demo/demoSearchConsole";
 import type { SearchSource } from "@/features/searchConsole/widgets/useSearchWidgetSource";
 
 export type SearchFailure = { kind: "upgrade" | "error"; message: string };
@@ -21,11 +24,23 @@ function argsOf(source: SearchSource) {
 }
 
 export function useSearchPerformanceData(source: SearchSource) {
-  const { data, isLoading, isFetching, error, refetch } = useGetSearchPerformanceQuery(argsOf(source));
-  return { data, loading: isLoading || (isFetching && !data), failure: failureOf(error), retry: refetch };
+  const { data: realData, isLoading, isFetching, error, refetch } = useGetSearchPerformanceQuery(argsOf(source));
+  const { demo } = useDemo();
+  const sample = useMemo(
+    () => (demo && source.kind === "ready" ? demoSearchPerformance(source.days) : null),
+    [demo, source],
+  );
+  const data = sample ?? realData;
+  return { data, loading: !sample && (isLoading || (isFetching && !data)), failure: sample ? null : failureOf(error), retry: refetch };
 }
 
 export function useSearchInsightsData(source: SearchSource) {
-  const { data, isLoading, isFetching, error, refetch } = useGetSearchInsightsQuery(argsOf(source));
-  return { data, loading: isLoading || (isFetching && !data), failure: failureOf(error), retry: refetch };
+  const { data: realData, isLoading, isFetching, error, refetch } = useGetSearchInsightsQuery(argsOf(source));
+  const { demo } = useDemo();
+  const sample = useMemo(
+    () => (demo && source.kind === "ready" ? demoSearchInsights(source.days) : null),
+    [demo, source],
+  );
+  const data = sample ?? realData;
+  return { data, loading: !sample && (isLoading || (isFetching && !data)), failure: sample ? null : failureOf(error), retry: refetch };
 }

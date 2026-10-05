@@ -7,7 +7,9 @@ import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 
-export function useCompetitorActions(workspaceId: string, siteId: string, domain: string | undefined) {
+export function useCompetitorActions(
+  workspaceId: string, siteId: string, domain: string | undefined, demo = false,
+) {
   const { user } = useAuth();
   const [addCompetitor, { isLoading: adding }] = useAddCompetitorMutation();
   const [refreshCompetitor] = useRefreshCompetitorMutation();
@@ -17,6 +19,10 @@ export function useCompetitorActions(workspaceId: string, siteId: string, domain
   const site = domain ?? "your site";
 
   const add = async (url: string): Promise<boolean> => {
+    if (demo) {
+      notify.error("Turn off demo data to add a competitor.");
+      return false;
+    }
     const trimmed = url.trim();
     if (!trimmed) return false;
     trace(user?.id, "add_competitor", "compare", "competitor_added");
@@ -31,6 +37,10 @@ export function useCompetitorActions(workspaceId: string, siteId: string, domain
   };
 
   const refreshOne = async (competitorId: string) => {
+    if (demo) {
+      notify.error("Turn off demo data to refresh a competitor.");
+      return;
+    }
     trace(user?.id, "refresh_competitor", "compare", "competitor_analysis");
     setRefreshingId(competitorId);
     try {
@@ -43,6 +53,10 @@ export function useCompetitorActions(workspaceId: string, siteId: string, domain
   };
 
   const refreshEveryone = async () => {
+    if (demo) {
+      notify.error("Turn off demo data to refresh competitors.");
+      return;
+    }
     trace(user?.id, "refresh_all_competitors", "compare", "competitor_analysis");
     try {
       const result = await refreshAll({ workspaceId, siteId }).unwrap();
@@ -58,6 +72,10 @@ export function useCompetitorActions(workspaceId: string, siteId: string, domain
   };
 
   const remove = (competitorId: string, label: string) => {
+    if (demo) {
+      notify.error("Turn off demo data to remove a competitor.");
+      return;
+    }
     confirmDelete({
       title: "Remove competitor",
       body: `Stop tracking ${label}? Their recorded score history goes too.`,

@@ -9,7 +9,10 @@ import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
 import { DELIVERY_WINDOW_MINUTES, describe, runAtISO, type Draft } from "../components/draft";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
+import { useDemo } from "@/features/demo/context";
 import type { ScheduledPost } from "@/shared/types";
+
+const DEMO_READ_ONLY = "Demo data is read-only. Turn off demo mode to make changes.";
 
 /**
  * Everything that changes a scheduled post, with the confirmations and messages
@@ -33,6 +36,7 @@ export function usePostActions({
   onMoved: (id: string) => void;
 }) {
   const { user } = useAuth();
+  const { demo } = useDemo();
   const [create, { isLoading: creating }] = useCreateScheduledPostMutation();
   const [update, { isLoading: updating }] = useUpdateScheduledPostMutation();
   const [remove] = useDeleteScheduledPostMutation();
@@ -41,6 +45,10 @@ export function usePostActions({
   const [publishingId, setPublishingId] = useState<string | null>(null);
 
   const save = async (draft: Draft, asDraft = false): Promise<boolean> => {
+    if (demo) {
+      notify.error(DEMO_READ_ONLY);
+      return false;
+    }
     trace(
       user?.id,
       editing ? "update_post" : asDraft ? "save_draft" : "create_post",
@@ -136,6 +144,10 @@ export function usePostActions({
   };
 
   const toggle = async (post: ScheduledPost) => {
+    if (demo) {
+      notify.error(DEMO_READ_ONLY);
+      return;
+    }
     const next = post.status === "active" ? "paused" : "active";
     trace(user?.id, next === "active" ? "resume_post" : "pause_post", "posts_list", next);
     try {
@@ -155,6 +167,10 @@ export function usePostActions({
    * otherwise "post now" reads like it might consume the next run.
    */
   const publishNow = (post: ScheduledPost) => {
+    if (demo) {
+      notify.error(DEMO_READ_ONLY);
+      return;
+    }
     // Named from the post rather than fixed: this dialog is the last thing read
     // before something goes out publicly, and naming the wrong network there is
     // the one place a mistake cannot be taken back.
@@ -193,6 +209,10 @@ export function usePostActions({
    * row is visible before it is acted on.
    */
   const destroy = (post: ScheduledPost) => {
+    if (demo) {
+      notify.error(DEMO_READ_ONLY);
+      return;
+    }
     confirmDelete({
       title: "Delete this post?",
       body: (

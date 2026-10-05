@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  Alert, Button, Group, Loader, Menu, Paper, Stack, Text,
+  Alert, Button, Group, Loader, Menu, Paper, Stack, Text, Tooltip,
 } from "@mantine/core";
 import { AlertTriangle, MoreVertical, RefreshCw, Star, Unlink } from "lucide-react";
 import { modals } from "@mantine/modals";
@@ -9,6 +9,8 @@ import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoGoogleReviewsStatus, demoGoogleReviewsList } from "@/features/demo/demoReviews";
 import { useTitle } from "@/shared/lib/useTitle";
 import { notify, notifyError, errMessage } from "@/shared/lib/notify";
 import {
@@ -39,17 +41,25 @@ export default function Reviews() {
   const { canAdmin } = usePermissions();
   const workspaceId = active?._id ?? "";
 
-  const { data: status, isLoading, refetch } = useGetGoogleReviewsStatusQuery(workspaceId, {
+  const { demo } = useDemo();
+
+  const { data: realStatus, isLoading: realStatusLoading, refetch } = useGetGoogleReviewsStatusQuery(workspaceId, {
     skip: !workspaceId,
   });
+  const demoStatus = useMemo(() => (demo ? demoGoogleReviewsStatus() : null), [demo]);
+  const status = demoStatus ?? realStatus;
+  const isLoading = demoStatus ? false : realStatusLoading;
 
   const connected = !!status?.connected;
   const hasLocations = !!status?.locations.length;
 
-  const { data: reviewData, isLoading: reviewsLoading } = useGetGoogleReviewsQuery(
+  const { data: realReviewData, isLoading: realReviewsLoading } = useGetGoogleReviewsQuery(
     { workspaceId },
-    { skip: !workspaceId || !hasLocations },
+    { skip: !workspaceId || !hasLocations || demo },
   );
+  const demoReviewData = useMemo(() => (demo ? demoGoogleReviewsList() : null), [demo]);
+  const reviewData = demoReviewData ?? realReviewData;
+  const reviewsLoading = demoReviewData ? false : realReviewsLoading;
 
   // Only fetched at the one moment it is needed: after authorising, before a
   // business has been picked. It is a live Google call, so asking for it on
@@ -71,6 +81,10 @@ export default function Reviews() {
   const { connect, connecting } = useGoogleConnect(workspaceId, refetch);
 
   const handleSync = async (locationId: string) => {
+    if (demo) {
+      notify.error("Demo data is read-only. Turn off demo mode to sync reviews.");
+      return;
+    }
     setSyncingId(locationId);
     try {
       const result = await syncLocation({ workspaceId, locationId }).unwrap();
@@ -87,6 +101,10 @@ export default function Reviews() {
   };
 
   const handleDisconnect = () => {
+    if (demo) {
+      notify.error("Demo data is read-only. Turn off demo mode to disconnect Google.");
+      return;
+    }
     modals.openConfirmModal({
       title: "Disconnect Google",
       // Says plainly that the cached reviews go too. Someone who expects a
@@ -139,6 +157,7 @@ export default function Reviews() {
                 <Menu.Item
                   color="red"
                   leftSection={<Unlink size={14} />}
+                  disabled={demo}
                   onClick={handleDisconnect}
                 >
                   Disconnect Google
@@ -254,15 +273,18 @@ export default function Reviews() {
                     </Stack>
 
                     {canAdmin && (
-                      <Button
-                        variant="light"
-                        size="xs"
-                        leftSection={<RefreshCw size={14} />}
-                        loading={syncing && syncingId === location.id}
-                        onClick={() => handleSync(location.id)}
-                      >
-                        Sync reviews
-                      </Button>
+                      <Tooltip label="Demo data is read-only" disabled={!demo} withArrow>
+                        <Button
+                          variant="light"
+                          size="xs"
+                          leftSection={<RefreshCw size={14} />}
+                          loading={syncing && syncingId === location.id}
+                          disabled={demo}
+                          onClick={() => handleSync(location.id)}
+                        >
+                          Sync reviews
+                        </Button>
+                      </Tooltip>
                     )}
                   </Group>
                 </Paper>

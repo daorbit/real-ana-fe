@@ -1,7 +1,19 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { useIsPlatformAdmin } from "@/features/auth/context";
 
 const KEY = "quantalog_demo_data";
+
+/**
+ * Routes that must never show demo data, even for an admin with the toggle on.
+ * Billing shows this account's real plan, usage, and invoices — faking it could
+ * make an admin misjudge their own billing state.
+ */
+export const DEMO_EXCLUDED_ROUTES = ["/app/billing"];
+
+function isExcludedRoute(pathname: string): boolean {
+  return DEMO_EXCLUDED_ROUTES.some((route) => pathname.startsWith(route));
+}
 
 type DemoValue = {
   /** Demo data is being shown in place of the workspace's real numbers. */
@@ -39,9 +51,15 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     else sessionStorage.removeItem(KEY);
   }, []);
 
-  // Gate the value, not just the control: losing admin mid-session must drop
-  // back to real data rather than leave stale sample numbers on screen.
-  const demo = available && on;
+  // Re-derived on every route change: a route-based gate that only checked on
+  // mount would keep showing demo data after navigating into Billing from a
+  // page where the toggle was already on.
+  const { pathname } = useLocation();
+
+  // Gate the value, not just the control: losing admin mid-session, or
+  // landing on an excluded route, must drop back to real data rather than
+  // leave stale sample numbers on screen.
+  const demo = available && on && !isExcludedRoute(pathname);
 
   const value = useMemo(() => ({ demo, available, toggle }), [demo, available, toggle]);
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal, TextInput, Group, Button, Stack, Text, Center,
   SegmentedControl, Pagination, Box,
@@ -7,6 +7,8 @@ import { Search, ImageOff, Upload } from "lucide-react";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useGetMediaQuery, useUploadMediaMutation } from "@/app/store";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoMediaResponse } from "@/features/demo/demoMedia";
 import { notify, errMessage } from "@/shared/lib/notify";
 import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "./MediaGrid";
@@ -44,7 +46,11 @@ export function MediaPickerModal({
   title = "Choose a file",
 }: Props) {
   const { active } = useWorkspace();
-  const { canEdit } = usePermissions();
+  const perms = usePermissions();
+  const { demo } = useDemo();
+  // Nothing uploaded through the picker in demo mode would belong to a real
+  // workspace, so picking stays read-only over the sample library.
+  const canEdit = perms.canEdit && !demo;
   const workspaceId = active?._id ?? "";
   const fileInput = useRef<HTMLInputElement>(null);
   const [upload] = useUploadMediaMutation();
@@ -75,7 +81,7 @@ export function MediaPickerModal({
     setPage(1);
   }, [filter, debouncedQ]);
 
-  const { data, isFetching } = useGetMediaQuery(
+  const { data: queried, isFetching: queryFetching } = useGetMediaQuery(
     {
       workspaceId,
       q: debouncedQ || undefined,
@@ -83,8 +89,22 @@ export function MediaPickerModal({
       page,
       perPage: PER_PAGE,
     },
-    { skip: !workspaceId || !opened },
+    { skip: !workspaceId || !opened || demo },
   );
+  const sample = useMemo(
+    () =>
+      demo
+        ? demoMediaResponse({
+            q: debouncedQ || undefined,
+            kind: filter === "all" ? undefined : filter,
+            page,
+            perPage: PER_PAGE,
+          })
+        : null,
+    [demo, debouncedQ, filter, page],
+  );
+  const data = sample ?? queried;
+  const isFetching = sample ? false : queryFetching;
 
   const items = data?.items ?? [];
   const pages = data ? Math.max(1, Math.ceil(data.total / data.perPage)) : 1;

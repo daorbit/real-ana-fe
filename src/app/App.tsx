@@ -231,8 +231,8 @@ export default function App() {
   return (
     <ErrorBoundary variant="app">
       <AuthProvider>
-        <DemoProvider>
-          <BrowserRouter>
+        <BrowserRouter>
+          <DemoProvider>
             <SelfTracking />
             <NavigationCapture />
             <FocusOnRouteChange />
@@ -293,8 +293,8 @@ export default function App() {
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </DemoProvider>
+          </DemoProvider>
+        </BrowserRouter>
       </AuthProvider>
     </ErrorBoundary>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Text, Group, TextInput, Badge, Stack, Pagination, ThemeIcon,
@@ -12,6 +12,8 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoJourneyUsers } from "@/features/demo/demoJourney";
 import { timeAgo } from "@/shared/lib";
 import { useTitle } from "@/shared/lib/useTitle";
 import classes from "./Journey.module.css";
@@ -37,10 +39,16 @@ export default function Journey() {
 
   useEffect(() => setPage(1), [q, sort, filter]);
 
-  const { data, isFetching, refetch } = useGetJourneyUsersQuery(
+  const { data: realData, isFetching, refetch } = useGetJourneyUsersQuery(
     { wid: active?._id ?? "", q: q || undefined, page, sort, filter },
     { skip: !active },
   );
+
+  const { demo } = useDemo();
+  const sample = useMemo(() => (demo ? demoJourneyUsers() : null), [demo]);
+  const data = sample ?? realData;
+  const loading = sample ? false : isFetching;
+
   const users = data?.users ?? [];
   const total = data?.total ?? 0;
   const summary = data?.summary;
@@ -62,7 +70,7 @@ export default function Journey() {
                 onClick={() => refetch()}
                 aria-label="Refresh"
               >
-                <RotateCw size={16} className={isFetching ? "spin" : undefined} />
+                <RotateCw size={16} className={loading ? "spin" : undefined} />
               </ActionIcon>
             </Tooltip>
             <PageHelpButton />
@@ -125,7 +133,7 @@ export default function Journey() {
         </Group>
       </Group>
 
-      {isFetching ? (
+      {loading ? (
         <Stack gap="sm">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} height={68} radius="sm" />

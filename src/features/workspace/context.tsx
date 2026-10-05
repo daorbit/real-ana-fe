@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useGetWorkspacesQuery } from "@/app/store";
+import { useDemo } from "@/features/demo/context";
+import { demoWorkspaces } from "@/features/demo/demoData";
 import { ROLE_RANK, type Workspace, type QuotaSummary } from "@/shared/types";
 
 /**
@@ -38,7 +40,8 @@ const Ctx = createContext<WsState | null>(null);
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Cached by RTK Query — the list is fetched once and reused across pages.
   const { data, isLoading, isError, refetch } = useGetWorkspacesQuery();
-  const workspaces = data ?? EMPTY;
+  const { demo } = useDemo();
+  const workspaces = demo ? demoWorkspaces : data ?? EMPTY;
 
   const [activeId, setActiveId] = useState<string | null>(() =>
     localStorage.getItem(ACTIVE_KEY)
@@ -62,7 +65,16 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const active = workspaces.find((w) => w._id === activeId) ?? null;
 
   return (
-    <Ctx.Provider value={{ workspaces, active, loading: isLoading, fetchFailed: isError, setActive, refresh }}>
+    <Ctx.Provider
+      value={{
+        workspaces,
+        active,
+        loading: demo ? false : isLoading,
+        fetchFailed: demo ? false : isError,
+        setActive,
+        refresh,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

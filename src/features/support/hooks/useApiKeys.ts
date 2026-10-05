@@ -6,6 +6,8 @@ import {
   useRevokeApiKeyMutation,
 } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
+import { useDemo } from "@/features/demo/context";
+import { demoApiKeys } from "@/features/demo/demoData";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import type { ApiKey } from "@/shared/types";
@@ -13,18 +15,26 @@ import type { ApiKey } from "@/shared/types";
 export function useApiKeys(workspaceId: string) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { demo } = useDemo();
   const {
-    currentData: keys = [],
-    isLoading,
-    isError,
+    currentData: realKeys = [],
+    isLoading: realLoading,
+    isError: realError,
     isFetching,
     refetch,
   } = useGetApiKeysQuery(workspaceId, { skip: !workspaceId });
+  const keys = demo ? demoApiKeys : realKeys;
+  const isLoading = !demo && realLoading;
+  const isError = !demo && realError;
   const [createMutation, { isLoading: creating }] = useCreateApiKeyMutation();
   const [renameMutation, { isLoading: renaming }] = useRenameApiKeyMutation();
   const [revokeMutation] = useRevokeApiKeyMutation();
 
   const create = async (name: string, expiresInDays: number | null): Promise<ApiKey | null> => {
+    if (demo) {
+      notify.error("Turn off demo data to create a key.");
+      return null;
+    }
     trace(user?.id, "api_key_created", "developers", "api_key");
     try {
       return await createMutation({
@@ -39,6 +49,10 @@ export function useApiKeys(workspaceId: string) {
   };
 
   const rename = async (key: ApiKey, name: string): Promise<boolean> => {
+    if (demo) {
+      notify.error("Turn off demo data to rename a key.");
+      return false;
+    }
     try {
       await renameMutation({ workspaceId, keyId: key.id, name: name.trim() }).unwrap();
       notify.success(t("developers.renamedToast"));
@@ -50,6 +64,10 @@ export function useApiKeys(workspaceId: string) {
   };
 
   const revoke = (key: ApiKey) => {
+    if (demo) {
+      notify.error("Turn off demo data to revoke a key.");
+      return;
+    }
     confirmDelete({
       title: t("developers.revokeTitle", { name: key.name }),
       body: t("developers.revokeBody"),

@@ -1,17 +1,30 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useGetBrandingQuery, useUpdateBrandingMutation } from "@/app/store";
 import { usePermissions } from "@/features/workspace/context";
+import { useDemo } from "@/features/demo/context";
+import { demoBranding } from "@/features/demo/demoBranding";
 import { useUnsavedGuard, useEscapeDiscard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { FALLBACK_BRAND_NAME, FALLBACK_POWERED_BY } from "../constants";
 
 export function useBrandingForm(workspaceId: string) {
   const { canAdmin } = usePermissions();
-  const { data, isLoading, isError, isFetching, refetch } = useGetBrandingQuery(workspaceId, {
-    skip: !workspaceId,
-  });
-  const [save, { isLoading: saving }] = useUpdateBrandingMutation();
+  const { demo } = useDemo();
+  const {
+    data: queried,
+    isLoading: queryLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useGetBrandingQuery(workspaceId, { skip: !workspaceId || demo });
+  const sample = useMemo(() => (demo ? demoBranding : null), [demo]);
+  const data = sample ?? queried;
+  const isLoading = sample ? false : queryLoading;
+  const [save, { isLoading: savingMutation }] = useUpdateBrandingMutation();
+  // Nothing to save against in demo — the form stays interactive so the
+  // product can be shown, but the submit path is cut off before the network.
+  const saving = demo ? false : savingMutation;
 
   const [name, setName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
@@ -33,7 +46,7 @@ export function useBrandingForm(workspaceId: string) {
   useEffect(() => setLogoBroken(false), [logoUrl]);
 
   const editable = Boolean(data?.editable);
-  const locked = !editable || !canAdmin;
+  const locked = !editable || !canAdmin || demo;
 
   const dirty =
     !!data &&
@@ -74,6 +87,7 @@ export function useBrandingForm(workspaceId: string) {
     saving,
     editable,
     canAdmin,
+    demo,
     locked,
     dirty,
     reset,
