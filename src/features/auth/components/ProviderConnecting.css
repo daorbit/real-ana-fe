@@ -1,0 +1,114 @@
+.provider-connecting {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  animation: provider-connecting-fade 220ms ease both;
+}
+
+.provider-connecting__card {
+  width: min(360px, 100%);
+  padding: 32px 28px 28px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: provider-connecting-in 420ms cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.provider-connecting__marks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.provider-connecting__tile {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.provider-connecting__tile img {
+  display: block;
+  border-radius: 6px;
+}
+
+.provider-connecting__link {
+  display: flex;
+  gap: 5px;
+}
+
+.provider-connecting__link span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: provider-connecting-dot 1.2s ease-in-out infinite;
+}
+
+.provider-connecting__link span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.provider-connecting__link span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.provider-connecting__title {
+  margin: 22px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.provider-connecting__detail {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+@keyframes provider-connecting-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes provider-connecting-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+
+@keyframes provider-connecting-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+    background: var(--text);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .provider-connecting,
+  .provider-connecting__card,
+  .provider-connecting__link span {
+    animation: none;
+  }
+}

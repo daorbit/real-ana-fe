@@ -1,8 +1,7 @@
 import { Button } from "@mantine/core";
 import { LinkedInMark } from "@/shared/ui/LinkedInMark";
 import { useOAuthLoginReturn } from "@/features/auth/useOAuthLoginReturn";
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+import { OAUTH_START_URL } from "@/features/auth/oauthStart";
 
 export function LinkedInSignInButton({
   label = "Continue with LinkedIn",
@@ -31,7 +30,7 @@ export function LinkedInSignInButton({
       leftSection={<LinkedInMark />}
       onClick={() => {
         setBusy(true);
-        window.location.href = `${API_BASE}/api/auth/linkedin?mode=login`;
+        window.location.href = OAUTH_START_URL.linkedin;
       }}
     >
       {label}

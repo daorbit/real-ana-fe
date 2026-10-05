@@ -12,6 +12,9 @@ import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
 import GitHubSignInButton from "@/features/auth/components/GitHubSignInButton";
+import { ProviderConnecting } from "@/features/auth/components/ProviderConnecting";
+import { useProviderAutostart } from "@/features/auth/useProviderAutostart";
+import { GoogleMark } from "@/shared/ui/GoogleMark";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { VerifyEmailStep } from "@/features/auth/components/VerifyEmailStep";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
@@ -30,6 +33,7 @@ export default function Signup() {
   const { signup, startDemo, verifyTotp } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
+  const autoProvider = useProviderAutostart();
 
   // Carries the currency picked on the landing page's pricing toggle through
   // to Billing, which reads the same storage key — so switching to USD there
@@ -190,10 +194,17 @@ export default function Signup() {
             {/* The providers come first, and by a wider margin than on login:
                 they skip five fields *and* the emailed code, because the
                 address is already verified. Paired in a row, as on login. */}
+            {autoProvider === "google" && (
+              <Alert color="gray" variant="light" icon={<GoogleMark size={16} />}>
+                Pick your Google account in the prompt to continue, or tap Google below.
+              </Alert>
+            )}
+
             <div className="auth-providers">
               <GoogleSignInButton
                 label="Google"
                 text="signup_with"
+                oneTap={autoProvider === "google"}
                 onBusyChange={setGoogleBusy}
                 onSuccess={(created) => {
                   if (created) {
@@ -311,6 +322,8 @@ export default function Signup() {
         onSubmit={submitTotp}
         onCancel={() => setPending2faToken(null)}
       />
+
+      {autoProvider && autoProvider !== "google" && <ProviderConnecting provider={autoProvider} />}
     </div>
   );
 }
