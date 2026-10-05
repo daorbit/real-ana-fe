@@ -32,7 +32,7 @@ export default function Signup() {
   const { signup, startDemo, verifyTotp } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
-  const autoProvider = useProviderAutostart();
+  const { provider: autoProvider, mode: autostartMode } = useProviderAutostart();
 
   // Carries the currency picked on the landing page's pricing toggle through
   // to Billing, which reads the same storage key — so switching to USD there
@@ -197,6 +197,7 @@ export default function Signup() {
               <GoogleSignInButton
                 label="Google"
                 text="signup_with"
+                oneTap={autoProvider === "google" && autostartMode === "prompt"}
                 onBusyChange={setGoogleBusy}
                 onSuccess={(created) => {
                   if (created) {
@@ -315,7 +316,7 @@ export default function Signup() {
         onCancel={() => setPending2faToken(null)}
       />
 
-      {autoProvider && <ProviderConnecting provider={autoProvider} />}
+      {autoProvider && autostartMode === "redirect" && <ProviderConnecting provider={autoProvider} />}
     </div>
   );
 }

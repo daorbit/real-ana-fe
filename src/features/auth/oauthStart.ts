@@ -8,6 +8,8 @@ export const OAUTH_START_URL: Record<AutoProvider, string> = {
   linkedin: `${API_BASE}/api/auth/linkedin?mode=login`,
 };
 
+export const GOOGLE_REDIRECT_CONFIG_URL = `${API_BASE}/api/auth/google-oauth/config`;
+
 export const PROVIDER_LABEL: Record<AutoProvider, string> = {
   google: "Google",
   linkedin: "LinkedIn",
