@@ -66,3 +66,22 @@ export function prefetchRoute(to: string): Promise<void> {
   pending.set(path, promise);
   return promise;
 }
+
+export function prefetchAllRoutes(): () => void {
+  const paths = Object.keys(importers);
+  let cancelled = false;
+  let timer = 0;
+  const next = () => {
+    if (cancelled) return;
+    const path = paths.shift();
+    if (!path) return;
+    void prefetchRoute(path).finally(() => {
+      timer = window.setTimeout(next, 50);
+    });
+  };
+  timer = window.setTimeout(next, 1500);
+  return () => {
+    cancelled = true;
+    window.clearTimeout(timer);
+  };
+}

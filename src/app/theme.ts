@@ -40,10 +40,9 @@ export const theme = createTheme({
       "#ecfdf5", "#d1fae5", "#a7f3d0", "#6ee7b7", "#34d399",
       "#10b981", "#059669", "#047857", "#065f46", "#064e3b",
     ],
-    // neutral dark surfaces (no purple cast)
     dark: [
-      "#c9ced6", "#a8aeb8", "#8b929e", "#5f6673", "#3a3f4a",
-      "#2b2f38", "#22252c", "#1a1c22", "#131519", "#0b0c0f",
+      "#c9c9c9", "#a8a8a8", "#8a8a8a", "#5e5e5e", "#2c2c2c",
+      "#242424", "#1c1c1c", "#161616", "#0f0f0f", "#0a0a0a",
     ],
   },
   shadows: {
