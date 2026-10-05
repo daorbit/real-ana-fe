@@ -3,13 +3,14 @@ import { Lock } from "lucide-react";
 import { GitHubMark } from "@/shared/ui/GitHubMark";
 import { LinkedInMark } from "@/shared/ui/LinkedInMark";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
+import { Wordmark } from "@/shared/ui/Brand";
 import { PROVIDER_LABEL, type AutoProvider } from "@/features/auth/oauthStart";
 import "./ProviderConnecting.css";
 
 const MARKS: Record<AutoProvider, ReactNode> = {
-  google: <GoogleMark size={28} />,
-  github: <GitHubMark size={28} />,
-  linkedin: <LinkedInMark size={28} />,
+  google: <GoogleMark size={34} />,
+  github: <GitHubMark size={34} />,
+  linkedin: <LinkedInMark size={34} />,
 };
 
 export function ProviderConnecting({ provider }: { provider: AutoProvider }) {
@@ -17,24 +18,37 @@ export function ProviderConnecting({ provider }: { provider: AutoProvider }) {
 
   return (
     <div className="provider-connecting" role="status" aria-live="polite">
-      <div className="provider-connecting__card">
-        <div className="provider-connecting__mark" aria-hidden>
-          <span className="provider-connecting__ring" />
-          <span className="provider-connecting__logo">{MARKS[provider]}</span>
+      <div className="provider-connecting__brand">
+        <Wordmark />
+      </div>
+
+      <div className="provider-connecting__stage">
+        <div className="provider-connecting__pair" aria-hidden>
+          <span className="provider-connecting__tile provider-connecting__tile--app">
+            <img src="/favicon.png" alt="" width={36} height={36} />
+          </span>
+
+          <span className="provider-connecting__link">
+            <span className="provider-connecting__track" />
+            <span className="provider-connecting__beam" />
+            <span className="provider-connecting__dot" />
+          </span>
+
+          <span className="provider-connecting__tile provider-connecting__tile--provider">
+            {MARKS[provider]}
+          </span>
         </div>
 
-        <p className="provider-connecting__title">Continuing with {label}</p>
+        <h1 className="provider-connecting__title">Connecting to {label}</h1>
         <p className="provider-connecting__detail">
-          Redirecting you to {label} to finish signing in. This only takes a moment.
+          Hang tight. We're taking you to {label} to sign in.
         </p>
-
-        <p className="provider-connecting__secure">
-          <Lock size={12} strokeWidth={2.2} />
-          Secure sign-in. We never see your {label} password.
-        </p>
-
-        <span className="provider-connecting__progress" aria-hidden />
       </div>
+
+      <p className="provider-connecting__secure">
+        <Lock size={12} strokeWidth={2.2} />
+        Secure sign-in. Your {label} password never reaches Quantalog.
+      </p>
     </div>
   );
 }
