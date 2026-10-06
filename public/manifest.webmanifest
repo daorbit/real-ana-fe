@@ -1,0 +1,13 @@
+{
+  "name": "Quantalog",
+  "short_name": "Quantalog",
+  "description": "Analytics, leads, reviews and social in one workspace.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0c0e",
+  "theme_color": "#0b0c0e",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

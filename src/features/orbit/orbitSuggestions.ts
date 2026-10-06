@@ -46,6 +46,8 @@ export const ORBIT_SUGGESTION_POOL = [
   "How do I check my site's Core Web Vitals?",
   "How do I add competitors to track?",
   "How do we beat a competitor's traffic?",
+  "Do I have reviews that need a reply?",
+  "How are my Google reviews doing?",
   "How do I change my account password?",
   "How do I update my email address?",
   "How do I enable two-factor authentication?",
