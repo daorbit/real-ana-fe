@@ -57,7 +57,7 @@ export function AccountMenu({
       data-expanded={opened || undefined}
       aria-label={collapsed ? name || "Account" : undefined}
     >
-      <UserAvatar src={avatarUrl} color="emerald" radius="md" size={collapsed ? "sm" : 34}>
+      <UserAvatar src={avatarUrl} color="emerald" radius="md" size={collapsed ? 30 : 34}>
         {initials}
       </UserAvatar>
       {!collapsed && (

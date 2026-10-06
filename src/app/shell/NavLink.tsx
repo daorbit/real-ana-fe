@@ -53,18 +53,9 @@ export function NavLink({
       // keyboard lands on the row, so it is ready by the time it is clicked.
       onMouseEnter={() => void prefetchRoute(to)}
       onFocus={() => void prefetchRoute(to)}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        width: "100%",
-        padding: "5px 8px",
-        marginBottom: 2,
-        justifyContent: collapsed ? "center" : undefined,
-      }}
     >
       <span className="nav-link-icon">
-        <Icon size={15} style={{ flexShrink: 0 }} />
+        <Icon size={collapsed ? 18 : 15} />
       </span>
       {!collapsed && (
         <Text fz={13} fw={active ? 600 : 450} lh={1.4} truncate>
@@ -118,17 +109,10 @@ export function NavAction({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
-        padding: "8px 10px",
-        marginBottom: mb,
-        color: color ?? "var(--text-2)",
-      }}
+      c={color ?? "var(--text-2)"}
+      mb={mb}
     >
-      <Icon size={17} />
+      <Icon size={18} />
     </UnstyledButton>
   );
 

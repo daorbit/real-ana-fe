@@ -18,7 +18,59 @@
 }
 
 .foot[data-collapsed] {
-  align-items: stretch;
+  align-items: center;
+  gap: 4px;
+  padding-top: 12px;
+}
+
+.foot[data-collapsed]::before {
+  left: 50%;
+  right: auto;
+  width: 20px;
+  transform: translateX(-50%);
+  background: var(--border);
+}
+
+.brandToggle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  transition: background-color 150ms ease;
+}
+
+.brandToggle:hover,
+.brandToggle:focus-visible {
+  background: var(--surface-2);
+}
+
+.brandMark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  transition: opacity 150ms ease;
+}
+
+.brandExpand {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.brandToggle:hover .brandMark,
+.brandToggle:focus-visible .brandMark {
+  opacity: 0;
+}
+
+.brandToggle:hover .brandExpand,
+.brandToggle:focus-visible .brandExpand {
+  opacity: 1;
 }
 
 .orbit {
@@ -39,7 +91,9 @@
 
 .orbit[data-collapsed] {
   justify-content: center;
-  padding: 8px 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
 }
 
 .orbitIcon {
@@ -90,7 +144,7 @@
 
 .foot[data-collapsed] .accountRow {
   flex-direction: column-reverse;
-  gap: 6px;
+  gap: 4px;
 }
 
 .account {
@@ -112,8 +166,9 @@
 .account[data-collapsed] {
   flex: none;
   justify-content: center;
-  width: 100%;
-  padding: 6px 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
 }
 
 .accountText {
@@ -151,7 +206,8 @@
 }
 
 .foot[data-collapsed] .themeToggle {
-  width: 100%;
+  --ai-size: 40px;
+  border-radius: 10px;
 }
 
 .menu {

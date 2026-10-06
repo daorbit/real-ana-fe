@@ -45,8 +45,8 @@ function NavGroupBlock({
   ));
 
   return (
-    <Box className="nav-group" mb={14}>
-      {collapsed && showRule && <Box className="nav-rule" mb={6} />}
+    <Box className="nav-group" mb={collapsed ? 6 : 14}>
+      {collapsed && showRule && <Box className="nav-rule" data-collapsed />}
 
       {!collapsed && (
         <UnstyledButton

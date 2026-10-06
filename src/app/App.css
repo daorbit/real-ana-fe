@@ -926,6 +926,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .nav-link {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 2px;
   border-radius: 8px;
   color: var(--text);
   transition: background 0.12s ease, color 0.12s ease;
@@ -1002,6 +1007,11 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   height: 1px;
   margin-inline: 10px;
   background: var(--border);
+}
+
+.nav-rule[data-collapsed] {
+  width: 20px;
+  margin: 4px auto 10px;
 }
 
 
@@ -2353,7 +2363,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 .nav-link[data-collapsed] {
-  padding: 8px 0 !important;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-inline: auto;
+  padding: 0 !important;
+  border-radius: 10px;
 }
 
 .nav-link[data-active="true"],

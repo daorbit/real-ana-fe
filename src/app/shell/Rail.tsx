@@ -127,8 +127,7 @@ export function Rail({
     <MantineShell.Navbar p="md">
 
       <MantineShell.Section visibleFrom="sm" mb="md">
-        <Group gap={4} wrap="nowrap" align="center">
-      
+        <Group gap={4} wrap="nowrap" align="center" justify={collapsed ? "center" : undefined}>
           {!collapsed && (
             <Box style={{ minWidth: 0, flex: 1 }}>
               <RailWorkspaceHeader collapsed={collapsed} />
