@@ -64,7 +64,11 @@ export function DashboardListSkeleton() {
           {Array.from({ length: 3 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
-          <div className={home.skeletonNew} />
+          <div className={home.skeletonNew}>
+            <Skeleton height={40} width={40} radius={12} mb={8} />
+            <Skeleton height={13} width={110} radius="sm" />
+            <Skeleton height={10} width={170} maw="80%" radius="sm" />
+          </div>
         </div>
       </div>
     </>
