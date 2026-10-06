@@ -4,7 +4,10 @@ import { notifyError } from "@/shared/lib/notify";
 import { useDemo } from "@/features/demo/context";
 import { demoStats } from "@/features/demo/demoStats";
 import { POLL_MS } from "@/shared/hooks/usePolling";
+import { useRefetchOnFocus } from "@/shared/hooks/useRefetchOnFocus";
 import type { CompareMode } from "@/shared/types";
+
+const STATS_FOCUS_STALE_MS = 30_000;
 
 export function useStats(
   workspaceId: string | undefined,
@@ -34,9 +37,10 @@ export function useStats(
       // them every cycle is load the server carries for a dashboard nobody is
       // looking at; the focus refetch catches it up on return.
       skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
     }
   );
+
+  useRefetchOnFocus(refetch, fulfilledTimeStamp, STATS_FOCUS_STALE_MS, Boolean(workspaceId));
 
 
   const staleIsSameWorkspace = originalArgs?.workspaceId === workspaceId;

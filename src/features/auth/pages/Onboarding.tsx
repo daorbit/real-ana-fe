@@ -20,7 +20,7 @@ import { notifyError } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import type { ReferralSource, Site } from "@/shared/types";
-import { WELCOME_PENDING_KEY } from "@/shared/ui/WelcomeOverlay";
+import { WELCOME_PENDING_KEY } from "@/shared/ui/welcomePending";
 import s from "@/features/auth/components/onboarding/Onboarding.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
 

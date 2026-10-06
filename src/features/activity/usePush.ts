@@ -4,6 +4,8 @@ import {
   useUnsubscribeFromPushMutation,
   useSendTestPushMutation,
 } from "@/app/store";
+import { useAuth } from "@/features/auth/context";
+import { clearPushSync, markPushSynced, needsPushSync, pushSyncKey } from "@/features/activity/pushSync";
 
 /**
  * Browser push: permission, registration, and the switch that turns it on.
@@ -33,7 +35,7 @@ export type PushState =
   /** A registration or permission request is in flight. */
   | "working";
 
-function supported(): boolean {
+export function pushSupported(): boolean {
   return (
     typeof window !== "undefined" &&
     "serviceWorker" in navigator &&
@@ -91,6 +93,7 @@ function subscriptionBody(sub: PushSubscription) {
 
 export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
   const [state, setState] = useState<PushState>("unsupported");
+  const userId = useAuth().user?.id;
   const [subscribe] = useSubscribeToPushMutation();
   const [unsubscribe] = useUnsubscribeFromPushMutation();
   const [sendTestPush, { isLoading: testing }] = useSendTestPushMutation();
@@ -99,7 +102,7 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
     let cancelled = false;
 
     (async () => {
-      if (!supported()) return setState("unsupported");
+      if (!pushSupported()) return setState("unsupported");
       if (!pushConfigured || !vapidPublicKey) return setState("unconfigured");
       if (Notification.permission === "denied") return setState("denied");
 
@@ -119,7 +122,13 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
         }
 
         const body = existing ? subscriptionBody(existing) : null;
-        if (body) await subscribe(body).unwrap().catch(() => {});
+        if (body) {
+          const key = pushSyncKey(userId, body.endpoint);
+          if (needsPushSync(key)) {
+            const synced = await subscribe(body).unwrap().then(() => true, () => false);
+            if (synced) markPushSynced(key);
+          }
+        }
 
         if (!cancelled) setState(body ? "on" : "off");
       } catch {
@@ -133,10 +142,10 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
     return () => {
       cancelled = true;
     };
-  }, [pushConfigured, vapidPublicKey, subscribe]);
+  }, [pushConfigured, vapidPublicKey, subscribe, userId]);
 
   const enable = useCallback(async () => {
-    if (!supported() || !vapidPublicKey) return;
+    if (!pushSupported() || !vapidPublicKey) return;
     setState("working");
 
     try {
@@ -164,12 +173,13 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
       }
 
       await subscribe(body).unwrap();
+      markPushSynced(pushSyncKey(userId, body.endpoint));
 
       setState("on");
     } catch {
       setState("off");
     }
-  }, [subscribe, vapidPublicKey]);
+  }, [subscribe, vapidPublicKey, userId]);
 
   const disable = useCallback(async () => {
     setState("working");
@@ -184,6 +194,7 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
         await unsubscribe({ endpoint: existing.endpoint }).unwrap().catch(() => {});
         await existing.unsubscribe();
       }
+      clearPushSync();
 
       setState("off");
     } catch {

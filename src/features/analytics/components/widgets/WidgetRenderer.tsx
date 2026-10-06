@@ -1,19 +1,19 @@
+import { Suspense, type ReactNode } from "react";
 import { MetricTile } from "@/shared/ui/MetricTile";
 import { percentChange } from "@/shared/lib/metricChange";
 import { num } from "@/shared/lib";
-import { WorldMap } from "@/shared/ui/WorldMap";
 import { Heatmap } from "@/shared/ui/Heatmap";
+import { ChartSkeleton } from "@/shared/ui/Skeletons";
 import { ClicksPanel } from "@/features/analytics/components/ClicksPanel";
 import { ScrollPanel, LandingPanel } from "@/features/analytics/components/EngagementPanels";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
-import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
-import { SeoScoreCard } from "@/features/seo/components/SeoScoreCard";
-import { TargetsWidget } from "@/features/goals/components/TargetsWidget";
 import { MiniList } from "@/features/analytics/components/widgets/MiniList";
 import { TrafficCard } from "@/features/analytics/components/widgets/TrafficCard";
 import { LivePagesCard } from "@/features/analytics/components/widgets/LivePagesCard";
 import { METRIC_TONE, listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
-import { SearchWidget } from "@/features/searchConsole/widgets/SearchWidget";
+import {
+  GoalsPanel, SearchWidget, SeoScoreCard, TargetsWidget, WorldMap,
+} from "@/features/analytics/components/widgets/lazyWidgets";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
 import type { Bucket, Site, Stats } from "@/shared/types";
@@ -30,6 +30,10 @@ export type WidgetData = {
   embedded?: boolean;
   range?: string;
 };
+
+function Deferred({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<ChartSkeleton height={160} />}>{children}</Suspense>;
+}
 
 export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData }) {
   const { stats, sites = [], siteScope = [], workspaceId, embedded = false } = data;
@@ -61,7 +65,11 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
     case "livePages":
       return <LivePagesCard live={live} pages={data.livePages ?? []} />;
     case "worldMap":
-      return <WorldMap countries={stats?.countries ?? []} liveCountries={data.liveCountries} />;
+      return (
+        <Deferred>
+          <WorldMap countries={stats?.countries ?? []} liveCountries={data.liveCountries} />
+        </Deferred>
+      );
     case "clicks":
       return <ClicksPanel clicks={stats?.clicks ?? []} total={stats?.clickCount ?? 0} />;
     case "heatmap":
@@ -79,19 +87,37 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
   if (!workspaceId) return null;
 
   if (isSearchWidget(id)) {
-    return <SearchWidget id={id} workspaceId={workspaceId} sites={sites} siteScope={siteScope} range={data.range} />;
+    return (
+      <Deferred>
+        <SearchWidget id={id} workspaceId={workspaceId} sites={sites} siteScope={siteScope} range={data.range} />
+      </Deferred>
+    );
   }
 
-  if (id === "goals") return <GoalsPanel workspaceId={workspaceId} goals={stats?.goals ?? []} loading={!stats} />;
-  if (id === "targets") return <TargetsWidget workspaceId={workspaceId} />;
+  if (id === "goals") {
+    return (
+      <Deferred>
+        <GoalsPanel workspaceId={workspaceId} goals={stats?.goals ?? []} loading={!stats} />
+      </Deferred>
+    );
+  }
+  if (id === "targets") {
+    return (
+      <Deferred>
+        <TargetsWidget workspaceId={workspaceId} />
+      </Deferred>
+    );
+  }
   if (id === "seoScore") {
     const seoSite = (siteScope.length === 1 && sites.find((s) => s.siteId === siteScope[0])) || sites[0];
     return (
-      <SeoScoreCard
-        workspaceId={workspaceId}
-        siteId={seoSite?.siteId ?? ""}
-        siteName={sites.length > 1 ? seoSite?.name : undefined}
-      />
+      <Deferred>
+        <SeoScoreCard
+          workspaceId={workspaceId}
+          siteId={seoSite?.siteId ?? ""}
+          siteName={sites.length > 1 ? seoSite?.name : undefined}
+        />
+      </Deferred>
     );
   }
   return null;

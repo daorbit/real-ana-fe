@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
-import { useGetWorkspacesQuery } from "@/app/store";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { api, useGetWorkspacesQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import { demoWorkspaces } from "@/features/demo/demoData";
 import { ROLE_RANK, type Workspace, type QuotaSummary } from "@/shared/types";
@@ -137,4 +138,10 @@ export function useActiveBilling(): QuotaSummary {
   // Read straight off the workspace — the list already carries each one's plan,
   // so there is no second request and no way for the two to disagree.
   return active?.billing ?? null;
+}
+
+export function useActiveUsage(): QuotaSummary {
+  const { active } = useWorkspace();
+  const { data } = api.endpoints.getWorkspaceUsage.useQueryState(active?._id ?? skipToken);
+  return data ?? active?.billing ?? null;
 }

@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@mantine/core";
 import { ArrowRight, CalendarClock, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useWorkspace } from "@/features/workspace/context";
+import { useActiveUsage } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
-import { useGetWorkspaceUsageQuery } from "@/app/store";
 import { shortDate } from "@/shared/lib";
 import { readDismissal, writeDismissal, type Dismissal } from "./planNoticeDismissal";
 import "./PlanExpiryNotice.css";
@@ -18,9 +17,8 @@ function daysUntil(iso: string): number {
 
 export function PlanExpiryNotice() {
   const nav = useNavigate();
-  const { active } = useWorkspace();
   const { user } = useAuth();
-  const { data } = useGetWorkspaceUsageQuery(active?._id ?? "", { skip: !active?._id });
+  const data = useActiveUsage();
 
   const [dismissal, setDismissal] = useState<Dismissal | null>(() => readDismissal());
   const [shown, setShown] = useState(false);

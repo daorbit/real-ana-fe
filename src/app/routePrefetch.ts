@@ -1,3 +1,5 @@
+import { isConstrainedNetwork, onIdle } from "@/shared/lib/idle";
+
 /**
  * Warms a route's lazy chunk before the user clicks it.
  *
@@ -67,21 +69,37 @@ export function prefetchRoute(to: string): Promise<void> {
   return promise;
 }
 
-export function prefetchAllRoutes(): () => void {
-  const paths = Object.keys(importers);
+const COMMON_ROUTES = [
+  "/app/analytics",
+  "/app/dashboards",
+  "/app/goals",
+  "/app/search-visibility",
+  "/app/seo",
+  "/app/reports",
+  "/app/settings",
+];
+
+const IDLE_PREFETCH_DELAY_MS = 5000;
+
+export function prefetchCommonRoutes(): () => void {
+  if (isConstrainedNetwork()) return () => undefined;
+  const paths = [...COMMON_ROUTES];
   let cancelled = false;
-  let timer = 0;
+  let cancelIdle = () => {};
   const next = () => {
     if (cancelled) return;
     const path = paths.shift();
     if (!path) return;
     void prefetchRoute(path).finally(() => {
-      timer = window.setTimeout(next, 50);
+      if (!cancelled) cancelIdle = onIdle(next);
     });
   };
-  timer = window.setTimeout(next, 1500);
+  const timer = window.setTimeout(() => {
+    cancelIdle = onIdle(next);
+  }, IDLE_PREFETCH_DELAY_MS);
   return () => {
     cancelled = true;
     window.clearTimeout(timer);
+    cancelIdle();
   };
 }

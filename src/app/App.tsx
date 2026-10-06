@@ -15,7 +15,7 @@ import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { NotFound } from "@/shared/ui/NotFound";
 import { AppBootSkeleton } from "@/shared/ui/Skeletons";
 import { ShellLayout } from "@/app/shell/ShellLayout";
-import { WelcomeOverlay, consumeWelcomePending } from "@/shared/ui/WelcomeOverlay";
+import { consumeWelcomePending } from "@/shared/ui/welcomePending";
 import "@/app/App.css";
 import "@/polish.css";
 import "@/app/viewTransitions.css";
@@ -71,6 +71,9 @@ const DashboardView = lazy(() => import("@/features/dashboards/pages/DashboardVi
 const DashboardStudio = lazy(() => import("@/features/dashboards/pages/DashboardStudio"));
 const Goals = lazy(() => import("@/features/goals/pages/Goals"));
 const EmbedWidget = lazy(() => import("@/features/embed/pages/EmbedWidget"));
+const WelcomeOverlay = lazy(() =>
+  import("@/shared/ui/WelcomeOverlay").then((m) => ({ default: m.WelcomeOverlay })),
+);
 
 function RequireSetup({ children }: { children: ReactNode }) {
   const { workspaces, loading, fetchFailed } = useWorkspace();
@@ -94,10 +97,12 @@ function RequireSetup({ children }: { children: ReactNode }) {
   return (
     <>
       {showWelcome && (
-        <WelcomeOverlay
-          name={user?.firstName || undefined}
-          onDone={() => setShowWelcome(false)}
-        />
+        <Suspense fallback={null}>
+          <WelcomeOverlay
+            name={user?.firstName || undefined}
+            onDone={() => setShowWelcome(false)}
+          />
+        </Suspense>
       )}
       {children}
     </>

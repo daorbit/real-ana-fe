@@ -27,7 +27,7 @@ function readAll(): Record<string, string[]> {
  * filter is sent to the API.
  */
 /** The saved selection for a workspace, or "all sites" when there is none. */
-function savedScope(workspaceId: string | undefined): string[] {
+export function savedScope(workspaceId: string | undefined): string[] {
   if (!workspaceId) return [];
   const saved = readAll()[workspaceId];
   return Array.isArray(saved) ? saved : [];

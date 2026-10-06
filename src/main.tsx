@@ -4,9 +4,10 @@ import { Provider } from 'react-redux'
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { ModalsProvider } from '@mantine/modals'
-import { CodeHighlightAdapterProvider, createHighlightJsAdapter } from '@mantine/code-highlight'
-import hljs from 'highlight.js'
+import { CodeHighlightAdapterProvider } from '@mantine/code-highlight'
 import { store } from '@/app/store'
+import { highlightAdapter } from '@/app/highlightAdapter'
+import { prefetchBootData } from '@/app/bootPrefetch'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import '@mantine/dates/styles.css'
@@ -30,13 +31,13 @@ applyDocumentLang(readLanguage())
 const initialPrefs = loadAndApplyTheme()
 const mantineScheme = initialPrefs.mode === 'system' ? 'auto' : initialPrefs.mode
 
-const highlightJsAdapter = createHighlightJsAdapter(hljs)
+prefetchBootData(store)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <MantineProvider theme={theme} defaultColorScheme={mantineScheme}>
-        <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>
+        <CodeHighlightAdapterProvider adapter={highlightAdapter}>
           <Notifications position="top-center" limit={3} />
           <ModalsProvider>
             <ErrorBoundary>

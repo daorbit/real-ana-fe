@@ -2,8 +2,10 @@ import { useCallback, useMemo, useState } from "react";
 import { useGetSitesQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import { demoSites } from "@/features/demo/demoData";
-import { POLL_MS } from "@/shared/hooks/usePolling";
+import { useRefetchOnFocus } from "@/shared/hooks/useRefetchOnFocus";
 import type { Site } from "@/shared/types";
+
+const SITES_FOCUS_STALE_MS = 5 * 60_000;
 
 /**
  * The sites belonging to a workspace.
@@ -16,16 +18,10 @@ export function useSites(workspaceId: string | undefined) {
   const { demo } = useDemo();
   const { data, currentData, refetch, fulfilledTimeStamp, originalArgs } = useGetSitesQuery(
     workspaceId!,
-    {
-      skip: !workspaceId || demo,
-      pollingInterval: POLL_MS,
-      // A backgrounded tab is not being looked at, and polling it on a timer
-      // is load the server carries for nobody. The refetch on focus is what
-      // catches the list up when someone comes back.
-      skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
-    },
+    { skip: !workspaceId || demo },
   );
+
+  useRefetchOnFocus(refetch, fulfilledTimeStamp, SITES_FOCUS_STALE_MS, Boolean(workspaceId) && !demo);
 
   const [refreshing, setRefreshing] = useState(false);
   const refresh = useCallback(async () => {

@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Alert, Button, Group, Text } from "@mantine/core";
 import { AlertTriangle, ArrowUpCircle, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useWorkspace } from "@/features/workspace/context";
+import { useActiveUsage } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
-import { useGetWorkspaceUsageQuery } from "@/app/store";
 
  
 type Meter = { key: string; label: string; used: number; total: number };
@@ -13,9 +12,8 @@ const WARN_AT = 0.8;
 
 export function QuotaNudge() {
   const nav = useNavigate();
-  const { active } = useWorkspace();
   const { user } = useAuth();
-  const { data } = useGetWorkspaceUsageQuery(active?._id ?? "", { skip: !active?._id });
+  const data = useActiveUsage();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   // Demo sessions have no real plan to upgrade, and an impersonated session
