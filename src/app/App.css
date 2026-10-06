@@ -2148,21 +2148,22 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .auth-form .mantine-Input-input:focus,
 .auth-form .mantine-Input-input:focus-within {
-  border-color: var(--accent);
+  border-color: var(--auth-line-strong);
   background: var(--auth-surface);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 0 0 4px var(--auth-line);
 }
 
-.auth-form .mantine-Anchor-root {
-  --anchor-color: var(--accent);
-}
-
+.auth-form .mantine-Anchor-root,
 .auth-form .mantine-Anchor-root:hover {
-  --anchor-color: var(--accent);
+  --anchor-color: var(--auth-ink);
 }
 
-.auth-form > .mantine-Stack-root > .mantine-Text-root .mantine-Anchor-root {
-  --anchor-color: var(--accent);
+.auth-form .auth-field-head .mantine-Anchor-root {
+  --anchor-color: var(--auth-ink-dim);
+}
+
+.auth-form .auth-field-head .mantine-Anchor-root:hover {
+  --anchor-color: var(--auth-ink);
 }
 
 .auth-submit {
@@ -2325,8 +2326,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 .auth-form .mantine-PinInput-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: var(--auth-line-strong);
+  box-shadow: 0 0 0 4px var(--auth-line);
 }
 
 .auth-form .mantine-Button-root[data-variant="subtle"] {

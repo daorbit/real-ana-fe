@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Divider,
+  TextInput, PasswordInput, Button, Title, Text, Stack, Anchor, Divider,
   Group,
 } from "@mantine/core";
 import { PlayCircle } from "lucide-react";
@@ -18,7 +18,8 @@ import TurnstileWidget, { turnstileConfigured } from "@/features/auth/components
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { LegalConsent } from "@/features/auth/components/LegalConsent";
 import { AccountLockedDialog } from "@/features/auth/components/AccountLockedDialog";
-import { notify, errMessage } from "@/shared/lib/notify";
+import { useAuthToast } from "@/features/auth/useAuthToast";
+import { notify } from "@/shared/lib/notify";
 import { consumeReturnPath } from "@/shared/lib/session";
 import { getLastUser, type LoginMethod } from "@/features/auth/lastUser";
 import { LastUsedBadge } from "@/features/auth/components/LastUsedBadge";
@@ -33,7 +34,7 @@ export default function Login() {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const { highlight, showMessage, showError, clear } = useAuthToast();
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
@@ -54,7 +55,7 @@ export default function Login() {
 
   const enterDemo = async () => {
     setDemoBusy(true);
-    setError(null);
+    clear();
     try {
       await startDemo();
       trace(undefined, "demo_started", "login", "app");
@@ -63,13 +64,9 @@ export default function Login() {
       const e = err as ApiError;
       if (e?.status === 429) {
         const retryAt = e.body?.retryAt ? new Date(String(e.body.retryAt)) : null;
-        setError(
-          retryAt
-            ? `${e.message} You can start another demo ${timeUntil(retryAt)}.`
-            : e.message
-        );
+        notify.error(retryAt ? `${e.message} You can start another demo ${timeUntil(retryAt)}.` : e.message);
       } else {
-        setError(errMessage(err, "Could not start the demo. Try again in a moment."));
+        showError(err, "Could not start the demo. Try again in a moment.");
       }
     } finally {
       setDemoBusy(false);
@@ -97,7 +94,7 @@ export default function Login() {
   const finishLogin = async (token?: string) => {
     setAwaitingCaptcha(false);
     setBusy(true);
-    setError(null);
+    clear();
     try {
       const r = await login(email.trim(), password, token);
       if (r.requires2fa) {
@@ -111,7 +108,7 @@ export default function Login() {
       if (e?.status === 423 && e.body?.lockedUntil) {
         setLockedUntil(new Date(String(e.body.lockedUntil)));
       } else {
-        setError(errMessage(err, "Login failed. Check your email and password."));
+        showError(err, "Login failed. Check your email and password.");
       }
     } finally {
       setBusy(false);
@@ -155,7 +152,7 @@ export default function Login() {
     param: "googleLogin",
     method: "google",
     provider: "Google",
-    onError: setError,
+    onError: showMessage,
     onRequires2fa: requireGoogle2fa,
   });
 
@@ -165,7 +162,7 @@ export default function Login() {
     setTouched({ email: true, password: true });
     if (Object.values(errors).some(Boolean)) return;
 
-    setError(null);
+    clear();
     if (!needsCaptcha) {
       void finishLogin();
       return;
@@ -198,14 +195,9 @@ export default function Login() {
               </Text>
             </div>
 
-            {error && (
-              <Alert color="red" variant="light">
-                {error}
-              </Alert>
-            )}
 
             <div className="auth-providers">
-              <div className="last-used-anchor">
+              <div className="last-used-anchor" data-highlight={highlight === "google" || undefined}>
                 {lastUser?.method === "google" && <LastUsedBadge />}
                 <GoogleSignInButton
                   label="Google"
@@ -220,24 +212,24 @@ export default function Login() {
                     goAfterLogin();
                   }}
                   onRequires2fa={requireGoogle2fa}
-                  onError={setError}
+                  onError={showMessage}
                 />
               </div>
 
-              <div className="last-used-anchor">
+              <div className="last-used-anchor" data-highlight={highlight === "linkedin" || undefined}>
                 {lastUser?.method === "linkedin" && <LastUsedBadge />}
                 <LinkedInSignInButton
                   label="LinkedIn"
-                  onError={setError}
+                  onError={showMessage}
                   onRequires2fa={requireLinkedIn2fa}
                 />
               </div>
 
-              <div className="last-used-anchor">
+              <div className="last-used-anchor" data-highlight={highlight === "github" || undefined}>
                 {lastUser?.method === "github" && <LastUsedBadge />}
                 <GitHubSignInButton
                   label="GitHub"
-                  onError={setError}
+                  onError={showMessage}
                   onRequires2fa={requireGitHub2fa}
                 />
               </div>

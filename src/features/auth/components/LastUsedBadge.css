@@ -2,6 +2,11 @@
   position: relative;
 }
 
+.auth-form .last-used-anchor[data-highlight] .mantine-Button-root {
+  border-color: var(--auth-line-strong);
+  box-shadow: 0 0 0 3px var(--auth-line);
+}
+
 .last-used-badge {
   position: absolute;
   top: -8px;
@@ -16,9 +21,9 @@
   white-space: nowrap;
 
   
-  color: var(--mantine-color-emerald-4);
-  background: color-mix(in srgb, var(--mantine-color-emerald-6) 18%, var(--mantine-color-body));
-  border: 1px solid color-mix(in srgb, var(--mantine-color-emerald-6) 35%, transparent);
+  color: var(--auth-ink-dim);
+  background: color-mix(in srgb, var(--auth-ink) 8%, var(--mantine-color-body));
+  border: 1px solid var(--auth-line-strong);
 
   
   pointer-events: none;

@@ -10,7 +10,8 @@ import { ArrowLeft, MailCheck } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
-import { notify, errMessage } from "@/shared/lib/notify";
+import { notify } from "@/shared/lib/notify";
+import { useAuthToast } from "@/features/auth/useAuthToast";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -43,7 +44,7 @@ export default function ForgotPassword() {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
 
-  const [error, setError] = useState<string | null>(null);
+  const { showMessage, showError, clear: clearError } = useAuthToast();
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [resending, setResending] = useState(false);
@@ -69,12 +70,12 @@ export default function ForgotPassword() {
       // Only now does the field earn an error — on load it has been shown to
       // nobody and complained at nobody.
       setTouched(true);
-      setError(null);
+      clearError();
       return;
     }
 
     setBusy(true);
-    setError(null);
+    clearError();
     try {
       await forgotPassword(email.trim().toLowerCase());
       setStep("reset");
@@ -82,7 +83,7 @@ export default function ForgotPassword() {
     } catch (err) {
       // Only a transport or server fault reaches here — an unknown address
       // resolves successfully by design.
-      setError(errMessage(err, "Could not send the code. Please try again."));
+      showError(err, "Could not send the code. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -91,13 +92,13 @@ export default function ForgotPassword() {
   async function submit(value: string) {
     if (submitted.current) return;
     if (v.password(password)) {
-      setError("Choose a password that meets the requirements below.");
+      showMessage("Choose a password that meets the requirements below.");
       return;
     }
 
     submitted.current = true;
     setBusy(true);
-    setError(null);
+    clearError();
     try {
       await resetPassword(email.trim().toLowerCase(), value, password);
       notify.success("Password changed — you're signed in");
@@ -113,7 +114,7 @@ export default function ForgotPassword() {
         setCode("");
         setCooldown(0);
       }
-      setError(errMessage(err, "Could not reset your password."));
+      showError(err, "Could not reset your password.");
       setCode("");
     } finally {
       submitted.current = false;
@@ -123,7 +124,7 @@ export default function ForgotPassword() {
 
   async function resend() {
     setResending(true);
-    setError(null);
+    clearError();
     setNotice(null);
     try {
       await resendResetCode(email.trim().toLowerCase());
@@ -133,7 +134,7 @@ export default function ForgotPassword() {
       const e = err as ApiError;
       const retry = (e.body as { retryInSeconds?: number } | undefined)?.retryInSeconds;
       if (retry) setCooldown(retry);
-      setError(errMessage(err, "Could not send a new code."));
+      showError(err, "Could not send a new code.");
     } finally {
       setResending(false);
     }
@@ -177,7 +178,6 @@ export default function ForgotPassword() {
                   </Text>
                 </div>
 
-                {error && <Alert color="red" variant="light">{error}</Alert>}
 
                 <TextInput
                   label="Email"
@@ -215,7 +215,6 @@ export default function ForgotPassword() {
                   </Text>
                 </div>
 
-                {error && <Alert color="red" variant="light">{error}</Alert>}
                 {notice && <Alert color="green" variant="light">{notice}</Alert>}
 
                 {/* The strength meter belongs to the field above it, so the two
@@ -232,7 +231,7 @@ export default function ForgotPassword() {
                     error={passwordError}
                     onChange={(e) => {
                       setPassword(e.currentTarget.value);
-                      setError(null);
+                      clearError();
                     }}
                   />
                   {password && (
@@ -257,7 +256,7 @@ export default function ForgotPassword() {
                       value={code}
                       onChange={(val) => {
                         setCode(val);
-                        setError(null);
+                        clearError();
                       }}
                       // Only auto-submit once the password is valid — firing on
                       // the last digit with an empty password would burn one of
@@ -306,7 +305,7 @@ export default function ForgotPassword() {
                       setStep("request");
                       setCode("");
                       setPassword("");
-                      setError(null);
+                      clearError();
                       setNotice(null);
                     }}
                   >

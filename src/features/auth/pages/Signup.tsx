@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  TextInput, PasswordInput, Button, Title, Text, Alert, Stack, Anchor, Group, Divider,
+  TextInput, PasswordInput, Button, Title, Text, Stack, Anchor, Group, Divider,
 } from "@mantine/core";
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
@@ -18,7 +18,8 @@ import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { VerifyEmailStep } from "@/features/auth/components/VerifyEmailStep";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
 import { LegalConsent } from "@/features/auth/components/LegalConsent";
-import { notify, errMessage } from "@/shared/lib/notify";
+import { useAuthToast } from "@/features/auth/useAuthToast";
+import { notify } from "@/shared/lib/notify";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
 import * as v from "@/shared/lib/validate";
@@ -48,7 +49,7 @@ export default function Signup() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const { showMessage, showError, clear } = useAuthToast();
   const [busy, setBusy] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
@@ -71,7 +72,7 @@ export default function Signup() {
 
   const enterDemo = async () => {
     setDemoBusy(true);
-    setError(null);
+    clear();
     try {
       await startDemo();
       trace(undefined, "demo_started", "signup", "app");
@@ -82,11 +83,9 @@ export default function Signup() {
       // than leaving "try again later" to be guessed at.
       if (e?.status === 429) {
         const retryAt = e.body?.retryAt ? new Date(String(e.body.retryAt)) : null;
-        setError(
-          retryAt ? `${e.message} You can start another demo ${timeUntil(retryAt)}.` : e.message
-        );
+        notify.error(retryAt ? `${e.message} You can start another demo ${timeUntil(retryAt)}.` : e.message);
       } else {
-        setError(errMessage(err, "Could not start the demo. Try again in a moment."));
+        showError(err, "Could not start the demo. Try again in a moment.");
       }
     } finally {
       setDemoBusy(false);
@@ -131,14 +130,14 @@ export default function Signup() {
     if (Object.values(errors).some(Boolean)) return;
 
     setBusy(true);
-    setError(null);
+    clear();
     try {
       const name = `${firstName.trim()} ${lastName.trim()}`.trim();
       // This only sends a code — the account is created once it's verified.
       await signup(email.trim(), password, name);
       setPendingEmail(email.trim());
     } catch (err) {
-      setError(errMessage(err, "Signup failed. Please try again."));
+      showError(err, "Signup failed. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -185,11 +184,6 @@ export default function Signup() {
               </Text>
             </div>
 
-            {error && (
-              <Alert color="red" variant="light">
-                {error}
-              </Alert>
-            )}
 
             {/* The providers come first, and by a wider margin than on login:
                 they skip five fields *and* the emailed code, because the
@@ -212,12 +206,12 @@ export default function Signup() {
                   }
                 }}
                 onRequires2fa={setPending2faToken}
-                onError={setError}
+                onError={showMessage}
               />
 
-              <LinkedInSignInButton label="LinkedIn" onError={setError} />
+              <LinkedInSignInButton label="LinkedIn" onError={showMessage} />
 
-              <GitHubSignInButton label="GitHub" onError={setError} />
+              <GitHubSignInButton label="GitHub" onError={showMessage} />
             </div>
 
             <Divider label="or sign up with email" labelPosition="center" />
