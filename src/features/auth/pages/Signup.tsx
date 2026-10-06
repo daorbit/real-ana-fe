@@ -17,6 +17,7 @@ import { useProviderAutostart } from "@/features/auth/useProviderAutostart";
 import { PasswordStrength } from "@/features/auth/components/PasswordStrength";
 import { VerifyEmailStep } from "@/features/auth/components/VerifyEmailStep";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
+import { LegalConsent } from "@/features/auth/components/LegalConsent";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { timeUntil } from "@/shared/lib";
 import type { ApiError } from "@/shared/lib/http";
@@ -282,6 +283,8 @@ export default function Signup() {
             >
               {busy ? <span className="auth-submit-spinner" /> : "Create account"}
             </button>
+
+            <LegalConsent />
 
             {/* The demo's real home is the brand panel now. That panel is
                 hidden below 900px, so this stays as the mobile-only fallback —

@@ -8,6 +8,7 @@ import { CodeHighlightAdapterProvider } from '@mantine/code-highlight'
 import { store } from '@/app/store'
 import { highlightAdapter } from '@/app/highlightAdapter'
 import { prefetchBootData } from '@/app/bootPrefetch'
+import { startErrorReporting } from '@/shared/lib/errorReporting'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import '@mantine/dates/styles.css'
@@ -31,6 +32,7 @@ applyDocumentLang(readLanguage())
 const initialPrefs = loadAndApplyTheme()
 const mantineScheme = initialPrefs.mode === 'system' ? 'auto' : initialPrefs.mode
 
+startErrorReporting()
 prefetchBootData(store)
 
 createRoot(document.getElementById('root')!).render(

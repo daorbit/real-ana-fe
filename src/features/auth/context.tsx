@@ -8,6 +8,7 @@ import {
 import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
 import { trace } from "@/shared/lib/analytics";
+import { setReportingUser } from "@/shared/lib/errorReporting";
 import { rememberUser, type LoginMethod } from "@/features/auth/lastUser";
 import { hideLock, showLock } from "@/shared/lib/lockState";
 import type { ProfileUpdate, User } from "@/shared/types";
@@ -78,6 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setDatePrefs({ locale: user?.dateLocale, timeZone: user?.timezone });
   }, [user?.dateLocale, user?.timezone]);
+
+  useEffect(() => {
+    setReportingUser(user?.id);
+  }, [user?.id]);
 
   // On mount, restore session if token present
   useEffect(() => {

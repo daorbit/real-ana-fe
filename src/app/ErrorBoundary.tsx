@@ -1,6 +1,7 @@
-import { Component, type ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Center, Stack, Title, Text, Button, Group, Code, ThemeIcon } from "@mantine/core";
 import { AlertTriangle, RotateCcw } from "lucide-react";
+import { reportError } from "@/shared/lib/errorReporting";
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
@@ -21,10 +22,9 @@ export class ErrorBoundary extends Component<Props, State> {
     return { error };
   }
 
-  componentDidCatch(error: Error, info: unknown) {
-    // Surface it for anyone watching the console; a real deployment would ship
-    // this to an error tracker here.
+  componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Uncaught UI error:", error, info);
+    reportError(error, { boundary: "root", componentStack: info.componentStack });
   }
 
   reset = () => this.setState({ error: null });

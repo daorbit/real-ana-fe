@@ -21,6 +21,8 @@ Code is in the first bundle if `main.tsx`, `App.tsx`, `AppShell.tsx`, `app/shell
 - **Splitting a module:** if an eager module needs a small helper from a heavy one, move the helper into its own file. Example: `shared/ui/welcomePending.ts` was split out of `WelcomeOverlay`.
 - **Background route downloads** stay limited to `COMMON_ROUTES` in `routePrefetch.ts`. They start late, run when the browser is idle, and are skipped on slow or data-saver connections. Never go back to prefetching every route.
 - **Deferred work** uses `src/shared/lib/idle.ts`: `onIdle`, `whenIdle`, `isConstrainedNetwork`.
+- **Error tracking** goes only through `src/shared/lib/errorReporting.ts` (`reportError`, `setReportingUser`), which loads Sentry when the browser is idle and does nothing without `VITE_SENTRY_DSN`. Never import `@sentry/react` directly. Error boundaries already report; call `reportError` for any other unexpected failure you catch.
+- **Security headers** live in `vercel.json`. `/embed/*` and `/share/*` must stay frameable because customers embed them. Any new page meant to be iframed needs adding to that exclusion.
 
 ## Data fetching rules
 

@@ -16,6 +16,7 @@ import GitHubSignInButton from "@/features/auth/components/GitHubSignInButton";
 import { useOAuthLoginReturn } from "@/features/auth/useOAuthLoginReturn";
 import TurnstileWidget, { turnstileConfigured } from "@/features/auth/components/TurnstileWidget";
 import { TotpPrompt } from "@/features/auth/components/TotpPrompt";
+import { LegalConsent } from "@/features/auth/components/LegalConsent";
 import { AccountLockedDialog } from "@/features/auth/components/AccountLockedDialog";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { consumeReturnPath } from "@/shared/lib/session";
@@ -286,6 +287,8 @@ export default function Login() {
             >
               {busy || awaitingCaptcha ? <span className="auth-submit-spinner" /> : "Log in"}
             </button>
+
+            <LegalConsent />
 
             {/* The demo's real home is the brand panel now. That panel is
                 hidden below 900px, so this stays as the mobile-only fallback —

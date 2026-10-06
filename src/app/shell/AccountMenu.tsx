@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Menu, UnstyledButton } from "@mantine/core";
 import {
-  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Settings, ShieldCheck, StickyNote,
+  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Scale, Settings, ShieldCheck, StickyNote,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
-import { CONTACT_URL, DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
+import { CONTACT_URL, DOCS_BASE_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
 import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import type { ThemeMode } from "@/shared/lib/theme";
 import { ADMIN_ITEMS } from "./navItems";
@@ -158,6 +158,22 @@ export function AccountMenu({
           <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<LifeBuoy size={15} />}>
             {t("nav.contactSupport", "Contact support")}
           </Menu.Item>
+          <Menu.Sub>
+            <Menu.Sub.Target>
+              <Menu.Sub.Item leftSection={<Scale size={15} />}>{t("nav.legal", "Legal")}</Menu.Sub.Item>
+            </Menu.Sub.Target>
+            <Menu.Sub.Dropdown>
+              <Menu.Item component="a" href={LEGAL_URLS.terms} target="_blank" rel="noreferrer">
+                {t("legal.terms", "Terms of Service")}
+              </Menu.Item>
+              <Menu.Item component="a" href={LEGAL_URLS.privacy} target="_blank" rel="noreferrer">
+                {t("legal.privacy", "Privacy Policy")}
+              </Menu.Item>
+              <Menu.Item component="a" href={LEGAL_URLS.dpa} target="_blank" rel="noreferrer">
+                {t("legal.dpa", "Data Processing Addendum")}
+              </Menu.Item>
+            </Menu.Sub.Dropdown>
+          </Menu.Sub>
 
           <Menu.Divider />
 

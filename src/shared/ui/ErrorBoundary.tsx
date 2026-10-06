@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Box, Button, Code, Group, Stack, Text, Title } from "@mantine/core";
 import { RefreshCw, Home } from "lucide-react";
+import { reportError } from "@/shared/lib/errorReporting";
 
  
 type Props = {
@@ -26,6 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("[ErrorBoundary]", error, info.componentStack);
+    reportError(error, { boundary: this.props.variant ?? "route", componentStack: info.componentStack });
   }
 
   render() {

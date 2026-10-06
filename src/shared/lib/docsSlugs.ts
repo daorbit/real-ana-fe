@@ -1,6 +1,14 @@
-export const DOCS_BASE_URL = "https://quantalog.daorbit.in/docs";
+const SITE_URL = "https://quantalog.daorbit.in";
 
-export const CONTACT_URL = "https://quantalog.daorbit.in/contact";
+export const DOCS_BASE_URL = `${SITE_URL}/docs`;
+
+export const CONTACT_URL = `${SITE_URL}/contact`;
+
+export const LEGAL_URLS = {
+  terms: `${SITE_URL}/terms`,
+  privacy: `${SITE_URL}/privacy`,
+  dpa: `${SITE_URL}/dpa`,
+} as const;
 
 export const DOCS_SLUGS = {
   overview: "/overview",

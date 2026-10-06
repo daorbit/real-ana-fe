@@ -57,6 +57,7 @@
     "requestFeature": "Request a feature",
     "notes": "Notes",
     "contactSupport": "Contact support",
+    "legal": "Legal",
     "pageHelp": "What's on this page",
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
@@ -892,7 +893,14 @@
     "linkedinConnectFirst": "Connect your LinkedIn account first.",
     "linkedinSeeMore": "See more"
   },
+  "legal": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "dpa": "Data Processing Addendum"
+  },
   "auth": {
+    "legalConsent": "By continuing, you agree to our",
+    "legalAnd": "and",
     "login": "Log in",
     "signup": "Sign up",
     "email": "Email",
