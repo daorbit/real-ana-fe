@@ -8,6 +8,7 @@ import { useAuth } from "@/features/auth/context";
 import { leadFormsUrl, LEAD_FORMS_BASE } from "../themeParams";
 import { useEmbeddedPlanLimit } from "../useEmbeddedPlanLimit";
 import { useFrameUnreadCount } from "../useFrameUnreadCount";
+import { useFrameRailCollapse } from "../useFrameRailCollapse";
 import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
 import { api } from "@/shared/lib/http";
@@ -138,6 +139,7 @@ export default function LeadCapture() {
  
 function LeadCaptureFrame({ src }: { src: string }) {
   useEmbeddedPlanLimit();
+  useFrameRailCollapse();
   const frameRef = useRef<HTMLIFrameElement>(null);
   const sendUnreadCount = useFrameUnreadCount(frameRef);
   return (

@@ -36,11 +36,22 @@ function usePersistedFlag(key: string, fallback: boolean) {
       return !v;
     });
   }, [key]);
-  return [value, toggle] as const;
+  const set = useCallback((next: boolean) => {
+    writeFlag(key, next);
+    setValue(next);
+  }, [key]);
+  return [value, toggle, set] as const;
 }
 
 export function useRailState(mobile: boolean) {
-  const [railCollapsed, toggleRail] = usePersistedFlag(RAIL_KEY, false);
+  const [railCollapsed, , setRailCollapsed] = usePersistedFlag(RAIL_KEY, false);
+  const [autoCollapsed, setAutoCollapsed] = useState(false);
+  const shut = railCollapsed || autoCollapsed;
+
+  const toggleRail = useCallback(() => {
+    setAutoCollapsed(false);
+    setRailCollapsed(!shut);
+  }, [shut, setRailCollapsed]);
 
   /**
    * Whether the Admin group is expanded. Closed by default — five rows an
@@ -54,5 +65,5 @@ export function useRailState(mobile: boolean) {
    * content instead of getting out of the way, which is the opposite of what
    * the drawer is for.
    */
-  return { collapsed: railCollapsed && !mobile, toggleRail, adminOpen, toggleAdmin };
+  return { collapsed: shut && !mobile, toggleRail, setAutoCollapsed, adminOpen, toggleAdmin };
 }

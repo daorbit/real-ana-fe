@@ -23,7 +23,7 @@ import { MobileTabBar } from "./shell/MobileTabBar";
 import { RailWorkspaceHeader } from "./shell/RailWorkspaceHeader";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { HeaderDocsButton } from "@/shared/ui/DocsButton";
-import { ShellMountedContext } from "./shell/ShellContext";
+import { RailAutoCollapseContext, ShellMountedContext } from "./shell/ShellContext";
 import { routeKey } from "./routeKey";
 
 function useStarfieldPreset(): boolean {
@@ -73,7 +73,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
 
   const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
-  const { collapsed, toggleRail, adminOpen, toggleAdmin } =
+  const { collapsed, toggleRail, setAutoCollapsed, adminOpen, toggleAdmin } =
     useRailState(mobile);
 
   const wsSwitch = useSwitchOverlay(active?._id ?? null);
@@ -202,7 +202,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
                 }
               >
                 <ShellMountedContext.Provider value>
-                  {children}
+                  <RailAutoCollapseContext.Provider value={setAutoCollapsed}>
+                    {children}
+                  </RailAutoCollapseContext.Provider>
                 </ShellMountedContext.Provider>
               </motion.div>
             </div>
