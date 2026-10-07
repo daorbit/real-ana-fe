@@ -1944,7 +1944,7 @@ export const api = createApi({
  
       invalidatesTags: (result) =>
         result && "free" in result && result.free
-          ? ["Billing", "Usage", "Workspace"]
+          ? ["Billing", "Usage", "Workspace", "Referral"]
           : [],
     }),
 
@@ -1978,7 +1978,7 @@ export const api = createApi({
       VerifyPurchaseBody | { gateway: "cashfree"; cf_order_id: string }
     >({
       query: (body) => ({ url: "/api/billing/confirm", method: "POST", body }),
-      invalidatesTags: ["Billing", "Usage", "Workspace"],
+      invalidatesTags: ["Billing", "Usage", "Workspace", "Referral"],
     }),
 
  

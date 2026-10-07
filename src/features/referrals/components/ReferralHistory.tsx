@@ -1,9 +1,9 @@
-import { Badge, CopyButton, Table, Text, Tooltip, UnstyledButton } from "@mantine/core";
+import { Badge } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Users } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { shortDate } from "@/shared/lib";
-import type { MyReferralRow } from "@/shared/types";
+import type { MyReferralRow, ReferralQualifyOn } from "@/shared/types";
 import classes from "./Referrals.module.css";
 
 const STATUS_COLOR: Record<MyReferralRow["status"], string> = {
@@ -12,81 +12,66 @@ const STATUS_COLOR: Record<MyReferralRow["status"], string> = {
   closed: "gray",
 };
 
-export function ReferralHistory({ rows }: { rows: MyReferralRow[] }) {
+export function ReferralHistory({ rows, qualifyOn }: { rows: MyReferralRow[]; qualifyOn?: ReferralQualifyOn }) {
   const { t } = useTranslation();
 
-  if (!rows.length) {
-    return (
-      <EmptyState
-        compact
-        icon={Users}
-        title={t("referrals.emptyTitle", "No referrals yet")}
-        description={t("referrals.emptyBody", "People who sign up with your link will show up here.")}
-      />
-    );
-  }
-
-  const statusLabel = (s: MyReferralRow["status"]) =>
-    s === "rewarded"
-      ? t("referrals.statusRewarded", "Rewarded")
-      : s === "pending"
-        ? t("referrals.statusPending", "Pending")
-        : t("referrals.statusClosed", "Not eligible");
+  const status = (r: MyReferralRow) => {
+    if (r.status === "rewarded")
+      return {
+        label: t("referrals.statusRewarded", "Rewarded"),
+        hint: t("referrals.hintRewarded", "Earned you a {{percent}}% coupon", { percent: r.coupon?.percentOff ?? "" }),
+      };
+    if (r.status === "pending")
+      return qualifyOn === "first_payment"
+        ? {
+            label: t("referrals.statusPending", "Pending"),
+            hint: t("referrals.hintPendingPayment", "Rewarded after their first purchase"),
+          }
+        : {
+            label: t("referrals.statusReview", "In review"),
+            hint: t("referrals.hintPendingReview", "We are checking this signup"),
+          };
+    return {
+      label: t("referrals.statusClosed", "Not eligible"),
+      hint: t("referrals.hintClosed", "This signup did not qualify"),
+    };
+  };
 
   return (
-    <div>
-      <p className={classes.sectionLabel}>{t("referrals.history", "Your referrals")}</p>
-      <Table.ScrollContainer minWidth={560}>
-        <Table verticalSpacing="sm" horizontalSpacing="md">
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>{t("referrals.colPerson", "Person")}</Table.Th>
-              <Table.Th>{t("referrals.colJoined", "Joined")}</Table.Th>
-              <Table.Th>{t("referrals.colStatus", "Status")}</Table.Th>
-              <Table.Th>{t("referrals.colReward", "Your coupon")}</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {rows.map((r) => (
-              <Table.Tr key={r.id}>
-                <Table.Td>{r.name}</Table.Td>
-                <Table.Td>{shortDate(r.createdAt)}</Table.Td>
-                <Table.Td>
-                  <Badge variant="light" color={STATUS_COLOR[r.status]}>{statusLabel(r.status)}</Badge>
-                </Table.Td>
-                <Table.Td>
-                  {r.coupon ? (
-                    r.coupon.used ? (
-                      <Text size="sm" className={`${classes.code} ${classes.used}`}>{r.coupon.code}</Text>
-                    ) : (
-                      <CopyButton value={r.coupon.code} timeout={1400}>
-                        {({ copied, copy }) => (
-                          <Tooltip
-                            label={
-                              copied
-                                ? t("share.copied")
-                                : r.coupon?.expiresAt
-                                  ? t("referrals.validUntil", "Valid until {{date}}", { date: shortDate(r.coupon.expiresAt) })
-                                  : t("share.copy")
-                            }
-                            withArrow
-                          >
-                            <UnstyledButton onClick={copy}>
-                              <Text size="sm" className={classes.code}>{r.coupon?.code}</Text>
-                            </UnstyledButton>
-                          </Tooltip>
-                        )}
-                      </CopyButton>
-                    )
-                  ) : (
-                    <Text size="sm" c="dimmed">—</Text>
-                  )}
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </Table.ScrollContainer>
-    </div>
+    <section>
+      <div className={classes.sectionHead}>
+        <h4 className={classes.sectionTitle}>{t("referrals.history", "People you invited")}</h4>
+      </div>
+
+      {!rows.length ? (
+        <EmptyState
+          compact
+          icon={Users}
+          title={t("referrals.emptyTitle", "No referrals yet")}
+          description={t("referrals.emptyBody", "People who sign up with your link will show up here.")}
+        />
+      ) : (
+        <ul className={classes.people}>
+          {rows.map((r) => {
+            const s = status(r);
+            return (
+              <li key={r.id} className={classes.person}>
+                <span className={classes.avatar} aria-hidden>{r.name.charAt(0).toUpperCase()}</span>
+                <div className={classes.personMain}>
+                  <span className={classes.personName}>{r.name}</span>
+                  <span className={classes.personMeta}>
+                    {t("referrals.joinedOn", "Joined {{date}}", { date: shortDate(r.createdAt) })}
+                  </span>
+                </div>
+                <div className={classes.personStatus}>
+                  <Badge size="sm" variant="light" color={STATUS_COLOR[r.status]}>{s.label}</Badge>
+                  <span className={classes.personMeta}>{s.hint}</span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }

@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { ActionIcon, Badge, Card, Center, Group, Loader, Switch, Table, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Card, Center, Group, Loader, Progress, Switch, Table, Text, Tooltip } from "@mantine/core";
 import { LogIn, Trophy } from "lucide-react";
 import { useGetAdminTopReferrersQuery, useSetAdminReferralCodeActiveMutation } from "@/app/store";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { num } from "@/shared/lib";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { useImpersonateUser } from "../hooks/useImpersonateUser";
+import { ReferralPerson } from "./ReferralPerson";
+import classes from "./ReferralAdmin.module.css";
 
 export function TopReferrersPanel() {
   const { data, isLoading } = useGetAdminTopReferrersQuery();
@@ -34,7 +36,7 @@ export function TopReferrersPanel() {
         <EmptyState compact icon={Trophy} title="No referrers yet" description="The people who bring in the most signups will be ranked here." />
       ) : (
         <Table.ScrollContainer minWidth={760}>
-          <Table verticalSpacing="sm" horizontalSpacing="md" highlightOnHover>
+          <Table verticalSpacing="md" horizontalSpacing="lg" highlightOnHover>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>#</Table.Th>
@@ -49,20 +51,16 @@ export function TopReferrersPanel() {
             <Table.Tbody>
               {rows.map((r, i) => (
                 <Table.Tr key={r.user?.id ?? i}>
-                  <Table.Td><Text size="sm" c="dimmed">{i + 1}</Text></Table.Td>
-                  <Table.Td>
-                    {r.user ? (
-                      <div>
-                        <Text size="sm" fw={500} lineClamp={1}>{r.user.name}</Text>
-                        <Text size="xs" c="dimmed" lineClamp={1}>{r.user.email}</Text>
-                      </div>
-                    ) : (
-                      <Text size="sm" c="dimmed">Deleted account</Text>
-                    )}
-                  </Table.Td>
-                  <Table.Td><Text size="sm" ff="monospace">{r.code?.code ?? "—"}</Text></Table.Td>
+                  <Table.Td><span className={classes.rank} data-top={i < 3 || undefined}>{i + 1}</span></Table.Td>
+                  <Table.Td><ReferralPerson user={r.user} /></Table.Td>
+                  <Table.Td><span className={classes.mono}>{r.code?.code ?? "—"}</span></Table.Td>
                   <Table.Td><Text size="sm" fw={600}>{num(r.total)}</Text></Table.Td>
-                  <Table.Td><Badge variant="light" color="teal">{num(r.rewarded)}</Badge></Table.Td>
+                  <Table.Td>
+                    <div className={classes.rate}>
+                      <Text size="sm" fw={600}>{num(r.rewarded)}</Text>
+                      <Progress value={r.total ? (r.rewarded / r.total) * 100 : 0} size="xs" radius="xl" color="teal" className={classes.rateBar} />
+                    </div>
+                  </Table.Td>
                   <Table.Td>
                     {r.user && r.code ? (
                       <Switch

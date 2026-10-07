@@ -853,12 +853,23 @@ export type ReferralSettings = {
   maxRewardsPerUser: number;
 };
 
+export type RewardCouponState = "ready" | "used" | "expired" | "off";
+
+export type MyRewardCoupon = {
+  code: string;
+  state: RewardCouponState;
+  percentOff: number;
+  expiresAt: string | null;
+  usedAt: string | null;
+  usedFor: string;
+};
+
 export type MyReferralRow = {
   id: string;
   name: string;
   status: "pending" | "rewarded" | "closed";
   createdAt: string;
-  coupon: { code: string; used: boolean; expiresAt: string | null } | null;
+  coupon: MyRewardCoupon | null;
 };
 
 export type MyReferrals = {
@@ -882,7 +893,16 @@ export type AdminReferral = {
   rewardedAt: string | null;
   referrer: ReferralUserRef | null;
   referee: ReferralUserRef | null;
-  coupon: { code: string; uses: number; expiresAt: string | null; active: boolean } | null;
+  coupon: {
+    code: string;
+    state: RewardCouponState;
+    percentOff: number;
+    uses: number;
+    active: boolean;
+    expiresAt: string | null;
+    usedAt: string | null;
+    usedFor: string;
+  } | null;
 };
 
 export type AdminReferralPage = {
@@ -896,6 +916,7 @@ export type ReferralOverview = Record<ReferralStatus, number> & {
   total: number;
   flagged: number;
   couponsRedeemed: number;
+  couponsReady: number;
   codes: number;
 };
 

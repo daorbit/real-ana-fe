@@ -3,15 +3,15 @@ import { useAdminReferralActionMutation } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import type { AdminReferral } from "@/shared/types";
 
-type Action = "reward" | "reject" | "revoke";
+export type ReferralAction = "reward" | "reject" | "revoke";
 
-const COPY: Record<Action, { title: string; confirmLabel: string; color: string; done: string }> = {
+const COPY: Record<ReferralAction, { title: string; confirmLabel: string; color: string; done: string }> = {
   reward: { title: "Reward this referral?", confirmLabel: "Issue coupon", color: "teal", done: "Coupon issued to the referrer." },
   reject: { title: "Reject this referral?", confirmLabel: "Reject", color: "red", done: "Referral rejected." },
   revoke: { title: "Revoke this reward?", confirmLabel: "Revoke", color: "red", done: "Reward revoked and coupon turned off." },
 };
 
-const BODY: Record<Action, string> = {
+const BODY: Record<ReferralAction, string> = {
   reward: "Creates a single-use coupon for the referrer with the current program discount, even if they are over the reward cap.",
   reject: "Marks the referral as not eligible. No coupon is issued. Use this for self-referrals or fake accounts.",
   revoke: "Turns off the coupon issued for this referral. If it was already used, the past discount stays as it is.",
@@ -21,7 +21,7 @@ export function useReferralActions() {
   const [run] = useAdminReferralActionMutation();
   const [busy, setBusy] = useState<string | null>(null);
 
-  const act = (referral: AdminReferral, action: Action) => {
+  const act = (referral: AdminReferral, action: ReferralAction) => {
     const copy = COPY[action];
     confirmDelete({
       title: copy.title,

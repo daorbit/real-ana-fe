@@ -4,10 +4,11 @@ import { Info } from "lucide-react";
 import { useGetMyReferralsQuery } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
 import { BillingSkeleton } from "@/shared/ui/Skeletons";
-import { num } from "@/shared/lib";
+import { referralTotals, rewardCoupons } from "../lib/rewards";
 import { ReferralInviteCard } from "./ReferralInviteCard";
+import { ReferralStats } from "./ReferralStats";
+import { RewardWallet } from "./RewardWallet";
 import { ReferralHistory } from "./ReferralHistory";
-import classes from "./Referrals.module.css";
 
 export function ReferralsTab() {
   const { t } = useTranslation();
@@ -36,29 +37,12 @@ export function ReferralsTab() {
     );
   }
 
-  const rewarded = data.referrals.filter((r) => r.status === "rewarded").length;
-  const unused = data.referrals.filter((r) => r.coupon && !r.coupon.used).length;
-
   return (
-    <Stack gap={28}>
+    <Stack gap={32}>
       <ReferralInviteCard data={data} />
-
-      <div className={classes.stats}>
-        <div className={classes.stat}>
-          <span className={classes.statLabel}>{t("referrals.statJoined", "Joined with your link")}</span>
-          <span className={classes.statValue}>{num(data.referrals.length)}</span>
-        </div>
-        <div className={classes.stat}>
-          <span className={classes.statLabel}>{t("referrals.statRewards", "Coupons earned")}</span>
-          <span className={classes.statValue}>{num(rewarded)}</span>
-        </div>
-        <div className={classes.stat}>
-          <span className={classes.statLabel}>{t("referrals.statUnused", "Ready to use")}</span>
-          <span className={classes.statValue}>{num(unused)}</span>
-        </div>
-      </div>
-
-      <ReferralHistory rows={data.referrals} />
+      <ReferralStats totals={referralTotals(data.referrals)} />
+      <RewardWallet coupons={rewardCoupons(data.referrals)} />
+      <ReferralHistory rows={data.referrals} qualifyOn={data.qualifyOn} />
     </Stack>
   );
 }

@@ -1,35 +1,15 @@
 import { useEffect, useState } from "react";
-import {
-  ActionIcon, Badge, Card, Center, Group, Loader, Pagination, SegmentedControl, Stack, Table, Text, TextInput, Tooltip,
-} from "@mantine/core";
-import { Ban, Flag, Gift, Search, Undo2, Users } from "lucide-react";
-import { useGetAdminReferralsQuery } from "@/app/store";
+import { Badge, Card, Center, Group, Loader, Pagination, SegmentedControl, Stack, Table, Text, TextInput, Tooltip } from "@mantine/core";
+import { ArrowRight, Search, Users } from "lucide-react";
+import { useGetAdminReferralOverviewQuery, useGetAdminReferralsQuery } from "@/app/store";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { num, shortDate } from "@/shared/lib";
-import type { AdminReferral, ReferralUserRef } from "@/shared/types";
 import { useReferralActions } from "../hooks/useReferralActions";
 import { REFERRAL_STATUS_FILTERS, REFERRAL_STATUS_META } from "../lib/referralStatus";
-
-function Person({ user }: { user: ReferralUserRef | null }) {
-  if (!user) return <Text size="sm" c="dimmed">Deleted account</Text>;
-  return (
-    <div>
-      <Text size="sm" fw={500} lineClamp={1}>{user.name}</Text>
-      <Text size="xs" c="dimmed" lineClamp={1}>{user.email}</Text>
-    </div>
-  );
-}
-
-function CouponCell({ coupon }: { coupon: AdminReferral["coupon"] }) {
-  if (!coupon) return <Text size="sm" c="dimmed">—</Text>;
-  const state = !coupon.active ? "Off" : coupon.uses > 0 ? "Used" : coupon.expiresAt && new Date(coupon.expiresAt) < new Date() ? "Expired" : "Unused";
-  return (
-    <div>
-      <Text size="sm" ff="monospace">{coupon.code}</Text>
-      <Text size="xs" c="dimmed">{state}{coupon.expiresAt ? ` · until ${shortDate(coupon.expiresAt)}` : ""}</Text>
-    </div>
-  );
-}
+import { ReferralPerson } from "./ReferralPerson";
+import { AdminCouponCell } from "./AdminCouponCell";
+import { ReferralRowActions } from "./ReferralRowActions";
+import classes from "./ReferralAdmin.module.css";
 
 export function ReferralListPanel() {
   const [query, setQuery] = useState("");
@@ -45,8 +25,14 @@ export function ReferralListPanel() {
   useEffect(() => setPage(1), [search, status]);
 
   const { data, isLoading, isFetching } = useGetAdminReferralsQuery({ q: search || undefined, status: status || undefined, page });
+  const { data: overview } = useGetAdminReferralOverviewQuery();
   const { act, busy } = useReferralActions();
   const rows = data?.referrals ?? [];
+
+  const filters = REFERRAL_STATUS_FILTERS.map((f) => {
+    const count = overview ? (f.value ? overview[f.value as keyof typeof REFERRAL_STATUS_META] : overview.total) : null;
+    return { value: f.value, label: count === null ? f.label : `${f.label} · ${num(count)}` };
+  });
 
   return (
     <Stack gap="md">
@@ -59,7 +45,7 @@ export function ReferralListPanel() {
           w={{ base: "100%", sm: 320 }}
           rightSection={isFetching ? <Loader size={14} /> : null}
         />
-        <SegmentedControl value={status} onChange={setStatus} data={REFERRAL_STATUS_FILTERS} />
+        <SegmentedControl value={status} onChange={setStatus} data={filters} size="xs" />
       </Group>
 
       <Card withBorder radius="lg" p={0}>
@@ -68,64 +54,51 @@ export function ReferralListPanel() {
         ) : !rows.length ? (
           <EmptyState compact icon={Users} title="No referrals found" description="Referrals appear here as people sign up with a referral link." />
         ) : (
-          <Table.ScrollContainer minWidth={980}>
-            <Table verticalSpacing="sm" horizontalSpacing="md" highlightOnHover>
+          <Table.ScrollContainer minWidth={1000}>
+            <Table verticalSpacing="md" horizontalSpacing="lg" highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Referrer</Table.Th>
-                  <Table.Th>Joined user</Table.Th>
-                  <Table.Th>Code</Table.Th>
+                  <Table.Th>Referral</Table.Th>
                   <Table.Th>Status</Table.Th>
                   <Table.Th>Reward coupon</Table.Th>
-                  <Table.Th>Date</Table.Th>
+                  <Table.Th>Joined</Table.Th>
                   <Table.Th />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {rows.map((r) => {
                   const meta = REFERRAL_STATUS_META[r.status];
-                  const rowBusy = busy === r.id;
                   return (
                     <Table.Tr key={r.id}>
-                      <Table.Td><Person user={r.referrer} /></Table.Td>
-                      <Table.Td><Person user={r.referee} /></Table.Td>
-                      <Table.Td><Text size="sm" ff="monospace">{r.code}</Text></Table.Td>
                       <Table.Td>
-                        <Group gap={6} wrap="nowrap">
-                          <Badge variant="light" color={meta.color}>{meta.label}</Badge>
-                          {r.flagged && (
-                            <Tooltip label="Same network as another referral from this referrer. Not rewarded automatically.">
-                              <Flag size={14} color="var(--mantine-color-red-5)" />
-                            </Tooltip>
-                          )}
-                        </Group>
+                        <div className={classes.pair}>
+                          <ReferralPerson user={r.referrer} role="Referrer" />
+                          <ArrowRight size={14} className={classes.pairArrow} />
+                          <ReferralPerson user={r.referee} role="Joined" />
+                        </div>
                       </Table.Td>
-                      <Table.Td><CouponCell coupon={r.coupon} /></Table.Td>
-                      <Table.Td><Text size="sm">{shortDate(r.createdAt)}</Text></Table.Td>
                       <Table.Td>
-                        <Group gap={4} justify="flex-end" wrap="nowrap">
-                          {r.status === "pending" && (
-                            <>
-                              <Tooltip label="Issue reward coupon">
-                                <ActionIcon variant="subtle" color="teal" loading={rowBusy} onClick={() => act(r, "reward")} aria-label="Reward">
-                                  <Gift size={15} />
-                                </ActionIcon>
+                        <Stack gap={4} align="flex-start">
+                          <Group gap={6} wrap="nowrap">
+                            <Badge variant="light" color={meta.color}>{meta.label}</Badge>
+                            {r.flagged && (
+                              <Tooltip label="Same network as another referral from this referrer. Not rewarded automatically." multiline w={240}>
+                                <Badge variant="outline" color="red">Flagged</Badge>
                               </Tooltip>
-                              <Tooltip label="Reject">
-                                <ActionIcon variant="subtle" color="red" disabled={rowBusy} onClick={() => act(r, "reject")} aria-label="Reject">
-                                  <Ban size={15} />
-                                </ActionIcon>
-                              </Tooltip>
-                            </>
-                          )}
-                          {r.status === "rewarded" && (
-                            <Tooltip label="Revoke reward">
-                              <ActionIcon variant="subtle" color="red" loading={rowBusy} onClick={() => act(r, "revoke")} aria-label="Revoke">
-                                <Undo2 size={15} />
-                              </ActionIcon>
-                            </Tooltip>
-                          )}
-                        </Group>
+                            )}
+                          </Group>
+                          <span className={classes.muted}>
+                            Code <span className={classes.mono}>{r.code}</span>
+                          </span>
+                        </Stack>
+                      </Table.Td>
+                      <Table.Td><AdminCouponCell coupon={r.coupon} /></Table.Td>
+                      <Table.Td>
+                        <Text size="sm">{shortDate(r.createdAt)}</Text>
+                        {r.rewardedAt && <span className={classes.muted}>Rewarded {shortDate(r.rewardedAt)}</span>}
+                      </Table.Td>
+                      <Table.Td>
+                        <ReferralRowActions referral={r} busy={busy === r.id} onAct={act} />
                       </Table.Td>
                     </Table.Tr>
                   );
@@ -136,10 +109,10 @@ export function ReferralListPanel() {
         )}
       </Card>
 
-      {data && data.pages > 1 && (
+      {data && data.total > 0 && (
         <Group justify="space-between">
           <Text size="sm" c="dimmed">{num(data.total)} referrals</Text>
-          <Pagination value={page} onChange={setPage} total={data.pages} size="sm" />
+          {data.pages > 1 && <Pagination value={page} onChange={setPage} total={data.pages} size="sm" />}
         </Group>
       )}
     </Stack>
