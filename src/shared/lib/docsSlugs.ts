@@ -14,6 +14,7 @@ export const DOCS_SLUGS = {
   overview: "/overview",
   demo: "/demo",
   billing: "/billing",
+  referrals: "/referrals",
   tracking: "/tracking",
   mobileTracking: "/mobile-tracking",
   scriptOptions: "/script-options",

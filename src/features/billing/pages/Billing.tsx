@@ -118,7 +118,7 @@ export default function Billing() {
       <PageHeader
         title={t("billing.title")}
         description={t("billing.description")}
-        docsPath={DOCS_SLUGS.billing}
+        docsPath={tab === "referrals" ? DOCS_SLUGS.referrals : DOCS_SLUGS.billing}
         actions={<PageHelpButton />}
       />
 
