@@ -30,7 +30,7 @@ export const NOTIFICATION_GROUPS: NotificationGroup[] = [
     descriptionKey: "activity.prefGroup.billingDesc",
     description: "Payments, plan renewals and usage limits.",
     icon: CreditCard,
-    types: ["plan.ending", "payment.received", "payment.failed", "quota.exceeded"],
+    types: ["plan.ending", "payment.received", "payment.failed", "quota.exceeded", "referral.rewarded"],
   },
   {
     id: "activity",

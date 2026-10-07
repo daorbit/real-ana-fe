@@ -25,6 +25,7 @@ import { UsageOverviewTab } from "../components/usage/UsageOverviewTab";
 import { PlanCheckoutModal } from "../components/PlanCheckoutModal";
 import { AddonCheckoutModal } from "../components/AddonCheckoutModal";
 import { CheckoutOutcome } from "../components/CheckoutOutcome";
+import { ReferralsTab } from "@/features/referrals/components/ReferralsTab";
 import { useTitle } from "@/shared/lib/useTitle";
 
 /**
@@ -227,6 +228,10 @@ export default function Billing() {
               ) : (
                 <Receipts workspaceId={selectedWorkspaceId ?? ""} />
               )}
+            </Tabs.Panel>
+
+            <Tabs.Panel value="referrals">
+              <ReferralsTab />
             </Tabs.Panel>
           </BillingTabs>
         </Stack>

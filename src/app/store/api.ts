@@ -25,6 +25,7 @@ import type {
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
   Coupon, CouponCheckResult, Invoice, QuotaSummary, UsageHistory,
+  MyReferrals, ReferralSettings, AdminReferralPage, ReferralOverview, TopReferrer,
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
@@ -123,7 +124,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -2133,6 +2134,58 @@ export const api = createApi({
       invalidatesTags: ["Coupon"],
     }),
 
+    getMyReferrals: build.query<MyReferrals, void>({
+      query: () => "/api/referrals/me",
+      providesTags: ["Referral"],
+    }),
+
+    claimReferral: build.mutation<{ ok: true }, string>({
+      query: (code) => ({ url: "/api/referrals/claim", method: "POST", body: { code } }),
+      invalidatesTags: ["Referral"],
+    }),
+
+    getAdminReferralSettings: build.query<ReferralSettings, void>({
+      query: () => "/api/admin/referrals/settings",
+      providesTags: ["AdminReferral"],
+    }),
+
+    saveAdminReferralSettings: build.mutation<ReferralSettings, Partial<ReferralSettings>>({
+      query: (body) => ({ url: "/api/admin/referrals/settings", method: "PUT", body }),
+      invalidatesTags: ["AdminReferral"],
+    }),
+
+    getAdminReferralOverview: build.query<ReferralOverview, void>({
+      query: () => "/api/admin/referrals/overview",
+      providesTags: ["AdminReferral"],
+    }),
+
+    getAdminReferrals: build.query<AdminReferralPage, { q?: string; status?: string; page?: number }>({
+      query: ({ q, status, page }) => {
+        const p = new URLSearchParams();
+        if (q) p.set("q", q);
+        if (status) p.set("status", status);
+        if (page && page > 1) p.set("page", String(page));
+        const qs = p.toString();
+        return `/api/admin/referrals${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: ["AdminReferral"],
+    }),
+
+    getAdminTopReferrers: build.query<{ referrers: TopReferrer[] }, void>({
+      query: () => "/api/admin/referrals/top",
+      providesTags: ["AdminReferral"],
+    }),
+
+    adminReferralAction: build.mutation<{ ok: true; couponCode?: string }, { id: string; action: "reward" | "reject" | "revoke" }>({
+      query: ({ id, action }) => ({ url: `/api/admin/referrals/${id}/${action}`, method: "POST" }),
+      invalidatesTags: ["AdminReferral"],
+    }),
+
+    setAdminReferralCodeActive: build.mutation<{ ok: true; active: boolean }, { userId: string; active: boolean }>({
+      query: ({ userId, active }) => ({ url: `/api/admin/referrals/codes/${userId}`, method: "PUT", body: { active } }),
+      invalidatesTags: ["AdminReferral"],
+    }),
+
     // ---- Google Reviews ----
 
     getGoogleReviewsStatus: build.query<GoogleReviewsStatus, string>({
@@ -2538,6 +2591,15 @@ export const {
   useGetAdminCouponsQuery,
   useSaveAdminCouponMutation,
   useDeleteAdminCouponMutation,
+  useGetMyReferralsQuery,
+  useClaimReferralMutation,
+  useGetAdminReferralSettingsQuery,
+  useSaveAdminReferralSettingsMutation,
+  useGetAdminReferralOverviewQuery,
+  useGetAdminReferralsQuery,
+  useGetAdminTopReferrersQuery,
+  useAdminReferralActionMutation,
+  useSetAdminReferralCodeActiveMutation,
   useGetNotificationCountQuery,
   useGetNotificationsQuery,
   useLazyGetNotificationsQuery,

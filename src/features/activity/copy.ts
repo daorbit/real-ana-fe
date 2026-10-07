@@ -255,6 +255,17 @@ export function notificationCopy(
         body: preview,
       };
     }
+
+    case "referral.rewarded": {
+      const percent = str(d, "percentOff");
+      const code = str(d, "couponCode");
+      return {
+        title: t("activity.referralRewarded.title", "You earned a referral reward"),
+        body: percent
+          ? t("activity.referralRewarded.body", "Someone you invited joined. Use {{code}} for {{percent}}% off.", { code, percent })
+          : t("activity.referralRewarded.bodyNoPercent", "Someone you invited joined. A coupon is waiting in Billing."),
+      };
+    }
   }
 }
 
@@ -283,6 +294,7 @@ export function notificationTypeLabel(type: NotificationType, t: TFunction): str
     "admin.message": ["activity.pref.adminMessage", "Product announcements"],
     "security.alert": ["activity.pref.securityAlert", "Security alerts"],
     "form.submission": ["activity.pref.formSubmission", "Form submissions"],
+    "referral.rewarded": ["activity.pref.referralRewarded", "Referral rewards"],
   };
 
   const [key, fallback] = labels[type];

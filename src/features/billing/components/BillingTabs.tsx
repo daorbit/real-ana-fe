@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Tabs } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Activity, Layers, Receipt, ShoppingCart } from "lucide-react";
+import { Activity, Gift, Layers, Receipt, ShoppingCart } from "lucide-react";
 import type { BillingTab } from "../hooks/useBillingView";
 import classes from "./BillingTabs.module.css";
 
@@ -20,6 +20,7 @@ export function BillingTabs({
     { value: "usage", icon: Activity, label: t("billing.tabUsage", "Usage") },
     { value: "addons", icon: ShoppingCart, label: t("billing.tabAddons") },
     { value: "history", icon: Receipt, label: t("billing.tabHistory") },
+    { value: "referrals", icon: Gift, label: t("billing.tabReferrals", "Refer & earn") },
   ] as const;
 
   return (

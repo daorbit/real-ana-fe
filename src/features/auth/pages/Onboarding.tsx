@@ -23,6 +23,7 @@ import type { ReferralSource, Site } from "@/shared/types";
 import { WELCOME_PENDING_KEY } from "@/shared/ui/welcomePending";
 import s from "@/features/auth/components/onboarding/Onboarding.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
+import { useClaimPendingReferral } from "@/features/referrals/hooks/useClaimPendingReferral";
 
 const STEPS = [
   {
@@ -163,6 +164,7 @@ function SetupBar({
 
 export default function Onboarding() {
   useTitle("Set up");
+  useClaimPendingReferral();
   const nav = useNavigate();
   const { setActive, workspaces } = useWorkspace();
   const { user, updateProfile } = useAuth();

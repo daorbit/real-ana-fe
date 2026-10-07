@@ -62,6 +62,7 @@ const ComparePlans = lazy(() => import("@/features/billing/pages/ComparePlans"))
 const AdminBilling = lazy(() => import("@/features/admin/pages/AdminBilling"));
 const AdminBroadcast = lazy(() => import("@/features/admin/pages/AdminBroadcast"));
 const AdminDatabase = lazy(() => import("@/features/admin/pages/AdminDatabase"));
+const AdminReferrals = lazy(() => import("@/features/referralAdmin/pages/AdminReferrals"));
 const Onboarding = lazy(() => import("@/features/auth/pages/Onboarding"));
 const PublicDashboard = lazy(() => import("@/features/analytics/pages/PublicDashboard"));
 const PublicSeoReport = lazy(() => import("@/features/seo/pages/PublicSeoReport"));
@@ -295,6 +296,7 @@ export default function App() {
                 <Route path="/app/admin/billing" element={<AdminBilling />} />
                 <Route path="/app/admin/broadcast" element={<AdminBroadcast />} />
                 <Route path="/app/admin/database" element={<AdminDatabase />} />
+                <Route path="/app/admin/referrals" element={<AdminReferrals />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

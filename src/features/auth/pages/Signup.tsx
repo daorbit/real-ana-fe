@@ -26,6 +26,7 @@ import * as v from "@/shared/lib/validate";
 import { CURRENCIES, setStoredCurrency } from "@/shared/lib/currency";
 import type { Currency } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
+import { storePendingRef } from "@/features/referrals/lib/pendingRef";
 
 type Touched = Record<string, boolean>;
 
@@ -44,6 +45,7 @@ export default function Signup() {
     if ((CURRENCIES as readonly string[]).includes(currency ?? "")) {
       setStoredCurrency(currency as Currency);
     }
+    storePendingRef(params.get("ref"));
   }, [params]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");

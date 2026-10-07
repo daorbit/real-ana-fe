@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, TrendingUp,
-  LayoutDashboard, Flag, Settings,
+  LayoutDashboard, Flag, Settings, Gift,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 
@@ -73,5 +73,6 @@ export const ADMIN_ITEMS: NavItem[] = [
   { to: "/app/impersonate", labelKey: "nav.viewAsUser", label: "Impersonate", icon: Users },
   { to: "/app/demo-usage", labelKey: "nav.demoUsage", label: "Demo usage", icon: PlayCircle },
   { to: "/app/admin/billing", labelKey: "nav.adminBilling", label: "Plans & addons", icon: CreditCard },
+  { to: "/app/admin/referrals", labelKey: "nav.adminReferrals", label: "Referrals", icon: Gift },
   { to: "/app/admin/database", labelKey: "nav.adminDatabase", label: "Database", icon: Database },
 ];

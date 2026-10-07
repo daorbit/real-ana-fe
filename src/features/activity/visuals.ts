@@ -15,6 +15,7 @@ import {
   UserPlus,
   UserRoundCheck,
   Inbox,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 import type { NotificationType } from "@/shared/types";
@@ -62,6 +63,7 @@ export const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> 
   "admin.message": { icon: Megaphone, color: "indigo" },
   "security.alert": { icon: AlertTriangle, color: "red", severity: "critical" },
   "form.submission": { icon: Inbox, color: "teal", image: formSubmissionLogo },
+  "referral.rewarded": { icon: Gift, color: "teal" },
 };
 
 

@@ -47,6 +47,7 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/settings/security": () => import("@/features/auth/pages/Settings"),
   "/app/billing": () => import("@/features/billing/pages/Billing"),
   "/app/billing/plans": () => import("@/features/billing/pages/ComparePlans"),
+  "/app/admin/referrals": () => import("@/features/referralAdmin/pages/AdminReferrals"),
 };
 
 const pending = new Map<string, Promise<void>>();

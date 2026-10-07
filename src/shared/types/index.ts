@@ -842,6 +842,70 @@ export type CouponCheckResult = {
   coupon?: { code: string; percentOff: number };
 };
 
+export type ReferralQualifyOn = "signup" | "first_payment";
+export type ReferralStatus = "pending" | "rewarded" | "rejected" | "revoked";
+
+export type ReferralSettings = {
+  enabled: boolean;
+  qualifyOn: ReferralQualifyOn;
+  rewardPercentOff: number;
+  rewardValidDays: number;
+  maxRewardsPerUser: number;
+};
+
+export type MyReferralRow = {
+  id: string;
+  name: string;
+  status: "pending" | "rewarded" | "closed";
+  createdAt: string;
+  coupon: { code: string; used: boolean; expiresAt: string | null } | null;
+};
+
+export type MyReferrals = {
+  enabled: boolean;
+  code: string | null;
+  active: boolean;
+  qualifyOn?: ReferralQualifyOn;
+  rewardPercentOff?: number;
+  rewardValidDays?: number;
+  referrals: MyReferralRow[];
+};
+
+export type ReferralUserRef = { id: string; name: string; email: string };
+
+export type AdminReferral = {
+  id: string;
+  code: string;
+  status: ReferralStatus;
+  flagged: boolean;
+  createdAt: string;
+  rewardedAt: string | null;
+  referrer: ReferralUserRef | null;
+  referee: ReferralUserRef | null;
+  coupon: { code: string; uses: number; expiresAt: string | null; active: boolean } | null;
+};
+
+export type AdminReferralPage = {
+  referrals: AdminReferral[];
+  total: number;
+  page: number;
+  pages: number;
+};
+
+export type ReferralOverview = Record<ReferralStatus, number> & {
+  total: number;
+  flagged: number;
+  couponsRedeemed: number;
+  codes: number;
+};
+
+export type TopReferrer = {
+  user: ReferralUserRef | null;
+  total: number;
+  rewarded: number;
+  code: { code: string; active: boolean } | null;
+};
+
 /** A row in the admin's user switcher. */
 export type AdminUser = {
   id: string;
@@ -2497,7 +2561,8 @@ export type NotificationType =
   | "lead.captured"
   | "admin.message"
   | "security.alert"
-  | "form.submission";
+  | "form.submission"
+  | "referral.rewarded";
 
 /**
  * One row in the panel.

@@ -5,8 +5,8 @@ import {
 } from "@/shared/lib/currency";
 import type { BillingCycle, Currency } from "@/shared/types";
 
-export type BillingTab = "plans" | "usage" | "addons" | "history";
-const BILLING_TABS: BillingTab[] = ["plans", "usage", "addons", "history"];
+export type BillingTab = "plans" | "usage" | "addons" | "history" | "referrals";
+const BILLING_TABS: BillingTab[] = ["plans", "usage", "addons", "history", "referrals"];
 
 /**
  * Which tab, cycle and currency the page is showing.
