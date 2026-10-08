@@ -11,7 +11,7 @@ import type { Bucket } from "@/shared/types";
 // Accent ramp: light (few visitors) -> dark (many), mixed live from the
 // active theme accent rather than a fixed hue, so switching accent presets
 // re-tints the map along with everything else.
-const RAMP = [10, 25, 40, 55, 70, 85, 100].map(
+const RAMP = [14, 22, 30, 38, 46, 56, 66].map(
   (pct) => `color-mix(in srgb, var(--accent) ${pct}%, var(--surface-2))`
 );
 

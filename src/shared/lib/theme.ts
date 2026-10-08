@@ -271,7 +271,7 @@ type ThemePrefs = {
 };
 
 const DEFAULT_PREFS: ThemePrefs = {
-  mode: "system",
+  mode: "light",
   preset: "none",
   cta: "accent",
   accent: "blue",
@@ -419,11 +419,11 @@ export function buildBgValue(
   return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
 }
 
-export const FIXED_ACCENT = { light: "#0d9488", dark: "#14b8a6" };
+export const FIXED_ACCENT = { light: "#2563eb", dark: "#5b8def" };
 
 const FIXED_CTA = {
-  light: { bg: "#171717", bgHover: "#333333", fg: "#ffffff" },
-  dark: { bg: "#fafafa", bgHover: "#e5e5e5", fg: "#0a0a0a" },
+  light: { bg: "#0f1115", bgHover: "#272a31", fg: "#ffffff" },
+  dark: { bg: "#f2f3f5", bgHover: "#dcdee3", fg: "#0c0d10" },
 };
 
 export function applyTheme(prefs: ThemePrefs) {

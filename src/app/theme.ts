@@ -11,6 +11,8 @@ const DROPDOWN_DEFAULTS = {
   },
 };
 
+const SOFT_HOVER = "color-mix(in srgb, var(--text) 7%, var(--surface-2))";
+
 const DROPDOWN_CLASSES = {
   dropdown: "app-combobox-dropdown",
   option: "app-combobox-option",
@@ -46,8 +48,8 @@ export const theme = createTheme({
     ],
   },
   shadows: {
-    md: "0 8px 24px -8px rgba(0,0,0,0.45)",
-    lg: "0 16px 40px -12px rgba(0,0,0,0.55)",
+    md: "0 1px 3px rgba(15,17,21,0.08), 0 8px 24px -8px rgba(15,17,21,0.18)",
+    lg: "0 2px 6px rgba(15,17,21,0.08), 0 18px 44px -12px rgba(15,17,21,0.24)",
   },
   components: {
  
@@ -129,32 +131,59 @@ export const theme = createTheme({
     Card: { defaultProps: { radius: "md" } },
     Button: Button.extend({
       defaultProps: { radius: "md" },
-      vars: (_theme, props) =>
-        (props.variant === undefined || props.variant === "filled") &&
-        (!props.color || props.color === "emerald")
-          ? {
-              root: {
-                "--button-bg": "var(--cta)",
-                "--button-hover": "var(--cta-hover)",
-                "--button-color": "var(--cta-fg)",
-                "--button-hover-color": "var(--cta-fg)",
-              },
-            }
-          : { root: {} },
+      styles: { label: { fontWeight: 550, letterSpacing: "-0.005em" } },
+      vars: (_theme, props) => {
+        if (props.color && props.color !== "emerald") return { root: {} };
+        if (props.variant === undefined || props.variant === "filled") {
+          return {
+            root: {
+              "--button-bg": "var(--cta)",
+              "--button-hover": "var(--cta-hover)",
+              "--button-color": "var(--cta-fg)",
+              "--button-hover-color": "var(--cta-fg)",
+            },
+          };
+        }
+        if (props.variant === "light") {
+          return {
+            root: {
+              "--button-bg": "var(--surface-2)",
+              "--button-hover": SOFT_HOVER,
+              "--button-color": "var(--text)",
+              "--button-hover-color": "var(--text)",
+              "--button-bd": "1px solid var(--border)",
+            },
+          };
+        }
+        return { root: {} };
+      },
     }),
     ActionIcon: ActionIcon.extend({
-      vars: (_theme, props) =>
-        (props.variant === undefined || props.variant === "filled") &&
-        (!props.color || props.color === "emerald")
-          ? {
-              root: {
-                "--ai-bg": "var(--cta)",
-                "--ai-hover": "var(--cta-hover)",
-                "--ai-color": "var(--cta-fg)",
-                "--ai-hover-color": "var(--cta-fg)",
-              },
-            }
-          : { root: {} },
+      vars: (_theme, props) => {
+        if (props.color && props.color !== "emerald") return { root: {} };
+        if (props.variant === undefined || props.variant === "filled") {
+          return {
+            root: {
+              "--ai-bg": "var(--cta)",
+              "--ai-hover": "var(--cta-hover)",
+              "--ai-color": "var(--cta-fg)",
+              "--ai-hover-color": "var(--cta-fg)",
+            },
+          };
+        }
+        if (props.variant === "light") {
+          return {
+            root: {
+              "--ai-bg": "var(--surface-2)",
+              "--ai-hover": SOFT_HOVER,
+              "--ai-color": "var(--text)",
+              "--ai-hover-color": "var(--text)",
+              "--ai-bd": "1px solid var(--border)",
+            },
+          };
+        }
+        return { root: {} };
+      },
     }),
     Pagination: Pagination.extend({
       vars: (_theme, props) =>

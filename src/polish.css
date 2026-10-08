@@ -207,9 +207,36 @@
  * without touching the filled red buttons, which read from `-filled`.
  *
  * Light mode already lands on a genuine tint, so it is left alone. */
-[data-mantine-color-scheme="dark"] {
+:root[data-mantine-color-scheme="dark"] {
   --mantine-color-red-light: color-mix(in srgb, var(--mantine-color-red-6) 14%, transparent);
   --mantine-color-red-light-hover: color-mix(in srgb, var(--mantine-color-red-6) 20%, transparent);
+  --mantine-color-red-light-color: var(--mantine-color-red-4);
+  --mantine-color-pink-light: color-mix(in srgb, var(--mantine-color-pink-6) 14%, transparent);
+  --mantine-color-pink-light-hover: color-mix(in srgb, var(--mantine-color-pink-6) 20%, transparent);
+  --mantine-color-grape-light: color-mix(in srgb, var(--mantine-color-grape-6) 14%, transparent);
+  --mantine-color-grape-light-hover: color-mix(in srgb, var(--mantine-color-grape-6) 20%, transparent);
+  --mantine-color-violet-light: color-mix(in srgb, var(--mantine-color-violet-6) 14%, transparent);
+  --mantine-color-violet-light-hover: color-mix(in srgb, var(--mantine-color-violet-6) 20%, transparent);
+  --mantine-color-indigo-light: color-mix(in srgb, var(--mantine-color-indigo-6) 14%, transparent);
+  --mantine-color-indigo-light-hover: color-mix(in srgb, var(--mantine-color-indigo-6) 20%, transparent);
+  --mantine-color-blue-light: color-mix(in srgb, var(--mantine-color-blue-6) 14%, transparent);
+  --mantine-color-blue-light-hover: color-mix(in srgb, var(--mantine-color-blue-6) 20%, transparent);
+  --mantine-color-cyan-light: color-mix(in srgb, var(--mantine-color-cyan-6) 14%, transparent);
+  --mantine-color-cyan-light-hover: color-mix(in srgb, var(--mantine-color-cyan-6) 20%, transparent);
+  --mantine-color-teal-light: color-mix(in srgb, var(--mantine-color-teal-6) 14%, transparent);
+  --mantine-color-teal-light-hover: color-mix(in srgb, var(--mantine-color-teal-6) 20%, transparent);
+  --mantine-color-green-light: color-mix(in srgb, var(--mantine-color-green-6) 14%, transparent);
+  --mantine-color-green-light-hover: color-mix(in srgb, var(--mantine-color-green-6) 20%, transparent);
+  --mantine-color-lime-light: color-mix(in srgb, var(--mantine-color-lime-6) 14%, transparent);
+  --mantine-color-lime-light-hover: color-mix(in srgb, var(--mantine-color-lime-6) 20%, transparent);
+  --mantine-color-yellow-light: color-mix(in srgb, var(--mantine-color-yellow-6) 14%, transparent);
+  --mantine-color-yellow-light-hover: color-mix(in srgb, var(--mantine-color-yellow-6) 20%, transparent);
+  --mantine-color-orange-light: color-mix(in srgb, var(--mantine-color-orange-6) 14%, transparent);
+  --mantine-color-orange-light-hover: color-mix(in srgb, var(--mantine-color-orange-6) 20%, transparent);
+  --mantine-color-gray-light: color-mix(in srgb, var(--text) 7%, transparent);
+  --mantine-color-gray-light-hover: color-mix(in srgb, var(--text) 11%, transparent);
+  --mantine-color-dark-light: color-mix(in srgb, var(--text) 7%, transparent);
+  --mantine-color-dark-light-hover: color-mix(in srgb, var(--text) 11%, transparent);
 }
 
 /* ---- Funnel step rows ------------------------------------------------------

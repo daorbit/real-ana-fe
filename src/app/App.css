@@ -27,13 +27,15 @@
   --shell: #000000;
   --rail: #000000;
 
-  --surface: #161616;
-  --surface-2: #1c1c1c;
-  --border: #292929;
-  --border-strong: #3a3a3a;
+  --surface: #111111;
+  --surface-2: #191919;
+  --border: #232323;
+  --border-strong: #303030;
   --text: #f5f5f5;
-  --text-2: #a3a3a3;
-  --muted: #8f8f8f;
+  --text-2: #a8a8a8;
+  --muted: #8c8c8c;
+
+  --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
 
   --violet: #047857;
@@ -44,7 +46,7 @@
   --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
 
 
-  --grad-chart: linear-gradient(180deg, rgba(16,185,129,0.45) 0%, rgba(16,185,129,0) 100%);
+  --grad-chart: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 100%);
 
   --green: #34d399;
   --amber: #f59e0b;
@@ -55,8 +57,8 @@
   --radius-sm: 11px;
   --radius-lg: 20px;
 
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 4px 14px -8px rgba(0,0,0,0.5);
-  --shadow: 0 2px 6px rgba(0,0,0,0.35), 0 20px 48px -20px rgba(0,0,0,0.6);
+  --shadow-sm: var(--edge-light), 0 1px 2px rgba(0,0,0,0.8), 0 6px 16px -6px rgba(0,0,0,0.9);
+  --shadow: var(--edge-light), 0 2px 4px rgba(0,0,0,0.8), 0 22px 44px -18px rgba(0,0,0,0.95);
   --font: "Google Sans Flex", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font);
 
@@ -64,25 +66,26 @@
 }
 
 [data-mantine-color-scheme="light"] {
-  --bg: #f5f5f5;
+  --bg: #f7f7f8;
   --bg-2: #ffffff;
-  --shell: #f5f5f5;
-  --rail: #f5f5f5;
+  --shell: #f7f7f8;
+  --rail: #f7f7f8;
   --surface: #ffffff;
-  --surface-2: #f5f5f5;
-  --border: #e5e5e5;
-  --border-strong: #d4d4d4;
-  --text: #171717;
-  --text-2: #525252;
-  --muted: #737373;
+  --surface-2: #f3f3f5;
+  --border: #e7e7eb;
+  --border-strong: #d8d8de;
+  --text: #0f1115;
+  --text-2: #4a4f5b;
+  --muted: #6b707c;
   --violet: #059669;
   --violet-2: #047857;
   --violet-soft: rgba(5, 150, 105, 0.09);
   --accent: #059669;
   --accent-2: #047857;
   --accent-soft: rgba(5, 150, 105, 0.14);
-  --shadow-sm: 0 1px 2px rgba(16,24,40,0.04), 0 6px 16px -10px rgba(16,24,40,0.10);
-  --shadow: 0 2px 6px rgba(16,24,40,0.05), 0 18px 40px -18px rgba(16,24,40,0.16);
+  --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --shadow-sm: 0 1px 2px rgba(15,17,21,0.04), 0 2px 6px -2px rgba(15,17,21,0.05);
+  --shadow: 0 1px 3px rgba(15,17,21,0.05), 0 14px 32px -14px rgba(15,17,21,0.14);
 }
 
 * { box-sizing: border-box; }
@@ -492,6 +495,13 @@ body { overflow-wrap: break-word; }
   --mantine-color-default-border: var(--border-strong);
 }
 
+[data-mantine-color-scheme="light"] {
+  --mantine-color-body: var(--shell);
+  --mantine-color-default: var(--surface);
+  --mantine-color-default-hover: var(--surface-2);
+  --mantine-color-default-border: var(--border-strong);
+}
+
 [data-mantine-color-scheme="dark"] .mantine-Input-input {
   border-color: var(--border-strong);
   background: var(--surface);
@@ -530,10 +540,37 @@ body { overflow-wrap: break-word; }
 }
 
 
-[data-mantine-color-scheme="dark"] .mantine-Card-root {
+.mantine-Card-root {
   background: var(--surface);
   border-color: var(--border);
   box-shadow: var(--shadow-sm);
+}
+
+.mantine-Button-root[data-variant="default"] {
+  box-shadow: 0 1px 2px rgba(15, 17, 21, 0.05);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="default"],
+[data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="light"],
+[data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="default"],
+[data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="light"] {
+  box-shadow: var(--edge-light), 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Menu-dropdown,
+[data-mantine-color-scheme="dark"] .mantine-Popover-dropdown,
+[data-mantine-color-scheme="dark"] .mantine-Modal-content {
+  border-color: var(--border-strong);
+  box-shadow: var(--edge-light), 0 2px 6px rgba(0, 0, 0, 0.8), 0 24px 56px -16px rgba(0, 0, 0, 0.95);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Menu-dropdown,
+[data-mantine-color-scheme="dark"] .mantine-Popover-dropdown {
+  background: var(--surface);
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Modal-content:not(.running-dialog__content) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--text) 4%, var(--surface)) 0%, var(--surface) 160px);
 }
 
 
@@ -817,9 +854,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   position: relative;
   overflow: hidden;
   border-radius: var(--radius);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--accent) 2%, transparent) 55%),
-    var(--surface);
+  background: var(--surface);
   box-shadow:
     inset 0 0 0 1px var(--border),
     var(--shadow-sm);
