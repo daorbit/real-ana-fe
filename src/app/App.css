@@ -1573,9 +1573,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .world-map { display: block; width: 100%; height: auto; }
-.world-map .country { transition: fill 0.12s ease; }
+.world-map .country { transition: fill-opacity 0.12s ease, stroke 0.12s ease; }
 .world-map .country.has-data { cursor: pointer; }
-.world-map .country.has-data:hover { fill: var(--accent-2); }
+.world-map .country.has-data:hover { fill-opacity: 1; stroke: var(--text); stroke-width: 0.8; }
 .legend-swatch {
   width: 16px; height: 8px; border-radius: 2px; display: inline-block;
 }
@@ -3354,9 +3354,19 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   height: 100%;
   background: var(--shell);
   background-clip: padding-box;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 16px;
   overflow: hidden;
+}
+
+.app-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border: 1px solid var(--border);
+  border-radius: calc(16px - 1px);
+  pointer-events: none;
 }
 
 
@@ -3448,6 +3458,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 @media (max-width: 48em) {
   .app-panel { border-radius: var(--radius-sm); }
   [data-bg-style="textured"] .app-panel::before { border-radius: calc(var(--radius-sm) - 1px); }
+  .app-panel::after { border-radius: calc(var(--radius-sm) - 1px); }
   .app-panel__scroll { padding: var(--mantine-spacing-sm); }
 }
 

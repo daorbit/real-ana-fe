@@ -43,7 +43,7 @@ export function LayoutEditControls({
   onDiscard: () => void;
   onSave: () => void;
   onAdd: () => void;
-  onPreset: (preset: LayoutPreset) => void;
+  onPreset?: (preset: LayoutPreset) => void;
 }) {
   const display = useHomeDisplay();
 
@@ -66,23 +66,27 @@ export function LayoutEditControls({
           <Menu.Item leftSection={<Plus size={14} />} onClick={onAdd}>
             Add widgets
           </Menu.Item>
-          <PresetMenu onPreset={onPreset} />
-          <Menu.Divider />
-          <Menu.Label>Show on Home</Menu.Label>
-          <Menu.Item
-            closeMenuOnClick={false}
-            leftSection={display.greeting ? <Check size={14} /> : <span className={classes.checkSpacer} />}
-            onClick={() => setHomeDisplay({ greeting: !display.greeting })}
-          >
-            Greeting
-          </Menu.Item>
-          <Menu.Item
-            closeMenuOnClick={false}
-            leftSection={display.hero ? <Check size={14} /> : <span className={classes.checkSpacer} />}
-            onClick={() => setHomeDisplay({ hero: !display.hero })}
-          >
-            Summary banner
-          </Menu.Item>
+          {onPreset && (
+            <>
+              <PresetMenu onPreset={onPreset} />
+              <Menu.Divider />
+              <Menu.Label>Show on Home</Menu.Label>
+              <Menu.Item
+                closeMenuOnClick={false}
+                leftSection={display.greeting ? <Check size={14} /> : <span className={classes.checkSpacer} />}
+                onClick={() => setHomeDisplay({ greeting: !display.greeting })}
+              >
+                Greeting
+              </Menu.Item>
+              <Menu.Item
+                closeMenuOnClick={false}
+                leftSection={display.hero ? <Check size={14} /> : <span className={classes.checkSpacer} />}
+                onClick={() => setHomeDisplay({ hero: !display.hero })}
+              >
+                Summary banner
+              </Menu.Item>
+            </>
+          )}
         </Menu.Dropdown>
       </Menu>
     );
@@ -104,16 +108,18 @@ export function LayoutEditControls({
           Done
         </Button>
       )}
-      <Menu position="bottom-end" withinPortal shadow="md" width={240}>
-        <Menu.Target>
-          <Button variant="default" leftSection={<LayoutTemplate size={15} />} rightSection={<ChevronDown size={14} />}>
-            Presets
-          </Button>
-        </Menu.Target>
-        <Menu.Dropdown>
-          <PresetItems onPreset={onPreset} />
-        </Menu.Dropdown>
-      </Menu>
+      {onPreset && (
+        <Menu position="bottom-end" withinPortal shadow="md" width={240}>
+          <Menu.Target>
+            <Button variant="default" leftSection={<LayoutTemplate size={15} />} rightSection={<ChevronDown size={14} />}>
+              Presets
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <PresetItems onPreset={onPreset} />
+          </Menu.Dropdown>
+        </Menu>
+      )}
       <Button variant="default" leftSection={<Plus size={15} />} onClick={onAdd}>
         Add widgets
       </Button>

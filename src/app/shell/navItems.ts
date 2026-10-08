@@ -12,6 +12,9 @@ export type NavItem = {
   labelKey: string;
   label: string;
   icon: typeof Home;
+  external?: boolean;
+  linkUrl?: string;
+  logoUrl?: string;
 };
 
 export type NavGroup = {

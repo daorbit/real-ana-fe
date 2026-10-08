@@ -38,6 +38,7 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/journey": () => import("@/features/journey/pages/Journey"),
   "/app/social": () => import("@/features/social/pages/SocialPosts"),
   "/app/lead-capture": () => import("@/features/leadCapture/pages/LeadCapture"),
+  "/app/link": () => import("@/features/customLinks/pages/LinkFrame"),
   "/app/developers": () => import("@/features/support/pages/Developers"),
   "/app/settings": () => import("@/features/auth/pages/Settings"),
   "/app/settings/profile": () => import("@/features/auth/pages/Settings"),
@@ -53,7 +54,8 @@ const importers: Record<string, () => Promise<unknown>> = {
 const pending = new Map<string, Promise<void>>();
 
 export function prefetchRoute(to: string): Promise<void> {
-  const path = to.split(/[?#]/)[0];
+  const exact = to.split(/[?#]/)[0];
+  const path = exact.startsWith("/app/link/") ? "/app/link" : exact;
   const existing = pending.get(path);
   if (existing) return existing;
   const load = importers[path];

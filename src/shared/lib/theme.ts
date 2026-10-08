@@ -424,11 +424,21 @@ export function buildBgValue(
   return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
 }
 
-export const FIXED_ACCENT = { light: "#2563eb", dark: "#5b8def" };
+export const FIXED_ACCENT = { light: "#007aff", dark: "#0a84ff" };
 
 const FIXED_CTA = {
-  light: { bg: "#0f1115", bgHover: "#272a31", fg: "#ffffff" },
-  dark: { bg: "#f2f3f5", bgHover: "#dcdee3", fg: "#0c0d10" },
+  light: { bg: "#1d1d1f", bgHover: "#333336", fg: "#ffffff" },
+  dark: { bg: "#f5f5f7", bgHover: "#e3e3e8", fg: "#1d1d1f" },
+};
+
+const NEUTRAL_SOFT = {
+  light: "color-mix(in srgb, var(--text) 6%, transparent)",
+  dark: "color-mix(in srgb, var(--text) 9%, transparent)",
+};
+
+const NEUTRAL_SOFT_HOVER = {
+  light: "color-mix(in srgb, var(--text) 10%, transparent)",
+  dark: "color-mix(in srgb, var(--text) 14%, transparent)",
 };
 
 export function applyTheme(input: ThemePrefs) {
@@ -456,18 +466,9 @@ export function applyTheme(input: ThemePrefs) {
   const cta = dark ? FIXED_CTA.dark : FIXED_CTA.light;
 
   const accent = preset.hex;
-
-  const { r: ar, g: ag, b: ab } = hexToRgb(preset.hex);
-  const accentLuminance = (0.299 * ar + 0.587 * ag + 0.114 * ab) / 255;
-  const accent2 =
-    accentLuminance > 0.75
-      ? "var(--text)"
-      : dark
-        ? shade(preset.hex, 0.12)
-        : shade(preset.hex, -0.15);
-  const accentSoft = dark
-    ? `color-mix(in srgb, ${preset.hex} 18%, transparent)`
-    : `color-mix(in srgb, ${preset.hex} 10%, transparent)`;
+  const accent2 = "var(--text)";
+  const accentSoft = dark ? NEUTRAL_SOFT.dark : NEUTRAL_SOFT.light;
+  const accentSoftHover = dark ? NEUTRAL_SOFT_HOVER.dark : NEUTRAL_SOFT_HOVER.light;
 
   root.style.setProperty("--accent", accent);
   root.style.setProperty("--accent-2", accent2);
@@ -497,15 +498,9 @@ export function applyTheme(input: ThemePrefs) {
     root.style.setProperty(`--mantine-color-${name}-filled`, filled);
     root.style.setProperty(`--mantine-color-${name}-filled-hover`, filledHover);
     root.style.setProperty(`--mantine-color-${name}-light`, accentSoft);
-    root.style.setProperty(`--mantine-color-${name}-light-hover`, accentSoft);
-    root.style.setProperty(
-      `--mantine-color-${name}-light-color`,
-      scale[dark ? 4 : 6],
-    );
-    root.style.setProperty(
-      `--mantine-color-${name}-text`,
-      dark ? scale[4] : filled,
-    );
+    root.style.setProperty(`--mantine-color-${name}-light-hover`, accentSoftHover);
+    root.style.setProperty(`--mantine-color-${name}-light-color`, "var(--text)");
+    root.style.setProperty(`--mantine-color-${name}-text`, accent);
     root.style.setProperty(`--mantine-color-${name}-outline`, filled);
     root.style.setProperty(`--mantine-color-${name}-outline-hover`, accentSoft);
   }

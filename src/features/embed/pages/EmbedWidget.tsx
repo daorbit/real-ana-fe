@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Loader } from "@mantine/core";
 import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRenderer";
+import { usePublicAccent } from "@/features/analytics/components/public/usePublicAccent";
 import { usePublicEmbed } from "@/features/embed/hooks/usePublicEmbed";
 import { useEmbedTheme, useReportHeight } from "@/features/embed/hooks/useEmbedChrome";
 import { rangeLong } from "@/features/dashboards/types";
@@ -18,6 +19,7 @@ export default function EmbedWidget() {
 
   useEmbedTheme(embed?.theme, "quantalog-embed");
   useReportHeight(ref, token);
+  usePublicAccent(ref, embed?.brand?.accentColor);
 
   return (
     <div ref={ref} className={classes.root}>
@@ -37,11 +39,13 @@ export default function EmbedWidget() {
               trafficTitle: `${embed.name} — ${rangeLong(embed.range)}`,
             }}
           />
-          <div className={classes.foot}>
-            <a className={classes.brand} href={SITE} target="_blank" rel="noopener noreferrer">
-              Analytics by Quantalog
-            </a>
-          </div>
+          {embed.brand?.showPoweredBy !== false && (
+            <div className={classes.foot}>
+              <a className={classes.brand} href={SITE} target="_blank" rel="noopener noreferrer">
+                Analytics by Quantalog
+              </a>
+            </div>
+          )}
         </>
       )}
     </div>

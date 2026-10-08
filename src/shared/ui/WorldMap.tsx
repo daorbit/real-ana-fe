@@ -2,49 +2,19 @@ import { useMemo, useState } from "react";
 import { Card, Group, Text, Stack, Center, ThemeIcon, SegmentedControl } from "@mantine/core";
 import { Globe2, Map as MapIcon, Satellite } from "lucide-react";
 import { SatelliteMap } from "@/shared/ui/SatelliteMap";
-import { geoMercator, geoPath } from "d3-geo";
-import { feature } from "topojson-client";
-import topo from "world-atlas/countries-110m.json";
 import { countryName } from "@/shared/lib";
 import type { Bucket } from "@/shared/types";
+import { MAP_HEIGHT as HEIGHT, MAP_WIDTH as WIDTH, useWorldPaths } from "@/shared/ui/worldMap/useWorldPaths";
+import { FLAG_PALETTES } from "@/shared/ui/worldMap/flagPalette";
+import { FlagGradients, flagGradientId } from "@/shared/ui/worldMap/FlagGradients";
 
-// Accent ramp: light (few visitors) -> dark (many), mixed live from the
-// active theme accent rather than a fixed hue, so switching accent presets
-// re-tints the map along with everything else.
 const RAMP = [14, 22, 30, 38, 46, 56, 66].map(
   (pct) => `color-mix(in srgb, var(--accent) ${pct}%, var(--surface-2))`
 );
 
-const WIDTH = 800;
-const HEIGHT = 380;
-
-type Feature = {
-  type: string;
-  id?: string;
-  properties: { name: string };
-  geometry: unknown;
-};
-
-/** Project the world once — the topology never changes. */
-function useWorldPaths() {
-  return useMemo(() => {
-    // topojson-client gives us GeoJSON features from the compact topology
-    const fc = feature(topo as any, (topo as any).objects.countries) as unknown as {
-      features: Feature[];
-    };
-
-    const projection = geoMercator()
-      .scale(WIDTH / (2 * Math.PI))
-      .translate([WIDTH / 2, HEIGHT / 1.55]);
-
-    const path = geoPath(projection as any);
-
-    return fc.features.map((f) => ({
-      name: f.properties.name,
-      d: path(f as any) ?? "",
-    }));
-  }, []);
-}
+const LEGEND = [0.4, 0.52, 0.64, 0.76, 0.88, 1].map(
+  (o) => `color-mix(in srgb, var(--text) ${Math.round(o * 55)}%, var(--surface-2))`
+);
 
 export function WorldMap({
   countries,
@@ -79,13 +49,20 @@ export function WorldMap({
 
   const max = Math.max(1, ...byName.values());
 
-  const fillFor = (name: string): string => {
+  const intensity = (v: number) => Math.log(v + 1) / Math.log(max + 1);
+
+  const paintFor = (name: string, code: string | null): { fill: string; opacity: number } => {
     const v = byName.get(name);
-    if (!v) return "var(--surface-2)";
-    // log scale so one dominant country doesn't flatten everybody else
-    const t = Math.log(v + 1) / Math.log(max + 1);
-    return RAMP[Math.min(RAMP.length - 1, Math.floor(t * RAMP.length))];
+    if (!v) return { fill: "var(--surface-2)", opacity: 1 };
+    const t = intensity(v);
+    if (code && FLAG_PALETTES[code]) return { fill: `url(#${flagGradientId(code)})`, opacity: 0.4 + 0.6 * t };
+    return { fill: RAMP[Math.min(RAMP.length - 1, Math.floor(t * RAMP.length))], opacity: 1 };
   };
+
+  const active = useMemo(
+    () => shapes.filter((s) => s.code && (byName.get(s.name) ?? 0) > 0),
+    [shapes, byName],
+  );
 
   const hasData = byName.size > 0;
 
@@ -159,13 +136,16 @@ export function WorldMap({
             role="img"
             aria-label="Visitors by country"
           >
+            <FlagGradients codes={active.map((s) => s.code as string)} />
             {shapes.map((s) => {
               const count = byName.get(s.name) ?? 0;
+              const paint = paintFor(s.name, s.code);
               return (
                 <path
                   key={s.name}
                   d={s.d}
-                  fill={fillFor(s.name)}
+                  fill={paint.fill}
+                  fillOpacity={paint.opacity}
                   stroke="var(--border)"
                   strokeWidth={0.4}
                   className={count ? "country has-data" : "country"}
@@ -180,7 +160,7 @@ export function WorldMap({
 
           <Group gap={4} justify="flex-end" mt="xs" align="center">
             <Text size="xs" c="dimmed" mr={4}>Fewer</Text>
-            {RAMP.map((c) => (
+            {LEGEND.map((c) => (
               <span key={c} className="legend-swatch" style={{ background: c }} />
             ))}
             <Text size="xs" c="dimmed" ml={4}>More</Text>

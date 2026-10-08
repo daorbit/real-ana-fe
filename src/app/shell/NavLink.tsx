@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Text, Tooltip, UnstyledButton } from "@mantine/core";
-import type { Home } from "lucide-react";
+import { ExternalLink, type Home } from "lucide-react";
 import { trace } from "@/shared/lib/analytics";
 import { prefetchRoute } from "@/app/routePrefetch";
 import { isPlainLeftClick, transitionTo } from "@/app/viewTransition";
 import { useAuth } from "@/features/auth/context";
+import { LinkLogo } from "./LinkLogo";
 
 /**
  * One row of the rail.
@@ -17,12 +18,14 @@ export function NavLink({
   to,
   label,
   icon: Icon,
+  logo,
   active,
   collapsed,
 }: {
   to: string;
   label: string;
   icon: typeof Home;
+  logo?: { url: string; logoUrl?: string };
   active: boolean;
   collapsed?: boolean;
 }) {
@@ -55,7 +58,11 @@ export function NavLink({
       onFocus={() => void prefetchRoute(to)}
     >
       <span className="nav-link-icon">
-        <Icon size={collapsed ? 18 : 15} />
+        {logo ? (
+          <LinkLogo url={logo.url} logoUrl={logo.logoUrl} label={label} size={collapsed ? 18 : 15} />
+        ) : (
+          <Icon size={collapsed ? 18 : 15} />
+        )}
       </span>
       {!collapsed && (
         <Text fz={12} fw={active ? 600 : 450} lh={1.4} truncate>
@@ -63,6 +70,49 @@ export function NavLink({
         </Text>
       )}
     </UnstyledButton>
+  );
+
+  return collapsed ? (
+    <Tooltip label={label} position="right" withArrow openDelay={200}>
+      {link}
+    </Tooltip>
+  ) : (
+    link
+  );
+}
+
+export function ExternalNavLink({
+  href,
+  label,
+  logoUrl,
+  collapsed,
+}: {
+  href: string;
+  label: string;
+  logoUrl?: string;
+  collapsed?: boolean;
+}) {
+  const link = (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="nav-link"
+      data-collapsed={collapsed || undefined}
+      aria-label={collapsed ? `${label} (opens in a new tab)` : undefined}
+    >
+      <span className="nav-link-icon">
+        <LinkLogo url={href} logoUrl={logoUrl} label={label} size={collapsed ? 18 : 15} />
+      </span>
+      {!collapsed && (
+        <>
+          <Text fz={12} fw={450} lh={1.4} truncate>
+            {label}
+          </Text>
+          <ExternalLink size={12} className="nav-link-meta" />
+        </>
+      )}
+    </a>
   );
 
   return collapsed ? (

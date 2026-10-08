@@ -1,59 +1,16 @@
-import { useSyncExternalStore } from "react";
+import { useWorkspace } from "@/features/workspace/context";
+import type { CustomLink, CustomLinkMode, NavPrefs } from "@/shared/types";
 
-export type NavPrefs = { hidden: string[]; pinned: string[] };
-
-const KEY = "quantalog.navPrefs";
-const EMPTY: NavPrefs = { hidden: [], pinned: [] };
-export const LOCKED_NAV_ITEMS = new Set(["/app", "/app/settings"]);
-
-const listeners = new Set<() => void>();
-let cache: NavPrefs | null = null;
-
-const strings = (v: unknown): string[] =>
-  Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
-
-function read(): NavPrefs {
-  if (cache) return cache;
-  try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? "null");
-    cache = raw
-      ? {
-          hidden: strings(raw.hidden).filter((to) => !LOCKED_NAV_ITEMS.has(to)),
-          pinned: strings(raw.pinned),
-        }
-      : EMPTY;
-  } catch {
-    cache = EMPTY;
-  }
-  return cache;
-}
-
-function write(next: NavPrefs) {
-  cache = next;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    return;
-  } finally {
-    listeners.forEach((l) => l());
-  }
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  const onStorage = (e: StorageEvent) => {
-    if (e.key !== KEY) return;
-    cache = null;
-    listener();
-  };
-  window.addEventListener("storage", onStorage);
-  return () => {
-    listeners.delete(listener);
-    window.removeEventListener("storage", onStorage);
-  };
-}
-
+export type { CustomLink, CustomLinkMode, NavPrefs };
 export type NavItemState = "pinned" | "shown" | "hidden";
+
+export const EMPTY_NAV_PREFS: NavPrefs = { hidden: [], pinned: [], links: [] };
+export const LOCKED_NAV_ITEMS = new Set(["/app", "/app/settings"]);
+export const MAX_CUSTOM_LINKS = 10;
+
+export function useNavPrefs(): NavPrefs {
+  return useWorkspace().active?.navPrefs ?? EMPTY_NAV_PREFS;
+}
 
 export function navItemState(prefs: NavPrefs, to: string): NavItemState {
   if (prefs.pinned.includes(to)) return "pinned";
@@ -61,30 +18,64 @@ export function navItemState(prefs: NavPrefs, to: string): NavItemState {
   return "shown";
 }
 
-export function setNavItemState(to: string, state: NavItemState) {
-  if (state === "hidden" && LOCKED_NAV_ITEMS.has(to)) return;
-  const prefs = read();
+export function withItemState(prefs: NavPrefs, to: string, state: NavItemState): NavPrefs {
+  if (state === "hidden" && LOCKED_NAV_ITEMS.has(to)) return prefs;
   const hidden = prefs.hidden.filter((x) => x !== to);
   const pinned = prefs.pinned.filter((x) => x !== to);
   if (state === "hidden") hidden.push(to);
   if (state === "pinned") pinned.push(to);
-  write({ hidden, pinned });
+  return { ...prefs, hidden, pinned };
 }
 
-export function moveNavPinned(to: string, delta: -1 | 1) {
-  const prefs = read();
-  const from = prefs.pinned.indexOf(to);
-  const target = from + delta;
-  if (from < 0 || target < 0 || target >= prefs.pinned.length) return;
-  const pinned = [...prefs.pinned];
-  [pinned[from], pinned[target]] = [pinned[target], pinned[from]];
-  write({ ...prefs, pinned });
+const moveIn = <T,>(list: T[], from: number, to: number): T[] => {
+  if (from === to || from < 0 || to < 0 || from >= list.length || to >= list.length) return list;
+  const next = [...list];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+};
+
+export function withPinnedOrder(prefs: NavPrefs, from: number, to: number): NavPrefs {
+  return { ...prefs, pinned: moveIn(prefs.pinned, from, to) };
 }
 
-export function resetNavPrefs() {
-  write(EMPTY);
+export function withLinkOrder(prefs: NavPrefs, from: number, to: number): NavPrefs {
+  return { ...prefs, links: moveIn(prefs.links, from, to) };
 }
 
-export function useNavPrefs(): NavPrefs {
-  return useSyncExternalStore(subscribe, read, () => EMPTY);
+export function withLink(prefs: NavPrefs, link: CustomLink): NavPrefs {
+  const exists = prefs.links.some((l) => l.id === link.id);
+  if (!exists && prefs.links.length >= MAX_CUSTOM_LINKS) return prefs;
+  return {
+    ...prefs,
+    links: exists ? prefs.links.map((l) => (l.id === link.id ? link : l)) : [...prefs.links, link],
+  };
+}
+
+export function withoutLink(prefs: NavPrefs, id: string): NavPrefs {
+  return { ...prefs, links: prefs.links.filter((l) => l.id !== id) };
+}
+
+export function withDefaultPages(prefs: NavPrefs): NavPrefs {
+  return { ...prefs, hidden: [], pinned: [] };
+}
+
+export const LINK_ROUTE = "/app/link";
+
+export function linkPath(slug: string): string {
+  return `${LINK_ROUTE}/${slug}`;
+}
+
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40)
+    .replace(/-+$/, "");
+}
+
+export function newLinkId(): string {
+  return `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 }

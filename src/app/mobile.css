@@ -65,6 +65,10 @@
     border-radius: 0;
   }
 
+  .app-panel::after {
+    display: none;
+  }
+
   .app-panel__scroll {
     padding: 12px 12px calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 16px);
   }

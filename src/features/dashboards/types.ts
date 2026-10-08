@@ -1,5 +1,6 @@
 import type { Placed, WidgetId } from "@/features/analytics/widgetCatalog";
 import type { Stats } from "@/shared/types";
+import type { PublicBrand } from "@/features/analytics/components/public/publicBrand";
 
 export type DashboardRange = "24h" | "7d" | "30d";
 
@@ -76,6 +77,7 @@ export type PublicEmbed = {
   range: DashboardRange;
   theme: EmbedTheme;
   workspace: string;
+  brand?: PublicBrand;
   data: Partial<Stats>;
 };
 

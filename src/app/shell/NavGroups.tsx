@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
 import { useFavouriteDashboards } from "@/features/dashboards/favourites";
-import { NavLink } from "./NavLink";
+import { ExternalNavLink, NavLink } from "./NavLink";
 import { DashboardsTreeNode } from "./DashboardsTreeNode";
 import type { NavGroup } from "./navItems";
 
@@ -34,13 +34,31 @@ function NavGroupBlock({
 
   const isActive = (to: string) =>
     pathname === to || (to !== "/app" && pathname.startsWith(`${to}/`));
-  const holdsCurrent = group.items.some((n) => isActive(n.to));
+  const holdsCurrent = group.items.some((n) => !n.external && isActive(n.to));
   const open = group.collapsible
     ? adminOpen || holdsCurrent
     : ownOpen || holdsCurrent;
   const toggle = group.collapsible ? onToggleAdmin : () => setOwnOpen((v) => !v);
 
-  const rows = group.items.map((n) => {
+  const rows = group.items.map((n, i) => {
+    if (n.external) {
+      return (
+        <ExternalNavLink key={`${i}-${n.to}`} href={n.to} label={n.label} logoUrl={n.logoUrl} collapsed={collapsed} />
+      );
+    }
+    if (n.linkUrl) {
+      return (
+        <NavLink
+          key={n.to}
+          to={n.to}
+          label={n.label}
+          icon={n.icon}
+          logo={{ url: n.linkUrl, logoUrl: n.logoUrl }}
+          active={isActive(n.to)}
+          collapsed={collapsed}
+        />
+      );
+    }
     const label = t(n.labelKey, n.label);
     const active = isActive(n.to) && !(n.to === DASHBOARDS_PATH && onFavourite);
     if (n.to === DASHBOARDS_PATH && !collapsed && favourites.length > 0) {

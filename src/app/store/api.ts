@@ -9,7 +9,7 @@ import type {
   AdminUserPage, AdminUserBilling, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
-  MailLayout, Branding, BrandingInput,
+  MailLayout, Branding, BrandingInput, NavPrefs,
   MediaAsset, MediaListResult, MediaKind, MediaUploadInput,
 } from "@/shared/types";
 import type { Placed } from "@/features/analytics/widgetCatalog";
@@ -941,6 +941,58 @@ export const api = createApi({
           dispatch(
             api.util.updateQueryData("getWorkspaceTheme", workspaceId, (draft) => {
               draft.theme = data.theme;
+            }),
+          );
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    saveNavPrefs: build.mutation<{ navPrefs: NavPrefs | null }, { workspaceId: string; navPrefs: NavPrefs }>({
+      query: ({ workspaceId, navPrefs }) => ({
+        url: `/api/workspaces/${workspaceId}/nav`,
+        method: "PUT",
+        body: navPrefs,
+      }),
+    }),
+
+    uploadNavLinkLogo: build.mutation<
+      { navPrefs: NavPrefs | null },
+      { workspaceId: string; linkId: string; file: string }
+    >({
+      query: ({ workspaceId, linkId, file }) => ({
+        url: `/api/workspaces/${workspaceId}/nav/links/${encodeURIComponent(linkId)}/logo`,
+        method: "POST",
+        body: { file },
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            api.util.updateQueryData("getWorkspaces", undefined, (draft) => {
+              const ws = draft.find((w) => w._id === workspaceId);
+              if (ws) ws.navPrefs = data.navPrefs;
+            }),
+          );
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    clearNavLinkLogo: build.mutation<{ navPrefs: NavPrefs | null }, { workspaceId: string; linkId: string }>({
+      query: ({ workspaceId, linkId }) => ({
+        url: `/api/workspaces/${workspaceId}/nav/links/${encodeURIComponent(linkId)}/logo`,
+        method: "DELETE",
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            api.util.updateQueryData("getWorkspaces", undefined, (draft) => {
+              const ws = draft.find((w) => w._id === workspaceId);
+              if (ws) ws.navPrefs = data.navPrefs;
             }),
           );
         } catch {
@@ -2474,6 +2526,9 @@ export const {
   useSaveLayoutMutation,
   useGetWorkspaceThemeQuery,
   useSaveWorkspaceThemeMutation,
+  useSaveNavPrefsMutation,
+  useUploadNavLinkLogoMutation,
+  useClearNavLinkLogoMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
   useAdminReset2faMutation,

@@ -19,6 +19,12 @@ const NAMES: Record<string, string> = {
   VN: "Vietnam", ZA: "South Africa",
 };
 
+const CODES_BY_NAME = new Map(Object.entries(NAMES).map(([code, name]) => [name, code]));
+
+export function countryCodeByName(name: string): string | null {
+  return CODES_BY_NAME.get(name) ?? null;
+}
+
 export function countryName(code: string): string | null {
   if (!code || code === "unknown") return null;
   return NAMES[code.toUpperCase()] ?? null;

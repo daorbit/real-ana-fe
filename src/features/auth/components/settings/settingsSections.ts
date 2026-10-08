@@ -33,7 +33,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     labelKey: "settings.tabSidebar",
     label: "Sidebar",
     descriptionKey: "settings.sidebarPageDesc",
-    description: "Pin the pages you use most and hide the ones you don't.",
+    description: "Shape the sidebar your whole workspace shares: pin pages, hide the rest and add links to your other tools.",
     icon: PanelLeft,
   },
   {

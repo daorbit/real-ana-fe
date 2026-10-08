@@ -39,7 +39,7 @@ export default function BrandingPage() {
       <form onSubmit={form.submit}>
         <PageHeader
           title="Branding"
-          description={`Choose the name, logo and colour people see on ${active.name}'s forms, payment windows and public dashboard.`}
+          description={`Choose the name, logo and colour people see on ${active.name}'s forms, payment windows, public dashboard and embedded widgets.`}
           docsPath={DOCS_SLUGS.branding}
         />
 

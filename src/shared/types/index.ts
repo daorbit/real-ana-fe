@@ -1045,7 +1045,21 @@ export type Workspace = {
    * creating one assigns Free.
    */
   billing: QuotaSummary;
+  navPrefs?: NavPrefs | null;
 };
+
+export type CustomLinkMode = "external" | "internal";
+
+export type CustomLink = {
+  id: string;
+  label: string;
+  url: string;
+  mode: CustomLinkMode;
+  slug: string;
+  logoUrl: string;
+};
+
+export type NavPrefs = { hidden: string[]; pinned: string[]; links: CustomLink[] };
 
 /**
  * A person's role within one workspace, strongest first.

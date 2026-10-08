@@ -53,6 +53,7 @@ const JourneyTimeline = lazy(() => import("@/features/journey/pages/JourneyTimel
 const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
 const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
 const LeadCapture = lazy(() => import("@/features/leadCapture/pages/LeadCapture"));
+const LinkFrame = lazy(() => import("@/features/customLinks/pages/LinkFrame"));
 const Impersonate = lazy(() => import("@/features/admin/pages/Impersonate"));
 const DemoUsage = lazy(() => import("@/features/admin/pages/DemoUsage"));
 const Settings = lazy(() => import("@/features/auth/pages/Settings"));
@@ -286,6 +287,7 @@ export default function App() {
                 <Route path="/app/social" element={<SocialPosts />} />
                 <Route path="/app/reviews" element={<Reviews />} />
                 <Route path="/app/lead-capture" element={<LeadCapture />} />
+                <Route path="/app/link/:slug" element={<LinkFrame />} />
                 <Route path="/app/developers" element={<Developers />} />
                 <Route path="/app/settings/:section?" element={<Settings />} />
                 <Route path="/app/billing" element={<Billing />} />

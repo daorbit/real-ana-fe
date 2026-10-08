@@ -33,25 +33,6 @@
   color: var(--text-2);
 }
 
-.commit {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  padding: 1px 7px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-family: var(--mantine-font-family-monospace);
-  font-size: 10.5px;
-  color: var(--text-2);
-  transition: border-color 150ms ease, color 150ms ease;
-}
-
-.commit:hover {
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-
 .meta {
   white-space: nowrap;
 }
