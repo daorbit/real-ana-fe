@@ -21,7 +21,7 @@ export function comparisonLabel(comparison: Comparison, range: string): string {
 }
 
 export function statComparison(
-  view: Stats | undefined,
+  view: Stats | null | undefined,
   metric: ComparedMetric,
   range: string,
 ): StatComparison | undefined {
