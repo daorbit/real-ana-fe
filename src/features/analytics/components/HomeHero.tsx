@@ -96,7 +96,7 @@ export function HomeHero({
               <Text size="xs" c="dimmed" fw={500} mb={4}>
                 Visitors today
               </Text>
-              <Text fw={650} fz={22} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+              <Text fw={650} fz={20.5} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
                 {num(visitors)}
               </Text>
             </div>
@@ -104,7 +104,7 @@ export function HomeHero({
               <Text size="xs" c="dimmed" fw={500} mb={4}>
                 Pageviews today
               </Text>
-              <Text fw={650} fz={22} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+              <Text fw={650} fz={20.5} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
                 {num(pageviews)}
               </Text>
             </div>

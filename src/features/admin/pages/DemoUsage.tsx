@@ -138,7 +138,7 @@ function Stat({
         <Icon size={14} />
       </ThemeIcon>
       <Text
-        fz={26}
+        fz={24.5}
         fw={700}
         lh={1.1}
         c={tone === "warn" ? "yellow.5" : undefined}

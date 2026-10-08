@@ -31,7 +31,7 @@
 .title {
   margin: 4px 0 0;
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 24.5px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.025em;
@@ -41,7 +41,7 @@
 .lede {
   margin: 0;
   max-width: 56ch;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.55;
   color: var(--text-2);
 }
@@ -75,7 +75,7 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  font-size: 13.5px;
+  font-size: 12.5px;
   white-space: nowrap;
   text-overflow: ellipsis;
   color: var(--text);
@@ -112,7 +112,7 @@
 
 .code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--text);
@@ -172,14 +172,14 @@
 
 .timelineTitle {
   margin: 3px 0 2px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
 
 .timelineBody {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.45;
   color: var(--text-2);
 }
@@ -201,14 +201,14 @@
 }
 
 .statLabel {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-2);
 }
 
 .statValue {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 26.5px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -230,7 +230,7 @@
 .sectionTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
@@ -238,7 +238,7 @@
 
 .sectionHint {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -272,7 +272,7 @@
   border-radius: 50%;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
   color: var(--text);
 }
@@ -287,7 +287,7 @@
 
 .personName {
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -295,7 +295,7 @@
 }
 
 .personMeta {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -329,7 +329,7 @@
   }
 
   .title {
-    font-size: 22px;
+    font-size: 20.5px;
   }
 
   .linkField {

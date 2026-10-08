@@ -122,7 +122,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 650;
   letter-spacing: -0.01em;
 }
@@ -166,7 +166,7 @@
   min-width: 0;
   padding: 6px 8px;
   font: inherit;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
@@ -258,7 +258,7 @@
   gap: 6px;
   align-items: center;
   min-width: 0;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text);
 }
@@ -286,7 +286,7 @@
 .itemPreview {
   display: -webkit-box;
   overflow: hidden;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
   -webkit-line-clamp: 2;
@@ -322,14 +322,14 @@
 }
 
 .emptyTitle {
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 650;
 }
 
 .emptyText {
   max-width: 260px;
   margin-bottom: 10px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
 }
@@ -375,7 +375,7 @@
   min-height: 0;
   padding: 0 0 12px;
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.7;
   color: var(--text);
   resize: none;

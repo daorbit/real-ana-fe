@@ -14,7 +14,7 @@
 }
 
 .title {
-  font-size: 1.15rem;
+  font-size: 1.0938rem;
   font-weight: 650;
   letter-spacing: -0.015em;
   color: var(--text);
@@ -22,7 +22,7 @@
 
 .subtitle {
   margin-top: 4px;
-  font-size: 0.82rem;
+  font-size: 0.7813rem;
   color: var(--text-2);
 }
 
@@ -30,7 +30,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.8rem;
+  font-size: 0.7688rem;
   font-weight: 550;
   color: var(--accent-2);
   text-decoration: none;
@@ -87,7 +87,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.8438rem;
   color: var(--muted);
 }
 
@@ -99,7 +99,7 @@
   outline: none;
   background: transparent;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 0.9063rem;
   font-weight: 500;
   color: var(--text);
 }
@@ -142,7 +142,7 @@
 
 .hint {
   margin-top: 0.5rem;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--muted);
 }
 
@@ -199,7 +199,7 @@
 }
 
 .listCount {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -264,7 +264,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.92rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
   text-decoration: none;
@@ -292,7 +292,7 @@
   align-items: center;
   gap: 2px 8px;
   margin-top: 3px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }

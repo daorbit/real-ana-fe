@@ -24,7 +24,7 @@
 }
 
 .metricValue {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -48,7 +48,7 @@
     padding: 12px;
   }
   .metricValue {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
@@ -512,7 +512,7 @@
   padding: 12px 18px;
   border-bottom: 1px solid var(--m-line);
   background: var(--m-panel);
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .mailMetaLabel {
@@ -548,7 +548,7 @@
 
 .mailHeading {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.3px;
   color: var(--m-text);
@@ -556,7 +556,7 @@
 
 .mailRange {
   margin-top: 3px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--m-faint);
 }
 
@@ -587,7 +587,7 @@
 }
 
 .mailBlockTitle {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--m-text);
 }
@@ -623,7 +623,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 4px;
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .aiAction strong {
@@ -724,7 +724,7 @@
 
 .seoRow {
   border-top: 1px solid var(--m-line);
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--m-dim);
 }
 
@@ -755,7 +755,7 @@
   border-radius: 8px;
   background: var(--m-accent);
   color: #fff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -786,7 +786,7 @@
 }
 
 .attachmentName {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--m-text);
 }

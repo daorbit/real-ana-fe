@@ -84,7 +84,7 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 650;
   color: var(--text);
   white-space: nowrap;
@@ -165,7 +165,7 @@
 
 .controlsTitle {
   margin: 0 0 18px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.015em;
   color: var(--text);
@@ -204,13 +204,13 @@
 }
 
 .controlTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
 
 .controlBody {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
 }

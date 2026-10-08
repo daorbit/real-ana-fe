@@ -130,7 +130,7 @@
   display: block;
   margin-top: 4px;
   font-family: var(--mantine-font-family-monospace);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.5px;
   word-break: break-all;
   color: var(--mantine-color-text);
@@ -182,7 +182,7 @@
   border: 1px solid var(--border);
   background: var(--surface-2);
   font-family: var(--mantine-font-family-monospace);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 1px;
 }
 

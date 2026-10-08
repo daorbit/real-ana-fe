@@ -79,7 +79,7 @@ function MetricCard({
         </Badge>
       </Group>
 
-      <Text fw={700} fz={22} lh={1.1}>
+      <Text fw={700} fz={20.5} lh={1.1}>
         {format(metric?.p75 ?? null, unit)}
       </Text>
       <Text size="xs" c="dimmed" mt={2}>

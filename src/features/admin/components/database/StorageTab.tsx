@@ -26,7 +26,7 @@ export function StorageTab({ data }: { data: DbStats }) {
               roundCaps
               sections={[{ value: Math.min(100, pct), color: tone }]}
               label={
-                <Text ta="center" fw={800} fz={22} style={{ letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums" }}>
+                <Text ta="center" fw={800} fz={20.5} style={{ letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums" }}>
                   {pct < 1 ? pct.toFixed(1) : Math.round(pct)}%
                 </Text>
               }
@@ -36,7 +36,7 @@ export function StorageTab({ data }: { data: DbStats }) {
                 Plan usage
               </Text>
               <Group gap={6} align="baseline" mt={4}>
-                <Text fw={800} fz={30} style={{ letterSpacing: "-0.03em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}>
+                <Text fw={800} fz={28} style={{ letterSpacing: "-0.03em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}>
                   {bytes(data.used)}
                 </Text>
                 <Text c="dimmed" fz="sm">of {bytes(data.limit)}</Text>

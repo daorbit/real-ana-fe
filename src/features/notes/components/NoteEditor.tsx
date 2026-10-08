@@ -1,9 +1,13 @@
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { ChevronLeft } from "lucide-react";
+import { useDispatch } from "react-redux";
 import { notify } from "@/shared/lib/notify";
+import { deferDelete } from "@/shared/lib/deferDelete";
 import { shortDate } from "@/shared/lib";
+import type { AppDispatch } from "@/app/store";
 import { useNoteDraft } from "@/features/notes/hooks/useNoteDraft";
-import { useDeleteNoteMutation, useUpdateNoteMutation } from "@/features/notes/api";
+import { useNotes } from "@/features/notes/NotesProvider";
+import { hideNote, useDeleteNoteMutation, useUpdateNoteMutation } from "@/features/notes/api";
 import { NoteMenu } from "@/features/notes/components/NoteMenu";
 import { NoteFooter } from "@/features/notes/components/NoteFooter";
 import { PanelControls } from "@/features/notes/components/PanelControls";
@@ -27,6 +31,8 @@ export function NoteEditor({
   onNew: () => void;
 }) {
   const draft = useNoteDraft(note);
+  const dispatch = useDispatch<AppDispatch>();
+  const { open: openNote } = useNotes();
   const [updateNote] = useUpdateNoteMutation();
   const [deleteNote] = useDeleteNoteMutation();
   const current = { title: draft.title, body: draft.body };
@@ -40,15 +46,17 @@ export function NoteEditor({
     }
   };
 
-  const remove = async () => {
+  const remove = () => {
     draft.discard();
     onBack();
-    try {
-      await deleteNote(note.id).unwrap();
-      notify.success("Note deleted");
-    } catch {
-      notify.error("Couldn't delete the note.");
-    }
+    deferDelete({
+      key: `note:${note.id}`,
+      message: "Note deleted",
+      errorMessage: "Couldn't delete the note.",
+      hide: () => dispatch(hideNote(note.id)),
+      commit: () => deleteNote(note.id).unwrap(),
+      onUndo: () => openNote(note.id),
+    });
   };
 
   return (

@@ -34,7 +34,7 @@ export function PublicSeoBody({
     <Stack gap="lg">
       {!hideHeader && (
         <Group justify="space-between" wrap="wrap" gap="xs">
-          <Text fw={700} fz={22} style={{ letterSpacing: "-0.02em" }}>
+          <Text fw={700} fz={20.5} style={{ letterSpacing: "-0.02em" }}>
             SEO audit
           </Text>
           <Tooltip label={dateTime(data.createdAt)} withArrow>

@@ -113,13 +113,13 @@
 }
 
 .railTitle {
-  font-size: 0.95rem;
+  font-size: 0.9063rem;
   font-weight: 600;
   color: var(--onb-ink);
 }
 
 .railMeta {
-  font-size: 0.8rem;
+  font-size: 0.7688rem;
   color: var(--onb-ink-faint);
   font-variant-numeric: tabular-nums;
 }
@@ -200,7 +200,7 @@
 }
 
 .railLabel {
-  font-size: 0.86rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--onb-ink-dim);
 }
@@ -215,7 +215,7 @@
 }
 
 .railHint {
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   color: var(--onb-ink-faint);
 }
 
@@ -235,7 +235,7 @@
   background: transparent;
   color: var(--onb-ink-dim);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
 }
@@ -296,7 +296,7 @@
 /* Tabular figures: without them the counter reflows by a pixel or two on each
    step as digit widths change, and the label beside it twitches. */
 .progressCount {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--onb-ink-faint);
@@ -305,7 +305,7 @@
 }
 
 .progressLabel {
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: -0.005em;
   color: var(--onb-ink);
@@ -389,7 +389,7 @@
 }
 
 .lede {
-  font-size: 1.1rem;
+  font-size: 1.0313rem;
   line-height: 1.5;
   color: var(--onb-ink-dim);
   margin: 0.8rem 0 0;
@@ -425,7 +425,7 @@
 }
 
 .wideTitle {
-  font-size: 1.5rem;
+  font-size: 1.4063rem;
   font-weight: 640;
   line-height: 1.15;
   letter-spacing: -0.022em;
@@ -434,7 +434,7 @@
 }
 
 .wideLede {
-  font-size: 0.92rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   color: var(--onb-ink-dim);
   margin: 0.4rem 0 0;
@@ -445,8 +445,8 @@
    wide steps share — the heading has to line up with the content under it. */
 @media (max-width: 48em) {
   .wideHead { padding: 1.25rem 1.1rem 0; }
-  .wideTitle { font-size: 1.25rem; }
-  .wideLede { font-size: 0.88rem; }
+  .wideTitle { font-size: 1.1875rem; }
+  .wideLede { font-size: 0.8125rem; }
 }
 
 /* ----------------------------------------------------------------- foot --- */
@@ -560,7 +560,7 @@
   .body { padding: 2.5rem 1.25rem 0; }
   .bodyCentred { padding-bottom: 2.5rem; }
   .progressLabel { display: none; }
-  .lede { font-size: 0.95rem; }
+  .lede { font-size: 0.9063rem; }
   .controls { margin-top: 1.75rem; }
   .foot, .footSticky { margin-top: 1.75rem; }
 }
@@ -636,8 +636,8 @@
   }
   .bodyCentred .column { margin-bottom: 0; }
 
-  .title { font-size: 1.75rem; }
-  .lede { font-size: 0.95rem; margin-top: 0.5rem; }
+  .title { font-size: 1.6563rem; }
+  .lede { font-size: 0.9063rem; margin-top: 0.5rem; }
   .controls { margin-top: 1.5rem; }
 
   /* The profile step carries its own Continue inside its form; let that
@@ -684,7 +684,7 @@
     flex: 1;
     height: 44px;
     border-radius: 10px;
-    font-size: 0.95rem;
+    font-size: 0.9063rem;
   }
 }
 

@@ -65,7 +65,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
       <Text size="xs" c="dimmed" fw={500} mb={6}>
         {label}
       </Text>
-      <Text fw={650} fz={22} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+      <Text fw={650} fz={20.5} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
         {value}
       </Text>
     </Box>
@@ -326,7 +326,7 @@ export default function PublicDashboard() {
                     </Text>
                   </Group>
                   <Group align="baseline" gap="sm" wrap="nowrap">
-                    <Text fw={700} fz={56} lh={1} style={{ letterSpacing: "-0.04em" }}>
+                    <Text fw={700} fz={52.5} lh={1} style={{ letterSpacing: "-0.04em" }}>
                       {num(data.live)}
                     </Text>
                     <Text size="sm" c="dimmed" pb={8}>
@@ -338,13 +338,13 @@ export default function PublicDashboard() {
                 <Group gap="xl" wrap="wrap">
                   <div>
                     <Text size="xs" c="dimmed" fw={500} mb={4}>Visitors</Text>
-                    <Text fw={650} fz={26} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+                    <Text fw={650} fz={24.5} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
                       {num(data.visitors)}
                     </Text>
                   </div>
                   <div>
                     <Text size="xs" c="dimmed" fw={500} mb={4}>Pageviews</Text>
-                    <Text fw={650} fz={26} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
+                    <Text fw={650} fz={24.5} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
                       {num(data.pageviews)}
                     </Text>
                   </div>

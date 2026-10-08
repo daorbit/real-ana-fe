@@ -30,7 +30,7 @@
 
 .topTitle {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
 }
@@ -113,7 +113,7 @@
 
 .heroTitle {
   margin: 0;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.028em;
@@ -122,7 +122,7 @@
 
 .heroDesc {
   margin: 2px 0 0;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--text-2);
 }
@@ -146,21 +146,21 @@
   align-items: baseline;
   gap: 8px;
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
 }
 
 .blockHint {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--muted);
 }
 
 .blockDesc {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--muted);
 }
@@ -233,7 +233,7 @@
 }
 
 .cycleName {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -255,19 +255,19 @@
 }
 
 .cyclePriceValue {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
 .cyclePer {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
 }
 
 .cycleNote {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -293,12 +293,12 @@
 }
 
 .statLabel {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--muted);
 }
 
 .statValue {
-  font-size: 28px;
+  font-size: 26.5px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -310,7 +310,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
@@ -336,7 +336,7 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 13.5px;
+  font-size: 12.5px;
   line-height: 1.45;
   color: var(--text-2);
 }
@@ -358,14 +358,14 @@
 
 .summaryTitle {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--muted);
 }
 
 .summaryTotal {
   margin: -12px 0 4px;
-  font-size: 40px;
+  font-size: 37.5px;
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.04em;
@@ -409,7 +409,7 @@
 
 .itemName {
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -417,13 +417,13 @@
 }
 
 .itemSub {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--muted);
 }
 
 .itemValue {
   flex: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--text);
@@ -439,7 +439,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--violet-2);
 }
@@ -466,7 +466,7 @@
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
@@ -484,7 +484,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -531,7 +531,7 @@
   }
 
   .heroTitle {
-    font-size: 24px;
+    font-size: 22.5px;
   }
 
   .cycles,

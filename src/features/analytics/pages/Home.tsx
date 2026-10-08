@@ -8,6 +8,8 @@ import { useAuth } from "@/features/auth/context";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { HomeHero } from "@/features/analytics/components/HomeHero";
+import { HomeGreeting } from "@/features/analytics/components/home/HomeGreeting";
+import { useLastVisit } from "@/features/analytics/hooks/useLastVisit";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
@@ -43,6 +45,11 @@ export default function Home() {
   );
 
   const { live, livePages, liveCountries, audience } = useLive(active?._id, undefined, siteScope);
+  const lastVisit = useLastVisit(
+    active?._id,
+    JSON.stringify(siteScope ?? null),
+    stats && !switching ? stats : null,
+  );
   const { sites } = useSites(active?._id);
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
@@ -130,6 +137,7 @@ export default function Home() {
       />
 
       <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap" className="home-toolbar">
+        {!editing && !dirty && <HomeGreeting firstName={user?.firstName ?? ""} last={lastVisit} />}
         <Group gap="sm" wrap="wrap" justify="flex-end" className="home-toolbar-btns">
 
           {!editing && !dirty && (

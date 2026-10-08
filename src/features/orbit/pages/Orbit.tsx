@@ -9,6 +9,7 @@ import {
   Volume2, VolumeX, X,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useAskParam } from "@/features/orbit/hooks/useAskParam";
 import { useMediaQuery } from "@mantine/hooks";
 import { AppShell } from "@/app/AppShell";
 import { useSpeechInput } from "@/shared/hooks/useSpeechInput";
@@ -615,6 +616,8 @@ export default function Orbit() {
       { replace: true },
     );
   }, [conversationId, setSearchParams]);
+
+  useAskParam(setInput);
 
   // Picked once per visit, not on every render: reshuffling on each keystroke
   // would make the chips jump around while the composer is still empty.

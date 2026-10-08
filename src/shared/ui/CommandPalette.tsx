@@ -1,268 +1,37 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Modal, TextInput, ScrollArea, Text, Box, UnstyledButton } from "@mantine/core";
-import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
-import {
-  Home, BarChart3, FolderKanban, Code2, Share2, CalendarClock, Users,
-  Search, Moon, Sun, BookOpen, CornerDownLeft, TrendingUp, LayoutDashboard, Flag, StickyNote,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { useWorkspace } from "@/features/workspace/context";
 import { useNotes } from "@/features/notes";
-import { useIsPlatformAdmin } from "@/features/auth/context";
-import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
-import { DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
+import { usePaletteHotkeys } from "@/shared/ui/palette/usePaletteHotkeys";
 
-type Command = {
-  id: string;
-  label: string;
-  /** Groups the command in the list, and is searched alongside the label. */
-  section: string;
-  icon: LucideIcon;
-  hint?: string;
-  run: () => void;
-};
+const PaletteDialog = lazy(() => import("@/shared/ui/palette/PaletteDialog"));
+const ShortcutsSheet = lazy(() => import("@/shared/ui/palette/ShortcutsSheet"));
 
-/**
- * Cmd/Ctrl-K palette: jump to any page, switch workspace, or toggle the theme
- * without reaching for the mouse.
- *
- * Every entry here is reachable through the UI as well — the palette is a
- * shortcut for people who already know where they are going, never the only
- * path to something.
- */
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [cursor, setCursor] = useState(0);
-
+  const [sheetOpen, setSheetOpen] = useState(false);
   const navigate = useNavigate();
   const { workspaces, active, setActive } = useWorkspace();
-  const { setColorScheme } = useMantineColorScheme();
-  const scheme = useComputedColorScheme("light");
-  const dark = scheme === "dark";
-
-  const isAdmin = useIsPlatformAdmin();
   const { open: openNotes } = useNotes();
 
-  // Global hotkey. Bound on the window so it works from anywhere, including
-  // while a field elsewhere on the page has focus.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setOpen((v) => !v);
-        return;
-      }
+  const closePalette = useCallback(() => setOpen(false), []);
+  const openShortcuts = useCallback(() => setSheetOpen(true), []);
 
-      // Ctrl/Cmd 1-9 jumps straight to a workspace by position, which is what
-      // the hints in the workspace menu promise. Bound here beside the palette
-      // key so every global shortcut in the app is declared in one place.
-      if ((e.metaKey || e.ctrlKey) && !e.altKey && /^[1-9]$/.test(e.key)) {
-        const target = workspaces[Number(e.key) - 1];
-        if (!target || target._id === active?._id) return;
-        e.preventDefault();
-        setActive(target._id);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [workspaces, active?._id, setActive]);
-
-  const close = () => {
-    setOpen(false);
-    setQuery("");
-    setCursor(0);
-  };
-
-  const commands = useMemo<Command[]>(() => {
-    const go = (to: string) => () => {
-      navigate(to);
-      close();
-    };
-
-    const pages: Command[] = [
-      { id: "home", label: "Home", section: "Go to", icon: Home, run: go("/app") },
-      { id: "analytics", label: "Website analytics", section: "Go to", icon: BarChart3, run: go("/app/analytics") },
-      { id: "dashboards", label: "Dashboards", section: "Go to", icon: LayoutDashboard, run: go("/app/dashboards") },
-      { id: "goals", label: "Goals", section: "Go to", icon: Flag, run: go("/app/goals") },
-      { id: "search-visibility", label: "Search visibility", section: "Go to", icon: TrendingUp, run: go("/app/search-visibility") },
-      { id: "seo", label: "SEO", section: "Go to", icon: Search, run: go("/app/seo") },
-      { id: "workspaces", label: "Workspaces", section: "Go to", icon: FolderKanban, run: go("/app/workspaces") },
-      { id: "share", label: "Public dashboard", section: "Go to", icon: Share2, run: go("/app/share") },
-      { id: "reports", label: "Reports", section: "Go to", icon: CalendarClock, run: go("/app/reports") },
-      { id: "developers", label: "Developers", section: "Go to", icon: Code2, run: go("/app/developers") },
-      ...SETTINGS_SECTIONS.map((s) => ({
-        id: `settings-${s.id}`,
-        label: `Settings: ${s.label}`,
-        section: "Go to",
-        icon: s.icon,
-        run: go(settingsPath(s.id)),
-      })),
-    ];
-
-    if (isAdmin) {
-      pages.push({
-        id: "impersonate",
-        label: "Impersonate",
-        section: "Go to",
-        icon: Users,
-        run: go("/app/impersonate"),
-      });
-    }
-
-    // Switching to the workspace you are already in is a no-op, so it is left
-    // out rather than shown as a dead entry.
-    const wsCommands: Command[] = workspaces
-      .filter((w) => w._id !== active?._id)
-      .map((w) => ({
-        id: `ws-${w._id}`,
-        label: w.name,
-        section: "Switch workspace",
-        icon: FolderKanban,
-        hint: "workspace",
-        run: () => {
-          setActive(w._id);
-          close();
-        },
-      }));
-
-    const actions: Command[] = [
-      {
-        id: "theme",
-        label: dark ? "Switch to light mode" : "Switch to dark mode",
-        section: "Actions",
-        icon: dark ? Sun : Moon,
-        run: () => {
-          setColorScheme(dark ? "light" : "dark");
-          close();
-        },
-      },
-      {
-        id: "notes",
-        label: "Open notes",
-        section: "Actions",
-        icon: StickyNote,
-        run: () => {
-          openNotes();
-          close();
-        },
-      },
-      {
-        id: "docs",
-        label: "Open documentation",
-        section: "Actions",
-        icon: BookOpen,
-        run: () => {
-          window.open(DOCS_BASE_URL, "_blank", "noreferrer");
-          close();
-        },
-      },
-    ];
-
-    return [...pages, ...wsCommands, ...actions];
-    // `close` is stable in effect: it only touches setState setters.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspaces, active?._id, isAdmin, dark, navigate, setActive, setColorScheme, openNotes]);
-
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return commands;
-    return commands.filter(
-      (c) =>
-        c.label.toLowerCase().includes(q) || c.section.toLowerCase().includes(q)
-    );
-  }, [commands, query]);
-
-  // A filtered list can be shorter than the last cursor position.
-  useEffect(() => setCursor(0), [query]);
-
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setCursor((i) => (i + 1) % Math.max(1, results.length));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setCursor((i) => (i - 1 + results.length) % Math.max(1, results.length));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      results[cursor]?.run();
-    }
-  };
-
-  // Keep the highlighted row in view while arrowing through a long list.
-  useEffect(() => {
-    listRef.current
-      ?.querySelector<HTMLElement>(`[data-index="${cursor}"]`)
-      ?.scrollIntoView({ block: "nearest" });
-  }, [cursor]);
-
-  let lastSection = "";
+  usePaletteHotkeys({
+    togglePalette: () => setOpen((v) => !v),
+    openShortcuts,
+    openNotes: () => openNotes(),
+    switchWorkspace: (index) => {
+      const target = workspaces[index];
+      if (target && target._id !== active?._id) setActive(target._id);
+    },
+    go: (to) => navigate(to),
+  });
 
   return (
-    <Modal
-      opened={open}
-      onClose={close}
-      withCloseButton={false}
-      padding={0}
-      radius="lg"
-      size="lg"
-      transitionProps={{ transition: "pop", duration: 160 }}
-      overlayProps={{ backgroundOpacity: 0.55, blur: 4 }}
-      styles={{ body: { padding: 0 } }}
-    >
-      <Box p="xs" style={{ borderBottom: "1px solid var(--border)" }}>
-        <TextInput
-          data-autofocus
-          variant="unstyled"
-          size="md"
-          placeholder="Search pages, workspaces, actions…"
-          leftSection={<Search size={16} />}
-          value={query}
-          onChange={(e) => setQuery(e.currentTarget.value)}
-          onKeyDown={onKeyDown}
-        />
-      </Box>
-
-      <ScrollArea.Autosize mah={380} p={6}>
-        <div ref={listRef}>
-          {results.length === 0 && (
-            <Text size="sm" c="dimmed" ta="center" py="lg">
-              No matches for “{query}”
-            </Text>
-          )}
-
-          {results.map((c, i) => {
-            const heading = c.section !== lastSection ? c.section : null;
-            lastSection = c.section;
-            const Icon = c.icon;
-            return (
-              <div key={c.id}>
-                {heading && <p className="cmdk-section">{heading}</p>}
-                <UnstyledButton
-                  className="cmdk-item"
-                  data-index={i}
-                  data-active={i === cursor}
-                  onMouseEnter={() => setCursor(i)}
-                  onClick={c.run}
-                >
-                  <Icon size={16} style={{ flexShrink: 0 }} />
-                  <Text size="sm" truncate>{c.label}</Text>
-                  {c.hint && <span className="cmdk-item__hint">{c.hint}</span>}
-                  {i === cursor && (
-                    <CornerDownLeft
-                      size={13}
-                      style={{ marginLeft: c.hint ? 8 : "auto", opacity: 0.6 }}
-                    />
-                  )}
-                </UnstyledButton>
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea.Autosize>
-    </Modal>
+    <Suspense fallback={null}>
+      {open && <PaletteDialog opened onClose={closePalette} onOpenShortcuts={openShortcuts} />}
+      {sheetOpen && <ShortcutsSheet opened onClose={() => setSheetOpen(false)} />}
+    </Suspense>
   );
 }

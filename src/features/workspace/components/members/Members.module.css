@@ -54,7 +54,7 @@
 }
 
 .countValue {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -63,14 +63,14 @@
 }
 
 .countLabel {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text);
 }
 
 .countMeta {
   margin: 6px 0 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -89,7 +89,7 @@
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -135,14 +135,14 @@
 
 .accessRole {
   margin: 2px 0 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
   color: var(--text);
 }
 
 .accessText {
   margin: 1px 0 0;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -210,7 +210,7 @@
 
 .name {
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -225,7 +225,7 @@
 
 .email {
   overflow: hidden;
-  font-size: 12.5px;
+  font-size: 12px;
   white-space: nowrap;
   text-overflow: ellipsis;
   color: var(--muted);
@@ -233,7 +233,7 @@
 
 .roleText {
   padding-left: 10px;
-  font-size: 13.5px;
+  font-size: 12.5px;
   color: var(--text-2);
 }
 
@@ -242,7 +242,7 @@
   min-height: 32px;
   padding-left: 10px;
   border-radius: 8px;
-  font-size: 13.5px;
+  font-size: 12.5px;
   color: var(--text-2);
   transition: background-color 140ms ease, color 140ms ease;
 }
@@ -261,7 +261,7 @@
 }
 
 .optionName {
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--text);
 }
@@ -274,7 +274,7 @@
 }
 
 .date {
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
 }
@@ -287,7 +287,7 @@
 
 .empty {
   padding: 36px 20px;
-  font-size: 13.5px;
+  font-size: 12.5px;
   text-align: center;
   color: var(--muted);
 }
@@ -299,7 +299,7 @@
   gap: 12px;
   padding: 14px 20px;
   border-top: 1px solid var(--border);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
   background: color-mix(in srgb, var(--text) 2%, transparent);
 }
@@ -373,14 +373,14 @@
 }
 
 .modalTitle {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 650;
   letter-spacing: -0.01em;
 }
 
 .fieldLabel {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
 }

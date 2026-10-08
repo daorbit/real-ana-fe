@@ -64,7 +64,7 @@
 }
 
 .plan-notice__count {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -103,7 +103,7 @@
 
 .plan-notice__title {
   margin-top: 3px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.012em;
@@ -112,7 +112,7 @@
 
 .plan-notice__detail {
   margin-top: 4px;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.45;
   color: var(--text-2);
 }
@@ -157,7 +157,7 @@
 .plan-notice .plan-notice__btn {
   flex: 1;
   height: 36px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: -0.005em;
   border: none;

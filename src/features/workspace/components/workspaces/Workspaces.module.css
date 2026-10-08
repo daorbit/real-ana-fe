@@ -84,7 +84,7 @@
 }
 
 .tabName {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -190,7 +190,7 @@
 
 .heroName {
   margin: 2px 0 0;
-  font-size: 26px;
+  font-size: 24.5px;
   font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -262,14 +262,14 @@
 }
 
 .statValue {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
 .statOf {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 550;
   color: var(--text-2);
 }
@@ -323,7 +323,7 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 650;
   letter-spacing: -0.015em;
 }
@@ -341,7 +341,7 @@
 
 .sitesSub {
   margin-top: 2px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -408,7 +408,7 @@
 }
 
 .siteName {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
   white-space: nowrap;
   overflow: hidden;
@@ -421,7 +421,7 @@
   gap: 4px;
   max-width: 100%;
   margin-top: 2px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-2);
   text-decoration: none;
   white-space: nowrap;
@@ -584,14 +584,14 @@
 }
 
 .addTileTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
 
 .addTileSub {
   max-width: 240px;
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .empty {
@@ -627,7 +627,7 @@
   }
 
   .heroName {
-    font-size: 22px;
+    font-size: 20.5px;
   }
 
   .heroActions {
@@ -653,7 +653,7 @@
   }
 
   .statValue {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .statHint {

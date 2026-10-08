@@ -34,10 +34,10 @@
     --mantine-font-size-md: calc(14px * var(--font-scale, 1));
     --mantine-font-size-lg: calc(16px * var(--font-scale, 1));
     --mantine-font-size-xl: calc(18px * var(--font-scale, 1));
-    --mantine-h1-font-size: 1.5rem;
-    --mantine-h2-font-size: 1.3rem;
-    --mantine-h3-font-size: 1.12rem;
-    --mantine-h4-font-size: 1rem;
+    --mantine-h1-font-size: 1.4063rem;
+    --mantine-h2-font-size: 1.2188rem;
+    --mantine-h3-font-size: 1.0625rem;
+    --mantine-h4-font-size: 0.9375rem;
     /* Tighter gutters, so cards and stacks stop eating the narrow width. */
     --mantine-spacing-xs: 8px;
     --mantine-spacing-sm: 10px;
@@ -58,6 +58,10 @@
 
   .app-panel {
     border: 0;
+    border-radius: 0;
+  }
+
+  [data-bg-style="textured"] .app-panel::before {
     border-radius: 0;
   }
 
@@ -199,7 +203,7 @@
     height: 28px !important;
     border-radius: 7px !important;
   }
-  .m-header .rail-workspace__name { font-size: 13px; }
+  .m-header .rail-workspace__name { font-size: 12px; }
   .m-header .rail-workspace__meta { font-size: 11px; margin-top: 0; }
   .m-header__bell { flex-shrink: 0; display: flex; align-items: center; gap: 2px; padding-right: 4px; }
   .app-panel .activity-bell,
@@ -284,7 +288,7 @@
   /* ------------------------------------------------------ page heads --- */
 
   .app-panel__scroll .mantine-Title-root[data-order="1"] {
-    font-size: 1.4rem;
+    font-size: 1.3125rem;
     letter-spacing: -0.02em;
   }
 
@@ -315,7 +319,7 @@
   }
   .stat-card-body > .stat-card-value { order: 2; }
 
-  .stat-card-value { font-size: 1.3rem !important; }
+  .stat-card-value { font-size: 1.2188rem !important; }
 
   /* ------------------------------------------------------------ home --- */
 
@@ -331,7 +335,7 @@
      running through them, the two totals pair up, and the "Period" tag goes —
      the page is always the last 24 hours. */
   .hero-band { margin-bottom: 16px !important; }
-  .hero-figure { font-size: 40px; }
+  .hero-figure { font-size: 37.5px; }
   .hero-pad { padding: 18px 18px 64px !important; }
   .hero-spark {
     height: 56px;
@@ -361,7 +365,7 @@
   .section-tab {
     gap: 5px;
     padding: 5px 10px;
-    font-size: 12.5px;
+    font-size: 12px;
   }
   .section-tab svg { width: 14px; height: 14px; }
 
@@ -393,9 +397,9 @@
     flex: 1 1 100%;
     gap: 12px 18px;
   }
-  .seo-cat .top .v { font-size: 15px; }
+  .seo-cat .top .v { font-size: 14px; }
 
-  .seo-mstrip .mv { font-size: 18px; }
+  .seo-mstrip .mv { font-size: 17px; }
   .seo-hbar { grid-template-columns: 76px 1fr 22px; gap: 10px; }
 
   /* Wide tables scroll inside their card rather than pushing the page. */
@@ -427,14 +431,14 @@
   .social-toolbar .mantine-Button-root {
     height: 30px;
     padding: 0 12px;
-    font-size: 12.5px;
+    font-size: 12px;
   }
 
   .post-timeline { padding-inline: 0; }
   .post-slot__empty { padding: 9px 12px; }
   .post-slot__time { font-size: 12px; padding-bottom: 4px; }
   .post-slot__time--empty { padding-top: 0; }
-  .post-day { margin-bottom: 10px; font-size: 13.5px; }
+  .post-day { margin-bottom: 10px; font-size: 12.5px; }
 
   .post-calendar-scroll { overflow-x: visible; }
   .post-calendar {
@@ -477,7 +481,7 @@
     gap: 8px !important;
   }
   .composer-header > .mantine-Text-root {
-    font-size: 13.5px;
+    font-size: 12.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -493,7 +497,7 @@
   .composer-footer .mantine-Button-root {
     height: 34px;
     padding: 0 12px;
-    font-size: 12.5px;
+    font-size: 12px;
   }
   .composer-footer > .mantine-Group-root {
     flex: 1;

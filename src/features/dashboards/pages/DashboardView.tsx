@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ActionIcon, Alert, Button, Group, Loader, Menu, Text } from "@mantine/core";
-import { ChevronLeft, Code2, Copy, LayoutGrid, MoreHorizontal, Move, SearchX, SlidersHorizontal, Trash2 } from "lucide-react";
+import { ChevronLeft, Code2, Copy, LayoutGrid, MoreHorizontal, Move, Printer, SearchX, SlidersHorizontal, Trash2 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { RefreshButton } from "@/shared/ui/Refresh";
@@ -28,6 +28,8 @@ import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowanc
 import { useDashboardLayout } from "@/features/dashboards/hooks/useDashboardLayout";
 import { useDashboardRange } from "@/features/dashboards/hooks/useDashboardRange";
 import { useDashboardActions } from "@/features/dashboards/hooks/useDashboardActions";
+import { useDashboardPrint } from "@/features/dashboards/hooks/useDashboardPrint";
+import { DashboardPrintCover } from "@/features/dashboards/components/print/DashboardPrintCover";
 import { DashboardTitle } from "@/features/dashboards/components/DashboardTitle";
 import { RangeControl } from "@/features/dashboards/components/RangeControl";
 import { WidgetFrame } from "@/features/dashboards/components/WidgetFrame";
@@ -71,6 +73,7 @@ export default function DashboardView() {
   const { widgetData, sites, siteScope, setSiteScope, refresh, refreshing, refetching, lastUpdated } =
     useDashboardData(workspaceId, range);
   const { duplicateDashboard, deleteDashboard } = useDashboardActions(workspaceId, demo);
+  const print = useDashboardPrint();
 
   const [editing, setEditing] = useState(false);
   const [customizing, setCustomizing] = useState(false);
@@ -167,7 +170,20 @@ export default function DashboardView() {
         }}
       />
 
-      <div className={classes.viewHead}>
+      {print.printing && (
+        <DashboardPrintCover
+          workspaceId={workspaceId}
+          workspaceName={active?.name ?? ""}
+          title={dashboard.name}
+          subtitle={dashboard.description || `${layout.layout.length} widgets`}
+          rangeLabel={`Range: ${rangeLong(range)}`}
+          scopeLabel={siteScope?.length ? `${siteScope.length} site${siteScope.length === 1 ? "" : "s"}` : "All sites"}
+          skipBranding={demo}
+          onReady={print.onReady}
+        />
+      )}
+
+      <div className={classes.viewHead} data-print-hide>
         <div className={`${classes.viewIntro} ${classes.accent}`} data-accent={template.accent}>
           <Link to="/app/dashboards" className={classes.crumb}>
             <ChevronLeft size={14} /> Dashboards
@@ -202,7 +218,7 @@ export default function DashboardView() {
               onAdd={() => setCustomizing(true)}
             />
           )}
-          {canEdit && quiet && (
+          {quiet && (
             <Menu position="bottom-end" withinPortal>
               <Menu.Target>
                 <ActionIcon variant="default" size="lg" aria-label="More actions">
@@ -210,22 +226,29 @@ export default function DashboardView() {
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
-                {!embedAllowance.locked && (
+                <Menu.Item leftSection={<Printer size={14} />} onClick={print.start} disabled={layout.layout.length === 0}>
+                  Export as PDF
+                </Menu.Item>
+                {canEdit && !embedAllowance.locked && (
                   <Menu.Item leftSection={<Code2 size={14} />} onClick={() => embedWidgetOf(layout.layout.find((p) => isEmbeddable(p.id))?.id ?? "visitors")}>
                     Embed a widget
                   </Menu.Item>
                 )}
-                <Menu.Item leftSection={<Copy size={14} />} onClick={() => duplicateDashboard(dashboard, true)}>
-                  Duplicate
-                </Menu.Item>
-                <Menu.Divider />
-                <Menu.Item
-                  leftSection={<Trash2 size={14} />}
-                  color="red"
-                  onClick={() => deleteDashboard(dashboard, () => navigate("/app/dashboards"))}
-                >
-                  Delete dashboard
-                </Menu.Item>
+                {canEdit && (
+                  <Menu.Item leftSection={<Copy size={14} />} onClick={() => duplicateDashboard(dashboard, true)}>
+                    Duplicate
+                  </Menu.Item>
+                )}
+                {canEdit && <Menu.Divider />}
+                {canEdit && (
+                  <Menu.Item
+                    leftSection={<Trash2 size={14} />}
+                    color="red"
+                    onClick={() => deleteDashboard(dashboard, () => navigate("/app/dashboards"))}
+                  >
+                    Delete dashboard
+                  </Menu.Item>
+                )}
               </Menu.Dropdown>
             </Menu>
           )}

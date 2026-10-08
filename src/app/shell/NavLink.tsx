@@ -58,7 +58,7 @@ export function NavLink({
         <Icon size={collapsed ? 18 : 15} />
       </span>
       {!collapsed && (
-        <Text fz={13} fw={active ? 600 : 450} lh={1.4} truncate>
+        <Text fz={12} fw={active ? 600 : 450} lh={1.4} truncate>
           {label}
         </Text>
       )}

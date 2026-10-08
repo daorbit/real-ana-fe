@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDeleteDashboardMutation, useDuplicateDashboardMutation } from "@/features/dashboards/api";
-import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/notify";
+import { useDispatch } from "react-redux";
+import { hideDashboard, useDeleteDashboardMutation, useDuplicateDashboardMutation } from "@/features/dashboards/api";
+import { notify, notifyError } from "@/shared/lib/notify";
+import { deferDelete } from "@/shared/lib/deferDelete";
+import type { AppDispatch } from "@/app/store";
 import type { CardBusy } from "@/features/dashboards/components/home/cardBusy";
 import type { Dashboard } from "@/features/dashboards/types";
 
 export function useDashboardActions(workspaceId: string | undefined, demo = false) {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const [duplicate] = useDuplicateDashboardMutation();
   const [remove] = useDeleteDashboardMutation();
   const [busy, setBusy] = useState<Record<string, CardBusy>>({});
@@ -43,28 +47,15 @@ export function useDashboardActions(workspaceId: string | undefined, demo = fals
       notify.error("Turn off demo data to delete a dashboard.");
       return;
     }
-    confirmDelete({
-      title: "Delete dashboard?",
-      body: <>“{d.name}” and its layout will be removed. Your analytics data is not affected.</>,
-      onConfirm: after
-        ? async () => {
-            try {
-              await remove({ workspaceId, id: d.id }).unwrap();
-              notify.success(`“${d.name}” deleted.`, "Dashboards");
-              after();
-            } catch (e) {
-              notify.error(errMessage(e, "Could not delete the dashboard."));
-            }
-          }
-        : () => {
-            mark(d.id, "deleting");
-            remove({ workspaceId, id: d.id })
-              .unwrap()
-              .then(() => notify.success(`“${d.name}” deleted.`, "Dashboards"))
-              .catch((e) => notify.error(errMessage(e, "Could not delete the dashboard.")))
-              .finally(() => mark(d.id, null));
-          },
+    deferDelete({
+      key: `dashboard:${d.id}`,
+      message: `“${d.name}” deleted`,
+      errorMessage: "Could not delete the dashboard.",
+      hide: () => dispatch(hideDashboard(workspaceId, d.id)),
+      commit: () => remove({ workspaceId, id: d.id }).unwrap(),
+      onUndo: after ? () => navigate(`/app/dashboards/${d.id}`) : undefined,
     });
+    after?.();
   };
 
   return { duplicateDashboard, deleteDashboard, busy };

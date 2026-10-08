@@ -3,6 +3,7 @@ import { Box, Group, Text, Title, Stack, Divider } from "@mantine/core";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import type { DocsSlug } from "@/shared/lib/docsSlugs";
+import classes from "@/shared/ui/Page.module.css";
 
 
 export function PageHeader({
@@ -24,8 +25,8 @@ export function PageHeader({
   return (
     <Box mb="xl">
       <Group justify="space-between" align="flex-start" gap="md" wrap="wrap">
-        <div style={{ flex: "1 1 260px", minWidth: 0 }}>
-          <Title order={1} style={{ letterSpacing: "-0.02em" }}>
+        <div className={classes.titleCol}>
+          <Title order={1} className={classes.title}>
             {title}
           </Title>
           {description && (
@@ -62,8 +63,8 @@ export function Section({
   return (
     <Box>
       <Group justify="space-between" align="flex-end" mb="sm" wrap="nowrap">
-        <div style={{ minWidth: 0 }}>
-          <Text fw={650} size="sm" style={{ letterSpacing: "-0.01em" }}>
+        <div className={classes.sectionHead}>
+          <Text fw={650} size="sm" className={classes.sectionTitle}>
             {title}
           </Text>
           {description && (
@@ -102,17 +103,17 @@ export function Field({
         px="lg"
         py="md"
       >
-        <div style={{ flex: "1 1 220px", minWidth: 0 }}>
+        <div className={classes.fieldLabel}>
           <Text size="sm" fw={500}>
             {label}
           </Text>
           {hint && (
-            <Text size="xs" c="dimmed" mt={3} style={{ maxWidth: "46ch" }}>
+            <Text size="xs" c="dimmed" mt={3} className={classes.fieldHint}>
               {hint}
             </Text>
           )}
         </div>
-        <div style={{ flex: "0 1 320px", minWidth: 240 }}>{children}</div>
+        <div className={classes.fieldControl}>{children}</div>
       </Group>
       {!last && <Divider />}
     </>
@@ -128,7 +129,7 @@ export function PageStack({
   maxWidth?: number | string;
 }) {
   return (
-    <Stack gap="xl" style={{ maxWidth }}>
+    <Stack gap="xl" maw={maxWidth}>
       {children}
     </Stack>
   );

@@ -25,13 +25,13 @@
 .panelTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
   color: var(--text);
 }
 
 .panelMeta {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -54,14 +54,14 @@
 }
 
 .funnelLabel {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-2);
 }
 
 .funnelValue {
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -110,12 +110,12 @@
 
 .attentionLabel {
   flex: 1;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
 .attentionValue {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
   color: var(--text);
@@ -148,7 +148,7 @@
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 650;
   color: var(--text);
 }
@@ -169,7 +169,7 @@
 
 .personName {
   overflow: hidden;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -187,7 +187,7 @@
 
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--text);

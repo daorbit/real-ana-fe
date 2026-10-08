@@ -53,7 +53,7 @@
 }
 
 .brandName {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.2px;
   overflow: hidden;
@@ -63,7 +63,7 @@
 
 .formTitle {
   text-align: center;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -89,7 +89,7 @@
   border-radius: 8px;
   background: #059669;
   color: #fff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -125,12 +125,12 @@
   object-fit: contain;
   background: #fff;
   color: var(--brand-accent);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
 }
 
 .payName {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -138,7 +138,7 @@
   padding: 4px 14px;
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.18);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -160,7 +160,7 @@
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .paySecured {

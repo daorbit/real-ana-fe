@@ -20,7 +20,7 @@
 
 .title {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.15;
@@ -30,7 +30,7 @@
 
 .lede {
   max-width: 300px;
-  font-size: 0.95rem;
+  font-size: 0.9063rem;
   line-height: 1.45;
   color: var(--q-fg-muted);
   text-align: center;
@@ -55,7 +55,7 @@
   border-radius: 14px;
   background: var(--q-bg-subtle);
   color: var(--q-fg);
-  font-size: 1.25rem;
+  font-size: 1.1875rem;
   font-weight: 500;
 }
 
@@ -74,7 +74,7 @@
   border-radius: 999px;
   background: var(--q-cta);
   color: var(--q-cta-fg);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 

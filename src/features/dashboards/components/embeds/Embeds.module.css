@@ -47,7 +47,7 @@
 }
 
 .name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
@@ -110,7 +110,7 @@
 }
 
 .statValue {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
@@ -196,7 +196,7 @@
 
 .modalTitle {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);

@@ -15,7 +15,7 @@
 
 .pickerTitle {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.015em;
   color: var(--text);
@@ -23,7 +23,7 @@
 
 .pickerSub {
   margin: 6px 0 18px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -84,13 +84,13 @@
 }
 
 .optionTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
 
 .optionSub {
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.4;
   color: var(--text-2);
 }
@@ -166,7 +166,7 @@
 }
 
 .emailSubject {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
@@ -188,7 +188,7 @@
 }
 
 .emailStatValue {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   font-variant-numeric: tabular-nums;

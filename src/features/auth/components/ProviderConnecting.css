@@ -128,7 +128,7 @@
 .provider-connecting__detail {
   max-width: 340px;
   margin: 10px 0 0;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--text-2);
   animation: provider-connecting-rise 700ms cubic-bezier(0.19, 1, 0.22, 1) 340ms both;

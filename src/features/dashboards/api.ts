@@ -147,6 +147,9 @@ export const dashboardsApi = queries.injectEndpoints({
   }),
 });
 
+export const hideDashboard = (workspaceId: string, id: string) =>
+  queries.util.updateQueryData("getDashboards", workspaceId, (list) => list.filter((d) => d.id !== id));
+
 export const {
   useGetDashboardsQuery,
   useGetDashboardQuery,

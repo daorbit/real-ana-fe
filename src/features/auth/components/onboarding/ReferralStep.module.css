@@ -42,7 +42,7 @@
 
 .optionLabel {
   white-space: nowrap;
-  font-size: 0.855rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.3;
   color: var(--mantine-color-text);

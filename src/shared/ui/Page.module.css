@@ -1,0 +1,37 @@
+.titleCol {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.title {
+  letter-spacing: -0.02em;
+}
+
+.sectionHead {
+  min-width: 0;
+}
+
+.sectionTitle {
+  letter-spacing: -0.01em;
+}
+
+.fieldLabel {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.fieldHint {
+  max-width: 46ch;
+}
+
+.fieldControl {
+  flex: 0 1 320px;
+  min-width: 240px;
+}
+
+@media (max-width: 480px) {
+  .fieldControl {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+}

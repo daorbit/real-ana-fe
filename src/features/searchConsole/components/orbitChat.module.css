@@ -31,7 +31,7 @@
 }
 
 .brandName {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--q-fg);
 }
@@ -96,7 +96,7 @@
 
 .heroTitle {
   margin: 0;
-  font-size: 24px;
+  font-size: 22.5px;
   font-weight: 650;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -104,7 +104,7 @@
 
 .heroSub {
   max-width: 340px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--mantine-color-dimmed);
 }
@@ -139,7 +139,7 @@
   border-radius: 14px;
   border: 0;
   background: var(--q-bg-subtle);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.4;
   color: var(--q-fg);
   text-align: left;
@@ -196,7 +196,7 @@
   width: 100%;
   padding: 9px 2px;
   border-top: 1px solid var(--mantine-color-default-border);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.4;
   color: var(--mantine-color-text);
   text-align: left;
@@ -235,7 +235,7 @@
 }
 
 .answerName {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -250,7 +250,7 @@
 }
 
 .thinking {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 550;
   background: linear-gradient(
     90deg,
@@ -431,7 +431,7 @@
   box-shadow: none;
   background: transparent;
   color: var(--mantine-color-text);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
   scrollbar-width: none;
 }

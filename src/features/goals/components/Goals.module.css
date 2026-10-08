@@ -65,7 +65,7 @@
 
 .heroCenterValue {
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -101,7 +101,7 @@
 .heroTitle {
   margin: 6px 0 0;
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -154,7 +154,7 @@
 
 .legendPct {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text);
   font-variant-numeric: tabular-nums;
@@ -273,7 +273,7 @@
 
 .pct {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 22.5px;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -309,7 +309,7 @@
 .current {
   margin-top: 6px;
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -401,7 +401,7 @@
 .emptyTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: 34px;
   font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1.1;
@@ -411,7 +411,7 @@
 .emptyText {
   max-width: 460px;
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
   color: var(--text-2);
 }
@@ -497,7 +497,7 @@
 .presetNumber {
   margin-top: 8px;
   font-family: var(--font-display);
-  font-size: 40px;
+  font-size: 37.5px;
   font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -695,11 +695,11 @@
 
   .heroTitle,
   .emptyTitle {
-    font-size: 28px;
+    font-size: 26.5px;
   }
 
   .current {
-    font-size: 28px;
+    font-size: 26.5px;
   }
 
   .widgetRings > :first-child {

@@ -195,7 +195,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--mantine-font-family-monospace);
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text);
 }
 
@@ -353,7 +353,7 @@
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }

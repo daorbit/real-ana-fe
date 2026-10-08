@@ -28,7 +28,7 @@ export function Tile({
         {label}
       </Text>
       <Text
-        fz={22}
+        fz={20.5}
         fw={650}
         lh={1.2}
         mt={4}

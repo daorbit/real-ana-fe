@@ -163,7 +163,7 @@ export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
                     {RATING_LABEL[s.rating]}
                   </Badge>
                 </Group>
-                <Text fz={22} fw={750} lh={1.15} style={{ letterSpacing: "-0.02em" }}>
+                <Text fz={20.5} fw={750} lh={1.15} style={{ letterSpacing: "-0.02em" }}>
                   {format(s.p75, m.unit)}
                 </Text>
                 {s.samples > 0 && (

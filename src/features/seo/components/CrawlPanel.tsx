@@ -247,7 +247,7 @@ function Tile({
       <Text size="xs" c="dimmed" truncate>
         {label}
       </Text>
-      <Text fz={22} fw={650} lh={1.2} mt={4} truncate style={{ letterSpacing: "-0.02em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}>
+      <Text fz={20.5} fw={650} lh={1.2} mt={4} truncate style={{ letterSpacing: "-0.02em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}>
         {value}
       </Text>
     </Box>

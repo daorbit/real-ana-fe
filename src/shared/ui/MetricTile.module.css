@@ -92,7 +92,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 550;
   color: var(--text-2);
 }
@@ -117,7 +117,7 @@
 
 .value {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -172,6 +172,6 @@
   }
 
   .value {
-    font-size: 24px;
+    font-size: 22.5px;
   }
 }

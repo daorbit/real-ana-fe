@@ -163,7 +163,7 @@ function ScoreHero({
       <Group gap={28} align="center" wrap="wrap">
         <Stack gap={8} align="center">
           <Gauge value={score} color={bandHex(score)}>
-            <Text className="g-num" fz={46}>{score}</Text>
+            <Text className="g-num" fz={43}>{score}</Text>
             <Text className="g-of">/ 100</Text>
           </Gauge>
           <Group gap={5} align="center">
@@ -246,7 +246,7 @@ function SeverityDonut({ breakdown }: { breakdown: ReturnType<typeof useIssueBre
               })}
           </svg>
           <div>
-            <Text className="g-num" fz={26}>{total}</Text>
+            <Text className="g-num" fz={24.5}>{total}</Text>
             <Text className="g-of">{total === 1 ? "issue" : "issues"}</Text>
           </div>
         </Box>

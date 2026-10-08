@@ -57,7 +57,7 @@
   background: color-mix(in srgb, var(--chip) 14%, transparent);
   background-size: cover;
   background-position: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--chip);
 }
@@ -136,7 +136,7 @@
 
 .body {
   margin-top: 3px;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
   word-break: break-word;

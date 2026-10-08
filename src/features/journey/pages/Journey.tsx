@@ -89,7 +89,7 @@ export default function Journey() {
               {stat.label}
             </Text>
             {summary ? (
-              <Text fw={700} fz={22} lh={1.2}>
+              <Text fw={700} fz={20.5} lh={1.2}>
                 {stat.value?.toLocaleString() ?? "—"}
               </Text>
             ) : (
@@ -163,7 +163,16 @@ export default function Journey() {
             <Box
               key={u.appUserId}
               className={classes.row}
+              role="link"
+              tabIndex={0}
               onClick={() => navigate(`/app/journey/${encodeURIComponent(u.appUserId)}`)}
+              onKeyDown={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  navigate(`/app/journey/${encodeURIComponent(u.appUserId)}`);
+                }
+              }}
             >
               <Group justify="space-between" wrap="wrap" gap="md">
                 <Group gap="sm" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>

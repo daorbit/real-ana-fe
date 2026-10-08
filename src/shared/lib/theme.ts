@@ -221,9 +221,9 @@ export const DENSITIES: { id: Density; label: string }[] = [
 ];
 
 export const FONT_SIZES: { id: FontSize; label: string; px: number }[] = [
-  { id: "small", label: "Small", px: 13 },
-  { id: "default", label: "Default", px: 14 },
-  { id: "large", label: "Large", px: 15.5 },
+  { id: "small", label: "Small", px: 12.5 },
+  { id: "default", label: "Default", px: 13.25 },
+  { id: "large", label: "Large", px: 14.5 },
 ];
 
 export const TABLE_STYLES: { id: TableStyle; label: string }[] = [

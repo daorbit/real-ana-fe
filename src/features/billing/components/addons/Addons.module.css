@@ -1,6 +1,6 @@
 .sectionLabel {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-2);
 }
@@ -40,7 +40,7 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -56,7 +56,7 @@
 
 .balanceValue {
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -120,7 +120,7 @@
 .packName {
   margin: 0;
   overflow: hidden;
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -129,7 +129,7 @@
 
 .packQty {
   margin: 3px 0 0;
-  font-size: 12.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
@@ -154,7 +154,7 @@
 }
 
 .packPrice {
-  font-size: 22px;
+  font-size: 20.5px;
   font-weight: 700;
   letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
@@ -165,7 +165,7 @@
   padding: 40px 16px;
   border-radius: 16px;
   border: 1px dashed var(--border);
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
   color: var(--text-2);
 }

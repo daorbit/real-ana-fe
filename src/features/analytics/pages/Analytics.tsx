@@ -22,6 +22,7 @@ import { useAuth } from "@/features/auth/context";
 import { PlanGate } from "@/features/billing/components/PlanGate";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { StatCard } from "@/shared/ui/StatCard";
+import { statComparison } from "@/features/analytics/lib/statComparison";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { WorldMap } from "@/shared/ui/WorldMap";
@@ -575,11 +576,11 @@ export default function Analytics() {
   // Stat `label`s are translated; the long `hint` tooltips stay English for a
   // later pass — they fall back cleanly and aren't blocking to read.
   const audience = [
-    { metric: "visitors", icon: Users, label: t("analytics.stat.visitors"), value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, spark: series, sparkKey: "visitors",
+    { metric: "visitors", icon: Users, label: t("analytics.stat.visitors"), value: view?.visitors ?? 0, color: "emerald", delta: d?.visitors ?? null, comparison: statComparison(view, "visitors", range), spark: series, sparkKey: "visitors", syncId: "analytics-overview",
       hint: "Distinct people in this period. A visitor is a privacy-friendly daily hash of IP and browser — no cookies, so the same person on two days counts twice." },
-    { metric: "pageviews", icon: Eye, label: t("analytics.stat.pageviews"), value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, spark: series, sparkKey: "views",
+    { metric: "pageviews", icon: Eye, label: t("analytics.stat.pageviews"), value: view?.pageviews ?? 0, color: "cyan", delta: d?.pageviews ?? null, comparison: statComparison(view, "pageviews", range), spark: series, syncId: "analytics-overview", sparkKey: "views",
       hint: "Every page load, including SPA route changes. One visitor can rack up many pageviews." },
-    { metric: "sessions", icon: Layers, label: t("analytics.stat.sessions"), value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null,
+    { metric: "sessions", icon: Layers, label: t("analytics.stat.sessions"), value: view?.sessions ?? 0, color: "amber", delta: d?.sessions ?? null, comparison: statComparison(view, "sessions", range),
       hint: "A visit — one or more pageviews with no 30-minute gap. A returning visitor later in the day starts a fresh session." },
     { metric: null, icon: Radio, label: t("analytics.stat.live"), value: liveAudience ? liveAudience.humans : view?.live ?? 0, color: "green", live: true,
       hint: liveAudience
@@ -588,13 +589,13 @@ export default function Analytics() {
   ] as const;
 
   const engagement = [
-    { metric: "bounceRate", icon: MousePointerClick, label: t("analytics.stat.bounce"), value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true,
+    { metric: "bounceRate", icon: MousePointerClick, label: t("analytics.stat.bounce"), value: `${view?.bounceRate ?? 0}%`, color: "pink", delta: d?.bounceRate ?? null, inverseDelta: true, comparison: statComparison(view, "bounceRate", range),
       hint: "Share of sessions that left after a single pageview without interacting. Lower is usually better." },
-    { metric: "avgSessionMs", icon: Timer, label: t("analytics.stat.avgSession"), value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null,
+    { metric: "avgSessionMs", icon: Timer, label: t("analytics.stat.avgSession"), value: duration(view?.avgSessionMs ?? 0), color: "emerald", delta: d?.avgSessionMs ?? null, comparison: statComparison(view, "avgSessionMs", range),
       hint: "Average visible time across a whole visit. A backgrounded tab doesn't count, so this is real attention time." },
     { metric: "avgTimeOnPageMs", icon: Timer, label: t("analytics.stat.avgTimeOnPage"), value: duration(view?.avgTimeOnPageMs ?? 0), color: "cyan",
       hint: "Average visible time on a single page before moving on." },
-    { metric: "pagesPerSession", icon: Layers, label: t("analytics.stat.pagesPerSession"), value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null,
+    { metric: "pagesPerSession", icon: Layers, label: t("analytics.stat.pagesPerSession"), value: view?.pagesPerSession ?? 0, color: "amber", delta: d?.pagesPerSession ?? null, comparison: statComparison(view, "pagesPerSession", range),
       hint: "How many pages a typical visit touches. Higher means people explore more." },
   ] as const;
 
@@ -770,7 +771,7 @@ export default function Analytics() {
             </Group>
             {hasData ? (
               <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={series} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                <AreaChart data={series} syncId="analytics-overview" margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                   <defs>
                     <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.45} />

@@ -16,7 +16,7 @@
 
 .sampleTitle {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--text);
@@ -24,7 +24,7 @@
 
 .sampleSub {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -93,7 +93,7 @@
 
 .rowName {
   overflow: hidden;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text);
   white-space: nowrap;
@@ -129,7 +129,7 @@
 .rowFill[data-score="71"] { width: 71%; }
 
 .rowScore {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   text-align: right;
   color: var(--text);

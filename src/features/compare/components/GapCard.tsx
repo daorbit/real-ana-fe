@@ -120,7 +120,7 @@ export function GapCard({
           </Box>
         </Group>
         <Stack gap={2} align="flex-end">
-          <Text fz={22} fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
+          <Text fz={20.5} fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
             {snapshot.score}
           </Text>
           <Standing scoreGap={gap.scoreGap} />

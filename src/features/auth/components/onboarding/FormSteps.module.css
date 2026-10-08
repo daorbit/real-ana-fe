@@ -33,7 +33,7 @@
 
 .error {
   margin-top: 0.45rem;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--mantine-color-error);
 }
 
@@ -131,7 +131,7 @@
 }
 
 .identityName {
-  font-size: 1.25rem;
+  font-size: 1.1875rem;
   font-weight: 650;
   letter-spacing: -0.015em;
   line-height: 1.25;
@@ -147,7 +147,7 @@
 
 .identityMeta {
   margin-top: 2px;
-  font-size: 0.8rem;
+  font-size: 0.7688rem;
   color: var(--onb-ink-dim);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -170,7 +170,7 @@
   border: 0;
   background: none;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.7688rem;
   font-weight: 550;
   color: var(--accent-2);
   cursor: pointer;
@@ -196,7 +196,7 @@
     height: 68px;
   }
   .identityName {
-    font-size: 1.08rem;
+    font-size: 1rem;
   }
 }
 
@@ -223,7 +223,7 @@
   background: transparent;
   color: var(--onb-ink);
   font: inherit;
-  font-size: 1.65rem;
+  font-size: 1.5625rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   outline: none;
@@ -245,7 +245,7 @@
 
 .hint {
   margin-top: 0.5rem;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--onb-ink-faint);
 }
 
@@ -270,7 +270,7 @@
 }
 
 .perkTerm {
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.35;
   color: var(--onb-ink);
@@ -278,14 +278,14 @@
 
 .perkGloss {
   margin-top: 2px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   line-height: 1.45;
   color: var(--onb-ink-dim);
 }
 
 @media (max-width: 36em) {
   .bigInput {
-    font-size: 1.3rem;
+    font-size: 1.2188rem;
   }
   .perks {
     grid-template-columns: minmax(0, 1fr);
@@ -364,7 +364,7 @@
 }
 
 .scheme {
-  font-size: 0.9rem;
+  font-size: 0.8438rem;
   color: var(--onb-ink-faint);
 }
 
@@ -375,7 +375,7 @@
   background: transparent;
   color: var(--onb-ink);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 0.9063rem;
   font-weight: 500;
   outline: none;
 }
@@ -413,7 +413,7 @@
   background: transparent;
   color: var(--onb-ink-dim);
   font: inherit;
-  font-size: 0.83rem;
+  font-size: 0.7813rem;
   font-weight: 500;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;

@@ -13,7 +13,7 @@
 }
 
 .statLabel {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -21,7 +21,7 @@
 .statValue {
   margin-top: 8px;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 22.5px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.025em;
@@ -93,7 +93,7 @@
 
 .description {
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 550;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -122,13 +122,13 @@
 }
 
 .date {
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
 }
 
 .amount {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -157,7 +157,7 @@
 
 .emptyTitle {
   margin: 4px 0 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
@@ -165,7 +165,7 @@
 .emptyText {
   max-width: 380px;
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
 }

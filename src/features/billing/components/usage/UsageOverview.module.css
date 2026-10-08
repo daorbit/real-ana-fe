@@ -51,7 +51,7 @@
 
 .heroNumber {
   font-family: var(--font-display);
-  font-size: 48px;
+  font-size: 45px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -196,7 +196,7 @@
 
 .allowanceLabel {
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -227,7 +227,7 @@
 
 .allowanceUsed {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -238,7 +238,7 @@
 
 .allowanceTotal {
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0;
   color: var(--muted);
@@ -496,7 +496,7 @@
   }
 
   .heroNumber {
-    font-size: 36px;
+    font-size: 34px;
   }
 
   .card {

@@ -1,0 +1,12 @@
+.root {
+  text-align: center;
+}
+
+.root[data-compact] {
+  padding: 40px 20px;
+}
+
+.description {
+  max-width: 42ch;
+  line-height: 1.6;
+}

@@ -45,7 +45,7 @@
 }
 
 .single .productName {
-  font-size: 19px;
+  font-size: 18px;
 }
 
 .single .gateway {
@@ -53,7 +53,7 @@
 }
 
 .single .totalValue {
-  font-size: 30px;
+  font-size: 28px;
 }
 
 .quantityRow {
@@ -112,7 +112,7 @@
 
 .productName {
   margin: 2px 0 0;
-  font-size: 22px;
+  font-size: 20.5px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -121,7 +121,7 @@
 
 .productMeta {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.45;
   color: var(--text-2);
 }
@@ -134,7 +134,7 @@
 }
 
 .productPriceValue {
-  font-size: 28px;
+  font-size: 26.5px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -143,7 +143,7 @@
 }
 
 .productPricePer {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -231,7 +231,7 @@
 .packName {
   min-width: 0;
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -240,7 +240,7 @@
 
 .packMeta {
   margin: 2px 0 10px;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.45;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
@@ -253,7 +253,7 @@
 
 .packTotal {
   flex: none;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 650;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -261,13 +261,13 @@
 }
 
 .groupLabel {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text);
 }
 
 .groupValue {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
   color: var(--violet-2);
@@ -318,7 +318,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -341,7 +341,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-2);
 }
 
@@ -380,13 +380,13 @@
 }
 
 .totalLabel {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
 
 .totalValue {
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -406,7 +406,7 @@
   align-items: center;
   align-self: flex-start;
   gap: 8px;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--violet-2);
   transition: opacity 140ms ease;
@@ -426,7 +426,7 @@
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--violet-2) 35%, var(--border));
   background: color-mix(in srgb, var(--violet-2) 7%, transparent);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--violet-2);
 }
@@ -535,7 +535,7 @@
 .pay {
   height: 50px;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
 }
 

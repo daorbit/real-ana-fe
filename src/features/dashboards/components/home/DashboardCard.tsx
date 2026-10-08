@@ -41,7 +41,13 @@ export function DashboardCard({
       aria-busy={Boolean(busy)}
       data-busy={busy ?? undefined}
       onClick={onOpen}
-      onKeyDown={(e) => e.key === "Enter" && onOpen()}
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, scale: busy === "deleting" ? 0.985 : 1 }}

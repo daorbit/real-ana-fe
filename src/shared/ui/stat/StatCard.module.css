@@ -1,0 +1,100 @@
+.head {
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.labelGroup {
+  min-width: 0;
+}
+
+.icon {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.label {
+  letter-spacing: 0.01em;
+}
+
+.hint {
+  color: var(--muted);
+  cursor: help;
+  flex-shrink: 0;
+}
+
+.actions {
+  flex-shrink: 0;
+}
+
+.value {
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.value[data-live] {
+  color: var(--accent);
+}
+
+.value[data-live][data-accent="green"] {
+  color: #34d399;
+}
+
+.value[data-live][data-accent="cyan"] {
+  color: #22d3ee;
+}
+
+.value[data-live][data-accent="amber"] {
+  color: #f59e0b;
+}
+
+.value[data-live][data-accent="pink"] {
+  color: #f472b6;
+}
+
+.deltaTrigger {
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+}
+
+.deltaTip {
+  display: grid;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.deltaTipRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.deltaTipArrow {
+  opacity: 0.6;
+}
+
+.deltaTipNote {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.spark {
+  height: 46px;
+  margin-top: 10px;
+}
+
+.sparkTip {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sparkTipBucket {
+  color: var(--muted);
+  margin-right: 6px;
+}

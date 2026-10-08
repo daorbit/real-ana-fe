@@ -33,14 +33,14 @@
 }
 
 .headerTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .headerRight {
   justify-self: end;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -73,7 +73,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
   white-space: nowrap;
 }
@@ -134,21 +134,21 @@
 }
 
 .eyebrow {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-2);
 }
 
 .title {
   margin: 6px 0 0;
-  font-size: 24px;
+  font-size: 22.5px;
   font-weight: 650;
   letter-spacing: -0.02em;
 }
 
 .description {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.55;
   color: var(--text-2);
 }
@@ -209,13 +209,13 @@
 }
 
 .choiceTitle {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
 
 .choiceBlurb {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
 }
@@ -234,7 +234,7 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.45;
   color: var(--text-2);
 }
@@ -256,13 +256,13 @@
 }
 
 .sectionTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .sectionHint {
   margin: 2px 0 12px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -291,13 +291,13 @@
 }
 
 .rowLabel {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 .rowHint {
   margin-top: 2px;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
 }
@@ -314,7 +314,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 24px;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--text-2);
 }
@@ -367,20 +367,20 @@
   height: 28px;
   border-radius: 50%;
   border: 1px solid var(--border-strong);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-2);
 }
 
 .taskTitle {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 28px;
 }
 
 .taskHint {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-2);
 }
@@ -389,7 +389,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -419,7 +419,7 @@
   }
 
   .title {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .footer {

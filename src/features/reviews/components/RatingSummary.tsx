@@ -57,7 +57,7 @@ export function RatingSummary({
     <Paper withBorder p="lg" radius="md">
       <Group align="flex-start" gap="xl" wrap="wrap">
         <Stack gap={4} style={{ minWidth: 120 }}>
-          <Text fz={44} fw={700} lh={1}>
+          <Text fz={41.5} fw={700} lh={1}>
             {rating ? rating.toFixed(1) : "—"}
           </Text>
           <Stars value={rating} />

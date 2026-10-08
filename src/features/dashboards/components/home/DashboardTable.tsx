@@ -46,7 +46,13 @@ export function DashboardTable({
             data-accent={template.accent}
             aria-busy={Boolean(state)}
             onClick={() => onOpen(d)}
-            onKeyDown={(e) => e.key === "Enter" && onOpen(d)}
+            onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return;
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onOpen(d);
+              }
+            }}
           >
             <span className={classes.tableName} role="cell">
               <span className={classes.tableIcon}><Icon size={15} /></span>

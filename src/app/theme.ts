@@ -27,9 +27,9 @@ export const theme = createTheme({
     fontFamily: "'Google Sans Flex', ui-sans-serif, system-ui, sans-serif",
     fontWeight: "700",
     sizes: {
-      h1: { fontSize: rem(30), lineHeight: "1.2" },
-      h2: { fontSize: rem(23), lineHeight: "1.25" },
-      h3: { fontSize: rem(18), lineHeight: "1.3" },
+      h1: { fontSize: rem(27), lineHeight: "1.2" },
+      h2: { fontSize: rem(21), lineHeight: "1.25" },
+      h3: { fontSize: rem(16.5), lineHeight: "1.3" },
     },
   },
   defaultRadius: "md",

@@ -74,7 +74,7 @@
 
 .previewValue {
   font-family: var(--mantine-font-family-monospace);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
 }

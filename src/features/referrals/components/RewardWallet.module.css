@@ -57,7 +57,7 @@
 
 .percent {
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 24.5px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -102,7 +102,7 @@
 .code {
   overflow: hidden;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -116,7 +116,7 @@
 
 .detail {
   margin: 0;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.45;
   color: var(--text-2);
 }
@@ -133,6 +133,6 @@
   padding: 18px 20px;
   border-radius: 14px;
   border: 1px dashed var(--border-strong);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-2);
 }

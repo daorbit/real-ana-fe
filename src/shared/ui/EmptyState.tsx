@@ -1,6 +1,7 @@
 import { Button, Stack, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
+import classes from "@/shared/ui/EmptyState.module.css";
 
 /**
  * The empty-state pattern for the whole app: an icon, a line, an optional
@@ -47,15 +48,16 @@ export function EmptyState({
       align="center"
       justify="center"
       gap={0}
-      className="empty-state"
-      style={{ minHeight: compact ? undefined : minHeight, textAlign: "center", padding: compact ? "40px 20px" : undefined }}
+      className={`empty-state ${classes.root}`}
+      data-compact={compact || undefined}
+      mih={compact ? undefined : minHeight}
     >
       <div className="empty-state__icon" data-size={compact ? "sm" : "md"} aria-hidden>
         <Icon size={compact ? 26 : 40} strokeWidth={1.25} />
       </div>
       <Text fw={650} fz="lg" mt="lg">{title}</Text>
       {description && (
-        <Text size="sm" c="dimmed" mt={6} style={{ maxWidth: "42ch", lineHeight: 1.6 }}>
+        <Text size="sm" c="dimmed" mt={6} className={classes.description}>
           {description}
         </Text>
       )}

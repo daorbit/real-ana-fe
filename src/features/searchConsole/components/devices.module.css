@@ -62,7 +62,7 @@
 
 .donutValue {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 600;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;

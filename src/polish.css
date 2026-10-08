@@ -326,7 +326,7 @@
 
 .flow-node-count {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   line-height: 1.1;
   color: var(--text);
@@ -418,7 +418,7 @@
   z-index: 500;
   padding: 8px 14px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #fff;
   background: var(--accent, var(--mantine-color-emerald-6));

@@ -29,7 +29,7 @@
 
 .statValue {
   margin-top: 6px;
-  font-size: 26px;
+  font-size: 24.5px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -171,7 +171,7 @@
 
 .cardTitle {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
@@ -179,7 +179,7 @@
 .cardSub {
   margin: 3px 0 0;
   max-width: 70ch;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--muted);
 }
@@ -223,7 +223,7 @@
 
 .table td {
   vertical-align: middle;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .source {
@@ -240,7 +240,7 @@
 
 .domain {
   overflow: hidden;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -304,7 +304,7 @@
 
 .emptyRow {
   padding: 40px 24px;
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
   color: var(--muted);
 }
@@ -315,7 +315,7 @@
   gap: 10px;
   padding: 12px 14px;
   border-radius: 12px;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.55;
   color: var(--text);
   background: var(--surface-2);
@@ -387,7 +387,7 @@
 
 .itemLabel {
   overflow: hidden;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -401,7 +401,7 @@
 
 .itemValue {
   flex: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
@@ -428,7 +428,7 @@
 .profileName {
   margin: 0;
   overflow: hidden;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.015em;
   white-space: nowrap;
@@ -460,7 +460,7 @@
 
 .factValue {
   margin-top: 2px;
-  font-size: 22px;
+  font-size: 20.5px;
   font-weight: 700;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
@@ -505,14 +505,14 @@
 }
 
 .insightTitle {
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text);
 }
 
 .insightDetail {
   margin-top: 2px;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.55;
   color: var(--text-2);
 }
@@ -525,7 +525,7 @@
 
 .breakdownTitle {
   margin: 0 0 10px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-2);
 }
@@ -536,7 +536,7 @@
   align-items: center;
   gap: 10px;
   padding: 4px 0;
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .barLabel {
@@ -579,7 +579,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 8px 0;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .listRow + .listRow {
@@ -642,7 +642,7 @@
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -652,7 +652,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .resultRow + .resultRow {
@@ -711,7 +711,7 @@
 
 .stepBlurb {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.6;
   color: var(--text-2);
 }
@@ -734,14 +734,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
 }
 
 .stepDetail {
   margin: 3px 0 0;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.6;
   color: var(--text-2);
 }
@@ -761,7 +761,7 @@
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text);
 }
