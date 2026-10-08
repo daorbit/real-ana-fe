@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ActionIcon, UnstyledButton } from "@mantine/core";
 import { ChevronRight, Search, X } from "lucide-react";
@@ -7,12 +7,15 @@ import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { NAV_GROUPS, type NavGroup } from "../navItems";
 import { MOBILE_TAB_PATHS } from "../mobileTabs";
 import { openPalette } from "../openPalette";
+import { useNavPrefs } from "../navPrefs";
+import { applyNavPrefs } from "../applyNavPrefs";
 import { MobileNavList } from "./MobileNavList";
 import classes from "./MobileMoreSheet.module.css";
 
-const SHEET_GROUPS: NavGroup[] = NAV_GROUPS
-  .map((group) => ({ ...group, items: group.items.filter((item) => !MOBILE_TAB_PATHS.has(item.to)) }))
-  .filter((group) => group.items.length > 0);
+const sheetGroups = (groups: NavGroup[]): NavGroup[] =>
+  groups
+    .map((group) => ({ ...group, items: group.items.filter((item) => !MOBILE_TAB_PATHS.has(item.to)) }))
+    .filter((group) => group.items.length > 0);
 
 export function MobileMoreSheet({
   pathname,
@@ -27,6 +30,8 @@ export function MobileMoreSheet({
 }) {
   const { t } = useTranslation();
   const onOrbit = pathname.startsWith("/app/orbit");
+  const navPrefs = useNavPrefs();
+  const groups = useMemo(() => sheetGroups(applyNavPrefs(NAV_GROUPS, navPrefs)), [navPrefs]);
 
   return (
     <div className={classes.root}>
@@ -66,7 +71,7 @@ export function MobileMoreSheet({
           </section>
         )}
 
-        {SHEET_GROUPS.map((group) => (
+        {groups.map((group) => (
           <MobileNavList key={group.headingKey} group={group} pathname={pathname} />
         ))}
 

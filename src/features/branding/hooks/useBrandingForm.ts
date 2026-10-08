@@ -72,7 +72,7 @@ export function useBrandingForm(workspaceId: string) {
         hidePoweredBy: !showPoweredBy,
         watermarkAiImages,
       }).unwrap();
-      notify.success("Your forms and payment windows now use it.", "Branding saved");
+      notify.success("Your forms, payment windows and public dashboard now use it.", "Branding saved");
     } catch (err) {
       notify.error(errMessage(err));
     }

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useThemeMode } from "./useThemeMode";
 import { ThemeToggleButton } from "./ThemeSwitch";
 import classes from "./Rail.module.css";
@@ -14,6 +14,8 @@ import { RailWorkspaceHeader } from "./RailWorkspaceHeader";
 import { AccountMenu } from "./AccountMenu";
 import { DemoCard, ImpersonationCard, OrbitCard, PlanCard } from "./RailCards";
 import { NAV_GROUPS } from "./navItems";
+import { useNavPrefs } from "./navPrefs";
+import { applyNavPrefs } from "./applyNavPrefs";
 import { LogoutDialog } from "./LogoutDialog";
 import { MobileMoreSheet } from "./mobile/MobileMoreSheet";
 
@@ -49,9 +51,8 @@ export function Rail({
   const [leaving, setLeaving] = useState(false);
 
   const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
-  // The admin rows live in the account menu now, not the rail — a regular
-  // member should never see navigation they cannot use.
-  const groups = NAV_GROUPS;
+  const navPrefs = useNavPrefs();
+  const groups = useMemo(() => applyNavPrefs(NAV_GROUPS, navPrefs), [navPrefs]);
 
   const leave = async () => {
     setLeaving(true);

@@ -2,6 +2,7 @@ import { Box } from "@mantine/core";
 import { AppearanceSection } from "@/features/auth/components/AppearanceSection";
 import { InfoPanel } from "./InfoPanel";
 import { ConnectionsPanel } from "./ConnectionsPanel";
+import { SidebarPanel } from "./sidebar/SidebarPanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { SecurityOverview } from "./SecurityOverview";
 import { PasswordPanel } from "./PasswordPanel";
@@ -19,6 +20,8 @@ export function SettingsSectionBody({ id, form }: { id: SettingsSectionId; form:
       return <InfoPanel form={form} />;
     case "appearance":
       return <AppearanceSection bare />;
+    case "sidebar":
+      return <SidebarPanel />;
     case "connections":
       return <ConnectionsPanel />;
     case "notifications":

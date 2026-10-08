@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Menu, UnstyledButton } from "@mantine/core";
 import {
-  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Scale, Settings, ShieldCheck, StickyNote,
+  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, PanelLeft, Scale, Settings, ShieldCheck, StickyNote,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
@@ -15,6 +15,7 @@ import { ADMIN_ITEMS } from "./navItems";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { RequestFeatureModal } from "./RequestFeatureModal";
 import classes from "./Rail.module.css";
+import { MenuVersion } from "./MenuVersion";
 
 export function AccountMenu({
   collapsed,
@@ -107,6 +108,10 @@ export function AccountMenu({
             {t("nav.accountSettings", "Account settings")}
           </Menu.Item>
 
+          <Menu.Item component={Link} to={settingsPath("sidebar")} leftSection={<PanelLeft size={15} />}>
+            {t("nav.customizeSidebar", "Customize sidebar")}
+          </Menu.Item>
+
           <Menu.Item leftSection={<StickyNote size={15} />} onClick={() => notes.open()}>
             {t("nav.notes", "Notes")}
           </Menu.Item>
@@ -180,6 +185,9 @@ export function AccountMenu({
           <Menu.Item color="red" className="danger-item" leftSection={<LogOut size={15} />} onClick={onLogout}>
             {t("nav.logout", "Log out")}
           </Menu.Item>
+
+          <Menu.Divider />
+          <MenuVersion />
         </Menu.Dropdown>
       </Menu>
     </>

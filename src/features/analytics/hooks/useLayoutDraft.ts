@@ -55,8 +55,9 @@ export function useLayoutDraft(saved: Placed[], defaults: Placed[], scopeKey: st
 
   const reset = useCallback(() => setDraft(defaults), [defaults]);
   const clear = useCallback(() => setDraft([]), []);
+  const apply = useCallback((next: Placed[]) => setDraft(next.map((p) => ({ ...p }))), []);
 
-  return { layout, draft, dirty, revert, has, spanOf, toggle, remove, setSpan, move, reset, clear };
+  return { layout, draft, dirty, revert, has, spanOf, toggle, remove, setSpan, move, reset, clear, apply };
 }
 
 export type LayoutDraft = ReturnType<typeof useLayoutDraft>;

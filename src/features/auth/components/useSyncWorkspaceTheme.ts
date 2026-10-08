@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useGetWorkspaceThemeQuery } from "@/app/store";
-import { applyTheme, saveThemePrefs, readThemePrefs, withThemeTransition } from "@/shared/lib/theme";
+import { applyTheme, saveThemePrefs, readThemePrefs, sharedThemePrefs, withThemeTransition } from "@/shared/lib/theme";
 import type { ThemePrefs } from "@/shared/lib/theme";
 
 export function useSyncWorkspaceTheme(workspaceId: string | undefined) {
@@ -13,7 +13,7 @@ export function useSyncWorkspaceTheme(workspaceId: string | undefined) {
     if (!data?.theme) return; // Never saved server-side — keep localStorage.
 
     const current = readThemePrefs();
-    const merged: ThemePrefs = { ...current, ...(data.theme as Partial<ThemePrefs>) };
+    const merged: ThemePrefs = { ...current, ...sharedThemePrefs(data.theme as Partial<ThemePrefs>) };
     saveThemePrefs(merged);
 
     // The query result is a new object on every refetch (route change, cache

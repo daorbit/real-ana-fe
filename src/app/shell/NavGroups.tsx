@@ -1,11 +1,11 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { Box, UnstyledButton } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
 import { useFavouriteDashboards } from "@/features/dashboards/favourites";
 import { NavLink } from "./NavLink";
-import { FavouriteLinks } from "./FavouriteLinks";
+import { DashboardsTreeNode } from "./DashboardsTreeNode";
 import type { NavGroup } from "./navItems";
 
 const DASHBOARDS_PATH = "/app/dashboards";
@@ -40,18 +40,24 @@ function NavGroupBlock({
     : ownOpen || holdsCurrent;
   const toggle = group.collapsible ? onToggleAdmin : () => setOwnOpen((v) => !v);
 
-  const rows = group.items.map((n) => (
-    <Fragment key={n.to}>
-      <NavLink
-        to={n.to}
-        label={t(n.labelKey, n.label)}
-        icon={n.icon}
-        active={isActive(n.to) && !(n.to === DASHBOARDS_PATH && onFavourite)}
-        collapsed={collapsed}
-      />
-      {n.to === DASHBOARDS_PATH && !collapsed && <FavouriteLinks pathname={pathname} />}
-    </Fragment>
-  ));
+  const rows = group.items.map((n) => {
+    const label = t(n.labelKey, n.label);
+    const active = isActive(n.to) && !(n.to === DASHBOARDS_PATH && onFavourite);
+    if (n.to === DASHBOARDS_PATH && !collapsed && favourites.length > 0) {
+      return (
+        <DashboardsTreeNode
+          key={n.to}
+          item={n}
+          label={label}
+          active={active}
+          pathname={pathname}
+          favourites={favourites}
+          onFavourite={onFavourite}
+        />
+      );
+    }
+    return <NavLink key={n.to} to={n.to} label={label} icon={n.icon} active={active} collapsed={collapsed} />;
+  });
 
   return (
     <Box className="nav-group" mb={collapsed ? 6 : 14}>

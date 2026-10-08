@@ -8,7 +8,6 @@ import { useInstagramReturn } from "@/features/social/useInstagramReturn";
 import { useProfileForm } from "@/features/auth/components/settings/useProfileForm";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
 import { SettingsSectionBody } from "@/features/auth/components/settings/SettingsSectionBody";
-import { AppVersion } from "@/features/auth/components/settings/AppVersion";
 import { PageTabs } from "@/shared/ui/PageTabs";
 import { pageTabId, pageTabPanelId } from "@/shared/ui/pageTabIds";
 import pageClasses from "@/features/auth/components/settings/SettingsPage.module.css";
@@ -87,8 +86,6 @@ function SettingsPage({ id }: { id: SettingsSectionId }) {
           <p className={pageClasses.intro}>{t(section.descriptionKey, section.description)}</p>
           <SettingsSectionBody id={id} form={form} />
         </motion.div>
-
-        <AppVersion />
 
         {dirty && <SaveBar saving={saving} onDiscard={seedFromUser} />}
       </form>

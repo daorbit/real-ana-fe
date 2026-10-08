@@ -16,3 +16,19 @@
 .liveDot {
   background: var(--mantine-color-teal-6);
 }
+
+.presetLabel {
+  display: block;
+  font-weight: 600;
+}
+
+.presetHint {
+  display: block;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--muted);
+}
+
+.checkSpacer {
+  display: inline-block;
+  width: 14px;
+}

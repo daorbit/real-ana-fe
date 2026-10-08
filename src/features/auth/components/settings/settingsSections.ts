@@ -1,6 +1,6 @@
-import { BellRing, Link2, Palette, ShieldCheck, UserRound } from "lucide-react";
+import { BellRing, Link2, Palette, PanelLeft, ShieldCheck, UserRound } from "lucide-react";
 
-export type SettingsSectionId = "profile" | "appearance" | "connections" | "notifications" | "security";
+export type SettingsSectionId = "profile" | "appearance" | "sidebar" | "connections" | "notifications" | "security";
 
 export interface SettingsSection {
   id: SettingsSectionId;
@@ -27,6 +27,14 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     descriptionKey: "settings.appearancePageDesc",
     description: "Theme, colours and layout of your dashboard.",
     icon: Palette,
+  },
+  {
+    id: "sidebar",
+    labelKey: "settings.tabSidebar",
+    label: "Sidebar",
+    descriptionKey: "settings.sidebarPageDesc",
+    description: "Pin the pages you use most and hide the ones you don't.",
+    icon: PanelLeft,
   },
   {
     id: "connections",

@@ -81,27 +81,30 @@ export const theme = createTheme({
     },
  
     Switch: {
-      vars: () => ({
+      vars: (_theme: unknown, props: { color?: string }) => ({
         root: {
           "--switch-bg": "var(--surface-2)",
           "--switch-bd": "1px solid var(--border)",
           "--switch-thumb-bg": "var(--text)",
+          ...(props.color ? {} : { "--switch-color": "var(--cta)" }),
         },
       }),
     },
     Checkbox: {
-      vars: () => ({
+      vars: (_theme: unknown, props: { color?: string }) => ({
         root: {
           "--checkbox-bd": "1px solid var(--border)",
-          "--checkbox-icon-color": "var(--accent-contrast)",
+          "--checkbox-icon-color": props.color ? "var(--accent-contrast)" : "var(--cta-fg)",
+          ...(props.color ? {} : { "--checkbox-color": "var(--cta)" }),
         },
       }),
     },
     Radio: {
-      vars: () => ({
+      vars: (_theme: unknown, props: { color?: string }) => ({
         root: {
           "--radio-bd": "1px solid var(--border)",
-          "--radio-icon-color": "var(--accent-contrast)",
+          "--radio-icon-color": props.color ? "var(--accent-contrast)" : "var(--cta-fg)",
+          ...(props.color ? {} : { "--radio-color": "var(--cta)" }),
         },
       }),
     },

@@ -28,7 +28,7 @@ function writeFlag(key: string, value: boolean) {
 }
 
 /** A boolean that remembers itself across reloads. */
-function usePersistedFlag(key: string, fallback: boolean) {
+export function usePersistedFlag(key: string, fallback: boolean) {
   const [value, setValue] = useState(() => readFlag(key, fallback));
   const toggle = useCallback(() => {
     setValue((v) => {

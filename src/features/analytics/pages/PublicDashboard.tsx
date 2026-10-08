@@ -5,9 +5,12 @@ import {
   UnstyledButton, Progress,
 } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip as RTooltip } from "recharts";
-import { EyeOff, BarChart3 } from "lucide-react";
+import { EyeOff } from "lucide-react";
 import { Wordmark } from "@/shared/ui/Brand";
 import { num, duration, countryFlag, countryLabel } from "@/shared/lib";
+import { PublicBrandMark } from "@/features/analytics/components/public/PublicBrandMark";
+import { usePublicAccent } from "@/features/analytics/components/public/usePublicAccent";
+import type { PublicBrand } from "@/features/analytics/components/public/publicBrand";
 
 const RANGES = [
   { value: "24h", label: "24 hours" },
@@ -34,6 +37,7 @@ type Panels = {
 };
 type Shared = {
   workspace: string;
+  brand?: PublicBrand;
   range: string;
   panels: Panels;
   pageviews: number;
@@ -134,6 +138,9 @@ export default function PublicDashboard() {
   // Only the first load counts as a view — switching range re-fetches, and
   // counting that would inflate one reader into several.
   const counted = useRef(false);
+  const pageRef = useRef<HTMLDivElement>(null);
+  usePublicAccent(pageRef, data?.brand?.accentColor);
+  const title = data?.brand?.name ?? data?.workspace ?? "";
 
  
   useEffect(() => {
@@ -185,8 +192,8 @@ export default function PublicDashboard() {
   }, [token, range]);
 
   useEffect(() => {
-    if (data) document.title = `${data.workspace} — Analytics`;
-  }, [data]);
+    if (title) document.title = `${title} — Analytics`;
+  }, [title]);
 
   if (state === "loading") {
     return (
@@ -251,16 +258,14 @@ export default function PublicDashboard() {
   }[];
 
   return (
-    <Box mih="100dvh" style={{ background: "var(--bg)" }}>
+    <Box ref={pageRef} mih="100dvh" style={{ background: "var(--bg)" }}>
       <Box className="pub-bar">
         <Group justify="space-between" wrap="wrap" gap="md" className="pub-inner">
           <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-            <Box className="pub-mark">
-              <BarChart3 size={17} />
-            </Box>
+            <PublicBrandMark logoUrl={data.brand?.logoUrl} name={title} />
             <div style={{ minWidth: 0 }}>
               <Title order={3} style={{ letterSpacing: "-0.02em" }} lineClamp={1}>
-                {data.workspace}
+                {title}
               </Title>
               <Text size="xs" c="dimmed" mt={1}>
                 Live analytics · updates automatically
@@ -436,7 +441,7 @@ export default function PublicDashboard() {
           </SimpleGrid>
         )}
 
-        <PoweredBy />
+        {data.brand?.showPoweredBy !== false && <PoweredBy />}
       </Box>
     </Box>
   );

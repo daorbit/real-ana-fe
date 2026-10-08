@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Group, Text, UnstyledButton, useMantineColorScheme } from "@mantine/core";
+import { Box, Text, UnstyledButton, useMantineColorScheme } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { Starfield } from "@/shared/ui/Starfield";
@@ -9,19 +9,10 @@ import { trace } from "@/shared/lib/analytics";
 import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
   BG_STYLES,
-  // Appearance offers mode, preset, accent and background only. Radius,
-  // density, font size, table rows and motion were pulled back out: they are
-  // fine-tuning nobody asked for, and each one is another way for the app to
-  // look wrong. Their defaults in `theme.ts` still apply.
-  applyTheme, readThemePrefs, saveThemePrefs, withThemeTransition, buildBgValue,
+  applyTheme, readThemePrefs, saveThemePrefs, sharedThemePrefs, withThemeTransition, buildBgValue,
 } from "@/shared/lib/theme";
-import type { ThemeMode, ThemePrefs } from "@/shared/lib/theme";
-
-const MODES: { id: ThemeMode; label: string }[] = [
-  { id: "system", label: "System" },
-  { id: "light", label: "Light" },
-  { id: "dark", label: "Dark" },
-];
+import type { ThemePrefs } from "@/shared/lib/theme";
+import { ModePicker } from "./appearance/ModePicker";
 
 /** A group heading with real weight and its own breathing room above — the
  *  page reads as a list of distinct decisions, not one dense wall. */
@@ -99,11 +90,12 @@ export function AppearanceSection({
     });
     // notify.theme(describeChange(patch));
 
-    if (active?._id) {
+    const sharedChanged = Object.keys(sharedThemePrefs(patch)).length > 0;
+    if (active?._id && sharedChanged) {
       const workspaceId = active._id;
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
-        void saveWorkspaceTheme({ workspaceId, theme: next });
+        void saveWorkspaceTheme({ workspaceId, theme: sharedThemePrefs(next) });
       }, 600);
     }
   };
@@ -112,24 +104,12 @@ export function AppearanceSection({
       <Box px={bare ? 0 : "lg"} py={bare ? 0 : "lg"} className={split ? "appearance-split" : undefined}>
         <div>
         <GroupBlock>
-          <GroupLabel>{t("settings.mode", "Mode")}</GroupLabel>
-          <Group gap="sm">
-            {MODES.map((m) => (
-              <UnstyledButton
-                key={m.id}
-                className="tile"
-                data-selected={prefs.mode === m.id}
-                onClick={() => update({ mode: m.id })}
-                px="lg"
-                py={10}
-                style={{ fontSize: 13.5, fontWeight: 550 }}
-              >
-                {m.label}
-              </UnstyledButton>
-            ))}
-          </Group>
+          <Text size="sm" fw={650}>{t("settings.interfaceTheme", "Interface theme")}</Text>
+          <Text size="sm" c="dimmed" mb={16}>
+            {t("settings.interfaceThemeDesc", "Select or customize your UI theme")}
+          </Text>
+          <ModePicker value={prefs.mode} onChange={(mode) => update({ mode })} />
         </GroupBlock>
-
         </div>
 
         <div>

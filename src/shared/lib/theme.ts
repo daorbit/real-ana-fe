@@ -294,11 +294,11 @@ export function readThemePrefs(): ThemePrefs {
       cta: parsed.cta ?? DEFAULT_PREFS.cta,
       accent: parsed.accent ?? DEFAULT_PREFS.accent,
       bg: parsed.bg ?? DEFAULT_PREFS.bg,
-      radius: parsed.radius ?? DEFAULT_PREFS.radius,
-      density: parsed.density ?? DEFAULT_PREFS.density,
-      fontSize: parsed.fontSize ?? DEFAULT_PREFS.fontSize,
-      table: parsed.table ?? DEFAULT_PREFS.table,
-      motion: parsed.motion ?? DEFAULT_PREFS.motion,
+      radius: DEFAULT_PREFS.radius,
+      density: DEFAULT_PREFS.density,
+      fontSize: DEFAULT_PREFS.fontSize,
+      table: DEFAULT_PREFS.table,
+      motion: DEFAULT_PREFS.motion,
     };
   } catch {
     return DEFAULT_PREFS;
@@ -307,6 +307,11 @@ export function readThemePrefs(): ThemePrefs {
 
 export function saveThemePrefs(prefs: ThemePrefs) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+}
+
+export function sharedThemePrefs(prefs: Partial<ThemePrefs>): Partial<ThemePrefs> {
+  const { mode: _mode, ...shared } = prefs;
+  return shared;
 }
 
 /** #rrggbb -> {r,g,b} */
@@ -426,7 +431,15 @@ const FIXED_CTA = {
   dark: { bg: "#f2f3f5", bgHover: "#dcdee3", fg: "#0c0d10" },
 };
 
-export function applyTheme(prefs: ThemePrefs) {
+export function applyTheme(input: ThemePrefs) {
+  const prefs: ThemePrefs = {
+    ...input,
+    radius: DEFAULT_PREFS.radius,
+    density: DEFAULT_PREFS.density,
+    fontSize: DEFAULT_PREFS.fontSize,
+    table: DEFAULT_PREFS.table,
+    motion: DEFAULT_PREFS.motion,
+  };
   const root = document.documentElement;
 
   if (prefs.mode === "system") {

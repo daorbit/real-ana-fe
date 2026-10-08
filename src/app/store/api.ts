@@ -935,9 +935,18 @@ export const api = createApi({
         method: "PUT",
         body: theme,
       }),
-      invalidatesTags: (_r, _e, { workspaceId }) => [
-        { type: "Theme", id: workspaceId },
-      ],
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            api.util.updateQueryData("getWorkspaceTheme", workspaceId, (draft) => {
+              draft.theme = data.theme;
+            }),
+          );
+        } catch {
+          return;
+        }
+      },
     }),
 
     getAdminUsers: build.query<

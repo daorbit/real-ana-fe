@@ -1,11 +1,84 @@
-.list {
+.node {
+  margin-bottom: 2px;
+}
+
+.head {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin: 2px 0 4px 19px;
-  padding-left: 10px;
-  border-left: 1px solid var(--border);
+}
+
+.head > :global(.nav-link) {
+  margin-bottom: 0;
+  padding-right: 52px !important;
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 4px 0 7px;
+  border-radius: 6px;
+  color: var(--muted);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.toggle:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text);
+}
+
+.toggle:disabled {
+  cursor: default;
+}
+
+.count {
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.chevron {
+  transition: rotate 150ms ease;
+}
+
+.chevron[data-open] {
+  rotate: 90deg;
+}
+
+.tree {
+  list-style: none;
+  margin: 2px 0 4px;
+  padding: 0 0 0 17px;
+}
+
+.branch {
+  position: relative;
+  padding: 1px 0 1px 16px;
+}
+
+.branch::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 11px;
+  height: 50%;
+  border-left: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+  border-bottom-left-radius: 7px;
+}
+
+.branch:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--border-strong);
 }
 
 .link {
@@ -13,7 +86,7 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 5px 8px;
+  padding: 6px 8px;
   border-radius: 8px;
   font-size: 12px;
   color: var(--text-2);
@@ -27,15 +100,23 @@
 }
 
 .link[data-active] {
-  background: color-mix(in srgb, var(--text) 8%, transparent);
+  background: color-mix(in srgb, var(--text) 9%, transparent);
   color: var(--text);
   font-weight: 600;
 }
 
 .icon {
   flex-shrink: 0;
-  color: #f5a524;
-  fill: currentColor;
+  color: var(--muted);
+  transition: color 120ms ease;
+}
+
+.link:hover .icon {
+  color: var(--text-2);
+}
+
+.link[data-active] .icon {
+  color: var(--accent-2);
 }
 
 .name {

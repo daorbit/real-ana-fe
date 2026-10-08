@@ -22,6 +22,7 @@ import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRe
 import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
 import { LayoutEditControls } from "@/features/analytics/components/widgets/LayoutEditControls";
 import { useStats, useLive, useHomeWidgets, useLinkedInReturn, useSiteScope } from "@/features/analytics";
+import { useHomeDisplay } from "@/features/analytics/homeDisplayPrefs";
 import { useSites } from "@/features/workspace";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -53,8 +54,9 @@ export default function Home() {
   const { sites } = useSites(active?._id);
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
-    has, spanOf, toggle, remove, setSpan, move, reset, clear,
+    has, spanOf, toggle, remove, setSpan, move, reset, clear, apply,
   } = useHomeWidgets();
+  const display = useHomeDisplay();
 
   const [customizing, setCustomizing] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -137,7 +139,7 @@ export default function Home() {
       />
 
       <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap" className="home-toolbar">
-        {!editing && !dirty && <HomeGreeting firstName={user?.firstName ?? ""} last={lastVisit} />}
+        {!editing && !dirty && display.greeting && <HomeGreeting firstName={user?.firstName ?? ""} last={lastVisit} />}
         <Group gap="sm" wrap="wrap" justify="flex-end" className="home-toolbar-btns">
 
           {!editing && !dirty && (
@@ -157,6 +159,11 @@ export default function Home() {
             onAdd={() => {
               trace(user?.id, "add_widget_clicked", "home", "widget_drawer");
               setCustomizing(true);
+            }}
+            onPreset={(preset) => {
+              trace(user?.id, "layout_preset_applied", "home", preset.id);
+              apply(preset.layout);
+              setEditing(true);
             }}
           />
 
@@ -180,7 +187,7 @@ export default function Home() {
       </Group>
 
       <div className={dimClasses.dim} data-switching={switching || undefined}>
-      {!editing && !dirty && (
+      {!editing && !dirty && display.hero && (
         <HomeHero
           workspaceName={active.name}
           live={live}
