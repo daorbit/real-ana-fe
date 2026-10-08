@@ -374,6 +374,7 @@
     "deleteWsConsequenceSites_one": "{{count}} साइट हटाई जाएगी",
     "deleteWsConsequenceSites_other": "{{count}} साइटें हटाई जाएँगी",
     "deleteWsConsequenceHistory": "एकत्र किया गया पूरा एनालिटिक्स इतिहास मिट जाएगा",
+    "deleteWsConsequenceContent": "फ़ॉर्म और उनके सबमिशन, रिपोर्ट, मीडिया फ़ाइलें और जुड़े हुए Google खाते हटा दिए जाएँगे",
     "deleteWsConsequenceLinks": "इन साइटों के सार्वजनिक डैशबोर्ड लिंक काम करना बंद कर देंगे",
     "deleteWsConsequenceSnippet": "स्निपेट चला रहा कोई भी ऐप डेटा भेजना बंद कर देगा",
     "deletedWsToast": "वर्कस्पेस “{{name}}” हटा दिया गया।",

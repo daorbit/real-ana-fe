@@ -45,6 +45,7 @@ export function useWorkspaceActions(active: Workspace | null, siteCount: number)
           ? t("workspaces.deleteWsConsequenceAllSites")
           : t("workspaces.deleteWsConsequenceSites", { count }),
         t("workspaces.deleteWsConsequenceHistory"),
+        t("workspaces.deleteWsConsequenceContent"),
         t("workspaces.deleteWsConsequenceLinks"),
         t("workspaces.deleteWsConsequenceSnippet"),
       ],

@@ -374,6 +374,7 @@
     "deleteWsConsequenceSites_one": "{{count}} 件のサイトが削除されます",
     "deleteWsConsequenceSites_other": "{{count}} 件のサイトが削除されます",
     "deleteWsConsequenceHistory": "収集済みのアナリティクス履歴がすべて消去されます",
+    "deleteWsConsequenceContent": "フォームとその回答、レポート、メディアファイル、接続済みの Google アカウントが削除されます",
     "deleteWsConsequenceLinks": "これらのサイトの公開ダッシュボードのリンクが使えなくなります",
     "deleteWsConsequenceSnippet": "スニペットを実行中のアプリからのデータ送信が停止します",
     "deletedWsToast": "ワークスペース「{{name}}」を削除しました。",

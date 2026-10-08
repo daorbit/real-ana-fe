@@ -374,6 +374,7 @@
     "deleteWsConsequenceSites_one": "Se elimina {{count}} sitio",
     "deleteWsConsequenceSites_other": "Se eliminan {{count}} sitios",
     "deleteWsConsequenceHistory": "Se borra todo el historial de analíticas recopilado",
+    "deleteWsConsequenceContent": "Se eliminan los formularios y sus respuestas, los informes, los archivos multimedia y las cuentas de Google conectadas",
     "deleteWsConsequenceLinks": "Los enlaces de paneles públicos de estos sitios dejan de funcionar",
     "deleteWsConsequenceSnippet": "Cualquier aplicación que aún ejecute el fragmento deja de enviar datos",
     "deletedWsToast": "Espacio de trabajo «{{name}}» eliminado.",

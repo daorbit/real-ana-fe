@@ -1098,6 +1098,7 @@
     "deleteWsConsequenceSites_one": "{{count}} site is deleted",
     "deleteWsConsequenceSites_other": "{{count}} sites are deleted",
     "deleteWsConsequenceHistory": "All collected analytics history is erased",
+    "deleteWsConsequenceContent": "Forms and their submissions, reports, media files and connected Google accounts are removed",
     "deleteWsConsequenceLinks": "Public dashboard links for these sites stop working",
     "deleteWsConsequenceSnippet": "Any app still running the snippet stops reporting",
     "deletedWsToast": "Workspace \"{{name}}\" deleted.",

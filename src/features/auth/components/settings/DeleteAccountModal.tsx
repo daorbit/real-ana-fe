@@ -36,7 +36,7 @@ export function DeleteAccountModal({ user, onClose }: { user: User; onClose: () 
     <Modal opened onClose={onClose} title="Delete your account" radius="lg" size={460} centered>
       <Stack gap="md" pt={4}>
         <Text size="sm" c="dimmed">
-          This permanently deletes your profile, sessions, notes, connected accounts and Orbit history. It cannot be undone.
+          This permanently deletes your profile, sessions, notes, connected accounts and Orbit history. It cannot be undone. We'll send a confirmation to {user.email}.
         </Text>
 
         {owned.length > 0 && (
