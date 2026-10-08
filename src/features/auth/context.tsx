@@ -55,6 +55,7 @@ type AuthState = {
   unlockScreen: (proof: { pin: string } | { totpCode: string }) => Promise<void>;
   startDemo: () => Promise<void>;
   logout: () => void;
+  deleteAccount: (confirmEmail: string, proof?: IdentityProof) => Promise<void>;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
 
   uploadAvatar: (file: Blob) => Promise<void>;
@@ -333,6 +334,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(rtkApi.util.resetApiState());
   };
 
+  const deleteAccount = async (confirmEmail: string, proof?: IdentityProof) => {
+    await api.post("/api/auth/me/delete", { confirmEmail, ...proof });
+    localStorage.removeItem("rta_active_ws");
+    logout();
+  };
+
   const impersonate = async (userId: string) => {
     const r = await api.post<AuthResp>(`/api/admin/impersonate/${userId}`, {});
     startImpersonating(r.token);
@@ -356,7 +363,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, setPin, enableScreenLock, disableScreenLock, lockScreenNow, unlockScreen, startDemo, logout, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, setPin, enableScreenLock, disableScreenLock, lockScreenNow, unlockScreen, startDemo, logout, deleteAccount, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

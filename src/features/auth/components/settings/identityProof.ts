@@ -6,6 +6,10 @@ export function identityProof(user: User, value: string): IdentityProof {
   return user.hasPassword ? { password: value } : { code: value.trim() };
 }
 
+export function hasIdentityFactor(user: User): boolean {
+  return Boolean(user.hasPassword || user.hasPin || user.totpEnabled);
+}
+
 export function identityPrompt(user: User): string {
   if (user.hasPassword) return "Confirm your password";
   if (user.hasPin && user.totpEnabled) return "Confirm with your PIN or a code from your authenticator app";

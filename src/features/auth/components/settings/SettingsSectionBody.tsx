@@ -8,6 +8,7 @@ import { PasswordPanel } from "./PasswordPanel";
 import { TwoFactorPanel } from "./TwoFactorPanel";
 import { ScreenLockPanel } from "./ScreenLockPanel";
 import { SessionsPanel } from "./SessionsPanel";
+import { DeleteAccountPanel } from "./DeleteAccountPanel";
 import securityClasses from "./Security.module.css";
 import type { SettingsSectionId } from "./settingsSections";
 import type { ProfileForm } from "./useProfileForm";
@@ -30,6 +31,7 @@ export function SettingsSectionBody({ id, form }: { id: SettingsSectionId; form:
           <TwoFactorPanel />
           <ScreenLockPanel />
           <SessionsPanel />
+          <DeleteAccountPanel />
         </Box>
       );
   }
