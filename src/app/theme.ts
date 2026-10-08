@@ -131,7 +131,7 @@ export const theme = createTheme({
     Card: { defaultProps: { radius: "md" } },
     Button: Button.extend({
       defaultProps: { radius: "md" },
-      styles: { label: { fontWeight: 550, letterSpacing: "-0.005em" } },
+      styles: { label: { fontWeight: 500, letterSpacing: "-0.005em" } },
       vars: (_theme, props) => {
         if (props.color && props.color !== "emerald") return { root: {} };
         if (props.variant === undefined || props.variant === "filled") {

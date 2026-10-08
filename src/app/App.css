@@ -554,7 +554,32 @@ body { overflow-wrap: break-word; }
 [data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="light"],
 [data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="default"],
 [data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="light"] {
-  box-shadow: var(--edge-light), 0 1px 2px rgba(0, 0, 0, 0.7);
+  border-color: var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]),
+:root[data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]) {
+  --button-bg: var(--surface) !important;
+  --button-hover: var(--surface-2) !important;
+  --button-bd: 1px solid var(--border) !important;
+  --ai-bg: var(--surface) !important;
+  --ai-hover: var(--surface-2) !important;
+  --ai-bd: 1px solid var(--border) !important;
+  background-clip: padding-box;
+}
+
+[data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="default"]:hover,
+[data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="default"]:hover {
+  border-color: var(--border-strong);
+}
+
+.mantine-Button-section[data-position="left"] {
+  margin-inline-end: 7px;
+}
+
+.mantine-Button-section[data-position="right"] {
+  margin-inline-start: 6px;
 }
 
 [data-mantine-color-scheme="dark"] .mantine-Menu-dropdown,
