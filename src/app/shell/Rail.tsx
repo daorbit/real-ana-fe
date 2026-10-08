@@ -183,7 +183,7 @@ export function Rail({
               onToggleDemo={toggleDemo}
               onLogout={() => setLogoutOpen(true)}
             />
-            <ThemeToggleButton onChange={setMode} />
+            {!collapsed && <ThemeToggleButton onChange={setMode} />}
           </div>
         </div>
       </MantineShell.Section>
