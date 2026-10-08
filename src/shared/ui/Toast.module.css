@@ -31,29 +31,6 @@
   margin-inline-end: 0;
 }
 
-.undoRow {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.undoButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  color: var(--toast-fg);
-  font-size: 12px;
-  font-weight: 650;
-  background: color-mix(in srgb, var(--toast-fg) 14%, transparent);
-  transition: background-color 0.12s ease;
-}
-
-.undoButton:hover {
-  background: color-mix(in srgb, var(--toast-fg) 24%, transparent);
-}
-
 .message.message {
   color: var(--toast-fg);
   font-size: 12px;

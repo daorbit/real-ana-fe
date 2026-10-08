@@ -17,6 +17,7 @@ import { useDemo } from "@/features/demo/context";
 import { Starfield } from "@/shared/ui/Starfield";
 import { BG_STYLES, readThemePrefs } from "@/shared/lib/theme";
 import { ActivityPanelProvider } from "@/features/activity/ActivityPanelContext";
+import { TabBadge } from "@/features/activity/TabBadge";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
@@ -95,6 +96,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
 
   return (
     <ActivityPanelProvider>
+      <TabBadge />
       <OfflineBar />
       <FetchProgress />
       <CommandPalette />

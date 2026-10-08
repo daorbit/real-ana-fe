@@ -1,19 +1,13 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { hideTarget, useCreateTargetMutation, useDeleteTargetMutation, useUpdateTargetMutation } from "@/features/goals/api";
-import { notify, notifyError } from "@/shared/lib/notify";
-import { deferDelete } from "@/shared/lib/deferDelete";
-import type { AppDispatch } from "@/app/store";
+import { useCreateTargetMutation, useDeleteTargetMutation, useUpdateTargetMutation } from "@/features/goals/api";
+import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/notify";
 import type { TargetInput, TargetProgress } from "@/features/goals/types";
 
 type Editing = { id: string | null; initial: Partial<TargetInput> | null };
 
-const NO_DELETING: string | null = null;
-
 export function useTargetEditor(workspaceId: string | undefined) {
-  const dispatch = useDispatch<AppDispatch>();
   const [editing, setEditing] = useState<Editing | null>(null);
-  const deletingId = NO_DELETING;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [create, { isLoading: creating }] = useCreateTargetMutation();
   const [update, { isLoading: updating }] = useUpdateTargetMutation();
   const [remove] = useDeleteTargetMutation();
@@ -42,12 +36,16 @@ export function useTargetEditor(workspaceId: string | undefined) {
 
   const askDelete = (t: TargetProgress) => {
     if (!workspaceId) return;
-    deferDelete({
-      key: `target:${t.id}`,
-      message: `“${t.name}” deleted`,
-      errorMessage: "Could not delete the goal.",
-      hide: () => dispatch(hideTarget(workspaceId, t.id)),
-      commit: () => remove({ workspaceId, id: t.id }).unwrap(),
+    confirmDelete({
+      title: "Delete goal?",
+      body: <>“{t.name}” will stop being tracked.</>,
+      onConfirm: () => {
+        setDeletingId(t.id);
+        remove({ workspaceId, id: t.id })
+          .unwrap()
+          .catch((e) => notify.error(errMessage(e, "Could not delete the goal.")))
+          .finally(() => setDeletingId(null));
+      },
     });
   };
 

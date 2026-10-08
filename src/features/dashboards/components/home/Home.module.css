@@ -264,7 +264,7 @@
 .tableHead,
 .tableRow {
   display: grid;
-  grid-template-columns: minmax(0, 2.4fr) minmax(70px, 0.6fr) minmax(110px, 1fr) minmax(110px, 1fr) 44px;
+  grid-template-columns: minmax(0, 2.4fr) minmax(70px, 0.6fr) minmax(110px, 1fr) minmax(110px, 1fr) 76px;
   align-items: center;
   gap: 16px;
   padding: 0 14px 0 18px;
@@ -362,7 +362,9 @@
 
 .tableActions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 2px;
 }
 
 .busy {
@@ -904,7 +906,7 @@
 
   .tableHead,
   .tableRow {
-    grid-template-columns: minmax(0, 1fr) minmax(80px, auto) 44px;
+    grid-template-columns: minmax(0, 1fr) minmax(80px, auto) 76px;
   }
 
   .tableHead > :nth-child(2),

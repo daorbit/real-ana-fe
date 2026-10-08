@@ -59,9 +59,6 @@ const goalsApi = queries.injectEndpoints({
   }),
 });
 
-export const hideTarget = (workspaceId: string, id: string) =>
-  queries.util.updateQueryData("getTargets", workspaceId, (list) => list.filter((t) => t.id !== id));
-
 export const { useGetTargetsQuery } = queries;
 
 export const {

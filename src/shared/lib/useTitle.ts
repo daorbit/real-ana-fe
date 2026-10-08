@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-
-const SUFFIX = "Quantalog";
+import { TITLE_SUFFIX, getTitleBase, setTitleBase } from "@/shared/lib/tabTitle";
 
 /**
  * Sets the browser tab title for the page that mounts this, and restores the
@@ -12,10 +11,10 @@ const SUFFIX = "Quantalog";
  */
 export function useTitle(name?: string) {
   useEffect(() => {
-    const prev = document.title;
-    document.title = name ? `${name} · ${SUFFIX}` : SUFFIX;
+    const prev = getTitleBase();
+    setTitleBase(name ? `${name} · ${TITLE_SUFFIX}` : TITLE_SUFFIX);
     return () => {
-      document.title = prev;
+      setTitleBase(prev);
     };
   }, [name]);
 }

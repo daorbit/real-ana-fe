@@ -1,19 +1,17 @@
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { ChevronLeft } from "lucide-react";
-import { useDispatch } from "react-redux";
-import { notify } from "@/shared/lib/notify";
-import { deferDelete } from "@/shared/lib/deferDelete";
+import { confirmDelete, notify } from "@/shared/lib/notify";
 import { shortDate } from "@/shared/lib";
-import type { AppDispatch } from "@/app/store";
 import { useNoteDraft } from "@/features/notes/hooks/useNoteDraft";
-import { useNotes } from "@/features/notes/NotesProvider";
-import { hideNote, useDeleteNoteMutation, useUpdateNoteMutation } from "@/features/notes/api";
+import { useDeleteNoteMutation, useUpdateNoteMutation } from "@/features/notes/api";
 import { NoteMenu } from "@/features/notes/components/NoteMenu";
 import { NoteFooter } from "@/features/notes/components/NoteFooter";
 import { PanelControls } from "@/features/notes/components/PanelControls";
 import { downloadNote, noteAsText, wordCount } from "@/features/notes/noteText";
 import type { Note } from "@/features/notes/types";
 import classes from "@/features/notes/components/Notes.module.css";
+
+const NOTES_DIALOG_Z = 340;
 
 export function NoteEditor({
   note,
@@ -31,8 +29,6 @@ export function NoteEditor({
   onNew: () => void;
 }) {
   const draft = useNoteDraft(note);
-  const dispatch = useDispatch<AppDispatch>();
-  const { open: openNote } = useNotes();
   const [updateNote] = useUpdateNoteMutation();
   const [deleteNote] = useDeleteNoteMutation();
   const current = { title: draft.title, body: draft.body };
@@ -47,15 +43,20 @@ export function NoteEditor({
   };
 
   const remove = () => {
-    draft.discard();
-    onBack();
-    deferDelete({
-      key: `note:${note.id}`,
-      message: "Note deleted",
-      errorMessage: "Couldn't delete the note.",
-      hide: () => dispatch(hideNote(note.id)),
-      commit: () => deleteNote(note.id).unwrap(),
-      onUndo: () => openNote(note.id),
+    confirmDelete({
+      title: "Delete note?",
+      body: <>“{draft.title.trim() || "Untitled note"}” will be permanently deleted.</>,
+      zIndex: NOTES_DIALOG_Z,
+      onConfirm: async () => {
+        try {
+          await deleteNote(note.id).unwrap();
+          draft.discard();
+          onBack();
+          notify.success("Note deleted");
+        } catch {
+          notify.error("Couldn't delete the note.");
+        }
+      },
     });
   };
 

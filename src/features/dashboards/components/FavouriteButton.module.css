@@ -1,0 +1,16 @@
+.star {
+  color: var(--muted);
+  transition: color 150ms ease;
+}
+
+.star:hover {
+  color: var(--text);
+}
+
+.star[data-active] {
+  color: #f5a524;
+}
+
+.star[data-active] svg {
+  fill: currentColor;
+}

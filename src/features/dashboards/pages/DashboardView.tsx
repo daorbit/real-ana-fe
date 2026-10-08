@@ -31,6 +31,8 @@ import { useDashboardActions } from "@/features/dashboards/hooks/useDashboardAct
 import { useDashboardPrint } from "@/features/dashboards/hooks/useDashboardPrint";
 import { DashboardPrintCover } from "@/features/dashboards/components/print/DashboardPrintCover";
 import { DashboardTitle } from "@/features/dashboards/components/DashboardTitle";
+import { FavouriteButton } from "@/features/dashboards/components/FavouriteButton";
+import { removeFavourite, syncFavouriteName } from "@/features/dashboards/favourites";
 import { RangeControl } from "@/features/dashboards/components/RangeControl";
 import { WidgetFrame } from "@/features/dashboards/components/WidgetFrame";
 import { EmbedModal } from "@/features/dashboards/components/embeds/EmbedModal";
@@ -52,7 +54,7 @@ export default function DashboardView() {
   const workspaceId = active?._id;
 
   const { demo } = useDemo();
-  const { data: realDashboard, isLoading: dashboardLoading, isError: dashboardError } = useGetDashboardQuery(
+  const { data: realDashboard, isLoading: dashboardLoading, isError: dashboardError, error: dashboardFailure } = useGetDashboardQuery(
     { workspaceId: workspaceId ?? "", id },
     { skip: !workspaceId || !id }
   );
@@ -61,6 +63,15 @@ export default function DashboardView() {
   const isLoading = !sample && dashboardLoading;
   const isError = !sample && dashboardError;
   useTitle(dashboard?.name ?? "Dashboard");
+
+  useEffect(() => {
+    if (workspaceId && dashboard && !sample) syncFavouriteName(workspaceId, dashboard.id, dashboard.name);
+  }, [workspaceId, dashboard, sample]);
+
+  const notFound = (dashboardFailure as { status?: unknown } | undefined)?.status === 404;
+  useEffect(() => {
+    if (workspaceId && notFound) removeFavourite(workspaceId, id);
+  }, [workspaceId, notFound, id]);
 
   const layout = useDashboardLayout(workspaceId, dashboard);
   const fresh = useFreshWidgets();
@@ -206,6 +217,7 @@ export default function DashboardView() {
           {quiet && <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />}
           {quiet && <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />}
           {quiet && <RangeControl value={range} allowed={allowed} onChange={change} />}
+          {quiet && <FavouriteButton workspaceId={workspaceId} id={dashboard.id} name={dashboard.name} size="lg" />}
           {canEdit && !editing && <AskOrbitSearchButton label="Edit with Orbit" onClick={openStudio} />}
           {canEdit && (
             <LayoutEditControls

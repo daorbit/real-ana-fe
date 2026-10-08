@@ -279,6 +279,7 @@ export function confirmDelete(opts: {
    * than destructive, and painting "Post now" red would misstate what it does.
    */
   confirmColor?: string;
+  zIndex?: number;
   onConfirm: () => void | Promise<void>;
 }) {
   const id = `confirm-delete-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -288,6 +289,7 @@ export function confirmDelete(opts: {
     title: opts.title,
     centered: true,
     radius: "lg",
+    zIndex: opts.zIndex,
     children: (
       <ConfirmForm
         body={opts.body}

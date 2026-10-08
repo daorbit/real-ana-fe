@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { timeAgo } from "@/shared/lib";
 import { MiniWindow } from "@/features/dashboards/components/MiniWindow";
 import { DashboardMenu } from "@/features/dashboards/components/home/DashboardMenu";
+import { FavouriteButton } from "@/features/dashboards/components/FavouriteButton";
+import { useWorkspace } from "@/features/workspace/context";
 import { CardBusyOverlay } from "@/features/dashboards/components/home/CardBusyOverlay";
 import { TEMPLATE_MAP } from "@/features/dashboards/templates";
 import { rangeLong } from "@/features/dashboards/types";
@@ -28,6 +30,7 @@ export function DashboardCard({
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
+  const workspaceId = useWorkspace().active?._id;
   const template = TEMPLATE_MAP[dashboard.template] ?? TEMPLATE_MAP.blank;
   const count = dashboard.layout.length;
   const Icon = template.icon;
@@ -79,6 +82,7 @@ export function DashboardCard({
             {rangeLong(dashboard.range)}
           </div>
         </div>
+        {workspaceId && <FavouriteButton workspaceId={workspaceId} id={dashboard.id} name={dashboard.name} />}
         {canEdit && <DashboardMenu onDuplicate={onDuplicate} onDelete={onDelete} />}
       </div>
 

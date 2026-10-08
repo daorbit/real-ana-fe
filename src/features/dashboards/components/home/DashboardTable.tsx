@@ -1,6 +1,8 @@
 import { Loader } from "@mantine/core";
 import { timeAgo } from "@/shared/lib";
 import { DashboardMenu } from "@/features/dashboards/components/home/DashboardMenu";
+import { FavouriteButton } from "@/features/dashboards/components/FavouriteButton";
+import { useWorkspace } from "@/features/workspace/context";
 import { BUSY_LABEL } from "@/features/dashboards/components/home/cardBusy";
 import { TEMPLATE_MAP } from "@/features/dashboards/templates";
 import { rangeLong } from "@/features/dashboards/types";
@@ -24,6 +26,8 @@ export function DashboardTable({
   onDuplicate: (d: Dashboard) => void;
   onDelete: (d: Dashboard) => void;
 }) {
+  const workspaceId = useWorkspace().active?._id;
+
   return (
     <div className={classes.table} role="table" aria-label="Dashboards">
       <div className={classes.tableHead} role="row">
@@ -71,6 +75,7 @@ export function DashboardTable({
               )}
             </span>
             <span className={classes.tableActions} role="cell">
+              {workspaceId && <FavouriteButton workspaceId={workspaceId} id={d.id} name={d.name} />}
               {canEdit && <DashboardMenu onDuplicate={() => onDuplicate(d)} onDelete={() => onDelete(d)} />}
             </span>
           </div>

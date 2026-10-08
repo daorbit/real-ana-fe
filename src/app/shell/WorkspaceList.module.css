@@ -1,0 +1,18 @@
+.search {
+  padding: 4px 4px 6px;
+}
+
+.scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.empty {
+  padding: 10px 10px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.check {
+  color: var(--accent-2);
+}

@@ -1,10 +1,10 @@
 import { ActionIcon, Menu, Tooltip, UnstyledButton } from "@mantine/core";
-import { Check, FolderKanban, Plus, RefreshCw } from "lucide-react";
+import { FolderKanban, Plus, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
 import { useAuth } from "@/features/auth/context";
-import { workspaceInitial } from "@/features/workspace/workspaceMarks";
+import { WorkspaceList } from "./WorkspaceList";
 
 /**
  * Which workspace everything on screen belongs to, as a rail-width icon row.
@@ -90,28 +90,7 @@ export function WorkspaceMenuItems() {
         </div>
       )}
 
-      {workspaces.map((w, i) => (
-        <Menu.Item
-          key={w._id}
-          onClick={() => setActive(w._id)}
-          leftSection={<WorkspaceMark name={w.name} />}
-          // The current one is marked rather than omitted: a list that
-          // silently drops where you are makes you count to find out.
-          rightSection={
-            w._id === active?._id ? (
-              <Check size={15} style={{ color: "var(--accent-2)" }} />
-            ) : (
-              // Only the first nine are reachable by number, so only those
-              // advertise one.
-              i < 9 && <span className="ws-menu__hint">Ctrl {i + 1}</span>
-            )
-          }
-        >
-          <span className={w._id === active?._id ? "ws-menu__name--active" : undefined}>
-            {w.name}
-          </span>
-        </Menu.Item>
-      ))}
+      <WorkspaceList workspaces={workspaces} activeId={active?._id} onPick={setActive} />
 
       <Menu.Divider />
 
@@ -124,14 +103,6 @@ export function WorkspaceMenuItems() {
         {t("workspaces.newWorkspace", "New workspace")}
       </Menu.Item>
     </Menu.Dropdown>
-  );
-}
-
-function WorkspaceMark({ name }: { name: string }) {
-  return (
-    <span aria-hidden className="ws-menu__mark">
-      {workspaceInitial(name)}
-    </span>
   );
 }
 

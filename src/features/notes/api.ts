@@ -54,8 +54,5 @@ const notesApi = queries.injectEndpoints({
   }),
 });
 
-export const hideNote = (id: string) =>
-  queries.util.updateQueryData("getNotes", undefined, (list) => list.filter((n) => n.id !== id));
-
 export const { useGetNotesQuery } = queries;
 export const { useCreateNoteMutation, useUpdateNoteMutation, useDeleteNoteMutation } = notesApi;
