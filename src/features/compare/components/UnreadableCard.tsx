@@ -18,7 +18,7 @@ export function UnreadableCard({
   if (!comparison.readIssue) return null;
 
   return (
-    <section className={`${classes.card} ${classes.unreadable}`}>
+    <section className={`${classes.card} ${classes.unreadable} glass`}>
       <span className={classes.unreadableIcon}><ShieldAlert size={20} /></span>
       <h3 className={classes.cardTitle}>We could not read this page</h3>
       <p className={classes.unreadableText}>{readIssueText(comparison.readIssue, comparison.snapshot.statusCode)}</p>

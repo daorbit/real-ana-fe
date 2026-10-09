@@ -71,6 +71,67 @@
   box-shadow: none !important;
 }
 
+:root {
+  --glass-bg: color-mix(in srgb, #0b0b0c 86%, transparent);
+  --glass-sheen: linear-gradient(transparent, transparent);
+  --glass-edge: rgba(255, 255, 255, 0.07);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 30px -14px rgba(0, 0, 0, 0.8);
+  --glass-fill: rgba(255, 255, 255, 0.022);
+  --glass-fill-strong: rgba(255, 255, 255, 0.045);
+}
+
+[data-mantine-color-scheme="light"] {
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.35) 45%, transparent 100%);
+  --glass-edge: rgba(15, 17, 21, 0.08);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 28px -16px rgba(15, 17, 21, 0.18);
+  --glass-fill: rgba(15, 17, 21, 0.03);
+  --glass-fill-strong: rgba(15, 17, 21, 0.055);
+}
+
+.glass {
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-sheen), var(--glass-bg);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+.tone-tile {
+  --tone: #0d9488;
+  border: 1px solid color-mix(in srgb, var(--tone) 18%, var(--glass-edge));
+  background:
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--tone) 9%, transparent) 0%, transparent 70%),
+    var(--glass-sheen),
+    var(--glass-bg);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+:root:not([data-mantine-color-scheme="light"]) .tone-tile {
+  background:
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--tone) 14%, transparent) 0%, transparent 70%),
+    var(--glass-sheen),
+    var(--glass-bg);
+}
+
+.tone-tile[data-tone="teal"] { --tone: #0d9488; }
+.tone-tile[data-tone="blue"] { --tone: #2563eb; }
+.tone-tile[data-tone="violet"] { --tone: #7c3aed; }
+.tone-tile[data-tone="amber"] { --tone: #b45309; }
+.tone-tile[data-tone="rose"] { --tone: #e11d48; }
+.tone-tile[data-tone="slate"] { --tone: #475569; }
+.tone-tile[data-tone="indigo"] { --tone: #4f46e5; }
+
+:root:not([data-mantine-color-scheme="light"]) .tone-tile[data-tone="teal"] { --tone: #2dd4bf; }
+:root:not([data-mantine-color-scheme="light"]) .tone-tile[data-tone="blue"] { --tone: #60a5fa; }
+:root:not([data-mantine-color-scheme="light"]) .tone-tile[data-tone="violet"] { --tone: #a78bfa; }
+:root:not([data-mantine-color-scheme="light"]) .tone-tile[data-tone="amber"] { --tone: #fbbf24; }
+:root:not([data-mantine-color-scheme="light"]) .tone-tile[data-tone="rose"] { --tone: #fb7185; }
+:root:not([data-mantine-color-scheme="light"]) .tone-tile[data-tone="slate"] { --tone: #94a3b8; }
+:root:not([data-mantine-color-scheme="light"]) .tone-tile[data-tone="indigo"] { --tone: #818cf8; }
+
  
 /* ---- Focus ----------------------------------------------------------------
    Keyboard focus gets a visible accent ring everywhere. Pointer focus does not,

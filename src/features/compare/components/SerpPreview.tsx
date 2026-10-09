@@ -19,10 +19,10 @@ function displayUrl(url: string): string {
   }
 }
 
-function Result({ who, snapshot }: { who: string; snapshot: SeoCompareSnapshot }) {
+function Result({ who, snapshot, you }: { who: string; snapshot: SeoCompareSnapshot; you?: boolean }) {
   const url = snapshot.finalUrl || snapshot.url;
   return (
-    <div className={classes.serp}>
+    <div className={classes.serp} data-you={you || undefined}>
       <span className={classes.serpWho}>{who}</span>
       <div className={classes.serpUrl}>
         <SiteFavicon domain={url} size={14} />
@@ -58,7 +58,7 @@ export function SerpPreview({
   label: string;
 }) {
   return (
-    <section className={classes.card}>
+    <section className={`${classes.card} glass`}>
       <div className={classes.cardHead}>
         <div>
           <h3 className={classes.cardTitle}>What searchers see</h3>
@@ -68,7 +68,7 @@ export function SerpPreview({
         </div>
       </div>
       <div className={classes.serpGrid}>
-        <Result who="Your page" snapshot={mine} />
+        <Result who="Your page" snapshot={mine} you />
         <Result who={label} snapshot={theirs} />
       </div>
     </section>

@@ -1,0 +1,198 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px 22px 18px;
+  border-radius: var(--radius-lg);
+}
+
+.head {
+  margin-bottom: 14px;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sub {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.plot {
+  flex: 1;
+  min-height: 220px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 12px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 200px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  color: var(--text-2);
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+button.legendItem:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.legendItem[data-active] {
+  color: var(--text);
+  border-color: var(--glass-edge);
+  background: var(--glass-fill-strong);
+}
+
+.legendItem[data-you] {
+  color: var(--violet-2);
+  font-weight: 550;
+}
+
+.legendText {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.omitted {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tooltip {
+  min-width: 180px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-sheen), var(--glass-bg);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+.tipDate {
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tipRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: 12px;
+}
+
+.tipName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-2);
+}
+
+.tipValue {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+button.bar:hover {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.bar[data-active] {
+  border-color: var(--glass-edge);
+  background: var(--glass-fill-strong);
+}
+
+.bar[data-you] {
+  background: var(--accent-soft);
+}
+
+.barHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.barName {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.bar[data-you] .barName {
+  color: var(--violet-2);
+}
+
+.barStatus {
+  flex: 1;
+  font-size: 11.5px;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.barStatus[data-tone="ahead"] {
+  color: var(--mantine-color-red-5);
+}
+
+.barStatus[data-tone="behind"] {
+  color: var(--violet-2);
+}
+
+.barScore {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.track {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}

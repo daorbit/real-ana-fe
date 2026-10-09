@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { SegmentedControl, Tooltip } from "@mantine/core";
-import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import type { SeoCompareVerdict, SeoMetricComparison } from "@/shared/types";
-import classes from "./Compare.module.css";
+import classes from "./Checks.module.css";
+import shared from "./Compare.module.css";
 
 type SortMode = "impact" | "listed";
 
 const HIGH_IMPACT = 0.05;
+
+const VERDICT_TEXT: Record<SeoCompareVerdict, string> = {
+  lose: "Behind",
+  win: "Ahead",
+  tie: "Even",
+};
 
 function orderMetrics(metrics: SeoMetricComparison[], mode: SortMode): SeoMetricComparison[] {
   if (mode === "listed") return metrics;
@@ -15,20 +21,21 @@ function orderMetrics(metrics: SeoMetricComparison[], mode: SortMode): SeoMetric
   return [...score, ...rest];
 }
 
-function VerdictMark({ verdict, tieReason }: { verdict: SeoCompareVerdict; tieReason?: string }) {
+function VerdictPill({ verdict, tieReason }: { verdict: SeoCompareVerdict; tieReason?: string }) {
   const label =
     verdict === "lose" ? "They beat you here" : verdict === "win" ? "You beat them here" : tieReason ?? "Both pages measure the same here.";
-  const Icon = verdict === "lose" ? ArrowUp : verdict === "win" ? ArrowDown : Minus;
   return (
     <Tooltip label={label} withArrow multiline={Boolean(tieReason)} w={tieReason ? 250 : undefined}>
-      <Icon size={13} className={classes.verdict} data-verdict={verdict} />
+      <span className={classes.pill} data-verdict={verdict}>
+        {VERDICT_TEXT[verdict]}
+      </span>
     </Tooltip>
   );
 }
 
 function CheckLabel({ metric }: { metric: SeoMetricComparison }) {
   const content = (
-    <span className={classes.checkLabel} data-hint={metric.note ? true : undefined}>
+    <span className={classes.label} data-hint={metric.note ? true : undefined}>
       {metric.label}
       {metric.impact >= HIGH_IMPACT && <span className={classes.impact}>High impact</span>}
     </span>
@@ -45,14 +52,17 @@ export function ChecksTable({ metrics, label }: { metrics: SeoMetricComparison[]
   const [sortMode, setSortMode] = useState<SortMode>("impact");
   const rows = orderMetrics(metrics, sortMode);
   const losing = metrics.filter((m) => m.verdict === "lose").length;
+  const winning = metrics.filter((m) => m.verdict === "win").length;
 
   return (
-    <section className={`${classes.card} ${classes.checks}`}>
-      <div className={classes.cardHead}>
+    <section className={`${shared.card} ${classes.card} glass`}>
+      <div className={`${shared.cardHead} ${classes.head}`}>
         <div>
-          <h3 className={classes.cardTitle}>Every check</h3>
-          <p className={classes.cardSub}>
-            {losing === 0 ? "You match or beat them everywhere" : `Behind on ${losing} of ${metrics.length}`}
+          <h3 className={shared.cardTitle}>Every check</h3>
+          <p className={shared.cardSub}>
+            {losing === 0
+              ? `You match or beat them on all ${metrics.length}`
+              : `Behind on ${losing}, ahead on ${winning}, of ${metrics.length}`}
           </p>
         </div>
         <SegmentedControl
@@ -67,19 +77,20 @@ export function ChecksTable({ metrics, label }: { metrics: SeoMetricComparison[]
         />
       </div>
 
-      <div className={`${classes.checkGrid} ${classes.checkHead}`}>
+      <div className={`${classes.grid} ${classes.columns}`}>
         <span>Check</span>
-        <span className={classes.checkHeadYou}>You</span>
-        <span className={classes.checkHeadThem}>{label}</span>
+        <span className={classes.you}>You</span>
+        <span className={classes.them}>{label}</span>
+        <span className={classes.result}>Result</span>
       </div>
 
       {rows.map((m) => (
-        <div key={m.id} className={`${classes.checkGrid} ${classes.checkRow}`}>
+        <div key={m.id} className={`${classes.grid} ${classes.row}`} data-verdict={m.verdict}>
           <CheckLabel metric={m} />
-          <span className={classes.checkValue}>{m.mine}</span>
-          <span className={classes.checkValue} data-verdict={m.verdict}>
-            <VerdictMark verdict={m.verdict} tieReason={m.tieReason} />
-            {m.theirs}
+          <span className={classes.value}>{m.mine}</span>
+          <span className={classes.value}>{m.theirs}</span>
+          <span className={classes.result}>
+            <VerdictPill verdict={m.verdict} tieReason={m.tieReason} />
           </span>
         </div>
       ))}

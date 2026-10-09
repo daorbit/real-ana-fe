@@ -1,0 +1,132 @@
+.panel {
+  border-radius: var(--radius-lg);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.count {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.add {
+  padding: 0 14px 14px;
+  border-bottom: 1px solid var(--glass-edge);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 10px;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px 10px 8px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+button.row:hover {
+  background: var(--glass-fill);
+}
+
+.row[data-active] {
+  background: var(--glass-fill-strong);
+  border-color: var(--glass-edge);
+}
+
+.row[data-you] {
+  background: color-mix(in srgb, var(--violet-2) 9%, transparent);
+  border-color: color-mix(in srgb, var(--violet-2) 28%, transparent);
+}
+
+.rank {
+  flex: none;
+  width: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.row[data-you] .rank {
+  color: var(--violet-2);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.status {
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.status[data-tone="ahead"] {
+  color: var(--mantine-color-red-5);
+}
+
+.status[data-tone="behind"] {
+  color: var(--violet-2);
+}
+
+.status[data-tone="unread"] {
+  color: var(--amber);
+}
+
+.status[data-tone="you"] {
+  color: var(--violet-2);
+}
+
+.score {
+  flex: none;
+  min-width: 26px;
+  font-size: 15px;
+  font-weight: 650;
+  text-align: right;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.row[data-active] .score {
+  color: var(--text);
+}
+
+.row[data-you] .score {
+  color: var(--violet-2);
+}

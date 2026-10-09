@@ -26,7 +26,7 @@ export function GapChips({ gap }: { gap: SeoCompetitorGap }) {
   if (!groups.length) return null;
 
   return (
-    <section className={classes.card}>
+    <section className={`${classes.card} glass`}>
       <div className={classes.cardHead}>
         <div>
           <h3 className={classes.cardTitle}>What they have that you do not</h3>
@@ -39,6 +39,7 @@ export function GapChips({ gap }: { gap: SeoCompetitorGap }) {
             <Tooltip label={g.hint} withArrow multiline w={280} position="top-start">
               <span className={classes.gapLabel}>
                 {g.title}
+                <span className={classes.gapCount}>{gap[g.key].length}</span>
                 <Info size={12} className={classes.infoIcon} />
               </span>
             </Tooltip>

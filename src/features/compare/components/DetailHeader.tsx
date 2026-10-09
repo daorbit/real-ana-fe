@@ -1,4 +1,4 @@
-import { ActionIcon, Tooltip } from "@mantine/core";
+import { ActionIcon, Progress, Tooltip } from "@mantine/core";
 import { ExternalLink, RefreshCw, Trash2 } from "lucide-react";
 import type { SeoCompareBaseline, SeoCompareSnapshot, SeoCompetitorComparison } from "@/shared/types";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
@@ -6,7 +6,43 @@ import { FreshnessBadge } from "./FreshnessBadge";
 import { ProvenanceLine } from "./ProvenanceLine";
 import { TrustNotices } from "./TrustNotices";
 import { comparisonNotices } from "../lib/trust";
-import classes from "./Compare.module.css";
+import { toneOf } from "../lib/board";
+import classes from "./DetailHeader.module.css";
+
+function verdictText(scoreGap: number, readable: boolean): string {
+  if (!readable) return "Not compared";
+  if (scoreGap > 0) return `Leads you by ${scoreGap}`;
+  if (scoreGap < 0) return `Trails you by ${Math.abs(scoreGap)}`;
+  return "Level with you";
+}
+
+function ScoreTile({
+  label,
+  score,
+  side,
+  tone,
+  domain,
+}: {
+  label: string;
+  score: number | null;
+  side: "you" | "them";
+  tone?: string;
+  domain: string;
+}) {
+  return (
+    <div className={classes.tile} data-side={side} data-tone={tone}>
+      <div className={classes.tileHead}>
+        <SiteFavicon domain={domain} size={14} />
+        <span className={classes.tileLabel}>{label}</span>
+      </div>
+      <div className={classes.tileScore}>
+        {score ?? "—"}
+        <span className={classes.tileOutOf}>/ 100</span>
+      </div>
+      <Progress value={score ?? 0} size={5} radius="xl" classNames={{ root: classes.track, section: classes.fill }} />
+    </div>
+  );
+}
 
 export function DetailHeader({
   comparison,
@@ -27,32 +63,30 @@ export function DetailHeader({
 }) {
   const { gap, snapshot, label } = comparison;
   const readable = !comparison.readIssue;
-  const tone = gap.scoreGap > 0 ? "ahead" : gap.scoreGap < 0 ? "behind" : "level";
-  const standing = !readable
-    ? "Not compared"
-    : gap.scoreGap > 0
-      ? `They lead by ${gap.scoreGap}`
-      : gap.scoreGap < 0
-        ? `You lead by ${Math.abs(gap.scoreGap)}`
-        : "Level";
+  const tone = toneOf(comparison);
 
   return (
-    <section className={classes.card}>
-      <div className={classes.detailTop}>
+    <section className={`${classes.card} glass`}>
+      <div className={classes.top}>
         <div className={classes.identity}>
           <span className={classes.favicon}>
             <SiteFavicon domain={comparison.url} size={20} />
           </span>
           <div className={classes.identityText}>
-            <h2 className={classes.detailName}>{label}</h2>
-            <a className={classes.detailUrl} href={comparison.url} target="_blank" rel="noreferrer">
-              <span className={classes.detailUrlText}>{comparison.url}</span>
+            <div className={classes.nameRow}>
+              <h2 className={classes.name}>{label}</h2>
+              <span className={classes.verdict} data-tone={tone}>
+                {verdictText(gap.scoreGap, readable)}
+              </span>
+            </div>
+            <a className={classes.url} href={comparison.url} target="_blank" rel="noreferrer">
+              <span className={classes.urlText}>{comparison.url}</span>
               <ExternalLink size={11} />
             </a>
           </div>
         </div>
 
-        <div className={classes.detailActions}>
+        <div className={classes.actions}>
           <FreshnessBadge checkedAt={comparison.lastCheckedAt} />
           {canEdit && (
             <>
@@ -78,23 +112,15 @@ export function DetailHeader({
         </div>
       </div>
 
-      <div className={classes.scoreboard}>
-        <div className={classes.scoreCell}>
-          <span className={classes.scoreLabel}>{label}</span>
-          <div className={classes.scoreValue}>{readable ? snapshot.score : "—"}</div>
-        </div>
-        <div className={classes.scoreCell}>
-          <span className={classes.scoreLabel}>Your page</span>
-          <div className={classes.scoreValue} data-you>
-            {mine.score}
-          </div>
-        </div>
-        <div className={classes.scoreCell}>
-          <span className={classes.scoreLabel}>Standing</span>
-          <div className={classes.standing} data-tone={readable ? tone : "level"}>
-            {standing}
-          </div>
-        </div>
+      <div className={classes.tiles}>
+        <ScoreTile label="Your page" score={mine.score} side="you" domain={mine.finalUrl || mine.url} />
+        <ScoreTile
+          label={label}
+          score={readable ? snapshot.score : null}
+          side="them"
+          tone={tone}
+          domain={comparison.url}
+        />
       </div>
 
       <ProvenanceLine baseline={baseline} comparison={comparison} />

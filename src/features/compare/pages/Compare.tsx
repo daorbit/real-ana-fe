@@ -89,6 +89,7 @@ export default function Compare() {
   const noBaseline = Boolean(analysisError && "status" in analysisError && analysisError.status === 404);
   const hasComparison = !noBaseline && Boolean(analysis && analysis.competitors.length > 0);
   const unread = analysis?.competitors.filter((c) => c.readIssue).length ?? 0;
+  const showStandings = Boolean(analysis?.position) && unread < (analysis?.competitors.length ?? 0);
 
   const addForm = (size: "sm" | "md" = "sm") =>
     canEdit ? (
@@ -172,14 +173,23 @@ export default function Compare() {
         />
       ) : (
         <>
-          {analysis.position && unread < analysis.competitors.length && (
-            <StandingsCard
-              position={analysis.position}
+          <div className={classes.overview} data-solo={!showStandings || undefined}>
+            {showStandings && (
+              <StandingsCard
+                position={analysis.position}
+                myScore={analysis.mine.score}
+                unread={unread}
+                onSelectCompetitor={setPickedCompetitor}
+              />
+            )}
+            <ScoreTrendChart
+              history={history}
+              competitors={analysis.competitors}
               myScore={analysis.mine.score}
-              unread={unread}
-              onSelectCompetitor={setPickedCompetitor}
+              selectedId={selected.competitorId}
+              onSelect={setPickedCompetitor}
             />
-          )}
+          </div>
 
           <div className={classes.workspace}>
             <aside className={classes.rail}>
@@ -190,12 +200,10 @@ export default function Compare() {
                 myScore={analysis.mine.score}
                 myDomain={site.domain}
                 myFramework={site.framework}
-                toughestId={analysis.toughest}
                 count={competitors.length}
                 max={MAX_COMPETITORS}
                 addForm={addForm()}
               />
-              <ScoreTrendChart history={history} competitors={analysis.competitors} myScore={analysis.mine.score} />
             </aside>
 
             <CompetitorDetail

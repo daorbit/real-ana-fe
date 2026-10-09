@@ -2,15 +2,8 @@ import type { ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import type { SeoCompetitorComparison } from "@/shared/types";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
-import classes from "./Compare.module.css";
-
-function standing(c: SeoCompetitorComparison): { tone: string; text: string } {
-  if (c.readIssue) return { tone: "unread", text: c.readIssue === "blocked" ? "Blocked our crawler" : `HTTP ${c.snapshot.statusCode}` };
-  const scoreGap = c.gap.scoreGap;
-  if (scoreGap > 0) return { tone: "ahead", text: `${scoreGap} ahead of you` };
-  if (scoreGap < 0) return { tone: "behind", text: `${Math.abs(scoreGap)} behind you` };
-  return { tone: "level", text: "Level" };
-}
+import { buildBoard, standingText, toneOf } from "../lib/board";
+import classes from "./Rail.module.css";
 
 export function CompetitorRail({
   competitors,
@@ -19,7 +12,6 @@ export function CompetitorRail({
   myScore,
   myDomain,
   myFramework,
-  toughestId,
   count,
   max,
   addForm,
@@ -30,67 +22,63 @@ export function CompetitorRail({
   myScore: number;
   myDomain: string;
   myFramework?: string;
-  toughestId: string | null;
   count: number;
   max: number;
   addForm?: ReactNode;
 }) {
-  const ordered = [...competitors].sort(
-    (a, b) => Number(Boolean(a.readIssue)) - Number(Boolean(b.readIssue)) || b.gap.scoreGap - a.gap.scoreGap,
-  );
+  const rows = buildBoard(competitors, myScore);
 
   return (
-    <div className={classes.panel}>
-      <div className={classes.railHead}>
-        <h3 className={classes.railTitle}>Competitors</h3>
-        <span className={classes.railCount}>
-          {count} / {max}
+    <div className={`${classes.panel} glass`}>
+      <div className={classes.head}>
+        <h3 className={classes.title}>Leaderboard</h3>
+        <span className={classes.count}>
+          {count} / {max} tracked
         </span>
       </div>
 
-      {addForm && <div className={classes.addForm}>{addForm}</div>}
+      {addForm && <div className={classes.add}>{addForm}</div>}
 
-      <div className={classes.baseline}>
-        <SiteFavicon domain={myDomain} framework={myFramework} size={18} />
-        <div className={classes.itemText}>
-          <div className={classes.itemLabel}>{myDomain}</div>
-          <div className={classes.itemStatus} data-tone="you">
-            Your page · baseline
-          </div>
-        </div>
-        <span className={classes.itemScore}>{myScore}</span>
-      </div>
+      <ol className={classes.list}>
+        {rows.map((row) => {
+          if (row.kind === "you") {
+            return (
+              <li key="you" className={classes.row} data-you>
+                <span className={classes.rank}>{row.rank}</span>
+                <SiteFavicon domain={myDomain} framework={myFramework} size={18} />
+                <div className={classes.text}>
+                  <div className={classes.name}>{myDomain}</div>
+                  <div className={classes.status} data-tone="you">
+                    Your page
+                  </div>
+                </div>
+                <span className={classes.score}>{row.score}</span>
+              </li>
+            );
+          }
 
-      <div className={classes.listLabel}>
-        <span>Tracked</span>
-        <span>Toughest first</span>
-      </div>
-
-      <div className={classes.list}>
-        {ordered.map((c) => {
-          const { tone, text } = standing(c);
+          const c = row.comparison;
           return (
-            <UnstyledButton
-              key={c.competitorId}
-              className={classes.item}
-              data-active={c.competitorId === selectedId || undefined}
-              onClick={() => onSelect(c.competitorId)}
-            >
-              <SiteFavicon domain={c.url} size={18} />
-              <div className={classes.itemText}>
-                <div className={classes.itemLabel}>
-                  {c.label}
-                  {c.competitorId === toughestId && <span className={classes.toughDot} aria-label="Furthest ahead" />}
+            <li key={c.competitorId}>
+              <UnstyledButton
+                className={classes.row}
+                data-active={c.competitorId === selectedId || undefined}
+                onClick={() => onSelect(c.competitorId)}
+              >
+                <span className={classes.rank}>{row.rank ?? "–"}</span>
+                <SiteFavicon domain={c.url} size={18} />
+                <div className={classes.text}>
+                  <div className={classes.name}>{c.label}</div>
+                  <div className={classes.status} data-tone={toneOf(c)}>
+                    {standingText(c)}
+                  </div>
                 </div>
-                <div className={classes.itemStatus} data-tone={tone}>
-                  {text}
-                </div>
-              </div>
-              <span className={classes.itemScore}>{c.readIssue ? "—" : c.snapshot.score}</span>
-            </UnstyledButton>
+                <span className={classes.score}>{c.readIssue ? "—" : c.snapshot.score}</span>
+              </UnstyledButton>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </div>
   );
 }
