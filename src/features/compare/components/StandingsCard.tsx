@@ -22,10 +22,12 @@ function ordinal(n: number): string {
 export function StandingsCard({
   position,
   myScore,
+  unread,
   onSelectCompetitor,
 }: {
   position: SeoCompetitivePosition;
   myScore: number;
+  unread: number;
   onSelectCompetitor: (competitorId: string) => void;
 }) {
   const { rank, fieldSize, percentile, leader, gapToLeader, nextUp, closestBehind } = position;
@@ -42,6 +44,11 @@ export function StandingsCard({
         <p className={classes.rankText}>
           {leading ? "You lead the field you are tracking" : `Behind ${leader}, who leads by ${gapToLeader}`}
         </p>
+        {unread > 0 && (
+          <p className={classes.rankNote}>
+            {unread} {unread === 1 ? "competitor" : "competitors"} not ranked — their page could not be read.
+          </p>
+        )}
       </div>
 
       <div className={classes.stat}>

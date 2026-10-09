@@ -4,6 +4,10 @@ import {
   CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import type { SeoCompetitorComparison, SeoCompetitorHistoryPoint } from "@/shared/types";
+import { BASELINE_ID } from "../lib/trust";
+import classes from "./Compare.module.css";
+
+const MY_LINE = "var(--accent-2)";
 
 /**
  * Competitor scores over time.
@@ -149,8 +153,10 @@ export function ScoreTrendChart({
   const dark = colorScheme === "dark";
   const palette = dark ? SERIES_DARK : SERIES_LIGHT;
 
-  const plotted = competitors.slice(0, MAX_SERIES);
-  const omitted = competitors.slice(MAX_SERIES);
+  const readable = competitors.filter((c) => !c.readIssue);
+  const plotted = readable.slice(0, MAX_SERIES);
+  const omitted = readable.slice(MAX_SERIES);
+  const hasMyLine = history.some((p) => p.competitorId === BASELINE_ID && p.statusCode < 400);
 
   const rows = useMemo<Row[]>(() => {
     // Bucketed by day: several refreshes on one day are the same point on a
@@ -196,7 +202,7 @@ export function ScoreTrendChart({
         Score over time
       </Text>
       <Text size="xs" c="dimmed" mb="md">
-        On-page score at each recorded check. Failed fetches are left out.
+        On-page score at each recorded check, yours dashed. Failed and blocked fetches are left out.
       </Text>
 
       <Box h={260}>
@@ -226,10 +232,24 @@ export function ScoreTrendChart({
               }}
               labelStyle={{ color: axis, marginBottom: 4 }}
               formatter={(value, name) => {
+                if (name === BASELINE_ID) return [value, "Your page"];
                 const match = plotted.find((c) => c.competitorId === name);
                 return [value, match?.label ?? String(name)];
               }}
             />
+            {hasMyLine && (
+              <Line
+                type="monotone"
+                dataKey={BASELINE_ID}
+                name={BASELINE_ID}
+                stroke={MY_LINE}
+                strokeWidth={2.5}
+                strokeDasharray="5 3"
+                dot={{ r: 3, strokeWidth: 0, fill: MY_LINE }}
+                activeDot={{ r: 5 }}
+                connectNulls
+              />
+            )}
             {plotted.map((c, i) => (
               <Line
                 key={c.competitorId}
@@ -255,6 +275,12 @@ export function ScoreTrendChart({
           label names it, which is also the relief the light-mode contrast
           warning requires. */}
       <Group gap="md" mt="md" wrap="wrap">
+        {hasMyLine && (
+          <Group gap={6} wrap="nowrap">
+            <Box w={10} h={10} className={classes.mySwatch} />
+            <Text size="xs" c="dimmed">Your page</Text>
+          </Group>
+        )}
         {plotted.map((c, i) => (
           <Group key={c.competitorId} gap={6} wrap="nowrap">
             <Box

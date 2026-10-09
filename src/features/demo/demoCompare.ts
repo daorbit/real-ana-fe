@@ -70,6 +70,9 @@ const rivalComparison: SeoCompetitorComparison = {
   label: demoCompetitors[0].label,
   url: demoCompetitors[0].url,
   lastCheckedAt: demoCompetitors[0].lastCheckedAt,
+  lastError: "",
+  lastErrorAt: null,
+  readIssue: null,
   snapshot: demoCompetitors[0].snapshot as SeoCompareSnapshot,
   gap: {
     scoreGap: -14,
@@ -101,6 +104,9 @@ const nimbusComparison: SeoCompetitorComparison = {
   label: demoCompetitors[1].label,
   url: demoCompetitors[1].url,
   lastCheckedAt: demoCompetitors[1].lastCheckedAt,
+  lastError: "",
+  lastErrorAt: null,
+  readIssue: null,
   snapshot: demoCompetitors[1].snapshot as SeoCompareSnapshot,
   gap: {
     scoreGap: -7,
@@ -126,6 +132,9 @@ const fastlaneComparison: SeoCompetitorComparison = {
   label: demoCompetitors[2].label,
   url: demoCompetitors[2].url,
   lastCheckedAt: demoCompetitors[2].lastCheckedAt,
+  lastError: "",
+  lastErrorAt: null,
+  readIssue: null,
   snapshot: demoCompetitors[2].snapshot as SeoCompareSnapshot,
   gap: {
     scoreGap: -30,
@@ -139,6 +148,7 @@ const fastlaneComparison: SeoCompetitorComparison = {
 
 export const demoCompetitorAnalysis: SeoCompetitorAnalysis = {
   mine: mySnapshot,
+  baseline: { source: "live", checkedAt: iso(3 * 3_600_000), lastError: "", readIssue: null },
   auditedAt: iso(3 * 3_600_000),
   competitors: [rivalComparison, nimbusComparison, fastlaneComparison],
   toughest: nimbusComparison.competitorId,
@@ -166,6 +176,10 @@ export const demoCompetitorHistory: SeoCompetitorHistoryPoint[] = [
 
   { competitorId: fastlaneComparison.competitorId, score: 61, wordCount: 480, responseTimeMs: 940, statusCode: 200, takenAt: iso(12 * DAY) },
   { competitorId: fastlaneComparison.competitorId, score: 58, wordCount: 520, responseTimeMs: 890, statusCode: 200, takenAt: iso(4 * DAY) },
+
+  { competitorId: "__you__", score: 82, wordCount: 1_120, responseTimeMs: 470, statusCode: 200, takenAt: iso(27 * DAY) },
+  { competitorId: "__you__", score: 85, wordCount: 1_210, responseTimeMs: 440, statusCode: 200, takenAt: iso(14 * DAY) },
+  { competitorId: "__you__", score: 88, wordCount: 1_284, responseTimeMs: 412, statusCode: 200, takenAt: iso(1 * DAY) },
 ];
 
 export const demoCompetitorBriefAvailable = { available: true };

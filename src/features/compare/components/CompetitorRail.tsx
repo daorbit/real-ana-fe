@@ -4,7 +4,9 @@ import type { SeoCompetitorComparison } from "@/shared/types";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
 import classes from "./Compare.module.css";
 
-function standing(scoreGap: number): { tone: string; text: string } {
+function standing(c: SeoCompetitorComparison): { tone: string; text: string } {
+  if (c.readIssue) return { tone: "unread", text: c.readIssue === "blocked" ? "Blocked our crawler" : `HTTP ${c.snapshot.statusCode}` };
+  const scoreGap = c.gap.scoreGap;
   if (scoreGap > 0) return { tone: "ahead", text: `${scoreGap} ahead of you` };
   if (scoreGap < 0) return { tone: "behind", text: `${Math.abs(scoreGap)} behind you` };
   return { tone: "level", text: "Level" };
@@ -33,7 +35,9 @@ export function CompetitorRail({
   max: number;
   addForm?: ReactNode;
 }) {
-  const ordered = [...competitors].sort((a, b) => b.gap.scoreGap - a.gap.scoreGap);
+  const ordered = [...competitors].sort(
+    (a, b) => Number(Boolean(a.readIssue)) - Number(Boolean(b.readIssue)) || b.gap.scoreGap - a.gap.scoreGap,
+  );
 
   return (
     <div className={classes.panel}>
@@ -64,7 +68,7 @@ export function CompetitorRail({
 
       <div className={classes.list}>
         {ordered.map((c) => {
-          const { tone, text } = standing(c.gap.scoreGap);
+          const { tone, text } = standing(c);
           return (
             <UnstyledButton
               key={c.competitorId}
@@ -82,7 +86,7 @@ export function CompetitorRail({
                   {text}
                 </div>
               </div>
-              <span className={classes.itemScore}>{c.snapshot.score}</span>
+              <span className={classes.itemScore}>{c.readIssue ? "—" : c.snapshot.score}</span>
             </UnstyledButton>
           );
         })}

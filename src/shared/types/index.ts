@@ -1958,8 +1958,26 @@ export type SeoCompareSnapshot = {
   hasMobileViewport?: boolean;
   /** Rendered text bytes over total HTML bytes, as a percentage. */
   textRatio?: number;
+  quality?: SeoSnapshotQuality;
 
   score: number;
+};
+
+export type SeoSnapshotQuality = {
+  blocked: boolean;
+  clientRendered: boolean;
+  redirectedHost: string;
+};
+
+export type SeoReadIssue = "blocked" | "http-error";
+
+export type SeoBaselineSource = "live" | "audit";
+
+export type SeoCompareBaseline = {
+  source: SeoBaselineSource;
+  checkedAt: string | null;
+  lastError: string;
+  readIssue: SeoReadIssue | null;
 };
 
 /** Which side of a comparison a metric favours. */
@@ -2002,6 +2020,9 @@ export type SeoCompetitorComparison = {
   label: string;
   url: string;
   lastCheckedAt: string | null;
+  lastError: string;
+  lastErrorAt: string | null;
+  readIssue: SeoReadIssue | null;
   snapshot: SeoCompareSnapshot;
   gap: SeoCompetitorGap;
 };
@@ -2043,7 +2064,8 @@ export type SeoCompetitivePosition = {
 
 export type SeoCompetitorAnalysis = {
   mine: SeoCompareSnapshot;
-  auditedAt: string;
+  baseline: SeoCompareBaseline;
+  auditedAt: string | null;
   competitors: SeoCompetitorComparison[];
   /** Whoever leads by the most — the one worth reading first. */
   toughest: string | null;
@@ -2125,6 +2147,7 @@ export type SeoCompetitor = {
   lastCheckedAt: string | null;
   /** Why the last fetch failed, when it did. Empty on success. */
   lastError: string;
+  lastErrorAt?: string | null;
   createdAt: string;
 };
 

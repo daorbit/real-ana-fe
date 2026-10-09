@@ -82,11 +82,13 @@ export default function Compare() {
   const selected =
     analysis?.competitors.find((c) => c.competitorId === pickedCompetitor) ??
     analysis?.competitors.find((c) => c.competitorId === analysis.toughest) ??
+    analysis?.competitors.find((c) => !c.readIssue) ??
     analysis?.competitors[0] ??
     null;
 
-  const needsOwnAudit = analysisError && "status" in analysisError && analysisError.status === 404;
-  const hasComparison = Boolean(analysis && analysis.competitors.length > 0);
+  const noBaseline = Boolean(analysisError && "status" in analysisError && analysisError.status === 404);
+  const hasComparison = !noBaseline && Boolean(analysis && analysis.competitors.length > 0);
+  const unread = analysis?.competitors.filter((c) => c.readIssue).length ?? 0;
 
   const addForm = (size: "sm" | "md" = "sm") =>
     canEdit ? (
@@ -160,9 +162,9 @@ export default function Compare() {
         <CompareSkeleton />
       ) : !site && sitesFailed ? (
         <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
-      ) : !site || needsOwnAudit || !hasComparison || !analysis || !selected ? (
+      ) : !site || !hasComparison || !analysis || !selected ? (
         <CompareStartPanel
-          stage={!site ? "noSite" : needsOwnAudit ? "needsAudit" : "ready"}
+          stage={!site ? "noSite" : "ready"}
           domain={site?.domain ?? ""}
           canEdit={canEdit}
           addForm={addForm("md")}
@@ -170,10 +172,11 @@ export default function Compare() {
         />
       ) : (
         <>
-          {analysis.position && (
+          {analysis.position && unread < analysis.competitors.length && (
             <StandingsCard
               position={analysis.position}
               myScore={analysis.mine.score}
+              unread={unread}
               onSelectCompetitor={setPickedCompetitor}
             />
           )}
@@ -197,7 +200,8 @@ export default function Compare() {
 
             <CompetitorDetail
               comparison={selected}
-              myAuditedAt={analysis.auditedAt ?? null}
+              mine={analysis.mine}
+              baseline={analysis.baseline}
               workspaceId={workspaceId}
               siteId={siteId}
               briefAvailable={briefAvailable?.available ?? false}

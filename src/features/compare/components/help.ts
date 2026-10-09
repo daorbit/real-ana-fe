@@ -35,9 +35,25 @@ export const COMPARE_HELP: HelpSection[] = [
         tag: "important",
       },
       {
-        term: "Your page, re-scored",
+        term: "Both pages, measured together",
         detail:
-          "Your own audit is narrowed to exactly the fields a competitor fetch produces and scored with the same formula. Comparing a full audit against a one-fetch snapshot would flatter whichever side had more inputs.",
+          "Every time you add a competitor or compare again, your own page is fetched alongside theirs with the same crawler, parsed by the same code and scored by the same formula. Until that first fetch, your last SEO audit stands in, and the page says so.",
+      },
+      {
+        term: "Pages we cannot read",
+        detail:
+          "Some sites answer automated requests with a bot check, a block or an error instead of the page. Those fetches are never scored: the competitor is marked as unreadable and left out of the standings rather than shown as losing.",
+        tag: "important",
+      },
+      {
+        term: "JavaScript-built pages",
+        detail:
+          "When a page builds its text in the browser, the HTML it sends is nearly empty. Word count, headings and topic gaps are then not compared, because counting an empty shell would invent a gap that does not exist.",
+      },
+      {
+        term: "Response time is one sample",
+        detail:
+          "Measured once per fetch from our server. It moves with network conditions, so small differences are treated as a tie.",
       },
       {
         term: "What is never measured",
