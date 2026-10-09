@@ -7,11 +7,13 @@
 }
 
 .cover {
-  height: 92px;
-  background:
-    radial-gradient(90% 140% at 0% 0%, color-mix(in srgb, var(--accent) 38%, transparent), transparent 60%),
-    radial-gradient(70% 120% at 100% 100%, color-mix(in srgb, var(--accent-2) 26%, transparent), transparent 60%),
-    var(--surface-2);
+  height: 96px;
+  background: linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--hue-indigo) 22%, var(--surface-2)) 0%,
+    color-mix(in srgb, var(--hue-violet) 12%, var(--surface-2)) 50%,
+    var(--surface-2) 100%
+  );
   border-bottom: 1px solid var(--border);
 }
 

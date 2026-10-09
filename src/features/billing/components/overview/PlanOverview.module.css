@@ -1,8 +1,29 @@
 .root {
+  --hue-a: var(--hue-mint);
+  --hue-b: var(--hue-sky);
+  --hue-c: var(--hue-indigo);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
   overflow: hidden;
+}
+
+.root[data-plan="pro"] {
+  --hue-a: var(--hue-gold);
+  --hue-b: var(--hue-orange);
+  --hue-c: var(--hue-rose);
+}
+
+.root[data-plan="starter"] {
+  --hue-a: var(--hue-violet);
+  --hue-b: var(--hue-indigo);
+  --hue-c: var(--hue-sky);
+}
+
+.root[data-plan="free"] {
+  --hue-a: var(--hue-rose);
+  --hue-b: var(--hue-orange);
+  --hue-c: var(--hue-gold);
 }
 
 .head {
@@ -12,11 +33,17 @@
   flex-wrap: wrap;
   gap: 20px 24px;
   padding: 28px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--violet-2) 10%, transparent), transparent);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--hue-a) var(--wash-strong), var(--surface)) 0%,
+    var(--surface) 60%
+  );
 }
 
-.root[data-expired] .head {
-  background: color-mix(in srgb, var(--mantine-color-red-6) 8%, transparent);
+.root[data-expired] {
+  --hue-a: var(--hue-rose);
+  --hue-b: var(--hue-rose);
+  --hue-c: var(--hue-orange);
 }
 
 .identity {
@@ -33,11 +60,8 @@
   width: 64px;
   height: 64px;
   border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--plan-accent) 28%, var(--border));
-  background:
-    radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--plan-accent) 22%, transparent), transparent 70%),
-    var(--bg-2);
-  box-shadow: 0 10px 28px -14px color-mix(in srgb, var(--plan-accent) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hue-a) 22%, var(--border));
+  background: color-mix(in srgb, var(--hue-a) 8%, var(--bg-2));
 }
 
 .eyebrow {
@@ -63,10 +87,7 @@
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.03em;
-  background: linear-gradient(180deg, var(--text) 30%, color-mix(in srgb, var(--plan-accent) 70%, var(--text)));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text);
 }
 
 .meta {

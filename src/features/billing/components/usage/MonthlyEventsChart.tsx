@@ -6,6 +6,8 @@ import { monthLabel, monthTick } from "../../lib/usageMonth";
 import classes from "./UsageOverview.module.css";
 
 const AXIS_TICK = { fill: "var(--text-2)", fontSize: 11 };
+const CURRENT_FILL = "usage-bar-current";
+const PAST_FILL = "usage-bar-past";
 
 type Point = UsageHistoryMonth & { tick: string };
 
@@ -58,13 +60,24 @@ export function MonthlyEventsChart({ months }: { months: UsageHistoryMonth[] }) 
               allowDecimals={false}
               tickFormatter={compact}
             />
-            <Tooltip cursor={{ fill: "var(--surface-2)" }} content={<MonthTooltip />} isAnimationActive={false} />
-            <Bar dataKey="events" radius={[6, 6, 0, 0]} maxBarSize={40} animationDuration={500}>
+            <defs>
+              <linearGradient id={CURRENT_FILL} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--accent-2)" />
+                <stop offset="100%" stopColor="var(--accent-2)" stopOpacity={0.6} />
+              </linearGradient>
+              <linearGradient id={PAST_FILL} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--text-2)" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="var(--text-2)" stopOpacity={0.2} />
+              </linearGradient>
+            </defs>
+            <Tooltip
+              cursor={{ fill: "color-mix(in srgb, var(--text) 4%, transparent)" }}
+              content={<MonthTooltip />}
+              isAnimationActive={false}
+            />
+            <Bar dataKey="events" radius={[8, 8, 2, 2]} maxBarSize={44} animationDuration={500}>
               {points.map((p) => (
-                <Cell
-                  key={p.month}
-                  fill={p.current ? "var(--violet-2)" : "color-mix(in srgb, var(--violet-2) 38%, var(--surface))"}
-                />
+                <Cell key={p.month} fill={`url(#${p.current ? CURRENT_FILL : PAST_FILL})`} />
               ))}
             </Bar>
           </BarChart>

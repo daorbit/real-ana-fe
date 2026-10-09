@@ -13,6 +13,11 @@
   gap: 10px;
   min-width: 0;
   padding: 28px;
+  background: linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--hue-violet) var(--wash-strong), var(--surface)) 0%,
+    var(--surface) 60%
+  );
 }
 
 .eyebrow {

@@ -34,6 +34,7 @@ export function PlanOverview({
   return (
     <section
       className={classes.root}
+      data-plan={usage.plan.slug}
       data-expired={expired || undefined}
       style={{ "--plan-accent": accent } as CSSProperties}
     >

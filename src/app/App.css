@@ -48,6 +48,20 @@
 
   --grad-chart: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 100%);
 
+  --hue-gold: #f5b301;
+  --hue-orange: #ff7a1a;
+  --hue-rose: #ff3d7f;
+  --hue-violet: #8b5cf6;
+  --hue-indigo: #5b6cff;
+  --hue-sky: #0ea5e9;
+  --hue-mint: #10d39e;
+  --wash-strong: 9%;
+  --wash-soft: 3%;
+  --hue-ink: 0%;
+  --grad-fitness: linear-gradient(90deg, var(--accent-2) 0%, var(--hue-sky) 100%);
+  --grad-sunset: linear-gradient(120deg, var(--hue-gold) 0%, var(--hue-orange) 45%, var(--hue-rose) 100%);
+  --grad-dusk: linear-gradient(120deg, var(--hue-violet) 0%, var(--hue-indigo) 50%, var(--hue-sky) 100%);
+
   --green: #34d399;
   --amber: #f59e0b;
   --pink: #f472b6;
@@ -83,6 +97,9 @@
   --accent: #059669;
   --accent-2: #047857;
   --accent-soft: rgba(5, 150, 105, 0.14);
+  --wash-strong: 7%;
+  --wash-soft: 2%;
+  --hue-ink: 38%;
   --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   --shadow-sm: 0 1px 2px rgba(15,17,21,0.04), 0 2px 6px -2px rgba(15,17,21,0.05);
   --shadow: 0 1px 3px rgba(15,17,21,0.05), 0 14px 32px -14px rgba(15,17,21,0.14);
