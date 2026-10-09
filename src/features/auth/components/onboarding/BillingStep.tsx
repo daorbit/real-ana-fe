@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@mantine/core";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { PlansGridSkeleton } from "@/shared/ui/Skeletons";
@@ -11,6 +11,7 @@ import { PlansTab } from "@/features/billing/components/PlansTab";
 import { PlanCheckoutModal } from "@/features/billing/components/PlanCheckoutModal";
 import { CheckoutOutcome } from "@/features/billing/components/CheckoutOutcome";
 import { useCheckout } from "@/features/billing/hooks/useCheckout";
+import { clearPlanIntent, readPlanIntent } from "@/features/billing/lib/planIntent";
 import s from "./AppearanceStep.module.css";
 
 
@@ -24,7 +25,8 @@ export function BillingStep({
   const { active, workspaces } = useWorkspace();
   const workspaceId = active?._id ?? workspaces[0]?._id ?? null;
 
-  const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const [intent] = useState(readPlanIntent);
+  const [cycle, setCycle] = useState<BillingCycle>(intent?.cycle ?? "monthly");
   const [currency, setCurrency] = useState<Currency>(() => getStoredCurrency() ?? detectCurrency());
   const changeCurrency = (v: Currency) => {
     setCurrency(v);
@@ -53,6 +55,18 @@ export function BillingStep({
   const {
     subscribe, subscribing, celebration, setCelebration, cancelled, setCancelled,
   } = useCheckout({ workspaceId, cycle, currency, planCoupon, addonCoupon: null });
+
+  const intentHandled = useRef(false);
+  useEffect(() => {
+    if (!intent || intentHandled.current || !plans.length || !usage) return;
+    intentHandled.current = true;
+    clearPlanIntent();
+    const wanted = plans.find((p) => p.slug === intent.plan);
+    if (wanted && wanted.slug !== usage.plan.slug) {
+      setPlanCoupon(null);
+      setConfirmPlan(wanted);
+    }
+  }, [intent, plans, usage]);
 
   useEffect(() => {
     if (celebration) setConfirmPlan(null);
@@ -133,7 +147,8 @@ export function BillingStep({
         coupon={planCoupon}
         onCoupon={setPlanCoupon}
         busy={!!confirmPlan && subscribing === confirmPlan.slug}
-        renewal={null}
+        renewing={false}
+        workspaceId={workspaceId}
         onClose={() => setConfirmPlan(null)}
         onConfirm={(plan, selection, gateway, phone) => subscribe(plan, selection, gateway, phone)}
       />

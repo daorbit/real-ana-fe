@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Text, Stack, Alert, Tabs } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Info } from "lucide-react";
@@ -41,7 +41,7 @@ export default function Billing() {
   useTitle("Billing");
   const { t } = useTranslation();
   const { user: _user, isDemo } = useAuth();
-  const { tab, setTab, cycle, setCycle, currency, changeCurrency, money } = useBillingView();
+  const { tab, setTab, cycle, setCycle, cyclePinned, currency, changeCurrency, money } = useBillingView();
 
   // The workspace being bought for is the one selected in the sidebar.
   const { workspaces, active, loading: billingLoading } = useWorkspace();
@@ -89,24 +89,14 @@ export default function Billing() {
   const loading = plansLoading || addonsLoading || billingLoading;
   const expired = usage?.status === "expired";
 
-  // A renewal is the current plan bought again, on its own cycle, before the
-  // period has lapsed. The server stacks another cycle onto the existing end
-  // date in that case; this mirrors the sum so the checkout dialog can show
-  // the resulting date.
-  const CYCLE_DAYS = cycle === "yearly" ? 365 : 30;
-  const renewal =
-    confirmPlan &&
-    usage &&
-    !expired &&
-    usage.plan.slug === confirmPlan.slug &&
-    usage.cycle === cycle &&
-    usage.currentPeriodEnd
-      ? {
-          newPeriodEnd: new Date(
-            new Date(usage.currentPeriodEnd).getTime() + CYCLE_DAYS * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-        }
-      : null;
+  const cycleSynced = useRef(cyclePinned);
+  useEffect(() => {
+    if (cycleSynced.current || !usage) return;
+    cycleSynced.current = true;
+    if (usage.plan.slug !== "free" && !expired) setCycle(usage.cycle);
+  }, [usage, expired, setCycle]);
+
+  const renewing = Boolean(confirmPlan && usage && !expired && usage.plan.slug === confirmPlan.slug);
 
   const featuredSlug = featuredPlanSlug(plans, usage?.plan.slug ?? null, currency);
 
@@ -248,7 +238,8 @@ export default function Billing() {
         coupon={planCoupon}
         onCoupon={setPlanCoupon}
         busy={!!confirmPlan && subscribing === confirmPlan.slug}
-        renewal={renewal}
+        renewing={renewing}
+        workspaceId={isDemo ? null : selectedWorkspaceId}
         onClose={() => setConfirmPlan(null)}
         onConfirm={(plan, selection, gateway, phone) => subscribe(plan, selection, gateway, phone)}
       />

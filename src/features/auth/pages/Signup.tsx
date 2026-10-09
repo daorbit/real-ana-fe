@@ -27,6 +27,7 @@ import { CURRENCIES, setStoredCurrency } from "@/shared/lib/currency";
 import type { Currency } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
 import { storePendingRef } from "@/features/referrals/lib/pendingRef";
+import { storePlanIntent } from "@/features/billing/lib/planIntent";
 
 type Touched = Record<string, boolean>;
 
@@ -46,6 +47,7 @@ export default function Signup() {
       setStoredCurrency(currency as Currency);
     }
     storePendingRef(params.get("ref"));
+    storePlanIntent(params.get("plan"), params.get("cycle"));
   }, [params]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");

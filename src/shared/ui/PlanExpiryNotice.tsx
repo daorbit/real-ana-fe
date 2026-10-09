@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button } from "@mantine/core";
+import { UnstyledButton } from "@mantine/core";
 import { ArrowRight, CalendarClock, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useActiveUsage } from "@/features/workspace/context";
@@ -60,9 +60,15 @@ export function PlanExpiryNotice() {
       ? `Your ${data.plan.name} plan ends tomorrow`
       : `Your ${data.plan.name} plan ends ${shortDate(data.currentPeriodEnd!)}`;
 
+  const cycleWord = data.cycle === "yearly" ? "yearly" : "monthly";
   const detail = lapsed
     ? "You're on Free for now. Your data is safe and tracking continues at Free limits."
-    : "Plans don't renew automatically. Renew to keep your paid features.";
+    : `Your ${cycleWord} plan doesn't renew automatically. Renew now and the new period starts when this one ends, so you lose no days.`;
+
+  const renewSlug = lapsed ? data.lapsedPlan?.slug : data.plan.slug;
+  const renewPath = renewSlug
+    ? `/app/billing?checkout=${encodeURIComponent(renewSlug)}&cycle=${data.cycle ?? "monthly"}`
+    : "/app/billing";
 
   return (
     <aside
@@ -101,24 +107,20 @@ export function PlanExpiryNotice() {
 
       <div className="plan-notice__actions">
         {!lapsed && (
-          <Button
-            radius="xl"
-            size="sm"
+          <UnstyledButton
             className="plan-notice__btn plan-notice__btn--quiet"
             onClick={() => dismiss(Date.now() + SNOOZE_MS)}
           >
-            Remind me later
-          </Button>
+            Remind me tomorrow
+          </UnstyledButton>
         )}
-        <Button
-          radius="xl"
-          size="sm"
+        <UnstyledButton
           className="plan-notice__btn plan-notice__btn--primary"
-          rightSection={<ArrowRight size={14} strokeWidth={2.2} />}
-          onClick={() => nav("/app/billing")}
+          onClick={() => nav(renewPath)}
         >
-          {lapsed ? "Renew plan" : "View plans"}
-        </Button>
+          {lapsed ? `Renew ${data.lapsedPlan?.name ?? "plan"}` : `Renew ${data.plan.name}`}
+          <ArrowRight size={14} strokeWidth={2.2} />
+        </UnstyledButton>
       </div>
     </aside>
   );

@@ -779,8 +779,13 @@ type GatewayOrder =
  * A ₹0 plan (Free) is assigned server-side with no order — `free: true` and
  * nothing else. A paid plan returns a gateway order to check out with.
  */
+export type CheckoutPreview = {
+  periodEnd: string;
+  carriedDays: number;
+};
+
 export type StartSubscriptionResponse =
-  | { free: true; plan: { name: string; cycle: BillingCycle } }
+  | { free: true; plan: { name: string; cycle: BillingCycle }; periodEnd: string | null }
   | (GatewayOrder & {
       free?: false;
       plan: { name: string; cycle: BillingCycle };

@@ -29,6 +29,7 @@ export function useBillingView() {
     setSearchParams(next === "plans" ? {} : { tab: next }, { replace: true });
   };
 
+  const [cyclePinned] = useState(() => searchParams.has("cycle"));
   const [cycle, setCycle] = useState<BillingCycle>(() =>
     searchParams.get("cycle") === "yearly" ? "yearly" : "monthly",
   );
@@ -41,5 +42,5 @@ export function useBillingView() {
 
   const money = (amountMinor: number) => formatMoney(amountMinor, currency);
 
-  return { tab, setTab, cycle, setCycle, currency, changeCurrency, money };
+  return { tab, setTab, cycle, setCycle, cyclePinned, currency, changeCurrency, money };
 }

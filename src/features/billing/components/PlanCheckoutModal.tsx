@@ -18,6 +18,7 @@ import { OrderItems, type OrderItem } from "./checkout/OrderItems";
 import { OrderTotals } from "./checkout/OrderTotals";
 import { GatewayPicker } from "./checkout/GatewayPicker";
 import { SavingsCard } from "./checkout/SavingsCard";
+import { PeriodPreview } from "./checkout/PeriodPreview";
 import { TrustList } from "./checkout/TrustList";
 import { num } from "@/shared/lib";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
@@ -38,7 +39,8 @@ export function PlanCheckoutModal({
   coupon,
   onCoupon,
   busy,
-  renewal,
+  renewing,
+  workspaceId,
   onClose,
   onConfirm,
 }: {
@@ -52,7 +54,8 @@ export function PlanCheckoutModal({
   coupon: CouponCheckResult | null;
   onCoupon: (result: CouponCheckResult | null) => void;
   busy: boolean;
-  renewal: { newPeriodEnd: string } | null;
+  renewing: boolean;
+  workspaceId: string | null;
   onClose: () => void;
   onConfirm: (
     plan: Plan,
@@ -128,10 +131,6 @@ export function PlanCheckoutModal({
   const currentPlan = usage ? plans.find((p) => p.slug === usage.plan.slug) ?? null : null;
   const showChanges = !!currentPlan && currentPlan.slug !== plan.slug;
 
-  const renewalDate = renewal
-    ? new Date(renewal.newPeriodEnd).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
-    : null;
-
   return (
     <Modal
       opened
@@ -153,7 +152,7 @@ export function PlanCheckoutModal({
               </span>
               <div className={s.heroText}>
                 <span className={s.eyebrow}>
-                  {renewal ? t("billing.confirmRenewal", "Confirm renewal") : t("billing.confirmSubscription")}
+                  {renewing ? t("billing.confirmRenewal", "Confirm renewal") : t("billing.confirmSubscription")}
                 </span>
                 <h1 className={s.heroTitle}>{planLabel}</h1>
                 {plan.description && <p className={s.heroDesc}>{plan.description}</p>}
@@ -237,6 +236,8 @@ export function PlanCheckoutModal({
 
             {!isFreePlan && <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />}
 
+            {!isFreePlan && <PeriodPreview workspaceId={workspaceId} plan={plan} cycle={cycle} />}
+
             {!noCharge && <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />}
 
             <Button
@@ -249,16 +250,27 @@ export function PlanCheckoutModal({
               disabled={!gatewayChoice.canPay}
               onClick={() => onConfirm(plan, selection, gatewayChoice.gateway, gatewayChoice.phoneForGateway)}
             >
-              {noCharge ? t("billing.confirm") : t("billing.payAmount", { amount: money(chargeable) })}
+              {noCharge
+                ? isFreePlan
+                  ? t("billing.confirm")
+                  : t("billing.activateCycle", "Activate {{plan}} {{cycle}} — no charge", {
+                      plan: plan.name,
+                      cycle: cycle === "yearly" ? t("billing.cycleYearlyWord") : t("billing.cycleMonthlyWord"),
+                    })
+                : t("billing.payAmount", { amount: money(chargeable) })}
             </Button>
 
             <p className={classes.footnote}>
               <ShieldCheck size={14} />
               <span>
-                {noCharge
+                {isFreePlan
                   ? t("billing.planIsFree")
-                  : t(cycle === "yearly" ? "billing.oneTimeChargeYear" : "billing.oneTimeChargeMonth")}
-                {renewalDate && ` ${t("billing.renewalExtendsTo", { date: renewalDate })}`}
+                  : noCharge
+                    ? t("billing.couponCovers", "Your coupon covers the full {{cycle}} price. You'll get a {{zero}} receipt for your records.", {
+                        cycle: cycle === "yearly" ? t("billing.cycleYearlyWord") : t("billing.cycleMonthlyWord"),
+                        zero: money(0),
+                      })
+                    : t(cycle === "yearly" ? "billing.oneTimeChargeYear" : "billing.oneTimeChargeMonth")}
               </span>
             </p>
 

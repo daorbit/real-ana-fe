@@ -24,7 +24,7 @@ import type {
   Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus,
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
-  Coupon, CouponCheckResult, Invoice, QuotaSummary, UsageHistory,
+  Coupon, CouponCheckResult, CheckoutPreview, Invoice, QuotaSummary, UsageHistory,
   MyReferrals, ReferralSettings, AdminReferralPage, ReferralOverview, TopReferrer,
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
   Segment, Marker, MarkerKind, StatsFilter,
@@ -1953,6 +1953,13 @@ export const api = createApi({
       providesTags: ["Plan"],
     }),
 
+    getCheckoutPreview: build.query<CheckoutPreview, { workspaceId: string; planSlug: string; cycle: BillingCycle }>({
+      query: ({ workspaceId, planSlug, cycle }) =>
+        `/api/billing/preview?workspaceId=${workspaceId}&planSlug=${encodeURIComponent(planSlug)}&cycle=${cycle}`,
+      providesTags: ["Billing"],
+      keepUnusedDataFor: 30,
+    }),
+
     getAddonPacks: build.query<AddonPack[], { currency: Currency }>({
       query: ({ currency }) => `/api/billing/addons?currency=${currency}`,
       providesTags: ["AddonPack"],
@@ -2593,6 +2600,7 @@ export const {
   useAcceptInviteMutation,
   useGetPlansQuery,
   useGetAddonPacksQuery,
+  useGetCheckoutPreviewQuery,
   useStartSubscriptionMutation,
   useConfirmPurchaseMutation,
   useStartAddonPurchaseMutation,

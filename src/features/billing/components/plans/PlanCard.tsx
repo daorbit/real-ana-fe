@@ -8,10 +8,8 @@ import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../PlanI
 import { FeatureLine } from "../FeatureLine";
 import { RIBBON_FALLBACK } from "../../lib/constants";
 import { planFeatureLines } from "../../lib/planFeatures";
-import { daysUntil } from "../../lib/usageMonth";
+import { isActionable, planAction } from "../../lib/planAction";
 import classes from "./Plans.module.css";
-
-const RENEW_WITHIN_DAYS = 7;
 
 interface Props {
   plan: Plan;
@@ -42,26 +40,30 @@ export function PlanCard({
   const price = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
   const buyable = price > 0;
   const current = usage?.plan.slug === plan.slug && !expired;
-  const daysLeft = usage?.currentPeriodEnd ? daysUntil(usage.currentPeriodEnd) : null;
-  const renewable =
-    current && buyable && usage?.cycle === cycle && daysLeft !== null && daysLeft > 0 && daysLeft <= RENEW_WITHIN_DAYS;
+  const action = planAction({ plan, usage, expired, lower, cycle, currency, isDemo });
+  const actionable = isActionable(action);
   const highlight = featured || current;
-  const resting = !featured && ((current && !renewable) || lower || !buyable);
+  const resting = !featured && !actionable;
+  const currentCycleWord = usage?.cycle === "yearly" ? t("billing.cycleYearlyWord") : t("billing.cycleMonthlyWord");
 
-  const pill = renewable
+  const pill = action.kind === "renew" && current
     ? { icon: Clock, label: t("billing.ribbonRenewSoon", "Renew soon") }
     : current
-      ? { icon: Check, label: t("billing.ribbonCurrent") }
+      ? { icon: Check, label: `${t("billing.ribbonCurrent")} · ${currentCycleWord}` }
       : featured
         ? { icon: ArrowUpRight, label: t("billing.ribbonRecommended") }
         : null;
 
-  const ctaLabel = isDemo ? t("billing.ctaSignUpSubscribe")
-    : renewable ? t("billing.ctaRenew")
-    : current ? t("billing.ctaCurrentPlan")
-    : lower ? t("billing.ctaIncludedInPlan")
-    : !buyable ? t("billing.ctaIncludedFree")
-    : usage?.plan.slug === plan.slug ? t("billing.ctaRenew")
+  const ctaLabel =
+    action.kind === "demo" ? t("billing.ctaSignUpSubscribe")
+    : action.kind === "renew" ? t("billing.ctaRenew")
+    : action.kind === "switchCycle"
+      ? action.to === "yearly"
+        ? t("billing.ctaSwitchYearly", "Switch to yearly")
+        : t("billing.ctaSwitchMonthly", "Switch to monthly")
+    : action.kind === "current" ? t("billing.ctaCurrentPlan")
+    : action.kind === "lower" ? t("billing.ctaIncludedInNamed", "Included in {{plan}}", { plan: action.currentName })
+    : action.kind === "free" ? t("billing.ctaIncludedFree")
     : t("billing.ctaSubscribe");
 
   const features = planFeatureLines(plan, t);
@@ -108,11 +110,11 @@ export function PlanCard({
         size="md"
         radius="md"
         color="emerald"
-        variant={renewable || featured ? "filled" : "light"}
+        variant={action.kind === "renew" || action.kind === "switchCycle" || featured ? "filled" : "light"}
         className={ctaClass}
-        disabled={(current && !renewable) || lower || !buyable || isDemo || !selectedWorkspaceId}
+        disabled={!actionable || !selectedWorkspaceId}
         loading={subscribing === plan.slug}
-        leftSection={buyable && !current && !lower ? <CreditCard size={15} /> : undefined}
+        leftSection={action.kind === "subscribe" ? <CreditCard size={15} /> : undefined}
         onClick={() => onPick(plan)}
       >
         {ctaLabel}
