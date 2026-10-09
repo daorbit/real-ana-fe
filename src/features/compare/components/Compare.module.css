@@ -147,6 +147,10 @@
   scrollbar-width: thin;
 }
 
+.rail > * {
+  flex-shrink: 0;
+}
+
 .panel {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
