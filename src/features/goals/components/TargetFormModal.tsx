@@ -2,15 +2,12 @@ import { useEffect, useState } from "react";
 import {
   Modal, Stack, TextInput, NumberInput, SegmentedControl, Select, Group, Button, Text, UnstyledButton,
 } from "@mantine/core";
-import { useGetGoalsQuery } from "@/app/store";
 import { useSites } from "@/features/workspace";
-import { useDemo } from "@/features/demo/context";
-import { demoGoals } from "@/features/demo/demoData";
 import { METRICS, METRIC_MAP, suggestName } from "@/features/goals/metrics";
 import type { TargetInput, TargetMetric, TargetPeriod } from "@/features/goals/types";
 import classes from "@/features/goals/components/Goals.module.css";
 
-const EMPTY: TargetInput = { name: "", metric: "visitors", target: 10_000, period: "month", siteId: "", goalId: null };
+const EMPTY: TargetInput = { name: "", metric: "visitors", target: 10_000, period: "month", siteId: "" };
 
 export function TargetFormModal({
   opened,
@@ -32,9 +29,6 @@ export function TargetFormModal({
   const [form, setForm] = useState<TargetInput>(EMPTY);
   const [nameTouched, setNameTouched] = useState(false);
   const { sites } = useSites(workspaceId);
-  const { demo } = useDemo();
-  const { data: realGoals = [] } = useGetGoalsQuery(workspaceId, { skip: !opened });
-  const goals = demo ? demoGoals : realGoals;
 
   useEffect(() => {
     if (!opened) return;
@@ -50,13 +44,9 @@ export function TargetFormModal({
       ...f,
       metric,
       target: f.metric === metric ? f.target : METRIC_MAP[metric].placeholder,
-      goalId: metric === "conversions" ? f.goalId : null,
     }));
 
-  const valid =
-    name.trim().length > 0 &&
-    form.target > 0 &&
-    (form.metric !== "conversions" || Boolean(form.goalId));
+  const valid = name.trim().length > 0 && form.target > 0;
 
   const submit = () => {
     if (!valid) return;
@@ -90,18 +80,6 @@ export function TargetFormModal({
           </div>
           <Text size="xs" c="dimmed" mt={8}>{meta.description}</Text>
         </div>
-
-        {form.metric === "conversions" && (
-          <Select
-            label="Conversion goal"
-            placeholder={goals.length ? "Pick a goal" : "Create a conversion goal in Analytics first"}
-            data={goals.map((g) => ({ value: g.id, label: `${g.name} (${g.match})` }))}
-            value={form.goalId ?? null}
-            onChange={(v) => setForm((f) => ({ ...f, goalId: v }))}
-            disabled={goals.length === 0}
-            allowDeselect={false}
-          />
-        )}
 
         <Group grow align="flex-start">
           <NumberInput

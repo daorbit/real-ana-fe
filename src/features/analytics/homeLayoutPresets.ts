@@ -29,7 +29,6 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
       { id: "traffic", span: 4 },
       { id: "channels", span: 1 },
       { id: "utmSources", span: 1 },
-      { id: "goals", span: 2 },
       { id: "utmCampaigns", span: 2 },
       { id: "landingPages", span: 2 },
     ],

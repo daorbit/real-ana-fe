@@ -1,5 +1,5 @@
 import type {
-  Workspace, Site, Goal, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, ShareState, SeoReport,
+  Workspace, Site, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, ShareState, SeoReport,
   SeoReportSummary, SeoCrawlReport, SeoCrawlPage, SeoSearchTraffic, SeoFieldVitals,
   SeoCompetitor, SeoShareState,
 } from "@/shared/types";
@@ -69,12 +69,6 @@ export const demoSites: Site[] = [
     siteId: DEMO_SITE_ID_2,
     createdAt: iso(90 * DAY),
   },
-];
-
-export const demoGoals: Goal[] = [
-  { id: "demo-goal-1", name: "Signup", kind: "page", match: "/signup" },
-  { id: "demo-goal-2", name: "Pricing viewed", kind: "page", match: "/pricing" },
-  { id: "demo-goal-3", name: "Docs read", kind: "page", match: "/docs" },
 ];
 
 export const demoApiKeys: ApiKey[] = [

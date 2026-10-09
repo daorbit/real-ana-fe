@@ -62,7 +62,6 @@ export function FunnelBuilder({
     const entry = stats?.entryPages?.[0]?.key;
     const topPages = (stats?.topPages ?? []).map((p) => p.key).filter((p) => p !== entry);
     const events = [...(stats?.customEvents ?? [])].sort((a, b) => b.count - a.count);
-    const goals = stats?.goals ?? [];
 
     // Landing page into whatever else people actually visit next.
     if (entry && topPages.length > 0) {
@@ -72,21 +71,6 @@ export function FunnelBuilder({
         steps: [
           { type: "page", value: entry },
           { type: "page", value: topPages[0] },
-        ],
-      });
-    }
-
-    // Entry page into each configured goal — the funnel a goal implies but
-    // nobody built yet.
-    for (const g of goals.slice(0, 2)) {
-      if (!entry) break;
-      if (g.kind === "page" && g.match === entry) continue;
-      list.push({
-        key: `goal-${g.id}`,
-        label: `${entry} → ${g.name}`,
-        steps: [
-          { type: "page", value: entry },
-          { type: g.kind, value: g.match },
         ],
       });
     }

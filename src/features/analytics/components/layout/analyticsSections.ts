@@ -38,7 +38,6 @@ export function getAnalyticsSections(t: TFunction): AnalyticsSection[] {
       tabs: [
         { value: "flow", label: t("analytics.tab.flow"), icon: Waypoints },
         { value: "funnel", label: t("analytics.tab.funnel"), icon: GitBranch },
-        { value: "goals", label: t("analytics.tab.goals"), icon: Target },
         { value: "events", label: t("analytics.tab.events"), icon: Zap },
         { value: "retention", label: t("analytics.tab.retention"), icon: Repeat },
         { value: "errors", label: t("analytics.tab.errors"), icon: AlertTriangle },

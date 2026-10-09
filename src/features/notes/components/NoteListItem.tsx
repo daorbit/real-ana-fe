@@ -1,22 +1,21 @@
 import { UnstyledButton } from "@mantine/core";
-import { Pin } from "lucide-react";
-import { timeAgo } from "@/shared/lib";
-import { notePreview, noteTitle } from "@/features/notes/noteText";
+import { listStamp } from "@/features/notes/noteDates";
+import { noteHeadline } from "@/features/notes/noteText";
 import type { Note } from "@/features/notes/types";
 import classes from "@/features/notes/components/Notes.module.css";
 
 export function NoteListItem({ note, onOpen }: { note: Note; onOpen: (id: string) => void }) {
-  const preview = notePreview(note.body);
+  const { title, preview } = noteHeadline(note);
 
   return (
-    <UnstyledButton className={`${classes.item} ${classes.tone}`} data-color={note.color} onClick={() => onOpen(note.id)}>
-      <span className={classes.itemTitle}>
-        <span className={classes.itemTitleText}>{noteTitle(note)}</span>
-        {note.pinned && <Pin size={11} className={classes.itemPin} aria-label="Pinned" />}
-        <span className={classes.itemTime}>{timeAgo(note.updatedAt)}</span>
+    <UnstyledButton className={`${classes.row} ${classes.tone}`} data-color={note.color} onClick={() => onOpen(note.id)}>
+      <span className={classes.rowTitle}>
+        {note.color !== "default" && <span className={classes.rowDot} aria-hidden="true" />}
+        <span className={classes.rowTitleText}>{title}</span>
       </span>
-      <span className={classes.itemPreview} data-empty={!preview || undefined}>
-        {preview || "No content yet"}
+      <span className={classes.rowMeta}>
+        <span className={classes.rowStamp}>{listStamp(note.updatedAt)}</span>
+        <span className={classes.rowPreview}>{preview || "No additional text"}</span>
       </span>
     </UnstyledButton>
   );

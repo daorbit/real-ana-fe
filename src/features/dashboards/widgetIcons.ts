@@ -1,7 +1,7 @@
 import {
   Activity, ArrowDownToLine, Bug, Compass, CornerUpLeft, Eye, ExternalLink, FileText, Files, Flag, Gauge,
   Globe, Grid3x3, Languages, Layers, Link2, LogIn, LogOut, Maximize2, Megaphone, Monitor, MousePointerClick,
-  PlaneLanding, Radio, Smartphone, Split, Tag, Target, Timer, TrendingUp, Trophy, Users,
+  PlaneLanding, Radio, Smartphone, Split, Tag, Target, Timer, TrendingUp, Users,
   Percent, Medal, Search, FileSearch, ChartNoAxesColumn, Lightbulb,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -38,7 +38,6 @@ export const WIDGET_ICON: Record<WidgetId, LucideIcon> = {
   scrollDepth: ArrowDownToLine,
   landingPages: PlaneLanding,
   channels: Split,
-  goals: Trophy,
   outbound: ExternalLink,
   errors: Bug,
   searchClicks: MousePointerClick,

@@ -1,4 +1,4 @@
-import { Users, Eye, Layers, Target, ClipboardList, Search } from "lucide-react";
+import { Users, Eye, Layers, ClipboardList, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { compact, num } from "@/shared/lib";
 import type { TargetMetric, TargetProgress, TargetStatus } from "@/features/goals/types";
@@ -18,7 +18,6 @@ export const METRICS: MetricMeta[] = [
   { value: "visitors", label: "Visitors", unit: "visitors", description: "Unique people across your sites", icon: Users, lowerIsBetter: false, needsSite: true, placeholder: 10_000 },
   { value: "pageviews", label: "Pageviews", unit: "pageviews", description: "Every page loaded", icon: Eye, lowerIsBetter: false, needsSite: true, placeholder: 50_000 },
   { value: "sessions", label: "Sessions", unit: "sessions", description: "Distinct visits", icon: Layers, lowerIsBetter: false, needsSite: true, placeholder: 15_000 },
-  { value: "conversions", label: "Conversions", unit: "conversions", description: "People who hit a conversion goal", icon: Target, lowerIsBetter: false, needsSite: true, placeholder: 250 },
   { value: "formSubmissions", label: "Form submissions", unit: "submissions", description: "Responses to your lead-capture forms", icon: ClipboardList, lowerIsBetter: false, needsSite: false, placeholder: 500 },
   { value: "searchPosition", label: "Average position", unit: "avg. position", description: "Where you rank on Google, lower is better", icon: Search, lowerIsBetter: true, needsSite: true, placeholder: 5 },
 ];

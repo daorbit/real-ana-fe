@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import type { KeyboardEvent } from "react";
 import { Portal } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { longDate } from "@/shared/lib";
 import { useNotes } from "@/features/notes/NotesProvider";
 import { useCreateNoteMutation, useGetNotesQuery } from "@/features/notes/api";
 import { useDraggablePanel } from "@/features/notes/hooks/useDraggablePanel";
@@ -24,7 +23,7 @@ function NotesWindow() {
 
   const create = async () => {
     try {
-      const note = await createNote({ title: longDate(new Date()), body: "" }).unwrap();
+      const note = await createNote({ title: "", body: "" }).unwrap();
       select(note.id);
     } catch {
       return;

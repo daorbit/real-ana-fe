@@ -14,7 +14,7 @@ import {
 import {
   Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow, Zap, Filter, Split, Target, GitCompareArrows, CloudOff,
+  ArrowDownWideNarrow, Zap, Filter, Split, GitCompareArrows, CloudOff,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { trace } from "@/shared/lib/analytics";
@@ -33,7 +33,6 @@ import { CustomEventsPanel } from "@/features/analytics/components/CustomEventsP
 import { FunnelBuilder } from "@/features/analytics/components/FunnelBuilder";
 import { UserFlowPanel } from "@/features/analytics/components/UserFlowPanel";
 import { RetentionGrid } from "@/features/analytics/components/RetentionGrid";
-import { GoalsPanel } from "@/features/analytics/components/GoalsPanel";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
 import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitPanel";
 import { FilterBar } from "@/features/analytics/components/FilterBar";
@@ -959,35 +958,6 @@ export default function Analytics() {
                 >
                   See the tracking docs
                 </Button>
-              </Stack>
-            </Card>
-          </SimpleGrid>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="goals">
-          <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-            <GoalsPanel workspaceId={active._id} goals={view?.goals ?? []} />
-            <Card withBorder radius="lg" padding="lg" h="100%">
-              <Group gap={8} mb="md">
-                <Target size={15} className="sect-ic" />
-                <Text fw={600} c="dimmed" size="sm">About goals</Text>
-              </Group>
-              <Stack gap="sm">
-                <Text size="sm" c="dimmed">
-                  A goal is an outcome you care about — reaching a page like{" "}
-                  <code>/thank-you</code>, or firing a custom event like{" "}
-                  <code>purchase</code>. Each goal is scored over the range you&apos;re
-                  viewing.
-                </Text>
-                <Text size="sm" c="dimmed">
-                  Conversion rate is the share of visitors in this period who
-                  converted at least once — a visitor who converts twice still
-                  counts once.
-                </Text>
-                <Text size="sm" c="dimmed">
-                  Goals re-score past traffic, so adding one doesn&apos;t lose
-                  history and removing one keeps your events intact.
-                </Text>
               </Stack>
             </Card>
           </SimpleGrid>

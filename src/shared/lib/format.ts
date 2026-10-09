@@ -102,6 +102,11 @@ export function longDate(d: Date | string): string {
   });
 }
 
+export function formatDate(d: Date | string, options: Intl.DateTimeFormatOptions): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleString(datePrefs.locale, { ...options, timeZone: datePrefs.timeZone });
+}
+
 /** Date and time in the user's locale/zone, e.g. "11 Jul 2026, 14:05" */
 export function dateTime(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;

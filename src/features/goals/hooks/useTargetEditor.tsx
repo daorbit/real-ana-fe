@@ -17,7 +17,7 @@ export function useTargetEditor(workspaceId: string | undefined) {
   const openEdit = (t: TargetProgress) =>
     setEditing({
       id: t.id,
-      initial: { name: t.name, metric: t.metric, target: t.target, period: t.period, siteId: t.siteId, goalId: t.goalId },
+      initial: { name: t.name, metric: t.metric, target: t.target, period: t.period, siteId: t.siteId },
     });
 
   const close = () => setEditing(null);

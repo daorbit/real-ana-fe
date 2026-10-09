@@ -235,12 +235,6 @@ export function demoStats(range: string): Stats {
       { key: "ResizeObserver loop limit exceeded", count: 7, path: "/", lastSeen: new Date(Date.now() - 2.4e7).toISOString() },
     ],
 
-    goals: [
-      { id: "demo-goal-1", name: "Signup", kind: "event", match: "signup", conversions: 142, conversionRate: 4.1 },
-      { id: "demo-goal-2", name: "Reached pricing", kind: "page", match: "/pricing", conversions: 486, conversionRate: 14.0 },
-      { id: "demo-goal-3", name: "Purchase", kind: "event", match: "purchase", conversions: 61, conversionRate: 1.8 },
-    ],
-
     livePages: ranked([PAGES[0], PAGES[1], PAGES[2], PAGES[3]], 34, 0.5),
 
     timeseries,

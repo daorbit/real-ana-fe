@@ -1,3 +1,4 @@
+import { longDate } from "@/shared/lib";
 import type { Note } from "@/features/notes/types";
 
 export function noteTitle(note: Pick<Note, "title">): string {
@@ -6,6 +7,19 @@ export function noteTitle(note: Pick<Note, "title">): string {
 
 export function notePreview(body: string): string {
   return body.replace(/\s+/g, " ").trim();
+}
+
+function isAutoTitle(note: Pick<Note, "title" | "createdAt">): boolean {
+  const title = note.title.trim();
+  return !title || title === longDate(note.createdAt);
+}
+
+export function noteHeadline(note: Pick<Note, "title" | "body" | "createdAt">): { title: string; preview: string } {
+  const lines = note.body.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (isAutoTitle(note) && lines.length) {
+    return { title: lines[0], preview: notePreview(lines.slice(1).join(" ")) };
+  }
+  return { title: noteTitle(note), preview: notePreview(note.body) };
 }
 
 export function wordCount(body: string): number {

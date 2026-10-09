@@ -1,13 +1,12 @@
 import { useActiveBilling } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
 
-export type CountedFeature = "dashboards" | "embeds" | "goalTargets" | "conversionGoals";
+export type CountedFeature = "dashboards" | "embeds" | "goalTargets";
 
 const COPY: Record<CountedFeature, { kind: string; label: string; noun: string; plural: string }> = {
   dashboards: { kind: "dashboards", label: "Dashboards", noun: "custom dashboard", plural: "custom dashboards" },
   embeds: { kind: "embeds", label: "Embedded widgets", noun: "embedded widget", plural: "embedded widgets" },
   goalTargets: { kind: "goal_targets", label: "Goal targets", noun: "goal target", plural: "goal targets" },
-  conversionGoals: { kind: "conversion_goals", label: "Conversion goals", noun: "conversion goal", plural: "conversion goals" },
 };
 
 export function useFeatureAllowance(feature: CountedFeature, used: number) {

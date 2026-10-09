@@ -1,5 +1,5 @@
 import {
-  demoWorkspaces, demoSites, demoGoals, demoApiKeys, demoApiKeyUsage, demoShare, demoSeoReport,
+  demoWorkspaces, demoSites, demoApiKeys, demoApiKeyUsage, demoShare, demoSeoReport,
   demoSeoHistory, demoSeoShare, demoCrawl, demoSearchTraffic, demoVitals,
   demoCompetitors, demoInstallStatus, demoStats, demoUserFlow, DEMO_WORKSPACE_ID,
 } from "@/features/demo/demoData";
@@ -39,8 +39,7 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   if (/\/funnel$/.test(path)) return { steps: [] };
   if (/\/user-flow$/.test(path)) return demoUserFlow();
 
-  // goals, keys, sharing
-  if (/\/goals$/.test(path)) return demoGoals;
+  // keys, sharing
   if (/\/keys$/.test(path)) return demoApiKeys;
   if (/\/keys\/usage$/.test(path)) {
     const days = Number(params.get("days"));

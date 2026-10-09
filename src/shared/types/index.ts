@@ -730,7 +730,6 @@ export type QuotaSummary = {
   dashboards?: FeatureAllowance;
   embeds?: FeatureAllowance;
   goalTargets?: FeatureAllowance;
-  conversionGoals?: FeatureAllowance;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
   /** Comparison baselines this plan may pick. Every tier keeps "previous". */
@@ -1323,9 +1322,6 @@ export type Stats = {
   // client-side errors the tracker forwarded
   errors: ErrorBucket[];
 
-  // conversion goals scored over this window
-  goals: GoalResult[];
-
   // real-time
   livePages: Bucket[];
 
@@ -1485,23 +1481,6 @@ export type OutboundBucket = Bucket & {
 export type ErrorBucket = Bucket & {
   path: string;
   lastSeen: string;
-};
-
-/** A conversion goal definition. */
-export type Goal = {
-  id: string;
-  name: string;
-  kind: "page" | "event";
-  /** Path (page goal) or event name (event goal) that counts as a conversion. */
-  match: string;
-};
-
-/** A goal scored over a window: how many converted and at what rate. */
-export type GoalResult = Goal & {
-  /** Distinct visitors who converted. */
-  conversions: number;
-  /** Share of window visitors who converted, as a percentage. */
-  conversionRate: number;
 };
 
 /** A custom event fired via `rta.track(name, props)`. */

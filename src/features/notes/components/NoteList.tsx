@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
-import { Button, Skeleton, TextInput } from "@mantine/core";
-import { Plus, Search, SearchX, StickyNote } from "lucide-react";
+import { Button, Skeleton } from "@mantine/core";
+import { Lock, SearchX, StickyNote } from "lucide-react";
 import { NoteListItem } from "@/features/notes/components/NoteListItem";
+import { NoteSearch } from "@/features/notes/components/NoteSearch";
+import { ComposeButton } from "@/features/notes/components/ComposeButton";
 import { PanelControls } from "@/features/notes/components/PanelControls";
+import { groupNotes } from "@/features/notes/noteDates";
 import { matchesNote } from "@/features/notes/noteText";
 import type { Note } from "@/features/notes/types";
 import classes from "@/features/notes/components/Notes.module.css";
@@ -32,76 +35,76 @@ export function NoteList({
 }) {
   const [query, setQuery] = useState("");
 
-  const { pinned, others } = useMemo(() => {
-    const visible = notes.filter((n) => matchesNote(n, query)).sort(byRecent);
-    return { pinned: visible.filter((n) => n.pinned), others: visible.filter((n) => !n.pinned) };
-  }, [notes, query]);
+  const groups = useMemo(
+    () => groupNotes(notes.filter((n) => matchesNote(n, query)).sort(byRecent)),
+    [notes, query],
+  );
 
   const empty = !loading && notes.length === 0;
-  const noMatch = !loading && notes.length > 0 && pinned.length + others.length === 0;
+  const noMatch = !loading && notes.length > 0 && groups.length === 0;
 
   return (
     <>
-      <header className={classes.head} data-drag-handle>
-        <span className={classes.headBadge}><StickyNote size={15} /></span>
-        <span className={classes.headText}>
-          <span className={classes.headTitle}>
-            Notes
-            {notes.length > 0 && <span className={classes.count}>{notes.length}</span>}
-          </span>
-          <span className={classes.headSub}>Private to you · saved as you type</span>
-        </span>
-        <span className={classes.headActions}>
+      <header className={classes.listHead}>
+        <div className={classes.listHeadTop} data-drag-handle>
+          <h2 className={classes.largeTitle}>Notes</h2>
           <PanelControls expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose} />
-        </span>
+        </div>
+        {!empty && <NoteSearch value={query} onChange={setQuery} />}
       </header>
 
       {empty ? (
         <div className={classes.empty}>
-          <span className={classes.emptyIcon}><StickyNote size={22} /></span>
-          <span className={classes.emptyTitle}>No notes yet</span>
+          <span className={classes.emptyIcon}><StickyNote size={24} strokeWidth={1.75} /></span>
+          <span className={classes.emptyTitle}>No Notes</span>
           <span className={classes.emptyText}>
-            Jot down ideas, to-dos and findings while you work. Notes are private to you and saved as you type.
+            Capture ideas, to-dos and findings while you work. Everything saves as you type.
           </span>
-          <Button size="sm" leftSection={<Plus size={15} />} onClick={onCreate} loading={creating}>
-            New note
+          <Button size="sm" radius="xl" onClick={onCreate} loading={creating}>
+            New Note
           </Button>
+          <span className={classes.privacy}><Lock size={11} /> Only you can see your notes</span>
         </div>
       ) : (
-        <>
-          <div className={classes.toolbar}>
-            <TextInput
-              className={classes.search}
-              size="sm"
-              leftSection={<Search size={14} />}
-              placeholder="Search notes"
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-              aria-label="Search notes"
-            />
-            <Button size="sm" leftSection={<Plus size={15} />} onClick={onCreate} loading={creating}>
-              New
-            </Button>
-          </div>
+        <div className={classes.list}>
+          {loading && (
+            <div className={classes.card}>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className={classes.skeletonRow}>
+                  <Skeleton height={12} width="55%" radius="sm" />
+                  <Skeleton height={10} width="80%" radius="sm" mt={8} />
+                </div>
+              ))}
+            </div>
+          )}
 
-          <div className={classes.list}>
-            {loading && [0, 1, 2].map((i) => <Skeleton key={i} className={classes.skeleton} />)}
+          {noMatch && (
+            <div className={classes.empty}>
+              <span className={classes.emptyIcon}><SearchX size={22} strokeWidth={1.75} /></span>
+              <span className={classes.emptyTitle}>No Results</span>
+              <span className={classes.emptyText}>Nothing matches “{query.trim()}”.</span>
+            </div>
+          )}
 
-            {noMatch && (
-              <div className={classes.empty}>
-                <span className={classes.emptyIcon}><SearchX size={20} /></span>
-                <span className={classes.emptyTitle}>No notes match</span>
-                <span className={classes.emptyText}>Try a different word, or clear the search.</span>
+          {groups.map((group) => (
+            <section key={group.label} className={classes.group}>
+              <h3 className={classes.groupLabel}>{group.label}</h3>
+              <div className={classes.card}>
+                {group.notes.map((n) => <NoteListItem key={n.id} note={n} onOpen={onOpen} />)}
               </div>
-            )}
+            </section>
+          ))}
+        </div>
+      )}
 
-            {pinned.length > 0 && <div className={classes.group}>Pinned</div>}
-            {pinned.map((n) => <NoteListItem key={n.id} note={n} onOpen={onOpen} />)}
-
-            {pinned.length > 0 && others.length > 0 && <div className={classes.group}>Others</div>}
-            {others.map((n) => <NoteListItem key={n.id} note={n} onOpen={onOpen} />)}
-          </div>
-        </>
+      {!empty && (
+        <footer className={classes.bar}>
+          <span className={classes.barSpacer} />
+          <span className={classes.barCount}>
+            {loading ? "" : `${notes.length} ${notes.length === 1 ? "Note" : "Notes"}`}
+          </span>
+          <ComposeButton onClick={onCreate} loading={creating} />
+        </footer>
       )}
     </>
   );

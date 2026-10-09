@@ -38,19 +38,19 @@ export function demoTargets(): TargetProgress[] {
   return [
     {
       id: "demo-target-visitors", name: "10K visitors this month", metric: "visitors", target: 10_000,
-      period: "month", siteId: "", goalId: null, direction: "above", ...w,
+      period: "month", siteId: "", direction: "above", ...w,
       status: "ok", reason: null, current: visitors, progress: Math.min(1, visitors / 10_000),
       achieved: visitors >= 10_000, projected: Math.round(visitors / Math.max(w.elapsed, 0.05)),
     },
     {
       id: "demo-target-forms", name: "500 form submissions this month", metric: "formSubmissions", target: 500,
-      period: "month", siteId: "", goalId: null, direction: "above", ...w,
+      period: "month", siteId: "", direction: "above", ...w,
       status: "ok", reason: null, current: forms, progress: Math.min(1, forms / 500),
       achieved: forms >= 500, projected: Math.round(forms / Math.max(w.elapsed, 0.05)),
     },
     {
       id: "demo-target-position", name: "Average position under 5", metric: "searchPosition", target: 5,
-      period: "month", siteId: "", goalId: null, direction: "below", ...w,
+      period: "month", siteId: "", direction: "below", ...w,
       status: "ok", reason: null, current: 6.2, windowLabel: "Last 28 days", progress: 5 / 6.2,
       achieved: false, projected: null,
     },

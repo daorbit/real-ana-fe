@@ -1,12 +1,12 @@
-import { ActionIcon, Tooltip } from "@mantine/core";
+import { UnstyledButton } from "@mantine/core";
 import { ChevronLeft } from "lucide-react";
 import { confirmDelete, notify } from "@/shared/lib/notify";
-import { shortDate } from "@/shared/lib";
 import { useNoteDraft } from "@/features/notes/hooks/useNoteDraft";
 import { useDeleteNoteMutation, useUpdateNoteMutation } from "@/features/notes/api";
 import { NoteMenu } from "@/features/notes/components/NoteMenu";
 import { NoteFooter } from "@/features/notes/components/NoteFooter";
 import { PanelControls } from "@/features/notes/components/PanelControls";
+import { fullStamp } from "@/features/notes/noteDates";
 import { downloadNote, noteAsText, wordCount } from "@/features/notes/noteText";
 import type { Note } from "@/features/notes/types";
 import classes from "@/features/notes/components/Notes.module.css";
@@ -62,21 +62,11 @@ export function NoteEditor({
 
   return (
     <>
-      <header className={`${classes.head} ${classes.editorHead} ${classes.tone}`} data-color={note.color} data-drag-handle>
-        <Tooltip label="All notes" withArrow>
-          <ActionIcon variant="subtle" color="gray" radius="md" onClick={onBack} aria-label="Back to all notes">
-            <ChevronLeft size={17} />
-          </ActionIcon>
-        </Tooltip>
-        <input
-          className={classes.titleInput}
-          value={draft.title}
-          onChange={(e) => draft.setTitle(e.currentTarget.value)}
-          onBlur={draft.flush}
-          placeholder="Untitled note"
-          maxLength={120}
-          aria-label="Note title"
-        />
+      <header className={classes.editorHead} data-drag-handle>
+        <UnstyledButton className={classes.back} onClick={onBack} aria-label="Back to all notes">
+          <ChevronLeft size={20} strokeWidth={2.25} />
+          Notes
+        </UnstyledButton>
         <span className={classes.headActions}>
           <NoteMenu
             color={note.color}
@@ -89,17 +79,29 @@ export function NoteEditor({
         </span>
       </header>
 
-      <div className={classes.editorBody}>
-        <span className={classes.editorMeta}>
-          Created {shortDate(note.createdAt)}
-          {note.pinned && <span className={classes.metaChip}>Pinned</span>}
-        </span>
+      <div className={`${classes.editorBody} ${classes.tone}`} data-color={note.color}>
+        <span className={classes.stamp}>{fullStamp(note.updatedAt)}</span>
+        <input
+          className={classes.titleInput}
+          value={draft.title}
+          onChange={(e) => draft.setTitle(e.currentTarget.value)}
+          onBlur={draft.flush}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.parentElement?.querySelector("textarea")?.focus();
+            }
+          }}
+          placeholder="Title"
+          maxLength={120}
+          aria-label="Note title"
+        />
         <textarea
           className={classes.textarea}
           value={draft.body}
           onChange={(e) => draft.setBody(e.currentTarget.value)}
           onBlur={draft.flush}
-          placeholder="Start typing…"
+          placeholder="Start writing…"
           autoFocus={!note.body}
           aria-label="Note"
         />

@@ -7,7 +7,7 @@ import { reportLoadFailure } from "@/shared/lib/loadFailure";
 import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession";
 import type {
   AdminUserPage, AdminUserBilling, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
-  FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, Goal, FlowNode, FlowEdge,
+  FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout, Branding, BrandingInput, NavPrefs,
   MediaAsset, MediaListResult, MediaKind, MediaUploadInput,
@@ -124,7 +124,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Goal", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -1394,32 +1394,6 @@ export const api = createApi({
       }),
     }),
 
-    getGoals: build.query<Goal[], string>({
-      query: (workspaceId) => `/api/workspaces/${workspaceId}/goals`,
-      providesTags: ["Goal"],
-    }),
-
-    createGoal: build.mutation<
-      Goal,
-      { workspaceId: string; name: string; kind: "page" | "event"; match: string }
-    >({
-      query: ({ workspaceId, ...body }) => ({
-        url: `/api/workspaces/${workspaceId}/goals`,
-        method: "POST",
-        body,
-      }),
-      // A new goal changes the conversion numbers the stats endpoint reports.
-      invalidatesTags: ["Goal", "Stats"],
-    }),
-
-    deleteGoal: build.mutation<void, { workspaceId: string; goalId: string }>({
-      query: ({ workspaceId, goalId }) => ({
-        url: `/api/workspaces/${workspaceId}/goals/${goalId}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Goal", "Stats"],
-    }),
-
     getApiKeys: build.query<ApiKey[], string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/keys`,
       providesTags: ["ApiKey"],
@@ -2573,9 +2547,6 @@ export const {
   useGetEmailRecipientsQuery,
   useSendAdminEmailMutation,
   useSendTestEmailMutation,
-  useGetGoalsQuery,
-  useCreateGoalMutation,
-  useDeleteGoalMutation,
   useGetApiKeysQuery,
   useGetApiKeyUsageQuery,
   useCreateApiKeyMutation,

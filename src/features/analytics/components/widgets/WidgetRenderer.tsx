@@ -12,7 +12,7 @@ import { TrafficCard } from "@/features/analytics/components/widgets/TrafficCard
 import { LivePagesCard } from "@/features/analytics/components/widgets/LivePagesCard";
 import { METRIC_TONE, listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
 import {
-  GoalsPanel, SearchWidget, SeoScoreCard, TargetsWidget, WorldMap,
+  SearchWidget, SeoScoreCard, TargetsWidget, WorldMap,
 } from "@/features/analytics/components/widgets/lazyWidgets";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
@@ -94,13 +94,6 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
     );
   }
 
-  if (id === "goals") {
-    return (
-      <Deferred>
-        <GoalsPanel workspaceId={workspaceId} goals={stats?.goals ?? []} loading={!stats} />
-      </Deferred>
-    );
-  }
   if (id === "targets") {
     return (
       <Deferred>

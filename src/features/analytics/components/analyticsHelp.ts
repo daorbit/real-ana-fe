@@ -18,7 +18,7 @@ const SPEC = [
   { id: "audience", icon: Users, items: ["Visitors", "Pageviews", "Sessions", "Live"] },
   { id: "behavior", icon: ArrowDownWideNarrow, items: ["Bounce", "AvgSession", "TimePage", "Pages", "Engagement"] },
   { id: "acquisition", icon: Tag, items: ["Channels", "Utm", "Geo", "Tech"] },
-  { id: "conversion", icon: Target, items: ["Goals", "Events", "Funnel", "Retention", "Errors"] },
+  { id: "conversion", icon: Target, items: ["Events", "Funnel", "Retention", "Errors"] },
   { id: "comparing", icon: GitCompareArrows, items: ["Baseline", "Yoy", "Custom", "Breakdowns"] },
 ] as const;
 

@@ -2,7 +2,6 @@ export type TargetMetric =
   | "visitors"
   | "pageviews"
   | "sessions"
-  | "conversions"
   | "formSubmissions"
   | "searchPosition";
 
@@ -14,7 +13,6 @@ export type TargetInput = {
   target: number;
   period: TargetPeriod;
   siteId?: string;
-  goalId?: string | null;
 };
 
 export type TargetProgress = {
@@ -24,7 +22,6 @@ export type TargetProgress = {
   target: number;
   period: TargetPeriod;
   siteId: string;
-  goalId: string | null;
   direction: "above" | "below";
   periodKey: string;
   periodLabel: string;

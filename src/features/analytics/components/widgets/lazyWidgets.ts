@@ -8,10 +8,6 @@ export const SearchWidget = lazy(() =>
   import("@/features/searchConsole/widgets/SearchWidget").then((m) => ({ default: m.SearchWidget })),
 );
 
-export const GoalsPanel = lazy(() =>
-  import("@/features/analytics/components/GoalsPanel").then((m) => ({ default: m.GoalsPanel })),
-);
-
 export const TargetsWidget = lazy(() =>
   import("@/features/goals/components/TargetsWidget").then((m) => ({ default: m.TargetsWidget })),
 );

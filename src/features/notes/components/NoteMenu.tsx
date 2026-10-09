@@ -1,4 +1,4 @@
-import { ActionIcon, Menu, Tooltip, UnstyledButton } from "@mantine/core";
+import { Menu, Tooltip, UnstyledButton } from "@mantine/core";
 import { MoreHorizontal, Pin, PinOff, Trash2 } from "lucide-react";
 import { NOTE_COLORS } from "@/features/notes/types";
 import type { NoteColor } from "@/features/notes/types";
@@ -18,11 +18,11 @@ export function NoteMenu({
   onDelete: () => void;
 }) {
   return (
-    <Menu position="bottom-end" withinPortal zIndex={320} width={210}>
+    <Menu position="bottom-end" withinPortal zIndex={320} width={220} radius="md" classNames={{ dropdown: classes.menu }}>
       <Menu.Target>
-        <ActionIcon variant="subtle" color="gray" radius="md" aria-label="Note options">
-          <MoreHorizontal size={16} />
-        </ActionIcon>
+        <UnstyledButton className={classes.ctrl} aria-label="Note options">
+          <MoreHorizontal size={15} />
+        </UnstyledButton>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>Colour</Menu.Label>
