@@ -30,6 +30,17 @@ export function countryName(code: string): string | null {
   return NAMES[code.toUpperCase()] ?? null;
 }
 
+let regionNames: Intl.DisplayNames | null = null;
+
+export function countryShortName(code: string): string {
+  try {
+    regionNames ??= new Intl.DisplayNames(["en"], { type: "region" });
+    return regionNames.of(code.toUpperCase()) ?? countryLabel(code);
+  } catch {
+    return countryLabel(code);
+  }
+}
+
 /** Turn an ISO-2 code into its flag emoji via regional indicator symbols. */
 export function countryFlag(code: string): string {
   if (!code || code.length !== 2 || code === "unknown") return "🌐";

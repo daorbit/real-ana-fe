@@ -1589,13 +1589,35 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-.world-map { display: block; width: 100%; height: auto; }
-.world-map .country { transition: fill-opacity 0.12s ease, stroke 0.12s ease; }
-.world-map .country.has-data { cursor: pointer; }
-.world-map .country.has-data:hover { fill-opacity: 1; stroke: var(--text); stroke-width: 0.8; }
+.world-map-frame { position: relative; width: 100%; overflow: hidden; border-radius: var(--mantine-radius-md); }
+.world-map { display: block; width: 100%; height: auto; overflow: hidden; user-select: none; }
+.world-map.zoomed { cursor: grab; touch-action: none; }
+.world-map.dragging { cursor: grabbing; }
+.world-map-zoom { position: absolute; right: 8px; bottom: 8px; }
 .legend-swatch {
   width: 16px; height: 8px; border-radius: 2px; display: inline-block;
 }
+.world-map .country {
+  stroke: color-mix(in srgb, var(--border) 80%, transparent);
+  stroke-width: 0.7;
+  vector-effect: non-scaling-stroke;
+  transition: fill-opacity 0.12s ease, stroke 0.12s ease;
+}
+.world-map .country.has-data { cursor: pointer; }
+.world-map.zoomed .country.has-data { cursor: inherit; }
+.world-map .country.has-data:hover { fill-opacity: 1; stroke: var(--text); stroke-width: 1.4; }
+.world-map .country.spotlit { stroke: color-mix(in srgb, #fff 30%, transparent); stroke-width: 0.8; }
+.world-map .country.spotlit:hover { fill-opacity: 0.9; stroke: #fff; }
+.map-callout { pointer-events: none; }
+.map-callout-line { fill: none; stroke-width: 1; stroke-opacity: 0.9; vector-effect: non-scaling-stroke; }
+.map-callout-halo { fill-opacity: 0.35; }
+.map-callout-anchor { fill: #fff; }
+.map-callout-box {
+  fill: color-mix(in srgb, var(--surface) 92%, transparent);
+  stroke-width: 1;
+}
+.map-callout-name { fill: var(--text-2); font-size: 11px; font-weight: 500; }
+.map-callout-value { fill: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
 
 .map-view-switch .mantine-SegmentedControl-label {
   display: flex;
