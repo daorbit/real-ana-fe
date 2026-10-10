@@ -579,20 +579,15 @@ export function loadAndApplyTheme(): ThemePrefs {
 }
 
 let transitionTimer: ReturnType<typeof setTimeout> | null = null;
-let pulseTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function withThemeTransition(apply: () => void) {
   const root = document.documentElement;
-  root.classList.add("theme-transitioning", "theme-pulse");
+  root.classList.add("theme-transitioning");
   apply();
   if (transitionTimer) clearTimeout(transitionTimer);
   transitionTimer = setTimeout(() => {
     root.classList.remove("theme-transitioning");
   }, 360);
-  if (pulseTimer) clearTimeout(pulseTimer);
-  pulseTimer = setTimeout(() => {
-    root.classList.remove("theme-pulse");
-  }, 700);
 }
 
 export type { ThemePrefs };
