@@ -16,8 +16,9 @@ export function buildBoard(competitors: SeoCompetitorComparison[], myScore: numb
   const scores = [myScore, ...readable.map((c) => c.snapshot.score)];
   const rankOf = (score: number) => scores.filter((s) => s > score).length + 1;
 
+  const you: BoardRow = { kind: "you", rank: rankOf(myScore), score: myScore };
   const ranked: BoardRow[] = [
-    { kind: "you", rank: rankOf(myScore), score: myScore },
+    you,
     ...readable.map((c): BoardRow => ({ kind: "rival", rank: rankOf(c.snapshot.score), comparison: c })),
   ].sort((a, b) => rowScore(b) - rowScore(a) || Number(b.kind === "you") - Number(a.kind === "you"));
 
