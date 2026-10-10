@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, TrendingUp,
-  LayoutDashboard, Flag, Settings, Gift,
+  LayoutDashboard, Flag, Settings, Gift, ScrollText,
 } from "lucide-react";
 import { LeadMagnetIcon } from "./icons";
 
@@ -61,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
       { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
+      { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText },
       { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette },
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },

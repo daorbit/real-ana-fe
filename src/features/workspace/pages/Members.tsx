@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Button, Group } from "@mantine/core";
 import { motion } from "framer-motion";
-import { UserPlus, Users } from "lucide-react";
+import { ScrollText, UserPlus, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useGetMembersQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -62,6 +63,17 @@ export default function Members() {
         docsPath={DOCS_SLUGS.workspaceMembers}
         actions={
           <Group gap="xs" wrap="nowrap">
+            {perms.canAdmin && (
+              <Button
+                component={Link}
+                to="/app/audit-log"
+                variant="default"
+                radius="md"
+                leftSection={<ScrollText size={15} />}
+              >
+                Audit log
+              </Button>
+            )}
             {canAdmin && (
               <Button radius="md" leftSection={<UserPlus size={15} />} onClick={() => setInviteOpen(true)}>
                 Invite someone

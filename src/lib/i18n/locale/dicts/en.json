@@ -41,6 +41,7 @@
     "viewAsUser": "Impersonate",
     "demoUsage": "Demo usage",
     "members": "Members",
+    "auditLog": "Audit log",
     "billing": "Billing",
     "help": "Help & support",
     "adminBilling": "Plans & addons",

@@ -1139,6 +1139,49 @@ export type MembersResponse = {
   invites: WorkspaceInvite[];
 };
 
+export type AuditCategory =
+  | "account"
+  | "members"
+  | "workspace"
+  | "sites"
+  | "analytics"
+  | "seo"
+  | "developers"
+  | "forms";
+
+export type AuditEntry = {
+  id: string;
+  action: string;
+  category: AuditCategory;
+  createdAt: string;
+  actor: { id: string; name: string; email: string; avatarUrl: string; deleted: boolean } | null;
+  viaSupport: boolean;
+  target: { kind: string; id: string; label: string };
+  meta: Record<string, string | number | boolean>;
+  source: "dashboard" | "forms";
+  ip: string;
+  location: string;
+  browser: string;
+  os: string;
+};
+
+export type AuditPage = {
+  items: AuditEntry[];
+  nextCursor: string | null;
+};
+
+export type AuditSummary = {
+  total: number;
+  people: number;
+  lastAt: string | null;
+  byCategory: Partial<Record<AuditCategory, number>>;
+};
+
+export type WorkspaceAuditPage = AuditPage & {
+  summary: AuditSummary | null;
+  retention: { days: number; plan: string; upgradable: boolean };
+};
+
 /** What an invite link is for, readable before signing in. */
 export type InvitePreview = {
   workspaceName: string;

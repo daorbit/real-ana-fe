@@ -4,6 +4,8 @@ import {
   demoCompetitors, demoInstallStatus, demoStats, demoUserFlow, DEMO_WORKSPACE_ID,
 } from "@/features/demo/demoData";
 import { demoDashboards, demoTargets } from "@/features/demo/demoDashboards";
+import { demoAccountActivity, demoAuditPage } from "@/features/demo/demoAudit";
+import type { AuditCategory } from "@/shared/types";
 
 /**
  * Answer a dashboard request from the demo fixtures.
@@ -67,6 +69,9 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   }
   if (/\/targets$/.test(path)) return demoTargets();
   if (/\/embeds$/.test(path)) return [];
+
+  if (/\/audit$/.test(path)) return demoAuditPage((params.get("category") as AuditCategory | null) ?? null);
+  if (path === "/api/auth/activity") return demoAccountActivity();
 
   // admin
   // The demo account is a plain user, so these are never reached in practice.

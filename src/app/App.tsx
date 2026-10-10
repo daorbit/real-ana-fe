@@ -43,6 +43,7 @@ const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"))
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
 const Developers = lazy(() => import("@/features/support/pages/Developers"));
 const Members = lazy(() => import("@/features/workspace/pages/Members"));
+const AuditLog = lazy(() => import("@/features/audit/pages/AuditLog"));
 const Branding = lazy(() => import("@/features/branding/pages/Branding"));
 const MediaLibrary = lazy(() => import("@/features/media/pages/MediaLibrary"));
 const AcceptInvite = lazy(() => import("@/features/workspace/pages/AcceptInvite"));
@@ -277,6 +278,7 @@ export default function App() {
                 <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/workspaces" element={<Workspaces />} />
                 <Route path="/app/members" element={<Members />} />
+                <Route path="/app/audit-log" element={<AuditLog />} />
                 <Route path="/app/orbit" element={<Orbit />} />
                 <Route path="/app/branding" element={<Branding />} />
                 <Route path="/app/media" element={<MediaLibrary />} />

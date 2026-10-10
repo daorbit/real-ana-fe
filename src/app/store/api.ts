@@ -27,6 +27,7 @@ import type {
   Coupon, CouponCheckResult, CheckoutPreview, Invoice, QuotaSummary, UsageHistory,
   MyReferrals, ReferralSettings, AdminReferralPage, ReferralOverview, TopReferrer,
   MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
+  AuditCategory, AuditPage, WorkspaceAuditPage,
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
   JourneyUser, JourneyEvent,
@@ -124,7 +125,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -1946,6 +1947,49 @@ export const api = createApi({
       invalidatesTags: ["Workspace"],
     }),
 
+    getWorkspaceAudit: build.query<
+      WorkspaceAuditPage,
+      { workspaceId: string; category?: AuditCategory | null; actor?: string | null; cursor?: string | null }
+    >({
+      query: ({ workspaceId, category, actor, cursor }) => {
+        const params = new URLSearchParams();
+        if (category) params.set("category", category);
+        if (actor) params.set("actor", actor);
+        if (cursor) params.set("cursor", cursor);
+        const qs = params.toString();
+        return `/api/workspaces/${workspaceId}/audit${qs ? `?${qs}` : ""}`;
+      },
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        `${endpointName}-${queryArgs.workspaceId}-${queryArgs.category ?? "all"}-${queryArgs.actor ?? "anyone"}`,
+      merge: (current, incoming, { arg }) => {
+        if (!arg.cursor) return incoming;
+        const seen = new Set(current.items.map((i) => i.id));
+        current.items.push(...incoming.items.filter((i) => !seen.has(i.id)));
+        current.nextCursor = incoming.nextCursor;
+        current.retention = incoming.retention;
+      },
+      forceRefetch: ({ currentArg, previousArg }) => currentArg?.cursor !== previousArg?.cursor,
+      providesTags: (_r, _e, { workspaceId }) => [{ type: "Audit", id: workspaceId }],
+    }),
+
+    getAccountActivity: build.query<AuditPage, { cursor?: string | null } | void>({
+      query: (args) => {
+        const cursor = args && "cursor" in args ? args.cursor : null;
+        return `/api/auth/activity${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`;
+      },
+      serializeQueryArgs: ({ endpointName }) => endpointName,
+      merge: (current, incoming, { arg }) => {
+        if (!arg || !("cursor" in arg) || !arg.cursor) return incoming;
+        const seen = new Set(current.items.map((i) => i.id));
+        current.items.push(...incoming.items.filter((i) => !seen.has(i.id)));
+        current.nextCursor = incoming.nextCursor;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        (currentArg as { cursor?: string } | undefined)?.cursor !==
+        (previousArg as { cursor?: string } | undefined)?.cursor,
+      providesTags: ["Audit"],
+    }),
+
 
     getPlans: build.query<Plan[], { currency: Currency; workspaceId?: string | null }>({
       query: ({ currency, workspaceId }) =>
@@ -2598,6 +2642,8 @@ export const {
   useRemoveMemberMutation,
   useGetInviteQuery,
   useAcceptInviteMutation,
+  useGetWorkspaceAuditQuery,
+  useGetAccountActivityQuery,
   useGetPlansQuery,
   useGetAddonPacksQuery,
   useGetCheckoutPreviewQuery,
