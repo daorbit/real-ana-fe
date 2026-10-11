@@ -23,6 +23,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { useIsPlatformAdmin } from "@/features/auth/context";
 import { pickOrbitSuggestions } from "@/features/orbit/orbitSuggestions";
 import { ORBIT_EXTENSION_URL, canInstallOrbitExtension } from "@/features/orbit/orbitExtension";
+import { copyRichText } from "@/features/orbit/richCopy";
 import type { OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
@@ -39,6 +40,12 @@ async function copyText(text: string, successMessage = "Copied to clipboard") {
   } catch {
     notify.error("Couldn't copy that.");
   }
+}
+
+async function copyAnswer(markdown: string) {
+  const ok = await copyRichText(markdown, toPlainText(markdown));
+  if (ok) notify.success("Copied to clipboard");
+  else notify.error("Couldn't copy that.");
 }
 
 async function copyDigestAsReport(digest: unknown) {
@@ -215,7 +222,7 @@ function TurnActions({
           size="sm"
           radius="xl"
           onClick={() =>
-            message.imageUrl ? copyImage(message.imageUrl) : copyText(toPlainText(message.content))
+            message.imageUrl ? copyImage(message.imageUrl) : copyAnswer(message.content)
           }
           aria-label="Copy"
         >
