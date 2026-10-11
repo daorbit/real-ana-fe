@@ -5,7 +5,7 @@ import {
 } from "@mantine/core";
 import {
   AlertTriangle, ArrowUp, ClipboardList, Copy, Download, FileText, FolderPlus,
-  Globe, History, Mic, Palette, Pencil, Paperclip, RefreshCw, RotateCcw, Share2, Square,
+  Globe, History, Mic, Palette, Pencil, Paperclip, Puzzle, RefreshCw, RotateCcw, Share2, Square,
   Volume2, VolumeX, X,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -22,6 +22,7 @@ import { useOrbit } from "@/features/orbit/components/OrbitProvider";
 import { useWorkspace } from "@/features/workspace/context";
 import { useIsPlatformAdmin } from "@/features/auth/context";
 import { pickOrbitSuggestions } from "@/features/orbit/orbitSuggestions";
+import { ORBIT_EXTENSION_URL, canInstallOrbitExtension } from "@/features/orbit/orbitExtension";
 import type { OrbitMessage } from "@/features/orbit/useOrbitChat";
 import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
@@ -1080,6 +1081,22 @@ export default function Orbit() {
                 aria-label="Start over"
               >
                 <RotateCcw size={15} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+          {canInstallOrbitExtension() && (
+            <Tooltip label="Get Orbit for Chrome" withArrow>
+              <ActionIcon
+                component="a"
+                href={ORBIT_EXTENSION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="subtle"
+                color="gray"
+                size="md"
+                aria-label="Get Orbit for Chrome"
+              >
+                <Puzzle size={16} />
               </ActionIcon>
             </Tooltip>
           )}

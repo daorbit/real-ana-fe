@@ -11,6 +11,7 @@ import { CommandPalette } from "@/shared/ui/CommandPalette";
 import { QuotaNudge } from "@/shared/ui/QuotaNudge";
 import { PlanExpiryNotice } from "@/shared/ui/PlanExpiryNotice";
 import { PushPrompt } from "@/shared/ui/PushPrompt";
+import { OrbitExtensionPrompt } from "@/features/orbit/components/OrbitExtensionPrompt";
 import { OfflineBar } from "@/shared/ui/OfflineBar";
 import { FetchProgress } from "@/shared/ui/FetchProgress";
 import { useDemo } from "@/features/demo/context";
@@ -101,6 +102,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
       <FetchProgress />
       <CommandPalette />
       <PushPrompt />
+      <OrbitExtensionPrompt />
       {wsSwitch.active && active && (
         <SwitchOverlay
           label={active.name}
