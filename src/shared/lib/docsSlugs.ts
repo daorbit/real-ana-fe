@@ -4,6 +4,8 @@ export const DOCS_BASE_URL = `${SITE_URL}/docs`;
 
 export const CONTACT_URL = `${SITE_URL}/contact`;
 
+export const DEMO_CALL_URL = "https://forms.daorbit.in/form/6accc4af7ffcc5038e50d43f/view";
+
 export const LEGAL_URLS = {
   terms: `${SITE_URL}/terms`,
   privacy: `${SITE_URL}/privacy`,

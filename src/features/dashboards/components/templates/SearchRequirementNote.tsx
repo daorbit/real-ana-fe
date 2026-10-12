@@ -1,5 +1,5 @@
 import { skipToken } from "@reduxjs/toolkit/query";
-import { CircleCheck, PlugZap, Unplug } from "lucide-react";
+import { CircleCheck, Link2, Link2Off } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import { useGetSearchConsoleStatusQuery } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
@@ -11,7 +11,7 @@ export function SearchRequirementNote({ count }: { count: number }) {
   const widgets = `${count} Google Search widget${count === 1 ? "" : "s"}`;
 
   let tone: "ok" | "warn" | "info" = "info";
-  let Icon = PlugZap;
+  let Icon = Link2;
   let text = `Includes ${widgets}. Connect Google Search after creating it — each widget shows you how.`;
 
   if (status && !status.configured) {
@@ -22,7 +22,7 @@ export function SearchRequirementNote({ count }: { count: number }) {
     text = `Includes ${widgets}. Google Search is connected${status.connection.googleEmail ? ` as ${status.connection.googleEmail}` : ""}, so they fill in straight away.`;
   } else if (status?.connection) {
     tone = "warn";
-    Icon = Unplug;
+    Icon = Link2Off;
     text = `Includes ${widgets}. Your Google connection needs reconnecting — the dashboard will prompt you.`;
   }
 

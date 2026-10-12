@@ -1,5 +1,5 @@
 import { ActionIcon, Menu, Select, Text, Tooltip } from "@mantine/core";
-import { ExternalLink, Link2Off, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
+import { ExternalLink, Link2Off, LogOut, MoreHorizontal, RefreshCw } from "lucide-react";
 import { useRefreshSearchPerformanceMutation } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { timeAgo } from "@/shared/lib";
@@ -138,7 +138,7 @@ export function SearchConsoleToolbar({
             {link.onDisconnect && (
               <>
                 <Menu.Divider />
-                <Menu.Item color="red" leftSection={<Unplug size={14} />} onClick={link.onDisconnect}>
+                <Menu.Item color="red" leftSection={<LogOut size={14} />} onClick={link.onDisconnect}>
                   Disconnect Search visibility
                 </Menu.Item>
               </>

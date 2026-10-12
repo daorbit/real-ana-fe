@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@mantine/core";
-import { Globe, Link2Off, Lock, PlugZap, SearchX, TriangleAlert, Unplug } from "lucide-react";
+import { Globe, Link2Off, Lock, Link2, SearchX, TriangleAlert } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import { usePermissions } from "@/features/workspace/context";
@@ -68,14 +68,14 @@ export function SearchWidgetNotice({
     notice = { icon: SearchX, title: emptyTitle ?? "No search data yet", text: emptyText ?? "New Google properties take a few days to fill in." };
   } else if (source?.kind === "connect") {
     notice = {
-      icon: PlugZap,
+      icon: Link2,
       title: "Connect Google Search",
       text: canAdmin ? "See clicks, rankings and queries from Google right here." : askAdmin,
       action: connectAction,
     };
   } else if (source?.kind === "reconnect") {
     notice = {
-      icon: Unplug,
+      icon: Link2Off,
       title: "Google connection lost",
       text: canAdmin ? source.message || "Reconnect to keep these numbers updating." : askAdmin,
       action: reconnectAction,

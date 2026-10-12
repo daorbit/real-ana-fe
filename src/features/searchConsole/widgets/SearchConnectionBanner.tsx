@@ -1,5 +1,5 @@
 import { Alert, Button, Group, Text } from "@mantine/core";
-import { PlugZap, Unplug } from "lucide-react";
+import { Link2, Link2Off } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import { usePermissions } from "@/features/workspace/context";
 import { useSearchWidgetsConnect } from "@/features/searchConsole/widgets/searchWidgetsContext";
@@ -25,7 +25,7 @@ export function SearchConnectionBanner(input: SearchSourceInput) {
       variant="light"
       radius="lg"
       mb="lg"
-      icon={lost ? <Unplug size={17} /> : <PlugZap size={17} />}
+      icon={lost ? <Link2Off size={17} /> : <Link2 size={17} />}
       title={title}
     >
       <Group justify="space-between" gap="sm" wrap="wrap">

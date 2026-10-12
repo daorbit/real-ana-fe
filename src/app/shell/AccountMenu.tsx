@@ -2,18 +2,20 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Menu, UnstyledButton } from "@mantine/core";
 import {
-  BookOpen, ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, PanelLeft, Scale, Settings, ShieldCheck, StickyNote,
+  ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Scale, Settings, ShieldCheck, StickyNote,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
-import { CONTACT_URL, DOCS_BASE_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
+import { CONTACT_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
 import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import type { ThemeMode } from "@/shared/lib/theme";
 import { ADMIN_ITEMS } from "./navItems";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { RequestFeatureModal } from "./RequestFeatureModal";
+import { DemoCallBanner } from "./DemoCallBanner";
+import { DemoCallModal } from "./DemoCallModal";
 import classes from "./Rail.module.css";
 import { MenuVersion } from "./MenuVersion";
 
@@ -48,6 +50,7 @@ export function AccountMenu({
 }) {
   const { t } = useTranslation();
   const [featureOpen, setFeatureOpen] = useState(false);
+  const [demoCallOpen, setDemoCallOpen] = useState(false);
   const notes = useNotes();
   const [opened, setOpened] = useState(false);
 
@@ -76,6 +79,7 @@ export function AccountMenu({
   return (
     <>
       <RequestFeatureModal opened={featureOpen} onClose={() => setFeatureOpen(false)} />
+      <DemoCallModal opened={demoCallOpen} onClose={() => setDemoCallOpen(false)} />
       <Menu
         opened={opened}
         onChange={setOpened}
@@ -99,6 +103,13 @@ export function AccountMenu({
             </span>
           </div>
 
+          <DemoCallBanner
+            onOpen={() => {
+              setOpened(false);
+              setDemoCallOpen(true);
+            }}
+          />
+
           <div className={classes.menuSection}>{t("settings.appearance", "Appearance")}</div>
           <div className={classes.themeWrap}>
             <ThemeSwitch mode={mode} onChange={onMode} />
@@ -106,10 +117,6 @@ export function AccountMenu({
 
           <Menu.Item component={Link} to={settingsPath("profile")} leftSection={<Settings size={15} />}>
             {t("nav.accountSettings", "Account settings")}
-          </Menu.Item>
-
-          <Menu.Item component={Link} to={settingsPath("sidebar")} leftSection={<PanelLeft size={15} />}>
-            {t("nav.customizeSidebar", "Customize sidebar")}
           </Menu.Item>
 
           <Menu.Item leftSection={<StickyNote size={15} />} onClick={() => notes.open()}>
@@ -125,17 +132,6 @@ export function AccountMenu({
             </Menu.Sub.Dropdown>
           </Menu.Sub>
 
-          {demoAvailable && (
-            <Menu.Item
-              leftSection={<FlaskConical size={15} />}
-              rightSection={demo ? <Badge size="xs" variant="light" color="violet" tt="none">on</Badge> : null}
-              onClick={() => onToggleDemo(!demo)}
-              closeMenuOnClick={false}
-            >
-              {t("nav.demoData", "Demo data")}
-            </Menu.Item>
-          )}
-
           {isAdmin && (
             <Menu.Sub>
               <Menu.Sub.Target>
@@ -147,6 +143,16 @@ export function AccountMenu({
                     {t(item.labelKey, item.label)}
                   </Menu.Item>
                 ))}
+                {demoAvailable && (
+                  <Menu.Item
+                    leftSection={<FlaskConical size={15} />}
+                    rightSection={demo ? <Badge size="xs" variant="light" color="violet" tt="none">on</Badge> : null}
+                    onClick={() => onToggleDemo(!demo)}
+                    closeMenuOnClick={false}
+                  >
+                    {t("nav.demoData", "Demo data")}
+                  </Menu.Item>
+                )}
               </Menu.Sub.Dropdown>
             </Menu.Sub>
           )}
@@ -154,9 +160,6 @@ export function AccountMenu({
           <Menu.Divider />
           <div className={classes.menuSection}>{t("nav.help", "Help")}</div>
 
-          <Menu.Item component="a" href={DOCS_BASE_URL} target="_blank" rel="noreferrer" leftSection={<BookOpen size={15} />}>
-            {t("nav.documentation", "Documentation")}
-          </Menu.Item>
           <Menu.Item leftSection={<Lightbulb size={15} />} onClick={() => setFeatureOpen(true)}>
             {t("nav.requestFeature", "Request a feature")}
           </Menu.Item>
