@@ -1,37 +1,21 @@
-import { useEffect, useState } from "react";
 import { Button, Center, Group, Loader, NumberInput, SegmentedControl, Stack, Switch } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { Save } from "lucide-react";
-import { useGetAdminReferralSettingsQuery, useSaveAdminReferralSettingsMutation } from "@/app/store";
 import { Field, Section } from "@/shared/ui/Page";
-import { notify, errMessage } from "@/shared/lib/notify";
-import type { ReferralQualifyOn, ReferralSettings } from "@/shared/types";
+import type { ReferralQualifyOn } from "@/shared/types";
+import { useReferralSettingsForm } from "../hooks/useReferralSettingsForm";
+import { ReferralSettingsMobile } from "./mobile/ReferralSettingsMobile";
 
 export function ReferralSettingsPanel() {
-  const { data, isLoading } = useGetAdminReferralSettingsQuery();
-  const [save, { isLoading: saving }] = useSaveAdminReferralSettingsMutation();
-  const [draft, setDraft] = useState<ReferralSettings | null>(null);
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
+  const form = useReferralSettingsForm();
+  const { draft, loading, saving, dirty, set, submit } = form;
 
-  useEffect(() => {
-    if (data) setDraft(data);
-  }, [data]);
-
-  if (isLoading || !draft) {
+  if (loading || !draft) {
     return <Center py="xl"><Loader size="sm" /></Center>;
   }
 
-  const set = <K extends keyof ReferralSettings>(key: K, value: ReferralSettings[K]) =>
-    setDraft((prev) => (prev ? { ...prev, [key]: value } : prev));
-
-  const dirty = JSON.stringify(draft) !== JSON.stringify(data);
-
-  const submit = async () => {
-    try {
-      await save(draft).unwrap();
-      notify.success("Referral program updated.", "Saved");
-    } catch (e) {
-      notify.error(errMessage(e, "Could not save the referral settings."));
-    }
-  };
+  if (mobile) return <ReferralSettingsMobile form={form} draft={draft} />;
 
   return (
     <Stack gap="xl">

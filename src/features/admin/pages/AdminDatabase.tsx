@@ -10,6 +10,7 @@ import {
   type WorkersAiTrendCardHandle,
 } from "@/features/admin/components/database/WorkersAiTrendCard";
 import { WorkersAiCard } from "@/features/admin/components/database/WorkersAiCard";
+import classes from "@/features/admin/components/Admin.module.css";
 
 export default function AdminDatabase() {
   const { data, isFetching, refetch } = useGetDbStatsQuery();
@@ -48,7 +49,7 @@ export default function AdminDatabase() {
       />
 
       <Tabs defaultValue="storage" keepMounted={false}>
-        <Tabs.List mb="lg">
+        <Tabs.List mb="lg" className={classes.scrollTabs}>
           <Tabs.Tab value="storage">Storage</Tabs.Tab>
           {data.workersAi.length > 0 && <Tabs.Tab value="ai">AI usage</Tabs.Tab>}
         </Tabs.List>

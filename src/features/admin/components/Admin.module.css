@@ -1,0 +1,212 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--mantine-spacing-sm);
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.search {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.tableCard {
+  overflow: hidden;
+  transition: opacity 120ms ease;
+}
+
+.tableCard[data-fetching] {
+  opacity: 0.6;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  min-width: 0;
+}
+
+.accountText {
+  min-width: 0;
+}
+
+.zoomAvatar {
+  cursor: zoom-in;
+}
+
+.userList {
+  transition: opacity 120ms ease;
+}
+
+.userList[data-fetching] {
+  opacity: 0.6;
+}
+
+.mobileSearch {
+  flex: 1 1 100%;
+}
+
+.chipsRow {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.mobileSearch input {
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 15px;
+}
+
+.planTag {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.planTag[data-tone="pro"] {
+  color: var(--mantine-color-emerald-5);
+}
+
+.planTag[data-tone="expired"] {
+  color: var(--mantine-color-red-5);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.profileText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sheetTitle {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.sheetMeta {
+  overflow: hidden;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-xs);
+}
+
+.actionsHead {
+  text-align: right;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
+  margin-top: var(--mantine-spacing-md);
+}
+
+.scrollTabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.scrollTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollTabs > * {
+  flex: none;
+}
+
+.composerGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  align-items: start;
+  gap: 28px;
+}
+
+.previewFrame {
+  display: block;
+  width: 100%;
+  height: 460px;
+  border: 0;
+}
+
+.previewBox {
+  overflow: hidden;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 10px;
+}
+
+.priceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--mantine-spacing-sm);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mantine-spacing-sm);
+}
+
+.tabBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
+}
+
+.tabActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-sm);
+  margin-left: auto;
+}
+
+@media (max-width: 62em) {
+  .composerGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 48em) {
+  .search {
+    flex-basis: 100%;
+  }
+
+  .previewFrame {
+    height: 360px;
+  }
+
+  .formRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

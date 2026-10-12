@@ -4,6 +4,8 @@ import { useEmailComposer } from "@/features/admin/useEmailComposer";
 import { AudiencePicker } from "@/features/admin/components/email/AudiencePicker";
 import { MessagePane } from "@/features/admin/components/email/MessagePane";
 import type { AdminUser } from "@/shared/types";
+import { useMediaQuery } from "@mantine/hooks";
+import classes from "./Admin.module.css";
 
 /**
  * Admin-only: compose and send a message, either to a segment, to a list of
@@ -33,6 +35,7 @@ export function EmailComposer({
 }) {
   const state = useEmailComposer({ opened, onClose, user });
   const { single, status, statusLoading, busy, close } = state;
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
   return (
     <Modal
@@ -44,6 +47,7 @@ export function EmailComposer({
       // Wide enough for two columns and a preview at something near the mail's
       // real width. A single-recipient send has no picker, so it stays narrow.
       size={single ? "lg" : "80rem"}
+      fullScreen={mobile}
       closeOnClickOutside={false}
       closeOnEscape={!busy}
       withCloseButton={!busy}
@@ -68,15 +72,7 @@ export function EmailComposer({
         // Grid rather than flex: the audience column holds a fixed width and the
         // message takes the rest, and on a narrow screen the two stack with the
         // picker on top — which is the order the decisions happen in.
-        <Box
-          style={{
-            display: "grid",
-            gap: 28,
-            gridTemplateColumns: "minmax(260px, 320px) minmax(0, 1fr)",
-            alignItems: "start",
-          }}
-          className="email-composer-grid"
-        >
+        <Box className={classes.composerGrid}>
           <AudiencePicker state={state} user={user} />
           <MessagePane state={state} />
         </Box>

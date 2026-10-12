@@ -6,6 +6,7 @@ import { Send, FlaskConical, Eye, PencilLine, Check } from "lucide-react";
 import type { EmailComposerState } from "@/features/admin/useEmailComposer";
 import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
+import classes from "../Admin.module.css";
 
 /**
  * The message: what it says, and what it will look like.
@@ -134,18 +135,12 @@ export function MessagePane({ state }: { state: EmailComposerState }) {
                   ? `Shown as ${preview.sampleName} would receive it.`
                   : "Shown as a recipient with no name on file would receive it."}
               </Text>
-              <Box
-                style={{
-                  border: "1px solid var(--mantine-color-default-border)",
-                  borderRadius: 10,
-                  overflow: "hidden",
-                }}
-              >
+              <Box className={classes.previewBox}>
                 <iframe
                   title="Email preview"
                   srcDoc={preview.html}
                   sandbox=""
-                  style={{ width: "100%", height: 460, border: 0, display: "block" }}
+                  className={classes.previewFrame}
                 />
               </Box>
             </Stack>
@@ -164,7 +159,7 @@ export function MessagePane({ state }: { state: EmailComposerState }) {
         </Text>
       )}
 
-      <Group justify="flex-end" gap="xs" mt="xs">
+      <Group justify="flex-end" gap="xs" mt="xs" wrap="wrap">
         <Button
           variant="default"
           radius="md"

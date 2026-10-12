@@ -237,16 +237,3 @@
     grid-template-columns: 1fr;
   }
 }
-
-@media (max-width: 560px) {
-  .funnel {
-    grid-template-columns: 1fr;
-  }
-
-  .funnelStep + .funnelStep {
-    padding-top: 16px;
-    padding-left: 0;
-    border-top: 1px solid var(--border);
-    border-left: 0;
-  }
-}

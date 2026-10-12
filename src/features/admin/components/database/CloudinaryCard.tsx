@@ -11,7 +11,7 @@ export function CloudinaryCard({ usage: u }: { usage: CloudinaryUsage }) {
   const metered = credPct != null;
 
   return (
-    <Card withBorder radius="lg" padding="xl">
+    <Card withBorder radius="lg" p={{ base: "md", sm: "xl" }}>
       <Group justify="space-between" align="baseline" mb="lg">
         <Text fw={700} size="sm">Cloudinary media storage</Text>
         <Text size="xs" c="dimmed" tt="capitalize">{u.plan} plan · {num(u.resources)} assets</Text>

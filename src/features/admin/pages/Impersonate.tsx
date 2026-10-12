@@ -1,30 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Title, Text, TextInput, Stack, Group, Badge, Card, Center, Loader, ThemeIcon,
-  Avatar, SegmentedControl, Pagination, Button, Table, Tooltip, ActionIcon,
-  HoverCard, Image,
+  Text, TextInput, Stack, Center, Loader, ThemeIcon, SegmentedControl, Pagination, Button, Tooltip,
+  ActionIcon, CloseButton,
 } from "@mantine/core";
-import { Search, SearchX, X, LogIn, ShieldAlert, Trash2, Mail, CreditCard, RefreshCw, ShieldOff, LockKeyholeOpen } from "lucide-react";
+import { useMediaQuery } from "@mantine/hooks";
+import { Search, SearchX, ShieldAlert, RefreshCw } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
+import { PageHeader } from "@/shared/ui/Page";
 import { EmailComposer } from "@/features/admin/components/EmailComposer";
 import { AdminPlanDialog } from "@/features/admin/components/AdminPlanDialog";
-import {
-  useGetAdminUsersQuery, useDeleteAdminUserMutation,
-  useAdminReset2faMutation, useAdminResetScreenLockMutation,
-} from "@/app/store";
-import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
-import { UserAvatar } from "@/shared/ui/UserAvatar";
-import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { num, timeAgo, shortDate } from "@/shared/lib";
-import type { AdminUser } from "@/shared/types";
+import { UsersTable } from "@/features/admin/components/users/UsersTable";
+import { UserMobileList } from "@/features/admin/components/users/UserMobileList";
+import { FilterChips } from "@/shared/ui/FilterChips";
+import { useAdminUserActions } from "@/features/admin/useAdminUserActions";
+import { useGetAdminUsersQuery } from "@/app/store";
+import { useIsPlatformAdmin } from "@/features/auth/context";
+import classes from "@/features/admin/components/Admin.module.css";
 
-/**
- * Accounts per page. Mirrors `USERS_PAGE_SIZE` in the admin route — the server
- * decides the slice, this is only what the "showing 1–10 of 42" line counts
- * with. If the two drift, that line lies; the table itself stays correct.
- */
 const USERS_PER_PAGE = 10;
 
 const ROLE_FILTERS = [
@@ -33,38 +26,20 @@ const ROLE_FILTERS = [
   { label: "Admins", value: "admin" },
 ];
 
-/**
- * Admin-only: browse every account, open the dashboard as one of them, or
- * delete one outright.
- *
- * Admins are listed but neither selectable nor deletable — impersonating one
- * would be a way to climb sideways into another admin's session, and deleting
- * one is an escalation/own-goal path with no legitimate use. Both guards are
- * enforced server-side too; the disabled controls here are just the friendly
- * half.
- */
 export default function Impersonate() {
-  const { user, impersonate } = useAuth();
   const navigate = useNavigate();
-
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [page, setPage] = useState(1);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
-  // The one account being messaged, when the mail button in a row is used.
-  const [messaging, setMessaging] = useState<AdminUser | null>(null);
-  // The one account whose plan dialog is open.
-  const [planUser, setPlanUser] = useState<AdminUser | null>(null);
+  const actions = useAdminUserActions();
 
-  // Debounced, so typing a name doesn't fire a request per keystroke.
   useEffect(() => {
     const t = setTimeout(() => setSearch(query), 250);
     return () => clearTimeout(t);
   }, [query]);
 
-  // A narrower filter can leave you past the last page, showing nothing.
   useEffect(() => setPage(1), [search, role]);
 
   const isAdmin = useIsPlatformAdmin();
@@ -73,100 +48,7 @@ export default function Impersonate() {
     { q: search || undefined, role: role || undefined, page },
     { skip: !isAdmin }
   );
-  const [deleteUser] = useDeleteAdminUserMutation();
-  const [reset2fa, { isLoading: resetting2fa }] = useAdminReset2faMutation();
-  const [resetScreenLock, { isLoading: resettingLock }] = useAdminResetScreenLockMutation();
-  const isSuperAdmin = user?.role === "super_admin" && !user?.impersonating;
 
-  const enter = async (u: AdminUser) => {
-    trace(user?.id, "impersonate_user", "impersonate", u.id);
-    setBusy(u.id);
-    try {
-      await impersonate(u.id);
-      navigate("/app");
-      notify.success(`You are now viewing as ${u.email}.`, "Impersonating");
-    } catch (e) {
-      notify.error(errMessage(e, "Could not switch to that user."));
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const resetTwoFactor = (u: AdminUser) => {
-    confirmDelete({
-      title: "Turn off two-factor authentication?",
-      confirmLabel: "Turn off 2FA",
-      body: (
-        <>
-          Turns off 2FA for <b>{u.name}</b> ({u.email}) so they can sign in
-          with just their password again. Use this when someone has lost
-          their authenticator and used up their backup codes — the codes
-          themselves are never visible to anyone, including admins, so this
-          reset is the only way back in.
-        </>
-      ),
-      onConfirm: async () => {
-        try {
-          await reset2fa(u.id).unwrap();
-          notify.success(`Two-factor authentication turned off for ${u.email}.`, "2FA reset");
-        } catch (e) {
-          notify.error(errMessage(e, "Could not turn off 2FA for that account."));
-        }
-      },
-    });
-  };
-
-  const resetScreenLockFor = (u: AdminUser) => {
-    confirmDelete({
-      title: "Reset the screen lock?",
-      confirmLabel: "Reset lock",
-      body: (
-        <>
-          Clears the screen-lock PIN and turns the idle lock off for{" "}
-          <b>{u.name}</b> ({u.email}). Use this when someone is locked out
-          with no working PIN or authenticator code — the PIN is never
-          visible to anyone, including admins.
-        </>
-      ),
-      onConfirm: async () => {
-        try {
-          await resetScreenLock(u.id).unwrap();
-          notify.success(`Screen lock reset for ${u.email}.`, "Screen lock reset");
-        } catch (e) {
-          notify.error(errMessage(e, "Could not reset the screen lock for that account."));
-        }
-      },
-    });
-  };
-
-  const remove = (u: AdminUser) => {
-    confirmDelete({
-      title: "Delete this account?",
-      confirmLabel: "Delete account",
-      body: (
-        <>
-          <b>{u.name}</b> ({u.email}) and everything they own — every workspace,
-          site, API key, and all recorded analytics — will be permanently
-          deleted. This cannot be undone.
-        </>
-      ),
-      onConfirm: async () => {
-        trace(user?.id, "delete_user_account", "impersonate", u.id);
-        setDeleting(u.id);
-        try {
-          await deleteUser(u.id).unwrap();
-          notify.success(`${u.email} has been deleted.`, "Account deleted");
-        } catch (e) {
-          notify.error(errMessage(e, "Could not delete that account."));
-        } finally {
-          setDeleting(null);
-        }
-      },
-    });
-  };
-
-  // The route is admin-only server-side too; this is just a friendlier wall
-  // than a page full of failed requests.
   if (!isAdmin) {
     return (
       <AppShell>
@@ -188,56 +70,52 @@ export default function Impersonate() {
 
   return (
     <AppShell>
-      <Group justify="space-between" align="flex-start" mb="lg">
-        <div>
-          <Title order={1}>Users</Title>
-          <Text c="dimmed" size="sm" mt={6}>
-            Every account on the platform. Open the dashboard as one, or delete one.
-          </Text>
-        </div>
-        <Group gap="sm">
-          {/* The total lives in the table footer now, next to the range it
-              belongs with — two copies of the same number was one too many. */}
+      <PageHeader
+        title="Users"
+        description="Every account on the platform. Open the dashboard as one, or delete one."
+        actions={
           <Tooltip label="Refetch">
             <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={isFetching} onClick={refetch} aria-label="Refetch">
               <RefreshCw size={15} />
             </ActionIcon>
           </Tooltip>
-        </Group>
-      </Group>
-
-      {/* Keyed by account so the draft never carries over between recipients. */}
-      <EmailComposer
-        key={messaging?.id}
-        opened={Boolean(messaging)}
-        user={messaging}
-        onClose={() => setMessaging(null)}
+        }
       />
 
-      <AdminPlanDialog user={planUser} onClose={() => setPlanUser(null)} />
+      <EmailComposer
+        key={actions.messaging?.id}
+        opened={Boolean(actions.messaging)}
+        user={actions.messaging}
+        onClose={actions.closeMessage}
+      />
 
-      <Group mb="lg" align="flex-end" wrap="wrap">
+      <AdminPlanDialog user={actions.planUser} onClose={actions.closePlan} />
+
+      <div className={classes.toolbar}>
         <TextInput
-          placeholder="Search by name or email…"
+          className={mobile ? classes.mobileSearch : classes.search}
+          placeholder={mobile ? "Search" : "Search by name or email…"}
+          aria-label="Search by name or email"
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
-          leftSection={<Search size={15} />}
-          rightSection={
-            query ? (
-              <X size={15} style={{ cursor: "pointer" }} onClick={() => setQuery("")} />
-            ) : null
-          }
-          style={{ flex: 1, minWidth: 260 }}
+          leftSection={<Search size={mobile ? 16 : 15} />}
+          rightSection={query ? <CloseButton size="sm" onClick={() => setQuery("")} aria-label="Clear search" /> : null}
         />
-        <SegmentedControl
-          size="sm"
-          radius="md"
-          color="emerald"
-          value={role}
-          onChange={setRole}
-          data={ROLE_FILTERS}
-        />
-      </Group>
+        {mobile ? (
+          <div className={classes.chipsRow}>
+            <FilterChips value={role} onChange={setRole} data={ROLE_FILTERS} ariaLabel="Filter by role" />
+          </div>
+        ) : (
+          <SegmentedControl
+            size="sm"
+            radius="md"
+            color="emerald"
+            value={role}
+            onChange={setRole}
+            data={ROLE_FILTERS}
+          />
+        )}
+      </div>
 
       {isLoading ? (
         <Center py="xl"><Loader size="sm" /></Center>
@@ -254,257 +132,14 @@ export default function Impersonate() {
         </Center>
       ) : (
         <>
-          {/* Dim the table, rather than swapping it for a spinner, so the rows
-              don't jump while a page or filter loads. */}
-          <Card withBorder radius="md" p={0} style={{ opacity: isFetching ? 0.6 : 1, overflow: "hidden" }}>
-            <Table.ScrollContainer minWidth={1000}>
-              <Table verticalSpacing="sm" horizontalSpacing="md" highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Account</Table.Th>
-                    <Table.Th>Role</Table.Th>
-                    <Table.Th>Plan</Table.Th>
-                    <Table.Th>Joined</Table.Th>
-                    <Table.Th>Workspaces</Table.Th>
-                    <Table.Th>Sites</Table.Th>
-                    <Table.Th>Events</Table.Th>
-                    <Table.Th style={{ textAlign: "right" }}>Actions</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {users.map((u) => {
-                    const admin = u.role === "admin" || u.role === "super_admin";
-                    const isSelf = u.id === user?.id;
-                    const rowBusy = busy === u.id || deleting === u.id;
-                    // The superadmin can open a regular admin's dashboard for
-                    // oversight — everyone else is blocked from any admin row,
-                    // and nobody (including the superadmin) opens another
-                    // superadmin's, matching the server-side guard.
-                    const impersonateBlocked =
-                      u.role === "super_admin" || (u.role === "admin" && !isSuperAdmin);
-                    return (
-                      <Table.Tr key={u.id}>
-                        <Table.Td>
-                          <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                            {u.avatarUrl ? (
-                              // Only accounts with a real picture get the hover
-                              // preview — a blown-up pair of initials is noise.
-                              <HoverCard width={220} shadow="md" withArrow openDelay={200} position="right">
-                                <HoverCard.Target>
-                                  <UserAvatar
-                                    src={u.avatarUrl}
-                                    name={u.name}
-                                    color="emerald"
-                                    radius="xl"
-                                    size="md"
-                                    style={{ cursor: "zoom-in" }}
-                                  />
-                                </HoverCard.Target>
-                                <HoverCard.Dropdown p="xs">
-                                  <Image
-                                    src={u.avatarUrl}
-                                    alt={u.name}
-                                    radius="md"
-                                    fit="contain"
-                                    h={200}
-                                    // Same reason as UserAvatar — Google's CDN
-                                    // 403s a request carrying our referrer.
-                                    referrerPolicy="no-referrer"
-                                  />
-                                </HoverCard.Dropdown>
-                              </HoverCard>
-                            ) : (
-                              <Avatar color="emerald" radius="xl" size="md">
-                                {u.name.slice(0, 2).toUpperCase()}
-                              </Avatar>
-                            )}
-                            <div style={{ minWidth: 0 }}>
-                              <Text fw={600} size="sm" truncate>{u.name}</Text>
-                              <Text size="xs" c="dimmed" truncate>{u.email}</Text>
-                            </div>
-                          </Group>
-                        </Table.Td>
-                        <Table.Td>
-                          <Badge
-                            size="sm"
-                            variant="light"
-                            color={admin ? "grape" : "gray"}
-                          >
-                            {u.role}
-                          </Badge>
-                        </Table.Td>
-                        <Table.Td>
-                          {u.plan ? (
-                            <Badge
-                              size="sm"
-                              variant="light"
-                              color={u.plan.expired ? "red" : u.plan.slug === "pro" ? "emerald" : "gray"}
-                            >
-                              {u.plan.name}{u.plan.expired ? " (expired)" : ""}
-                            </Badge>
-                          ) : (
-                            <Text size="xs" c="dimmed">none</Text>
-                          )}
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="sm">{shortDate(u.createdAt)}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="sm">{u.workspaceCount}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="sm">{u.siteCount}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          {/* A zero here means the account has never been
-                              tracked, which reads differently from "quiet
-                              lately" — so only show a last-seen when there is
-                              something to have been seen. */}
-                          <Text size="sm">{num(u.eventCount)}</Text>
-                          {u.eventCount > 0 && (
-                            <Text size="xs" c="dimmed">{timeAgo(u.lastEventAt)}</Text>
-                          )}
-                        </Table.Td>
-                        <Table.Td>
-                          <Group gap="xs" justify="flex-end" wrap="nowrap">
-                            <Tooltip
-                              label={
-                                u.role === "super_admin"
-                                  ? "The superadmin can't be opened"
-                                  : impersonateBlocked
-                                  ? "Admins can't be opened"
-                                  : "Open dashboard as this user"
-                              }
-                              withArrow
-                            >
-                              <Button
-                                size="xs"
-                                variant="light"
-                                color="emerald"
-                                leftSection={
-                                  busy === u.id ? <Loader size={12} color="emerald" /> : <LogIn size={14} />
-                                }
-                                disabled={impersonateBlocked || rowBusy}
-                                onClick={() => enter(u)}
-                              >
-                                Open
-                              </Button>
-                            </Tooltip>
-                            <Tooltip label="Plan details" withArrow>
-                              <ActionIcon
-                                variant="light"
-                                color="gray"
-                                size="lg"
-                                radius="md"
-                                aria-label="Plan details"
-                                onClick={() => {
-                                  trace(user?.id, "view_user_plan_clicked", "impersonate", "plan_dialog");
-                                  setPlanUser(u);
-                                }}
-                              >
-                                <CreditCard size={16} />
-                              </ActionIcon>
-                            </Tooltip>
-                            <Tooltip label={`Email ${u.email}`} withArrow>
-                              <ActionIcon
-                                variant="light"
-                                color="gray"
-                                size="lg"
-                                radius="md"
-                                disabled={rowBusy}
-                                aria-label={`Email ${u.email}`}
-                                onClick={() => {
-                                  trace(user?.id, "message_user_clicked", "impersonate", "email_composer");
-                                  setMessaging(u);
-                                }}
-                              >
-                                <Mail size={16} />
-                              </ActionIcon>
-                            </Tooltip>
-                            {isSuperAdmin && (
-                              <Tooltip
-                                label={
-                                  !u.totpEnabled
-                                    ? "2FA is already off for this account"
-                                    : "Turn off 2FA — for a lost authenticator with no backup codes left"
-                                }
-                                withArrow
-                              >
-                                <ActionIcon
-                                  variant="light"
-                                  color="orange"
-                                  size="lg"
-                                  radius="md"
-                                  disabled={!u.totpEnabled || resetting2fa}
-                                  onClick={() => resetTwoFactor(u)}
-                                  aria-label={`Reset two-factor for ${u.email}`}
-                                >
-                                  <ShieldOff size={16} />
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
-                            {isSuperAdmin && (
-                              <Tooltip
-                                label={
-                                  !u.screenLockEnabled
-                                    ? "Screen lock is already off for this account"
-                                    : "Reset screen lock — for someone locked out with no working PIN"
-                                }
-                                withArrow
-                              >
-                                <ActionIcon
-                                  variant="light"
-                                  color="orange"
-                                  size="lg"
-                                  radius="md"
-                                  disabled={!u.screenLockEnabled || resettingLock}
-                                  onClick={() => resetScreenLockFor(u)}
-                                  aria-label={`Reset screen lock for ${u.email}`}
-                                >
-                                  <LockKeyholeOpen size={16} />
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
-                            <Tooltip
-                              label={
-                                !isSuperAdmin
-                                  ? "Only the superadmin can delete accounts"
-                                  : isSelf
-                                  ? "You can't delete yourself"
-                                  : admin
-                                  ? "Admins can't be deleted"
-                                  : "Delete this account"
-                              }
-                              withArrow
-                            >
-                              <ActionIcon
-                                variant="light"
-                                color="red"
-                                size="lg"
-                                radius="md"
-                                disabled={!isSuperAdmin || admin || isSelf || rowBusy}
-                                onClick={() => remove(u)}
-                                aria-label={`Delete ${u.email}`}
-                              >
-                                {deleting === u.id ? <Loader size={14} color="red" /> : <Trash2 size={16} />}
-                              </ActionIcon>
-                            </Tooltip>
-                          </Group>
-                        </Table.Td>
-                      </Table.Tr>
-                    );
-                  })}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
-          </Card>
+          {mobile ? (
+            <UserMobileList users={users} fetching={isFetching} actions={actions} />
+          ) : (
+            <UsersTable users={users} fetching={isFetching} actions={actions} />
+          )}
 
-          {/* A footer bar rather than a lone centred pager: "which rows am I
-              looking at, out of how many" is the question a paged table raises,
-              and the controls mean little without it. Shown whenever there are
-              results — the range is worth reading on a single page too. */}
           {data && data.total > 0 && (
-            <Group justify="space-between" align="center" mt="md" wrap="wrap" gap="sm">
+            <div className={classes.pager}>
               <Text size="sm" c="dimmed">
                 Showing{" "}
                 <Text span fw={600} c="var(--text)">
@@ -520,19 +155,17 @@ export default function Impersonate() {
 
               {data.pages > 1 && (
                 <Pagination
-                  size="md"
+                  size={mobile ? "sm" : "md"}
                   radius="md"
                   color="emerald"
                   value={page}
                   onChange={setPage}
                   total={data.pages}
-                  withEdges
-                  // One neighbour each side keeps the control a fixed width as
-                  // the page moves, instead of growing and shifting the row.
-                  siblings={1}
+                  withEdges={!mobile}
+                  siblings={mobile ? 0 : 1}
                 />
               )}
-            </Group>
+            </div>
           )}
         </>
       )}

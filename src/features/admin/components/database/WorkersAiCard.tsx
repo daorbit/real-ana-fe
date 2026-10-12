@@ -6,7 +6,7 @@ import { Meter, Num } from "./shared";
 
 export function WorkersAiCard({ accounts }: { accounts: WorkersAiUsage[] }) {
   return (
-    <Card withBorder radius="lg" padding="xl">
+    <Card withBorder radius="lg" p={{ base: "md", sm: "xl" }}>
       <Group justify="space-between" align="baseline" mb="lg">
         <Text fw={700} size="sm">Cloudflare Workers AI</Text>
         <Text size="xs" c="dimmed">used by Orbit chat &amp; the post planner</Text>
@@ -18,7 +18,7 @@ export function WorkersAiCard({ accounts }: { accounts: WorkersAiUsage[] }) {
           return (
             <Box
               key={u.label}
-              p="lg"
+              p={{ base: "sm", sm: "lg" }}
               style={{
                 border: "1px solid var(--mantine-color-default-border)",
                 borderRadius: "var(--mantine-radius-md)",

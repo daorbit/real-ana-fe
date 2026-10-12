@@ -7,6 +7,7 @@ import { AudiencePicker } from "@/features/admin/components/email/AudiencePicker
 import { MessagePane } from "@/features/admin/components/email/MessagePane";
 import { useEmailComposer } from "@/features/admin/useEmailComposer";
 import { useIsPlatformAdmin } from "@/features/auth/context";
+import classes from "@/features/admin/components/Admin.module.css";
 
 /**
  * Admin-only: send a message to a segment, a hand-typed list, or one account.
@@ -48,7 +49,7 @@ export default function AdminBroadcast() {
         description="Pick who it goes to, write it, then send."
       />
 
-      <Card withBorder radius="lg" p="lg">
+      <Card withBorder radius="lg" p={{ base: "md", sm: "lg" }}>
         {statusLoading ? (
           <Center py="xl"><Loader size="sm" /></Center>
         ) : !status?.configured ? (
@@ -64,15 +65,7 @@ export default function AdminBroadcast() {
           // Grid rather than flex: the audience column holds a fixed width and
           // the message takes the rest. Below the breakpoint they stack with
           // the picker on top, which is the order the decisions happen in.
-          <Box
-            style={{
-              display: "grid",
-              gap: 32,
-              gridTemplateColumns: "minmax(260px, 320px) minmax(0, 1fr)",
-              alignItems: "start",
-            }}
-            className="email-composer-grid"
-          >
+          <Box className={classes.composerGrid}>
             <AudiencePicker state={state} />
             <MessagePane state={state} />
           </Box>

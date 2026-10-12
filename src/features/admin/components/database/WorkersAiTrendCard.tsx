@@ -30,7 +30,7 @@ export const WorkersAiTrendCard = forwardRef<WorkersAiTrendCardHandle>(function 
   );
 
   return (
-    <Card withBorder radius="lg" padding="xl">
+    <Card withBorder radius="lg" p={{ base: "md", sm: "xl" }}>
       <Group justify="space-between" align="center" mb="md">
         <div>
           <Text fw={700} size="sm">Neurons over time</Text>

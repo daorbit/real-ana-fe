@@ -1254,11 +1254,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   max-width: 680px;
   margin-inline: auto;
 }
-
-
-@media (max-width: 62em) {
-  .email-composer-grid { grid-template-columns: minmax(0, 1fr) !important; }
-}
 .sect-ic { color: var(--violet-2); }
 
 

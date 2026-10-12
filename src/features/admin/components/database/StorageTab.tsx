@@ -18,8 +18,8 @@ export function StorageTab({ data }: { data: DbStats }) {
   return (
     <Stack gap="lg">
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
-        <Card withBorder radius="lg" padding="xl">
-          <Group align="center" gap="lg" wrap="nowrap" h="100%">
+        <Card withBorder radius="lg" p={{ base: "md", sm: "xl" }}>
+          <Group align="center" gap="lg" wrap="wrap" h="100%">
             <RingProgress
               size={128}
               thickness={12}
@@ -51,8 +51,8 @@ export function StorageTab({ data }: { data: DbStats }) {
           </Group>
         </Card>
 
-        <Card withBorder radius="lg" padding="xl">
-          <SimpleGrid cols={2} spacing="lg" verticalSpacing="lg">
+        <Card withBorder radius="lg" p={{ base: "md", sm: "xl" }}>
+          <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="lg" verticalSpacing="lg">
             <Metric label="Documents on disk" value={bytes(data.storageSize)} hint="after compression" />
             <Metric label="Indexes" value={bytes(data.indexSize)} />
             <Metric label="Uncompressed" value={bytes(data.dataSize)} hint="raw document size" />
@@ -73,7 +73,7 @@ export function StorageTab({ data }: { data: DbStats }) {
       {data.cloudinary && <CloudinaryCard usage={data.cloudinary} />}
 
       <Card withBorder radius="lg" padding={0}>
-        <Group justify="space-between" px="xl" py="md">
+        <Group justify="space-between" px={{ base: "md", sm: "xl" }} py="md">
           <Text fw={700} size="sm">By collection</Text>
           <Text size="xs" c="dimmed">sorted by storage + indexes</Text>
         </Group>

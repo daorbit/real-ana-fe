@@ -88,9 +88,9 @@ const SOCIAL_SPEC: SectionSpec[] = [
 ];
 
 const JOURNEY_SPEC: SectionSpec[] = [
-  { id: "users", icon: Fingerprint, items: ["Who", "Id", "Search", "LastSeen"] },
+  { id: "users", icon: Fingerprint, items: ["Who", "Id", "Columns", "LastSeen"] },
   { id: "steps", icon: Route, items: ["Shape", "Order", "Repeats", "Gaps"] },
-  { id: "filters", icon: Filter, items: ["Range", "Action", "Clear"] },
+  { id: "filters", icon: Filter, items: ["Search", "Sort", "Active"] },
   { id: "source", icon: Code2, items: ["Api", "NotTracker", "Missing"] },
 ];
 

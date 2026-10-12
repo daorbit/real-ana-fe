@@ -1,38 +1,26 @@
-import { useEffect, useState } from "react";
 import { Badge, Card, Center, Group, Loader, Pagination, SegmentedControl, Stack, Table, Text, TextInput, Tooltip } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { ArrowRight, Search, Users } from "lucide-react";
-import { useGetAdminReferralOverviewQuery, useGetAdminReferralsQuery } from "@/app/store";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { num, shortDate } from "@/shared/lib";
 import { useReferralActions } from "../hooks/useReferralActions";
-import { REFERRAL_STATUS_FILTERS, REFERRAL_STATUS_META } from "../lib/referralStatus";
+import { useReferralList } from "../hooks/useReferralList";
+import { REFERRAL_STATUS_META } from "../lib/referralStatus";
 import { ReferralPerson } from "./ReferralPerson";
 import { AdminCouponCell } from "./AdminCouponCell";
 import { ReferralRowActions } from "./ReferralRowActions";
+import { ReferralListMobile } from "./mobile/ReferralListMobile";
 import classes from "./ReferralAdmin.module.css";
 
 export function ReferralListPanel() {
-  const [query, setQuery] = useState("");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    const t = setTimeout(() => setSearch(query), 250);
-    return () => clearTimeout(t);
-  }, [query]);
-
-  useEffect(() => setPage(1), [search, status]);
-
-  const { data, isLoading, isFetching } = useGetAdminReferralsQuery({ q: search || undefined, status: status || undefined, page });
-  const { data: overview } = useGetAdminReferralOverviewQuery();
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
+  const list = useReferralList();
   const { act, busy } = useReferralActions();
-  const rows = data?.referrals ?? [];
 
-  const filters = REFERRAL_STATUS_FILTERS.map((f) => {
-    const count = overview ? (f.value ? overview[f.value as keyof typeof REFERRAL_STATUS_META] : overview.total) : null;
-    return { value: f.value, label: count === null ? f.label : `${f.label} · ${num(count)}` };
-  });
+  if (mobile) return <ReferralListMobile list={list} busy={busy} onAct={act} />;
+
+  const { query, setQuery, status, setStatus, page, setPage, data, rows, isLoading, isFetching, filters } = list;
+  const segments = filters.map((f) => ({ value: f.value, label: f.count === null ? f.label : `${f.label} · ${f.count}` }));
 
   return (
     <Stack gap="md">
@@ -42,10 +30,10 @@ export function ReferralListPanel() {
           leftSection={<Search size={15} />}
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
-          w={{ base: "100%", sm: 320 }}
+          w={320}
           rightSection={isFetching ? <Loader size={14} /> : null}
         />
-        <SegmentedControl value={status} onChange={setStatus} data={filters} size="xs" />
+        <SegmentedControl value={status} onChange={setStatus} data={segments} size="xs" />
       </Group>
 
       <Card withBorder radius="lg" p={0}>

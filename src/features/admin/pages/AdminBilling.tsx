@@ -20,6 +20,7 @@ import { useAuth } from "@/features/auth/context";
 import { CURRENCIES, CURRENCY_SYMBOLS } from "@/shared/types";
 import type { Plan, AddonPack, AddonType, Coupon, Currency, CurrencyPrices } from "@/shared/types";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
+import classes from "@/features/admin/components/Admin.module.css";
 
 function money(amountMinor: number, currency: Currency = "INR"): string {
   return formatMoney(amountMinor, currency);
@@ -47,7 +48,7 @@ function CurrencyPriceInputs({
   return (
     <Stack gap={4}>
       <Text size="sm" fw={500}>{label}</Text>
-      <Group grow>
+      <div className={classes.priceGrid}>
         {CURRENCIES.map((c) => (
           <NumberInput
             key={c}
@@ -58,7 +59,7 @@ function CurrencyPriceInputs({
             min={0}
           />
         ))}
-      </Group>
+      </div>
     </Stack>
   );
 }
@@ -84,7 +85,7 @@ export default function AdminBilling() {
     <AppShell>
       <PageHeader title="Plans & addons" description="Pricing and quotas admins can change without a deploy." />
       <Tabs defaultValue="plans" keepMounted={false}>
-        <Tabs.List mb="lg">
+        <Tabs.List mb="lg" className={classes.scrollTabs}>
           <Tabs.Tab value="plans">Plans</Tabs.Tab>
           <Tabs.Tab value="addons">Addon packs</Tabs.Tab>
           <Tabs.Tab value="coupons">Coupons</Tabs.Tab>
@@ -139,7 +140,7 @@ function CurrencySync() {
   const rate = fx?.snapshot?.rates.USD;
 
   return (
-    <Group gap="sm">
+    <Group gap="sm" wrap="wrap">
       <Text size="xs" c="dimmed">
         {fx && !fx.configured
           ? "Exchange rate API key not configured"
@@ -210,11 +211,14 @@ function PlansTab() {
 
   return (
     <Stack gap="md">
-      <Group justify="space-between">
+      <div className={classes.tabBar}>
         <CurrencySync />
-        <RefetchButton onClick={refetch} loading={isFetching} />
-      </Group>
+        <div className={classes.tabActions}>
+          <RefetchButton onClick={refetch} loading={isFetching} />
+        </div>
+      </div>
       <Card withBorder radius="md" padding={0}>
+        <Table.ScrollContainer minWidth={640}>
         <Table verticalSpacing="sm" horizontalSpacing="md">
           <Table.Thead>
             <Table.Tr>
@@ -246,6 +250,7 @@ function PlansTab() {
             )}
           </Table.Tbody>
         </Table>
+        </Table.ScrollContainer>
       </Card>
 
       <Modal opened={modal} onClose={() => setModal(false)} title={draft ? `Edit ${draft.name} price` : ""} radius="lg" centered>
@@ -341,14 +346,15 @@ function AddonsTab() {
 
   return (
     <Stack gap="md">
-      <Group justify="flex-end">
+      <div className={classes.tabActions}>
         <RefetchButton onClick={refetch} loading={isFetching} />
         <Button size="xs" color="emerald" leftSection={<Plus size={14} />} onClick={openNew}>
           New addon pack
         </Button>
-      </Group>
+      </div>
 
       <Card withBorder radius="md" padding={0}>
+        <Table.ScrollContainer minWidth={640}>
         <Table verticalSpacing="sm" horizontalSpacing="md">
           <Table.Thead>
             <Table.Tr>
@@ -393,15 +399,16 @@ function AddonsTab() {
             )}
           </Table.Tbody>
         </Table>
+        </Table.ScrollContainer>
       </Card>
 
       <Modal opened={modal} onClose={() => setModal(false)} title={draft._id ? "Edit addon pack" : "New addon pack"} radius="lg" centered>
         <Stack gap="sm">
-          <Group grow>
+          <div className={classes.formRow}>
             <TextInput label="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.currentTarget.value })} placeholder="+10 audits" />
             <TextInput label="Slug" value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: e.currentTarget.value })} placeholder="audits-10" />
-          </Group>
-          <Group grow>
+          </div>
+          <div className={classes.formRow}>
             <Select
               label="Type"
               value={draft.type}
@@ -416,7 +423,7 @@ function AddonsTab() {
               ]}
             />
             <NumberInput label="Quantity" value={draft.quantity} onChange={(v) => setDraft({ ...draft, quantity: Number(v) || 1 })} min={1} />
-          </Group>
+          </div>
           <CurrencyPriceInputs label="Price" values={priceRupees} onChange={setPriceRupees} />
           <Switch label="Active (visible on the Billing page)" checked={draft.active !== false} onChange={(e) => setDraft({ ...draft, active: e.currentTarget.checked })} />
           <Group justify="flex-end" mt="sm">
@@ -479,14 +486,15 @@ function CouponsTab() {
 
   return (
     <Stack gap="md">
-      <Group justify="flex-end">
+      <div className={classes.tabActions}>
         <RefetchButton onClick={refetch} loading={isFetching} />
         <Button size="xs" color="emerald" leftSection={<Plus size={14} />} onClick={openNew}>
           New coupon
         </Button>
-      </Group>
+      </div>
 
       <Card withBorder radius="md" padding={0}>
+        <Table.ScrollContainer minWidth={560}>
         <Table verticalSpacing="sm" horizontalSpacing="md">
           <Table.Thead>
             <Table.Tr>
@@ -530,6 +538,7 @@ function CouponsTab() {
             )}
           </Table.Tbody>
         </Table>
+        </Table.ScrollContainer>
       </Card>
 
       <CouponPreview coupon={preview} plans={plans} onClose={() => setPreview(null)} />
@@ -615,7 +624,7 @@ function CouponPreview({
             onChange={(v) => { setPlanSlug(v); setResult(null); }}
             data={plans.map((p) => ({ value: p.slug, label: p.name }))}
           />
-          <Group grow>
+          <div className={classes.formRow}>
             <Select
               label="Cycle"
               value={cycle}
@@ -628,7 +637,7 @@ function CouponPreview({
               onChange={(v) => { setCurrency((v as Currency) ?? "INR"); setResult(null); }}
               data={CURRENCIES.map((c) => ({ value: c, label: c }))}
             />
-          </Group>
+          </div>
 
           <Group justify="space-between" mt="xs">
             <Text size="sm" c="dimmed">List price</Text>
