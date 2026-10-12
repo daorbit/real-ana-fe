@@ -108,6 +108,7 @@ const TEAM_COPY: Record<string, Describe> = {
   "api_key.created": (e) => `created the API key ${quoted(e.target.label, "")}`.trim(),
   "api_key.updated": (e) => `renamed an API key to ${quoted(e.target.label, "")}`.trim(),
   "api_key.revoked": (e) => `revoked the API key ${quoted(e.target.label, "")}`.trim(),
+  "api_key.revealed": (e) => `revealed the API key ${quoted(e.target.label, "")}`.trim(),
 
   "form.created": (e) => `created the form ${quoted(e.target.label, "")}`.trim(),
   "form.duplicated": (e) => `duplicated a form as ${quoted(e.target.label, "")}`.trim(),

@@ -12,11 +12,12 @@ interface Props {
   usage: Map<string, ApiKeyUsageEntry>;
   windowDays: ApiKeyUsageWindow;
   onViewUsage: (keyId: string) => void;
+  onReveal: (key: ApiKey) => void;
   onRename: (key: ApiKey) => void;
   onRevoke: (key: ApiKey) => void;
 }
 
-export function ApiKeysTable({ keys, usage, windowDays, onViewUsage, onRename, onRevoke }: Props) {
+export function ApiKeysTable({ keys, usage, windowDays, onViewUsage, onReveal, onRename, onRevoke }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -98,6 +99,8 @@ export function ApiKeysTable({ keys, usage, windowDays, onViewUsage, onRename, o
                 </Table.Td>
                 <Table.Td className={classes.actionCol}>
                   <KeyActionsMenu
+                    canReveal={Boolean(k.revealable) && status !== "expired"}
+                    onReveal={() => onReveal(k)}
                     onViewUsage={() => onViewUsage(k.id)}
                     onRename={() => onRename(k)}
                     onRevoke={() => onRevoke(k)}

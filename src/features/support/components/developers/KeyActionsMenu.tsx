@@ -1,24 +1,34 @@
 import { ActionIcon, Menu } from "@mantine/core";
-import { BarChart3, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { BarChart3, Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
+  canReveal: boolean;
+  onReveal: () => void;
   onViewUsage: () => void;
   onRename: () => void;
   onRevoke: () => void;
 }
 
-export function KeyActionsMenu({ onViewUsage, onRename, onRevoke }: Props) {
+export function KeyActionsMenu({ canReveal, onReveal, onViewUsage, onRename, onRevoke }: Props) {
   const { t } = useTranslation();
 
   return (
-    <Menu position="bottom-end" withinPortal shadow="md" width={180}>
+    <Menu position="bottom-end" withinPortal shadow="md" width={200}>
       <Menu.Target>
         <ActionIcon variant="subtle" color="gray" aria-label={t("developers.keyActions")}>
           <MoreHorizontal size={16} />
         </ActionIcon>
       </Menu.Target>
       <Menu.Dropdown>
+        <Menu.Item
+          leftSection={<Eye size={14} />}
+          onClick={onReveal}
+          disabled={!canReveal}
+          title={canReveal ? undefined : t("developers.revealUnavailable")}
+        >
+          {t("developers.revealKey")}
+        </Menu.Item>
         <Menu.Item leftSection={<BarChart3 size={14} />} onClick={onViewUsage}>
           {t("developers.viewUsage")}
         </Menu.Item>

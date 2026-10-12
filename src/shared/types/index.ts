@@ -1224,6 +1224,7 @@ export type ApiKey = {
   createdBy?: { name?: string; email?: string } | null;
   expiresAt?: string | null;
   key?: string; // only present right after creation
+  revealable?: boolean;
 };
 
 export type ApiKeyUsageWindow = 7 | 30 | 90;

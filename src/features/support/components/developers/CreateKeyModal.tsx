@@ -1,12 +1,11 @@
 import { useState } from "react";
-import {
-  ActionIcon, Alert, Box, Button, CopyButton, Group, Modal, Select, Stack, Text, TextInput, Tooltip,
-} from "@mantine/core";
-import { AlertTriangle, Check, Copy } from "lucide-react";
+import { Alert, Box, Button, Group, Modal, Select, Stack, Text, TextInput } from "@mantine/core";
+import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { shortDate } from "@/shared/lib/format";
 import type { ApiKey } from "@/shared/types";
 import { EXPIRY_OPTIONS, expiryDate, expiryDays, type ExpiryOption } from "../../developers";
+import { SecretKeyField } from "./SecretKeyField";
 import classes from "./Developers.module.css";
 
 interface Props {
@@ -73,34 +72,7 @@ export function CreateKeyModal({ opened, onClose, workspaceName, creating, onCre
             {t("developers.saveKeyBody")}
           </Text>
 
-          <Group gap="xs" wrap="nowrap">
-            <TextInput
-              readOnly
-              value={created.key}
-              className={classes.secretInput}
-              flex={1}
-              onFocus={(e) => e.currentTarget.select()}
-              aria-label={created.name}
-            />
-            <CopyButton value={created.key}>
-              {({ copied: justCopied, copy }) => (
-                <Tooltip label={justCopied ? t("developers.copied") : t("developers.copyKey")} withArrow>
-                  <ActionIcon
-                    size={36}
-                    variant={justCopied ? "filled" : "default"}
-                    color={justCopied ? "teal" : undefined}
-                    onClick={() => {
-                      copy();
-                      setCopied(true);
-                    }}
-                    aria-label={t("developers.copyKey")}
-                  >
-                    {justCopied ? <Check size={16} /> : <Copy size={16} />}
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </CopyButton>
-          </Group>
+          <SecretKeyField value={created.key} label={created.name} onCopy={() => setCopied(true)} />
 
           <Text size="xs" c="dimmed">
             {created.expiresAt

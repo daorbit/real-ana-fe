@@ -10,6 +10,7 @@ import { useKeyUsage } from "../../hooks/useKeyUsage";
 import { ApiKeysTable } from "./ApiKeysTable";
 import { CreateKeyModal } from "./CreateKeyModal";
 import { RenameKeyModal } from "./RenameKeyModal";
+import { RevealKeyModal } from "./RevealKeyModal";
 import { SectionHeader } from "./SectionHeader";
 import classes from "./Developers.module.css";
 
@@ -28,6 +29,7 @@ export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, onViewUsa
   const { byKey } = useKeyUsage(workspaceId, windowDays, null);
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [renamingKey, setRenamingKey] = useState<ApiKey | null>(null);
+  const [revealingKey, setRevealingKey] = useState<ApiKey | null>(null);
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -89,6 +91,7 @@ export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, onViewUsa
             usage={byKey}
             windowDays={windowDays}
             onViewUsage={onViewUsage}
+            onReveal={setRevealingKey}
             onRename={setRenamingKey}
             onRevoke={revoke}
           />
@@ -110,6 +113,7 @@ export function ApiKeysPanel({ workspaceId, workspaceName, windowDays, onViewUsa
         onClose={() => setRenamingKey(null)}
         onSave={rename}
       />
+      <RevealKeyModal apiKey={revealingKey} workspaceId={workspaceId} onClose={() => setRevealingKey(null)} />
     </div>
   );
 }

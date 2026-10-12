@@ -1437,6 +1437,17 @@ export const api = createApi({
       invalidatesTags: ["ApiKey"],
     }),
 
+    revealApiKey: build.mutation<
+      { id: string; key: string },
+      { workspaceId: string; keyId: string; proof: { password: string } | { code: string } }
+    >({
+      query: ({ workspaceId, keyId, proof }) => ({
+        url: `/api/workspaces/${workspaceId}/keys/${keyId}/reveal`,
+        method: "POST",
+        body: proof,
+      }),
+    }),
+
  
     analyzeSeo: build.mutation<
       { report: SeoReport; cached: boolean },
@@ -2603,6 +2614,7 @@ export const {
   useCreateApiKeyMutation,
   useRenameApiKeyMutation,
   useRevokeApiKeyMutation,
+  useRevealApiKeyMutation,
   useAnalyzeSeoMutation,
   useGetSeoReportsQuery,
   useGetLatestSeoReportQuery,
