@@ -1,7 +1,8 @@
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ActionIcon, UnstyledButton } from "@mantine/core";
-import { ChevronRight, Search, X } from "lucide-react";
+import { CalendarCheck, ChevronRight, Search, X } from "lucide-react";
+import { DemoCallModal } from "../DemoCallModal";
 import { useTranslation } from "react-i18next";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { NAV_GROUPS, type NavGroup } from "../navItems";
@@ -32,6 +33,7 @@ export function MobileMoreSheet({
   const onOrbit = pathname.startsWith("/app/orbit");
   const navPrefs = useNavPrefs();
   const groups = useMemo(() => sheetGroups(applyNavPrefs(NAV_GROUPS, navPrefs)), [navPrefs]);
+  const [demoCallOpen, setDemoCallOpen] = useState(false);
 
   return (
     <div className={classes.root}>
@@ -70,6 +72,22 @@ export function MobileMoreSheet({
             </div>
           </section>
         )}
+
+        <section className={classes.section}>
+          <div className={classes.card}>
+            <UnstyledButton className={`${classes.row} ${classes.fullRow}`} onClick={() => setDemoCallOpen(true)}>
+              <span className={classes.demoIcon}>
+                <CalendarCheck size={18} />
+              </span>
+              <span className={classes.rowText}>
+                <span className={classes.label}>{t("nav.demoCallTitle", "Book a 1:1 demo call")}</span>
+                <span className={classes.hint}>{t("nav.demoCallSub", "We’ll set up Quantalog with you")}</span>
+              </span>
+              <ChevronRight size={16} className={classes.chevron} />
+            </UnstyledButton>
+          </div>
+        </section>
+        <DemoCallModal opened={demoCallOpen} onClose={() => setDemoCallOpen(false)} />
 
         {groups.map((group) => (
           <MobileNavList key={group.headingKey} group={group} pathname={pathname} />

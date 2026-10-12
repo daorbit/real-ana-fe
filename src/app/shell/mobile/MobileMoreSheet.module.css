@@ -119,6 +119,27 @@
   height: 30px;
 }
 
+.fullRow {
+  width: 100%;
+  text-align: left;
+}
+
+.demoIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #4f46e5 12%, transparent);
+  color: #4f46e5;
+}
+
+:root:not([data-mantine-color-scheme="light"]) .demoIcon {
+  background: color-mix(in srgb, #818cf8 16%, transparent);
+  color: #818cf8;
+}
+
 .rowText {
   display: flex;
   flex: 1;
