@@ -54,12 +54,10 @@ button.row:hover {
 
 .row[data-active] {
   background: var(--glass-fill-strong);
-  border-color: var(--glass-edge);
 }
 
 .row[data-you] {
   background: color-mix(in srgb, var(--violet-2) 9%, transparent);
-  border-color: color-mix(in srgb, var(--violet-2) 28%, transparent);
 }
 
 .rank {

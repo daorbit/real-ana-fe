@@ -1,62 +1,71 @@
-import { ActionIcon, Tooltip } from "@mantine/core";
-import { Eye, EyeOff, Pin } from "lucide-react";
+import { ActionIcon, Switch, Tooltip } from "@mantine/core";
+import { Pin } from "lucide-react";
 import type { NavItem } from "@/app/shell/navItems";
 import classes from "./Sidebar.module.css";
 
 export function PageRow({
   item,
   label,
+  section,
+  pinned,
   hidden,
   locked,
   editable,
-  onPin,
-  onToggleHidden,
+  onTogglePin,
+  onToggleShown,
 }: {
   item: NavItem;
   label: string;
+  section: string;
+  pinned: boolean;
   hidden: boolean;
   locked: boolean;
   editable: boolean;
-  onPin: () => void;
-  onToggleHidden: () => void;
+  onTogglePin: () => void;
+  onToggleShown: () => void;
 }) {
   const Icon = item.icon;
 
   return (
-    <div className={classes.row} data-hidden={hidden || undefined}>
-      <span className={classes.tile}>
-        <Icon size={16} />
-      </span>
-      <span className={classes.rowText}>
-        <span className={classes.rowLabel}>{label}</span>
-        {hidden && <span className={classes.rowHint}>Hidden from the sidebar</span>}
-      </span>
-      {editable && (
-        <span className={classes.rowActions}>
-          {!hidden && (
-            <Tooltip label="Pin to top" withArrow openDelay={300}>
-              <ActionIcon variant="subtle" color="gray" size={32} radius="md" onClick={onPin} aria-label={`Pin ${label}`}>
-                <Pin size={16} />
-              </ActionIcon>
-            </Tooltip>
-          )}
-          <Tooltip label={locked ? "Always shown" : hidden ? "Show in sidebar" : "Hide from sidebar"} withArrow openDelay={300}>
-            <span>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size={32}
-                radius="md"
-                disabled={locked}
-                onClick={onToggleHidden}
-                aria-label={hidden ? `Show ${label}` : `Hide ${label}`}
-              >
-                {hidden ? <EyeOff size={16} /> : <Eye size={16} />}
-              </ActionIcon>
-            </span>
-          </Tooltip>
+    <div className={classes.pageRow} data-hidden={hidden || undefined}>
+      <span className={classes.pageName}>
+        <span className={classes.tile} data-accent={pinned || undefined}>
+          <Icon size={16} />
         </span>
-      )}
+        <span className={classes.rowLabel}>{label}</span>
+      </span>
+      <span className={classes.pageSection}>{section}</span>
+      <span className={classes.cell}>
+        <Tooltip label={pinned ? "Unpin" : "Pin to top"} withArrow openDelay={300} disabled={!editable}>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size={30}
+            radius="md"
+            className={classes.pinButton}
+            data-active={pinned || undefined}
+            disabled={!editable}
+            onClick={onTogglePin}
+            aria-label={pinned ? `Unpin ${label}` : `Pin ${label}`}
+            aria-pressed={pinned}
+          >
+            <Pin size={15} />
+          </ActionIcon>
+        </Tooltip>
+      </span>
+      <span className={classes.cell}>
+        <Tooltip label="Always shown" withArrow openDelay={300} disabled={!locked}>
+          <span>
+            <Switch
+              size="sm"
+              checked={!hidden}
+              disabled={!editable || locked}
+              onChange={onToggleShown}
+              aria-label={hidden ? `Show ${label}` : `Hide ${label}`}
+            />
+          </span>
+        </Tooltip>
+      </span>
     </div>
   );
 }

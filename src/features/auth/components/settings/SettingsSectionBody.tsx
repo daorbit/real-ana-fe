@@ -9,6 +9,7 @@ import { PasswordPanel } from "./PasswordPanel";
 import { TwoFactorPanel } from "./TwoFactorPanel";
 import { ScreenLockPanel } from "./ScreenLockPanel";
 import { SessionsPanel } from "./SessionsPanel";
+import { SecurityGroup } from "./SecurityGroup";
 import { AccountActivityPanel } from "./AccountActivityPanel";
 import { DeleteAccountPanel } from "./DeleteAccountPanel";
 import securityClasses from "./Security.module.css";
@@ -31,12 +32,23 @@ export function SettingsSectionBody({ id, form }: { id: SettingsSectionId; form:
       return (
         <Box className={securityClasses.stack}>
           <SecurityOverview />
-          <PasswordPanel />
-          <TwoFactorPanel />
-          <ScreenLockPanel />
-          <SessionsPanel />
-          <AccountActivityPanel />
-          <DeleteAccountPanel />
+          <Box className={securityClasses.columns}>
+            <Box className={securityClasses.column}>
+              <SecurityGroup
+                label="Protection"
+                footer="With two-factor on, you can also unlock the screen with your authenticator app."
+              >
+                <PasswordPanel />
+                <TwoFactorPanel />
+                <ScreenLockPanel />
+              </SecurityGroup>
+              <SessionsPanel />
+            </Box>
+            <Box className={securityClasses.column}>
+              <AccountActivityPanel />
+              <DeleteAccountPanel />
+            </Box>
+          </Box>
         </Box>
       );
   }

@@ -1,6 +1,6 @@
-import { Badge, Button, Group, Loader, Stack, Text } from "@mantine/core";
-import { Laptop, LogOut, Monitor, MonitorSmartphone, Smartphone, Tablet, type LucideIcon } from "lucide-react";
-import { SettingsCard } from "./SettingsCard";
+import { Button, Loader } from "@mantine/core";
+import { Laptop, LogOut, Monitor, Smartphone, Tablet, type LucideIcon } from "lucide-react";
+import { SecurityGroup, SecurityLinkRow, SecurityRow } from "./SecurityGroup";
 import { useSessions, type Session } from "./useSessions";
 import { timeAgo } from "@/shared/lib/format";
 import { confirmDelete } from "@/shared/lib/notify";
@@ -20,48 +20,24 @@ function deviceLabel(session: Session): string {
   return [session.browser, session.os].filter(Boolean).join(" · ") || "Unknown device";
 }
 
-function SessionRow({
-  session,
-  busy,
-  onRevoke,
-}: {
-  session: Session;
-  busy: boolean;
-  onRevoke: () => void;
-}) {
-  const Icon = deviceIcon(session.device);
-
+function SessionRow({ session, busy, onRevoke }: { session: Session; busy: boolean; onRevoke: () => void }) {
   return (
-    <Group justify="space-between" wrap="nowrap" className={classes.sessionRow} data-current={session.current || undefined}>
-      <Group gap={12} wrap="nowrap" style={{ minWidth: 0 }}>
-        <span className={classes.sessionIcon} data-current={session.current || undefined}>
-          <Icon size={17} />
-        </span>
-        <Stack gap={2} style={{ minWidth: 0 }}>
-          <Group gap={8} wrap="nowrap">
-            <Text size="sm" fw={600} truncate>
-              {deviceLabel(session)}
-            </Text>
-            {session.current && (
-              <Badge size="xs" variant="light" color="green" radius="sm">
-                This device
-              </Badge>
-            )}
-          </Group>
-          <Text size="xs" c="dimmed" truncate>
-            {[session.location, session.current ? "Active now" : `Active ${timeAgo(session.lastSeenAt)}`]
-              .filter(Boolean)
-              .join(" · ")}
-          </Text>
-        </Stack>
-      </Group>
-
-      {!session.current && (
-        <Button variant="default" size="xs" loading={busy} onClick={onRevoke}>
-          Revoke
-        </Button>
-      )}
-    </Group>
+    <SecurityRow
+      icon={deviceIcon(session.device)}
+      hue={session.current ? "green" : "slate"}
+      title={deviceLabel(session)}
+      status={session.current && <span className={classes.current}>This device</span>}
+      description={[session.location, session.current ? "Active now" : `Active ${timeAgo(session.lastSeenAt)}`]
+        .filter(Boolean)
+        .join(" · ")}
+      action={
+        !session.current && (
+          <Button variant="subtle" color="red" size="xs" radius="xl" loading={busy} onClick={onRevoke}>
+            Revoke
+          </Button>
+        )
+      }
+    />
   );
 }
 
@@ -80,42 +56,18 @@ export function SessionsPanel() {
   };
 
   return (
-    <SettingsCard
-      icon={MonitorSmartphone}
-      title="Active sessions"
-      badge={
-        !loading && (
-          <Badge size="sm" variant="light" color="gray" radius="sm">
-            {sessions.length}
-          </Badge>
-        )
-      }
-      description="Devices and browsers currently signed in to your account."
-      action={
-        hasOthers && (
-          <Button
-            variant="default"
-            color="red"
-            size="sm"
-            leftSection={<LogOut size={15} />}
-            loading={revokingOthers}
-            onClick={confirmRevokeOthers}
-          >
-            Sign out others
-          </Button>
-        )
-      }
+    <SecurityGroup
+      label={loading ? "Where you're signed in" : `Where you're signed in · ${sessions.length}`}
+      footer="Revoke any device you don't recognise, then change your password."
     >
       {loading ? (
-        <Group justify="center" py="lg">
+        <div className={classes.loading}>
           <Loader size="sm" />
-        </Group>
+        </div>
       ) : sessions.length === 0 ? (
-        <Text size="sm" c="dimmed" ta="center" py="lg">
-          No active sessions found.
-        </Text>
+        <p className={classes.empty}>No active sessions found.</p>
       ) : (
-        <Stack gap={0} className={classes.sessionList}>
+        <>
           {sessions.map((session) => (
             <SessionRow
               key={session.id}
@@ -124,8 +76,16 @@ export function SessionsPanel() {
               onRevoke={() => revoke(session.id)}
             />
           ))}
-        </Stack>
+          {hasOthers && (
+            <SecurityLinkRow
+              icon={LogOut}
+              label={revokingOthers ? "Signing out…" : "Sign out of all other devices"}
+              busy={revokingOthers}
+              onClick={confirmRevokeOthers}
+            />
+          )}
+        </>
       )}
-    </SettingsCard>
+    </SecurityGroup>
   );
 }

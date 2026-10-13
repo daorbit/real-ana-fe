@@ -63,7 +63,7 @@ function Stat({ metric, current, previous }: { metric: HourlyMetric; current: Se
 }
 
 export function SearchHourlyCard({ workspaceId, siteId, type }: { workspaceId: string; siteId: string; type: SearchType }) {
-  const [metric, setMetric] = useState<HourlyMetric>("clicks");
+  const [metric, setMetric] = useState<HourlyMetric>("impressions");
   const real = useGetSearchHourlyQuery({ workspaceId, siteId, type });
   const { demo } = useDemo();
   const sample = useMemo(() => (demo ? demoSearchHourly(type) : null), [demo, type]);
@@ -92,8 +92,8 @@ export function SearchHourlyCard({ workspaceId, siteId, type }: { workspaceId: s
           value={metric}
           onChange={(v) => setMetric(v as HourlyMetric)}
           data={[
-            { value: "clicks", label: "Clicks" },
             { value: "impressions", label: "Impressions" },
+            { value: "clicks", label: "Clicks" },
           ]}
         />
       </div>

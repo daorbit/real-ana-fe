@@ -4,7 +4,7 @@ import { GripVertical, Pin, PinOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAV_GROUPS, type NavItem } from "@/app/shell/navItems";
 import { withItemState, withPinnedOrder } from "@/app/shell/navPrefs";
-import { InsetSection } from "./InsetSection";
+import { SidebarCard } from "./SidebarCard";
 import { SortableList } from "./SortableList";
 import type { NavPrefsEditor } from "./useNavPrefsEditor";
 import classes from "./Sidebar.module.css";
@@ -25,16 +25,18 @@ export function PinnedSection({ editor, workspaceName }: { editor: NavPrefsEdito
   );
 
   return (
-    <InsetSection
+    <SidebarCard
       title="Pinned"
-      footer={`Pinned pages sit at the top of the sidebar for everyone in ${workspaceName}.${items.length > 1 && editable ? " Drag to reorder." : ""}`}
+      description={`Shown first in the sidebar for everyone in ${workspaceName}.${
+        items.length > 1 && editable ? " Drag to reorder." : ""
+      }`}
     >
       {items.length === 0 ? (
         <div className={classes.empty}>
           <span className={classes.emptyIcon}>
-            <Pin size={16} />
+            <Pin size={15} />
           </span>
-          <span>Pin the pages your team opens most to keep them one click away.</span>
+          <span>Nothing pinned yet. Use the pin next to a page to keep it one click away.</span>
         </div>
       ) : (
         <SortableList
@@ -46,38 +48,34 @@ export function PinnedSection({ editor, workspaceName }: { editor: NavPrefsEdito
             const label = t(item.labelKey, item.label);
             return (
               <div className={classes.row}>
+                {editable && items.length > 1 && (
+                  <span className={classes.grip} {...handle} aria-label={`Reorder ${label}`}>
+                    <GripVertical size={15} />
+                  </span>
+                )}
                 <span className={classes.tile} data-accent>
                   <Icon size={16} />
                 </span>
-                <span className={classes.rowText}>
-                  <span className={classes.rowLabel}>{label}</span>
-                </span>
+                <span className={classes.rowLabel}>{label}</span>
                 {editable && (
-                  <span className={classes.rowActions}>
-                    <Tooltip label="Unpin" withArrow openDelay={300}>
-                      <ActionIcon
-                        variant="subtle"
-                        color="gray"
-                        size={32}
-                        radius="md"
-                        onClick={() => apply(withItemState(prefs, item.to, "shown"))}
-                        aria-label={`Unpin ${label}`}
-                      >
-                        <PinOff size={16} />
-                      </ActionIcon>
-                    </Tooltip>
-                    {items.length > 1 && (
-                      <span className={classes.grip} {...handle} aria-label={`Reorder ${label}`}>
-                        <GripVertical size={16} />
-                      </span>
-                    )}
-                  </span>
+                  <Tooltip label="Unpin" withArrow openDelay={300}>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      size={30}
+                      radius="md"
+                      onClick={() => apply(withItemState(prefs, item.to, "shown"))}
+                      aria-label={`Unpin ${label}`}
+                    >
+                      <PinOff size={15} />
+                    </ActionIcon>
+                  </Tooltip>
                 )}
               </div>
             );
           }}
         />
       )}
-    </InsetSection>
+    </SidebarCard>
   );
 }

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { UnstyledButton } from "@mantine/core";
-import { ChevronRight, GripVertical, Plus } from "lucide-react";
+import { Button, UnstyledButton } from "@mantine/core";
+import { ChevronRight, GripVertical, Link2, Plus } from "lucide-react";
 import { LinkLogo } from "@/app/shell/LinkLogo";
 import { MAX_CUSTOM_LINKS, linkPath, withLinkOrder, type CustomLink } from "@/app/shell/navPrefs";
-import { InsetSection } from "./InsetSection";
+import { SidebarCard } from "./SidebarCard";
 import { SortableList } from "./SortableList";
 import { LinkSheet } from "./LinkSheet";
 import { linkHost } from "@/features/customLinks/lib/linkUrl";
@@ -17,57 +17,60 @@ export function LinksSection({ editor }: { editor: NavPrefsEditor }) {
 
   return (
     <>
-      <InsetSection
-        title="Links"
-        footer={
-          full
-            ? `You've added the maximum of ${MAX_CUSTOM_LINKS} links.`
-            : "Shortcuts to the tools your team uses alongside Quantalog. They open in a new tab."
+      <SidebarCard
+        title="Custom links"
+        description="Shortcuts to the tools your team uses alongside Quantalog."
+        action={
+          editable &&
+          !full && (
+            <Button size="xs" variant="default" radius="md" leftSection={<Plus size={14} />} onClick={() => setEditing("new")}>
+              Add link
+            </Button>
+          )
         }
+        footer={full ? `You've added the maximum of ${MAX_CUSTOM_LINKS} links.` : undefined}
       >
-        <SortableList
-          items={prefs.links}
-          disabled={!editable}
-          onReorder={(from, to) => apply(withLinkOrder(prefs, from, to))}
-          renderItem={(link, handle) => (
-            <div className={classes.row}>
-              <UnstyledButton
-                className={classes.rowButton}
-                onClick={() => setEditing(link)}
-                disabled={!editable}
-                aria-label={editable ? `Edit ${link.label}` : link.label}
-              >
-                <span className={classes.logoTile}>
-                  <LinkLogo url={link.url} logoUrl={link.logoUrl} label={link.label} size={20} />
-                </span>
-                <span className={classes.rowText}>
-                  <span className={classes.rowLabel}>{link.label}</span>
-                  <span className={classes.rowHint}>
-                    {link.mode === "internal" && link.slug ? linkPath(link.slug) : `${linkHost(link.url)} · New tab`}
-                  </span>
-                </span>
-                {editable && <ChevronRight size={16} className={classes.chevron} />}
-              </UnstyledButton>
-              {editable && (
-                <span className={classes.grip} {...handle} aria-label={`Reorder ${link.label}`}>
-                  <GripVertical size={16} />
-                </span>
-              )}
-            </div>
-          )}
-        />
-
-        {editable && !full && (
-          <UnstyledButton className={classes.addRow} onClick={() => setEditing("new")}>
-            <span className={classes.addIcon}>
-              <Plus size={15} />
+        {prefs.links.length === 0 ? (
+          <div className={classes.empty}>
+            <span className={classes.emptyIcon}>
+              <Link2 size={15} />
             </span>
-            Add link
-          </UnstyledButton>
+            <span>No links yet. Add Stripe, Notion or any tool your team opens daily.</span>
+          </div>
+        ) : (
+          <SortableList
+            items={prefs.links}
+            disabled={!editable}
+            onReorder={(from, to) => apply(withLinkOrder(prefs, from, to))}
+            renderItem={(link, handle) => (
+              <div className={classes.row}>
+                {editable && prefs.links.length > 1 && (
+                  <span className={classes.grip} {...handle} aria-label={`Reorder ${link.label}`}>
+                    <GripVertical size={15} />
+                  </span>
+                )}
+                <UnstyledButton
+                  className={classes.rowButton}
+                  onClick={() => setEditing(link)}
+                  disabled={!editable}
+                  aria-label={editable ? `Edit ${link.label}` : link.label}
+                >
+                  <span className={classes.logoTile}>
+                    <LinkLogo url={link.url} logoUrl={link.logoUrl} label={link.label} size={18} />
+                  </span>
+                  <span className={classes.rowText}>
+                    <span className={classes.rowLabel}>{link.label}</span>
+                    <span className={classes.rowHint}>
+                      {link.mode === "internal" && link.slug ? linkPath(link.slug) : `${linkHost(link.url)} · New tab`}
+                    </span>
+                  </span>
+                  {editable && <ChevronRight size={15} className={classes.chevron} />}
+                </UnstyledButton>
+              </div>
+            )}
+          />
         )}
-
-        {!editable && prefs.links.length === 0 && <div className={classes.empty}>No links yet.</div>}
-      </InsetSection>
+      </SidebarCard>
 
       <LinkSheet
         key={editing === "new" ? "new" : editing?.id ?? "closed"}

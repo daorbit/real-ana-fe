@@ -22,7 +22,7 @@ export function DetailSections({
         size="sm"
         value={value}
         onChange={(v) => onChange(v as SectionId)}
-        classNames={{ root: `${classes.segRoot} glass`, indicator: classes.segIndicator }}
+        classNames={{ root: classes.segRoot }}
         data={items.map((item) => ({
           value: item.id,
           label: (

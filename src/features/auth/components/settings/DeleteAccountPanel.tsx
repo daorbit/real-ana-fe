@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@mantine/core";
-import { Trash2, UserX } from "lucide-react";
-import { SettingsCard } from "./SettingsCard";
+import { UserX } from "lucide-react";
+import { SecurityGroup, SecurityRow } from "./SecurityGroup";
 import { DeleteAccountModal } from "./DeleteAccountModal";
 import { useAuth } from "@/features/auth/context";
 
@@ -13,16 +13,20 @@ export function DeleteAccountPanel() {
 
   return (
     <>
-      <SettingsCard
-        icon={UserX}
-        title="Delete account"
-        description="Permanently delete your account, every workspace you own and all of their data."
-        action={
-          <Button variant="default" color="red" leftSection={<Trash2 size={15} />} onClick={() => setOpen(true)}>
-            Delete account
-          </Button>
-        }
-      />
+      <SecurityGroup>
+        <SecurityRow
+          icon={UserX}
+          hue="rose"
+          danger
+          title="Delete account"
+          description="Permanently deletes your account, every workspace you own and all of their data."
+          action={
+            <Button variant="default" color="red" radius="xl" onClick={() => setOpen(true)}>
+              Delete…
+            </Button>
+          }
+        />
+      </SecurityGroup>
       {open && <DeleteAccountModal user={user} onClose={() => setOpen(false)} />}
     </>
   );

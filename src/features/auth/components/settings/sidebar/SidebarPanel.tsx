@@ -1,15 +1,11 @@
 import { Text } from "@mantine/core";
 import { Lock } from "lucide-react";
-import { NAV_GROUPS } from "@/app/shell/navItems";
 import { useWorkspace } from "@/features/workspace/context";
 import { PinnedSection } from "./PinnedSection";
 import { LinksSection } from "./LinksSection";
-import { PageGroups, PagesFoot } from "./PageGroups";
+import { PagesTable } from "./PagesTable";
 import { useNavPrefsEditor } from "./useNavPrefsEditor";
 import classes from "./Sidebar.module.css";
-
-const LEFT_GROUPS = NAV_GROUPS.slice(0, 1);
-const RIGHT_GROUPS = NAV_GROUPS.slice(1);
 
 export function SidebarPanel() {
   const { active } = useWorkspace();
@@ -27,16 +23,12 @@ export function SidebarPanel() {
         </div>
       )}
 
-      <div className={classes.columns}>
-        <div className={classes.column}>
+      <div className={classes.layout}>
+        <PagesTable editor={editor} />
+        <aside className={classes.aside}>
           <PinnedSection editor={editor} workspaceName={workspaceName} />
-          <PageGroups editor={editor} groups={LEFT_GROUPS} />
-        </div>
-        <div className={classes.column}>
           <LinksSection editor={editor} />
-          <PageGroups editor={editor} groups={RIGHT_GROUPS} />
-          <PagesFoot editor={editor} />
-        </div>
+        </aside>
       </div>
     </div>
   );

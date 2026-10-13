@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Alert, Button, Modal, Stack, Text } from "@mantine/core";
 import { ShieldCheck, ShieldOff, Smartphone } from "lucide-react";
-import { SettingsCard } from "./SettingsCard";
+import { SecurityRow } from "./SecurityGroup";
 import { StatusBadge } from "./StatusBadge";
+import { SECURITY_ROW_IDS } from "./securityRows";
 import { ConfirmIdentityField } from "./ConfirmIdentityField";
 import { identityProof, identityPrompt } from "./identityProof";
 import { TwoFactorSetupModal } from "./TwoFactorSetupModal";
@@ -57,23 +58,26 @@ export function TwoFactorPanel() {
 
   return (
     <>
-      <SettingsCard
+      <SecurityRow
+        id={SECURITY_ROW_IDS.twoFactor}
         icon={Smartphone}
+        hue="blue"
         title="Two-factor authentication"
-        badge={<StatusBadge on={Boolean(user.totpEnabled)} />}
-        description="Ask for a code from an authenticator app, like Google Authenticator or 1Password, every time you log in — with a password, Google or LinkedIn."
+        status={<StatusBadge on={Boolean(user.totpEnabled)} />}
+        description="A code from your authenticator app, like Google Authenticator or 1Password, every time you log in."
         action={
           user.totpEnabled ? (
             <Button
               variant="default"
               color="red"
+              radius="xl"
               leftSection={<ShieldOff size={15} />}
               onClick={() => setDisableOpen(true)}
             >
               Turn off
             </Button>
           ) : (
-            <Button leftSection={<ShieldCheck size={15} />} loading={starting} onClick={startSetup}>
+            <Button radius="xl" leftSection={<ShieldCheck size={15} />} loading={starting} onClick={startSetup}>
               Turn on
             </Button>
           )

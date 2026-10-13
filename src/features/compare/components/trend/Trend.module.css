@@ -55,7 +55,6 @@ button.legendItem:hover {
 
 .legendItem[data-active] {
   color: var(--text);
-  border-color: var(--glass-edge);
   background: var(--glass-fill-strong);
 }
 
@@ -141,7 +140,6 @@ button.bar:hover {
 }
 
 .bar[data-active] {
-  border-color: var(--glass-edge);
   background: var(--glass-fill-strong);
 }
 

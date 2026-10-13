@@ -1,10 +1,11 @@
 import { useState } from "react";
 import {
-  Alert, Button, Group, Modal, PasswordInput, PinInput, Stack, Text,
+  Alert, Button, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
 import { KeyRound, Lock, LockKeyhole, LockKeyholeOpen } from "lucide-react";
-import { SettingsCard } from "./SettingsCard";
+import { SecurityRow } from "./SecurityGroup";
 import { StatusBadge } from "./StatusBadge";
+import { SECURITY_ROW_IDS } from "./securityRows";
 import { ConfirmIdentityField } from "./ConfirmIdentityField";
 import { identityProof, identityPrompt } from "./identityProof";
 import { useAuth } from "@/features/auth/context";
@@ -106,11 +107,13 @@ export function ScreenLockPanel() {
 
   return (
     <>
-      <SettingsCard
+      <SecurityRow
+        id={SECURITY_ROW_IDS.screenLock}
         icon={LockKeyhole}
+        hue="indigo"
         title="Lock on inactivity"
-        badge={<StatusBadge on={Boolean(user.screenLockEnabled)} />}
-        description={`Show a lock screen after 5 minutes without activity. Unlock with ${
+        status={<StatusBadge on={Boolean(user.screenLockEnabled)} />}
+        description={`Locks the screen after 5 minutes without activity. Unlock with ${
           user.hasPin && user.totpEnabled
             ? "your PIN or your authenticator app"
             : user.totpEnabled
@@ -119,29 +122,31 @@ export function ScreenLockPanel() {
         }.${user.screenLockEnabled ? " Use “Lock now” to try it." : ""}`}
         action={
           user.screenLockEnabled ? (
-            <Group gap="xs" wrap="nowrap">
+            <>
               <Button
                 variant="default"
+                radius="xl"
                 leftSection={<Lock size={15} />}
                 loading={locking}
                 onClick={() => void lockNow()}
               >
                 Lock now
               </Button>
-              <Button variant="default" leftSection={<KeyRound size={15} />} onClick={() => setPinOpen(true)}>
+              <Button variant="default" radius="xl" leftSection={<KeyRound size={15} />} onClick={() => setPinOpen(true)}>
                 {user.hasPin ? "Change PIN" : "Set a PIN"}
               </Button>
               <Button
                 variant="default"
                 color="red"
+                radius="xl"
                 leftSection={<LockKeyholeOpen size={15} />}
                 onClick={() => setDisableOpen(true)}
               >
                 Turn off
               </Button>
-            </Group>
+            </>
           ) : (
-            <Button leftSection={<LockKeyhole size={15} />} onClick={openEnable}>
+            <Button radius="xl" leftSection={<LockKeyhole size={15} />} onClick={openEnable}>
               Turn on
             </Button>
           )

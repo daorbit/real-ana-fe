@@ -52,7 +52,7 @@
 }
 
 .verdict {
-  --tone: var(--text-2);
+  --tone: var(--hue-sky);
   flex: none;
   padding: 2px 9px;
   border-radius: 999px;
@@ -112,26 +112,24 @@
 }
 
 .tile {
-  --tone: var(--text-2);
+  --tone: var(--hue-sky);
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid var(--glass-edge);
+  border: 0;
   background: var(--glass-fill);
 }
 
 .tile[data-side="you"] {
   --tone: var(--violet-2);
-  border-color: color-mix(in srgb, var(--violet-2) 28%, transparent);
   background: color-mix(in srgb, var(--violet-2) 8%, transparent);
 }
 
 .tile[data-tone="ahead"] {
   --tone: var(--mantine-color-red-5);
-  border-color: color-mix(in srgb, var(--mantine-color-red-5) 26%, var(--border));
   background: color-mix(in srgb, var(--mantine-color-red-5) 7%, transparent);
 }
 
@@ -183,7 +181,7 @@
 }
 
 .tile[data-side="you"] .fill {
-  background: var(--grad-fitness);
+  background: var(--accent);
 }
 
 @media (max-width: 48em) {
