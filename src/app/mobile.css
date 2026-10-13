@@ -279,9 +279,9 @@
   .an-range .mantine-SegmentedControl-label,
   .an-range .mantine-SegmentedControl-label[data-active]::before { border-radius: 999px; }
   /* The range and compare pickers' own segmented rows. */
-  .range-segmented { padding: 2px; flex-shrink: 0; }
+  .range-segmented { height: 30px; padding: 2px; flex-shrink: 0; }
   .range-seg-btn {
-    padding: 4px 10px;
+    padding: 0 10px;
     font-size: 12px;
   }
   .an-range .mantine-Button-root { height: 30px !important; }

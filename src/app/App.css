@@ -1028,19 +1028,25 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .range-segmented {
+  box-sizing: border-box;
+  height: 36px;
+  align-items: stretch;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 3px;
 }
 .range-seg-btn {
-  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 12px;
   border-radius: calc(var(--radius-sm) - 3px);
   font-size: 12.5px;
   font-weight: 500;
+  line-height: 1;
   color: var(--muted);
-  display: flex;
-  align-items: center;
   transition: background 0.15s ease, color 0.15s ease;
 }
 .range-seg-btn:hover:not([data-locked="true"]) {
