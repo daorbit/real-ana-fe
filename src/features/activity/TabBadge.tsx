@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { setTitleCount } from "@/shared/lib/tabTitle";
-import { setFaviconBadge } from "@/shared/lib/faviconBadge";
 import { useActivityPanel } from "@/features/activity/ActivityPanelContext";
 
 export function TabBadge() {
@@ -8,16 +7,9 @@ export function TabBadge() {
 
   useEffect(() => {
     setTitleCount(count);
-    void setFaviconBadge(count > 0);
   }, [count]);
 
-  useEffect(
-    () => () => {
-      setTitleCount(0);
-      void setFaviconBadge(false);
-    },
-    [],
-  );
+  useEffect(() => () => setTitleCount(0), []);
 
   return null;
 }
