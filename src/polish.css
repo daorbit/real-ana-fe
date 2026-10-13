@@ -19,8 +19,8 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: lowercase;
-  color: var(--violet-2);
-  background: color-mix(in srgb, var(--violet-2) 12%, transparent);
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
   white-space: nowrap;
 }
 
