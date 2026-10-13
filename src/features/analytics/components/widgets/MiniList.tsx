@@ -4,6 +4,7 @@ import { num, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import { DonutBreakdown } from "@/shared/ui/rank/DonutBreakdown";
+import { PathLabel, isPathKey } from "@/shared/ui/rank/PathLabel";
 import type { RankTone } from "@/shared/ui/rank/tones";
 import type { Bucket } from "@/shared/types";
 
@@ -47,9 +48,11 @@ export function MiniList({
       ) : (
         <RankList
           limit={6}
+          strip
           items={items.map((i) => ({
             id: i.key,
-            label: format ? format(i.key) : i.key,
+            label: format ? format(i.key) : isPathKey(i.key) ? <PathLabel path={i.key} /> : i.key,
+            weight: i.count,
             title: i.key,
             value: num(i.count),
             aside: share(i.count, total),

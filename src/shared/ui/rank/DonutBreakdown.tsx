@@ -31,9 +31,9 @@ export function DonutBreakdown({
   const [active, setActive] = useState<number | null>(null);
   const slices = toSlices(items, limit);
   const total = slices.reduce((sum, s) => sum + s.value, 0);
-  const focus = active === null ? null : slices[active];
+  const focus = active === null ? null : slices[active] ?? null;
   const canSelect = (s: Slice) => Boolean(onSelect) && s.id !== OTHER_ID;
-  const select = (s: Slice) => canSelect(s) && onSelect?.(s.id);
+  const select = (s: Slice | undefined) => s && canSelect(s) && onSelect?.(s.id);
   const onKeyDown = (s: Slice) => (e: KeyboardEvent<HTMLLIElement>) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();

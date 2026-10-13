@@ -36,6 +36,7 @@ import { RetentionGrid } from "@/features/analytics/components/RetentionGrid";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
 import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitPanel";
 import { BarList } from "@/features/analytics/components/BarList";
+import { ClassicBarList } from "@/features/analytics/components/ClassicBarList";
 import { FilterBar } from "@/features/analytics/components/FilterBar";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import dimClasses from "@/features/analytics/components/layout/ScopeDim.module.css";
@@ -64,7 +65,7 @@ import {
   markerLines, MarkerLegend, MarkerDialog, MarkerButton,
 } from "@/features/analytics/components/MarkerLayer";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { countryLabel, duration, num } from "@/shared/lib";
+import { countryLabel, duration } from "@/shared/lib";
 import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
 import { ADD_SITE_PATH } from "@/features/workspace/paths";
@@ -673,13 +674,13 @@ export default function Analytics() {
 
         <Tabs.Panel value="pages">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <BarList title={t("analytics.list.topPages")} icon={Eye} items={view?.topPages ?? []} color="teal"
-                     filterKey="path" onFilter={addFilter}
-                     dimension="path" useCompare={useBreakdownCompare} />
-            <BarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="blue"
-                     empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
-            <BarList title={t("analytics.list.exitPages")} icon={LogOut} items={view?.exitPages ?? []} color="pink"
-                     empty="No completed sessions yet" filterKey="path" onFilter={addFilter} />
+            <ClassicBarList title={t("analytics.list.topPages")} icon={Eye} items={view?.topPages ?? []} color="teal"
+                            filterKey="path" onFilter={addFilter}
+                            dimension="path" useCompare={useBreakdownCompare} />
+            <ClassicBarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="emerald"
+                            empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
+            <ClassicBarList title={t("analytics.list.exitPages")} icon={LogOut} items={view?.exitPages ?? []} color="pink"
+                            empty="No completed sessions yet" filterKey="path" onFilter={addFilter} />
           </SimpleGrid>
         </Tabs.Panel>
 

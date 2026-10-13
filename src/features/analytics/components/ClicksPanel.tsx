@@ -29,7 +29,9 @@ export function ClicksPanel({
       ) : (
         <RankList
           limit={limit}
+          strip
           items={clicks.map((c) => ({
+            weight: c.count,
             id: `${c.key}|${c.path}`,
             label: c.key,
             title: c.key,

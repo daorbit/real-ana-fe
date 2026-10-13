@@ -3,6 +3,7 @@ import { num, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import { DepthRing } from "@/shared/ui/rank/DepthRing";
+import { PathLabel } from "@/shared/ui/rank/PathLabel";
 import type { RankTone } from "@/shared/ui/rank/tones";
 import type { ScrollBucket, LandingBucket } from "@/shared/types";
 
@@ -38,7 +39,7 @@ export function ScrollPanel({
           items={items.map((i) => ({
             id: i.key,
             leading: <DepthRing percent={i.avgDepth} />,
-            label: i.key,
+            label: <PathLabel path={i.key} />,
             title: i.key,
             value: `${i.avgDepth}%`,
             aside: `${i.completionRate}% finish`,
@@ -64,14 +65,15 @@ export function LandingPanel({ items }: { items: LandingBucket[] }) {
         <RankEmpty icon={LogIn}>Waiting for data…</RankEmpty>
       ) : (
         <RankList
+          strip
           items={items.map((i) => ({
             id: i.key,
-            label: i.key,
+            label: <PathLabel path={i.key} />,
+            weight: i.count,
             title: i.key,
             value: num(i.count),
             aside: share(i.count, total),
             meta: `${i.bounceRate}% bounce · ${i.pagesPerSession} pages / session`,
-            tone: i.bounceRate >= 70 ? "rose" : undefined,
           }))}
         />
       )}

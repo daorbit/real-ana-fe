@@ -1,35 +1,15 @@
 import { useState, type ReactNode } from "react";
-import { ActionIcon, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Tooltip } from "@mantine/core";
 import { GitCompareArrows, Inbox, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { num, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import { DonutBreakdown } from "@/shared/ui/rank/DonutBreakdown";
+import { PathLabel, isPathKey } from "@/shared/ui/rank/PathLabel";
 import { toRankTone } from "@/shared/ui/rank/tones";
-import type { Bucket, BreakdownComparisonRow, StatsFilter } from "@/shared/types";
-
-function BreakdownDelta({ row }: { row?: BreakdownComparisonRow }) {
-  if (!row) return null;
-  const { delta: pct, previous } = row;
-
-  if (previous === 0) {
-    return <Text size="xs" c="emerald" fw={600}>new</Text>;
-  }
-  if (pct === null) return <Text size="xs" c="dimmed">—</Text>;
-
-  const up = pct > 0;
-  const flat = pct === 0;
-  return (
-    <Tooltip label={`${num(previous)} in the baseline period`} withArrow>
-      <Text size="xs" fw={600} c={flat ? "dimmed" : up ? "emerald" : "red"}>
-        {flat ? "±0%" : `${up ? "+" : ""}${pct}%`}
-      </Text>
-    </Tooltip>
-  );
-}
-
-const NO_COMPARE = () => ({ rows: undefined, loading: false });
+import { BreakdownDelta, NO_COMPARE, type BreakdownCompareHook } from "./BreakdownDelta";
+import type { Bucket, StatsFilter } from "@/shared/types";
 
 export function BarList({
   title,
@@ -56,10 +36,7 @@ export function BarList({
   onFilter?: (key: keyof StatsFilter, value: string) => void;
   fill?: boolean;
   dimension?: string;
-  useCompare?: (dimension: string, enabled: boolean) => {
-    rows: BreakdownComparisonRow[] | undefined;
-    loading: boolean;
-  };
+  useCompare?: BreakdownCompareHook;
 }) {
   const { t } = useTranslation();
   const [compareOn, setCompareOn] = useState(false);
@@ -113,9 +90,11 @@ export function BarList({
         />
       ) : (
         <RankList
+          strip={!showCompare}
           items={shown.map((i) => ({
             id: i.key,
-            label: format ? format(i.key) : i.key,
+            label: format ? format(i.key) : isPathKey(i.key) ? <PathLabel path={i.key} /> : i.key,
+            weight: i.count,
             title: filterKey && onFilter ? `Filter by ${i.key}` : i.key,
             value: num(i.count),
             aside: showCompare ? <BreakdownDelta row={deltaByKey.get(i.key)} /> : share(i.count, total),
