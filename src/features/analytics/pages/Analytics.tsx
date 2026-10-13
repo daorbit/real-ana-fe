@@ -4,17 +4,17 @@ import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import {
-  Text, Group, Button, SimpleGrid, Card, Progress,
-  Stack, Center, ThemeIcon, Tabs, Box,
-  ActionIcon, Tooltip as MTooltip, Alert,
+  Text, Group, Button, SimpleGrid, Card,
+  Stack, Center, Tabs, Box,
+  Alert,
 } from "@mantine/core";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import {
-  Users, Eye, Radio, FolderKanban, Inbox, MousePointerClick, Timer,
+  Users, Eye, Radio, FolderKanban, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow, Zap, Filter, Split, GitCompareArrows, CloudOff,
+  ArrowDownWideNarrow, Zap, Split, CloudOff,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { trace } from "@/shared/lib/analytics";
@@ -35,6 +35,7 @@ import { UserFlowPanel } from "@/features/analytics/components/UserFlowPanel";
 import { RetentionGrid } from "@/features/analytics/components/RetentionGrid";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
 import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitPanel";
+import { BarList } from "@/features/analytics/components/BarList";
 import { FilterBar } from "@/features/analytics/components/FilterBar";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import dimClasses from "@/features/analytics/components/layout/ScopeDim.module.css";
@@ -63,12 +64,12 @@ import {
   markerLines, MarkerLegend, MarkerDialog, MarkerButton,
 } from "@/features/analytics/components/MarkerLayer";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { countryLabel, duration, share, num } from "@/shared/lib";
+import { countryLabel, duration, num } from "@/shared/lib";
 import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
 import { ADD_SITE_PATH } from "@/features/workspace/paths";
 import type {
-   Bucket, StatsFilter, Segment, Marker, MarkerKind, BreakdownComparisonRow,
+   StatsFilter, Segment, Marker, MarkerKind,
 } from "@/shared/types";
 import { serializeFilter } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -102,166 +103,6 @@ function LegendDot({ color, children }: { color: string; children: React.ReactNo
       <span style={{ width: 9, height: 9, borderRadius: 3, background: color, display: "inline-block" }} />
       <Text size="xs" c="dimmed">{children}</Text>
     </Group>
-  );
-}
-
-
-function BreakdownDelta({ row }: { row?: BreakdownComparisonRow }) {
-  if (!row) return null;
-  const { delta: pct, previous } = row;
-
-  // A row with no baseline is new, not up-by-infinity.
-  if (previous === 0) {
-    return <Text size="xs" c="emerald" fw={600}>new</Text>;
-  }
-  if (pct === null) return <Text size="xs" c="dimmed">—</Text>;
-
-  const up = pct > 0;
-  const flat = pct === 0;
-  return (
-    <MTooltip label={`${num(previous)} in the baseline period`} withArrow>
-      <Text size="xs" fw={600} c={flat ? "dimmed" : up ? "emerald" : "red"}>
-        {flat ? "±0%" : `${up ? "+" : ""}${pct}%`}
-      </Text>
-    </MTooltip>
-  );
-}
-
-
-const NO_COMPARE = () => ({ rows: undefined, loading: false });
-
-function BarList({
-  title,
-  items,
-  color = "teal",
-  icon: Icon,
-  format,
-  empty,
-  filterKey,
-  onFilter,
-  fill = true,
-  dimension,
-  useCompare,
-}: {
-  title: string;
-  items: Bucket[];
-  color?: string;
-  icon?: any;
-  format?: (key: string) => React.ReactNode;
-  empty?: string;
-  /** When set, each row filters the dashboard by this dimension on click. */
-  filterKey?: keyof StatsFilter;
-  onFilter?: (key: keyof StatsFilter, value: string) => void;
-
-  fill?: boolean;
-
-  dimension?: string;
-  /** Fetches this dimension's rows across both periods, when the toggle is on. */
-  useCompare?: (dimension: string, enabled: boolean) => {
-    rows: BreakdownComparisonRow[] | undefined;
-    loading: boolean;
-  };
-}) {
-  const { t } = useTranslation();
-  const emptyText = empty ?? t("analytics.waitingForData");
-  const clickable = Boolean(filterKey && onFilter);
-
-  const [compareOn, setCompareOn] = useState(false);
-  const canCompare = Boolean(dimension && useCompare);
-
-  const compareHook = useCompare ?? NO_COMPARE;
-  const { rows: compareRows, loading: compareLoading } = compareHook(
-    dimension ?? "",
-    compareOn && canCompare,
-  );
-
-  // While the comparison loads, the plain ranking stays on screen rather than
-  // blanking the card — same reasoning as the page-level stale payload.
-  const showCompare = compareOn && canCompare && !!compareRows;
-  const shown: Bucket[] = showCompare
-    ? compareRows.map((r) => ({ key: r.key, count: r.count }))
-    : items;
-
-  const deltaByKey = new Map(compareRows?.map((r) => [r.key, r]) ?? []);
-  const total = shown.reduce((sum, i) => sum + i.count, 0);
-  const max = Math.max(1, ...shown.map((i) => i.count));
-
-  return (
-    <Card withBorder radius="lg" padding="lg" h={fill ? "100%" : undefined}>
-      <Group gap={8} mb="md" justify="space-between" wrap="nowrap">
-        <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
-          {Icon && <Icon size={15} className="sect-ic" />}
-          <Text fw={600} c="dimmed" size="sm" truncate>{title}</Text>
-        </Group>
-        {canCompare && (
-          <MTooltip label="Compare to the baseline period" withArrow>
-            <ActionIcon
-              variant={compareOn ? "filled" : "subtle"}
-              color={compareOn ? "emerald" : "gray"}
-              size="sm"
-              loading={compareLoading}
-              onClick={() => setCompareOn((v) => !v)}
-              aria-label="Compare to the baseline period"
-            >
-              <GitCompareArrows size={14} />
-            </ActionIcon>
-          </MTooltip>
-        )}
-      </Group>
-
-      {shown.length === 0 ? (
-        <Center py="lg" mih={120}>
-          <Stack align="center" gap={4}>
-            <ThemeIcon variant="light" color="gray" size="md" radius="md"><Inbox size={16} /></ThemeIcon>
-            <Text c="dimmed" size="xs">{emptyText}</Text>
-          </Stack>
-        </Center>
-      ) : (
-        <Stack gap="sm">
-          {shown.map((i) => (
-            <div
-              key={i.key}
-              role={clickable ? "button" : undefined}
-              tabIndex={clickable ? 0 : undefined}
-              onClick={clickable ? () => onFilter!(filterKey!, i.key) : undefined}
-              onKeyDown={
-                clickable
-                  ? (e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onFilter!(filterKey!, i.key);
-                      }
-                    }
-                  : undefined
-              }
-              className={clickable ? "bar-row" : undefined}
-              title={clickable ? `Filter by ${i.key}` : undefined}
-            >
-              <Group justify="space-between" gap="xs" mb={4} wrap="nowrap">
-                <Text size="sm" truncate style={{ flex: 1 }}>
-                  {format ? format(i.key) : i.key}
-                </Text>
-                <Group gap={6} wrap="nowrap">
-                  {clickable && (
-                    <span className="bar-row-filter">
-                      <Filter size={12} />
-                      Filter
-                    </span>
-                  )}
-                  {showCompare ? (
-                    <BreakdownDelta row={deltaByKey.get(i.key)} />
-                  ) : (
-                    <Text size="xs" c="dimmed">{share(i.count, total)}</Text>
-                  )}
-                  <Text size="sm" fw={700}>{num(i.count)}</Text>
-                </Group>
-              </Group>
-              <Progress value={(i.count / max) * 100} size="sm" radius="xl" color={color} />
-            </div>
-          ))}
-        </Stack>
-      )}
-    </Card>
   );
 }
 
@@ -835,7 +676,7 @@ export default function Analytics() {
             <BarList title={t("analytics.list.topPages")} icon={Eye} items={view?.topPages ?? []} color="teal"
                      filterKey="path" onFilter={addFilter}
                      dimension="path" useCompare={useBreakdownCompare} />
-            <BarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="emerald"
+            <BarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="blue"
                      empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
             <BarList title={t("analytics.list.exitPages")} icon={LogOut} items={view?.exitPages ?? []} color="pink"
                      empty="No completed sessions yet" filterKey="path" onFilter={addFilter} />
@@ -855,13 +696,13 @@ export default function Analytics() {
               three channels beside nine referrers — and a grid row would pad the
               short card out to the tall one's height, leaving a dead block. */}
           <div className="masonry">
-            <BarList title={t("analytics.list.channels")} icon={Split} items={view?.channels ?? []} color="emerald"
+            <BarList title={t("analytics.list.channels")} chart="donut" icon={Split} items={view?.channels ?? []} color="emerald"
                      empty="No traffic yet" fill={false} />
-            <BarList title={t("analytics.list.referrers")} icon={Tag} items={view?.topReferrers ?? []} color="cyan"
+            <BarList title={t("analytics.list.referrers")} icon={Tag} items={view?.topReferrers ?? []} color="orange"
                      filterKey="referrer" onFilter={addFilter} fill={false}
                      dimension="referrer" useCompare={useBreakdownCompare} />
             <VisitorSplitPanel split={view?.visitorSplit} />
-            <BarList title={t("analytics.list.utmSources")} icon={Tag} items={view?.utmSources ?? []} color="teal"
+            <BarList title={t("analytics.list.utmSources")} icon={Tag} items={view?.utmSources ?? []} color="indigo"
                      filterKey="utmSource" onFilter={addFilter} fill={false}
                      dimension="utmSource" useCompare={useBreakdownCompare} />
             <BarList title={t("analytics.list.utmCampaigns")} icon={Tag} items={view?.utmCampaigns ?? []} color="grape"
@@ -872,16 +713,16 @@ export default function Analytics() {
 
         <Tabs.Panel value="tech">
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-            <BarList title={t("analytics.list.browsers")} icon={AppWindow} items={view?.browsers ?? []} color="cyan"
+            <BarList title={t("analytics.list.browsers")} chart="donut" icon={AppWindow} items={view?.browsers ?? []} color="cyan"
                      filterKey="browser" onFilter={addFilter}
                      dimension="browser" useCompare={useBreakdownCompare} />
-            <BarList title={t("analytics.list.operatingSystems")} icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="teal"
+            <BarList title={t("analytics.list.operatingSystems")} chart="donut" icon={MonitorSmartphone} items={view?.operatingSystems ?? []} color="blue"
                      filterKey="os" onFilter={addFilter}
                      dimension="os" useCompare={useBreakdownCompare} />
-            <BarList title={t("analytics.list.devices")} icon={MonitorSmartphone} items={view?.devices ?? []} color="emerald"
+            <BarList title={t("analytics.list.devices")} chart="donut" icon={MonitorSmartphone} items={view?.devices ?? []} color="amber"
                      filterKey="device" onFilter={addFilter}
                      dimension="device" useCompare={useBreakdownCompare} />
-            <BarList title={t("analytics.list.screenSizes")} icon={MonitorSmartphone} items={view?.screenSizes ?? []} color="grape" />
+            <BarList title={t("analytics.list.screenSizes")} chart="donut" icon={MonitorSmartphone} items={view?.screenSizes ?? []} color="grape" />
           </SimpleGrid>
         </Tabs.Panel>
 
@@ -905,7 +746,7 @@ export default function Analytics() {
                   </span>
                 )}
               />
-              <BarList title={t("analytics.list.languages")} icon={Languages} items={view?.languages ?? []} color="cyan"
+              <BarList title={t("analytics.list.languages")} icon={Languages} items={view?.languages ?? []} color="indigo"
                        filterKey="language" onFilter={addFilter}
                        dimension="language" useCompare={useBreakdownCompare} />
             </Stack>

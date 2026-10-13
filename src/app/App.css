@@ -1343,46 +1343,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .site-filter-row:hover { background: var(--surface-2); }
 
 
-.bar-row {
-  padding: 6px 8px;
-  margin: 0 -8px;
-  border-radius: 8px;
-  cursor: pointer;
-  outline: none;
-  transition: background 0.12s, box-shadow 0.12s;
-}
-.bar-row:hover,
-.bar-row:focus-visible {
-  background: color-mix(in srgb, var(--mantine-color-emerald-6) 10%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mantine-color-emerald-6) 35%, transparent);
-}
-
-
-.bar-row-filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--mantine-color-emerald-7, var(--accent-2));
-  background: color-mix(in srgb, var(--mantine-color-emerald-6) 16%, transparent);
-  opacity: 0;
-  transform: translateX(4px);
-  transition: opacity 0.12s, transform 0.12s;
-  white-space: nowrap;
-}
-.bar-row:hover .bar-row-filter,
-.bar-row:focus-visible .bar-row-filter {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-@media (hover: none) {
-  .bar-row-filter { opacity: 0.7; transform: none; }
-}
-
 
 .retention-table {
   border-collapse: separate;

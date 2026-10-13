@@ -4,6 +4,7 @@ import {
   LogIn, LogOut, AppWindow, MonitorSmartphone, Languages, Tag, Split,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { RankTone } from "@/shared/ui/rank/tones";
 import { countryLabel, duration } from "@/shared/lib";
 import { CountryFlag } from "@/shared/ui/CountryFlag";
 import type { Bucket, Stats } from "@/shared/types";
@@ -32,6 +33,8 @@ export const METRIC_TONE: Record<string, string> = {
 export type ListSource = {
   title: string;
   icon: LucideIcon;
+  tone: RankTone;
+  chart?: "list" | "donut";
   items: Bucket[];
   empty: string;
   format?: (key: string) => ReactNode;
@@ -67,18 +70,18 @@ export function metricSources(
 
 export function listSources(stats: Partial<Stats> | null): Record<string, ListSource> {
   return {
-    topPages: { title: "Top pages", icon: Eye, items: stats?.topPages ?? [], empty: "No pageviews yet" },
-    entryPages: { title: "Entry pages", icon: LogIn, items: stats?.entryPages ?? [], empty: "No sessions yet" },
-    exitPages: { title: "Exit pages", icon: LogOut, items: stats?.exitPages ?? [], empty: "No completed sessions yet" },
-    topReferrers: { title: "Referrers", icon: ArrowUpRight, items: stats?.topReferrers ?? [], empty: "No referrers yet" },
-    topCountries: { title: "Countries", icon: Globe2, items: stats?.countries ?? [], empty: "No location data yet", format: flag },
-    browsers: { title: "Browsers", icon: AppWindow, items: stats?.browsers ?? [], empty: "No data yet" },
-    operatingSystems: { title: "Operating systems", icon: MonitorSmartphone, items: stats?.operatingSystems ?? [], empty: "No data yet" },
-    devices: { title: "Devices", icon: MonitorSmartphone, items: stats?.devices ?? [], empty: "No data yet" },
-    screenSizes: { title: "Screen sizes", icon: MonitorSmartphone, items: stats?.screenSizes ?? [], empty: "No data yet" },
-    languages: { title: "Languages", icon: Languages, items: stats?.languages ?? [], empty: "No data yet" },
-    utmSources: { title: "UTM sources", icon: Tag, items: stats?.utmSources ?? [], empty: "No campaigns yet" },
-    utmCampaigns: { title: "UTM campaigns", icon: Tag, items: stats?.utmCampaigns ?? [], empty: "No campaigns yet" },
-    channels: { title: "Channels", icon: Split, items: stats?.channels ?? [], empty: "No traffic yet" },
+    topPages: { title: "Top pages", icon: Eye, tone: "teal", items: stats?.topPages ?? [], empty: "No pageviews yet" },
+    entryPages: { title: "Entry pages", icon: LogIn, tone: "blue", items: stats?.entryPages ?? [], empty: "No sessions yet" },
+    exitPages: { title: "Exit pages", icon: LogOut, tone: "pink", items: stats?.exitPages ?? [], empty: "No completed sessions yet" },
+    topReferrers: { title: "Referrers", icon: ArrowUpRight, tone: "orange", items: stats?.topReferrers ?? [], empty: "No referrers yet" },
+    topCountries: { title: "Countries", icon: Globe2, tone: "emerald", items: stats?.countries ?? [], empty: "No location data yet", format: flag },
+    browsers: { title: "Browsers", icon: AppWindow, tone: "cyan", chart: "donut", items: stats?.browsers ?? [], empty: "No data yet" },
+    operatingSystems: { title: "Operating systems", icon: MonitorSmartphone, tone: "blue", chart: "donut", items: stats?.operatingSystems ?? [], empty: "No data yet" },
+    devices: { title: "Devices", icon: MonitorSmartphone, tone: "amber", chart: "donut", items: stats?.devices ?? [], empty: "No data yet" },
+    screenSizes: { title: "Screen sizes", icon: MonitorSmartphone, tone: "violet", chart: "donut", items: stats?.screenSizes ?? [], empty: "No data yet" },
+    languages: { title: "Languages", icon: Languages, tone: "indigo", items: stats?.languages ?? [], empty: "No data yet" },
+    utmSources: { title: "UTM sources", icon: Tag, tone: "indigo", items: stats?.utmSources ?? [], empty: "No campaigns yet" },
+    utmCampaigns: { title: "UTM campaigns", icon: Tag, tone: "violet", items: stats?.utmCampaigns ?? [], empty: "No campaigns yet" },
+    channels: { title: "Channels", icon: Split, tone: "emerald", chart: "donut", items: stats?.channels ?? [], empty: "No traffic yet" },
   };
 }
