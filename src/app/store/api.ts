@@ -17,7 +17,7 @@ import type { TrackerOptions } from "@/features/workspace/tracker";
 import { formsQuery } from "@/features/integrations/lib/formsClient";
 import type {
   FormsApp, FormsAppTestResult, PaymentSettings, PaymentSettingsInput, PaymentTestResult,
-  PaymentMode, PaymentProvider, CalendarStatus, SheetsStatus,
+  PaymentMode, PaymentProvider, CalendarStatus, SheetsStatus, TelegramChatList,
 } from "@/features/integrations/types";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
@@ -491,6 +491,21 @@ export const api = createApi({
           return;
         }
       },
+    }),
+
+    findFormsAppChats: build.mutation<TelegramChatList, { workspaceId: string; appId: string; botToken?: string }>({
+      queryFn: ({ workspaceId, appId, botToken }, queryApi, extra, baseQuery) =>
+        formsQuery<TelegramChatList>(
+          {
+            workspaceId,
+            path: `/apps/${encodeURIComponent(appId)}/chats`,
+            method: "POST",
+            body: botToken ? { botToken } : {},
+          },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
     }),
 
     disconnectFormsApp: build.mutation<FormsApp[], { workspaceId: string; appId: string }>({
@@ -2769,6 +2784,7 @@ export const {
   useGetFormsAppsQuery,
   useSaveFormsAppMutation,
   useTestFormsAppMutation,
+  useFindFormsAppChatsMutation,
   useDisconnectFormsAppMutation,
   useGetFormsPaymentsQuery,
   useSaveFormsPaymentsMutation,

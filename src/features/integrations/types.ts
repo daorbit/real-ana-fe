@@ -35,7 +35,18 @@ export interface FormsAppTestResult {
   app: FormsApp;
 }
 
-export type PaymentProvider = "razorpay" | "cashfree" | "payu";
+export interface TelegramChat {
+  id: string;
+  title: string;
+  type: string;
+}
+
+export interface TelegramChatList {
+  botUsername?: string;
+  chats: TelegramChat[];
+}
+
+export type PaymentProvider ="razorpay" | "cashfree" | "payu";
 
 export type PaymentMode = "test" | "live";
 
