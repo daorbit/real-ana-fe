@@ -1,0 +1,123 @@
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--mantine-radius-md);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.step:hover {
+  background-color: var(--mantine-color-body);
+}
+
+.step[data-active="true"] {
+  border-color: var(--mantine-color-default-border);
+  background-color: var(--mantine-color-body);
+}
+
+.stepIndex {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mantine-color-dimmed);
+  background-color: var(--mantine-color-default-border);
+}
+
+.stepIndex[data-done="true"] {
+  color: #fff;
+  background-color: var(--mantine-color-teal-6);
+}
+
+.stepText {
+  min-width: 0;
+}
+
+.stepHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  margin-bottom: 6px;
+}
+
+.crumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.crumbSep {
+  opacity: 0.5;
+}
+
+.inlineLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.urlBlock {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+}
+
+.callout[data-tone="danger"] {
+  border-color: color-mix(in srgb, var(--mantine-color-red-6) 45%, transparent);
+}
+
+.callout[data-tone="warn"] {
+  border-color: color-mix(in srgb, var(--mantine-color-orange-6) 45%, transparent);
+}
+
+.calloutIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--mantine-color-dimmed);
+}
+
+.callout[data-tone="danger"] .calloutIcon {
+  color: var(--mantine-color-red-6);
+}
+
+.callout[data-tone="warn"] .calloutIcon {
+  color: var(--mantine-color-orange-6);
+}
+
+.callout[data-tone="ok"] .calloutIcon {
+  color: var(--mantine-color-teal-6);
+}
+
+.verified {
+  flex-shrink: 0;
+  color: var(--mantine-color-teal-6);
+}

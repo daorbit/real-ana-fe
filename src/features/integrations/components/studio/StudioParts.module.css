@@ -1,0 +1,98 @@
+.section {
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-lg);
+  background-color: var(--mantine-color-body);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px 0;
+}
+
+.sectionBody {
+  padding: 16px 20px 20px;
+}
+
+.block + .block {
+  margin-top: 24px;
+}
+
+.label {
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mantine-color-dimmed);
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkDone {
+  flex-shrink: 0;
+  color: var(--mantine-color-teal-6);
+}
+
+.checkOpen {
+  flex-shrink: 0;
+  color: var(--mantine-color-dimmed);
+}
+
+.secure {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  background-color: var(--mantine-color-body);
+}
+
+.secureIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--mantine-color-dimmed);
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background-color: var(--mantine-color-dimmed);
+}
+
+.dot[data-state="live"] {
+  background-color: var(--mantine-color-teal-6);
+}
+
+.dot[data-state="saved"] {
+  background-color: var(--mantine-color-orange-6);
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}

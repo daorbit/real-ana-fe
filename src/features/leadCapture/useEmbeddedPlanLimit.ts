@@ -2,21 +2,31 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { notify, type QuotaLimitInfo } from "@/shared/lib/notify";
 import { useActivityPanel } from "@/features/activity/ActivityPanelContext";
+import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import { LEAD_FORMS_BASE } from "./themeParams";
 
 const UPGRADE = "quantalog:upgrade";
 const PLAN_LIMIT = "quantalog:plan-limit";
 const OPEN_NOTIFICATIONS = "quantalog:open-notifications";
+const OPEN_INTEGRATIONS = "quantalog:open-integrations";
 
 interface FramePlanMessage {
-  type: typeof UPGRADE | typeof PLAN_LIMIT | typeof OPEN_NOTIFICATIONS;
+  type: typeof UPGRADE | typeof PLAN_LIMIT | typeof OPEN_NOTIFICATIONS | typeof OPEN_INTEGRATIONS;
   message?: string;
   limit?: QuotaLimitInfo;
+  app?: unknown;
+}
+
+const APP_ID = /^[a-z0-9-]{1,40}$/;
+
+function connectionsTarget(app: unknown): string {
+  const base = settingsPath("connections");
+  return typeof app === "string" && APP_ID.test(app) ? `${base}?app=${app}` : base;
 }
 
 function isFramePlanMessage(data: unknown): data is FramePlanMessage {
   const type = (data as { type?: unknown } | null)?.type;
-  return type === UPGRADE || type === PLAN_LIMIT || type === OPEN_NOTIFICATIONS;
+  return type === UPGRADE || type === PLAN_LIMIT || type === OPEN_NOTIFICATIONS || type === OPEN_INTEGRATIONS;
 }
 
 
@@ -36,6 +46,10 @@ export function useEmbeddedPlanLimit() {
       }
       if (event.data.type === OPEN_NOTIFICATIONS) {
         openActivityPanel();
+        return;
+      }
+      if (event.data.type === OPEN_INTEGRATIONS) {
+        navigate(connectionsTarget(event.data.app));
         return;
       }
       notify.quotaLimit(event.data.message ?? "Upgrade your plan to continue.", event.data.limit);

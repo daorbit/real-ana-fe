@@ -1,0 +1,16 @@
+.logo {
+  display: block;
+  flex-shrink: 0;
+}
+
+.wordmark {
+  display: block;
+  flex-shrink: 0;
+  color: var(--mantine-color-text);
+}
+
+.webhook {
+  display: block;
+  flex-shrink: 0;
+  color: #8b5cf6;
+}

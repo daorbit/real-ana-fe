@@ -14,6 +14,11 @@ import type {
 } from "@/shared/types";
 import type { Placed } from "@/features/analytics/widgetCatalog";
 import type { TrackerOptions } from "@/features/workspace/tracker";
+import { formsQuery } from "@/features/integrations/lib/formsClient";
+import type {
+  FormsApp, FormsAppTestResult, PaymentSettings, PaymentSettingsInput, PaymentTestResult,
+  PaymentMode, PaymentProvider, CalendarStatus,
+} from "@/features/integrations/types";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
@@ -125,7 +130,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsWebhook"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -432,6 +437,196 @@ export const api = createApi({
     disconnectLinkedIn: build.mutation<{ connected: false }, void>({
       query: () => ({ url: "/api/auth/linkedin", method: "DELETE" }),
       invalidatesTags: ["LinkedIn"],
+    }),
+
+    getFormsApps: build.query<FormsApp[], string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<FormsApp[]>({ workspaceId, path: "/apps" }, queryApi, extra, baseQuery),
+      providesTags: ["FormsApps"],
+    }),
+
+    saveFormsApp: build.mutation<
+      FormsApp,
+      { workspaceId: string; appId: string; values: Record<string, unknown>; enabled?: boolean }
+    >({
+      queryFn: ({ workspaceId, appId, values, enabled }, queryApi, extra, baseQuery) =>
+        formsQuery<FormsApp>(
+          { workspaceId, path: `/apps/${encodeURIComponent(appId)}`, method: "PUT", body: { values, enabled } },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            api.util.updateQueryData("getFormsApps", workspaceId, (draft) =>
+              draft.map((app) => (app.id === data.id ? data : app)),
+            ),
+          );
+          if (data.category === "email" && data.enabled) dispatch(api.util.invalidateTags(["FormsApps"]));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    testFormsApp: build.mutation<FormsAppTestResult, { workspaceId: string; appId: string; to?: string }>({
+      queryFn: ({ workspaceId, appId, to }, queryApi, extra, baseQuery) =>
+        formsQuery<FormsAppTestResult>(
+          { workspaceId, path: `/apps/${encodeURIComponent(appId)}/test`, method: "POST", body: to ? { to } : {} },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            api.util.updateQueryData("getFormsApps", workspaceId, (draft) =>
+              draft.map((app) => (app.id === data.app.id ? data.app : app)),
+            ),
+          );
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    disconnectFormsApp: build.mutation<FormsApp[], { workspaceId: string; appId: string }>({
+      queryFn: ({ workspaceId, appId }, queryApi, extra, baseQuery) =>
+        formsQuery<FormsApp[]>(
+          { workspaceId, path: `/apps/${encodeURIComponent(appId)}`, method: "DELETE" },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getFormsApps", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    getFormsPayments: build.query<PaymentSettings, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<PaymentSettings>({ workspaceId, path: "/payments" }, queryApi, extra, baseQuery),
+      providesTags: ["FormsPayments"],
+    }),
+
+    saveFormsPayments: build.mutation<PaymentSettings, { workspaceId: string; input: PaymentSettingsInput }>({
+      queryFn: ({ workspaceId, input }, queryApi, extra, baseQuery) =>
+        formsQuery<PaymentSettings>(
+          { workspaceId, path: "/payments", method: "PUT", body: input },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getFormsPayments", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    testFormsPayments: build.mutation<
+      PaymentTestResult,
+      { workspaceId: string; mode: PaymentMode; provider: PaymentProvider }
+    >({
+      queryFn: ({ workspaceId, mode, provider }, queryApi, extra, baseQuery) =>
+        formsQuery<PaymentTestResult>(
+          { workspaceId, path: "/payments/test", method: "POST", body: { mode, provider } },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getFormsPayments", workspaceId, data.settings));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    disconnectFormsPayments: build.mutation<
+      PaymentSettings,
+      { workspaceId: string; mode: PaymentMode; provider: PaymentProvider }
+    >({
+      queryFn: ({ workspaceId, mode, provider }, queryApi, extra, baseQuery) =>
+        formsQuery<PaymentSettings>(
+          { workspaceId, path: `/payments?mode=${mode}&provider=${provider}`, method: "DELETE" },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getFormsPayments", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    getFormsCalendar: build.query<CalendarStatus, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<CalendarStatus>({ workspaceId, path: "/calendar" }, queryApi, extra, baseQuery),
+      providesTags: ["FormsCalendar"],
+    }),
+
+    getFormsCalendarConnectUrl: build.mutation<{ url: string }, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<{ url: string }>({ workspaceId, path: "/calendar/connect" }, queryApi, extra, baseQuery),
+    }),
+
+    disconnectFormsCalendar: build.mutation<CalendarStatus, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<CalendarStatus>({ workspaceId, path: "/calendar", method: "DELETE" }, queryApi, extra, baseQuery),
+      async onQueryStarted(workspaceId, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getFormsCalendar", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    getFormsWebhook: build.query<{ enabled: boolean }, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<{ enabled: boolean }>({ workspaceId, path: "/webhook-app" }, queryApi, extra, baseQuery),
+      providesTags: ["FormsWebhook"],
+    }),
+
+    saveFormsWebhook: build.mutation<{ enabled: boolean }, { workspaceId: string; enabled: boolean }>({
+      queryFn: ({ workspaceId, enabled }, queryApi, extra, baseQuery) =>
+        formsQuery<{ enabled: boolean }>(
+          { workspaceId, path: "/webhook-app", method: "PUT", body: { enabled } },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      async onQueryStarted({ workspaceId, enabled }, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          api.util.updateQueryData("getFormsWebhook", workspaceId, (draft) => {
+            draft.enabled = enabled;
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
     }),
 
     /**
@@ -2547,6 +2742,19 @@ export const {
   useGetInstagramStatusQuery,
   useDisconnectInstagramMutation,
   useDisconnectLinkedInMutation,
+  useGetFormsAppsQuery,
+  useSaveFormsAppMutation,
+  useTestFormsAppMutation,
+  useDisconnectFormsAppMutation,
+  useGetFormsPaymentsQuery,
+  useSaveFormsPaymentsMutation,
+  useTestFormsPaymentsMutation,
+  useDisconnectFormsPaymentsMutation,
+  useGetFormsCalendarQuery,
+  useGetFormsCalendarConnectUrlMutation,
+  useDisconnectFormsCalendarMutation,
+  useGetFormsWebhookQuery,
+  useSaveFormsWebhookMutation,
   usePostToLinkedInMutation,
   useGetScheduledPostsQuery,
   useGetSentPostsQuery,

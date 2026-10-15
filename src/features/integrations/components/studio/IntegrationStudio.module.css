@@ -1,0 +1,152 @@
+.studio {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background-color: var(--mantine-color-body);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 64px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  flex-shrink: 0;
+}
+
+.back {
+  flex-shrink: 0;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  flex-shrink: 0;
+  background-color: var(--mantine-color-default-border);
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.identityText {
+  min-width: 0;
+}
+
+.actions {
+  flex-shrink: 0;
+}
+
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.aside {
+  width: 320px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 20px;
+  border-right: 1px solid var(--mantine-color-default-border);
+  background-color: var(--mantine-color-default-hover);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 28px 40px;
+}
+
+.footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--mantine-color-default-border);
+  background-color: var(--mantine-color-body);
+}
+
+.footerInner {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 14px 28px calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 48em) {
+  .topbar {
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  .backLabel,
+  .divider {
+    display: none;
+  }
+
+  .layout {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .aside {
+    width: 100%;
+    order: 2;
+    overflow: visible;
+    border-right: 0;
+    border-top: 1px solid var(--mantine-color-default-border);
+  }
+
+  .main {
+    flex: none;
+  }
+
+  .scroll {
+    overflow: visible;
+  }
+
+  .inner {
+    padding: 20px 16px 24px;
+  }
+
+  .footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+  }
+
+  .footerInner {
+    padding-inline: 16px;
+  }
+}

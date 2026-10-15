@@ -1,0 +1,60 @@
+.soon {
+  opacity: 0.55;
+}
+
+.mark {
+  --brand: var(--mantine-primary-color-filled);
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+}
+
+.mark[data-brand="linkedin"] {
+  --brand: #0a66c2;
+}
+
+.mark[data-brand="instagram"] {
+  --brand: #e4405f;
+}
+
+.mark[data-brand="facebook"] {
+  --brand: #1877f2;
+}
+
+.mark[data-brand="brevo"] {
+  --brand: #0b996e;
+}
+
+.mark[data-brand="smtp"] {
+  --brand: #64748b;
+}
+
+.mark[data-brand="razorpay"] {
+  --brand: #3395ff;
+}
+
+.mark[data-brand="cashfree"] {
+  --brand: #04ab61;
+}
+
+.mark[data-brand="payu"] {
+  --brand: #a2d045;
+}
+
+.mark[data-brand="webhook"] {
+  --brand: #8b5cf6;
+}
+
+.mark[data-brand="slack"] {
+  --brand: #e01e5a;
+}
+
+.mark[data-brand="discord"] {
+  --brand: #5865f2;
+}
+
+.mark[data-brand="google-calendar"] {
+  --brand: #4285f4;
+}
+
+.hint {
+  flex: 1;
+}

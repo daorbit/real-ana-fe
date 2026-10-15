@@ -1,0 +1,43 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.search {
+  flex: 1;
+  max-width: 380px;
+}
+
+.category {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.status {
+  margin-left: auto;
+}
+
+.count {
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+  color: var(--mantine-color-dimmed);
+}
+
+@media (max-width: 48em) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search,
+  .category {
+    width: 100%;
+    max-width: none;
+  }
+
+  .status {
+    margin-left: 0;
+  }
+}

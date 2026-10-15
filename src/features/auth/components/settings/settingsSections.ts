@@ -41,7 +41,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     labelKey: "settings.tabConnections",
     label: "Connections",
     descriptionKey: "settings.connectionsPageDesc",
-    description: "Accounts linked to Quantalog, like LinkedIn and Instagram.",
+    description: "Social accounts and the email, payment, calendar and chat apps your forms use.",
     icon: Link2,
   },
   {

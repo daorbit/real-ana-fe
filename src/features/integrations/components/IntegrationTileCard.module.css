@@ -1,0 +1,22 @@
+.status {
+  min-height: 22px;
+}
+
+.ok {
+  flex-shrink: 0;
+  color: var(--mantine-color-teal-6);
+}
+
+.paused {
+  flex-shrink: 0;
+  color: var(--mantine-color-yellow-6);
+}
+
+.warn {
+  flex-shrink: 0;
+  color: var(--mantine-color-orange-6);
+}
+
+.link {
+  flex-shrink: 0;
+}
