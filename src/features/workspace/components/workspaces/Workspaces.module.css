@@ -594,6 +594,37 @@
   font-size: 12px;
 }
 
+.modalTitle {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.editNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.editNote svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 .empty {
   padding: 48px 24px;
   border-radius: 14px;

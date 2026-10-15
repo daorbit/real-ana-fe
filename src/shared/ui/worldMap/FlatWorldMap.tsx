@@ -7,8 +7,6 @@ import { SPOTLIGHT_GLOW_ID, SpotlightGlow } from "./SpotlightDefs";
 import { CountryCallout } from "./CountryCallout";
 import { FLAG_PALETTES } from "./flagPalette";
 import { FlagGradients, flagGradientId } from "./FlagGradients";
-import { isIdentity, useMapZoom, zoomShape } from "./useMapZoom";
-import { ZoomControls } from "./ZoomControls";
 
 const SPOTLIGHT_LIMIT = 6;
 
@@ -34,19 +32,13 @@ export function FlatWorldMap({
   const shapes = useWorldPaths();
   const { ref, width } = useElementSize();
   const scale = width / MAP_WIDTH;
-  const { surface, zoom, dragging, canZoomIn, canZoomOut, zoomIn, zoomOut, reset, dragHandlers } = useMapZoom();
 
   const max = Math.max(1, ...byName.values());
   const intensity = (v: number) => Math.log(v + 1) / Math.log(max + 1);
 
-  const viewShapes = useMemo(
-    () => (isIdentity(zoom) ? shapes : shapes.map((s) => zoomShape(s, zoom))),
-    [shapes, zoom],
-  );
-
   const spots = useMemo(
-    () => (spotlight ? buildSpotlights(viewShapes, byName, SPOTLIGHT_LIMIT, scale) : NO_SPOTS),
-    [spotlight, viewShapes, byName, scale],
+    () => (spotlight ? buildSpotlights(shapes, byName, SPOTLIGHT_LIMIT, scale) : NO_SPOTS),
+    [spotlight, shapes, byName, scale],
   );
 
   const spotNames = useMemo(() => new Set(spots.map((s) => s.shape.name)), [spots]);
@@ -77,20 +69,18 @@ export function FlatWorldMap({
     <>
       <div ref={ref} className="world-map-frame">
         <svg
-          ref={surface}
           viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
-          className={`world-map${canZoomOut ? " zoomed" : ""}${dragging ? " dragging" : ""}`}
+          className="world-map"
           role="img"
           aria-label="Visitors by country"
-          {...dragHandlers}
         >
           <FlagGradients codes={active.map((s) => s.code as string)} />
           {spotlight && (
             <defs>
-              <SpotlightGlow zoom={zoom.k} />
+              <SpotlightGlow />
             </defs>
           )}
-          <g transform={`translate(${zoom.x} ${zoom.y}) scale(${zoom.k})`}>
+          <g>
             {ordered.map((s) => {
               const count = byName.get(s.name) ?? 0;
               const spotlit = spotNames.has(s.name);
@@ -115,13 +105,6 @@ export function FlatWorldMap({
             <CountryCallout key={s.shape.name} spot={s} />
           ))}
         </svg>
-        <ZoomControls
-          canZoomIn={canZoomIn}
-          canZoomOut={canZoomOut}
-          onZoomIn={zoomIn}
-          onZoomOut={zoomOut}
-          onReset={reset}
-        />
       </div>
 
       {!spotlight && (

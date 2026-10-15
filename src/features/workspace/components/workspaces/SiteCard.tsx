@@ -3,7 +3,7 @@ import {
   ActionIcon, Box, Button, Collapse, CopyButton, Divider, Group, Menu, Tooltip,
 } from "@mantine/core";
 import { SendToDeveloperButton } from "@/features/workspace/components/SendToDeveloperButton";
-import { Activity, Check, ChevronDown, Code2, Copy, ExternalLink, MoreHorizontal, Trash2 } from "lucide-react";
+import { Activity, Check, ChevronDown, Code2, Copy, ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
 import { SnippetBuilder } from "@/features/workspace/components/SnippetBuilder";
@@ -19,6 +19,7 @@ import classes from "./Workspaces.module.css";
 interface Props {
   site: Site;
   workspaceId: string;
+  onEdit: (() => void) | null;
   onDelete: (() => void) | null;
   focused?: boolean;
 }
@@ -27,7 +28,7 @@ interface Props {
  * One tracked site as a card. Opening "Install & verify" widens it to the full
  * row, so the snippet builder has room to breathe.
  */
-export function SiteCard({ site, workspaceId, onDelete, focused = false }: Props) {
+export function SiteCard({ site, workspaceId, onEdit, onDelete, focused = false }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(focused);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -78,6 +79,11 @@ export function SiteCard({ site, workspaceId, onDelete, focused = false }: Props
             >
               {t("workspaces.openSite", "Open site")}
             </Menu.Item>
+            {onEdit && (
+              <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>
+                {t("workspaces.editSite", "Edit name & domain")}
+              </Menu.Item>
+            )}
             <Menu.Item leftSection={<Copy size={14} />} onClick={() => void navigator.clipboard.writeText(site.siteId)}>
               {t("workspaces.copySiteId", "Copy site ID")}
             </Menu.Item>

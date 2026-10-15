@@ -683,6 +683,20 @@ export const api = createApi({
       ],
     }),
 
+    updateSite: build.mutation<
+      Site,
+      { workspaceId: string; siteId: string; name?: string; domain?: string }
+    >({
+      query: ({ workspaceId, siteId, ...body }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [
+        { type: "Site", id: `LIST-${workspaceId}` },
+      ],
+    }),
+
     deleteSite: build.mutation<void, { workspaceId: string; siteId: string }>({
       query: ({ workspaceId, siteId }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}`,
@@ -2545,6 +2559,7 @@ export const {
   useCreateSiteMutation,
   useGenerateOnboardingCopyMutation,
   useUpdateSiteOptionsMutation,
+  useUpdateSiteMutation,
   useDeleteSiteMutation,
   useGetStatsQuery,
   useGetLiveQuery,

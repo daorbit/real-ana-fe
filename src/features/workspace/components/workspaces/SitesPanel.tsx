@@ -6,6 +6,7 @@ import { RefreshButton } from "@/shared/ui/Refresh";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import type { Site } from "@/shared/types";
 import { SiteCard } from "./SiteCard";
+import { EditSiteModal } from "./EditSiteModal";
 import classes from "./Workspaces.module.css";
 
 interface Props {
@@ -33,6 +34,7 @@ export function SitesPanel({
 }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
+  const [editing, setEditing] = useState<Site | null>(null);
 
   const q = query.trim().toLowerCase();
   const shown = q
@@ -107,6 +109,7 @@ export function SitesPanel({
               key={s._id}
               site={s}
               workspaceId={workspaceId}
+              onEdit={canEdit ? () => setEditing(s) : null}
               onDelete={canEdit ? () => onDeleteSite(s) : null}
               focused={s.siteId === focusedSiteId}
             />
@@ -124,6 +127,8 @@ export function SitesPanel({
           )}
         </div>
       )}
+
+      <EditSiteModal site={editing} sites={sites} workspaceId={workspaceId} onClose={() => setEditing(null)} />
     </Box>
   );
 }

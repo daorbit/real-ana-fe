@@ -103,6 +103,7 @@ const TEAM_COPY: Record<string, Describe> = {
   "sitemap.removed": () => "removed a sitemap from Google",
 
   "site.added": (e) => `added the site ${quoted(e.target.label, "")}`.trim(),
+  "site.updated": (e) => `updated the site ${quoted(e.target.label, "")}`.trim(),
   "site.removed": (e) => `removed the site ${quoted(e.target.label, "")} and its data`.trim(),
 
   "api_key.created": (e) => `created the API key ${quoted(e.target.label, "")}`.trim(),
