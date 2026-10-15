@@ -14,6 +14,8 @@ export type Draft = {
   recipients: string[];
   emailChannel: boolean;
   whatsappChannel: boolean;
+  telegramChannel: boolean;
+  telegramChatIds: string[];
   analytics: boolean;
   seo: boolean;
   dashboardLink: boolean;
@@ -29,6 +31,8 @@ export const emptyDraft = (): Draft => ({
   recipients: [],
   emailChannel: true,
   whatsappChannel: false,
+  telegramChannel: false,
+  telegramChatIds: [],
   analytics: true,
   seo: true,
   dashboardLink: false,
@@ -46,6 +50,8 @@ export const fromSchedule = (s: ReportSchedule): Draft => ({
   recipients: s.recipients.slice(1).map((r) => r.email),
   emailChannel: s.channels.email,
   whatsappChannel: s.channels.whatsapp,
+  telegramChannel: Boolean(s.channels.telegram),
+  telegramChatIds: s.telegramChatIds ?? [],
   analytics: s.include.analytics,
   seo: s.include.seo,
   dashboardLink: s.include.dashboardLink,

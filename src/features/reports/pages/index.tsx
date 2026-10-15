@@ -106,6 +106,7 @@ export default function Reports() {
                 onEdit={dialog.openEdit}
                 onTest={page.runTest}
                 onTestWhatsApp={page.runWhatsAppTest}
+                onTestTelegram={page.runTelegramTest}
                 onToggle={page.toggleEnabled}
                 onDelete={page.destroy}
               />
@@ -120,6 +121,7 @@ export default function Reports() {
         editingId={dialog.editingId}
         draft={dialog.draft}
         setDraft={dialog.setDraft}
+        workspaceId={page.workspaceId}
         emailInput={dialog.emailInput}
         setEmailInput={dialog.setEmailInput}
         addEmail={dialog.addEmail}

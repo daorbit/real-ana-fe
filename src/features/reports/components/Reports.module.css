@@ -458,6 +458,10 @@
   background: color-mix(in srgb, var(--surface-2) 40%, transparent);
 }
 
+.channelPanel {
+  margin-top: 12px;
+}
+
 /* ================= Email preview ================= */
 
 .previewHead {

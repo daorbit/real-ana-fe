@@ -81,6 +81,9 @@ export function recipientSummary(s: ReportSchedule): string {
     const active = s.phoneRecipients.filter((p) => !p.optedOut).length;
     parts.push(i18n.t("reports.whatsappCount", { count: active }));
   }
+  if (s.channels.telegram) {
+    parts.push(i18n.t("reports.telegramCount", { count: s.telegramChatIds?.length ?? 0 }));
+  }
   const out =
     s.recipients.filter((r) => r.unsubscribed).length +
     s.phoneRecipients.filter((p) => p.optedOut).length;
@@ -94,6 +97,9 @@ export function destinations(s: ReportSchedule): string {
     ...(s.channels.email ? s.recipients.filter((r) => !r.unsubscribed).map((r) => r.email) : []),
     ...(s.channels.whatsapp
       ? s.phoneRecipients.filter((p) => !p.optedOut).map((p) => p.label || `+${p.phone}`)
+      : []),
+    ...(s.channels.telegram && s.telegramChatIds?.length
+      ? [i18n.t("reports.telegramCount", { count: s.telegramChatIds.length })]
       : []),
   ].join(", ");
 }

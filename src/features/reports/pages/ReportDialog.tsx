@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { ActionIcon, Button, Modal } from "@mantine/core";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ export function ReportDialog({
   editingId,
   draft,
   setDraft,
+  workspaceId,
   emailInput,
   setEmailInput,
   addEmail,
@@ -47,7 +48,8 @@ export function ReportDialog({
   onClose: () => void;
   editingId: string | null;
   draft: Draft;
-  setDraft: (d: Draft) => void;
+  setDraft: Dispatch<SetStateAction<Draft>>;
+  workspaceId: string;
   emailInput: string;
   setEmailInput: (v: string) => void;
   addEmail: () => void;
@@ -79,7 +81,7 @@ export function ReportDialog({
     sections.current[tab as FormSection]?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [tab, focusTick]);
 
-  const recipients = 1 + draft.recipients.length;
+  const recipients = 1 + draft.recipients.length + (draft.telegramChannel ? draft.telegramChatIds.length : 0);
   const summary = [
     frequencyLabel(draft.frequency),
     draft.enabled ? t("reports.previewNextSend", { when: nextRunLabel(draft.frequency) }) : t("reports.paused"),
@@ -124,6 +126,7 @@ export function ReportDialog({
             <ReportForm
               draft={draft}
               setDraft={setDraft}
+              workspaceId={workspaceId}
               sites={sites}
               emailInput={emailInput}
               setEmailInput={setEmailInput}

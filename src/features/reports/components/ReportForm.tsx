@@ -1,7 +1,7 @@
-import type { ReactNode, Ref } from "react";
+import type { Dispatch, ReactNode, Ref, SetStateAction } from "react";
 import { ActionIcon, Alert, Button, MultiSelect, Switch, Text, TextInput } from "@mantine/core";
 import {
-  BarChart3, FileSpreadsheet, Link2, Mail, MessageCircle, MessageSquareText, Search, X,
+  BarChart3, FileSpreadsheet, Link2, Mail, MessageCircle, MessageSquareText, Search, Send, X,
   type LucideIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -9,13 +9,15 @@ import { REPORT_FREQUENCIES } from "@/shared/types";
 import type { ShareState, Site, WhatsAppStatus } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { frequencyHint, frequencyLabel } from "@/features/reports/pages/utils";
+import { TelegramDelivery } from "@/features/reports/components/telegram/TelegramDelivery";
 import classes from "./Reports.module.css";
 
 export type FormSection = "schedule" | "delivery" | "content";
 
 interface Props {
   draft: Draft;
-  setDraft: (d: Draft) => void;
+  setDraft: Dispatch<SetStateAction<Draft>>;
+  workspaceId: string;
   sites: Site[];
   emailInput: string;
   setEmailInput: (v: string) => void;
@@ -90,7 +92,7 @@ function ToggleRow({
  * hidden behind a Next button and editing one field is a single scroll.
  */
 export function ReportForm({
-  draft, setDraft, sites, emailInput, setEmailInput, addEmail, removeEmail,
+  draft, setDraft, workspaceId, sites, emailInput, setEmailInput, addEmail, removeEmail,
   ownerEmail, ownerMobile, wa, waReady, waEntitled, share, sectionRef,
 }: Props) {
   const { t } = useTranslation();
@@ -234,7 +236,23 @@ export function ReportForm({
               disabled={!waReady || !waEntitled}
               onChange={(v) => setDraft({ ...draft, whatsappChannel: v })}
             />
+            <ToggleRow
+              icon={Send}
+              label={t("reports.channelTelegram")}
+              hint={t("reports.channelTelegramHint")}
+              checked={draft.telegramChannel}
+              onChange={(v) => setDraft({ ...draft, telegramChannel: v })}
+            />
           </div>
+          {draft.telegramChannel && workspaceId && (
+            <div className={classes.channelPanel}>
+              <TelegramDelivery
+                workspaceId={workspaceId}
+                selected={draft.telegramChatIds}
+                onSelect={(telegramChatIds) => setDraft((d) => ({ ...d, telegramChatIds }))}
+              />
+            </div>
+          )}
           {draft.whatsappChannel && (
             <Alert color="teal" variant="light" radius="md" p="xs" mt="xs" icon={<MessageCircle size={15} />}>
               <Text size="xs">

@@ -555,7 +555,22 @@ export type ReportPhoneRecipient = {
 };
 
 /** Which channels a report goes out on. At least one is always true. */
-export type ReportChannels = { email: boolean; whatsapp: boolean };
+export type ReportChannels = { email: boolean; whatsapp: boolean; telegram?: boolean };
+
+export type TelegramChat = {
+  chatId: string;
+  title: string;
+  type: string;
+  linkedAt?: string;
+};
+
+export type TelegramStatus = {
+  platformAvailable: boolean;
+  platformBot: string | null;
+  ownBot: { username: string } | null;
+  mode: "quantalog" | "own";
+  chats: TelegramChat[];
+};
 
 /** Whether WhatsApp delivery is available, and the paired session's live state. */
 export type WhatsAppStatus = {
@@ -574,6 +589,7 @@ export type ReportSchedule = {
   recipients: ReportRecipient[];
   phoneRecipients: ReportPhoneRecipient[];
   channels: ReportChannels;
+  telegramChatIds?: string[];
   include: { analytics: boolean; seo: boolean; dashboardLink: boolean; aiSummary?: boolean };
   attachXlsx: boolean;
   enabled: boolean;
@@ -594,6 +610,7 @@ export type ReportScheduleInput = {
    * mobile, which the server reads from their profile.
    */
   channels: ReportChannels;
+  telegramChatIds: string[];
   include: { analytics: boolean; seo: boolean; dashboardLink: boolean; aiSummary?: boolean };
   attachXlsx: boolean;
   enabled?: boolean;

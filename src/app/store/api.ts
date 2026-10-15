@@ -27,7 +27,7 @@ import type {
   DemoUsage, DbStats, WorkersAiTrendPoint, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
   Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
-  ReportSchedule, ReportScheduleInput, WhatsAppStatus,
+  ReportSchedule, ReportScheduleInput, WhatsAppStatus, TelegramStatus, TelegramChat,
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
   Coupon, CouponCheckResult, CheckoutPreview, Invoice, QuotaSummary, UsageHistory,
   MyReferrals, ReferralSettings, AdminReferralPage, ReferralOverview, TopReferrer,
@@ -130,7 +130,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -2390,6 +2390,92 @@ export const api = createApi({
       }),
     }),
 
+    testReportTelegram: build.mutation<{ ok: true; sentTo: string[] }, { workspaceId: string; id: string }>({
+      query: ({ workspaceId, id }) => ({
+        url: `/api/workspaces/${workspaceId}/reports/${id}/test-telegram`,
+        method: "POST",
+      }),
+    }),
+
+    getTelegramStatus: build.query<TelegramStatus, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/telegram`,
+      providesTags: ["Telegram"],
+    }),
+
+    createTelegramLink: build.mutation<{ url: string; expiresAt: string }, { workspaceId: string; group: boolean }>({
+      query: ({ workspaceId, group }) => ({
+        url: `/api/workspaces/${workspaceId}/telegram/link`,
+        method: "POST",
+        body: { group },
+      }),
+    }),
+
+    saveTelegramBot: build.mutation<TelegramStatus, { workspaceId: string; token: string }>({
+      query: ({ workspaceId, token }) => ({
+        url: `/api/workspaces/${workspaceId}/telegram/own-bot`,
+        method: "PUT",
+        body: { token },
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getTelegramStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    removeTelegramBot: build.mutation<TelegramStatus, { workspaceId: string }>({
+      query: ({ workspaceId }) => ({
+        url: `/api/workspaces/${workspaceId}/telegram/own-bot`,
+        method: "DELETE",
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getTelegramStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    findTelegramBotChats: build.mutation<{ chats: TelegramChat[] }, { workspaceId: string }>({
+      query: ({ workspaceId }) => `/api/workspaces/${workspaceId}/telegram/own-bot/chats`,
+    }),
+
+    addTelegramChat: build.mutation<TelegramStatus, { workspaceId: string; chatId: string }>({
+      query: ({ workspaceId, chatId }) => ({
+        url: `/api/workspaces/${workspaceId}/telegram/chats`,
+        method: "POST",
+        body: { chatId },
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getTelegramStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    removeTelegramChat: build.mutation<TelegramStatus, { workspaceId: string; chatId: string }>({
+      query: ({ workspaceId, chatId }) => ({
+        url: `/api/workspaces/${workspaceId}/telegram/chats/${encodeURIComponent(chatId)}`,
+        method: "DELETE",
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getTelegramStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
 
     getAdminPlans: build.query<Plan[], void>({
       query: () => "/api/admin/billing/plans",
@@ -2938,6 +3024,14 @@ export const {
   useTestReportScheduleMutation,
   useGetWhatsAppStatusQuery,
   useTestReportWhatsAppMutation,
+  useTestReportTelegramMutation,
+  useGetTelegramStatusQuery,
+  useCreateTelegramLinkMutation,
+  useSaveTelegramBotMutation,
+  useRemoveTelegramBotMutation,
+  useFindTelegramBotChatsMutation,
+  useAddTelegramChatMutation,
+  useRemoveTelegramChatMutation,
   useGetAdminFxQuery,
   useSyncAdminPlanCurrencyMutation,
   useGetAdminAddonPacksQuery,

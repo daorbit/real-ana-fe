@@ -19,6 +19,7 @@ interface Props {
   onEdit: (s: ReportSchedule) => void;
   onTest: (s: ReportSchedule) => void;
   onTestWhatsApp: (s: ReportSchedule) => void;
+  onTestTelegram: (s: ReportSchedule) => void;
   onToggle: (s: ReportSchedule) => void;
   onDelete: (s: ReportSchedule) => void;
 }
@@ -30,7 +31,7 @@ interface Props {
  */
 export function ReportsTable({
   schedules, siteNameFor, canEdit, waEntitled, testingId,
-  onEdit, onTest, onTestWhatsApp, onToggle, onDelete,
+  onEdit, onTest, onTestWhatsApp, onTestTelegram, onToggle, onDelete,
 }: Props) {
   const { t } = useTranslation();
 
@@ -74,7 +75,12 @@ export function ReportsTable({
                   <span className={classes.channels}>
                     {s.channels.email && <Mail size={12} aria-label={t("reports.channelEmail")} />}
                     {s.channels.whatsapp && <MessageCircle size={12} aria-label={t("reports.channelWhatsApp")} />}
-                    {[s.channels.email && t("reports.channelEmail"), s.channels.whatsapp && t("reports.channelWhatsApp")]
+                    {s.channels.telegram && <Send size={12} aria-label={t("reports.channelTelegram")} />}
+                    {[
+                      s.channels.email && t("reports.channelEmail"),
+                      s.channels.whatsapp && t("reports.channelWhatsApp"),
+                      s.channels.telegram && t("reports.channelTelegram"),
+                    ]
                       .filter(Boolean)
                       .join(" + ")}
                   </span>
@@ -154,6 +160,11 @@ export function ReportsTable({
                         {s.channels.whatsapp && waEntitled && (
                           <Menu.Item leftSection={<MessageCircle size={14} />} onClick={() => onTestWhatsApp(s)}>
                             {t("reports.sendWhatsAppTest")}
+                          </Menu.Item>
+                        )}
+                        {s.channels.telegram && (
+                          <Menu.Item leftSection={<Send size={14} />} onClick={() => onTestTelegram(s)}>
+                            {t("reports.sendTelegramTest")}
                           </Menu.Item>
                         )}
                         <Menu.Divider />

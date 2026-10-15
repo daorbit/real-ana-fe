@@ -1,4 +1,4 @@
-import { CalendarClock, FileSpreadsheet, Mail, MessageCircle, Pause } from "lucide-react";
+import { CalendarClock, FileSpreadsheet, Mail, MessageCircle, Pause, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Site } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
@@ -202,7 +202,15 @@ export function EmailPreview({
             {t("reports.previewWhatsAppCopy")}
           </span>
         )}
-        {!draft.emailChannel && !draft.whatsappChannel && <span>{t("reports.previewNoChannel")}</span>}
+        {draft.telegramChannel && (
+          <span>
+            <Send size={13} />
+            {t("reports.previewTelegramCopy")}
+          </span>
+        )}
+        {!draft.emailChannel && !draft.whatsappChannel && !draft.telegramChannel && (
+          <span>{t("reports.previewNoChannel")}</span>
+        )}
         {showAi && <span className={classes.factNote}>{t("reports.previewAiSkipped")}</span>}
       </div>
     </div>

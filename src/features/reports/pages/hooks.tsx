@@ -4,7 +4,7 @@ import {
   useGetReportSchedulesQuery, useSaveReportScheduleMutation,
   useDeleteReportScheduleMutation, useTestReportScheduleMutation,
   useGetSitesQuery, useGetShareQuery,
-  useGetWhatsAppStatusQuery, useTestReportWhatsAppMutation,
+  useGetWhatsAppStatusQuery, useTestReportWhatsAppMutation, useTestReportTelegramMutation,
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
@@ -69,6 +69,7 @@ export function useReportsPage() {
   const [remove] = useDeleteReportScheduleMutation();
   const [sendTest, { isLoading: testing }] = useTestReportScheduleMutation();
   const [sendWaTest] = useTestReportWhatsAppMutation();
+  const [sendTgTest] = useTestReportTelegramMutation();
   const [testingId, setTestingId] = useState<string | null>(null);
 
   const schedules = data?.schedules ?? [];
@@ -102,7 +103,8 @@ export function useReportsPage() {
       siteIds: d.siteIds,
       frequency: d.frequency,
       recipients: d.recipients,
-      channels: { email: d.emailChannel, whatsapp: d.whatsappChannel },
+      channels: { email: d.emailChannel, whatsapp: d.whatsappChannel, telegram: d.telegramChannel },
+      telegramChatIds: d.telegramChannel ? d.telegramChatIds : [],
       include: { analytics: d.analytics, seo: d.seo, dashboardLink: d.dashboardLink, aiSummary: d.aiSummary },
       attachXlsx: d.attachXlsx,
       enabled: d.enabled,
@@ -156,6 +158,19 @@ export function useReportsPage() {
     }
   };
 
+  const runTelegramTest = async (s: ReportSchedule) => {
+    trace(user?.id, "test_report_telegram", "reports", "telegram");
+    setTestingId(s.id);
+    try {
+      const result = await sendTgTest({ workspaceId, id: s.id }).unwrap();
+      notify.success(t("reports.tgTestSentBody", { chats: result.sentTo.join(", ") }), t("reports.tgTestSentTitle"));
+    } catch (e) {
+      notify.error(errMessage(e, t("reports.tgTestError")));
+    } finally {
+      setTestingId(null);
+    }
+  };
+
   const destroy = (s: ReportSchedule) => {
     confirmDelete({
       title: t("reports.deleteTitle"),
@@ -177,7 +192,7 @@ export function useReportsPage() {
     enabled, nextUp, reach, siteNameFor, nextSendLabel,
     waReady, waEntitled, ownerMobile, canEdit,
     saving, testing, testingId,
-    persist, toggleEnabled, runTest, runWhatsAppTest, destroy,
+    persist, toggleEnabled, runTest, runWhatsAppTest, runTelegramTest, destroy,
   };
 }
 
@@ -255,8 +270,12 @@ export function useReportDialog(opts: {
       fail("content", t("reports.needContent"));
       return;
     }
-    if (!draft.emailChannel && !draft.whatsappChannel) {
+    if (!draft.emailChannel && !draft.whatsappChannel && !draft.telegramChannel) {
       fail("delivery", t("reports.needChannel"));
+      return;
+    }
+    if (draft.telegramChannel && !draft.telegramChatIds.length) {
+      fail("delivery", t("reports.tgNeedChat"));
       return;
     }
     if (draft.whatsappChannel && !opts.waEntitled) {
