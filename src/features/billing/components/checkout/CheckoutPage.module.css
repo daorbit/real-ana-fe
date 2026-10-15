@@ -10,11 +10,10 @@
 
 .shell {
   --pa: var(--accent);
-  --pa-ink: var(--accent);
   --pa-on: #ffffff;
-  --price: var(--green);
-  --violet-2: var(--pa-ink);
-  --accent-2: var(--pa-ink);
+  --price: var(--text);
+  --good: var(--green);
+  --violet-2: var(--text);
 }
 
 .topBar {
@@ -103,8 +102,8 @@
   width: 64px;
   height: 64px;
   border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--pa) 32%, var(--border));
-  background: color-mix(in srgb, var(--pa) 12%, var(--surface));
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .heroText {
@@ -115,9 +114,11 @@
 }
 
 .eyebrow {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--pa-ink);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .heroTitle {
@@ -202,7 +203,7 @@
 .cycle[data-active],
 .cycle[data-active]:hover:not(:disabled) {
   border-color: var(--pa);
-  background: color-mix(in srgb, var(--pa) 8%, var(--surface));
+  background: var(--surface-2);
   box-shadow: inset 0 0 0 1px var(--pa);
 }
 
@@ -253,8 +254,8 @@
   border-radius: 999px;
   font-size: 11px;
   font-weight: 650;
-  color: var(--violet-2);
-  background: color-mix(in srgb, var(--violet-2) 13%, transparent);
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 12%, transparent);
 }
 
 .cyclePrice {
@@ -327,7 +328,7 @@
 }
 
 .statDelta[data-tone="up"] {
-  color: var(--violet-2);
+  color: var(--good);
 }
 
 .statDelta[data-tone="down"] {
@@ -358,8 +359,8 @@
   margin-top: -1px;
   padding: 3px;
   border-radius: 50%;
-  color: var(--pa-ink);
-  background: color-mix(in srgb, var(--pa) 15%, transparent);
+  color: var(--text-2);
+  background: var(--surface-2);
 }
 
 .packGrid {
@@ -373,19 +374,10 @@
 
 .summaryTitle {
   margin: 0;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.summaryTotal {
-  margin: -12px 0 4px;
-  font-size: 37.5px;
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-  color: var(--price);
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
 
 .items {
@@ -454,15 +446,15 @@
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--pa) 32%, var(--border));
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--pa) 8%, var(--surface));
+  background: var(--surface);
 }
 
 .periodIcon {
   flex: none;
   margin-top: 1px;
-  color: var(--accent-2);
+  color: var(--muted);
 }
 
 .periodBody {
@@ -487,7 +479,7 @@
 
 .periodNote {
   font-size: 12px;
-  color: var(--accent-2);
+  color: var(--muted);
 }
 
 .saving {
@@ -496,8 +488,8 @@
   justify-content: space-between;
   gap: 12px;
   font-size: 12.5px;
-  font-weight: 600;
-  color: var(--violet-2);
+  font-weight: 500;
+  color: var(--text-2);
 }
 
 .savingLabel {
@@ -507,7 +499,9 @@
 }
 
 .savingValue {
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  color: var(--good);
 }
 
 .savingBreak {

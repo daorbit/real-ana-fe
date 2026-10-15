@@ -183,8 +183,8 @@
   font-size: 10.5px;
   font-weight: 700;
   white-space: nowrap;
-  color: var(--violet-2);
-  background: color-mix(in srgb, var(--violet-2) 14%, transparent);
+  color: var(--good, var(--violet-2));
+  background: color-mix(in srgb, var(--good, var(--violet-2)) 12%, transparent);
 }
 
 .packFoot {
@@ -364,7 +364,7 @@
 }
 
 .line[data-tone="discount"] .lineValue {
-  color: var(--violet-2);
+  color: var(--good, var(--violet-2));
 }
 
 .rule {
@@ -408,12 +408,12 @@
   gap: 8px;
   font-size: 12.5px;
   font-weight: 500;
-  color: var(--violet-2);
-  transition: opacity 140ms ease;
+  color: var(--text-2);
+  transition: color 140ms ease;
 }
 
 .couponToggle:hover {
-  opacity: 0.75;
+  color: var(--text);
 }
 
 .coupon {
@@ -475,7 +475,7 @@
 .gateway[data-active],
 .gateway[data-active]:hover:not(:disabled) {
   border-color: var(--pa, var(--text));
-  background: color-mix(in srgb, var(--pa, var(--text)) 6%, var(--surface));
+  background: var(--surface-2);
   box-shadow: inset 0 0 0 1px var(--pa, var(--text));
 }
 
