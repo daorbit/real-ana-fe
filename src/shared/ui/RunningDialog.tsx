@@ -16,9 +16,13 @@ export function RunningDialog({
   minimizable = true,
   minimizedLabel,
   successMessage = "Done",
+  size = 380,
+  children,
 }: {
   opened: boolean;
   title: string;
+  size?: number;
+  children?: ReactNode;
   description?: ReactNode;
   /** Optional rotating status lines, ~3s each, held on the last one. */
   steps?: string[];
@@ -78,24 +82,28 @@ export function RunningDialog({
         centered
         radius="lg"
         padding={0}
-        size={380}
+        size={size}
         overlayProps={{ blur: 6, backgroundOpacity: 0.55 }}
         classNames={{ content: "running-dialog__content" }}
+        aria-label={title}
       >
         <Box className="running-dialog">
-          <Stack align="center" gap="md" p="lg" pt="xl">
-            <Stack align="center" gap={6}>
-              <Text fw={650} fz="lg" ta="center">
-                {title}
-              </Text>
-              {description && (
-                <Text size="sm" c="dimmed" ta="center" lh={1.5}>
-                  {description}
+          {children}
+          <Stack align="center" gap="md" p="lg" pt={children ? "xs" : "xl"}>
+            {!children && (
+              <Stack align="center" gap={6}>
+                <Text fw={650} fz="lg" ta="center">
+                  {title}
                 </Text>
-              )}
-            </Stack>
+                {description && (
+                  <Text size="sm" c="dimmed" ta="center" lh={1.5}>
+                    {description}
+                  </Text>
+                )}
+              </Stack>
+            )}
 
-            {steps?.length ? <RunningSteps steps={steps} active={step} /> : null}
+            {!children && steps?.length ? <RunningSteps steps={steps} active={step} /> : null}
 
             {minimizable && (
               <Button

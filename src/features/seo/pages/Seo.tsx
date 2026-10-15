@@ -12,6 +12,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { RunningDialog } from "@/shared/ui/RunningDialog";
+import { AuditScan } from "@/features/seo/components/audit/AuditScan";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { getSeoHelp } from "@/features/seo/components/help";
 import { PageHeader } from "@/shared/ui/Page";
@@ -561,21 +562,12 @@ export default function Seo() {
       <RunningDialog
         opened={analyzing}
         title="Running SEO audit"
-        description={
-          <>
-            {targetUrl || "This page"} — usually 20-60 seconds.
-          </>
-        }
         minimizedLabel="Running SEO audit…"
         successMessage="SEO audit complete"
-        steps={[
-          "Fetching the page…",
-          "Parsing meta tags and headings…",
-          "Checking technical setup…",
-          "Running Lighthouse…",
-          "Scoring and building the report…",
-        ]}
-      />
+        size={440}
+      >
+        <AuditScan url={targetUrl} running={analyzing} />
+      </RunningDialog>
 
       <PageHeader
         title="SEO"
