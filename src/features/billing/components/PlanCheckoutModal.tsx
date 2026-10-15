@@ -217,7 +217,6 @@ export function PlanCheckoutModal({
         <aside className={s.right}>
           <div className={s.rightInner}>
             <h4 className={s.summaryTitle}>{t("billing.orderSummary")}</h4>
-            <p className={s.summaryTotal}>{money(chargeable)}</p>
 
             <OrderItems items={items} />
 
