@@ -110,6 +110,25 @@ export interface CalendarStatus {
   calendars: CalendarSummary[];
 }
 
+export interface LinkedSheet {
+  formId: string;
+  formTitle: string;
+  spreadsheetUrl: string;
+  rows: number;
+  lastRowAt?: string;
+  createdAt: string;
+}
+
+export interface SheetsStatus {
+  configured: boolean;
+  connected: boolean;
+  status?: "active" | "revoked";
+  email?: string;
+  lastUsedAt?: string;
+  lastError?: string;
+  sheets: LinkedSheet[];
+}
+
 export type IntegrationCategory =
   | "email"
   | "payments"
@@ -118,7 +137,7 @@ export type IntegrationCategory =
   | "crm"
   | "automation";
 
-export type IntegrationKind = "app" | "payment" | "calendar" | "webhook";
+export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook";
 
 export interface IntegrationTile {
   kind: IntegrationKind;

@@ -16,7 +16,10 @@ import {
   type Searchable,
 } from "../../lib/filter";
 import { FormsIntegrations } from "../FormsIntegrations";
+import { ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
 import { ConnectionsToolbar } from "./ConnectionsToolbar";
+
+const SKELETON_CARDS = 8;
 import { FormsNotice } from "./FormsNotice";
 import { SocialGroup } from "./SocialGroup";
 
@@ -57,14 +60,22 @@ export function ConnectionsBoard() {
 
   const visibleSocial = social.entries.filter((entry) => matchesFilter(entry, filter));
   const visibleForms = formEntries.filter((entry) => matchesFilter(entry, filter));
+  const loading = social.loading || (!lockedReason && integrations.loading);
   const formsSettled = Boolean(lockedReason) || (!integrations.loading && !integrations.failed);
   const nothingMatches = formsSettled && visibleSocial.length === 0 && visibleForms.length === 0;
 
   return (
     <>
-      <ConnectionsToolbar filter={filter} counts={counts} categories={categories} onChange={setFilter} />
+      <ConnectionsToolbar
+        filter={filter}
+        counts={loading ? undefined : counts}
+        categories={categories}
+        onChange={setFilter}
+      />
 
-      {nothingMatches ? (
+      {loading ? (
+        <ConnectionGridSkeleton count={SKELETON_CARDS} />
+      ) : nothingMatches ? (
         <EmptyState
           compact
           icon={SearchX}

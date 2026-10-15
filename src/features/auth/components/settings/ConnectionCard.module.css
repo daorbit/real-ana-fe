@@ -55,6 +55,14 @@
   --brand: #4285f4;
 }
 
+.mark[data-brand="telegram"] {
+  --brand: #26a5e4;
+}
+
+.mark[data-brand="google-sheets"] {
+  --brand: #0f9d58;
+}
+
 .hint {
   flex: 1;
 }

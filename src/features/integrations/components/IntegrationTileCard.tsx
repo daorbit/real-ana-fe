@@ -3,7 +3,7 @@ import { Check, CirclePause, Link2, TriangleAlert } from "lucide-react";
 import { ConnectionCard } from "@/features/auth/components/settings/ConnectionCard";
 import { timeAgo } from "@/shared/lib/format";
 import { BrandMark } from "./logos/BrandMarks";
-import { CONNECT_HINT } from "../lib/catalog";
+import { CONNECT_HINT, WEBHOOK_HINT } from "../lib/catalog";
 import type { IntegrationTile } from "../types";
 import classes from "./IntegrationTileCard.module.css";
 
@@ -63,7 +63,7 @@ function TileStatus({ tile, busy, lockedReason, onOpen }: Props) {
   }
 
   if (tile.connected) {
-    const expired = tile.kind === "calendar";
+    const expired = tile.kind === "calendar" || tile.kind === "sheets";
     return (
       <Group gap={8} wrap="nowrap" className={classes.status}>
         {expired ? <TriangleAlert size={14} className={classes.warn} /> : <CirclePause size={14} className={classes.paused} />}
@@ -88,7 +88,7 @@ function TileStatus({ tile, busy, lockedReason, onOpen }: Props) {
   return (
     <>
       <Text size="xs" c="dimmed" mb={10}>
-        {CONNECT_HINT[tile.category]}
+        {tile.kind === "webhook" ? WEBHOOK_HINT : CONNECT_HINT[tile.category]}
       </Text>
       <Button
         type="button"

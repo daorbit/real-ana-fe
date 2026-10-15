@@ -17,7 +17,7 @@ import type { TrackerOptions } from "@/features/workspace/tracker";
 import { formsQuery } from "@/features/integrations/lib/formsClient";
 import type {
   FormsApp, FormsAppTestResult, PaymentSettings, PaymentSettingsInput, PaymentTestResult,
-  PaymentMode, PaymentProvider, CalendarStatus,
+  PaymentMode, PaymentProvider, CalendarStatus, SheetsStatus,
 } from "@/features/integrations/types";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
@@ -130,7 +130,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsWebhook"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -595,6 +595,30 @@ export const api = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(api.util.upsertQueryData("getFormsCalendar", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    getFormsSheets: build.query<SheetsStatus, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<SheetsStatus>({ workspaceId, path: "/sheets" }, queryApi, extra, baseQuery),
+      providesTags: ["FormsSheets"],
+    }),
+
+    getFormsSheetsConnectUrl: build.mutation<{ url: string }, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<{ url: string }>({ workspaceId, path: "/sheets/connect" }, queryApi, extra, baseQuery),
+    }),
+
+    disconnectFormsSheets: build.mutation<SheetsStatus, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        formsQuery<SheetsStatus>({ workspaceId, path: "/sheets", method: "DELETE" }, queryApi, extra, baseQuery),
+      async onQueryStarted(workspaceId, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getFormsSheets", workspaceId, data));
         } catch {
           return;
         }
@@ -2753,6 +2777,9 @@ export const {
   useGetFormsCalendarQuery,
   useGetFormsCalendarConnectUrlMutation,
   useDisconnectFormsCalendarMutation,
+  useGetFormsSheetsQuery,
+  useGetFormsSheetsConnectUrlMutation,
+  useDisconnectFormsSheetsMutation,
   useGetFormsWebhookQuery,
   useSaveFormsWebhookMutation,
   usePostToLinkedInMutation,

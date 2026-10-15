@@ -13,7 +13,7 @@ const STATUS_LABELS: { value: StatusFilter; label: string }[] = [
 
 interface Props {
   filter: ConnectionFilter;
-  counts: Record<StatusFilter, number>;
+  counts?: Record<StatusFilter, number>;
   categories: string[];
   onChange: (filter: ConnectionFilter) => void;
 }
@@ -76,7 +76,7 @@ export function ConnectionsToolbar({ filter, counts, categories, onChange }: Pro
           label: (
             <span>
               {option.label}
-              <span className={classes.count}>{counts[option.value]}</span>
+              {counts && <span className={classes.count}>{counts[option.value]}</span>}
             </span>
           ),
         }))}

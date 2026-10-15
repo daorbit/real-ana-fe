@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Anchor, Group, Skeleton, Text } from "@mantine/core";
+import { Anchor, Group, Text } from "@mantine/core";
 import { useSaveFormsWebhookMutation } from "@/app/store";
 import { ConnectionGroup } from "@/features/auth/components/settings/ConnectionGroup";
 import { notify, notifyError } from "@/shared/lib/notify";
 import type { useFormsIntegrations } from "../hooks/useFormsIntegrations";
-import { useCalendarConnect } from "../hooks/useCalendarConnect";
+import { useGoogleConnect } from "../hooks/useGoogleConnect";
 import { CATEGORY_HINT, CATEGORY_TITLE, isPaymentProvider } from "../lib/catalog";
 import { isFiltered, matchesFilter, tileState, type ConnectionFilter } from "../lib/filter";
 import { IntegrationTileCard } from "./IntegrationTileCard";
 import { AppConnectModal } from "./AppConnectModal";
 import { GoogleCalendarModal } from "./GoogleCalendarModal";
+import { GoogleSheetsModal } from "./GoogleSheetsModal";
 import { PaymentsModal } from "./payments/PaymentsModal";
 import type { IntegrationTile, PaymentProvider } from "../types";
 
-const SKELETON_TILES = 3;
 const FORMS_TITLE = "Form apps";
 const FORMS_HINT = "Email, payments, calendar and chat apps your lead forms use.";
 
@@ -31,8 +31,10 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
   const [openAppId, setOpenAppId] = useState<string | null>(null);
   const [payProvider, setPayProvider] = useState<PaymentProvider | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [sheetsOpen, setSheetsOpen] = useState(false);
   const [saveWebhook, webhookState] = useSaveFormsWebhookMutation();
-  const calendar = useCalendarConnect(workspaceId ?? "", integrations.refetchCalendar);
+  const calendar = useGoogleConnect("calendar", workspaceId ?? "", integrations.refetchCalendar);
+  const sheets = useGoogleConnect("sheets", workspaceId ?? "", integrations.refetchSheets);
   const { failed, error, loading, sections } = integrations;
   const requestedApp = params.get("app");
 
@@ -74,6 +76,7 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
   const open = (tile: IntegrationTile) => {
     if (tile.kind === "webhook") void toggleWebhook(!tile.enabled);
     else if (tile.kind === "calendar") setCalendarOpen(true);
+    else if (tile.kind === "sheets") setSheetsOpen(true);
     else if (tile.kind === "payment" && isPaymentProvider(tile.id)) setPayProvider(tile.id);
     else setOpenAppId(tile.id);
   };
@@ -91,7 +94,15 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
     <IntegrationTileCard
       key={tile.id}
       tile={tile}
-      busy={tile.kind === "webhook" ? webhookState.isLoading : tile.kind === "calendar" ? calendar.busy : false}
+      busy={
+        tile.kind === "webhook"
+          ? webhookState.isLoading
+          : tile.kind === "calendar"
+            ? calendar.busy
+            : tile.kind === "sheets"
+              ? sheets.busy
+              : false
+      }
       onOpen={open}
     />
   );
@@ -110,20 +121,21 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
           if (await calendar.disconnect()) setCalendarOpen(false);
         }}
       />
+      <GoogleSheetsModal
+        opened={sheetsOpen && Boolean(integrations.sheets?.configured)}
+        status={integrations.sheets}
+        busy={sheets.busy}
+        onClose={() => setSheetsOpen(false)}
+        onConnect={() => void sheets.connect()}
+        onDisconnect={async () => {
+          if (await sheets.disconnect()) setSheetsOpen(false);
+        }}
+      />
     </>
   );
 
   if (flat) {
-    if (lockedReason || failed) return null;
-    if (loading) {
-      return (
-        <>
-          {Array.from({ length: SKELETON_TILES }, (_, index) => (
-            <Skeleton key={index} height={196} radius="md" />
-          ))}
-        </>
-      );
-    }
+    if (lockedReason || failed || loading) return null;
     return (
       <>
         {visibleSections.flatMap((section) => section.tiles).map(renderTile)}
@@ -143,15 +155,7 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
     );
   }
 
-  if (loading) {
-    return (
-      <ConnectionGroup title={FORMS_TITLE} hint="Loading the apps connected to your forms.">
-        {Array.from({ length: SKELETON_TILES }, (_, index) => (
-          <Skeleton key={index} height={196} radius="md" />
-        ))}
-      </ConnectionGroup>
-    );
-  }
+  if (loading) return null;
 
   if (failed) {
     return (

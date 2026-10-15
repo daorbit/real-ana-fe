@@ -23,10 +23,12 @@ function socialState(status: SocialStatus | undefined): ConnectionState {
   return "connected";
 }
 
-export function useSocialConnections(): { entries: SocialEntry[]; canUseInstagram: boolean } {
+export function useSocialConnections(): { entries: SocialEntry[]; canUseInstagram: boolean; loading: boolean } {
   const canUseInstagram = useCanUseInstagram();
-  const { data: linkedIn } = useGetLinkedInStatusQuery();
-  const { data: instagram } = useGetInstagramStatusQuery(undefined, { skip: !canUseInstagram });
+  const { data: linkedIn, isLoading: linkedInLoading } = useGetLinkedInStatusQuery();
+  const { data: instagram, isLoading: instagramLoading } = useGetInstagramStatusQuery(undefined, {
+    skip: !canUseInstagram,
+  });
 
   const entries = useMemo<SocialEntry[]>(
     () => [
@@ -55,5 +57,5 @@ export function useSocialConnections(): { entries: SocialEntry[]; canUseInstagra
     [linkedIn, instagram, canUseInstagram],
   );
 
-  return { entries, canUseInstagram };
+  return { entries, canUseInstagram, loading: linkedInLoading || instagramLoading };
 }

@@ -4,6 +4,7 @@ import {
   useGetFormsAppsQuery,
   useGetFormsCalendarQuery,
   useGetFormsPaymentsQuery,
+  useGetFormsSheetsQuery,
   useGetFormsWebhookQuery,
 } from "@/app/store";
 import { buildSections } from "../lib/catalog";
@@ -13,16 +14,18 @@ export function useFormsIntegrations(workspaceId: string | null) {
   const apps = useGetFormsAppsQuery(arg);
   const payments = useGetFormsPaymentsQuery(arg);
   const calendar = useGetFormsCalendarQuery(arg);
+  const sheets = useGetFormsSheetsQuery(arg);
   const webhook = useGetFormsWebhookQuery(arg);
 
   const appList = apps.currentData;
   const paymentSettings = payments.currentData;
   const calendarStatus = calendar.currentData;
+  const sheetsStatus = sheets.currentData;
   const webhookEnabled = Boolean(webhook.currentData?.enabled);
 
   const sections = useMemo(
-    () => buildSections(appList, paymentSettings, calendarStatus, webhookEnabled),
-    [appList, paymentSettings, calendarStatus, webhookEnabled],
+    () => buildSections(appList, paymentSettings, calendarStatus, sheetsStatus, webhookEnabled),
+    [appList, paymentSettings, calendarStatus, sheetsStatus, webhookEnabled],
   );
 
   return {
@@ -30,14 +33,17 @@ export function useFormsIntegrations(workspaceId: string | null) {
     apps: appList,
     payments: paymentSettings,
     calendar: calendarStatus,
-    loading: apps.isLoading || payments.isLoading || calendar.isLoading || webhook.isLoading,
+    sheets: sheetsStatus,
+    loading: apps.isLoading || payments.isLoading || calendar.isLoading || sheets.isLoading || webhook.isLoading,
     failed: apps.isError,
     error: apps.error,
     refetchCalendar: calendar.refetch,
+    refetchSheets: sheets.refetch,
     refetchAll: () => {
       void apps.refetch();
       void payments.refetch();
       void calendar.refetch();
+      void sheets.refetch();
       void webhook.refetch();
     },
   };

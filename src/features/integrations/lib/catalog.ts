@@ -5,6 +5,7 @@ import type {
   IntegrationTile,
   PaymentProvider,
   PaymentSettings,
+  SheetsStatus,
 } from "../types";
 
 export const CATEGORY_ORDER: IntegrationCategory[] = [
@@ -31,7 +32,7 @@ export const CATEGORY_HINT: Record<IntegrationCategory, string> = {
   scheduling: "Calendars your booking fields check for busy times and add events to.",
   notification: "Channels a new form response is announced in.",
   crm: "Tools a response can be copied into.",
-  automation: "Send each submission on to your own systems.",
+  automation: "Send each submission on to spreadsheets and your own systems.",
 };
 
 export const CONNECT_HINT: Record<IntegrationCategory, string> = {
@@ -40,8 +41,10 @@ export const CONNECT_HINT: Record<IntegrationCategory, string> = {
   scheduling: "Connect it so booking fields skip your busy times and add Meet links.",
   notification: "Connect a channel to get every new response posted there.",
   crm: "Connect it to copy responses into your CRM.",
-  automation: "Turn it on, then set a URL from any form's Webhook panel.",
+  automation: "Connect it once and every form starts sending its responses there.",
 };
+
+export const WEBHOOK_HINT = "Turn it on, then set a URL from any form's Webhook panel.";
 
 export const PAYMENT_PROVIDERS: { id: PaymentProvider; name: string; description: string }[] = [
   { id: "razorpay", name: "Razorpay", description: "Take payments on your forms through Razorpay." },
@@ -98,6 +101,23 @@ function calendarTiles(status: CalendarStatus | undefined): IntegrationTile[] {
   ];
 }
 
+function sheetsTiles(status: SheetsStatus | undefined): IntegrationTile[] {
+  if (!status?.configured) return [];
+  return [
+    {
+      kind: "sheets",
+      id: "google-sheets",
+      name: "Google Sheets",
+      category: "automation",
+      description: "Every response becomes a new row in a spreadsheet, one sheet per form, created for you.",
+      connected: status.connected || status.status === "revoked",
+      enabled: status.connected,
+      account: status.email,
+      lastUsedAt: status.lastUsedAt,
+    },
+  ];
+}
+
 function webhookTile(enabled: boolean): IntegrationTile {
   return {
     kind: "webhook",
@@ -119,12 +139,14 @@ export function buildSections(
   apps: FormsApp[] | undefined,
   payments: PaymentSettings | undefined,
   calendar: CalendarStatus | undefined,
+  sheets: SheetsStatus | undefined,
   webhookEnabled: boolean,
 ): IntegrationSection[] {
   const all = [
     ...appTiles(apps ?? []),
     ...paymentTiles(payments),
     ...calendarTiles(calendar),
+    ...sheetsTiles(sheets),
     webhookTile(webhookEnabled),
   ];
   return CATEGORY_ORDER.map((category) => ({
