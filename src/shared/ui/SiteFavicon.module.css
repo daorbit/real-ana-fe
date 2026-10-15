@@ -1,0 +1,32 @@
+.box {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+}
+
+.img {
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.monogram {
+  --tone: var(--hue-indigo);
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 28%;
+  background: color-mix(in srgb, var(--tone) 18%, var(--surface-2));
+  color: var(--tone);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.monogram[data-tone="1"] { --tone: var(--hue-sky); }
+.monogram[data-tone="2"] { --tone: var(--hue-mint); }
+.monogram[data-tone="3"] { --tone: var(--hue-orange); }
+.monogram[data-tone="4"] { --tone: var(--hue-rose); }
+.monogram[data-tone="5"] { --tone: var(--hue-violet); }
+.monogram[data-tone="6"] { --tone: var(--hue-gold); }

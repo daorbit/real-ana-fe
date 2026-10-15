@@ -141,6 +141,7 @@ export function PlanCheckoutModal({
       transitionProps={{ transition: "fade", duration: 180 }}
       classNames={{ content: s.page, body: s.body }}
     >
+      <div className={s.shell} data-plan={plan.slug}>
       <CheckoutTopBar onBack={onClose} disabled={busy} />
 
       <div className={s.split}>
@@ -243,7 +244,6 @@ export function PlanCheckoutModal({
             <Button
               fullWidth
               size="lg"
-              color="emerald"
               className={classes.pay}
               leftSection={<Lock size={15} />}
               loading={busy}
@@ -277,6 +277,7 @@ export function PlanCheckoutModal({
             <TrustList />
           </div>
         </aside>
+      </div>
       </div>
     </Modal>
   );

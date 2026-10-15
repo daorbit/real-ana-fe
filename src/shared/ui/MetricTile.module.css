@@ -18,9 +18,7 @@
 
 .tile[data-tinted] {
   border-color: color-mix(in srgb, var(--metric) 18%, var(--border));
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--metric) 9%, transparent) 0%, transparent 70%),
-    var(--surface);
+  background: var(--surface);
 }
 
 .liveDot {

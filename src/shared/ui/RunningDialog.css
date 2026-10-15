@@ -1,8 +1,6 @@
 .mantine-Modal-content.running-dialog__content {
   overflow: hidden;
-  background:
-    radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--accent-2) 7%, transparent) 0%, transparent 70%),
-    linear-gradient(180deg, color-mix(in srgb, var(--text) 5%, var(--surface-2)) 0%, var(--surface-2) 45%, var(--surface) 100%);
+  background: var(--surface-2);
   border: 1px solid var(--border-strong);
 }
 

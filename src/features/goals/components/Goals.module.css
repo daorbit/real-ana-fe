@@ -555,10 +555,10 @@
   transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.fill[data-status="achieved"] { background: linear-gradient(90deg, #10b981, #6ee7b7); }
-.fill[data-status="onTrack"] { background: linear-gradient(90deg, #0ea5e9, #67e8f9); }
-.fill[data-status="behind"] { background: linear-gradient(90deg, #f97316, #fcd34d); }
-.fill[data-status="climbing"] { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+.fill[data-status="achieved"] { background: #10b981; }
+.fill[data-status="onTrack"] { background: var(--accent); }
+.fill[data-status="behind"] { background: var(--amber); }
+.fill[data-status="climbing"] { background: #3b82f6; }
 .fill[data-status="unavailable"] { background: var(--border-strong); }
 
 .paceMark {

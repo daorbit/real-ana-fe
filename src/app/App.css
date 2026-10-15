@@ -58,7 +58,6 @@
   --wash-strong: 9%;
   --wash-soft: 3%;
   --hue-ink: 0%;
-  --grad-fitness: linear-gradient(90deg, var(--accent-2) 0%, var(--hue-sky) 100%);
   --grad-sunset: linear-gradient(120deg, var(--hue-gold) 0%, var(--hue-orange) 45%, var(--hue-rose) 100%);
   --grad-dusk: linear-gradient(120deg, var(--hue-violet) 0%, var(--hue-indigo) 50%, var(--hue-sky) 100%);
 
@@ -1708,7 +1707,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .scan-bar {
   height: 100%; border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  background: var(--accent);
 }
 
 
