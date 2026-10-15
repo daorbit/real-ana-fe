@@ -1,9 +1,9 @@
-import { Anchor, Badge, Button, Group, Text } from "@mantine/core";
-import { Check, CirclePause, Link2, TriangleAlert } from "lucide-react";
+import type { ReactNode } from "react";
+import { Badge, Button, Group, Text } from "@mantine/core";
+import { Check, CircleDashed, CirclePause, Link2, Power, RefreshCw, Settings2, TriangleAlert } from "lucide-react";
 import { ConnectionCard } from "@/features/auth/components/settings/ConnectionCard";
 import { timeAgo } from "@/shared/lib/format";
 import { BrandMark } from "./logos/BrandMarks";
-import { CONNECT_HINT, WEBHOOK_HINT } from "../lib/catalog";
 import { appGuideUrl } from "../lib/links";
 import type { IntegrationTile } from "../types";
 import classes from "./IntegrationTileCard.module.css";
@@ -15,10 +15,58 @@ interface Props {
   onOpen: (tile: IntegrationTile) => void;
 }
 
+interface Footer {
+  icon: ReactNode;
+  label: string;
+  action: string;
+  actionIcon: ReactNode;
+  variant: "default" | "light";
+  color?: string;
+}
+
 function enabledLabel(tile: IntegrationTile): string {
   if (tile.kind === "webhook") return "On for every form";
   const base = tile.account ?? "Connected";
   return tile.lastUsedAt ? `${base} · used ${timeAgo(tile.lastUsedAt)}` : base;
+}
+
+function footerFor(tile: IntegrationTile): Footer {
+  const webhook = tile.kind === "webhook";
+  if (tile.enabled) {
+    return {
+      icon: <Check size={14} className={classes.ok} />,
+      label: enabledLabel(tile),
+      action: webhook ? "Turn off" : "Manage",
+      actionIcon: webhook ? <Power size={14} /> : <Settings2 size={14} />,
+      variant: "default",
+    };
+  }
+  if (tile.connected) {
+    const expired = tile.kind === "calendar" || tile.kind === "sheets" || tile.kind === "search-console";
+    return expired
+      ? {
+          icon: <TriangleAlert size={14} className={classes.warn} />,
+          label: "Access expired",
+          action: "Reconnect",
+          actionIcon: <RefreshCw size={14} />,
+          variant: "light",
+          color: "orange",
+        }
+      : {
+          icon: <CirclePause size={14} className={classes.paused} />,
+          label: "Saved, switched off",
+          action: "Turn on",
+          actionIcon: <Power size={14} />,
+          variant: "light",
+        };
+  }
+  return {
+    icon: <CircleDashed size={14} className={classes.idle} />,
+    label: "Not connected",
+    action: webhook ? "Turn on" : "Connect",
+    actionIcon: webhook ? <Power size={14} /> : <Link2 size={14} />,
+    variant: "light",
+  };
 }
 
 function ModeBadge({ tile }: { tile: IntegrationTile }) {
@@ -31,77 +79,41 @@ function ModeBadge({ tile }: { tile: IntegrationTile }) {
   );
 }
 
-function TileStatus({ tile, busy, lockedReason, onOpen }: Props) {
+function TileFooter({ tile, busy, lockedReason, onOpen }: Props) {
   if (lockedReason) {
     return (
-      <Text size="xs" c="dimmed">
-        {lockedReason}
-      </Text>
-    );
-  }
-
-  if (tile.enabled) {
-    return (
-      <Group gap={8} wrap="nowrap" className={classes.status}>
-        <Check size={14} className={classes.ok} />
-        <Text size="xs" c="dimmed" truncate>
-          {enabledLabel(tile)}
+      <div className={classes.footer}>
+        <Text size="xs" c="dimmed">
+          {lockedReason}
         </Text>
-        <Anchor
-          component="button"
-          type="button"
-          size="xs"
-          c="dimmed"
-          underline="always"
-          disabled={busy}
-          onClick={() => onOpen(tile)}
-          className={classes.link}
-        >
-          {tile.kind === "webhook" ? "Turn off" : "Manage"}
-        </Anchor>
-      </Group>
+      </div>
     );
   }
 
-  if (tile.connected) {
-    const expired = tile.kind === "calendar" || tile.kind === "sheets" || tile.kind === "search-console";
-    return (
-      <Group gap={8} wrap="nowrap" className={classes.status}>
-        {expired ? <TriangleAlert size={14} className={classes.warn} /> : <CirclePause size={14} className={classes.paused} />}
-        <Text size="xs" c="dimmed" truncate>
-          {expired ? "Access expired" : "Saved, but switched off"}
-        </Text>
-        <Anchor
-          component="button"
-          type="button"
-          size="xs"
-          underline="always"
-          disabled={busy}
-          onClick={() => onOpen(tile)}
-          className={classes.link}
-        >
-          {expired ? "Reconnect" : "Turn on"}
-        </Anchor>
-      </Group>
-    );
-  }
-
+  const footer = footerFor(tile);
   return (
-    <>
-      <Text size="xs" c="dimmed" mb={10}>
-        {tile.kind === "webhook" ? WEBHOOK_HINT : CONNECT_HINT[tile.category]}
-      </Text>
+    <Group justify="space-between" gap="sm" wrap="nowrap" className={classes.footer}>
+      <Group gap={8} wrap="nowrap" className={classes.status}>
+        {footer.icon}
+        <Text size="xs" c="dimmed" truncate>
+          {footer.label}
+        </Text>
+      </Group>
       <Button
         type="button"
-        size="sm"
-        variant="default"
+        size="xs"
+        radius="md"
+        variant={footer.variant}
+        color={footer.color}
         loading={busy}
-        leftSection={<Link2 size={15} />}
+        leftSection={footer.actionIcon}
         onClick={() => onOpen(tile)}
+        className={classes.action}
+        aria-label={`${footer.action} ${tile.name}`}
       >
-        {tile.kind === "webhook" ? "Turn on webhooks" : `Connect ${tile.name}`}
+        {footer.action}
       </Button>
-    </>
+    </Group>
   );
 }
 
@@ -116,7 +128,7 @@ export function IntegrationTileCard(props: Props) {
       badge={<ModeBadge tile={tile} />}
       docsUrl={appGuideUrl(tile.id)}
     >
-      <TileStatus {...props} />
+      <TileFooter {...props} />
     </ConnectionCard>
   );
 }

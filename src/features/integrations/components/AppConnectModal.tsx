@@ -24,7 +24,9 @@ import type { FormsApp } from "../types";
 interface Props {
   app: FormsApp | null;
   workspaceId: string;
+  refreshing: boolean;
   onClose: () => void;
+  onRefresh: () => void;
 }
 
 function StatusBadge({ app }: { app: FormsApp }) {
@@ -105,7 +107,7 @@ function AppAside({ app, dirty }: { app: FormsApp; dirty: boolean }) {
   );
 }
 
-export function AppConnectModal({ app, workspaceId, onClose }: Props) {
+export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefresh }: Props) {
   const { user } = useAuth();
   const [values, setValues] = useState<FieldValues>({});
   const [testTo, setTestTo] = useState("");
@@ -210,6 +212,9 @@ export function AppConnectModal({ app, workspaceId, onClose }: Props) {
       closeDisabled={busy}
       aside={<AppAside app={app} dirty={dirty} />}
       footer={footer}
+      onRefresh={app.connected ? onRefresh : undefined}
+      refreshing={refreshing}
+      refreshDisabled={busy || dirty}
     >
       <StudioHero {...heroFor(app)} stats={statsFor(app)} />
 

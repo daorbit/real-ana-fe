@@ -37,18 +37,6 @@ export const CATEGORY_HINT: Record<IntegrationCategory, string> = {
   automation: "Send each submission on to spreadsheets and your own systems.",
 };
 
-export const CONNECT_HINT: Record<IntegrationCategory, string> = {
-  search: "Connect it to see the searches, rankings and pages that bring visitors.",
-  email: "Connect it to send notification emails from your own domain.",
-  payments: "Connect your account to take payments on forms with a payment field.",
-  scheduling: "Connect it so booking fields skip your busy times and add Meet links.",
-  notification: "Connect a channel to get every new response posted there.",
-  crm: "Connect it to copy responses into your CRM.",
-  automation: "Connect it once and every form starts sending its responses there.",
-};
-
-export const WEBHOOK_HINT = "Turn it on, then set a URL from any form's Webhook panel.";
-
 export const PAYMENT_PROVIDERS: { id: PaymentProvider; name: string; description: string }[] = [
   { id: "razorpay", name: "Razorpay", description: "Take payments on your forms through Razorpay." },
   { id: "cashfree", name: "Cashfree", description: "Take payments on your forms through Cashfree." },

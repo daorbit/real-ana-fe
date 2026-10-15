@@ -11,9 +11,11 @@ interface Props {
   opened: boolean;
   status: SheetsStatus | undefined;
   busy: boolean;
+  refreshing: boolean;
   onClose: () => void;
   onConnect: () => void;
   onDisconnect: () => void;
+  onRefresh: () => void;
 }
 
 const HOW_IT_WORKS = [
@@ -91,7 +93,7 @@ function LinkedSheets({ sheets }: { sheets: LinkedSheet[] }) {
   );
 }
 
-export function GoogleSheetsModal({ opened, status, busy, onClose, onConnect, onDisconnect }: Props) {
+export function GoogleSheetsModal({ opened, status, busy, refreshing, onClose, onConnect, onDisconnect, onRefresh }: Props) {
   const connected = Boolean(status?.connected);
   const expired = !connected && status?.status === "revoked";
 
@@ -150,6 +152,9 @@ export function GoogleSheetsModal({ opened, status, busy, onClose, onConnect, on
       docsUrl={GOOGLE_SHEETS_DOCS_URL}
       aside={<SheetsAside />}
       footer={footer}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+      refreshDisabled={busy}
     >
       <StudioHero
         state={connected ? "live" : expired ? "saved" : "off"}

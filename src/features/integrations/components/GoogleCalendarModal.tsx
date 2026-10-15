@@ -10,9 +10,11 @@ interface Props {
   opened: boolean;
   status: CalendarStatus | undefined;
   busy: boolean;
+  refreshing: boolean;
   onClose: () => void;
   onConnect: () => void;
   onDisconnect: () => void;
+  onRefresh: () => void;
 }
 
 const USES = [
@@ -102,7 +104,7 @@ function PermissionList() {
   );
 }
 
-export function GoogleCalendarModal({ opened, status, busy, onClose, onConnect, onDisconnect }: Props) {
+export function GoogleCalendarModal({ opened, status, busy, refreshing, onClose, onConnect, onDisconnect, onRefresh }: Props) {
   const connected = Boolean(status?.connected);
   const expired = !connected && status?.status === "revoked";
 
@@ -161,6 +163,9 @@ export function GoogleCalendarModal({ opened, status, busy, onClose, onConnect, 
       }
       aside={<CalendarAside />}
       footer={footer}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+      refreshDisabled={busy}
     >
       <StudioHero
         state={connected ? "live" : expired ? "saved" : "off"}

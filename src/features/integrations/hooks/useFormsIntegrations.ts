@@ -37,8 +37,12 @@ export function useFormsIntegrations(workspaceId: string | null) {
     loading: apps.isLoading || payments.isLoading || calendar.isLoading || sheets.isLoading || webhook.isLoading,
     failed: apps.isError,
     error: apps.error,
+    refetchApps: apps.refetch,
     refetchCalendar: calendar.refetch,
     refetchSheets: sheets.refetch,
+    appsFetching: apps.isFetching,
+    calendarFetching: calendar.isFetching,
+    sheetsFetching: sheets.isFetching,
     refetchAll: () => {
       void apps.refetch();
       void payments.refetch();

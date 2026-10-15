@@ -109,12 +109,20 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
 
   const dialogs = workspaceId && (
     <>
-      <AppConnectModal app={openApp} workspaceId={workspaceId} onClose={() => setOpenAppId(null)} />
+      <AppConnectModal
+        app={openApp}
+        workspaceId={workspaceId}
+        refreshing={integrations.appsFetching}
+        onClose={() => setOpenAppId(null)}
+        onRefresh={() => void integrations.refetchApps()}
+      />
       <PaymentsModal workspaceId={workspaceId} provider={payProvider} onClose={() => setPayProvider(null)} />
       <GoogleCalendarModal
         opened={calendarOpen && Boolean(integrations.calendar?.configured)}
         status={integrations.calendar}
         busy={calendar.busy}
+        refreshing={integrations.calendarFetching}
+        onRefresh={() => void integrations.refetchCalendar()}
         onClose={() => setCalendarOpen(false)}
         onConnect={() => void calendar.connect()}
         onDisconnect={async () => {
@@ -125,6 +133,8 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
         opened={sheetsOpen && Boolean(integrations.sheets?.configured)}
         status={integrations.sheets}
         busy={sheets.busy}
+        refreshing={integrations.sheetsFetching}
+        onRefresh={() => void integrations.refetchSheets()}
         onClose={() => setSheetsOpen(false)}
         onConnect={() => void sheets.connect()}
         onDisconnect={async () => {
