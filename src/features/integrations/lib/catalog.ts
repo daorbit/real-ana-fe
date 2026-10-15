@@ -18,6 +18,7 @@ export const CATEGORY_ORDER: IntegrationCategory[] = [
 ];
 
 export const CATEGORY_TITLE: Record<IntegrationCategory, string> = {
+  search: "Search & SEO",
   email: "Email delivery",
   payments: "Payments",
   scheduling: "Scheduling",
@@ -27,6 +28,7 @@ export const CATEGORY_TITLE: Record<IntegrationCategory, string> = {
 };
 
 export const CATEGORY_HINT: Record<IntegrationCategory, string> = {
+  search: "Google data behind your Search visibility reports.",
   email: "Where your form notification emails are sent from. One provider is active at a time.",
   payments: "Gateways your forms can charge through. Keys stay encrypted on the server.",
   scheduling: "Calendars your booking fields check for busy times and add events to.",
@@ -36,6 +38,7 @@ export const CATEGORY_HINT: Record<IntegrationCategory, string> = {
 };
 
 export const CONNECT_HINT: Record<IntegrationCategory, string> = {
+  search: "Connect it to see the searches, rankings and pages that bring visitors.",
   email: "Connect it to send notification emails from your own domain.",
   payments: "Connect your account to take payments on forms with a payment field.",
   scheduling: "Connect it so booking fields skip your busy times and add Meet links.",

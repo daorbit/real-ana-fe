@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Badge, Box, Group, Text } from "@mantine/core";
+import { ActionIcon, Badge, Box, Group, Text, Tooltip } from "@mantine/core";
+import { BookOpen } from "lucide-react";
 import classes from "./ConnectionCard.module.css";
 
 interface Props {
@@ -9,12 +10,31 @@ interface Props {
   hint: string;
   badge?: ReactNode;
   soon?: boolean;
+  docsUrl?: string;
   children?: ReactNode;
 }
 
-export function ConnectionCard({ mark, brand, name, hint, badge, soon, children }: Props) {
+export function ConnectionCard({ mark, brand, name, hint, badge, soon, docsUrl, children }: Props) {
   return (
-    <Box className={`connection-card${soon ? ` ${classes.soon}` : ""}`}>
+    <Box className={`connection-card ${classes.card}${soon ? ` ${classes.soon}` : ""}`}>
+      {docsUrl && (
+        <Tooltip label={`${name} setup guide`} withArrow>
+          <ActionIcon
+            component="a"
+            href={docsUrl}
+            target="_blank"
+            rel="noreferrer"
+            variant="subtle"
+            color="gray"
+            size="md"
+            className={classes.docs}
+            aria-label={`${name} setup guide`}
+          >
+            <BookOpen size={15} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+
       <Box aria-hidden className={`connection-card__mark ${classes.mark}`} data-brand={brand}>
         {mark}
       </Box>

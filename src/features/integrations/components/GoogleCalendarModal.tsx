@@ -1,7 +1,7 @@
-import { Anchor, Badge, Button, Group, Stack, Text } from "@mantine/core";
+import { Anchor, Badge, Button, Group, Text } from "@mantine/core";
 import { CalendarDays, Check, KeyRound } from "lucide-react";
 import { IntegrationStudio } from "./studio/IntegrationStudio";
-import { AsideBlock, SecureNote, StatusLine, StudioSection } from "./studio/StudioParts";
+import { AsideBlock, SecureNote, StudioHero, StudioSection } from "./studio/StudioParts";
 import { GOOGLE_DATA_POLICY_URL, GOOGLE_CALENDAR_DOCS_URL } from "../lib/links";
 import type { CalendarStatus } from "../types";
 import classes from "./GoogleCalendarModal.module.css";
@@ -50,15 +50,10 @@ function CalendarAside() {
           your Google Account's security settings.
         </SecureNote>
       </AsideBlock>
-      <AsideBlock label="Learn more">
-        <Stack gap={6}>
-          <Anchor href={GOOGLE_DATA_POLICY_URL} target="_blank" rel="noopener noreferrer" size="sm">
-            How we handle Google data
-          </Anchor>
-          <Anchor href={GOOGLE_CALENDAR_DOCS_URL} target="_blank" rel="noopener noreferrer" size="sm">
-            Booking field guide
-          </Anchor>
-        </Stack>
+      <AsideBlock label="Privacy">
+        <Anchor href={GOOGLE_DATA_POLICY_URL} target="_blank" rel="noopener noreferrer" size="sm">
+          How we handle Google data
+        </Anchor>
       </AsideBlock>
     </>
   );
@@ -147,6 +142,7 @@ export function GoogleCalendarModal({ opened, status, busy, onClose, onConnect, 
       onClose={onClose}
       brand="google-calendar"
       title="Google Calendar"
+      docsUrl={GOOGLE_CALENDAR_DOCS_URL}
       subtitle={connected || expired ? status?.email || "Google account" : "Scheduling for booking fields"}
       badge={
         connected ? (
@@ -166,13 +162,36 @@ export function GoogleCalendarModal({ opened, status, busy, onClose, onConnect, 
       aside={<CalendarAside />}
       footer={footer}
     >
-      <StatusLine state={connected ? "live" : expired ? "saved" : "off"}>
-        {connected
-          ? `Live. Booking fields use ${status?.email || "this Google account"}.`
-          : expired
-            ? "Google no longer accepts this connection. Bookings still work, but busy times are not checked and no events are added until you reconnect."
-            : "Not connected. Booking fields cannot check busy times or add events yet."}
-      </StatusLine>
+      <StudioHero
+        state={connected ? "live" : expired ? "saved" : "off"}
+        pill={expired ? "Access expired" : undefined}
+        title={
+          connected ? "Google Calendar is connected" : expired ? "Reconnect Google Calendar" : "Connect Google Calendar"
+        }
+        description={
+          connected
+            ? `Booking fields check busy times and add events to ${status?.email || "this Google account"}.`
+            : expired
+              ? "Google no longer accepts this connection. Bookings still work, but busy times are not checked and no events are added until you reconnect."
+              : "Let booking fields skip times you are busy, add every booking to your calendar and send a Google Meet link."
+        }
+        stats={
+          connected && status
+            ? [
+                { label: "Calendars", value: status.calendars.length },
+                {
+                  label: "Can take bookings",
+                  value: status.calendars.filter((c) => c.canWrite).length,
+                  tone: "ok",
+                },
+                {
+                  label: "Primary calendar",
+                  value: status.calendars.find((c) => c.primary)?.summary ?? "None",
+                },
+              ]
+            : undefined
+        }
+      />
 
       {connected && status ? (
         <StudioSection title="Calendars on this account" description="Pick where bookings go from each booking field.">

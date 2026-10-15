@@ -52,13 +52,8 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-}
-
-.wordmark {
-  display: flex;
-  align-items: center;
-  min-height: 28px;
-  margin-bottom: 6px;
+  padding-top: 28px;
+  border-top: 1px solid var(--mantine-color-default-border);
 }
 
 .crumbs {

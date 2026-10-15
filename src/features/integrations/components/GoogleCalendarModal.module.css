@@ -34,7 +34,7 @@
 }
 
 .calendars {
-  max-height: 220px;
+  max-height: 360px;
   overflow-y: auto;
   border: 1px solid var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-md);

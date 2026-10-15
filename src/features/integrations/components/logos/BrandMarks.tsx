@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { Webhook } from "lucide-react";
+import { GoogleMark } from "@/shared/ui/GoogleMark";
 import classes from "./Logos.module.css";
 
 interface MarkProps {
@@ -127,6 +128,7 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   telegram: TelegramMark,
   "google-calendar": GoogleCalendarMark,
   "google-sheets": GoogleSheetsMark,
+  "search-console": ({ size = 24 }: MarkProps) => <GoogleMark size={size} />,
   razorpay: RazorpayMark,
   cashfree: CashfreeMark,
   payu: PayuMark,

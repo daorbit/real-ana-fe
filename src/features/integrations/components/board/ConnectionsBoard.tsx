@@ -15,13 +15,15 @@ import {
   type ConnectionFilter,
   type Searchable,
 } from "../../lib/filter";
+import { useSearchConsoleConnection } from "../../hooks/useSearchConsoleConnection";
 import { FormsIntegrations } from "../FormsIntegrations";
+import { SearchConsoleConnection } from "../SearchConsoleConnection";
 import { ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
 import { ConnectionsToolbar } from "./ConnectionsToolbar";
-
-const SKELETON_CARDS = 8;
 import { FormsNotice } from "./FormsNotice";
 import { SocialGroup } from "./SocialGroup";
+
+const SKELETON_CARDS = 8;
 
 function formsLockReason(isDemo: boolean, hasWorkspace: boolean, canEdit: boolean): string | undefined {
   if (isDemo) return "Form apps are connected in your own workspace, not the demo.";
@@ -33,12 +35,14 @@ function formsLockReason(isDemo: boolean, hasWorkspace: boolean, canEdit: boolea
 export function ConnectionsBoard() {
   const { isDemo } = useAuth();
   const { active } = useWorkspace();
-  const { canEdit } = usePermissions();
+  const { canEdit, canAdmin } = usePermissions();
   const workspaceId = active?._id ?? null;
   const lockedReason = formsLockReason(isDemo, Boolean(workspaceId), canEdit);
+  const searchWorkspaceId = isDemo ? null : workspaceId;
   const [filter, setFilter] = useState<ConnectionFilter>(EMPTY_FILTER);
 
   const social = useSocialConnections();
+  const searchConsole = useSearchConsoleConnection(searchWorkspaceId);
   const integrations = useFormsIntegrations(lockedReason ? null : workspaceId);
 
   const formEntries = useMemo<Searchable[]>(
@@ -54,15 +58,28 @@ export function ConnectionsBoard() {
     [integrations.sections],
   );
 
-  const allEntries = useMemo(() => [...social.entries, ...formEntries], [social.entries, formEntries]);
+  const searchEntry = searchConsole.entry;
+  const allEntries = useMemo(
+    () => [...social.entries, ...(searchEntry ? [searchEntry] : []), ...formEntries],
+    [social.entries, searchEntry, formEntries],
+  );
   const counts = useMemo(() => countByStatus(allEntries, filter), [allEntries, filter]);
   const categories = useMemo(() => categoryOptions(allEntries), [allEntries]);
 
-  const visibleSocial = social.entries.filter((entry) => matchesFilter(entry, filter));
-  const visibleForms = formEntries.filter((entry) => matchesFilter(entry, filter));
-  const loading = social.loading || (!lockedReason && integrations.loading);
+  const visibleCount = allEntries.filter((entry) => matchesFilter(entry, filter)).length;
+  const loading = social.loading || searchConsole.loading || (!lockedReason && integrations.loading);
   const formsSettled = Boolean(lockedReason) || (!integrations.loading && !integrations.failed);
-  const nothingMatches = formsSettled && visibleSocial.length === 0 && visibleForms.length === 0;
+  const nothingMatches = formsSettled && visibleCount === 0;
+  const visibleSocial = social.entries.filter((entry) => matchesFilter(entry, filter));
+  const searchCard = (flat: boolean) => (
+    <SearchConsoleConnection
+      workspaceId={searchWorkspaceId}
+      searchConsole={searchConsole}
+      canManage={canAdmin}
+      filter={filter}
+      flat={flat}
+    />
+  );
 
   return (
     <>
@@ -91,6 +108,7 @@ export function ConnectionsBoard() {
         <>
           <div className="connection-grid">
             <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} flat />
+            {searchCard(true)}
             <FormsIntegrations
               workspaceId={workspaceId}
               lockedReason={lockedReason}
@@ -104,6 +122,7 @@ export function ConnectionsBoard() {
       ) : (
         <>
           <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} />
+          {searchCard(false)}
           <FormsIntegrations
             workspaceId={workspaceId}
             lockedReason={lockedReason}

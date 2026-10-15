@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
-import { ActionIcon, Button, Group, Modal, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Anchor, Button, Group, Modal, Text, Tooltip } from "@mantine/core";
 import { ArrowLeft, BookOpen, X } from "lucide-react";
 import cardClasses from "@/features/auth/components/settings/ConnectionCard.module.css";
 import { BrandMark } from "../logos/BrandMarks";
+import { AsideBlock } from "./StudioParts";
 import classes from "./IntegrationStudio.module.css";
 
 interface Props {
@@ -78,21 +79,6 @@ export function IntegrationStudio({
           </div>
 
           <Group gap={6} wrap="nowrap" className={classes.actions}>
-            {docsUrl && (
-              <Tooltip label="Where to find these details" withArrow>
-                <ActionIcon
-                  component="a"
-                  href={docsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  variant="default"
-                  size={34}
-                  aria-label="Where to find these details"
-                >
-                  <BookOpen size={16} />
-                </ActionIcon>
-              </Tooltip>
-            )}
             <Tooltip label="Close" withArrow>
               <ActionIcon
                 variant="default"
@@ -108,7 +94,19 @@ export function IntegrationStudio({
         </header>
 
         <div className={classes.layout}>
-          {aside && <aside className={classes.aside}>{aside}</aside>}
+          {(aside || docsUrl) && (
+            <aside className={classes.aside}>
+              {aside}
+              {docsUrl && (
+                <AsideBlock label="Guide">
+                  <Anchor href={docsUrl} target="_blank" rel="noreferrer" size="sm" className={classes.guide}>
+                    <BookOpen size={15} />
+                    {title} setup guide
+                  </Anchor>
+                </AsideBlock>
+              )}
+            </aside>
+          )}
           <div className={classes.main}>
             <div className={classes.scroll}>
               <div className={classes.inner}>{children}</div>

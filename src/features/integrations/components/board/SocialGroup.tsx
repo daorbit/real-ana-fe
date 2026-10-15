@@ -7,6 +7,7 @@ import { ConnectionCard } from "@/features/auth/components/settings/ConnectionCa
 import { ConnectionGroup } from "@/features/auth/components/settings/ConnectionGroup";
 import { FacebookMark, InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { SocialEntry, SocialId } from "../../hooks/useSocialConnections";
+import { appGuideUrl } from "../../lib/links";
 
 interface Props {
   entries: SocialEntry[];
@@ -21,7 +22,14 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
 
   const cards: Record<SocialId, ReactNode> = {
     linkedin: (
-      <ConnectionCard key="linkedin" mark={<LinkedInMark size={26} />} brand="linkedin" name="LinkedIn" hint="Publishing account for scheduled social posts.">
+      <ConnectionCard
+        key="linkedin"
+        mark={<LinkedInMark size={26} />}
+        brand="linkedin"
+        name="LinkedIn"
+        hint="Publishing account for scheduled social posts."
+        docsUrl={appGuideUrl("linkedin")}
+      >
         <LinkedInConnection onConnected={() => nav("/app/social")} />
       </ConnectionCard>
     ),
@@ -33,6 +41,7 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
         name="Instagram"
         hint="Feed posts from the same composer."
         soon={!canUseInstagram}
+        docsUrl={canUseInstagram ? appGuideUrl("instagram") : undefined}
       >
         {canUseInstagram && <InstagramConnection onConnected={() => nav("/app/social")} />}
       </ConnectionCard>

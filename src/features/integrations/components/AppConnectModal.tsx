@@ -1,14 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Button, Group, Stack, Text, TextInput } from "@mantine/core";
+import { Anchor, Badge, Button, Group, Stack, Text, TextInput } from "@mantine/core";
 import { FlaskConical, Link2, Mail, Send, ShieldCheck } from "lucide-react";
 import { useDisconnectFormsAppMutation, useSaveFormsAppMutation, useTestFormsAppMutation } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
 import { notify, notifyError } from "@/shared/lib/notify";
-import { dateTime } from "@/shared/lib/format";
+import { dateTime, timeAgo } from "@/shared/lib/format";
 import { AppFieldInput } from "./AppFieldInput";
 import { IntegrationStudio } from "./studio/IntegrationStudio";
-import { AsideBlock, SecureNote, SetupChecklist, StatusLine, StudioSection, studioClasses } from "./studio/StudioParts";
+import {
+  AsideBlock,
+  SecureNote,
+  SetupChecklist,
+  StudioHero,
+  StudioSection,
+  studioClasses,
+  type StudioStat,
+  type StudioState,
+} from "./studio/StudioParts";
 import { initialValues, isDirty, missingRequired, payloadValues, type FieldValues } from "../lib/appForm";
+import { appGuideUrl } from "../lib/links";
 import type { FormsApp } from "../types";
 
 interface Props {
@@ -23,11 +33,40 @@ function StatusBadge({ app }: { app: FormsApp }) {
   return <Badge size="sm" variant="light" color="gray">Not connected</Badge>;
 }
 
-function statusText(app: FormsApp): string {
+function heroFor(app: FormsApp): { state: StudioState; title: string; description: string } {
   const email = app.category === "email";
-  if (app.enabled) return email ? `Live. Notification emails send through ${app.name}.` : `Live. New responses are posted to ${app.name}.`;
-  if (app.connected) return "Saved but switched off. Nothing is sent through it.";
-  return `Not connected. ${app.name} is not sending anything yet.`;
+  if (app.enabled) {
+    return {
+      state: "live",
+      title: `${app.name} is live`,
+      description: email
+        ? `Every form notification email in this workspace is sent through ${app.name}.`
+        : `Every new response is posted to ${app.name} for forms that notify you.`,
+    };
+  }
+  if (app.connected) {
+    return {
+      state: "saved",
+      title: `${app.name} is saved but switched off`,
+      description: "Your details are kept. Turn it on to start sending through it.",
+    };
+  }
+  return {
+    state: "off",
+    title: `Connect ${app.name}`,
+    description: email
+      ? `Send form emails from your own address, so replies reach you and your domain's reputation stays yours.`
+      : `Get a message in ${app.name} the moment a new response comes in.`,
+  };
+}
+
+function statsFor(app: FormsApp): StudioStat[] | undefined {
+  if (!app.connected) return undefined;
+  return [
+    { label: "Status", value: app.enabled ? "On" : "Off", tone: app.enabled ? "ok" : "warn" },
+    { label: "Last verified", value: app.verifiedAt ? timeAgo(app.verifiedAt) : "Never", tone: app.verifiedAt ? undefined : "warn" },
+    { label: "Last used", value: app.lastUsedAt ? timeAgo(app.lastUsedAt) : "Not yet" },
+  ];
 }
 
 function AppAside({ app, dirty }: { app: FormsApp; dirty: boolean }) {
@@ -55,6 +94,13 @@ function AppAside({ app, dirty }: { app: FormsApp; dirty: boolean }) {
           Keys and passwords are encrypted on the server and never shown again. Leave a saved secret blank to keep it.
         </SecureNote>
       </AsideBlock>
+      {app.docsUrl && app.docsUrl !== appGuideUrl(app.id) && (
+        <AsideBlock label={`${app.name} help`}>
+          <Anchor href={app.docsUrl} target="_blank" rel="noreferrer" size="sm">
+            Where to find these in {app.name}
+          </Anchor>
+        </AsideBlock>
+      )}
     </>
   );
 }
@@ -160,12 +206,12 @@ export function AppConnectModal({ app, workspaceId, onClose }: Props) {
       title={app.name}
       subtitle={isEmail ? "Email delivery for form notifications" : "Chat alerts for new responses"}
       badge={<StatusBadge app={app} />}
-      docsUrl={app.docsUrl}
+      docsUrl={appGuideUrl(app.id) ?? app.docsUrl}
       closeDisabled={busy}
       aside={<AppAside app={app} dirty={dirty} />}
       footer={footer}
     >
-      <StatusLine state={app.enabled ? "live" : app.connected ? "saved" : "off"}>{statusText(app)}</StatusLine>
+      <StudioHero {...heroFor(app)} stats={statsFor(app)} />
 
       <StudioSection
         title={isEmail ? "Account details" : "Channel"}

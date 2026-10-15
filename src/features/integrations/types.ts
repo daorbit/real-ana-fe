@@ -130,6 +130,7 @@ export interface SheetsStatus {
 }
 
 export type IntegrationCategory =
+  | "search"
   | "email"
   | "payments"
   | "scheduling"
@@ -137,7 +138,7 @@ export type IntegrationCategory =
   | "crm"
   | "automation";
 
-export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook";
+export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook" | "search-console";
 
 export interface IntegrationTile {
   kind: IntegrationKind;

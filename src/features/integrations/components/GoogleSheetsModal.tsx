@@ -2,7 +2,7 @@ import { Anchor, Badge, Button, Group, Stack, Text } from "@mantine/core";
 import { ExternalLink, FileSpreadsheet } from "lucide-react";
 import { timeAgo } from "@/shared/lib/format";
 import { IntegrationStudio } from "./studio/IntegrationStudio";
-import { AsideBlock, SecureNote, StatusLine, StudioSection } from "./studio/StudioParts";
+import { AsideBlock, SecureNote, StudioHero, StudioSection } from "./studio/StudioParts";
 import { GOOGLE_DATA_POLICY_URL, GOOGLE_SHEETS_DOCS_URL } from "../lib/links";
 import type { LinkedSheet, SheetsStatus } from "../types";
 import classes from "./GoogleSheetsModal.module.css";
@@ -39,15 +39,10 @@ function SheetsAside() {
           encrypted, and you can disconnect at any time.
         </SecureNote>
       </AsideBlock>
-      <AsideBlock label="Learn more">
-        <Stack gap={6}>
-          <Anchor href={GOOGLE_SHEETS_DOCS_URL} target="_blank" rel="noopener noreferrer" size="sm">
-            Google Sheets guide
-          </Anchor>
-          <Anchor href={GOOGLE_DATA_POLICY_URL} target="_blank" rel="noopener noreferrer" size="sm">
-            How we handle Google data
-          </Anchor>
-        </Stack>
+      <AsideBlock label="Privacy">
+        <Anchor href={GOOGLE_DATA_POLICY_URL} target="_blank" rel="noopener noreferrer" size="sm">
+          How we handle Google data
+        </Anchor>
       </AsideBlock>
     </>
   );
@@ -156,13 +151,31 @@ export function GoogleSheetsModal({ opened, status, busy, onClose, onConnect, on
       aside={<SheetsAside />}
       footer={footer}
     >
-      <StatusLine state={connected ? "live" : expired ? "saved" : "off"}>
-        {connected
-          ? `Live. New responses from every form are added to sheets in ${status?.email || "your Google account"}.`
-          : expired
-            ? "Google no longer accepts this connection, so new responses are not being added. Reconnect to resume."
-            : "Not connected. Connect a Google account to start sending responses to Google Sheets."}
-      </StatusLine>
+      <StudioHero
+        state={connected ? "live" : expired ? "saved" : "off"}
+        pill={expired ? "Access expired" : undefined}
+        title={connected ? "Responses go to Google Sheets" : expired ? "Reconnect Google Sheets" : "Connect Google Sheets"}
+        description={
+          connected
+            ? `Every form adds a row to its own spreadsheet in ${status?.email || "your Google account"} the moment a response comes in.`
+            : expired
+              ? "Google no longer accepts this connection, so new responses are not being added. Reconnect to resume."
+              : "Get a spreadsheet for every form, with a new row for each response. Share it, chart it, or connect it to anything."
+        }
+        stats={
+          connected && status
+            ? [
+                { label: "Spreadsheets", value: status.sheets.length },
+                { label: "Rows added", value: status.sheets.reduce((sum, sheet) => sum + sheet.rows, 0), tone: "ok" },
+                {
+                  label: "Last row",
+                  value: status.lastUsedAt ? timeAgo(status.lastUsedAt) : "Not yet",
+                  tone: status.lastError ? "warn" : undefined,
+                },
+              ]
+            : undefined
+        }
+      />
 
       {connected && status?.lastError && (
         <Text size="sm" className={classes.errorText}>

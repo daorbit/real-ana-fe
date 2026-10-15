@@ -1,3 +1,13 @@
+.card {
+  position: relative;
+}
+
+.docs {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
 .soon {
   opacity: 0.55;
 }
@@ -61,6 +71,10 @@
 
 .mark[data-brand="google-sheets"] {
   --brand: #0f9d58;
+}
+
+.mark[data-brand="search-console"] {
+  --brand: #4285f4;
 }
 
 .hint {

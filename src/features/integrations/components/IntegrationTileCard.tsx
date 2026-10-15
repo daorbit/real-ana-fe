@@ -4,6 +4,7 @@ import { ConnectionCard } from "@/features/auth/components/settings/ConnectionCa
 import { timeAgo } from "@/shared/lib/format";
 import { BrandMark } from "./logos/BrandMarks";
 import { CONNECT_HINT, WEBHOOK_HINT } from "../lib/catalog";
+import { appGuideUrl } from "../lib/links";
 import type { IntegrationTile } from "../types";
 import classes from "./IntegrationTileCard.module.css";
 
@@ -63,7 +64,7 @@ function TileStatus({ tile, busy, lockedReason, onOpen }: Props) {
   }
 
   if (tile.connected) {
-    const expired = tile.kind === "calendar" || tile.kind === "sheets";
+    const expired = tile.kind === "calendar" || tile.kind === "sheets" || tile.kind === "search-console";
     return (
       <Group gap={8} wrap="nowrap" className={classes.status}>
         {expired ? <TriangleAlert size={14} className={classes.warn} /> : <CirclePause size={14} className={classes.paused} />}
@@ -113,6 +114,7 @@ export function IntegrationTileCard(props: Props) {
       name={tile.name}
       hint={tile.description}
       badge={<ModeBadge tile={tile} />}
+      docsUrl={appGuideUrl(tile.id)}
     >
       <TileStatus {...props} />
     </ConnectionCard>

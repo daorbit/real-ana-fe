@@ -3,6 +3,63 @@ import { Text } from "@mantine/core";
 import { CircleCheck, CircleDashed, LockKeyhole } from "lucide-react";
 import classes from "./StudioParts.module.css";
 
+export type StudioState = "live" | "saved" | "off";
+
+export interface StudioStat {
+  label: string;
+  value: ReactNode;
+  tone?: "ok" | "warn";
+}
+
+const PILL_TEXT: Record<StudioState, string> = {
+  live: "Live",
+  saved: "Needs attention",
+  off: "Not connected",
+};
+
+export function StudioHero({
+  state,
+  pill,
+  title,
+  description,
+  stats,
+}: {
+  state: StudioState;
+  pill?: string;
+  title: string;
+  description: ReactNode;
+  stats?: StudioStat[];
+}) {
+  return (
+    <header className={classes.hero}>
+      <div className={classes.heroHead}>
+        <span className={classes.pill} data-state={state}>
+          <span className={classes.pillDot} aria-hidden />
+          {pill ?? PILL_TEXT[state]}
+        </span>
+        <Text component="h2" className={classes.heroTitle}>
+          {title}
+        </Text>
+        <Text size="sm" c="dimmed" mt={8}>
+          {description}
+        </Text>
+      </div>
+      {stats && stats.length > 0 && (
+        <div className={classes.stats}>
+          {stats.map((stat) => (
+            <div key={stat.label} className={classes.stat} data-tone={stat.tone}>
+              <div className={classes.statValue}>{stat.value}</div>
+              <Text size="xs" c="dimmed" mt={6}>
+                {stat.label}
+              </Text>
+            </div>
+          ))}
+        </div>
+      )}
+    </header>
+  );
+}
+
 export function StudioSection({
   title,
   description,
@@ -17,17 +74,15 @@ export function StudioSection({
   return (
     <section className={classes.section}>
       <div className={classes.sectionHead}>
-        <div>
-          <Text fw={650} size="sm">
-            {title}
+        <Text fw={650} size="sm">
+          {title}
+        </Text>
+        {description && (
+          <Text size="xs" c="dimmed" mt={4}>
+            {description}
           </Text>
-          {description && (
-            <Text size="xs" c="dimmed" mt={3}>
-              {description}
-            </Text>
-          )}
-        </div>
-        {action}
+        )}
+        {action && <div className={classes.sectionAction}>{action}</div>}
       </div>
       <div className={classes.sectionBody}>{children}</div>
     </section>
@@ -67,17 +122,6 @@ export function SecureNote({ children }: { children: ReactNode }) {
     <div className={classes.secure}>
       <LockKeyhole size={15} className={classes.secureIcon} />
       <Text size="xs" c="dimmed">
-        {children}
-      </Text>
-    </div>
-  );
-}
-
-export function StatusLine({ state, children }: { state: "live" | "saved" | "off"; children: ReactNode }) {
-  return (
-    <div className={classes.statusRow}>
-      <span className={classes.dot} data-state={state} />
-      <Text size="sm" c={state === "live" ? undefined : "dimmed"}>
         {children}
       </Text>
     </div>

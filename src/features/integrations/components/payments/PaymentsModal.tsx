@@ -3,8 +3,10 @@ import { Badge, Button, Code, Group, Text, Title } from "@mantine/core";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useGetFormsPaymentsQuery } from "@/app/store";
 import { usePaymentSetup } from "../../hooks/usePaymentSetup";
-import { paymentWebhookUrl } from "../../lib/links";
+import { appGuideUrl, paymentWebhookUrl } from "../../lib/links";
+import { timeAgo } from "@/shared/lib/format";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
+import { StudioHero } from "../studio/StudioParts";
 import { GatewayWordmark } from "../logos/GatewayWordmarks";
 import { Callout } from "./PaymentBits";
 import { StepRail } from "./StepRail";
@@ -87,6 +89,7 @@ function PaymentSetup({
       onClose={onClose}
       brand={provider}
       title={label}
+      docsUrl={appGuideUrl(provider)}
       subtitle="Take payments on your forms"
       badge={
         <Badge size="sm" variant="light" color={view?.enabled ? (live ? "teal" : "gray") : "gray"}>
@@ -106,18 +109,37 @@ function PaymentSetup({
       }
       footer={footer}
     >
-      <div>
-        <div className={classes.wordmark}>
-          <GatewayWordmark provider={provider} height={22} />
+      <StudioHero
+        state={view?.enabled ? "live" : view?.test.hasKeyId || view?.live.hasKeyId ? "saved" : "off"}
+        pill={view?.enabled ? (live ? "Live mode" : "Test mode") : undefined}
+        title={
+          view?.enabled
+            ? live
+              ? `${label} is taking payments`
+              : `${label} is on in test mode`
+            : `Set up ${label} payments`
+        }
+        description="Three steps: add your API keys, register the webhook so payments get confirmed, then switch it on."
+        stats={[
+          { label: "Mode", value: live ? "Live" : "Test", tone: live ? "ok" : undefined },
+          { label: "Accepting payments", value: view?.enabled ? "On" : "Off", tone: view?.enabled ? "ok" : "warn" },
+          { label: "Last payment", value: view?.lastChargeAt ? timeAgo(view.lastChargeAt) : "None yet" },
+        ]}
+      />
+
+      <div className={classes.stepHead}>
+        <div>
+          <Text size="xs" c="dimmed" fw={600} tt="uppercase">
+            Step {index + 1} of {STEPS.length}
+          </Text>
+          <Title order={3} mt={4}>
+            {current.label}
+          </Title>
+          <Text size="sm" c="dimmed" mt={2}>
+            {current.hint}
+          </Text>
         </div>
-        <div className={classes.stepHead}>
-          <div>
-            <Title order={3}>{current.label}</Title>
-            <Text size="sm" c="dimmed" mt={2}>
-              {current.hint}
-            </Text>
-          </div>
-        </div>
+        <GatewayWordmark provider={provider} height={20} />
       </div>
 
       {!settings.configurable && (
