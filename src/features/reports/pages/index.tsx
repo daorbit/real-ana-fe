@@ -3,7 +3,6 @@ import { MailWarning, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { useAuth } from "@/features/auth/context";
-import { useWorkspace } from "@/features/workspace/context";
 import { PageHeader, PageStack } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
@@ -30,7 +29,6 @@ export default function Reports() {
   useTitle("Reports");
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { active } = useWorkspace();
   const page = useReportsPage();
   const dialog = useReportDialog({
     waEntitled: page.waEntitled,
@@ -137,7 +135,6 @@ export default function Reports() {
         waEntitled={page.waEntitled}
         ownerEmail={user?.email ?? ""}
         ownerMobile={page.ownerMobile}
-        workspace={active?.name ?? ""}
       />
     </AppShell>
   );

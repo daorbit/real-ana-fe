@@ -34,7 +34,6 @@ export function TelegramDelivery({ workspaceId, selected, onSelect }: Props) {
   return (
     <div className={classes.delivery}>
       <div>
-        <span className={reportClasses.fieldLabel}>{t("reports.tgChatsLabel")}</span>
         <div className={reportClasses.rows}>
           {tg.chats.length ? (
             <div className={reportClasses.recipientList}>

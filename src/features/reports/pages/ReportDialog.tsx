@@ -1,25 +1,14 @@
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from "react";
-import { ActionIcon, Button, Modal } from "@mantine/core";
+import { ActionIcon, Button, Modal, Switch } from "@mantine/core";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Site, ShareState, WhatsAppStatus } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { frequencyLabel, nextRunLabel } from "@/features/reports/pages/utils";
 import { ReportForm, type FormSection } from "@/features/reports/components/ReportForm";
-import { EmailPreview } from "@/features/reports/components/EmailPreview";
 import classes from "@/features/reports/components/Reports.module.css";
+import editorClasses from "@/features/reports/components/editor/Editor.module.css";
 
-/**
- * The create/edit screen.
- *
- * Full-screen, with the form on the left and the email a recipient will get on
- * the right, updating as the form changes. The whole form is one page — no
- * wizard — and Save sits in the top bar, so it is reachable from anywhere.
- *
- * Presentational: the draft and every action are passed in from `hooks.tsx`,
- * which also owns the validation. A failed check names a section; this file
- * scrolls to it.
- */
 export function ReportDialog({
   opened,
   onClose,
@@ -42,7 +31,6 @@ export function ReportDialog({
   waEntitled,
   ownerEmail,
   ownerMobile,
-  workspace,
 }: {
   opened: boolean;
   onClose: () => void;
@@ -65,7 +53,6 @@ export function ReportDialog({
   waEntitled: boolean;
   ownerEmail: string;
   ownerMobile: string;
-  workspace: string;
 }) {
   const { t } = useTranslation();
   const sections = useRef<Partial<Record<FormSection, HTMLElement | null>>>({});
@@ -76,12 +63,19 @@ export function ReportDialog({
     [],
   );
 
+  const jump = useCallback((id: FormSection) => {
+    sections.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   useEffect(() => {
     if (!focusTick) return;
-    sections.current[tab as FormSection]?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [tab, focusTick]);
+    jump(tab as FormSection);
+  }, [tab, focusTick, jump]);
 
-  const recipients = 1 + draft.recipients.length + (draft.telegramChannel ? draft.telegramChatIds.length : 0);
+  const recipients =
+    (draft.emailChannel ? 1 + draft.recipients.length : 0) +
+    (draft.whatsappChannel ? 1 : 0) +
+    (draft.telegramChannel ? draft.telegramChatIds.length : 0);
   const summary = [
     frequencyLabel(draft.frequency),
     draft.enabled ? t("reports.previewNextSend", { when: nextRunLabel(draft.frequency) }) : t("reports.paused"),
@@ -96,10 +90,7 @@ export function ReportDialog({
       withCloseButton={false}
       padding={0}
       transitionProps={{ transition: "fade", duration: 150 }}
-      styles={{
-        content: { display: "flex", flexDirection: "column", border: "none" },
-        body: { flex: 1, minHeight: 0, overflow: "hidden" },
-      }}
+      classNames={{ content: classes.modalContent, body: classes.modalBody }}
     >
       <div className={classes.editor}>
         <header className={classes.topbar}>
@@ -108,11 +99,20 @@ export function ReportDialog({
           </ActionIcon>
           <div className={classes.topTitle}>
             <div className={classes.topName}>
-              {editingId ? t("reports.dialogEditTitle") : t("reports.dialogNewTitle")}
-              {draft.name.trim() && ` · ${draft.name.trim()}`}
+              {draft.name.trim() || (editingId ? t("reports.dialogEditTitle") : t("reports.dialogNewTitle"))}
             </div>
             <div className={classes.topSummary}>{summary}</div>
           </div>
+          <Switch
+            size="sm"
+            label={t("reports.activeLabel")}
+            checked={draft.enabled}
+            onChange={(e) => {
+              const enabled = e.currentTarget.checked;
+              setDraft((d) => ({ ...d, enabled }));
+            }}
+            className={classes.topSwitch}
+          />
           <Button variant="default" onClick={onClose} visibleFrom="xs">
             {t("common.cancel")}
           </Button>
@@ -121,9 +121,8 @@ export function ReportDialog({
           </Button>
         </header>
 
-        <div className={classes.split}>
-          <div className={classes.formPane}>
-            <ReportForm
+        <div className={editorClasses.scroll}>
+          <ReportForm
               draft={draft}
               setDraft={setDraft}
               workspaceId={workspaceId}
@@ -140,16 +139,6 @@ export function ReportDialog({
               share={share}
               sectionRef={sectionRef}
             />
-          </div>
-          <aside className={classes.previewPane}>
-            <EmailPreview
-              draft={draft}
-              sites={sites}
-              ownerEmail={ownerEmail}
-              shareEnabled={Boolean(share?.enabled)}
-              workspace={workspace}
-            />
-          </aside>
         </div>
       </div>
     </Modal>

@@ -15,7 +15,7 @@ export function frequencyLabel(f: ReportFrequency): string {
 }
 
 /** The order Next walks, and the order the tabs are shown in. */
-export const TAB_ORDER: string[] = ["schedule", "delivery", "content"];
+export const TAB_ORDER: string[] = ["schedule", "content", "delivery"];
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
