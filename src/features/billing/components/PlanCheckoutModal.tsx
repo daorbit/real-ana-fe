@@ -141,7 +141,7 @@ export function PlanCheckoutModal({
       transitionProps={{ transition: "fade", duration: 180 }}
       classNames={{ content: s.page, body: s.body }}
     >
-      <div className={s.shell} data-plan={plan.slug}>
+      <div className={s.shell}>
       <CheckoutTopBar onBack={onClose} disabled={busy} />
 
       <div className={s.split}>

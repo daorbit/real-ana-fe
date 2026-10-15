@@ -10,39 +10,11 @@
 
 .shell {
   --pa: var(--accent);
-  --pa-ink: var(--accent-2);
+  --pa-ink: var(--accent);
   --pa-on: #ffffff;
+  --price: var(--green);
   --violet-2: var(--pa-ink);
   --accent-2: var(--pa-ink);
-}
-
-.shell[data-plan="pro"] {
-  --pa: #d9a441;
-  --pa-ink: #e8b65a;
-  --pa-on: #3b2503;
-}
-
-.shell[data-plan="starter"] {
-  --pa: #8b5cf6;
-  --pa-ink: #a78bfa;
-}
-
-.shell[data-plan="free"] {
-  --pa: #dc2626;
-  --pa-ink: #f87171;
-}
-
-[data-mantine-color-scheme="light"] .shell[data-plan="pro"] {
-  --pa: #c98a1b;
-  --pa-ink: #a16207;
-}
-
-[data-mantine-color-scheme="light"] .shell[data-plan="starter"] {
-  --pa-ink: #6d28d9;
-}
-
-[data-mantine-color-scheme="light"] .shell[data-plan="free"] {
-  --pa-ink: #b91c1c;
 }
 
 .topBar {
@@ -103,8 +75,8 @@
 }
 
 .right {
-  border-left: 1px solid color-mix(in srgb, var(--pa) 18%, var(--border));
-  background: color-mix(in srgb, var(--pa) 5%, var(--bg));
+  border-left: 1px solid var(--border);
+  background: var(--bg-2);
 }
 
 .rightInner {
@@ -231,7 +203,7 @@
 .cycle[data-active]:hover:not(:disabled) {
   border-color: var(--pa);
   background: color-mix(in srgb, var(--pa) 8%, var(--surface));
-  box-shadow: inset 0 0 0 1px var(--pa), 0 0 0 4px color-mix(in srgb, var(--pa) 14%, transparent);
+  box-shadow: inset 0 0 0 1px var(--pa);
 }
 
 .cycle:disabled {
@@ -297,6 +269,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+  color: var(--price);
 }
 
 .cyclePer {
@@ -412,7 +385,7 @@
   line-height: 1.05;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
+  color: var(--price);
 }
 
 .items {
@@ -468,7 +441,7 @@
   font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
+  color: var(--price);
 }
 
 .divider {

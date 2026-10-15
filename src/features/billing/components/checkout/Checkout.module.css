@@ -391,7 +391,7 @@
   line-height: 1;
   letter-spacing: -0.035em;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
+  color: var(--price, var(--text));
 }
 
 .hint {
@@ -541,7 +541,7 @@
   color: var(--pa-on, #ffffff);
   font-size: 14px;
   font-weight: 650;
-  box-shadow: 0 10px 28px -14px var(--pa, transparent);
+  box-shadow: none;
   transition: background-color 140ms ease;
 }
 
