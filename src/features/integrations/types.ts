@@ -139,7 +139,7 @@ export type IntegrationCategory =
   | "crm"
   | "automation";
 
-export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook" | "search-console" | "telegram" | "quantalog-app";
+export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook" | "search-console" | "telegram" | "whatsapp" | "quantalog-app";
 
 export interface IntegrationTile {
   kind: IntegrationKind;

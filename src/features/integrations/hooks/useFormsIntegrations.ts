@@ -7,6 +7,7 @@ import {
   useGetFormsSheetsQuery,
   useGetFormsWebhookQuery,
   useGetTelegramStatusQuery,
+  useGetWhatsAppStatusQuery,
 } from "@/app/store";
 import { buildSections } from "../lib/catalog";
 
@@ -18,17 +19,19 @@ export function useFormsIntegrations(workspaceId: string | null) {
   const sheets = useGetFormsSheetsQuery(arg);
   const webhook = useGetFormsWebhookQuery(arg);
   const telegram = useGetTelegramStatusQuery(arg);
+  const whatsapp = useGetWhatsAppStatusQuery(arg);
 
   const appList = apps.currentData;
   const paymentSettings = payments.currentData;
   const calendarStatus = calendar.currentData;
   const sheetsStatus = sheets.currentData;
   const telegramStatus = telegram.currentData;
+  const whatsappStatus = whatsapp.currentData;
   const webhookEnabled = Boolean(webhook.currentData?.enabled);
 
   const sections = useMemo(
-    () => buildSections(appList, paymentSettings, calendarStatus, sheetsStatus, telegramStatus, webhookEnabled),
-    [appList, paymentSettings, calendarStatus, sheetsStatus, telegramStatus, webhookEnabled],
+    () => buildSections(appList, paymentSettings, calendarStatus, sheetsStatus, telegramStatus, whatsappStatus, webhookEnabled),
+    [appList, paymentSettings, calendarStatus, sheetsStatus, telegramStatus, whatsappStatus, webhookEnabled],
   );
 
   return {
@@ -38,7 +41,8 @@ export function useFormsIntegrations(workspaceId: string | null) {
     calendar: calendarStatus,
     sheets: sheetsStatus,
     telegram: telegramStatus,
-    loading: apps.isLoading || payments.isLoading || calendar.isLoading || sheets.isLoading || webhook.isLoading || telegram.isLoading,
+    whatsapp: whatsappStatus,
+    loading: apps.isLoading || payments.isLoading || calendar.isLoading || sheets.isLoading || webhook.isLoading || telegram.isLoading || whatsapp.isLoading,
     failed: apps.isError,
     error: apps.error,
     refetchApps: apps.refetch,
@@ -54,6 +58,7 @@ export function useFormsIntegrations(workspaceId: string | null) {
       void sheets.refetch();
       void webhook.refetch();
       void telegram.refetch();
+      void whatsapp.refetch();
     },
   };
 }

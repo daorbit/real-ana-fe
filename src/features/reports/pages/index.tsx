@@ -32,7 +32,6 @@ export default function Reports() {
   const page = useReportsPage();
   const dialog = useReportDialog({
     waEntitled: page.waEntitled,
-    ownerMobile: page.ownerMobile,
     persist: page.persist,
   });
 
@@ -130,11 +129,8 @@ export default function Reports() {
         saving={page.saving}
         sites={page.sites}
         share={page.share}
-        wa={page.wa}
-        waReady={page.waReady}
         waEntitled={page.waEntitled}
         ownerEmail={user?.email ?? ""}
-        ownerMobile={page.ownerMobile}
       />
     </AppShell>
   );

@@ -545,17 +545,8 @@ export type ReportRecipient = {
   unsubscribed: boolean;
 };
 
-/** A WhatsApp destination on a report. */
-export type ReportPhoneRecipient = {
-  /** Digits only, country code first — normalised server-side. */
-  phone: string;
-  label: string;
-  /** Removed from delivery by the owner, without deleting the row. */
-  optedOut: boolean;
-};
-
 /** Which channels a report goes out on. At least one is always true. */
-export type ReportChannels = { email: boolean; whatsapp: boolean; telegram?: boolean };
+export type ReportChannels = { email: boolean; whatsapp?: boolean; telegram?: boolean };
 
 export type TelegramChat = {
   chatId: string;
@@ -573,12 +564,19 @@ export type TelegramStatus = {
   chats: TelegramChat[];
 };
 
-/** Whether WhatsApp delivery is available, and the paired session's live state. */
+export type WhatsAppNumber = {
+  phone: string;
+  label: string;
+  formAlerts: boolean;
+  verifiedAt: string;
+};
+
 export type WhatsAppStatus = {
-  configured: boolean;
-  status?: "connected" | "pairing" | "disconnected" | "error" | string;
-  phoneNumber?: string;
-  error?: string;
+  available: boolean;
+  entitled: boolean;
+  planName: string | null;
+  enabled: boolean;
+  numbers: WhatsAppNumber[];
 };
 
 export type ReportSchedule = {
@@ -588,9 +586,9 @@ export type ReportSchedule = {
   siteIds: string[];
   frequency: ReportFrequency;
   recipients: ReportRecipient[];
-  phoneRecipients: ReportPhoneRecipient[];
   channels: ReportChannels;
   telegramChatIds?: string[];
+  whatsappNumbers?: string[];
   include: { analytics: boolean; seo: boolean; dashboardLink: boolean; aiSummary?: boolean };
   attachXlsx: boolean;
   enabled: boolean;
@@ -606,12 +604,9 @@ export type ReportScheduleInput = {
   frequency: ReportFrequency;
   /** Extra addresses only — the owner's own is always added server-side. */
   recipients: string[];
-  /**
-   * Not sent by the client: WhatsApp is delivered to the account owner's own
-   * mobile, which the server reads from their profile.
-   */
   channels: ReportChannels;
   telegramChatIds: string[];
+  whatsappNumbers: string[];
   include: { analytics: boolean; seo: boolean; dashboardLink: boolean; aiSummary?: boolean };
   attachXlsx: boolean;
   enabled?: boolean;

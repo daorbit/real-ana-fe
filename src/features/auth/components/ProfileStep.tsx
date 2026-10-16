@@ -228,7 +228,7 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
             setPhoneError(null);
           }}
           error={phoneError}
-          description="Only needed for WhatsApp report delivery — you can add it later in Settings. We never share it."
+          description="Optional — you can add it later in Settings. We never share it."
         />
       </div>
 

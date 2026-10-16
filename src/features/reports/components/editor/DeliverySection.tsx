@@ -1,12 +1,11 @@
 import type { Dispatch, Ref, SetStateAction } from "react";
-import { Mail, MessageCircle, Send, Smartphone } from "lucide-react";
+import { Mail, MessageCircle, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { WhatsAppStatus } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { TelegramDelivery } from "../telegram/TelegramDelivery";
+import { WhatsAppDelivery } from "../whatsapp/WhatsAppDelivery";
 import { EditorSection, SettingRow, SettingsGroup, type FormSection } from "./EditorSection";
 import { EmailRecipients } from "./EmailRecipients";
-import reportClasses from "../Reports.module.css";
 import classes from "./Editor.module.css";
 
 interface Props {
@@ -18,27 +17,16 @@ interface Props {
   addEmail: () => void;
   removeEmail: (email: string) => void;
   ownerEmail: string;
-  ownerMobile: string;
-  wa?: WhatsAppStatus;
-  waReady: boolean;
   waEntitled: boolean;
   sectionRef: (id: FormSection) => Ref<HTMLElement>;
 }
 
 export function DeliverySection({
   draft, setDraft, workspaceId, emailInput, setEmailInput, addEmail, removeEmail,
-  ownerEmail, ownerMobile, wa, waReady, waEntitled, sectionRef,
+  ownerEmail, waEntitled, sectionRef,
 }: Props) {
   const { t } = useTranslation();
   const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }));
-
-  const waHint = !waEntitled
-    ? t("reports.waNotEntitled")
-    : !wa?.configured
-      ? t("reports.waNotConfigured")
-      : wa.status === "connected"
-        ? t("reports.waConnected")
-        : t("reports.waUnavailable");
 
   return (
     <EditorSection
@@ -69,19 +57,20 @@ export function DeliverySection({
         <SettingRow
           icon={MessageCircle}
           label={t("reports.channelWhatsApp")}
-          hint={waHint}
+          hint={waEntitled ? t("reports.channelWhatsAppShort") : t("reports.waNotEntitled")}
           checked={draft.whatsappChannel}
-          disabled={!waReady || !waEntitled}
+          disabled={!waEntitled}
           onChange={(whatsappChannel) => set({ whatsappChannel })}
         >
-          {ownerMobile ? (
-            <div className={classes.waRow}>
-              <Smartphone size={15} className={classes.recipientIcon} />
-              <span className={classes.grow}>+{ownerMobile}</span>
-              <span className={reportClasses.recipientTag}>{t("reports.waOnlyYouShort")}</span>
-            </div>
-          ) : (
-            <div className={classes.waMissing}>{t("reports.waNoticeNoNumber")}</div>
+          {workspaceId && (
+            <>
+              <div className={classes.detailHint}>{t("reports.whatsappNumbersHint")}</div>
+              <WhatsAppDelivery
+                workspaceId={workspaceId}
+                selected={draft.whatsappNumbers}
+                onSelect={(whatsappNumbers) => set({ whatsappNumbers })}
+              />
+            </>
           )}
         </SettingRow>
 

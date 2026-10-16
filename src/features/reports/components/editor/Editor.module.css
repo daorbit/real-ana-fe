@@ -151,19 +151,6 @@
   min-width: 0;
 }
 
-.waRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--mantine-font-size-sm);
-  color: var(--text);
-}
-
-.waMissing {
-  font-size: var(--mantine-font-size-sm);
-  color: var(--mantine-color-orange-6);
-}
-
 .detailHint {
   margin-bottom: 10px;
   font-size: var(--mantine-font-size-xs);

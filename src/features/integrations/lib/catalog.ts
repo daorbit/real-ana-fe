@@ -7,7 +7,7 @@ import type {
   PaymentSettings,
   SheetsStatus,
 } from "../types";
-import type { TelegramStatus } from "@/shared/types";
+import type { TelegramStatus, WhatsAppStatus } from "@/shared/types";
 
 export const CATEGORY_ORDER: IntegrationCategory[] = [
   "email",
@@ -130,6 +130,24 @@ function telegramTiles(status: TelegramStatus | undefined): IntegrationTile[] {
   ];
 }
 
+function whatsappTiles(status: WhatsAppStatus | undefined): IntegrationTile[] {
+  if (!status) return [];
+  const live = status.enabled && status.numbers.length > 0;
+  const count = status.numbers.length;
+  return [
+    {
+      kind: "whatsapp",
+      id: "whatsapp",
+      name: "WhatsApp",
+      category: "notification",
+      description: "Send scheduled reports and new form responses to the WhatsApp numbers you verify.",
+      connected: live,
+      enabled: live,
+      account: live ? `${count} number${count === 1 ? "" : "s"}` : undefined,
+    },
+  ];
+}
+
 function webhookTile(enabled: boolean): IntegrationTile {
   return {
     kind: "webhook",
@@ -153,6 +171,7 @@ export function buildSections(
   calendar: CalendarStatus | undefined,
   sheets: SheetsStatus | undefined,
   telegram: TelegramStatus | undefined,
+  whatsapp: WhatsAppStatus | undefined,
   webhookEnabled: boolean,
 ): IntegrationSection[] {
   const all = [
@@ -160,6 +179,7 @@ export function buildSections(
     ...paymentTiles(payments),
     ...calendarTiles(calendar),
     ...sheetsTiles(sheets),
+    ...whatsappTiles(whatsapp),
     ...telegramTiles(telegram),
     webhookTile(webhookEnabled),
   ];

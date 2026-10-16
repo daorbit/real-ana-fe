@@ -4,7 +4,7 @@ import {
   useGetReportSchedulesQuery, useSaveReportScheduleMutation,
   useDeleteReportScheduleMutation, useTestReportScheduleMutation,
   useGetSitesQuery, useGetShareQuery,
-  useGetWhatsAppStatusQuery, useTestReportWhatsAppMutation, useTestReportTelegramMutation,
+  useTestReportWhatsAppMutation, useTestReportTelegramMutation,
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
@@ -35,9 +35,6 @@ export function useReportsPage() {
   // read-only on top of whatever the role would normally allow.
   const canEdit = usePermissions().canEdit && !demo;
   const workspaceId = active?._id ?? "";
-  // WhatsApp is delivered to the account owner's own number only, so the
-  // profile mobile is both the destination and the precondition.
-  const ownerMobile = (user?.mobile ?? "").replace(/[^\d]/g, "");
 
   const { data: queried, isLoading: queryLoading } = useGetReportSchedulesQuery(workspaceId, {
     skip: !workspaceId || demo,
@@ -51,18 +48,6 @@ export function useReportsPage() {
   const { currentData: queriedSites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId || demo });
   const sites = demo ? demoSites : queriedSites;
   const { data: share } = useGetShareQuery(workspaceId, { skip: !workspaceId || demo });
-  // WhatsApp needs a real paired session, which demo has none of — reports
-  // can still show the email channel, just not a WhatsApp test send.
-  const { data: wa } = useGetWhatsAppStatusQuery(workspaceId, { skip: !workspaceId || demo });
-
-  // Offered only when the gateway is both configured and actually paired —
-  // enabling a channel that cannot send is a promise the product can't keep.
-  const waReady = Boolean(wa?.configured && wa.status === "connected");
-  /**
-   * Two separate reasons the channel can be unavailable, kept apart because
-   * they need different words: the gateway being down is temporary and no
-   * fault of the user's, while the plan not including it is neither.
-   */
   const waEntitled = billing?.whatsappReports ?? false;
 
   const [save, { isLoading: saving }] = useSaveReportScheduleMutation();
@@ -105,6 +90,7 @@ export function useReportsPage() {
       recipients: d.recipients,
       channels: { email: d.emailChannel, whatsapp: d.whatsappChannel, telegram: d.telegramChannel },
       telegramChatIds: d.telegramChannel ? d.telegramChatIds : [],
+      whatsappNumbers: d.whatsappChannel ? d.whatsappNumbers : [],
       include: { analytics: d.analytics, seo: d.seo, dashboardLink: d.dashboardLink, aiSummary: d.aiSummary },
       attachXlsx: d.attachXlsx,
       enabled: d.enabled,
@@ -138,17 +124,16 @@ export function useReportsPage() {
   };
 
   const runWhatsAppTest = async (s: ReportSchedule) => {
-    const first = s.phoneRecipients.find((p) => !p.optedOut);
-    if (!first) {
+    if (!s.whatsappNumbers?.length) {
       notify.error(t("reports.noWhatsAppNumbers"));
       return;
     }
     trace(user?.id, "test_report_whatsapp", "reports", "whatsapp");
     setTestingId(s.id);
     try {
-      await sendWaTest({ workspaceId, id: s.id, phone: first.phone }).unwrap();
+      const result = await sendWaTest({ workspaceId, id: s.id }).unwrap();
       notify.success(
-        t("reports.waTestSentBody", { phone: first.phone }),
+        t("reports.waTestSentBody", { phone: result.sentTo.join(", ") }),
         t("reports.waTestSentTitle"),
       );
     } catch (e) {
@@ -188,9 +173,9 @@ export function useReportsPage() {
   };
 
   return {
-    workspaceId, isLoading, schedules, sites, share, wa, mailReady,
+    workspaceId, isLoading, schedules, sites, share, mailReady,
     enabled, nextUp, reach, siteNameFor, nextSendLabel,
-    waReady, waEntitled, ownerMobile, canEdit,
+    waEntitled, canEdit,
     saving, testing, testingId,
     persist, toggleEnabled, runTest, runWhatsAppTest, runTelegramTest, destroy,
   };
@@ -204,7 +189,6 @@ export function useReportsPage() {
  */
 export function useReportDialog(opts: {
   waEntitled: boolean;
-  ownerMobile: string;
   persist: (d: Draft, id: string | null) => Promise<void>;
 }) {
   const { t } = useTranslation();
@@ -282,8 +266,8 @@ export function useReportDialog(opts: {
       fail("delivery", t("reports.waIsPro"));
       return;
     }
-    if (draft.whatsappChannel && !opts.ownerMobile) {
-      fail("delivery", t("reports.waNeedsMobile"));
+    if (draft.whatsappChannel && !draft.whatsappNumbers.length) {
+      fail("delivery", t("reports.waNeedNumber"));
       return;
     }
 

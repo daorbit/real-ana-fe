@@ -130,7 +130,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram"],
+  tagTypes: ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram", "WhatsApp"],
   // Hold a cached entry for 5 minutes after the last component stops using it.
   keepUnusedDataFor: 300,
   endpoints: (build) => ({
@@ -2377,22 +2377,89 @@ export const api = createApi({
       }),
     }),
 
-    /** Live state of the paired WhatsApp session — checked per page load, never cached long. */
     getWhatsAppStatus: build.query<WhatsAppStatus, string>({
-      query: (workspaceId) => `/api/workspaces/${workspaceId}/reports/whatsapp/status`,
-      // A dropped pairing should surface on the next visit, not 5 minutes later.
-      keepUnusedDataFor: 30,
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/whatsapp`,
+      providesTags: ["WhatsApp"],
     }),
 
-    /** Send this report over WhatsApp now, to one number already on it. */
-    testReportWhatsApp: build.mutation<
-      { ok: true; sentTo: string; messageId: string },
-      { workspaceId: string; id: string; phone: string }
+    setWhatsAppEnabled: build.mutation<WhatsAppStatus, { workspaceId: string; enabled: boolean }>({
+      query: ({ workspaceId, enabled }) => ({ url: `/api/workspaces/${workspaceId}/whatsapp`, method: "PUT", body: { enabled } }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getWhatsAppStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    startWhatsAppVerification: build.mutation<
+      { phone: string; expiresAt: string },
+      { workspaceId: string; phone: string; label: string }
     >({
-      query: ({ workspaceId, id, phone }) => ({
+      query: ({ workspaceId, phone, label }) => ({
+        url: `/api/workspaces/${workspaceId}/whatsapp/numbers`,
+        method: "POST",
+        body: { phone, label },
+      }),
+    }),
+
+    confirmWhatsAppVerification: build.mutation<WhatsAppStatus, { workspaceId: string; phone: string; code: string }>({
+      query: ({ workspaceId, phone, code }) => ({
+        url: `/api/workspaces/${workspaceId}/whatsapp/numbers/verify`,
+        method: "POST",
+        body: { phone, code },
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getWhatsAppStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    setWhatsAppFormAlerts: build.mutation<WhatsAppStatus, { workspaceId: string; phone: string; formAlerts: boolean }>({
+      query: ({ workspaceId, phone, formAlerts }) => ({
+        url: `/api/workspaces/${workspaceId}/whatsapp/numbers/${phone}`,
+        method: "PATCH",
+        body: { formAlerts },
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getWhatsAppStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    removeWhatsAppNumber: build.mutation<WhatsAppStatus, { workspaceId: string; phone: string }>({
+      query: ({ workspaceId, phone }) => ({ url: `/api/workspaces/${workspaceId}/whatsapp/numbers/${phone}`, method: "DELETE" }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getWhatsAppStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    sendWhatsAppTest: build.mutation<{ sent: string[]; failed: { phone: string; error: string }[] }, { workspaceId: string }>({
+      query: ({ workspaceId }) => ({ url: `/api/workspaces/${workspaceId}/whatsapp/test`, method: "POST" }),
+    }),
+
+    testReportWhatsApp: build.mutation<
+      { ok: true; sentTo: string[]; failed: { phone: string; error: string }[] },
+      { workspaceId: string; id: string }
+    >({
+      query: ({ workspaceId, id }) => ({
         url: `/api/workspaces/${workspaceId}/reports/${id}/test-whatsapp`,
         method: "POST",
-        body: { phone },
       }),
     }),
 
@@ -3052,6 +3119,12 @@ export const {
   useTestReportScheduleMutation,
   useGetWhatsAppStatusQuery,
   useTestReportWhatsAppMutation,
+  useSetWhatsAppEnabledMutation,
+  useStartWhatsAppVerificationMutation,
+  useConfirmWhatsAppVerificationMutation,
+  useSetWhatsAppFormAlertsMutation,
+  useRemoveWhatsAppNumberMutation,
+  useSendWhatsAppTestMutation,
   useTestReportTelegramMutation,
   useGetTelegramStatusQuery,
   useCreateTelegramLinkMutation,

@@ -1,5 +1,5 @@
 import type { Dispatch, Ref, SetStateAction } from "react";
-import type { ShareState, Site, WhatsAppStatus } from "@/shared/types";
+import type { ShareState, Site } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { BasicsSection } from "./editor/BasicsSection";
 import { ContentSection } from "./editor/ContentSection";
@@ -19,9 +19,6 @@ interface Props {
   addEmail: () => void;
   removeEmail: (email: string) => void;
   ownerEmail: string;
-  ownerMobile: string;
-  wa?: WhatsAppStatus;
-  waReady: boolean;
   waEntitled: boolean;
   share?: ShareState;
   sectionRef: (id: FormSection) => Ref<HTMLElement>;
@@ -29,7 +26,7 @@ interface Props {
 
 export function ReportForm({
   draft, setDraft, workspaceId, sites, emailInput, setEmailInput, addEmail, removeEmail,
-  ownerEmail, ownerMobile, wa, waReady, waEntitled, share, sectionRef,
+  ownerEmail, waEntitled, share, sectionRef,
 }: Props) {
   return (
     <div className={classes.form}>
@@ -44,9 +41,6 @@ export function ReportForm({
         addEmail={addEmail}
         removeEmail={removeEmail}
         ownerEmail={ownerEmail}
-        ownerMobile={ownerMobile}
-        wa={wa}
-        waReady={waReady}
         waEntitled={waEntitled}
         sectionRef={sectionRef}
       />

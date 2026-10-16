@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } fr
 import { ActionIcon, Button, Modal, Switch } from "@mantine/core";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Site, ShareState, WhatsAppStatus } from "@/shared/types";
+import type { Site, ShareState } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { frequencyLabel, nextRunLabel } from "@/features/reports/pages/utils";
 import { ReportForm, type FormSection } from "@/features/reports/components/ReportForm";
@@ -26,11 +26,8 @@ export function ReportDialog({
   saving,
   sites,
   share,
-  wa,
-  waReady,
   waEntitled,
   ownerEmail,
-  ownerMobile,
 }: {
   opened: boolean;
   onClose: () => void;
@@ -48,11 +45,8 @@ export function ReportDialog({
   saving: boolean;
   sites: Site[];
   share?: ShareState;
-  wa?: WhatsAppStatus;
-  waReady: boolean;
   waEntitled: boolean;
   ownerEmail: string;
-  ownerMobile: string;
 }) {
   const { t } = useTranslation();
   const sections = useRef<Partial<Record<FormSection, HTMLElement | null>>>({});
@@ -74,7 +68,7 @@ export function ReportDialog({
 
   const recipients =
     (draft.emailChannel ? 1 + draft.recipients.length : 0) +
-    (draft.whatsappChannel ? 1 : 0) +
+    (draft.whatsappChannel ? draft.whatsappNumbers.length : 0) +
     (draft.telegramChannel ? draft.telegramChatIds.length : 0);
   const summary = [
     frequencyLabel(draft.frequency),
@@ -132,9 +126,6 @@ export function ReportDialog({
               addEmail={addEmail}
               removeEmail={removeEmail}
               ownerEmail={ownerEmail}
-              ownerMobile={ownerMobile}
-              wa={wa}
-              waReady={waReady}
               waEntitled={waEntitled}
               share={share}
               sectionRef={sectionRef}

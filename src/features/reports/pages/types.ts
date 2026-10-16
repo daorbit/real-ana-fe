@@ -14,6 +14,7 @@ export type Draft = {
   recipients: string[];
   emailChannel: boolean;
   whatsappChannel: boolean;
+  whatsappNumbers: string[];
   telegramChannel: boolean;
   telegramChatIds: string[];
   analytics: boolean;
@@ -31,6 +32,7 @@ export const emptyDraft = (): Draft => ({
   recipients: [],
   emailChannel: true,
   whatsappChannel: false,
+  whatsappNumbers: [],
   telegramChannel: false,
   telegramChatIds: [],
   analytics: true,
@@ -49,7 +51,8 @@ export const fromSchedule = (s: ReportSchedule): Draft => ({
   // as a removable chip — removing it would be a no-op and look like a bug.
   recipients: s.recipients.slice(1).map((r) => r.email),
   emailChannel: s.channels.email,
-  whatsappChannel: s.channels.whatsapp,
+  whatsappChannel: Boolean(s.channels.whatsapp),
+  whatsappNumbers: s.whatsappNumbers ?? [],
   telegramChannel: Boolean(s.channels.telegram),
   telegramChatIds: s.telegramChatIds ?? [],
   analytics: s.include.analytics,

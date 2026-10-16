@@ -65,6 +65,10 @@
   --brand: var(--accent);
 }
 
+.mark[data-brand="whatsapp"] {
+  --brand: #25d366;
+}
+
 .mark[data-brand="teams"] {
   --brand: #5059c9;
 }

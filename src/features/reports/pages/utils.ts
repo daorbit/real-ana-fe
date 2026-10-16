@@ -78,15 +78,12 @@ export function recipientSummary(s: ReportSchedule): string {
     parts.push(i18n.t("reports.emailCount", { count: active }));
   }
   if (s.channels.whatsapp) {
-    const active = s.phoneRecipients.filter((p) => !p.optedOut).length;
-    parts.push(i18n.t("reports.whatsappCount", { count: active }));
+    parts.push(i18n.t("reports.whatsappCount", { count: s.whatsappNumbers?.length ?? 0 }));
   }
   if (s.channels.telegram) {
     parts.push(i18n.t("reports.telegramCount", { count: s.telegramChatIds?.length ?? 0 }));
   }
-  const out =
-    s.recipients.filter((r) => r.unsubscribed).length +
-    s.phoneRecipients.filter((p) => p.optedOut).length;
+  const out = s.recipients.filter((r) => r.unsubscribed).length;
   if (out) parts.push(i18n.t("reports.optedOutCount", { count: out }));
   return parts.join(" · ");
 }
@@ -95,9 +92,7 @@ export function recipientSummary(s: ReportSchedule): string {
 export function destinations(s: ReportSchedule): string {
   return [
     ...(s.channels.email ? s.recipients.filter((r) => !r.unsubscribed).map((r) => r.email) : []),
-    ...(s.channels.whatsapp
-      ? s.phoneRecipients.filter((p) => !p.optedOut).map((p) => p.label || `+${p.phone}`)
-      : []),
+    ...(s.channels.whatsapp ? (s.whatsappNumbers ?? []).map((p) => `+${p}`) : []),
     ...(s.channels.telegram && s.telegramChatIds?.length
       ? [i18n.t("reports.telegramCount", { count: s.telegramChatIds.length })]
       : []),

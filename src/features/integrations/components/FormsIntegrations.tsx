@@ -14,6 +14,8 @@ import { GoogleCalendarModal } from "./GoogleCalendarModal";
 import { GoogleSheetsModal } from "./GoogleSheetsModal";
 import { PaymentsModal } from "./payments/PaymentsModal";
 import { TelegramModal } from "./telegram/TelegramModal";
+import { WhatsAppModal } from "./whatsapp/WhatsAppModal";
+import { usePermissions } from "@/features/workspace/context";
 import type { IntegrationTile, PaymentProvider } from "../types";
 
 const FORMS_TITLE = "Form apps";
@@ -34,6 +36,8 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [sheetsOpen, setSheetsOpen] = useState(false);
   const [telegramOpen, setTelegramOpen] = useState(false);
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const { canAdmin } = usePermissions();
   const [saveWebhook, webhookState] = useSaveFormsWebhookMutation();
   const calendar = useGoogleConnect("calendar", workspaceId ?? "", integrations.refetchCalendar);
   const sheets = useGoogleConnect("sheets", workspaceId ?? "", integrations.refetchSheets);
@@ -80,6 +84,7 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
     else if (tile.kind === "calendar") setCalendarOpen(true);
     else if (tile.kind === "sheets") setSheetsOpen(true);
     else if (tile.kind === "telegram") setTelegramOpen(true);
+    else if (tile.kind === "whatsapp") setWhatsappOpen(true);
     else if (tile.kind === "payment" && isPaymentProvider(tile.id)) setPayProvider(tile.id);
     else setOpenAppId(tile.id);
   };
@@ -125,6 +130,13 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
         workspaceId={workspaceId}
         status={integrations.telegram}
         onClose={() => setTelegramOpen(false)}
+      />
+      <WhatsAppModal
+        opened={whatsappOpen}
+        workspaceId={workspaceId}
+        canManage={canAdmin}
+        status={integrations.whatsapp}
+        onClose={() => setWhatsappOpen(false)}
       />
       <GoogleCalendarModal
         opened={calendarOpen && Boolean(integrations.calendar?.configured)}

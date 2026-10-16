@@ -13,6 +13,10 @@
   --accent-bar: #5865f2;
 }
 
+.preview[data-app="whatsapp"] {
+  --accent-bar: #25d366;
+}
+
 .preview[data-app="teams"] {
   --accent-bar: #5059c9;
 }
