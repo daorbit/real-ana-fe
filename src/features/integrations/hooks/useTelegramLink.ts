@@ -21,11 +21,12 @@ export function useTelegramLink(workspaceId: string | null, onLinked?: (chatIds:
   const [createLink, linkState] = useCreateTelegramLinkMutation();
   const [removeChatMutation] = useRemoveTelegramChatMutation();
   const [linkUrl, setLinkUrl] = useState<string | null>(null);
+  const [awaitingReturn, setAwaitingReturn] = useState(false);
   const known = useRef<Set<string> | null>(null);
   const callbacks = useRef({ onLinked, onRemoved });
   callbacks.current = { onLinked, onRemoved };
 
-  useRefetchOnFocus(query.refetch, query.fulfilledTimeStamp, FOCUS_MIN_AGE_MS, Boolean(workspaceId));
+  useRefetchOnFocus(query.refetch, query.fulfilledTimeStamp, FOCUS_MIN_AGE_MS, Boolean(workspaceId && (linkUrl || awaitingReturn)));
 
   useEffect(() => {
     if (!status) return;
@@ -78,6 +79,7 @@ export function useTelegramLink(workspaceId: string | null, onLinked?: (chatIds:
     linkUrl,
     connect,
     checkAgain: () => void query.refetch(),
+    expectReturn: () => setAwaitingReturn(true),
     remove,
   };
 }

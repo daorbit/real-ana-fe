@@ -73,7 +73,7 @@ export function TelegramDelivery({ workspaceId, selected, onSelect }: Props) {
 
       <Text size="xs" c="dimmed" className={classes.inline}>
         {sender && <span>{t(status.mode === "own" ? "reports.tgViaOwn" : "reports.tgViaQuantalog", { bot: sender })} ·</span>}
-        <Anchor component={Link} to={CONNECTIONS_URL} target="_blank" size="xs" className={classes.inline}>
+        <Anchor component={Link} to={CONNECTIONS_URL} target="_blank" size="xs" className={classes.inline} onClick={tg.expectReturn}>
           <Settings2 size={12} />
           {t("reports.tgManageInConnections")}
         </Anchor>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, PasswordInput, Text, UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import type { TelegramStatus } from "@/shared/types";
@@ -14,6 +14,9 @@ export function TelegramBotChooser({ status, bot }: Props) {
   const { t } = useTranslation();
   const usingOwn = status.mode === "own";
   const [ownPicked, setOwnPicked] = useState(usingOwn || !status.platformAvailable);
+  useEffect(() => {
+    setOwnPicked(usingOwn || !status.platformAvailable);
+  }, [usingOwn, status.platformAvailable]);
   const showToken = !usingOwn && ownPicked;
 
   const pickQuantalog = () => {
