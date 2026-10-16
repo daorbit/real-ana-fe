@@ -1,0 +1,6 @@
+.mark {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 22%;
+  object-fit: cover;
+}

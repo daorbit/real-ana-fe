@@ -1,6 +1,6 @@
 import { Button, Text } from "@mantine/core";
 import { Send } from "lucide-react";
-import { Logo } from "@/shared/ui/Brand";
+import { QuantalogMark } from "@/shared/ui/QuantalogMark";
 import type { TelegramStatus } from "@/shared/types";
 import { BrandMark } from "../logos/BrandMarks";
 import classes from "./Telegram.module.css";
@@ -25,7 +25,7 @@ export function TelegramStatusCard({ status, testing, onTest }: Props) {
   return (
     <header className={classes.status} data-live={live || undefined}>
       <span className={classes.statusAvatar}>
-        {status.mode === "own" ? <BrandMark id="telegram" size={44} /> : <Logo size={44} />}
+        {status.mode === "own" ? <BrandMark id="telegram" size={44} /> : <QuantalogMark size={44} />}
       </span>
       <div className={classes.statusText}>
         <span className={classes.statusPill}>

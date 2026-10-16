@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, PasswordInput, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Logo } from "@/shared/ui/Brand";
+import { QuantalogMark } from "@/shared/ui/QuantalogMark";
 import type { TelegramStatus } from "@/shared/types";
 import type { useTelegramOwnBot } from "../../hooks/useTelegramOwnBot";
 import { BrandMark } from "../logos/BrandMarks";
@@ -32,7 +32,7 @@ export function TelegramBotChooser({ status, bot }: Props) {
     <div className={classes.chooser}>
       <div className={classes.modes}>
         <TelegramBotOption
-          avatar={<Logo size={36} />}
+          avatar={<QuantalogMark size={36} />}
           title="Quantalog bot"
           description={
             status.platformAvailable
