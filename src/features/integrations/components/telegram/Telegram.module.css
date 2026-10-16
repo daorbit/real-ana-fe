@@ -151,7 +151,7 @@
   transition: border-color 120ms ease, background-color 120ms ease;
 }
 
-.mode:hover:not(:disabled) {
+.mode:hover:not(:disabled):not([data-active]) {
   border-color: var(--border-strong);
 }
 
