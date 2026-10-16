@@ -32,6 +32,23 @@ function enabledLabel(tile: IntegrationTile): string {
 
 function footerFor(tile: IntegrationTile): Footer {
   const webhook = tile.kind === "webhook";
+  if (tile.kind === "quantalog-app") {
+    return tile.enabled
+      ? {
+          icon: <Check size={14} className={classes.ok} />,
+          label: tile.account ?? "On",
+          action: "Manage",
+          actionIcon: <Settings2 size={14} />,
+          variant: "default",
+        }
+      : {
+          icon: <CircleDashed size={14} className={classes.idle} />,
+          label: "Off",
+          action: "Enable",
+          actionIcon: <Power size={14} />,
+          variant: "light",
+        };
+  }
   if (tile.enabled) {
     return {
       icon: <Check size={14} className={classes.ok} />,
@@ -70,6 +87,13 @@ function footerFor(tile: IntegrationTile): Footer {
 }
 
 function ModeBadge({ tile }: { tile: IntegrationTile }) {
+  if (tile.kind === "quantalog-app") {
+    return (
+      <Badge size="xs" variant="light" color="blue">
+        Official
+      </Badge>
+    );
+  }
   if (tile.kind !== "payment" || !tile.enabled) return null;
   const live = tile.account === "Live mode";
   return (

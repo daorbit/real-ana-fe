@@ -1068,7 +1068,12 @@ export type Workspace = {
    */
   billing: QuotaSummary;
   navPrefs?: NavPrefs | null;
+  apps?: WorkspaceApps;
 };
+
+export type WorkspaceAppId = "compare";
+
+export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string }>>;
 
 export type CustomLinkMode = "external" | "internal";
 

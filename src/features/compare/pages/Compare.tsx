@@ -27,6 +27,8 @@ import { StandingsCard } from "../components/StandingsCard";
 import { ScoreTrendChart } from "../components/ScoreTrendChart";
 import { AddCompetitorForm } from "../components/AddCompetitorForm";
 import { CompareSkeleton } from "../components/CompareSkeleton";
+import { CompareAppGate } from "../components/CompareAppGate";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import classes from "../components/Compare.module.css";
 
 const MAX_COMPETITORS = 10;
@@ -59,7 +61,8 @@ export default function Compare() {
     setPickedCompetitor(null);
   }, [siteId]);
 
-  const skip = !workspaceId || !siteId;
+  const { compare: compareOn } = useWorkspaceApps();
+  const skip = !workspaceId || !siteId || !compareOn;
 
   const { data: realCompetitors = [], isLoading: listLoading } = useGetCompetitorsQuery({ workspaceId, siteId }, { skip });
   const {
@@ -159,7 +162,9 @@ export default function Compare() {
 
       <HelpDrawer opened={helpOpen} onClose={() => setHelpOpen(false)} title="Compare" sections={COMPARE_HELP} />
 
-      {sitesLoading || (site && (listLoading || analysisLoading)) ? (
+      {!compareOn ? (
+        <CompareAppGate />
+      ) : sitesLoading || (site && (listLoading || analysisLoading)) ? (
         <CompareSkeleton />
       ) : !site && sitesFailed ? (
         <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />

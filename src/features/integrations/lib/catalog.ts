@@ -19,6 +19,7 @@ export const CATEGORY_ORDER: IntegrationCategory[] = [
 ];
 
 export const CATEGORY_TITLE: Record<IntegrationCategory, string> = {
+  quantalog: "Quantalog apps",
   search: "Search & SEO",
   email: "Email delivery",
   payments: "Payments",
@@ -29,6 +30,7 @@ export const CATEGORY_TITLE: Record<IntegrationCategory, string> = {
 };
 
 export const CATEGORY_HINT: Record<IntegrationCategory, string> = {
+  quantalog: "Official Quantalog modules. Turn one on and it appears in the sidebar for everyone in this workspace.",
   search: "Google data behind your Search visibility reports.",
   email: "Where your form notification emails are sent from. One provider is active at a time.",
   payments: "Gateways your forms can charge through. Keys stay encrypted on the server.",

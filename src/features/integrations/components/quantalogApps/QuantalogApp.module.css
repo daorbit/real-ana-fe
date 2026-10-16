@@ -1,0 +1,41 @@
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.featureIcon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.badgeText {
+  flex: 1;
+  min-width: 0;
+}

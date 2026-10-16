@@ -130,6 +130,7 @@ export interface SheetsStatus {
 }
 
 export type IntegrationCategory =
+  | "quantalog"
   | "search"
   | "email"
   | "payments"
@@ -138,7 +139,7 @@ export type IntegrationCategory =
   | "crm"
   | "automation";
 
-export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook" | "search-console" | "telegram";
+export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook" | "search-console" | "telegram" | "quantalog-app";
 
 export interface IntegrationTile {
   kind: IntegrationKind;

@@ -133,7 +133,12 @@ function PayuMark({ size = 24 }: MarkProps) {
   );
 }
 
+function QuantalogCompareMark({ size = 24 }: MarkProps) {
+  return <img src="/apps/quantalog-compare.png" width={size} height={size} alt="Quantalog Compare" className={classes.appLogo} />;
+}
+
 const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
+  "quantalog-compare": QuantalogCompareMark,
   brevo: BrevoMark,
   smtp: SmtpMark,
   slack: SlackMark,

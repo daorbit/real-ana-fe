@@ -5,6 +5,8 @@ import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useFormsIntegrations } from "../../hooks/useFormsIntegrations";
 import { useSocialConnections } from "../../hooks/useSocialConnections";
+import { useQuantalogApps } from "../../hooks/useQuantalogApps";
+import { QuantalogAppsConnection } from "../quantalogApps/QuantalogAppsConnection";
 import { CATEGORY_TITLE } from "../../lib/catalog";
 import {
   EMPTY_FILTER,
@@ -41,6 +43,7 @@ export function ConnectionsBoard() {
   const searchWorkspaceId = isDemo ? null : workspaceId;
   const [filter, setFilter] = useState<ConnectionFilter>(EMPTY_FILTER);
 
+  const quantalogApps = useQuantalogApps();
   const social = useSocialConnections();
   const searchConsole = useSearchConsoleConnection(searchWorkspaceId);
   const integrations = useFormsIntegrations(lockedReason ? null : workspaceId);
@@ -60,8 +63,8 @@ export function ConnectionsBoard() {
 
   const searchEntry = searchConsole.entry;
   const allEntries = useMemo(
-    () => [...social.entries, ...(searchEntry ? [searchEntry] : []), ...formEntries],
-    [social.entries, searchEntry, formEntries],
+    () => [...quantalogApps.entries, ...social.entries, ...(searchEntry ? [searchEntry] : []), ...formEntries],
+    [quantalogApps.entries, social.entries, searchEntry, formEntries],
   );
   const counts = useMemo(() => countByStatus(allEntries, filter), [allEntries, filter]);
   const categories = useMemo(() => categoryOptions(allEntries), [allEntries]);
@@ -107,6 +110,7 @@ export function ConnectionsBoard() {
       ) : filter.status === "all" ? (
         <>
           <div className="connection-grid">
+            <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} flat />
             <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} flat />
             {searchCard(true)}
             <FormsIntegrations
@@ -121,6 +125,7 @@ export function ConnectionsBoard() {
         </>
       ) : (
         <>
+          <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} />
           <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} />
           {searchCard(false)}
           <FormsIntegrations

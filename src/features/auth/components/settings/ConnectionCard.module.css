@@ -61,6 +61,10 @@
   --brand: #5865f2;
 }
 
+.mark[data-brand="quantalog-compare"] {
+  --brand: var(--accent);
+}
+
 .mark[data-brand="teams"] {
   --brand: #5059c9;
 }

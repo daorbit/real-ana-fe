@@ -3,6 +3,7 @@ import {
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, TrendingUp,
   LayoutDashboard, Flag, Settings, Gift, ScrollText,
 } from "lucide-react";
+import type { WorkspaceAppId } from "@/shared/types";
 import { LeadMagnetIcon } from "./icons";
 
 
@@ -15,6 +16,7 @@ export type NavItem = {
   external?: boolean;
   linkUrl?: string;
   logoUrl?: string;
+  app?: WorkspaceAppId;
 };
 
 export type NavGroup = {
@@ -41,7 +43,8 @@ export const NAV_GROUPS: NavGroup[] = [
       // Hidden from the sidebar for now; the /app/backlinks route still works.
       // { to: "/app/backlinks", labelKey: "nav.backlinks", label: "Backlinks", icon: Link2 },
 
-      { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords },    ],
+      { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords, app: "compare" },
+    ],
   },
   {
     headingKey: "nav.groupEngage",

@@ -3,6 +3,13 @@
   flex-shrink: 0;
 }
 
+.appLogo {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 24%;
+  object-fit: cover;
+}
+
 .wordmark {
   display: block;
   flex-shrink: 0;

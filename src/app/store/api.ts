@@ -31,7 +31,7 @@ import type {
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
   Coupon, CouponCheckResult, CheckoutPreview, Invoice, QuotaSummary, UsageHistory,
   MyReferrals, ReferralSettings, AdminReferralPage, ReferralOverview, TopReferrer,
-  MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview,
+  MembersResponse, WorkspaceInvite, WorkspaceRole, InvitePreview, WorkspaceApps, WorkspaceAppId,
   AuditCategory, AuditPage, WorkspaceAuditPage,
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
@@ -319,6 +319,27 @@ export const api = createApi({
           await queryFulfilled;
         } catch {
           patch.undo();
+        }
+      },
+    }),
+
+    setWorkspaceApp: build.mutation<{ apps: WorkspaceApps }, { workspaceId: string; app: WorkspaceAppId; enabled: boolean }>({
+      query: ({ workspaceId, app, enabled }) => ({
+        url: `/api/workspaces/${workspaceId}/apps/${app}`,
+        method: "PUT",
+        body: { enabled },
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            api.util.updateQueryData("getWorkspaces", undefined, (draft) => {
+              const ws = draft.find((w) => w._id === workspaceId);
+              if (ws) ws.apps = data.apps;
+            }),
+          );
+        } catch {
+          return;
         }
       },
     }),
@@ -3039,6 +3060,7 @@ export const {
   useFindTelegramBotChatsMutation,
   useAddTelegramChatMutation,
   useRemoveTelegramChatMutation,
+  useSetWorkspaceAppMutation,
   useSetTelegramFormAlertsMutation,
   useSendTelegramTestMutation,
   useGetAdminFxQuery,

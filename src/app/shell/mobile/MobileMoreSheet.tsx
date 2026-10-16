@@ -5,11 +5,10 @@ import { CalendarCheck, ChevronRight, Search, X } from "lucide-react";
 import { DemoCallModal } from "../DemoCallModal";
 import { useTranslation } from "react-i18next";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
-import { NAV_GROUPS, type NavGroup } from "../navItems";
+import type { NavGroup } from "../navItems";
 import { MOBILE_TAB_PATHS } from "../mobileTabs";
 import { openPalette } from "../openPalette";
-import { useNavPrefs } from "../navPrefs";
-import { applyNavPrefs } from "../applyNavPrefs";
+import { useNavGroups } from "../useNavGroups";
 import { MobileNavList } from "./MobileNavList";
 import classes from "./MobileMoreSheet.module.css";
 
@@ -31,8 +30,8 @@ export function MobileMoreSheet({
 }) {
   const { t } = useTranslation();
   const onOrbit = pathname.startsWith("/app/orbit");
-  const navPrefs = useNavPrefs();
-  const groups = useMemo(() => sheetGroups(applyNavPrefs(NAV_GROUPS, navPrefs)), [navPrefs]);
+  const navGroups = useNavGroups();
+  const groups = useMemo(() => sheetGroups(navGroups), [navGroups]);
   const [demoCallOpen, setDemoCallOpen] = useState(false);
 
   return (
