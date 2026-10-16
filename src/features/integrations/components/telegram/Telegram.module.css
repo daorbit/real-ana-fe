@@ -29,8 +29,8 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 8px 8px 14px;
+  gap: 12px;
+  padding: 10px 10px 10px 14px;
   font-size: var(--mantine-font-size-sm);
   color: var(--text);
 }
@@ -39,17 +39,37 @@
   border-top: 1px solid var(--border);
 }
 
-.rowTitle {
+.rowIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.rowText {
   flex: 1;
   min-width: 0;
+}
+
+.rowTitle {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 550;
 }
 
 .rowTag {
   font-size: var(--mantine-font-size-xs);
   color: var(--text-2);
+}
+
+.alertSwitch {
+  flex-shrink: 0;
+  padding-right: 4px;
 }
 
 .addRow {
@@ -132,6 +152,18 @@
 .mode[data-active] {
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+
+.modeHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.modeCheck {
+  flex-shrink: 0;
+  color: var(--accent);
 }
 
 .mode:disabled {

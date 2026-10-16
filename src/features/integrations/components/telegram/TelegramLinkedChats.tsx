@@ -35,8 +35,10 @@ export function TelegramLinkedChats({ workspaceId, link, canLink }: Props) {
               onRemove={() => link.remove(chat)}
               trailing={
                 <Switch
-                  size="xs"
+                  size="sm"
                   label="Form alerts"
+                  labelPosition="left"
+                  className={classes.alertSwitch}
                   checked={Boolean(chat.formAlerts)}
                   disabled={state.isLoading && state.originalArgs?.chatId === chat.chatId}
                   onChange={(e) => void toggle(chat, e.currentTarget.checked)}

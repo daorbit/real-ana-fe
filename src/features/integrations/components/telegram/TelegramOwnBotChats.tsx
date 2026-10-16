@@ -29,8 +29,10 @@ export function TelegramOwnBotChats({ bot }: { bot: ReturnType<typeof useTelegra
         <div className={`${classes.rows} ${classes.found}`}>
           {bot.found.map((chat) => (
             <div key={chat.chatId} className={classes.row}>
-              <span className={classes.rowTitle}>{chat.title}</span>
-              <span className={classes.rowTag}>{chatTypeLabel(chat.type, t)}</span>
+              <div className={classes.rowText}>
+                <div className={classes.rowTitle}>{chat.title}</div>
+                <div className={classes.rowTag}>{chatTypeLabel(chat.type, t)}</div>
+              </div>
               <Button
                 size="compact-xs"
                 variant="light"

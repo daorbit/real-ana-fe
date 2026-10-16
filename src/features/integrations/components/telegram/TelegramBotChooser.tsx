@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, PasswordInput, Text, UnstyledButton } from "@mantine/core";
+import { CircleCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { TelegramStatus } from "@/shared/types";
 import type { useTelegramOwnBot } from "../../hooks/useTelegramOwnBot";
@@ -34,9 +35,12 @@ export function TelegramBotChooser({ status, bot }: Props) {
           disabled={!status.platformAvailable || bot.removing}
           onClick={pickQuantalog}
         >
-          <Text size="sm" fw={600}>
-            Quantalog bot
-          </Text>
+          <span className={classes.modeHead}>
+            <Text size="sm" fw={600}>
+              Quantalog bot
+            </Text>
+            {!usingOwn && !ownPicked && <CircleCheck size={16} className={classes.modeCheck} />}
+          </span>
           <Text size="xs" c="dimmed">
             {status.platformAvailable
               ? `Messages come from @${status.platformBot}. Nothing to set up: connect a chat and you are done.`
@@ -49,9 +53,12 @@ export function TelegramBotChooser({ status, bot }: Props) {
           data-active={usingOwn || ownPicked || undefined}
           onClick={() => setOwnPicked(true)}
         >
-          <Text size="sm" fw={600}>
-            {t("reports.tgOwnBotTitle")}
-          </Text>
+          <span className={classes.modeHead}>
+            <Text size="sm" fw={600}>
+              {t("reports.tgOwnBotTitle")}
+            </Text>
+            {(usingOwn || ownPicked) && <CircleCheck size={16} className={classes.modeCheck} />}
+          </span>
           <Text size="xs" c="dimmed">
             {usingOwn ? t("reports.tgViaOwn", { bot: status.ownBot?.username }) : t("reports.tgOwnBotHint")}
           </Text>

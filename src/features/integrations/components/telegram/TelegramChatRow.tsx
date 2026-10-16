@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { ActionIcon } from "@mantine/core";
-import { MessageCircle, Users, X } from "lucide-react";
+import { ActionIcon, Tooltip } from "@mantine/core";
+import { MessageCircle, Trash2, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { timeAgo } from "@/shared/lib/format";
 import type { TelegramChat } from "@/shared/types";
 import classes from "./Telegram.module.css";
 
@@ -24,24 +25,28 @@ export function TelegramChatRow({
 }) {
   const { t } = useTranslation();
   const Icon = chat.type === "private" ? MessageCircle : Users;
+  const removeLabel = t("reports.tgRemoveChat", { title: chat.title });
 
   return (
     <div className={classes.row}>
       {leading}
-      <Icon size={14} className={classes.chatIcon} />
-      <span className={classes.rowTitle}>{chat.title}</span>
-      <span className={classes.rowTag}>{chatTypeLabel(chat.type, t)}</span>
+      <span className={classes.rowIcon}>
+        <Icon size={15} />
+      </span>
+      <div className={classes.rowText}>
+        <div className={classes.rowTitle}>{chat.title}</div>
+        <div className={classes.rowTag}>
+          {chatTypeLabel(chat.type, t)}
+          {chat.linkedAt && ` · linked ${timeAgo(chat.linkedAt)}`}
+        </div>
+      </div>
       {trailing}
       {onRemove && (
-        <ActionIcon
-          size="sm"
-          variant="subtle"
-          color="gray"
-          onClick={onRemove}
-          aria-label={t("reports.tgRemoveChat", { title: chat.title })}
-        >
-          <X size={14} />
-        </ActionIcon>
+        <Tooltip label={removeLabel} withArrow>
+          <ActionIcon size="md" variant="subtle" color="gray" onClick={onRemove} aria-label={removeLabel}>
+            <Trash2 size={15} />
+          </ActionIcon>
+        </Tooltip>
       )}
     </div>
   );

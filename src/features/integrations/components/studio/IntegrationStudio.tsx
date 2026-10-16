@@ -46,6 +46,7 @@ export function IntegrationStudio({
       fullScreen
       padding={0}
       withCloseButton={false}
+      classNames={{ content: classes.modalContent, body: classes.modalBody }}
       closeOnEscape={!closeDisabled}
       transitionProps={{ transition: "fade", duration: 160 }}
     >

@@ -32,7 +32,7 @@ function statsFor(status: TelegramStatus): StudioStat[] {
   return [
     { label: "Sends as", value: senderOf(status) },
     { label: "Linked chats", value: status.chats.length, tone: status.chats.length ? "ok" : "warn" },
-    { label: "Get form alerts", value: alerts, tone: alerts ? "ok" : undefined },
+    { label: "With form alerts on", value: alerts, tone: alerts ? "ok" : undefined },
   ];
 }
 
@@ -68,7 +68,11 @@ function TelegramBody({ workspaceId }: { workspaceId: string }) {
       <StudioHero
         state={live ? "live" : "off"}
         title={live ? "Telegram is live" : "Connect Telegram"}
-        description="One Telegram connection for this workspace. Reports pick which chats they go to, and chats with form alerts on get a message for every new form response."
+        description={
+          live
+            ? "Scheduled reports and new form responses can be sent to the chats below."
+            : "Pick a bot, then link a chat, group or channel to receive reports and form alerts."
+        }
         stats={statsFor(status)}
       />
 
@@ -79,7 +83,7 @@ function TelegramBody({ workspaceId }: { workspaceId: string }) {
       {(usingOwn || status.platformAvailable) && (
         <StudioSection
           title="Chats"
-          description="Chats this workspace can send to. Turn on form alerts where new responses should be posted; pick chats for each report in the report's Delivery settings."
+          description="Where messages go. Turn on Form alerts for chats that should get every new response. Reports choose their chats in the report editor."
         >
           <div className={classes.delivery}>
             <TelegramLinkedChats workspaceId={workspaceId} link={link} canLink={!usingOwn} />

@@ -1246,7 +1246,7 @@
     "tgWaiting": "Telegram should be open. Press Start there (or pick the group), then come back here.",
     "tgOpenAgain": "Open Telegram",
     "tgCheckAgain": "Check again",
-    "tgLinked": "Telegram chat connected.",
+    "tgLinkedTitle": "Telegram connected: {{title}}",
     "tgLinkError": "Could not start the Telegram connection.",
     "tgRemoveChat": "Remove {{title}}",
     "tgRemoveTitle": "Remove this Telegram chat?",

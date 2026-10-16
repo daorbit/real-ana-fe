@@ -1,7 +1,15 @@
+.modalContent {
+  overflow: hidden;
+}
+
+.modalBody {
+  height: 100%;
+}
+
 .studio {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
   background-color: var(--mantine-color-body);
 }
 

@@ -22,7 +22,7 @@ export function useTelegramLink(workspaceId: string | null, onLinked?: (chatIds:
   const [removeChatMutation] = useRemoveTelegramChatMutation();
   const [linkUrl, setLinkUrl] = useState<string | null>(null);
   const [awaitingReturn, setAwaitingReturn] = useState(false);
-  const known = useRef<Set<string> | null>(null);
+  const known = useRef<Map<string, string | undefined> | null>(null);
   const callbacks = useRef({ onLinked, onRemoved });
   callbacks.current = { onLinked, onRemoved };
 
@@ -30,15 +30,15 @@ export function useTelegramLink(workspaceId: string | null, onLinked?: (chatIds:
 
   useEffect(() => {
     if (!status) return;
-    const ids = new Set(chats.map((c) => c.chatId));
     const previous = known.current;
-    known.current = ids;
+    known.current = new Map(chats.map((c) => [c.chatId, c.linkedAt]));
     if (!previous) return;
-    const added = [...ids].filter((id) => !previous.has(id));
-    if (!added.length) return;
-    callbacks.current.onLinked?.(added);
+    const linked = chats.filter((c) => !previous.has(c.chatId) || previous.get(c.chatId) !== c.linkedAt);
+    if (!linked.length) return;
+    const fresh = linked.filter((c) => !previous.has(c.chatId)).map((c) => c.chatId);
+    if (fresh.length) callbacks.current.onLinked?.(fresh);
     setLinkUrl(null);
-    notify.success(t("reports.tgLinked"));
+    notify.success(t("reports.tgLinkedTitle", { title: linked.map((c) => c.title).join(", ") }));
   }, [status, chats, t]);
 
   const connect = async (group: boolean) => {
