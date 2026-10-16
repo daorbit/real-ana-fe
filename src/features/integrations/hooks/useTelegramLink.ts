@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useTranslation } from "react-i18next";
 import {
   useCreateTelegramLinkMutation,
@@ -12,24 +13,19 @@ import type { TelegramChat } from "@/shared/types";
 const EMPTY: TelegramChat[] = [];
 const FOCUS_MIN_AGE_MS = 1500;
 
-export function useTelegramDelivery(opts: {
-  workspaceId: string;
-  selected: string[];
-  onSelect: (chatIds: string[]) => void;
-}) {
+export function useTelegramLink(workspaceId: string | null, onLinked?: (chatIds: string[]) => void, onRemoved?: (chatId: string) => void) {
   const { t } = useTranslation();
-  const { workspaceId, selected, onSelect } = opts;
-  const query = useGetTelegramStatusQuery(workspaceId, { skip: !workspaceId });
+  const query = useGetTelegramStatusQuery(workspaceId ?? skipToken);
   const status = query.currentData;
   const chats = status?.chats ?? EMPTY;
   const [createLink, linkState] = useCreateTelegramLinkMutation();
   const [removeChatMutation] = useRemoveTelegramChatMutation();
   const [linkUrl, setLinkUrl] = useState<string | null>(null);
   const known = useRef<Set<string> | null>(null);
-  const latest = useRef({ selected, onSelect });
-  latest.current = { selected, onSelect };
+  const callbacks = useRef({ onLinked, onRemoved });
+  callbacks.current = { onLinked, onRemoved };
 
-  useRefetchOnFocus(query.refetch, query.fulfilledTimeStamp, FOCUS_MIN_AGE_MS, Boolean(linkUrl));
+  useRefetchOnFocus(query.refetch, query.fulfilledTimeStamp, FOCUS_MIN_AGE_MS, Boolean(workspaceId));
 
   useEffect(() => {
     if (!status) return;
@@ -39,13 +35,13 @@ export function useTelegramDelivery(opts: {
     if (!previous) return;
     const added = [...ids].filter((id) => !previous.has(id));
     if (!added.length) return;
-    const { selected: current, onSelect: select } = latest.current;
-    select([...new Set([...current, ...added])]);
+    callbacks.current.onLinked?.(added);
     setLinkUrl(null);
     notify.success(t("reports.tgLinked"));
   }, [status, chats, t]);
 
   const connect = async (group: boolean) => {
+    if (!workspaceId) return;
     const popup = window.open("", "_blank");
     try {
       const { url } = await createLink({ workspaceId, group }).unwrap();
@@ -57,18 +53,15 @@ export function useTelegramDelivery(opts: {
     }
   };
 
-  const toggle = (chatId: string, on: boolean) => {
-    onSelect(on ? [...new Set([...selected, chatId])] : selected.filter((id) => id !== chatId));
-  };
-
   const remove = (chat: TelegramChat) => {
+    if (!workspaceId) return;
     confirmDelete({
       title: t("reports.tgRemoveTitle"),
       body: t("reports.tgRemoveBody", { title: chat.title }),
       onConfirm: async () => {
         try {
           await removeChatMutation({ workspaceId, chatId: chat.chatId }).unwrap();
-          latest.current.onSelect(latest.current.selected.filter((id) => id !== chat.chatId));
+          callbacks.current.onRemoved?.(chat.chatId);
         } catch (e) {
           notify.error(errMessage(e, t("reports.tgRemoveError")));
         }
@@ -85,7 +78,6 @@ export function useTelegramDelivery(opts: {
     linkUrl,
     connect,
     checkAgain: () => void query.refetch(),
-    toggle,
     remove,
   };
 }

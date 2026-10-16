@@ -7,7 +7,6 @@ import { notify, notifyError } from "@/shared/lib/notify";
 import { dateTime, timeAgo } from "@/shared/lib/format";
 import { AppFieldInput } from "./AppFieldInput";
 import { ChatMessagePreview } from "./chat/ChatMessagePreview";
-import { TelegramChatFinder } from "./chat/TelegramChatFinder";
 import { IntegrationStudio } from "./studio/IntegrationStudio";
 import {
   AsideBlock,
@@ -234,16 +233,6 @@ export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefre
               onChange={(value) => setValues((prev) => ({ ...prev, [field.key]: value }))}
             />
           ))}
-          {app.id === "telegram" && (
-            <TelegramChatFinder
-              workspaceId={workspaceId}
-              botToken={String(values.botToken ?? "")}
-              hasSavedToken={Boolean(app.secrets.botToken)}
-              chatId={String(values.chatId ?? "")}
-              disabled={busy}
-              onPick={(chatId) => setValues((prev) => ({ ...prev, chatId }))}
-            />
-          )}
         </Stack>
       </StudioSection>
 

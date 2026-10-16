@@ -17,7 +17,7 @@ import type { TrackerOptions } from "@/features/workspace/tracker";
 import { formsQuery } from "@/features/integrations/lib/formsClient";
 import type {
   FormsApp, FormsAppTestResult, PaymentSettings, PaymentSettingsInput, PaymentTestResult,
-  PaymentMode, PaymentProvider, CalendarStatus, SheetsStatus, TelegramChatList,
+  PaymentMode, PaymentProvider, CalendarStatus, SheetsStatus,
 } from "@/features/integrations/types";
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
@@ -491,21 +491,6 @@ export const api = createApi({
           return;
         }
       },
-    }),
-
-    findFormsAppChats: build.mutation<TelegramChatList, { workspaceId: string; appId: string; botToken?: string }>({
-      queryFn: ({ workspaceId, appId, botToken }, queryApi, extra, baseQuery) =>
-        formsQuery<TelegramChatList>(
-          {
-            workspaceId,
-            path: `/apps/${encodeURIComponent(appId)}/chats`,
-            method: "POST",
-            body: botToken ? { botToken } : {},
-          },
-          queryApi,
-          extra,
-          baseQuery,
-        ),
     }),
 
     disconnectFormsApp: build.mutation<FormsApp[], { workspaceId: string; appId: string }>({
@@ -2476,6 +2461,29 @@ export const api = createApi({
       },
     }),
 
+    setTelegramFormAlerts: build.mutation<TelegramStatus, { workspaceId: string; chatId: string; formAlerts: boolean }>({
+      query: ({ workspaceId, chatId, formAlerts }) => ({
+        url: `/api/workspaces/${workspaceId}/telegram/chats/${encodeURIComponent(chatId)}`,
+        method: "PATCH",
+        body: { formAlerts },
+      }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(api.util.upsertQueryData("getTelegramStatus", workspaceId, data));
+        } catch {
+          return;
+        }
+      },
+    }),
+
+    sendTelegramTest: build.mutation<{ sent: string[]; failed: { chat: string; error: string }[] }, { workspaceId: string }>({
+      query: ({ workspaceId }) => ({
+        url: `/api/workspaces/${workspaceId}/telegram/test`,
+        method: "POST",
+      }),
+    }),
+
 
     getAdminPlans: build.query<Plan[], void>({
       query: () => "/api/admin/billing/plans",
@@ -2870,7 +2878,6 @@ export const {
   useGetFormsAppsQuery,
   useSaveFormsAppMutation,
   useTestFormsAppMutation,
-  useFindFormsAppChatsMutation,
   useDisconnectFormsAppMutation,
   useGetFormsPaymentsQuery,
   useSaveFormsPaymentsMutation,
@@ -3032,6 +3039,8 @@ export const {
   useFindTelegramBotChatsMutation,
   useAddTelegramChatMutation,
   useRemoveTelegramChatMutation,
+  useSetTelegramFormAlertsMutation,
+  useSendTelegramTestMutation,
   useGetAdminFxQuery,
   useSyncAdminPlanCurrencyMutation,
   useGetAdminAddonPacksQuery,

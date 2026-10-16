@@ -1,12 +1,14 @@
-import { useState } from "react";
-import { Anchor, Button, Group, Loader, Text } from "@mantine/core";
-import { RefreshCw, Send, Users } from "lucide-react";
+import { Anchor, Checkbox, Loader, Text } from "@mantine/core";
+import { Settings2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { TelegramChatRow } from "./TelegramChatRow";
-import { TelegramOwnBot } from "./TelegramOwnBot";
-import { useTelegramDelivery } from "./useTelegramDelivery";
-import reportClasses from "../Reports.module.css";
-import classes from "./Telegram.module.css";
+import { useTelegramLink } from "@/features/integrations/hooks/useTelegramLink";
+import { TelegramChatRow } from "@/features/integrations/components/telegram/TelegramChatRow";
+import { TelegramConnectButtons } from "@/features/integrations/components/telegram/TelegramConnectButtons";
+import { TelegramLinkWaiting } from "@/features/integrations/components/telegram/TelegramLinkWaiting";
+import classes from "@/features/integrations/components/telegram/Telegram.module.css";
+
+const CONNECTIONS_URL = "/app/settings/connections?app=telegram";
 
 interface Props {
   workspaceId: string;
@@ -16,8 +18,11 @@ interface Props {
 
 export function TelegramDelivery({ workspaceId, selected, onSelect }: Props) {
   const { t } = useTranslation();
-  const tg = useTelegramDelivery({ workspaceId, selected, onSelect });
-  const [ownOpen, setOwnOpen] = useState(false);
+  const tg = useTelegramLink(
+    workspaceId,
+    (added) => onSelect([...new Set([...selected, ...added])]),
+    (removed) => onSelect(selected.filter((id) => id !== removed)),
+  );
   const status = tg.status;
 
   if (tg.loading || !status) {
@@ -28,87 +33,51 @@ export function TelegramDelivery({ workspaceId, selected, onSelect }: Props) {
     );
   }
 
-  const usingOwn = status.mode === "own";
-  const showOwn = usingOwn || ownOpen || !status.platformAvailable;
+  const canLink = status.mode === "quantalog" && status.platformAvailable;
+  const sender = status.mode === "own" ? status.ownBot?.username : status.platformBot;
+
+  const toggle = (chatId: string, on: boolean) => {
+    onSelect(on ? [...new Set([...selected, chatId])] : selected.filter((id) => id !== chatId));
+  };
 
   return (
     <div className={classes.delivery}>
-      <div>
-        <div className={reportClasses.rows}>
-          {tg.chats.length ? (
-            <div className={reportClasses.recipientList}>
-              {tg.chats.map((chat) => (
-                <TelegramChatRow
-                  key={chat.chatId}
-                  chat={chat}
-                  checked={selected.includes(chat.chatId)}
-                  onToggle={(on) => tg.toggle(chat.chatId, on)}
-                  onRemove={() => tg.remove(chat)}
-                />
-              ))}
-            </div>
-          ) : (
-            <Text size="xs" c="dimmed" className={classes.empty}>
-              {t("reports.tgNoChats")}
-            </Text>
-          )}
-
-          {!usingOwn && status.platformAvailable && (
-            <div className={reportClasses.addRow}>
-              <Button
-                size="xs"
-                variant="light"
-                leftSection={<Send size={14} />}
-                loading={tg.linking}
-                onClick={() => tg.connect(false)}
-              >
-                {t("reports.tgConnectChat")}
-              </Button>
-              <Button size="xs" variant="default" leftSection={<Users size={14} />} onClick={() => tg.connect(true)}>
-                {t("reports.tgConnectGroup")}
-              </Button>
-            </div>
-          )}
-        </div>
+      <div className={classes.rows}>
+        {tg.chats.length ? (
+          <div className={classes.list}>
+            {tg.chats.map((chat) => (
+              <TelegramChatRow
+                key={chat.chatId}
+                chat={chat}
+                onRemove={() => tg.remove(chat)}
+                leading={
+                  <Checkbox
+                    size="xs"
+                    checked={selected.includes(chat.chatId)}
+                    onChange={(e) => toggle(chat.chatId, e.currentTarget.checked)}
+                    aria-label={chat.title}
+                  />
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <Text size="xs" c="dimmed" className={classes.empty}>
+            {canLink ? t("reports.tgNoChats") : t("reports.tgNoChatsSettings")}
+          </Text>
+        )}
+        {canLink && <TelegramConnectButtons linking={tg.linking} onConnect={(group) => void tg.connect(group)} />}
       </div>
 
-      {tg.linkUrl && (
-        <div className={classes.waiting}>
-          <Text size="xs">{t("reports.tgWaiting")}</Text>
-          <Group gap="xs" mt={8}>
-            <Button
-              size="compact-xs"
-              variant="default"
-              leftSection={<RefreshCw size={12} />}
-              loading={tg.checking}
-              onClick={tg.checkAgain}
-            >
-              {t("reports.tgCheckAgain")}
-            </Button>
-            <Anchor href={tg.linkUrl} target="_blank" rel="noreferrer" size="xs">
-              {t("reports.tgOpenAgain")}
-            </Anchor>
-          </Group>
-        </div>
-      )}
+      {tg.linkUrl && <TelegramLinkWaiting linkUrl={tg.linkUrl} checking={tg.checking} onCheck={tg.checkAgain} />}
 
-      {!status.platformAvailable && !usingOwn && (
-        <Text size="xs" c="dimmed">
-          {t("reports.tgPlatformMissing")}
-        </Text>
-      )}
-
-      {showOwn ? (
-        <TelegramOwnBot workspaceId={workspaceId} status={status} />
-      ) : (
-        <Text size="xs" c="dimmed">
-          {status.platformBot && t("reports.tgViaQuantalog", { bot: status.platformBot })}
-          {" · "}
-          <Anchor component="button" type="button" size="xs" onClick={() => setOwnOpen(true)}>
-            {t("reports.tgUseOwnBot")}
-          </Anchor>
-        </Text>
-      )}
+      <Text size="xs" c="dimmed" className={classes.inline}>
+        {sender && <span>{t(status.mode === "own" ? "reports.tgViaOwn" : "reports.tgViaQuantalog", { bot: sender })} ·</span>}
+        <Anchor component={Link} to={CONNECTIONS_URL} target="_blank" size="xs" className={classes.inline}>
+          <Settings2 size={12} />
+          {t("reports.tgManageInConnections")}
+        </Anchor>
+      </Text>
     </div>
   );
 }

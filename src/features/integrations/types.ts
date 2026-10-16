@@ -35,17 +35,6 @@ export interface FormsAppTestResult {
   app: FormsApp;
 }
 
-export interface TelegramChat {
-  id: string;
-  title: string;
-  type: string;
-}
-
-export interface TelegramChatList {
-  botUsername?: string;
-  chats: TelegramChat[];
-}
-
 export type PaymentProvider ="razorpay" | "cashfree" | "payu";
 
 export type PaymentMode = "test" | "live";
@@ -149,7 +138,7 @@ export type IntegrationCategory =
   | "crm"
   | "automation";
 
-export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook" | "search-console";
+export type IntegrationKind = "app" | "payment" | "calendar" | "sheets" | "webhook" | "search-console" | "telegram";
 
 export interface IntegrationTile {
   kind: IntegrationKind;

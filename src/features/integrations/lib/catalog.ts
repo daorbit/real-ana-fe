@@ -7,6 +7,7 @@ import type {
   PaymentSettings,
   SheetsStatus,
 } from "../types";
+import type { TelegramStatus } from "@/shared/types";
 
 export const CATEGORY_ORDER: IntegrationCategory[] = [
   "email",
@@ -109,6 +110,24 @@ function sheetsTiles(status: SheetsStatus | undefined): IntegrationTile[] {
   ];
 }
 
+function telegramTiles(status: TelegramStatus | undefined): IntegrationTile[] {
+  if (!status) return [];
+  const live = status.chats.length > 0;
+  const sender = status.mode === "own" ? status.ownBot?.username : status.platformBot;
+  return [
+    {
+      kind: "telegram",
+      id: "telegram",
+      name: "Telegram",
+      category: "notification",
+      description: "Send scheduled reports and new form responses to Telegram, from the Quantalog bot or your own.",
+      connected: live,
+      enabled: live,
+      account: live ? `${sender ? `@${sender} · ` : ""}${status.chats.length} chat${status.chats.length === 1 ? "" : "s"}` : undefined,
+    },
+  ];
+}
+
 function webhookTile(enabled: boolean): IntegrationTile {
   return {
     kind: "webhook",
@@ -131,6 +150,7 @@ export function buildSections(
   payments: PaymentSettings | undefined,
   calendar: CalendarStatus | undefined,
   sheets: SheetsStatus | undefined,
+  telegram: TelegramStatus | undefined,
   webhookEnabled: boolean,
 ): IntegrationSection[] {
   const all = [
@@ -138,6 +158,7 @@ export function buildSections(
     ...paymentTiles(payments),
     ...calendarTiles(calendar),
     ...sheetsTiles(sheets),
+    ...telegramTiles(telegram),
     webhookTile(webhookEnabled),
   ];
   return CATEGORY_ORDER.map((category) => ({

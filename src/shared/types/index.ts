@@ -561,6 +561,7 @@ export type TelegramChat = {
   chatId: string;
   title: string;
   type: string;
+  formAlerts?: boolean;
   linkedAt?: string;
 };
 
