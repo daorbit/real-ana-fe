@@ -69,6 +69,10 @@
   --brand: #25d366;
 }
 
+.mark[data-brand="google-chat"] {
+  --brand: #00ac47;
+}
+
 .mark[data-brand="teams"] {
   --brand: #5059c9;
 }

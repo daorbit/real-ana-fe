@@ -56,6 +56,16 @@ function TeamsMark({ size = 24 }: MarkProps) {
   return <img src="/brands/microsoft-teams.svg" width={size} height={size} alt="Microsoft Teams" className={classes.logo} />;
 }
 
+function GoogleChatMark({ size = 24 }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 479.4 500" role="img" aria-label="Google Chat" className={classes.logo}>
+      <path fill="#00AC47" d="M108.8,269.7V107.2h-71C16.9,107.2,0,124.2,0,145.1V481c0,16.9,20.4,25.3,32.3,13.4l78.1-78.1h222.4c20.9,0,37.8-16.9,37.8-37.8v-71H146.7C125.8,307.5,108.8,290.6,108.8,269.7z" />
+      <path fill="#5BB974" d="M441.6,0H146.7c-20.9,0-37.8,16.9-37.8,37.8v69.4h223.9c20.9,0,37.8,16.9,37.8,37.8v162.4h71c20.9,0,37.8-16.9,37.8-37.8V37.8C479.4,16.9,462.5,0,441.6,0z" />
+      <path fill="#00832D" d="M332.8,107.2H108.8v162.4c0,20.9,16.9,37.8,37.8,37.8h223.9V145.1C370.6,124.2,353.7,107.2,332.8,107.2z" />
+    </svg>
+  );
+}
+
 function WhatsAppMark({ size = 24 }: MarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="WhatsApp" className={classes.logo}>
@@ -146,6 +156,7 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   slack: SlackMark,
   discord: DiscordMark,
   teams: TeamsMark,
+  "google-chat": GoogleChatMark,
   whatsapp: WhatsAppMark,
   telegram: TelegramMark,
   "google-calendar": GoogleCalendarMark,

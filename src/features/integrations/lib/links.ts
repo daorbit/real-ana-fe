@@ -15,6 +15,7 @@ const APP_GUIDES: Record<string, string> = {
   slack: `${NOTIFICATIONS}#chat`,
   discord: `${NOTIFICATIONS}#chat`,
   teams: `${NOTIFICATIONS}#chat`,
+  "google-chat": `${NOTIFICATIONS}#chat`,
   whatsapp: `${NOTIFICATIONS}#whatsapp`,
   telegram: `${NOTIFICATIONS}#telegram`,
   razorpay: PAYMENTS,

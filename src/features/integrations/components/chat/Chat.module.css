@@ -17,6 +17,10 @@
   --accent-bar: #25d366;
 }
 
+.preview[data-app="google-chat"] {
+  --accent-bar: #00ac47;
+}
+
 .preview[data-app="teams"] {
   --accent-bar: #5059c9;
 }

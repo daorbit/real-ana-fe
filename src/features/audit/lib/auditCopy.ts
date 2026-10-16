@@ -29,6 +29,7 @@ const APP_NAMES: Record<string, string> = {
   slack: "Slack",
   discord: "Discord",
   teams: "Microsoft Teams",
+  "google-chat": "Google Chat",
   webhook: "Webhook",
 };
 
