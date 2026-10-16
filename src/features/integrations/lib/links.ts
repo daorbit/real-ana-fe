@@ -23,7 +23,7 @@ const APP_GUIDES: Record<string, string> = {
   "google-sheets": GOOGLE_SHEETS_DOCS_URL,
   webhook: `${docsUrl(DOCS_SLUGS.leadCapture)}#webhook`,
   "search-console": `${docsUrl(DOCS_SLUGS.searchVisibility)}#connecting`,
-  "quantalog-compare": `${docsUrl(DOCS_SLUGS.seo)}#compare`,
+  "quantalog-compare": docsUrl(DOCS_SLUGS.quantalogCompare),
   linkedin: SOCIAL,
   instagram: SOCIAL,
 };

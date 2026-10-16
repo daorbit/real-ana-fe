@@ -144,6 +144,8 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   payu: PayuMark,
 };
 
+export const CARD_MARK_SIZE = 36;
+
 export function BrandMark({ id, size = 24 }: { id: string; size?: number }) {
   const Mark = MARKS[id];
   if (Mark) return <Mark size={size} />;

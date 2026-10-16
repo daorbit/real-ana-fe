@@ -68,7 +68,7 @@ export function IntegrationStudio({
 
           <div className={classes.identity}>
             <span className={`${classes.mark} ${cardClasses.mark}`} data-brand={brand} aria-hidden>
-              <BrandMark id={brand} size={22} />
+              <BrandMark id={brand} size={28} />
             </span>
             <div className={classes.identityText}>
               <Group gap={8} wrap="nowrap">

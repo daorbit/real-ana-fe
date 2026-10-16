@@ -111,7 +111,7 @@ export default function Compare() {
       <PageHeader
         title="Compare"
         description="How your pages stack up against your competitors', and what would close the gap."
-        docsPath={DOCS_SLUGS.comparisons}
+        docsPath={DOCS_SLUGS.quantalogCompare}
         actions={
           <Group gap="sm" wrap="nowrap">
             <Tooltip label="How comparison scoring works" withArrow>

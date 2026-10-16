@@ -3,7 +3,7 @@ import { Badge, Button, Group, Text } from "@mantine/core";
 import { Check, CircleDashed, CirclePause, Link2, Power, RefreshCw, Settings2, TriangleAlert } from "lucide-react";
 import { ConnectionCard } from "@/features/auth/components/settings/ConnectionCard";
 import { timeAgo } from "@/shared/lib/format";
-import { BrandMark } from "./logos/BrandMarks";
+import { BrandMark, CARD_MARK_SIZE } from "./logos/BrandMarks";
 import { appGuideUrl } from "../lib/links";
 import type { IntegrationTile } from "../types";
 import classes from "./IntegrationTileCard.module.css";
@@ -145,7 +145,7 @@ export function IntegrationTileCard(props: Props) {
   const { tile } = props;
   return (
     <ConnectionCard
-      mark={<BrandMark id={tile.id} size={26} />}
+      mark={<BrandMark id={tile.id} size={CARD_MARK_SIZE} />}
       brand={tile.id}
       name={tile.name}
       hint={tile.description}

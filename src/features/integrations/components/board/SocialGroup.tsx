@@ -8,6 +8,7 @@ import { ConnectionGroup } from "@/features/auth/components/settings/ConnectionG
 import { FacebookMark, InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { SocialEntry, SocialId } from "../../hooks/useSocialConnections";
 import { appGuideUrl } from "../../lib/links";
+import { CARD_MARK_SIZE } from "../logos/BrandMarks";
 
 interface Props {
   entries: SocialEntry[];
@@ -24,7 +25,7 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
     linkedin: (
       <ConnectionCard
         key="linkedin"
-        mark={<LinkedInMark size={26} />}
+        mark={<LinkedInMark size={CARD_MARK_SIZE} />}
         brand="linkedin"
         name="LinkedIn"
         hint="Publishing account for scheduled social posts."
@@ -36,7 +37,7 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
     instagram: (
       <ConnectionCard
         key="instagram"
-        mark={<InstagramMark size={26} />}
+        mark={<InstagramMark size={CARD_MARK_SIZE} />}
         brand="instagram"
         name="Instagram"
         hint="Feed posts from the same composer."
@@ -47,7 +48,7 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
       </ConnectionCard>
     ),
     facebook: (
-      <ConnectionCard key="facebook" mark={<FacebookMark size={26} />} brand="facebook" name="Facebook" hint="Pages and profile posting." soon />
+      <ConnectionCard key="facebook" mark={<FacebookMark size={CARD_MARK_SIZE} />} brand="facebook" name="Facebook" hint="Pages and profile posting." soon />
     ),
   };
 
