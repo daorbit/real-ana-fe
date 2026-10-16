@@ -1,5 +1,4 @@
-import { Badge, Button, Loader, Text } from "@mantine/core";
-import { Send } from "lucide-react";
+import { Badge, Loader, Text } from "@mantine/core";
 import { useSendTelegramTestMutation } from "@/app/store";
 import { notify, notifyError } from "@/shared/lib/notify";
 import type { TelegramStatus } from "@/shared/types";
@@ -8,8 +7,9 @@ import { useTelegramOwnBot } from "../../hooks/useTelegramOwnBot";
 import { appGuideUrl } from "../../lib/links";
 import { ChatMessagePreview } from "../chat/ChatMessagePreview";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
-import { AsideBlock, SecureNote, SetupChecklist, StudioHero, StudioSection, type StudioStat } from "../studio/StudioParts";
+import { AsideBlock, SecureNote, SetupChecklist, StudioSection } from "../studio/StudioParts";
 import { TelegramBotChooser } from "./TelegramBotChooser";
+import { TelegramStatusCard } from "./TelegramStatusCard";
 import { TelegramLinkWaiting } from "./TelegramLinkWaiting";
 import { TelegramLinkedChats } from "./TelegramLinkedChats";
 import { TelegramOwnBotChats } from "./TelegramOwnBotChats";
@@ -20,20 +20,6 @@ interface Props {
   workspaceId: string;
   status?: TelegramStatus;
   onClose: () => void;
-}
-
-function senderOf(status: TelegramStatus): string {
-  if (status.mode === "own") return `@${status.ownBot?.username ?? ""}`;
-  return status.platformBot ? `@${status.platformBot}` : "Quantalog bot";
-}
-
-function statsFor(status: TelegramStatus): StudioStat[] {
-  const alerts = status.chats.filter((c) => c.formAlerts).length;
-  return [
-    { label: "Sends as", value: senderOf(status) },
-    { label: "Linked chats", value: status.chats.length, tone: status.chats.length ? "ok" : "warn" },
-    { label: "With form alerts on", value: alerts, tone: alerts ? "ok" : undefined },
-  ];
 }
 
 function TelegramBody({ workspaceId }: { workspaceId: string }) {
@@ -51,7 +37,6 @@ function TelegramBody({ workspaceId }: { workspaceId: string }) {
   }
 
   const usingOwn = status.mode === "own";
-  const live = status.chats.length > 0;
 
   const runTest = async () => {
     try {
@@ -65,25 +50,16 @@ function TelegramBody({ workspaceId }: { workspaceId: string }) {
 
   return (
     <>
-      <StudioHero
-        state={live ? "live" : "off"}
-        title={live ? "Telegram is live" : "Connect Telegram"}
-        description={
-          live
-            ? "Scheduled reports and new form responses can be sent to the chats below."
-            : "Pick a bot, then link a chat, group or channel to receive reports and form alerts."
-        }
-        stats={statsFor(status)}
-      />
+      <TelegramStatusCard status={status} testing={testState.isLoading} onTest={runTest} />
 
-      <StudioSection title="Bot" description="Who the messages come from.">
+      <StudioSection title="Bot" description="Who your messages come from.">
         <TelegramBotChooser status={status} bot={bot} />
       </StudioSection>
 
       {(usingOwn || status.platformAvailable) && (
         <StudioSection
           title="Chats"
-          description="Where messages go. Turn on Form alerts for chats that should get every new response. Reports choose their chats in the report editor."
+          description="Where messages go. Switch on Form alerts to get every new response there. Reports choose their own chats."
         >
           <div className={classes.delivery}>
             <TelegramLinkedChats workspaceId={workspaceId} link={link} canLink={!usingOwn} />
@@ -93,17 +69,9 @@ function TelegramBody({ workspaceId }: { workspaceId: string }) {
         </StudioSection>
       )}
 
-      <StudioSection title="Form alert preview" description="What a chat with form alerts on shows for each new response.">
+      <StudioSection title="Preview" description="How a new form response looks in a chat with form alerts on.">
         <ChatMessagePreview appId="telegram" appName="Telegram" />
       </StudioSection>
-
-      {live && (
-        <StudioSection title="Test the connection" description="Post a sample message to every linked chat.">
-          <Button type="button" variant="default" leftSection={<Send size={15} />} loading={testState.isLoading} onClick={runTest}>
-            Send test message
-          </Button>
-        </StudioSection>
-      )}
     </>
   );
 }

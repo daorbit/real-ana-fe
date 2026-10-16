@@ -127,18 +127,24 @@
   margin-top: 10px;
 }
 
+.chooser {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .modes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
 }
 
 .mode {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md, 12px);
   border: 1px solid var(--border);
   background: var(--surface);
   text-align: left;
@@ -154,11 +160,22 @@
   background: var(--accent-soft);
 }
 
-.modeHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+.mode:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modeAvatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.modeText {
+  flex: 1;
+  min-width: 0;
 }
 
 .modeCheck {
@@ -166,7 +183,69 @@
   color: var(--accent);
 }
 
-.mode:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.modeIdle {
+  flex-shrink: 0;
+  color: var(--border-strong);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.statusAvatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+}
+
+.statusText {
+  flex: 1;
+  min-width: 0;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--muted);
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.status[data-live] .statusPill {
+  color: var(--mantine-color-teal-5);
+}
+
+.status[data-live] .statusDot {
+  background: var(--mantine-color-teal-5);
+}
+
+.statusTitle {
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+@media (max-width: 48em) {
+  .status {
+    flex-wrap: wrap;
+  }
 }

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { Button, PasswordInput, Text, UnstyledButton } from "@mantine/core";
-import { CircleCheck } from "lucide-react";
+import { Button, PasswordInput, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
+import { Logo } from "@/shared/ui/Brand";
 import type { TelegramStatus } from "@/shared/types";
 import type { useTelegramOwnBot } from "../../hooks/useTelegramOwnBot";
+import { BrandMark } from "../logos/BrandMarks";
+import { TelegramBotOption } from "./TelegramBotOption";
 import classes from "./Telegram.module.css";
 
 interface Props {
@@ -18,6 +20,7 @@ export function TelegramBotChooser({ status, bot }: Props) {
   useEffect(() => {
     setOwnPicked(usingOwn || !status.platformAvailable);
   }, [usingOwn, status.platformAvailable]);
+  const quantalogActive = !usingOwn && !ownPicked;
   const showToken = !usingOwn && ownPicked;
 
   const pickQuantalog = () => {
@@ -26,61 +29,57 @@ export function TelegramBotChooser({ status, bot }: Props) {
   };
 
   return (
-    <>
+    <div className={classes.chooser}>
       <div className={classes.modes}>
-        <UnstyledButton
-          type="button"
-          className={classes.mode}
-          data-active={(!usingOwn && !ownPicked) || undefined}
+        <TelegramBotOption
+          avatar={<Logo size={36} />}
+          title="Quantalog bot"
+          description={
+            status.platformAvailable
+              ? `Sends as @${status.platformBot}. Nothing to set up.`
+              : t("reports.tgPlatformMissing")
+          }
+          active={quantalogActive}
           disabled={!status.platformAvailable || bot.removing}
           onClick={pickQuantalog}
-        >
-          <span className={classes.modeHead}>
-            <Text size="sm" fw={600}>
-              Quantalog bot
-            </Text>
-            {!usingOwn && !ownPicked && <CircleCheck size={16} className={classes.modeCheck} />}
-          </span>
-          <Text size="xs" c="dimmed">
-            {status.platformAvailable
-              ? `Messages come from @${status.platformBot}. Nothing to set up: connect a chat and you are done.`
-              : t("reports.tgPlatformMissing")}
-          </Text>
-        </UnstyledButton>
-        <UnstyledButton
-          type="button"
-          className={classes.mode}
-          data-active={usingOwn || ownPicked || undefined}
+        />
+        <TelegramBotOption
+          avatar={<BrandMark id="telegram" size={36} />}
+          title={t("reports.tgOwnBotTitle")}
+          description={
+            usingOwn
+              ? `Sends as @${status.ownBot?.username}. Your bot's name and picture.`
+              : "Use a bot you made with @BotFather, with your own name and picture."
+          }
+          active={!quantalogActive}
           onClick={() => setOwnPicked(true)}
-        >
-          <span className={classes.modeHead}>
-            <Text size="sm" fw={600}>
-              {t("reports.tgOwnBotTitle")}
-            </Text>
-            {(usingOwn || ownPicked) && <CircleCheck size={16} className={classes.modeCheck} />}
-          </span>
-          <Text size="xs" c="dimmed">
-            {usingOwn ? t("reports.tgViaOwn", { bot: status.ownBot?.username }) : t("reports.tgOwnBotHint")}
-          </Text>
-        </UnstyledButton>
+        />
       </div>
 
       {showToken && (
-        <div className={`${classes.inline} ${classes.manual}`}>
-          <PasswordInput
-            className={classes.grow}
-            size="sm"
-            placeholder="123456789:AAH…"
-            aria-label={t("reports.tgOwnBotToken")}
-            value={bot.token}
-            autoComplete="new-password"
-            onChange={(e) => bot.setToken(e.currentTarget.value)}
-          />
-          <Button size="sm" onClick={bot.save} loading={bot.saving} disabled={!bot.token.trim()}>
-            {t("reports.tgOwnBotSave")}
-          </Button>
+        <div className={classes.panel}>
+          <Text size="sm" fw={600}>
+            Connect your bot
+          </Text>
+          <Text size="xs" c="dimmed" mt={2} mb="sm">
+            In Telegram, open @BotFather, send /newbot and paste the token it gives you.
+          </Text>
+          <div className={classes.inline}>
+            <PasswordInput
+              className={classes.grow}
+              size="sm"
+              placeholder="123456789:AAH…"
+              aria-label={t("reports.tgOwnBotToken")}
+              value={bot.token}
+              autoComplete="new-password"
+              onChange={(e) => bot.setToken(e.currentTarget.value)}
+            />
+            <Button size="sm" onClick={bot.save} loading={bot.saving} disabled={!bot.token.trim()}>
+              {t("reports.tgOwnBotSave")}
+            </Button>
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
