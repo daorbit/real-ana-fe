@@ -13,6 +13,10 @@
   --accent-bar: #5865f2;
 }
 
+.preview[data-app="teams"] {
+  --accent-bar: #5059c9;
+}
+
 .preview[data-app="telegram"] {
   --accent-bar: #26a5e4;
 }

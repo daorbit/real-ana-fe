@@ -28,6 +28,7 @@ const APP_NAMES: Record<string, string> = {
   smtp: "Custom SMTP",
   slack: "Slack",
   discord: "Discord",
+  teams: "Microsoft Teams",
   webhook: "Webhook",
 };
 

@@ -61,6 +61,10 @@
   --brand: #5865f2;
 }
 
+.mark[data-brand="teams"] {
+  --brand: #5059c9;
+}
+
 .mark[data-brand="google-calendar"] {
   --brand: #4285f4;
 }

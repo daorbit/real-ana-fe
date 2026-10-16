@@ -52,6 +52,19 @@ function DiscordMark({ size = 24 }: MarkProps) {
   );
 }
 
+function TeamsMark({ size = 24 }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="Microsoft Teams" className={classes.logo}>
+      <circle cx="19" cy="6.5" r="2.5" fill="#7B83EB" />
+      <path fill="#7B83EB" d="M15.5 10H22a1 1 0 0 1 1 1v5a3.75 3.75 0 0 1-7.5 0z" />
+      <circle cx="12.5" cy="5" r="3" fill="#5059C9" />
+      <path fill="#5059C9" d="M8 9.5h9.5a1 1 0 0 1 1 1V16a5.25 5.25 0 0 1-10.5 0z" />
+      <rect x="1" y="6" width="12" height="12" rx="2" fill="#4B53BC" />
+      <path fill="#fff" d="M4 9h6v1.6H7.8V15H6.2v-4.4H4z" />
+    </svg>
+  );
+}
+
 function TelegramMark({ size = 24 }: MarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="Telegram" className={classes.logo}>
@@ -125,6 +138,7 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   smtp: SmtpMark,
   slack: SlackMark,
   discord: DiscordMark,
+  teams: TeamsMark,
   telegram: TelegramMark,
   "google-calendar": GoogleCalendarMark,
   "google-sheets": GoogleSheetsMark,

@@ -14,6 +14,7 @@ const APP_GUIDES: Record<string, string> = {
   smtp: `${NOTIFICATIONS}#email-app`,
   slack: `${NOTIFICATIONS}#chat`,
   discord: `${NOTIFICATIONS}#chat`,
+  teams: `${NOTIFICATIONS}#chat`,
   telegram: `${NOTIFICATIONS}#telegram`,
   razorpay: PAYMENTS,
   cashfree: PAYMENTS,
