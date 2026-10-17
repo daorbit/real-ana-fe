@@ -49,14 +49,18 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/settings/security": () => import("@/features/auth/pages/Settings"),
   "/app/billing": () => import("@/features/billing/pages/Billing"),
   "/app/billing/plans": () => import("@/features/billing/pages/ComparePlans"),
-  "/app/admin/referrals": () => import("@/features/referralAdmin/pages/AdminReferrals"),
+  "/app/admin-tools": () => import("@/features/admin/pages/AdminTools"),
 };
 
 const pending = new Map<string, Promise<void>>();
 
 export function prefetchRoute(to: string): Promise<void> {
   const exact = to.split(/[?#]/)[0];
-  const path = exact.startsWith("/app/link/") ? "/app/link" : exact;
+  const path = exact.startsWith("/app/link/")
+    ? "/app/link"
+    : exact.startsWith("/app/admin-tools/")
+      ? "/app/admin-tools"
+      : exact;
   const existing = pending.get(path);
   if (existing) return existing;
   const load = importers[path];

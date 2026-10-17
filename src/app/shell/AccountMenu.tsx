@@ -12,7 +12,7 @@ import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { CONTACT_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
 import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import type { ThemeMode } from "@/shared/lib/theme";
-import { ADMIN_ITEMS } from "./navItems";
+import { ADMIN_TOOLS_PATH } from "@/features/admin/lib/adminTabs";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { RequestFeatureModal } from "./RequestFeatureModal";
 import { DemoCallBanner } from "./DemoCallBanner";
@@ -137,28 +137,21 @@ export function AccountMenu({
           </Menu.Sub>
 
           {isAdmin && (
-            <Menu.Sub>
-              <Menu.Sub.Target>
-                <Menu.Sub.Item leftSection={<ShieldCheck size={15} />}>{t("nav.adminTools", "Admin tools")}</Menu.Sub.Item>
-              </Menu.Sub.Target>
-              <Menu.Sub.Dropdown>
-                {ADMIN_ITEMS.map((item) => (
-                  <Menu.Item key={item.to} component={Link} to={item.to} leftSection={<item.icon size={15} />}>
-                    {t(item.labelKey, item.label)}
-                  </Menu.Item>
-                ))}
-                {demoAvailable && (
-                  <Menu.Item
-                    leftSection={<FlaskConical size={15} />}
-                    rightSection={demo ? <Badge size="xs" variant="light" color="violet" tt="none">on</Badge> : null}
-                    onClick={() => onToggleDemo(!demo)}
-                    closeMenuOnClick={false}
-                  >
-                    {t("nav.demoData", "Demo data")}
-                  </Menu.Item>
-                )}
-              </Menu.Sub.Dropdown>
-            </Menu.Sub>
+            <>
+              <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<ShieldCheck size={15} />}>
+                {t("nav.adminTools", "Admin tools")}
+              </Menu.Item>
+              {demoAvailable && (
+                <Menu.Item
+                  leftSection={<FlaskConical size={15} />}
+                  rightSection={demo ? <Badge size="xs" variant="light" color="violet" tt="none">on</Badge> : null}
+                  onClick={() => onToggleDemo(!demo)}
+                  closeMenuOnClick={false}
+                >
+                  {t("nav.demoData", "Demo data")}
+                </Menu.Item>
+              )}
+            </>
           )}
 
           <Menu.Divider />

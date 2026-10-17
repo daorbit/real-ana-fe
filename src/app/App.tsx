@@ -15,6 +15,8 @@ import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { NotFound } from "@/shared/ui/NotFound";
 import { AppBootSkeleton } from "@/shared/ui/Skeletons";
 import { ShellLayout } from "@/app/shell/ShellLayout";
+import { ADMIN_TABS } from "@/features/admin/lib/adminTabs";
+import { LegacyAdminRedirect } from "@/features/admin/components/LegacyAdminRedirect";
 import { consumeWelcomePending } from "@/shared/ui/welcomePending";
 import "@/app/App.css";
 import "@/polish.css";
@@ -55,17 +57,12 @@ const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
 const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
 const LeadCapture = lazy(() => import("@/features/leadCapture/pages/LeadCapture"));
 const LinkFrame = lazy(() => import("@/features/customLinks/pages/LinkFrame"));
-const Impersonate = lazy(() => import("@/features/admin/pages/Impersonate"));
-const DemoUsage = lazy(() => import("@/features/admin/pages/DemoUsage"));
 const Settings = lazy(() => import("@/features/auth/pages/Settings"));
 const Apps = lazy(() => import("@/features/integrations/pages/Apps"));
 const DataDeletion = lazy(() => import("@/features/auth/pages/DataDeletion"));
 const Billing = lazy(() => import("@/features/billing/pages/Billing"));
 const ComparePlans = lazy(() => import("@/features/billing/pages/ComparePlans"));
-const AdminBilling = lazy(() => import("@/features/admin/pages/AdminBilling"));
-const AdminBroadcast = lazy(() => import("@/features/admin/pages/AdminBroadcast"));
-const AdminDatabase = lazy(() => import("@/features/admin/pages/AdminDatabase"));
-const AdminReferrals = lazy(() => import("@/features/referralAdmin/pages/AdminReferrals"));
+const AdminTools = lazy(() => import("@/features/admin/pages/AdminTools"));
 const Onboarding = lazy(() => import("@/features/auth/pages/Onboarding"));
 const PublicDashboard = lazy(() => import("@/features/analytics/pages/PublicDashboard"));
 const PublicSeoReport = lazy(() => import("@/features/seo/pages/PublicSeoReport"));
@@ -297,12 +294,10 @@ export default function App() {
                 <Route path="/app/billing" element={<Billing />} />
                 <Route path="/app/billing/plans" element={<ComparePlans />} />
                 {/* Admin-only, enforced by the page and by every /api/admin route. */}
-                <Route path="/app/impersonate" element={<Impersonate />} />
-                <Route path="/app/demo-usage" element={<DemoUsage />} />
-                <Route path="/app/admin/billing" element={<AdminBilling />} />
-                <Route path="/app/admin/broadcast" element={<AdminBroadcast />} />
-                <Route path="/app/admin/database" element={<AdminDatabase />} />
-                <Route path="/app/admin/referrals" element={<AdminReferrals />} />
+                <Route path="/app/admin-tools/:tab?" element={<AdminTools />} />
+                {ADMIN_TABS.map((tab) => (
+                  <Route key={tab.id} path={tab.legacyPath} element={<LegacyAdminRedirect tab={tab.id} />} />
+                ))}
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
