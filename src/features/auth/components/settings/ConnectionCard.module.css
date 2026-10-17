@@ -61,10 +61,24 @@
   --brand: #5865f2;
 }
 
-.mark[data-brand="quantalog-compare"],
-.mark[data-brand="quantalog-goals"],
+.mark[data-brand="quantalog-compare"] {
+  --brand: #4f46e5;
+}
+
+.mark[data-brand="quantalog-goals"] {
+  --brand: #059669;
+}
+
 .mark[data-brand="quantalog-notes"] {
-  --brand: var(--accent);
+  --brand: #d97706;
+}
+
+.mark[data-brand="quantalog-reviews"] {
+  --brand: #db2777;
+}
+
+.mark[data-brand="quantalog-links"] {
+  --brand: #0891b2;
 }
 
 .mark[data-brand="whatsapp"] {

@@ -145,22 +145,18 @@ function PayuMark({ size = 24 }: MarkProps) {
   );
 }
 
-function QuantalogCompareMark({ size = 24 }: MarkProps) {
-  return <img src="/apps/quantalog-compare.png" width={size} height={size} alt="Quantalog Compare" className={classes.appLogo} />;
-}
-
-function QuantalogGoalsMark({ size = 24 }: MarkProps) {
-  return <img src="/apps/quantalog-goals.svg" width={size} height={size} alt="Quantalog Goals" className={classes.appLogo} />;
-}
-
-function QuantalogNotesMark({ size = 24 }: MarkProps) {
-  return <img src="/apps/quantalog-notes.svg" width={size} height={size} alt="Quantalog Notes" className={classes.appLogo} />;
+function appMark(file: string, name: string) {
+  return function AppMark({ size = 24 }: MarkProps) {
+    return <img src={`/apps/${file}`} width={size} height={size} alt={name} className={classes.appLogo} />;
+  };
 }
 
 const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
-  "quantalog-compare": QuantalogCompareMark,
-  "quantalog-goals": QuantalogGoalsMark,
-  "quantalog-notes": QuantalogNotesMark,
+  "quantalog-compare": appMark("quantalog-compare.svg", "Quantalog Compare"),
+  "quantalog-goals": appMark("quantalog-goals.svg", "Quantalog Goals"),
+  "quantalog-notes": appMark("quantalog-notes.svg", "Quantalog Notes"),
+  "quantalog-reviews": appMark("quantalog-reviews.svg", "Quantalog Reviews"),
+  "quantalog-links": appMark("quantalog-links.svg", "Quantalog Links"),
   brevo: BrevoMark,
   smtp: SmtpMark,
   slack: SlackMark,

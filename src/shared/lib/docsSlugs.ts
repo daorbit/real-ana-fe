@@ -36,6 +36,7 @@ export const DOCS_SLUGS = {
   seo: "/seo",
   quantalogCompare: "/quantalog-compare",
   quantalogNotes: "/quantalog-notes",
+  quantalogLinks: "/quantalog-links",
   searchVisibility: "/search-visibility",
   emailReports: "/email-reports",
   scheduledPosts: "/scheduled-posts",

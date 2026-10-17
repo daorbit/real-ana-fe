@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Reviews">
+  <rect width="256" height="256" rx="56" fill="#DB2777"/>
+  <path d="M88 60h80a24 24 0 0 1 24 24v64a24 24 0 0 1-24 24h-48l-30 24v-24h-2a24 24 0 0 1-24-24V84a24 24 0 0 1 24-24z" fill="#FFFFFF"/>
+  <path d="M128 86 135.3 105.9 156.5 106.7 139.9 119.9 145.6 140.3 128 128.5 110.4 140.3 116.1 119.9 99.5 106.7 120.7 105.9z" fill="#DB2777" stroke="#DB2777" stroke-width="5" stroke-linejoin="round"/>
+</svg>

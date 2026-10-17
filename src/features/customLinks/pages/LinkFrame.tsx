@@ -5,6 +5,8 @@ import { AppShell } from "@/app/AppShell";
 import { useNavPrefs } from "@/app/shell/navPrefs";
 import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import { useWorkspace } from "@/features/workspace/context";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
+import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import classes from "@/features/customLinks/components/LinkFrame.module.css";
@@ -13,7 +15,8 @@ export default function LinkFrame() {
   const { slug } = useParams<{ slug: string }>();
   const { loading } = useWorkspace();
   const prefs = useNavPrefs();
-  const link = prefs.links.find((l) => l.mode === "internal" && l.slug === slug);
+  const { links: linksOn } = useWorkspaceApps();
+  const link = linksOn ? prefs.links.find((l) => l.mode === "internal" && l.slug === slug) : undefined;
   useTitle(link?.label ?? "Link");
 
   useEffect(() => {
@@ -25,6 +28,14 @@ export default function LinkFrame() {
   }, [link]);
 
   if (loading) return <AppShell><div className={classes.frame} /></AppShell>;
+
+  if (!linksOn) {
+    return (
+      <AppShell>
+        <QuantalogAppGate app="links" />
+      </AppShell>
+    );
+  }
 
   if (!link) {
     return (

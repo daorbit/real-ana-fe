@@ -8,8 +8,12 @@ export type EnabledApps = Record<WorkspaceAppId, boolean>;
 export function useWorkspaceApps(): EnabledApps {
   const { active } = useWorkspace();
   const { demo } = useDemo();
-  const compare = demo || Boolean(active?.apps?.compare?.enabled);
-  const goals = demo || Boolean(active?.apps?.goals?.enabled);
-  const notes = demo || Boolean(active?.apps?.notes?.enabled);
-  return useMemo(() => ({ compare, goals, notes }), [compare, goals, notes]);
+  const apps = active?.apps;
+  const on = (id: WorkspaceAppId) => demo || Boolean(apps?.[id]?.enabled);
+  const compare = on("compare");
+  const goals = on("goals");
+  const notes = on("notes");
+  const reviews = on("reviews");
+  const links = on("links");
+  return useMemo(() => ({ compare, goals, notes, reviews, links }), [compare, goals, notes, reviews, links]);
 }

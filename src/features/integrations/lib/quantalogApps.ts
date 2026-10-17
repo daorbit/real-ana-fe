@@ -63,6 +63,37 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Find them fast", body: "Pin the important ones, and search every note from the command palette with Ctrl K." },
     ],
   },
+  reviews: {
+    id: "reviews",
+    tileId: "quantalog-reviews",
+    name: "Quantalog Reviews",
+    navLabel: "Reviews",
+    route: "/app/reviews",
+    location: "in the sidebar",
+    offNote: "Your Google connection and synced reviews are kept, so turning it back on picks up where you left off.",
+    tagline: "Your Google reviews, synced into Quantalog.",
+    description: "Connect your Google Business Profile to see every review and your rating breakdown in one place, and serve them on your website through the Quantalog API.",
+    features: [
+      { title: "Every review in one place", body: "Ratings, comments and your replies for each business location, kept in sync automatically." },
+      { title: "Rating breakdown", body: "See how your stars split from five to one, and spot a dip before it shows on Google." },
+      { title: "On your website", body: "Show your best reviews on your own site through the Quantalog API." },
+    ],
+  },
+  links: {
+    id: "links",
+    tileId: "quantalog-links",
+    name: "Quantalog Links",
+    navLabel: "Links",
+    location: "at the top of the sidebar",
+    offNote: "Your links are kept, so turning it back on puts them back in the sidebar.",
+    tagline: "Shortcuts to your team's other tools, right in the sidebar.",
+    description: "Add Stripe, Notion, your CRM or any tool your team opens daily to the sidebar. Open them in a new tab, or inside Quantalog without leaving the app.",
+    features: [
+      { title: "One click away", body: "Up to 10 tools your team uses most, listed under Links at the top of everyone's sidebar." },
+      { title: "Open inside Quantalog", body: "Choose to open a link in a new tab or in a page inside Quantalog, so work stays in one window." },
+      { title: "Your logos", body: "Each link shows its site's icon automatically, or a logo you upload." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

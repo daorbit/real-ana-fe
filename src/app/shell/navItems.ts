@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, TrendingUp,
-  LayoutDashboard, Flag, Settings, Gift, ScrollText, Blocks,
+  LayoutDashboard, Flag, Settings, Gift, ScrollText, Blocks, Star,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { LeadMagnetIcon } from "./icons";
@@ -53,8 +53,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon },
-      // Hidden from the sidebar for now; the /app/reviews route still works.
-      // { to: "/app/reviews", labelKey: "nav.reviews", label: "Google reviews", icon: Star },
+      { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
     ],
   },

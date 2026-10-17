@@ -10,6 +10,8 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useDemo } from "@/features/demo/context";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
+import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { demoGoogleReviewsStatus, demoGoogleReviewsList } from "@/features/demo/demoReviews";
 import { useTitle } from "@/shared/lib/useTitle";
 import { notify, notifyError, errMessage } from "@/shared/lib/notify";
@@ -36,15 +38,16 @@ import { SelectBusiness } from "@/features/reviews/components/SelectBusiness";
  * credentials, an admin member authorises, and anyone can then read.
  */
 export default function Reviews() {
-  useTitle("Google Reviews");
+  useTitle("Reviews");
   const { active } = useWorkspace();
   const { canAdmin } = usePermissions();
   const workspaceId = active?._id ?? "";
 
   const { demo } = useDemo();
+  const { reviews: reviewsOn } = useWorkspaceApps();
 
   const { data: realStatus, isLoading: realStatusLoading, refetch } = useGetGoogleReviewsStatusQuery(workspaceId, {
-    skip: !workspaceId,
+    skip: !workspaceId || !reviewsOn,
   });
   const demoStatus = useMemo(() => (demo ? demoGoogleReviewsStatus() : null), [demo]);
   const status = demoStatus ?? realStatus;
@@ -129,6 +132,19 @@ export default function Reviews() {
     });
   };
 
+  if (!reviewsOn) {
+    return (
+      <AppShell>
+        <PageHeader
+          title="Reviews"
+          description="Your Google reviews, synced into Quantalog."
+          docsPath={DOCS_SLUGS.reviews}
+        />
+        <QuantalogAppGate app="reviews" />
+      </AppShell>
+    );
+  }
+
   if (isLoading) {
     return (
       <AppShell>
@@ -142,7 +158,7 @@ export default function Reviews() {
   return (
     <AppShell>
       <PageHeader
-        title="Google Reviews"
+        title="Reviews"
         description="Sync reviews from your Google Business Profile and serve them through the Quantalog API."
         docsPath={DOCS_SLUGS.reviews}
         actions={

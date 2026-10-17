@@ -28,6 +28,8 @@ const APP_GUIDES: Record<string, string> = {
   "quantalog-compare": docsUrl(DOCS_SLUGS.quantalogCompare),
   "quantalog-goals": docsUrl(DOCS_SLUGS.goals),
   "quantalog-notes": docsUrl(DOCS_SLUGS.quantalogNotes),
+  "quantalog-reviews": docsUrl(DOCS_SLUGS.reviews),
+  "quantalog-links": docsUrl(DOCS_SLUGS.quantalogLinks),
   linkedin: SOCIAL,
   instagram: SOCIAL,
 };

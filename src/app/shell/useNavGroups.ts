@@ -13,5 +13,8 @@ function hideDisabledApps(groups: NavGroup[], apps: EnabledApps): NavGroup[] {
 export function useNavGroups(): NavGroup[] {
   const navPrefs = useNavPrefs();
   const apps = useWorkspaceApps();
-  return useMemo(() => hideDisabledApps(applyNavPrefs(NAV_GROUPS, navPrefs), apps), [navPrefs, apps]);
+  return useMemo(
+    () => hideDisabledApps(applyNavPrefs(NAV_GROUPS, apps.links ? navPrefs : { ...navPrefs, links: [] }), apps),
+    [navPrefs, apps],
+  );
 }

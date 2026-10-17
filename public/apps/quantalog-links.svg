@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Links">
+  <rect width="256" height="256" rx="56" fill="#0891B2"/>
+  <g transform="rotate(-45 128 128)" fill="none" stroke-width="20">
+    <rect x="58" y="104" width="84" height="48" rx="24" stroke="#FFFFFF" stroke-opacity="0.55"/>
+    <rect x="114" y="104" width="84" height="48" rx="24" stroke="#FFFFFF"/>
+  </g>
+</svg>
