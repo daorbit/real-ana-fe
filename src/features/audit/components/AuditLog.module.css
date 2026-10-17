@@ -161,6 +161,25 @@
   margin-top: 18px;
 }
 
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pagerLabel {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pagerSpinner {
+  display: inline-flex;
+  width: 14px;
+}
+
 .end {
   margin-top: 18px;
   font-size: 12px;

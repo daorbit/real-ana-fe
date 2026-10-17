@@ -41,7 +41,10 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   // real session, which is not something to hand to every platform admin.
   const available = useIsPlatformAdmin();
 
-  const [on, setOn] = useState(() => sessionStorage.getItem(KEY) === "1");
+  const [on, setOn] = useState(() => {
+    sessionStorage.removeItem(KEY);
+    return false;
+  });
 
   const toggle = useCallback((next: boolean) => {
     setOn(next);

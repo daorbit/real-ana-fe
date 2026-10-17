@@ -2214,26 +2214,23 @@ export const api = createApi({
 
     getWorkspaceAudit: build.query<
       WorkspaceAuditPage,
-      { workspaceId: string; category?: AuditCategory | null; actor?: string | null; cursor?: string | null }
+      {
+        workspaceId: string;
+        category?: AuditCategory | null;
+        actor?: string | null;
+        page?: number;
+        limit?: number;
+      }
     >({
-      query: ({ workspaceId, category, actor, cursor }) => {
+      query: ({ workspaceId, category, actor, page, limit }) => {
         const params = new URLSearchParams();
         if (category) params.set("category", category);
         if (actor) params.set("actor", actor);
-        if (cursor) params.set("cursor", cursor);
+        if (page) params.set("page", String(page));
+        if (limit) params.set("limit", String(limit));
         const qs = params.toString();
         return `/api/workspaces/${workspaceId}/audit${qs ? `?${qs}` : ""}`;
       },
-      serializeQueryArgs: ({ endpointName, queryArgs }) =>
-        `${endpointName}-${queryArgs.workspaceId}-${queryArgs.category ?? "all"}-${queryArgs.actor ?? "anyone"}`,
-      merge: (current, incoming, { arg }) => {
-        if (!arg.cursor) return incoming;
-        const seen = new Set(current.items.map((i) => i.id));
-        current.items.push(...incoming.items.filter((i) => !seen.has(i.id)));
-        current.nextCursor = incoming.nextCursor;
-        current.retention = incoming.retention;
-      },
-      forceRefetch: ({ currentArg, previousArg }) => currentArg?.cursor !== previousArg?.cursor,
       providesTags: (_r, _e, { workspaceId }) => [{ type: "Audit", id: workspaceId }],
     }),
 

@@ -1,7 +1,6 @@
 import { AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
-import { useDemo } from "@/features/demo/context";
 import { notify } from "@/shared/lib/notify";
 import { useState } from "react";
 import { useThemeMode } from "./useThemeMode";
@@ -39,8 +38,6 @@ export function Rail({
   const { user, logout, isDemo } = useAuth();
   const { mode, setMode } = useThemeMode();
 
-  const { demo, available: demoAvailable, toggle: toggleDemo } = useDemo();
-
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   // Super-admin only, and never while impersonating — see `useIsPlatformAdmin`.
@@ -60,9 +57,6 @@ export function Rail({
       isAdmin={isAdmin}
       mode={mode}
       onMode={setMode}
-      demo={demo}
-      demoAvailable={demoAvailable}
-      onToggleDemo={toggleDemo}
       onLogout={() => setLogoutOpen(true)}
     />
   );
@@ -144,9 +138,6 @@ export function Rail({
               isAdmin={isAdmin}
               mode={mode}
               onMode={setMode}
-              demo={demo}
-              demoAvailable={demoAvailable}
-              onToggleDemo={toggleDemo}
               onLogout={() => setLogoutOpen(true)}
             />
             {!collapsed && <ThemeToggleButton onChange={setMode} />}

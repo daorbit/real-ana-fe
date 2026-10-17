@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { Button } from "@mantine/core";
+import { useMemo, type ReactNode } from "react";
 import type { AuditEntry } from "@/shared/types";
 import { groupByDay } from "../lib/groupByDay";
 import { AuditRow } from "./AuditRow";
@@ -7,16 +6,12 @@ import classes from "./AuditLog.module.css";
 
 export function AuditTimeline({
   entries,
-  hasMore,
-  loadingMore,
-  onLoadMore,
+  footer,
   endNote,
   onSelect,
 }: {
   entries: AuditEntry[];
-  hasMore: boolean;
-  loadingMore: boolean;
-  onLoadMore: () => void;
+  footer?: ReactNode;
   endNote?: string;
   onSelect: (entry: AuditEntry) => void;
 }) {
@@ -37,15 +32,8 @@ export function AuditTimeline({
         ))}
       </div>
 
-      {hasMore ? (
-        <div className={classes.more}>
-          <Button variant="default" radius="md" size="sm" loading={loadingMore} onClick={onLoadMore}>
-            Load older activity
-          </Button>
-        </div>
-      ) : (
-        endNote && <p className={classes.end}>{endNote}</p>
-      )}
+      {footer}
+      {endNote && <p className={classes.end}>{endNote}</p>}
     </>
   );
 }

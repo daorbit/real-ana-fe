@@ -1198,6 +1198,7 @@ export type AuditSummary = {
 export type WorkspaceAuditPage = AuditPage & {
   summary: AuditSummary | null;
   retention: { days: number; plan: string; upgradable: boolean };
+  pagination?: { page: number; limit: number; total: number; pages: number };
 };
 
 /** What an invite link is for, readable before signing in. */
@@ -1663,6 +1664,7 @@ export type SeoStrategyResult = {
   strategy: "mobile" | "desktop";
   scores: SeoScores;
   metrics: SeoMetrics;
+  screenshot?: string | null;
 };
 
 export type SeoSuggestion = {

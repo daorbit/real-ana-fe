@@ -16,6 +16,7 @@ import { useWorkspaceAudit } from "../hooks/useWorkspaceAudit";
 import { AuditOverview } from "../components/AuditOverview";
 import { AuditFilters } from "../components/AuditFilters";
 import { AuditTimeline } from "../components/AuditTimeline";
+import { AuditPager } from "../components/AuditPager";
 import { AuditSkeleton, AuditOverviewSkeleton } from "../components/AuditSkeleton";
 import { AuditEmpty } from "../components/AuditEmpty";
 import { AuditDetailDrawer } from "../components/AuditDetailDrawer";
@@ -130,11 +131,24 @@ export default function AuditLog() {
               >
                 <AuditTimeline
                   entries={items}
-                  hasMore={Boolean(data?.nextCursor)}
-                  loadingMore={audit.loadingMore}
-                  onLoadMore={audit.loadMore}
                   onSelect={openDetail}
-                  endNote="You've reached the start of this period."
+                  footer={
+                    audit.pagination && (
+                      <AuditPager
+                        page={audit.page}
+                        pages={audit.pagination.pages}
+                        total={audit.pagination.total}
+                        limit={audit.pagination.limit}
+                        loading={audit.paging}
+                        onChange={audit.goToPage}
+                      />
+                    )
+                  }
+                  endNote={
+                    audit.pagination && audit.page >= audit.pagination.pages
+                      ? "You've reached the start of this period."
+                      : undefined
+                  }
                 />
               </motion.div>
             )}

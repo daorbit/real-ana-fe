@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-  Alert, Anchor, Badge, Box, Card, Center, Group, SegmentedControl, SimpleGrid, Stack, Text, ThemeIcon,
+  Alert, Anchor, Badge, Box, Card, Group, SegmentedControl, SimpleGrid, Stack, Text, ThemeIcon,
 } from "@mantine/core";
 import {
   AlertTriangle, CheckCircle2, XCircle, FileText, Image as ImageIcon, Share2, Bot,
-  Lock, Braces, Smartphone, Monitor, CircleCheck, TrendingUp, TrendingDown, Minus,
+  Lock, Braces, Smartphone, Monitor, TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -14,9 +14,12 @@ import type {
 import { num } from "@/shared/lib";
 import { scoreColor, scoreLabel } from "@/features/seo/components/ScoreRing";
 import { Gauge } from "@/features/seo/components/shared/Gauge";
-import { SEVERITY } from "@/features/seo/components/shared/Panel";
 import { useIssueBreakdown } from "@/features/seo/components/hooks";
-import { AREA_LABEL, bandHex, pageSize, severityHex } from "@/features/seo/components/utils";
+import { bandHex, pageSize } from "@/features/seo/components/utils";
+import { IssueClusterCard } from "@/features/seo/components/overview/IssueClusterCard";
+import { PriorityFixesCard } from "@/features/seo/components/overview/PriorityFixesCard";
+import { PagePreviewCard, pageScreenshots } from "@/features/seo/components/overview/PagePreviewCard";
+import overviewClasses from "@/features/seo/components/overview/overviewCards.module.css";
 
 /**
  * The Overview tab, laid out as a bento: one focal score, then a dense grid of
@@ -41,6 +44,8 @@ export function OverviewPanel({
 }) {
   const { score, performance, issues, content, technical, siteFiles } = data;
   const breakdown = useIssueBreakdown(issues);
+  const shots = pageScreenshots(performance);
+  const hasPreview = Boolean(shots.mobile || shots.desktop);
 
   return (
     <Stack gap="md">
@@ -70,30 +75,11 @@ export function OverviewPanel({
         <SeverityDonut breakdown={breakdown} />
         <MetricStrip content={content} technical={technical} />
         <ScoreSpark history={history} current={score} />
-        <IssuesByArea breakdown={breakdown} />
+        <IssueClusterCard breakdown={breakdown} />
+        <PriorityFixesCard breakdown={breakdown} onViewIssues={onViewIssues} />
 
-        <Card withBorder radius="md" padding="lg" className="col-7 seo-panel">
-          <Group justify="space-between" mb="md">
-            <Text size="sm" fw={600} c="dimmed">Priority fixes</Text>
-            <Text className="seo-eyebrow">Worst first</Text>
-          </Group>
-          {breakdown.priority.length ? (
-            <Stack gap={10}>
-              {breakdown.priority.map((issue, i) => (
-                <PriorityRow key={`${issue.title}-${i}`} issue={issue} />
-              ))}
-            </Stack>
-          ) : (
-            <Center py="lg">
-              <Group gap={8}>
-                <ThemeIcon size={30} radius="xl" variant="light" color="teal"><CircleCheck size={15} /></ThemeIcon>
-                <Text size="sm" c="dimmed">Every check came back clean.</Text>
-              </Group>
-            </Center>
-          )}
-        </Card>
-
-        <TechChecks technical={technical} siteFiles={siteFiles} />
+        <TechChecks technical={technical} siteFiles={siteFiles} narrow={hasPreview} />
+        {hasPreview && <PagePreviewCard performance={performance} />}
       </Box>
     </Stack>
   );
@@ -110,7 +96,7 @@ function ScoreHero({
   performance: SeoPerformance;
   available: boolean;
 }) {
-  const [strategy, setStrategy] = useState<"mobile" | "desktop">("mobile");
+  const [strategy, setStrategy] = useState<"mobile" | "desktop">("desktop");
 
 
   const bothProfiles = Boolean(performance.mobile && performance.desktop);
@@ -135,20 +121,20 @@ function ScoreHero({
               onChange={(v) => setStrategy(v as "mobile" | "desktop")}
               data={[
                 {
-                  value: "mobile",
-                  label: (
-                    <Group gap={5} wrap="nowrap" justify="center">
-                      <Smartphone size={12} />
-                      <Text size="xs">Mobile</Text>
-                    </Group>
-                  ),
-                },
-                {
                   value: "desktop",
                   label: (
                     <Group gap={5} wrap="nowrap" justify="center">
                       <Monitor size={12} />
                       <Text size="xs">Desktop</Text>
+                    </Group>
+                  ),
+                },
+                {
+                  value: "mobile",
+                  label: (
+                    <Group gap={5} wrap="nowrap" justify="center">
+                      <Smartphone size={12} />
+                      <Text size="xs">Mobile</Text>
                     </Group>
                   ),
                 },
@@ -277,7 +263,7 @@ function MetricStrip({ content, technical }: { content: SeoContent; technical: S
   const size = pageSize(technical.contentLength);
   const [sizeVal, sizeUnit] = size === "—" ? ["—", ""] : size.split(" ");
   return (
-    <Card withBorder radius="md" padding="md" className="col-8 seo-panel">
+    <Card withBorder radius="md" padding="md" className={`col-8 seo-panel ${overviewClasses.fill} ${overviewClasses.centered}`}>
       <Box className="seo-mstrip">
         <MetricCell k="Words" v={num(content.wordCount)} />
         <MetricCell k="Response" v={String(technical.responseTimeMs)} unit="ms" />
@@ -353,31 +339,16 @@ function DeltaPill({ delta }: { delta: number }) {
   );
 }
 
-/** Ranked horizontal bars — which part of the page the issues concentrate in. */
-function IssuesByArea({ breakdown }: { breakdown: ReturnType<typeof useIssueBreakdown> }) {
-  const max = Math.max(1, ...breakdown.byArea.map((c) => c.n));
-  return (
-    <Card withBorder radius="md" padding="lg" className="col-5 seo-panel">
-      <Text size="sm" fw={600} c="dimmed" mb="md">Where issues cluster</Text>
-      <Stack gap={13}>
-        {breakdown.byArea.map((c) => (
-          <Box key={c.area} className="seo-hbar">
-            <Text size="xs" c="dimmed" truncate>{AREA_LABEL[c.area]}</Text>
-            <Box className="t">
-              <i style={{ width: `${(c.n / max) * 100}%`, background: severityHex(c.worst) }} />
-            </Box>
-            <Text size="xs" fw={650} ta="right" style={{ fontVariantNumeric: "tabular-nums", color: "var(--text-2)" }}>
-              {c.n}
-            </Text>
-          </Box>
-        ))}
-      </Stack>
-    </Card>
-  );
-}
-
 /** The pass/fail signals, two columns, with real icons. */
-function TechChecks({ technical, siteFiles }: { technical: SeoTechnical; siteFiles: SeoSiteFiles }) {
+function TechChecks({
+  technical,
+  siteFiles,
+  narrow,
+}: {
+  technical: SeoTechnical;
+  siteFiles: SeoSiteFiles;
+  narrow: boolean;
+}) {
   const rows: { label: string; ok: boolean; icon: LucideIcon }[] = [
     { label: "Served over HTTPS", ok: technical.hasHttps, icon: Lock },
     { label: "Mobile viewport tag", ok: technical.hasMobileViewport, icon: Smartphone },
@@ -392,7 +363,7 @@ function TechChecks({ technical, siteFiles }: { technical: SeoTechnical; siteFil
   const mid = Math.ceil(rows.length / 2);
 
   return (
-    <Card withBorder radius="md" padding="lg" className="col-12 seo-panel">
+    <Card withBorder radius="md" padding="lg" className={`${narrow ? "col-8" : "col-12"} seo-panel`}>
       <Group justify="space-between" mb="md">
         <Text size="sm" fw={600} c="dimmed">Technical checks</Text>
         <Text className="seo-eyebrow">{passing} of {rows.length} passing</Text>
@@ -407,35 +378,14 @@ function TechChecks({ technical, siteFiles }: { technical: SeoTechnical; siteFil
 
 function CheckLine({ label, ok, icon: Icon }: { label: string; ok: boolean; icon: LucideIcon }) {
   return (
-    <Group gap={10} wrap="nowrap" py={11} style={{ borderBottom: "1px solid var(--seo-hairline)" }}>
-      <ThemeIcon size={24} radius="sm" variant="light" color="gray">
+    <div className={overviewClasses.checkLine}>
+      <ThemeIcon size={26} radius="md" variant="light" color={ok ? "teal" : "red"}>
         <Icon size={13} />
       </ThemeIcon>
-      <Text size="sm">{label}</Text>
-      <Badge size="sm" variant="light" color={ok ? "teal" : "red"} ml="auto" radius="xl">
+      <span className={overviewClasses.checkLabel}>{label}</span>
+      <span className={overviewClasses.status} data-fail={!ok || undefined}>
         {ok ? "Pass" : "Fail"}
-      </Badge>
-    </Group>
-  );
-}
-
-function PriorityRow({ issue }: { issue: SeoIssue }) {
-  const s = SEVERITY[issue.severity];
-  const Icon = s.icon;
-  return (
-    <Box className="seo-issue" p="sm" style={{ "--seo-rail": s.rail } as React.CSSProperties}>
-      <Group gap={12} align="flex-start" wrap="nowrap">
-        <ThemeIcon size={26} radius="sm" variant="light" color={s.color}>
-          <Icon size={13} />
-        </ThemeIcon>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <Group gap={8} mb={2} wrap="wrap">
-            <Text size="sm" fw={600}>{issue.title}</Text>
-            <Badge size="xs" variant="default" tt="capitalize">{issue.area}</Badge>
-          </Group>
-          <Text size="xs" c="dimmed" lh={1.5} lineClamp={2}>{issue.detail}</Text>
-        </div>
-      </Group>
-    </Box>
+      </span>
+    </div>
   );
 }

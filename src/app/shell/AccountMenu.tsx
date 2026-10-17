@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Badge, Menu, UnstyledButton } from "@mantine/core";
+import { Menu, UnstyledButton } from "@mantine/core";
 import {
-  ChevronsUpDown, FlaskConical, Languages, Lightbulb, LifeBuoy, LogOut, Scale, Settings, ShieldCheck, StickyNote,
+  ChevronsUpDown, Languages, Lightbulb, LifeBuoy, LogOut, Scale, Settings, ShieldCheck, StickyNote,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
@@ -30,9 +30,6 @@ export function AccountMenu({
   isAdmin,
   mode,
   onMode,
-  demo,
-  demoAvailable,
-  onToggleDemo,
   onLogout,
 }: {
   collapsed: boolean;
@@ -44,9 +41,6 @@ export function AccountMenu({
   isAdmin: boolean;
   mode: ThemeMode;
   onMode: (mode: ThemeMode) => void;
-  demo: boolean;
-  demoAvailable: boolean;
-  onToggleDemo: (next: boolean) => void;
   onLogout: () => void;
 }) {
   const { t } = useTranslation();
@@ -137,21 +131,9 @@ export function AccountMenu({
           </Menu.Sub>
 
           {isAdmin && (
-            <>
-              <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<ShieldCheck size={15} />}>
-                {t("nav.adminTools", "Admin tools")}
-              </Menu.Item>
-              {demoAvailable && (
-                <Menu.Item
-                  leftSection={<FlaskConical size={15} />}
-                  rightSection={demo ? <Badge size="xs" variant="light" color="violet" tt="none">on</Badge> : null}
-                  onClick={() => onToggleDemo(!demo)}
-                  closeMenuOnClick={false}
-                >
-                  {t("nav.demoData", "Demo data")}
-                </Menu.Item>
-              )}
-            </>
+            <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<ShieldCheck size={15} />}>
+              {t("nav.adminTools", "Admin tools")}
+            </Menu.Item>
           )}
 
           <Menu.Divider />
