@@ -1017,7 +1017,7 @@ export type EmailStatus = {
 };
 
  
-export type MailLayout = "plain" | "invite" | "install" | "welcome" | "feature";
+export type MailLayout = "plain" | "invite" | "install" | "welcome" | "feature" | "offer" | "upgrade";
 
 /** A canned message. The copy lives server-side so it can be fixed without a build. */
 export type MailTemplate = {

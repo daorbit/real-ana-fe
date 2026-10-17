@@ -38,6 +38,7 @@ export function PlanCheckoutModal({
   addons,
   coupon,
   onCoupon,
+  initialCouponCode,
   busy,
   renewing,
   workspaceId,
@@ -53,6 +54,7 @@ export function PlanCheckoutModal({
   addons: AddonPack[];
   coupon: CouponCheckResult | null;
   onCoupon: (result: CouponCheckResult | null) => void;
+  initialCouponCode?: string;
   busy: boolean;
   renewing: boolean;
   workspaceId: string | null;
@@ -234,7 +236,7 @@ export function PlanCheckoutModal({
 
             <SavingsCard lines={savings} money={money} />
 
-            {!isFreePlan && <CouponField amount={subtotal} result={coupon} onChange={onCoupon} />}
+            {!isFreePlan && <CouponField amount={subtotal} result={coupon} onChange={onCoupon} initialCode={initialCouponCode} />}
 
             {!isFreePlan && <PeriodPreview workspaceId={workspaceId} plan={plan} cycle={cycle} />}
 

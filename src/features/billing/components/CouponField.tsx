@@ -11,14 +11,16 @@ export function CouponField({
   amount,
   result,
   onChange,
+  initialCode,
 }: {
   amount: number;
   result: CouponCheckResult | null;
   onChange: (result: CouponCheckResult | null) => void;
+  initialCode?: string;
 }) {
   const { t } = useTranslation();
-  const [code, setCode] = useState("");
-  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState(initialCode ?? "");
+  const [open, setOpen] = useState(Boolean(initialCode));
   const [checkCoupon, { isLoading }] = useCheckCouponMutation();
 
   useEffect(() => {

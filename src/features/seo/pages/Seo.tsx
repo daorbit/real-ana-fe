@@ -6,7 +6,7 @@ import {
   Pagination,
 } from "@mantine/core";
 import {
-  RefreshCw, Globe, History, Trash2, Trophy, ExternalLink,
+  RefreshCw, History, Trash2, Trophy, ExternalLink,
   TrendingUp, TrendingDown, Minus, Printer, Clock,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -24,7 +24,8 @@ import {
 } from "@/features/demo/demoData";
 import { SeoInspectBar } from "@/features/seo/components/layout/SeoInspectBar";
 import { SeoStartPanel } from "@/features/seo/components/start/SeoStartPanel";
-import { SitesLoadError, ADD_SITE_PATH } from "@/features/workspace";
+import { SeoNoSitePanel } from "@/features/seo/components/start/SeoNoSitePanel";
+import { SitesLoadError } from "@/features/workspace";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
   useGetLatestSeoReportQuery, useGetSeoReportQuery, useDeleteSeoReportMutation,
@@ -527,12 +528,7 @@ export default function Seo() {
     return (
       <AppShell>
         <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath={DOCS_SLUGS.seo} />
-        <EmptyState
-          icon={Globe}
-          title="No sites yet"
-          description="SEO audits run against the sites in this workspace. Add one first and it will show up here."
-          action={{ label: "Add a site", to: ADD_SITE_PATH }}
-        />
+        <SeoNoSitePanel canEdit={canEdit} />
       </AppShell>
     );
   }

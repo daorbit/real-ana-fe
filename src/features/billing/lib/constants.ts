@@ -9,5 +9,6 @@ export const BILLING_PATH = "/app/billing";
 export const COMPARE_PLANS_PATH = "/app/billing/plans";
 
 export const CHECKOUT_PARAM = "checkout";
+export const COUPON_PARAM = "coupon";
 
 export const CHECKOUT_LOGO = `${window.location.origin}/favicon.png`;

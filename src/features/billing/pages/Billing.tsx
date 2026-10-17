@@ -15,6 +15,7 @@ import type { Plan, AddonPack, CouponCheckResult } from "@/shared/types";
 import { useBillingView } from "../hooks/useBillingView";
 import { useCheckout } from "../hooks/useCheckout";
 import { useCheckoutIntent } from "../hooks/useCheckoutIntent";
+import { useCouponIntent } from "../hooks/useCouponIntent";
 import { featuredPlanSlug } from "../lib/planFeatures";
 import { PlanOverview } from "../components/overview/PlanOverview";
 import { BillingTabs } from "../components/BillingTabs";
@@ -102,6 +103,7 @@ export default function Billing() {
 
   const pickPlan = (plan: Plan) => { setPlanCoupon(null); setConfirmPlan(plan); };
   useCheckoutIntent(plans, pickPlan);
+  const emailCoupon = useCouponIntent();
 
   return (
     <AppShell>
@@ -237,6 +239,7 @@ export default function Billing() {
         addons={addons}
         coupon={planCoupon}
         onCoupon={setPlanCoupon}
+        initialCouponCode={emailCoupon}
         busy={!!confirmPlan && subscribing === confirmPlan.slug}
         renewing={renewing}
         workspaceId={isDemo ? null : selectedWorkspaceId}
