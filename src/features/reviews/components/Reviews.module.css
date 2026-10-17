@@ -1,0 +1,25 @@
+.option {
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+
+.option:hover {
+  border-color: var(--mantine-color-default-border-hover, var(--mantine-color-gray-5));
+}
+
+.optionSelected {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.optionSelected:hover {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.locationText {
+  min-width: 0;
+}
+
+.results {
+  max-height: 360px;
+  overflow-y: auto;
+}

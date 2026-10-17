@@ -12,6 +12,7 @@ const DAY = 86_400_000;
 
 const demoLocation: GoogleReviewLocation = {
   id: "demo-location-1",
+  source: "business",
   title: "Acme Inc. — HQ",
   address: "500 Market Street, San Francisco, CA",
   status: "connected",
@@ -23,6 +24,7 @@ const demoLocation: GoogleReviewLocation = {
 export function demoGoogleReviewsStatus(): GoogleReviewsStatus {
   return {
     configured: true,
+    placesConfigured: true,
     connected: true,
     connection: {
       googleEmail: "team@acme.example",

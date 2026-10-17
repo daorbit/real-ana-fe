@@ -25,7 +25,7 @@ const IMPORTERS: Record<AdminSectionId, () => PanelModule> = {
 
 const PANELS = Object.fromEntries(
   Object.entries(IMPORTERS).map(([id, load]) => [id, lazy(load)]),
-) as Record<AdminSectionId, ComponentType>;
+) as unknown as Record<AdminSectionId, ComponentType>;
 
 function usePreloadPanels(enabled: boolean) {
   useEffect(() => {

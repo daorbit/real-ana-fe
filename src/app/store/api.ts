@@ -37,7 +37,7 @@ import type {
   CompareMode, BreakdownComparisonRow,
   JourneyUser, JourneyEvent,
   GoogleReviewsStatus, GoogleReviewLocation, GoogleAvailableLocations,
-  GoogleReviewsList, GoogleSyncResult,
+  GoogleReviewsList, GoogleSyncResult, GooglePlaceResult,
   SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
   SearchBreakdown, SearchBreakdownDimension, SearchSitemaps, SearchInspection,
   SearchType, SearchBreakdownSort, SearchInsights, SearchDrilldown, SearchHourly,
@@ -2772,6 +2772,34 @@ export const api = createApi({
       invalidatesTags: ["GoogleReviews", "GoogleReviewList"],
     }),
 
+    searchGooglePlaces: build.query<{ places: GooglePlaceResult[] }, { workspaceId: string; q: string }>({
+      query: ({ workspaceId, q }) => ({
+        url: `/api/auth/google-business/workspaces/${workspaceId}/places/search`,
+        params: { q },
+      }),
+      keepUnusedDataFor: 0,
+    }),
+
+    connectGooglePlace: build.mutation<
+      { location: GoogleReviewLocation; sync?: GoogleSyncResult; syncError?: string },
+      { workspaceId: string } & GooglePlaceResult
+    >({
+      query: ({ workspaceId, ...body }) => ({
+        url: `/api/auth/google-business/workspaces/${workspaceId}/places/locations`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["GoogleReviews", "GoogleReviewList"],
+    }),
+
+    removeGoogleLocation: build.mutation<{ removed: boolean }, { workspaceId: string; locationId: string }>({
+      query: ({ workspaceId, locationId }) => ({
+        url: `/api/auth/google-business/workspaces/${workspaceId}/locations/${locationId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["GoogleReviews", "GoogleReviewList"],
+    }),
+
     getSearchConsoleStatus: build.query<SearchConsoleStatus, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/search-console`,
       providesTags: ["SearchConsole"],
@@ -3033,6 +3061,9 @@ export const {
   useSyncGoogleLocationMutation,
   useGetGoogleReviewsQuery,
   useDisconnectGoogleReviewsMutation,
+  useSearchGooglePlacesQuery,
+  useConnectGooglePlaceMutation,
+  useRemoveGoogleLocationMutation,
   useGetSearchConsoleStatusQuery,
   useGetSearchConsolePropertiesQuery,
   useLinkSearchConsolePropertyMutation,

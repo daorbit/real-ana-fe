@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import {
-  Alert, Button, Group, Loader, Menu, Paper, Stack, Text, Tooltip,
+  Alert, Button, Group, Loader, Menu, Paper, Stack, Text,
 } from "@mantine/core";
-import { AlertTriangle, MoreVertical, RefreshCw, Star, Unlink } from "lucide-react";
+import { AlertTriangle, MoreVertical, Star, Unlink } from "lucide-react";
 import { modals } from "@mantine/modals";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -21,12 +21,16 @@ import {
   useGetGoogleAvailableLocationsQuery,
   useGetGoogleReviewsQuery,
   useGetGoogleReviewsStatusQuery,
+  useRemoveGoogleLocationMutation,
   useSyncGoogleLocationMutation,
 } from "@/app/store";
+import type { GoogleReviewLocation } from "@/shared/types";
 import { useGoogleConnect } from "@/features/reviews/useGoogleConnect";
 import { RatingSummary } from "@/features/reviews/components/RatingSummary";
 import { ReviewList } from "@/features/reviews/components/ReviewList";
 import { SelectBusiness } from "@/features/reviews/components/SelectBusiness";
+import { FindBusiness } from "@/features/reviews/components/FindBusiness";
+import { LocationCard } from "@/features/reviews/components/LocationCard";
 
 /**
  * Google Reviews.
@@ -79,7 +83,10 @@ export default function Reviews() {
   const [connectLocation, { isLoading: connectingLocation }] = useConnectGoogleLocationMutation();
   const [syncLocation, { isLoading: syncing }] = useSyncGoogleLocationMutation();
   const [disconnect] = useDisconnectGoogleReviewsMutation();
+  const [removeLocation] = useRemoveGoogleLocationMutation();
   const [syncingId, setSyncingId] = useState<string | null>(null);
+
+  const showFinder = !hasLocations && canAdmin && !demo && !!status?.placesConfigured;
 
   const { connect, connecting } = useGoogleConnect(workspaceId, refetch);
 
@@ -101,6 +108,28 @@ export default function Reviews() {
     } finally {
       setSyncingId(null);
     }
+  };
+
+  const handleRemove = (location: GoogleReviewLocation) => {
+    modals.openConfirmModal({
+      title: "Remove business",
+      children: (
+        <Text size="sm">
+          This removes {location.title} and its cached reviews from Quantalog. Your reviews on Google
+          are not affected.
+        </Text>
+      ),
+      labels: { confirm: "Remove", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: async () => {
+        try {
+          await removeLocation({ workspaceId, locationId: location.id }).unwrap();
+          notify.success(`${location.title} removed`);
+        } catch (e) {
+          notifyError(e);
+        }
+      },
+    });
   };
 
   const handleDisconnect = () => {
@@ -188,7 +217,7 @@ export default function Reviews() {
         {/* An administrator has not added the Google credentials to this
             deployment. Nothing the person reading this can fix themselves, so
             it says who can. */}
-        {status && !status.configured && (
+        {status && !status.configured && !status.placesConfigured && (
           <Alert color="yellow" icon={<AlertTriangle size={16} />} title="Google is not set up yet">
             Google Reviews is not configured on this deployment. An administrator needs to add the
             Google Business Profile credentials before this can be connected.
@@ -214,11 +243,21 @@ export default function Reviews() {
           </Alert>
         )}
 
-        {!connected && status?.configured && (
+        {showFinder && (
+          <Paper withBorder p="lg" radius="md">
+            <FindBusiness workspaceId={workspaceId} />
+          </Paper>
+        )}
+
+        {!connected && !hasLocations && status?.configured && (
           <EmptyState
             icon={Star}
             title="Connect your Google Business Profile"
-            description="Authorise Google to fetch and manage your reviews inside Quantalog."
+            description={
+              showFinder
+                ? "Or sign in with Google to sync every review and reply from Quantalog once Business Profile access is enabled."
+                : "Authorise Google to fetch and manage your reviews inside Quantalog."
+            }
             action={
               canAdmin
                 ? { label: "Connect Google", onClick: connect, loading: connecting }
@@ -270,40 +309,15 @@ export default function Reviews() {
           <>
             <Stack gap="sm">
               {status!.locations.map((location) => (
-                <Paper key={location.id} withBorder p="md" radius="md">
-                  <Group justify="space-between" wrap="wrap" gap="sm">
-                    <Stack gap={2} style={{ minWidth: 0 }}>
-                      <Text fw={600} size="sm">
-                        {location.title}
-                      </Text>
-                      {location.address && (
-                        <Text size="xs" c="dimmed">
-                          {location.address}
-                        </Text>
-                      )}
-                      {location.lastSyncError && (
-                        <Text size="xs" c="red">
-                          {location.lastSyncError}
-                        </Text>
-                      )}
-                    </Stack>
-
-                    {canAdmin && (
-                      <Tooltip label="Demo data is read-only" disabled={!demo} withArrow>
-                        <Button
-                          variant="light"
-                          size="xs"
-                          leftSection={<RefreshCw size={14} />}
-                          loading={syncing && syncingId === location.id}
-                          disabled={demo}
-                          onClick={() => handleSync(location.id)}
-                        >
-                          Sync reviews
-                        </Button>
-                      </Tooltip>
-                    )}
-                  </Group>
-                </Paper>
+                <LocationCard
+                  key={location.id}
+                  location={location}
+                  canAdmin={canAdmin}
+                  demo={demo}
+                  syncing={syncing && syncingId === location.id}
+                  onSync={() => handleSync(location.id)}
+                  onRemove={() => handleRemove(location)}
+                />
               ))}
             </Stack>
 

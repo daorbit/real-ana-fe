@@ -2387,6 +2387,7 @@ export type MediaUploadInput = { file: string; name: string; alt?: string };
 /** One business location connected to a workspace. */
 export type GoogleReviewLocation = {
   id: string;
+  source: "business" | "places";
   title: string;
   address: string;
   status: "connected" | "disconnected" | "error";
@@ -2413,6 +2414,7 @@ export type GoogleReviewLocation = {
  */
 export type GoogleReviewsStatus = {
   configured: boolean;
+  placesConfigured: boolean;
   connected: boolean;
   connection?: {
     googleEmail: string;
@@ -2608,6 +2610,12 @@ export type GoogleAvailableLocations = {
   locations: GoogleAvailableLocation[];
   /** Guidance when the list is empty — no Business Profile, or no locations. */
   message?: string;
+};
+
+export type GooglePlaceResult = {
+  placeId: string;
+  title: string;
+  address: string;
 };
 
 /** One cached review, as the dashboard reads it. */
