@@ -6,6 +6,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import type { FunnelResultStep } from "@/shared/types";
 import { FunnelStepNode, type FunnelStepNodeData } from "./FunnelStepNode";
+import classes from "./funnel/Funnel.module.css";
 
 const NODE_W = 208;
 const NODE_H = 84;
@@ -13,12 +14,7 @@ const COL_W = 300;
 
 const nodeTypes = { step: FunnelStepNode };
 
-/** Green while the step holds its traffic, amber then pink as it sheds it. */
-function stepColor(dropFromPrev: number): string {
-  if (dropFromPrev < 30) return "var(--green)";
-  if (dropFromPrev < 60) return "var(--amber)";
-  return "var(--pink)";
-}
+const EDGE_STROKE = "var(--border-strong)";
 
 /** The funnel's steps drawn as a left-to-right node chain, sized by who's left. */
 export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
@@ -39,9 +35,7 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
     }));
 
     const edges: Edge[] = steps.slice(1).map((s, i) => {
-      // The edge carries the loss, so it is coloured by the drop it represents
-      // rather than by the step it lands on.
-      const stroke = s.dropFromPrev > 0 ? stepColor(s.dropFromPrev) : "var(--border-strong)";
+      const stroke = EDGE_STROKE;
       return {
         id: `e${i}`,
         source: `step-${i}`,
@@ -53,7 +47,7 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
         labelBgPadding: [6, 3] as [number, number],
         labelBgBorderRadius: 999,
         labelBgStyle: { fill: "var(--surface)", stroke: "var(--border)" },
-        labelStyle: { fill: stroke, fontSize: 10, fontWeight: 600 },
+        labelStyle: { fill: "var(--mantine-color-red-text)", fontSize: 10, fontWeight: 600 },
         style: { stroke, strokeWidth: 1.4 },
         markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 14, height: 14 },
       };
@@ -68,7 +62,7 @@ export function FunnelFlowView({ steps }: { steps: FunnelResultStep[] }) {
   useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
 
   return (
-    <div style={{ height: 220, width: "100%", position: "relative" }}>
+    <div className={classes.flow}>
       <ReactFlow
         nodes={nodes}
         nodeTypes={nodeTypes}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Group, Stack, Modal, TextInput, Button, Card, Skeleton } from "@mantine/core";
+import { Group, Stack, Modal, TextInput, Button, Skeleton } from "@mantine/core";
 import {
   useComputeFunnelMutation, useGetFunnelsQuery, useCreateFunnelMutation,
   useUpdateFunnelMutation, useDeleteFunnelMutation,
@@ -9,7 +9,8 @@ import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { FunnelSidebar } from "@/features/analytics/components/FunnelSidebar";
 import { FunnelStepEditor, type Draft } from "@/features/analytics/components/FunnelStepEditor";
-import { FunnelResults } from "@/features/analytics/components/FunnelResults";
+import { FunnelResults, type FunnelView } from "@/features/analytics/components/FunnelResults";
+import classes from "@/features/analytics/components/funnel/Funnel.module.css";
 import { FlowGraphSkeleton } from "@/shared/ui/Skeletons";
 import type { Stats, FunnelStepInput, FunnelResultStep } from "@/shared/types";
 
@@ -35,7 +36,7 @@ export function FunnelBuilder({
     { type: "page", value: "" },
   ]);
   const [result, setResult] = useState<FunnelResultStep[] | null>(null);
-  const [view, setView] = useState<"list" | "flow" | "shape">("flow");
+  const [view, setView] = useState<FunnelView>("bars");
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saveOpen, setSaveOpen] = useState(false);
@@ -183,7 +184,7 @@ export function FunnelBuilder({
   };
 
   return (
-    <Group align="flex-start" wrap="nowrap" gap="lg">
+    <div className={classes.layout}>
       <FunnelSidebar
         savedFunnels={savedFunnels}
         presets={presets}
@@ -195,7 +196,7 @@ export function FunnelBuilder({
         onRunPreset={runPreset}
       />
 
-      <Stack style={{ flex: 1, minWidth: 0 }} gap="lg">
+      <div className={classes.main}>
         <FunnelStepEditor
           steps={steps}
           pageOptions={pageOptions}
@@ -210,18 +211,20 @@ export function FunnelBuilder({
           onCompute={() => compute()}
         />
 
-        <Modal opened={saveOpen} onClose={() => setSaveOpen(false)} title={editingId ? "Update funnel" : "Save funnel"} size="sm">
-          <Stack gap="sm">
+        <Modal opened={saveOpen} onClose={() => setSaveOpen(false)} title={editingId ? "Update funnel" : "Save funnel"} size="sm" radius="lg">
+          <Stack gap="md">
             <TextInput
               label="Name"
+              radius="md"
               placeholder="e.g. Signup funnel"
               value={saveName}
               onChange={(e) => setSaveName(e.currentTarget.value)}
               data-autofocus
             />
             <Group justify="flex-end">
-              <Button variant="subtle" onClick={() => setSaveOpen(false)}>Cancel</Button>
+              <Button variant="subtle" color="gray" radius="xl" onClick={() => setSaveOpen(false)}>Cancel</Button>
               <Button
+                radius="xl"
                 onClick={confirmSave}
                 loading={isSaving || isUpdating}
                 disabled={!saveName.trim()}
@@ -232,20 +235,19 @@ export function FunnelBuilder({
           </Stack>
         </Modal>
 
-        {/* A recompute replaces the whole result, so the panel is a skeleton
-            rather than stale numbers under a spinner. */}
         {isLoading ? (
-          <Card withBorder radius="lg" padding="lg">
-            <Group justify="space-between" mb="md">
-              <Skeleton height={12} width={70} radius="sm" />
-              <Skeleton height={26} width={140} radius="xl" />
+          <div className={`${classes.panel} ${classes.results}`}>
+            <Group justify="space-between" mb="lg">
+              <Skeleton height={14} width={90} radius="sm" />
+              <Skeleton height={26} width={160} radius="xl" />
             </Group>
+            <Skeleton height={72} radius="md" mb="lg" />
             <FlowGraphSkeleton height={220} columns={[1, 1, 1, 1]} />
-          </Card>
+          </div>
         ) : result && result.length > 0 ? (
           <FunnelResults result={result} view={view} onViewChange={setView} />
         ) : null}
-      </Stack>
-    </Group>
+      </div>
+    </div>
   );
 }

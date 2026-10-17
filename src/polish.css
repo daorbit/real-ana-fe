@@ -288,13 +288,6 @@
   --mantine-color-dark-light-hover: color-mix(in srgb, var(--text) 11%, transparent);
 }
 
-/* ---- Funnel step rows ------------------------------------------------------
-   A step row is a bordered container rather than a bare line, so it reads as
-   one editable unit; the hover tint confirms which row the pointer is over. */
-.funnel-step-row:hover {
-  background: var(--mantine-color-default-hover);
-}
-
 /* ---- User-flow graph -------------------------------------------------------
    The nodes are pages and the edges are transitions between them, so the two
    have to stay visually separable: nodes are solid surfaces with a leading

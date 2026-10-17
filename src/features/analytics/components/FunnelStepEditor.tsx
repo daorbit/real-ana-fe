@@ -1,9 +1,13 @@
-import { Card, Group, Text, Stack, Button, Select, ActionIcon, ThemeIcon, Loader, Divider } from "@mantine/core";
-import { Plus, Trash2, Filter, Play, Save } from "lucide-react";
+import { Button } from "@mantine/core";
+import { Plus, Play, Bookmark } from "lucide-react";
+import { FunnelStepRow } from "@/features/analytics/components/funnel/FunnelStepRow";
+import classes from "@/features/analytics/components/funnel/Funnel.module.css";
 
 export type Draft = { type: "page" | "event"; value: string };
 
-/** The ordered list of funnel steps, plus the add/save/compute action bar. */
+const MIN_STEPS = 2;
+const MAX_STEPS = 8;
+
 export function FunnelStepEditor({
   steps,
   pageOptions,
@@ -29,99 +33,52 @@ export function FunnelStepEditor({
   onSave: () => void;
   onCompute: () => void;
 }) {
+  const filled = steps.filter((s) => s.value).length;
+
   return (
-    <Card withBorder radius="lg" padding="lg">
-      <Group gap={8} mb="md">
-        <Filter size={15} className="sect-ic" />
-        <Text fw={600} c="dimmed" size="sm">Build a funnel</Text>
-      </Group>
+    <section className={`${classes.panel} ${classes.editor}`} aria-labelledby="funnel-editor-title">
+      <header className={classes.head}>
+        <div className={classes.headText}>
+          <h3 id="funnel-editor-title" className={classes.title}>Funnel steps</h3>
+          <p className={classes.subtitle}>Sessions are counted only when they hit each step in this order.</p>
+        </div>
+      </header>
 
-      <Stack gap={6}>
+      <ol className={classes.steps}>
         {steps.map((s, i) => (
-          <Group
+          <FunnelStepRow
             key={i}
-            gap="sm"
-            wrap="nowrap"
-            px="sm"
-            py={6}
-            className="funnel-step-row"
-            style={{
-              borderRadius: 10,
-              border: "1px solid var(--mantine-color-default-border)",
-              transition: "background 100ms ease",
-            }}
-          >
-            <ThemeIcon variant="light" color="gray" radius="xl" size="sm">
-              <Text size="xs" fw={700}>{i + 1}</Text>
-            </ThemeIcon>
-            <Select
-              w={110}
-              size="sm"
-              data={[
-                { value: "page", label: "Page" },
-                { value: "event", label: "Event" },
-              ]}
-              value={s.type}
-              onChange={(v) => onStepChange(i, { type: (v as "page" | "event") ?? "page", value: "" })}
-              allowDeselect={false}
-            />
-            <Select
-              flex={1}
-              size="sm"
-              placeholder={s.type === "page" ? "Choose a page…" : "Choose an event…"}
-              data={s.type === "page" ? pageOptions : eventOptions}
-              value={s.value || null}
-              onChange={(v) => onStepChange(i, { value: v ?? "" })}
-              searchable
-              nothingFoundMessage="No data for this dimension yet"
-              comboboxProps={{ withinPortal: true }}
-            />
-            <ActionIcon
-              variant="subtle"
-              color="red"
-              onClick={() => onRemoveStep(i)}
-              disabled={steps.length <= 2}
-              title="Remove step"
-              aria-label="Remove step"
-            >
-              <Trash2 size={15} />
-            </ActionIcon>
-          </Group>
+            index={i}
+            step={s}
+            pageOptions={pageOptions}
+            eventOptions={eventOptions}
+            removable={steps.length > MIN_STEPS}
+            onChange={(patch) => onStepChange(i, patch)}
+            onRemove={() => onRemoveStep(i)}
+          />
         ))}
-      </Stack>
+      </ol>
 
-      <Divider my="md" />
+      <button type="button" className={classes.addStep} onClick={onAddStep} disabled={steps.length >= MAX_STEPS}>
+        <span className={classes.addMarker}>
+          <Plus size={14} />
+        </span>
+        {steps.length >= MAX_STEPS ? `Up to ${MAX_STEPS} steps` : "Add step"}
+      </button>
 
-      <Group justify="space-between">
-        <Button
-          variant="subtle"
-          size="xs"
-          leftSection={<Plus size={14} />}
-          onClick={onAddStep}
-          disabled={steps.length >= 8}
-        >
-          Add step
-        </Button>
-        <Group gap="xs">
-          <Button
-            variant="default"
-            size="sm"
-            leftSection={<Save size={14} />}
-            onClick={onSave}
-            disabled={!valid}
-          >
+      <footer className={classes.footer}>
+        <span className={classes.hint}>
+          {valid ? `${filled} of ${steps.length} steps ready` : `Pick at least ${MIN_STEPS} steps to compute`}
+        </span>
+        <div className={classes.actions}>
+          <Button variant="default" radius="xl" leftSection={<Bookmark size={14} />} onClick={onSave} disabled={!valid}>
             {editingId ? "Update" : "Save"}
           </Button>
-          <Button
-            size="sm"
-            leftSection={isLoading ? <Loader size={14} color="white" /> : <Play size={15} />}
-            onClick={onCompute}
-            disabled={!valid || isLoading}
-          >
-            Compute funnel
+          <Button radius="xl" leftSection={<Play size={14} />} onClick={onCompute} disabled={!valid} loading={isLoading}>
+            Compute
           </Button>
-        </Group>
-      </Group>
-    </Card>
+        </div>
+      </footer>
+    </section>
   );
 }

@@ -1,0 +1,495 @@
+.layout {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--mantine-spacing-lg);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-lg);
+  min-width: 0;
+}
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.rail {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 14px 10px;
+}
+
+.railGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.railTitle {
+  padding: 0 10px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.railRow {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.railItem {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.railItem:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.railItem[data-active] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.railItem:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.railName {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.railItem[data-active] .railName {
+  font-weight: 600;
+}
+
+.railMeta {
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
+  margin-bottom: 20px;
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.editor {
+  padding: 22px 24px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 0;
+}
+
+.step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: calc(50% + 16px);
+  bottom: calc(-50% + 16px);
+  left: 13.5px;
+  width: 1px;
+  background: var(--border-strong);
+}
+
+.marker {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.step[data-filled] .marker {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.stepFields {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stepKind {
+  flex-shrink: 0;
+}
+
+.stepValue {
+  flex: 1;
+  min-width: 0;
+}
+
+.addStep {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: color 120ms ease, opacity 120ms ease;
+}
+
+.addStep:disabled {
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.addMarker {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px dashed currentColor;
+  border-radius: 999px;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--mantine-spacing-xs);
+  margin-left: auto;
+}
+
+.results {
+  padding: 22px 24px;
+}
+
+.summary {
+  margin-bottom: 24px;
+}
+
+.empty {
+  padding: 36px 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.chartScroll {
+  overflow-x: auto;
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: repeat(var(--steps), minmax(132px, 1fr));
+  min-width: calc(var(--steps) * 132px);
+}
+
+.col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.col + .col {
+  border-left: 1px solid var(--border);
+}
+
+.colStep {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.colLabel {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.colCount {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.colRate {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 168px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.fill {
+  width: 100%;
+  height: max(var(--rate), 2%);
+  border-radius: 10px 10px 0 0;
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: funnel-rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.drop {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mantine-color-red-6) 12%, transparent);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--mantine-color-red-text);
+}
+
+.keep {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listRow {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1.4fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.listRow + .listRow {
+  border-top: 1px solid var(--border);
+}
+
+.listName {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.listBar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.listFill {
+  width: max(var(--rate), 1.5%);
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: funnel-grow 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.listNums {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 150px;
+}
+
+.listNums .drop {
+  align-self: auto;
+  margin-top: 0;
+}
+
+.listCount {
+  min-width: 56px;
+  font-size: 14px;
+  font-weight: 650;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.flow {
+  position: relative;
+  width: 100%;
+  height: 240px;
+}
+
+@keyframes funnel-rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes funnel-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill,
+  .listFill {
+    animation: none;
+  }
+}
+
+@media (max-width: 62em) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rail {
+    position: static;
+  }
+}
+
+@media (max-width: 48em) {
+  .editor,
+  .results {
+    padding: 18px 16px;
+  }
+
+  .stepFields {
+    flex-wrap: wrap;
+  }
+
+  .stepValue {
+    flex-basis: 100%;
+  }
+
+  .listRow {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+  }
+
+  .listBar {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+
+  .listNums {
+    min-width: 0;
+  }
+}

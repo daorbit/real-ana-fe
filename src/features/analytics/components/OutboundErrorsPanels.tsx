@@ -27,7 +27,6 @@ export function OutboundPanel({ items }: { items: OutboundBucket[] }) {
         <RankEmpty icon={ExternalLink}>No outbound clicks or downloads yet</RankEmpty>
       ) : (
         <RankList
-          strip
           items={items.map((i) => {
             const { host, rest } = hostOf(i.key);
             return {

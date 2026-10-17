@@ -90,7 +90,6 @@ export function BarList({
         />
       ) : (
         <RankList
-          strip={!showCompare}
           items={shown.map((i) => ({
             id: i.key,
             label: format ? format(i.key) : isPathKey(i.key) ? <PathLabel path={i.key} /> : i.key,

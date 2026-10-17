@@ -15,32 +15,24 @@ export type RankItem = {
   tone?: RankTone;
 };
 
-const STRIP_STEPS = 5;
-
 function RankRow({
   item,
   position,
   showRank,
-  step,
-  active,
-  dim,
+  share,
   selected,
   selectHint,
   hintIcon: HintIcon,
   onSelect,
-  onHover,
 }: {
   item: RankItem;
   position: number;
   showRank: boolean;
-  step?: number;
-  active: boolean;
-  dim: boolean;
+  share?: number;
   selected: boolean;
   selectHint: string;
   hintIcon: LucideIcon;
   onSelect?: (id: string) => void;
-  onHover: (index: number | null) => void;
 }) {
   const selectable = Boolean(onSelect);
   const onKeyDown = (e: KeyboardEvent<HTMLLIElement>) => {
@@ -53,9 +45,8 @@ function RankRow({
     <li
       className={classes.row}
       data-tone={item.tone}
+      data-bar={share !== undefined || undefined}
       data-selectable={selectable || undefined}
-      data-active={active || undefined}
-      data-dim={dim || undefined}
       data-selected={selected || undefined}
       aria-pressed={onSelect ? selected : undefined}
       role={selectable ? "button" : undefined}
@@ -63,14 +54,11 @@ function RankRow({
       title={item.title}
       onClick={selectable ? () => onSelect?.(item.id) : undefined}
       onKeyDown={selectable ? onKeyDown : undefined}
-      onMouseEnter={() => onHover(position - 1)}
-      onMouseLeave={() => onHover(null)}
     >
-      {showRank && (
-        <span className={classes.rank} data-step={step}>
-          {position}
-        </span>
+      {share !== undefined && (
+        <span className={classes.bar} style={{ "--share": `${share}%` } as CSSProperties} aria-hidden />
       )}
+      {showRank && <span className={classes.rank}>{position}</span>}
       {item.leading && <span className={classes.leading}>{item.leading}</span>}
       <span className={classes.label}>
         <span className={classes.labelText}>{item.label}</span>
@@ -88,49 +76,10 @@ function RankRow({
   );
 }
 
-function ShareStrip({
-  items,
-  hover,
-  onHover,
-}: {
-  items: RankItem[];
-  hover: number | null;
-  onHover: (index: number | null) => void;
-}) {
-  const top = items.slice(0, STRIP_STEPS);
-  const rest = items.slice(STRIP_STEPS).reduce((sum, i) => sum + (i.weight ?? 0), 0);
-  const restActive = hover !== null && hover >= STRIP_STEPS;
-
-  return (
-    <div className={classes.strip} data-hovering={hover !== null || undefined} role="presentation">
-      {top.map((item, i) => (
-        <span
-          key={item.id}
-          className={classes.segment}
-          data-step={i}
-          data-active={hover === i || undefined}
-          style={{ flexGrow: item.weight ?? 0 } as CSSProperties}
-          onMouseEnter={() => onHover(i)}
-          onMouseLeave={() => onHover(null)}
-        />
-      ))}
-      {rest > 0 && (
-        <span
-          className={classes.segment}
-          data-step="rest"
-          data-active={restActive || undefined}
-          style={{ flexGrow: rest } as CSSProperties}
-        />
-      )}
-    </div>
-  );
-}
-
 export function RankList({
   items,
   limit = 8,
   showRank = true,
-  strip = false,
   selectedId,
   selectHint = "Filter",
   hintIcon = Filter,
@@ -139,21 +88,19 @@ export function RankList({
   items: RankItem[];
   limit?: number;
   showRank?: boolean;
-  strip?: boolean;
   selectedId?: string | null;
   selectHint?: string;
   hintIcon?: LucideIcon;
   onSelect?: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [hover, setHover] = useState<number | null>(null);
   const overflow = items.length > limit;
   const visible = expanded || !overflow ? items : items.slice(0, limit);
-  const showStrip = strip && items.length > 1 && items.every((i) => typeof i.weight === "number");
+  const weighted = items.length > 0 && items.every((i) => typeof i.weight === "number");
+  const top = weighted ? Math.max(...items.map((i) => i.weight ?? 0), 0) : 0;
 
   return (
     <div className={classes.listWrap}>
-      {showStrip && <ShareStrip items={items} hover={hover} onHover={setHover} />}
       <ol className={classes.list}>
         {visible.map((item, index) => (
           <RankRow
@@ -161,14 +108,11 @@ export function RankList({
             item={item}
             position={index + 1}
             showRank={showRank}
-            step={showStrip && index < STRIP_STEPS ? index : undefined}
-            active={hover === index}
-            dim={showStrip && hover !== null && hover !== index}
+            share={weighted && top > 0 ? Math.max(((item.weight ?? 0) / top) * 100, 1.5) : undefined}
             selected={selectedId === item.id}
             selectHint={selectHint}
             hintIcon={hintIcon}
             onSelect={onSelect}
-            onHover={setHover}
           />
         ))}
       </ol>

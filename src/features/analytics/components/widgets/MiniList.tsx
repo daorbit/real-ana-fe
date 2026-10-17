@@ -48,7 +48,6 @@ export function MiniList({
       ) : (
         <RankList
           limit={6}
-          strip
           items={items.map((i) => ({
             id: i.key,
             label: format ? format(i.key) : isPathKey(i.key) ? <PathLabel path={i.key} /> : i.key,

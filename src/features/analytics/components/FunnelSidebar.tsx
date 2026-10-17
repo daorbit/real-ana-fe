@@ -1,12 +1,16 @@
-import { Card, Group, Text, Stack, ActionIcon, Menu, UnstyledButton } from "@mantine/core";
-import { Bookmark, Pencil, MoreVertical, Trash2, LayoutList } from "lucide-react";
+import { ActionIcon, Menu } from "@mantine/core";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { stepCountLabel } from "@/features/analytics/components/funnel/funnelStats";
+import classes from "@/features/analytics/components/funnel/Funnel.module.css";
 import type { FunnelStepInput } from "@/shared/types";
 
 type SavedFunnel = { id: string; name: string; steps: FunnelStepInput[] };
 type Preset = { key: string; label: string; steps: FunnelStepInput[] };
 
-/** Combined picker for saved funnels and ready-made templates, shown as a
- * left rail next to the builder rather than as separate stacked cards. */
+function stepPath(steps: FunnelStepInput[]): string {
+  return steps.map((s) => s.value).join(" → ");
+}
+
 export function FunnelSidebar({
   savedFunnels,
   presets,
@@ -29,86 +33,62 @@ export function FunnelSidebar({
   if (savedFunnels.length === 0 && presets.length === 0) return null;
 
   return (
-    <Stack w={260} gap="md" style={{ flexShrink: 0 }}>
+    <aside className={`${classes.panel} ${classes.rail}`} aria-label="Funnels">
       {savedFunnels.length > 0 && (
-        <Card withBorder radius="lg" padding="sm">
-          <Group gap={8} mb={6} px={4}>
-            <Bookmark size={14} className="sect-ic" />
-            <Text fw={600} c="dimmed" size="xs" tt="uppercase">Saved funnels</Text>
-          </Group>
-          <Stack gap={2}>
-            {savedFunnels.map((f) => (
-              <Group key={f.id} gap={0} wrap="nowrap">
-                <UnstyledButton
-                  onClick={() => onLoadSaved(f)}
-                  disabled={disabled}
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    borderRadius: 8,
-                    padding: "7px 10px",
-                    background: editingId === f.id ? "var(--mantine-color-grape-light)" : "transparent",
-                    color: editingId === f.id ? "var(--mantine-color-grape-6)" : undefined,
-                    fontWeight: editingId === f.id ? 600 : 500,
-                    fontSize: 13,
-                    transition: "background 100ms ease",
-                  }}
-                >
-                  <Text size="sm" truncate fw="inherit" c="inherit">{f.name}</Text>
-                </UnstyledButton>
-                <Menu withinPortal position="bottom-end">
-                  <Menu.Target>
-                    <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Funnel actions">
-                      <MoreVertical size={13} />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item leftSection={<Pencil size={13} />} onClick={() => onLoadSaved(f)}>
-                      Load &amp; edit
-                    </Menu.Item>
-                    <Menu.Item
-                      leftSection={<Trash2 size={13} />}
-                      color="red"
-                      onClick={() => onRemoveSaved(f.id)}
-                    >
-                      Delete
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              </Group>
-            ))}
-          </Stack>
-        </Card>
+        <div className={classes.railGroup}>
+          <span className={classes.railTitle}>Saved</span>
+          {savedFunnels.map((f) => (
+            <div key={f.id} className={classes.railRow}>
+              <button
+                type="button"
+                className={classes.railItem}
+                data-active={editingId === f.id || undefined}
+                onClick={() => onLoadSaved(f)}
+                disabled={disabled}
+                title={stepPath(f.steps)}
+              >
+                <span className={classes.railName}>{f.name}</span>
+                <span className={classes.railMeta}>{stepCountLabel(f.steps.length)}</span>
+              </button>
+              <Menu withinPortal position="bottom-end">
+                <Menu.Target>
+                  <ActionIcon variant="subtle" color="gray" radius="xl" size="sm" aria-label={`Actions for ${f.name}`}>
+                    <MoreHorizontal size={14} />
+                  </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item leftSection={<Pencil size={13} />} onClick={() => onLoadSaved(f)}>
+                    Open and edit
+                  </Menu.Item>
+                  <Menu.Item leftSection={<Trash2 size={13} />} color="red" onClick={() => onRemoveSaved(f.id)}>
+                    Delete
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            </div>
+          ))}
+        </div>
       )}
 
       {presets.length > 0 && (
-        <Card withBorder radius="lg" padding="sm">
-          <Group gap={8} mb={6} px={4}>
-            <LayoutList size={14} className="sect-ic" />
-            <Text fw={600} c="dimmed" size="xs" tt="uppercase">Templates</Text>
-          </Group>
-          <Stack gap={2}>
-            {presets.map((p) => (
-              <UnstyledButton
-                key={p.key}
-                onClick={() => onRunPreset(p)}
-                disabled={disabled}
-                style={{
-                  borderRadius: 8,
-                  padding: "7px 10px",
-                  background: activePreset === p.key ? "var(--mantine-color-emerald-light)" : "transparent",
-                  color: activePreset === p.key ? "var(--mantine-color-emerald-6)" : undefined,
-                  fontWeight: activePreset === p.key ? 600 : 500,
-                  fontSize: 13,
-                  transition: "background 100ms ease",
-                }}
-              >
-                <Text size="sm" truncate fw="inherit" c="inherit">{p.label}</Text>
-              </UnstyledButton>
-            ))}
-          </Stack>
-        </Card>
+        <div className={classes.railGroup}>
+          <span className={classes.railTitle}>Suggested</span>
+          {presets.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              className={classes.railItem}
+              data-active={activePreset === p.key || undefined}
+              onClick={() => onRunPreset(p)}
+              disabled={disabled}
+              title={stepPath(p.steps)}
+            >
+              <span className={classes.railName}>{p.label}</span>
+              <span className={classes.railMeta}>{stepCountLabel(p.steps.length)}</span>
+            </button>
+          ))}
+        </div>
       )}
-    </Stack>
+    </aside>
   );
 }

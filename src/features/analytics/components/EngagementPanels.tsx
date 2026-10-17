@@ -65,7 +65,6 @@ export function LandingPanel({ items }: { items: LandingBucket[] }) {
         <RankEmpty icon={LogIn}>Waiting for data…</RankEmpty>
       ) : (
         <RankList
-          strip
           items={items.map((i) => ({
             id: i.key,
             label: <PathLabel path={i.key} />,
