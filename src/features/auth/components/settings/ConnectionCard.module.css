@@ -61,7 +61,9 @@
   --brand: #5865f2;
 }
 
-.mark[data-brand="quantalog-compare"] {
+.mark[data-brand="quantalog-compare"],
+.mark[data-brand="quantalog-goals"],
+.mark[data-brand="quantalog-notes"] {
   --brand: var(--accent);
 }
 

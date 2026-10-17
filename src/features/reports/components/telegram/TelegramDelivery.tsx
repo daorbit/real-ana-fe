@@ -7,8 +7,9 @@ import { TelegramChatRow } from "@/features/integrations/components/telegram/Tel
 import { TelegramConnectButtons } from "@/features/integrations/components/telegram/TelegramConnectButtons";
 import { TelegramLinkWaiting } from "@/features/integrations/components/telegram/TelegramLinkWaiting";
 import classes from "@/features/integrations/components/telegram/Telegram.module.css";
+import { appsPath } from "@/features/integrations/lib/appsPath";
 
-const CONNECTIONS_URL = "/app/settings/connections?app=telegram";
+const CONNECTIONS_URL = appsPath("telegram");
 
 interface Props {
   workspaceId: string;

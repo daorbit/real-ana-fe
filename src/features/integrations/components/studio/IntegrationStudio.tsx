@@ -62,7 +62,7 @@ export function IntegrationStudio({
             disabled={closeDisabled}
             onClick={onClose}
           >
-            <span className={classes.backLabel}>Connections</span>
+            <span className={classes.backLabel}>Apps</span>
           </Button>
           <span className={classes.divider} aria-hidden />
 

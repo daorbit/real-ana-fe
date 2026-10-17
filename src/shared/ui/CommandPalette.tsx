@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/features/workspace/context";
 import { useNotes } from "@/features/notes";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { usePaletteHotkeys } from "@/shared/ui/palette/usePaletteHotkeys";
 
 const PaletteDialog = lazy(() => import("@/shared/ui/palette/PaletteDialog"));
@@ -13,6 +14,7 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const { workspaces, active, setActive } = useWorkspace();
   const { open: openNotes } = useNotes();
+  const { notes: notesOn } = useWorkspaceApps();
 
   const closePalette = useCallback(() => setOpen(false), []);
   const openShortcuts = useCallback(() => setSheetOpen(true), []);
@@ -20,7 +22,9 @@ export function CommandPalette() {
   usePaletteHotkeys({
     togglePalette: () => setOpen((v) => !v),
     openShortcuts,
-    openNotes: () => openNotes(),
+    openNotes: () => {
+      if (notesOn) openNotes();
+    },
     switchWorkspace: (index) => {
       const target = workspaces[index];
       if (target && target._id !== active?._id) setActive(target._id);

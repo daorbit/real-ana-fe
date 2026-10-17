@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { NAV_GROUPS, ADMIN_ITEMS } from "@/app/shell/navItems";
 import { useWorkspace } from "@/features/workspace/context";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { useNotes } from "@/features/notes";
 import { useGetNotesQuery } from "@/features/notes/api";
 import { useGetDashboardsQuery } from "@/features/dashboards/api";
@@ -29,7 +30,8 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
   const workspaceId = active?._id ?? "";
 
   const { data: dashboards = EMPTY } = useGetDashboardsQuery(workspaceId, { skip: !workspaceId });
-  const { data: notes = EMPTY } = useGetNotesQuery();
+  const { notes: notesOn } = useWorkspaceApps();
+  const { data: notes = EMPTY } = useGetNotesQuery(undefined, { skip: !notesOn });
 
   return useMemo<PaletteCommand[]>(() => {
     const go = (to: string) => () => {
@@ -90,7 +92,7 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
         keywords: d.description,
         run: go(`/app/dashboards/${d.id}`),
       })),
-      ...notes.map((n) => ({
+      ...(notesOn ? notes : EMPTY).map((n) => ({
         id: `note:${n.id}`,
         label: n.title || "Untitled note",
         section: "Notes",
@@ -128,17 +130,21 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
         keywords: "create template",
         run: go("/app/dashboards/new"),
       },
-      {
-        id: "action:notes",
-        label: "Open notes",
-        section: "Actions",
-        icon: StickyNote,
-        keys: ["N"],
-        run: () => {
-          openNotes();
-          close();
-        },
-      },
+      ...(notesOn
+        ? [
+            {
+              id: "action:notes",
+              label: "Open notes",
+              section: "Actions",
+              icon: StickyNote,
+              keys: ["N"],
+              run: () => {
+                openNotes();
+                close();
+              },
+            },
+          ]
+        : []),
       {
         id: "action:theme",
         label: dark ? "Switch to light mode" : "Switch to dark mode",
@@ -178,6 +184,6 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
     return [...pages, ...content, ...actions, ...switches, ...settings, ...admin];
   }, [
     navigate, t, close, openShortcuts, dashboards, notes, workspaces, active?._id, setActive,
-    openNotes, dark, setColorScheme, isAdmin,
+    openNotes, dark, setColorScheme, isAdmin, notesOn,
   ]);
 }

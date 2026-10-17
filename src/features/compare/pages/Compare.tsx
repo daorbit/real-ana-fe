@@ -27,7 +27,7 @@ import { StandingsCard } from "../components/StandingsCard";
 import { ScoreTrendChart } from "../components/ScoreTrendChart";
 import { AddCompetitorForm } from "../components/AddCompetitorForm";
 import { CompareSkeleton } from "../components/CompareSkeleton";
-import { CompareAppGate } from "../components/CompareAppGate";
+import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import classes from "../components/Compare.module.css";
 
@@ -163,7 +163,7 @@ export default function Compare() {
       <HelpDrawer opened={helpOpen} onClose={() => setHelpOpen(false)} title="Compare" sections={COMPARE_HELP} />
 
       {!compareOn ? (
-        <CompareAppGate />
+        <QuantalogAppGate app="compare" />
       ) : sitesLoading || (site && (listLoading || analysisLoading)) ? (
         <CompareSkeleton />
       ) : !site && sitesFailed ? (

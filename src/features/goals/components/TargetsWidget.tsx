@@ -6,10 +6,15 @@ import { TargetBar } from "@/features/goals/components/TargetBar";
 import { useTargets } from "@/features/goals/hooks/useTargets";
 import { formatMetric, targetStatus } from "@/features/goals/metrics";
 import { RING_PALETTE } from "@/features/goals/tones";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
+import { GoalsAppOffCard } from "@/features/goals/components/GoalsAppOffCard";
 import classes from "@/features/goals/components/Goals.module.css";
 
 export function TargetsWidget({ workspaceId }: { workspaceId: string }) {
-  const { targets, loading } = useTargets(workspaceId);
+  const { goals: goalsOn } = useWorkspaceApps();
+  const { targets, loading } = useTargets(goalsOn ? workspaceId : undefined);
+
+  if (!goalsOn) return <GoalsAppOffCard />;
   const achieved = targets.filter((t) => t.achieved).length;
   const featured = targets.slice(0, 3);
 

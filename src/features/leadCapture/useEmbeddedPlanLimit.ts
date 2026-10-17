@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { notify, type QuotaLimitInfo } from "@/shared/lib/notify";
 import { useActivityPanel } from "@/features/activity/ActivityPanelContext";
-import { settingsPath } from "@/features/auth/components/settings/settingsSections";
+import { appsPath } from "@/features/integrations/lib/appsPath";
 import { LEAD_FORMS_BASE } from "./themeParams";
 
 const UPGRADE = "quantalog:upgrade";
@@ -20,8 +20,7 @@ interface FramePlanMessage {
 const APP_ID = /^[a-z0-9-]{1,40}$/;
 
 function connectionsTarget(app: unknown): string {
-  const base = settingsPath("connections");
-  return typeof app === "string" && APP_ID.test(app) ? `${base}?app=${app}` : base;
+  return appsPath(typeof app === "string" && APP_ID.test(app) ? app : undefined);
 }
 
 function isFramePlanMessage(data: unknown): data is FramePlanMessage {

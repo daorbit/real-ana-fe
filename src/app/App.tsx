@@ -58,6 +58,7 @@ const LinkFrame = lazy(() => import("@/features/customLinks/pages/LinkFrame"));
 const Impersonate = lazy(() => import("@/features/admin/pages/Impersonate"));
 const DemoUsage = lazy(() => import("@/features/admin/pages/DemoUsage"));
 const Settings = lazy(() => import("@/features/auth/pages/Settings"));
+const Apps = lazy(() => import("@/features/integrations/pages/Apps"));
 const DataDeletion = lazy(() => import("@/features/auth/pages/DataDeletion"));
 const Billing = lazy(() => import("@/features/billing/pages/Billing"));
 const ComparePlans = lazy(() => import("@/features/billing/pages/ComparePlans"));
@@ -292,6 +293,7 @@ export default function App() {
                 <Route path="/app/link/:slug" element={<LinkFrame />} />
                 <Route path="/app/developers" element={<Developers />} />
                 <Route path="/app/settings/:section?" element={<Settings />} />
+                <Route path="/app/apps" element={<Apps />} />
                 <Route path="/app/billing" element={<Billing />} />
                 <Route path="/app/billing/plans" element={<ComparePlans />} />
                 {/* Admin-only, enforced by the page and by every /api/admin route. */}

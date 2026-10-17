@@ -26,6 +26,8 @@ const APP_GUIDES: Record<string, string> = {
   webhook: `${docsUrl(DOCS_SLUGS.leadCapture)}#webhook`,
   "search-console": `${docsUrl(DOCS_SLUGS.searchVisibility)}#connecting`,
   "quantalog-compare": docsUrl(DOCS_SLUGS.quantalogCompare),
+  "quantalog-goals": docsUrl(DOCS_SLUGS.goals),
+  "quantalog-notes": docsUrl(DOCS_SLUGS.quantalogNotes),
   linkedin: SOCIAL,
   instagram: SOCIAL,
 };

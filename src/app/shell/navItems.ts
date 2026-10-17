@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, PlayCircle, CalendarClock,
   Send, CreditCard, Mail, Swords, Share2, Route, Database, Palette, Images, TrendingUp,
-  LayoutDashboard, Flag, Settings, Gift, ScrollText,
+  LayoutDashboard, Flag, Settings, Gift, ScrollText, Blocks,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { LeadMagnetIcon } from "./icons";
@@ -35,7 +35,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app", labelKey: "nav.home", label: "Home", icon: Home },
       { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
       { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: LayoutDashboard },
-      { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag },
+      { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag, app: "goals" },
 
       { to: "/app/journey", labelKey: "nav.journey", label: "User journeys", icon: Route },
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
@@ -62,6 +62,7 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupWorkspace",
     heading: "Workspace",
     items: [
+      { to: "/app/apps", labelKey: "nav.apps", label: "Apps", icon: Blocks },
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
       { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
       { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText },

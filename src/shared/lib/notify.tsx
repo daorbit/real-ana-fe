@@ -256,6 +256,8 @@ function ConfirmForm({
   );
 }
 
+const CONFIRM_Z_INDEX = 600;
+
 /**
  * Destructive confirmation dialog.
  *
@@ -289,7 +291,7 @@ export function confirmDelete(opts: {
     title: opts.title,
     centered: true,
     radius: "lg",
-    zIndex: opts.zIndex,
+    zIndex: opts.zIndex ?? CONFIRM_Z_INDEX,
     children: (
       <ConfirmForm
         body={opts.body}

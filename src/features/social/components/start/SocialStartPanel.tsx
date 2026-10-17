@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button, Text } from "@mantine/core";
 import { Link2, Plus, Send } from "lucide-react";
 import { StartHero, StartScreen } from "@/shared/ui/start/StartScreen";
-import { settingsPath } from "@/features/auth/components/settings/settingsSections";
+import { APPS_PATH } from "@/features/integrations/lib/appsPath";
 import { WeekStrip } from "./WeekStrip";
 
 export function SocialStartPanel({
@@ -40,7 +40,7 @@ export function SocialStartPanel({
           <>
             <Button
               component={Link}
-              to={settingsPath("connections")}
+              to={APPS_PATH}
               size="md"
               color="emerald"
               leftSection={<Link2 size={16} />}
@@ -49,7 +49,7 @@ export function SocialStartPanel({
               Connect {networks}
             </Button>
             <Text size="xs" c="dimmed" ta="center">
-              Takes a few seconds. You can disconnect it any time from Settings.
+              Takes a few seconds. You can disconnect it any time from Apps.
             </Text>
           </>
         )}

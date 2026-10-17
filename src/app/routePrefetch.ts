@@ -44,7 +44,7 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/settings": () => import("@/features/auth/pages/Settings"),
   "/app/settings/profile": () => import("@/features/auth/pages/Settings"),
   "/app/settings/appearance": () => import("@/features/auth/pages/Settings"),
-  "/app/settings/connections": () => import("@/features/auth/pages/Settings"),
+  "/app/apps": () => import("@/features/integrations/pages/Apps"),
   "/app/settings/notifications": () => import("@/features/auth/pages/Settings"),
   "/app/settings/security": () => import("@/features/auth/pages/Settings"),
   "/app/billing": () => import("@/features/billing/pages/Billing"),

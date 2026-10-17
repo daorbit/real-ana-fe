@@ -149,8 +149,18 @@ function QuantalogCompareMark({ size = 24 }: MarkProps) {
   return <img src="/apps/quantalog-compare.png" width={size} height={size} alt="Quantalog Compare" className={classes.appLogo} />;
 }
 
+function QuantalogGoalsMark({ size = 24 }: MarkProps) {
+  return <img src="/apps/quantalog-goals.svg" width={size} height={size} alt="Quantalog Goals" className={classes.appLogo} />;
+}
+
+function QuantalogNotesMark({ size = 24 }: MarkProps) {
+  return <img src="/apps/quantalog-notes.svg" width={size} height={size} alt="Quantalog Notes" className={classes.appLogo} />;
+}
+
 const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   "quantalog-compare": QuantalogCompareMark,
+  "quantalog-goals": QuantalogGoalsMark,
+  "quantalog-notes": QuantalogNotesMark,
   brevo: BrevoMark,
   smtp: SmtpMark,
   slack: SlackMark,

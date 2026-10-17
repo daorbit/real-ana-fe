@@ -7,6 +7,8 @@ import { RefreshButton } from "@/shared/ui/Refresh";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
+import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { useTargets } from "@/features/goals/hooks/useTargets";
 import { useTargetEditor } from "@/features/goals/hooks/useTargetEditor";
 import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
@@ -21,10 +23,11 @@ export default function Goals() {
   useTitle("Goals");
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
+  const { goals: goalsOn } = useWorkspaceApps();
   const workspaceId = active?._id;
-  const { targets, loading, refresh, refreshing, lastUpdated } = useTargets(workspaceId);
+  const { targets, loading, refresh, refreshing, lastUpdated } = useTargets(goalsOn ? workspaceId : undefined);
   const editor = useTargetEditor(workspaceId);
-  const hasTargets = targets.length > 0;
+  const hasTargets = goalsOn && targets.length > 0;
   const allowance = useFeatureAllowance("goalTargets", targets.length);
   const openNew = (preset: Parameters<typeof editor.openNew>[0] = null) => allowance.guard(() => editor.openNew(preset));
 
@@ -48,7 +51,9 @@ export default function Goals() {
         }
       />
 
-      {loading ? (
+      {!goalsOn ? (
+        <QuantalogAppGate app="goals" />
+      ) : loading ? (
         <GoalsSkeleton />
       ) : !hasTargets ? (
         <GoalsEmpty canEdit={canEdit} onCreate={(preset) => openNew(preset ?? null)} />
@@ -79,7 +84,7 @@ export default function Goals() {
         </>
       )}
 
-      {workspaceId && (
+      {workspaceId && goalsOn && (
         <TargetFormModal
           opened={editor.editing !== null}
           workspaceId={workspaceId}

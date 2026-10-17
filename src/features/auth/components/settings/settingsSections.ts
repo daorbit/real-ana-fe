@@ -1,6 +1,7 @@
-import { BellRing, Link2, Palette, PanelLeft, ShieldCheck, UserRound } from "lucide-react";
+import { BellRing, Palette, PanelLeft, ShieldCheck, UserRound } from "lucide-react";
+import { APPS_PATH } from "@/features/integrations/lib/appsPath";
 
-export type SettingsSectionId = "profile" | "appearance" | "sidebar" | "connections" | "notifications" | "security";
+export type SettingsSectionId = "profile" | "appearance" | "sidebar" | "notifications" | "security";
 
 export interface SettingsSection {
   id: SettingsSectionId;
@@ -37,14 +38,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     icon: PanelLeft,
   },
   {
-    id: "connections",
-    labelKey: "settings.tabConnections",
-    label: "Connections",
-    descriptionKey: "settings.connectionsPageDesc",
-    description: "Social accounts and the email, payment, calendar and chat apps your forms use.",
-    icon: Link2,
-  },
-  {
     id: "notifications",
     labelKey: "settings.tabNotifications",
     label: "Notifications",
@@ -68,6 +61,7 @@ const ALIASES: Record<string, string> = {
   info: settingsPath("profile"),
   billing: "/app/billing",
   members: "/app/members",
+  connections: APPS_PATH,
 };
 
 export function findSettingsSection(id: string | undefined): SettingsSection | undefined {

@@ -7,12 +7,12 @@ import { useCreateNoteMutation, useGetNotesQuery } from "@/features/notes/api";
 import { useDraggablePanel } from "@/features/notes/hooks/useDraggablePanel";
 import { NoteList } from "@/features/notes/components/NoteList";
 import { NoteEditor } from "@/features/notes/components/NoteEditor";
+import { NotesAppGate } from "@/features/notes/components/NotesAppGate";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import classes from "@/features/notes/components/Notes.module.css";
 
-function NotesWindow() {
+function NotesContent() {
   const { activeId, expanded, close, select, toggleExpanded } = useNotes();
-  const compact = useMediaQuery("(max-width: 640px)") ?? false;
-  const drag = useDraggablePanel<HTMLElement>(!compact);
   const { data: notes = [], isLoading } = useGetNotesQuery();
   const [createNote, { isLoading: creating }] = useCreateNoteMutation();
   const active = notes.find((n) => n.id === activeId);
@@ -29,6 +29,36 @@ function NotesWindow() {
       return;
     }
   };
+
+  return active ? (
+    <NoteEditor
+      key={active.id}
+      note={active}
+      expanded={expanded}
+      onToggleExpand={toggleExpanded}
+      onBack={() => select(null)}
+      onClose={close}
+      onNew={() => void create()}
+    />
+  ) : (
+    <NoteList
+      notes={notes}
+      loading={isLoading}
+      creating={creating}
+      expanded={expanded}
+      onToggleExpand={toggleExpanded}
+      onClose={close}
+      onOpen={select}
+      onCreate={() => void create()}
+    />
+  );
+}
+
+function NotesWindow() {
+  const { expanded, close, toggleExpanded } = useNotes();
+  const { notes: notesOn } = useWorkspaceApps();
+  const compact = useMediaQuery("(max-width: 640px)") ?? false;
+  const drag = useDraggablePanel<HTMLElement>(!compact);
 
   const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key === "Escape" && e.currentTarget.contains(e.target as Node)) close();
@@ -50,27 +80,10 @@ function NotesWindow() {
           <span className={classes.gripBar} />
         </div>
       )}
-      {active ? (
-        <NoteEditor
-          key={active.id}
-          note={active}
-          expanded={expanded}
-          onToggleExpand={toggleExpanded}
-          onBack={() => select(null)}
-          onClose={close}
-          onNew={() => void create()}
-        />
+      {notesOn ? (
+        <NotesContent />
       ) : (
-        <NoteList
-          notes={notes}
-          loading={isLoading}
-          creating={creating}
-          expanded={expanded}
-          onToggleExpand={toggleExpanded}
-          onClose={close}
-          onOpen={select}
-          onCreate={() => void create()}
-        />
+        <NotesAppGate expanded={expanded} onToggleExpand={toggleExpanded} onClose={close} />
       )}
     </section>
   );

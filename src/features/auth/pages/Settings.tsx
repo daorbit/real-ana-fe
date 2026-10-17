@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import AvatarCropper from "@/shared/ui/AvatarCropper";
-import { useInstagramReturn } from "@/features/social/useInstagramReturn";
 import { useProfileForm } from "@/features/auth/components/settings/useProfileForm";
 import { SaveBar } from "@/features/auth/components/settings/SaveBar";
 import { SettingsSectionBody } from "@/features/auth/components/settings/SettingsSectionBody";
@@ -33,10 +32,11 @@ function LegacySettingsRedirect() {
 
 export default function Settings() {
   const { section: sectionId } = useParams<{ section?: string }>();
+  const { search } = useLocation();
   const section = findSettingsSection(sectionId);
 
   if (!sectionId) return <LegacySettingsRedirect />;
-  if (!section) return <Navigate to={settingsRedirectTarget(sectionId)} replace />;
+  if (!section) return <Navigate to={`${settingsRedirectTarget(sectionId)}${search}`} replace />;
   return <SettingsPage id={section.id} />;
 }
 
@@ -45,7 +45,6 @@ function SettingsPage({ id }: { id: SettingsSectionId }) {
   const navigate = useNavigate();
   const section = findSettingsSection(id)!;
   useTitle(`${section.label} · Settings`);
-  useInstagramReturn();
   const form = useProfileForm();
   const { user, cropFile, setCropFile, avatarBusy, saving, dirty, seedFromUser, submit, saveCrop } = form;
 
@@ -62,7 +61,7 @@ function SettingsPage({ id }: { id: SettingsSectionId }) {
           title={t("settings.title", "Settings")}
           description={t(
             "settings.pageDesc",
-            "Your profile, how Quantalog looks, the accounts it's linked to, what it tells you about, and how your account is protected.",
+            "Your profile, how Quantalog looks, what it tells you about, and how your account is protected.",
           )}
         />
 

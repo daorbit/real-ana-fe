@@ -6,8 +6,9 @@ import { useTranslation } from "react-i18next";
 import { useGetWhatsAppStatusQuery } from "@/app/store";
 import { useRefetchOnFocus } from "@/shared/hooks/useRefetchOnFocus";
 import classes from "@/features/integrations/components/telegram/Telegram.module.css";
+import { appsPath } from "@/features/integrations/lib/appsPath";
 
-const CONNECTIONS_URL = "/app/settings/connections?app=whatsapp";
+const CONNECTIONS_URL = appsPath("whatsapp");
 const FOCUS_MIN_AGE_MS = 1500;
 
 interface Props {

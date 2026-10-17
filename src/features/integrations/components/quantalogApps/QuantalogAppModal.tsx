@@ -1,6 +1,7 @@
 import { Badge, Button, Group, Text } from "@mantine/core";
 import { ArrowRight, Power } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useNotes } from "@/features/notes";
 import { confirmDelete } from "@/shared/lib/notify";
 import { dateTime } from "@/shared/lib/format";
 import { useToggleWorkspaceApp } from "../../hooks/useToggleWorkspaceApp";
@@ -20,17 +21,19 @@ interface Props {
 
 export function QuantalogAppModal({ info, opened, onClose }: Props) {
   const navigate = useNavigate();
+  const notes = useNotes();
   const app = useToggleWorkspaceApp(info.id);
 
   const open = () => {
     onClose();
-    navigate(info.route);
+    if (info.route) navigate(info.route);
+    else notes.open();
   };
 
   const turnOff = () =>
     confirmDelete({
       title: `Turn off ${info.name}?`,
-      body: `${info.navLabel} leaves the sidebar for everyone in this workspace. Your tracked competitors and their history are kept, so turning it back on picks up where you left off.`,
+      body: `${info.navLabel} disappears for everyone in this workspace. ${info.offNote}`,
       confirmLabel: "Turn off",
       onConfirm: async () => {
         await app.toggle(false);
@@ -88,8 +91,8 @@ export function QuantalogAppModal({ info, opened, onClose }: Props) {
           </AsideBlock>
           <AsideBlock label="Access">
             <Text size="sm" c="dimmed">
-              Workspace admins turn apps on and off. Once on, everyone in the workspace sees {info.navLabel} in the
-              sidebar.
+              Workspace admins turn apps on and off. Once on, everyone in the workspace finds {info.navLabel}{" "}
+              {info.location}.
             </Text>
           </AsideBlock>
           {app.enabled && app.enabledAt && (
@@ -113,9 +116,9 @@ export function QuantalogAppModal({ info, opened, onClose }: Props) {
           <Text fw={650}>{info.name}</Text>
           <Text size="sm" c="dimmed">
             {app.enabled
-              ? `Open it any time from ${info.navLabel} in the sidebar.`
+              ? `Open ${info.navLabel} any time ${info.location}.`
               : app.canManage
-                ? `Enable it and ${info.navLabel} appears in the sidebar for everyone in this workspace.`
+                ? `Enable it and everyone in this workspace finds ${info.navLabel} ${info.location}.`
                 : `Ask a workspace admin to enable it.`}
           </Text>
         </div>

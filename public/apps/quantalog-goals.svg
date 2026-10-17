@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Goals">
+  <rect width="256" height="256" rx="58" fill="#3B5BF6"/>
+  <path d="M120 54 175 86v64l-55 32-55-32V86z" fill="none" stroke="#ffffff" stroke-width="20" stroke-linejoin="round"/>
+  <path d="M106 90v58" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round"/>
+  <path d="M106 91 148 104 106 118z" fill="#ffffff" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="190" cy="190" r="15" fill="#ffffff"/>
+</svg>

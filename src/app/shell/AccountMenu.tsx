@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { CONTACT_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
@@ -52,6 +53,7 @@ export function AccountMenu({
   const [featureOpen, setFeatureOpen] = useState(false);
   const [demoCallOpen, setDemoCallOpen] = useState(false);
   const notes = useNotes();
+  const { notes: notesOn } = useWorkspaceApps();
   const [opened, setOpened] = useState(false);
 
   const trigger = (
@@ -119,9 +121,11 @@ export function AccountMenu({
             {t("nav.accountSettings", "Account settings")}
           </Menu.Item>
 
-          <Menu.Item leftSection={<StickyNote size={15} />} onClick={() => notes.open()}>
-            {t("nav.notes", "Notes")}
-          </Menu.Item>
+          {notesOn && (
+            <Menu.Item leftSection={<StickyNote size={15} />} onClick={() => notes.open()}>
+              {t("nav.notes", "Notes")}
+            </Menu.Item>
+          )}
 
           <Menu.Sub>
             <Menu.Sub.Target>

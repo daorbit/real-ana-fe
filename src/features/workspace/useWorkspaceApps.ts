@@ -9,5 +9,7 @@ export function useWorkspaceApps(): EnabledApps {
   const { active } = useWorkspace();
   const { demo } = useDemo();
   const compare = demo || Boolean(active?.apps?.compare?.enabled);
-  return useMemo(() => ({ compare }), [compare]);
+  const goals = demo || Boolean(active?.apps?.goals?.enabled);
+  const notes = demo || Boolean(active?.apps?.notes?.enabled);
+  return useMemo(() => ({ compare, goals, notes }), [compare, goals, notes]);
 }
