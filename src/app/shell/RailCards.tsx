@@ -1,22 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Badge,
-  Box,
-  Button,
-  Group,
-  Progress,
-  Text,
-  ThemeIcon,
-  Tooltip,
-  UnstyledButton,
-} from "@mantine/core";
-import { ArrowUpRight, Eye, LogOut, PlayCircle, UserPlus } from "lucide-react";
+import { Box, Group, Text, ThemeIcon, Tooltip, UnstyledButton } from "@mantine/core";
+import { LogOut, PlayCircle, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { useAuth } from "@/features/auth/context";
-import { useActiveBilling } from "@/features/workspace/context";
 import { NavAction } from "./NavLink";
 import { isPlainLeftClick, supportsViewTransitions, transitionTo } from "@/app/viewTransition";
 import classes from "./Rail.module.css";
@@ -134,51 +122,6 @@ export function PendingInviteCard() {
 }
 
 
-export function ImpersonationCard({
-  collapsed,
-  email,
-  leaving,
-  onLeave,
-}: {
-  collapsed: boolean;
-  email: string;
-  leaving: boolean;
-  onLeave: () => void;
-}) {
-  const { t } = useTranslation();
-
-  if (collapsed) {
-    return (
-      <NavAction
-        collapsed
-        icon={Eye}
-        color="var(--amber)"
-        label={t("nav.exit")}
-        tooltip={`${t("nav.viewingAs")} ${email} — ${t("nav.exit")}`}
-        onClick={onLeave}
-        disabled={leaving}
-        mb={8}
-      />
-    );
-  }
-
-  return (
-    <Box className="impersonation-card" mb="xs">
-      <Group gap={6} wrap="nowrap" mb={4}>
-        <Eye size={12} style={{ color: "var(--amber)", flexShrink: 0 }} />
-        <Text size="xs" fw={650}>{t("nav.viewingAs")}</Text>
-      </Group>
-      <Text size="xs" c="dimmed" lh={1.4} truncate title={email}>
-        {email}
-      </Text>
-      <UnstyledButton className="impersonation-exit" onClick={onLeave} disabled={leaving}>
-        <LogOut size={11} />
-        {t("nav.exit")}
-      </UnstyledButton>
-    </Box>
-  );
-}
-
 /**
  * A read-only demo session.
  *
@@ -215,76 +158,6 @@ export function DemoCard({ collapsed, onExit }: { collapsed: boolean; onExit: ()
         <LogOut size={11} />
         {t("nav.exitDemo")}
       </UnstyledButton>
-    </Box>
-  );
-}
-
-
-export function PlanCard() {
-  const billing = useActiveBilling();
-  if (!billing) return null;
-
-  const expired = billing.status === "expired";
-
-  // The tightest of the two usage ratios is what decides whether this nudges
-  // — a plan can have plenty of crawl headroom left while audits are nearly
-  // exhausted, and that's the number that should drive the warning.
-  const auditPct = billing.audits.planQuota > 0
-    ? billing.audits.used / billing.audits.planQuota
-    : 1;
-  const crawlPct = billing.crawls.planQuota > 0
-    ? billing.crawls.used / billing.crawls.planQuota
-    : 1;
-  const worstPct = Math.max(auditPct, crawlPct);
-  const nearLimit = worstPct >= 0.8
-    && billing.audits.addonCredits === 0
-    && billing.crawls.addonCredits === 0;
-
-  const nudge = expired || nearLimit;
-
-  // Nothing while the plan is healthy: the workspace header at the top of the
-  // rail already names the tier and its icon, so a card down here repeating it
-  // was the same fact twice. This one appears only when there is something to
-  // say — a lapsed plan, or a quota about to run out.
-  if (!nudge) return null;
-
-  return (
-    <Box className="tile" style={{ padding: 10, marginBottom: 8 }}>
-      <Group justify="space-between" wrap="nowrap" mb={6}>
-        <Group gap={6} wrap="nowrap">
-          <PlanIcon slug={billing.plan.slug} size={16} uid="rail-warn" />
-          <Text size="xs" fw={650}>{billing.plan.name} plan</Text>
-        </Group>
-        {expired && (
-          <Badge size="xs" variant="light" color="red" tt="none">expired</Badge>
-        )}
-      </Group>
-
-      {expired ? (
-        <Text size="xs" c="dimmed" lh={1.4} mb={8}>
-          Your period ended — audits and crawls are paused until you renew.
-        </Text>
-      ) : (
-        <>
-          <Text size="xs" c="dimmed" lh={1.4} mb={6}>
-            You've used {billing.audits.used}/{billing.audits.planQuota} audits and{" "}
-            {billing.crawls.used}/{billing.crawls.planQuota} crawls this cycle.
-          </Text>
-          <Progress value={worstPct * 100} size={4} radius="xl" color="yellow" mb={8} />
-        </>
-      )}
-
-      <Button
-        component={Link}
-        to="/app/billing"
-        size="compact-xs"
-        fullWidth
-        color={expired ? "red" : "emerald"}
-        variant={expired ? "filled" : "light"}
-        rightSection={<ArrowUpRight size={12} />}
-      >
-        {expired ? "Renew plan" : "Upgrade plan"}
-      </Button>
     </Box>
   );
 }

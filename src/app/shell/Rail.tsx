@@ -2,7 +2,7 @@ import { AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core"
 import { useTranslation } from "react-i18next";
 import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
-import { notify, errMessage } from "@/shared/lib/notify";
+import { notify } from "@/shared/lib/notify";
 import { useState } from "react";
 import { useThemeMode } from "./useThemeMode";
 import { ThemeToggleButton } from "./ThemeSwitch";
@@ -12,7 +12,7 @@ import { SearchButton } from "./SearchButton";
 import { NavGroups } from "./NavGroups";
 import { RailWorkspaceHeader } from "./RailWorkspaceHeader";
 import { AccountMenu } from "./AccountMenu";
-import { DemoCard, ImpersonationCard, OrbitCard, PlanCard } from "./RailCards";
+import { DemoCard, OrbitCard } from "./RailCards";
 import { useNavGroups } from "./useNavGroups";
 import { LogoutDialog } from "./LogoutDialog";
 import { MobileMoreSheet } from "./mobile/MobileMoreSheet";
@@ -36,32 +36,18 @@ export function Rail({
   onCloseNav: () => void;
 }) {
   const { t } = useTranslation();
-  const { user, logout, exitImpersonation, isDemo } = useAuth();
+  const { user, logout, isDemo } = useAuth();
   const { mode, setMode } = useThemeMode();
 
   const { demo, available: demoAvailable, toggle: toggleDemo } = useDemo();
 
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  const impersonating = Boolean(user?.impersonating);
   // Super-admin only, and never while impersonating — see `useIsPlatformAdmin`.
   const isAdmin = useIsPlatformAdmin();
-  const [leaving, setLeaving] = useState(false);
 
   const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
   const groups = useNavGroups();
-
-  const leave = async () => {
-    setLeaving(true);
-    try {
-      await exitImpersonation();
-      notify.info(t("nav.backToAccount"));
-    } catch (e) {
-      notify.error(errMessage(e, t("nav.exitImpersonationError")));
-    } finally {
-      setLeaving(false);
-    }
-  };
 
   const accountMenu = (
     <AccountMenu
@@ -94,14 +80,7 @@ export function Rail({
   );
 
   if (mobile) {
-    const cards = (
-      <>
-        {impersonating && (
-          <ImpersonationCard collapsed={false} email={user?.email ?? ""} leaving={leaving} onLeave={leave} />
-        )}
-        {isDemo ? <DemoCard collapsed={false} onExit={logout} /> : <PlanCard />}
-      </>
-    );
+    const cards = isDemo ? <DemoCard collapsed={false} onExit={logout} /> : undefined;
 
     return (
       <MantineShell.Navbar p={0}>
@@ -150,17 +129,6 @@ export function Rail({
       </MantineShell.Section>
 
       <MantineShell.Section pt="sm">
-        {impersonating && (
-          <ImpersonationCard
-            collapsed={collapsed}
-            email={user?.email ?? ""}
-            leaving={leaving}
-            onLeave={leave}
-          />
-        )}
-
-        {!isDemo && !collapsed && <PlanCard />}
-
         {isDemo && <DemoCard collapsed={collapsed} onExit={logout} />}
 
         <div className={classes.foot} data-collapsed={collapsed || undefined}>

@@ -1,0 +1,82 @@
+.card {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 350;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 12px 12px 12px 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--amber) 40%, var(--border));
+  box-shadow: var(--shadow);
+}
+
+.icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--amber) 16%, transparent);
+  color: var(--amber);
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.title {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.email {
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exit {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 12%, transparent);
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.exit:hover {
+  background: color-mix(in srgb, var(--amber) 20%, transparent);
+}
+
+.exit:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.exit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (max-width: 48em) {
+  .card {
+    right: 16px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}

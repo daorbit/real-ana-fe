@@ -13,6 +13,7 @@ import { PlanExpiryNotice } from "@/shared/ui/PlanExpiryNotice";
 import { PushPrompt } from "@/shared/ui/PushPrompt";
 import { OrbitExtensionPrompt } from "@/features/orbit/components/OrbitExtensionPrompt";
 import { OfflineBar } from "@/shared/ui/OfflineBar";
+import { ImpersonationBar } from "./shell/ImpersonationBar";
 import { FetchProgress } from "@/shared/ui/FetchProgress";
 import { useDemo } from "@/features/demo/context";
 import { Starfield } from "@/shared/ui/Starfield";
@@ -99,6 +100,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
     <ActivityPanelProvider>
       <TabBadge />
       <OfflineBar />
+      <ImpersonationBar />
       <FetchProgress />
       <CommandPalette />
       <PushPrompt />
