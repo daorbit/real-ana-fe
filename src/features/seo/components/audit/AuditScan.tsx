@@ -11,7 +11,7 @@ export function AuditScan({ url, running }: { url: string; running: boolean }) {
   const domain = display.split("/")[0];
 
   return (
-    <div className={classes.root}>
+    <div className={classes.root} data-phase={phase}>
       <div className={classes.browser}>
         <div className={classes.chrome}>
           <span className={classes.dots}>
@@ -20,10 +20,11 @@ export function AuditScan({ url, running }: { url: string; running: boolean }) {
             <i />
           </span>
           <span className={classes.address}>
-            <Lock size={11} />
+            <Lock size={11} className={classes.lock} />
             <SiteFavicon domain={domain} size={13} />
             <span className={classes.addressText}>{display}</span>
           </span>
+          <span className={classes.loadBar} />
         </div>
         <AuditWireframe phase={phase} />
       </div>

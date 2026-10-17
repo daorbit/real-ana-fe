@@ -1,3 +1,4 @@
+import { ClipboardCheck } from "lucide-react";
 import classes from "./AuditScan.module.css";
 
 function Tag({ label, spot }: { label: string; spot: string }) {
@@ -46,10 +47,11 @@ export function AuditWireframe({ phase }: { phase: number }) {
       <Tag label="CLS" spot="cls" />
 
       <div className={classes.scoreRing} aria-hidden="true">
-        <svg viewBox="0 0 64 64">
+        <svg viewBox="0 0 64 64" className={classes.ring}>
           <circle className={classes.ringTrack} cx="32" cy="32" r="27" />
           <circle className={classes.ringArc} cx="32" cy="32" r="27" />
         </svg>
+        <ClipboardCheck size={20} className={classes.ringIcon} />
       </div>
     </div>
   );
