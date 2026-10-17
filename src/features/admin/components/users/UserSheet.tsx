@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { CreditCard, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
+import { adminUserPath } from "../../lib/adminSections";
 import { num, shortDate, timeAgo } from "@/shared/lib";
 import { PanelDrawer } from "@/shared/ui/PanelDrawer";
 import { InsetList, InsetRow, RowIcon } from "@/shared/ui/InsetList";
@@ -18,6 +20,7 @@ interface Props {
 
 export function UserSheet({ user, actions, onClose }: Props) {
   const [shown, setShown] = useState(user);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) setShown(user);
@@ -66,6 +69,16 @@ export function UserSheet({ user, actions, onClose }: Props) {
           </InsetList>
 
           <InsetList>
+            <InsetRow
+              leading={<RowIcon tone="blue"><Eye size={15} /></RowIcon>}
+              title="View full details"
+              subtitle="Workspaces, sites, activity and sign-ins"
+              onClick={() => {
+                onClose();
+                navigate(adminUserPath(u.id));
+              }}
+              chevron
+            />
             <InsetRow
               leading={<RowIcon tone="blue"><LogIn size={15} /></RowIcon>}
               title="Open dashboard as this user"

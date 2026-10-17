@@ -964,6 +964,37 @@ export type AdminUser = {
   screenLockEnabled: boolean;
 };
 
+export type AdminUserSite = {
+  id: string;
+  name: string;
+  domain: string;
+  platform: string;
+  createdAt: string;
+  events30d: number;
+  lastEventAt: string | null;
+};
+
+export type AdminUserWorkspace = {
+  id: string;
+  name: string;
+  createdAt: string;
+  role: string;
+  owner: { name: string; email: string } | null;
+  members: number;
+  plan: { slug: string; name: string; status: string; expired: boolean; renewsAt: string | null } | null;
+  apps: string[];
+  events30d: number;
+  sites: AdminUserSite[];
+};
+
+export type AdminUserOverview = {
+  user: Omit<AdminUser, "workspaceCount" | "siteCount" | "eventCount">;
+  totals: { workspaces: number; owned: number; shared: number; sites: number; events30d: number };
+  trend: { date: string; events: number }[];
+  workspaces: AdminUserWorkspace[];
+  signIns: { at: string; method: string; location: string; browser: string; os: string }[];
+};
+
 export type AdminUserPage = {
   users: AdminUser[];
   total: number;

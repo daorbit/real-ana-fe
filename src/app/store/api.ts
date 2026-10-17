@@ -6,7 +6,7 @@ import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import { reportLoadFailure } from "@/shared/lib/loadFailure";
 import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession";
 import type {
-  AdminUserPage, AdminUserBilling, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
+  AdminUserPage, AdminUserBilling, AdminUserOverview, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, FlowNode, FlowEdge,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout, Branding, BrandingInput, NavPrefs,
@@ -1288,6 +1288,10 @@ export const api = createApi({
     adminResetScreenLock: build.mutation<{ ok: true }, string>({
       query: (userId) => ({ url: `/api/admin/users/${userId}/screen-lock/reset`, method: "POST" }),
       invalidatesTags: ["AdminUser"],
+    }),
+
+    getAdminUserOverview: build.query<AdminUserOverview, string>({
+      query: (userId) => `/api/admin/users/${userId}/overview`,
     }),
 
     getAdminUserBilling: build.query<AdminUserBilling, string>({
@@ -3042,6 +3046,7 @@ export const {
   useAdminReset2faMutation,
   useAdminResetScreenLockMutation,
   useGetAdminUserBillingQuery,
+  useGetAdminUserOverviewQuery,
   useGrantAdminSiteSlotMutation,
   useGetOrbitStatusQuery,
   useAskOrbitMutation,

@@ -119,6 +119,10 @@ export function adminSectionPath(section: AdminSectionId = DEFAULT_ADMIN_SECTION
   return `${ADMIN_TOOLS_PATH}/${section}`;
 }
 
+export function adminUserPath(userId: string): string {
+  return `${ADMIN_TOOLS_PATH}/users/${userId}`;
+}
+
 export function resolveAdminSection(value: string | undefined): AdminSectionId | null {
   if (!value) return null;
   if (ADMIN_SECTIONS.some((s) => s.id === value)) return value as AdminSectionId;

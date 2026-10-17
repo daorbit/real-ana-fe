@@ -1,6 +1,9 @@
+import { Link } from "react-router-dom";
 import { ActionIcon, Button, Loader, Tooltip } from "@mantine/core";
-import { CreditCard, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
+import { CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
+import { prefetchRoute } from "@/app/routePrefetch";
 import type { AdminUser } from "@/shared/types";
+import { adminUserPath } from "../../lib/adminSections";
 import type { AdminUserActions } from "../../useAdminUserActions";
 import classes from "../Admin.module.css";
 
@@ -35,6 +38,20 @@ export function UserRowActions({ user: u, actions }: Props) {
         >
           Open
         </Button>
+      </Tooltip>
+      <Tooltip label="View everything about this user" withArrow>
+        <ActionIcon
+          component={Link}
+          to={adminUserPath(u.id)}
+          onMouseEnter={() => void prefetchRoute(adminUserPath(u.id))}
+          variant="light"
+          color="blue"
+          size="lg"
+          radius="md"
+          aria-label={`View details for ${u.email}`}
+        >
+          <Eye size={16} />
+        </ActionIcon>
       </Tooltip>
       <Tooltip label="Plan details" withArrow>
         <ActionIcon

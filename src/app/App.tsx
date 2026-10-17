@@ -63,6 +63,7 @@ const DataDeletion = lazy(() => import("@/features/auth/pages/DataDeletion"));
 const Billing = lazy(() => import("@/features/billing/pages/Billing"));
 const ComparePlans = lazy(() => import("@/features/billing/pages/ComparePlans"));
 const AdminTools = lazy(() => import("@/features/admin/pages/AdminTools"));
+const AdminUserDetail = lazy(() => import("@/features/admin/pages/AdminUserDetail"));
 const Onboarding = lazy(() => import("@/features/auth/pages/Onboarding"));
 const PublicDashboard = lazy(() => import("@/features/analytics/pages/PublicDashboard"));
 const PublicSeoReport = lazy(() => import("@/features/seo/pages/PublicSeoReport"));
@@ -294,6 +295,7 @@ export default function App() {
                 <Route path="/app/billing" element={<Billing />} />
                 <Route path="/app/billing/plans" element={<ComparePlans />} />
                 {/* Admin-only, enforced by the page and by every /api/admin route. */}
+                <Route path="/app/admin-tools/users/:userId" element={<AdminUserDetail />} />
                 <Route path="/app/admin-tools/:section?" element={<AdminTools />} />
                 {LEGACY_ADMIN_PATHS.map((legacy) => (
                   <Route key={legacy.path} path={legacy.path} element={<LegacyAdminRedirect section={legacy.section} />} />
