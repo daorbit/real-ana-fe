@@ -32,6 +32,7 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupAnalyze",
     heading: "Analyze",
     items: [
+      { to: "/app/apps", labelKey: "nav.apps", label: "Apps", icon: Blocks },
       { to: "/app", labelKey: "nav.home", label: "Home", icon: Home },
       { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
       { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: LayoutDashboard },
@@ -61,7 +62,6 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupWorkspace",
     heading: "Workspace",
     items: [
-      { to: "/app/apps", labelKey: "nav.apps", label: "Apps", icon: Blocks },
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
       { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
       { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText },

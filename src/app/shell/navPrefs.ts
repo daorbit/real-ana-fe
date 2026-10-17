@@ -5,7 +5,7 @@ export type { CustomLink, CustomLinkMode, NavPrefs };
 export type NavItemState = "pinned" | "shown" | "hidden";
 
 export const EMPTY_NAV_PREFS: NavPrefs = { hidden: [], pinned: [], links: [] };
-export const LOCKED_NAV_ITEMS = new Set(["/app", "/app/settings"]);
+export const LOCKED_NAV_ITEMS = new Set(["/app", "/app/apps", "/app/settings"]);
 export const MAX_CUSTOM_LINKS = 10;
 
 export function useNavPrefs(): NavPrefs {
