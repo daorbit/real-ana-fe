@@ -41,6 +41,8 @@ import { LocationCard } from "@/features/reviews/components/LocationCard";
  * each needs a different action from a different person — an administrator adds
  * credentials, an admin member authorises, and anyone can then read.
  */
+const NO_BREAKDOWN: { stars: number; count: number }[] = [];
+
 export default function Reviews() {
   useTitle("Reviews");
   const { active } = useWorkspace();
@@ -67,6 +69,8 @@ export default function Reviews() {
   const demoReviewData = useMemo(() => (demo ? demoGoogleReviewsList() : null), [demo]);
   const reviewData = demoReviewData ?? realReviewData;
   const reviewsLoading = demoReviewData ? false : realReviewsLoading;
+  const hasReviews = !!reviewData?.reviews.length;
+  const hasRatings = !!status?.locations.some((location) => location.totalReviewCount > 0);
 
   // Only fetched at the one moment it is needed: after authorising, before a
   // business has been picked. It is a live Google call, so asking for it on
@@ -325,29 +329,34 @@ export default function Reviews() {
               <Group justify="center" py="xl">
                 <Loader size="sm" />
               </Group>
-            ) : reviewData?.reviews.length ? (
-              <>
-                <RatingSummary
-                  locations={status!.locations}
-                  breakdown={reviewData.breakdown}
-                />
-                <div>
-                  <Text fw={600} mb="sm">
-                    Latest reviews
-                  </Text>
-                  <ReviewList reviews={reviewData.reviews} />
-                </div>
-              </>
             ) : (
-              // Connected with nothing to show. Most often a business that has
-              // no reviews yet, which is not a problem to solve — so this does
-              // not offer a fix, only says which it is.
-              <EmptyState
-                icon={Star}
-                title="No reviews yet"
-                description="This business has no Google reviews to show. New reviews appear here after the next sync."
-                compact
-              />
+              <>
+                {(hasReviews || hasRatings) && (
+                  <RatingSummary
+                    locations={status!.locations}
+                    breakdown={reviewData?.breakdown ?? NO_BREAKDOWN}
+                  />
+                )}
+                {hasReviews ? (
+                  <div>
+                    <Text fw={600} mb="sm">
+                      Latest reviews
+                    </Text>
+                    <ReviewList reviews={reviewData!.reviews} />
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={Star}
+                    title={hasRatings ? "Review text not available yet" : "No reviews yet"}
+                    description={
+                      hasRatings
+                        ? "Google is sharing this business's rating and review count, but not the review text right now. Reviews appear here after a sync once Google includes them."
+                        : "This business has no Google reviews to show. New reviews appear here after the next sync."
+                    }
+                    compact
+                  />
+                )}
+              </>
             )}
           </>
         )}

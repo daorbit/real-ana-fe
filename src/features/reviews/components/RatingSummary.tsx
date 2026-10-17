@@ -66,6 +66,7 @@ export function RatingSummary({
           </Text>
         </Stack>
 
+        {counted > 0 && (
         <Box style={{ flex: "1 1 240px", minWidth: 0 }}>
           <Stack gap={6}>
             {breakdown.map(({ stars, count }) => (
@@ -88,6 +89,7 @@ export function RatingSummary({
             ))}
           </Stack>
         </Box>
+        )}
       </Group>
     </Paper>
   );
