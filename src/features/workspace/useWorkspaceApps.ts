@@ -15,5 +15,9 @@ export function useWorkspaceApps(): EnabledApps {
   const notes = on("notes");
   const reviews = on("reviews");
   const links = on("links");
-  return useMemo(() => ({ compare, goals, notes, reviews, links }), [compare, goals, notes, reviews, links]);
+  const media = on("media");
+  return useMemo(
+    () => ({ compare, goals, notes, reviews, links, media }),
+    [compare, goals, notes, reviews, links, media],
+  );
 }

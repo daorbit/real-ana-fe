@@ -81,6 +81,10 @@
   --brand: #0891b2;
 }
 
+.mark[data-brand="quantalog-media"] {
+  --brand: #7c3aed;
+}
+
 .mark[data-brand="whatsapp"] {
   --brand: #25d366;
 }

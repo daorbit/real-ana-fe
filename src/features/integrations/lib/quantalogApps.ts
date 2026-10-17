@@ -94,6 +94,22 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Your logos", body: "Each link shows its site's icon automatically, or a logo you upload." },
     ],
   },
+  media: {
+    id: "media",
+    tileId: "quantalog-media",
+    name: "Quantalog Media",
+    navLabel: "Media",
+    route: "/app/media",
+    location: "in the sidebar",
+    offNote: "Your files are kept, and posts, branding and forms keep using them while it is off.",
+    tagline: "One library for your workspace's images, videos and files.",
+    description: "Upload once and reuse everywhere: post images, your logo, form backgrounds and payment windows all pick from the same library. Search, filter, rename and clean up in one place.",
+    features: [
+      { title: "Upload once, use anywhere", body: "Scheduled posts, branding and forms all pick from the same library, so nothing is uploaded twice." },
+      { title: "Find files fast", body: "Search by name and filter by images, videos or other files." },
+      { title: "Keep it tidy", body: "Rename files, preview them full size, and delete what you no longer need in bulk." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

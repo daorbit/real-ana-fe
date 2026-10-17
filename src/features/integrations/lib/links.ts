@@ -30,6 +30,7 @@ const APP_GUIDES: Record<string, string> = {
   "quantalog-notes": docsUrl(DOCS_SLUGS.quantalogNotes),
   "quantalog-reviews": docsUrl(DOCS_SLUGS.reviews),
   "quantalog-links": docsUrl(DOCS_SLUGS.quantalogLinks),
+  "quantalog-media": docsUrl(DOCS_SLUGS.mediaLibrary),
   linkedin: SOCIAL,
   instagram: SOCIAL,
 };

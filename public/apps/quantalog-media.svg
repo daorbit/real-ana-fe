@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Media">
+  <rect width="256" height="256" rx="56" fill="#7C3AED"/>
+  <rect x="64" y="70" width="128" height="116" rx="20" fill="#FFFFFF"/>
+  <path d="M82 166 114 128 136 152 150 138 174 166z" fill="#7C3AED" stroke="#7C3AED" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="154" cy="104" r="12" fill="#7C3AED" fill-opacity="0.55"/>
+</svg>

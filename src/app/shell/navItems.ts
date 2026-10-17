@@ -66,7 +66,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
       { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText },
       { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette },
-      { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images },
+      { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images, app: "media" },
       { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
       { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: Settings },

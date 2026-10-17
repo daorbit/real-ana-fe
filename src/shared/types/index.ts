@@ -1066,7 +1066,7 @@ export type Workspace = {
   apps?: WorkspaceApps;
 };
 
-export type WorkspaceAppId = "compare" | "goals" | "notes" | "reviews" | "links";
+export type WorkspaceAppId = "compare" | "goals" | "notes" | "reviews" | "links" | "media";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string }>>;
 

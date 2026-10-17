@@ -14,6 +14,8 @@ import {
 } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
+import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
@@ -46,6 +48,21 @@ const KIND_LABELS: Record<MediaKind | "all", string> = {
  * this page owns uploading, naming and deleting — and nothing else has to.
  */
 export default function MediaLibraryPage() {
+  const { media: mediaOn } = useWorkspaceApps();
+  return mediaOn ? <MediaLibrary /> : <MediaAppOff />;
+}
+
+function MediaAppOff() {
+  useTitle("Media");
+  return (
+    <AppShell>
+      <PageHeader title="Media" description="Your workspace's images, videos and files in one place." docsPath={DOCS_SLUGS.mediaLibrary} />
+      <QuantalogAppGate app="media" />
+    </AppShell>
+  );
+}
+
+function MediaLibrary() {
   useTitle("Media");
   const { active } = useWorkspace();
   const perms = usePermissions();
