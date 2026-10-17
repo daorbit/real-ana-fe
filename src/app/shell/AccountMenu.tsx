@@ -12,7 +12,7 @@ import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { CONTACT_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
 import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import type { ThemeMode } from "@/shared/lib/theme";
-import { ADMIN_TOOLS_PATH } from "@/features/admin/lib/adminTabs";
+import { ADMIN_TOOLS_PATH } from "@/features/admin/lib/adminSections";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { RequestFeatureModal } from "./RequestFeatureModal";
 import { DemoCallBanner } from "./DemoCallBanner";

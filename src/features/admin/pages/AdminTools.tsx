@@ -1,46 +1,72 @@
-import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from "react";
+import { lazy, Suspense, useEffect, type ComponentType } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
-import { PageTabs } from "@/shared/ui/PageTabs";
-import { pageTabId, pageTabPanelId } from "@/shared/ui/pageTabIds";
-import { ListSkeleton } from "@/shared/ui/Skeletons";
-import { ADMIN_TABS, adminToolPath, isAdminTab, type AdminTabId } from "../lib/adminTabs";
+import { PageHeader } from "@/shared/ui/Page";
+import { useTitle } from "@/shared/lib/useTitle";
+import { onIdle } from "@/shared/lib/idle";
+import { useIsPlatformAdmin } from "@/features/auth/context";
+import { SuperAdminOnly } from "@/features/referralAdmin/components/SuperAdminOnly";
+import { AdminNav } from "../components/layout/AdminNav";
+import { adminSectionMeta, adminSectionPath, resolveAdminSection, type AdminSectionId } from "../lib/adminSections";
+import classes from "../components/layout/AdminLayout.module.css";
 
-const TABS_ID = "admin-tools";
+type PanelModule = Promise<{ default: ComponentType }>;
 
-const PANELS: Record<AdminTabId, LazyExoticComponent<ComponentType>> = {
-  email: lazy(() => import("@/features/admin/pages/AdminBroadcast")),
-  impersonate: lazy(() => import("@/features/admin/pages/Impersonate")),
-  "demo-usage": lazy(() => import("@/features/admin/pages/DemoUsage")),
-  plans: lazy(() => import("@/features/admin/pages/AdminBilling")),
-  referrals: lazy(() => import("@/features/referralAdmin/pages/AdminReferrals")),
-  database: lazy(() => import("@/features/admin/pages/AdminDatabase")),
+const IMPORTERS: Record<AdminSectionId, () => PanelModule> = {
+  users: () => import("../components/panels/UsersPanel"),
+  email: () => import("../components/panels/EmailPanel"),
+  plans: () => import("../components/panels/PlansPanel"),
+  addons: () => import("../components/panels/AddonsPanel"),
+  coupons: () => import("../components/panels/CouponsPanel"),
+  referrals: () => import("../components/panels/ReferralsPanel"),
+  demo: () => import("../components/panels/DemoPanel"),
+  database: () => import("../components/panels/DatabasePanel"),
 };
 
+const PANELS = Object.fromEntries(
+  Object.entries(IMPORTERS).map(([id, load]) => [id, lazy(load)]),
+) as Record<AdminSectionId, ComponentType>;
+
+function usePreloadPanels(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    return onIdle(() => {
+      Object.values(IMPORTERS).forEach((load) => void load().catch(() => undefined));
+    });
+  }, [enabled]);
+}
+
 export default function AdminTools() {
-  const { t } = useTranslation();
-  const { tab } = useParams<{ tab?: string }>();
+  const { section: raw } = useParams<{ section?: string }>();
   const { search } = useLocation();
   const navigate = useNavigate();
+  const isAdmin = useIsPlatformAdmin();
+  const section = resolveAdminSection(raw);
+  useTitle(section ? `${adminSectionMeta(section).label} · Admin` : "Admin");
+  usePreloadPanels(isAdmin);
 
-  if (!isAdminTab(tab)) return <Navigate to={`${adminToolPath()}${search}`} replace />;
+  if (!isAdmin) {
+    return (
+      <AppShell>
+        <SuperAdminOnly />
+      </AppShell>
+    );
+  }
 
-  const Panel = PANELS[tab];
+  if (!section || section !== raw) return <Navigate to={`${adminSectionPath(section ?? undefined)}${search}`} replace />;
+
+  const Panel = PANELS[section];
 
   return (
     <AppShell>
-      <PageTabs
-        items={ADMIN_TABS.map((item) => ({ id: item.id, label: t(item.labelKey, item.label), icon: item.icon }))}
-        active={tab}
-        onChange={(next) => navigate(adminToolPath(next), { replace: true })}
-        label={t("nav.adminTools", "Admin tools")}
-        idPrefix={TABS_ID}
-      />
-      <div role="tabpanel" id={pageTabPanelId(TABS_ID, tab)} aria-labelledby={pageTabId(TABS_ID, tab)}>
-        <Suspense fallback={<ListSkeleton rows={6} />}>
-          <Panel />
-        </Suspense>
+      <PageHeader title="Admin" description="Run the platform: the people on it, what they pay, and how the system is holding up." />
+      <div className={classes.layout}>
+        <AdminNav active={section} onSelect={(next) => navigate(adminSectionPath(next), { replace: true })} />
+        <div className={classes.content}>
+          <Suspense fallback={null}>
+            <Panel />
+          </Suspense>
+        </div>
       </div>
     </AppShell>
   );

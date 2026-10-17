@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
-import { ADMIN_TABS, adminToolPath } from "@/features/admin/lib/adminTabs";
+import { ADMIN_SECTIONS, adminSectionPath } from "@/features/admin/lib/adminSections";
 import { LeadMagnetIcon } from "./icons";
 
 
@@ -76,9 +76,9 @@ export const NAV_GROUPS: NavGroup[] = [
 ];
 
 
-export const ADMIN_ITEMS: NavItem[] = ADMIN_TABS.map((tab) => ({
-  to: adminToolPath(tab.id),
-  labelKey: tab.labelKey,
-  label: tab.label,
-  icon: tab.icon,
+export const ADMIN_ITEMS: NavItem[] = ADMIN_SECTIONS.map((section) => ({
+  to: adminSectionPath(section.id),
+  labelKey: section.labelKey,
+  label: section.label,
+  icon: section.icon,
 }));

@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Text, TextInput, Stack, Center, Loader, ThemeIcon, SegmentedControl, Pagination, Button, Tooltip,
-  ActionIcon, CloseButton,
-} from "@mantine/core";
+import { Text, TextInput, Stack, Center, Loader, ThemeIcon, SegmentedControl, Pagination, CloseButton } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { Search, SearchX, ShieldAlert, RefreshCw } from "lucide-react";
-import { AppShell } from "@/app/AppShell";
-import { PageHeader } from "@/shared/ui/Page";
+import { Search, SearchX } from "lucide-react";
 import { EmailComposer } from "@/features/admin/components/EmailComposer";
 import { AdminPlanDialog } from "@/features/admin/components/AdminPlanDialog";
 import { UsersTable } from "@/features/admin/components/users/UsersTable";
@@ -15,7 +9,8 @@ import { UserMobileList } from "@/features/admin/components/users/UserMobileList
 import { FilterChips } from "@/shared/ui/FilterChips";
 import { useAdminUserActions } from "@/features/admin/useAdminUserActions";
 import { useGetAdminUsersQuery } from "@/app/store";
-import { useIsPlatformAdmin } from "@/features/auth/context";
+import { AdminSection } from "../layout/AdminSection";
+import { AdminRefreshButton } from "../layout/AdminRefreshButton";
 import classes from "@/features/admin/components/Admin.module.css";
 
 const USERS_PER_PAGE = 10;
@@ -26,8 +21,7 @@ const ROLE_FILTERS = [
   { label: "Admins", value: "admin" },
 ];
 
-export default function Impersonate() {
-  const navigate = useNavigate();
+export default function UsersPanel() {
   const mobile = useMediaQuery("(max-width: 48em)") ?? false;
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
@@ -42,46 +36,16 @@ export default function Impersonate() {
 
   useEffect(() => setPage(1), [search, role]);
 
-  const isAdmin = useIsPlatformAdmin();
-
-  const { data, isLoading, isFetching, refetch } = useGetAdminUsersQuery(
-    { q: search || undefined, role: role || undefined, page },
-    { skip: !isAdmin }
-  );
-
-  if (!isAdmin) {
-    return (
-      <AppShell>
-        <Center mih="60vh">
-          <Stack align="center" gap="sm">
-            <ThemeIcon variant="light" color="gray" size={56} radius="md">
-              <ShieldAlert size={28} />
-            </ThemeIcon>
-            <Text fw={600}>Admins only</Text>
-            <Text c="dimmed" size="sm">This page isn't available on your account.</Text>
-            <Button variant="light" onClick={() => navigate("/app")}>Back to Home</Button>
-          </Stack>
-        </Center>
-      </AppShell>
-    );
-  }
+  const { data, isLoading, isFetching, refetch } = useGetAdminUsersQuery({
+    q: search || undefined,
+    role: role || undefined,
+    page,
+  });
 
   const users = data?.users ?? [];
 
   return (
-    <AppShell>
-      <PageHeader
-        title="Users"
-        description="Every account on the platform. Open the dashboard as one, or delete one."
-        actions={
-          <Tooltip label="Refetch">
-            <ActionIcon variant="light" color="gray" size="lg" radius="md" loading={isFetching} onClick={refetch} aria-label="Refetch">
-              <RefreshCw size={15} />
-            </ActionIcon>
-          </Tooltip>
-        }
-      />
-
+    <AdminSection id="users" actions={<AdminRefreshButton onClick={refetch} loading={isFetching} />}>
       <EmailComposer
         key={actions.messaging?.id}
         opened={Boolean(actions.messaging)}
@@ -106,14 +70,7 @@ export default function Impersonate() {
             <FilterChips value={role} onChange={setRole} data={ROLE_FILTERS} ariaLabel="Filter by role" />
           </div>
         ) : (
-          <SegmentedControl
-            size="sm"
-            radius="md"
-            color="emerald"
-            value={role}
-            onChange={setRole}
-            data={ROLE_FILTERS}
-          />
+          <SegmentedControl size="sm" radius="md" value={role} onChange={setRole} data={ROLE_FILTERS} />
         )}
       </div>
 
@@ -143,8 +100,7 @@ export default function Impersonate() {
               <Text size="sm" c="dimmed">
                 Showing{" "}
                 <Text span fw={600} c="var(--text)">
-                  {(page - 1) * USERS_PER_PAGE + 1}–
-                  {Math.min(page * USERS_PER_PAGE, data.total)}
+                  {(page - 1) * USERS_PER_PAGE + 1}–{Math.min(page * USERS_PER_PAGE, data.total)}
                 </Text>{" "}
                 of{" "}
                 <Text span fw={600} c="var(--text)">
@@ -157,7 +113,6 @@ export default function Impersonate() {
                 <Pagination
                   size={mobile ? "sm" : "md"}
                   radius="md"
-                  color="emerald"
                   value={page}
                   onChange={setPage}
                   total={data.pages}
@@ -169,6 +124,6 @@ export default function Impersonate() {
           )}
         </>
       )}
-    </AppShell>
+    </AdminSection>
   );
 }

@@ -15,7 +15,7 @@ import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { NotFound } from "@/shared/ui/NotFound";
 import { AppBootSkeleton } from "@/shared/ui/Skeletons";
 import { ShellLayout } from "@/app/shell/ShellLayout";
-import { ADMIN_TABS } from "@/features/admin/lib/adminTabs";
+import { LEGACY_ADMIN_PATHS } from "@/features/admin/lib/adminSections";
 import { LegacyAdminRedirect } from "@/features/admin/components/LegacyAdminRedirect";
 import { consumeWelcomePending } from "@/shared/ui/welcomePending";
 import "@/app/App.css";
@@ -294,9 +294,9 @@ export default function App() {
                 <Route path="/app/billing" element={<Billing />} />
                 <Route path="/app/billing/plans" element={<ComparePlans />} />
                 {/* Admin-only, enforced by the page and by every /api/admin route. */}
-                <Route path="/app/admin-tools/:tab?" element={<AdminTools />} />
-                {ADMIN_TABS.map((tab) => (
-                  <Route key={tab.id} path={tab.legacyPath} element={<LegacyAdminRedirect tab={tab.id} />} />
+                <Route path="/app/admin-tools/:section?" element={<AdminTools />} />
+                {LEGACY_ADMIN_PATHS.map((legacy) => (
+                  <Route key={legacy.path} path={legacy.path} element={<LegacyAdminRedirect section={legacy.section} />} />
                 ))}
               </Route>
               <Route path="*" element={<NotFound />} />

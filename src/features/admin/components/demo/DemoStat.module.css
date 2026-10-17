@@ -1,0 +1,26 @@
+.value {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.value[data-tone="warn"] {
+  color: var(--mantine-color-yellow-5);
+}
+
+.limitRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.limitText {
+  flex: 1 1 320px;
+  min-width: 0;
+}
