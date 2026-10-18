@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { getPageHelp } from "@/shared/ui/pageHelp";
+import { useHeaderHelp, useRegisterHeaderHelp } from "@/shared/lib/headerHelp";
 
 /**
  * The "what's on this page" button, for pages whose help is a fixed set of
@@ -27,6 +28,7 @@ export function PageHelpButton() {
   // Re-resolved each render so switching language re-translates an open drawer
   // rather than leaving it in the language it was opened in.
   const help = getPageHelp(loc.pathname, t);
+  useRegisterHeaderHelp(help ? () => setOpened(true) : null);
   if (!help) return null;
 
   const label = t("nav.pageHelp");
@@ -40,6 +42,7 @@ export function PageHelpButton() {
           radius="md"
           onClick={() => setOpened(true)}
           aria-label={label}
+          className="page-help-button"
         >
           <HelpCircle size={17} />
         </ActionIcon>
@@ -51,5 +54,17 @@ export function PageHelpButton() {
         sections={help.sections}
       />
     </>
+  );
+}
+
+export function HeaderHelpButton() {
+  const { t } = useTranslation();
+  const open = useHeaderHelp();
+  if (!open) return null;
+
+  return (
+    <ActionIcon variant="subtle" color="gray" size="lg" radius="md" onClick={open} aria-label={t("nav.pageHelp")}>
+      <HelpCircle size={19} />
+    </ActionIcon>
   );
 }

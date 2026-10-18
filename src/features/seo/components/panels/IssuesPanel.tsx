@@ -1,23 +1,17 @@
 import { useMemo, useState } from "react";
 import {
-  ActionIcon, Anchor, Badge, Box, Button, Card, CopyButton, Group, ScrollArea,
-  SegmentedControl, Stack, Table, Text, ThemeIcon, Tooltip,
+  Anchor, Badge, Box, Button, Card, CopyButton, Group, ScrollArea,
+  SegmentedControl, Stack, Table, Text, ThemeIcon,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { Check, CircleCheck, Copy } from "lucide-react";
 import type { SeoReportData } from "@/shared/types";
 import { SEVERITY } from "@/features/seo/components/shared/Panel";
 import { EmptyState } from "@/shared/ui/EmptyState";
-import { AskOrbitButton } from "@/features/orbit/components/AskOrbitButton";
-
-type Severity = "critical" | "warning" | "info";
-
-type Row = {
-  severity: Severity;
-  source: string;
-  title: string;
-  detail: string;
-  url?: string;
-};
+import { listText, type IssueRow as Row, type IssueSeverity as Severity } from "./issueText";
+import { IssueRowActions } from "./IssueRowActions";
+import { IssueListMobile } from "./IssueList.mobile";
+import classes from "./IssuesPanel.module.css";
 
 const ORDER: Record<Severity, number> = { critical: 0, warning: 1, info: 2 };
 
@@ -113,26 +107,9 @@ export function collectIssues(data: SeoReportData): Row[] {
   return rows;
 }
 
-/**
- * One issue as plain text, for pasting into a ticket or a message.
- *
- * Severity and source lead the line because they are what someone triaging the
- * paste reads first; the URL trails on its own line so it stays clickable in
- * clients that linkify.
- */
-function issueText(row: Row): string {
-  const head = `[${SEVERITY[row.severity].label} · ${row.source}] ${row.title}`;
-  return [head, row.detail, row.url].filter(Boolean).join("\n");
-}
-
-/** The visible list as one block, numbered to match what is on screen. */
-function listText(rows: Row[], heading: string): string {
-  return [heading, "", ...rows.map((r, i) => `${i + 1}. ${issueText(r)}`)].join("\n");
-}
-
-
 export function IssuesPanel({ data }: { data: SeoReportData }) {
   const [filter, setFilter] = useState<Filter>("all");
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
 
   const all = useMemo(() => collectIssues(data), [data]);
 
@@ -170,8 +147,8 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
 
   return (
     <Stack gap="md">
-      <Group justify="space-between" wrap="wrap" gap="sm">
-        <Group gap={6}>
+      <div className={classes.toolbar}>
+        <Group gap={6} className={classes.summary}>
           <Text size="sm" fw={600}>
             {counts.all} issue{counts.all === 1 ? "" : "s"}
           </Text>
@@ -192,17 +169,19 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
           )}
         </Group>
 
-        <Group gap="xs" wrap="nowrap">
+        <div className={classes.controls}>
           <SegmentedControl
             size="xs"
             radius="md"
+            fullWidth={mobile}
+            className={classes.filter}
             value={filter}
             onChange={(v) => setFilter(v as Filter)}
             data={[
-              { value: "all", label: `All (${counts.all})` },
-              { value: "critical", label: `Critical (${counts.critical})` },
-              { value: "warning", label: `Warnings (${counts.warning})` },
-              { value: "info", label: `Notes (${counts.info})` },
+              { value: "all", label: mobile ? "All" : `All (${counts.all})` },
+              { value: "critical", label: mobile ? "Critical" : `Critical (${counts.critical})` },
+              { value: "warning", label: mobile ? "Warnings" : `Warnings (${counts.warning})` },
+              { value: "info", label: mobile ? "Notes" : `Notes (${counts.info})` },
             ]}
           />
 
@@ -217,14 +196,15 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
                 color={copied ? "teal" : undefined}
                 onClick={copy}
                 disabled={!rows.length}
+                className={classes.copy}
                 leftSection={copied ? <Check size={14} /> : <Copy size={14} />}
               >
                 {copied ? "Copied" : "Copy all"}
               </Button>
             )}
           </CopyButton>
-        </Group>
-      </Group>
+        </div>
+      </div>
 
       {!rows.length ? (
         <EmptyState
@@ -233,6 +213,8 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
           title="Nothing at this severity"
           description="Switch the filter to see the rest of the findings."
         />
+      ) : mobile ? (
+        <IssueListMobile rows={rows} />
       ) : (
         <Card withBorder radius="md" padding={0}>
           <ScrollArea>
@@ -298,32 +280,7 @@ export function IssuesPanel({ data }: { data: SeoReportData }) {
                         </Box>
                       </Table.Td>
                       <Table.Td>
-                        <Group gap={2} wrap="nowrap" justify="flex-end">
-                        <AskOrbitButton
-                          iconOnly
-                          label="Ask Orbit how to fix this"
-                          question={`My SEO audit flagged: "${row.title}". ${row.detail} How do I fix this?`}
-                        />
-                        <CopyButton value={issueText(row)}>
-                          {({ copied, copy }) => (
-                            <Tooltip
-                              label={copied ? "Copied" : "Copy this issue"}
-                              withArrow
-                              position="left"
-                            >
-                              <ActionIcon
-                                variant="subtle"
-                                size="sm"
-                                color={copied ? "teal" : "gray"}
-                                onClick={copy}
-                                aria-label="Copy this issue"
-                              >
-                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                              </ActionIcon>
-                            </Tooltip>
-                          )}
-                        </CopyButton>
-                        </Group>
+                        <IssueRowActions row={row} />
                       </Table.Td>
                     </Table.Tr>
                   );

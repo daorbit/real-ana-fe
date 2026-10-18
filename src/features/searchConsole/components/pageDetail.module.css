@@ -292,3 +292,9 @@
     height: 40px;
   }
 }
+
+@media (max-width: 48em) {
+  .title {
+    font-size: 20px;
+  }
+}

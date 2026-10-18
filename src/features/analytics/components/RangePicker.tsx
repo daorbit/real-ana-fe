@@ -96,7 +96,7 @@ export function RangePicker({
 
   return (
     <>
-      <Group gap="xs" wrap="nowrap">
+      <Group gap="xs" wrap="nowrap" className="range-picker">
         {/* A plain SegmentedControl can't grey out one option while keeping
             the others clickable, so this is hand-rolled from buttons. */}
         <Group gap={2} wrap="nowrap" className="range-segmented">

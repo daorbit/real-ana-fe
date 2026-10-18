@@ -310,3 +310,9 @@
   flex-direction: column;
   gap: 10px;
 }
+
+@media (max-width: 48em) {
+  .trendValue {
+    font-size: 19px;
+  }
+}

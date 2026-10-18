@@ -17,6 +17,24 @@ export function setTitleBase(next: string) {
   render();
 }
 
+let pageName: string | null = null;
+const pageNameListeners = new Set<() => void>();
+
+export function getPageName(): string | null {
+  return pageName;
+}
+
+export function setPageName(next: string | null) {
+  if (next === pageName) return;
+  pageName = next;
+  pageNameListeners.forEach((listener) => listener());
+}
+
+export function subscribePageName(listener: () => void) {
+  pageNameListeners.add(listener);
+  return () => pageNameListeners.delete(listener);
+}
+
 export function setTitleCount(next: number) {
   if (next === count) return;
   count = next;

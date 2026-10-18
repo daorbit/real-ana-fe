@@ -18,7 +18,7 @@ import { WorkspaceMenuItems } from "./WorkspaceSwitcher";
  * the bottom for that width, and two ways to switch stacked in one column
  * would read as two different controls.
  */
-export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
+export function RailWorkspaceHeader({ collapsed, title }: { collapsed: boolean; title?: string | null }) {
   const { t } = useTranslation();
   const { workspaces, active } = useWorkspace();
   const billing = useActiveBilling();
@@ -90,6 +90,15 @@ export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
             style={{ width: 34, height: 34, flexShrink: 0, borderRadius: 8 }}
           />
 
+          {title ? (
+            <div className="rail-workspace__text">
+              <div className="rail-workspace__name rail-workspace__name--page">{title}</div>
+              <div className="rail-workspace__meta rail-workspace__switch">
+                <span>{active?.name ?? t("nav.activeWorkspace")}</span>
+                <ChevronDown size={12} />
+              </div>
+            </div>
+          ) : (
           <Box style={{ minWidth: 0, flex: 1 }}>
             <Box className="rail-workspace__name" style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <Box component="span" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -108,6 +117,7 @@ export function RailWorkspaceHeader({ collapsed }: { collapsed: boolean }) {
               </Box>
             )}
           </Box>
+          )}
         </UnstyledButton>
       </Menu.Target>
 

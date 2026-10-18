@@ -34,8 +34,10 @@ export function MobileTabBar({
             onTouchStart={() => void prefetchRoute(to)}
             onFocus={() => void prefetchRoute(to)}
           >
-            <Icon size={19} strokeWidth={active ? 2.3 : 1.8} />
-            <span>{t(labelKey, label)}</span>
+            <span className="m-tab__pill">
+              <Icon size={19} strokeWidth={active ? 2.2 : 1.7} />
+            </span>
+            <span className="m-tab__label">{t(labelKey, label)}</span>
           </Link>
         );
       })}
@@ -47,8 +49,10 @@ export function MobileTabBar({
         aria-expanded={moreOpen}
         onClick={onMore}
       >
-        <Menu size={19} strokeWidth={moreOpen || !anyTab ? 2.3 : 1.8} />
-        <span>{t("nav.more", "More")}</span>
+        <span className="m-tab__pill">
+          <Menu size={19} strokeWidth={moreOpen || !anyTab ? 2.2 : 1.7} />
+        </span>
+        <span className="m-tab__label">{t("nav.more", "More")}</span>
       </UnstyledButton>
     </nav>
   );

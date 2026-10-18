@@ -87,22 +87,24 @@ export function SearchConsoleToolbar({
           type={type}
           onOpen={onOpenPage}
         />
-        <Select
-          size="sm"
-          className={classes.typeSelect}
-          aria-label="Search type"
-          data={SEARCH_TYPE_OPTIONS}
-          value={type}
-          onChange={(v) => v && onTypeChange(v as SearchType)}
-          allowDeselect={false}
-          disabled={refreshing}
-        />
-        <SearchRangeSelect
-          className={classes.rangeSelect}
-          days={days}
-          onChange={onDaysChange}
-          disabled={refreshing}
-        />
+        <div className={classes.filters}>
+          <Select
+            size="sm"
+            className={classes.typeSelect}
+            aria-label="Search type"
+            data={SEARCH_TYPE_OPTIONS}
+            value={type}
+            onChange={(v) => v && onTypeChange(v as SearchType)}
+            allowDeselect={false}
+            disabled={refreshing}
+          />
+          <SearchRangeSelect
+            className={classes.rangeSelect}
+            days={days}
+            onChange={onDaysChange}
+            disabled={refreshing}
+          />
+        </div>
         <Tooltip label="Fetch the latest from Google" withArrow>
           <ActionIcon
             variant="default"

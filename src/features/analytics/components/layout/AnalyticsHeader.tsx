@@ -6,6 +6,7 @@ import { RefreshButton } from "@/shared/ui/Refresh";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
+import { useRegisterHeaderHelp } from "@/shared/lib/headerHelp";
 import classes from "./AnalyticsLayout.module.css";
 
 export function AnalyticsHeader({
@@ -24,6 +25,7 @@ export function AnalyticsHeader({
   onHelp: () => void;
 }) {
   const { t } = useTranslation();
+  useRegisterHeaderHelp(onHelp);
 
   return (
     <header className={classes.header}>
@@ -36,7 +38,7 @@ export function AnalyticsHeader({
         <RefreshButton onRefresh={onRefresh} refreshing={refreshing} lastUpdated={lastUpdated} />
         {exportMenu}
         <Tooltip label={t("analytics.helpTooltip")} withArrow>
-          <ActionIcon variant="default" size="lg" onClick={onHelp} aria-label={t("analytics.help")}>
+          <ActionIcon variant="default" size="lg" onClick={onHelp} aria-label={t("analytics.help")} className="page-help-button">
             <HelpCircle size={17} />
           </ActionIcon>
         </Tooltip>

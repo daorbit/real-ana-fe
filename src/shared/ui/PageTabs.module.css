@@ -99,8 +99,8 @@
 
 @media (max-width: 48em) {
   .tabbarWrap {
-    top: calc(var(--mantine-spacing-sm) * -1);
-    margin-inline: calc(var(--mantine-spacing-sm) * -1);
-    padding: var(--mantine-spacing-sm) var(--mantine-spacing-sm) 0;
+    top: -12px;
+    margin-inline: calc(var(--m-gutter) * -1);
+    padding: 12px var(--m-gutter) 0;
   }
 }

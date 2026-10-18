@@ -5,6 +5,7 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
+import { useRegisterHeaderHelp } from "@/shared/lib/headerHelp";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { SitesLoadError } from "@/features/workspace";
@@ -52,6 +53,7 @@ export default function Compare() {
 
   const [picked, setPicked] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
+  useRegisterHeaderHelp(() => setHelpOpen(true));
   const [pickedCompetitor, setPickedCompetitor] = useState<string | null>(null);
 
   const site = sites.find((s) => s.siteId === picked) ?? sites[0] ?? null;
@@ -121,6 +123,7 @@ export default function Compare() {
                 size="lg"
                 onClick={() => setHelpOpen(true)}
                 aria-label="How comparison scoring works"
+                className="page-help-button"
               >
                 <HelpCircle size={18} />
               </ActionIcon>

@@ -4,11 +4,11 @@ import { LayoutGrid, Search } from "lucide-react";
 import { ALL_CATEGORIES, type ConnectionFilter, type StatusFilter } from "../../lib/filter";
 import classes from "./ConnectionsToolbar.module.css";
 
-const STATUS_LABELS: { value: StatusFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "connected", label: "Connected" },
-  { value: "attention", label: "Needs attention" },
-  { value: "available", label: "Not connected" },
+const STATUS_LABELS: { value: StatusFilter; label: string; short: string }[] = [
+  { value: "all", label: "All", short: "All" },
+  { value: "connected", label: "Connected", short: "On" },
+  { value: "attention", label: "Needs attention", short: "Issues" },
+  { value: "available", label: "Not connected", short: "Off" },
 ];
 
 interface Props {
@@ -75,7 +75,8 @@ export function ConnectionsToolbar({ filter, counts, categories, onChange }: Pro
           value: option.value,
           label: (
             <span>
-              {option.label}
+              <span className={classes.full}>{option.label}</span>
+              <span className={classes.short}>{option.short}</span>
               {counts && <span className={classes.count}>{counts[option.value]}</span>}
             </span>
           ),

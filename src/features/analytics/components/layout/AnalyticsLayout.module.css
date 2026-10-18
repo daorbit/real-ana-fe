@@ -247,8 +247,22 @@
 
 @media (max-width: 48em) {
   .deck {
-    margin-inline: calc(var(--mantine-spacing-sm) * -1);
-    padding: var(--mantine-spacing-sm) var(--mantine-spacing-sm) 0;
+    top: var(--deck-pin, -12px);
+    margin-inline: calc(var(--m-gutter) * -1);
+    padding: 12px var(--m-gutter) 0;
+    background: var(--shell);
+  }
+
+  .deck[data-stuck] {
+    box-shadow: none;
+  }
+
+  .bar {
+    border-bottom: 0.5px solid var(--m-separator, var(--border));
+  }
+
+  .headerText {
+    display: none;
   }
 
   .header .actions {
@@ -264,6 +278,27 @@
 
   .header .actions > * {
     flex-shrink: 0;
+  }
+
+  .bar .controls {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0 12px;
+    overflow: visible;
+  }
+
+  .bar .controls > * {
+    flex: 1 1 100%;
+  }
+
+  .bar .controls > :global(.mantine-Loader-root) {
+    display: none;
+  }
+
+  .tab {
+    padding: 12px 2px;
+    margin-right: 18px;
+    font-size: 13px;
   }
 
   .subRow {

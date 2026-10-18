@@ -23,19 +23,19 @@ export function PageHeader({
   docsPath?: DocsSlug;
 }) {
   return (
-    <Box mb="xl">
+    <Box mb="xl" className={classes.header}>
       <Group justify="space-between" align="flex-start" gap="md" wrap="wrap">
         <div className={classes.titleCol}>
           <Title order={1} className={classes.title}>
             {title}
           </Title>
           {description && (
-            <Text c="dimmed" size="sm" mt={6}>
+            <Text c="dimmed" size="sm" mt={6} className={classes.description}>
               {description}
             </Text>
           )}
         </div>
-        <Group gap="sm" wrap="wrap" justify="flex-end">
+        <Group gap="sm" wrap="wrap" justify="flex-end" className={classes.actions}>
           {actions}
           <Group gap="sm" wrap="nowrap" visibleFrom="sm">
             <DocsButton path={docsPath} />

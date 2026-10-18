@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { AppShell as MantineShell, Box, Group, Overlay } from "@mantine/core";
+import { AppShell as MantineShell, Box, Overlay } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
@@ -23,9 +23,8 @@ import { TabBadge } from "@/features/activity/TabBadge";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
-import { RailWorkspaceHeader } from "./shell/RailWorkspaceHeader";
-import { ActivityBellIcon } from "@/features/activity/ActivityBell";
-import { HeaderDocsButton } from "@/shared/ui/DocsButton";
+import { MobileAppBar } from "./shell/mobile/MobileAppBar";
+import { useStuck } from "@/shared/lib/useStuck";
 import { RailAutoCollapseContext, ShellMountedContext } from "./shell/ShellContext";
 import { routeKey } from "./routeKey";
 
@@ -84,12 +83,12 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const motionOff = useRouteMotionOff();
 
   const scroller = useRef<HTMLDivElement>(null);
+  const { sentinel: scrollTop, stuck: scrolled } = useStuck();
 
   useSyncWorkspaceTheme(active?._id);
   const [navOpen, { toggle: toggleNav, close: closeNav }] =
     useDisclosure(false);
-  const pageKey = routeKey(loc.pathname);
-  useEffect(() => {
+  const pageKey = routeKey(loc.pathname);  useEffect(() => {
     closeNav();
   }, [loc.pathname, closeNav]);
   useEffect(() => {
@@ -113,7 +112,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         />
       )}
       <MantineShell
-        header={{ height: { base: 48, sm: 0 } }}
+        header={{ height: { base: "calc(3rem + env(safe-area-inset-top))", sm: 0 } }}
         navbar={{
           width: collapsed ? 72 : 264,
           breakpoint: "sm",
@@ -122,28 +121,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         padding="sm"
         data-nav-open={navOpen || undefined}
       >
-        <MantineShell.Header
-          px="xs"
-          hiddenFrom="sm"
-          className="m-header"
-          style={{
-            background: "var(--bg)",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          {/* No burger: the tab bar's "More" opens the drawer on a phone. The
-              workspace row takes the wordmark's place, so the mark, the
-              workspace and its plan are on screen here as they are in the rail. */}
-          <Group h="100%" gap="sm" wrap="nowrap">
-            <Box style={{ minWidth: 0, flex: 1 }}>
-              <RailWorkspaceHeader collapsed={false} />
-            </Box>
-            <Box className="m-header__bell">
-              <HeaderDocsButton />
-              <ActivityBellIcon variant="subtle" size="lg" iconSize={19} withTooltip={false} />
-            </Box>
-          </Group>
-        </MantineShell.Header>
+        <MobileAppBar pathname={loc.pathname} scrolled={scrolled} />
 
         <Rail
           pathname={loc.pathname}
@@ -194,6 +172,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
               <Starfield variant="app" count={70} scrollTarget={scroller} />
             )}
             <div className="app-panel__scroll" ref={scroller}>
+              <div ref={scrollTop} className="app-panel__top" aria-hidden />
               <PlanExpiryNotice />
               <QuotaNudge />
               <motion.div

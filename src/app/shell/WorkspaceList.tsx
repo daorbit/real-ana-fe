@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Menu, TextInput } from "@mantine/core";
 import { Check, Search } from "lucide-react";
-import { workspaceInitial } from "@/features/workspace/workspaceMarks";
 import classes from "./WorkspaceList.module.css";
 
 const SEARCH_FROM = 6;
@@ -62,11 +61,6 @@ export function WorkspaceList({
               key={w._id}
               data-ws-item
               onClick={() => onPick(w._id)}
-              leftSection={
-                <span aria-hidden className="ws-menu__mark">
-                  {workspaceInitial(w.name)}
-                </span>
-              }
               rightSection={
                 current ? (
                   <Check size={15} className={classes.check} />

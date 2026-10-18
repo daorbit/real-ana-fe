@@ -553,3 +553,15 @@
     margin-left: 48px;
   }
 }
+
+@media (max-width: 48em) {
+  .summaryTitle {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .highlightValue,
+  .bandValue {
+    font-size: 21px;
+  }
+}

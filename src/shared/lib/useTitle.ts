@@ -1,5 +1,7 @@
-import { useEffect } from "react";
-import { TITLE_SUFFIX, getTitleBase, setTitleBase } from "@/shared/lib/tabTitle";
+import { useEffect, useSyncExternalStore } from "react";
+import {
+  TITLE_SUFFIX, getPageName, getTitleBase, setPageName, setTitleBase, subscribePageName,
+} from "@/shared/lib/tabTitle";
 
 /**
  * Sets the browser tab title for the page that mounts this, and restores the
@@ -12,9 +14,16 @@ import { TITLE_SUFFIX, getTitleBase, setTitleBase } from "@/shared/lib/tabTitle"
 export function useTitle(name?: string) {
   useEffect(() => {
     const prev = getTitleBase();
+    const prevName = getPageName();
     setTitleBase(name ? `${name} · ${TITLE_SUFFIX}` : TITLE_SUFFIX);
+    setPageName(name ?? null);
     return () => {
       setTitleBase(prev);
+      setPageName(prevName);
     };
   }, [name]);
+}
+
+export function usePageName(): string | null {
+  return useSyncExternalStore(subscribePageName, getPageName);
 }

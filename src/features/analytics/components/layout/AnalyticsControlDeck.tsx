@@ -21,6 +21,16 @@ export function AnalyticsControlDeck({
 }) {
   const { sentinel, stuck } = useStuck();
   const bar = useRef<HTMLDivElement>(null);
+  const deck = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = deck.current;
+    const tabs = bar.current;
+    if (!el || !tabs) return;
+    const observer = new ResizeObserver(() => el.style.setProperty("--deck-pin", `${-tabs.offsetTop}px`));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const el = bar.current?.querySelector<HTMLElement>("[data-active]");
@@ -35,7 +45,7 @@ export function AnalyticsControlDeck({
   return (
     <>
       <div ref={sentinel} className={classes.anchor} aria-hidden />
-      <div className={classes.deck} data-stuck={stuck || undefined}>
+      <div ref={deck} className={classes.deck} data-stuck={stuck || undefined}>
         <div className={classes.bar}>
           <div ref={bar} className={classes.tabbar} role="tablist" aria-label="Analytics sections">
             {sections.map((s) => {

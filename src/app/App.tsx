@@ -24,6 +24,7 @@ import "@/app/viewTransitions.css";
 import "@/app/dropdown.css";
 // Last, so the phone layout wins over the desktop rules it adjusts.
 import "@/app/mobile.css";
+import "@/app/mobile-ios.css";
 
 // Auth screens load eagerly: they are the first thing a signed-out visitor
 // sees, and a chunk fetch there would show a blank frame before the form.

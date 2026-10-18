@@ -1,5 +1,6 @@
 import { Anchor } from "@mantine/core";
 import { PageTabs, type PageTabItem } from "@/shared/ui/PageTabs";
+import { useRegisterHeaderHelp } from "@/shared/lib/headerHelp";
 import { SEO_TABS, type SeoSubId, type SeoTab, type SeoTabId } from "../sections";
 import classes from "./SeoLayout.module.css";
 
@@ -32,6 +33,8 @@ export function SeoTabIntro({
   onHelp: () => void;
   onJump: (id: SeoSubId) => void;
 }) {
+  useRegisterHeaderHelp(onHelp);
+
   return (
     <div className={classes.intro}>
       <p className={classes.introText}>

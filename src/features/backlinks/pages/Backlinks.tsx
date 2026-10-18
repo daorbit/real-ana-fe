@@ -4,6 +4,7 @@ import { HelpCircle, Link2, Plus, RotateCw, Search } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
+import { useRegisterHeaderHelp } from "@/shared/lib/headerHelp";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -42,6 +43,7 @@ export default function Backlinks() {
   const [picked, setPicked] = useState("");
   const [tab, setTab] = useState<BacklinksTabId>("links");
   const [helpOpen, setHelpOpen] = useState(false);
+  useRegisterHeaderHelp(() => setHelpOpen(true));
 
   const site = sites.find((s) => s.siteId === picked) ?? sites[0] ?? null;
   const siteId = site?.siteId ?? "";
@@ -165,6 +167,7 @@ export default function Backlinks() {
                 size="lg"
                 onClick={() => setHelpOpen(true)}
                 aria-label="How backlink tracking works"
+                className="page-help-button"
               >
                 <HelpCircle size={18} />
               </ActionIcon>

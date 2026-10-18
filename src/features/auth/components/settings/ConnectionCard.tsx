@@ -39,8 +39,8 @@ export function ConnectionCard({ mark, brand, name, hint, badge, soon, docsUrl, 
         {mark}
       </Box>
 
-      <Group gap={8} wrap="nowrap" align="center" mt="md">
-        <Text fw={600}>{name}</Text>
+      <Group gap={8} wrap="nowrap" align="center" mt="md" className={classes.nameRow}>
+        <Text fw={600} className={classes.name}>{name}</Text>
         {soon ? (
           <Badge size="xs" variant="light" color="gray">
             Coming soon

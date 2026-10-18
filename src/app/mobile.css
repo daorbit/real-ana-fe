@@ -13,11 +13,16 @@
  */
 
 :root {
-  --m-tabbar-h: 54px;
+  --m-tabbar-h: 64px;
 }
 
 /* Hidden above the breakpoint; the component only mounts on phones anyway. */
 .m-tabbar { display: none; }
+
+.app-panel__top {
+  height: 1px;
+  margin-bottom: -1px;
+}
 
 @media (max-width: 48em) {
   /* ------------------------------------------------------------- type --- */
@@ -28,16 +33,17 @@
      covers menus and modals portalled outside the shell. --mantine-scale
      shrinks Mantine's control heights, paddings and icon boxes to match. */
   body {
-    --mantine-scale: 0.9;
+    --m-gutter: 16px;
+    --mantine-scale: 1;
     --mantine-font-size-xs: calc(11px * var(--font-scale, 1));
-    --mantine-font-size-sm: calc(12.5px * var(--font-scale, 1));
+    --mantine-font-size-sm: calc(13px * var(--font-scale, 1));
     --mantine-font-size-md: calc(14px * var(--font-scale, 1));
-    --mantine-font-size-lg: calc(16px * var(--font-scale, 1));
-    --mantine-font-size-xl: calc(18px * var(--font-scale, 1));
-    --mantine-h1-font-size: 1.4063rem;
-    --mantine-h2-font-size: 1.2188rem;
-    --mantine-h3-font-size: 1.0625rem;
-    --mantine-h4-font-size: 0.9375rem;
+    --mantine-font-size-lg: calc(15.5px * var(--font-scale, 1));
+    --mantine-font-size-xl: calc(17px * var(--font-scale, 1));
+    --mantine-h1-font-size: 1.25rem;
+    --mantine-h2-font-size: 1.0625rem;
+    --mantine-h3-font-size: 0.9688rem;
+    --mantine-h4-font-size: 0.9063rem;
     /* Tighter gutters, so cards and stacks stop eating the narrow width. */
     --mantine-spacing-xs: 8px;
     --mantine-spacing-sm: 10px;
@@ -46,11 +52,6 @@
     --mantine-spacing-xl: 22px;
   }
 
-  /* Text fields stay at 16px: below that iOS zooms the page on focus. */
-  input:not([type="checkbox"]):not([type="radio"]):not([readonly]),
-  textarea {
-    font-size: 16px !important;
-  }
 
   /* ------------------------------------------------------------ frame --- */
 
@@ -70,18 +71,18 @@
   }
 
   .app-panel__scroll {
-    padding: 12px 12px calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 16px);
+    padding: 12px var(--m-gutter) calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 24px);
   }
 
   .mantine-AppShell-navbar {
     top: auto !important;
-    bottom: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: min(82dvh, 760px) !important;
+    height: min(88dvh, 820px) !important;
     padding-top: 26px !important;
-    padding-bottom: 12px !important;
+    padding-bottom: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 8px) !important;
     border: 1px solid var(--border) !important;
     border-bottom: 0 !important;
     border-radius: 20px 20px 0 0 !important;
@@ -154,44 +155,60 @@
 
   .m-tabbar {
     position: fixed;
-    inset-inline: 0;
-    bottom: 0;
-    /* Above the drawer (101) so "More" can close what it opened. */
+    right: 16px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    left: 16px;
     z-index: 102;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    height: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: saturate(180%) blur(18px);
-    -webkit-backdrop-filter: saturate(180%) blur(18px);
-    border-top: 1px solid var(--border);
+    align-items: center;
+    max-width: 360px;
+    height: 52px;
+    margin-inline: auto;
+    padding: 0 4px;
+    border: 0.5px solid color-mix(in srgb, var(--text) 10%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.55);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
 
   .m-tab {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
     min-width: 0;
+    height: 100%;
     color: var(--muted);
     text-decoration: none;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
     transition: color 150ms ease;
   }
-  .m-tab span {
-    max-width: 100%;
+  .m-tab__pill {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    transition: background-color 200ms ease, transform 120ms ease;
+  }
+  .m-tab__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
-    text-overflow: ellipsis;
+    clip-path: inset(50%);
     white-space: nowrap;
   }
-  .m-tab[data-active="true"] { color: var(--accent); }
-  .m-tab:active svg { transform: scale(0.9); }
-  .m-tab svg { transition: transform 120ms ease; }
+  .m-tab[data-active="true"] { color: color-mix(in srgb, var(--accent-2) 70%, var(--text)); }
+  .m-tab[data-active="true"] .m-tab__pill {
+    background: color-mix(in srgb, var(--accent-2) 16%, transparent);
+  }
+  .m-tab:active .m-tab__pill { transform: scale(0.9); }
 
   /* ----------------------------------------------------------- header --- */
 
@@ -209,9 +226,33 @@
   }
   .m-header .rail-workspace__name { font-size: 12px; }
   .m-header .rail-workspace__meta { font-size: 11px; margin-top: 0; }
+  .m-header .rail-workspace__text { flex: 1; min-width: 0; }
+  .m-header .rail-workspace__name--page {
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .m-header .rail-workspace__switch {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+    color: var(--muted);
+  }
+  .m-header .rail-workspace__switch span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .m-header .rail-workspace__switch svg { flex-shrink: 0; }
   .m-header__bell { flex-shrink: 0; display: flex; align-items: center; gap: 2px; padding-right: 4px; }
   .app-panel .activity-bell,
-  .app-panel .docs-button { display: none; }
+  .app-panel .docs-button,
+  .app-panel .page-help-button { display: none; }
 
   /* -------------------------------------------------- toolbars as chips --- */
 
@@ -224,17 +265,14 @@
        gives it a line of its own, the width of the screen. */
     flex: 1 1 100%;
     min-width: 0;
-    max-width: calc(100% + 24px);
-    margin-inline: -12px;
+    max-width: calc(100% + var(--m-gutter) * 2);
+    margin-inline: calc(var(--m-gutter) * -1);
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
   .home-toolbar-btns,
-  .an-toolbar-btns,
-  .an-range {
-    /* Capped at the screen, so the row scrolls instead of growing to fit
-       its chips and being clipped. */
+  .an-toolbar-btns {
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -245,55 +283,70 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
-    padding: 2px 12px;
-    scroll-padding-inline: 12px;
+    padding: 2px var(--m-gutter);
+    scroll-padding-inline: var(--m-gutter);
   }
   .home-toolbar-btns::-webkit-scrollbar,
-  .an-toolbar-btns::-webkit-scrollbar,
-  .an-range::-webkit-scrollbar { display: none; }
+  .an-toolbar-btns::-webkit-scrollbar { display: none; }
 
   .home-toolbar-btns > *,
-  .an-toolbar-btns > *,
-  .an-range > * { flex-shrink: 0; }
+  .an-toolbar-btns > * { flex-shrink: 0; }
 
   .home-toolbar-btns .mantine-Button-root,
-  .an-toolbar-btns .mantine-Button-root,
-  .an-range .mantine-Button-root {
-    height: 30px;
+  .an-toolbar-btns .mantine-Button-root {
+    height: 34px;
     padding: 0 12px;
-    border-radius: 999px;
-    font-size: 12px;
+    border-radius: 10px;
+    font-size: 13px;
   }
   .home-toolbar-btns .mantine-ActionIcon-root,
-  .an-toolbar-btns .mantine-ActionIcon-root,
-  .an-range .mantine-ActionIcon-root {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    border-radius: 999px;
+  .an-toolbar-btns .mantine-ActionIcon-root {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 10px;
   }
-  .an-range .mantine-SegmentedControl-root {
-    flex: 0 0 auto;
-    border-radius: 999px;
+
+  .range-picker,
+  .compare-picker {
+    width: 100%;
+    min-width: 0;
   }
-  .an-range .mantine-SegmentedControl-label,
-  .an-range .mantine-SegmentedControl-label[data-active]::before { border-radius: 999px; }
-  /* The range and compare pickers' own segmented rows. */
-  .range-segmented { height: 30px; padding: 2px; flex-shrink: 0; }
-  .range-seg-btn {
-    padding: 0 10px;
-    font-size: 12px;
+  .range-picker > .range-segmented,
+  .compare-picker > .range-segmented {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    padding: 2px;
+    border-radius: 9px;
   }
-  .an-range .mantine-Button-root { height: 30px !important; }
+  .range-picker .range-seg-btn,
+  .compare-picker .range-seg-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 0 6px;
+    border-radius: 7px;
+    font-size: 13px;
+  }
+  .range-picker .mantine-Button-root,
+  .compare-picker .mantine-Button-root {
+    flex-shrink: 0;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 9px;
+    font-size: 13px;
+  }
+  .compare-picker > .mantine-Divider-root { display: none; }
 
   /* "Full analytics" is a tab now; a second way in is noise on a phone. */
   .home-toolbar-btns a[href="/app/analytics"] { display: none; }
 
   /* ------------------------------------------------------ page heads --- */
 
-  .app-panel__scroll .mantine-Title-root[data-order="1"] {
-    font-size: 1.3125rem;
-    letter-spacing: -0.02em;
+  .app-panel__scroll .mantine-Title-root[data-order="2"] {
+    font-size: 1.0625rem;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
   }
 
   /* ------------------------------------------------------- stat cards --- */
@@ -361,9 +414,9 @@
 
   /* The section switcher scrolls sideways too, to the screen edges. */
   .section-rail {
-    margin-inline: -12px;
-    padding-inline: 12px;
-    scroll-padding-inline: 12px;
+    margin-inline: calc(var(--m-gutter) * -1);
+    padding-inline: var(--m-gutter);
+    scroll-padding-inline: var(--m-gutter);
     border-radius: 0;
   }
   .section-tab {
@@ -378,8 +431,8 @@
     flex-wrap: nowrap !important;
     overflow-x: auto;
     scrollbar-width: none;
-    margin-inline: -12px;
-    padding: 2px 12px;
+    margin-inline: calc(var(--m-gutter) * -1);
+    padding: 2px var(--m-gutter);
   }
   .an-subtabs::-webkit-scrollbar { display: none; }
   .an-subtabs > * { flex-shrink: 0; }
@@ -411,9 +464,9 @@
 
   .page-header--sticky {
     top: -12px;
-    margin-inline: -12px;
+    margin-inline: calc(var(--m-gutter) * -1);
     margin-top: -12px;
-    padding: 12px 12px 0;
+    padding: 12px var(--m-gutter) 0;
   }
 
   .social-head { gap: 10px !important; }
@@ -514,13 +567,145 @@
   .share-post-body { padding-top: 16px; padding-bottom: 24px; }
 
   /* Tighter rhythm between stacked cards than the desktop's `lg` gaps. */
+  .connection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .connection-card {
+    min-width: 0;
+    padding: 14px;
+  }
+  .connection-card__mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .connection-card__mark svg,
+  .connection-card__mark img {
+    max-width: 24px;
+    max-height: 24px;
+  }
+  .connection-card .mantine-Button-root {
+    max-width: 100%;
+  }
+
   .app-panel__scroll .mantine-SimpleGrid-root {
     --sg-spacing-x: 12px !important;
     --sg-spacing-y: 12px !important;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  a,
+  button,
+  label,
+  summary,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"] {
+    touch-action: manipulation;
+  }
+
+  .app-panel__scroll {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mantine-Notifications-root[data-position="top-center"] {
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    width: calc(100% - 24px);
+  }
+
+  .mantine-Notifications-root .mantine-Notification-root {
+    border-radius: 16px;
+  }
+
+  .mantine-Menu-dropdown {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    z-index: 400 !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: 80dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 22px 10px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    border-width: 1px 0 0 !important;
+    border-radius: 22px 22px 0 0 !important;
+    transform: none !important;
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.42) !important;
+    animation: m-sheet-up 280ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .mantine-Menu-dropdown::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border-strong, var(--border));
+    transform: translateX(-50%);
+  }
+
+  .mantine-Menu-arrow { display: none; }
+
+  .mantine-Menu-item,
+  .ws-menu .mantine-Menu-item {
+    min-height: 48px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+  }
+
+  .mantine-Menu-itemSection[data-position="left"] { margin-inline-end: 12px; }
+
+  .mantine-Menu-label {
+    padding: 12px 14px 6px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .mantine-Menu-divider { margin: 6px 8px; }
+
+  .mantine-Tabs-list:not([data-orientation="vertical"]) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .mantine-Tabs-list:not([data-orientation="vertical"])::-webkit-scrollbar { display: none; }
+  .mantine-Tabs-list:not([data-orientation="vertical"]) > * { flex-shrink: 0; }
+
+  .mantine-SegmentedControl-root {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .mantine-SegmentedControl-root::-webkit-scrollbar { display: none; }
+  .mantine-SegmentedControl-control { flex-shrink: 0; }
+
+  .app-panel__scroll :has(> .mantine-Table-table) {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .app-panel__scroll .mantine-Table-th { white-space: nowrap; }
+
+  .mantine-Drawer-content {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mantine-Drawer-header {
+    padding-top: calc(var(--mantine-spacing-md) + env(safe-area-inset-top, 0px));
   }
 }
 
 @media (max-width: 48em) and (prefers-reduced-motion: reduce) {
   .m-tab,
-  .m-tab svg { transition: none; }
+  .m-tab__pill { transition: none; }
+  .mantine-Menu-dropdown { animation: none !important; }
 }

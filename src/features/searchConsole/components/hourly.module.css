@@ -123,3 +123,9 @@
     width: 100%;
   }
 }
+
+@media (max-width: 48em) {
+  .statValue {
+    font-size: 19px;
+  }
+}

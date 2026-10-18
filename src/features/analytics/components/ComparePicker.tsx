@@ -95,7 +95,7 @@ export function ComparePicker({
       : "Custom baseline";
 
   return (
-    <Group gap="xs" wrap="nowrap">
+    <Group gap="xs" wrap="nowrap" className="compare-picker">
       {/* A rule between the two pickers. They are adjacent, similarly sized and
           both end in a button that opens a calendar — without a boundary the
           row reads as one control with five parts rather than "what am I

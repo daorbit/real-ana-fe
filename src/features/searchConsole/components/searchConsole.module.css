@@ -45,6 +45,10 @@
   gap: 8px;
 }
 
+.filters {
+  display: contents;
+}
+
 .card {
   padding: 22px var(--mantine-spacing-lg) var(--mantine-spacing-lg);
   border-radius: 20px;
@@ -466,4 +470,24 @@
 .headlineDown {
   color: var(--mantine-color-red-4);
   font-weight: 600;
+}
+
+@media (max-width: 48em) {
+  .headlineTitle {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .filters {
+    display: flex;
+    flex: 1 1 100%;
+    order: -1;
+    gap: 8px;
+  }
+
+  .filters > * {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
 }

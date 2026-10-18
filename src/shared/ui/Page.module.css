@@ -29,6 +29,52 @@
   min-width: 240px;
 }
 
+@media (max-width: 48em) {
+  .header {
+    margin-bottom: var(--mantine-spacing-md);
+  }
+
+  .header:has(.actions:not(:has(> :not(:global(.mantine-visible-from-sm), :global(.page-help-button))))) {
+    margin-bottom: 0;
+  }
+
+  .titleCol {
+    display: none;
+  }
+
+  .description {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 13.5px;
+    line-height: 1.45;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .actions {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    width: calc(100% + var(--m-gutter) * 2);
+    margin-inline: calc(var(--m-gutter) * -1);
+    padding: 2px var(--m-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .actions > * {
+    flex-shrink: 0;
+  }
+
+  .actions:not(:has(> :not(:global(.mantine-visible-from-sm), :global(.page-help-button)))) {
+    display: none;
+  }
+}
+
 @media (max-width: 480px) {
   .fieldControl {
     min-width: 0;
