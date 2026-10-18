@@ -128,7 +128,7 @@
   }
 
   .content {
-    inset: auto 0 calc(var(--m-tabbar-h, 54px) + env(safe-area-inset-bottom, 0px)) 0;
+    inset: auto 0 calc(var(--m-tabbar-h, 50px) + var(--m-tabbar-inset, env(safe-area-inset-bottom, 0px))) 0;
     height: min(86%, 780px) !important;
     padding-top: 14px;
     border-bottom: 0;

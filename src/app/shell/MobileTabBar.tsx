@@ -3,17 +3,19 @@ import { UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Menu } from "lucide-react";
 import { prefetchRoute } from "@/app/routePrefetch";
+import { haptic } from "@/shared/lib/haptics";
 import { MOBILE_TABS as TABS } from "./mobileTabs";
-
 
 export function MobileTabBar({
   pathname,
   moreOpen,
   onMore,
+  onReselect,
 }: {
   pathname: string;
   moreOpen: boolean;
   onMore: () => void;
+  onReselect: () => void;
 }) {
   const { t } = useTranslation();
   const onTab = (to: string, exact?: boolean) =>
@@ -33,6 +35,12 @@ export function MobileTabBar({
             aria-current={active ? "page" : undefined}
             onTouchStart={() => void prefetchRoute(to)}
             onFocus={() => void prefetchRoute(to)}
+            onClick={(e) => {
+              haptic();
+              if (pathname !== to) return;
+              e.preventDefault();
+              onReselect();
+            }}
           >
             <span className="m-tab__pill">
               <Icon size={22} strokeWidth={active ? 2.25 : 1.75} />
@@ -47,7 +55,10 @@ export function MobileTabBar({
         // page is one of the destinations that only lives in the drawer.
         data-active={moreOpen || !anyTab}
         aria-expanded={moreOpen}
-        onClick={onMore}
+        onClick={() => {
+          haptic();
+          onMore();
+        }}
       >
         <span className="m-tab__pill">
           <Menu size={22} strokeWidth={moreOpen || !anyTab ? 2.25 : 1.75} />

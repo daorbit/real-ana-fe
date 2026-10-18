@@ -700,7 +700,7 @@
      bottom clearance — it is what lifts the composer above the tab bar — but
      trims the rest, since the chat is its own full-height layout. */
   :global(body[data-page='orbit']) :global(.app-panel__scroll) {
-    padding: 8px 12px calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px) + 6px);
+    padding: 8px 12px calc(var(--m-tabbar-h, 50px) + var(--m-tabbar-inset, env(safe-area-inset-bottom, 0px)) + 6px);
   }
 
   /* Fill exactly what the scroller leaves, rather than a viewport sum that

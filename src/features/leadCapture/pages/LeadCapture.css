@@ -10,7 +10,7 @@ body[data-page="lead-capture"] .app-panel__scroll > .route-fade {
 
 @media (max-width: 48em) {
   body[data-page="lead-capture"] .app-panel__scroll {
-    padding: 0 0 calc(var(--m-tabbar-h, 54px) + env(safe-area-inset-bottom, 0px));
+    padding: 0 0 calc(var(--m-tabbar-h, 50px) + var(--m-tabbar-inset, env(safe-area-inset-bottom, 0px)));
   }
 }
 

@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { AppShell, UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft } from "lucide-react";
@@ -7,19 +6,13 @@ import { HeaderDocsButton } from "@/shared/ui/DocsButton";
 import { HeaderHelpButton } from "@/shared/ui/PageHelpButton";
 import { usePageName } from "@/shared/lib/useTitle";
 import { RailWorkspaceHeader } from "../RailWorkspaceHeader";
-import { detailParent } from "./mobileRoute";
+import { useMobileBack } from "./useMobileBack";
 import classes from "./MobileAppBar.module.css";
 
 export function MobileAppBar({ pathname, scrolled }: { pathname: string; scrolled: boolean }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const parent = detailParent(pathname);
+  const { parent, goBack } = useMobileBack(pathname);
   const pageName = usePageName();
-
-  const goBack = () => {
-    if ((window.history.state?.idx ?? 0) > 0) navigate(-1);
-    else if (parent) navigate(parent.to);
-  };
 
   const parentLabel = parent ? (parent.linkUrl ? parent.label : t(parent.labelKey, parent.label)) : "";
 

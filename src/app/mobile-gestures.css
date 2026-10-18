@@ -1,0 +1,102 @@
+.m-ptr {
+  display: none;
+}
+
+@media (max-width: 48em) {
+  .m-ptr {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-2);
+    box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.45);
+    opacity: min(1, calc(var(--ptr, 0) / 48));
+    pointer-events: none;
+    transform: translate(-50%, calc(var(--ptr, 0) * 1px - 40px));
+    transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1), opacity 200ms ease;
+  }
+
+  .m-ptr[data-state="pulling"] {
+    transition: none;
+  }
+
+  .m-ptr svg {
+    transform: rotate(calc(var(--ptr, 0) * 4deg));
+    transition: color 150ms ease;
+  }
+
+  .m-ptr[data-ready="true"] {
+    color: var(--accent-2);
+  }
+
+  .m-ptr[data-state="refreshing"] svg {
+    animation: m-ptr-spin 700ms linear infinite;
+  }
+
+  @keyframes m-ptr-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .app-panel[data-swipe="dragging"],
+  .app-panel[data-swipe="settling"] {
+    transform: translateX(var(--swipe-x, 0px));
+    box-shadow: -18px 0 40px -18px rgba(0, 0, 0, 0.6);
+  }
+
+  .app-panel[data-swipe="settling"] {
+    transition: transform 200ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  :is(a.mantine-Card-root, a.mantine-Paper-root, [role="button"].mantine-Card-root, a.connection-card, .stat-card a) {
+    transition: transform 140ms ease;
+  }
+
+  :is(a.mantine-Card-root, a.mantine-Paper-root, [role="button"].mantine-Card-root, a.connection-card):active {
+    transform: scale(0.985);
+  }
+
+  .m-header,
+  .m-tabbar,
+  .mantine-AppShell-navbar,
+  .mantine-Menu-dropdown,
+  .mantine-Button-root,
+  .mantine-Tabs-tab,
+  .mantine-SegmentedControl-root {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .m-header a,
+  .m-tabbar a,
+  .mantine-AppShell-navbar a,
+  img {
+    -webkit-touch-callout: none;
+  }
+}
+
+@media (max-width: 48em) and (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+}
+
+@media (max-width: 48em) and (prefers-reduced-motion: reduce) {
+  .m-ptr,
+  .m-ptr svg,
+  .app-panel[data-swipe="settling"] {
+    transition: none;
+  }
+
+  .m-ptr[data-state="refreshing"] svg {
+    animation-duration: 1.6s;
+  }
+}

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppShell as MantineShell, Box, Overlay } from "@mantine/core";
@@ -24,6 +24,8 @@ import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
 import { MobileAppBar } from "./shell/mobile/MobileAppBar";
+import { PullIndicator } from "./shell/mobile/PullIndicator";
+import { useMobileGestures } from "./shell/mobile/useMobileGestures";
 import { useStuck } from "@/shared/lib/useStuck";
 import { RailAutoCollapseContext, ShellMountedContext } from "./shell/ShellContext";
 import { routeKey } from "./routeKey";
@@ -82,13 +84,15 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const stars = useStarfieldPreset();
   const motionOff = useRouteMotionOff();
 
-  const scroller = useRef<HTMLDivElement>(null);
+  const { scroller, indicator, panel, scrollToTop, isDetail } = useMobileGestures(mobile, loc.pathname);
   const { sentinel: scrollTop, stuck: scrolled } = useStuck();
 
   useSyncWorkspaceTheme(active?._id);
   const [navOpen, { toggle: toggleNav, close: closeNav }] =
     useDisclosure(false);
-  const pageKey = routeKey(loc.pathname);  useEffect(() => {
+  const pageKey = routeKey(loc.pathname);
+  const pushIn = mobile && isDetail;
+  useEffect(() => {
     closeNav();
   }, [loc.pathname, closeNav]);
   useEffect(() => {
@@ -165,12 +169,13 @@ export function ShellFrame({ children }: { children: ReactNode }) {
             />
           )}
 
-          <div className="app-panel">
+          <div className="app-panel" ref={panel}>
             {/* Inside the panel so it is clipped to the panel's radius and
                 bounded by its border, exactly like the other backgrounds. */}
             {stars && (
               <Starfield variant="app" count={70} scrollTarget={scroller} />
             )}
+            {mobile && <PullIndicator ref={indicator} />}
             <div className="app-panel__scroll" ref={scroller}>
               <div ref={scrollTop} className="app-panel__top" aria-hidden />
               <PlanExpiryNotice />
@@ -178,12 +183,12 @@ export function ShellFrame({ children }: { children: ReactNode }) {
               <motion.div
                 key={pageKey}
                 className="route-fade"
-                initial={motionOff ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={motionOff ? false : pushIn ? { opacity: 0, x: 28 } : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={
                   motionOff
                     ? { duration: 0 }
-                    : { duration: 0.18, ease: [0.16, 1, 0.3, 1] }
+                    : { duration: pushIn ? 0.26 : 0.18, ease: [0.16, 1, 0.3, 1] }
                 }
               >
                 <ShellMountedContext.Provider value>
@@ -199,7 +204,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </MantineShell.Main>
 
         {mobile && (
-          <MobileTabBar pathname={loc.pathname} moreOpen={navOpen} onMore={toggleNav} />
+          <MobileTabBar pathname={loc.pathname} moreOpen={navOpen} onMore={toggleNav} onReselect={scrollToTop} />
         )}
       </MantineShell>
     </ActivityPanelProvider>
