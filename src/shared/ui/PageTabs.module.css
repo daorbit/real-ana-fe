@@ -101,6 +101,15 @@
   .tabbarWrap {
     top: -12px;
     margin-inline: calc(var(--m-gutter) * -1);
-    padding: 12px var(--m-gutter) 0;
+    padding: 0 var(--m-gutter);
+  }
+
+  .tabbar {
+    margin-bottom: var(--mantine-spacing-sm);
+  }
+
+  .tab {
+    padding: 10px 2px;
+    margin-right: 16px;
   }
 }

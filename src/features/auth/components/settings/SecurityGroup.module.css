@@ -188,11 +188,25 @@
 @media (max-width: 36em) {
   .row {
     grid-template-columns: auto minmax(0, 1fr);
+    padding: 12px 14px;
+  }
+
+  .row + .row::before,
+  .row + .linkRow::before {
+    left: 60px;
   }
 
   .action {
     grid-column: 2 / -1;
     justify-content: flex-start;
+    margin-top: 10px;
+  }
+
+  .description {
+    font-size: 12px;
+  }
+
+  .extra {
     margin-top: 12px;
   }
 }

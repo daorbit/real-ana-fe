@@ -87,8 +87,8 @@
   }
 
   .mantine-Button-label {
-    font-weight: 600 !important;
-    letter-spacing: -0.015em !important;
+    font-weight: 550 !important;
+    letter-spacing: -0.01em !important;
   }
 
   .mantine-SegmentedControl-root {

@@ -153,3 +153,54 @@
 .activity {
   padding: 4px 18px 14px;
 }
+
+@media (max-width: 48em) {
+  .stack,
+  .column {
+    gap: 20px;
+  }
+
+  .overview {
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .summary {
+    gap: 14px;
+  }
+
+  .summary > :first-child {
+    flex-shrink: 0;
+    zoom: 0.76;
+  }
+
+  .eyebrow {
+    font-size: 10.5px;
+  }
+
+  .headline {
+    margin-top: 2px;
+    font-size: 15.5px;
+    line-height: 1.3;
+  }
+
+  .sub {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .chips {
+    gap: 6px;
+  }
+
+  .chip {
+    gap: 6px;
+    padding: 4px 10px 4px 5px;
+    font-size: 12px;
+  }
+
+  .chipIcon {
+    width: 16px;
+    height: 16px;
+  }
+}

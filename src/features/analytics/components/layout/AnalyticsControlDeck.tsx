@@ -27,7 +27,11 @@ export function AnalyticsControlDeck({
     const el = deck.current;
     const tabs = bar.current;
     if (!el || !tabs) return;
-    const observer = new ResizeObserver(() => el.style.setProperty("--deck-pin", `${-tabs.offsetTop}px`));
+    const scroller = el.closest<HTMLElement>(".app-panel__scroll");
+    const observer = new ResizeObserver(() => {
+      const inset = scroller ? parseFloat(getComputedStyle(scroller).paddingTop) || 0 : 0;
+      el.style.setProperty("--deck-pin", `${-(tabs.offsetTop + inset)}px`);
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);

@@ -34,7 +34,7 @@
      shrinks Mantine's control heights, paddings and icon boxes to match. */
   body {
     --m-gutter: 16px;
-    --mantine-scale: 1;
+    --mantine-scale: 0.88;
     --mantine-font-size-xs: calc(11px * var(--font-scale, 1));
     --mantine-font-size-sm: calc(13px * var(--font-scale, 1));
     --mantine-font-size-md: calc(14px * var(--font-scale, 1));
