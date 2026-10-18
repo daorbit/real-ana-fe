@@ -35,7 +35,7 @@ export function MobileTabBar({
             onFocus={() => void prefetchRoute(to)}
           >
             <span className="m-tab__pill">
-              <Icon size={19} strokeWidth={active ? 2.2 : 1.7} />
+              <Icon size={22} strokeWidth={active ? 2.2 : 1.7} />
             </span>
             <span className="m-tab__label">{t(labelKey, label)}</span>
           </Link>
@@ -50,7 +50,7 @@ export function MobileTabBar({
         onClick={onMore}
       >
         <span className="m-tab__pill">
-          <Menu size={19} strokeWidth={moreOpen || !anyTab ? 2.2 : 1.7} />
+          <Menu size={22} strokeWidth={moreOpen || !anyTab ? 2.2 : 1.7} />
         </span>
         <span className="m-tab__label">{t("nav.more", "More")}</span>
       </UnstyledButton>
