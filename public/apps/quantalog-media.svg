@@ -1,6 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Media">
-  <rect width="256" height="256" rx="56" fill="#7C3AED"/>
-  <rect x="64" y="70" width="128" height="116" rx="20" fill="#FFFFFF"/>
-  <path d="M82 166 114 128 136 152 150 138 174 166z" fill="#7C3AED" stroke="#7C3AED" stroke-width="8" stroke-linejoin="round"/>
-  <circle cx="154" cy="104" r="12" fill="#7C3AED" fill-opacity="0.55"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="28 28 200 200" width="256" height="256" role="img" aria-label="Quantalog Media">
+  <defs>
+    <clipPath id="qm-card">
+      <rect x="28" y="84" width="168" height="134" rx="24"/>
+    </clipPath>
+  </defs>
+  <rect x="84" y="38" width="144" height="122" rx="24" fill="#2F6BFF"/>
+  <rect x="28" y="84" width="168" height="134" rx="24" fill="#F472B6"/>
+  <g clip-path="url(#qm-card)">
+    <path d="M70 222 136 146 204 222Z" fill="#DB2777" stroke="#DB2777" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M20 222 84 160 148 222Z" fill="#9D174D" stroke="#9D174D" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+  <circle cx="152" cy="122" r="16" fill="#FDE68A"/>
 </svg>

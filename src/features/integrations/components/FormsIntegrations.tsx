@@ -39,8 +39,8 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
   const [whatsappOpen, setWhatsappOpen] = useState(false);
   const { canAdmin } = usePermissions();
   const [saveWebhook, webhookState] = useSaveFormsWebhookMutation();
-  const calendar = useGoogleConnect("calendar", workspaceId ?? "", integrations.refetchCalendar);
-  const sheets = useGoogleConnect("sheets", workspaceId ?? "", integrations.refetchSheets);
+  const calendar = useGoogleConnect("calendar", workspaceId ?? "", integrations.calendar, integrations.refetchCalendar);
+  const sheets = useGoogleConnect("sheets", workspaceId ?? "", integrations.sheets, integrations.refetchSheets);
   const { failed, error, loading, sections } = integrations;
   const requestedApp = params.get("app");
 
@@ -146,9 +146,7 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
         onRefresh={() => void integrations.refetchCalendar()}
         onClose={() => setCalendarOpen(false)}
         onConnect={() => void calendar.connect()}
-        onDisconnect={async () => {
-          if (await calendar.disconnect()) setCalendarOpen(false);
-        }}
+        onDisconnect={() => calendar.disconnect(() => setCalendarOpen(false))}
       />
       <GoogleSheetsModal
         opened={sheetsOpen && Boolean(integrations.sheets?.configured)}
@@ -158,9 +156,7 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
         onRefresh={() => void integrations.refetchSheets()}
         onClose={() => setSheetsOpen(false)}
         onConnect={() => void sheets.connect()}
-        onDisconnect={async () => {
-          if (await sheets.disconnect()) setSheetsOpen(false);
-        }}
+        onDisconnect={() => sheets.disconnect(() => setSheetsOpen(false))}
       />
     </>
   );

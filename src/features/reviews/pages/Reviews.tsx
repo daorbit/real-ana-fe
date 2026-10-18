@@ -149,7 +149,8 @@ export default function Reviews() {
       children: (
         <Text size="sm">
           This removes the Google connection and every review cached for this workspace. Your
-          reviews on Google are not affected, and reconnecting will fetch them again.
+          reviews on Google are not affected, your other Google apps in Quantalog stay connected,
+          and reconnecting will fetch them again.
         </Text>
       ),
       labels: { confirm: "Disconnect", cancel: "Cancel" },

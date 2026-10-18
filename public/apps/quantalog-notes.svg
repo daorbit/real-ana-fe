@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Notes">
-  <rect width="256" height="256" rx="56" fill="#D97706"/>
-  <path d="M90 62h56l40 40v78a14 14 0 0 1-14 14H90a14 14 0 0 1-14-14V76a14 14 0 0 1 14-14z" fill="#FFFFFF"/>
-  <path d="M146 62v26a14 14 0 0 0 14 14h26z" fill="#FFFFFF" fill-opacity="0.55"/>
-  <path d="M100 132h56M100 160h36" fill="none" stroke="#D97706" stroke-width="14" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 27 186 186" width="256" height="256" role="img" aria-label="Quantalog Notes">
+  <rect x="44" y="40" width="148" height="148" rx="24" fill="#2F6BFF" transform="rotate(-10 118 114)"/>
+  <path d="M88 64h102a22 22 0 0 1 22 22v78l-48 48H88a22 22 0 0 1-22-22V86a22 22 0 0 1 22-22z" fill="#FBBF24"/>
+  <path d="M212 164h-30a18 18 0 0 0-18 18v30z" fill="#D97706"/>
+  <path d="M94 110h80M94 144h46" fill="none" stroke="#B45309" stroke-width="14" stroke-linecap="round"/>
 </svg>

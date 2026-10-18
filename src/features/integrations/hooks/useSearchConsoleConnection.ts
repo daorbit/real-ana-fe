@@ -50,7 +50,7 @@ export function useSearchConsoleConnection(workspaceId: string | null) {
     if (!workspaceId) return;
     confirmDelete({
       title: "Disconnect Google Search Console?",
-      body: "Quantalog will stop reading search data for every site in this workspace, and the saved Search visibility data is deleted. You can reconnect at any time.",
+      body: "Quantalog will stop reading search data for every site in this workspace, and the saved Search visibility data is deleted. Your other Google apps in Quantalog stay connected, and you can reconnect at any time.",
       confirmLabel: "Disconnect",
       onConfirm: async () => {
         try {

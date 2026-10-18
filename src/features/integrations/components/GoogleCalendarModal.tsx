@@ -48,8 +48,8 @@ function CalendarAside() {
       </AsideBlock>
       <AsideBlock label="Security">
         <SecureNote>
-          Google tokens are encrypted and stay on Quantalog's servers. Disconnect here at any time, or remove access from
-          your Google Account's security settings.
+          Google tokens are encrypted and stay on Quantalog's servers. Disconnect here at any time. Removing Quantalog in
+          your Google Account settings disconnects every Quantalog Google app at once.
         </SecureNote>
       </AsideBlock>
       <AsideBlock label="Privacy">

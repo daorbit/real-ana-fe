@@ -6,8 +6,6 @@
 .appLogo {
   display: block;
   flex-shrink: 0;
-  border-radius: 24%;
-  object-fit: cover;
 }
 
 .wordmark {

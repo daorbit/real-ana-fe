@@ -1,7 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Links">
-  <rect width="256" height="256" rx="56" fill="#0891B2"/>
-  <g transform="rotate(-45 128 128)" fill="none" stroke-width="20">
-    <rect x="58" y="104" width="84" height="48" rx="24" stroke="#FFFFFF" stroke-opacity="0.55"/>
-    <rect x="114" y="104" width="84" height="48" rx="24" stroke="#FFFFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="26 26 204 204" width="256" height="256" role="img" aria-label="Quantalog Links">
+  <defs>
+    <clipPath id="ql-over">
+      <rect x="96" y="60" width="64" height="68"/>
+    </clipPath>
+  </defs>
+  <g transform="rotate(-45 128 128)">
+    <rect x="40" y="100" width="100" height="56" rx="28" fill="none" stroke="#06B6D4" stroke-width="26"/>
+    <rect x="116" y="100" width="100" height="56" rx="28" fill="none" stroke="#2F6BFF" stroke-width="26"/>
+    <rect x="40" y="100" width="100" height="56" rx="28" fill="none" stroke="#06B6D4" stroke-width="26" clip-path="url(#ql-over)"/>
   </g>
 </svg>

@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Quantalog Compare">
-  <rect width="256" height="256" rx="56" fill="#4F46E5"/>
-  <rect x="70" y="108" width="50" height="86" rx="14" fill="#FFFFFF" fill-opacity="0.55"/>
-  <rect x="136" y="62" width="50" height="132" rx="14" fill="#FFFFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="28 28 200 200" width="256" height="256" role="img" aria-label="Quantalog Compare">
+  <circle cx="96" cy="128" r="66" fill="#2F6BFF"/>
+  <circle cx="160" cy="128" r="66" fill="#38BDF8"/>
+  <path d="M128 70.3A66 66 0 0 1 128 185.7A66 66 0 0 1 128 70.3Z" fill="#1D3FC4"/>
 </svg>
