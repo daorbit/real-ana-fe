@@ -3,6 +3,7 @@ import { ActionIcon, Anchor, CopyButton, Switch, Tooltip } from "@mantine/core";
 import { Check, Copy, ExternalLink, Eye } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { num, timeAgo } from "@/shared/lib";
+import { NativeShareButton } from "@/shared/ui/NativeShareButton";
 import classes from "./Share.module.css";
 
 interface Props {
@@ -75,6 +76,7 @@ export function ShareLinkCard({
                 )}
               </CopyButton>
             </div>
+            <NativeShareButton url={url} title={title} />
             {primaryAction}
             <Tooltip label={t("share.openNewTab")} withArrow>
               <ActionIcon

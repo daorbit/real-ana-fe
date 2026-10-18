@@ -19,6 +19,9 @@ export function WebDetailsStep({ form }: { form: AddSiteForm }) {
         <TextInput
           label="Domain"
           placeholder="yoursite.com"
+          inputMode="url"
+          autoCapitalize="none"
+          autoCorrect="off"
           description="The site you'll install the tracker on."
           leftSection={<span className={classes.eyebrow}>https://</span>}
           leftSectionWidth={62}

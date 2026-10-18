@@ -183,6 +183,9 @@ export default function ForgotPassword() {
                   label="Email"
                   placeholder="you@company.com"
                   size="md"
+                  type="email"
+                  inputMode="email"
+                  autoCapitalize="none"
                   autoComplete="email"
                   autoFocus
                   value={email}

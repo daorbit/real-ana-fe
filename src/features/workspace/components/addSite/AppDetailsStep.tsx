@@ -35,6 +35,9 @@ export function AppDetailsStep({ form }: { form: AddSiteForm }) {
         <TextInput
           label="App URL"
           placeholder="app.yourcompany.com"
+          inputMode="url"
+          autoCapitalize="none"
+          autoCorrect="off"
           description="Where the app is hosted."
           leftSection={<span className={classes.eyebrow}>https://</span>}
           leftSectionWidth={62}

@@ -82,6 +82,12 @@
   }
 }
 
+@media (max-width: 48em) and (pointer: coarse) {
+  body:has(:is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [readonly]), textarea:not([readonly]), [contenteditable="true"]):focus) .m-tabbar {
+    display: none;
+  }
+}
+
 @media (max-width: 48em) and (display-mode: standalone) {
   html,
   body {

@@ -31,6 +31,10 @@ export function AddCompetitorForm({
         radius="md"
         placeholder="https://competitor.com/page"
         aria-label="Competitor URL"
+        inputMode="url"
+        autoCapitalize="none"
+        autoCorrect="off"
+        enterKeyHint="go"
         leftSection={<Link2 size={15} />}
         value={url}
         disabled={atLimit}

@@ -2,6 +2,7 @@ import { ActionIcon, Button, CopyButton, Tooltip } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Check, Copy, Mail, MessageCircle } from "lucide-react";
 import { LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { NativeShareButton } from "@/shared/ui/NativeShareButton";
 import { referralLink } from "../lib/pendingRef";
 import classes from "./Referrals.module.css";
 
@@ -47,6 +48,7 @@ export function ReferralShareBox({ code }: { code: string }) {
             </Button>
           )}
         </CopyButton>
+        <NativeShareButton url={link} title="Quantalog" />
       </div>
 
       <div className={classes.shareRow}>

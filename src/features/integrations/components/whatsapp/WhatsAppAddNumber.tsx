@@ -58,6 +58,9 @@ export function WhatsAppAddNumber({ wa }: { wa: ReturnType<typeof useWhatsAppCon
           className={classes.phone}
           label="WhatsApp number"
           placeholder="+91 98765 43210"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.currentTarget.value)}
         />

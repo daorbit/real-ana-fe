@@ -88,6 +88,9 @@ export function TrackingStep({ form }: { form: AddSiteForm }) {
           <TextInput
             label="Report as domain"
             placeholder="Leave empty to use the site's own domain"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
             description="Lets a staging deploy report into this site's numbers."
             value={t.reportDomain}
             onChange={(e) => t.setReportDomain(e.currentTarget.value)}

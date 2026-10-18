@@ -13,5 +13,11 @@
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Analytics", "short_name": "Analytics", "url": "/app/analytics", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Search visibility", "short_name": "Search", "url": "/app/search-visibility", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "SEO audit", "short_name": "SEO", "url": "/app/seo", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Ask Orbit", "short_name": "Orbit", "url": "/app/orbit", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

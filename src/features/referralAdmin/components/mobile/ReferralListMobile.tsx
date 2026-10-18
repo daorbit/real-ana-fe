@@ -29,6 +29,7 @@ export function ReferralListMobile({ list, busy, onAct }: Props) {
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
           aria-label="Search by name, email or code"
+          enterKeyHint="search"
         />
         <FilterChips value={status} onChange={setStatus} data={filters} ariaLabel="Filter by status" />
       </div>

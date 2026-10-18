@@ -13,6 +13,7 @@ import { demoSeoShare } from "@/features/demo/demoData";
 import { num, timeAgo } from "@/shared/lib";
 import { useSaveRegistration } from "@/shared/ui/SaveBar";
 import type { SeoSharePanels } from "@/shared/types";
+import { NativeShareButton } from "@/shared/ui/NativeShareButton";
 
 type PanelDef = { key: keyof SeoSharePanels; label: string; hint: string };
 
@@ -235,6 +236,7 @@ export function SeoSharePanel({
                   </Button>
                 )}
               </CopyButton>
+              <NativeShareButton url={url} title="SEO audit" />
               <Tooltip label="Open in a new tab" withArrow>
                 <ActionIcon
                   component="a"

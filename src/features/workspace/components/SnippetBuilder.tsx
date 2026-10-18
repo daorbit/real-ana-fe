@@ -205,6 +205,9 @@ export function SnippetBuilder({
           <TextInput
             label="Report as domain"
             placeholder="Leave empty to use this site's domain"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
             description="Lets a staging deploy report into this site's numbers."
             value={domain}
             onChange={(e) => setDomain(e.currentTarget.value)}

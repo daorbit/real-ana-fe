@@ -106,6 +106,9 @@ export function LinkSheet({
         <TextInput
           label="Website"
           placeholder="stripe.com"
+          inputMode="url"
+          autoCapitalize="none"
+          autoCorrect="off"
           value={url}
           error={urlError}
           data-autofocus

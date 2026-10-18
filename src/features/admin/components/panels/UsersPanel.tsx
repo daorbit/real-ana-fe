@@ -60,6 +60,7 @@ export default function UsersPanel() {
           className={mobile ? classes.mobileSearch : classes.search}
           placeholder={mobile ? "Search" : "Search by name or email…"}
           aria-label="Search by name or email"
+          enterKeyHint="search"
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
           leftSection={<Search size={mobile ? 16 : 15} />}

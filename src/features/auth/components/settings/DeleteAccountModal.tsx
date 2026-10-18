@@ -64,6 +64,9 @@ export function DeleteAccountModal({ user, onClose }: { user: User; onClose: () 
         <TextInput
           label={`Type ${user.email} to confirm`}
           autoComplete="off"
+          inputMode="email"
+          autoCapitalize="none"
+          autoCorrect="off"
           value={typedEmail}
           onChange={(e) => setTypedEmail(e.currentTarget.value)}
           onKeyDown={(e) => e.key === "Enter" && void submit()}

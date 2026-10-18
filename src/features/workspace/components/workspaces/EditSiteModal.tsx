@@ -47,6 +47,9 @@ export function EditSiteModal({ site, sites, workspaceId, onClose }: Props) {
           <TextInput
             label={t("workspaces.siteDomainLabel", "Domain")}
             placeholder="example.com"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
             size="md"
             radius="md"
             leftSection={<Globe size={16} />}

@@ -57,6 +57,9 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
           label={t("settings.mobile")}
           description={t("common.optional")}
           placeholder="+91 98765 43210"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
           value={mobile}
           onChange={(e) => {
             const v = e.currentTarget.value;
