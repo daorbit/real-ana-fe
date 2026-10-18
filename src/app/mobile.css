@@ -13,7 +13,7 @@
  */
 
 :root {
-  --m-tabbar-h: 50px;
+  --m-tabbar-h: 54px;
 }
 
 /* Hidden above the breakpoint; the component only mounts on phones anyway. */
@@ -164,18 +164,19 @@
     height: calc(var(--m-tabbar-h) + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     border-top: 0.5px solid var(--m-separator, var(--border));
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
 
   .m-tab {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-width: 0;
-    color: color-mix(in srgb, var(--muted) 85%, transparent);
+    color: var(--muted);
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none;
@@ -198,6 +199,23 @@
     white-space: nowrap;
   }
   .m-tab[data-active="true"] { color: color-mix(in srgb, var(--accent-2) 70%, var(--text)); }
+  .m-tab::before {
+    content: "";
+    position: absolute;
+    top: -0.5px;
+    left: 50%;
+    width: 22px;
+    height: 2.5px;
+    border-radius: 0 0 3px 3px;
+    background: currentColor;
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.4);
+    transition: opacity 180ms ease, transform 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .m-tab[data-active="true"]::before {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
   .m-tab:active .m-tab__pill { transform: scale(0.92); }
 
   /* ----------------------------------------------------------- header --- */
@@ -696,6 +714,7 @@
 
 @media (max-width: 48em) and (prefers-reduced-motion: reduce) {
   .m-tab,
+  .m-tab::before,
   .m-tab__pill { transition: none; }
   .mantine-Menu-dropdown { animation: none !important; }
 }

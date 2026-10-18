@@ -98,13 +98,21 @@
     background: var(--m-fill) !important;
   }
 
-  .mantine-SegmentedControl-root:not([style*="--sc-color"]) .mantine-SegmentedControl-indicator {
-    background: var(--m-thumb) !important;
+  html .mantine-SegmentedControl-root:not([style*="--sc-color"]) .mantine-SegmentedControl-label[data-active]::before {
+    inset: 0;
+    border-radius: 7px !important;
+    background-color: var(--m-thumb) !important;
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.22) !important;
   }
 
-  .mantine-SegmentedControl-indicator {
-    border-radius: 7px !important;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04) !important;
+  .mantine-SegmentedControl-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 30px;
+    padding-block: 0;
+    line-height: 1;
   }
 
   .mantine-SegmentedControl-label {
