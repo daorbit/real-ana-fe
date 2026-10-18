@@ -23,6 +23,7 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/goals": () => import("@/features/goals/pages/Goals"),
   "/app/alerts": () => import("@/features/alerts/pages/Alerts"),
   "/app/popups": () => import("@/features/popups/pages/Popups"),
+  "/app/popups/new": () => import("@/features/popups/pages/PopupStudio"),
   "/app/seo": () => import("@/features/seo/pages/Seo"),
   "/app/search-visibility": () => import("@/features/searchConsole/pages/SearchConsole"),
   "/app/search-visibility/page": () => import("@/features/searchConsole/pages/SearchConsolePageDetail"),
@@ -61,6 +62,8 @@ export function prefetchRoute(to: string): Promise<void> {
   const exact = to.split(/[?#]/)[0];
   const path = exact.startsWith("/app/link/")
     ? "/app/link"
+    : exact.startsWith("/app/popups/")
+      ? "/app/popups/new"
     : exact.startsWith("/app/admin-tools/users/")
       ? "/app/admin-tools/users"
       : exact.startsWith("/app/admin-tools/")

@@ -1,0 +1,206 @@
+.browser {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  height: 22px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.address {
+  flex: 1;
+  height: 8px;
+  max-width: 45%;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.page {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px 16px;
+}
+
+.line {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.line[data-w="hero"] { width: 55%; height: 11px; }
+.line[data-w="long"] { width: 88%; }
+.line[data-w="mid"] { width: 70%; }
+.line[data-w="short"] { width: 40%; }
+
+.blocks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.block {
+  height: 34px;
+  border-radius: 7px;
+  background: var(--surface-2);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--text) 26%, transparent);
+}
+
+.popup {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.popup[data-layout="modal"] {
+  top: 50%;
+  left: 50%;
+  width: 46%;
+  transform: translate(-50%, -50%);
+}
+
+.popup[data-layout="slide"] {
+  right: 10px;
+  bottom: 10px;
+  width: 36%;
+}
+
+.popupTitle {
+  width: 70%;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--text-2);
+  opacity: 0.55;
+}
+
+.popupField {
+  height: 9px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.popupButton {
+  height: 10px;
+  margin-top: 2px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+.browser[data-size="sm"] .bar {
+  height: 16px;
+  gap: 4px;
+  padding: 0 7px;
+}
+
+.browser[data-size="sm"] .dot {
+  width: 4px;
+  height: 4px;
+}
+
+.browser[data-size="sm"] .page {
+  gap: 5px;
+  padding: 9px 10px;
+}
+
+.browser[data-size="sm"] .line {
+  height: 5px;
+}
+
+.browser[data-size="sm"] .blocks {
+  display: none;
+}
+
+.browser[data-size="sm"] .popup {
+  gap: 3px;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.browser[data-size="sm"] .popupTitle,
+.browser[data-size="sm"] .popupField,
+.browser[data-size="sm"] .popupButton {
+  height: 5px;
+}
+
+.browser[data-size="lg"] .bar {
+  height: 30px;
+  gap: 7px;
+  padding: 0 14px;
+}
+
+.browser[data-size="lg"] .dot {
+  width: 9px;
+  height: 9px;
+}
+
+.browser[data-size="lg"] .page {
+  gap: 12px;
+  padding: 24px 28px;
+}
+
+.browser[data-size="lg"] .line {
+  height: 10px;
+}
+
+.browser[data-size="lg"] .line[data-w="hero"] {
+  height: 18px;
+}
+
+.browser[data-size="lg"] .block {
+  height: 64px;
+}
+
+.browser[data-size="lg"] .popup {
+  gap: 9px;
+  padding: 18px;
+  border-radius: 14px;
+}
+
+.browser[data-size="lg"] .popupTitle {
+  height: 11px;
+}
+
+.browser[data-size="lg"] .popupField {
+  height: 16px;
+}
+
+.browser[data-size="lg"] .popupButton {
+  height: 18px;
+}

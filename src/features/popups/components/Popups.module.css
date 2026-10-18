@@ -1,3 +1,7 @@
+.overview {
+  margin-bottom: 26px;
+}
+
 .sectionHead {
   display: flex;
   align-items: baseline;
@@ -21,16 +25,14 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 18px;
 }
 
 .card {
-  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -42,58 +44,105 @@
   border-color: var(--border-strong);
 }
 
-.card[data-off] .cardBody {
-  opacity: 0.55;
+.preview {
+  position: relative;
+  display: block;
+  padding: 18px 18px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: opacity 200ms ease;
 }
 
-.cardHead {
+.card[data-off] .preview {
+  opacity: 0.6;
+}
+
+.status {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-2);
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.status[data-live] {
+  color: var(--text);
+}
+
+.status[data-live] .statusDot {
+  background: var(--mantine-color-teal-6);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px 16px;
+}
+
+.head {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
 }
 
-.cardTitleWrap {
+.titleBlock {
   flex: 1;
   min-width: 0;
 }
 
-.cardTitle {
+.title {
+  display: block;
+  overflow: hidden;
   font-size: var(--mantine-font-size-sm);
   font-weight: 650;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  transition: color 150ms ease;
 }
 
-.cardForm {
+.title:hover {
+  color: var(--violet-2);
+}
+
+.subtitle {
   margin-top: 2px;
-  font-size: var(--mantine-font-size-xs);
-  color: var(--text-2);
-  white-space: nowrap;
   overflow: hidden;
+  font-size: var(--mantine-font-size-xs);
+  white-space: nowrap;
   text-overflow: ellipsis;
+  color: var(--text-2);
 }
 
-.cardBody {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  transition: opacity 200ms ease;
-}
-
-.chips {
+.meta {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.chip {
+.metaItem {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 3px 9px;
-  border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface-2);
   font-size: 11px;
@@ -101,106 +150,130 @@
   color: var(--text-2);
 }
 
-.stats {
+.metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
 }
 
-.stat {
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--surface-2);
-}
-
-.statValue {
+.metricValue {
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.1;
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
-.statLabel {
-  margin-top: 2px;
+.metricLabel {
+  margin-top: 3px;
   font-size: 11px;
   font-weight: 500;
   color: var(--text-2);
 }
 
-.cardFoot {
+.foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
   font-size: var(--mantine-font-size-xs);
   color: var(--text-2);
 }
 
-.site {
-  display: inline-flex;
+.empty {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   align-items: center;
-  gap: 6px;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.optionGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.option {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 12px;
+  gap: 48px;
+  padding: 44px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
-  text-align: left;
-  transition: border-color 120ms ease, background 120ms ease;
+  box-shadow: var(--shadow-sm);
 }
 
-.option:hover {
-  border-color: var(--border-strong);
-}
-
-.option[data-active] {
-  border-color: var(--violet-2);
-  background: var(--accent-soft);
-}
-
-.optionIcon {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: var(--accent-soft);
+.emptyEyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--violet-2);
 }
 
-.optionLabel {
+.emptyTitle {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+
+.emptyText {
+  max-width: 440px;
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 26px 0 28px;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  gap: 12px;
+}
+
+.stepNumber {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--violet-2);
+}
+
+.stepTitle {
   font-size: var(--mantine-font-size-sm);
   font-weight: 600;
   color: var(--text);
 }
 
-.optionHint {
-  font-size: 11px;
-  line-height: 1.4;
+.stepText {
+  margin-top: 2px;
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.5;
   color: var(--text-2);
 }
 
-.note {
+.emptyNote {
+  margin-top: 10px;
   font-size: var(--mantine-font-size-xs);
   color: var(--text-2);
+}
+
+@media (max-width: 900px) {
+  .empty {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 28px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -208,7 +281,7 @@
     grid-template-columns: 1fr;
   }
 
-  .optionGrid {
-    grid-template-columns: 1fr;
+  .emptyTitle {
+    font-size: 27px;
   }
 }
