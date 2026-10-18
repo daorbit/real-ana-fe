@@ -24,12 +24,19 @@ export type AlertChannelStatus = {
   whatsapp: { available: boolean; entitled: boolean; numbers: number };
 };
 
+export type AlertIncident = AlertHistoryItem & { since: string };
+
+export type AlertDay = { day: string; count: number };
+
 export type AlertsOverview = {
   config: AlertConfig;
   checkEveryHours: number;
   lastCheckedAt: string | null;
   nextCheckAt: string | null;
   ongoing: number;
+  sitesWatched: number;
+  incidents: AlertIncident[];
+  daily: AlertDay[];
   history: AlertHistoryItem[];
   channels: AlertChannelStatus;
 };
