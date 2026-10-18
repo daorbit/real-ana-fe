@@ -110,6 +110,38 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Keep it tidy", body: "Rename files, preview them full size, and delete what you no longer need in bulk." },
     ],
   },
+  alerts: {
+    id: "alerts",
+    tileId: "quantalog-alerts",
+    name: "Quantalog Alerts",
+    navLabel: "Alerts",
+    route: "/app/alerts",
+    location: "in the sidebar",
+    offNote: "Your alert settings and history are kept, so turning it back on picks up where you left off.",
+    tagline: "Hear about traffic drops, spikes and stalled goals as they happen.",
+    description: "Quantalog watches your sites around the clock and tells you when traffic falls or jumps, tracking stops, a goal slips behind pace or your forms go quiet, by email, Telegram, WhatsApp or the bell.",
+    features: [
+      { title: "Catch problems early", body: "A sudden drop or a site that stopped sending data reaches you in hours, not at the end of the month." },
+      { title: "Once per incident", body: "Each alert fires when something starts and stays quiet until it clears, so your inbox does not fill up." },
+      { title: "Where you already are", body: "Choose email, Telegram, WhatsApp or the in-app bell, and tune every threshold." },
+    ],
+  },
+  popups: {
+    id: "popups",
+    tileId: "quantalog-popups",
+    name: "Quantalog Popups",
+    navLabel: "Popups",
+    route: "/app/popups",
+    location: "in the sidebar",
+    offNote: "Your popups are kept but stop showing on your sites until you turn it back on.",
+    tagline: "Show your lead capture forms as popups on your website.",
+    description: "Turn any lead capture form into a popup or slide-in on your site, timed to a delay, a scroll depth or the moment someone is about to leave. It runs through the tracking script you already installed.",
+    features: [
+      { title: "No new code", body: "Popups load through your existing Quantalog script, after the page has finished loading." },
+      { title: "The right moment", body: "Open after a few seconds, halfway down the page, or when a visitor heads for the close button." },
+      { title: "Never annoying", body: "Pick the pages and devices, and how long to wait before showing it to the same person again." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

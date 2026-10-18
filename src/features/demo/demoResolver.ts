@@ -4,6 +4,8 @@ import {
   demoCompetitors, demoInstallStatus, demoStats, demoUserFlow, DEMO_WORKSPACE_ID,
 } from "@/features/demo/demoData";
 import { demoDashboards, demoTargets } from "@/features/demo/demoDashboards";
+import { demoAlerts } from "@/features/demo/demoAlerts";
+import { demoPopups } from "@/features/demo/demoPopups";
 import { demoAccountActivity, demoAuditPage } from "@/features/demo/demoAudit";
 import type { AuditCategory } from "@/shared/types";
 
@@ -68,6 +70,8 @@ export function resolveDemoRequest(url: string): unknown | undefined {
     return demoDashboards.find((d) => d.id === id) ?? demoDashboards[0];
   }
   if (/\/targets$/.test(path)) return demoTargets();
+  if (/\/alerts$/.test(path)) return demoAlerts();
+  if (/\/popups$/.test(path)) return demoPopups();
   if (/\/embeds$/.test(path)) return [];
 
   if (/\/audit$/.test(path)) return demoAuditPage((params.get("category") as AuditCategory | null) ?? null);

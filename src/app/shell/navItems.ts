@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, CalendarClock,
   Send, CreditCard, Swords, Share2, Route, Palette, Images, TrendingUp,
-  LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star,
+  LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { ADMIN_SECTIONS, adminSectionPath } from "@/features/admin/lib/adminSections";
@@ -38,6 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
       { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: LayoutDashboard },
       { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag, app: "goals" },
+      { to: "/app/alerts", labelKey: "nav.alerts", label: "Alerts", icon: BellRing, app: "alerts" },
 
       { to: "/app/journey", labelKey: "nav.journey", label: "User journeys", icon: Route },
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
@@ -55,6 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon },
+      { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
       { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
       { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
     ],

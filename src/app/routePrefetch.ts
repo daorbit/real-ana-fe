@@ -21,6 +21,8 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/analytics": () => import("@/features/analytics/pages/Analytics"),
   "/app/dashboards": () => import("@/features/dashboards/pages/Dashboards"),
   "/app/goals": () => import("@/features/goals/pages/Goals"),
+  "/app/alerts": () => import("@/features/alerts/pages/Alerts"),
+  "/app/popups": () => import("@/features/popups/pages/Popups"),
   "/app/seo": () => import("@/features/seo/pages/Seo"),
   "/app/search-visibility": () => import("@/features/searchConsole/pages/SearchConsole"),
   "/app/search-visibility/page": () => import("@/features/searchConsole/pages/SearchConsolePageDetail"),

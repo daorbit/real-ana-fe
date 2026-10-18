@@ -44,6 +44,7 @@ export const NOTIFICATION_GROUPS: NotificationGroup[] = [
       "seo.audit.done",
       "seo.rank.changed",
       "tracking.stopped",
+      "alert.triggered",
       "social.post.failed",
       "lead.captured",
       "form.submission",

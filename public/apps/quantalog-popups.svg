@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="28 30 204 204" width="256" height="256" role="img" aria-label="Quantalog Popups">
+  <defs>
+    <clipPath id="qp-window">
+      <rect x="28" y="48" width="168" height="140" rx="22"/>
+    </clipPath>
+  </defs>
+  <rect x="28" y="48" width="168" height="140" rx="22" fill="#2F6BFF"/>
+  <rect x="28" y="48" width="168" height="34" fill="#1D3FC4" clip-path="url(#qp-window)"/>
+  <circle cx="52" cy="65" r="6" fill="#6B93FF"/>
+  <circle cx="72" cy="65" r="6" fill="#6B93FF"/>
+  <circle cx="92" cy="65" r="6" fill="#6B93FF"/>
+  <rect x="96" y="112" width="136" height="104" rx="20" fill="#8B5CF6"/>
+  <rect x="116" y="134" width="70" height="12" rx="6" fill="#EDE9FE"/>
+  <rect x="116" y="156" width="96" height="12" rx="6" fill="#C4B5FD"/>
+  <rect x="116" y="180" width="52" height="18" rx="9" fill="#FBBF24"/>
+</svg>

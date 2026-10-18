@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  BellRing,
   CreditCard,
   DollarSign,
   CalendarClock,
@@ -58,6 +59,7 @@ export const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> 
   "seo.rank.changed": { icon: TrendingUp, color: "blue" },
   // The one failure invisible from the dashboard — see its spec on the server.
   "tracking.stopped": { icon: SatelliteDish, color: "red", severity: "critical" },
+  "alert.triggered": { icon: BellRing, color: "orange", severity: "warning" },
   "social.post.failed": { icon: SendHorizontal, color: "orange", severity: "warning" },
   "lead.captured": { icon: UserRoundCheck, color: "teal" },
   "admin.message": { icon: Megaphone, color: "indigo" },

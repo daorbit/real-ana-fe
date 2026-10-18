@@ -743,6 +743,8 @@ export type QuotaSummary = {
   dashboards?: FeatureAllowance;
   embeds?: FeatureAllowance;
   goalTargets?: FeatureAllowance;
+  popups?: FeatureAllowance;
+  alertCheckHours?: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
   /** Comparison baselines this plan may pick. Every tier keeps "previous". */
@@ -1097,7 +1099,7 @@ export type Workspace = {
   apps?: WorkspaceApps;
 };
 
-export type WorkspaceAppId = "compare" | "goals" | "notes" | "reviews" | "links" | "media";
+export type WorkspaceAppId = "compare" | "goals" | "notes" | "reviews" | "links" | "media" | "alerts" | "popups";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string }>>;
 
@@ -2702,6 +2704,7 @@ export type NotificationType =
   | "seo.audit.done"
   | "seo.rank.changed"
   | "tracking.stopped"
+  | "alert.triggered"
   | "social.post.failed"
   | "lead.captured"
   | "admin.message"

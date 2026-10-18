@@ -72,6 +72,8 @@ const DashboardTemplates = lazy(() => import("@/features/dashboards/pages/Dashbo
 const DashboardView = lazy(() => import("@/features/dashboards/pages/DashboardView"));
 const DashboardStudio = lazy(() => import("@/features/dashboards/pages/DashboardStudio"));
 const Goals = lazy(() => import("@/features/goals/pages/Goals"));
+const Alerts = lazy(() => import("@/features/alerts/pages/Alerts"));
+const Popups = lazy(() => import("@/features/popups/pages/Popups"));
 const EmbedWidget = lazy(() => import("@/features/embed/pages/EmbedWidget"));
 const WelcomeOverlay = lazy(() =>
   import("@/shared/ui/WelcomeOverlay").then((m) => ({ default: m.WelcomeOverlay })),
@@ -268,6 +270,8 @@ export default function App() {
                 <Route path="/app/dashboards/:id" element={<DashboardView />} />
                 <Route path="/app/dashboards/:id/studio" element={<DashboardStudio />} />
                 <Route path="/app/goals" element={<Goals />} />
+                <Route path="/app/alerts" element={<Alerts />} />
+                <Route path="/app/popups" element={<Popups />} />
                 <Route path="/app/seo" element={<Seo />} />
                 <Route path="/app/search-visibility" element={<SearchConsole />} />
                 <Route path="/app/search-visibility/page/:pageKey" element={<SearchConsolePageDetail />} />

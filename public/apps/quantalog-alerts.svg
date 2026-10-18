@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 26 200 200" width="256" height="256" role="img" aria-label="Quantalog Alerts">
+  <defs>
+    <clipPath id="qa-half">
+      <rect x="128" y="0" width="128" height="256"/>
+    </clipPath>
+  </defs>
+  <rect x="117" y="32" width="22" height="28" rx="11" fill="#F59E0B"/>
+  <path d="M128 50C90 50 66 80 66 118V150L46 178H210L190 150V118C190 80 166 50 128 50Z" fill="#FBBF24"/>
+  <path d="M128 50C90 50 66 80 66 118V150L46 178H210L190 150V118C190 80 166 50 128 50Z" fill="#F59E0B" clip-path="url(#qa-half)"/>
+  <rect x="40" y="170" width="176" height="24" rx="12" fill="#2F6BFF"/>
+  <path d="M104 194a24 24 0 0 0 48 0Z" fill="#1D3FC4"/>
+  <circle cx="196" cy="64" r="26" fill="#F43F5E"/>
+</svg>

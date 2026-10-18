@@ -158,6 +158,8 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   "quantalog-reviews": appMark("quantalog-reviews.svg", "Quantalog Reviews"),
   "quantalog-links": appMark("quantalog-links.svg", "Quantalog Links"),
   "quantalog-media": appMark("quantalog-media.svg", "Quantalog Media"),
+  "quantalog-alerts": appMark("quantalog-alerts.svg", "Quantalog Alerts"),
+  "quantalog-popups": appMark("quantalog-popups.svg", "Quantalog Popups"),
   brevo: BrevoMark,
   smtp: SmtpMark,
   slack: SlackMark,

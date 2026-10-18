@@ -176,6 +176,12 @@ export function notificationCopy(
       };
     }
 
+    case "alert.triggered":
+      return {
+        title: str(d, "title", t("activity.alertTriggered.title", "Quantalog alert")),
+        body: str(d, "summary"),
+      };
+
     case "social.post.failed": {
       const channel = str(d, "channel");
       return {
@@ -289,6 +295,7 @@ export function notificationTypeLabel(type: NotificationType, t: TFunction): str
     "seo.audit.done": ["activity.pref.seoAuditDone", "Finished SEO audits"],
     "seo.rank.changed": ["activity.pref.seoRankChanged", "Competitor ranking changes"],
     "tracking.stopped": ["activity.pref.trackingStopped", "Tracking outages"],
+    "alert.triggered": ["activity.pref.alertTriggered", "Traffic, goal and form alerts"],
     "social.post.failed": ["activity.pref.socialPostFailed", "Failed scheduled posts"],
     "lead.captured": ["activity.pref.leadCaptured", "New leads"],
     "admin.message": ["activity.pref.adminMessage", "Product announcements"],

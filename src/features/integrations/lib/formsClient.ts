@@ -22,6 +22,7 @@ interface FormsCall {
   path: string;
   method?: "GET" | "PUT" | "POST" | "DELETE";
   body?: unknown;
+  area?: "settings" | "forms";
 }
 
 const EXPIRY_MARGIN_S = 60;
@@ -69,6 +70,11 @@ export function formsSettingsUrl(workspaceId: string, path: string): string {
   return `${FORMS_API_BASE}/workspaces/${encodeURIComponent(workspaceId)}/settings${path}`;
 }
 
+function formsCallUrl(call: FormsCall): string {
+  if (call.area === "forms") return `${FORMS_API_BASE}/workspaces/${encodeURIComponent(call.workspaceId)}/forms${call.path}`;
+  return formsSettingsUrl(call.workspaceId, call.path);
+}
+
 export async function formsQuery<T>(
   call: FormsCall,
   queryApi: BaseQueryApi,
@@ -81,7 +87,7 @@ export async function formsQuery<T>(
 
   let res: Response;
   try {
-    res = await fetch(formsSettingsUrl(call.workspaceId, call.path), {
+    res = await fetch(formsCallUrl(call), {
       method: call.method ?? "GET",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${minted.data}` },
       body: call.body === undefined ? undefined : JSON.stringify(call.body),
