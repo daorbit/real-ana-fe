@@ -35,6 +35,8 @@ const APP_GUIDES: Record<string, string> = {
   instagram: SOCIAL,
 };
 
+export const CLAUDE_CONNECTORS_URL = "https://claude.ai/settings/connectors";
+
 export function appGuideUrl(appId: string): string | undefined {
   return APP_GUIDES[appId];
 }

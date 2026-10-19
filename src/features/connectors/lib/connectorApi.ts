@@ -29,6 +29,6 @@ export const connectorApi = {
     api.post<{ redirectUrl: string }>(`${base}/requests/${encodeURIComponent(requestId)}/approve`, { workspaceId }),
   deny: (requestId: string) =>
     api.post<{ redirectUrl: string }>(`${base}/requests/${encodeURIComponent(requestId)}/deny`, {}),
-  listApps: () => api.get<{ items: ConnectedApp[] }>(`${base}/grants`),
+  listApps: () => api.get<{ items: ConnectedApp[]; mcpUrl: string }>(`${base}/grants`),
   revokeApp: (grantId: string) => api.del(`${base}/grants/${encodeURIComponent(grantId)}`),
 };

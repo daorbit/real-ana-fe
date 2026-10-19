@@ -18,6 +18,8 @@ import {
   type Searchable,
 } from "../../lib/filter";
 import { useSearchConsoleConnection } from "../../hooks/useSearchConsoleConnection";
+import { useClaudeConnection } from "../../hooks/useClaudeConnection";
+import { ClaudeConnection } from "../claude/ClaudeConnection";
 import { FormsIntegrations } from "../FormsIntegrations";
 import { SearchConsoleConnection } from "../SearchConsoleConnection";
 import { ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
@@ -47,6 +49,7 @@ export function ConnectionsBoard() {
   const social = useSocialConnections();
   const searchConsole = useSearchConsoleConnection(searchWorkspaceId);
   const integrations = useFormsIntegrations(lockedReason ? null : workspaceId);
+  const claude = useClaudeConnection(workspaceId, !isDemo);
 
   const formEntries = useMemo<Searchable[]>(
     () =>
@@ -62,15 +65,32 @@ export function ConnectionsBoard() {
   );
 
   const searchEntry = searchConsole.entry;
+  const claudeEntry = claude.available ? claude.entry : null;
   const allEntries = useMemo(
-    () => [...quantalogApps.entries, ...social.entries, ...(searchEntry ? [searchEntry] : []), ...formEntries],
-    [quantalogApps.entries, social.entries, searchEntry, formEntries],
+    () => [
+      ...quantalogApps.entries,
+      ...(claudeEntry ? [claudeEntry] : []),
+      ...social.entries,
+      ...(searchEntry ? [searchEntry] : []),
+      ...formEntries,
+    ],
+    [quantalogApps.entries, claudeEntry, social.entries, searchEntry, formEntries],
   );
   const counts = useMemo(() => countByStatus(allEntries, filter), [allEntries, filter]);
   const categories = useMemo(() => categoryOptions(allEntries), [allEntries]);
 
   const visibleCount = allEntries.filter((entry) => matchesFilter(entry, filter)).length;
-  const loading = social.loading || searchConsole.loading || (!lockedReason && integrations.loading);
+  const loading =
+    social.loading || searchConsole.loading || claude.loading || (!lockedReason && integrations.loading);
+  const claudeCard = (flat: boolean) => (
+    <ClaudeConnection
+      claude={claude}
+      workspaceName={active?.name ?? ""}
+      lockedReason={workspaceId ? undefined : "Pick a workspace to connect Claude to it."}
+      filter={filter}
+      flat={flat}
+    />
+  );
   const formsSettled = Boolean(lockedReason) || (!integrations.loading && !integrations.failed);
   const nothingMatches = formsSettled && visibleCount === 0;
   const visibleSocial = social.entries.filter((entry) => matchesFilter(entry, filter));
@@ -111,6 +131,7 @@ export function ConnectionsBoard() {
         <>
           <div className="connection-grid">
             <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} flat />
+            {claudeCard(true)}
             <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} flat />
             {searchCard(true)}
             <FormsIntegrations
@@ -126,6 +147,7 @@ export function ConnectionsBoard() {
       ) : (
         <>
           <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} />
+          {claudeCard(false)}
           <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} />
           {searchCard(false)}
           <FormsIntegrations

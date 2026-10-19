@@ -3,16 +3,19 @@ import { connectorApi, type ConnectedApp } from "@/features/connectors/lib/conne
 import type { ApiError } from "@/shared/lib/http";
 import { errMessage, notify } from "@/shared/lib/notify";
 
-export function useConnectedApps() {
+export function useConnectedApps(enabled = true) {
   const [apps, setApps] = useState<ConnectedApp[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [mcpUrl, setMcpUrl] = useState("");
+  const [loading, setLoading] = useState(enabled);
   const [available, setAvailable] = useState(true);
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setApps((await connectorApi.listApps()).items);
+      const result = await connectorApi.listApps();
+      setApps(result.items);
+      setMcpUrl(result.mcpUrl);
     } catch (err) {
       if ((err as ApiError).status === 404) setAvailable(false);
       else notify.error(errMessage(err, "Could not load your connected AI apps."));
@@ -22,8 +25,8 @@ export function useConnectedApps() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (enabled) void load();
+  }, [enabled, load]);
 
   const revoke = async (id: string) => {
     setRevokingId(id);
@@ -38,5 +41,5 @@ export function useConnectedApps() {
     }
   };
 
-  return { apps, loading, available, revokingId, revoke };
+  return { apps, mcpUrl, loading, available, revokingId, revoke, reload: load };
 }

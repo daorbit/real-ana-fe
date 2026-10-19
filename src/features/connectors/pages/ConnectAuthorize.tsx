@@ -103,7 +103,11 @@ export default function ConnectAuthorize() {
           <>
             <div className={classes.marks} aria-hidden="true">
               <span className={classes.mark}>
-                <Bot size={24} />
+                {/claude/i.test(clientName) ? (
+                  <img src="/apps/claude.svg" alt="" className={classes.markImage} />
+                ) : (
+                  <Bot size={24} />
+                )}
               </span>
               <ArrowLeftRight size={18} className={classes.link} />
               <span className={classes.mark}>
@@ -133,7 +137,7 @@ export default function ConnectAuthorize() {
               <p className={classes.sectionLabel}>It will be able to</p>
               <ScopeList scopes={request.scopes} />
               <p className={classes.note}>
-                It can&apos;t create, change or delete anything. Disconnect at any time in Settings → Security.
+                It can&apos;t create, change or delete anything. Disconnect at any time in Apps → Claude.
               </p>
             </div>
 
