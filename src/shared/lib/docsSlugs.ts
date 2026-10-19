@@ -51,6 +51,7 @@ export const DOCS_SLUGS = {
   formsGoogleSheets: "/forms-google-sheets",
   segmentsMarkers: "/segments-markers",
   orbitAi: "/orbit-ai",
+  aiAssistants: "/ai-assistants",
   platformApi: "/platform-api",
   apiReference: "/api-reference",
   privacy: "/privacy",

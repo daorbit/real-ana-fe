@@ -8,6 +8,7 @@ import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import { useAuthorizationRequest } from "@/features/connectors/hooks/useAuthorizationRequest";
 import { PermissionList } from "@/features/connectors/components/PermissionList";
 import { WorkspacePicker } from "@/features/connectors/components/WorkspacePicker";
+import { assistantForHost } from "@/features/integrations/lib/aiAssistants";
 import { rememberReturnPath } from "@/shared/lib/session";
 import { useTitle } from "@/shared/lib/useTitle";
 import classes from "./ConnectAuthorize.module.css";
@@ -56,14 +57,11 @@ function Problem({ title, body }: { title: string; body: string }) {
   );
 }
 
-function ClientMark({ name }: { name: string }) {
+function ClientMark({ host }: { host: string }) {
+  const assistant = assistantForHost(host);
   return (
     <span className={classes.mark}>
-      {/claude/i.test(name) ? (
-        <img src="/apps/claude.svg" alt="" className={classes.markImage} />
-      ) : (
-        <Bot size={26} />
-      )}
+      {assistant ? <img src={assistant.logo} alt="" className={classes.markImage} /> : <Bot size={26} />}
     </span>
   );
 }
@@ -136,7 +134,7 @@ export default function ConnectAuthorize() {
   return (
     <Shell>
       <div className={classes.marks} aria-hidden>
-        <ClientMark name={clientName} />
+        <ClientMark host={request.client.redirectHost} />
         <span className={classes.dots}>
           <i />
           <i />
@@ -189,7 +187,7 @@ export default function ConnectAuthorize() {
       </div>
 
       <p className={classes.meta}>
-        You&apos;ll return to {request.client.redirectHost || "the app"}. Disconnect any time in Apps → Claude.
+        You&apos;ll return to {request.client.redirectHost || "the app"}. Disconnect any time in Quantalog → Apps.
       </p>
       <p className={classes.meta}>
         Signed in as <span className={classes.email}>{user.email}</span> ·{" "}

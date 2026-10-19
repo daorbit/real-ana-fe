@@ -172,6 +172,7 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   "google-sheets": GoogleSheetsMark,
   "search-console": ({ size = 24 }: MarkProps) => <GoogleMark size={size} />,
   claude: appMark("claude.svg", "Claude"),
+  chatgpt: appMark("openai-chatgpt.svg", "ChatGPT"),
   razorpay: RazorpayMark,
   cashfree: CashfreeMark,
   payu: PayuMark,

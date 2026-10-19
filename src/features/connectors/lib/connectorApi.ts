@@ -13,6 +13,7 @@ export type AuthorizationRequest = {
 export type ConnectedApp = {
   id: string;
   clientName: string;
+  clientHost: string;
   workspaceId: string;
   workspaceName: string;
   scopes: ConnectorScope[];

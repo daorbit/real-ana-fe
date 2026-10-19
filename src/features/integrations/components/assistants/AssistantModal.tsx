@@ -4,33 +4,13 @@ import type { ConnectedApp } from "@/features/connectors/lib/connectorApi";
 import { timeAgo } from "@/shared/lib/format";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
 import { AsideBlock, SecureNote, StudioHero, StudioSection } from "../studio/StudioParts";
-import { CLAUDE_CONNECTORS_URL } from "../../lib/links";
-import classes from "./Claude.module.css";
-
-const CAN_READ = [
-  "Workspace name, your role and tracked sites",
-  "Forms, their questions and form analytics",
-  "Form responses and the lead pipeline",
-  "Booking counts and upcoming booked slots",
-  "Website traffic summaries",
-];
-
-const STEPS = [
-  "In Claude, open Settings → Connectors.",
-  "Choose Add custom connector, name it Quantalog and paste the URL above.",
-  "Click Connect, sign in to Quantalog and pick this workspace.",
-  "Ask Claude about your forms, leads, bookings or traffic.",
-];
-
-const PROMPTS = [
-  "Which of my forms got the most responses this month?",
-  "Show my 10 newest leads from the contact form.",
-  "How many bookings are coming up this week?",
-  "Summarise my website traffic for the last 7 days.",
-];
+import { ASSISTANT_CAN_READ, ASSISTANT_PROMPTS, type AssistantInfo } from "../../lib/aiAssistants";
+import { appGuideUrl } from "../../lib/links";
+import classes from "./Assistant.module.css";
 
 interface Props {
   opened: boolean;
+  info: AssistantInfo;
   workspaceName: string;
   mcpUrl: string;
   connections: ConnectedApp[];
@@ -40,12 +20,12 @@ interface Props {
   onDisconnect: (app: ConnectedApp) => void;
 }
 
-function Aside() {
+function Aside({ name }: { name: string }) {
   return (
     <>
-      <AsideBlock label="What Claude can read">
+      <AsideBlock label={`What ${name} can read`}>
         <ul className={classes.list}>
-          {CAN_READ.map((item) => (
+          {ASSISTANT_CAN_READ.map((item) => (
             <li key={item}>
               <Check size={14} className={classes.check} />
               {item}
@@ -55,7 +35,7 @@ function Aside() {
       </AsideBlock>
       <AsideBlock label="Security">
         <SecureNote>
-          Read-only: Claude can't create, change or delete anything. Each connection belongs to one person and one
+          Read-only: {name} can't create, change or delete anything. Each connection belongs to one person and one
           workspace, uses short-lived tokens, and stops the moment you disconnect it or leave the workspace.
         </SecureNote>
       </AsideBlock>
@@ -104,8 +84,9 @@ function ConnectionRow({ app, busy, onDisconnect }: { app: ConnectedApp; busy: b
   );
 }
 
-export function ClaudeModal({
+export function AssistantModal({
   opened,
+  info,
   workspaceName,
   mcpUrl,
   connections,
@@ -124,12 +105,12 @@ export function ClaudeModal({
       </Button>
       <Button
         component="a"
-        href={CLAUDE_CONNECTORS_URL}
+        href={info.connectorsUrl}
         target="_blank"
         rel="noreferrer"
         rightSection={<ExternalLink size={15} />}
       >
-        Open Claude connectors
+        {info.connectorsLabel}
       </Button>
     </Group>
   );
@@ -138,25 +119,26 @@ export function ClaudeModal({
     <IntegrationStudio
       opened={opened}
       onClose={onClose}
-      brand="claude"
-      title="Claude"
+      brand={info.id}
+      title={info.name}
+      docsUrl={appGuideUrl(info.id)}
       subtitle={`Read-only access to ${workspaceName || "this workspace"}`}
       badge={
         <Badge color={connected ? "teal" : "gray"} variant="light" size="sm">
           {connected ? "Connected" : "Not connected"}
         </Badge>
       }
-      aside={<Aside />}
+      aside={<Aside name={info.name} />}
       footer={footer}
       onRefresh={onRefresh}
     >
       <StudioHero
         state={connected ? "live" : "off"}
-        title={connected ? "Claude can read this workspace" : "Connect Claude to Quantalog"}
+        title={connected ? `${info.name} can read this workspace` : `Connect ${info.name} to Quantalog`}
         description={
           connected
-            ? "Ask Claude about your forms, leads, bookings and traffic in plain language. Disconnect any connection below."
-            : "Add Quantalog as a custom connector in Claude, then ask questions about your forms, leads, bookings and traffic."
+            ? `Ask ${info.name} about your forms, leads, bookings and traffic in plain language. Disconnect any connection below.`
+            : `Add Quantalog as a connector in ${info.name}, then ask questions about your forms, leads, bookings and traffic.`
         }
         stats={
           connected
@@ -168,13 +150,13 @@ export function ClaudeModal({
         }
       />
 
-      <StudioSection title="Connector URL" description="Paste this into Claude when you add the connector.">
+      <StudioSection title="Connector URL" description={`Paste this into ${info.name} when you add the connector.`}>
         <UrlField url={mcpUrl} />
       </StudioSection>
 
-      <StudioSection title="Add it in Claude">
+      <StudioSection title={`Add it in ${info.name}`} description={info.note}>
         <ol className={classes.steps}>
-          {STEPS.map((step, index) => (
+          {info.steps.map((step, index) => (
             <li key={step}>
               <span className={classes.stepNo}>{index + 1}</span>
               <Text size="sm">{step}</Text>
@@ -200,7 +182,7 @@ export function ClaudeModal({
 
       <StudioSection title="Try asking">
         <ul className={classes.prompts}>
-          {PROMPTS.map((prompt) => (
+          {ASSISTANT_PROMPTS.map((prompt) => (
             <li key={prompt}>
               <Text size="sm">{prompt}</Text>
             </li>

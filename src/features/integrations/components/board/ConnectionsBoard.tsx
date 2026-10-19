@@ -18,8 +18,8 @@ import {
   type Searchable,
 } from "../../lib/filter";
 import { useSearchConsoleConnection } from "../../hooks/useSearchConsoleConnection";
-import { useClaudeConnection } from "../../hooks/useClaudeConnection";
-import { ClaudeConnection } from "../claude/ClaudeConnection";
+import { useAiAssistants } from "../../hooks/useAiAssistants";
+import { AiAssistantsConnection } from "../assistants/AiAssistantsConnection";
 import { FormsIntegrations } from "../FormsIntegrations";
 import { SearchConsoleConnection } from "../SearchConsoleConnection";
 import { ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
@@ -49,7 +49,7 @@ export function ConnectionsBoard() {
   const social = useSocialConnections();
   const searchConsole = useSearchConsoleConnection(searchWorkspaceId);
   const integrations = useFormsIntegrations(lockedReason ? null : workspaceId);
-  const claude = useClaudeConnection(workspaceId, !isDemo);
+  const assistants = useAiAssistants(workspaceId, !isDemo);
 
   const formEntries = useMemo<Searchable[]>(
     () =>
@@ -65,28 +65,31 @@ export function ConnectionsBoard() {
   );
 
   const searchEntry = searchConsole.entry;
-  const claudeEntry = claude.available ? claude.entry : null;
+  const assistantEntries = useMemo(
+    () => (assistants.available ? assistants.items.map((item) => item.entry) : []),
+    [assistants.available, assistants.items],
+  );
   const allEntries = useMemo(
     () => [
       ...quantalogApps.entries,
-      ...(claudeEntry ? [claudeEntry] : []),
+      ...assistantEntries,
       ...social.entries,
       ...(searchEntry ? [searchEntry] : []),
       ...formEntries,
     ],
-    [quantalogApps.entries, claudeEntry, social.entries, searchEntry, formEntries],
+    [quantalogApps.entries, assistantEntries, social.entries, searchEntry, formEntries],
   );
   const counts = useMemo(() => countByStatus(allEntries, filter), [allEntries, filter]);
   const categories = useMemo(() => categoryOptions(allEntries), [allEntries]);
 
   const visibleCount = allEntries.filter((entry) => matchesFilter(entry, filter)).length;
   const loading =
-    social.loading || searchConsole.loading || claude.loading || (!lockedReason && integrations.loading);
-  const claudeCard = (flat: boolean) => (
-    <ClaudeConnection
-      claude={claude}
+    social.loading || searchConsole.loading || assistants.loading || (!lockedReason && integrations.loading);
+  const assistantCards = (flat: boolean) => (
+    <AiAssistantsConnection
+      assistants={assistants}
       workspaceName={active?.name ?? ""}
-      lockedReason={workspaceId ? undefined : "Pick a workspace to connect Claude to it."}
+      lockedReason={workspaceId ? undefined : "Pick a workspace to connect an AI assistant to it."}
       filter={filter}
       flat={flat}
     />
@@ -131,7 +134,7 @@ export function ConnectionsBoard() {
         <>
           <div className="connection-grid">
             <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} flat />
-            {claudeCard(true)}
+            {assistantCards(true)}
             <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} flat />
             {searchCard(true)}
             <FormsIntegrations
@@ -147,7 +150,7 @@ export function ConnectionsBoard() {
       ) : (
         <>
           <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} />
-          {claudeCard(false)}
+          {assistantCards(false)}
           <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} />
           {searchCard(false)}
           <FormsIntegrations

@@ -25,6 +25,8 @@ const APP_GUIDES: Record<string, string> = {
   "google-sheets": GOOGLE_SHEETS_DOCS_URL,
   webhook: `${docsUrl(DOCS_SLUGS.leadCapture)}#webhook`,
   "search-console": `${docsUrl(DOCS_SLUGS.searchVisibility)}#connecting`,
+  claude: `${docsUrl(DOCS_SLUGS.aiAssistants)}#claude`,
+  chatgpt: `${docsUrl(DOCS_SLUGS.aiAssistants)}#chatgpt`,
   "quantalog-compare": docsUrl(DOCS_SLUGS.quantalogCompare),
   "quantalog-goals": docsUrl(DOCS_SLUGS.goals),
   "quantalog-notes": docsUrl(DOCS_SLUGS.quantalogNotes),
@@ -34,8 +36,6 @@ const APP_GUIDES: Record<string, string> = {
   linkedin: SOCIAL,
   instagram: SOCIAL,
 };
-
-export const CLAUDE_CONNECTORS_URL = "https://claude.ai/settings/connectors";
 
 export function appGuideUrl(appId: string): string | undefined {
   return APP_GUIDES[appId];
