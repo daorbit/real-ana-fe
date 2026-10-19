@@ -1,29 +1,34 @@
-import { Building2, CalendarDays, ChartLine, FileText, Inbox, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Building2, CalendarDays, ChartLine, FileText, Inbox, LockKeyhole, ShieldCheck, type LucideIcon } from "lucide-react";
 import type { ConnectorScope } from "@/features/connectors/lib/connectorApi";
 import classes from "./PermissionList.module.css";
 
-const SCOPE_ICONS: Record<string, LucideIcon> = {
-  "workspace:read": Building2,
-  "forms:read": FileText,
-  "submissions:read": Inbox,
-  "bookings:read": CalendarDays,
-  "analytics:read": ChartLine,
+const SCOPES: Record<string, { icon: LucideIcon; label: string }> = {
+  "workspace:read": { icon: Building2, label: "Workspace & sites" },
+  "forms:read": { icon: FileText, label: "Forms" },
+  "submissions:read": { icon: Inbox, label: "Responses & leads" },
+  "bookings:read": { icon: CalendarDays, label: "Bookings" },
+  "analytics:read": { icon: ChartLine, label: "Website traffic" },
 };
 
 export function PermissionList({ scopes }: { scopes: ConnectorScope[] }) {
   return (
-    <div className={classes.group}>
-      <ul className={classes.list}>
+    <div className={classes.card}>
+      <ul className={classes.grid}>
         {scopes.map((s) => {
-          const Icon = SCOPE_ICONS[s.scope] ?? ShieldCheck;
+          const known = SCOPES[s.scope];
+          const Icon = known?.icon ?? ShieldCheck;
           return (
-            <li key={s.scope} className={classes.item}>
-              <Icon size={17} strokeWidth={1.9} className={classes.icon} />
-              <span>{s.description}</span>
+            <li key={s.scope} className={classes.item} title={s.description}>
+              <Icon size={16} strokeWidth={1.9} className={classes.icon} />
+              <span>{known?.label ?? s.description}</span>
             </li>
           );
         })}
       </ul>
+      <p className={classes.assure}>
+        <LockKeyhole size={13} />
+        Read-only — nothing can be created, changed or deleted.
+      </p>
     </div>
   );
 }

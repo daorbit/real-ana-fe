@@ -1,5 +1,5 @@
 .form {
-  max-width: 420px;
+  max-width: 380px;
 }
 
 .loading {
@@ -12,29 +12,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .mark {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
   background: var(--auth-surface);
   color: var(--auth-ink);
 }
 
 .markImage {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
 }
 
 .dots {
   display: flex;
-  gap: 5px;
+  gap: 4px;
 }
 
 .dots i {
@@ -52,47 +52,69 @@
   opacity: 0.3;
 }
 
-.section {
-  margin-top: 32px;
+.title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: var(--auth-ink);
 }
 
-.label {
-  margin: 0 0 10px 4px;
-  font-size: 0.7688rem;
-  font-weight: 500;
+.lead {
+  margin: 6px 0 0;
+  font-size: 0.9375rem;
+  text-align: center;
   color: var(--auth-ink-faint);
 }
 
-.assure {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0 0 4px;
-  font-size: 0.8125rem;
+.section {
+  margin-top: 24px;
+}
+
+.label {
+  margin: 0 0 8px 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
   color: var(--auth-ink-faint);
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 32px;
+  align-items: center;
+  gap: 6px;
+  margin-top: 26px;
+}
+
+.cancel {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--auth-ink-faint);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.cancel:hover:not(:disabled) {
+  color: var(--auth-ink);
+}
+
+.cancel:disabled {
+  cursor: default;
+  opacity: 0.6;
 }
 
 .meta {
-  margin: 16px 0 0;
+  margin: 12px 0 0;
   font-size: 0.75rem;
-  line-height: 1.5;
   text-align: center;
   color: var(--auth-ink-ghost);
-}
-
-.meta + .meta {
-  margin-top: 4px;
-}
-
-.email {
-  color: var(--auth-ink-dim);
 }
 
 .switch {
@@ -101,9 +123,8 @@
   background: none;
   font: inherit;
   color: var(--auth-ink-dim);
-  text-decoration: underline;
-  text-underline-offset: 2px;
   cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .switch:hover:not(:disabled) {
@@ -130,22 +151,11 @@
 }
 
 @media (max-width: 48em) {
-  .marks {
-    margin-bottom: 22px;
-  }
-
-  .mark {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-  }
-
-  .markImage {
-    width: 32px;
-    height: 32px;
+  .title {
+    font-size: 1.5rem;
   }
 
   .section {
-    margin-top: 26px;
+    margin-top: 20px;
   }
 }

@@ -2,12 +2,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button, Loader, Title, Text } from "@mantine/core";
-import { Bot, LockKeyhole, TriangleAlert } from "lucide-react";
+import { Bot, TriangleAlert } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import { useAuthorizationRequest } from "@/features/connectors/hooks/useAuthorizationRequest";
 import { PermissionList } from "@/features/connectors/components/PermissionList";
-import { WorkspacePicker } from "@/features/connectors/components/WorkspacePicker";
+import { WorkspaceSelect } from "@/features/connectors/components/WorkspaceSelect";
 import { assistantForHost } from "@/features/integrations/lib/aiAssistants";
 import { rememberReturnPath } from "@/shared/lib/session";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -145,16 +145,12 @@ export default function ConnectAuthorize() {
         </span>
       </div>
 
-      <Title order={2} ta="center">
-        Connect {clientName}
-      </Title>
-      <Text ta="center" mt={8}>
-        {clientName} wants read-only access to one of your workspaces.
-      </Text>
+      <h1 className={classes.title}>Connect {clientName}</h1>
+      <p className={classes.lead}>Read-only access to one workspace.</p>
 
       <section className={classes.section}>
-        <p className={classes.label}>Choose a workspace</p>
-        <WorkspacePicker
+        <p className={classes.label}>Workspace</p>
+        <WorkspaceSelect
           workspaces={request.workspaces}
           value={workspaceId}
           disabled={busy}
@@ -165,10 +161,6 @@ export default function ConnectAuthorize() {
       <section className={classes.section}>
         <p className={classes.label}>{clientName} will be able to see</p>
         <PermissionList scopes={request.scopes} />
-        <p className={classes.assure}>
-          <LockKeyhole size={14} />
-          Read-only. Nothing can be created, changed or deleted.
-        </p>
       </section>
 
       <div className={classes.actions}>
@@ -181,16 +173,13 @@ export default function ConnectAuthorize() {
         >
           Allow access
         </Button>
-        <Button variant="default" fullWidth loading={deciding === "deny"} disabled={busy} onClick={() => decide("deny")}>
-          Cancel
-        </Button>
+        <button type="button" className={classes.cancel} disabled={busy} onClick={() => decide("deny")}>
+          {deciding === "deny" ? "Cancelling…" : "Cancel"}
+        </button>
       </div>
 
       <p className={classes.meta}>
-        You&apos;ll return to {request.client.redirectHost || "the app"}. Disconnect any time in Quantalog → Apps.
-      </p>
-      <p className={classes.meta}>
-        Signed in as <span className={classes.email}>{user.email}</span> ·{" "}
+        {user.email} ·{" "}
         <button type="button" className={classes.switch} onClick={logout} disabled={busy}>
           Not you?
         </button>
