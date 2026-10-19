@@ -1,0 +1,92 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  max-height: 248px;
+  overflow-y: auto;
+  border-radius: 18px;
+  background: var(--auth-surface);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 18px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: var(--auth-ink);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.option + .option {
+  border-top: 1px solid var(--auth-line);
+}
+
+.option:hover:not(:disabled) {
+  background: var(--auth-surface-hover);
+}
+
+.option:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--auth-line-strong);
+  outline-offset: -2px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--auth-solid);
+  color: var(--auth-solid-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.name {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.role {
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  color: var(--auth-ink-faint);
+}
+
+.radio {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--auth-line-strong);
+  color: var(--auth-solid-ink);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.option[data-selected] .radio {
+  border-color: var(--auth-solid);
+  background: var(--auth-solid);
+}

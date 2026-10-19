@@ -1,0 +1,29 @@
+.group {
+  border-radius: 18px;
+  background: var(--auth-surface);
+}
+
+.list {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  font-size: 0.9063rem;
+  line-height: 1.35;
+  color: var(--auth-ink-dim);
+}
+
+.item + .item {
+  border-top: 1px solid var(--auth-line);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--auth-ink-faint);
+}

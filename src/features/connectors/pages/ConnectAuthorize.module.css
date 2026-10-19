@@ -1,122 +1,151 @@
-.page {
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
-  padding: 24px 16px;
-  background: var(--bg);
+.form {
+  max-width: 420px;
 }
 
-.card {
-  width: 100%;
-  max-width: 460px;
-  padding: 32px 28px 28px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  background: var(--surface);
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 64px 0;
 }
 
 .marks {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 28px;
 }
 
 .mark {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text);
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--auth-surface);
+  color: var(--auth-ink);
 }
 
 .markImage {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
 }
 
-.link {
-  color: var(--muted);
+.dots {
+  display: flex;
+  gap: 5px;
 }
 
-.title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 650;
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-  text-align: center;
-  color: var(--text);
+.dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--auth-ink-ghost);
 }
 
-.lead {
-  margin: 8px 0 0;
-  font-size: 13.5px;
-  line-height: 1.5;
-  text-align: center;
-  color: var(--muted);
+.dots i:nth-child(2) {
+  opacity: 0.6;
+}
+
+.dots i:nth-child(3) {
+  opacity: 0.3;
 }
 
 .section {
-  margin-top: 22px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
+  margin-top: 32px;
 }
 
-.sectionLabel {
-  margin: 0 0 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+.label {
+  margin: 0 0 10px 4px;
+  font-size: 0.7688rem;
+  font-weight: 500;
+  color: var(--auth-ink-faint);
 }
 
-.note {
-  margin: 14px 0 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--muted);
-}
-
-.account {
-  margin: 18px 0 0;
-  font-size: 12.5px;
-  text-align: center;
-  color: var(--muted);
-}
-
-.accountEmail {
-  font-weight: 600;
-  color: var(--text-2);
+.assure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0 4px;
+  font-size: 0.8125rem;
+  color: var(--auth-ink-faint);
 }
 
 .actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 24px;
+  margin-top: 32px;
 }
 
-.state {
+.meta {
+  margin: 16px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--auth-ink-ghost);
+}
+
+.meta + .meta {
+  margin-top: 4px;
+}
+
+.email {
+  color: var(--auth-ink-dim);
+}
+
+.switch {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--auth-ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.switch:hover:not(:disabled) {
+  color: var(--auth-ink);
+}
+
+.problem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 12px 0;
+  padding-top: 24px;
   text-align: center;
 }
 
-@media (max-width: 30em) {
-  .card {
-    padding: 24px 18px 20px;
+.problemIcon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 20px;
+  border-radius: 18px;
+  background: var(--auth-surface);
+  color: var(--auth-ink-faint);
+}
+
+@media (max-width: 48em) {
+  .marks {
+    margin-bottom: 22px;
   }
 
-  .actions {
-    grid-template-columns: 1fr;
+  .mark {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+  }
+
+  .markImage {
+    width: 32px;
+    height: 32px;
+  }
+
+  .section {
+    margin-top: 26px;
   }
 }
