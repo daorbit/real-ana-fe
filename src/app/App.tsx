@@ -51,6 +51,7 @@ const AuditLog = lazy(() => import("@/features/audit/pages/AuditLog"));
 const Branding = lazy(() => import("@/features/branding/pages/Branding"));
 const MediaLibrary = lazy(() => import("@/features/media/pages/MediaLibrary"));
 const AcceptInvite = lazy(() => import("@/features/workspace/pages/AcceptInvite"));
+const ConnectAuthorize = lazy(() => import("@/features/connectors/pages/ConnectAuthorize"));
 const Share = lazy(() => import("@/features/analytics/pages/Share"));
 const Reports = lazy(() => import("@/features/reports/pages"));
 const Journey = lazy(() => import("@/features/journey/pages/Journey"));
@@ -257,6 +258,7 @@ export default function App() {
               <Route path="/share/:token" element={<RouteFrame><PublicDashboard /></RouteFrame>} />
               <Route path="/embed/:token" element={<RouteFrame><EmbedWidget /></RouteFrame>} />
               <Route path="/invite/:token" element={<RouteFrame><AcceptInvite /></RouteFrame>} />
+              <Route path="/connect/authorize" element={<RouteFrame><ConnectAuthorize /></RouteFrame>} />
               <Route path="/seo-report/:token" element={<RouteFrame><PublicSeoReport /></RouteFrame>} />
               <Route path="/data-deletion" element={<RouteFrame><DataDeletion /></RouteFrame>} />
               <Route path="/app/onboarding" element={<ProtectedRaw><RouteFrame><Onboarding /></RouteFrame></ProtectedRaw>} />

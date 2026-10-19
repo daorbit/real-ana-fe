@@ -8,6 +8,7 @@ import { PasswordPanel } from "./PasswordPanel";
 import { TwoFactorPanel } from "./TwoFactorPanel";
 import { ScreenLockPanel } from "./ScreenLockPanel";
 import { SessionsPanel } from "./SessionsPanel";
+import { ConnectedAppsPanel } from "@/features/connectors/components/ConnectedAppsPanel";
 import { SecurityGroup } from "./SecurityGroup";
 import { AccountActivityPanel } from "./AccountActivityPanel";
 import { DeleteAccountPanel } from "./DeleteAccountPanel";
@@ -40,6 +41,7 @@ export function SettingsSectionBody({ id, form }: { id: SettingsSectionId; form:
                 <ScreenLockPanel />
               </SecurityGroup>
               <SessionsPanel />
+              <ConnectedAppsPanel />
             </Box>
             <Box className={securityClasses.column}>
               <AccountActivityPanel />

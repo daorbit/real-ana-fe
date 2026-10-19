@@ -112,6 +112,8 @@ const TEAM_COPY: Record<string, Describe> = {
   "api_key.updated": (e) => `renamed an API key to ${quoted(e.target.label, "")}`.trim(),
   "api_key.revoked": (e) => `revoked the API key ${quoted(e.target.label, "")}`.trim(),
   "api_key.revealed": (e) => `revealed the API key ${quoted(e.target.label, "")}`.trim(),
+  "ai_connector.authorized": (e) => `connected ${quoted(e.target.label, "an AI app")} to this workspace`,
+  "ai_connector.revoked": (e) => `disconnected ${quoted(e.target.label, "an AI app")} from this workspace`,
 
   "form.created": (e) => `created the form ${quoted(e.target.label, "")}`.trim(),
   "form.duplicated": (e) => `duplicated a form as ${quoted(e.target.label, "")}`.trim(),

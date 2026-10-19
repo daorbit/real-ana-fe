@@ -67,6 +67,14 @@ export function handleSessionExpired() {
   });
 }
 
+export function rememberReturnPath(path: string) {
+  try {
+    sessionStorage.setItem(RETURN_KEY, path);
+  } catch {
+    /* private mode — losing the return path is acceptable */
+  }
+}
+
 /** The path to send someone back to after they re-authenticate, if any. */
 export function consumeReturnPath(): string | null {
   try {
