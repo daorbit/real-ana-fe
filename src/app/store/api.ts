@@ -926,6 +926,14 @@ export const api = createApi({
       ],
     }),
 
+    uploadSiteLogo: build.mutation<{ url: string }, { workspaceId: string; file: string }>({
+      query: ({ workspaceId, file }) => ({
+        url: `/api/workspaces/${workspaceId}/site-logo`,
+        method: "POST",
+        body: { file },
+      }),
+    }),
+
     updateSite: build.mutation<
       Site,
       { workspaceId: string; siteId: string; name?: string; domain?: string; logoUrl?: string }
@@ -3020,6 +3028,7 @@ export const {
   useGenerateOnboardingCopyMutation,
   useUpdateSiteOptionsMutation,
   useUpdateSiteMutation,
+  useUploadSiteLogoMutation,
   useDeleteSiteMutation,
   useGetStatsQuery,
   useGetLiveQuery,

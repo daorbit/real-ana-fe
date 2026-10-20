@@ -1,77 +1,86 @@
-import { useState } from "react";
-import { Button } from "@mantine/core";
-import { ImagePlus, Trash2 } from "lucide-react";
+import { useRef, type ChangeEvent } from "react";
+import { Loader, UnstyledButton } from "@mantine/core";
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
+import { useUploadSiteLogoMutation } from "@/app/store";
+import { useWorkspace } from "@/features/workspace/context";
+import { readAsDataUrl } from "@/features/media/lib";
+import { notify, notifyError } from "@/shared/lib/notify";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
 import classes from "./SiteLogoField.module.css";
+
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+const ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
 
 export function SiteLogoField({
   value,
   onChange,
   domain,
-  label,
   disabled,
 }: {
   value: string;
   onChange: (url: string) => void;
   domain: string;
-  label?: string;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
-  const [picking, setPicking] = useState(false);
+  const { active } = useWorkspace();
+  const [upload, { isLoading: uploading }] = useUploadSiteLogoMutation();
+  const input = useRef<HTMLInputElement>(null);
   const cleanDomain = domain.trim().replace(/^https?:\/\//i, "");
+
+  const pick = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0];
+    e.currentTarget.value = "";
+    if (!file || !active?._id) return;
+    if (file.size > MAX_LOGO_BYTES) {
+      notify.error(t("workspaces.logoTooBig", "The logo must be 2 MB or smaller."));
+      return;
+    }
+    try {
+      const { url } = await upload({ workspaceId: active._id, file: await readAsDataUrl(file) }).unwrap();
+      onChange(url);
+    } catch (err) {
+      notifyError(err, t("workspaces.logoUploadFailed", "Could not upload that image."));
+    }
+  };
 
   return (
     <div className={classes.field}>
-      <span className={classes.label}>{label ?? t("workspaces.siteLogo", "Site logo")}</span>
+      <span className={classes.label}>
+        {t("workspaces.siteLogo", "Site logo")}
+        <span className={classes.optional}>· {t("workspaces.optional", "optional")}</span>
+      </span>
       <div className={classes.row}>
-        <span className={classes.preview}>
-          <SiteFavicon domain={cleanDomain} logoUrl={value || undefined} size={30} />
-        </span>
+        <UnstyledButton
+          className={classes.tile}
+          data-empty={!value || undefined}
+          onClick={() => input.current?.click()}
+          disabled={disabled || uploading || !active?._id}
+          aria-label={value ? t("workspaces.changeLogo", "Change logo") : t("workspaces.addLogo", "Add logo")}
+        >
+          {uploading ? (
+            <Loader size="xs" />
+          ) : value ? (
+            <SiteFavicon domain={cleanDomain} logoUrl={value} size={30} />
+          ) : (
+            <Plus size={20} />
+          )}
+        </UnstyledButton>
+        <input ref={input} type="file" accept={ACCEPT} className={classes.file} onChange={pick} tabIndex={-1} />
         <div className={classes.text}>
           <span className={classes.hint}>
             {value
-              ? t("workspaces.siteLogoSet", "Shown wherever this site appears in Quantalog.")
-              : t(
-                  "workspaces.siteLogoHint",
-                  "Optional. Add one if your favicon doesn't show up, or to use a sharper mark.",
-                )}
+              ? t("workspaces.siteLogoSet", "Click the logo to change it.")
+              : t("workspaces.siteLogoHint", "PNG, JPG, WebP or GIF up to 2 MB. Useful when your favicon doesn't show up.")}
           </span>
-          <div className={classes.actions}>
-            <Button
-              size="xs"
-              variant="default"
-              leftSection={<ImagePlus size={14} />}
-              onClick={() => setPicking(true)}
-              disabled={disabled}
-            >
-              {value ? t("workspaces.changeLogo", "Change") : t("workspaces.chooseLogo", "Upload logo")}
-            </Button>
-            {value && (
-              <Button
-                size="xs"
-                variant="subtle"
-                color="gray"
-                leftSection={<Trash2 size={14} />}
-                onClick={() => onChange("")}
-                disabled={disabled}
-              >
-                {t("workspaces.removeLogo", "Remove")}
-              </Button>
-            )}
-          </div>
+          {value && !uploading && (
+            <UnstyledButton className={classes.remove} onClick={() => onChange("")} disabled={disabled}>
+              {t("workspaces.removeLogo", "Remove")}
+            </UnstyledButton>
+          )}
         </div>
       </div>
-
-      <MediaPickerModal
-        opened={picking}
-        onClose={() => setPicking(false)}
-        onPick={(asset) => onChange(asset.url)}
-        kind="image"
-        title={t("workspaces.chooseSiteLogo", "Choose a site logo")}
-      />
     </div>
   );
 }
