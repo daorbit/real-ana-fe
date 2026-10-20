@@ -15,12 +15,37 @@ export type DataDigestSite = {
   bounceRate: number;
   bounceRateChangePct: number | null;
   live: number;
+  avgSessionSeconds?: number;
+  pagesPerSession?: number;
   topPages: DataDigestRow[];
   topReferrers: DataDigestRow[];
+  channels?: DataDigestRow[];
   countries: DataDigestRow[];
   devices: DataDigestRow[];
 };
-export type DataDigest = { sites: DataDigestSite[]; rangeLabel?: string };
+export type DataDigestLeads = {
+  leads: number;
+  leadsChangePct: number | null;
+  byStage: Record<string, number>;
+  averageLeadScore: number | null;
+  topForms: DataDigestRow[];
+  bookings: number;
+  upcomingBookings: number;
+};
+export type DataDigest = { sites: DataDigestSite[]; rangeLabel?: string; leads?: DataDigestLeads };
+
+const NO_ROWS: DataDigestRow[] = [];
+
+function stageRows(byStage: Record<string, number>): DataDigestRow[] {
+  return Object.entries(byStage)
+    .filter(([, count]) => count > 0)
+    .map(([key, count]) => ({ key, count }));
+}
+
+function formatSeconds(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+}
 
 export function isDataDigest(v: unknown): v is DataDigest {
   return Boolean(v) && typeof v === "object" && Array.isArray((v as DataDigest).sites);
@@ -45,26 +70,40 @@ function rowsLine(label: string, rows: DataDigestRow[]): string {
  * standalone summary someone can paste into an email or a doc, rather than a
  * chat turn that only makes sense next to the question that produced it.
  */
+function leadsText(leads: DataDigestLeads, range: string): string {
+  return [
+    `Leads — ${range}`,
+    `New leads: ${leads.leads}${changeLine(leads.leadsChangePct)}`,
+    leads.averageLeadScore !== null ? `Average lead score: ${leads.averageLeadScore}` : "",
+    `Bookings: ${leads.bookings}`,
+    rowsLine("Pipeline", stageRows(leads.byStage)),
+    rowsLine("Top forms", leads.topForms),
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function formatDigestAsText(digest: DataDigest): string {
   const range = digest.rangeLabel ?? "the last 7 days";
-  return digest.sites
-    .map((site) =>
-      [
-        `${site.domain} — ${range}`,
-        `Visitors: ${site.visitors}${changeLine(site.visitorsChangePct)}`,
-        `Pageviews: ${site.pageviews}${changeLine(site.pageviewsChangePct)}`,
-        `Sessions: ${site.sessions}${changeLine(site.sessionsChangePct)}`,
-        `Bounce rate: ${site.bounceRate}%${changeLine(site.bounceRateChangePct)}`,
-        `Visitors online now: ${site.live}`,
-        rowsLine("Top pages", site.topPages),
-        rowsLine("Top referrers", site.topReferrers),
-        rowsLine("Countries", site.countries),
-        rowsLine("Devices", site.devices),
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    )
-    .join("\n\n");
+  const sites = digest.sites.map((site) =>
+    [
+      `${site.domain} — ${range}`,
+      `Visitors: ${site.visitors}${changeLine(site.visitorsChangePct)}`,
+      `Pageviews: ${site.pageviews}${changeLine(site.pageviewsChangePct)}`,
+      `Sessions: ${site.sessions}${changeLine(site.sessionsChangePct)}`,
+      `Bounce rate: ${site.bounceRate}%${changeLine(site.bounceRateChangePct)}`,
+      site.avgSessionSeconds !== undefined ? `Average session: ${formatSeconds(site.avgSessionSeconds)}` : "",
+      `Visitors online now: ${site.live}`,
+      rowsLine("Top pages", site.topPages),
+      rowsLine("Channels", site.channels ?? NO_ROWS),
+      rowsLine("Top referrers", site.topReferrers),
+      rowsLine("Countries", site.countries),
+      rowsLine("Devices", site.devices),
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  );
+  return [...sites, ...(digest.leads ? [leadsText(digest.leads, range)] : [])].join("\n\n");
 }
 
 function csvCell(value: string | number): string {
@@ -90,9 +129,20 @@ export function csvFromDigest(digest: DataDigest): string {
       [site.domain, "bounce_rate", "", site.bounceRate].map(csvCell).join(","),
       [site.domain, "online_now", "", site.live].map(csvCell).join(","),
       ...csvRows("top_page", site.domain, site.topPages),
+      ...csvRows("channel", site.domain, site.channels ?? NO_ROWS),
       ...csvRows("top_referrer", site.domain, site.topReferrers),
       ...csvRows("country", site.domain, site.countries),
       ...csvRows("device", site.domain, site.devices),
+    );
+  }
+
+  if (digest.leads) {
+    const leads = digest.leads;
+    lines.push(
+      ["forms", "leads", "", leads.leads].map(csvCell).join(","),
+      ["forms", "bookings", "", leads.bookings].map(csvCell).join(","),
+      ...csvRows("pipeline_stage", "forms", stageRows(leads.byStage)),
+      ...csvRows("top_form", "forms", leads.topForms),
     );
   }
 
@@ -187,6 +237,29 @@ function takenAt(iso?: string): string | null {
   })}`;
 }
 
+function LeadsCard({ leads, caption }: { leads: DataDigestLeads; caption: string }) {
+  const stages = stageRows(leads.byStage);
+  return (
+    <div className={classes.card}>
+      <Text size="xs" fw={600} c="dimmed" mb={8}>
+        Forms & leads · {caption}
+      </Text>
+      <div className={classes.statRow}>
+        <Stat label="New leads" value={leads.leads} pct={leads.leadsChangePct} />
+        <Stat label="Bookings" value={leads.bookings} pct={null} />
+        <Stat label="Upcoming" value={leads.upcomingBookings} pct={null} />
+        {leads.averageLeadScore !== null && <Stat label="Avg score" value={leads.averageLeadScore} pct={null} />}
+      </div>
+      {(stages.length > 0 || leads.topForms.length > 0) && (
+        <div className={classes.breakdowns}>
+          <TopRows label="Pipeline" rows={stages} />
+          <TopRows label="Top forms" rows={leads.topForms} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DataDigestTable({
   digest,
   /** ISO time the snapshot was taken — set on a restored turn, not a live one. */
@@ -195,7 +268,7 @@ export function DataDigestTable({
   digest: unknown;
   takenAtIso?: string;
 }) {
-  if (!isDataDigest(digest) || !digest.sites.length) return null;
+  if (!isDataDigest(digest) || (!digest.sites.length && !digest.leads)) return null;
 
   const stamp = takenAt(takenAtIso);
   const range = digest.rangeLabel ?? "the last 7 days";
@@ -213,14 +286,19 @@ export function DataDigestTable({
             <Stat label="Pageviews" value={site.pageviews} pct={site.pageviewsChangePct} />
             <Stat label="Sessions" value={site.sessions} pct={site.sessionsChangePct} />
             <Stat label="Bounce" value={`${site.bounceRate}%`} pct={site.bounceRateChangePct} />
+            {site.avgSessionSeconds !== undefined && (
+              <Stat label="Avg session" value={formatSeconds(site.avgSessionSeconds)} pct={null} />
+            )}
             <Stat label="Online now" value={site.live} pct={null} />
           </div>
           {(site.topPages.length > 0 ||
             site.topReferrers.length > 0 ||
+            (site.channels?.length ?? 0) > 0 ||
             site.countries.length > 0 ||
             site.devices.length > 0) && (
             <div className={classes.breakdowns}>
               <TopRows label="Top pages" rows={site.topPages} />
+              <TopRows label="Channels" rows={site.channels ?? NO_ROWS} />
               <TopRows label="Top referrers" rows={site.topReferrers} />
               <TopRows label="Countries" rows={site.countries} />
               <TopRows label="Devices" rows={site.devices} />
@@ -228,6 +306,9 @@ export function DataDigestTable({
           )}
         </div>
       ))}
+      {digest.leads && (
+        <LeadsCard leads={digest.leads} caption={stamp ? `${range} · ${stamp}` : range} />
+      )}
     </div>
   );
 }

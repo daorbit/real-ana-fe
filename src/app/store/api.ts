@@ -1375,8 +1375,6 @@ export const api = createApi({
          * the panel only ever passes it straight to `DataDigestTable`.
          */
         dataDigest?: unknown;
-        /** Pages a web search drew on, set only when the model used one. */
-        citations?: { url: string; title: string }[];
         /**
          * Questions left this cycle, plan remainder plus purchased credits.
          *
@@ -1507,8 +1505,6 @@ export const api = createApi({
           imageUrl?: string;
           suggestions: string[];
           dataDigest?: unknown;
-          /** Pages a web search drew on, when the turn used one. */
-          citations?: { url: string; title: string }[];
           /** True when the turn is a stored error rather than an answer. */
           failed: boolean;
           modelLabel?: string;

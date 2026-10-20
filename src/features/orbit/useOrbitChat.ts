@@ -42,8 +42,6 @@ export type OrbitMessage = {
   modelLabel?: string;
   dataDigest?: unknown;
   digestAt?: string;
-  /** Pages a web search drew on, set only when the model actually used one. */
-  citations?: { url: string; title: string }[];
   /** A user turn's attached document's file name, for the chip in the thread. */
   documentName?: string;
 };
@@ -269,7 +267,6 @@ export function useOrbitChat() {
               imageUrl: answered.imageUrl,
               suggestions: answered.suggestions,
               dataDigest: answered.dataDigest,
-              citations: answered.citations,
               modelLabel: answered.modelLabel,
             },
           ];
@@ -452,7 +449,6 @@ export function useOrbitChat() {
     failed: boolean;
     suggestions: string[];
     dataDigest?: unknown;
-    citations?: { url: string; title: string }[];
     createdAt: string;
     modelLabel?: string;
   }): OrbitMessage => ({
@@ -463,7 +459,6 @@ export function useOrbitChat() {
     failed: m.failed || undefined,
     suggestions: m.suggestions.length ? m.suggestions : undefined,
     dataDigest: m.dataDigest,
-    citations: m.citations,
     digestAt: m.createdAt,
     modelLabel: m.modelLabel,
   });
