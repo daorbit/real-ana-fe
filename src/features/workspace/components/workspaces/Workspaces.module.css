@@ -73,7 +73,7 @@
   color: var(--text);
   border-color: var(--border-strong);
   background: var(--surface-2);
-  box-shadow: 0 1px 0 color-mix(in srgb, #fff 6%, transparent) inset, 0 4px 14px -8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 14px -8px rgba(0, 0, 0, 0.5);
 }
 
 .tabText {

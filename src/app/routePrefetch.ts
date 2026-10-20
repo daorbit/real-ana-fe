@@ -33,6 +33,7 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/backlinks": () => import("@/features/backlinks/pages/Backlinks"),
   "/app/reviews": () => import("@/features/reviews/pages/Reviews"),
   "/app/workspaces": () => import("@/features/workspace/pages/Workspaces"),
+  "/app/install": () => import("@/features/workspace/pages/InstallSite"),
   "/app/members": () => import("@/features/workspace/pages/Members"),
   "/app/audit-log": () => import("@/features/audit/pages/AuditLog"),
   "/app/branding": () => import("@/features/branding/pages/Branding"),

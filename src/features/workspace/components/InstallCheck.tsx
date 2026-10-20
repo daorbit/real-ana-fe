@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Card, Group, Text, Button, ThemeIcon, List, Collapse } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { Radar, CheckCircle2, AlertTriangle, RotateCw } from "lucide-react";
@@ -10,14 +11,19 @@ export function InstallCheck({
   siteId,
   domain,
   autoStart = false,
+  onInstalled,
 }: {
   workspaceId: string;
   siteId: string;
   domain?: string;
   autoStart?: boolean;
+  onInstalled?: () => void;
 }) {
   const { user } = useAuth();
   const { phase, start, secondsLeft, progress } = useInstallCheck(workspaceId, siteId, autoStart);
+  useEffect(() => {
+    if (phase === "installed") onInstalled?.();
+  }, [phase, onInstalled]);
   const site = domain ? <b>{domain}</b> : "your site";
   const onStart = () => {
     trace(user?.id, "verify_install_clicked", "install_check", siteId);

@@ -46,6 +46,8 @@ import { ExportMenu } from "@/shared/ui/ExportMenu";
 import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { AnalyticsHeader } from "@/features/analytics/components/layout/AnalyticsHeader";
+import { setupStateFor } from "@/features/workspace/setupState";
+import { SetupScreen } from "@/features/workspace/components/setup/SetupScreen";
 import { AnalyticsControlDeck } from "@/features/analytics/components/layout/AnalyticsControlDeck";
 import { AnalyticsSubTabs } from "@/features/analytics/components/layout/AnalyticsSubTabs";
 import { getAnalyticsSections } from "@/features/analytics/components/layout/analyticsSections";
@@ -142,7 +144,8 @@ export default function Analytics() {
 
   const [pickedSites, setPickedSites] = useSiteScope(active?._id);
 
-  const { sites } = useSites(active?._id);
+  const { sites, lastUpdated: sitesLoadedAt, refresh: refreshSites } = useSites(active?._id);
+  const setup = setupStateFor(sites, Boolean(sitesLoadedAt));
 
   const siteScope = useMemo(() => {
     if (!pickedSites.length) return [];
@@ -382,6 +385,14 @@ export default function Analytics() {
           description="Analytics reports on the sites inside a workspace. Pick one — or create your first — and the numbers land here."
           action={{ label: "Go to Workspaces", to: "/app/workspaces" }}
         />
+      </AppShell>
+    );
+  }
+
+  if (setup) {
+    return (
+      <AppShell>
+        <SetupScreen pageTitle="Analytics" state={setup} workspaceId={active._id} onVerified={() => void refreshSites()} />
       </AppShell>
     );
   }

@@ -1257,6 +1257,7 @@ export type Site = {
   bundleId?: string;
   siteId: string;
   createdAt: string;
+  firstEventAt?: string | null;
   /** One-line "what's this site for?" answer from onboarding, if given. */
   purpose?: string;
   /**

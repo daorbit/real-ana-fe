@@ -45,6 +45,7 @@ const Compare = lazy(() => import("@/features/compare/pages/Compare"));
 const Backlinks = lazy(() => import("@/features/backlinks/pages/Backlinks"));
 const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"));
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
+const InstallSite = lazy(() => import("@/features/workspace/pages/InstallSite"));
 const Developers = lazy(() => import("@/features/support/pages/Developers"));
 const Members = lazy(() => import("@/features/workspace/pages/Members"));
 const AuditLog = lazy(() => import("@/features/audit/pages/AuditLog"));
@@ -287,6 +288,8 @@ export default function App() {
                 <Route path="/app/compare" element={<Compare />} />
                 <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/workspaces" element={<Workspaces />} />
+              <Route path="/app/install" element={<InstallSite />} />
+              <Route path="/app/install/:siteId" element={<InstallSite />} />
                 <Route path="/app/members" element={<Members />} />
                 <Route path="/app/audit-log" element={<AuditLog />} />
                 <Route path="/app/orbit" element={<Orbit />} />

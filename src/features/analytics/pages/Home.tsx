@@ -24,6 +24,8 @@ import { LayoutEditControls } from "@/features/analytics/components/widgets/Layo
 import { useStats, useLive, useHomeWidgets, useLinkedInReturn, useSiteScope } from "@/features/analytics";
 import { useHomeDisplay } from "@/features/analytics/homeDisplayPrefs";
 import { useSites } from "@/features/workspace";
+import { setupStateFor } from "@/features/workspace/setupState";
+import { SetupScreen } from "@/features/workspace/components/setup/SetupScreen";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { HomeSkeleton } from "@/shared/ui/Skeletons";
@@ -51,7 +53,8 @@ export default function Home() {
     JSON.stringify(siteScope ?? null),
     stats && !switching ? stats : null,
   );
-  const { sites } = useSites(active?._id);
+  const { sites, lastUpdated: sitesLoadedAt, refresh: refreshSites } = useSites(active?._id);
+  const setup = setupStateFor(sites, Boolean(sitesLoadedAt));
   const {
     layout, loading: layoutLoading, saving, dirty, save, revert,
     has, spanOf, toggle, remove, setSpan, move, reset, clear, apply,
@@ -105,6 +108,14 @@ export default function Home() {
           action={{ label: "Create a workspace", to: "/app/workspaces", icon: Plus }}
           actionNote="Free to start — no card needed."
         />
+      </AppShell>
+    );
+  }
+
+  if (setup) {
+    return (
+      <AppShell>
+        <SetupScreen pageTitle="Home" state={setup} workspaceId={active._id} onVerified={() => void refreshSites()} />
       </AppShell>
     );
   }
