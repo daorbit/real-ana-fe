@@ -27,6 +27,12 @@
   text-align: left;
 }
 
+.option[data-selected="true"],
+.option[data-selected="true"]:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
 /* No `color` here: each icon is given its own by the component, from the
    option's data. This only handles how present that colour is — held back a
    little while unselected so thirteen brand hues sit behind the labels rather
@@ -53,7 +59,7 @@
 .optionCheck {
   flex-shrink: 0;
   display: none;
-  color: var(--accent-2);
+  color: var(--accent);
 }
 .option[data-selected="true"] .optionCheck {
   display: block;

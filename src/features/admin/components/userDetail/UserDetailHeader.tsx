@@ -5,6 +5,7 @@ import type { AdminUser } from "@/shared/types";
 import type { AdminUserActions } from "../../useAdminUserActions";
 import { AdminUserAvatar } from "../users/AdminUserAvatar";
 import { UserPlanBadge, UserRoleBadge } from "../users/UserBadges";
+import { UserReferralSources } from "./UserReferralSources";
 import classes from "./userDetail.module.css";
 
 interface Props {
@@ -29,6 +30,7 @@ export function UserDetailHeader({ user, actions, refreshing, onRefresh }: Props
             <UserPlanBadge user={user} />
             <span>Joined {shortDate(user.createdAt)}</span>
           </div>
+          <UserReferralSources sources={user.referralSources} />
         </div>
       </div>
 

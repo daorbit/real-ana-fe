@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
-import { Badge, Button, Group, Text } from "@mantine/core";
+import { Badge, Text } from "@mantine/core";
 import { Check, CircleDashed, CirclePause, Link2, Power, RefreshCw, Settings2, TriangleAlert } from "lucide-react";
 import { ConnectionCard, type ConnectionCardStatus } from "@/features/auth/components/settings/ConnectionCard";
 import { timeAgo } from "@/shared/lib/format";
 import { BrandMark, CARD_MARK_SIZE } from "./logos/BrandMarks";
 import { appGuideUrl } from "../lib/links";
 import { useJustConnected } from "../hooks/useJustConnected";
+import { ConnectionFooter } from "./ConnectionFooter";
 import type { IntegrationTile } from "../types";
 import classes from "./IntegrationTileCard.module.css";
 
@@ -123,28 +124,13 @@ function TileFooter({ tile, busy, lockedReason, onOpen, celebrate }: Props & { c
 
   const footer = footerFor(tile);
   return (
-    <Group justify="space-between" gap="sm" wrap="nowrap" className={classes.footer}>
-      <Group gap={8} wrap="nowrap" className={classes.status}>
-        {footer.icon}
-        <Text size="xs" c={celebrate ? "teal" : "dimmed"} fw={celebrate ? 600 : undefined} truncate aria-live="polite">
-          {celebrate ? "Connected just now" : footer.label}
-        </Text>
-      </Group>
-      <Button
-        type="button"
-        size="xs"
-        radius="md"
-        variant={footer.variant}
-        color={footer.color}
-        loading={busy}
-        leftSection={footer.actionIcon}
-        onClick={() => onOpen(tile)}
-        className={classes.action}
-        aria-label={`${footer.action} ${tile.name}`}
-      >
-        {footer.action}
-      </Button>
-    </Group>
+    <ConnectionFooter
+      {...footer}
+      busy={busy}
+      celebrate={celebrate}
+      ariaLabel={`${footer.action} ${tile.name}`}
+      onAction={() => onOpen(tile)}
+    />
   );
 }
 

@@ -964,6 +964,7 @@ export type AdminUser = {
   plan: { slug: string; name: string; expired: boolean } | null;
   totpEnabled: boolean;
   screenLockEnabled: boolean;
+  referralSources?: ReferralSource[];
 };
 
 export type AdminUserSite = {

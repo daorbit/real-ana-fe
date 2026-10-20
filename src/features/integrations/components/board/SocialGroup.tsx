@@ -1,8 +1,7 @@
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
-import { InstagramConnection } from "@/features/social/components/InstagramConnection";
+import { InstagramTileFooter, LinkedInTileFooter } from "./SocialTileFooters";
 import { ConnectionCard, type ConnectionCardStatus } from "@/features/auth/components/settings/ConnectionCard";
 import { ConnectionGroup } from "@/features/auth/components/settings/ConnectionGroup";
 import { FacebookMark, InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
@@ -31,6 +30,7 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
   const instagramStatus = statusFor(entries.find((e) => e.id === "instagram")?.state);
   const linkedInCelebrate = useJustConnected(linkedInStatus === "connected");
   const instagramCelebrate = useJustConnected(instagramStatus === "connected");
+  const goToSocial = useCallback(() => nav("/app/social"), [nav]);
   if (entries.length === 0) return null;
 
   const cards: Record<SocialId, ReactNode> = {
@@ -45,7 +45,7 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
         status={linkedInStatus}
         celebrate={linkedInCelebrate}
       >
-        <LinkedInConnection onConnected={() => nav("/app/social")} />
+        <LinkedInTileFooter celebrate={linkedInCelebrate} onConnected={goToSocial} />
       </ConnectionCard>
     ),
     instagram: (
@@ -60,7 +60,7 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
         status={canUseInstagram ? instagramStatus : undefined}
         celebrate={instagramCelebrate}
       >
-        {canUseInstagram && <InstagramConnection onConnected={() => nav("/app/social")} />}
+        {canUseInstagram && <InstagramTileFooter celebrate={instagramCelebrate} onConnected={goToSocial} />}
       </ConnectionCard>
     ),
     facebook: (

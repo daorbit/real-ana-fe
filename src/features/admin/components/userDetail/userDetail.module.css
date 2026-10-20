@@ -71,6 +71,43 @@
   color: var(--muted);
 }
 
+.referral {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.referralLabel {
+  color: var(--muted);
+}
+
+.referralList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.referralChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+}
+
+.referralEmpty {
+  color: var(--muted);
+  font-style: italic;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
