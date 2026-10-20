@@ -56,7 +56,7 @@
 .progressFill {
   width: var(--wizard-progress, 0%);
   height: 100%;
-  background: var(--accent-2);
+  background: var(--accent);
   transition: width 240ms ease;
 }
 
@@ -95,22 +95,31 @@
   color: var(--text-2);
 }
 
+.stepItem[data-state="done"] {
+  color: var(--text);
+}
+
 .stepItem[data-state="current"] .stepNum {
-  border-color: var(--text);
-  background: var(--text);
-  color: var(--bg);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .stepItem[data-state="done"] .stepNum {
-  border-color: var(--accent-2);
-  background: var(--accent-2);
-  color: #fff;
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
 }
 
 .stepLine {
   width: 28px;
   height: 1px;
   background: var(--border-strong);
+  transition: background-color 240ms ease;
+}
+
+.stepLine[data-done] {
+  background: var(--accent);
 }
 
 .scroll {
@@ -119,6 +128,12 @@
 }
 
 .body {
+  --onb-ink: var(--text);
+  --onb-ink-dim: var(--text-2);
+  --onb-ink-faint: var(--muted);
+  --onb-line: var(--border);
+  --onb-edge: var(--border-strong);
+  --onb-raise: var(--surface);
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
@@ -135,8 +150,8 @@
 
 .eyebrow {
   font-size: 12px;
-  font-weight: 500;
-  color: var(--text-2);
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .title {
@@ -175,7 +190,7 @@
   border: 1px solid var(--border);
   background: var(--surface);
   text-align: left;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color 120ms ease, background-color 120ms ease;
 }
 
 .choice:hover {
@@ -183,8 +198,26 @@
 }
 
 .choice[data-selected] {
-  border-color: var(--accent-2);
-  box-shadow: 0 0 0 1px var(--accent-2);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+.choiceIcon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.choice[data-selected] .choiceIcon {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
 }
 
 .choiceTop {
@@ -204,7 +237,7 @@
 }
 
 .choice[data-selected] .radio {
-  border-color: var(--accent-2);
+  border-color: var(--accent);
   border-width: 5px;
 }
 
@@ -242,7 +275,15 @@
 .pointIcon {
   flex-shrink: 0;
   margin-top: 2px;
-  color: var(--text-2);
+  color: var(--muted);
+}
+
+.choice[data-selected] .pointIcon {
+  color: var(--accent);
+}
+
+.choice[data-selected] .points {
+  border-top-color: color-mix(in srgb, var(--accent) 22%, var(--border));
 }
 
 .fields {
@@ -366,10 +407,11 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid var(--border-strong);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-2);
+  font-weight: 650;
+  color: var(--accent);
 }
 
 .taskTitle {

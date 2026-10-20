@@ -25,6 +25,8 @@ export function useAddSiteForm(workspaceId: string, existingDomains: string[]) {
   const [domain, setDomain] = useState("");
   const [bundleId, setBundleId] = useState("");
   const [framework, setFramework] = useState<FrameworkId>("html");
+  const [purpose, setPurpose] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
@@ -59,6 +61,8 @@ export function useAddSiteForm(workspaceId: string, existingDomains: string[]) {
     setDomain("");
     setBundleId("");
     setFramework("html");
+    setPurpose("");
+    setLogoUrl("");
     setNameError(null);
     setDomainError(null);
     setDnt(false);
@@ -128,6 +132,8 @@ export function useAddSiteForm(workspaceId: string, existingDomains: string[]) {
         domain: v.normalizeDomain(domain),
         framework,
         trackerOptions: options,
+        purpose: purpose.trim(),
+        logoUrl: logoUrl || undefined,
       }).unwrap();
       setCreated(site);
       setStep(lastStep);
@@ -147,7 +153,8 @@ export function useAddSiteForm(workspaceId: string, existingDomains: string[]) {
       if (validateWebIdentity()) setStep(2);
       return;
     }
-    if (step === 2) await createWebSite();
+    if (step === lastStep - 1) return createWebSite();
+    setStep(step + 1);
   };
 
   const back = () => setStep((s) => Math.max(0, s - 1));
@@ -181,6 +188,10 @@ export function useAddSiteForm(workspaceId: string, existingDomains: string[]) {
     setBundleId,
     framework,
     setFramework,
+    purpose,
+    setPurpose,
+    logoUrl,
+    setLogoUrl,
     options,
     tracking: {
       dnt, setDnt, hash, setHash, clicks, setClicks, errors, setErrors,

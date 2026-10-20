@@ -61,7 +61,7 @@ export function SiteStepBody({
   const looksValid = LOOKS_LIKE_DOMAIN.test(bare);
 
   return (
-    <div className={f.fields} style={{ gap: "1.6rem" }}>
+    <div className={`${f.fields} ${f.fieldsLoose}`}>
       <div>
         <label className={f.eyebrow} htmlFor="onb-site-domain">
           Domain
@@ -112,7 +112,7 @@ export function SiteStepBody({
 
       <div>
         <div className={f.eyebrow} id="onb-site-purpose">
-          What's it for? <span style={{ textTransform: "none", letterSpacing: 0 }}>· optional</span>
+          What's it for? <span className={f.eyebrowNote}>· optional</span>
         </div>
         <div className={f.purposes} role="group" aria-labelledby="onb-site-purpose">
           {SITE_PURPOSES.map(({ label, icon: Icon, color }) => (

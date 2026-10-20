@@ -1036,15 +1036,15 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 .tile:hover {
   border-color: var(--border-strong);
   background: var(--surface-2);
 }
 .tile[data-selected="true"] {
-  border-color: var(--accent-2);
-  background: var(--accent-soft);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 
 

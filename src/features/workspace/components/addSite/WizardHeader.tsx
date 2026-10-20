@@ -28,7 +28,7 @@ export function WizardHeader({ title, steps, current, onClose }: Props) {
           const state = i === current ? "current" : i < current ? "done" : "todo";
           return (
             <Fragment key={s.label}>
-              {i > 0 && <span className={classes.stepLine} aria-hidden />}
+              {i > 0 && <span className={classes.stepLine} data-done={i <= current || undefined} aria-hidden />}
               <li className={classes.stepItem} data-state={state} aria-current={state === "current" ? "step" : undefined}>
                 <span className={classes.stepNum}>{state === "done" ? <Check size={12} strokeWidth={3} /> : i + 1}</span>
                 {s.label}

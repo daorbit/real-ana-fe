@@ -6,6 +6,7 @@ import { StepHeading } from "./addSite/StepHeading";
 import { PlatformStep } from "./addSite/PlatformStep";
 import { WebDetailsStep } from "./addSite/WebDetailsStep";
 import { AppDetailsStep } from "./addSite/AppDetailsStep";
+import { FrameworkStep } from "./addSite/FrameworkStep";
 import { TrackingStep } from "./addSite/TrackingStep";
 import { AppInstallStep, WebInstallStep } from "./addSite/InstallStep";
 import classes from "./addSite/AddSiteWizard.module.css";
@@ -50,7 +51,8 @@ export function AddSiteWizard({ opened, onClose, workspaceId, existingDomains }:
           {step === 0 && <PlatformStep value={platform} onChange={form.setPlatform} />}
           {step === 1 && !isApp && <WebDetailsStep form={form} />}
           {step === 1 && isApp && <AppDetailsStep form={form} />}
-          {step === 2 && !isApp && <TrackingStep form={form} />}
+          {step === 2 && !isApp && <FrameworkStep form={form} />}
+          {step === 3 && !isApp && <TrackingStep form={form} />}
           {isLast && created && !isApp && <WebInstallStep form={form} site={created} workspaceId={workspaceId} />}
           {isLast && created && isApp && <AppInstallStep form={form} site={created} />}
         </Box>

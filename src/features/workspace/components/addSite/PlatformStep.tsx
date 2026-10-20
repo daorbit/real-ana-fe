@@ -18,7 +18,9 @@ export function PlatformStep({ value, onChange }: { value: Platform; onChange: (
             onClick={() => onChange(choice.id)}
           >
             <span className={classes.choiceTop}>
-              <choice.icon size={20} strokeWidth={1.75} />
+              <span className={classes.choiceIcon}>
+                <choice.icon size={19} strokeWidth={1.75} />
+              </span>
               <span className={classes.radio} aria-hidden />
             </span>
             <span className={classes.choiceTitle}>{choice.title}</span>

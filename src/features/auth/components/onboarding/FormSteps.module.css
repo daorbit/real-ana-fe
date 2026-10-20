@@ -31,6 +31,15 @@
   gap: 1.1rem;
 }
 
+.fieldsLoose {
+  gap: 1.6rem;
+}
+
+.eyebrowNote {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .error {
   margin-top: 0.45rem;
   font-size: 0.75rem;
