@@ -3,6 +3,7 @@ import { Button, Modal, Stack, TextInput } from "@mantine/core";
 import { Globe, Info, Type } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEditSite } from "@/features/workspace/hooks/useEditSite";
+import { SiteLogoField } from "@/features/workspace/components/SiteLogoField";
 import type { Site } from "@/shared/types";
 import classes from "./Workspaces.module.css";
 
@@ -62,6 +63,8 @@ export function EditSiteModal({ site, sites, workspaceId, onClose }: Props) {
                 : t("workspaces.siteDomainHint", "Your history, goals and snippet stay the same — only the domain changes.")
             }
           />
+
+          <SiteLogoField value={form.logoUrl} onChange={form.setLogoUrl} domain={form.domain} />
 
           {form.domainChanged && !form.domainError && (
             <div className={classes.editNote}>

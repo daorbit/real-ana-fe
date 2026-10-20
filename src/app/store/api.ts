@@ -887,6 +887,7 @@ export const api = createApi({
         bundleId?: string;
         trackerOptions?: TrackerOptions;
         purpose?: string;
+        logoUrl?: string;
       }
     >({
       query: ({ workspaceId, ...body }) => ({
@@ -927,7 +928,7 @@ export const api = createApi({
 
     updateSite: build.mutation<
       Site,
-      { workspaceId: string; siteId: string; name?: string; domain?: string }
+      { workspaceId: string; siteId: string; name?: string; domain?: string; logoUrl?: string }
     >({
       query: ({ workspaceId, siteId, ...body }) => ({
         url: `/api/workspaces/${workspaceId}/sites/${siteId}`,

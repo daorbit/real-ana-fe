@@ -25,24 +25,46 @@ function toneOf(domain: string): number {
 export function SiteFavicon({
   domain,
   framework,
+  logoUrl,
   size = 20,
 }: {
   domain: string;
   framework?: string;
+  logoUrl?: string;
   size?: number;
 }) {
 
   const [attempt, setAttempt] = useState(0);
+  const [logoFailed, setLogoFailed] = useState(false);
 
-  const [seen, setSeen] = useState(domain);
-  if (seen !== domain) {
-    setSeen(domain);
+  const [seen, setSeen] = useState(`${domain}|${logoUrl ?? ""}`);
+  if (seen !== `${domain}|${logoUrl ?? ""}`) {
+    setSeen(`${domain}|${logoUrl ?? ""}`);
     setAttempt(0);
+    setLogoFailed(false);
   }
 
   const clean = domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
   const showFallback = attempt >= ICON_PATHS.length || !clean;
   const bare = clean.replace(/^www\./, "");
+
+  if (logoUrl && !logoFailed) {
+    return (
+      <Box className={classes.box} w={size} h={size}>
+        <img
+          src={logoUrl}
+          alt=""
+          width={size}
+          height={size}
+          aria-hidden="true"
+          loading="lazy"
+          onError={() => setLogoFailed(true)}
+          referrerPolicy="no-referrer"
+          className={classes.logo}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box className={classes.box} w={size} h={size}>

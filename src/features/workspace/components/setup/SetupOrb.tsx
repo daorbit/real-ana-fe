@@ -9,7 +9,7 @@ export function SetupOrb({ site }: { site: Site | null }) {
       <span className={classes.ring} />
       <span className={`${classes.ring} ${classes.ringLate}`} />
       <span className={classes.core}>
-        {site ? <SiteFavicon domain={site.domain} framework={site.framework} size={30} /> : <Globe size={28} />}
+        {site ? <SiteFavicon domain={site.domain} framework={site.framework} logoUrl={site.logoUrl} size={30} /> : <Globe size={28} />}
       </span>
     </div>
   );

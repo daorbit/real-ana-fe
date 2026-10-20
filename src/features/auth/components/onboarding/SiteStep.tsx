@@ -3,6 +3,7 @@ import {
   Check, Lock, Building2, PenLine, Boxes, ShoppingCart, Megaphone,
   UserRound, BookText, Rocket, Wrench, MoreHorizontal,
 } from "lucide-react";
+import { SiteLogoField } from "@/features/workspace/components/SiteLogoField";
 import { StepFooter } from "./StepFooter";
 import f from "./FormSteps.module.css";
 
@@ -42,6 +43,8 @@ export function SiteStepBody({
   onDomainChange,
   purpose,
   onPurposeChange,
+  logoUrl,
+  onLogoChange,
 }: {
   siteName: string;
   siteError: string | null;
@@ -51,6 +54,8 @@ export function SiteStepBody({
   onDomainChange: (v: string) => void;
   purpose: string;
   onPurposeChange: (v: string) => void;
+  logoUrl: string;
+  onLogoChange: (v: string) => void;
 }) {
   const bare = domain.trim().replace(/^https?:\/\//i, "");
   const looksValid = LOOKS_LIKE_DOMAIN.test(bare);
@@ -102,6 +107,8 @@ export function SiteStepBody({
         error={siteError}
         onChange={(e) => onSiteNameChange(e.currentTarget.value)}
       />
+
+      <SiteLogoField value={logoUrl} onChange={onLogoChange} domain={bare} />
 
       <div>
         <div className={f.eyebrow} id="onb-site-purpose">

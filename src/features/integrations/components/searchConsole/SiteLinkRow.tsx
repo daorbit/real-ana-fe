@@ -34,7 +34,7 @@ export function SiteLinkRow({ workspaceId, site, propertyUrl, canManage }: Props
     <div className={classes.rowWrap}>
       <div className={classes.row}>
         <div className={classes.site}>
-          <SiteFavicon domain={site.domain} framework={site.framework} size={22} />
+          <SiteFavicon domain={site.domain} framework={site.framework} logoUrl={site.logoUrl} size={22} />
           <div className={classes.siteText}>
             <Text size="sm" fw={600} truncate>
               {site.name}

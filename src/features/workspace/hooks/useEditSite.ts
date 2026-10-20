@@ -11,6 +11,7 @@ export function useEditSite(workspaceId: string, site: Site | null, sites: Site[
   const [updateSite, { isLoading: saving }] = useUpdateSiteMutation();
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
@@ -19,6 +20,7 @@ export function useEditSite(workspaceId: string, site: Site | null, sites: Site[
   useEffect(() => {
     setName(site?.name ?? "");
     setDomain(site?.domain ?? "");
+    setLogoUrl(site?.logoUrl ?? "");
     setNameError(null);
     setDomainError(null);
   }, [site]);
@@ -40,10 +42,17 @@ export function useEditSite(workspaceId: string, site: Site | null, sites: Site[
     if (!site || !validate()) return false;
     const nextName = name.trim();
     const nextDomain = v.normalizeDomain(domain);
-    if (nextName === site.name && nextDomain === site.domain) return true;
+    const logoChanged = logoUrl !== (site.logoUrl ?? "");
+    if (nextName === site.name && nextDomain === site.domain && !logoChanged) return true;
     trace(user?.id, "edit_site", "workspaces", "workspaces");
     try {
-      await updateSite({ workspaceId, siteId: site.siteId, name: nextName, domain: nextDomain }).unwrap();
+      await updateSite({
+        workspaceId,
+        siteId: site.siteId,
+        name: nextName,
+        domain: nextDomain,
+        ...(logoChanged ? { logoUrl } : {}),
+      }).unwrap();
       notify.success(`Site "${nextName}" updated.`);
       return true;
     } catch (err) {
@@ -65,6 +74,8 @@ export function useEditSite(workspaceId: string, site: Site | null, sites: Site[
       setDomainError(null);
     },
     domainError,
+    logoUrl,
+    setLogoUrl,
     domainChanged: Boolean(site?.domain) && v.normalizeDomain(domain) !== site?.domain,
     saving,
     save,

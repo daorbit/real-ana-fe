@@ -44,7 +44,7 @@ function InstallView({ site, sites, workspaceId, onInstalled, onPick }: {
         title={
           <span className={classes.titleRow}>
             <span className={classes.titleFavicon}>
-              <SiteFavicon domain={site.domain} framework={site.framework} size={22} />
+              <SiteFavicon domain={site.domain} framework={site.framework} logoUrl={site.logoUrl} size={22} />
             </span>
             {t("install.pageTitleFor", { defaultValue: "Install on {{site}}", site: name })}
           </span>

@@ -1258,6 +1258,7 @@ export type Site = {
   siteId: string;
   createdAt: string;
   firstEventAt?: string | null;
+  logoUrl?: string;
   /** One-line "what's this site for?" answer from onboarding, if given. */
   purpose?: string;
   /**

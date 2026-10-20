@@ -26,7 +26,7 @@ export function InstallSitePicker({
             className={classes.pick}
             onClick={() => onPick(site.siteId)}
           >
-            <SiteFavicon domain={site.domain} framework={site.framework} size={16} />
+            <SiteFavicon domain={site.domain} framework={site.framework} logoUrl={site.logoUrl} size={16} />
             <span className={classes.pickName}>{site.name}</span>
             <span className={classes.statusDot} data-live={isSiteVerified(site) || undefined} />
           </UnstyledButton>

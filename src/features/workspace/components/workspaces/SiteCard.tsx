@@ -52,7 +52,7 @@ export function SiteCard({ site, workspaceId, onEdit, onDelete, focused = false 
     <Box ref={cardRef} className={classes.siteCard} data-open={open || undefined} data-live={installed || undefined}>
       <Box className={classes.siteTop}>
         <span className={classes.siteFavicon}>
-          <SiteFavicon domain={site.domain} framework={site.framework} size={24} />
+          <SiteFavicon domain={site.domain} framework={site.framework} logoUrl={site.logoUrl} size={24} />
         </span>
 
         <Box className={classes.siteText}>

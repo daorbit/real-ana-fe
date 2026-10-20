@@ -200,6 +200,7 @@ export default function Onboarding() {
   const [domain, setDomain] = useState("");
   const [framework, setFramework] = useState<FrameworkId>("html");
   const [purpose, setPurpose] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [siteError, setSiteError] = useState<string | null>(null);
   const [domainError, setDomainError] = useState<string | null>(null);
 
@@ -305,6 +306,7 @@ export default function Onboarding() {
         domain: v.normalizeDomain(domain),
         framework,
         purpose: purpose.trim(),
+        logoUrl: logoUrl || undefined,
       }).unwrap();
       setSite(created);
       setStep(INSTALL_STEP);
@@ -474,6 +476,8 @@ export default function Onboarding() {
                 }}
                 purpose={purpose}
                 onPurposeChange={setPurpose}
+                logoUrl={logoUrl}
+                onLogoChange={setLogoUrl}
               />
             )}
 
