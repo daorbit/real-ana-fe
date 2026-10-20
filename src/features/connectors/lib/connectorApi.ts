@@ -14,6 +14,7 @@ export type ConnectedApp = {
   id: string;
   clientName: string;
   clientHost: string;
+  assistant: "claude" | "chatgpt" | null;
   workspaceId: string;
   workspaceName: string;
   scopes: ConnectorScope[];

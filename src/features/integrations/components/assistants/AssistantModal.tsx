@@ -14,6 +14,7 @@ interface Props {
   workspaceName: string;
   mcpUrl: string;
   connections: ConnectedApp[];
+  elsewhere: ConnectedApp[];
   revokingId: string | null;
   onClose: () => void;
   onRefresh: () => void;
@@ -73,7 +74,7 @@ function ConnectionRow({ app, busy, onDisconnect }: { app: ConnectedApp; busy: b
           {app.clientName}
         </Text>
         <Text size="xs" c="dimmed">
-          Connected {timeAgo(app.connectedAt)}
+          {app.workspaceName || "Workspace"} · connected {timeAgo(app.connectedAt)}
           {app.lastUsedAt ? ` · used ${timeAgo(app.lastUsedAt)}` : " · not used yet"}
         </Text>
       </div>
@@ -90,6 +91,7 @@ export function AssistantModal({
   workspaceName,
   mcpUrl,
   connections,
+  elsewhere,
   revokingId,
   onClose,
   onRefresh,
@@ -169,6 +171,24 @@ export function AssistantModal({
         <StudioSection title="Your connections" description="Only connections you made to this workspace are shown.">
           <div className={classes.rows}>
             {connections.map((app) => (
+              <ConnectionRow
+                key={app.id}
+                app={app}
+                busy={revokingId === app.id}
+                onDisconnect={() => onDisconnect(app)}
+              />
+            ))}
+          </div>
+        </StudioSection>
+      )}
+
+      {elsewhere.length > 0 && (
+        <StudioSection
+          title="Connected to other workspaces"
+          description={`These ${info.name} connections read a different workspace, not ${workspaceName || "this one"}. To use this workspace, add the connector URL above.`}
+        >
+          <div className={classes.rows}>
+            {elsewhere.map((app) => (
               <ConnectionRow
                 key={app.id}
                 app={app}

@@ -48,8 +48,9 @@ export function AiAssistantsConnection({ assistants, workspaceName, lockedReason
           opened
           info={open.info}
           workspaceName={workspaceName}
-          mcpUrl={assistants.mcpUrl}
+          mcpUrl={open.mcpUrl}
           connections={open.connections}
+          elsewhere={open.elsewhere}
           revokingId={assistants.revokingId}
           onClose={() => setOpenId(null)}
           onRefresh={assistants.refresh}

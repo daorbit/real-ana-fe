@@ -23,8 +23,8 @@ export const AI_ASSISTANTS: AssistantInfo[] = [
     connectorsLabel: "Open Claude connectors",
     steps: [
       "In Claude, open Settings → Connectors.",
-      "Choose Add custom connector, name it Quantalog and paste the URL above.",
-      "Click Connect, sign in to Quantalog and pick this workspace.",
+      "Choose Add custom connector, name it Quantalog and paste the URL above. It is unique to this workspace.",
+      "Click Connect, sign in to Quantalog and approve access to this workspace.",
       "Ask Claude about your forms, leads, bookings or traffic.",
     ],
   },
@@ -38,8 +38,8 @@ export const AI_ASSISTANTS: AssistantInfo[] = [
     connectorsLabel: "Open ChatGPT settings",
     steps: [
       "In ChatGPT, open Settings → Apps & Connectors → Advanced and turn on Developer mode.",
-      "Back in Apps & Connectors, choose Create, name it Quantalog, paste the URL above and pick OAuth.",
-      "Click Connect, sign in to Quantalog and pick this workspace.",
+      "Back in Apps & Connectors, choose Create, name it Quantalog, paste the URL above and pick OAuth. The URL is unique to this workspace.",
+      "Click Connect, sign in to Quantalog and approve access to this workspace.",
       "In a new chat, add Quantalog from the + menu and ask about your forms, leads or traffic.",
     ],
     note: "Custom connectors need a ChatGPT plan that includes developer mode, such as Plus, Pro, Business or Enterprise.",
@@ -61,7 +61,28 @@ export const ASSISTANT_CAN_READ = [
   "Website traffic summaries",
 ];
 
+export function workspaceMcpUrl(baseUrl: string, workspaceId: string | null, assistant: AssistantId): string {
+  return baseUrl && workspaceId ? `${baseUrl.replace(/\/+$/, "")}/${workspaceId}/${assistant}` : baseUrl;
+}
+
 export function assistantForHost(host: string): AssistantInfo | undefined {
   const bare = host.toLowerCase().replace(/:\d+$/, "");
   return AI_ASSISTANTS.find((a) => a.hosts.includes(bare));
+}
+
+const NAME_HINTS: Record<AssistantId, string[]> = {
+  claude: ["claude", "anthropic"],
+  chatgpt: ["chatgpt", "openai"],
+};
+
+export function assistantForApp(app: {
+  assistant: AssistantId | null;
+  clientHost: string;
+  clientName: string;
+}): AssistantInfo | undefined {
+  if (app.assistant) return AI_ASSISTANTS.find((a) => a.id === app.assistant);
+  const byHost = assistantForHost(app.clientHost);
+  if (byHost) return byHost;
+  const name = app.clientName.toLowerCase();
+  return AI_ASSISTANTS.find((a) => NAME_HINTS[a.id].some((hint) => name.includes(hint)));
 }
