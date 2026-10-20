@@ -4,17 +4,28 @@ import { useCelebrateTargets } from "@/features/goals/hooks/useCelebrateTargets"
 import { useDemo } from "@/features/demo/context";
 import { demoTargets } from "@/features/demo/demoDashboards";
 import { POLL_MS } from "@/shared/hooks/usePolling";
+import { useRefetchOnFocus } from "@/shared/hooks/useRefetchOnFocus";
+
+const TARGETS_FOCUS_STALE_MS = 60_000;
 
 export function useTargets(workspaceId: string | undefined) {
-  const { data, isLoading, refetch, fulfilledTimeStamp } = useGetTargetsQuery(workspaceId ?? "", {
-    skip: !workspaceId,
-    pollingInterval: POLL_MS,
-    skipPollingIfUnfocused: true,
-    refetchOnFocus: true,
-  });
+  const { demo } = useDemo();
+  const enabled = Boolean(workspaceId) && !demo;
+
+  const { data, currentData, originalArgs, isLoading, refetch, fulfilledTimeStamp } = useGetTargetsQuery(
+    workspaceId ?? "",
+    {
+      skip: !enabled,
+      pollingInterval: POLL_MS,
+      skipPollingIfUnfocused: true,
+    },
+  );
+
+  useRefetchOnFocus(refetch, fulfilledTimeStamp, TARGETS_FOCUS_STALE_MS, enabled);
 
   const [refreshing, setRefreshing] = useState(false);
   const refresh = useCallback(async () => {
+    if (!enabled) return;
     setRefreshing(true);
     try {
       await refetch().unwrap();
@@ -23,11 +34,11 @@ export function useTargets(workspaceId: string | undefined) {
     } finally {
       setRefreshing(false);
     }
-  }, [refetch]);
+  }, [enabled, refetch]);
 
-  useCelebrateTargets(data);
+  const targets = currentData ?? (originalArgs === workspaceId ? data : undefined);
+  useCelebrateTargets(targets);
 
-  const { demo } = useDemo();
   const sample = useMemo(() => (demo ? demoTargets() : null), [demo]);
 
   if (sample) {
@@ -41,7 +52,7 @@ export function useTargets(workspaceId: string | undefined) {
   }
 
   return {
-    targets: data ?? [],
+    targets: targets ?? [],
     loading: isLoading,
     refresh,
     refreshing,
