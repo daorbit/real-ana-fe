@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { ActionIcon, Badge, Box, Group, Text, Tooltip } from "@mantine/core";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Check } from "lucide-react";
 import classes from "./ConnectionCard.module.css";
+
+export type ConnectionCardStatus = "connected" | "attention" | "idle";
 
 interface Props {
   mark: ReactNode;
@@ -11,12 +13,19 @@ interface Props {
   badge?: ReactNode;
   soon?: boolean;
   docsUrl?: string;
+  status?: ConnectionCardStatus;
+  celebrate?: boolean;
   children?: ReactNode;
 }
 
-export function ConnectionCard({ mark, brand, name, hint, badge, soon, docsUrl, children }: Props) {
+export function ConnectionCard({ mark, brand, name, hint, badge, soon, docsUrl, status, celebrate, children }: Props) {
   return (
-    <Box className={`connection-card ${classes.card}${soon ? ` ${classes.soon}` : ""}`}>
+    <Box
+      className={`connection-card ${classes.card}${soon ? ` ${classes.soon}` : ""}`}
+      data-brand={brand}
+      data-status={status}
+      data-celebrate={celebrate || undefined}
+    >
       {docsUrl && (
         <Tooltip label={`${name} setup guide`} withArrow>
           <ActionIcon
@@ -35,8 +44,13 @@ export function ConnectionCard({ mark, brand, name, hint, badge, soon, docsUrl, 
         </Tooltip>
       )}
 
-      <Box aria-hidden className={`connection-card__mark ${classes.mark}`} data-brand={brand}>
+      <Box aria-hidden className={`connection-card__mark ${classes.mark}`}>
         {mark}
+        {status === "connected" && (
+          <span className={classes.markBadge}>
+            <Check size={11} strokeWidth={3} />
+          </span>
+        )}
       </Box>
 
       <Group gap={8} wrap="nowrap" align="center" mt="md" className={classes.nameRow}>

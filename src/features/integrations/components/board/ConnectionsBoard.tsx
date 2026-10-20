@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { SearchX } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions, useWorkspace } from "@/features/workspace/context";
@@ -116,6 +116,7 @@ export function ConnectionsBoard() {
         onChange={setFilter}
       />
 
+      <Fragment key={workspaceId ?? "none"}>
       {loading ? (
         <ConnectionGridSkeleton count={SKELETON_CARDS} />
       ) : nothingMatches ? (
@@ -161,6 +162,7 @@ export function ConnectionsBoard() {
           />
         </>
       )}
+      </Fragment>
     </>
   );
 }

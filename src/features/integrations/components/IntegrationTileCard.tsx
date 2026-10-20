@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { Badge, Button, Group, Text } from "@mantine/core";
 import { Check, CircleDashed, CirclePause, Link2, Power, RefreshCw, Settings2, TriangleAlert } from "lucide-react";
-import { ConnectionCard } from "@/features/auth/components/settings/ConnectionCard";
+import { ConnectionCard, type ConnectionCardStatus } from "@/features/auth/components/settings/ConnectionCard";
 import { timeAgo } from "@/shared/lib/format";
 import { BrandMark, CARD_MARK_SIZE } from "./logos/BrandMarks";
 import { appGuideUrl } from "../lib/links";
+import { useJustConnected } from "../hooks/useJustConnected";
 import type { IntegrationTile } from "../types";
 import classes from "./IntegrationTileCard.module.css";
 
@@ -103,7 +104,13 @@ function ModeBadge({ tile }: { tile: IntegrationTile }) {
   );
 }
 
-function TileFooter({ tile, busy, lockedReason, onOpen }: Props) {
+function statusOf(tile: IntegrationTile): ConnectionCardStatus {
+  if (tile.enabled) return "connected";
+  if (tile.connected) return "attention";
+  return "idle";
+}
+
+function TileFooter({ tile, busy, lockedReason, onOpen, celebrate }: Props & { celebrate: boolean }) {
   if (lockedReason) {
     return (
       <div className={classes.footer}>
@@ -119,8 +126,8 @@ function TileFooter({ tile, busy, lockedReason, onOpen }: Props) {
     <Group justify="space-between" gap="sm" wrap="nowrap" className={classes.footer}>
       <Group gap={8} wrap="nowrap" className={classes.status}>
         {footer.icon}
-        <Text size="xs" c="dimmed" truncate>
-          {footer.label}
+        <Text size="xs" c={celebrate ? "teal" : "dimmed"} fw={celebrate ? 600 : undefined} truncate aria-live="polite">
+          {celebrate ? "Connected just now" : footer.label}
         </Text>
       </Group>
       <Button
@@ -142,7 +149,9 @@ function TileFooter({ tile, busy, lockedReason, onOpen }: Props) {
 }
 
 export function IntegrationTileCard(props: Props) {
-  const { tile } = props;
+  const { tile, lockedReason } = props;
+  const status = lockedReason ? "idle" : statusOf(tile);
+  const celebrate = useJustConnected(status === "connected");
   return (
     <ConnectionCard
       mark={<BrandMark id={tile.id} size={CARD_MARK_SIZE} />}
@@ -151,8 +160,10 @@ export function IntegrationTileCard(props: Props) {
       hint={tile.description}
       badge={<ModeBadge tile={tile} />}
       docsUrl={appGuideUrl(tile.id)}
+      status={status}
+      celebrate={celebrate}
     >
-      <TileFooter {...props} />
+      <TileFooter {...props} celebrate={celebrate} />
     </ConnectionCard>
   );
 }

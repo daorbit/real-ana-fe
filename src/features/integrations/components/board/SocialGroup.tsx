@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LinkedInConnection } from "@/features/analytics/components/LinkedInConnection";
 import { InstagramConnection } from "@/features/social/components/InstagramConnection";
-import { ConnectionCard } from "@/features/auth/components/settings/ConnectionCard";
+import { ConnectionCard, type ConnectionCardStatus } from "@/features/auth/components/settings/ConnectionCard";
 import { ConnectionGroup } from "@/features/auth/components/settings/ConnectionGroup";
 import { FacebookMark, InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { SocialEntry, SocialId } from "../../hooks/useSocialConnections";
+import { useJustConnected } from "../../hooks/useJustConnected";
+import type { ConnectionState } from "../../lib/filter";
 import { appGuideUrl } from "../../lib/links";
 import { CARD_MARK_SIZE } from "../logos/BrandMarks";
 
@@ -16,9 +18,19 @@ interface Props {
   flat?: boolean;
 }
 
+function statusFor(state: ConnectionState | undefined): ConnectionCardStatus {
+  if (state === "connected") return "connected";
+  if (state === "attention") return "attention";
+  return "idle";
+}
+
 export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
+  const linkedInStatus = statusFor(entries.find((e) => e.id === "linkedin")?.state);
+  const instagramStatus = statusFor(entries.find((e) => e.id === "instagram")?.state);
+  const linkedInCelebrate = useJustConnected(linkedInStatus === "connected");
+  const instagramCelebrate = useJustConnected(instagramStatus === "connected");
   if (entries.length === 0) return null;
 
   const cards: Record<SocialId, ReactNode> = {
@@ -30,6 +42,8 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
         name="LinkedIn"
         hint="Publishing account for scheduled social posts."
         docsUrl={appGuideUrl("linkedin")}
+        status={linkedInStatus}
+        celebrate={linkedInCelebrate}
       >
         <LinkedInConnection onConnected={() => nav("/app/social")} />
       </ConnectionCard>
@@ -43,6 +57,8 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
         hint="Feed posts from the same composer."
         soon={!canUseInstagram}
         docsUrl={canUseInstagram ? appGuideUrl("instagram") : undefined}
+        status={canUseInstagram ? instagramStatus : undefined}
+        celebrate={instagramCelebrate}
       >
         {canUseInstagram && <InstagramConnection onConnected={() => nav("/app/social")} />}
       </ConnectionCard>

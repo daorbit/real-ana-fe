@@ -33,7 +33,7 @@ export function StudioHero({
   return (
     <header className={classes.hero}>
       <div className={classes.heroHead}>
-        <span className={classes.pill} data-state={state}>
+        <span key={state} className={classes.pill} data-state={state}>
           <span className={classes.pillDot} aria-hidden />
           {pill ?? PILL_TEXT[state]}
         </span>
