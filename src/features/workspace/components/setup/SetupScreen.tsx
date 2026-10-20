@@ -6,8 +6,8 @@ import { usePermissions } from "@/features/workspace/context";
 import { ADD_SITE_PATH, siteInstallPath } from "@/features/workspace/paths";
 import type { SetupState } from "@/features/workspace/setupState";
 import { PageHeader } from "@/shared/ui/Page";
-import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
-import { SetupOrb } from "./SetupOrb";
+import { DOCS_SLUGS, docsUrl } from "@/shared/lib/docsSlugs";
+import { SetupAddressBar } from "./SetupAddressBar";
 import { SetupChecklist } from "./SetupChecklist";
 import { SetupVerifyButton } from "./SetupVerifyButton";
 import classes from "./SetupScreen.module.css";
@@ -32,7 +32,7 @@ export function SetupScreen({
     ? many
       ? t("setup.waitingMany", "Waiting for your first visit")
       : t("setup.waitingOne", { defaultValue: "Waiting for the first visit to {{site}}", site: site.domain || site.name })
-    : t("setup.noSiteTitle", "Add your website to get started");
+    : t("setup.noSiteTitle", "Add your website");
 
   const body = site
     ? t(
@@ -49,35 +49,34 @@ export function SetupScreen({
       <PageHeader title={pageTitle} docsPath={DOCS_SLUGS.tracking} />
 
       <section className={classes.screen}>
-        <span className={classes.glow} aria-hidden />
+        <SetupAddressBar site={site} />
 
-        <SetupOrb site={site} />
-
-        <p className={classes.status} data-waiting={site ? true : undefined}>
-          <span className={classes.statusDot} />
-          {site ? t("setup.eyebrowWaiting", "Waiting for data") : t("setup.eyebrowStart", "Get started")}
-        </p>
         <h1 className={classes.title}>{title}</h1>
         <p className={classes.body}>{body}</p>
 
-        <SetupChecklist site={site} canEdit={canEdit} />
+        <SetupChecklist site={site} />
 
         <div className={classes.actions}>
           {site ? (
             <>
-              <Button size="md" component={Link} to={siteInstallPath(site.siteId)} rightSection={<ArrowRight size={16} />}>
+              <Button size="md" radius="xl" component={Link} to={siteInstallPath(site.siteId)} rightSection={<ArrowRight size={16} />}>
                 {t("setup.installVerify", "Install & verify")}
               </Button>
               <SetupVerifyButton workspaceId={workspaceId} siteId={site.siteId} onVerified={onVerified} />
             </>
           ) : (
             canEdit && (
-              <Button size="md" component={Link} to={ADD_SITE_PATH} leftSection={<Plus size={16} />}>
+              <Button size="md" radius="xl" component={Link} to={ADD_SITE_PATH} leftSection={<Plus size={16} />}>
                 {t("setup.addSite", "Add a site")}
               </Button>
             )
           )}
         </div>
+
+        <a className={classes.help} href={docsUrl(DOCS_SLUGS.tracking)} target="_blank" rel="noreferrer">
+          {t("setup.readGuide", "Read the setup guide")}
+          <ArrowRight size={13} />
+        </a>
       </section>
     </>
   );

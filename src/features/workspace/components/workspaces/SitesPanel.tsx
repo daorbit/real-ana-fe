@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionIcon, Box, TextInput, UnstyledButton } from "@mantine/core";
-import { Globe, Plus, Search, SearchX, X } from "lucide-react";
+import { FolderPlus, Globe, Plus, Search, SearchX, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -13,7 +13,9 @@ interface Props {
   sites: Site[];
   workspaceId: string;
   canEdit: boolean;
+  canAddSite: boolean;
   onAddSite: () => void;
+  onCreateWorkspace?: () => void;
   onDeleteSite: (site: Site) => void;
   onRefresh: () => void;
   refreshing: boolean;
@@ -25,7 +27,9 @@ export function SitesPanel({
   sites,
   workspaceId,
   canEdit,
+  canAddSite,
   onAddSite,
+  onCreateWorkspace,
   onDeleteSite,
   onRefresh,
   refreshing,
@@ -114,7 +118,7 @@ export function SitesPanel({
               focused={s.siteId === focusedSiteId}
             />
           ))}
-          {canEdit && !q && (
+          {canAddSite && !q && (
             <UnstyledButton className={classes.addTile} onClick={onAddSite}>
               <span className={classes.addTileIcon}>
                 <Plus size={18} />
@@ -123,6 +127,15 @@ export function SitesPanel({
               <span className={classes.addTileSub}>
                 {t("workspaces.addTileSub", "Websites or mobile apps — we'll hand you the snippet.")}
               </span>
+            </UnstyledButton>
+          )}
+          {canEdit && !canAddSite && !q && onCreateWorkspace && (
+            <UnstyledButton className={classes.addTile} onClick={onCreateWorkspace}>
+              <span className={classes.addTileIcon}>
+                <FolderPlus size={18} />
+              </span>
+              <span className={classes.addTileTitle}>{t("workspaces.oneSiteTitle")}</span>
+              <span className={classes.addTileSub}>{t("workspaces.oneSiteSub")}</span>
             </UnstyledButton>
           )}
         </div>

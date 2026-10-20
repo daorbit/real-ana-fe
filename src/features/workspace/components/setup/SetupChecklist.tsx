@@ -1,29 +1,31 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
 import { CopyButton, UnstyledButton } from "@mantine/core";
-import { ArrowUpRight, Check, Copy, Plus } from "lucide-react";
+import { ArrowUpRight, Check, Code, Copy, Globe, MousePointerClick, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ADD_SITE_PATH } from "@/features/workspace/paths";
 import { trackingSnippet } from "@/features/workspace/tracker";
 import type { Site } from "@/shared/types";
 import classes from "./SetupScreen.module.css";
 
+type StepState = "done" | "current" | "upcoming";
+
 function Item({
-  n,
-  done,
+  icon: Icon,
+  state,
   title,
   detail,
   action,
 }: {
-  n: number;
-  done?: boolean;
+  icon: LucideIcon;
+  state: StepState;
   title: string;
   detail: string;
   action?: ReactNode;
 }) {
   return (
-    <li className={classes.item} data-done={done || undefined}>
-      <span className={classes.itemMark}>{done ? <Check size={14} strokeWidth={3} /> : n}</span>
+    <li className={classes.item} data-state={state} aria-current={state === "current" ? "step" : undefined}>
+      <span className={classes.itemMark}>
+        {state === "done" ? <Check size={16} strokeWidth={2.25} /> : <Icon size={16} strokeWidth={1.9} />}
+      </span>
       <span className={classes.itemMain}>
         <span className={classes.itemText}>
           <span className={classes.itemTitle}>{title}</span>
@@ -35,28 +37,25 @@ function Item({
   );
 }
 
-export function SetupChecklist({ site, canEdit }: { site: Site | null; canEdit: boolean }) {
+export function SetupChecklist({ site }: { site: Site | null }) {
   const { t } = useTranslation();
+  const stepState = (step: number): StepState => {
+    const current = site ? 2 : 1;
+    if (step < current) return "done";
+    return step === current ? "current" : "upcoming";
+  };
 
   return (
     <ol className={classes.checklist}>
       <Item
-        n={1}
-        done={Boolean(site)}
+        icon={Globe}
+        state={stepState(1)}
         title={t("setup.itemAdd", "Add your site")}
         detail={site ? site.domain || site.name : t("setup.itemAddDetail", "Your domain, so we can build the snippet")}
-        action={
-          !site &&
-          canEdit && (
-            <Link to={ADD_SITE_PATH} className={classes.chip}>
-              <Plus size={13} />
-              {t("setup.add", "Add")}
-            </Link>
-          )
-        }
       />
       <Item
-        n={2}
+        icon={Code}
+        state={stepState(2)}
         title={t("setup.itemPaste", "Paste the snippet")}
         detail={t("setup.itemPasteDetail", "One line, before </head> on every page")}
         action={
@@ -73,7 +72,8 @@ export function SetupChecklist({ site, canEdit }: { site: Site | null; canEdit: 
         }
       />
       <Item
-        n={3}
+        icon={MousePointerClick}
+        state={stepState(3)}
         title={t("setup.itemVisit", "Open your site")}
         detail={t("setup.itemVisitDetail", "Your first visit brings this page to life")}
         action={

@@ -15,7 +15,9 @@ import { WorkspaceSwitcher } from "@/features/workspace/components/workspaces/Wo
 import { WorkspaceHero } from "@/features/workspace/components/workspaces/WorkspaceHero";
 import { SitesPanel } from "@/features/workspace/components/workspaces/SitesPanel";
 import classes from "@/features/workspace/components/workspaces/Workspaces.module.css";
+import { hasSiteSlot } from "@/features/workspace/siteLimit";
 import { trace } from "@/shared/lib/analytics";
+import { notify } from "@/shared/lib/notify";
 import { useAuth } from "@/features/auth/context";
 import { WorkspacesSkeleton } from "@/shared/ui/Skeletons";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -49,8 +51,14 @@ export default function Workspaces() {
   const q = query.trim().toLowerCase();
   const shownWorkspaces = q ? workspaces.filter((w) => w.name.toLowerCase().includes(q)) : workspaces;
 
+  const canAddSite = canEdit && hasSiteSlot(active?.billing, sites.length);
+
   const createWorkspace = () => nav(NEW_WORKSPACE_PATH);
   const openAddSite = () => {
+    if (!hasSiteSlot(active?.billing, sites.length)) {
+      notify.info(t("workspaces.oneSiteToast"));
+      return;
+    }
     trace(user?.id, "add_site_clicked", "workspaces", "add_site_wizard");
     setSiteOpen(true);
   };
@@ -125,6 +133,7 @@ export default function Workspaces() {
               workspace={active}
               siteCount={sites.length}
               canEdit={canEdit}
+              canAddSite={canAddSite}
               canAdmin={canAdmin}
               canDelete={canDelete}
               validateName={actions.validateName}
@@ -137,7 +146,9 @@ export default function Workspaces() {
               sites={sites}
               workspaceId={active._id}
               canEdit={canEdit}
+              canAddSite={canAddSite}
               onAddSite={openAddSite}
+              onCreateWorkspace={demo ? undefined : createWorkspace}
               onDeleteSite={actions.removeSite}
               onRefresh={refresh}
               refreshing={refreshing}

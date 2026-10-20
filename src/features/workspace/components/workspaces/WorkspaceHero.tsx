@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { shortDate } from "@/shared/lib";
 import type { Workspace } from "@/shared/types";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
+import { siteQuota, sitesUsed } from "@/features/workspace/siteLimit";
 import { WorkspaceMark } from "./WorkspaceMark";
 import { roleLabel } from "./format";
 import classes from "./Workspaces.module.css";
@@ -16,6 +17,7 @@ interface Props {
   workspace: Workspace;
   siteCount: number;
   canEdit: boolean;
+  canAddSite: boolean;
   canAdmin: boolean;
   canDelete: boolean;
   validateName: (name: string) => string | null;
@@ -30,6 +32,7 @@ export function WorkspaceHero({
   workspace,
   siteCount,
   canEdit,
+  canAddSite,
   canAdmin,
   canDelete,
   validateName,
@@ -45,8 +48,8 @@ export function WorkspaceHero({
   const error = editing ? validateName(name) : null;
 
   const billing = workspace.billing;
-  const quota = billing ? billing.sites.quota + (billing.sites.addonSlots ?? 0) : 0;
-  const used = billing?.sites.used ?? siteCount;
+  const used = sitesUsed(billing, siteCount);
+  const quota = billing ? Math.max(siteQuota(billing), used) : 0;
   const pct = quota ? Math.min(100, Math.round((used / quota) * 100)) : 0;
   const expired = billing?.status === "expired";
 
@@ -124,7 +127,7 @@ export function WorkspaceHero({
           <Button variant="default" leftSection={<Users size={15} />} onClick={() => nav("/app/members")}>
             {t("workspaces.members", "Members")}
           </Button>
-          {canEdit && (
+          {canAddSite && (
             <Button leftSection={<Plus size={15} />} onClick={onAddSite}>
               {t("workspaces.addSite")}
             </Button>

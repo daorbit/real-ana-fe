@@ -42,7 +42,7 @@ export const demoWorkspaces: Workspace[] = [
       crawls: { planQuota: 50, used: 8, addonCredits: 0 },
       events: { planQuota: 2_000_000, used: 412_880 },
       sites: { quota: 2, used: 2 },
-      maxSitesPerWorkspace: 2,
+      maxSitesPerWorkspace: 1,
       allowedRanges: ["1h", "24h", "7d", "30d", "custom"],
       compareModes: ["previous", "yoy", "custom"],
       whatsappReports: true,

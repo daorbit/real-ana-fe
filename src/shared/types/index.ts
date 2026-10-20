@@ -639,7 +639,7 @@ export type AddonPack = {
  * the same name — the cap is flat across tiers because a workspace is the
  * billable unit, so more sites means another workspace, not a bigger plan.
  */
-export const MAX_SITES_PER_WORKSPACE = 2;
+export const MAX_SITES_PER_WORKSPACE = 1;
 
 export type UsageHistoryMonth = {
   month: string;
