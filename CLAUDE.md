@@ -8,7 +8,13 @@ React 19 + Vite 8 + Mantine 9 + Redux Toolkit Query + react-router 7. This app i
 - `src/app/store/api.ts`: the single RTK Query API. Every endpoint lives here.
 - `src/features/<feature>/{pages,components,hooks,lib}`: feature code.
 - `src/shared/{ui,hooks,lib,types}`: cross-feature building blocks.
-- Styling: Mantine props, `*.module.css` next to the component, and existing global CSS. No inline styles, and no comments in CSS.
+- Styling: Mantine props, `*.module.css` next to the component, and existing global CSS (`src/app/App.css` tokens, `polish.css`). No inline styles, and no comments in CSS. da-forms copies these tokens and theme, so a token change goes to `../../da-forms/frontend/src/styles` too.
+- Reusable UI is in `src/shared/ui` (`Page`, `PageTabs`, `EmptyState`, `ErrorState`, `FormModal`, `PanelDrawer`, `MetricTile`, `StatTile`, `Skeletons`, `SaveBar`, `UpgradeDialog`, `DocsButton`, ...) and helpers in `src/shared/lib` (`format.ts`, `http.ts`, `idle.ts`, `notify.tsx`, `validate.ts`, ...). Check there before building a new one.
+- Toasts: `notify` / `notifyError` from `src/shared/lib/notify.tsx`. No inline error cards.
+- Translations: `react-i18next`, set up in `src/lib/i18n/locale` with dictionaries in `dicts/{en,es,hi,ja}.json`. Screens that already use `t(...)` keep doing so; add new keys to every dictionary.
+- Demo mode: `useDemo()` from `features/demo/context.tsx`. In demo mode, skip the request and read the matching `features/demo/demo*.ts` data. New features need demo data and a read-only path.
+- Quantalog apps are gated with `QuantalogAppGate` and `features/integrations/lib/quantalogApps.ts`.
+- Lint: `npm run lint` (oxlint). End-to-end tests: Playwright in `e2e/` (`npm run test:e2e`). Run them only when asked.
 
 ## The eager graph (what every visitor downloads)
 
@@ -33,6 +39,8 @@ All server data goes through RTK Query endpoints in `api.ts`. Raw `fetch` is all
    - `useLive`: 10s
    - `useStats`: 60s (`POLL_MS`)
    - `useNotificationCount`: 30s
+
+   `useTargets` also polls at `POLL_MS` (60s), but only on the Goals page and in the optional Goal progress widget.
 
    Lists that change only through the app's own mutations (sites, goals, layouts, members, settings) **must not poll**. They refresh through `providesTags` / `invalidatesTags`.
 3. **Skip until the arguments exist.** Use `skip` or `skipToken` while a workspace id or other required input is missing, and in demo mode where demo data replaces the request.
