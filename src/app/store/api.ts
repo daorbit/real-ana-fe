@@ -24,7 +24,7 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
+  DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
   Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus, TelegramStatus, TelegramChat,
@@ -1282,6 +1282,11 @@ export const api = createApi({
       providesTags: ["AdminUser"],
     }),
 
+    setAdminUserRole: build.mutation<{ id: string; role: Role }, { userId: string; role: Role }>({
+      query: ({ userId, role }) => ({ url: `/api/admin/users/${userId}/role`, method: "PUT", body: { role } }),
+      invalidatesTags: ["AdminUser"],
+    }),
+
     deleteAdminUser: build.mutation<{ ok: true }, string>({
       query: (userId) => ({ url: `/api/admin/users/${userId}`, method: "DELETE" }),
       invalidatesTags: ["AdminUser"],
@@ -1303,6 +1308,7 @@ export const api = createApi({
 
     getAdminUserOverview: build.query<AdminUserOverview, string>({
       query: (userId) => `/api/admin/users/${userId}/overview`,
+      providesTags: ["AdminUser"],
     }),
 
     getAdminUserBilling: build.query<AdminUserBilling, string>({
@@ -3065,6 +3071,7 @@ export const {
   useClearNavLinkLogoMutation,
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
+  useSetAdminUserRoleMutation,
   useAdminReset2faMutation,
   useAdminResetScreenLockMutation,
   useGetAdminUserBillingQuery,

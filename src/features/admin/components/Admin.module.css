@@ -115,6 +115,14 @@
   gap: var(--mantine-spacing-xs);
 }
 
+.roleItemActive {
+  background: var(--accent-soft);
+}
+
+.roleCheck {
+  color: var(--accent);
+}
+
 .actionsHead {
   text-align: right;
 }

@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { ActionIcon, Button, Loader, Tooltip } from "@mantine/core";
-import { CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
+import { CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2, UserCog } from "lucide-react";
 import { prefetchRoute } from "@/app/routePrefetch";
 import type { AdminUser } from "@/shared/types";
 import { adminUserPath } from "../../lib/adminSections";
 import type { AdminUserActions } from "../../useAdminUserActions";
+import { UserRoleMenu } from "./UserRoleMenu";
 import classes from "../Admin.module.css";
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 }
 
 export function UserRowActions({ user: u, actions }: Props) {
-  const { isSuperAdmin, busy, deleting, resetting2fa, resettingLock } = actions;
+  const { isSuperAdmin, busy, deleting, resetting2fa, resettingLock, changingRole } = actions;
   const { admin, isSelf, rowBusy, impersonateBlocked } = actions.rowState(u);
 
   return (
@@ -21,7 +22,7 @@ export function UserRowActions({ user: u, actions }: Props) {
       <Tooltip
         label={
           u.role === "super_admin"
-            ? "The superadmin can't be opened"
+            ? "Super admins can't be opened"
             : impersonateBlocked
             ? "Admins can't be opened"
             : "Open dashboard as this user"
@@ -79,6 +80,22 @@ export function UserRowActions({ user: u, actions }: Props) {
         </ActionIcon>
       </Tooltip>
       {isSuperAdmin && (
+        <UserRoleMenu user={u} actions={actions}>
+          <Tooltip label={isSelf ? "You can't change your own role" : "Change role"} withArrow>
+            <ActionIcon
+              variant="light"
+              color="grape"
+              size="lg"
+              radius="md"
+              disabled={isSelf || rowBusy || changingRole}
+              aria-label={`Change role for ${u.email}`}
+            >
+              <UserCog size={16} />
+            </ActionIcon>
+          </Tooltip>
+        </UserRoleMenu>
+      )}
+      {isSuperAdmin && (
         <Tooltip
           label={
             !u.totpEnabled
@@ -125,7 +142,7 @@ export function UserRowActions({ user: u, actions }: Props) {
       <Tooltip
         label={
           !isSuperAdmin
-            ? "Only the superadmin can delete accounts"
+            ? "Only a super admin can delete accounts"
             : isSelf
             ? "You can't delete yourself"
             : admin

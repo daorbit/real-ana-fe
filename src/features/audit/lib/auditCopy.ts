@@ -147,6 +147,7 @@ const SELF_COPY: Record<string, Describe> = {
   "account.screen_lock_enabled": () => "Turned on the screen lock",
   "account.screen_lock_disabled": () => "Turned off the screen lock",
   "account.impersonated": () => "Quantalog support opened your account",
+  "account.role_changed": (e) => `Quantalog changed your account role to ${String(e.meta.to ?? "").replace("_", " ")}`,
 };
 
 export function describeTeamAction(entry: AuditEntry): string {

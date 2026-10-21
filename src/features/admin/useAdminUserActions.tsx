@@ -4,11 +4,13 @@ import {
   useDeleteAdminUserMutation,
   useAdminReset2faMutation,
   useAdminResetScreenLockMutation,
+  useSetAdminUserRoleMutation,
 } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { trace } from "@/shared/lib/analytics";
-import type { AdminUser } from "@/shared/types";
+import type { AdminUser, Role } from "@/shared/types";
+import { ROLE_LABELS } from "./lib/userRoles";
 
 export type AdminUserRow = {
   admin: boolean;
@@ -27,6 +29,7 @@ export function useAdminUserActions() {
   const [deleteUser] = useDeleteAdminUserMutation();
   const [reset2fa, { isLoading: resetting2fa }] = useAdminReset2faMutation();
   const [resetScreenLock, { isLoading: resettingLock }] = useAdminResetScreenLockMutation();
+  const [setRole, { isLoading: changingRole }] = useSetAdminUserRoleMutation();
   const isSuperAdmin = user?.role === "super_admin" && !user?.impersonating;
 
   const rowState = (u: AdminUser): AdminUserRow => ({
@@ -107,6 +110,36 @@ export function useAdminUserActions() {
     });
   };
 
+  const changeRole = (u: AdminUser, role: Role) => {
+    if (role === u.role) return;
+    const granting = role === "super_admin";
+    confirmDelete({
+      title: granting ? "Make this person a super admin?" : `Change role to ${ROLE_LABELS[role]}?`,
+      confirmLabel: granting ? "Make super admin" : "Change role",
+      confirmColor: granting ? "red" : "blue",
+      body: granting ? (
+        <>
+          <b>{u.name}</b> ({u.email}) will have full control of the platform: every account, plan, price and
+          setting, and they can make other people super admins too. Only do this for someone you trust completely.
+        </>
+      ) : (
+        <>
+          <b>{u.name}</b> ({u.email}) goes from {ROLE_LABELS[u.role]} to {ROLE_LABELS[role]}. The change applies
+          on their next request.
+        </>
+      ),
+      onConfirm: async () => {
+        trace(user?.id, "change_user_role", "impersonate", role);
+        try {
+          await setRole({ userId: u.id, role }).unwrap();
+          notify.success(`${u.email} is now ${ROLE_LABELS[role].toLowerCase()}.`, "Role changed");
+        } catch (e) {
+          notify.error(errMessage(e, "Could not change the role."));
+        }
+      },
+    });
+  };
+
   const remove = (u: AdminUser) => {
     confirmDelete({
       title: "Delete this account?",
@@ -139,6 +172,7 @@ export function useAdminUserActions() {
     deleting,
     resetting2fa,
     resettingLock,
+    changingRole,
     messaging,
     planUser,
     closeMessage: () => setMessaging(null),
@@ -149,6 +183,7 @@ export function useAdminUserActions() {
     openMessage,
     resetTwoFactor,
     resetLock,
+    changeRole,
     remove,
   };
 }

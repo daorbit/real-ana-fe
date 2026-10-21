@@ -1,11 +1,12 @@
 import { Badge, Text } from "@mantine/core";
 import type { AdminUser } from "@/shared/types";
+import { ROLE_LABELS } from "../../lib/userRoles";
 
 export function UserRoleBadge({ user }: { user: AdminUser }) {
   const admin = user.role === "admin" || user.role === "super_admin";
   return (
     <Badge size="sm" variant="light" color={admin ? "grape" : "gray"}>
-      {user.role}
+      {ROLE_LABELS[user.role]}
     </Badge>
   );
 }

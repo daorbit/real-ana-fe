@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
+import { Button } from "@mantine/core";
+import { ChevronDown, CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
 import { adminUserPath } from "../../lib/adminSections";
+import { ROLE_LABELS } from "../../lib/userRoles";
+import { UserRoleMenu } from "./UserRoleMenu";
 import { num, shortDate, timeAgo } from "@/shared/lib";
 import { PanelDrawer } from "@/shared/ui/PanelDrawer";
 import { InsetList, InsetRow, RowIcon } from "@/shared/ui/InsetList";
@@ -34,7 +37,7 @@ export function UserSheet({ user, actions, onClose }: Props) {
 
   const u = shown;
   const state = u ? actions.rowState(u) : null;
-  const { isSuperAdmin, resetting2fa, resettingLock } = actions;
+  const { isSuperAdmin, resetting2fa, resettingLock, changingRole } = actions;
 
   return (
     <PanelDrawer
@@ -62,7 +65,20 @@ export function UserSheet({ user, actions, onClose }: Props) {
           </StatTileGrid>
 
           <InsetList header="Account">
-            <InsetRow title="Role" trailing={<UserRoleBadge user={u} />} />
+            <InsetRow
+              title="Role"
+              trailing={
+                isSuperAdmin && !state.isSelf ? (
+                  <UserRoleMenu user={u} actions={actions}>
+                    <Button variant="subtle" size="compact-sm" rightSection={<ChevronDown size={14} />} disabled={changingRole}>
+                      {ROLE_LABELS[u.role]}
+                    </Button>
+                  </UserRoleMenu>
+                ) : (
+                  <UserRoleBadge user={u} />
+                )
+              }
+            />
             <InsetRow title="Plan" trailing={<UserPlanBadge user={u} />} />
             <InsetRow title="Joined" trailing={shortDate(u.createdAt)} />
             <InsetRow title="Last active" trailing={u.eventCount > 0 ? timeAgo(u.lastEventAt) : "Never tracked"} />
@@ -84,7 +100,7 @@ export function UserSheet({ user, actions, onClose }: Props) {
               title="Open dashboard as this user"
               subtitle={
                 u.role === "super_admin"
-                  ? "The superadmin can't be opened"
+                  ? "Super admins can't be opened"
                   : state.impersonateBlocked
                   ? "Admins can't be opened"
                   : undefined
@@ -133,7 +149,7 @@ export function UserSheet({ user, actions, onClose }: Props) {
               title="Delete account"
               subtitle={
                 !isSuperAdmin
-                  ? "Only the superadmin can delete accounts"
+                  ? "Only a super admin can delete accounts"
                   : state.isSelf
                   ? "You can't delete yourself"
                   : state.admin
