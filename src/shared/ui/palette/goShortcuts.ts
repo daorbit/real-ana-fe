@@ -5,7 +5,6 @@ export const GO_SHORTCUTS: GoShortcut[] = [
   { key: "a", to: "/app/analytics", label: "Website analytics" },
   { key: "d", to: "/app/dashboards", label: "Dashboards" },
   { key: "g", to: "/app/goals", label: "Goals" },
-  { key: "j", to: "/app/journey", label: "User journeys" },
   { key: "v", to: "/app/search-visibility", label: "Search visibility" },
   { key: "s", to: "/app/seo", label: "SEO" },
   { key: "c", to: "/app/compare", label: "Compare" },

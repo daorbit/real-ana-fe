@@ -3,12 +3,10 @@ import { useAddSiteForm } from "./addSite/useAddSiteForm";
 import { WizardHeader } from "./addSite/WizardHeader";
 import { WizardFooter } from "./addSite/WizardFooter";
 import { StepHeading } from "./addSite/StepHeading";
-import { PlatformStep } from "./addSite/PlatformStep";
 import { WebDetailsStep } from "./addSite/WebDetailsStep";
-import { AppDetailsStep } from "./addSite/AppDetailsStep";
 import { FrameworkStep } from "./addSite/FrameworkStep";
 import { TrackingStep } from "./addSite/TrackingStep";
-import { AppInstallStep, WebInstallStep } from "./addSite/InstallStep";
+import { WebInstallStep } from "./addSite/InstallStep";
 import classes from "./addSite/AddSiteWizard.module.css";
 
 interface Props {
@@ -20,8 +18,7 @@ interface Props {
 
 export function AddSiteWizard({ opened, onClose, workspaceId, existingDomains }: Props) {
   const form = useAddSiteForm(workspaceId, existingDomains);
-  const { step, steps, lastStep, platform, created } = form;
-  const isApp = platform === "app";
+  const { step, steps, lastStep, created } = form;
   const isLast = step === lastStep;
 
   const close = () => {
@@ -29,7 +26,7 @@ export function AddSiteWizard({ opened, onClose, workspaceId, existingDomains }:
     setTimeout(form.reset, 200);
   };
 
-  const primaryLabel = step === lastStep - 1 ? (isApp ? "Create app" : "Create site") : "Continue";
+  const primaryLabel = step === lastStep - 1 ? "Create site" : "Continue";
 
   return (
     <Modal
@@ -42,19 +39,16 @@ export function AddSiteWizard({ opened, onClose, workspaceId, existingDomains }:
       closeOnClickOutside={!isLast}
       classNames={{ content: classes.content, body: classes.modalBody }}
     >
-      <WizardHeader title={isApp ? "Add an app" : "Add a site"} steps={steps} current={step} onClose={close} />
+      <WizardHeader title="Add a site" steps={steps} current={step} onClose={close} />
 
       <ScrollArea className={classes.scroll} type="auto">
         <Box className={classes.body} data-wide={isLast || undefined}>
           <StepHeading step={steps[step]} index={step} total={steps.length} />
 
-          {step === 0 && <PlatformStep value={platform} onChange={form.setPlatform} />}
-          {step === 1 && !isApp && <WebDetailsStep form={form} />}
-          {step === 1 && isApp && <AppDetailsStep form={form} />}
-          {step === 2 && !isApp && <FrameworkStep form={form} />}
-          {step === 3 && !isApp && <TrackingStep form={form} />}
-          {isLast && created && !isApp && <WebInstallStep form={form} site={created} workspaceId={workspaceId} />}
-          {isLast && created && isApp && <AppInstallStep form={form} site={created} />}
+          {step === 0 && <WebDetailsStep form={form} />}
+          {step === 1 && <FrameworkStep form={form} />}
+          {step === 2 && <TrackingStep form={form} />}
+          {isLast && created && <WebInstallStep form={form} site={created} workspaceId={workspaceId} />}
         </Box>
       </ScrollArea>
 

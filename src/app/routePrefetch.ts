@@ -41,7 +41,6 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/share": () => import("@/features/analytics/pages/Share"),
   "/connect/authorize": () => import("@/features/connectors/pages/ConnectAuthorize"),
   "/app/reports": () => import("@/features/reports/pages"),
-  "/app/journey": () => import("@/features/journey/pages/Journey"),
   "/app/social": () => import("@/features/social/pages/SocialPosts"),
   "/app/lead-capture": () => import("@/features/leadCapture/pages/LeadCapture"),
   "/app/link": () => import("@/features/customLinks/pages/LinkFrame"),

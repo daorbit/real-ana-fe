@@ -1,6 +1,5 @@
 /**
- * Install + usage guide for an app site (web or mobile) — shown in place of
- * the framework picker when the wizard's platform step is set to "app".
+ * Install + usage guide for an existing app site (web or mobile).
  *
  * One call per action: trace(userId, action, src?, dest?). No identify()
  * step and no client-held state — the user id is passed fresh on every call,

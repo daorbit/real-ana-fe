@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { useEffect, useRef, useState, lazy, Suspense, type ReactNode } from "react";
 import { setNavigate } from "@/app/navigation";
 import { routeKey } from "@/app/routeKey";
-import { trace } from "@/shared/lib/analytics";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 import { useIdleLock } from "@/features/auth/useIdleLock";
 import { LockScreen } from "@/features/auth/components/LockScreen";
@@ -35,7 +34,7 @@ import Signup from "@/features/auth/pages/Signup";
 import Home from "@/features/analytics/pages/Home";
 
 // Everything else is split out — most sessions touch only a few of these, and
-// the admin, print and journey routes are dead weight for almost everyone.
+// the admin and print routes are dead weight for almost everyone.
 const Orbit = lazy(() => import("@/features/orbit/pages/Orbit"));
 const Analytics = lazy(() => import("@/features/analytics/pages/Analytics"));
 const Seo = lazy(() => import("@/features/seo/pages/Seo"));
@@ -55,8 +54,6 @@ const AcceptInvite = lazy(() => import("@/features/workspace/pages/AcceptInvite"
 const ConnectAuthorize = lazy(() => import("@/features/connectors/pages/ConnectAuthorize"));
 const Share = lazy(() => import("@/features/analytics/pages/Share"));
 const Reports = lazy(() => import("@/features/reports/pages"));
-const Journey = lazy(() => import("@/features/journey/pages/Journey"));
-const JourneyTimeline = lazy(() => import("@/features/journey/pages/JourneyTimeline"));
 const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
 const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
 const LeadCapture = lazy(() => import("@/features/leadCapture/pages/LeadCapture"));
@@ -197,28 +194,6 @@ function RouteFrame({ children }: { children: ReactNode }) {
 }
 
  
-function JourneyRouteTracer() {
-  const location = useLocation();
-  const { user } = useAuth();
-  const prevPath = useRef<string | null>(null);
- 
-  const lastSent = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const key = `${user.id}:${location.pathname}`;
-    if (lastSent.current === key) return;
-    lastSent.current = key;
-
-    trace(user.id, "page_view", prevPath.current ?? "", location.pathname);
-    prevPath.current = location.pathname;
-  }, [location.pathname, user?.id]);
-
-  return null;
-}
-
- 
 const SELF_TRACKING_ENABLED = false;
 
 function SelfTracking() {
@@ -250,7 +225,6 @@ export default function App() {
             <SelfTracking />
             <NavigationCapture />
             <FocusOnRouteChange />
-            <JourneyRouteTracer />
             <Routes>
               <Route path="/" element={<Root />} />
               <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
@@ -297,8 +271,6 @@ export default function App() {
                 <Route path="/app/media" element={<MediaLibrary />} />
                 <Route path="/app/share" element={<Share />} />
                 <Route path="/app/reports" element={<Reports />} />
-                <Route path="/app/journey" element={<Journey />} />
-                <Route path="/app/journey/:appUserId" element={<JourneyTimeline />} />
                 <Route path="/app/social" element={<SocialPosts />} />
                 <Route path="/app/reviews" element={<Reviews />} />
                 <Route path="/app/lead-capture" element={<LeadCapture />} />

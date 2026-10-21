@@ -1,6 +1,6 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, CalendarClock,
-  Send, CreditCard, Swords, Share2, Route, Palette, Images, TrendingUp,
+  Send, CreditCard, Swords, Share2, Palette, Images, TrendingUp,
   LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
@@ -40,7 +40,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag, app: "goals" },
       { to: "/app/alerts", labelKey: "nav.alerts", label: "Alerts", icon: BellRing, app: "alerts" },
 
-      { to: "/app/journey", labelKey: "nav.journey", label: "User journeys", icon: Route },
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
       // Hidden from the sidebar for now; the /app/backlinks route still works.

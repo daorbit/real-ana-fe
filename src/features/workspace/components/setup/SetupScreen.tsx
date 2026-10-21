@@ -10,7 +10,10 @@ import { DOCS_SLUGS, docsUrl } from "@/shared/lib/docsSlugs";
 import { SetupAddressBar } from "./SetupAddressBar";
 import { SetupChecklist } from "./SetupChecklist";
 import { SetupVerifyButton } from "./SetupVerifyButton";
+import { SetupHighlights } from "./SetupHighlights";
 import classes from "./SetupScreen.module.css";
+
+const TOTAL_STEPS = 3;
 
 export function SetupScreen({
   pageTitle,
@@ -27,6 +30,7 @@ export function SetupScreen({
   const { canEdit } = usePermissions();
   const site = state.kind === "unverified" ? state.sites[0] : null;
   const many = state.kind === "unverified" && state.sites.length > 1;
+  const currentStep = site ? 2 : 1;
 
   const title = site
     ? many
@@ -49,34 +53,44 @@ export function SetupScreen({
       <PageHeader title={pageTitle} docsPath={DOCS_SLUGS.tracking} />
 
       <section className={classes.screen}>
-        <SetupAddressBar site={site} />
+        <div className={classes.hero}>
+          <div className={classes.intro}>
+            <span className={classes.eyebrow}>
+              {t("setup.stepOf", { defaultValue: "Step {{n}} of {{total}}", n: currentStep, total: TOTAL_STEPS })}
+            </span>
+            <h1 className={classes.title}>{title}</h1>
+            <p className={classes.body}>{body}</p>
 
-        <h1 className={classes.title}>{title}</h1>
-        <p className={classes.body}>{body}</p>
+            <div className={classes.actions}>
+              {site ? (
+                <>
+                  <Button size="md" component={Link} to={siteInstallPath(site.siteId)} rightSection={<ArrowRight size={16} />}>
+                    {t("setup.installVerify", "Install & verify")}
+                  </Button>
+                  <SetupVerifyButton workspaceId={workspaceId} siteId={site.siteId} onVerified={onVerified} />
+                </>
+              ) : (
+                canEdit && (
+                  <Button size="md" component={Link} to={ADD_SITE_PATH} leftSection={<Plus size={16} />}>
+                    {t("setup.addSite", "Add a site")}
+                  </Button>
+                )
+              )}
+            </div>
 
-        <SetupChecklist site={site} />
+            <a className={classes.help} href={docsUrl(DOCS_SLUGS.tracking)} target="_blank" rel="noreferrer">
+              {t("setup.readGuide", "Read the setup guide")}
+              <ArrowRight size={13} />
+            </a>
+          </div>
 
-        <div className={classes.actions}>
-          {site ? (
-            <>
-              <Button size="md" radius="xl" component={Link} to={siteInstallPath(site.siteId)} rightSection={<ArrowRight size={16} />}>
-                {t("setup.installVerify", "Install & verify")}
-              </Button>
-              <SetupVerifyButton workspaceId={workspaceId} siteId={site.siteId} onVerified={onVerified} />
-            </>
-          ) : (
-            canEdit && (
-              <Button size="md" radius="xl" component={Link} to={ADD_SITE_PATH} leftSection={<Plus size={16} />}>
-                {t("setup.addSite", "Add a site")}
-              </Button>
-            )
-          )}
+          <div className={classes.panel}>
+            <SetupAddressBar site={site} />
+            <SetupChecklist site={site} currentStep={currentStep} />
+          </div>
         </div>
 
-        <a className={classes.help} href={docsUrl(DOCS_SLUGS.tracking)} target="_blank" rel="noreferrer">
-          {t("setup.readGuide", "Read the setup guide")}
-          <ArrowRight size={13} />
-        </a>
+        <SetupHighlights />
       </section>
     </>
   );

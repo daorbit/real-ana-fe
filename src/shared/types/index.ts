@@ -1502,33 +1502,6 @@ export type Marker = {
   siteIds: string[];
 };
 
-/**
- * A recently active identified user — traced via the workspace's Platform
- * API key from a real web or mobile app, not the anonymous landing-page
- * tracker. This is the row a journey list shows before drilling into one
- * user's timeline.
- */
-export type JourneyUser = {
-  appUserId: string;
-  lastSeen: string;
-  firstSeen: string;
-  lastAction: string;
-  siteId: string;
-  eventCount: number;
-  sessionCount: number;
-};
-
-/** One step of a user's journey: what happened, and where it went. */
-export type JourneyEvent = {
-  siteId: string;
-  action: string;
-  src: string;
-  dest: string;
-  /** Groups steps into visits, so a journey reads as sessions not one list. */
-  sessionId?: string;
-  ts: string;
-};
-
 /** One step a user defines in the funnel builder. */
 export type FunnelStepInput = { type: "page" | "event"; value: string };
 

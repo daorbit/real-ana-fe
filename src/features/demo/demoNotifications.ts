@@ -238,23 +238,6 @@ export function demoNotifications(): NotificationPage {
       true,
     ),
     row(
-      "announcement",
-      3 * 24 * 60 + 240,
-      {
-        // Authored prose, not translated — the one type whose words the server
-        // owns, because an admin types them into a form before it sends.
-        type: "admin.message",
-        data: {
-          subject: "User journeys is out of beta",
-          body: "Session replays now stitch across subdomains. Nothing to turn on.",
-        },
-        link: "/app/journey",
-        workspaceId: null,
-        actorId: null,
-      },
-      true,
-    ),
-    row(
       "role",
       4 * 24 * 60,
       {

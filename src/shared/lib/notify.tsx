@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import { Text, TextInput, Group, Button, Stack, Code, Alert } from "@mantine/core";
+import { Text, TextInput, Group, Button, Stack, Alert } from "@mantine/core";
 import { TriangleAlert } from "lucide-react";
 import { navigateTo } from "@/app/navigation";
 import { UpgradeDialog } from "@/shared/ui/UpgradeDialog";
+import { CopyablePhrase } from "@/shared/ui/CopyablePhrase";
 import type { ReactNode } from "react";
 import toastClasses from "@/shared/ui/Toast.module.css";
 
@@ -365,7 +366,7 @@ function DestroyForm({
 
       <div>
         <Text size="sm" mb={6}>
-          Type <Code>{phrase}</Code> to confirm.
+          Type <CopyablePhrase value={phrase} /> to confirm.
         </Text>
         <TextInput
           data-autofocus

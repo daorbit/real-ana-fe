@@ -1,0 +1,11 @@
+.phrase {
+  display: inline-flex;
+  vertical-align: baseline;
+  cursor: copy;
+  border-radius: 4px;
+  transition: opacity 120ms ease;
+}
+
+.phrase:hover {
+  opacity: 0.8;
+}

@@ -35,7 +35,6 @@ import type {
   AuditCategory, AuditPage, WorkspaceAuditPage,
   Segment, Marker, MarkerKind, StatsFilter,
   CompareMode, BreakdownComparisonRow,
-  JourneyUser, JourneyEvent,
   GoogleReviewsStatus, GoogleReviewLocation, GoogleAvailableLocations,
   GoogleReviewsList, GoogleSyncResult, GooglePlaceResult,
   SearchConsoleStatus, SearchConsoleProperties, SearchPerformance,
@@ -898,6 +897,8 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { workspaceId }) => [
         { type: "Site", id: `LIST-${workspaceId}` },
         "Stats",
+        "Workspace",
+        "Usage",
       ],
     }),
 
@@ -956,6 +957,8 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { workspaceId }) => [
         { type: "Site", id: `LIST-${workspaceId}` },
         "Stats",
+        "Workspace",
+        "Usage",
       ],
     }),
 
@@ -1985,49 +1988,6 @@ export const api = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["Segment"],
-    }),
-
- 
-    getJourneyUsers: build.query<
-      {
-        users: JourneyUser[];
-        total: number;
-        summary: { users: number; events: number; activeToday: number };
-        page: number;
-        pageSize: number;
-      },
-      {
-        wid: string;
-        q?: string;
-        sites?: string[];
-        page?: number;
-        sort?: "recent" | "events" | "new";
-        filter?: "all" | "active";
-      }
-    >({
-      query: ({ wid, q, sites, page, sort, filter }) => {
-        const qs = new URLSearchParams();
-        if (q) qs.set("q", q);
-        if (sites?.length) qs.set("sites", sites.join(","));
-        if (page) qs.set("page", String(page));
-        if (sort && sort !== "recent") qs.set("sort", sort);
-        if (filter === "active") qs.set("filter", "active");
-        const suffix = qs.toString() ? `?${qs}` : "";
-        return `/api/workspaces/${wid}/users${suffix}`;
-      },
-    }),
-
-    /** One user's full journey, oldest first. */
-    getJourneyTimeline: build.query<
-      { appUserId: string; events: JourneyEvent[] },
-      { wid: string; appUserId: string; sites?: string[] }
-    >({
-      query: ({ wid, appUserId, sites }) => {
-        const qs = new URLSearchParams();
-        if (sites?.length) qs.set("sites", sites.join(","));
-        const suffix = qs.toString() ? `?${qs}` : "";
-        return `/api/workspaces/${wid}/track/${appUserId}${suffix}`;
-      },
     }),
 
     getMarkers: build.query<Marker[], { wid: string; from?: string; to?: string }>({
@@ -3209,8 +3169,6 @@ export const {
   useSaveSegmentMutation,
   useUpdateSegmentMutation,
   useDeleteSegmentMutation,
-  useGetJourneyUsersQuery,
-  useGetJourneyTimelineQuery,
   useGetMarkersQuery,
   useSaveMarkerMutation,
   useUpdateMarkerMutation,
