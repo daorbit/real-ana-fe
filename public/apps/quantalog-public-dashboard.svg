@@ -4,17 +4,17 @@
       <rect x="28" y="48" width="176" height="140" rx="22"/>
     </clipPath>
   </defs>
-  <rect x="28" y="48" width="176" height="140" rx="22" fill="#2F6BFF"/>
-  <rect x="28" y="48" width="176" height="34" fill="#1D3FC4" clip-path="url(#qpd-window)"/>
-  <circle cx="52" cy="65" r="6" fill="#6B93FF"/>
-  <circle cx="72" cy="65" r="6" fill="#6B93FF"/>
-  <circle cx="92" cy="65" r="6" fill="#6B93FF"/>
-  <rect x="54" y="132" width="20" height="36" rx="6" fill="#BFD0FF"/>
+  <rect x="28" y="48" width="176" height="140" rx="22" fill="#007AFF"/>
+  <rect x="28" y="48" width="176" height="34" fill="#0051C7" clip-path="url(#qpd-window)"/>
+  <circle cx="52" cy="65" r="6" fill="#5AA2FF"/>
+  <circle cx="72" cy="65" r="6" fill="#5AA2FF"/>
+  <circle cx="92" cy="65" r="6" fill="#5AA2FF"/>
+  <rect x="54" y="132" width="20" height="36" rx="6" fill="#CFE4FF"/>
   <rect x="86" y="110" width="20" height="58" rx="6" fill="#FFFFFF"/>
-  <rect x="118" y="122" width="20" height="46" rx="6" fill="#BFD0FF"/>
-  <circle cx="196" cy="186" r="38" fill="#10B981"/>
-  <circle cx="180" cy="186" r="8" fill="#ECFDF5"/>
-  <circle cx="210" cy="172" r="8" fill="#ECFDF5"/>
-  <circle cx="210" cy="200" r="8" fill="#ECFDF5"/>
-  <path d="M180 186L210 172M180 186L210 200" stroke="#ECFDF5" stroke-width="6" stroke-linecap="round"/>
+  <rect x="118" y="122" width="20" height="46" rx="6" fill="#CFE4FF"/>
+  <circle cx="196" cy="186" r="38" fill="#34C759"/>
+  <circle cx="180" cy="186" r="8" fill="#E8F9EE"/>
+  <circle cx="210" cy="172" r="8" fill="#E8F9EE"/>
+  <circle cx="210" cy="200" r="8" fill="#E8F9EE"/>
+  <path d="M180 186L210 172M180 186L210 200" stroke="#E8F9EE" stroke-width="6" stroke-linecap="round"/>
 </svg>

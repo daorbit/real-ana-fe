@@ -1115,6 +1115,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transition: color 0.12s ease;
 }
 
+.nav-app-logo {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
 .nav-link:hover .nav-link-icon {
   color: var(--text);
 }

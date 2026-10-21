@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { prefetchRoute } from "@/app/routePrefetch";
 import type { NavGroup } from "../navItems";
 import { LinkLogo } from "../LinkLogo";
+import { NavItemIcon } from "../NavItemIcon";
 import classes from "./MobileMoreSheet.module.css";
 
 export function MobileNavList({ group, pathname }: { group: NavGroup; pathname: string }) {
@@ -13,7 +14,8 @@ export function MobileNavList({ group, pathname }: { group: NavGroup; pathname: 
     <section className={classes.section}>
       <h3 className={classes.groupLabel}>{t(group.headingKey, group.heading)}</h3>
       <div className={classes.card}>
-        {group.items.map(({ to, labelKey, label, icon: Icon, external, linkUrl, logoUrl }, i) => {
+        {group.items.map((item, i) => {
+          const { to, labelKey, label, external, linkUrl, logoUrl } = item;
           if (external) {
             return (
               <a key={`${i}-${to}`} href={to} target="_blank" rel="noopener noreferrer" className={classes.row}>
@@ -37,7 +39,7 @@ export function MobileNavList({ group, pathname }: { group: NavGroup; pathname: 
               onFocus={() => void prefetchRoute(to)}
             >
               <span className={classes.icon}>
-                {linkUrl ? <LinkLogo url={linkUrl} logoUrl={logoUrl} label={label} size={16} /> : <Icon size={16} />}
+                {linkUrl ? <LinkLogo url={linkUrl} logoUrl={logoUrl} label={label} size={16} /> : <NavItemIcon item={item} size={16} />}
               </span>
               <span className={classes.label}>{linkUrl ? label : t(labelKey, label)}</span>
               <ChevronRight size={16} className={classes.chevron} />

@@ -6,6 +6,7 @@ import { useWorkspace } from "@/features/workspace/context";
 import { useFavouriteDashboards } from "@/features/dashboards/favourites";
 import { ExternalNavLink, NavLink } from "./NavLink";
 import { DashboardsTreeNode } from "./DashboardsTreeNode";
+import { navImage } from "./NavItemIcon";
 import type { NavGroup } from "./navItems";
 
 const DASHBOARDS_PATH = "/app/dashboards";
@@ -74,7 +75,17 @@ function NavGroupBlock({
         />
       );
     }
-    return <NavLink key={n.to} to={n.to} label={label} icon={n.icon} active={active} collapsed={collapsed} />;
+    return (
+      <NavLink
+        key={n.to}
+        to={n.to}
+        label={label}
+        icon={n.icon}
+        image={navImage(n)}
+        active={active}
+        collapsed={collapsed}
+      />
+    );
   });
 
   return (

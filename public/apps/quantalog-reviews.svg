@@ -4,7 +4,7 @@
       <rect x="164" y="0" width="92" height="256"/>
     </clipPath>
   </defs>
-  <path d="M56 80h88a24 24 0 0 1 24 24v64a24 24 0 0 1-24 24H92l-30 26v-26h-6a24 24 0 0 1-24-24v-64a24 24 0 0 1 24-24z" fill="#2F6BFF"/>
-  <path d="M164 38 182.8 80.1 230.6 84.4 194.4 115.9 205.1 162.6 164 138 122.9 162.6 133.6 115.9 97.4 84.4 145.2 80.1Z" fill="#FBBF24" stroke="#FBBF24" stroke-width="12" stroke-linejoin="round"/>
-  <path d="M164 38 182.8 80.1 230.6 84.4 194.4 115.9 205.1 162.6 164 138 122.9 162.6 133.6 115.9 97.4 84.4 145.2 80.1Z" fill="#F59E0B" stroke="#F59E0B" stroke-width="12" stroke-linejoin="round" clip-path="url(#qr-half)"/>
+  <path d="M56 80h88a24 24 0 0 1 24 24v64a24 24 0 0 1-24 24H92l-30 26v-26h-6a24 24 0 0 1-24-24v-64a24 24 0 0 1 24-24z" fill="#007AFF"/>
+  <path d="M164 38 182.8 80.1 230.6 84.4 194.4 115.9 205.1 162.6 164 138 122.9 162.6 133.6 115.9 97.4 84.4 145.2 80.1Z" fill="#FFC233" stroke="#FFC233" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M164 38 182.8 80.1 230.6 84.4 194.4 115.9 205.1 162.6 164 138 122.9 162.6 133.6 115.9 97.4 84.4 145.2 80.1Z" fill="#FF9F0A" stroke="#FF9F0A" stroke-width="12" stroke-linejoin="round" clip-path="url(#qr-half)"/>
 </svg>

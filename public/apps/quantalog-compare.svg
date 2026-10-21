@@ -1,5 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="28 28 200 200" width="256" height="256" role="img" aria-label="Quantalog Compare">
-  <circle cx="96" cy="128" r="66" fill="#2F6BFF"/>
-  <circle cx="160" cy="128" r="66" fill="#38BDF8"/>
-  <path d="M128 70.3A66 66 0 0 1 128 185.7A66 66 0 0 1 128 70.3Z" fill="#1D3FC4"/>
+  <defs>
+    <clipPath id="qc-center">
+      <rect x="100" y="84" width="56" height="134" rx="12"/>
+    </clipPath>
+  </defs>
+  <rect x="38" y="124" width="56" height="94" rx="12" fill="#5AA2FF"/>
+  <rect x="100" y="84" width="56" height="134" rx="12" fill="#007AFF"/>
+  <rect x="100" y="84" width="56" height="26" fill="#0051C7" clip-path="url(#qc-center)"/>
+  <rect x="162" y="148" width="56" height="70" rx="12" fill="#FFC233"/>
+  <circle cx="128" cy="50" r="22" fill="#FF9F0A"/>
+  <circle cx="128" cy="50" r="10" fill="#FFF8E6"/>
 </svg>

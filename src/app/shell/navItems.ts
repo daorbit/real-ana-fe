@@ -18,6 +18,7 @@ export type NavItem = {
   linkUrl?: string;
   logoUrl?: string;
   app?: WorkspaceAppId | WorkspaceAppId[];
+  art?: string;
 };
 
 export type NavGroup = {
@@ -33,16 +34,16 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupOverview",
     heading: "Overview",
     items: [
-      { to: "/app", labelKey: "nav.home", label: "Home", icon: Home },
-      { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: LayoutDashboard },
-      { to: "/app/apps", labelKey: "nav.apps", label: "Apps", icon: Blocks },
+      { to: "/app", labelKey: "nav.home", label: "Home", icon: Home, art: "home" },
+      { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: LayoutDashboard, art: "dashboards" },
+      { to: "/app/apps", labelKey: "nav.apps", label: "Apps", icon: Blocks, art: "apps" },
     ],
   },
   {
     headingKey: "nav.groupAnalytics",
     heading: "Analytics",
     items: [
-      { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
+      { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3, art: "analytics" },
       { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag, app: "goals" },
       { to: "/app/alerts", labelKey: "nav.alerts", label: "Alerts", icon: BellRing, app: "alerts" },
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords, app: "compare" },
@@ -52,17 +53,17 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupSearch",
     heading: "Search",
     items: [
-      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
-      { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
+      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp, art: "search-visibility" },
+      { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search, art: "seo" },
     ],
   },
   {
     headingKey: "nav.groupEngage",
     heading: "Engage",
     items: [
-      { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock },
-      { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send },
-      { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon },
+      { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: CalendarClock, art: "reports" },
+      { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send, art: "scheduled-posts" },
+      { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon, art: "lead-capture" },
       { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
       { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
     ],
@@ -71,7 +72,7 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupBrand",
     heading: "Brand",
     items: [
-      { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette },
+      { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette, art: "branding" },
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images, app: "media" },
     ],
   },
@@ -79,18 +80,18 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupTeam",
     heading: "Team",
     items: [
-      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
-      { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText },
+      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users, art: "members" },
+      { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText, art: "audit-log" },
     ],
   },
   {
     headingKey: "nav.groupWorkspace",
     heading: "Workspace",
     items: [
-      { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
-      { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
-      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
-      { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: Settings },
+      { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban, art: "workspaces" },
+      { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard, art: "billing" },
+      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2, art: "developers" },
+      { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: Settings, art: "settings" },
     ],
   },
 ];

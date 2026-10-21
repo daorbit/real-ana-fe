@@ -4,13 +4,13 @@
       <rect x="48" y="36" width="140" height="176" rx="20"/>
     </clipPath>
   </defs>
-  <rect x="48" y="36" width="140" height="176" rx="20" fill="#2F6BFF"/>
-  <rect x="48" y="36" width="140" height="40" fill="#1D3FC4" clip-path="url(#qsr-page)"/>
-  <rect x="68" y="50" width="64" height="12" rx="6" fill="#6B93FF"/>
+  <rect x="48" y="36" width="140" height="176" rx="20" fill="#007AFF"/>
+  <rect x="48" y="36" width="140" height="40" fill="#0051C7" clip-path="url(#qsr-page)"/>
+  <rect x="68" y="50" width="64" height="12" rx="6" fill="#5AA2FF"/>
   <rect x="68" y="96" width="96" height="12" rx="6" fill="#FFFFFF"/>
-  <rect x="68" y="120" width="72" height="12" rx="6" fill="#BFD0FF"/>
-  <rect x="68" y="144" width="84" height="12" rx="6" fill="#BFD0FF"/>
-  <circle cx="176" cy="164" r="36" fill="#F59E0B"/>
-  <circle cx="176" cy="164" r="20" fill="#FFFBEB"/>
-  <rect x="196" y="186" width="16" height="40" rx="8" transform="rotate(-45 204 206)" fill="#B45309"/>
+  <rect x="68" y="120" width="72" height="12" rx="6" fill="#CFE4FF"/>
+  <rect x="68" y="144" width="84" height="12" rx="6" fill="#CFE4FF"/>
+  <circle cx="176" cy="164" r="36" fill="#FF9F0A"/>
+  <circle cx="176" cy="164" r="20" fill="#FFF8E6"/>
+  <rect x="196" y="186" width="16" height="40" rx="8" transform="rotate(-45 204 206)" fill="#C76A00"/>
 </svg>

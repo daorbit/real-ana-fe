@@ -3,6 +3,7 @@ import { ActionIcon, Tooltip } from "@mantine/core";
 import { GripVertical, Pin, PinOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NAV_GROUPS, type NavItem } from "@/app/shell/navItems";
+import { NavItemIcon } from "@/app/shell/NavItemIcon";
 import { withItemState, withPinnedOrder } from "@/app/shell/navPrefs";
 import { SidebarCard } from "./SidebarCard";
 import { SortableList } from "./SortableList";
@@ -44,7 +45,6 @@ export function PinnedSection({ editor, workspaceName }: { editor: NavPrefsEdito
           disabled={!editable}
           onReorder={(from, to) => apply(withPinnedOrder(prefs, from, to))}
           renderItem={(item, handle) => {
-            const Icon = item.icon;
             const label = t(item.labelKey, item.label);
             return (
               <div className={classes.row}>
@@ -54,7 +54,7 @@ export function PinnedSection({ editor, workspaceName }: { editor: NavPrefsEdito
                   </span>
                 )}
                 <span className={classes.tile} data-accent>
-                  <Icon size={16} />
+                  <NavItemIcon item={item} size={16} />
                 </span>
                 <span className={classes.rowLabel}>{label}</span>
                 {editable && (

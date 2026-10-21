@@ -1,6 +1,7 @@
 import { ActionIcon, Switch, Tooltip } from "@mantine/core";
 import { Pin } from "lucide-react";
 import type { NavItem } from "@/app/shell/navItems";
+import { NavItemIcon } from "@/app/shell/NavItemIcon";
 import classes from "./Sidebar.module.css";
 
 export function PageRow({
@@ -24,13 +25,11 @@ export function PageRow({
   onTogglePin: () => void;
   onToggleShown: () => void;
 }) {
-  const Icon = item.icon;
-
   return (
     <div className={classes.pageRow} data-hidden={hidden || undefined}>
       <span className={classes.pageName}>
         <span className={classes.tile} data-accent={pinned || undefined}>
-          <Icon size={16} />
+          <NavItemIcon item={item} size={16} />
         </span>
         <span className={classes.rowLabel}>{label}</span>
       </span>

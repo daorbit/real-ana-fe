@@ -1,6 +1,7 @@
 import { UnstyledButton } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
 import { NavLink } from "./NavLink";
+import { navImage } from "./NavItemIcon";
 import { FavouriteLinks } from "./FavouriteLinks";
 import { usePersistedFlag } from "./useRailState";
 import type { NavItem } from "./navItems";
@@ -30,7 +31,7 @@ export function DashboardsTreeNode({
   return (
     <div className={classes.node}>
       <div className={classes.head}>
-        <NavLink to={item.to} label={label} icon={item.icon} active={active} />
+        <NavLink to={item.to} label={label} icon={item.icon} image={navImage(item)} active={active} />
         <UnstyledButton
           className={classes.toggle}
           onClick={toggle}

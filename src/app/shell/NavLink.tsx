@@ -17,6 +17,7 @@ export function NavLink({
   label,
   icon: Icon,
   logo,
+  image,
   active,
   collapsed,
 }: {
@@ -24,6 +25,7 @@ export function NavLink({
   label: string;
   icon: typeof Home;
   logo?: { url: string; logoUrl?: string };
+  image?: string;
   active: boolean;
   collapsed?: boolean;
 }) {
@@ -55,6 +57,8 @@ export function NavLink({
       <span className="nav-link-icon">
         {logo ? (
           <LinkLogo url={logo.url} logoUrl={logo.logoUrl} label={label} size={collapsed ? 18 : 15} />
+        ) : image ? (
+          <img src={image} width={collapsed ? 18 : 15} height={collapsed ? 18 : 15} alt="" className="nav-app-logo" />
         ) : (
           <Icon size={collapsed ? 18 : 15} />
         )}

@@ -22,12 +22,23 @@ import { useAiAssistants } from "../../hooks/useAiAssistants";
 import { AiAssistantsConnection } from "../assistants/AiAssistantsConnection";
 import { FormsIntegrations } from "../FormsIntegrations";
 import { SearchConsoleConnection } from "../SearchConsoleConnection";
-import { ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
+import { ConnectionCardSkeleton, ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
 import { ConnectionsToolbar } from "./ConnectionsToolbar";
 import { FormsNotice } from "./FormsNotice";
 import { SocialGroup } from "./SocialGroup";
 
 const SKELETON_CARDS = 8;
+const FORMS_SKELETON_CARDS = 4;
+
+function FormsSkeletons() {
+  return (
+    <>
+      {Array.from({ length: FORMS_SKELETON_CARDS }, (_, index) => (
+        <ConnectionCardSkeleton key={index} />
+      ))}
+    </>
+  );
+}
 
 function formsLockReason(isDemo: boolean, hasWorkspace: boolean, canEdit: boolean): string | undefined {
   if (isDemo) return "Form apps are connected in your own workspace, not the demo.";
@@ -83,8 +94,9 @@ export function ConnectionsBoard() {
   const categories = useMemo(() => categoryOptions(allEntries), [allEntries]);
 
   const visibleCount = allEntries.filter((entry) => matchesFilter(entry, filter)).length;
-  const loading =
-    social.loading || searchConsole.loading || assistants.loading || (!lockedReason && integrations.loading);
+  const coreLoading = social.loading || searchConsole.loading || assistants.loading;
+  const formsLoading = !lockedReason && integrations.loading;
+  const loading = coreLoading || formsLoading;
   const assistantCards = (flat: boolean) => (
     <AiAssistantsConnection
       assistants={assistants}
@@ -117,7 +129,7 @@ export function ConnectionsBoard() {
       />
 
       <Fragment key={workspaceId ?? "none"}>
-      {loading ? (
+      {coreLoading ? (
         <ConnectionGridSkeleton count={SKELETON_CARDS} />
       ) : nothingMatches ? (
         <EmptyState
@@ -145,6 +157,7 @@ export function ConnectionsBoard() {
               filter={filter}
               flat
             />
+            {formsLoading && <FormsSkeletons />}
           </div>
           <FormsNotice lockedReason={lockedReason} failed={integrations.failed} onRetry={integrations.refetchAll} />
         </>
@@ -160,6 +173,11 @@ export function ConnectionsBoard() {
             integrations={integrations}
             filter={filter}
           />
+          {formsLoading && (
+            <div className="connection-grid" aria-busy="true">
+              <FormsSkeletons />
+            </div>
+          )}
         </>
       )}
       </Fragment>
