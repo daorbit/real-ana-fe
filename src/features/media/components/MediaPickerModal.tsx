@@ -14,7 +14,8 @@ import type { MediaAsset, MediaKind } from "@/shared/types";
 import { MediaGrid } from "./MediaGrid";
 import { MediaGridSkeleton } from "./MediaGridSkeleton";
 import { UploadTray, type UploadItem } from "./UploadTray";
-import { readAsDataUrl, MAX_ASSET_BYTES } from "../lib";
+import { MAX_ASSET_BYTES, MAX_ASSET_LABEL } from "../lib";
+import { uploadInBatches } from "../uploadInBatches";
 
 /** Enough to fill the wall without making the modal scroll far. */
 const PER_PAGE = 12;
@@ -115,7 +116,7 @@ export function MediaPickerModal({
     const files = Array.from(list);
     const queued: UploadItem[] = files.map((file) =>
       file.size > MAX_ASSET_BYTES
-        ? { file, state: "error", error: "Larger than 25MB" }
+        ? { file, state: "error", error: `Larger than ${MAX_ASSET_LABEL}` }
         : { file, state: "queued" },
     );
     setTray(queued);
@@ -131,10 +132,7 @@ export function MediaPickerModal({
     );
 
     try {
-      const payload = await Promise.all(
-        ok.map(async (f) => ({ file: await readAsDataUrl(f), name: f.name, alt: "" })),
-      );
-      const res = await upload({ workspaceId, files: payload }).unwrap();
+      const res = await uploadInBatches(ok, (files) => upload({ workspaceId, files }).unwrap());
 
       const failedNames = new Map(res.failed?.map((f) => [f.name, f.message]) ?? []);
       setTray((rows) =>

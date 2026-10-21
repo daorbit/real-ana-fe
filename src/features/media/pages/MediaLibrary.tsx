@@ -29,7 +29,8 @@ import { MediaGridSkeleton } from "../components/MediaGridSkeleton";
 import { MediaStartPanel } from "../components/start/MediaStartPanel";
 import { MediaPreviewModal } from "../components/MediaPreviewModal";
 import { UploadTray, type UploadItem } from "../components/UploadTray";
-import { readAsDataUrl, MAX_ASSET_BYTES } from "../lib";
+import { MAX_ASSET_BYTES, MAX_ASSET_LABEL } from "../lib";
+import { uploadInBatches } from "../uploadInBatches";
 import classes from "./MediaLibrary.module.css";
 
 const PER_PAGE = 40;
@@ -125,7 +126,7 @@ function MediaLibrary() {
     // to have the server reject it wastes the whole wait.
     const queued: UploadItem[] = files.map((file) =>
       file.size > MAX_ASSET_BYTES
-        ? { file, state: "error", error: "Larger than 25MB" }
+        ? { file, state: "error", error: `Larger than ${MAX_ASSET_LABEL}` }
         : { file, state: "queued" },
     );
     setTray(queued);
@@ -141,10 +142,7 @@ function MediaLibrary() {
     );
 
     try {
-      const payload = await Promise.all(
-        ok.map(async (f) => ({ file: await readAsDataUrl(f), name: f.name, alt: "" })),
-      );
-      const res = await upload({ workspaceId, files: payload }).unwrap();
+      const res = await uploadInBatches(ok, (files) => upload({ workspaceId, files }).unwrap());
 
       // The server answers per file, so the tray can say which one failed
       // rather than reporting the batch as one outcome.

@@ -3,6 +3,7 @@ import { Button, Text } from "@mantine/core";
 import { FolderSearch, Images, MousePointerClick, Upload } from "lucide-react";
 import { StartHero, StartScreen, StartSteps } from "@/shared/ui/start/StartScreen";
 import { settingsPath } from "@/features/auth/components/settings/settingsSections";
+import { MAX_ASSET_LABEL } from "../../lib";
 import classes from "./MediaStart.module.css";
 
 export function MediaStartPanel({
@@ -38,7 +39,7 @@ export function MediaStartPanel({
               Choose files
             </Button>
             <Text size="xs" c="dimmed">
-              Images, video, PDFs and more · up to 25 MB each
+              Images, video, PDFs and more · up to {MAX_ASSET_LABEL} each
             </Text>
           </div>
         )}

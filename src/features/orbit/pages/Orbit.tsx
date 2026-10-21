@@ -29,6 +29,7 @@ import { useTypewriter } from "@/features/orbit/useTypewriter";
 import { OrbitHistoryDrawer } from "./OrbitHistoryDrawer";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { notify } from "@/shared/lib/notify";
+import { fitsWithAttachment } from "../attachmentSize";
 import classes from "./orbitPage.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
 
@@ -666,7 +667,7 @@ export default function Orbit() {
     send(q);
   };
 
-  const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+  const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
   const acceptImage = (file: File | undefined | null) => {
     if (!file) return;
@@ -677,7 +678,11 @@ export default function Orbit() {
       return;
     }
     if (file.size > MAX_IMAGE_BYTES) {
-      setImageError("That image is too large — 6MB or smaller.");
+      setImageError("That image is too large — 3MB or smaller.");
+      return;
+    }
+    if (!fitsWithAttachment(file.size, pendingDocument?.data)) {
+      setImageError("The image and file together must be 3MB or smaller.");
       return;
     }
  
@@ -713,7 +718,7 @@ export default function Orbit() {
     }
   };
 
-  const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
+  const MAX_DOCUMENT_BYTES = 3 * 1024 * 1024;
 
   const SUPPORTED_DOCUMENT_MIME = new Set([
     "application/pdf",
@@ -732,7 +737,11 @@ export default function Orbit() {
       return;
     }
     if (file.size > MAX_DOCUMENT_BYTES) {
-      setDocumentError("That file is too large — 5MB or smaller.");
+      setDocumentError("That file is too large — 3MB or smaller.");
+      return;
+    }
+    if (!fitsWithAttachment(file.size, pendingImage)) {
+      setDocumentError("The image and file together must be 3MB or smaller.");
       return;
     }
 

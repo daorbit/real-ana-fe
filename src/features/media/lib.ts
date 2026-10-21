@@ -1,7 +1,9 @@
 import type { MediaAsset } from "@/shared/types";
 
 /** The ceiling the server enforces, repeated here so a refusal is instant. */
-export const MAX_ASSET_BYTES = 25 * 1024 * 1024;
+export const MAX_ASSET_BYTES = 3 * 1024 * 1024;
+export const MAX_ASSET_LABEL = "3MB";
+export const MAX_BATCH_BYTES = 3 * 1024 * 1024;
 
 /** A file as the upload endpoint wants it: a base64 data URL. */
 export function readAsDataUrl(file: File): Promise<string> {
