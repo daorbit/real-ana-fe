@@ -395,7 +395,11 @@
     "deleteSiteConsequenceLink": "このサイトの公開ダッシュボードのリンクが使えなくなります",
     "deleteSiteConsequenceSnippet": "スニペットを実行中のアプリからのデータ送信が停止します",
     "deletedSiteToast": "サイト「{{name}}」を削除しました。",
-    "deleteSiteError": "サイトを削除できませんでした。"
+    "deleteSiteError": "サイトを削除できませんでした。",
+    "otherTabTitle": "別のタブでワークスペースが変更されました",
+    "otherTabBody": "別のタブで {{other}} に切り替えました。このタブは {{current}} のままなので、ここでの変更は {{current}} に反映されます。",
+    "otherTabSwitch": "{{name}} に切り替える",
+    "otherTabStay": "{{name}} のままにする"
   },
   "reports": {
     "previewTitle": "プレビュー",

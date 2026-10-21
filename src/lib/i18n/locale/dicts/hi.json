@@ -395,7 +395,11 @@
     "deleteSiteConsequenceLink": "साइट का सार्वजनिक डैशबोर्ड लिंक काम करना बंद कर देगा",
     "deleteSiteConsequenceSnippet": "स्निपेट चला रहा कोई भी ऐप डेटा भेजना बंद कर देगा",
     "deletedSiteToast": "साइट “{{name}}” हटा दी गई।",
-    "deleteSiteError": "साइट नहीं हटाई जा सकी।"
+    "deleteSiteError": "साइट नहीं हटाई जा सकी।",
+    "otherTabTitle": "दूसरे टैब में वर्कस्पेस बदल गया",
+    "otherTabBody": "आपने दूसरे टैब में {{other}} पर स्विच किया है। यह टैब अभी भी {{current}} दिखा रहा है, इसलिए यहाँ किए गए बदलाव {{current}} में होंगे।",
+    "otherTabSwitch": "{{name}} पर स्विच करें",
+    "otherTabStay": "{{name}} पर रहें"
   },
   "reports": {
     "previewTitle": "पूर्वावलोकन",

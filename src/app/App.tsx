@@ -7,6 +7,7 @@ import { useIdleLock } from "@/features/auth/useIdleLock";
 import { LockScreen } from "@/features/auth/components/LockScreen";
 import { isLocked, subscribeLock } from "@/shared/lib/lockState";
 import { WorkspaceProvider, useWorkspace } from "@/features/workspace/context";
+import { WorkspaceChangedElsewhereModal } from "@/features/workspace/components/WorkspaceChangedElsewhereModal";
 import { DemoProvider } from "@/features/demo/context";
 import { OrbitProvider } from "@/features/orbit/components/OrbitProvider";
 import { NotesProvider, NotesPanel } from "@/features/notes";
@@ -126,6 +127,7 @@ function Protected({ children }: { children: ReactNode }) {
           <RequireSetup>{children}</RequireSetup>
           <NotesPanel />
           <LockScreen />
+          <WorkspaceChangedElsewhereModal />
         </NotesProvider>
       </OrbitProvider>
     </WorkspaceProvider>
