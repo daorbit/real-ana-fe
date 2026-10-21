@@ -17,7 +17,7 @@ export function TopReferrersPanel() {
   const { data, isLoading } = useGetAdminTopReferrersQuery();
   const [setActive] = useSetAdminReferralCodeActiveMutation();
   const [toggling, setToggling] = useState<string | null>(null);
-  const { enter, busy } = useImpersonateUser("referrals");
+  const { enter, busy } = useImpersonateUser();
   const rows = data?.referrers ?? [];
 
   const toggle = async (userId: string, active: boolean) => {

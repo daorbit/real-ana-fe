@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 
-export function useImpersonateUser(source = "impersonate") {
-  const { user, impersonate } = useAuth();
+export function useImpersonateUser() {
+  const { impersonate } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
 

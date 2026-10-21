@@ -12,7 +12,6 @@ import { useDemo } from "@/features/demo/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { demoReportSchedulesResponse } from "@/features/demo/demoReports";
 import { demoSites } from "@/features/demo/demoData";
-import { useAuth } from "@/features/auth/context";
 import type { ReportSchedule } from "@/shared/types";
 import { emptyDraft, fromSchedule, type Draft } from "@/features/reports/pages/types";
 import { EMAIL_RE, TAB_ORDER, nextSendLabel } from "@/features/reports/pages/utils";
@@ -26,7 +25,6 @@ import { EMAIL_RE, TAB_ORDER, nextSendLabel } from "@/features/reports/pages/uti
 export function useReportsPage() {
   const { t } = useTranslation();
   const { active } = useWorkspace();
-  const { user } = useAuth();
   const billing = useActiveBilling();
   const { demo } = useDemo();
   // Schedules are `editor` server-side. A viewer keeps the list, the summary
@@ -188,7 +186,6 @@ export function useReportDialog(opts: {
   persist: (d: Draft, id: string | null) => Promise<void>;
 }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [opened, setOpened] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);

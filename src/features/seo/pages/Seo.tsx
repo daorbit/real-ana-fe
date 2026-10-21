@@ -267,7 +267,7 @@ export default function Seo() {
   const { t } = useTranslation();
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
-  const { user, refreshUser } = useAuth();
+  const { refreshUser } = useAuth();
   const workspaceId = active?._id ?? "";
   const { demo } = useDemo();
 

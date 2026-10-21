@@ -5,7 +5,6 @@ import {
   useUpdateFunnelMutation, useDeleteFunnelMutation,
 } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { useAuth } from "@/features/auth/context";
 import { FunnelSidebar } from "@/features/analytics/components/FunnelSidebar";
 import { FunnelStepEditor, type Draft } from "@/features/analytics/components/FunnelStepEditor";
 import { FunnelResults, type FunnelView } from "@/features/analytics/components/FunnelResults";
@@ -41,7 +40,6 @@ export function FunnelBuilder({
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [run, { isLoading }] = useComputeFunnelMutation();
-  const { user } = useAuth();
 
   const { data: savedFunnels = [] } = useGetFunnelsQuery(workspaceId);
   const [createFunnel, { isLoading: isSaving }] = useCreateFunnelMutation();

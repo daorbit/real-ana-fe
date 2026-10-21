@@ -11,7 +11,6 @@ import {
 import { notify, errMessage } from "@/shared/lib/notify";
 import { useFitScale } from "@/hooks/useFitScale";
 import { DeviceFrame, frameSize, type DeviceId } from "@/features/social/components/DeviceFrame";
-import { useAuth } from "@/features/auth/context";
 import {
   useWriteShareCaptionMutation,
   useGetLinkedInStatusQuery,
@@ -63,7 +62,6 @@ export function SharePostModal({
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [writeCaption, { isLoading: writing }] = useWriteShareCaptionMutation();
   const [postToLinkedIn, { isLoading: posting }] = usePostToLinkedInMutation();
-  const { user } = useAuth();
   // The permalink of the post just published, so the panel can link to it.
   const [postedUrl, setPostedUrl] = useState<string | null>(null);
   const [justPosted, setJustPosted] = useState(false);

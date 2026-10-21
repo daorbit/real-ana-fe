@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { ExternalLink, type Home } from "lucide-react";
 import { prefetchRoute } from "@/app/routePrefetch";
@@ -27,7 +27,6 @@ export function NavLink({
   active: boolean;
   collapsed?: boolean;
 }) {
-  const location = useLocation();
   const navigate = useNavigate();
 
   const link = (
