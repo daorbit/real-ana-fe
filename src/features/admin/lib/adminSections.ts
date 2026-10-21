@@ -1,6 +1,6 @@
-import { CreditCard, Database, Gift, Mail, Package, PlayCircle, Ticket, Users, type LucideIcon } from "lucide-react";
+import { BellRing, CreditCard, Database, Gift, Mail, Package, PlayCircle, Ticket, Users, type LucideIcon } from "lucide-react";
 
-export type AdminSectionId = "users" | "email" | "plans" | "addons" | "coupons" | "referrals" | "demo" | "database";
+export type AdminSectionId = "users" | "email" | "plans" | "addons" | "coupons" | "referrals" | "demo" | "database" | "alerts";
 
 export type AdminTone = "blue" | "violet" | "teal" | "orange" | "pink" | "grape" | "cyan" | "gray";
 
@@ -92,6 +92,14 @@ export const ADMIN_GROUPS: { label: string; sections: AdminSectionMeta[] }[] = [
         description: "Storage used against the plan limit, and Workers AI usage.",
         icon: Database,
         tone: "gray",
+      },
+      {
+        id: "alerts",
+        labelKey: "nav.adminAlerts",
+        label: "System alerts",
+        description: "Where to send a Telegram message when an API fails, a cron job breaks or a service goes down.",
+        icon: BellRing,
+        tone: "orange",
       },
     ],
   },

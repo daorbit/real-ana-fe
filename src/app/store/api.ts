@@ -24,7 +24,7 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, PublicSeoReport,
-  DemoUsage, DbStats, WorkersAiTrendPoint, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
+  DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
   Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus, TelegramStatus, TelegramChat,
@@ -127,7 +127,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   return result;
 };
 
-export const API_TAGS = ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram", "WhatsApp"] as const;
+export const API_TAGS = ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram", "WhatsApp", "AdminOpsAlerts"] as const;
 
 export const api = createApi({
   reducerPath: "api",
@@ -1646,6 +1646,20 @@ export const api = createApi({
     setDemoLimit: build.mutation<{ limit: number }, number>({
       query: (limit) => ({ url: "/api/admin/demo/limit", method: "PUT", body: { limit } }),
       invalidatesTags: ["DemoUsage"],
+    }),
+
+    getAdminOpsAlerts: build.query<OpsAlertSettings, void>({
+      query: () => "/api/admin/ops-alerts",
+      providesTags: ["AdminOpsAlerts"],
+    }),
+
+    saveAdminOpsAlerts: build.mutation<OpsAlertSettings, OpsAlertSettingsInput>({
+      query: (body) => ({ url: "/api/admin/ops-alerts", method: "PUT", body }),
+      invalidatesTags: ["AdminOpsAlerts"],
+    }),
+
+    testAdminOpsAlert: build.mutation<{ ok: true }, void>({
+      query: () => ({ url: "/api/admin/ops-alerts/test", method: "POST" }),
     }),
 
     getDbStats: build.query<DbStats, void>({
@@ -3201,6 +3215,9 @@ export const {
   useClaimReferralMutation,
   useGetAdminReferralSettingsQuery,
   useSaveAdminReferralSettingsMutation,
+  useGetAdminOpsAlertsQuery,
+  useSaveAdminOpsAlertsMutation,
+  useTestAdminOpsAlertMutation,
   useGetAdminReferralOverviewQuery,
   useGetAdminReferralsQuery,
   useGetAdminTopReferrersQuery,

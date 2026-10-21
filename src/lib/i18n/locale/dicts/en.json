@@ -46,6 +46,7 @@
     "help": "Help & support",
     "adminBilling": "Plans & addons",
     "adminDatabase": "Database",
+    "adminAlerts": "System alerts",
     "adminReferrals": "Referrals",
     "settings": "Settings",
     "logout": "Log out",

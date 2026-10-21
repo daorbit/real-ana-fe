@@ -21,6 +21,7 @@ const IMPORTERS: Record<AdminSectionId, () => PanelModule> = {
   referrals: () => import("../components/panels/ReferralsPanel"),
   demo: () => import("../components/panels/DemoPanel"),
   database: () => import("../components/panels/DatabasePanel"),
+  alerts: () => import("../components/panels/AlertsPanel"),
 };
 
 const PANELS = Object.fromEntries(

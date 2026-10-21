@@ -872,6 +872,21 @@ export type ReferralSettings = {
   maxRewardsPerUser: number;
 };
 
+export type OpsAlertSettings = {
+  enabled: boolean;
+  chatId: string;
+  botTokenMask: string | null;
+  usesPlatformBot: boolean;
+  envConfigured: boolean;
+};
+
+export type OpsAlertSettingsInput = {
+  enabled?: boolean;
+  chatId?: string;
+  botToken?: string;
+  clearBotToken?: boolean;
+};
+
 export type RewardCouponState = "ready" | "used" | "expired" | "off";
 
 export type MyRewardCoupon = {
