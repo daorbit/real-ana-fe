@@ -22,7 +22,7 @@ import type {
 import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
-  SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
+  SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, SeoShareLink, PublicSeoReport,
   DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
@@ -1867,15 +1867,6 @@ export const api = createApi({
         `/api/public/seo/${token}${count ? "?count=1" : ""}`,
     }),
 
-    getSearchTraffic: build.query<
-      SeoSearchTraffic,
-      { workspaceId: string; siteId: string; days?: number }
-    >({
-      query: ({ workspaceId, siteId, days = 30 }) =>
-        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/search-traffic?days=${days}`,
-      providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: `search-${siteId}` }],
-    }),
-
     getFieldVitals: build.query<
       SeoFieldVitals,
       { workspaceId: string; siteId: string; days?: number }
@@ -3148,7 +3139,6 @@ export const {
   useRefreshCompetitorMutation,
   useRefreshAllCompetitorsMutation,
   useDeleteCompetitorMutation,
-  useGetSearchTrafficQuery,
   useGetFieldVitalsQuery,
   useRunCrawlMutation,
   useGetLatestCrawlQuery,

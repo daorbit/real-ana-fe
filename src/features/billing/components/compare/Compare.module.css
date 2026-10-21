@@ -73,9 +73,8 @@
 }
 
 .planHead[data-current] .planTag {
-  color: var(--accent-2);
-  background: color-mix(in srgb, var(--accent-2) 14%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 30%, transparent);
+  color: var(--selected-fg);
+  background: var(--selected-icon-bg);
 }
 
 .planHead[data-current],

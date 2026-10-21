@@ -18,7 +18,6 @@
     "saveShort": "Guardar"
   },
   "nav": {
-    "groupAnalyze": "Analizar",
     "adminAlerts": "Alertas del sistema",
     "groupAssistant": "Assistant",
     "orbit": "Orbit AI",
@@ -59,7 +58,12 @@
     "pageHelp": "Qué hay en esta página",
     "help": "Ayuda y soporte",
     "backlinks": "Backlinks",
-    "reviews": "Reseñas de Google"
+    "reviews": "Reseñas de Google",
+    "groupOverview": "Resumen",
+    "groupAnalytics": "Analítica",
+    "groupSearch": "Búsqueda",
+    "groupBrand": "Marca",
+    "groupTeam": "Equipo"
   },
   "settings": {
     "title": "Ajustes",

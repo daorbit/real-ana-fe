@@ -156,8 +156,8 @@
 }
 
 .mode[data-active] {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }
 
 .mode:disabled {

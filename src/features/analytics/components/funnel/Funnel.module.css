@@ -71,8 +71,8 @@
 }
 
 .railItem[data-active] {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--selected-bg);
+  color: var(--selected-fg);
 }
 
 .railItem:disabled {

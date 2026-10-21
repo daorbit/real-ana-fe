@@ -45,6 +45,11 @@
   --accent-2: #059669;
   --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
 
+  --selected-border: var(--accent);
+  --selected-fg: var(--accent);
+  --selected-bg: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --selected-icon-bg: color-mix(in srgb, var(--accent) 18%, transparent);
+
 
   --grad-chart: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 100%);
 
@@ -96,6 +101,8 @@
   --accent: #059669;
   --accent-2: #047857;
   --accent-soft: rgba(5, 150, 105, 0.14);
+  --selected-bg: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  --selected-icon-bg: color-mix(in srgb, var(--accent) 12%, transparent);
   --green: #059669;
   --wash-strong: 7%;
   --wash-soft: 2%;
@@ -1490,13 +1497,13 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
 }
 .page-break-toggle:hover {
-  border-color: var(--accent-2);
-  color: var(--accent-2);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 .page-break-row.active .page-break-toggle {
-  border-color: var(--accent-2);
-  color: var(--accent-2);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: var(--selected-border);
+  color: var(--selected-fg);
+  background: var(--selected-bg);
 }
 
 .theme-card {
@@ -1505,8 +1512,8 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .theme-card:hover { border-color: var(--border-strong) !important; }
 .theme-card.active {
-  border-color: var(--accent-2) !important;
-  box-shadow: 0 0 0 1px var(--accent-2);
+  border-color: var(--selected-border) !important;
+  background: var(--selected-bg);
 }
 
 

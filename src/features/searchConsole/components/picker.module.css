@@ -244,12 +244,11 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+  transition: border-color 140ms ease, background-color 140ms ease;
 }
 
 .tile:hover {
   border-color: var(--border-strong, var(--border));
-  transform: translateY(-1px);
 }
 
 .tile:focus-visible {
@@ -258,15 +257,13 @@
 }
 
 .tile[data-checked] {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: 0 0 0 1px var(--accent);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }
 
 .tile[data-mismatch][data-checked] {
   border-color: var(--mantine-color-yellow-6);
   background: color-mix(in srgb, var(--mantine-color-yellow-6) 8%, transparent);
-  box-shadow: 0 0 0 1px var(--mantine-color-yellow-6);
 }
 
 .tileTop {

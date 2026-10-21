@@ -18,7 +18,6 @@
     "saveShort": "सहेजें"
   },
   "nav": {
-    "groupAnalyze": "विश्लेषण करें",
     "adminAlerts": "सिस्टम अलर्ट",
     "groupAssistant": "Assistant",
     "orbit": "Orbit AI",
@@ -59,7 +58,12 @@
     "pageHelp": "इस पेज पर क्या है",
     "help": "सहायता और समर्थन",
     "backlinks": "बैकलिंक्स",
-    "reviews": "Google समीक्षाएँ"
+    "reviews": "Google समीक्षाएँ",
+    "groupOverview": "अवलोकन",
+    "groupAnalytics": "एनालिटिक्स",
+    "groupSearch": "सर्च",
+    "groupBrand": "ब्रांड",
+    "groupTeam": "टीम"
   },
   "settings": {
     "title": "सेटिंग्स",

@@ -154,8 +154,8 @@
 }
 
 .pinButton[data-active] {
-  color: var(--accent-2);
-  background: var(--accent-soft);
+  color: var(--selected-fg);
+  background: var(--selected-icon-bg);
 }
 
 .pageRow[data-hidden] .tile {
@@ -384,8 +384,8 @@
 }
 
 .modeOption[data-selected] {
-  border-color: var(--text);
-  background: var(--surface-2);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }
 
 .modeOption:focus-visible {
@@ -399,7 +399,7 @@
 }
 
 .modeOption[data-selected] .modeIcon {
-  color: var(--text);
+  color: var(--selected-fg);
 }
 
 .modeTitle {

@@ -203,8 +203,7 @@
 .cycle[data-active],
 .cycle[data-active]:hover:not(:disabled) {
   border-color: var(--pa);
-  background: var(--surface-2);
-  box-shadow: inset 0 0 0 1px var(--pa);
+  background: var(--selected-bg);
 }
 
 .cycle:disabled {

@@ -124,8 +124,8 @@
 }
 
 .tile[data-side="you"] {
-  --tone: var(--violet-2);
-  background: color-mix(in srgb, var(--violet-2) 8%, transparent);
+  --tone: var(--selected-fg);
+  background: var(--selected-bg);
 }
 
 .tile[data-tone="ahead"] {
@@ -150,7 +150,7 @@
 }
 
 .tile[data-side="you"] .tileLabel {
-  color: var(--violet-2);
+  color: var(--selected-fg);
 }
 
 .tileScore {

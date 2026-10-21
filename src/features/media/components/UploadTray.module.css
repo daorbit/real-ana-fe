@@ -71,7 +71,7 @@
 .fill {
   height: 100%;
   border-radius: 999px;
-  background: var(--mantine-primary-color-filled);
+  background: var(--accent);
   transition: width 200ms ease;
 }
 
@@ -93,7 +93,7 @@
   width: 14px;
   height: 14px;
   border: 2px solid var(--mantine-color-default-border);
-  border-top-color: var(--mantine-primary-color-filled);
+  border-top-color: var(--accent);
   border-radius: 999px;
   animation: spin 700ms linear infinite;
 }

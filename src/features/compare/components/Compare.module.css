@@ -263,7 +263,8 @@
 }
 
 .serp[data-you] {
-  border-color: color-mix(in srgb, var(--violet-2) 30%, var(--border));
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }
 
 .serpWho {
@@ -277,7 +278,7 @@
 }
 
 .serp[data-you] .serpWho {
-  color: var(--violet-2);
+  color: var(--selected-fg);
 }
 
 .serpUrl {

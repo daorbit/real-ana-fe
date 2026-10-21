@@ -18,7 +18,6 @@
     "saveShort": "保存"
   },
   "nav": {
-    "groupAnalyze": "分析",
     "adminAlerts": "システムアラート",
     "groupAssistant": "Assistant",
     "orbit": "Orbit AI",
@@ -59,7 +58,12 @@
     "pageHelp": "このページの内容",
     "help": "ヘルプとサポート",
     "backlinks": "被リンク",
-    "reviews": "Google レビュー"
+    "reviews": "Google レビュー",
+    "groupOverview": "概要",
+    "groupAnalytics": "分析",
+    "groupSearch": "検索",
+    "groupBrand": "ブランド",
+    "groupTeam": "チーム"
   },
   "settings": {
     "title": "設定",

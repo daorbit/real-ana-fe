@@ -1,0 +1,28 @@
+.tray {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--surface-2);
+}
+
+.tray .option {
+  color: var(--text-2);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.tray .option:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.tray .option[aria-pressed="true"],
+.tray .option[aria-pressed="true"]:hover {
+  color: var(--selected-fg);
+  background: var(--surface);
+  border-color: var(--border);
+}

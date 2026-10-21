@@ -10,6 +10,6 @@
 }
 
 .dropping {
-  border-color: var(--mantine-primary-color-filled);
-  background: var(--mantine-color-default-hover);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }

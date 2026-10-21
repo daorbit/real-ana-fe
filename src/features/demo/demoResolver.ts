@@ -1,6 +1,6 @@
 import {
   demoWorkspaces, demoSites, demoApiKeys, demoApiKeyUsage, demoShare, demoSeoReport,
-  demoSeoHistory, demoSeoShare, demoSeoShareLinks, demoCrawl, demoSearchTraffic, demoVitals,
+  demoSeoHistory, demoSeoShare, demoSeoShareLinks, demoCrawl, demoVitals,
   demoCompetitors, demoInstallStatus, demoStats, demoUserFlow, DEMO_WORKSPACE_ID,
 } from "@/features/demo/demoData";
 import { demoDashboards, demoTargets } from "@/features/demo/demoDashboards";
@@ -62,7 +62,6 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   if (/\/seo\/reports$/.test(path)) return demoSeoHistory;
   if (/\/seo\/reports\/[^/]+$/.test(path)) return demoSeoReport;
   if (/\/seo\/crawl\/latest$/.test(path)) return demoCrawl;
-  if (/\/seo\/search-traffic$/.test(path)) return demoSearchTraffic;
   if (/\/seo\/vitals$/.test(path)) return demoVitals;
   if (/\/seo\/competitors$/.test(path)) return demoCompetitors;
 

@@ -225,7 +225,7 @@
 }
 
 .stepDot[data-active] {
-  background: var(--violet-2);
+  background: var(--accent);
 }
 
 .picker {

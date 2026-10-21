@@ -50,12 +50,12 @@
 }
 
 .option[data-active] {
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
-  background: var(--accent-soft);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }
 
 .option:focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--selected-border);
   outline-offset: 2px;
 }
 
@@ -71,8 +71,8 @@
 }
 
 .option[data-active] .optionIcon {
-  background: var(--surface);
-  color: var(--accent-2);
+  background: var(--selected-icon-bg);
+  color: var(--selected-fg);
 }
 
 .optionText {
@@ -98,7 +98,7 @@
 .optionCheck {
   flex-shrink: 0;
   width: 14px;
-  color: var(--accent-2);
+  color: var(--selected-fg);
 }
 
 .useButton {

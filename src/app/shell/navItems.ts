@@ -30,22 +30,30 @@ export type NavGroup = {
 
 export const NAV_GROUPS: NavGroup[] = [
   {
-    headingKey: "nav.groupAnalyze",
-    heading: "Analyze",
+    headingKey: "nav.groupOverview",
+    heading: "Overview",
     items: [
-      { to: "/app/apps", labelKey: "nav.apps", label: "Apps", icon: Blocks },
       { to: "/app", labelKey: "nav.home", label: "Home", icon: Home },
-      { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
       { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: LayoutDashboard },
+      { to: "/app/apps", labelKey: "nav.apps", label: "Apps", icon: Blocks },
+    ],
+  },
+  {
+    headingKey: "nav.groupAnalytics",
+    heading: "Analytics",
+    items: [
+      { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: BarChart3 },
       { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag, app: "goals" },
       { to: "/app/alerts", labelKey: "nav.alerts", label: "Alerts", icon: BellRing, app: "alerts" },
-
+      { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords, app: "compare" },
+    ],
+  },
+  {
+    headingKey: "nav.groupSearch",
+    heading: "Search",
+    items: [
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: Search },
-      // Hidden from the sidebar for now; the /app/backlinks route still works.
-      // { to: "/app/backlinks", labelKey: "nav.backlinks", label: "Backlinks", icon: Link2 },
-
-      { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords, app: "compare" },
     ],
   },
   {
@@ -60,16 +68,28 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    headingKey: "nav.groupBrand",
+    heading: "Brand",
+    items: [
+      { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette },
+      { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images, app: "media" },
+    ],
+  },
+  {
+    headingKey: "nav.groupTeam",
+    heading: "Team",
+    items: [
+      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
+      { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText },
+    ],
+  },
+  {
     headingKey: "nav.groupWorkspace",
     heading: "Workspace",
     items: [
       { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: FolderKanban },
-      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: Users },
-      { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: ScrollText },
-      { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: Palette },
-      { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images, app: "media" },
-      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: CreditCard },
+      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: Code2 },
       { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: Settings },
     ],
   },

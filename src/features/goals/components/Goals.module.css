@@ -596,8 +596,18 @@
 }
 
 .metricOption[data-active] {
-  border-color: var(--violet-2);
-  background: var(--accent-soft);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
+}
+
+.metricOption .metricIcon {
+  color: var(--text-2);
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.metricOption[data-active] .metricIcon {
+  color: var(--selected-fg);
+  background: var(--selected-icon-bg);
 }
 
 .metricOptionLabel {

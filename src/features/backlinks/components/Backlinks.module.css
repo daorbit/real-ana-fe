@@ -372,8 +372,8 @@
 }
 
 .railItem[data-active] {
-  background: var(--surface-2);
-  box-shadow: inset 2px 0 0 var(--violet-2);
+  background: var(--selected-bg);
+  box-shadow: inset 2px 0 0 var(--selected-border);
 }
 
 .railItem[data-you] {

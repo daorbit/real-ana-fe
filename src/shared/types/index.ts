@@ -2264,24 +2264,6 @@ export type SeoCompetitor = {
   createdAt: string;
 };
 
-/** Organic search arrivals, derived from stored referrers. */
-export type SeoSearchTraffic = {
-  visits: number;
-  visitors: number;
-  /** All visits in the window, for computing organic share. */
-  totalVisits: number;
-  engines: { engine: string; visits: number; visitors: number }[];
-  landingPages: { path: string; visits: number; visitors: number }[];
-  /**
-   * Query terms actually present in referrers. Usually empty — Google and the
-   * other major engines stopped passing them in 2011.
-   */
-  terms: { term: string; visits: number }[];
-  hasTerms: boolean;
-  /** Window the figures cover. */
-  days: number;
-};
-
 export type SeoVitalKey = "lcp" | "cls" | "inp" | "fcp" | "ttfb";
 
 export type SeoVitalSummary = {

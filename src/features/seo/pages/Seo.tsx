@@ -20,7 +20,7 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useDemo } from "@/features/demo/context";
 import {
-  demoSites, demoSeoReport, demoSeoHistory, demoCrawl, demoSearchTraffic, demoVitals,
+  demoSites, demoSeoReport, demoSeoHistory, demoCrawl, demoVitals,
 } from "@/features/demo/demoData";
 import { SeoInspectBar } from "@/features/seo/components/layout/SeoInspectBar";
 import { SeoStartPanel } from "@/features/seo/components/start/SeoStartPanel";
@@ -29,7 +29,7 @@ import { SitesLoadError } from "@/features/workspace";
 import {
   useGetSitesQuery, useAnalyzeSeoMutation, useGetSeoReportsQuery,
   useGetLatestSeoReportQuery, useGetSeoReportQuery, useDeleteSeoReportMutation,
-  useGetSearchTrafficQuery, useGetFieldVitalsQuery,
+  useGetFieldVitalsQuery,
   useRunCrawlMutation, useGetLatestCrawlQuery,
 } from "@/app/store";
 import { notify, errMessage, notifyError, confirmDelete } from "@/shared/lib/notify";
@@ -39,7 +39,6 @@ import { scoreColor } from "@/features/seo/components/ScoreRing";
 import { SchemaPanel } from "@/features/seo/components/SchemaPanel";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { LinksPanel } from "@/features/seo/components/LinksPanel";
-import { SearchPanel } from "@/features/seo/components/SearchPanel";
 import { VitalsPanel } from "@/features/seo/components/VitalsPanel";
 import { CrawlPanel } from "@/features/seo/components/CrawlPanel";
 import {
@@ -344,13 +343,6 @@ export default function Seo() {
 
   const [analyze, { isLoading: analyzing }] = useAnalyzeSeoMutation();
   const [deleteReport] = useDeleteSeoReportMutation();
-
-  const { data: realSearchTraffic, isLoading: searchTrafficLoading } = useGetSearchTrafficQuery(
-    { workspaceId, siteId },
-    { skip: !workspaceId || !siteId }
-  );
-  const searchTraffic = demo ? demoSearchTraffic : realSearchTraffic;
-  const searchLoading = !demo && searchTrafficLoading;
 
   const { data: realFieldVitals } = useGetFieldVitalsQuery(
     { workspaceId, siteId },
@@ -739,7 +731,6 @@ export default function Seo() {
                       <Block id="ai"><AiSearchPanel aiSearch={data.aiSearch} /></Block>
                     </>
                   )}
-                  {x.id === "search" && <SearchPanel traffic={searchTraffic} loading={searchLoading} />}
                 </div>
               ))}
             </div>

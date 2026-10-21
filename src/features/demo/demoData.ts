@@ -1,6 +1,6 @@
 import type {
   Workspace, Site, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, ShareState, SeoReport,
-  SeoReportSummary, SeoCrawlReport, SeoCrawlPage, SeoSearchTraffic, SeoFieldVitals,
+  SeoReportSummary, SeoCrawlReport, SeoCrawlPage, SeoFieldVitals,
   SeoCompetitor, SeoShareState, SeoShareLink,
 } from "@/shared/types";
 import { demoStats, demoUserFlow } from "@/features/demo/demoStats";
@@ -438,29 +438,6 @@ export const demoCrawl: SeoCrawlReport = {
       },
     ],
   },
-};
-
-export const demoSearchTraffic: SeoSearchTraffic = {
-  visits: 4820,
-  visitors: 3960,
-  totalVisits: 12_400,
-  engines: [
-    { engine: "Google", visits: 4010, visitors: 3320 },
-    { engine: "Bing", visits: 420, visitors: 350 },
-    { engine: "DuckDuckGo", visits: 260, visitors: 214 },
-    { engine: "Brave", visits: 130, visitors: 108 },
-  ],
-  landingPages: [
-    { path: "/", visits: 2100, visitors: 1780 },
-    { path: "/pricing", visits: 880, visitors: 742 },
-    { path: "/docs", visits: 640, visitors: 553 },
-    { path: "/blog/real-time-analytics", visits: 520, visitors: 471 },
-  ],
-  // Search engines stopped passing query terms in referrers years ago, so the
-  // demo is honest about that rather than inventing keyword data.
-  terms: [],
-  hasTerms: false,
-  days: 30,
 };
 
 const vital = (

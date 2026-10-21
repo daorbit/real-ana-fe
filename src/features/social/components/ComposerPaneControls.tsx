@@ -1,15 +1,38 @@
-import { ActionIcon, Group, Tooltip } from "@mantine/core";
+import { ActionIcon, Tooltip } from "@mantine/core";
 import { Eye, Monitor, Smartphone } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import type { PaneTab } from "./ComposerPreviewPane";
+import classes from "./ComposerPaneControls.module.css";
 
 export type PreviewDevice = "desktop" | "mobile";
 
-/** The tray both icon pairs sit in, so the two read as one control family. */
-const TRAY = {
-  background: "var(--mantine-color-default)",
-  borderRadius: "var(--mantine-radius-md)",
-};
+function TrayButton({
+  label,
+  active,
+  onClick,
+  children,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip label={label} withArrow openDelay={400}>
+      <ActionIcon
+        variant="subtle"
+        size="lg"
+        radius="sm"
+        className={classes.option}
+        onClick={onClick}
+        aria-label={label}
+        aria-pressed={active}
+      >
+        {children}
+      </ActionIcon>
+    </Tooltip>
+  );
+}
 
 /**
  * What the right pane is showing, and at what width.
@@ -31,65 +54,30 @@ export function ComposerPaneControls({
 }) {
   return (
     <>
-      <Group gap={4} p={4} wrap="nowrap" style={TRAY}>
-        <Tooltip label="Preview" withArrow openDelay={400}>
-          <ActionIcon
-            variant={tab === "preview" ? "white" : "subtle"}
-            color={tab === "preview" ? "dark" : "gray"}
-            size="lg"
-            radius="sm"
-            onClick={() => onTab("preview")}
-            aria-label="Preview"
-            aria-pressed={tab === "preview"}
-          >
-            <Eye size={17} />
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Schedule with Orbit" withArrow openDelay={400}>
-          <ActionIcon
-            variant={tab === "orbit" ? "white" : "subtle"}
-            color={tab === "orbit" ? "dark" : "gray"}
-            size="lg"
-            radius="sm"
-            onClick={() => onTab("orbit")}
-            aria-label="Schedule with Orbit"
-            aria-pressed={tab === "orbit"}
-          >
-            <OrbitMark size={17} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
+      <div className={classes.tray}>
+        <TrayButton label="Preview" active={tab === "preview"} onClick={() => onTab("preview")}>
+          <Eye size={17} />
+        </TrayButton>
+        <TrayButton label="Schedule with Orbit" active={tab === "orbit"} onClick={() => onTab("orbit")}>
+          <OrbitMark size={17} />
+        </TrayButton>
+      </div>
 
       {/* Only meaningful over the preview — the conversation has no device.
           A spacer holds the row's shape so the pane switch does not slide to
           the middle when the device icons go. */}
       {tab !== "preview" && <span />}
       {tab === "preview" && (
-        <Group
-          gap={4}
-          p={4}
-          wrap="nowrap"
-          style={TRAY}
-        >
+        <div className={classes.tray}>
           {([
             { id: "desktop" as const, Icon: Monitor, label: "Desktop" },
             { id: "mobile" as const, Icon: Smartphone, label: "Mobile" },
           ]).map(({ id, Icon, label }) => (
-            <Tooltip key={id} label={label} withArrow openDelay={400}>
-              <ActionIcon
-                variant={device === id ? "white" : "subtle"}
-                color={device === id ? "dark" : "gray"}
-                size="lg"
-                radius="sm"
-                onClick={() => onDevice(id)}
-                aria-label={label}
-                aria-pressed={device === id}
-              >
-                <Icon size={17} />
-              </ActionIcon>
-            </Tooltip>
+            <TrayButton key={id} label={label} active={device === id} onClick={() => onDevice(id)}>
+              <Icon size={17} />
+            </TrayButton>
           ))}
-        </Group>
+        </div>
       )}
     </>
   );

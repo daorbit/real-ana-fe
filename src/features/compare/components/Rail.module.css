@@ -53,11 +53,12 @@ button.row:hover {
 }
 
 .row[data-active] {
-  background: var(--glass-fill-strong);
+  background: var(--selected-bg);
+  border-color: var(--selected-border);
 }
 
 .row[data-you] {
-  background: color-mix(in srgb, var(--violet-2) 9%, transparent);
+  background: var(--glass-fill);
 }
 
 .rank {
@@ -71,7 +72,7 @@ button.row:hover {
 }
 
 .row[data-you] .rank {
-  color: var(--violet-2);
+  color: var(--selected-fg);
 }
 
 .text {
@@ -107,7 +108,7 @@ button.row:hover {
 }
 
 .status[data-tone="you"] {
-  color: var(--violet-2);
+  color: var(--selected-fg);
 }
 
 .score {
@@ -126,5 +127,5 @@ button.row:hover {
 }
 
 .row[data-you] .score {
-  color: var(--violet-2);
+  color: var(--selected-fg);
 }

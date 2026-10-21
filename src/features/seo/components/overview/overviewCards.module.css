@@ -301,7 +301,7 @@
 }
 
 .preview:focus-visible {
-  outline: 2px solid var(--mantine-primary-color-filled);
+  outline: 2px solid var(--selected-border);
   outline-offset: 2px;
 }
 

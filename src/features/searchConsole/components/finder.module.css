@@ -110,9 +110,9 @@
 }
 
 .item[data-active] .itemIcon {
-  color: var(--accent-2);
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  background: var(--accent-soft);
+  color: var(--selected-fg);
+  border-color: var(--selected-border);
+  background: var(--selected-icon-bg);
 }
 
 .itemPath {

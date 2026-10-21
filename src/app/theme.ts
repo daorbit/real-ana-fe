@@ -90,6 +90,11 @@ export const theme = createTheme({
         },
       }),
     },
+    Slider: {
+      vars: (_theme: unknown, props: { color?: string }) => ({
+        root: props.color ? {} : { "--slider-color": "var(--accent)" },
+      }),
+    },
     Checkbox: {
       vars: (_theme: unknown, props: { color?: string }) => ({
         root: {

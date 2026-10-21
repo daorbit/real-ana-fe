@@ -28,7 +28,6 @@ export function RuleCard({
   const Icon = meta.icon;
   const blocked = Boolean(meta.needsGoals && !goalsOn);
   const on = config.enabled && !blocked;
-  const marks = [meta.min, meta.max].map((value) => ({ value, label: unitLabel(meta.unit, value) }));
 
   return (
     <div className={classes.rule} data-on={on || undefined} data-off={!on || undefined}>
@@ -57,13 +56,15 @@ export function RuleCard({
             min={meta.min}
             max={meta.max}
             step={meta.step}
-            marks={marks}
             label={null}
             value={config.value}
             disabled={!canEdit || !config.enabled}
             onChange={(value) => onChange({ value })}
-            mb="md"
           />
+          <div className={classes.thresholdRange}>
+            <span>{unitLabel(meta.unit, meta.min)}</span>
+            <span>{unitLabel(meta.unit, meta.max)}</span>
+          </div>
         </div>
       </div>
       {blocked && (

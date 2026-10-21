@@ -7,12 +7,10 @@
   border-color: var(--mantine-color-default-border-hover, var(--mantine-color-gray-5));
 }
 
-.optionSelected {
-  border-color: var(--mantine-primary-color-filled);
-}
-
+.optionSelected,
 .optionSelected:hover {
-  border-color: var(--mantine-primary-color-filled);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }
 
 .locationText {

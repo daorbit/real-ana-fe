@@ -326,8 +326,8 @@
 }
 
 .flow-node[data-selected] {
-  border-color: var(--accent-2);
-  box-shadow: 0 0 0 1px var(--accent-2), var(--shadow);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
 }
 
 .flow-node-head {

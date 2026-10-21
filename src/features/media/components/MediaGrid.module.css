@@ -53,17 +53,17 @@
 }
 
 .tile:hover {
-  border-color: var(--mantine-primary-color-filled);
+  border-color: var(--border-strong);
 }
 
 .tile:focus-visible {
-  outline: 2px solid var(--mantine-primary-color-filled);
+  outline: 2px solid var(--selected-border);
   outline-offset: 2px;
 }
 
-.selected {
-  border-color: var(--mantine-primary-color-filled);
-  box-shadow: 0 0 0 1px var(--mantine-primary-color-filled);
+.selected,
+.selected:hover {
+  border-color: var(--selected-border);
 }
 
 .image {
@@ -113,7 +113,7 @@
   width: 20px;
   height: 20px;
   border-radius: 999px;
-  background: var(--mantine-primary-color-filled);
+  background: var(--selected-fg);
   color: #fff;
 }
 

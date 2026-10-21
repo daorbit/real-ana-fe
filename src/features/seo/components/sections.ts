@@ -5,7 +5,7 @@ export type SeoSubId =
   | "meta" | "content" | "images" | "schema"
   | "technical" | "links" | "crawl" | "ai";
 
-export type SeoTabId = "overview" | "issues" | "onpage" | "performance" | "site" | "search";
+export type SeoTabId = "overview" | "issues" | "onpage" | "performance" | "site";
 
 export interface SeoSub {
   id: SeoSubId;
@@ -72,12 +72,6 @@ export const SEO_TABS: SeoTab[] = [
       { id: "crawl", label: "Site crawl", description: "Pages found by following links from the home page." },
       { id: "ai", label: "AI search", description: "Whether AI assistants and answer engines can read and cite the site." },
     ],
-  },
-  {
-    id: "search",
-    label: "Search traffic",
-    description: "Clicks, impressions and the queries that bring people here from Google.",
-    helpId: "search",
   },
 ];
 
