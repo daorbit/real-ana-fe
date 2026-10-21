@@ -7,8 +7,6 @@ import {
 } from "@/app/store";
 import { confirmDelete, notify, errMessage } from "@/shared/lib/notify";
 import { DELIVERY_WINDOW_MINUTES, describe, runAtISO, type Draft } from "../components/draft";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
 import type { ScheduledPost } from "@/shared/types";
 
@@ -35,7 +33,6 @@ export function usePostActions({
   /** A post whose time changed, so the list can mark where it went. */
   onMoved: (id: string) => void;
 }) {
-  const { user } = useAuth();
   const { demo } = useDemo();
   const [create, { isLoading: creating }] = useCreateScheduledPostMutation();
   const [update, { isLoading: updating }] = useUpdateScheduledPostMutation();
@@ -49,12 +46,6 @@ export function usePostActions({
       notify.error(DEMO_READ_ONLY);
       return false;
     }
-    trace(
-      user?.id,
-      editing ? "update_post" : asDraft ? "save_draft" : "create_post",
-      "composer",
-      editing ? "post_updated" : asDraft ? "draft_saved" : "post_scheduled",
-    );
     if (!workspaceId) {
       notify.error("Pick a workspace first.");
       return false;
@@ -149,7 +140,6 @@ export function usePostActions({
       return;
     }
     const next = post.status === "active" ? "paused" : "active";
-    trace(user?.id, next === "active" ? "resume_post" : "pause_post", "posts_list", next);
     try {
       await update({ id: post.id, status: next }).unwrap();
       notify.success(next === "active" ? "Post scheduled." : "Moved to drafts.");
@@ -187,7 +177,6 @@ export function usePostActions({
         </>
       ),
       onConfirm: async () => {
-        trace(user?.id, "publish_now", "posts_list", network.toLowerCase());
         setPublishingId(post.id);
         try {
           const res = await publish(post.id).unwrap();
@@ -223,7 +212,6 @@ export function usePostActions({
         </>
       ),
       onConfirm: async () => {
-        trace(user?.id, "delete_post", "posts_list", "post_deleted");
         try {
           await remove(post.id).unwrap();
           notify.success("Post deleted.");

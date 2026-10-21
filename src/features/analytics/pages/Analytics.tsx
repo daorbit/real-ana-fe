@@ -17,8 +17,6 @@ import {
   ArrowDownWideNarrow, Zap, Split, CloudOff,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import { PlanGate } from "@/features/billing/components/PlanGate";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { StatCard } from "@/shared/ui/StatCard";
@@ -130,7 +128,6 @@ export default function Analytics() {
   const billing = useActiveBilling();
   const funnelLocked = (billing?.plan?.slug ?? "free") === "free";
   const { active, loading } = useWorkspace();
-  const { user } = useAuth();
   const { canEdit } = usePermissions();
   const {
     rangeState, setRangeState, compareState, setCompareState,
@@ -168,7 +165,6 @@ export default function Analytics() {
   const { audience: liveAudience } = useLive(active?._id, serializeFilter(filter), siteScope);
 
   const addFilter = (key: keyof StatsFilter, value: string) => {
-    trace(user?.id, "filter_added", "analytics", String(key));
     setFilter((f) => ({ ...f, [key]: value }));
   };
   const removeFilter = (key: keyof StatsFilter) =>
@@ -215,7 +211,6 @@ export default function Analytics() {
     at: string;
   }) => {
     if (!active?._id) return;
-    trace(user?.id, "marker_added", "analytics", input.kind);
     try {
       await saveMarker({ wid: active._id, ...input }).unwrap();
       notify.success(`Marked "${input.label}"`);
@@ -228,7 +223,6 @@ export default function Analytics() {
 
   const handleDeleteMarker = async (marker: Marker) => {
     if (!active?._id) return;
-    trace(user?.id, "marker_deleted", "analytics", "marker");
     setDeletingMarker(marker.id);
     try {
       await deleteMarker({ wid: active._id, id: marker.id }).unwrap();
@@ -254,7 +248,6 @@ export default function Analytics() {
 
   const handleSaveSegment = async (name: string, f: StatsFilter) => {
     if (!active?._id) return;
-    trace(user?.id, "segment_saved", "analytics", "segment");
     try {
       await saveSegment({ wid: active._id, name, filter: f }).unwrap();
       notify.success(`Saved "${name}"`);
@@ -265,7 +258,6 @@ export default function Analytics() {
 
   const handleDeleteSegment = async (segment: Segment) => {
     if (!active?._id) return;
-    trace(user?.id, "segment_deleted", "analytics", "segment");
     setBusySegment(segment.id);
     try {
       await deleteSegment({ wid: active._id, id: segment.id }).unwrap();
@@ -279,7 +271,6 @@ export default function Analytics() {
 
   const handleTogglePin = async (segment: Segment) => {
     if (!active?._id) return;
-    trace(user?.id, "segment_pin_toggled", "analytics", segment.pinned ? "unpinned" : "pinned");
     setBusySegment(segment.id);
     try {
       await updateSegment({

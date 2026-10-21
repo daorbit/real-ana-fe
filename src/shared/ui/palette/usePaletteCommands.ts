@@ -11,7 +11,8 @@ import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { useNotes } from "@/features/notes";
 import { useGetNotesQuery } from "@/features/notes/api";
 import { useGetDashboardsQuery } from "@/features/dashboards/api";
-import { useIsPlatformAdmin } from "@/features/auth/context";
+import { useAdminToolsAccess } from "@/features/auth/context";
+import { sectionAllowed } from "@/features/admin/lib/adminSections";
 import { SETTINGS_SECTIONS, settingsPath } from "@/features/auth/components/settings/settingsSections";
 import { DOCS_BASE_URL } from "@/shared/lib/docsSlugs";
 import { GO_BY_PATH } from "@/shared/ui/palette/goShortcuts";
@@ -26,7 +27,7 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
   const { open: openNotes } = useNotes();
   const { setColorScheme } = useMantineColorScheme();
   const dark = useComputedColorScheme("light") === "dark";
-  const isAdmin = useIsPlatformAdmin();
+  const adminAccess = useAdminToolsAccess();
   const workspaceId = active?._id ?? "";
 
   const { data: dashboards = EMPTY } = useGetDashboardsQuery(workspaceId, { skip: !workspaceId });
@@ -72,15 +73,13 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
       run: go(settingsPath(s.id)),
     }));
 
-    const admin: PaletteCommand[] = isAdmin
-      ? ADMIN_ITEMS.map((item) => ({
-          id: `admin:${item.to}`,
-          label: t(item.labelKey, item.label),
-          section: "Admin",
-          icon: item.icon,
-          run: go(item.to),
-        }))
-      : [];
+    const admin: PaletteCommand[] = ADMIN_ITEMS.filter((item) => sectionAllowed(item.section, adminAccess)).map((item) => ({
+      id: `admin:${item.to}`,
+      label: t(item.labelKey, item.label),
+      section: "Admin",
+      icon: item.icon,
+      run: go(item.to),
+    }));
 
     const content: PaletteCommand[] = [
       ...dashboards.map((d) => ({
@@ -184,6 +183,6 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
     return [...pages, ...content, ...actions, ...switches, ...settings, ...admin];
   }, [
     navigate, t, close, openShortcuts, dashboards, notes, workspaces, active?._id, setActive,
-    openNotes, dark, setColorScheme, isAdmin, notesOn,
+    openNotes, dark, setColorScheme, adminAccess, notesOn,
   ]);
 }

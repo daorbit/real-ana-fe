@@ -8,8 +8,6 @@ import {
   useDeleteAdminAddonPackMutation, useGetAdminAddonPacksQuery, useSaveAdminAddonPackMutation,
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import type { AddonPack, AddonType, CurrencyPrices } from "@/shared/types";
 import { AdminSection } from "../layout/AdminSection";
 import { AdminRefreshButton } from "../layout/AdminRefreshButton";
@@ -42,7 +40,6 @@ const EMPTY: Partial<AddonPack> = {
 };
 
 export default function AddonsPanel() {
-  const { user } = useAuth();
   const { data: addons = [], isLoading, isFetching, refetch } = useGetAdminAddonPacksQuery();
   const [save, { isLoading: saving }] = useSaveAdminAddonPackMutation();
   const [remove] = useDeleteAdminAddonPackMutation();
@@ -55,7 +52,6 @@ export default function AddonsPanel() {
   const openEdit = (a: AddonPack) => { setDraft(a); setPrice(toMajor(a.price)); setOpen(true); };
 
   const submit = async () => {
-    trace(user?.id, draft._id ? "update_addon_pack" : "create_addon_pack", "admin_billing", "admin_billing");
     try {
       await save({ ...draft, price: toMinor(price) }).unwrap();
       notify.success(`${draft.name} saved.`, draft._id ? "Add-on updated" : "Add-on created");
@@ -70,7 +66,6 @@ export default function AddonsPanel() {
       title: `Delete ${a.name}?`,
       body: "Purchases already made are unaffected. This only removes it from the Billing page.",
       onConfirm: async () => {
-        trace(user?.id, "delete_addon_pack", "admin_billing", "admin_billing");
         try {
           await remove(a._id).unwrap();
           notify.success(`${a.name} deleted.`);

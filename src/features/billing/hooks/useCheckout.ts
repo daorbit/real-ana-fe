@@ -7,7 +7,6 @@ import {
   useConfirmPurchaseMutation,
 } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "@/features/billing/lib/razorpay";
 import { openCashfreeCheckout } from "@/features/billing/lib/cashfree";
@@ -135,7 +134,6 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     phone?: string,
   ) => {
     if (!workspaceId) return;
-    trace(user?.id, "subscribe_plan_clicked", "billing", plan.slug);
     setSubscribing(plan.slug);
     try {
       const chosen = Object.entries(selection)
@@ -222,7 +220,6 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     phone?: string,
   ) => {
     if (!workspaceId) return;
-    trace(user?.id, "buy_addon_clicked", "billing", pack.slug);
     setBuying(pack._id);
     try {
       const started = await startAddonPurchase({

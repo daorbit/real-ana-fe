@@ -7,7 +7,6 @@ import {
 } from "@/shared/lib/http";
 import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
-import { trace } from "@/shared/lib/analytics";
 import { setReportingUser } from "@/shared/lib/errorReporting";
 import { rememberUser, type LoginMethod } from "@/features/auth/lastUser";
 import { hideLock, showLock } from "@/shared/lib/lockState";
@@ -129,7 +128,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
     rememberUser(r.user, "password");
-    trace(r.user.id, "login", "login", "app");
     return { requires2fa: false as const };
   };
 
@@ -139,7 +137,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
     rememberUser(r.user, method);
-    trace(r.user.id, "login", "login_2fa", "app");
   };
 
   const googleSignIn = async (credential: string) => {
@@ -159,7 +156,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(r.user);
     rememberUser(r.user, "google");
-    trace(r.user.id, r.created ? "signup" : "login", "google_signin", "app");
     return { requires2fa: false as const, created: Boolean(r.created) };
   };
 
@@ -174,7 +170,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const me = await api.get<AuthResp["user"]>("/api/auth/me");
     setUser(me);
     rememberUser(me, method);
-    trace(me.id, created ? "signup" : "login", `${method}_signin`, "app");
   };
 
   const startDemo = async () => {
@@ -199,7 +194,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("quantalog_onboarding_dismissed");
     setUser(r.user);
     rememberUser(r.user, "password");
-    trace(r.user.id, "signup", "signup_verify", "app");
   };
 
   const resendSignupCode = async (email: string) => {
@@ -223,7 +217,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(r.token);
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
-    trace(r.user.id, "login", "password_reset", "app");
   };
 
   const resendResetCode = async (email: string) => {
@@ -325,7 +318,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    if (user?.id) trace(user.id, "logout", "app", "login");
     clearToken();
     hideLock();
     setUser(null);
@@ -379,6 +371,15 @@ export function useAuth(): AuthState {
 export function useIsPlatformAdmin(): boolean {
   const { user } = useAuth();
   return user?.role === "super_admin" && !user?.impersonating;
+}
+
+export type AdminToolsAccess = "full" | "limited" | null;
+
+export function useAdminToolsAccess(): AdminToolsAccess {
+  const { user } = useAuth();
+  if (!user || user.impersonating) return null;
+  if (user.role === "super_admin") return "full";
+  return user.role === "admin" ? "limited" : null;
 }
 
 export function useCanUseInstagram(): boolean {

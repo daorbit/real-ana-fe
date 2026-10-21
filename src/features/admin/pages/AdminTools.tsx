@@ -4,10 +4,16 @@ import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { useTitle } from "@/shared/lib/useTitle";
 import { onIdle } from "@/shared/lib/idle";
-import { useIsPlatformAdmin } from "@/features/auth/context";
+import { useAdminToolsAccess } from "@/features/auth/context";
 import { SuperAdminOnly } from "@/features/referralAdmin/components/SuperAdminOnly";
 import { AdminNav } from "../components/layout/AdminNav";
-import { adminSectionMeta, adminSectionPath, resolveAdminSection, type AdminSectionId } from "../lib/adminSections";
+import {
+  adminSectionMeta,
+  adminSectionPath,
+  resolveAdminSection,
+  sectionAllowed,
+  type AdminSectionId,
+} from "../lib/adminSections";
 import classes from "../components/layout/AdminLayout.module.css";
 
 type PanelModule = Promise<{ default: ComponentType }>;
@@ -41,12 +47,13 @@ export default function AdminTools() {
   const { section: raw } = useParams<{ section?: string }>();
   const { search } = useLocation();
   const navigate = useNavigate();
-  const isAdmin = useIsPlatformAdmin();
-  const section = resolveAdminSection(raw);
+  const access = useAdminToolsAccess();
+  const resolved = resolveAdminSection(raw);
+  const section = resolved && sectionAllowed(resolved, access) ? resolved : null;
   useTitle(section ? `${adminSectionMeta(section).label} · Admin` : "Admin");
-  usePreloadPanels(isAdmin);
+  usePreloadPanels(access === "full");
 
-  if (!isAdmin) {
+  if (!access) {
     return (
       <AppShell>
         <SuperAdminOnly />

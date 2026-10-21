@@ -7,8 +7,6 @@ import {
   useDeleteAdminCouponMutation, useGetAdminCouponsQuery, useGetAdminPlansQuery, useSaveAdminCouponMutation,
 } from "@/app/store";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import type { Coupon } from "@/shared/types";
 import { AdminSection } from "../layout/AdminSection";
 import { AdminRefreshButton } from "../layout/AdminRefreshButton";
@@ -23,7 +21,6 @@ function couponStatus(c: Coupon): { label: string; color: string } {
 }
 
 export default function CouponsPanel() {
-  const { user } = useAuth();
   const { data: coupons = [], isLoading, isFetching, refetch } = useGetAdminCouponsQuery();
   const { data: plans = [] } = useGetAdminPlansQuery();
   const [save, { isLoading: saving }] = useSaveAdminCouponMutation();
@@ -37,7 +34,6 @@ export default function CouponsPanel() {
   const openEdit = (c: Coupon) => { setDraft(c); setOpen(true); };
 
   const submit = async () => {
-    trace(user?.id, draft._id ? "update_coupon" : "create_coupon", "admin_billing", "admin_billing");
     try {
       await save(draft).unwrap();
       notify.success(`${draft.code} saved.`, draft._id ? "Coupon updated" : "Coupon created");
@@ -52,7 +48,6 @@ export default function CouponsPanel() {
       title: `Delete ${c.code}?`,
       body: "Anyone with this code will no longer be able to apply it. Past orders that used it are unaffected.",
       onConfirm: async () => {
-        trace(user?.id, "delete_coupon", "admin_billing", "admin_billing");
         try {
           await remove(c._id).unwrap();
           notify.success(`${c.code} deleted.`);

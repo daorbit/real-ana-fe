@@ -1,11 +1,8 @@
 import { useSetSeoShareMutation } from "@/app/store";
-import { useAuth } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
-import { trace } from "@/shared/lib/analytics";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 
 export function useReplaceSeoLink(workspaceId: string, siteId: string) {
-  const { user } = useAuth();
   const { demo } = useDemo();
   const [setShare] = useSetSeoShareMutation();
 
@@ -19,7 +16,6 @@ export function useReplaceSeoLink(workspaceId: string, siteId: string) {
       confirmLabel: "Replace link",
       body: "The current link stops working immediately. Anyone you already sent it to will need the new one.",
       onConfirm: async () => {
-        trace(user?.id, "rotate_seo_share_link", "seo_share", "seo_share");
         try {
           await setShare({ workspaceId, siteId, reportId, enabled: true, rotate: true }).unwrap();
           notify.success("A new link has been generated.", "Link replaced");

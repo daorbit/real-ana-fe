@@ -9,7 +9,6 @@ import {
   useRenameOrbitConversationMutation,
 } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 
@@ -331,7 +330,6 @@ export function useOrbitChat() {
 
       if ((!question && !image && !document) || thinking || !workspaceId) return;
 
-      trace(user?.id, "ask_orbit", "orbit_chat", "orbit_answer");
 
       const before = historyRef.current;
       const userTurn: OrbitMessage = {
@@ -378,7 +376,6 @@ export function useOrbitChat() {
     setMessages(withoutLast);
     historyRef.current = withoutLast;
 
-    trace(user?.id, "regenerate_orbit", "orbit_chat", "orbit_answer");
 
     await run({
       question: userTurn.content,
@@ -407,7 +404,6 @@ export function useOrbitChat() {
       setMessages(next);
       historyRef.current = next;
 
-      trace(user?.id, "edit_orbit_question", "orbit_chat", "orbit_answer");
 
       await run({
         question,

@@ -52,7 +52,6 @@ const Branding = lazy(() => import("@/features/branding/pages/Branding"));
 const MediaLibrary = lazy(() => import("@/features/media/pages/MediaLibrary"));
 const AcceptInvite = lazy(() => import("@/features/workspace/pages/AcceptInvite"));
 const ConnectAuthorize = lazy(() => import("@/features/connectors/pages/ConnectAuthorize"));
-const Share = lazy(() => import("@/features/analytics/pages/Share"));
 const Reports = lazy(() => import("@/features/reports/pages"));
 const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
 const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
@@ -269,7 +268,7 @@ export default function App() {
                 <Route path="/app/orbit" element={<Orbit />} />
                 <Route path="/app/branding" element={<Branding />} />
                 <Route path="/app/media" element={<MediaLibrary />} />
-                <Route path="/app/share" element={<Share />} />
+                <Route path="/app/share" element={<Navigate to="/app/apps?app=quantalog-public-dashboard" replace />} />
                 <Route path="/app/reports" element={<Reports />} />
                 <Route path="/app/social" element={<SocialPosts />} />
                 <Route path="/app/reviews" element={<Reviews />} />

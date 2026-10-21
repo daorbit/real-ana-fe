@@ -7,7 +7,12 @@ import { Box, Button, Group, Text, Transition, Portal } from "@mantine/core";
  
 type Entry = { dirty: boolean; save: () => Promise<void>; reset: () => void };
 
-type Ctx = { register: (id: string, entry: Entry) => void; unregister: (id: string) => void };
+type Ctx = {
+  register: (id: string, entry: Entry) => void;
+  unregister: (id: string) => void;
+  dirtyCount: number;
+  discardAll: () => void;
+};
 
 const SaveBarContext = createContext<Ctx | null>(null);
 
@@ -31,8 +36,15 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
   const dirty = [...entries.current.values()].filter((e) => e.dirty);
   const count = dirty.length;
 
- 
-  const ctxValue = useMemo(() => ({ register, unregister }), [register, unregister]);
+  const discardAll = useCallback(() => {
+    [...entries.current.values()].forEach((e) => e.dirty && e.reset());
+    bump((n) => n + 1);
+  }, []);
+
+  const ctxValue = useMemo(
+    () => ({ register, unregister, dirtyCount: count, discardAll }),
+    [register, unregister, count, discardAll],
+  );
 
   const saveAll = async () => {
     setSaving(true);
@@ -43,11 +55,6 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
     } finally {
       setSaving(false);
     }
-  };
-
-  const discardAll = () => {
-    [...entries.current.values()].forEach((e) => e.dirty && e.reset());
-    bump((n) => n + 1);
   };
 
   return (
@@ -122,23 +129,31 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
  * flag and callbacks; the bar handles the rest. `id` must be stable and unique
  * within the provider (e.g. the report id).
  */
+export function useUnsavedChanges(): { dirtyCount: number; discardAll: () => void } {
+  const ctx = useContext(SaveBarContext);
+  return { dirtyCount: ctx?.dirtyCount ?? 0, discardAll: ctx?.discardAll ?? (() => {}) };
+}
+
 export function useSaveRegistration(id: string, entry: Entry) {
   const ctx = useContext(SaveBarContext);
   // Keep the latest callbacks without re-registering on every render.
   const latest = useRef(entry);
   latest.current = entry;
 
+  const register = ctx?.register;
+  const unregister = ctx?.unregister;
+
   useEffect(() => {
-    if (!ctx) return;
-    ctx.register(id, {
+    if (!register || !unregister) return;
+    register(id, {
       get dirty() {
         return latest.current.dirty;
       },
       save: () => latest.current.save(),
       reset: () => latest.current.reset(),
     });
-    return () => ctx.unregister(id);
+    return () => unregister(id);
     // Re-register when dirtiness flips so the bar re-reads; callbacks are read
     // through the ref so they need not be deps.
-  }, [ctx, id, entry.dirty]);
+  }, [register, unregister, id, entry.dirty]);
 }

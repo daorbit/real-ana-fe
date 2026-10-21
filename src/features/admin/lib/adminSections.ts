@@ -107,6 +107,19 @@ export const ADMIN_GROUPS: { label: string; sections: AdminSectionMeta[] }[] = [
 
 export const ADMIN_SECTIONS: AdminSectionMeta[] = ADMIN_GROUPS.flatMap((g) => g.sections);
 
+const LIMITED_SECTIONS: AdminSectionId[] = ["users", "email"];
+
+export function sectionAllowed(id: AdminSectionId, access: "full" | "limited" | null): boolean {
+  if (access === "full") return true;
+  return access === "limited" && LIMITED_SECTIONS.includes(id);
+}
+
+export function adminGroupsFor(access: "full" | "limited" | null) {
+  return ADMIN_GROUPS.map((g) => ({ ...g, sections: g.sections.filter((s) => sectionAllowed(s.id, access)) })).filter(
+    (g) => g.sections.length > 0,
+  );
+}
+
 export const DEFAULT_ADMIN_SECTION: AdminSectionId = "users";
 
 export const LEGACY_ADMIN_PATHS: { path: string; section: AdminSectionId }[] = [

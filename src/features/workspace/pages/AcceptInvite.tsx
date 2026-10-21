@@ -7,7 +7,6 @@ import { Users, AlertTriangle } from "lucide-react";
 import { useGetInviteQuery, useAcceptInviteMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { useAuth } from "@/features/auth/context";
-import { trace } from "@/shared/lib/analytics";
 import { ACTIVE_WORKSPACE_KEY } from "@/features/workspace/context";
 import { useTitle } from "@/shared/lib/useTitle";
 
@@ -54,7 +53,6 @@ export default function AcceptInvite() {
   }, [error]);
 
   const claim = async () => {
-    trace(user?.id, "accept_invite_clicked", "accept_invite", "workspace");
     try {
       const result = await accept(token).unwrap();
       sessionStorage.removeItem("pendingInvite");

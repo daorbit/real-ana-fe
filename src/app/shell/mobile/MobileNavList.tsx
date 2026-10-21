@@ -1,17 +1,13 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ChevronRight, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { trace } from "@/shared/lib/analytics";
 import { prefetchRoute } from "@/app/routePrefetch";
-import { useAuth } from "@/features/auth/context";
 import type { NavGroup } from "../navItems";
 import { LinkLogo } from "../LinkLogo";
 import classes from "./MobileMoreSheet.module.css";
 
 export function MobileNavList({ group, pathname }: { group: NavGroup; pathname: string }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const location = useLocation();
 
   return (
     <section className={classes.section}>
@@ -39,7 +35,6 @@ export function MobileNavList({ group, pathname }: { group: NavGroup; pathname: 
               aria-current={active ? "page" : undefined}
               onTouchStart={() => void prefetchRoute(to)}
               onFocus={() => void prefetchRoute(to)}
-              onClick={() => trace(user?.id, "nav_clicked", location.pathname, to)}
             >
               <span className={classes.icon}>
                 {linkUrl ? <LinkLogo url={linkUrl} logoUrl={logoUrl} label={label} size={16} /> : <Icon size={16} />}

@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { useUpdateSiteMutation } from "@/app/store";
-import { useAuth } from "@/features/auth/context";
 import { notify, notifyError } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import * as v from "@/shared/lib/validate";
 import type { Site } from "@/shared/types";
 
 export function useEditSite(workspaceId: string, site: Site | null, sites: Site[]) {
-  const { user } = useAuth();
   const [updateSite, { isLoading: saving }] = useUpdateSiteMutation();
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
@@ -44,7 +41,6 @@ export function useEditSite(workspaceId: string, site: Site | null, sites: Site[
     const nextDomain = v.normalizeDomain(domain);
     const logoChanged = logoUrl !== (site.logoUrl ?? "");
     if (nextName === site.name && nextDomain === site.domain && !logoChanged) return true;
-    trace(user?.id, "edit_site", "workspaces", "workspaces");
     try {
       await updateSite({
         workspaceId,

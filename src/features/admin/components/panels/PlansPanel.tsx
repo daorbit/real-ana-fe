@@ -3,8 +3,6 @@ import { ActionIcon, Button, Card, Center, Group, Loader, Modal, Stack, Table, T
 import { Pencil } from "lucide-react";
 import { useGetAdminPlansQuery, useSaveAdminPlanPriceMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import type { CurrencyPrices, Plan } from "@/shared/types";
 import { AdminSection } from "../layout/AdminSection";
 import { AdminRefreshButton } from "../layout/AdminRefreshButton";
@@ -13,7 +11,6 @@ import { CurrencySync } from "../billing/CurrencySync";
 import { emptyPrices, moneyList, toMajor, toMinor } from "../billing/billingFormat";
 
 export default function PlansPanel() {
-  const { user } = useAuth();
   const { data: plans = [], isLoading, isFetching, refetch } = useGetAdminPlansQuery();
   const [save, { isLoading: saving }] = useSaveAdminPlanPriceMutation();
 
@@ -29,7 +26,6 @@ export default function PlansPanel() {
 
   const submit = async () => {
     if (!draft) return;
-    trace(user?.id, "save_plan_price", "admin_billing", draft.slug);
     try {
       await save({ slug: draft.slug, priceMonthly: toMinor(monthly), priceYearly: toMinor(yearly) }).unwrap();
       notify.success(`${draft.name} price updated.`, "Plan updated");

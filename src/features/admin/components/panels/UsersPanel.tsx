@@ -4,6 +4,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { Search, SearchX } from "lucide-react";
 import { EmailComposer } from "@/features/admin/components/EmailComposer";
 import { AdminPlanDialog } from "@/features/admin/components/AdminPlanDialog";
+import { GrantSuperAdminModal } from "@/features/admin/components/users/GrantSuperAdminModal";
 import { UsersTable } from "@/features/admin/components/users/UsersTable";
 import { UserMobileList } from "@/features/admin/components/users/UserMobileList";
 import { FilterChips } from "@/shared/ui/FilterChips";
@@ -54,6 +55,12 @@ export default function UsersPanel() {
       />
 
       <AdminPlanDialog user={actions.planUser} onClose={actions.closePlan} />
+      <GrantSuperAdminModal
+        target={actions.granting}
+        busy={actions.changingRole}
+        onConfirm={actions.confirmGrant}
+        onClose={actions.closeGrant}
+      />
 
       <div className={classes.toolbar}>
         <TextInput

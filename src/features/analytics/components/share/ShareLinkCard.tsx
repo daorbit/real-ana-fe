@@ -14,13 +14,11 @@ interface Props {
   views: number;
   lastViewedAt?: string | null;
   onReplace: () => void;
-  headerAction?: ReactNode;
   primaryAction?: ReactNode;
-  footerAction?: ReactNode;
 }
 
 export function ShareLinkCard({
-  title, description, busy, url, views, lastViewedAt, onReplace, headerAction, primaryAction, footerAction,
+  title, description, busy, url, views, lastViewedAt, onReplace, primaryAction,
 }: Props) {
   const { t } = useTranslation();
 
@@ -37,7 +35,6 @@ export function ShareLinkCard({
           </div>
           <div className={classes.linkDesc}>{description}</div>
         </div>
-        {headerAction}
       </div>
 
       <div className={classes.linkBody}>
@@ -95,7 +92,6 @@ export function ShareLinkCard({
           </span>
           <span className={classes.footSpacer} />
           <span className={classes.hint}>{t("share.linkWarning")}</span>
-          {footerAction}
           <Tooltip label={t("share.replaceHint")} withArrow multiline w={260}>
             <Anchor component="button" type="button" size="xs" c="red" onClick={onReplace} disabled={busy}>
               {t("share.replaceLinkShort")}

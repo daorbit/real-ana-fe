@@ -38,7 +38,6 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/audit-log": () => import("@/features/audit/pages/AuditLog"),
   "/app/branding": () => import("@/features/branding/pages/Branding"),
   "/app/media": () => import("@/features/media/pages/MediaLibrary"),
-  "/app/share": () => import("@/features/analytics/pages/Share"),
   "/connect/authorize": () => import("@/features/connectors/pages/ConnectAuthorize"),
   "/app/reports": () => import("@/features/reports/pages"),
   "/app/social": () => import("@/features/social/pages/SocialPosts"),

@@ -18,8 +18,7 @@ import {
   useGetWorkspaceUsageQuery,
 } from "@/app/store";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth, useCanUseInstagram } from "@/features/auth/context";
+import { useCanUseInstagram } from "@/features/auth/context";
 import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
 import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
@@ -37,7 +36,6 @@ import { useTitle } from "@/shared/lib/useTitle";
 export default function SocialPosts() {
   useTitle("Scheduled posts");
   const { active } = useWorkspace();
-  const { user } = useAuth();
   const canUseInstagram = useCanUseInstagram();
   const { demo } = useDemo();
   const { data: realData, isLoading: realLoading, isFetching: realFetching, refetch } = useGetScheduledPostsQuery();
@@ -257,7 +255,6 @@ export default function SocialPosts() {
       labels: { confirm: "Remove", cancel: "Keep" },
       confirmProps: { color: "red" },
       onConfirm: async () => {
-        trace(user?.id, "delete_sent_post", "sent_timeline", "post_removed");
         setRemovingId(post.id);
         try {
           await deleteSent(post.id).unwrap();
@@ -495,7 +492,6 @@ export default function SocialPosts() {
           instagramAvailable={canUseInstagram}
           disabled={postsFull}
           onCreate={(date) => openNew(date)}
-          onConnect={() => trace(user?.id, "connect_account_from_social_posts", "social_posts", "settings_connections")}
         />
       ) : view === "calendar" ? (
         <Box className="post-calendar-scroll">

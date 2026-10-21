@@ -7,10 +7,12 @@ import { dateTime } from "@/shared/lib/format";
 import { useToggleWorkspaceApp } from "../../hooks/useToggleWorkspaceApp";
 import { appGuideUrl } from "../../lib/links";
 import type { WorkspaceAppInfo } from "../../lib/quantalogApps";
-import { BrandMark } from "../logos/BrandMarks";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
-import { AsideBlock, StudioHero, StudioSection } from "../studio/StudioParts";
+import { AsideBlock, StudioHero } from "../studio/StudioParts";
 import { QuantalogAppFeatures } from "./QuantalogAppFeatures";
+import { QuantalogAppSettings, hasAppSettings } from "./QuantalogAppSettings";
+import { useWorkspace } from "@/features/workspace/context";
+import { SaveBarProvider, useUnsavedChanges } from "@/shared/ui/SaveBar";
 import classes from "./QuantalogApp.module.css";
 
 interface Props {
@@ -19,10 +21,37 @@ interface Props {
   onClose: () => void;
 }
 
-export function QuantalogAppModal({ info, opened, onClose }: Props) {
+export function QuantalogAppModal(props: Props) {
+  return (
+    <SaveBarProvider>
+      <QuantalogAppStudio {...props} />
+    </SaveBarProvider>
+  );
+}
+
+function QuantalogAppStudio({ info, opened, onClose }: Props) {
   const navigate = useNavigate();
   const notes = useNotes();
+  const { active } = useWorkspace();
+  const unsaved = useUnsavedChanges();
   const app = useToggleWorkspaceApp(info.id);
+  const showSettings = hasAppSettings(info.id) && app.enabled && app.canManage && Boolean(active);
+
+  const requestClose = () => {
+    if (!unsaved.dirtyCount) {
+      onClose();
+      return;
+    }
+    confirmDelete({
+      title: "Discard unsaved changes?",
+      body: "You have changes that haven't been saved. Closing now throws them away.",
+      confirmLabel: "Discard",
+      onConfirm: () => {
+        unsaved.discardAll();
+        onClose();
+      },
+    });
+  };
 
   const open = () => {
     onClose();
@@ -36,6 +65,7 @@ export function QuantalogAppModal({ info, opened, onClose }: Props) {
       body: `${info.navLabel} disappears for everyone in this workspace. ${info.offNote}`,
       confirmLabel: "Turn off",
       onConfirm: async () => {
+        unsaved.discardAll();
         await app.toggle(false);
       },
     });
@@ -47,11 +77,15 @@ export function QuantalogAppModal({ info, opened, onClose }: Props) {
           Turn off
         </Button>
       ) : (
-        <Button type="button" variant="default" onClick={onClose} disabled={app.saving}>
+        <Button type="button" variant="default" onClick={requestClose} disabled={app.saving}>
           Close
         </Button>
       )}
-      {app.enabled ? (
+      {showSettings ? (
+        <Button type="button" onClick={requestClose}>
+          Done
+        </Button>
+      ) : app.enabled ? (
         <Button type="button" rightSection={<ArrowRight size={15} />} onClick={open}>
           Open {info.navLabel}
         </Button>
@@ -72,7 +106,7 @@ export function QuantalogAppModal({ info, opened, onClose }: Props) {
   return (
     <IntegrationStudio
       opened={opened}
-      onClose={onClose}
+      onClose={requestClose}
       brand={info.tileId}
       title={info.name}
       subtitle="Official Quantalog app"
@@ -110,23 +144,21 @@ export function QuantalogAppModal({ info, opened, onClose }: Props) {
         description={info.tagline}
       />
 
-      <div className={classes.badge}>
-        <BrandMark id={info.tileId} size={48} />
-        <div className={classes.badgeText}>
-          <Text fw={650}>{info.name}</Text>
-          <Text size="sm" c="dimmed">
+      {showSettings && active ? (
+        <QuantalogAppSettings app={info.id} workspaceId={active._id} />
+      ) : (
+        <section className={classes.overview}>
+          <span className={classes.overviewLabel}>What you get</span>
+          <QuantalogAppFeatures info={info} />
+          <p className={classes.note}>
             {app.enabled
               ? `Open ${info.navLabel} any time ${info.location}.`
               : app.canManage
                 ? `Enable it and everyone in this workspace finds ${info.navLabel} ${info.location}.`
-                : `Ask a workspace admin to enable it.`}
-          </Text>
-        </div>
-      </div>
-
-      <StudioSection title="What you get" description="Built into Quantalog, using the sites you already track.">
-        <QuantalogAppFeatures info={info} />
-      </StudioSection>
+                : "Ask a workspace admin to enable it."}
+          </p>
+        </section>
+      )}
     </IntegrationStudio>
   );
 }

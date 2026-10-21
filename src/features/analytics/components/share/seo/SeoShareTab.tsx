@@ -1,11 +1,8 @@
 import { useState } from "react";
-import { Anchor, Center, Group, Select, Skeleton, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Center, Select, Skeleton, Stack, Text, ThemeIcon } from "@mantine/core";
 import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { useGetSeoShareLinksQuery, useGetSitesQuery } from "@/app/store";
-import { appsPath } from "@/features/integrations/lib/appsPath";
-import { WORKSPACE_APP_INFO } from "@/features/integrations/lib/quantalogApps";
 import { SectionHead } from "../SectionHead";
 import { ShareFootnote } from "../ShareFootnote";
 import { PanelSwitchList } from "../PanelSwitchList";
@@ -62,23 +59,18 @@ export function SeoShareTab({ workspaceId }: { workspaceId: string }) {
           title={t("share.seoSectionTitle")}
           description={t("share.seoSectionDesc")}
           actions={
-            <Group gap="md" wrap="nowrap">
-              {sites.length > 1 && (
-                <Select
-                  data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-                  value={activeSiteId}
-                  onChange={(v) => v && setSiteId(v)}
-                  allowDeselect={false}
-                  size="xs"
-                  w={200}
-                  leftSection={<Globe size={14} />}
-                  aria-label="Site"
-                />
-              )}
-              <Anchor component={Link} to={appsPath(WORKSPACE_APP_INFO.seoReports.tileId)} size="xs" c="dimmed">
-                {t("share.manageInApps")}
-              </Anchor>
-            </Group>
+            sites.length > 1 && (
+              <Select
+                data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
+                value={activeSiteId}
+                onChange={(v) => v && setSiteId(v)}
+                allowDeselect={false}
+                size="xs"
+                w={200}
+                leftSection={<Globe size={14} />}
+                aria-label="Site"
+              />
+            )
           }
         />
         {linksLoading ? (

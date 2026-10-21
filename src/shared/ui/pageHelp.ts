@@ -2,7 +2,6 @@ import {
   CalendarClock, Mail, FileSpreadsheet, Send,
   CreditCard, Layers, ShoppingCart, Receipt,
   KeyRound, BookOpen, ShieldCheck,
-  Share2, BarChart3, Search, EyeOff,
   FolderKanban, Globe, Code2,
   LayoutGrid, SlidersHorizontal, Users, UserPlus,
   PenLine, Clock, Link2,
@@ -54,13 +53,6 @@ const DEVELOPERS_SPEC: SectionSpec[] = [
   { id: "docs", icon: BookOpen, items: ["Install", "Events", "Mobile", "Api"] },
 ];
 
-const SHARE_SPEC: SectionSpec[] = [
-  { id: "link", icon: Share2, items: ["Toggle", "Credential", "Replace", "Live"] },
-  { id: "visible", icon: BarChart3, items: ["Panels", "Activity", "Scope"] },
-  { id: "seo", icon: Search, items: ["PerAudit", "Shows", "Off"] },
-  { id: "never", icon: EyeOff, items: ["Billing", "Keys", "Other"] },
-];
-
 const WORKSPACES_SPEC: SectionSpec[] = [
   { id: "workspaces", icon: FolderKanban, items: ["Grouping", "Active", "Rename", "Delete"] },
   { id: "sites", icon: Globe, items: ["Domain", "SiteId", "Waiting", "Remove"] },
@@ -97,7 +89,6 @@ const PAGE_SPECS: Record<string, { ns: string; spec: SectionSpec[] }> = {
   "/app/reports": { ns: "reports", spec: REPORTS_SPEC },
   "/app/billing": { ns: "billing", spec: BILLING_SPEC },
   "/app/developers": { ns: "developers", spec: DEVELOPERS_SPEC },
-  "/app/share": { ns: "share", spec: SHARE_SPEC },
   "/app/workspaces": { ns: "workspaces", spec: WORKSPACES_SPEC },
   "/app": { ns: "home", spec: HOME_SPEC },
   "/app/members": { ns: "members", spec: MEMBERS_SPEC },

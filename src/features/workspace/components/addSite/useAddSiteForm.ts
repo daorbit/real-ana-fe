@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useCreateSiteMutation } from "@/app/store";
-import { useAuth } from "@/features/auth/context";
 import type { TrackerOptions } from "@/features/workspace";
 import type { FrameworkId } from "@/features/workspace/frameworks";
 import * as v from "@/shared/lib/validate";
 import { notify, notifyError } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import type { Site } from "@/shared/types";
 import { WEB_STEPS } from "./constants";
 
@@ -14,7 +12,6 @@ function list(s: string): string[] {
 }
 
 export function useAddSiteForm(workspaceId: string, existingDomains: string[]) {
-  const { user } = useAuth();
   const [createSite, { isLoading: creating }] = useCreateSiteMutation();
 
   const [step, setStep] = useState(0);
@@ -83,7 +80,6 @@ export function useAddSiteForm(workspaceId: string, existingDomains: string[]) {
   };
 
   const createWebSite = async () => {
-    trace(user?.id, "create_site", "add_site_wizard", "web");
     try {
       const site = await createSite({
         workspaceId,

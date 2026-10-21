@@ -4,8 +4,6 @@ import {
 } from "@mantine/core";
 import { Send, FlaskConical, Eye, PencilLine, Check } from "lucide-react";
 import type { EmailComposerState } from "@/features/admin/useEmailComposer";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import classes from "../Admin.module.css";
 
 /**
@@ -16,7 +14,6 @@ import classes from "../Admin.module.css";
  * leave the preview too narrow to judge anything by.
  */
 export function MessagePane({ state }: { state: EmailComposerState }) {
-  const { user } = useAuth();
   const {
     single, audience,
     templates, applyTemplate, templateId,
@@ -30,11 +27,9 @@ export function MessagePane({ state }: { state: EmailComposerState }) {
   } = state;
 
   const onSend = () => {
-    trace(user?.id, "send_admin_email", "email_composer", single ? "single" : "broadcast");
     send();
   };
   const onTest = () => {
-    trace(user?.id, "send_test_email", "email_composer", "test");
     test();
   };
 

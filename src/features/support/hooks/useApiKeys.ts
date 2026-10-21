@@ -5,16 +5,13 @@ import {
   useRenameApiKeyMutation,
   useRevokeApiKeyMutation,
 } from "@/app/store";
-import { useAuth } from "@/features/auth/context";
 import { useDemo } from "@/features/demo/context";
 import { demoApiKeys } from "@/features/demo/demoData";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import type { ApiKey } from "@/shared/types";
 
 export function useApiKeys(workspaceId: string) {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const { demo } = useDemo();
   const {
     currentData: realKeys = [],
@@ -35,7 +32,6 @@ export function useApiKeys(workspaceId: string) {
       notify.error("Turn off demo data to create a key.");
       return null;
     }
-    trace(user?.id, "api_key_created", "developers", "api_key");
     try {
       return await createMutation({
         workspaceId,
@@ -73,7 +69,6 @@ export function useApiKeys(workspaceId: string) {
       body: t("developers.revokeBody"),
       confirmLabel: t("developers.revokeConfirm"),
       onConfirm: async () => {
-        trace(user?.id, "api_key_revoked", "developers", "api_key");
         try {
           await revokeMutation({ workspaceId, keyId: key.id }).unwrap();
           notify.success(t("developers.revokedToast", { name: key.name }));

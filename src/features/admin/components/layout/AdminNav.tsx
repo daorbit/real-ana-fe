@@ -1,14 +1,16 @@
 import { UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { ADMIN_GROUPS, type AdminSectionId } from "../../lib/adminSections";
+import { useAdminToolsAccess } from "@/features/auth/context";
+import { adminGroupsFor, type AdminSectionId } from "../../lib/adminSections";
 import classes from "./AdminLayout.module.css";
 
 export function AdminNav({ active, onSelect }: { active: AdminSectionId; onSelect: (id: AdminSectionId) => void }) {
   const { t } = useTranslation();
+  const groups = adminGroupsFor(useAdminToolsAccess());
 
   return (
     <nav className={classes.nav} aria-label={t("nav.adminTools", "Admin tools")}>
-      {ADMIN_GROUPS.map((group) => (
+      {groups.map((group) => (
         <div key={group.label} className={classes.group} role="group" aria-label={group.label}>
           <span className={classes.groupLabel}>{group.label}</span>
           {group.sections.map(({ id, label, icon: Icon, tone }) => (

@@ -8,7 +8,6 @@ import { useUpdateSiteOptionsMutation } from "@/app/store";
 import { type TrackerOptions } from "@/features/workspace";
 import { getFramework, frameworkLanguage } from "@/features/workspace/frameworks";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 
 /** Split a comma-separated field into clean entries. */
@@ -110,7 +109,6 @@ export function SnippetBuilder({
     (domain.trim() ? 1 : 0);
 
   const save = async () => {
-    trace(user?.id, "save_tracker_options", "snippet_builder", siteId);
     try {
       await updateOptions({ workspaceId, siteId, options }).unwrap();
       notify.success(

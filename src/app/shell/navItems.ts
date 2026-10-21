@@ -1,10 +1,10 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, CalendarClock,
-  Send, CreditCard, Swords, Share2, Palette, Images, TrendingUp,
+  Send, CreditCard, Swords, Palette, Images, TrendingUp,
   LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
-import { ADMIN_SECTIONS, adminSectionPath } from "@/features/admin/lib/adminSections";
+import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/features/admin/lib/adminSections";
 import { LeadMagnetIcon } from "./icons";
 
 
@@ -57,7 +57,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon },
       { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
       { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
-      { to: "/app/share", labelKey: "nav.share", label: "Public sharing", icon: Share2, app: ["publicDashboard", "seoReports"] },
     ],
   },
   {
@@ -77,9 +76,10 @@ export const NAV_GROUPS: NavGroup[] = [
 ];
 
 
-export const ADMIN_ITEMS: NavItem[] = ADMIN_SECTIONS.map((section) => ({
+export const ADMIN_ITEMS: (NavItem & { section: AdminSectionId })[] = ADMIN_SECTIONS.map((section) => ({
   to: adminSectionPath(section.id),
   labelKey: section.labelKey,
   label: section.label,
   icon: section.icon,
+  section: section.id,
 }));

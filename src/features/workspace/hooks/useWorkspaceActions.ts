@@ -4,15 +4,12 @@ import {
   useDeleteWorkspaceMutation,
   useDeleteSiteMutation,
 } from "@/app/store";
-import { useAuth } from "@/features/auth/context";
 import { notify, errMessage, confirmDestroy } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import * as v from "@/shared/lib/validate";
 import type { Site, Workspace } from "@/shared/types";
 
 export function useWorkspaceActions(active: Workspace | null, siteCount: number) {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [renameWs, { isLoading: renaming }] = useRenameWorkspaceMutation();
   const [deleteWs] = useDeleteWorkspaceMutation();
   const [deleteSiteMut] = useDeleteSiteMutation();
@@ -23,7 +20,6 @@ export function useWorkspaceActions(active: Workspace | null, siteCount: number)
   const rename = async (name: string): Promise<boolean> => {
     if (!active || validateName(name)) return false;
     if (name.trim() === active.name) return true;
-    trace(user?.id, "rename_workspace", "workspaces", "workspaces");
     try {
       await renameWs({ id: active._id, name: name.trim() }).unwrap();
       notify.success(t("workspaces.renamedToast"));
@@ -51,7 +47,6 @@ export function useWorkspaceActions(active: Workspace | null, siteCount: number)
       ],
       confirmLabel: t("workspaces.deleteWorkspace"),
       onConfirm: async () => {
-        trace(user?.id, "delete_workspace", "workspaces", "workspaces");
         try {
           await deleteWs(w._id).unwrap();
           notify.success(t("workspaces.deletedWsToast", { name: w.name }));
@@ -75,7 +70,6 @@ export function useWorkspaceActions(active: Workspace | null, siteCount: number)
       ],
       confirmLabel: t("workspaces.deleteSite"),
       onConfirm: async () => {
-        trace(user?.id, "delete_site", "workspaces", "workspaces");
         try {
           await deleteSiteMut({ workspaceId: active._id, siteId: s.siteId }).unwrap();
           notify.success(t("workspaces.deletedSiteToast", { name: s.name }));

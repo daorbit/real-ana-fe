@@ -1,6 +1,6 @@
 import { AppShell as MantineShell, Box, Group, ScrollArea } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
+import { useAuth, useAdminToolsAccess } from "@/features/auth/context";
 import { notify } from "@/shared/lib/notify";
 import { useState } from "react";
 import { useThemeMode } from "./useThemeMode";
@@ -40,8 +40,7 @@ export function Rail({
 
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  // Super-admin only, and never while impersonating — see `useIsPlatformAdmin`.
-  const isAdmin = useIsPlatformAdmin();
+  const isAdmin = useAdminToolsAccess() !== null;
 
   const initials = (user?.firstName || user?.name || "?").slice(0, 2).toUpperCase();
   const groups = useNavGroups();

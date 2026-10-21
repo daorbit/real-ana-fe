@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import {
   useAddBacklinkMutation, useCheckBacklinkPageMutation, useDeleteBacklinkMutation, useDiscoverBacklinksMutation,
   useRecheckBacklinkMutation, useRecheckBacklinksMutation, useSyncBacklinkIndexMutation,
@@ -9,7 +7,6 @@ import {
 import type { PageCheckResult } from "../types";
 
 export function useBacklinkActions(workspaceId: string, siteId: string, demo = false) {
-  const { user } = useAuth();
   const args = { workspaceId, siteId };
   const blocked = () => notify.error("Turn off demo data to make changes.");
   const [discover, { isLoading: discovering }] = useDiscoverBacklinksMutation();
@@ -24,7 +21,6 @@ export function useBacklinkActions(workspaceId: string, siteId: string, demo = f
 
   const findNew = async () => {
     if (demo) return blocked();
-    trace(user?.id, "discover_backlinks", "backlinks", "backlinks_discovered");
     try {
       const r = await discover(args).unwrap();
       const more = r.remaining > 0 ? ` ${r.remaining} more are queued for the next run.` : "";
@@ -41,7 +37,6 @@ export function useBacklinkActions(workspaceId: string, siteId: string, demo = f
 
   const recheckEverything = async () => {
     if (demo) return blocked();
-    trace(user?.id, "recheck_backlinks", "backlinks", "backlinks_rechecked");
     try {
       const r = await recheckAll(args).unwrap();
       notify.success(
@@ -70,7 +65,6 @@ export function useBacklinkActions(workspaceId: string, siteId: string, demo = f
       blocked();
       return false;
     }
-    trace(user?.id, "add_backlink", "backlinks", "backlink_added");
     try {
       const doc = await addLink({ ...args, url: url.trim() }).unwrap();
       if (doc.status === "live") notify.success("The link is live and now tracked.", "Backlink added");
@@ -87,7 +81,6 @@ export function useBacklinkActions(workspaceId: string, siteId: string, demo = f
       blocked();
       return false;
     }
-    trace(user?.id, "check_backlink_page", "backlinks", "backlink_page_checked");
     try {
       setPageResult(await checkPageMutation({ ...args, url: url.trim() }).unwrap());
       return true;
@@ -99,7 +92,6 @@ export function useBacklinkActions(workspaceId: string, siteId: string, demo = f
 
   const importFromIndex = async () => {
     if (demo) return blocked();
-    trace(user?.id, "sync_backlink_index", "backlinks", "backlink_index_synced");
     try {
       const r = await syncIndex(args).unwrap();
       const theirs = r.competitors.reduce((sum, c) => sum + c.links, 0);

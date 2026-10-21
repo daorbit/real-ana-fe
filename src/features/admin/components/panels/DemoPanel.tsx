@@ -3,8 +3,6 @@ import { Alert, Button, Card, Center, Group, Loader, NumberInput, SimpleGrid, St
 import { Check, Globe2, Info, PlayCircle, ShieldAlert } from "lucide-react";
 import { useGetDemoUsageQuery, useSetDemoLimitMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import { num, timeAgo } from "@/shared/lib";
 import { AdminSection } from "../layout/AdminSection";
 import { AdminRefreshButton } from "../layout/AdminRefreshButton";
@@ -12,7 +10,6 @@ import { DemoStat } from "../demo/DemoStat";
 import classes from "../demo/DemoStat.module.css";
 
 export default function DemoPanel() {
-  const { user } = useAuth();
   const { data: usage, isLoading, isFetching, refetch } = useGetDemoUsageQuery();
   const [setLimit, { isLoading: saving }] = useSetDemoLimitMutation();
   const [draftLimit, setDraftLimit] = useState<number | string>(3);
@@ -24,7 +21,6 @@ export default function DemoPanel() {
   const dirty = usage ? Number(draftLimit) !== usage.limit : false;
 
   const save = async () => {
-    trace(user?.id, "set_demo_limit", "demo_usage", "demo_usage");
     try {
       const r = await setLimit(Number(draftLimit)).unwrap();
       notify.success(`One visitor may now start ${r.limit} demo${r.limit === 1 ? "" : "s"} a day.`, "Limit updated");

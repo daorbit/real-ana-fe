@@ -4,7 +4,7 @@ import { Center, Loader } from "@mantine/core";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useGetAdminUserOverviewQuery } from "@/app/store";
-import { useIsPlatformAdmin } from "@/features/auth/context";
+import { useAdminToolsAccess } from "@/features/auth/context";
 import { SuperAdminOnly } from "@/features/referralAdmin/components/SuperAdminOnly";
 import { useTitle } from "@/shared/lib/useTitle";
 import { num, timeAgo } from "@/shared/lib";
@@ -14,6 +14,7 @@ import type { AdminUser } from "@/shared/types";
 import { useAdminUserActions } from "../useAdminUserActions";
 import { EmailComposer } from "../components/EmailComposer";
 import { AdminPlanDialog } from "../components/AdminPlanDialog";
+import { GrantSuperAdminModal } from "../components/users/GrantSuperAdminModal";
 import { UserDetailHeader } from "../components/userDetail/UserDetailHeader";
 import { UserActivityChart } from "../components/userDetail/UserActivityChart";
 import { SignInsCard } from "../components/userDetail/SignInsCard";
@@ -23,7 +24,7 @@ import classes from "../components/userDetail/userDetail.module.css";
 
 export default function AdminUserDetail() {
   const { userId = "" } = useParams<{ userId: string }>();
-  const isAdmin = useIsPlatformAdmin();
+  const isAdmin = useAdminToolsAccess() !== null;
   const actions = useAdminUserActions();
   const { data, isLoading, isFetching, isError, refetch } = useGetAdminUserOverviewQuery(userId, {
     skip: !isAdmin || !userId,
@@ -75,6 +76,12 @@ export default function AdminUserDetail() {
               onClose={actions.closeMessage}
             />
             <AdminPlanDialog user={actions.planUser} onClose={actions.closePlan} />
+            <GrantSuperAdminModal
+              target={actions.granting}
+              busy={actions.changingRole}
+              onConfirm={actions.confirmGrant}
+              onClose={actions.closeGrant}
+            />
 
             <UserDetailHeader user={user} actions={actions} refreshing={isFetching} onRefresh={refetch} />
 

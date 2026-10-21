@@ -8,7 +8,6 @@ import {
 } from "@mantine/core";
 import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
-import { trace } from "@/shared/lib/analytics";
 import { AuthBrand, AuthMobileBrand } from "@/features/auth/components/AuthBrand";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import LinkedInSignInButton from "@/features/auth/components/LinkedInSignInButton";
@@ -58,7 +57,6 @@ export default function Login() {
     clear();
     try {
       await startDemo();
-      trace(undefined, "demo_started", "login", "app");
       goAfterLogin();
     } catch (err) {
       const e = err as ApiError;

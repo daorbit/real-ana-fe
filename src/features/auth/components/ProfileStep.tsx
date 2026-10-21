@@ -10,7 +10,6 @@ import { useAuth } from "@/features/auth/context";
 import { guessCountry, splitNumber, type DialCode } from "@/shared/lib/dialCodes";
 import { randomPresetAvatar, fetchPresetAvatarBlob } from "@/shared/lib/presetAvatars";
 import { notifyError } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import onb from "@/features/auth/components/onboarding/Onboarding.module.css";
 import f from "@/features/auth/components/onboarding/FormSteps.module.css";
 
@@ -105,7 +104,6 @@ export function ProfileStep({ onDone }: { onDone: () => void }) {
     setPhoneError(pErr);
     if (fErr || pErr) return;
 
-    trace(user?.id, "onboarding_profile_saved", "onboarding", "profile");
     setSaving(true);
     try {
       await updateProfile({

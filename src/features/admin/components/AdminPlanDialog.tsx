@@ -5,8 +5,7 @@ import { CreditCard, Plus } from "lucide-react";
 import { useGetAdminUserBillingQuery, useGrantAdminSiteSlotMutation } from "@/app/store";
 import { shortDate } from "@/shared/lib";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
+import { useAuth, useAdminToolsAccess } from "@/features/auth/context";
 import type { AdminUser } from "@/shared/types";
 
 /**
@@ -18,11 +17,11 @@ import type { AdminUser } from "@/shared/types";
  */
 export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onClose: () => void }) {
   const { user: admin } = useAuth();
+  const canGrant = useAdminToolsAccess() === "full";
   const { data, isLoading } = useGetAdminUserBillingQuery(user?.id ?? "", { skip: !user });
   const [grantSiteSlot, { isLoading: isGranting }] = useGrantAdminSiteSlotMutation();
 
   const grantSlot = async (workspaceId: string) => {
-    trace(admin?.id, "grant_site_slot", "admin_plan_dialog", workspaceId);
     try {
       await grantSiteSlot(workspaceId).unwrap();
       notify.success("One extra site slot granted.");
@@ -92,19 +91,21 @@ export function AdminPlanDialog({ user, onClose }: { user: AdminUser | null; onC
                     <div style={{ flex: 1 }}>
                       <UsageRow label="Sites" used={ws.billing.sites.used} quota={ws.billing.sites.quota} />
                     </div>
-                    <Tooltip label="Grant one extra site slot" withArrow>
-                      <ActionIcon
-                        variant="light"
-                        color="emerald"
-                        size="md"
-                        radius="md"
-                        loading={isGranting}
-                        onClick={() => grantSlot(ws.workspaceId)}
-                        aria-label="Grant one extra site slot"
-                      >
-                        <Plus size={14} />
-                      </ActionIcon>
-                    </Tooltip>
+                    {canGrant && (
+                      <Tooltip label="Grant one extra site slot" withArrow>
+                        <ActionIcon
+                          variant="light"
+                          color="emerald"
+                          size="md"
+                          radius="md"
+                          loading={isGranting}
+                          onClick={() => grantSlot(ws.workspaceId)}
+                          aria-label="Grant one extra site slot"
+                        >
+                          <Plus size={14} />
+                        </ActionIcon>
+                      </Tooltip>
+                    )}
                   </Group>
                   {(ws.billing.sites.addonSlots ?? 0) > 0 && (
                     <Text size="xs" c="dimmed" mt={-8}>

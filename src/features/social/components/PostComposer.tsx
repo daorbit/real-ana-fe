@@ -18,8 +18,6 @@ import { captionLimit, isDirty, type Draft } from "./draft";
 
 const DRAFT_KEY = (workspaceId: string | undefined) =>
   `quantalog_post_draft_${workspaceId ?? "none"}`;
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import type { ScheduledPost } from "@/shared/types";
 
 export function PostComposer({
@@ -58,7 +56,6 @@ export function PostComposer({
    */
   onSave: (draft: Draft, asDraft?: boolean) => Promise<boolean>;
 }) {
-  const { user } = useAuth();
   const [draft, setDraft] = useState<Draft>(initial);
   const [device, setDevice] = useState<PreviewDevice>("desktop");
   const [confirmingClose, setConfirmingClose] = useState(false);
@@ -147,7 +144,6 @@ export function PostComposer({
   }, [draft, dirty, editing, opened, workspaceId]);
 
   const discard = () => {
-    trace(user?.id, "discard_draft_confirmed", "composer", editing ? "post_unchanged" : "post_discarded");
     clearStash();
     setConfirmingClose(false);
     onClose();

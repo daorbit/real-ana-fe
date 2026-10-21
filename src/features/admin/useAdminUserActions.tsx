@@ -8,9 +8,9 @@ import {
 } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import type { AdminUser, Role } from "@/shared/types";
 import { ROLE_LABELS } from "./lib/userRoles";
+import { identityProof } from "@/features/auth/components/settings/identityProof";
 
 export type AdminUserRow = {
   admin: boolean;
@@ -26,6 +26,7 @@ export function useAdminUserActions() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [messaging, setMessaging] = useState<AdminUser | null>(null);
   const [planUser, setPlanUser] = useState<AdminUser | null>(null);
+  const [granting, setGranting] = useState<AdminUser | null>(null);
   const [deleteUser] = useDeleteAdminUserMutation();
   const [reset2fa, { isLoading: resetting2fa }] = useAdminReset2faMutation();
   const [resetScreenLock, { isLoading: resettingLock }] = useAdminResetScreenLockMutation();
@@ -40,7 +41,6 @@ export function useAdminUserActions() {
   });
 
   const enter = async (u: AdminUser) => {
-    trace(user?.id, "impersonate_user", "impersonate", u.id);
     setBusy(u.id);
     try {
       await impersonate(u.id);
@@ -54,12 +54,10 @@ export function useAdminUserActions() {
   };
 
   const openPlan = (u: AdminUser) => {
-    trace(user?.id, "view_user_plan_clicked", "impersonate", "plan_dialog");
     setPlanUser(u);
   };
 
   const openMessage = (u: AdminUser) => {
-    trace(user?.id, "message_user_clicked", "impersonate", "email_composer");
     setMessaging(u);
   };
 
@@ -110,35 +108,40 @@ export function useAdminUserActions() {
     });
   };
 
+  const applyRole = async (u: AdminUser, role: Role, secret?: string): Promise<boolean> => {
+    try {
+      await setRole({ userId: u.id, role, proof: secret && user ? identityProof(user, secret) : undefined }).unwrap();
+      notify.success(`${u.email} is now ${ROLE_LABELS[role].toLowerCase()}.`, "Role changed");
+      return true;
+    } catch (e) {
+      notify.error(errMessage(e, "Could not change the role."));
+      return false;
+    }
+  };
+
   const changeRole = (u: AdminUser, role: Role) => {
     if (role === u.role) return;
-    const granting = role === "super_admin";
+    if (role === "super_admin") {
+      setGranting(u);
+      return;
+    }
     confirmDelete({
-      title: granting ? "Make this person a super admin?" : `Change role to ${ROLE_LABELS[role]}?`,
-      confirmLabel: granting ? "Make super admin" : "Change role",
-      confirmColor: granting ? "red" : "blue",
-      body: granting ? (
-        <>
-          <b>{u.name}</b> ({u.email}) will have full control of the platform: every account, plan, price and
-          setting, and they can make other people super admins too. Only do this for someone you trust completely.
-        </>
-      ) : (
+      title: `Change role to ${ROLE_LABELS[role]}?`,
+      confirmLabel: "Change role",
+      confirmColor: "blue",
+      body: (
         <>
           <b>{u.name}</b> ({u.email}) goes from {ROLE_LABELS[u.role]} to {ROLE_LABELS[role]}. The change applies
           on their next request.
         </>
       ),
       onConfirm: async () => {
-        trace(user?.id, "change_user_role", "impersonate", role);
-        try {
-          await setRole({ userId: u.id, role }).unwrap();
-          notify.success(`${u.email} is now ${ROLE_LABELS[role].toLowerCase()}.`, "Role changed");
-        } catch (e) {
-          notify.error(errMessage(e, "Could not change the role."));
-        }
+        await applyRole(u, role);
       },
     });
   };
+
+  const confirmGrant = (secret: string) => (granting ? applyRole(granting, "super_admin", secret) : Promise.resolve(false));
 
   const remove = (u: AdminUser) => {
     confirmDelete({
@@ -152,7 +155,6 @@ export function useAdminUserActions() {
         </>
       ),
       onConfirm: async () => {
-        trace(user?.id, "delete_user_account", "impersonate", u.id);
         setDeleting(u.id);
         try {
           await deleteUser(u.id).unwrap();
@@ -175,6 +177,9 @@ export function useAdminUserActions() {
     changingRole,
     messaging,
     planUser,
+    granting,
+    confirmGrant,
+    closeGrant: () => setGranting(null),
     closeMessage: () => setMessaging(null),
     closePlan: () => setPlanUser(null),
     rowState,

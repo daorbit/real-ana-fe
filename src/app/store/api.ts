@@ -1287,8 +1287,15 @@ export const api = createApi({
       providesTags: ["AdminUser"],
     }),
 
-    setAdminUserRole: build.mutation<{ id: string; role: Role }, { userId: string; role: Role }>({
-      query: ({ userId, role }) => ({ url: `/api/admin/users/${userId}/role`, method: "PUT", body: { role } }),
+    setAdminUserRole: build.mutation<
+      { id: string; role: Role },
+      { userId: string; role: Role; proof?: { password: string } | { code: string } }
+    >({
+      query: ({ userId, role, proof }) => ({
+        url: `/api/admin/users/${userId}/role`,
+        method: "PUT",
+        body: { role, ...(proof ?? {}) },
+      }),
       invalidatesTags: ["AdminUser"],
     }),
 

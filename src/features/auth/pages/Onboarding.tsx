@@ -17,7 +17,6 @@ import { getFramework } from "@/features/workspace/frameworks";
 import type { FrameworkId } from "@/features/workspace/frameworks";
 import * as v from "@/shared/lib/validate";
 import { notifyError } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import type { ReferralSource, Site } from "@/shared/types";
 import { WELCOME_PENDING_KEY } from "@/shared/ui/welcomePending";
@@ -167,7 +166,7 @@ export default function Onboarding() {
   useClaimPendingReferral();
   const nav = useNavigate();
   const { setActive, workspaces } = useWorkspace();
-  const { user, updateProfile } = useAuth();
+  const { updateProfile } = useAuth();
   const [params] = useSearchParams();
 
 
@@ -238,7 +237,6 @@ export default function Onboarding() {
 
 
   const skip = () => {
-    trace(user?.id, "onboarding_skipped", "onboarding", "app");
     localStorage.setItem("quantalog_onboarding_skipped", "1");
     if (wsId) localStorage.setItem(WELCOME_PENDING_KEY, "1");
     clearProgress();
@@ -257,7 +255,6 @@ export default function Onboarding() {
   };
 
   const submitReferral = async () => {
-    trace(user?.id, "onboarding_referral_saved", "onboarding", "referral");
     try {
       if (referralSources.length) await updateProfile({ referralSources });
     } catch {
@@ -275,7 +272,6 @@ export default function Onboarding() {
     setWsError(err);
     if (err) return;
 
-    trace(user?.id, "onboarding_workspace_created", "onboarding", "workspace");
     try {
       const ws = await createWorkspace({ name: wsName.trim() }).unwrap();
       setWsId(ws._id);
@@ -298,7 +294,6 @@ export default function Onboarding() {
   const submitFramework = async () => {
     if (!wsId) return;
 
-    trace(user?.id, "onboarding_site_created", "onboarding", "site");
     try {
       const created = await createSite({
         workspaceId: wsId,

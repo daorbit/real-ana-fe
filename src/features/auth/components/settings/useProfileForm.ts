@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/features/auth/context";
 import { useUnsavedGuard, useEscapeDiscard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { mobileError } from "./constants";
 
 export function useProfileForm() {
@@ -98,7 +97,6 @@ export function useProfileForm() {
     setErrors(next);
     if (Object.values(next).some(Boolean)) return;
 
-    trace(user?.id, "profile_saved", "settings", "profile");
     setSaving(true);
     try {
       await updateProfile({
@@ -143,7 +141,6 @@ export function useProfileForm() {
   };
 
   const saveCrop = async (cropped: Blob) => {
-    trace(user?.id, "avatar_uploaded", "settings", "profile");
     setAvatarBusy(true);
     try {
       await uploadAvatar(cropped);
@@ -158,7 +155,6 @@ export function useProfileForm() {
   };
 
   const clearAvatar = async () => {
-    trace(user?.id, "avatar_removed", "settings", "profile");
     setAvatarBusy(true);
     try {
       await removeAvatar();

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Text, Group, Button, ThemeIcon, Stack, Center, Alert } from "@mantine/core";
 import { BarChart3, FolderKanban, Plus, SlidersHorizontal, Move } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
-import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
@@ -168,11 +167,9 @@ export default function Home() {
             onDiscard={onDiscard}
             onSave={onSave}
             onAdd={() => {
-              trace(user?.id, "add_widget_clicked", "home", "widget_drawer");
               setCustomizing(true);
             }}
             onPreset={(preset) => {
-              trace(user?.id, "layout_preset_applied", "home", preset.id);
               apply(preset.layout);
               setEditing(true);
             }}
@@ -184,7 +181,6 @@ export default function Home() {
               to="/app/analytics"
               visibleFrom="sm"
               leftSection={<BarChart3 size={16} />}
-              onClick={() => trace(user?.id, "open_analytics_clicked", "home", "analytics")}
             >
               Full analytics
             </Button>
@@ -229,7 +225,6 @@ export default function Home() {
               variant="light"
               mt={4}
               onClick={() => {
-                trace(user?.id, "add_widget_clicked", "home_empty", "widget_drawer");
                 setCustomizing(true);
               }}
             >

@@ -1,10 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { ExternalLink, type Home } from "lucide-react";
-import { trace } from "@/shared/lib/analytics";
 import { prefetchRoute } from "@/app/routePrefetch";
 import { isPlainLeftClick, transitionTo } from "@/app/viewTransition";
-import { useAuth } from "@/features/auth/context";
 import { LinkLogo } from "./LinkLogo";
 
 /**
@@ -31,7 +29,6 @@ export function NavLink({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const link = (
     <UnstyledButton
@@ -47,7 +44,6 @@ export function NavLink({
       // One choke point for every sidebar click — traces navigation across
       // the whole rail without wiring each destination page separately.
       onClick={(e: React.MouseEvent) => {
-        trace(user?.id, "nav_clicked", location.pathname, to);
         if (!isPlainLeftClick(e)) return;
         e.preventDefault();
         transitionTo(navigate, to);

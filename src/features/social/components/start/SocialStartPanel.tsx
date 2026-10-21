@@ -10,13 +10,11 @@ export function SocialStartPanel({
   instagramAvailable,
   disabled,
   onCreate,
-  onConnect,
 }: {
   connected: boolean;
   instagramAvailable: boolean;
   disabled: boolean;
   onCreate: (date?: string) => void;
-  onConnect: () => void;
 }) {
   const networks = instagramAvailable ? "LinkedIn or Instagram" : "LinkedIn";
 
@@ -44,7 +42,6 @@ export function SocialStartPanel({
               size="md"
               color="emerald"
               leftSection={<Link2 size={16} />}
-              onClick={onConnect}
             >
               Connect {networks}
             </Button>

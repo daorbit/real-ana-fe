@@ -1,15 +1,10 @@
 import { useState } from "react";
-import { Anchor, Button, Skeleton } from "@mantine/core";
+import { Button, Skeleton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { Share2 } from "lucide-react";
 import { useGetShareQuery, useSetShareMutation } from "@/app/store";
 import { SharePostModal } from "@/features/analytics/components/SharePostModal";
-import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
-import { appsPath } from "@/features/integrations/lib/appsPath";
-import { WORKSPACE_APP_INFO } from "@/features/integrations/lib/quantalogApps";
-import { trace } from "@/shared/lib/analytics";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useSaveRegistration } from "@/shared/ui/SaveBar";
 import type { SharePanels } from "@/shared/types";
@@ -27,7 +22,6 @@ export function AnalyticsShareTab({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation();
   const { data, isLoading } = useGetShareQuery(workspaceId);
   const { active } = useWorkspace();
-  const { user } = useAuth();
   const [composerOpen, setComposerOpen] = useState(false);
   const [setShare] = useSetShareMutation();
   const [linkBusy, setLinkBusy] = useState(false);
@@ -45,7 +39,6 @@ export function AnalyticsShareTab({ workspaceId }: { workspaceId: string }) {
 
   const savePanels = async () => {
     if (!draft) return;
-    trace(user?.id, "share_panels_saved", "share", "analytics");
     try {
       await setShare({ workspaceId, enabled: true, panels: draft }).unwrap();
       setDraft(null);
@@ -70,7 +63,6 @@ export function AnalyticsShareTab({ workspaceId }: { workspaceId: string }) {
   };
 
   const createLink = () => {
-    trace(user?.id, "share_link_toggled", "share", "enabled");
     void runLinkAction({}, () => notify.success(t("share.sharingOnBody"), t("share.sharingOn")), "share.sharingError");
   };
 
@@ -80,7 +72,6 @@ export function AnalyticsShareTab({ workspaceId }: { workspaceId: string }) {
       confirmLabel: t("share.rotateConfirm"),
       body: <>{t("share.rotateBody")}</>,
       onConfirm: async () => {
-        trace(user?.id, "share_link_rotated", "share", "new_link");
         await runLinkAction(
           { rotate: true },
           () => notify.success(t("share.rotateSuccess"), t("share.rotateSuccessTitle")),
@@ -118,17 +109,11 @@ export function AnalyticsShareTab({ workspaceId }: { workspaceId: string }) {
         views={data?.views ?? 0}
         lastViewedAt={data?.lastViewedAt}
         onReplace={rotate}
-        headerAction={
-          <Anchor component={Link} to={appsPath(WORKSPACE_APP_INFO.publicDashboard.tileId)} size="xs" c="dimmed">
-            {t("share.manageInApps", "Manage in Apps")}
-          </Anchor>
-        }
         primaryAction={
           <Button
             className={classes.noShrink}
             leftSection={<Share2 size={14} />}
             onClick={() => {
-              trace(user?.id, "share_composer_opened", "share", "composer");
               setComposerOpen(true);
             }}
           >

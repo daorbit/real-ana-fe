@@ -9,8 +9,6 @@ import { RotateCcw, Eraser, Search, SearchX, X, Check } from "lucide-react";
 import { WIDGETS, WIDGET_GROUPS } from "@/features/analytics";
 import type { WidgetId, Span } from "@/features/analytics";
 import { WidgetPreview } from "@/features/analytics/components/WidgetPreview";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 
 /** The home grid is 4 columns wide, so a widget can span 1 to 4 of them. */
 const SPANS: Span[] = [1, 2, 3, 4];
@@ -52,7 +50,6 @@ export function CustomizeDrawer({
   onSave: () => void;
 }) {
   const [query, setQuery] = useState("");
-  const { user } = useAuth();
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -103,7 +100,6 @@ export function CustomizeDrawer({
               color="emerald"
               leftSection={<Check size={14} />}
               onClick={() => {
-                trace(user?.id, "widget_layout_saved", "widget_drawer", "home");
                 onSave();
               }}
               loading={saving}
@@ -239,7 +235,6 @@ export function CustomizeDrawer({
           size="xs"
           leftSection={<Eraser size={13} />}
           onClick={() => {
-            trace(user?.id, "widget_layout_cleared", "widget_drawer", "home");
             clear();
           }}
         >
@@ -251,7 +246,6 @@ export function CustomizeDrawer({
             size="xs"
             leftSection={<RotateCcw size={13} />}
             onClick={() => {
-              trace(user?.id, "widget_layout_reset", "widget_drawer", "home");
               reset();
             }}
           >

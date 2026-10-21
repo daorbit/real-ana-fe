@@ -9,7 +9,6 @@ import {
   Monitor, Smartphone, Link as LinkIcon, PenLine,
 } from "lucide-react";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { useFitScale } from "@/hooks/useFitScale";
 import { DeviceFrame, frameSize, type DeviceId } from "@/features/social/components/DeviceFrame";
 import { useAuth } from "@/features/auth/context";
@@ -173,7 +172,6 @@ export function SharePostModal({
    * work, unlike every other toolbar action.
    */
   const generate = async () => {
-    trace(user?.id, "share_caption_generated", "share_composer", platform);
     try {
       // An empty angle keeps the original behaviour: a caption about this
       // workspace's own dashboard, built from figures the server reads itself.
@@ -194,7 +192,6 @@ export function SharePostModal({
 
   /** Publish through our own LinkedIn connection. */
   const runLinkedInPost = async () => {
-    trace(user?.id, "linkedin_post_published", "share_composer", "linkedin");
     setJustPosted(false);
     setPostedUrl(null);
     try {
@@ -212,7 +209,6 @@ export function SharePostModal({
     // through our own connection, so the intent fallback must not run for it
     // while that connection is missing.
     if (blockedOnLinkedIn) return;
-    trace(user?.id, "share_post_opened", "share_composer", platform);
     // Platforms that drop the caption get it on the clipboard first, so the
     // paste is one keystroke away in the composer that is about to open.
     //
@@ -476,7 +472,6 @@ export function SharePostModal({
                 mt="sm"
                 leftSection={<Download size={15} />}
                 onClick={() => {
-                  trace(user?.id, "share_card_downloaded", "share_composer", "image");
                   downloadShareCard(image, workspace);
                 }}
               >

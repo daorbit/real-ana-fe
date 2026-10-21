@@ -4,7 +4,6 @@ import { useAuth } from "@/features/auth/context";
 import { identityProof } from "@/features/auth/components/settings/identityProof";
 import { useDemo } from "@/features/demo/context";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import type { ApiKey } from "@/shared/types";
 
 export function useRevealApiKey(workspaceId: string) {
@@ -25,7 +24,6 @@ export function useRevealApiKey(workspaceId: string) {
         keyId: key.id,
         proof: identityProof(user, secret),
       }).unwrap();
-      trace(user.id, "api_key_revealed", "developers", "api_key");
       return res.key;
     } catch (err) {
       notify.error(errMessage(err, t("developers.revealError")));

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { getToken } from "@/shared/lib/http";
 import { useAuth } from "@/features/auth/context";
 import { useGetLinkedInStatusQuery, useDisconnectLinkedInMutation } from "@/app/store";
@@ -47,7 +46,6 @@ export function useLinkedInConnect({ onConnected, source = "share_composer" }: {
   const needsPostingPermission = Boolean(status?.connected && !status.expired && status.canPublish === false);
 
   const connect = useCallback(() => {
-    trace(user?.id, "linkedin_connect_started", source, "linkedin_oauth");
     setConnecting(true);
     const popup = openLinkedInPopup();
     if (!popup) return setConnecting(false);
@@ -60,7 +58,6 @@ export function useLinkedInConnect({ onConnected, source = "share_composer" }: {
   }, [user?.id, source, refetch]);
 
   const disconnect = useCallback(async () => {
-    trace(user?.id, "linkedin_disconnected", source, "linkedin");
     try {
       await disconnectMutation().unwrap();
       notify.success(t("sharePost.linkedinDisconnected"));

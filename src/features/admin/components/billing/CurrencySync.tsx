@@ -2,17 +2,13 @@ import { Button, Text, Tooltip } from "@mantine/core";
 import { RefreshCw } from "lucide-react";
 import { useGetAdminFxQuery, useSyncAdminPlanCurrencyMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 import { relativeTime } from "./billingFormat";
 
 export function CurrencySync() {
-  const { user } = useAuth();
   const { data: fx } = useGetAdminFxQuery();
   const [sync, { isLoading: syncing }] = useSyncAdminPlanCurrencyMutation();
 
   const run = async () => {
-    trace(user?.id, "sync_usd_prices", "admin_billing", "admin_billing");
     try {
       const result = await sync().unwrap();
       const rate = result.snapshot.rates.USD;

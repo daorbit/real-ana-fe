@@ -4,13 +4,10 @@ import {
   useDeleteCompetitorMutation,
 } from "@/app/store";
 import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 
 export function useCompetitorActions(
   workspaceId: string, siteId: string, domain: string | undefined, demo = false,
 ) {
-  const { user } = useAuth();
   const [addCompetitor, { isLoading: adding }] = useAddCompetitorMutation();
   const [refreshCompetitor] = useRefreshCompetitorMutation();
   const [refreshAll, { isLoading: refreshingAll }] = useRefreshAllCompetitorsMutation();
@@ -25,7 +22,6 @@ export function useCompetitorActions(
     }
     const trimmed = url.trim();
     if (!trimmed) return false;
-    trace(user?.id, "add_competitor", "compare", "competitor_added");
     try {
       await addCompetitor({ workspaceId, siteId, url: trimmed }).unwrap();
       notify.success(`Fetched and compared against ${site}.`, "Competitor added");
@@ -41,7 +37,6 @@ export function useCompetitorActions(
       notify.error("Turn off demo data to refresh a competitor.");
       return;
     }
-    trace(user?.id, "refresh_competitor", "compare", "competitor_analysis");
     setRefreshingId(competitorId);
     try {
       await refreshCompetitor({ workspaceId, siteId, competitorId }).unwrap();
@@ -57,7 +52,6 @@ export function useCompetitorActions(
       notify.error("Turn off demo data to refresh competitors.");
       return;
     }
-    trace(user?.id, "refresh_all_competitors", "compare", "competitor_analysis");
     try {
       const result = await refreshAll({ workspaceId, siteId }).unwrap();
       notify.success(
@@ -80,7 +74,6 @@ export function useCompetitorActions(
       title: "Remove competitor",
       body: `Stop tracking ${label}? Their recorded score history goes too.`,
       onConfirm: async () => {
-        trace(user?.id, "remove_competitor", "compare", "competitor_removed");
         try {
           await deleteCompetitor({ workspaceId, siteId, competitorId }).unwrap();
         } catch (e) {

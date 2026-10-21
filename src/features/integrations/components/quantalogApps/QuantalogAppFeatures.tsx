@@ -1,29 +1,21 @@
-import { Text } from "@mantine/core";
-import { ListChecks, TrendingUp, Trophy, type LucideIcon } from "lucide-react";
+import { Check } from "lucide-react";
 import type { WorkspaceAppInfo } from "../../lib/quantalogApps";
 import classes from "./QuantalogApp.module.css";
 
-const ICONS: LucideIcon[] = [Trophy, TrendingUp, ListChecks];
-
 export function QuantalogAppFeatures({ info }: { info: WorkspaceAppInfo }) {
   return (
-    <div className={classes.features}>
-      {info.features.map((feature, index) => {
-        const Icon = ICONS[index % ICONS.length];
-        return (
-          <div key={feature.title} className={classes.feature}>
-            <span className={classes.featureIcon}>
-              <Icon size={17} />
-            </span>
-            <Text size="sm" fw={600}>
-              {feature.title}
-            </Text>
-            <Text size="xs" c="dimmed">
-              {feature.body}
-            </Text>
-          </div>
-        );
-      })}
-    </div>
+    <ul className={classes.featureList}>
+      {info.features.map((feature) => (
+        <li key={feature.title} className={classes.featureRow}>
+          <span className={classes.featureCheck} aria-hidden>
+            <Check size={14} strokeWidth={2.4} />
+          </span>
+          <span className={classes.featureText}>
+            <span className={classes.featureTitle}>{feature.title}</span>
+            <span className={classes.featureBody}>{feature.body}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }

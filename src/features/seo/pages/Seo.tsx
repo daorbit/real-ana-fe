@@ -33,7 +33,6 @@ import {
   useRunCrawlMutation, useGetLatestCrawlQuery,
 } from "@/app/store";
 import { notify, errMessage, notifyError, confirmDelete } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { useAuth } from "@/features/auth/context";
 import { timeAgo, dateTime } from "@/shared/lib";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
@@ -371,7 +370,6 @@ export default function Seo() {
       notify.error("Turn off demo data to run a crawl.");
       return;
     }
-    trace(user?.id, "run_site_crawl", "seo", "crawl");
     try {
       await runCrawl({ workspaceId, siteId }).unwrap();
       notify.success("Crawl complete");
@@ -461,7 +459,6 @@ export default function Seo() {
       notify.error("Turn off demo data to run an audit.");
       return;
     }
-    trace(user?.id, refresh ? "rerun_seo_audit" : "run_seo_audit", "seo", "seo_report");
     try {
       const res = await analyze({
         workspaceId,
@@ -490,7 +487,6 @@ export default function Seo() {
       body: "The stored audit is removed. It does not affect the site itself.",
       confirmLabel: "Delete report",
       onConfirm: async () => {
-        trace(user?.id, "delete_seo_report", "seo_history", "seo");
         try {
           await deleteReport({ workspaceId, siteId, reportId: id }).unwrap();
           if (viewingId === id) setViewingId(null);

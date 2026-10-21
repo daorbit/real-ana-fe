@@ -4,8 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Section } from "@/shared/ui/Page";
 import { Starfield } from "@/shared/ui/Starfield";
 import { useWorkspace } from "@/features/workspace/context";
-import { useAuth } from "@/features/auth/context";
-import { trace } from "@/shared/lib/analytics";
 import { useSaveWorkspaceThemeMutation } from "@/app/store";
 import {
   BG_STYLES,
@@ -55,7 +53,6 @@ export function AppearanceSection({
   const [prefs, setPrefs] = useState(readThemePrefs);
   const { setColorScheme } = useMantineColorScheme();
   const { active } = useWorkspace();
-  const { user } = useAuth();
   const [saveWorkspaceTheme] = useSaveWorkspaceThemeMutation();
 
   // Debounced rather than fired on every click: dragging through a swatch
@@ -69,7 +66,6 @@ export function AppearanceSection({
   }, []);
 
   const update = (patch: Partial<ThemePrefs>) => {
-    trace(user?.id, "appearance_changed", "settings", Object.keys(patch)[0] ?? "theme");
     // A manual accent/bg/cta change means the active preset no longer
     // describes the look — drop back to "Custom" unless this patch is the
     // preset itself being applied.

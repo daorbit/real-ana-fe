@@ -16,9 +16,7 @@ import { WorkspaceHero } from "@/features/workspace/components/workspaces/Worksp
 import { SitesPanel } from "@/features/workspace/components/workspaces/SitesPanel";
 import classes from "@/features/workspace/components/workspaces/Workspaces.module.css";
 import { hasSiteSlot } from "@/features/workspace/siteLimit";
-import { trace } from "@/shared/lib/analytics";
 import { notify } from "@/shared/lib/notify";
-import { useAuth } from "@/features/auth/context";
 import { WorkspacesSkeleton } from "@/shared/ui/Skeletons";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { PageHeader } from "@/shared/ui/Page";
@@ -33,7 +31,6 @@ export default function Workspaces() {
   useTitle("Workspaces");
   const { t } = useTranslation();
   const nav = useNavigate();
-  const { user } = useAuth();
   const { workspaces, active, setActive, loading } = useWorkspace();
   const { demo } = useDemo();
   const perms = usePermissions();
@@ -59,7 +56,6 @@ export default function Workspaces() {
       notify.info(t("workspaces.oneSiteToast"));
       return;
     }
-    trace(user?.id, "add_site_clicked", "workspaces", "add_site_wizard");
     setSiteOpen(true);
   };
   const focusedSiteId = useWorkspacesDeepLink(!loading && Boolean(active), canEdit, openAddSite);

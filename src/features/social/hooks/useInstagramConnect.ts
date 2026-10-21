@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { trace } from "@/shared/lib/analytics";
 import { getToken } from "@/shared/lib/http";
 import { useAuth } from "@/features/auth/context";
 import { useGetInstagramStatusQuery, useDisconnectInstagramMutation } from "@/app/store";
@@ -63,7 +62,6 @@ export function useInstagramConnect({ onConnected, source = "settings" }: { onCo
   const needsPostingPermission = Boolean(status?.connected && !status.expired && status.canPublish === false);
 
   const connect = useCallback(() => {
-    trace(user?.id, "connect_instagram", source, "instagram_oauth_popup");
     setConnecting(true);
     const popup = openInstagramPopup();
     if (!popup) return setConnecting(false);
@@ -76,7 +74,6 @@ export function useInstagramConnect({ onConnected, source = "settings" }: { onCo
   }, [user?.id, source, refetch]);
 
   const disconnect = useCallback(async () => {
-    trace(user?.id, "disconnect_instagram", source, "instagram_disconnected");
     try {
       await disconnectMutation().unwrap();
       notify.success(t("settings.instagramDisconnected", "Instagram disconnected"));

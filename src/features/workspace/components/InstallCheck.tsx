@@ -3,8 +3,6 @@ import { Card, Group, Text, Button, ThemeIcon, List, Collapse } from "@mantine/c
 import { motion, AnimatePresence } from "framer-motion";
 import { Radar, CheckCircle2, AlertTriangle, RotateCw } from "lucide-react";
 import { useInstallCheck } from "@/features/workspace";
-import { trace } from "@/shared/lib/analytics";
-import { useAuth } from "@/features/auth/context";
 
 export function InstallCheck({
   workspaceId,
@@ -19,14 +17,12 @@ export function InstallCheck({
   autoStart?: boolean;
   onInstalled?: () => void;
 }) {
-  const { user } = useAuth();
   const { phase, start, secondsLeft, progress } = useInstallCheck(workspaceId, siteId, autoStart);
   useEffect(() => {
     if (phase === "installed") onInstalled?.();
   }, [phase, onInstalled]);
   const site = domain ? <b>{domain}</b> : "your site";
   const onStart = () => {
-    trace(user?.id, "verify_install_clicked", "install_check", siteId);
     start();
   };
 
