@@ -17,7 +17,7 @@ export type NavItem = {
   external?: boolean;
   linkUrl?: string;
   logoUrl?: string;
-  app?: WorkspaceAppId;
+  app?: WorkspaceAppId | WorkspaceAppId[];
 };
 
 export type NavGroup = {
@@ -57,7 +57,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon },
       { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
       { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
-      { to: "/app/share", labelKey: "nav.share", label: "Public dashboard", icon: Share2 },
+      { to: "/app/share", labelKey: "nav.share", label: "Public sharing", icon: Share2, app: ["publicDashboard", "seoReports"] },
     ],
   },
   {

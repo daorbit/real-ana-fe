@@ -9,6 +9,7 @@ import {
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
 import { useDemo } from "@/features/demo/context";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { demoReportSchedulesResponse } from "@/features/demo/demoReports";
 import { demoSites } from "@/features/demo/demoData";
 import { useAuth } from "@/features/auth/context";
@@ -47,7 +48,8 @@ export function useReportsPage() {
   // site list is Workspaces' fixture, not fetched again here.
   const { currentData: queriedSites = [] } = useGetSitesQuery(workspaceId, { skip: !workspaceId || demo });
   const sites = demo ? demoSites : queriedSites;
-  const { data: share } = useGetShareQuery(workspaceId, { skip: !workspaceId || demo });
+  const { publicDashboard } = useWorkspaceApps();
+  const { data: share } = useGetShareQuery(workspaceId, { skip: !workspaceId || demo || !publicDashboard });
   const waEntitled = billing?.whatsappReports ?? false;
 
   const [save, { isLoading: saving }] = useSaveReportScheduleMutation();

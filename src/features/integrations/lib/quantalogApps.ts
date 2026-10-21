@@ -142,6 +142,38 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Never annoying", body: "Pick the pages and devices, and how long to wait before showing it to the same person again." },
     ],
   },
+  publicDashboard: {
+    id: "publicDashboard",
+    tileId: "quantalog-public-dashboard",
+    name: "Quantalog Public Dashboard",
+    navLabel: "Public dashboard",
+    route: "/app/share",
+    location: "under Public sharing in the sidebar",
+    offNote: "Your link and its settings are kept, but the link stops working until you turn it back on.",
+    tagline: "Share a live, read-only analytics dashboard at a link anyone can open.",
+    description: "Give clients, investors or your whole team your numbers without giving them an account. You pick exactly which panels the public page shows.",
+    features: [
+      { title: "One link, live numbers", body: "Visitors, pages, sources and countries update in real time. No login needed to view." },
+      { title: "You choose what is public", body: "Turn each of 14 panels on or off. Anything off never leaves the server." },
+      { title: "Post it anywhere", body: "Share to LinkedIn or X with a preview card, and see how often the link is opened." },
+    ],
+  },
+  seoReports: {
+    id: "seoReports",
+    tileId: "quantalog-seo-reports",
+    name: "Quantalog SEO Reports",
+    navLabel: "SEO reports",
+    route: "/app/share?tab=seo",
+    location: "under Public sharing in the sidebar",
+    offNote: "Your report links and their settings are kept, but the links stop working until you turn it back on.",
+    tagline: "Send a client a public link to any SEO audit.",
+    description: "Turn an SEO audit into a clean, read-only report at its own link. Choose which sections a client sees, and replace the link at any time.",
+    features: [
+      { title: "A link per audit", body: "Every audited page gets its own report link, ready to send to a client or a teammate." },
+      { title: "Only what you choose", body: "Show the score and issues, and keep internal URLs, links and raw data private." },
+      { title: "Know it was read", body: "See how often each report was opened, and replace a link the moment it leaks." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

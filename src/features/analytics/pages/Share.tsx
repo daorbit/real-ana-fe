@@ -29,6 +29,8 @@ import { ShareLinkCard } from "@/features/analytics/components/share/ShareLinkCa
 import { PanelSwitchList, type PanelGroup } from "@/features/analytics/components/share/PanelSwitchList";
 import { ShareFootnote } from "@/features/analytics/components/share/ShareFootnote";
 import { ShareStartPanel } from "@/features/analytics/components/share/start/ShareStartPanel";
+import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
+import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import classes from "@/features/analytics/components/share/Share.module.css";
 
 function SectionHead({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
@@ -559,7 +561,8 @@ export default function Share() {
   const { active } = useWorkspace();
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") === "seo" ? "seo" : "analytics";
-  const { data: share } = useGetShareQuery(active?._id ?? "", { skip: !active });
+  const apps = useWorkspaceApps();
+  const { data: share } = useGetShareQuery(active?._id ?? "", { skip: !active || !apps.publicDashboard });
 
   const setTab = (next: string | null) =>
     setParams(
@@ -577,7 +580,7 @@ export default function Share() {
       <PageHeader
         title={t("share.pageTitle")}
         description={t("share.pageDescription")}
-        docsPath={DOCS_SLUGS.publicDashboards}
+        docsPath={tab === "seo" ? DOCS_SLUGS.quantalogSeoReports : DOCS_SLUGS.publicDashboards}
         actions={<PageHelpButton />}
       />
       {active ? (
@@ -598,14 +601,22 @@ export default function Share() {
             </Tabs.List>
 
             <Tabs.Panel value="analytics">
-              <SaveBarProvider>
-                <ShareSettings workspaceId={active._id} />
-              </SaveBarProvider>
+              {apps.publicDashboard ? (
+                <SaveBarProvider>
+                  <ShareSettings workspaceId={active._id} />
+                </SaveBarProvider>
+              ) : (
+                <QuantalogAppGate app="publicDashboard" />
+              )}
             </Tabs.Panel>
             <Tabs.Panel value="seo">
-              <SaveBarProvider>
-                <SeoShareTab workspaceId={active._id} />
-              </SaveBarProvider>
+              {apps.seoReports ? (
+                <SaveBarProvider>
+                  <SeoShareTab workspaceId={active._id} />
+                </SaveBarProvider>
+              ) : (
+                <QuantalogAppGate app="seoReports" />
+              )}
             </Tabs.Panel>
           </Tabs>
         </RoleGate>
