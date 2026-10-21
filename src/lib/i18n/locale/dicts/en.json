@@ -1107,8 +1107,7 @@
     "addTileSub": "Websites or mobile apps — we'll hand you the snippet.",
     "otherTabTitle": "Workspace changed in another tab",
     "otherTabBody": "You switched to {{other}} in another tab. This tab is still showing {{current}}, so anything you change here goes to {{current}}.",
-    "otherTabSwitch": "Switch to {{name}}",
-    "otherTabStay": "Stay on {{name}}"
+    "otherTabSwitch": "Switch to {{name}}"
   },
   "validate": {
     "required": "{{label}} is required",

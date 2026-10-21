@@ -28,11 +28,8 @@ export function WorkspaceChangedElsewhereModal() {
               "You switched to {{other}} in another tab. This tab is still showing {{current}}, so anything you change here goes to {{current}}.",
           })}
         </Text>
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={dismiss}>
-            {t("workspaces.otherTabStay", { name: current.name, defaultValue: "Stay on {{name}}" })}
-          </Button>
-          <Button leftSection={<ArrowLeftRight size={16} />} onClick={accept} data-autofocus>
+        <Group justify="flex-end">
+          <Button leftSection={<ArrowLeftRight size={16} />} onClick={accept}>
             {t("workspaces.otherTabSwitch", { name: incoming.name, defaultValue: "Switch to {{name}}" })}
           </Button>
         </Group>

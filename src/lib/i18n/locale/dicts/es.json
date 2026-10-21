@@ -398,8 +398,7 @@
     "deleteSiteError": "No se pudo eliminar el sitio.",
     "otherTabTitle": "El espacio de trabajo cambió en otra pestaña",
     "otherTabBody": "Cambiaste a {{other}} en otra pestaña. Esta pestaña sigue mostrando {{current}}, así que lo que cambies aquí se aplica a {{current}}.",
-    "otherTabSwitch": "Cambiar a {{name}}",
-    "otherTabStay": "Seguir en {{name}}"
+    "otherTabSwitch": "Cambiar a {{name}}"
   },
   "reports": {
     "previewTitle": "Vista previa",
