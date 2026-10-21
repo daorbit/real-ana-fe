@@ -23,7 +23,7 @@ import type {
   ShareState, SharePanels, SeoReport, SeoReportSummary, SeoCompetitor,
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
   SeoSearchTraffic, SeoFieldVitals, SeoCrawlReport,
-  SeoShareState, SeoSharePanels, PublicSeoReport,
+  SeoShareState, SeoSharePanels, SeoShareLink, PublicSeoReport,
   DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
   Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
@@ -330,6 +330,8 @@ export const api = createApi({
         method: "PUT",
         body: { enabled },
       }),
+      invalidatesTags: (_r, _e, { workspaceId, app }) =>
+        app === "publicDashboard" ? [{ type: "Share", id: workspaceId }] : [],
       async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -1819,7 +1821,37 @@ export const api = createApi({
         method: "PUT",
         body: { enabled, rotate, panels },
       }),
-      invalidatesTags: (_r, _e, { reportId }) => [{ type: "Seo", id: `share-${reportId}` }],
+      invalidatesTags: (_r, _e, { reportId, siteId }) => [
+        { type: "Seo", id: `share-${reportId}` },
+        { type: "Seo", id: `links-${siteId}` },
+      ],
+    }),
+
+    getSeoShareLinks: build.query<{ links: SeoShareLink[] }, { workspaceId: string; siteId: string }>({
+      query: ({ workspaceId, siteId }) => `/api/workspaces/${workspaceId}/sites/${siteId}/seo/share-links`,
+      providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }, { type: "Seo", id: `links-${siteId}` }],
+    }),
+
+    removeSeoAuditPage: build.mutation<void, { workspaceId: string; siteId: string; reportId: string }>({
+      query: ({ workspaceId, siteId, reportId }) => ({
+        url: `/api/workspaces/${workspaceId}/sites/${siteId}/seo/share-links/${reportId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
+    }),
+
+    getSeoSharePanels: build.query<{ panels: SeoSharePanels }, string>({
+      query: (workspaceId) => `/api/workspaces/${workspaceId}/seo/share-panels`,
+      providesTags: (_r, _e, workspaceId) => [{ type: "Seo", id: `panels-${workspaceId}` }],
+    }),
+
+    setSeoSharePanels: build.mutation<{ panels: SeoSharePanels }, { workspaceId: string; panels: SeoSharePanels }>({
+      query: ({ workspaceId, panels }) => ({
+        url: `/api/workspaces/${workspaceId}/seo/share-panels`,
+        method: "PUT",
+        body: { panels },
+      }),
+      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Seo", id: `panels-${workspaceId}` }],
     }),
 
     /** The public read-only view — unauthenticated, token is the whole credential. */
@@ -3091,6 +3123,10 @@ export const {
   useDeleteSeoReportMutation,
   useGetSeoShareQuery,
   useSetSeoShareMutation,
+  useGetSeoShareLinksQuery,
+  useRemoveSeoAuditPageMutation,
+  useGetSeoSharePanelsQuery,
+  useSetSeoSharePanelsMutation,
   useGetPublicSeoReportQuery,
   useGetDemoUsageQuery,
   useSetDemoLimitMutation,

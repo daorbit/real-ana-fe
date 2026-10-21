@@ -1,7 +1,7 @@
 import type {
   Workspace, Site, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, ShareState, SeoReport,
   SeoReportSummary, SeoCrawlReport, SeoCrawlPage, SeoSearchTraffic, SeoFieldVitals,
-  SeoCompetitor, SeoShareState,
+  SeoCompetitor, SeoShareState, SeoShareLink,
 } from "@/shared/types";
 import { demoStats, demoUserFlow } from "@/features/demo/demoStats";
 
@@ -350,6 +350,20 @@ export const demoSeoShare: SeoShareState = {
   },
   views: 0,
   lastViewedAt: null,
+};
+
+export const demoSeoShareLinks: { links: SeoShareLink[] } = {
+  links: [
+    {
+      reportId: DEMO_REPORT_ID,
+      url: "https://acme.example/",
+      score: 88,
+      createdAt: demoSeoHistory[0].createdAt,
+      token: "pk_seo_demo",
+      views: 12,
+      lastViewedAt: iso(5 * 3_600_000),
+    },
+  ],
 };
 
 const crawlPage = (

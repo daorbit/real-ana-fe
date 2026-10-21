@@ -1983,6 +1983,16 @@ export type SeoSharePanels = {
 };
 
 /** Per-report share state, returned by the owner-facing share endpoints. */
+export type SeoShareLink = {
+  reportId: string;
+  url: string;
+  score: number;
+  createdAt: string;
+  token: string;
+  views: number;
+  lastViewedAt: string | null;
+};
+
 export type SeoShareState = {
   enabled: boolean;
   token: string | null;
