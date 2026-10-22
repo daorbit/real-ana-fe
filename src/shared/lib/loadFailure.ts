@@ -12,7 +12,7 @@ export function reportLoadFailure(signal?: AbortSignal) {
   lastShown = now;
 
   notify.error(
-    "Some information on this page couldn't be loaded. It will retry when you come back to this tab, or you can refresh the page.",
+    "Couldn't load part of this page. Refresh to try again.",
     "Couldn't load data",
   );
 }
