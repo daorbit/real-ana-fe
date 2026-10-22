@@ -744,6 +744,7 @@ export type QuotaSummary = {
   embeds?: FeatureAllowance;
   goalTargets?: FeatureAllowance;
   popups?: FeatureAllowance;
+  bioPages?: FeatureAllowance;
   alertCheckHours?: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
@@ -1125,7 +1126,8 @@ export type WorkspaceAppId =
   | "alerts"
   | "popups"
   | "publicDashboard"
-  | "seoReports";
+  | "seoReports"
+  | "bio";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string }>>;
 

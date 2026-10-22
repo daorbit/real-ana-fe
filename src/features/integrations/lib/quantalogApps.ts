@@ -172,6 +172,22 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Know it was read", body: "See how often each report was opened, and replace a link the moment it leaks." },
     ],
   },
+  bio: {
+    id: "bio",
+    tileId: "quantalog-bio",
+    name: "Quantalog Link-in-bio",
+    navLabel: "Link in bio",
+    route: "/app/bio",
+    location: "in the sidebar",
+    offNote: "Your pages and their stats are kept, but the public links stop working until you turn it back on.",
+    tagline: "One link for your Instagram, LinkedIn and TikTok bio, with every click counted.",
+    description: "Build a clean page of your most important links, put its address in your social bios, and see which links people actually tap. No extra tracking code needed.",
+    features: [
+      { title: "Ready in a minute", body: "Add a photo, a short bio, your links and social icons. The preview shows exactly what visitors see." },
+      { title: "Every tap counted", body: "Views and clicks per link for the last 30 days, so you know what your audience wants." },
+      { title: "Yours to style", body: "Light or dark, your accent colour and button shape, on a fast page at your own address." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

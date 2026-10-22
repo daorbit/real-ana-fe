@@ -1,4 +1,4 @@
-const SITE_URL = "https://quantalog.daorbit.in";
+export const SITE_URL = "https://quantalog.daorbit.in";
 
 export const DOCS_BASE_URL = `${SITE_URL}/docs`;
 
@@ -39,6 +39,7 @@ export const DOCS_SLUGS = {
   quantalogLinks: "/quantalog-links",
   quantalogAlerts: "/quantalog-alerts",
   quantalogPopups: "/quantalog-popups",
+  quantalogBio: "/quantalog-bio",
   quantalogSeoReports: "/quantalog-seo-reports",
   searchVisibility: "/search-visibility",
   emailReports: "/email-reports",

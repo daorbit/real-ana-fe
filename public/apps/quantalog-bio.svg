@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="28 28 200 200" width="256" height="256" role="img" aria-label="Quantalog Link-in-bio">
+  <rect x="58" y="34" width="124" height="190" rx="28" fill="#007AFF"/>
+  <rect x="102" y="44" width="36" height="8" rx="4" fill="#0051C7"/>
+  <circle cx="120" cy="86" r="18" fill="#FFC233"/>
+  <rect x="80" y="120" width="80" height="18" rx="9" fill="#FFFFFF"/>
+  <rect x="80" y="146" width="80" height="18" rx="9" fill="#CFE4FF"/>
+  <rect x="80" y="172" width="80" height="18" rx="9" fill="#CFE4FF"/>
+  <circle cx="188" cy="184" r="36" fill="#FF375F"/>
+  <path d="M188 204c-14-9-22-17-22-27a11 11 0 0 1 22-4 11 11 0 0 1 22 4c0 10-8 18-22 27z" fill="#FFFFFF"/>
+</svg>

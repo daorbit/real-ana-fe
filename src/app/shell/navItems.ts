@@ -1,7 +1,7 @@
 import {
   Home, BarChart3, FolderKanban, Code2, Users, Search, CalendarClock,
   Send, CreditCard, Swords, Palette, Images, TrendingUp,
-  LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow,
+  LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow, Link2,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/features/admin/lib/adminSections";
@@ -65,6 +65,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: Send, art: "scheduled-posts" },
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadMagnetIcon, art: "lead-capture" },
       { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
+      { to: "/app/bio", labelKey: "nav.bio", label: "Link in bio", icon: Link2, app: "bio" },
       { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
     ],
   },

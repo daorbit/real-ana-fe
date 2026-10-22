@@ -77,6 +77,9 @@ const Goals = lazy(() => import("@/features/goals/pages/Goals"));
 const Alerts = lazy(() => import("@/features/alerts/pages/Alerts"));
 const Popups = lazy(() => import("@/features/popups/pages/Popups"));
 const PopupStudio = lazy(() => import("@/features/popups/pages/PopupStudio"));
+const BioPages = lazy(() => import("@/features/bio/pages/BioPages"));
+const BioStudio = lazy(() => import("@/features/bio/pages/BioStudio"));
+const PublicBio = lazy(() => import("@/features/bio/pages/PublicBio"));
 const EmbedWidget = lazy(() => import("@/features/embed/pages/EmbedWidget"));
 const WelcomeOverlay = lazy(() =>
   import("@/shared/ui/WelcomeOverlay").then((m) => ({ default: m.WelcomeOverlay })),
@@ -234,6 +237,7 @@ export default function App() {
               <Route path="/forgot-password" element={<PublicOnly><ForgotPassword /></PublicOnly>} />
               <Route path="/share/:token" element={<RouteFrame><PublicDashboard /></RouteFrame>} />
               <Route path="/embed/:token" element={<RouteFrame><EmbedWidget /></RouteFrame>} />
+              <Route path="/bio/:slug" element={<RouteFrame><PublicBio /></RouteFrame>} />
               <Route path="/invite/:token" element={<RouteFrame><AcceptInvite /></RouteFrame>} />
               <Route path="/connect/authorize" element={<RouteFrame><ConnectAuthorize /></RouteFrame>} />
               <Route path="/seo-report/:token" element={<RouteFrame><PublicSeoReport /></RouteFrame>} />
@@ -256,6 +260,9 @@ export default function App() {
                 <Route path="/app/popups" element={<Popups />} />
                 <Route path="/app/popups/new" element={<PopupStudio />} />
                 <Route path="/app/popups/:popupId" element={<PopupStudio />} />
+                <Route path="/app/bio" element={<BioPages />} />
+                <Route path="/app/bio/new" element={<BioStudio />} />
+                <Route path="/app/bio/:pageId" element={<BioStudio />} />
                 <Route path="/app/seo" element={<Seo />} />
                 <Route path="/app/search-visibility" element={<SearchConsole />} />
                 <Route path="/app/search-visibility/page/:pageKey" element={<SearchConsolePageDetail />} />
