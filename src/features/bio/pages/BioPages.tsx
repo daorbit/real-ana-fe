@@ -1,11 +1,10 @@
 import { Button, Skeleton } from "@mantine/core";
-import { Link2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { ErrorState } from "@/shared/ui/ErrorState";
-import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
@@ -15,6 +14,7 @@ import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowanc
 import { useBioPages } from "@/features/bio/hooks/useBioPages";
 import { useBioActions } from "@/features/bio/hooks/useBioActions";
 import { BioPageCard } from "@/features/bio/components/BioPageCard";
+import { BioEmpty } from "@/features/bio/components/BioEmpty";
 import classes from "@/features/bio/components/BioPages.module.css";
 
 export default function BioPages() {
@@ -60,12 +60,7 @@ export default function BioPages() {
       ) : failed ? (
         <ErrorState onRetry={() => void refresh()} retrying={refreshing} />
       ) : !hasPages ? (
-        <EmptyState
-          icon={Link2}
-          title="Make your first link-in-bio page"
-          description="Add a photo, a short bio and your most important links. Put the address in your Instagram, LinkedIn or TikTok bio and see which links people tap."
-          action={canEdit ? { label: "Create a page", icon: Plus, onClick: openNew } : undefined}
-        />
+        <BioEmpty canEdit={canEdit} onCreate={openNew} />
       ) : (
         <>
           <div className={classes.sectionHead}>

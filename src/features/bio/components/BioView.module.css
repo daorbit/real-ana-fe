@@ -26,7 +26,7 @@
 }
 
 .root[data-variant="preview"] {
-  padding: 40px 16px 20px;
+  padding-top: 72px;
 }
 
 .column {
@@ -50,12 +50,6 @@
   font-size: 32px;
   font-weight: 650;
   letter-spacing: -0.02em;
-}
-
-.root[data-variant="preview"] .avatar {
-  width: 80px;
-  height: 80px;
-  font-size: 26px;
 }
 
 .avatarImage {
@@ -142,11 +136,6 @@ a.link:hover {
 
 .link[data-shape="square"] {
   border-radius: 4px;
-}
-
-.root[data-variant="preview"] .link {
-  min-height: 46px;
-  font-size: 14px;
 }
 
 .placeholder {

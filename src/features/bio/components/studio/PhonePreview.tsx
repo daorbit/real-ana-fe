@@ -1,18 +1,31 @@
-import { Lock } from "lucide-react";
+import { useFitScale } from "@/hooks/useFitScale";
+import { DeviceFrame, frameSize } from "@/features/social/components/DeviceFrame";
 import { publicBioDisplay } from "@/features/bio/lib/bioOptions";
 import type { BioPageInput } from "@/features/bio/types";
 import { BioView } from "../BioView";
 import classes from "./BioStudio.module.css";
 
-export function PhonePreview({ draft }: { draft: BioPageInput }) {
+const PHONE = frameSize("iphone");
+
+export function PhonePreview({
+  draft,
+  note = true,
+  compact = false,
+}: {
+  draft: BioPageInput;
+  note?: boolean;
+  compact?: boolean;
+}) {
+  const { ref, scale, measured } = useFitScale({
+    contentWidth: PHONE.width,
+    contentHeight: PHONE.height,
+    padding: { x: 0, y: 0 },
+  });
+
   return (
-    <>
-      <div className={classes.phone}>
-        <div className={classes.phoneBar}>
-          <Lock size={11} aria-hidden />
-          <span className={classes.phoneAddress}>{publicBioDisplay(draft.slug || "your-page")}</span>
-        </div>
-        <div className={classes.phoneScreen}>
+    <div className={classes.previewWrap}>
+      <div ref={ref} className={classes.stage} data-compact={compact || undefined}>
+        <DeviceFrame device="iphone" scale={scale} hidden={!measured}>
           <BioView
             variant="preview"
             title={draft.title}
@@ -22,9 +35,9 @@ export function PhonePreview({ draft }: { draft: BioPageInput }) {
             socials={draft.socials.filter((social) => social.url.trim())}
             theme={draft.theme}
           />
-        </div>
+        </DeviceFrame>
       </div>
-      <p className={classes.previewNote}>Live preview. Hidden links and empty fields are left out.</p>
-    </>
+      {note && <p className={classes.previewNote}>{publicBioDisplay(draft.slug || "your-page")}</p>}
+    </div>
   );
 }
