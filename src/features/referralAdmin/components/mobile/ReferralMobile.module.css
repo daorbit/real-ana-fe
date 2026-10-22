@@ -72,8 +72,8 @@
 }
 
 .rank[data-top] {
-  background: var(--text);
-  color: var(--shell);
+  background: var(--accent-soft);
+  color: var(--accent-text);
 }
 
 .linkDot {

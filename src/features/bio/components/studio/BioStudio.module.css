@@ -193,7 +193,7 @@
 }
 
 .swatch[data-active] {
-  border-color: var(--text);
+  border-color: var(--selected-border);
 }
 
 .fieldLabel {

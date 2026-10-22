@@ -166,8 +166,8 @@
   height: 44px;
   margin-bottom: 8px;
   border-radius: 50%;
-  background: var(--text);
-  color: var(--surface);
+  background: var(--accent-soft);
+  color: var(--accent-text);
 }
 
 .newTileTitle {

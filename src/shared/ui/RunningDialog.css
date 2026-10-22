@@ -9,20 +9,7 @@
 }
 
 .aurora-wash {
-  position: absolute;
-  inset: -40%;
-  background:
-    radial-gradient(38% 38% at 25% 25%, var(--accent-2) 0%, transparent 70%),
-    radial-gradient(34% 34% at 75% 65%, var(--cyan) 0%, transparent 70%);
-  opacity: 0.16;
-  filter: blur(28px);
-  animation: rd-drift 9s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-@keyframes rd-drift {
-  from { transform: translate3d(-4%, -3%, 0) scale(1); }
-  to   { transform: translate3d(5%, 4%, 0) scale(1.12); }
+  display: none;
 }
 
 .running-steps {

@@ -77,7 +77,7 @@
 }
 
 .tab[data-active]::after {
-  background: var(--text);
+  background: var(--accent);
 }
 
 .count {

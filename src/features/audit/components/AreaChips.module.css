@@ -28,9 +28,9 @@
 }
 
 .chip[data-active] {
-  border-color: transparent;
-  background: var(--text);
-  color: var(--shell);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
+  color: var(--selected-fg);
 }
 
 .chip:focus-visible {

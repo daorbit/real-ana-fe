@@ -27,9 +27,7 @@
   padding: 24px 28px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--violet-2) 10%, transparent), transparent 60%),
-    var(--surface);
+  background: var(--surface);
 }
 
 .headcount {
