@@ -24,7 +24,6 @@ import { FormsIntegrations } from "../FormsIntegrations";
 import { SearchConsoleConnection } from "../SearchConsoleConnection";
 import { ConnectionCardSkeleton, ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
 import { ConnectionsToolbar } from "./ConnectionsToolbar";
-import { FormsNotice } from "./FormsNotice";
 import { SocialGroup } from "./SocialGroup";
 
 const SKELETON_CARDS = 8;
@@ -97,25 +96,23 @@ export function ConnectionsBoard() {
   const coreLoading = social.loading || searchConsole.loading || assistants.loading;
   const formsLoading = !lockedReason && integrations.loading;
   const loading = coreLoading || formsLoading;
-  const assistantCards = (flat: boolean) => (
+  const assistantCards = (
     <AiAssistantsConnection
       assistants={assistants}
       workspaceName={active?.name ?? ""}
       lockedReason={workspaceId ? undefined : "Pick a workspace to connect an AI assistant to it."}
       filter={filter}
-      flat={flat}
     />
   );
   const formsSettled = Boolean(lockedReason) || (!integrations.loading && !integrations.failed);
   const nothingMatches = formsSettled && visibleCount === 0;
   const visibleSocial = social.entries.filter((entry) => matchesFilter(entry, filter));
-  const searchCard = (flat: boolean) => (
+  const searchCard = (
     <SearchConsoleConnection
       workspaceId={searchWorkspaceId}
       searchConsole={searchConsole}
       canManage={canAdmin}
       filter={filter}
-      flat={flat}
     />
   );
 
@@ -143,30 +140,14 @@ export function ConnectionsBoard() {
           }
           action={{ label: "Clear filters", onClick: () => setFilter(EMPTY_FILTER) }}
         />
-      ) : filter.status === "all" ? (
-        <>
-          <div className="connection-grid">
-            <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} flat />
-            {assistantCards(true)}
-            <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} flat />
-            {searchCard(true)}
-            <FormsIntegrations
-              workspaceId={workspaceId}
-              lockedReason={lockedReason}
-              integrations={integrations}
-              filter={filter}
-              flat
-            />
-            {formsLoading && <FormsSkeletons />}
-          </div>
-          <FormsNotice lockedReason={lockedReason} failed={integrations.failed} onRetry={integrations.refetchAll} />
-        </>
       ) : (
         <>
           <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} />
-          {assistantCards(false)}
-          <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} />
-          {searchCard(false)}
+          {assistantCards}
+          {visibleSocial.length > 0 && (
+            <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} />
+          )}
+          {searchCard}
           <FormsIntegrations
             workspaceId={workspaceId}
             lockedReason={lockedReason}

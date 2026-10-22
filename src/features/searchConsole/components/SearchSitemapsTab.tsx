@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { Alert, Text } from "@mantine/core";
-import { AlertTriangle, ExternalLink, FileText } from "lucide-react";
+import { Text } from "@mantine/core";
+import { ExternalLink, FileText } from "lucide-react";
 import { useGetSearchSitemapsQuery } from "@/app/store";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { usePermissions } from "@/features/workspace/context";
 import { errMessage } from "@/shared/lib/notify";
 import { num } from "@/shared/lib";
@@ -39,9 +40,13 @@ export function SearchSitemapsTab({
   if (isLoading) return <SitemapsSkeleton />;
   if (error || !data) {
     return (
-      <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-        {errMessage(error, "Sitemaps could not be loaded.")}
-      </Alert>
+      <ErrorState
+        compact
+        title="Couldn't load from Google"
+        description={errMessage(error, "Sitemaps could not be loaded.")}
+        onRetry={real.refetch}
+        retrying={real.isFetching}
+      />
     );
   }
 

@@ -1,7 +1,6 @@
-import { Alert } from "@mantine/core";
-import { AlertTriangle } from "lucide-react";
 import { useGetWorkspaceUsageHistoryQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import type { QuotaSummary } from "@/shared/types";
 import { ThisMonthCard } from "./ThisMonthCard";
 import { AllowanceList } from "./AllowanceList";
@@ -12,7 +11,7 @@ import { PlanTimeline } from "./PlanTimeline";
 import classes from "./UsageOverview.module.css";
 
 export function UsageOverviewTab({ workspaceId, usage }: { workspaceId: string; usage: QuotaSummary }) {
-  const { data, isLoading, error } = useGetWorkspaceUsageHistoryQuery(workspaceId, {
+  const { data, isLoading, isFetching, error, refetch } = useGetWorkspaceUsageHistoryQuery(workspaceId, {
     skip: !workspaceId,
     refetchOnMountOrArgChange: true,
   });
@@ -21,9 +20,13 @@ export function UsageOverviewTab({ workspaceId, usage }: { workspaceId: string; 
 
   if (error || !data) {
     return (
-      <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-        {errMessage(error, "Usage history could not be loaded.")}
-      </Alert>
+      <ErrorState
+        compact
+        title="Couldn't load usage"
+        description={errMessage(error, "Usage history could not be loaded.")}
+        onRetry={refetch}
+        retrying={isFetching}
+      />
     );
   }
 

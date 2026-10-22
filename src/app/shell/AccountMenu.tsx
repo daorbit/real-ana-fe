@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, UnstyledButton } from "@mantine/core";
 import {
-  ChevronsUpDown, Languages, Lightbulb, LifeBuoy, LogOut, Scale, Settings, ShieldCheck, StickyNote,
+  ChevronsUpDown,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
@@ -10,7 +10,6 @@ import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { CONTACT_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
-import { settingsPath } from "@/features/auth/components/settings/settingsSections";
 import type { ThemeMode } from "@/shared/lib/theme";
 import { ADMIN_TOOLS_PATH } from "@/features/admin/lib/adminSections";
 import { ThemeSwitch } from "./ThemeSwitch";
@@ -19,6 +18,7 @@ import { DemoCallBanner } from "./DemoCallBanner";
 import { DemoCallModal } from "./DemoCallModal";
 import classes from "./Rail.module.css";
 import { MenuVersion } from "./MenuVersion";
+import { MenuArtIcon } from "./MenuArtIcon";
 
 export function AccountMenu({
   collapsed,
@@ -111,19 +111,15 @@ export function AccountMenu({
             <ThemeSwitch mode={mode} onChange={onMode} />
           </div>
 
-          <Menu.Item component={Link} to={settingsPath("profile")} leftSection={<Settings size={15} />}>
-            {t("nav.accountSettings", "Account settings")}
-          </Menu.Item>
-
           {notesOn && (
-            <Menu.Item leftSection={<StickyNote size={15} />} onClick={() => notes.open()}>
+            <Menu.Item leftSection={<MenuArtIcon src="/apps/quantalog-notes.svg" />} onClick={() => notes.open()}>
               {t("nav.notes", "Notes")}
             </Menu.Item>
           )}
 
           <Menu.Sub>
             <Menu.Sub.Target>
-              <Menu.Sub.Item leftSection={<Languages size={15} />}>{t("nav.language", "Language")}</Menu.Sub.Item>
+              <Menu.Sub.Item leftSection={<MenuArtIcon src="/nav/language.svg" />}>{t("nav.language", "Language")}</Menu.Sub.Item>
             </Menu.Sub.Target>
             <Menu.Sub.Dropdown>
               <LanguageItems />
@@ -131,7 +127,7 @@ export function AccountMenu({
           </Menu.Sub>
 
           {isAdmin && (
-            <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<ShieldCheck size={15} />}>
+            <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<MenuArtIcon src="/nav/admin-tools.svg" />}>
               {t("nav.adminTools", "Admin tools")}
             </Menu.Item>
           )}
@@ -139,15 +135,15 @@ export function AccountMenu({
           <Menu.Divider />
           <div className={classes.menuSection}>{t("nav.help", "Help")}</div>
 
-          <Menu.Item leftSection={<Lightbulb size={15} />} onClick={() => setFeatureOpen(true)}>
+          <Menu.Item leftSection={<MenuArtIcon src="/nav/request-feature.svg" />} onClick={() => setFeatureOpen(true)}>
             {t("nav.requestFeature", "Request a feature")}
           </Menu.Item>
-          <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<LifeBuoy size={15} />}>
+          <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<MenuArtIcon src="/nav/contact-support.svg" />}>
             {t("nav.contactSupport", "Contact support")}
           </Menu.Item>
           <Menu.Sub>
             <Menu.Sub.Target>
-              <Menu.Sub.Item leftSection={<Scale size={15} />}>{t("nav.legal", "Legal")}</Menu.Sub.Item>
+              <Menu.Sub.Item leftSection={<MenuArtIcon src="/nav/legal.svg" />}>{t("nav.legal", "Legal")}</Menu.Sub.Item>
             </Menu.Sub.Target>
             <Menu.Sub.Dropdown>
               <Menu.Item component="a" href={LEGAL_URLS.terms} target="_blank" rel="noreferrer">
@@ -164,7 +160,7 @@ export function AccountMenu({
 
           <Menu.Divider />
 
-          <Menu.Item color="red" className="danger-item" leftSection={<LogOut size={15} />} onClick={onLogout}>
+          <Menu.Item color="red" className="danger-item" leftSection={<MenuArtIcon src="/nav/logout.svg" />} onClick={onLogout}>
             {t("nav.logout", "Log out")}
           </Menu.Item>
 

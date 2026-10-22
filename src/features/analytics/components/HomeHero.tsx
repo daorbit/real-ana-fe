@@ -1,8 +1,9 @@
-import { Box, Group, Text, Badge } from "@mantine/core";
+import { Box, Group } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { num } from "@/shared/lib";
 import type { LiveAudience, Point } from "@/shared/types";
 import { AudienceSummary } from "./liveAudience/AudienceSummary";
+import classes from "./HomeHero.module.css";
 
 /**
  * The band at the top of Home.
@@ -35,25 +36,18 @@ export function HomeHero({
 
   return (
     <Box className="hero-band" mb="xl">
-      {/* The trend sits behind the numbers as texture rather than as a chart —
-          it is context for the hero figure, and the real chart is below. */}
       {hasShape && (
         <div className="hero-spark" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={series} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.2} />
-                  <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <Area
                 type="monotone"
                 dataKey="views"
                 stroke="var(--accent)"
-                strokeWidth={2}
-                strokeOpacity={0.5}
-                fill="url(#heroSpark)"
+                strokeWidth={1.5}
+                strokeOpacity={0.6}
+                fill="var(--accent)"
+                fillOpacity={0.06}
                 dot={false}
                 isAnimationActive={false}
               />
@@ -63,60 +57,36 @@ export function HomeHero({
       )}
 
       <Box className="hero-content hero-pad" p="xl">
-        <Group justify="space-between" align="flex-start" wrap="wrap" gap="xl">
-          <div style={{ minWidth: 0 }}>
-            <Group gap={8} mb={10} wrap="nowrap">
-              <span className="status-dot live" style={{ background: "var(--accent)" }} />
-              <Text size="xs" c="dimmed" fw={600} style={{ letterSpacing: "0.06em" }}>
-                ONLINE NOW
-              </Text>
-            </Group>
+        <Group justify="space-between" align="flex-end" wrap="wrap" gap="xl">
+          <div className={classes.lead}>
+            <span className={classes.liveLabel}>
+              <span className={`status-dot live ${classes.liveDot}`} />
+              Online now
+            </span>
 
-            <Group align="baseline" gap="sm" wrap="nowrap">
-              {/* Hero figure: ≥48px, same sans as everything else. */}
-              <Text
-                className="hero-figure"
-                fw={700}
-                lh={1}
-                style={{ letterSpacing: "-0.04em", color: "var(--text)" }}
-              >
-                {num(people)}
-              </Text>
-              <Text size="sm" c="dimmed" pb={8}>
+            <div className={classes.figureRow}>
+              <span className={`hero-figure ${classes.figure}`}>{num(people)}</span>
+              <span className={classes.unit}>
                 {unit} on {workspaceName}
-              </Text>
-            </Group>
+              </span>
+            </div>
             {audience && <AudienceSummary audience={audience} />}
           </div>
 
-          {/* Supporting totals — deliberately small, so they read as context
-              for the hero rather than competing with it. */}
-          <Group gap="xl" wrap="wrap">
-            <div>
-              <Text size="xs" c="dimmed" fw={500} mb={4}>
-                Visitors today
-              </Text>
-              <Text fw={650} fz={20.5} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
-                {num(visitors)}
-              </Text>
+          <div className={classes.totals}>
+            <div className={classes.total}>
+              <div className={classes.totalLabel}>Visitors today</div>
+              <div className={classes.totalValue}>{num(visitors)}</div>
             </div>
-            <div>
-              <Text size="xs" c="dimmed" fw={500} mb={4}>
-                Pageviews today
-              </Text>
-              <Text fw={650} fz={20.5} lh={1.1} style={{ letterSpacing: "-0.02em" }}>
-                {num(pageviews)}
-              </Text>
+            <div className={classes.total}>
+              <div className={classes.totalLabel}>Pageviews today</div>
+              <div className={classes.totalValue}>{num(pageviews)}</div>
             </div>
-            <div>
-              <Text size="xs" c="dimmed" fw={500} mb={4}>
-                Period
-              </Text>
-              <Badge variant="light" color="gray" size="lg" radius="sm">
-                Last 24 hours
-              </Badge>
+            <div className={classes.total}>
+              <div className={classes.totalLabel}>Period</div>
+              <div className={classes.period}>Last 24 hours</div>
             </div>
-          </Group>
+          </div>
         </Group>
       </Box>
     </Box>

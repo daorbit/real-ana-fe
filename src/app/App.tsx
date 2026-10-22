@@ -18,6 +18,7 @@ import { ShellLayout } from "@/app/shell/ShellLayout";
 import { LEGACY_ADMIN_PATHS } from "@/features/admin/lib/adminSections";
 import { LegacyAdminRedirect } from "@/features/admin/components/LegacyAdminRedirect";
 import { consumeWelcomePending } from "@/shared/ui/welcomePending";
+import "@/app/tokens.css";
 import "@/app/App.css";
 import "@/polish.css";
 import "@/app/viewTransitions.css";

@@ -186,7 +186,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         description: `${plan.name} — ${cycle}`,
         image: CHECKOUT_LOGO,
         prefill: { name: user?.name, email: user?.email },
-        theme: { color: "#059669" },
+        theme: { color: "#2f6bff" },
         handler: async (response) => {
           paid = true;
           try {
@@ -257,7 +257,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         description: packs > 1 ? `${pack.name} × ${packs}` : pack.name,
         image: CHECKOUT_LOGO,
         prefill: { name: user?.name, email: user?.email },
-        theme: { color: "#059669" },
+        theme: { color: "#2f6bff" },
         handler: async (response) => {
           paid = true;
           try {

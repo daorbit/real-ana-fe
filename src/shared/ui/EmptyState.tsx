@@ -7,9 +7,7 @@ import classes from "@/shared/ui/EmptyState.module.css";
  * The empty-state pattern for the whole app: an icon, a line, an optional
  * action — floating directly on the page rather than boxed in a bordered
  * card. A card around "there is nothing here" doubles the message: it draws
- * a frame around empty space as though the frame itself were content. The
- * icon carries a slow float so the state reads as alive rather than as a
- * page that failed to load.
+ * a frame around empty space as though the frame itself were content.
  */
 export function EmptyState({
   icon: Icon,
@@ -53,9 +51,9 @@ export function EmptyState({
       mih={compact ? undefined : minHeight}
     >
       <div className="empty-state__icon" data-size={compact ? "sm" : "md"} aria-hidden>
-        <Icon size={compact ? 26 : 40} strokeWidth={1.25} />
+        <Icon size={compact ? 20 : 26} strokeWidth={1.5} />
       </div>
-      <Text fw={650} fz="lg" mt="lg">{title}</Text>
+      <Text fw={600} fz="md" mt="md">{title}</Text>
       {description && (
         <Text size="sm" c="dimmed" mt={6} className={classes.description}>
           {description}
@@ -63,8 +61,7 @@ export function EmptyState({
       )}
       {action && action.to && (
         <Button
-          mt="xl"
-          size="md"
+          mt="lg"
           leftSection={action.icon ? <action.icon size={16} /> : undefined}
           disabled={action.disabled}
           loading={action.loading}
@@ -77,8 +74,7 @@ export function EmptyState({
       )}
       {action && !action.to && (
         <Button
-          mt="xl"
-          size="md"
+          mt="lg"
           leftSection={action.icon ? <action.icon size={16} /> : undefined}
           disabled={action.disabled}
           loading={action.loading}

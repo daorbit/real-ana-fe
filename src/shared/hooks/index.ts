@@ -2,4 +2,5 @@ export { usePolling, POLL_MS } from "@/shared/hooks/usePolling";
 export { useCountUp } from "@/shared/hooks/useCountUp";
 export { useUnsavedGuard } from "@/shared/hooks/useUnsavedGuard";
 export { useEscapeDiscard } from "@/shared/hooks/useEscapeDiscard";
+export { useDismissOnFrameFocus } from "@/shared/hooks/useDismissOnFrameFocus";
  

@@ -12,10 +12,9 @@ import { QuantalogAppModal } from "./QuantalogAppModal";
 interface Props {
   quantalogApps: ReturnType<typeof useQuantalogApps>;
   filter: ConnectionFilter;
-  flat?: boolean;
 }
 
-export function QuantalogAppsConnection({ quantalogApps, filter, flat }: Props) {
+export function QuantalogAppsConnection({ quantalogApps, filter }: Props) {
   const [params, setParams] = useSearchParams();
   const [openId, setOpenId] = useState<WorkspaceAppId | null>(null);
   const requested = params.get("app");
@@ -37,14 +36,11 @@ export function QuantalogAppsConnection({ quantalogApps, filter, flat }: Props) 
 
   return (
     <>
-      {visible.length > 0 &&
-        (flat ? (
-          cards
-        ) : (
-          <ConnectionGroup title={CATEGORY_TITLE.quantalog} hint={CATEGORY_HINT.quantalog}>
-            {cards}
-          </ConnectionGroup>
-        ))}
+      {visible.length > 0 && (
+        <ConnectionGroup title={CATEGORY_TITLE.quantalog} hint={CATEGORY_HINT.quantalog}>
+          {cards}
+        </ConnectionGroup>
+      )}
       {openId && (
         <QuantalogAppModal info={WORKSPACE_APP_INFO[openId]} opened onClose={() => setOpenId(null)} />
       )}

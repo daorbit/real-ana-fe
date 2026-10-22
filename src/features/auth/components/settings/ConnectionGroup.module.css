@@ -1,7 +1,8 @@
 .group + .group {
-  margin-top: 36px;
+  margin-top: var(--space-10);
 }
 
 .title {
+  font-size: 15px;
   letter-spacing: -0.01em;
 }

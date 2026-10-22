@@ -424,12 +424,7 @@ export function buildBgValue(
   return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
 }
 
-export const FIXED_ACCENT = { light: "#007aff", dark: "#0a84ff" };
-
-const FIXED_CTA = {
-  light: { bg: "#1d1d1f", bgHover: "#333336", fg: "#ffffff" },
-  dark: { bg: "#f5f5f7", bgHover: "#e3e3e8", fg: "#1d1d1f" },
-};
+export const FIXED_ACCENT = { light: "#2f6bff", dark: "#4776ff" };
 
 const NEUTRAL_SOFT = {
   light: "color-mix(in srgb, var(--text) 6%, transparent)",
@@ -462,46 +457,26 @@ export function applyTheme(input: ThemePrefs) {
     prefs.mode === "dark" ||
     (prefs.mode === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const preset = { hex: dark ? FIXED_ACCENT.dark : FIXED_ACCENT.light };
-  const cta = dark ? FIXED_CTA.dark : FIXED_CTA.light;
-
-  const accent = preset.hex;
-  const accent2 = "var(--text)";
+  const scale = buildScale(FIXED_ACCENT.light, 6);
   const accentSoft = dark ? NEUTRAL_SOFT.dark : NEUTRAL_SOFT.light;
   const accentSoftHover = dark ? NEUTRAL_SOFT_HOVER.dark : NEUTRAL_SOFT_HOVER.light;
 
-  root.style.setProperty("--accent", accent);
-  root.style.setProperty("--accent-2", accent2);
-  root.style.setProperty("--accent-soft", accentSoft);
-  // Legacy var names kept — most of the app's CSS still reads --violet-*.
-  root.style.setProperty("--violet", accent);
-  root.style.setProperty("--violet-2", accent2);
-  root.style.setProperty("--violet-soft", accentSoft);
-
-  const primaryShadeIdx = dark ? 7 : 6;
-  const scale = buildScale(preset.hex, primaryShadeIdx);
   scale.forEach((c, i) => {
     root.style.setProperty(`--mantine-color-emerald-${i}`, c);
   });
-  const filled = cta.bg;
-  const filledHover = cta.bgHover;
 
-  const filledText = cta.fg;
-  root.style.setProperty("--tabs-text-color", filledText);
-
-  root.style.setProperty("--button-color", filledText);
-  root.style.setProperty("--section-color", filledText);
-
-  root.style.setProperty("--accent-contrast", filledText);
+  root.style.setProperty("--tabs-text-color", "var(--cta-fg)");
+  root.style.setProperty("--button-color", "var(--cta-fg)");
+  root.style.setProperty("--section-color", "var(--cta-fg)");
 
   for (const name of ["emerald", "primary"]) {
-    root.style.setProperty(`--mantine-color-${name}-filled`, filled);
-    root.style.setProperty(`--mantine-color-${name}-filled-hover`, filledHover);
+    root.style.setProperty(`--mantine-color-${name}-filled`, "var(--accent)");
+    root.style.setProperty(`--mantine-color-${name}-filled-hover`, "var(--blue-10)");
     root.style.setProperty(`--mantine-color-${name}-light`, accentSoft);
     root.style.setProperty(`--mantine-color-${name}-light-hover`, accentSoftHover);
     root.style.setProperty(`--mantine-color-${name}-light-color`, "var(--text)");
-    root.style.setProperty(`--mantine-color-${name}-text`, accent);
-    root.style.setProperty(`--mantine-color-${name}-outline`, filled);
+    root.style.setProperty(`--mantine-color-${name}-text`, "var(--accent-text)");
+    root.style.setProperty(`--mantine-color-${name}-outline`, "var(--accent)");
     root.style.setProperty(`--mantine-color-${name}-outline-hover`, accentSoft);
   }
   for (let i = 0; i < 10; i++) {
@@ -519,18 +494,8 @@ export function applyTheme(input: ThemePrefs) {
   );
   root.toggleAttribute("data-bg-animated", bgPreset.kind === "stars");
 
-  root.style.setProperty("--cta", cta.bg);
-  root.style.setProperty("--cta-hover", cta.bgHover);
-  root.style.setProperty("--cta-fg", cta.fg);
-
   root.style.setProperty("--rail-wash", "none");
   root.setAttribute("data-theme-preset", prefs.preset);
-
-  const radiusPx = RADIUS_STYLES.find((r) => r.id === prefs.radius)?.px ?? 16;
-  root.style.setProperty("--radius", `${radiusPx}px`);
-  root.style.setProperty("--radius-sm", `${Math.round(radiusPx * 0.7)}px`);
-  root.style.setProperty("--radius-lg", `${Math.round(radiusPx * 1.25)}px`);
-  root.style.setProperty("--mantine-radius-md", `${radiusPx}px`);
 
   root.setAttribute("data-density", prefs.density);
 

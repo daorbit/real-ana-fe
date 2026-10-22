@@ -29,7 +29,7 @@ export default function SeoReportPrint() {
   // White-label overrides, passed in the URL so a report can be branded
   // without storing per-agency settings server-side.
   const brand = params.get("brand")?.trim() || active?.name || "";
-  const accent = params.get("accent")?.trim() || "#10b981";
+  const accent = params.get("accent")?.trim() || "#2f6bff";
 
   const { data: report, isLoading } = useGetSeoReportQuery(
     { workspaceId, siteId, reportId },

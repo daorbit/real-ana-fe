@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { Alert, Text } from "@mantine/core";
-import { AlertTriangle } from "lucide-react";
+import { Text } from "@mantine/core";
 import { useGetSearchBreakdownQuery } from "@/app/store";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { errMessage } from "@/shared/lib/notify";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchBreakdown } from "@/features/demo/demoSearchConsole";
@@ -40,9 +40,13 @@ export function SearchDevicesTab({
   if (isLoading) return <DevicesSkeleton />;
   if (error || !data) {
     return (
-      <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-        {errMessage(error, "Search visibility data could not be loaded.")}
-      </Alert>
+      <ErrorState
+        compact
+        title="Couldn't load from Google"
+        description={errMessage(error, "Search visibility data could not be loaded.")}
+        onRetry={real.refetch}
+        retrying={real.isFetching}
+      />
     );
   }
 

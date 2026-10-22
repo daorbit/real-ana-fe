@@ -225,7 +225,7 @@ export function CrawlerFilesPanel({
   return (
     <Stack gap="lg">
       {robots?.blocksEverything && (
-        <Alert color="red" variant="filled" radius="md" icon={<XCircle size={18} />}>
+        <Alert color="red" variant="light" radius="md" icon={<XCircle size={18} />}>
           <Text fw={700} size="sm" mb={4}>
             This site is blocked from every search engine
           </Text>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Alert, Stack, Text } from "@mantine/core";
-import { AlertTriangle, FileSearch } from "lucide-react";
+import { FileSearch } from "lucide-react";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { AppShell } from "@/app/AppShell";
@@ -59,7 +60,7 @@ export default function SearchConsolePageDetail() {
   const status = demoStatus ?? realStatus;
   const propertyUrl = status?.links.find((l) => l.siteId === siteId)?.propertyUrl ?? "";
 
-  const { data: realData, isFetching, error } = useGetSearchDrilldownQuery(
+  const { data: realData, isFetching, error, refetch } = useGetSearchDrilldownQuery(
     { workspaceId, siteId, dimension: "page", value: pageUrl, days, type },
     { skip: !ready },
   );
@@ -107,9 +108,13 @@ export default function SearchConsolePageDetail() {
         />
 
         {error && !loaded ? (
-          <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-            {errMessage(error, "Could not load this page from Google.")}
-          </Alert>
+          <ErrorState
+            compact
+            title="Couldn't load from Google"
+            description={errMessage(error, "Could not load this page from Google.")}
+            onRetry={refetch}
+            retrying={isFetching}
+          />
         ) : loaded ? (
           <SearchMetricTiles
             columns={5}

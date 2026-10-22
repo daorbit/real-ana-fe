@@ -12,10 +12,9 @@ interface Props {
   workspaceName: string;
   lockedReason?: string;
   filter: ConnectionFilter;
-  flat?: boolean;
 }
 
-export function AiAssistantsConnection({ assistants, workspaceName, lockedReason, filter, flat }: Props) {
+export function AiAssistantsConnection({ assistants, workspaceName, lockedReason, filter }: Props) {
   const [openId, setOpenId] = useState<AssistantId | null>(null);
 
   if (!assistants.available) return null;
@@ -35,14 +34,11 @@ export function AiAssistantsConnection({ assistants, workspaceName, lockedReason
 
   return (
     <>
-      {visible.length > 0 &&
-        (flat ? (
-          cards
-        ) : (
-          <ConnectionGroup title={CATEGORY_TITLE.ai} hint={CATEGORY_HINT.ai}>
-            {cards}
-          </ConnectionGroup>
-        ))}
+      {visible.length > 0 && (
+        <ConnectionGroup title={CATEGORY_TITLE.ai} hint={CATEGORY_HINT.ai}>
+          {cards}
+        </ConnectionGroup>
+      )}
       {open && (
         <AssistantModal
           opened

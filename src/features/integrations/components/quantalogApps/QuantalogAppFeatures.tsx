@@ -8,7 +8,7 @@ export function QuantalogAppFeatures({ info }: { info: WorkspaceAppInfo }) {
       {info.features.map((feature) => (
         <li key={feature.title} className={classes.featureRow}>
           <span className={classes.featureCheck} aria-hidden>
-            <Check size={14} strokeWidth={2.4} />
+            <Check size={18} strokeWidth={2.2} />
           </span>
           <span className={classes.featureText}>
             <span className={classes.featureTitle}>{feature.title}</span>

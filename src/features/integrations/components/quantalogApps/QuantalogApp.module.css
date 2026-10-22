@@ -1,16 +1,14 @@
 .overview {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 760px;
+  gap: var(--space-3);
 }
 
 .overviewLabel {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
 
 .featureList {
@@ -19,37 +17,42 @@
   overflow: hidden;
   list-style: none;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius);
   background: var(--surface);
 }
 
 .featureRow {
+  position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 16px 18px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
 }
 
-.featureRow + .featureRow {
-  border-top: 1px solid var(--border);
+.featureRow + .featureRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 52px;
+  right: 0;
+  height: 1px;
+  background: var(--border);
 }
 
 .featureCheck {
   display: grid;
   flex-shrink: 0;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   margin-top: 1px;
-  border-radius: 50%;
-  background: var(--accent-soft);
   color: var(--accent);
 }
 
 .featureText {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -67,7 +70,8 @@
 }
 
 .note {
-  margin: 4px 0 0;
+  margin: 0;
+  padding-inline: var(--space-1);
   font-size: 13px;
   line-height: 1.5;
   color: var(--muted);

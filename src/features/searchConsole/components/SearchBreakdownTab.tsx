@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  Alert, Group, Loader, Pagination, ScrollArea, Select, Table, Text, TextInput, UnstyledButton,
+  Group, Loader, Pagination, ScrollArea, Select, Table, Text, TextInput, UnstyledButton,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { AlertTriangle, ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchBreakdown } from "@/features/demo/demoSearchConsole";
 import type {
@@ -101,9 +102,13 @@ export function SearchBreakdownTab({
   if (isLoading) return <BreakdownSkeleton labelHeader={labelHeader} showViews={dimension === "page" && ent.pageViews} />;
   if (error && !data) {
     return (
-      <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-        {errMessage(error, "Search visibility data could not be loaded.")}
-      </Alert>
+      <ErrorState
+        compact
+        title="Couldn't load from Google"
+        description={errMessage(error, "Search visibility data could not be loaded.")}
+        onRetry={realBreakdown.refetch}
+        retrying={realBreakdown.isFetching}
+      />
     );
   }
   if (!data) return null;

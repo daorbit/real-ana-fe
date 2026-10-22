@@ -23,7 +23,7 @@ export function PageHeader({
   docsPath?: DocsSlug;
 }) {
   return (
-    <Box mb="xl" className={classes.header}>
+    <Box className={classes.header}>
       <Group justify="space-between" align="flex-start" gap="md" wrap="wrap">
         <div className={classes.titleCol}>
           <Title order={1} className={classes.title}>

@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-import { Alert } from "@mantine/core";
-import { AlertTriangle } from "lucide-react";
 import { useGetSearchPerformanceQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchPerformance } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
@@ -115,9 +114,13 @@ export function SearchConsoleBody({
 
       {tab === "overview" &&
         (overview.error && !overview.data ? (
-          <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-            {errMessage(overview.error, "Search visibility data could not be loaded.")}
-          </Alert>
+          <ErrorState
+            compact
+            title="Couldn't load from Google"
+            description={errMessage(overview.error, "Search visibility data could not be loaded.")}
+            onRetry={realOverview.refetch}
+            retrying={realOverview.isFetching}
+          />
         ) : overview.data ? (
           <SearchOverviewTab
             data={overview.data}

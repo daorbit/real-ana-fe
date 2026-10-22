@@ -1,8 +1,7 @@
 import { useMemo } from "react";
-import { Alert } from "@mantine/core";
-import { AlertTriangle } from "lucide-react";
 import { useGetSearchInsightsQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchInsights } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
@@ -58,9 +57,13 @@ export function SearchInsightsTab({
   if (isLoading) return <InsightsSkeleton />;
   if (error && !data) {
     return (
-      <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-        {errMessage(error, "Insights could not be loaded.")}
-      </Alert>
+      <ErrorState
+        compact
+        title="Couldn't load from Google"
+        description={errMessage(error, "Insights could not be loaded.")}
+        onRetry={real.refetch}
+        retrying={real.isFetching}
+      />
     );
   }
   if (!data) return null;

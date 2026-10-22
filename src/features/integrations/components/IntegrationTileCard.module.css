@@ -1,7 +1,7 @@
 .footer {
-  min-height: 46px;
-  padding-top: 14px;
-  border-top: 1px solid var(--mantine-color-default-border);
+  min-height: 44px;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
 }
 
 .status {
@@ -15,22 +15,22 @@
 
 .ok {
   flex-shrink: 0;
-  color: var(--mantine-color-teal-6);
+  color: var(--green);
 }
 
 .paused {
   flex-shrink: 0;
-  color: var(--mantine-color-yellow-6);
+  color: var(--amber);
 }
 
 .warn {
   flex-shrink: 0;
-  color: var(--mantine-color-orange-6);
+  color: var(--amber);
 }
 
 .idle {
   flex-shrink: 0;
-  color: var(--mantine-color-dimmed);
+  color: var(--faint);
 }
 
 @media (max-width: 48em) {

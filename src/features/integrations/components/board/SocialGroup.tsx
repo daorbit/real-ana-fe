@@ -14,7 +14,6 @@ import { CARD_MARK_SIZE } from "../logos/BrandMarks";
 interface Props {
   entries: SocialEntry[];
   canUseInstagram: boolean;
-  flat?: boolean;
 }
 
 function statusFor(state: ConnectionState | undefined): ConnectionCardStatus {
@@ -23,7 +22,7 @@ function statusFor(state: ConnectionState | undefined): ConnectionCardStatus {
   return "idle";
 }
 
-export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
+export function SocialGroup({ entries, canUseInstagram }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
   const linkedInStatus = statusFor(entries.find((e) => e.id === "linkedin")?.state);
@@ -67,8 +66,6 @@ export function SocialGroup({ entries, canUseInstagram, flat }: Props) {
       <ConnectionCard key="facebook" mark={<FacebookMark size={CARD_MARK_SIZE} />} brand="facebook" name="Facebook" hint="Pages and profile posting." soon />
     ),
   };
-
-  if (flat) return <>{entries.map((entry) => cards[entry.id])}</>;
 
   return (
     <ConnectionGroup

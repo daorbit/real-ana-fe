@@ -11,10 +11,9 @@ interface Props {
   searchConsole: ReturnType<typeof useSearchConsoleConnection>;
   canManage: boolean;
   filter: ConnectionFilter;
-  flat?: boolean;
 }
 
-export function SearchConsoleConnection({ workspaceId, searchConsole, canManage, filter, flat }: Props) {
+export function SearchConsoleConnection({ workspaceId, searchConsole, canManage, filter }: Props) {
   const [open, setOpen] = useState(false);
   const { tile, entry, status, busy } = searchConsole;
 
@@ -28,13 +27,9 @@ export function SearchConsoleConnection({ workspaceId, searchConsole, canManage,
 
   return (
     <>
-      {flat ? (
-        card
-      ) : (
-        <ConnectionGroup title={CATEGORY_TITLE.search} hint={CATEGORY_HINT.search}>
-          {card}
-        </ConnectionGroup>
-      )}
+      <ConnectionGroup title={CATEGORY_TITLE.search} hint={CATEGORY_HINT.search}>
+        {card}
+      </ConnectionGroup>
       <SearchConsoleModal
         opened={open}
         workspaceId={workspaceId}

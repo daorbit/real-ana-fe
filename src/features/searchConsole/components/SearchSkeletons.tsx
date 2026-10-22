@@ -188,8 +188,7 @@ export function InsightsSkeleton() {
     <div className={insights.root}>
       <div className={insights.summary}>
         <div className={insights.summaryMain}>
-          <Skeleton height={40} width={40} radius="md" />
-          <div>
+          <div className={classes.grow}>
             <Skeleton height={20} width={380} maw="100%" radius="sm" />
             <Skeleton height={11} width={320} maw="100%" mt={10} radius="sm" />
             <div className={insights.kindCounts}>
@@ -210,9 +209,9 @@ export function InsightsSkeleton() {
           <div className={insights.panelHead}>
             <div>
               <Skeleton height={13} width={150} radius="sm" />
-              <Skeleton height={10} width={280} mt={8} radius="sm" />
+              <Skeleton height={10} width={280} maw="100%" mt={8} radius="sm" />
             </div>
-            <Skeleton height={30} width={300} radius="md" />
+            <Skeleton height={30} width={300} maw="100%" radius="md" />
           </div>
           <div className={insights.actions}>
             {range(5).map((i) => (
@@ -222,7 +221,7 @@ export function InsightsSkeleton() {
                   <Skeleton height={12} width={LABEL_WIDTHS[i]} radius="sm" />
                   <Skeleton height={10} width="85%" mt={8} radius="sm" />
                 </div>
-                <Skeleton height={22} width={96} radius="xl" />
+                <Skeleton height={22} width={72} radius="xl" className={classes.trailing} />
               </div>
             ))}
           </div>

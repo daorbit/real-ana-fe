@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Text, Group, Button, ThemeIcon, Stack, Center, Alert } from "@mantine/core";
+import { Text, Group, Button, Alert } from "@mantine/core";
 import { BarChart3, FolderKanban, Plus, SlidersHorizontal, Move } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useAuth } from "@/features/auth/context";
@@ -215,23 +215,13 @@ export default function Home() {
       )}
 
       {layout.length === 0 ? (
-        <Center mih="40vh">
-          <Stack align="center" gap="sm">
-            <ThemeIcon variant="light" color="gray" size={52} radius="md"><SlidersHorizontal size={24} /></ThemeIcon>
-            <Text fw={600} size="sm">Your home page is empty</Text>
-            <Text c="dimmed" size="xs">Choose the widgets you want to see at a glance.</Text>
-            <Button
-              size="xs"
-              variant="light"
-              mt={4}
-              onClick={() => {
-                setCustomizing(true);
-              }}
-            >
-              Add widgets
-            </Button>
-          </Stack>
-        </Center>
+        <EmptyState
+          icon={SlidersHorizontal}
+          title="Your home page is empty"
+          description="Choose the widgets you want to see at a glance."
+          minHeight="40vh"
+          action={{ label: "Add widgets", icon: Plus, onClick: () => setCustomizing(true) }}
+        />
       ) : (
         <SearchWidgetsProvider workspaceId={active._id}>
           <WidgetGrid

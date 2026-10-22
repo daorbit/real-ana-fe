@@ -43,12 +43,11 @@
 
 .eyebrow {
   display: block;
-  margin-bottom: 0.55rem;
-  font-size: 0.72rem;
+  margin-bottom: var(--space-2);
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  letter-spacing: -0.005em;
+  color: var(--text);
 }
 
 .urlBar {
@@ -65,7 +64,7 @@
 
 .urlBar:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .urlField {
@@ -312,7 +311,7 @@
 }
 
 .status {
-  --tone: var(--mantine-color-teal-5);
+  --tone: var(--green);
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -330,11 +329,11 @@
 }
 
 .status[data-tone="warn"] {
-  --tone: var(--mantine-color-yellow-5);
+  --tone: var(--amber);
 }
 
 .status[data-tone="bad"] {
-  --tone: var(--mantine-color-red-5);
+  --tone: var(--red);
 }
 
 .actions {
@@ -370,11 +369,45 @@
   }
 
   .urlBar {
-    padding-left: 8px;
+    gap: 6px;
+    height: 48px;
+    padding: 0 6px 0 14px;
+  }
+
+  .urlField {
+    padding: 0;
   }
 
   .base {
-    max-width: 45%;
+    max-width: 50%;
+    font-size: 13px;
+  }
+
+  .urlInput {
+    min-width: 60px;
+    font-size: 15px;
+  }
+
+  .submitButton {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+  }
+
+  .submitButton :global(.mantine-Button-section) {
+    margin: 0;
+  }
+
+  .submitLabel {
+    display: none;
+  }
+
+  .metaItem:last-child {
+    flex-basis: 100%;
+  }
+
+  .metaItem:last-child .metaDot {
+    display: none;
   }
 
   .notice {
@@ -386,19 +419,32 @@
   }
 
   .row {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px 12px;
+  }
+
+  .fileIcon {
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
 
   .rowMain {
-    flex-basis: calc(100% - 52px);
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .status {
-    margin-left: 52px;
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
   }
 
   .actions {
-    margin-left: auto;
+    grid-column: 3;
+    grid-row: 1;
+    height: 22px;
   }
 }
 
@@ -415,4 +461,11 @@
   box-shadow:
     inset 0 0 0 1px var(--border),
     var(--shadow-sm);
+}
+
+@media (max-width: 48em) {
+  .listCard {
+    padding: 14px 14px 4px;
+    border-radius: var(--radius-lg);
+  }
 }

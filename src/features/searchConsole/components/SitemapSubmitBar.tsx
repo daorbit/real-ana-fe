@@ -121,8 +121,9 @@ export function SitemapSubmitBar({
           loading={submitting}
           disabled={!trimmed}
           leftSection={<Send size={14} />}
+          aria-label="Submit sitemap"
         >
-          Submit
+          <span className={classes.submitLabel}>Submit</span>
         </Button>
       </form>
       <div className={classes.hint}>Type the path, or paste the full sitemap URL. Google reads new sitemaps within a few hours to a few days.</div>

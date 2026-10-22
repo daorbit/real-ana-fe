@@ -12,12 +12,12 @@ interface Props {
 export function ConnectionGroup({ title, hint, aside, children }: Props) {
   return (
     <Box component="section" className={classes.group}>
-      <Group justify="space-between" align="flex-end" wrap="nowrap" mb="lg">
+      <Group justify="space-between" align="flex-end" wrap="nowrap" mb="sm">
         <Box>
-          <Text fw={650} size="sm" className={classes.title}>
+          <Text fw={600} className={classes.title}>
             {title}
           </Text>
-          <Text c="dimmed" size="xs" mt={2}>
+          <Text c="dimmed" size="sm" mt={2}>
             {hint}
           </Text>
         </Box>

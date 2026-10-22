@@ -33,7 +33,7 @@ export function ConnectionFooter({
     <Group justify="space-between" gap="sm" wrap="nowrap" className={classes.footer}>
       <Group gap={8} wrap="nowrap" className={classes.status}>
         {icon}
-        <Text size="xs" c={celebrate ? "teal" : "dimmed"} fw={celebrate ? 600 : undefined} truncate aria-live="polite">
+        <Text size="xs" c={celebrate ? "green" : "dimmed"} fw={celebrate ? 600 : undefined} truncate aria-live="polite">
           {celebrate ? "Connected just now" : label}
         </Text>
       </Group>

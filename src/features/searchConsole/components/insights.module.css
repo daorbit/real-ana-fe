@@ -1,7 +1,7 @@
 .root {
-  --kind-opportunity: var(--mantine-color-blue-5);
-  --kind-declining: var(--mantine-color-red-5);
-  --kind-growing: var(--mantine-color-teal-5);
+  --kind-opportunity: var(--accent);
+  --kind-declining: var(--red);
+  --kind-growing: var(--green);
   display: flex;
   flex-direction: column;
   gap: var(--mantine-spacing-lg);
@@ -97,11 +97,9 @@
 }
 
 .highlightLabel {
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
 }
 
 .highlightValue {
@@ -142,22 +140,30 @@
 
 .filters {
   display: flex;
+  max-width: 100%;
   gap: 2px;
-  padding: 3px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  box-shadow: inset 0 0 0 1px var(--border);
+  padding: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
 }
 
 .filter {
   --kind: var(--text-2);
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: 7px;
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 500;
+  white-space: nowrap;
   color: var(--text-2);
   transition: background-color 180ms ease, color 180ms ease;
 }
@@ -171,9 +177,14 @@
 }
 
 .filter[data-active] {
-  background: var(--tab-on, var(--surface));
+  background: var(--surface);
   color: var(--text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+:global([data-mantine-color-scheme="dark"]) .filter[data-active] {
+  background: var(--gray-7);
+  box-shadow: none;
 }
 
 .filterCount {
@@ -531,14 +542,21 @@
 @media (max-width: 48em) {
   .summary {
     flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+    padding: 0;
+  }
+
+  .summaryMain,
+  .summaryMain > * {
+    width: 100%;
   }
 
   .highlight {
     flex-basis: auto;
-    padding-left: 0;
-    padding-top: var(--mantine-spacing-md);
-    border-left: 0;
-    border-top: 1px solid var(--border);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius);
   }
 
   .action {
@@ -556,12 +574,12 @@
 
 @media (max-width: 48em) {
   .summaryTitle {
-    font-size: 17px;
+    font-size: 16px;
     line-height: 1.35;
   }
 
   .highlightValue,
   .bandValue {
-    font-size: 21px;
+    font-size: 20px;
   }
 }

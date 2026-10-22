@@ -161,21 +161,20 @@
 }
 
 .tabbar {
-  --tab-on: color-mix(in srgb, var(--text) 11%, var(--surface-2));
+  --tab-on: var(--gray-7);
   display: inline-flex;
   align-self: flex-start;
   max-width: 100%;
   gap: 2px;
-  padding: 4px;
+  padding: 2px;
   overflow-x: auto;
   scrollbar-width: none;
-  border-radius: 999px;
-  background: var(--surface-2);
-  box-shadow: inset 0 0 0 1px var(--border);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 :global([data-mantine-color-scheme="light"]) .tabbar {
-  --tab-on: #ffffff;
+  --tab-on: var(--surface);
 }
 
 .tabbar::-webkit-scrollbar {
@@ -184,9 +183,9 @@
 
 .tab {
   flex-shrink: 0;
-  padding: 7px 16px;
+  padding: 6px 14px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 7px;
   background: transparent;
   color: var(--text-2);
   font: inherit;
@@ -201,16 +200,10 @@
   color: var(--text);
 }
 
-.tab:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
 .tab[data-active] {
   background: var(--tab-on);
   color: var(--text);
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28), 0 0 0 0.5px color-mix(in srgb, var(--text) 10%, transparent);
+  box-shadow: 0 0 0 1px var(--border);
 }
 
 .pager {
@@ -463,19 +456,35 @@
 }
 
 .headlineUp {
-  color: var(--mantine-color-teal-4);
+  color: var(--green);
   font-weight: 600;
 }
 
 .headlineDown {
-  color: var(--mantine-color-red-4);
+  color: var(--red);
   font-weight: 600;
 }
 
 @media (max-width: 48em) {
+  .headline {
+    gap: 12px;
+    padding: 0;
+  }
+
   .headlineTitle {
-    font-size: 17px;
-    line-height: 1.35;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .headlineTitle b {
+    font-weight: 600;
+  }
+
+  .headlineSub {
+    margin-top: 4px;
+    font-size: 12px;
   }
 
   .filters {

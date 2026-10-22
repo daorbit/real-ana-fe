@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Text } from "@mantine/core";
-import { AlertTriangle } from "lucide-react";
+import { Text } from "@mantine/core";
 import { useGetSearchDrilldownQuery } from "@/app/store";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { errMessage } from "@/shared/lib/notify";
 import { PanelDrawer } from "@/shared/ui/PanelDrawer";
 import { useDemo } from "@/features/demo/context";
@@ -69,9 +69,13 @@ export function SearchDrilldownDrawer({
       }
     >
       {error && !loaded ? (
-        <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-          {errMessage(error, "Could not load details from Google.")}
-        </Alert>
+        <ErrorState
+          compact
+          title="Couldn't load from Google"
+          description={errMessage(error, "Could not load details from Google.")}
+          onRetry={real.refetch}
+          retrying={real.isFetching}
+        />
       ) : !loaded ? (
         <DrawerSkeleton />
       ) : (

@@ -1,128 +1,39 @@
 .card {
-  --brand: var(--mantine-primary-color-filled);
-  --card-border: var(--mantine-color-default-border);
   position: relative;
-  transition: border-color 180ms ease;
-  animation: card-in 460ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  border-color: var(--border);
+  background: var(--surface);
+  transition: border-color var(--duration) ease;
+  animation: card-in 320ms var(--ease-out) both;
 }
 
-.card[data-brand] {
-  border-color: var(--card-border);
-}
-
-.card:nth-child(2) { animation-delay: 40ms; }
-.card:nth-child(3) { animation-delay: 80ms; }
-.card:nth-child(4) { animation-delay: 120ms; }
-.card:nth-child(5) { animation-delay: 160ms; }
-.card:nth-child(6) { animation-delay: 200ms; }
-.card:nth-child(7) { animation-delay: 240ms; }
-.card:nth-child(8) { animation-delay: 280ms; }
-.card:nth-child(9) { animation-delay: 320ms; }
-.card:nth-child(10) { animation-delay: 360ms; }
-.card:nth-child(11) { animation-delay: 400ms; }
-.card:nth-child(n + 12) { animation-delay: 440ms; }
-
-.card[data-status="connected"] {
-  --card-border: color-mix(in srgb, var(--mantine-color-teal-6) 32%, var(--mantine-color-default-border));
-}
-
-.card[data-status="attention"] {
-  --card-border: color-mix(in srgb, var(--mantine-color-orange-6) 36%, var(--mantine-color-default-border));
-}
-
-.card[data-brand]:hover {
-  border-color: color-mix(in srgb, var(--brand) 55%, var(--mantine-color-default-border));
+.card:hover {
+  border-color: var(--border-hover);
 }
 
 .card[data-celebrate] {
   animation:
-    card-in 460ms cubic-bezier(0.2, 0.7, 0.2, 1) both,
+    card-in 320ms var(--ease-out) both,
     card-connected 1600ms ease-out;
-  animation-delay: 0ms, 0ms;
 }
 
 .docs {
   position: absolute;
   top: 14px;
   right: 14px;
+  color: var(--muted);
 }
 
 .soon {
   opacity: 0.55;
 }
 
-.soon[data-brand]:hover {
-  border-color: var(--card-border);
+.soon:hover {
+  border-color: var(--border);
 }
 
 .mark {
-  position: relative;
-  background: color-mix(in srgb, var(--brand) 14%, transparent);
-  transition: background-color 180ms ease;
+  background: var(--surface-2);
 }
-
-.card:hover .mark {
-  background: color-mix(in srgb, var(--brand) 22%, transparent);
-}
-
-.mark::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 2px solid var(--mantine-color-teal-5);
-  border-radius: inherit;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.card[data-celebrate] .mark::after {
-  animation: ring-out 1100ms ease-out 2;
-}
-
-.markBadge {
-  position: absolute;
-  right: -5px;
-  bottom: -5px;
-  display: grid;
-  place-items: center;
-  width: 19px;
-  height: 19px;
-  border: 2px solid var(--mantine-color-body);
-  border-radius: 999px;
-  background-color: var(--mantine-color-teal-6);
-  color: var(--mantine-color-white);
-}
-
-.card[data-celebrate] .markBadge {
-  animation: badge-pop 560ms cubic-bezier(0.3, 1.6, 0.5, 1) 120ms both;
-}
-
-.card[data-brand="linkedin"] { --brand: #0a66c2; }
-.card[data-brand="instagram"] { --brand: #e4405f; }
-.card[data-brand="facebook"] { --brand: #1877f2; }
-.card[data-brand="brevo"] { --brand: #0b996e; }
-.card[data-brand="smtp"] { --brand: #64748b; }
-.card[data-brand="razorpay"] { --brand: #3395ff; }
-.card[data-brand="cashfree"] { --brand: #04ab61; }
-.card[data-brand="payu"] { --brand: #a2d045; }
-.card[data-brand="webhook"] { --brand: #8b5cf6; }
-.card[data-brand="slack"] { --brand: #e01e5a; }
-.card[data-brand="discord"] { --brand: #5865f2; }
-.card[data-brand="quantalog-compare"] { --brand: #4f46e5; }
-.card[data-brand="quantalog-goals"] { --brand: #059669; }
-.card[data-brand="quantalog-notes"] { --brand: #d97706; }
-.card[data-brand="quantalog-reviews"] { --brand: #db2777; }
-.card[data-brand="quantalog-links"] { --brand: #0891b2; }
-.card[data-brand="quantalog-media"] { --brand: #7c3aed; }
-.card[data-brand="whatsapp"] { --brand: #25d366; }
-.card[data-brand="google-chat"] { --brand: #00ac47; }
-.card[data-brand="teams"] { --brand: #5059c9; }
-.card[data-brand="google-calendar"] { --brand: #4285f4; }
-.card[data-brand="telegram"] { --brand: #26a5e4; }
-.card[data-brand="google-sheets"] { --brand: #0f9d58; }
-.card[data-brand="search-console"] { --brand: #4285f4; }
-.card[data-brand="claude"] { --brand: #d97757; }
-.card[data-brand="chatgpt"] { --brand: #10a37f; }
 
 .hint {
   flex: 1;
@@ -131,60 +42,26 @@
 @keyframes card-in {
   from {
     opacity: 0;
-    translate: 0 10px;
   }
   to {
     opacity: 1;
-    translate: 0 0;
   }
 }
 
 @keyframes card-connected {
   from {
-    border-color: var(--mantine-color-teal-5);
-    background-color: color-mix(in srgb, var(--mantine-color-teal-6) 9%, var(--mantine-color-body));
-  }
-}
-
-@keyframes ring-out {
-  0% {
-    inset: 0;
-    opacity: 0.75;
-  }
-  100% {
-    inset: -14px;
-    opacity: 0;
-  }
-}
-
-@keyframes badge-pop {
-  0% {
-    opacity: 0;
-    scale: 0.2;
-  }
-  60% {
-    opacity: 1;
-    scale: 1.18;
-  }
-  100% {
-    scale: 1;
+    border-color: var(--green);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card,
-  .mark,
-  .mark::after,
-  .markBadge {
+  .card {
     animation: none !important;
     transition: none !important;
   }
 }
 
-:global([data-motion="off"]) .card,
-:global([data-motion="off"]) .mark,
-:global([data-motion="off"]) .mark::after,
-:global([data-motion="off"]) .markBadge {
+:global([data-motion="off"]) .card {
   animation: none !important;
   transition: none !important;
 }

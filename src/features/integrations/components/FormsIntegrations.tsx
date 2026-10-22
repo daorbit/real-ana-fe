@@ -26,10 +26,9 @@ interface Props {
   lockedReason?: string;
   integrations: ReturnType<typeof useFormsIntegrations>;
   filter: ConnectionFilter;
-  flat?: boolean;
 }
 
-export function FormsIntegrations({ workspaceId, lockedReason, integrations, filter, flat }: Props) {
+export function FormsIntegrations({ workspaceId, lockedReason, integrations, filter }: Props) {
   const [params, setParams] = useSearchParams();
   const [openAppId, setOpenAppId] = useState<string | null>(null);
   const [payProvider, setPayProvider] = useState<PaymentProvider | null>(null);
@@ -160,16 +159,6 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
       />
     </>
   );
-
-  if (flat) {
-    if (lockedReason || failed || loading) return null;
-    return (
-      <>
-        {visibleSections.flatMap((section) => section.tiles).map(renderTile)}
-        {dialogs}
-      </>
-    );
-  }
 
   if (lockedReason) {
     if (isFiltered(filter)) return null;

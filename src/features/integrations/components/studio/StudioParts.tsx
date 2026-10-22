@@ -33,16 +33,14 @@ export function StudioHero({
   return (
     <header className={classes.hero}>
       <div className={classes.heroHead}>
-        <span key={state} className={classes.pill} data-state={state}>
+        <span className={classes.pill} data-state={state}>
           <span className={classes.pillDot} aria-hidden />
           {pill ?? PILL_TEXT[state]}
         </span>
         <Text component="h2" className={classes.heroTitle}>
           {title}
         </Text>
-        <Text size="sm" c="dimmed" mt={8}>
-          {description}
-        </Text>
+        <Text className={classes.heroDescription}>{description}</Text>
       </div>
       {stats && stats.length > 0 && (
         <div className={classes.stats}>
@@ -74,14 +72,8 @@ export function StudioSection({
   return (
     <section className={classes.section}>
       <div className={classes.sectionHead}>
-        <Text fw={650} size="sm">
-          {title}
-        </Text>
-        {description && (
-          <Text size="xs" c="dimmed" mt={4}>
-            {description}
-          </Text>
-        )}
+        <Text className={classes.sectionTitle}>{title}</Text>
+        {description && <Text className={classes.sectionDescription}>{description}</Text>}
         {action && <div className={classes.sectionAction}>{action}</div>}
       </div>
       <div className={classes.sectionBody}>{children}</div>

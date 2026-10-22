@@ -1,0 +1,88 @@
+.lead {
+  min-width: 0;
+}
+
+.liveLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.figureRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: nowrap;
+}
+
+.figure {
+  color: var(--text);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  color: var(--text-2);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.totals {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.total {
+  padding-inline: var(--space-6);
+  border-left: 1px solid var(--border);
+}
+
+.total:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.totalLabel {
+  margin-bottom: var(--space-1);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.totalValue {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.period {
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+@media (max-width: 48em) {
+  .total {
+    padding-inline: var(--space-4);
+  }
+}

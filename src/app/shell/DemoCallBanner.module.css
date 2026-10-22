@@ -1,5 +1,4 @@
 .banner {
-  --tone: #4f46e5;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -7,17 +6,13 @@
   margin: -6px -6px 6px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--tone) 6%, transparent);
+  background: var(--surface-2);
   text-align: left;
   transition: background-color 160ms ease;
 }
 
 .banner:hover {
-  background: color-mix(in srgb, var(--tone) 10%, transparent);
-}
-
-:root:not([data-mantine-color-scheme="light"]) .banner {
-  --tone: #818cf8;
+  background: var(--surface-hover);
 }
 
 .text {
@@ -47,5 +42,5 @@
 }
 
 .banner:hover .arrow {
-  color: var(--tone);
+  color: var(--text);
 }

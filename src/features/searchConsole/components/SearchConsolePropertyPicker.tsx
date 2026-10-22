@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Radio, Text } from "@mantine/core";
+import { Button, Radio, Text } from "@mantine/core";
 import { AlertTriangle, ArrowRight, RefreshCw, SearchX } from "lucide-react";
 import {
   useGetSearchConsolePropertiesQuery,
   useLinkSearchConsolePropertyMutation,
 } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { propertyLabel } from "../searchMetrics";
 import { PropertyPickerSkeleton } from "./SearchSkeletons";
 import { PropertyPickerIntro } from "./PropertyPickerIntro";
@@ -89,9 +90,13 @@ export function SearchConsolePropertyPicker({
         </header>
 
         {error ? (
-          <Alert color="red" variant="light" icon={<AlertTriangle size={16} />}>
-            {errMessage(error, "Could not load your Search Console properties.")}
-          </Alert>
+          <ErrorState
+            compact
+            title="Couldn't load your properties"
+            description={errMessage(error, "Could not load your Search Console properties.")}
+            onRetry={refetch}
+            retrying={isFetching}
+          />
         ) : properties.length === 0 ? (
           <div className={classes.empty}>
             <SearchX size={22} />

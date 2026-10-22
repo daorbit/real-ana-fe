@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ActionIcon, Badge, Box, Group, Text, Tooltip } from "@mantine/core";
-import { BookOpen, Check } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import classes from "./ConnectionCard.module.css";
 
 export type ConnectionCardStatus = "connected" | "attention" | "idle";
@@ -46,15 +46,10 @@ export function ConnectionCard({ mark, brand, name, hint, badge, soon, docsUrl, 
 
       <Box aria-hidden className={`connection-card__mark ${classes.mark}`}>
         {mark}
-        {status === "connected" && (
-          <span className={classes.markBadge}>
-            <Check size={11} strokeWidth={3} />
-          </span>
-        )}
       </Box>
 
       <Group gap={8} wrap="nowrap" align="center" mt="md" className={classes.nameRow}>
-        <Text fw={600} className={classes.name}>{name}</Text>
+        <Text fw={600} size="sm" className={classes.name}>{name}</Text>
         {soon ? (
           <Badge size="xs" variant="light" color="gray">
             Coming soon
@@ -63,7 +58,7 @@ export function ConnectionCard({ mark, brand, name, hint, badge, soon, docsUrl, 
           badge
         )}
       </Group>
-      <Text size="sm" c="dimmed" mt={4} className={classes.hint}>
+      <Text size="xs" c="dimmed" mt={4} lh={1.5} className={classes.hint}>
         {hint}
       </Text>
 

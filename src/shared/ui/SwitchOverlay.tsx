@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { QuantalogMark } from "@/shared/ui/QuantalogMark";
 import "@/shared/ui/SwitchOverlay.css";
 
 /** How long the overlay stays up, in ms. Matches the CSS animation budget. */
@@ -43,6 +44,7 @@ function LoaderMark() {
   return (
     <div className="switch-overlay__mark" aria-hidden>
       <div className="switch-overlay__wordmark">
+        <QuantalogMark size={32} />
         <span className="switch-overlay__word">Quantalog</span>
         <span className="switch-overlay__dot" />
       </div>

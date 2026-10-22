@@ -3,6 +3,7 @@ import { useLocation, useOutlet } from "react-router-dom";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { RouteFallback } from "@/shared/ui/RouteFallback";
 import { prefetchCommonRoutes } from "@/app/routePrefetch";
+import { useDismissOnFrameFocus } from "@/shared/hooks/useDismissOnFrameFocus";
 import { ShellFrame } from "../AppShell";
 
 export function ShellLayout() {
@@ -10,6 +11,7 @@ export function ShellLayout() {
   const { pathname } = useLocation();
 
   useEffect(() => prefetchCommonRoutes(), []);
+  useDismissOnFrameFocus();
 
   return (
     <ShellFrame>
