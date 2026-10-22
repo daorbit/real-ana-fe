@@ -34,7 +34,7 @@ export function PageHeatmapPanel({
   const [picked, setPicked] = useState<string | null>(null);
 
   const scope = { workspaceId, range, device, sites, from, to };
-  const { currentData: pagesData, isFetching: pagesLoading } = useGetHeatmapPagesQuery(scope);
+  const { currentData: pagesData, isFetching: pagesLoading, isError: pagesFailed } = useGetHeatmapPagesQuery(scope);
   const pages = pagesData?.pages ?? EMPTY_PAGES;
   const path = picked && pages.some((p) => p.path === picked) ? picked : pages[0]?.path ?? null;
 
@@ -55,8 +55,13 @@ export function PageHeatmapPanel({
       >
         {pagesLoading && !pagesData ? (
           <ChartSkeleton height={240} />
+        ) : pagesFailed ? (
+          <RankEmpty icon={Inbox}>Heatmaps couldn&apos;t load. Refresh to try again.</RankEmpty>
         ) : pages.length === 0 ? (
-          <RankEmpty icon={Inbox}>No heatmap data for this device in this range yet.</RankEmpty>
+          <RankEmpty icon={Inbox}>
+            No {device} clicks in this range yet. Check that the snippet on your site includes
+            data-heatmap=&quot;on&quot;, or try another device.
+          </RankEmpty>
         ) : (
           <RankList
             limit={12}
