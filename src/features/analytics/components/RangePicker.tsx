@@ -5,13 +5,14 @@ import { CalendarDays, Lock } from "lucide-react";
 import dayjs from "dayjs";
 import { useActiveBilling } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
+import { useKeyShortcuts } from "@/shared/hooks/useKeyShortcuts";
 
 /** The preset windows, matching the backend's RANGES keys. */
 export const RANGE_PRESETS = [
-  { label: "1h", value: "1h" },
-  { label: "24h", value: "24h" },
-  { label: "7d", value: "7d" },
-  { label: "30d", value: "30d" },
+  { label: "1h", value: "1h", key: "h" },
+  { label: "24h", value: "24h", key: "d" },
+  { label: "7d", value: "7d", key: "w" },
+  { label: "30d", value: "30d", key: "m" },
 ];
 
 export type RangeState = {
@@ -78,6 +79,11 @@ export function RangePicker({
     }
     onChange({ preset: range });
   };
+
+  useKeyShortcuts(
+    Object.fromEntries(RANGE_PRESETS.map((r) => [r.key, () => pick(r.value)])),
+    !disabled,
+  );
 
   const apply = () => {
     if (customLocked) {

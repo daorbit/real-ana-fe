@@ -61,7 +61,7 @@
 }
 
 .mantine-Card-root:not(.mantine-Card-root .mantine-Card-root):hover {
-  box-shadow: var(--shadow);
+  border-color: var(--border-strong);
 }
 
  
@@ -505,4 +505,10 @@
 
 .mantine-Switch-input:disabled + .mantine-Switch-track .mantine-Switch-thumb {
   --switch-thumb-bg: var(--text-2);
+}
+
+.recharts-wrapper,
+.mantine-Table-table,
+.mantine-Badge-label {
+  font-variant-numeric: tabular-nums;
 }

@@ -5,6 +5,7 @@ import { GitCompareArrows, Lock } from "lucide-react";
 import dayjs from "dayjs";
 import { useActiveBilling } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
+import { useKeyShortcuts } from "@/shared/hooks/useKeyShortcuts";
 import type { CompareMode } from "@/shared/types";
 
 export type CompareState = {
@@ -74,6 +75,8 @@ export function ComparePicker({
     }
     onChange({ mode });
   };
+
+  useKeyShortcuts({ c: () => pick(value.mode === "yoy" ? "previous" : "yoy") }, !disabled);
 
   const apply = () => {
     if (!draft) return;

@@ -127,6 +127,7 @@ export default function Home() {
     sites,
     siteScope,
     workspaceId: active._id,
+    filterLinks: !editing,
   };
 
   return (

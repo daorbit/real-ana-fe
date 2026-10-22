@@ -5,12 +5,9 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import {
   Text, Group, Button, SimpleGrid, Card,
-  Stack, Center, Tabs, Box,
+  Stack, Tabs, Box,
   Alert,
 } from "@mantine/core";
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-} from "recharts";
 import {
   Users, Eye, Radio, FolderKanban, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
@@ -18,8 +15,9 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PlanGate } from "@/features/billing/components/PlanGate";
-import { AnalyticsArt } from "@/shared/ui/Brand";
 import { StatCard } from "@/shared/ui/StatCard";
+import { TrafficTrendCard } from "@/features/analytics/components/trend/TrafficTrendCard";
+import { TREND_FOR_STAT, withBaseline, type TrendMetric } from "@/features/analytics/lib/trafficSeries";
 import { statComparison } from "@/features/analytics/lib/statComparison";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
@@ -61,21 +59,16 @@ import {
   useGetStatsCompareQuery, useExplainMetricMutation,
 } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
-import {
-  markerLines, MarkerLegend, MarkerDialog, MarkerButton,
-} from "@/features/analytics/components/MarkerLayer";
+import { MarkerDialog } from "@/features/analytics/components/MarkerLayer";
 import { notify, errMessage } from "@/shared/lib/notify";
 import { countryLabel, duration } from "@/shared/lib";
 import { CountryFlag } from "@/shared/ui/CountryFlag";
 import { useWorkspace, useActiveBilling, usePermissions } from "@/features/workspace/context";
-import { ADD_SITE_PATH } from "@/features/workspace/paths";
 import type {
    StatsFilter, Segment, Marker, MarkerKind,
 } from "@/shared/types";
 import { serializeFilter } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
-
-const CHART = "var(--accent)";
 
 /** Small uppercase heading that groups a band of cards under one label. */
 function SectionLabel({
@@ -97,30 +90,6 @@ function SectionLabel({
   );
 }
 
-/** A coloured dot + label, for the traffic chart's inline legend. */
-function LegendDot({ color, children }: { color: string; children: React.ReactNode }) {
-  return (
-    <Group gap={6} wrap="nowrap">
-      <span style={{ width: 9, height: 9, borderRadius: 3, background: color, display: "inline-block" }} />
-      <Text size="xs" c="dimmed">{children}</Text>
-    </Group>
-  );
-}
-
-function ChartTip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <Card withBorder shadow="md" padding="xs" radius="md">
-      <Text size="xs" c="dimmed" mb={2}>{label}</Text>
-      {payload.map((p: any) => (
-        <Text key={p.dataKey} size="sm" fw={700}>
-          {p.value.toLocaleString()} {p.dataKey === "views" ? "views" : "visitors"}
-        </Text>
-      ))}
-    </Card>
-  );
-}
-
 export default function Analytics() {
   useTitle("Analytics");
   const { t } = useTranslation();
@@ -138,6 +107,11 @@ export default function Analytics() {
   // has no fixture behind it — stays off there.
   const { demo } = useDemo();
   const [helpOpen, setHelpOpen] = useState(false);
+  const [chartFocus, setChartFocus] = useState<TrendMetric | null>(null);
+  const toggleChartFocus = useCallback(
+    (metric: TrendMetric) => setChartFocus((cur) => (cur === metric ? null : metric)),
+    [],
+  );
 
   const [pickedSites, setPickedSites] = useSiteScope(active?._id);
 
@@ -290,19 +264,10 @@ export default function Analytics() {
   const view = stats ?? shown.current;
 
 
-  const series = useMemo(() => {
-    const current = view?.timeseries ?? [];
-    const baseline = view?.comparison?.timeseries;
-    if (!baseline?.length) return current;
-    return current.map((p, i) => ({
-      ...p,
-      compareViews: baseline[i]?.views ?? 0,
-      compareVisitors: baseline[i]?.visitors ?? 0,
-      // Kept for the tooltip, which should name the date being compared to
-      // rather than just "previous".
-      compareBucket: baseline[i]?.bucket ?? "",
-    }));
-  }, [view?.timeseries, view?.comparison?.timeseries]);
+  const series = useMemo(
+    () => withBaseline(view?.timeseries, view?.comparison?.timeseries),
+    [view?.timeseries, view?.comparison?.timeseries],
+  );
 
 
   const explainSiteId =
@@ -559,10 +524,13 @@ export default function Analytics() {
         {audience.map((k, i) => {
           const { metric, ...card } = k;
           const key = metric ? `${metric}:${explainKey}` : "";
+          const trend = metric ? TREND_FOR_STAT[metric] : undefined;
           return (
             <motion.div key={k.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35 }}>
               <StatCard
                 {...card}
+                onSelect={trend && hasData ? () => toggleChartFocus(trend) : undefined}
+                selected={Boolean(trend) && chartFocus === trend}
                 onExplain={metric && explainSiteId ? () => onExplainMetric(metric) : undefined}
                 explaining={metric ? explainPendingKey === key : false}
                 explanation={metric ? explainState[key]?.text ?? null : null}
@@ -597,73 +565,16 @@ export default function Analytics() {
       <SectionLabel icon={Eye}>{t("analytics.sectionTraffic")}</SectionLabel>
       <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="xl">
         <div className="grid-span-2">
-          <Card withBorder radius="lg" padding="lg" h="100%">
-            <Group justify="space-between" mb="md" wrap="nowrap">
-              <Group gap={8} wrap="nowrap">
-                <Text fw={600} c="dimmed" size="sm">{t("analytics.trafficOverTime")}</Text>
-                <MarkerButton onClick={() => setMarkersOpen(true)} count={markers.length} />
-              </Group>
-              {hasData && (
-                <Group gap="md" wrap="nowrap">
-                  <LegendDot color="var(--accent)">Pageviews</LegendDot>
-                  <LegendDot color="#22d3ee">Visitors</LegendDot>
-                  {comparing && <LegendDot color="var(--muted)">Baseline</LegendDot>}
-                  <MarkerLegend markers={markers} />
-                </Group>
-              )}
-            </Group>
-            {hasData ? (
-              <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={series} syncId="analytics-overview" margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.45} />
-                      <stop offset="100%" stopColor="var(--accent-2)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.25} />
-                      <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} allowDecimals={false} tickLine={false} axisLine={false} />
-                  <Tooltip content={<ChartTip />} cursor={{ stroke: CHART, strokeWidth: 1 }} />
-                  <Area type="monotone" dataKey="views" stroke="var(--accent)" strokeWidth={2.5} fill="url(#g)" dot={false} activeDot={{ r: 5, fill: "var(--accent)" }} />
-                  <Area type="monotone" dataKey="visitors" stroke="#22d3ee" strokeWidth={2} fill="url(#g2)" dot={false} />
-                  {/* The baseline: a dashed unfilled line, drawn before the
-                      markers so it reads as background against the two filled
-                      areas rather than competing with them. */}
-                  {comparing && (
-                    <Area
-                      type="monotone"
-                      dataKey="compareViews"
-                      stroke="var(--muted)"
-                      strokeWidth={1.5}
-                      strokeDasharray="4 4"
-                      fill="none"
-                      dot={false}
-                      activeDot={false}
-                    />
-                  )}
-                  {/* Deploys and campaigns, drawn after the areas so the lines
-                      sit on top of the fills rather than under them. */}
-                  {markerLines(markers, series, range === "1h" || range === "24h")}
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <Center h={260}>
-                <Stack align="center" gap={6}>
-                  <AnalyticsArt />
-                  <Text fw={600} size="sm" mt="xs">{t("analytics.noPageviews")}</Text>
-                  <Text c="dimmed" size="xs" ta="center" maw={320}>
-                    Add a site in Workspaces and paste its snippet into your app.
-                  </Text>
-                  <Button component={Link} to={ADD_SITE_PATH} size="xs" variant="light" mt={6}>Add a site</Button>
-                </Stack>
-              </Center>
-            )}
-          </Card>
+          <TrafficTrendCard
+            series={series}
+            hasData={hasData}
+            comparing={comparing}
+            focus={chartFocus}
+            onFocus={toggleChartFocus}
+            markers={markers}
+            hourly={range === "1h" || range === "24h"}
+            onOpenMarkers={() => setMarkersOpen(true)}
+          />
         </div>
         <LiveNowCard pages={view?.livePages ?? []} total={view?.live ?? 0} audience={liveAudience} />
       </SimpleGrid>
@@ -688,8 +599,8 @@ export default function Analytics() {
 
         <Tabs.Panel value="engagement">
           <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg" mb="lg">
-            <ScrollPanel items={view?.scrollDepth ?? []} outdated={anyOutdated} />
-            <LandingPanel items={view?.landingPages ?? []} />
+            <ScrollPanel items={view?.scrollDepth ?? []} outdated={anyOutdated} onSelectPath={(p) => addFilter("path", p)} />
+            <LandingPanel items={view?.landingPages ?? []} onSelectPath={(p) => addFilter("path", p)} />
           </SimpleGrid>
           <Heatmap cells={view?.heatmap ?? []} />
         </Tabs.Panel>

@@ -1,19 +1,6 @@
 import { useEffect, useRef } from "react";
 import { GO_MAP } from "@/shared/ui/palette/goShortcuts";
-
-const SEQUENCE_MS = 1200;
-
-function isTyping(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null;
-  if (!el) return false;
-  if (el.isContentEditable) return true;
-  const tag = el.tagName;
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
-}
-
-function dialogOpen(): boolean {
-  return Boolean(document.querySelector('[role="dialog"][aria-modal="true"]'));
-}
+import { SEQUENCE_MS, dialogOpen, isTyping } from "@/shared/lib/keyboard";
 
 export type PaletteHotkeyHandlers = {
   togglePalette: () => void;

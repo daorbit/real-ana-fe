@@ -16,9 +16,11 @@ function depthTone(depth: number): RankTone {
 export function ScrollPanel({
   items,
   outdated = false,
+  onSelectPath,
 }: {
   items: ScrollBucket[];
   outdated?: boolean;
+  onSelectPath?: (path: string) => void;
 }) {
   return (
     <RankCard
@@ -40,18 +42,25 @@ export function ScrollPanel({
             id: i.key,
             leading: <DepthRing percent={i.avgDepth} />,
             label: <PathLabel path={i.key} />,
-            title: i.key,
+            title: onSelectPath ? `Filter by ${i.key}` : i.key,
             value: `${i.avgDepth}%`,
             aside: `${i.completionRate}% finish`,
             tone: depthTone(i.avgDepth),
           }))}
+          onSelect={onSelectPath}
         />
       )}
     </RankCard>
   );
 }
 
-export function LandingPanel({ items }: { items: LandingBucket[] }) {
+export function LandingPanel({
+  items,
+  onSelectPath,
+}: {
+  items: LandingBucket[];
+  onSelectPath?: (path: string) => void;
+}) {
   const total = items.reduce((sum, i) => sum + i.count, 0);
 
   return (
@@ -69,11 +78,12 @@ export function LandingPanel({ items }: { items: LandingBucket[] }) {
             id: i.key,
             label: <PathLabel path={i.key} />,
             weight: i.count,
-            title: i.key,
+            title: onSelectPath ? `Filter by ${i.key}` : i.key,
             value: num(i.count),
             aside: share(i.count, total),
             meta: `${i.bounceRate}% bounce · ${i.pagesPerSession} pages / session`,
           }))}
+          onSelect={onSelectPath}
         />
       )}
     </RankCard>

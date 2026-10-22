@@ -94,7 +94,7 @@ export function Rail({
   }
 
   return (
-    <MantineShell.Navbar p="md">
+    <MantineShell.Navbar p={collapsed ? 8 : "md"} pr={collapsed ? 0 : undefined}>
 
       <MantineShell.Section visibleFrom="sm" mb="md">
         <Group gap={4} wrap="nowrap" align="center" justify={collapsed ? "center" : undefined}>

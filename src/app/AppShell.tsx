@@ -118,7 +118,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
       <MantineShell
         header={{ height: { base: "calc(3rem + env(safe-area-inset-top))", sm: 0 } }}
         navbar={{
-          width: collapsed ? 72 : 264,
+          width: collapsed ? 48 : 232,
           breakpoint: "sm",
           collapsed: { mobile: !navOpen },
         }}

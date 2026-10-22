@@ -82,6 +82,7 @@ function NavGroupBlock({
         label={label}
         icon={n.icon}
         image={navImage(n)}
+        tone={n.tone}
         active={active}
         collapsed={collapsed}
       />

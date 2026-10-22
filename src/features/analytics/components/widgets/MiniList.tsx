@@ -16,6 +16,7 @@ export function MiniList({
   chart = "list",
   format,
   empty,
+  onSelect,
 }: {
   title: string;
   items: Bucket[];
@@ -24,8 +25,10 @@ export function MiniList({
   chart?: "list" | "donut";
   format?: (key: string) => ReactNode;
   empty: string;
+  onSelect?: (key: string) => void;
 }) {
   const total = items.reduce((sum, i) => sum + i.count, 0);
+  const rowTitle = (key: string) => (onSelect ? `Filter by ${key}` : key);
 
   return (
     <RankCard
@@ -41,9 +44,10 @@ export function MiniList({
           items={items.map((i) => ({
             id: i.key,
             label: format ? format(i.key) : i.key,
-            title: i.key,
+            title: rowTitle(i.key),
             value: i.count,
           }))}
+          onSelect={onSelect}
         />
       ) : (
         <RankList
@@ -52,10 +56,11 @@ export function MiniList({
             id: i.key,
             label: format ? format(i.key) : isPathKey(i.key) ? <PathLabel path={i.key} /> : i.key,
             weight: i.count,
-            title: i.key,
+            title: rowTitle(i.key),
             value: num(i.count),
             aside: share(i.count, total),
           }))}
+          onSelect={onSelect}
         />
       )}
     </RankCard>

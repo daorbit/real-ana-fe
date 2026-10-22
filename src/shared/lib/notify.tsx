@@ -38,7 +38,7 @@ function showDeduped(message: ReactNode, tone: ToastTone, autoClose: number) {
     autoClose,
     withCloseButton: false,
     classNames: {
-      root: tone === "error" ? `${toastClasses.toast} ${toastClasses.error}` : toastClasses.toast,
+      root: toastClasses.toast,
       body: toastClasses.body,
       description: toastClasses.message,
     },

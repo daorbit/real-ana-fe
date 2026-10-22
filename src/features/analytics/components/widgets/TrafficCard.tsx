@@ -33,16 +33,10 @@ export function TrafficCard({
       {hasData ? (
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={series} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="var(--accent-2)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--viz-grid)" vertical={false} />
             <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
             <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={LABEL_STYLE} />
-            <Area type="monotone" dataKey="views" stroke="var(--accent)" strokeWidth={2.5} fill="url(#hg)" dot={false} />
+            <Area type="monotone" dataKey="views" stroke="var(--viz-1)" strokeWidth={2} fill="var(--viz-1)" fillOpacity={0.08} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       ) : embedded ? (

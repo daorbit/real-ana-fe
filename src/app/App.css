@@ -1055,6 +1055,27 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--text);
 }
 
+.nav-tone-icon[data-tone] {
+  color: var(--nav-tone);
+}
+
+.nav-tone-icon[data-tone="blue"] { --nav-tone: var(--nav-blue); }
+.nav-tone-icon[data-tone="green"] { --nav-tone: var(--nav-green); }
+.nav-tone-icon[data-tone="teal"] { --nav-tone: var(--nav-teal); }
+.nav-tone-icon[data-tone="indigo"] { --nav-tone: var(--nav-indigo); }
+.nav-tone-icon[data-tone="pink"] { --nav-tone: var(--nav-pink); }
+.nav-tone-icon[data-tone="orange"] { --nav-tone: var(--nav-orange); }
+.nav-tone-icon[data-tone="violet"] { --nav-tone: var(--nav-violet); }
+.nav-tone-icon[data-tone="amber"] { --nav-tone: var(--nav-amber); }
+.nav-tone-icon[data-tone="cyan"] { --nav-tone: var(--nav-cyan); }
+.nav-tone-icon[data-tone="sky"] { --nav-tone: var(--nav-sky); }
+.nav-tone-icon[data-tone="magenta"] { --nav-tone: var(--nav-magenta); }
+.nav-tone-icon[data-tone="gold"] { --nav-tone: var(--nav-gold); }
+.nav-tone-icon[data-tone="mint"] { --nav-tone: var(--nav-mint); }
+.nav-tone-icon[data-tone="red"] { --nav-tone: var(--nav-red); }
+.nav-tone-icon[data-tone="brown"] { --nav-tone: var(--nav-brown); }
+.nav-tone-icon[data-tone="slate"] { --nav-tone: var(--nav-slate); }
+
 
 .nav-link[data-active="true"] {
   color: var(--text);
@@ -1567,7 +1588,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   transition: fill-opacity 0.12s ease, stroke 0.12s ease;
 }
 .world-map .country.has-data { cursor: pointer; }
-.world-map .country.has-data:hover { fill-opacity: 1; stroke: var(--text); stroke-width: 1.4; }
+.world-map .country.has-data:hover { fill-opacity: 1; stroke: color-mix(in srgb, var(--text) 22%, transparent); stroke-width: 1; }
 .world-map .country.spotlit { stroke: color-mix(in srgb, #fff 30%, transparent); stroke-width: 0.8; }
 .world-map .country.spotlit:hover { fill-opacity: 0.9; stroke: #fff; }
 .map-callout { pointer-events: none; }

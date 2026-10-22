@@ -1,4 +1,6 @@
 import { Suspense, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { analyticsFilterHref } from "@/features/analytics/lib/analyticsLinks";
 import { MetricTile } from "@/shared/ui/MetricTile";
 import { percentChange } from "@/shared/lib/metricChange";
 import { num } from "@/shared/lib";
@@ -16,7 +18,7 @@ import {
 } from "@/features/analytics/components/widgets/lazyWidgets";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
-import type { Bucket, Site, Stats } from "@/shared/types";
+import type { Bucket, Site, Stats, StatsFilter } from "@/shared/types";
 
 export type WidgetData = {
   stats: Partial<Stats> | null;
@@ -29,6 +31,7 @@ export type WidgetData = {
   trafficTitle?: string;
   embedded?: boolean;
   range?: string;
+  filterLinks?: boolean;
 };
 
 function Deferred({ children }: { children: ReactNode }) {
@@ -38,6 +41,9 @@ function Deferred({ children }: { children: ReactNode }) {
 export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData }) {
   const { stats, sites = [], siteScope = [], workspaceId, embedded = false } = data;
   const live = data.live ?? stats?.live ?? 0;
+  const navigate = useNavigate();
+  const openFiltered = (key: keyof StatsFilter | undefined) =>
+    key && data.filterLinks && !embedded ? (value: string) => navigate(analyticsFilterHref(key, value)) : undefined;
 
   const metric = metricSources(stats, live, sites.length)[id];
   if (metric) {
@@ -56,8 +62,11 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
     );
   }
 
-  const lists = listSources(stats);
-  if (lists[id]) return <MiniList {...lists[id]} />;
+  const list = listSources(stats)[id];
+  if (list) {
+    const { filterKey, ...listProps } = list;
+    return <MiniList {...listProps} onSelect={openFiltered(filterKey)} />;
+  }
 
   switch (id) {
     case "traffic":
@@ -75,9 +84,9 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
     case "heatmap":
       return <Heatmap cells={stats?.heatmap ?? []} />;
     case "scrollDepth":
-      return <ScrollPanel items={stats?.scrollDepth ?? []} />;
+      return <ScrollPanel items={stats?.scrollDepth ?? []} onSelectPath={openFiltered("path")} />;
     case "landingPages":
-      return <LandingPanel items={stats?.landingPages ?? []} />;
+      return <LandingPanel items={stats?.landingPages ?? []} onSelectPath={openFiltered("path")} />;
     case "outbound":
       return <OutboundPanel items={stats?.outboundClicks ?? []} />;
     case "errors":

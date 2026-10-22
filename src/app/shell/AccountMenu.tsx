@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, UnstyledButton } from "@mantine/core";
 import {
-  ChevronsUpDown,
+  ChevronsUpDown, Languages, ShieldCheck, Lightbulb, LifeBuoy, Scale, LogOut,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
@@ -19,6 +19,7 @@ import { DemoCallModal } from "./DemoCallModal";
 import classes from "./Rail.module.css";
 import { MenuVersion } from "./MenuVersion";
 import { MenuArtIcon } from "./MenuArtIcon";
+import { MenuToneIcon } from "./MenuToneIcon";
 
 export function AccountMenu({
   collapsed,
@@ -119,7 +120,7 @@ export function AccountMenu({
 
           <Menu.Sub>
             <Menu.Sub.Target>
-              <Menu.Sub.Item leftSection={<MenuArtIcon src="/nav/language.svg" />}>{t("nav.language", "Language")}</Menu.Sub.Item>
+              <Menu.Sub.Item leftSection={<MenuToneIcon icon={Languages} tone="indigo" />}>{t("nav.language", "Language")}</Menu.Sub.Item>
             </Menu.Sub.Target>
             <Menu.Sub.Dropdown>
               <LanguageItems />
@@ -127,7 +128,7 @@ export function AccountMenu({
           </Menu.Sub>
 
           {isAdmin && (
-            <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<MenuArtIcon src="/nav/admin-tools.svg" />}>
+            <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<MenuToneIcon icon={ShieldCheck} tone="blue" />}>
               {t("nav.adminTools", "Admin tools")}
             </Menu.Item>
           )}
@@ -135,15 +136,15 @@ export function AccountMenu({
           <Menu.Divider />
           <div className={classes.menuSection}>{t("nav.help", "Help")}</div>
 
-          <Menu.Item leftSection={<MenuArtIcon src="/nav/request-feature.svg" />} onClick={() => setFeatureOpen(true)}>
+          <Menu.Item leftSection={<MenuToneIcon icon={Lightbulb} tone="amber" />} onClick={() => setFeatureOpen(true)}>
             {t("nav.requestFeature", "Request a feature")}
           </Menu.Item>
-          <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<MenuArtIcon src="/nav/contact-support.svg" />}>
+          <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<MenuToneIcon icon={LifeBuoy} tone="orange" />}>
             {t("nav.contactSupport", "Contact support")}
           </Menu.Item>
           <Menu.Sub>
             <Menu.Sub.Target>
-              <Menu.Sub.Item leftSection={<MenuArtIcon src="/nav/legal.svg" />}>{t("nav.legal", "Legal")}</Menu.Sub.Item>
+              <Menu.Sub.Item leftSection={<MenuToneIcon icon={Scale} tone="slate" />}>{t("nav.legal", "Legal")}</Menu.Sub.Item>
             </Menu.Sub.Target>
             <Menu.Sub.Dropdown>
               <Menu.Item component="a" href={LEGAL_URLS.terms} target="_blank" rel="noreferrer">
@@ -160,7 +161,7 @@ export function AccountMenu({
 
           <Menu.Divider />
 
-          <Menu.Item color="red" className="danger-item" leftSection={<MenuArtIcon src="/nav/logout.svg" />} onClick={onLogout}>
+          <Menu.Item color="red" className="danger-item" leftSection={<MenuToneIcon icon={LogOut} tone="red" />} onClick={onLogout}>
             {t("nav.logout", "Log out")}
           </Menu.Item>
 

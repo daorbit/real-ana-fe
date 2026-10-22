@@ -79,6 +79,37 @@
   --wash-soft: 3%;
   --hue-ink: 0%;
 
+  --viz-1: var(--accent);
+  --viz-2: var(--cyan);
+  --viz-3: var(--green);
+  --viz-4: var(--amber);
+  --viz-5: var(--pink);
+  --viz-6: var(--hue-violet);
+  --viz-7: var(--hue-orange);
+  --viz-8: var(--hue-mint);
+  --viz-pos: var(--green);
+  --viz-neg: var(--red);
+  --viz-baseline: var(--muted);
+  --viz-grid: var(--border);
+  --viz-seq: var(--accent);
+
+  --nav-blue: #5b8cff;
+  --nav-green: #34c759;
+  --nav-teal: #2dd4bf;
+  --nav-indigo: #8b93ff;
+  --nav-pink: #ff6fae;
+  --nav-orange: #ff9f43;
+  --nav-violet: #b18cff;
+  --nav-amber: #ffb340;
+  --nav-cyan: #5ac8fa;
+  --nav-sky: #64d2ff;
+  --nav-magenta: #e879f9;
+  --nav-gold: #ffd60a;
+  --nav-mint: #63e6be;
+  --nav-red: #ff6961;
+  --nav-brown: #c8a07a;
+  --nav-slate: #a0aec0;
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -180,6 +211,23 @@
   --red: #e5484d;
   --pink: #db2777;
   --cyan: #0891b2;
+
+  --nav-blue: #2f6bff;
+  --nav-green: #1f9d4c;
+  --nav-teal: #0d9488;
+  --nav-indigo: #4f46e5;
+  --nav-pink: #db2777;
+  --nav-orange: #ea6a0c;
+  --nav-violet: #7c3aed;
+  --nav-amber: #c27c00;
+  --nav-cyan: #0891b2;
+  --nav-sky: #0284c7;
+  --nav-magenta: #c026d3;
+  --nav-gold: #b88a00;
+  --nav-mint: #0f9f7a;
+  --nav-red: #e5484d;
+  --nav-brown: #8b5e34;
+  --nav-slate: #64748b;
 
   --wash-strong: 7%;
   --wash-soft: 2%;

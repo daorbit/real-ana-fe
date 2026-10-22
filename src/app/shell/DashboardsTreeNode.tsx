@@ -31,7 +31,7 @@ export function DashboardsTreeNode({
   return (
     <div className={classes.node}>
       <div className={classes.head}>
-        <NavLink to={item.to} label={label} icon={item.icon} image={navImage(item)} active={active} />
+        <NavLink to={item.to} label={label} icon={item.icon} image={navImage(item)} tone={item.tone} active={active} />
         <UnstyledButton
           className={classes.toggle}
           onClick={toggle}

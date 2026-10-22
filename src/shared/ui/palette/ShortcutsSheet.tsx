@@ -1,5 +1,5 @@
 import { Modal } from "@mantine/core";
-import { GLOBAL_SHORTCUTS, GO_SHORTCUTS } from "@/shared/ui/palette/goShortcuts";
+import { ANALYTICS_SHORTCUTS, GLOBAL_SHORTCUTS, GO_SHORTCUTS } from "@/shared/ui/palette/goShortcuts";
 import { KeyCaps } from "@/shared/ui/palette/KeyCaps";
 import classes from "@/shared/ui/palette/Palette.module.css";
 
@@ -10,6 +10,17 @@ export default function ShortcutsSheet({ opened, onClose }: { opened: boolean; o
         <p className={classes.sheetTitle}>General</p>
         <div className={classes.sheetGrid}>
           {GLOBAL_SHORTCUTS.map((s) => (
+            <div key={s.label} className={classes.sheetRow}>
+              {s.label}
+              <KeyCaps keys={s.keys} className={classes.sheetKeys} />
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className={classes.sheetGroup}>
+        <p className={classes.sheetTitle}>Analytics</p>
+        <div className={classes.sheetGrid}>
+          {ANALYTICS_SHORTCUTS.map((s) => (
             <div key={s.label} className={classes.sheetRow}>
               {s.label}
               <KeyCaps keys={s.keys} className={classes.sheetKeys} />

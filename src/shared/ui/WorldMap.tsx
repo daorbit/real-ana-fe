@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Card, Group, Text, Stack, Center, ThemeIcon, SegmentedControl } from "@mantine/core";
-import { Globe2, Map as MapIcon, MapPinned, Satellite } from "lucide-react";
+import { Card, Group, Text, Center, SegmentedControl } from "@mantine/core";
+import { Map as MapIcon, MapPinned, Satellite } from "lucide-react";
 import { SatelliteMap } from "@/shared/ui/SatelliteMap";
 import { countryName } from "@/shared/lib";
 import type { Bucket } from "@/shared/types";
@@ -56,8 +56,6 @@ export function WorldMap({
     return m;
   }, [activeCountries]);
 
-  const hasData = byName.size > 0;
-
   return (
     <Card withBorder radius="lg" padding="lg" h="100%">
       <Group justify="space-between" mb="xs">
@@ -94,14 +92,7 @@ export function WorldMap({
         </Group>
       </Group>
 
-      {!hasData ? (
-        <Center h={280}>
-          <Stack align="center" gap={6}>
-            <ThemeIcon variant="light" color="gray" size="xl" radius="md"><Globe2 size={22} /></ThemeIcon>
-            <Text c="dimmed" size="xs">No location data yet</Text>
-          </Stack>
-        </Center>
-      ) : view === "satellite" ? (
+      {view === "satellite" ? (
         <SatelliteMap countries={activeCountries} />
       ) : (
         <FlatWorldMap byName={byName} spotlight={view === "flat"} onHover={setHover} />

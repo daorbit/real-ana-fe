@@ -13,12 +13,12 @@ import classes from "@/shared/ui/stat/StatCard.module.css";
 export type { StatComparison };
 
 export const ACCENT: Record<string, string> = {
-  emerald: "var(--accent)",
-  violet: "var(--accent)",
-  green: "#34d399",
-  cyan: "#22d3ee",
-  amber: "#f59e0b",
-  pink: "#f472b6",
+  emerald: "var(--viz-1)",
+  violet: "var(--viz-1)",
+  green: "var(--viz-3)",
+  cyan: "var(--viz-2)",
+  amber: "var(--viz-4)",
+  pink: "var(--viz-5)",
 };
 
 const COMPACT_FROM = 100_000;
@@ -54,6 +54,8 @@ export function StatCard({
   explanation,
   explainError,
   leading,
+  onSelect,
+  selected,
 }: {
   icon: LucideIcon;
   label: string;
@@ -72,12 +74,31 @@ export function StatCard({
   explanation?: string | null;
   explainError?: string | null;
   leading?: ReactNode;
+  onSelect?: () => void;
+  selected?: boolean;
 }) {
   const accent = ACCENT[color] ?? ACCENT.emerald;
   const hasSpark = Boolean(spark && spark.length > 1);
+  const selectable = Boolean(onSelect);
 
   return (
-    <Box className="stat-card">
+    <Box
+      className={selectable ? `stat-card ${classes.selectable}` : "stat-card"}
+      role={selectable ? "button" : undefined}
+      tabIndex={selectable ? 0 : undefined}
+      aria-pressed={selectable ? Boolean(selected) : undefined}
+      data-selected={(selectable && selected) || undefined}
+      onClick={(e) => {
+        if (!onSelect || (e.target as HTMLElement).closest("button, a")) return;
+        onSelect();
+      }}
+      onKeyDown={(e) => {
+        if (onSelect && e.target === e.currentTarget && (e.key === " " || e.key === "Enter")) {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+    >
       <Box className="stat-card-body" p="lg" pb={hasSpark ? 0 : "lg"}>
         <Group justify="space-between" align="center" wrap="nowrap" className={classes.head}>
           <Group gap={6} wrap="nowrap" className={classes.labelGroup}>
@@ -128,7 +149,6 @@ export function StatCard({
           dataKey={sparkKey}
           accent={accent}
           syncId={syncId}
-          id={`spark-${String(label).replace(/\W/g, "")}`}
         />
       )}
     </Box>

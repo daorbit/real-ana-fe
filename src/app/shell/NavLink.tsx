@@ -4,6 +4,7 @@ import { ExternalLink, type Home } from "lucide-react";
 import { prefetchRoute } from "@/app/routePrefetch";
 import { isPlainLeftClick, transitionTo } from "@/app/viewTransition";
 import { LinkLogo } from "./LinkLogo";
+import type { NavTone } from "./navItems";
 
 /**
  * One row of the rail.
@@ -18,6 +19,7 @@ export function NavLink({
   icon: Icon,
   logo,
   image,
+  tone,
   active,
   collapsed,
 }: {
@@ -26,6 +28,7 @@ export function NavLink({
   icon: typeof Home;
   logo?: { url: string; logoUrl?: string };
   image?: string;
+  tone?: NavTone;
   active: boolean;
   collapsed?: boolean;
 }) {
@@ -56,11 +59,11 @@ export function NavLink({
     >
       <span className="nav-link-icon">
         {logo ? (
-          <LinkLogo url={logo.url} logoUrl={logo.logoUrl} label={label} size={collapsed ? 18 : 15} />
+          <LinkLogo url={logo.url} logoUrl={logo.logoUrl} label={label} size={collapsed ? 18 : 16} />
         ) : image ? (
-          <img src={image} width={collapsed ? 18 : 15} height={collapsed ? 18 : 15} alt="" className="nav-app-logo" />
+          <img src={image} width={collapsed ? 18 : 16} height={collapsed ? 18 : 16} alt="" className="nav-app-logo" />
         ) : (
-          <Icon size={collapsed ? 18 : 15} />
+          <Icon size={collapsed ? 18 : 16} className="nav-tone-icon" data-tone={tone} />
         )}
       </span>
       {!collapsed && (

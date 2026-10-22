@@ -58,7 +58,7 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
                           minWidth: 14,
                           borderRadius: 3,
                           background: count
-                            ? `color-mix(in srgb, var(--mantine-color-emerald-6) ${Math.round(
+                            ? `color-mix(in srgb, var(--viz-seq) ${Math.round(
                                 (count / max) * 100
                               )}%, transparent)`
                             : "var(--surface)",

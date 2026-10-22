@@ -1,0 +1,108 @@
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  flex-wrap: nowrap;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.legendButton {
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  transition: opacity var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+
+.legendButton:hover {
+  color: var(--text);
+}
+
+.legendButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.legendButton[data-dim] {
+  opacity: 0.45;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.dot[data-metric="views"] {
+  background: var(--viz-1);
+}
+
+.dot[data-metric="visitors"] {
+  background: var(--viz-2);
+}
+
+.dot[data-metric="baseline"] {
+  background: var(--viz-baseline);
+}
+
+.tip {
+  min-width: 200px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tipHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+
+.tipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.tipLabel {
+  flex: 1;
+  color: var(--text-2);
+}
+
+.tipValue {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tipPrev {
+  color: var(--muted);
+}
+
+.change {
+  min-width: 48px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--viz-pos);
+}
+
+.change[data-bad] {
+  color: var(--viz-neg);
+}
+
+.change[data-flat] {
+  color: var(--muted);
+}

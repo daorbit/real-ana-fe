@@ -30,3 +30,11 @@ export const GLOBAL_SHORTCUTS: ShortcutRow[] = [
   { keys: ["Ctrl", "1–9"], label: "Switch workspace" },
   { keys: ["Esc"], label: "Close dialog or panel" },
 ];
+
+export const ANALYTICS_SHORTCUTS: ShortcutRow[] = [
+  { keys: ["H"], label: "Last hour" },
+  { keys: ["D"], label: "Last 24 hours" },
+  { keys: ["W"], label: "Last 7 days" },
+  { keys: ["M"], label: "Last 30 days" },
+  { keys: ["C"], label: "Switch previous period / year over year" },
+];

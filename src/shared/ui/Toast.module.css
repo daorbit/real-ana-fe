@@ -1,15 +1,19 @@
 .toast.toast {
-  --toast-bg: #1d1d1f;
-  --toast-fg: #f5f5f7;
+  --toast-bg: color-mix(in srgb, #ffffff 72%, transparent);
+  --toast-fg: var(--text);
+  --toast-edge: rgba(15, 17, 21, 0.08);
+  --toast-shadow: 0 8px 28px -12px rgba(15, 17, 21, 0.22);
   width: fit-content;
-  max-width: min(420px, calc(100vw - 32px));
+  max-width: min(440px, calc(100vw - 32px));
   margin-inline: auto;
   min-height: 0;
-  padding: 6px 14px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  border: 1px solid var(--toast-edge);
+  border-radius: 14px;
   background: var(--toast-bg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--toast-shadow);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
 .toast.toast::before {
@@ -17,9 +21,9 @@
 }
 
 :global([data-mantine-color-scheme='dark']) .toast.toast {
-  --toast-bg: var(--gray-5);
-  --toast-fg: var(--gray-12);
-  border-color: var(--border-strong);
+  --toast-bg: color-mix(in srgb, var(--gray-4) 78%, transparent);
+  --toast-edge: rgba(255, 255, 255, 0.08);
+  --toast-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
 }
 
 .body.body {
@@ -27,21 +31,11 @@
 }
 
 .message.message {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   color: var(--toast-fg);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-}
-
-.error .message.message::before {
-  content: "";
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--red);
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  text-align: center;
+  text-wrap: pretty;
 }
