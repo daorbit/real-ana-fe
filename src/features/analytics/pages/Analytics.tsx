@@ -28,6 +28,7 @@ import { ScrollPanel, LandingPanel } from "@/features/analytics/components/Engag
 import { CustomEventsPanel } from "@/features/analytics/components/CustomEventsPanel";
 import { FunnelBuilder } from "@/features/analytics/components/FunnelBuilder";
 import { UserFlowPanel } from "@/features/analytics/components/UserFlowPanel";
+import { PageHeatmapPanel } from "@/features/analytics/components/heatmap/PageHeatmapPanel";
 import { RetentionGrid } from "@/features/analytics/components/RetentionGrid";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
 import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitPanel";
@@ -674,6 +675,16 @@ export default function Analytics() {
             </div>
             <OutboundPanel items={view?.outboundClicks ?? []} />
           </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="heatmaps">
+          <PageHeatmapPanel
+            workspaceId={active._id}
+            range={range}
+            from={rangeState.from}
+            to={rangeState.to}
+            sites={siteScope}
+          />
         </Tabs.Panel>
 
         <Tabs.Panel value="events">

@@ -1537,6 +1537,23 @@ export type FlowNode = { id: string; count: number };
 /** One A -> B transition in the navigation graph, with how many sessions took it. */
 export type FlowEdge = { source: string; target: string; count: number };
 
+export type HeatmapDevice = "desktop" | "mobile" | "tablet";
+
+export type HeatmapPage = { path: string; clicks: number; sessions: number };
+
+export type HeatmapPagesResponse = { enabled: boolean; pages: HeatmapPage[] };
+
+export type HeatmapCell = { x: number; y: number; n: number };
+
+export type PageHeatmap = {
+  path: string;
+  device: HeatmapDevice;
+  grid: { x: number; y: number };
+  clicks: number;
+  cells: HeatmapCell[];
+  scroll: { sessions: number; reach: number[] };
+};
+
 /** One weekly retention cohort: how many started, and their return curve. */
 export type RetentionCohort = {
   /** Week index from the start of the observed window. */

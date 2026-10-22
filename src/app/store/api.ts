@@ -8,6 +8,7 @@ import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession
 import type {
   AdminUserPage, AdminUserBilling, AdminUserOverview, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
   FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, FlowNode, FlowEdge,
+  HeatmapDevice, HeatmapPagesResponse, PageHeatmap,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout, Branding, BrandingInput, NavPrefs,
   MediaAsset, MediaListResult, MediaKind, MediaUploadInput,
@@ -1150,6 +1151,32 @@ export const api = createApi({
       providesTags: (_r, _e, { workspaceId, range, sites }) => [
         { type: "Stats", id: `user-flow-${workspaceId}-${range}-${(sites ?? []).join(",")}` },
       ],
+    }),
+
+    getHeatmapPages: build.query<
+      HeatmapPagesResponse,
+      { workspaceId: string; range: string; device: HeatmapDevice; sites?: string[]; from?: string; to?: string }
+    >({
+      query: ({ workspaceId, range, device, sites, from, to }) => {
+        const qs = new URLSearchParams({ range, device });
+        if (sites && sites.length) qs.set("sites", sites.join(","));
+        if (from) qs.set("from", from);
+        if (to) qs.set("to", to);
+        return `/api/workspaces/${workspaceId}/heatmap/pages?${qs.toString()}`;
+      },
+    }),
+
+    getPageHeatmap: build.query<
+      PageHeatmap,
+      { workspaceId: string; path: string; range: string; device: HeatmapDevice; sites?: string[]; from?: string; to?: string }
+    >({
+      query: ({ workspaceId, path, range, device, sites, from, to }) => {
+        const qs = new URLSearchParams({ path, range, device });
+        if (sites && sites.length) qs.set("sites", sites.join(","));
+        if (from) qs.set("from", from);
+        if (to) qs.set("to", to);
+        return `/api/workspaces/${workspaceId}/heatmap?${qs.toString()}`;
+      },
     }),
 
     getRetention: build.query<
@@ -3049,6 +3076,8 @@ export const {
   useUpdateFunnelMutation,
   useDeleteFunnelMutation,
   useGetUserFlowQuery,
+  useGetHeatmapPagesQuery,
+  useGetPageHeatmapQuery,
   useGetRetentionQuery,
   useGetInstallStatusQuery,
   useLazyGetInstallStatusQuery,

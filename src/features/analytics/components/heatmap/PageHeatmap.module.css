@@ -1,0 +1,140 @@
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xl);
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.viewer {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: var(--mantine-spacing-sm);
+}
+
+.frame {
+  position: relative;
+  flex: 1 1 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.frame[data-device="desktop"] {
+  max-width: 720px;
+  aspect-ratio: 10 / 16;
+}
+
+.frame[data-device="tablet"] {
+  max-width: 440px;
+  aspect-ratio: 10 / 20;
+}
+
+.frame[data-device="mobile"] {
+  max-width: 280px;
+  aspect-ratio: 10 / 24;
+}
+
+.bands {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+}
+
+.band + .band {
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.band[data-level="mid"] {
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+}
+
+.band[data-level="low"] {
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--viz-seq);
+}
+
+.frameEmpty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--mantine-spacing-md);
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.rail {
+  flex: 0 0 52px;
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+}
+
+.railStep {
+  padding-top: 2px;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.railStep[data-level="high"] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.railStep[data-level="low"] {
+  color: var(--faint);
+}
+
+.note {
+  margin-top: var(--mantine-spacing-sm);
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  max-width: 420px;
+  margin: 0 auto;
+  padding: var(--mantine-spacing-xl) 0;
+  text-align: center;
+}
+
+.setupText {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
