@@ -348,6 +348,20 @@
       "subtitle": "Elige dónde quieres trabajar. Lo recordaremos en este dispositivo.",
       "open": "Elegir espacio de trabajo",
       "signOut": "Cerrar sesión",
+      "lastUsed": "Último usado",
+      "search": "Buscar un espacio de trabajo",
+      "noMatch": "Ningún espacio de trabajo coincide con “{{query}}”",
+      "newHint": "Empieza de cero",
+      "keysHint": "Consejo: pulsa 1–9 para abrir un espacio de trabajo",
+      "greeting": "Hola de nuevo, {{name}}",
+      "greetingNoName": "Hola de nuevo",
+      "settingUp": "Preparando {{name}}",
+      "settingUpSub": "Dejándolo todo listo para ti",
+      "steps": {
+        "sites": "Cargando tus sitios",
+        "dashboard": "Preparando tu panel",
+        "theme": "Aplicando tu tema"
+      },
       "role": {
         "owner": "Propietario",
         "admin": "Administrador",

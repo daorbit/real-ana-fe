@@ -25,6 +25,10 @@ export function prefetchBootData({ dispatch }: { dispatch: AppDispatch }): void 
   const workspaceId = rememberedWorkspace();
   if (!workspaceId) return;
 
+  prefetchWorkspaceData(dispatch, workspaceId, pathname);
+}
+
+export function prefetchWorkspaceData(dispatch: AppDispatch, workspaceId: string, pathname: string): void {
   dispatch(api.util.prefetch("getWorkspaceTheme", workspaceId, {}));
   if (!HOME_PATHS.has(pathname)) return;
 
