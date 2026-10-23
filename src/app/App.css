@@ -1860,9 +1860,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   text-underline-offset: 3px;
 }
 
-.auth-form > .mantine-Stack-root > .mantine-Text-root .mantine-Anchor-root {
-  --anchor-color: var(--auth-ink);
-}
 .auth-optional {
   font-weight: 400; font-size: 0.72rem;
   color: var(--auth-ink-ghost);
@@ -2147,18 +2144,18 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding: 0.4rem 0.85rem;
   border: 0;
   border-radius: 999px;
-  background: var(--auth-surface);
-  color: var(--auth-ink-dim);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
   font: inherit;
   font-size: 0.7813rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 .auth-top-link:hover:not(:disabled) {
-  background: var(--auth-surface-hover);
-  color: var(--auth-ink);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent);
 }
 
 .auth-top-link:disabled { opacity: 0.55; cursor: default; }
@@ -2225,16 +2222,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 .auth-form .mantine-Anchor-root,
-.auth-form .mantine-Anchor-root:hover {
-  --anchor-color: var(--auth-ink);
-}
-
-.auth-form .auth-field-head .mantine-Anchor-root {
-  --anchor-color: var(--auth-ink-dim);
-}
-
-.auth-form .auth-field-head .mantine-Anchor-root:hover {
-  --anchor-color: var(--auth-ink);
+.auth-form .mantine-Anchor-root:hover,
+.auth-form .auth-field-head .mantine-Anchor-root,
+.auth-form > .mantine-Stack-root > .mantine-Text-root .mantine-Anchor-root {
+  --anchor-color: var(--accent);
 }
 
 .auth-submit {
