@@ -57,7 +57,7 @@ export default function WorkspacePicker() {
             <span className={classes.email}>{user.email}</span>
             <Button
               variant="subtle"
-              color="gray"
+              color="red"
               size="xs"
               radius="xl"
               leftSection={<LogOut size={14} />}
