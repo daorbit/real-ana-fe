@@ -6,8 +6,8 @@ import { useWorkspace } from "@/features/workspace/context";
 import { readThemePrefs } from "@/shared/lib/theme";
 import type { Workspace } from "@/shared/types";
 
-const TRANSITION_MS = 1900;
-const REDUCED_MS = 300;
+const TRANSITION_MS = 1000;
+const REDUCED_MS = 250;
 
 function motionOff(): boolean {
   const osReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;

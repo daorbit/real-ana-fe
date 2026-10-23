@@ -4,16 +4,13 @@ import classes from "./WorkspacePicker.module.css";
 
 type Props = {
   name: string;
-  plan?: string;
-  paid: boolean;
-  role: string;
   shortcut?: number;
   lastUsed: boolean;
   lastUsedLabel: string;
   onClick: () => void;
 };
 
-export function WorkspaceTile({ name, plan, paid, role, shortcut, lastUsed, lastUsedLabel, onClick }: Props) {
+export function WorkspaceTile({ name, shortcut, lastUsed, lastUsedLabel, onClick }: Props) {
   return (
     <UnstyledButton
       className={classes.tile}
@@ -35,14 +32,6 @@ export function WorkspaceTile({ name, plan, paid, role, shortcut, lastUsed, last
         )}
       </span>
       <span className={classes.name}>{name}</span>
-      <span className={classes.meta}>
-        {plan && (
-          <span className={classes.plan} data-paid={paid || undefined}>
-            {plan}
-          </span>
-        )}
-        <span className={classes.role}>{role}</span>
-      </span>
     </UnstyledButton>
   );
 }

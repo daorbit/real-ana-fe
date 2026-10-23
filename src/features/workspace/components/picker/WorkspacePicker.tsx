@@ -7,10 +7,10 @@ import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 import { readLastWorkspace } from "@/features/workspace/lib/storedWorkspace";
 import { Wordmark } from "@/shared/ui/Brand";
+import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 import { WorkspaceTile } from "./WorkspaceTile";
 import { NewWorkspaceTile } from "./NewWorkspaceTile";
 import { PickerProfile } from "./PickerProfile";
-import { PickerTransition } from "./PickerTransition";
 import { usePickTransition } from "./usePickTransition";
 import { SHORTCUT_LIMIT, usePickerShortcuts } from "./usePickerShortcuts";
 import classes from "./WorkspacePicker.module.css";
@@ -40,11 +40,19 @@ export default function WorkspacePicker() {
     [workspaces, q],
   );
 
+  if (picked) {
+    return (
+      <div className={classes.screen}>
+        <SwitchVisual inline label={t("workspaces.picker.opening", { name: picked.name })} />
+      </div>
+    );
+  }
+
   return (
     <div className={classes.screen}>
       <header className={classes.top}>
         <Wordmark />
-        {user?.email && !picked && (
+        {user?.email && (
           <div className={classes.account}>
             <span className={classes.email}>{user.email}</span>
             <Button
@@ -61,56 +69,47 @@ export default function WorkspacePicker() {
         )}
       </header>
 
-      {picked ? (
-        <PickerTransition workspace={picked} />
-      ) : (
-        <main className={classes.center}>
-          <PickerProfile />
-          <h1 className={classes.title}>{t("workspaces.picker.title")}</h1>
-          <p className={classes.subtitle}>{t("workspaces.picker.subtitle")}</p>
+      <main className={classes.center}>
+        <PickerProfile />
+        <h1 className={classes.title}>{t("workspaces.picker.title")}</h1>
 
-          {workspaces.length >= SEARCH_FROM && (
-            <TextInput
-              className={classes.search}
-              radius="xl"
-              leftSection={<Search size={15} />}
-              placeholder={t("workspaces.picker.search")}
-              aria-label={t("workspaces.picker.search")}
-              value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
+        {workspaces.length >= SEARCH_FROM && (
+          <TextInput
+            className={classes.search}
+            radius="xl"
+            leftSection={<Search size={15} />}
+            placeholder={t("workspaces.picker.search")}
+            aria-label={t("workspaces.picker.search")}
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+          />
+        )}
+
+        <div className={classes.grid}>
+          {shown.map(({ w, index }) => (
+            <WorkspaceTile
+              key={w._id}
+              name={w.name}
+              shortcut={index < SHORTCUT_LIMIT ? index + 1 : undefined}
+              lastUsed={w._id === lastId}
+              lastUsedLabel={t("workspaces.picker.lastUsed")}
+              onClick={() => pick(w._id)}
+            />
+          ))}
+          {!q && (
+            <NewWorkspaceTile
+              label={t("workspaces.newWorkspace")}
+              onClick={() => nav(NEW_WORKSPACE_PATH)}
             />
           )}
+        </div>
 
-          <div className={classes.grid}>
-            {shown.map(({ w, index }) => (
-              <WorkspaceTile
-                key={w._id}
-                name={w.name}
-                plan={w.billing?.plan.name}
-                paid={Boolean(w.billing && w.billing.plan.slug !== "free")}
-                role={t(`workspaces.picker.role.${w.role}`)}
-                shortcut={index < SHORTCUT_LIMIT ? index + 1 : undefined}
-                lastUsed={w._id === lastId}
-                lastUsedLabel={t("workspaces.picker.lastUsed")}
-                onClick={() => pick(w._id)}
-              />
-            ))}
-            {!q && (
-              <NewWorkspaceTile
-                label={t("workspaces.newWorkspace")}
-                hint={t("workspaces.picker.newHint")}
-                onClick={() => nav(NEW_WORKSPACE_PATH)}
-              />
-            )}
-          </div>
+        {q && shown.length === 0 && (
+          <p className={classes.empty}>{t("workspaces.picker.noMatch", { query: query.trim() })}</p>
+        )}
 
-          {q && shown.length === 0 && (
-            <p className={classes.empty}>{t("workspaces.picker.noMatch", { query: query.trim() })}</p>
-          )}
-
-          {workspaces.length > 1 && <p className={classes.hint}>{t("workspaces.picker.keysHint")}</p>}
-        </main>
-      )}
+        {workspaces.length > 1 && <p className={classes.hint}>{t("workspaces.picker.keysHint")}</p>}
+      </main>
     </div>
   );
 }

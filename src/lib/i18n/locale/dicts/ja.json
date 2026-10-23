@@ -345,29 +345,15 @@
     "newWorkspace": "新しいワークスペース",
     "picker": {
       "title": "どのワークスペースを使いますか？",
-      "subtitle": "作業するワークスペースを選んでください。この端末に記憶されます。",
       "open": "ワークスペースを選ぶ",
       "signOut": "ログアウト",
       "lastUsed": "前回使用",
       "search": "ワークスペースを検索",
       "noMatch": "「{{query}}」に一致するワークスペースはありません",
-      "newHint": "新しく始める",
       "keysHint": "ヒント：1〜9 キーでワークスペースを開けます",
       "greeting": "おかえりなさい、{{name}}さん",
       "greetingNoName": "おかえりなさい",
-      "settingUp": "{{name}} を準備しています",
-      "settingUpSub": "すべての準備を整えています",
-      "steps": {
-        "sites": "サイトを読み込んでいます",
-        "dashboard": "ダッシュボードを準備しています",
-        "theme": "テーマを適用しています"
-      },
-      "role": {
-        "owner": "オーナー",
-        "admin": "管理者",
-        "editor": "編集者",
-        "viewer": "閲覧者"
-      }
+      "opening": "{{name}} を開いています"
     },
     "nameLabel": "ワークスペース名",
     "createTitle": "ワークスペースを作成",

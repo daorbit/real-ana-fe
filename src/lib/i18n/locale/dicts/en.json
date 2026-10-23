@@ -1032,29 +1032,15 @@
     "newWorkspace": "New workspace",
     "picker": {
       "title": "Which workspace?",
-      "subtitle": "Pick where you want to work. We'll remember it on this device.",
       "open": "Choose workspace",
       "signOut": "Sign out",
       "lastUsed": "Last used",
       "search": "Find a workspace",
       "noMatch": "No workspace matches “{{query}}”",
-      "newHint": "Start fresh",
       "keysHint": "Tip: press 1–9 to open a workspace",
       "greeting": "Welcome back, {{name}}",
       "greetingNoName": "Welcome back",
-      "settingUp": "Setting up {{name}}",
-      "settingUpSub": "Getting everything ready for you",
-      "steps": {
-        "sites": "Loading your sites",
-        "dashboard": "Preparing your dashboard",
-        "theme": "Applying your theme"
-      },
-      "role": {
-        "owner": "Owner",
-        "admin": "Admin",
-        "editor": "Editor",
-        "viewer": "Viewer"
-      }
+      "opening": "Opening {{name}}"
     },
     "nameLabel": "Workspace name",
     "createTitle": "Create workspace",
