@@ -1,4 +1,4 @@
-export function faviconForHost(host: string): string {
+function faviconForHost(host: string): string {
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`;
 }
 

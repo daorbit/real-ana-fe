@@ -1,21 +1,13 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FolderKanban } from "lucide-react";
-import { faviconForHost } from "@/shared/lib/favicon";
 import type { WorkspaceIcon as WorkspaceIconData } from "@/shared/types";
 import classes from "./WorkspacePicker.module.css";
 
 export function WorkspaceIcon({ icon }: { icon?: WorkspaceIconData | null }) {
-  const sources = useMemo(
-    () =>
-      [icon?.logoUrl, icon?.domain ? faviconForHost(icon.domain) : null].filter(
-        (s): s is string => Boolean(s),
-      ),
-    [icon?.logoUrl, icon?.domain],
-  );
-  const [failed, setFailed] = useState(0);
-  const src = sources[failed];
+  const [failed, setFailed] = useState(false);
+  const src = icon?.logoUrl;
 
-  if (!src) {
+  if (!src || failed) {
     return (
       <span className={classes.iconWell}>
         <FolderKanban size={30} strokeWidth={1.6} />
@@ -26,12 +18,11 @@ export function WorkspaceIcon({ icon }: { icon?: WorkspaceIconData | null }) {
   return (
     <span className={classes.iconWell} data-image>
       <img
-        key={src}
         src={src}
         alt=""
         className={classes.iconImage}
         referrerPolicy="no-referrer"
-        onError={() => setFailed((n) => n + 1)}
+        onError={() => setFailed(true)}
       />
     </span>
   );
