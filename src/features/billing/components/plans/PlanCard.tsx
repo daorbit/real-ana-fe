@@ -70,7 +70,7 @@ export function PlanCard({
   const visibleFeatures = featureLimit ? features.slice(0, featureLimit) : features;
   const hiddenCount = features.length - visibleFeatures.length;
 
-  const ctaClass = [classes.cta, featured ? classes.ctaFeatured : "", resting ? "plan-cta--resting" : ""]
+  const ctaClass = [classes.cta, resting ? "plan-cta--resting" : ""]
     .filter(Boolean)
     .join(" ");
 
@@ -110,7 +110,7 @@ export function PlanCard({
         size="md"
         radius="md"
         color="emerald"
-        variant={action.kind === "renew" || action.kind === "switchCycle" || featured ? "filled" : "light"}
+        variant={actionable ? "filled" : "light"}
         className={ctaClass}
         disabled={!actionable || !selectedWorkspaceId}
         loading={subscribing === plan.slug}

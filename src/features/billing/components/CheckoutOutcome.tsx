@@ -2,8 +2,8 @@ import { Modal, Title, Text, Button, Stack } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { creditType } from "../lib/credits";
 import type { Celebration } from "../hooks/useCheckout";
+import { CircleCheck } from "lucide-react";
 import cancelledBanner from "@/assets/banners/checkout-cancelled-banner.png";
-import successBanner from "@/assets/banners/checkout-success-banner.png";
 
 interface Props {
   /** What was abandoned at the payment sheet, if anything. */
@@ -68,18 +68,9 @@ export function CheckoutOutcome({ cancelled, setCancelled, celebration, setCeleb
   >
     {celebration && (
       <Stack gap={0}>
-        <div
-          style={{
-            height: 154,
-            backgroundImage: `url(${successBanner})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            borderTopLeftRadius: "var(--mantine-radius-lg)",
-            borderTopRightRadius: "var(--mantine-radius-lg)",
-          }}
-        />
-        <Stack align="center" gap="sm" px={26} py={24}>
-          <Title order={4} ta="center" style={{ letterSpacing: "-0.01em" }}>
+        <Stack align="center" gap="sm" px={26} pt={32} pb={24}>
+          <CircleCheck size={40} strokeWidth={1.6} color="var(--green)" />
+          <Title order={4} ta="center">
             {celebration.kind === "plan"
               ? t("billing.celebrationPlanTitle")
               : t("billing.celebrationAddonTitle")}

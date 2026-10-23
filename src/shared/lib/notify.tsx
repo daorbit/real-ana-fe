@@ -220,12 +220,14 @@ export function confirmLogout(onConfirm: () => void) {
 function ConfirmForm({
   body,
   confirmLabel,
+  cancelLabel,
   confirmColor,
   onConfirm,
   onCancel,
 }: {
   body: ReactNode;
   confirmLabel: string;
+  cancelLabel: string;
   confirmColor: string;
   onConfirm: () => void | Promise<void>;
   onCancel: () => void;
@@ -247,7 +249,7 @@ function ConfirmForm({
       <Text size="sm" c="dimmed">{body}</Text>
       <Group justify="flex-end" gap="sm">
         <Button variant="default" onClick={onCancel} disabled={busy}>
-          Cancel
+          {cancelLabel}
         </Button>
         <Button color={confirmColor} onClick={run} loading={busy}>
           {confirmLabel}
@@ -276,6 +278,7 @@ export function confirmDelete(opts: {
   title: string;
   body: ReactNode;
   confirmLabel?: string;
+  cancelLabel?: string;
   /**
    * Confirm button colour. Red by default, since deleting is what this mostly
    * guards — but it also covers actions that are merely irreversible rather
@@ -297,6 +300,7 @@ export function confirmDelete(opts: {
       <ConfirmForm
         body={opts.body}
         confirmLabel={opts.confirmLabel ?? "Delete"}
+        cancelLabel={opts.cancelLabel ?? "Cancel"}
         confirmColor={opts.confirmColor ?? "red"}
         onCancel={() => modals.close(id)}
         onConfirm={async () => {

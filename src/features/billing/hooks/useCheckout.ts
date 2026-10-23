@@ -7,12 +7,13 @@ import {
   useConfirmPurchaseMutation,
 } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
+import { shortDate } from "@/shared/lib/format";
 import { useAuth } from "@/features/auth/context";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "@/features/billing/lib/razorpay";
 import { openCashfreeCheckout } from "@/features/billing/lib/cashfree";
 import { CHECKOUT_LOGO } from "../lib/constants";
 import type {
-  BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
+  AutoRenewCheckout, BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
 } from "@/shared/types";
 
 /** What the page shows after a purchase lands. */
@@ -127,18 +128,66 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
     }
   };
 
+  const runAutoRenew = async (started: AutoRenewCheckout, plan: Plan) => {
+    const label = `${plan.name} — ${cycle}`;
+    const deferred = started.deferred;
+    let paid = false;
+
+    await loadRazorpayCheckout();
+    openRazorpayCheckout({
+      key: started.razorpayKeyId,
+      subscription_id: started.subscriptionId,
+      name: "Quantalog",
+      description: label,
+      image: CHECKOUT_LOGO,
+      prefill: { name: user?.name, email: user?.email },
+      theme: { color: "#2f6bff" },
+      handler: async (response) => {
+        paid = true;
+        try {
+          await confirmPurchase({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_subscription_id: response.razorpay_subscription_id,
+            razorpay_signature: response.razorpay_signature,
+          }).unwrap();
+          await refreshUser();
+          if (deferred) {
+            notify.success(
+              t("billing.autoRenewOnToast", "Auto-renew is on. First charge on {{date}}.", {
+                date: shortDate(started.startsAt),
+              }),
+            );
+            return;
+          }
+          setCelebration({ kind: "plan", planName: plan.name, credits: [] });
+          fireConfetti();
+        } catch (e) {
+          notify.error(errMessage(e, t("billing.verifyFailed")));
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          if (!paid) setCancelled(label);
+        },
+      },
+    });
+  };
+
   const subscribe = async (
     plan: Plan,
     selection: AddonSelection = {},
     gateway: PaymentGateway = "razorpay",
     phone?: string,
+    autoRenew = false,
   ) => {
     if (!workspaceId) return;
     setSubscribing(plan.slug);
     try {
-      const chosen = Object.entries(selection)
-        .filter(([, packs]) => packs > 0)
-        .map(([slug, packs]) => ({ slug, packs }));
+      const chosen = autoRenew
+        ? []
+        : Object.entries(selection)
+            .filter(([, packs]) => packs > 0)
+            .map(([slug, packs]) => ({ slug, packs }));
 
       const started = await startSubscription({
         workspaceId,
@@ -146,9 +195,10 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         cycle,
         couponCode: planCoupon?.coupon?.code,
         currency,
-        gateway,
-        ...(phone ? { phone } : {}),
+        gateway: autoRenew ? "razorpay" : gateway,
+        ...(phone && !autoRenew ? { phone } : {}),
         ...(chosen.length ? { addons: chosen } : {}),
+        ...(autoRenew ? { autoRenew: true } : {}),
       }).unwrap();
 
       // A free plan is activated server-side with no order to pay, so there is
@@ -157,6 +207,11 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         await refreshUser();
         setCelebration({ kind: "plan", planName: plan.name, credits: [] });
         fireConfetti();
+        return;
+      }
+
+      if ("subscriptionId" in started) {
+        await runAutoRenew(started, plan);
         return;
       }
 

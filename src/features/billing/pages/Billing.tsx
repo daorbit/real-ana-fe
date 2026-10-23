@@ -102,6 +102,13 @@ export default function Billing() {
   const featuredSlug = featuredPlanSlug(plans, usage?.plan.slug ?? null, currency);
 
   const pickPlan = (plan: Plan) => { setPlanCoupon(null); setConfirmPlan(plan); };
+
+  const turnOnAutoRenew = () => {
+    const current = usage ? plans.find((p) => p.slug === usage.plan.slug) : null;
+    if (!usage || !current) return;
+    setCycle(usage.cycle);
+    pickPlan(current);
+  };
   useCheckoutIntent(plans, pickPlan);
   const emailCoupon = useCouponIntent();
 
@@ -124,6 +131,7 @@ export default function Billing() {
               expired={expired}
               onChangePlan={() => setTab("plans")}
               onBuyAddons={() => setTab("addons")}
+              onTurnOnAutoRenew={turnOnAutoRenew}
             />
           )}
 
@@ -244,7 +252,7 @@ export default function Billing() {
         renewing={renewing}
         workspaceId={isDemo ? null : selectedWorkspaceId}
         onClose={() => setConfirmPlan(null)}
-        onConfirm={(plan, selection, gateway, phone) => subscribe(plan, selection, gateway, phone)}
+        onConfirm={(plan, selection, gateway, phone, autoRenew) => subscribe(plan, selection, gateway, phone, autoRenew)}
       />
 
       <AddonCheckoutModal

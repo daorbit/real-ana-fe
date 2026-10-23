@@ -494,24 +494,6 @@ export type OrbitImageModelOption = {
 };
 
 
-export type OrbitPlan = {
-  slug: string;
-  name: string;
-  description: string;
-  priceMonthly: CurrencyPrices;
-  priceYearly: CurrencyPrices;
-  /** Questions per billing cycle. */
-  monthlyQuota: number;
-  /** The highest model tier this plan may reach. */
-  modelTier: "basic" | "standard" | "advanced";
-  maxHistoryTurns: number;
-  maxQuestionChars: number;
-  hourlyBurst: number;
-  /** Whether answers may read the workspace's own analytics. */
-  dataAccess: boolean;
-  features: string[];
-};
-
 /**
  * The exchange rate the non-INR plan prices were last computed from.
  *
@@ -670,6 +652,14 @@ export type UsageHistory = {
 
 export type FeatureAllowance = { quota: number; used: number };
 
+export type RenewalStatus = "authenticated" | "active" | "pending" | "halted" | "cancelled" | "completed";
+
+export type RenewalSummary = {
+  autoRenew: boolean;
+  status: RenewalStatus | null;
+  nextChargeAt: string | null;
+};
+
 export type QuotaSummary = {
   workspaceId: string;
   plan: { slug: string; name: string };
@@ -678,6 +668,7 @@ export type QuotaSummary = {
   cycle: BillingCycle;
   status: "active" | "expired";
   currentPeriodEnd: string | null;
+  renewal?: RenewalSummary;
   usageMonth?: string;
   usageResetsAt?: string;
   audits: { planQuota: number; used: number; addonCredits: number };
@@ -800,8 +791,22 @@ export type CheckoutPreview = {
   carriedDays: number;
 };
 
+export type AutoRenewCheckout = {
+  gateway: "razorpay";
+  autoRenew: true;
+  free?: false;
+  subscriptionId: string;
+  razorpayKeyId: string;
+  upfront: number;
+  deferred: boolean;
+  currency: string;
+  startsAt: string;
+  plan: { name: string; cycle: BillingCycle };
+};
+
 export type StartSubscriptionResponse =
   | { free: true; plan: { name: string; cycle: BillingCycle }; periodEnd: string | null }
+  | AutoRenewCheckout
   | (GatewayOrder & {
       free?: false;
       plan: { name: string; cycle: BillingCycle };
@@ -819,6 +824,12 @@ export type VerifyPurchaseBody =
       gateway?: "razorpay";
       razorpay_payment_id: string;
       razorpay_order_id: string;
+      razorpay_signature: string;
+    }
+  | {
+      gateway?: "razorpay";
+      razorpay_payment_id: string;
+      razorpay_subscription_id: string;
       razorpay_signature: string;
     }
   | { gateway: "cashfree"; cashfree_order_id: string };

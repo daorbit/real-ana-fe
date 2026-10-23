@@ -150,7 +150,7 @@ export function BillingStep({
         renewing={false}
         workspaceId={workspaceId}
         onClose={() => setConfirmPlan(null)}
-        onConfirm={(plan, selection, gateway, phone) => subscribe(plan, selection, gateway, phone)}
+        onConfirm={(plan, selection, gateway, phone, autoRenew) => subscribe(plan, selection, gateway, phone, autoRenew)}
       />
 
       <CheckoutOutcome

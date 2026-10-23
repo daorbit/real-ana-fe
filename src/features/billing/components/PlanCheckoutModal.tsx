@@ -7,7 +7,6 @@ import { MIN_CHARGE } from "../lib/constants";
 import { PackIcon, creditType } from "../lib/credits";
 import { bulkSaving, creditBalance, packDiscount, yearlySaving } from "../lib/checkoutSavings";
 import { useGatewayChoice } from "../hooks/useGatewayChoice";
-import { CouponField } from "./CouponField";
 import { CheckoutTopBar } from "./checkout/CheckoutTopBar";
 import { CheckoutBlock } from "./checkout/CheckoutBlock";
 import { CycleOptions } from "./checkout/CycleOptions";
@@ -20,7 +19,11 @@ import { GatewayPicker } from "./checkout/GatewayPicker";
 import { SavingsCard } from "./checkout/SavingsCard";
 import { PeriodPreview } from "./checkout/PeriodPreview";
 import { TrustList } from "./checkout/TrustList";
+import { AutoRenewToggle } from "./checkout/AutoRenewToggle";
+import { CouponRow } from "./checkout/CouponRow";
+import { autoRenewTerms } from "../lib/autoRenew";
 import { num } from "@/shared/lib";
+import { shortDate } from "@/shared/lib/format";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
 import type {
   BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway, QuotaSummary,
@@ -64,15 +67,22 @@ export function PlanCheckoutModal({
     selection: AddonSelection,
     gateway: PaymentGateway,
     phone?: string,
+    autoRenew?: boolean,
   ) => void;
 }) {
   const { t } = useTranslation();
   const [selection, setSelection] = useState<AddonSelection>({});
+  const [autoRenew, setAutoRenew] = useState(true);
   const gatewayChoice = useGatewayChoice(currency);
 
   useEffect(() => {
     if (plan) setSelection({});
   }, [plan?.slug]);
+
+  const startsLater = !!plan && autoRenew && autoRenewTerms(usage, plan, cycle).deferred;
+  useEffect(() => {
+    if (startsLater && coupon) onCoupon(null);
+  }, [startsLater, coupon]);
 
   if (!plan) return <Modal opened={false} onClose={onClose} children={null} />;
 
@@ -80,6 +90,15 @@ export function PlanCheckoutModal({
   const planPrice = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
   const isFreePlan =
     priceIn(plan.priceMonthly, currency) === 0 && priceIn(plan.priceYearly, currency) === 0;
+  const recurring = autoRenew && !isFreePlan;
+  const terms = autoRenewTerms(usage, plan, cycle);
+  const deferred = recurring && terms.deferred;
+  const blockedOneTime = !recurring && !isFreePlan && terms.renewalLive;
+
+  const toggleAutoRenew = (on: boolean) => {
+    setAutoRenew(on);
+    if (on) setSelection({});
+  };
 
   const chosen = addons
     .map((pack) => ({ pack, packs: selection[pack.slug] ?? 0 }))
@@ -91,10 +110,12 @@ export function PlanCheckoutModal({
   );
 
   const subtotal = planPrice + addonTotal;
-  const percentOff = coupon?.coupon?.percentOff ?? 0;
+  const percentOff = deferred ? 0 : (coupon?.coupon?.percentOff ?? 0);
   const total = percentOff ? Math.floor((subtotal * (100 - percentOff)) / 100) : subtotal;
-  const noCharge = total === 0 && !chosen.length;
-  const chargeable = noCharge ? 0 : Math.max(total, MIN_CHARGE);
+  const noCharge = total === 0 && !chosen.length && !recurring;
+  const chargeable = noCharge || deferred ? 0 : Math.max(total, MIN_CHARGE);
+  const cycleWord = cycle === "yearly" ? t("billing.cycleYearlyWord") : t("billing.cycleMonthlyWord");
+  const cycleNoun = cycle === "yearly" ? t("billing.cycleYearNoun", "year") : t("billing.cycleMonthNoun", "month");
 
   const planLabel = t("billing.planNamed", { plan: plan.name });
 
@@ -103,9 +124,13 @@ export function PlanCheckoutModal({
       key: "plan",
       mark: <PlanIcon slug={plan.slug} size={22} uid={`summary-${plan.slug}`} />,
       name: planLabel,
-      sub: cycle === "yearly"
-        ? t("billing.billedEveryYear", "Billed once a year")
-        : t("billing.billedEveryMonth", "Billed every month"),
+      sub: recurring
+        ? cycle === "yearly"
+          ? t("billing.renewsEveryYear", "Renews every year")
+          : t("billing.renewsEveryMonth", "Renews every month")
+        : cycle === "yearly"
+          ? t("billing.billedEveryYear", "Billed once a year")
+          : t("billing.billedEveryMonth", "Billed every month"),
       value: money(planPrice),
     },
     ...chosen.map(({ pack, packs }) => {
@@ -190,7 +215,7 @@ export function PlanCheckoutModal({
               <PlanIncludes plan={plan} />
             </CheckoutBlock>
 
-            {addons.length > 0 && (
+            {addons.length > 0 && !recurring && (
               <CheckoutBlock
                 title={t("billing.addExtraCredits")}
                 hint={t("billing.optional")}
@@ -230,17 +255,30 @@ export function PlanCheckoutModal({
               total={total}
               chargeable={chargeable}
               percentOff={percentOff}
-              couponCode={coupon?.coupon?.code}
+              couponCode={deferred ? undefined : coupon?.coupon?.code}
               money={money}
             />
 
             <SavingsCard lines={savings} money={money} />
 
-            {!isFreePlan && <CouponField amount={subtotal} result={coupon} onChange={onCoupon} initialCode={initialCouponCode} />}
+            {!isFreePlan && (
+              <div className={classes.options}>
+                <AutoRenewToggle checked={autoRenew} cycle={cycle} busy={busy} onChange={toggleAutoRenew} />
+                {!deferred && (
+                  <CouponRow
+                    amount={subtotal}
+                    result={coupon}
+                    onChange={onCoupon}
+                    initialCode={initialCouponCode}
+                    firstPaymentOnly={recurring}
+                  />
+                )}
+              </div>
+            )}
 
-            {!isFreePlan && <PeriodPreview workspaceId={workspaceId} plan={plan} cycle={cycle} />}
+            {!isFreePlan && !deferred && <PeriodPreview workspaceId={workspaceId} plan={plan} cycle={cycle} />}
 
-            {!noCharge && <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />}
+            {!noCharge && !recurring && <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />}
 
             <Button
               fullWidth
@@ -248,17 +286,29 @@ export function PlanCheckoutModal({
               className={classes.pay}
               leftSection={<Lock size={15} />}
               loading={busy}
-              disabled={!gatewayChoice.canPay}
-              onClick={() => onConfirm(plan, selection, gatewayChoice.gateway, gatewayChoice.phoneForGateway)}
+              disabled={(!recurring && !gatewayChoice.canPay) || terms.alreadyRenewing || blockedOneTime}
+              onClick={() =>
+                onConfirm(
+                  plan,
+                  recurring ? {} : selection,
+                  recurring ? "razorpay" : gatewayChoice.gateway,
+                  recurring ? undefined : gatewayChoice.phoneForGateway,
+                  recurring,
+                )
+              }
             >
-              {noCharge
-                ? isFreePlan
-                  ? t("billing.confirm")
-                  : t("billing.activateCycle", "Activate {{plan}} {{cycle}} — no charge", {
-                      plan: plan.name,
-                      cycle: cycle === "yearly" ? t("billing.cycleYearlyWord") : t("billing.cycleMonthlyWord"),
-                    })
-                : t("billing.payAmount", { amount: money(chargeable) })}
+              {recurring && terms.alreadyRenewing
+                ? t("billing.alreadyAutoRenewing", "Already renews automatically")
+                : deferred
+                  ? t("billing.turnOnAutoRenew", "Turn on auto-renew")
+                  : noCharge
+                    ? isFreePlan
+                      ? t("billing.confirm")
+                      : t("billing.activateCycle", "Activate {{plan}} {{cycle}} — no charge", {
+                          plan: plan.name,
+                          cycle: cycleWord,
+                        })
+                    : t("billing.payAmount", { amount: money(chargeable) })}
             </Button>
 
             <p className={classes.footnote}>
@@ -266,16 +316,33 @@ export function PlanCheckoutModal({
               <span>
                 {isFreePlan
                   ? t("billing.planIsFree")
-                  : noCharge
-                    ? t("billing.couponCovers", "Your coupon covers the full {{cycle}} price. You'll get a {{zero}} receipt for your records.", {
-                        cycle: cycle === "yearly" ? t("billing.cycleYearlyWord") : t("billing.cycleMonthlyWord"),
-                        zero: money(0),
+                  : deferred && terms.firstChargeAt
+                    ? t("billing.autoRenewDeferredNote", "Nothing is charged today. Razorpay charges {{amount}} on {{date}}, then every {{cycle}}. Turn it off any time in Billing.", {
+                        amount: money(planPrice),
+                        date: shortDate(terms.firstChargeAt),
+                        cycle: cycleNoun,
                       })
-                    : t(cycle === "yearly" ? "billing.oneTimeChargeYear" : "billing.oneTimeChargeMonth")}
+                    : recurring && percentOff > 0
+                      ? t("billing.autoRenewCouponNote", "Your coupon applies to the first {{cycle}} only. After that, Razorpay charges {{amount}} every {{cycle}} until you cancel in Billing.", {
+                          cycle: cycleNoun,
+                          amount: money(planPrice),
+                        })
+                    : recurring
+                      ? t("billing.autoRenewNote", "Charged now through Razorpay, then every {{cycle}} until you cancel in Billing.", {
+                          cycle: cycleNoun,
+                        })
+                      : blockedOneTime
+                        ? t("billing.autoRenewBlocksOneTime", "Auto-renew is on for this workspace. Turn it off in Billing to pay once instead.")
+                        : noCharge
+                          ? t("billing.couponCovers", "Your coupon covers the full {{cycle}} price. You'll get a {{zero}} receipt for your records.", {
+                              cycle: cycleWord,
+                              zero: money(0),
+                            })
+                          : t(cycle === "yearly" ? "billing.oneTimeChargeYear" : "billing.oneTimeChargeMonth")}
               </span>
             </p>
 
-            <TrustList />
+            <TrustList recurring={recurring} />
           </div>
         </aside>
       </div>

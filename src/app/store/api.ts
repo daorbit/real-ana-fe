@@ -27,7 +27,7 @@ import type {
   SeoShareState, SeoSharePanels, SeoShareLink, PublicSeoReport,
   DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
-  Plan, OrbitPlan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
+  Plan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus, TelegramStatus, TelegramChat,
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
   Coupon, CouponCheckResult, CheckoutPreview, Invoice, QuotaSummary, UsageHistory,
@@ -2334,6 +2334,7 @@ export const api = createApi({
         phone?: string;
  
         addons?: { slug: string; packs: number }[];
+        autoRenew?: boolean;
       }
     >({
       query: (body) => ({ url: "/api/billing/subscribe", method: "POST", body }),
@@ -2369,8 +2370,13 @@ export const api = createApi({
      * The server looks the order id up in both collections, so the caller does
      * not have to know which it was.
      */
+    cancelAutoRenew: build.mutation<{ ok: true }, { workspaceId: string }>({
+      query: (body) => ({ url: "/api/billing/auto-renew/cancel", method: "POST", body }),
+      invalidatesTags: ["Usage", "Billing"],
+    }),
+
     confirmPurchase: build.mutation<
-      { ok: true; kind: "plan" | "addon" },
+      { ok: true; kind: "plan" | "addon"; autoRenew?: boolean },
       VerifyPurchaseBody | { gateway: "cashfree"; cf_order_id: string }
     >({
       query: (body) => ({ url: "/api/billing/confirm", method: "POST", body }),
@@ -2627,28 +2633,6 @@ export const api = createApi({
     saveAdminPlanPrice: build.mutation<Plan, { slug: string; priceMonthly: CurrencyPrices; priceYearly: CurrencyPrices }>({
       query: ({ slug, ...body }) => ({
         url: `/api/admin/billing/plans/${slug}`,
-        method: "PUT",
-        body,
-      }),
-      invalidatesTags: ["Plan"],
-    }),
-
-    /**
-     * The Orbit AI tiers. Same story as the plans above — everything but price
-     * is fixed in backend code, and they share the `Plan` tag so a currency
-     * sync refreshes both ladders at once.
-     */
-    getAdminOrbitPlans: build.query<OrbitPlan[], void>({
-      query: () => "/api/admin/billing/orbit-plans",
-      providesTags: ["Plan"],
-    }),
-
-    saveAdminOrbitPlanPrice: build.mutation<
-      OrbitPlan,
-      { slug: string; priceMonthly: CurrencyPrices; priceYearly: CurrencyPrices }
-    >({
-      query: ({ slug, ...body }) => ({
-        url: `/api/admin/billing/orbit-plans/${slug}`,
         method: "PUT",
         body,
       }),
@@ -3192,11 +3176,10 @@ export const {
   useGetCheckoutPreviewQuery,
   useStartSubscriptionMutation,
   useConfirmPurchaseMutation,
+  useCancelAutoRenewMutation,
   useStartAddonPurchaseMutation,
   useGetAdminPlansQuery,
   useSaveAdminPlanPriceMutation,
-  useGetAdminOrbitPlansQuery,
-  useSaveAdminOrbitPlanPriceMutation,
   useGetReportSchedulesQuery,
   useSaveReportScheduleMutation,
   useDeleteReportScheduleMutation,

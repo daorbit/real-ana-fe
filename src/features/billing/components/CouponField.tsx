@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
 import { CloseButton, TextInput, Loader, UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Tag } from "lucide-react";
-import { useCheckCouponMutation } from "@/app/store";
-import { errMessage } from "@/shared/lib/notify";
 import type { CouponCheckResult } from "@/shared/types";
+import { useCouponCode } from "../hooks/useCouponCode";
 import classes from "./checkout/Checkout.module.css";
 
 export function CouponField({
@@ -19,34 +17,12 @@ export function CouponField({
   initialCode?: string;
 }) {
   const { t } = useTranslation();
-  const [code, setCode] = useState(initialCode ?? "");
-  const [open, setOpen] = useState(Boolean(initialCode));
-  const [checkCoupon, { isLoading }] = useCheckCouponMutation();
-
-  useEffect(() => {
-    const trimmed = code.trim();
-    if (!trimmed) {
-      onChange(null);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await checkCoupon({ amount, code: trimmed }).unwrap();
-        onChange(res);
-      } catch (e) {
-        onChange({ amount, error: errMessage(e, t("billing.invalidCoupon")) });
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, 400);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code, amount]);
-
+  const coupon = useCouponCode(amount, onChange, initialCode);
   const applied = result?.coupon;
 
-  if (!applied && !open && !code) {
+  if (!applied && !coupon.open && !coupon.code) {
     return (
-      <UnstyledButton className={classes.couponToggle} onClick={() => setOpen(true)}>
+      <UnstyledButton className={classes.couponToggle} onClick={coupon.openField}>
         <Tag size={14} />
         {t("billing.addCoupon", "Add a coupon code")}
       </UnstyledButton>
@@ -60,11 +36,7 @@ export function CouponField({
           <Tag size={13} />
           {t("billing.couponOff", { code: applied.code, percent: applied.percentOff })}
         </span>
-        <CloseButton
-          size="sm"
-          aria-label={t("billing.removeCoupon", "Remove coupon")}
-          onClick={() => { setCode(""); setOpen(false); onChange(null); }}
-        />
+        <CloseButton size="sm" aria-label={t("billing.removeCoupon", "Remove coupon")} onClick={coupon.clear} />
       </div>
     );
   }
@@ -75,11 +47,11 @@ export function CouponField({
       size="sm"
       radius="md"
       autoFocus
-      onBlur={() => { if (!code.trim()) setOpen(false); }}
-      value={code}
-      onChange={(e) => setCode(e.currentTarget.value.toUpperCase())}
+      onBlur={coupon.blur}
+      value={coupon.code}
+      onChange={(e) => coupon.type(e.currentTarget.value)}
       leftSection={<Tag size={14} />}
-      rightSection={isLoading ? <Loader size={12} /> : undefined}
+      rightSection={coupon.checking ? <Loader size={12} /> : undefined}
       error={result?.error}
     />
   );

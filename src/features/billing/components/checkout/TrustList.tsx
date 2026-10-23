@@ -1,11 +1,13 @@
 import { useTranslation } from "react-i18next";
-import { CalendarX2, Infinity as InfinityIcon, Mail } from "lucide-react";
+import { CalendarCheck, CalendarX2, Infinity as InfinityIcon, Mail } from "lucide-react";
 import s from "./CheckoutPage.module.css";
 
-export function TrustList() {
+export function TrustList({ recurring = false }: { recurring?: boolean }) {
   const { t } = useTranslation();
   const items = [
-    { icon: CalendarX2, text: t("billing.trustNoRenew", "No auto-renew — you choose when to pay again") },
+    recurring
+      ? { icon: CalendarCheck, text: t("billing.trustCancelAnytime", "Cancel any time — your plan runs to the end of the period") }
+      : { icon: CalendarX2, text: t("billing.trustNoRenew", "No auto-renew — you choose when to pay again") },
     { icon: InfinityIcon, text: t("billing.trustNeverExpire", "Extra credits never expire") },
     { icon: Mail, text: t("billing.trustReceipt", "Receipt emailed after every payment") },
   ];

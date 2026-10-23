@@ -111,17 +111,6 @@
   margin-top: 16px;
 }
 
-.ctaFeatured {
-  --button-bg: var(--plan-gradient);
-  --button-hover: var(--plan-gradient);
-  --button-color: var(--plan-on);
-  --button-bd: none;
-}
-
-.ctaFeatured:hover {
-  opacity: 0.92;
-}
-
 .divider {
   height: 1px;
   margin: 22px 0 18px;
