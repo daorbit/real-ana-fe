@@ -17,7 +17,6 @@ export function WorkspaceTile({ name, shortcut, lastUsed, lastUsedLabel, onClick
       data-last={lastUsed || undefined}
       onClick={onClick}
       title={name}
-      autoFocus={lastUsed}
     >
       <span className={classes.art}>
         <span className={classes.iconWell}>

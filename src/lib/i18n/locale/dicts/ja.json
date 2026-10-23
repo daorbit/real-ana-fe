@@ -350,7 +350,6 @@
       "lastUsed": "前回使用",
       "search": "ワークスペースを検索",
       "noMatch": "「{{query}}」に一致するワークスペースはありません",
-      "keysHint": "ヒント：1〜9 キーでワークスペースを開けます",
       "greeting": "おかえりなさい、{{name}}さん",
       "greetingNoName": "おかえりなさい",
       "opening": "{{name}} を開いています"

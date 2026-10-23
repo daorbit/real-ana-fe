@@ -1037,7 +1037,6 @@
       "lastUsed": "Last used",
       "search": "Find a workspace",
       "noMatch": "No workspace matches “{{query}}”",
-      "keysHint": "Tip: press 1–9 to open a workspace",
       "greeting": "Welcome back, {{name}}",
       "greetingNoName": "Welcome back",
       "opening": "Opening {{name}}"

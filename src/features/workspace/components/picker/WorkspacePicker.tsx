@@ -108,7 +108,6 @@ export default function WorkspacePicker() {
           <p className={classes.empty}>{t("workspaces.picker.noMatch", { query: query.trim() })}</p>
         )}
 
-        {workspaces.length > 1 && <p className={classes.hint}>{t("workspaces.picker.keysHint")}</p>}
       </main>
     </div>
   );
