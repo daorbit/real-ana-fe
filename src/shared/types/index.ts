@@ -770,7 +770,7 @@ export type PaymentGateway = "razorpay" | "cashfree";
  * returns a payment session the SDK opens, plus which environment (`mode`) the
  * SDK must be told to run in.
  */
-type GatewayOrder =
+export type GatewayOrder =
   | {
       gateway: "razorpay";
       orderId: string;
@@ -851,7 +851,7 @@ export type AddonSelection = Record<string, number>;
 export type Invoice = {
   id: string;
   /** Which collection it came from — the download URL needs it. */
-  kind: "plan" | "addon";
+  kind: "plan" | "addon" | "app";
   /** `QTL-YYYYMM-NNNN`. */
   number: string;
   issuedAt: string;
@@ -1143,7 +1143,17 @@ export type WorkspaceAppId =
   | "seoReports"
   | "bio";
 
-export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string }>>;
+export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string; paidAt?: string }>>;
+
+export type PaidAppId = "notes" | "reviews" | "alerts" | "links" | "bio" | "popups";
+
+export type AppPrice = {
+  appId: PaidAppId;
+  name: string;
+  price: CurrencyPrices;
+};
+
+export type StartAppPurchaseResponse = GatewayOrder & { app: { id: PaidAppId; name: string } };
 
 export type CustomLinkMode = "external" | "internal";
 

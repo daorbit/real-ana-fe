@@ -1969,7 +1969,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--auth-surface);
   color: var(--auth-ink-faint);
 }
-.auth-btn.mantine-Button-root[data-variant="filled"] .mantine-Loader-root {
+.mantine-Button-root[data-variant="filled"] .mantine-Loader-root {
   --loader-color: currentColor;
 }
 

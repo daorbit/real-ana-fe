@@ -1,6 +1,17 @@
 import type { ReactNode } from "react";
 import { Badge, Text } from "@mantine/core";
-import { Check, CircleDashed, CirclePause, Link2, Power, RefreshCw, Settings2, TriangleAlert } from "lucide-react";
+import {
+  Check,
+  CircleDashed,
+  CirclePause,
+  Link2,
+  LockKeyhole,
+  LockOpen,
+  Power,
+  RefreshCw,
+  Settings2,
+  TriangleAlert,
+} from "lucide-react";
 import { ConnectionCard, type ConnectionCardStatus } from "@/features/auth/components/settings/ConnectionCard";
 import { timeAgo } from "@/shared/lib/format";
 import { BrandMark, CARD_MARK_SIZE } from "./logos/BrandMarks";
@@ -22,7 +33,7 @@ interface Footer {
   label: string;
   action: string;
   actionIcon: ReactNode;
-  variant: "default" | "light";
+  variant: "default" | "light" | "filled";
   color?: string;
 }
 
@@ -34,6 +45,16 @@ function enabledLabel(tile: IntegrationTile): string {
 
 function footerFor(tile: IntegrationTile): Footer {
   const webhook = tile.kind === "webhook";
+  if (tile.kind === "quantalog-app" && !tile.enabled && tile.price) {
+    return {
+      icon: <LockKeyhole size={14} className={classes.idle} />,
+      label: `${tile.price} · one-time`,
+      action: "Unlock",
+      actionIcon: <LockOpen size={14} />,
+      variant: "filled",
+      color: "emerald",
+    };
+  }
   if (tile.kind === "quantalog-app") {
     return tile.enabled
       ? {

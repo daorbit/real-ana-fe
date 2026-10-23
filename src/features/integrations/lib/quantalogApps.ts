@@ -192,7 +192,7 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];
 
-export function quantalogAppTile(info: WorkspaceAppInfo, enabled: boolean): IntegrationTile {
+export function quantalogAppTile(info: WorkspaceAppInfo, enabled: boolean, price?: string): IntegrationTile {
   return {
     kind: "quantalog-app",
     id: info.tileId,
@@ -202,9 +202,16 @@ export function quantalogAppTile(info: WorkspaceAppInfo, enabled: boolean): Inte
     connected: enabled,
     enabled,
     account: enabled ? `${info.navLabel}, ${info.location}` : undefined,
+    price: enabled ? undefined : price,
   };
 }
 
-export function quantalogAppTiles(apps: EnabledApps): { info: WorkspaceAppInfo; tile: IntegrationTile }[] {
-  return WORKSPACE_APP_IDS.map((id) => ({ info: WORKSPACE_APP_INFO[id], tile: quantalogAppTile(WORKSPACE_APP_INFO[id], apps[id]) }));
+export function quantalogAppTiles(
+  apps: EnabledApps,
+  prices: Partial<Record<WorkspaceAppId, string>> = {},
+): { info: WorkspaceAppInfo; tile: IntegrationTile }[] {
+  return WORKSPACE_APP_IDS.map((id) => ({
+    info: WORKSPACE_APP_INFO[id],
+    tile: quantalogAppTile(WORKSPACE_APP_INFO[id], apps[id], prices[id]),
+  }));
 }

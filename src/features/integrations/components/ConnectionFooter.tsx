@@ -7,7 +7,7 @@ export interface ConnectionFooterProps {
   label: string;
   action: string;
   actionIcon: ReactNode;
-  variant: "default" | "light";
+  variant: "default" | "light" | "filled";
   color?: string;
   busy?: boolean;
   disabled?: boolean;

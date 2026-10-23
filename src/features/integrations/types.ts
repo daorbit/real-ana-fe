@@ -152,4 +152,5 @@ export interface IntegrationTile {
   enabled: boolean;
   account?: string;
   lastUsedAt?: string;
+  price?: string;
 }

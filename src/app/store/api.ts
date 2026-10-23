@@ -27,7 +27,7 @@ import type {
   SeoShareState, SeoSharePanels, SeoShareLink, PublicSeoReport,
   DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
-  Plan, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
+  Plan, AppPrice, PaidAppId, StartAppPurchaseResponse, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus, TelegramStatus, TelegramChat,
   StartSubscriptionResponse, StartAddonPurchaseResponse, VerifyPurchaseBody, PaymentGateway,
   Coupon, CouponCheckResult, CheckoutPreview, Invoice, QuotaSummary, UsageHistory,
@@ -2370,13 +2370,32 @@ export const api = createApi({
      * The server looks the order id up in both collections, so the caller does
      * not have to know which it was.
      */
+    getAppPrices: build.query<AppPrice[], void>({
+      query: () => "/api/billing/apps",
+      providesTags: ["Plan"],
+    }),
+
+    startAppPurchase: build.mutation<
+      StartAppPurchaseResponse,
+      {
+        appId: PaidAppId;
+        workspaceId: string;
+        couponCode?: string;
+        currency: Currency;
+        gateway?: PaymentGateway;
+        phone?: string;
+      }
+    >({
+      query: ({ appId, ...body }) => ({ url: `/api/billing/apps/${appId}/purchase`, method: "POST", body }),
+    }),
+
     cancelAutoRenew: build.mutation<{ ok: true }, { workspaceId: string }>({
       query: (body) => ({ url: "/api/billing/auto-renew/cancel", method: "POST", body }),
       invalidatesTags: ["Usage", "Billing"],
     }),
 
     confirmPurchase: build.mutation<
-      { ok: true; kind: "plan" | "addon"; autoRenew?: boolean },
+      { ok: true; kind: "plan" | "addon" | "app"; autoRenew?: boolean },
       VerifyPurchaseBody | { gateway: "cashfree"; cf_order_id: string }
     >({
       query: (body) => ({ url: "/api/billing/confirm", method: "POST", body }),
@@ -3177,6 +3196,8 @@ export const {
   useStartSubscriptionMutation,
   useConfirmPurchaseMutation,
   useCancelAutoRenewMutation,
+  useGetAppPricesQuery,
+  useStartAppPurchaseMutation,
   useStartAddonPurchaseMutation,
   useGetAdminPlansQuery,
   useSaveAdminPlanPriceMutation,

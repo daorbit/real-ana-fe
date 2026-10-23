@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useDemo } from "@/features/demo/context";
 import type { WorkspaceAppId } from "@/shared/types";
+import { appUnlocked } from "@/features/integrations/lib/paidApps";
 import { useWorkspace } from "./context";
 
 export type EnabledApps = Record<WorkspaceAppId, boolean>;
@@ -9,7 +10,7 @@ export function useWorkspaceApps(): EnabledApps {
   const { active } = useWorkspace();
   const { demo } = useDemo();
   const apps = active?.apps;
-  const on = (id: WorkspaceAppId) => demo || Boolean(apps?.[id]?.enabled);
+  const on = (id: WorkspaceAppId) => demo || (Boolean(apps?.[id]?.enabled) && appUnlocked(apps, id));
   const compare = on("compare");
   const goals = on("goals");
   const notes = on("notes");

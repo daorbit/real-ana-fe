@@ -12,6 +12,7 @@ import { useAuth } from "@/features/auth/context";
 import { loadRazorpayCheckout, openRazorpayCheckout } from "@/features/billing/lib/razorpay";
 import { openCashfreeCheckout } from "@/features/billing/lib/cashfree";
 import { CHECKOUT_LOGO } from "../lib/constants";
+import { usePayOrder } from "./usePayOrder";
 import type {
   AutoRenewCheckout, BillingCycle, Plan, AddonPack, CouponCheckResult, Currency, AddonSelection, PaymentGateway,
 } from "@/shared/types";
@@ -44,6 +45,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
   const [startAddonPurchase] = useStartAddonPurchaseMutation();
   // One endpoint for every confirmation — plan or addon, Razorpay or Cashfree.
   const [confirmPurchase] = useConfirmPurchaseMutation();
+  const payOrder = usePayOrder();
 
   /** The slug/id being paid for, so only that card shows a spinner. */
   const [subscribing, setSubscribing] = useState<string | null>(null);
@@ -294,45 +296,8 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
         fireConfetti();
       };
 
-      if (started.gateway === "cashfree") {
-        await runCashfree(started.paymentSessionId, started.cashfreeMode, started.orderId, {
-          onPaid,
-          cancelledLabel: packs > 1 ? `${pack.name} × ${packs}` : pack.name,
-        });
-        return;
-      }
-
-      let paid = false;
-      await loadRazorpayCheckout();
-      openRazorpayCheckout({
-        key: started.razorpayKeyId,
-        amount: started.amount,
-        currency: started.currency,
-        order_id: started.orderId,
-        name: "Quantalog",
-        description: packs > 1 ? `${pack.name} × ${packs}` : pack.name,
-        image: CHECKOUT_LOGO,
-        prefill: { name: user?.name, email: user?.email },
-        theme: { color: "#2f6bff" },
-        handler: async (response) => {
-          paid = true;
-          try {
-            await confirmPurchase({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-            }).unwrap();
-            await onPaid();
-          } catch (e) {
-            notify.error(errMessage(e, t("billing.verifyFailed")));
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            if (!paid) setCancelled(pack.name);
-          },
-        },
-      });
+      const label = packs > 1 ? `${pack.name} × ${packs}` : pack.name;
+      await payOrder(started, { description: label, onPaid, onCancelled: () => setCancelled(label) });
     } catch (e) {
       notify.error(errMessage(e, t("billing.checkoutError")));
     } finally {

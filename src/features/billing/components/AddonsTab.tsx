@@ -8,6 +8,8 @@ import { CurrencyControl } from "./common/CurrencyControl";
 import { RefetchButton } from "./common/RefetchButton";
 import { FactList } from "./common/FactList";
 import { AddonPackCard } from "./addons/AddonPackCard";
+import { AppAddonCard } from "./addons/AppAddonCard";
+import { PAID_APP_IDS } from "@/features/integrations/lib/paidApps";
 import { sortPacks } from "../lib/credits";
 import classes from "./addons/Addons.module.css";
 
@@ -99,6 +101,17 @@ export function AddonsTab({
         </ul>
       ) : (
         <div className={classes.empty}>{t("billing.noAddons")}</div>
+      )}
+
+      {!isDemo && selectedWorkspaceId && (
+        <>
+          <p className={classes.appsLabel}>{t("billing.appsLabel")}</p>
+          <ul className={classes.packs}>
+            {PAID_APP_IDS.map((app) => (
+              <AppAddonCard key={app} app={app} />
+            ))}
+          </ul>
+        </>
       )}
 
       <FactList

@@ -1,10 +1,12 @@
 import { Badge, Button, Group, Text } from "@mantine/core";
-import { ArrowRight, Power } from "lucide-react";
+import { ArrowRight, LockOpen, Power } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useNotes } from "@/features/notes";
 import { confirmDelete } from "@/shared/lib/notify";
 import { dateTime } from "@/shared/lib/format";
 import { useToggleWorkspaceApp } from "../../hooks/useToggleWorkspaceApp";
+import { useAppUnlock } from "../../hooks/useAppUnlock";
+import { AppUnlockCheckout } from "./AppUnlockCheckout";
 import { appGuideUrl } from "../../lib/links";
 import type { WorkspaceAppInfo } from "../../lib/quantalogApps";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
@@ -35,7 +37,9 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
   const { active } = useWorkspace();
   const unsaved = useUnsavedChanges();
   const app = useToggleWorkspaceApp(info.id);
+  const unlock = useAppUnlock(info.id);
   const showSettings = hasAppSettings(info.id) && app.enabled && app.canManage && Boolean(active);
+  const unlockLabel = unlock.priceLabel ? `Unlock for ${unlock.priceLabel}` : "Unlock";
 
   const requestClose = () => {
     if (!unsaved.dirtyCount) {
@@ -89,6 +93,16 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
         <Button type="button" rightSection={<ArrowRight size={15} />} onClick={open}>
           Open {info.navLabel}
         </Button>
+      ) : unlock.locked ? (
+        <Button
+          type="button"
+          leftSection={<LockOpen size={15} />}
+          loading={unlock.buying}
+          disabled={!app.canManage || unlock.price === null}
+          onClick={unlock.openCheckout}
+        >
+          {unlockLabel}
+        </Button>
       ) : (
         <Button
           type="button"
@@ -111,9 +125,15 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
       title={info.name}
       subtitle="Official Quantalog app"
       badge={
-        <Badge size="sm" variant="light" color={app.enabled ? "teal" : "gray"}>
-          {app.enabled ? "On" : "Off"}
-        </Badge>
+        unlock.locked && unlock.priceLabel ? (
+          <Badge size="sm" variant="light" color="emerald">
+            {unlock.priceLabel} · one-time
+          </Badge>
+        ) : (
+          <Badge size="sm" variant="light" color={app.enabled ? "teal" : "gray"}>
+            {app.enabled ? "On" : "Off"}
+          </Badge>
+        )
       }
       docsUrl={appGuideUrl(info.tileId)}
       closeDisabled={app.saving}
@@ -123,6 +143,13 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
           <AsideBlock label="About">
             <Text size="sm">{info.description}</Text>
           </AsideBlock>
+          {unlock.locked && (
+            <AsideBlock label="Price">
+              <Text size="sm">
+                {unlock.priceLabel ?? "…"} once, for this workspace. No subscription, and it stays unlocked for good.
+              </Text>
+            </AsideBlock>
+          )}
           <AsideBlock label="Access">
             <Text size="sm" c="dimmed">
               Workspace admins turn apps on and off. Once on, everyone in the workspace finds {info.navLabel}{" "}
@@ -139,8 +166,8 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
     >
       <StudioHero
         state={app.enabled ? "live" : "off"}
-        pill={app.enabled ? "On" : "Off"}
-        title={app.enabled ? `${info.name} is on` : `Turn on ${info.name}`}
+        pill={app.enabled ? "On" : unlock.locked ? "Locked" : "Off"}
+        title={app.enabled ? `${info.name} is on` : unlock.locked ? `Unlock ${info.name}` : `Turn on ${info.name}`}
         description={info.tagline}
       />
 
@@ -153,11 +180,27 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
           <p className={classes.note}>
             {app.enabled
               ? `Open ${info.navLabel} any time ${info.location}.`
-              : app.canManage
-                ? `Enable it and everyone in this workspace finds ${info.navLabel} ${info.location}.`
-                : "Ask a workspace admin to enable it."}
+              : unlock.locked
+                ? app.canManage
+                  ? `A one-time payment${unlock.priceLabel ? ` of ${unlock.priceLabel}` : ""} unlocks it, and everyone in this workspace finds ${info.navLabel} ${info.location}.`
+                  : "Ask a workspace admin to unlock it."
+                : app.canManage
+                  ? `Enable it and everyone in this workspace finds ${info.navLabel} ${info.location}.`
+                  : "Ask a workspace admin to enable it."}
           </p>
         </section>
+      )}
+
+      {unlock.locked && unlock.price !== null && (
+        <AppUnlockCheckout
+          info={info}
+          opened={unlock.checkoutOpen}
+          price={unlock.price}
+          currency={unlock.currency}
+          busy={unlock.buying}
+          onClose={unlock.closeCheckout}
+          onConfirm={(request) => void unlock.buy(request)}
+        />
       )}
     </IntegrationStudio>
   );

@@ -14,7 +14,7 @@ export function LinksAppOff() {
       <div className={classes.empty}>
         <BrandMark id={INFO.tileId} size={28} />
         <span>
-          Turn on {INFO.name} in{" "}
+          Get {INFO.name} in{" "}
           <Anchor component={Link} to={appsPath(INFO.tileId)} size="sm">
             Apps
           </Anchor>{" "}
