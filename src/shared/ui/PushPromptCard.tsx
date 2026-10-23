@@ -42,8 +42,11 @@ export function PushPromptCard({ onDismiss }: { onDismiss: (d: PushDismissal) =>
       </button>
 
       <div className="push-prompt__body">
-        <Bell className="push-prompt__icon" size={17} strokeWidth={1.8} aria-hidden />
+        <span className="push-prompt__badge" aria-hidden>
+          <Bell size={20} strokeWidth={1.8} />
+        </span>
         <div className="push-prompt__text">
+          <p className="push-prompt__eyebrow">Notifications</p>
           <p className="push-prompt__title">Turn on notifications</p>
           <p className="push-prompt__detail">
             Know the moment something needs you, even with this tab closed.

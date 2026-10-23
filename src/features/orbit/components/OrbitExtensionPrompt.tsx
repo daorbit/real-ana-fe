@@ -11,7 +11,6 @@ import {
   writeOrbitExtensionDismissal,
 } from "../orbitExtension";
 import "@/shared/ui/PushPrompt.css";
-import classes from "./orbitExtensionPrompt.module.css";
 
 const SHOW_AFTER_MS = 4000;
 const SNOOZE_MS = 14 * 24 * 60 * 60 * 1000;
@@ -53,8 +52,11 @@ export function OrbitExtensionPrompt() {
       </button>
 
       <div className="push-prompt__body">
-        <OrbitMark size={18} className={classes.mark} />
+        <span className="push-prompt__badge" aria-hidden>
+          <OrbitMark size={24} />
+        </span>
         <div className="push-prompt__text">
+          <p className="push-prompt__eyebrow">New · Chrome extension</p>
           <p className="push-prompt__title">Orbit AI is now on Chrome</p>
           <p className="push-prompt__detail">
             Ask Orbit from any tab in the side panel. Open it with Ctrl+Shift+O.
@@ -74,7 +76,7 @@ export function OrbitExtensionPrompt() {
           href={ORBIT_EXTENSION_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className={`push-prompt__btn push-prompt__btn--primary ${classes.link}`}
+          className="push-prompt__btn push-prompt__btn--primary"
           onClick={() => dismiss(Number.MAX_SAFE_INTEGER)}
         >
           Add to Chrome
