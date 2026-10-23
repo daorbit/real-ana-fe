@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { useWorkspace, useActiveBilling } from "@/features/workspace/context";
 import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import { WorkspaceMenuItems } from "./WorkspaceSwitcher";
+import { WorkspaceLogo } from "./WorkspaceLogo";
+import classes from "./Rail.module.css";
 
 /**
  * The workspace this session is looking at, as the first block in the rail.
@@ -80,15 +82,7 @@ export function RailWorkspaceHeader({ collapsed, title }: { collapsed: boolean; 
           className="rail-workspace"
           aria-label={t("nav.activeWorkspace")}
         >
-          {/* The real product mark, not an initial: a workspace has no logo of
-              its own, and a letter tile here reads as a placeholder for one. */}
-          <Box
-            component="img"
-            src="/brand-mark.png"
-            alt=""
-            aria-hidden
-            style={{ width: 34, height: 34, flexShrink: 0, borderRadius: 8 }}
-          />
+          <WorkspaceLogo className={classes.workspaceLogo} />
 
           {title ? (
             <div className="rail-workspace__text">

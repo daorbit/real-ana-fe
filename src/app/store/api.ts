@@ -2120,10 +2120,13 @@ export const api = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: (_r, _e, { workspaceId }) => [{ type: "Branding", id: workspaceId }],
+      invalidatesTags: (_r, _e, { workspaceId }) => [
+        { type: "Branding", id: workspaceId },
+        { type: "Workspace", id: workspaceId },
+      ],
     }),
 
- 
+
     getMedia: build.query<
       MediaListResult,
       { workspaceId: string; kind?: MediaKind; q?: string; page?: number; perPage?: number }

@@ -1,6 +1,7 @@
 import { ActionIcon, Tooltip, UnstyledButton } from "@mantine/core";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { WorkspaceLogo } from "./WorkspaceLogo";
 import classes from "./Rail.module.css";
 
 export function RailBrand({
@@ -19,7 +20,7 @@ export function RailBrand({
     return (
       <Tooltip key="collapsed" label={label} position="right" withArrow openDelay={200}>
         <UnstyledButton className={classes.brandToggle} onClick={onToggle} aria-label={label} aria-expanded={false}>
-          <img src="/brand-mark.png" alt="" aria-hidden className={classes.brandMark} />
+          <WorkspaceLogo className={classes.brandMark} />
           <span className={classes.brandExpand} aria-hidden>
             <PanelLeftOpen size={18} />
           </span>

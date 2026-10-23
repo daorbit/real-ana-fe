@@ -1131,7 +1131,7 @@ export type Workspace = {
   icon?: WorkspaceIcon | null;
 };
 
-export type WorkspaceIcon = { logoUrl: string | null };
+export type WorkspaceIcon = { logoUrl: string | null; brandLogoUrl?: string | null };
 
 export type WorkspaceAppId =
   | "compare"
