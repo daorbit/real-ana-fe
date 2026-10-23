@@ -52,6 +52,7 @@
   height: 30px;
   border-radius: 8px;
   object-fit: cover;
+  background: #fff;
   transition: opacity 150ms ease;
 }
 
@@ -61,6 +62,7 @@
   flex-shrink: 0;
   border-radius: 8px;
   object-fit: cover;
+  background: #fff;
 }
 
 .brandExpand {

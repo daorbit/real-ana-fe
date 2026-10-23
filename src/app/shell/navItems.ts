@@ -1,11 +1,11 @@
 import {
-  Home, ChartColumn, FolderKanban, Code2, Users, SearchCheck, CalendarClock,
-  Send, CreditCard, Swords, Palette, Images, TrendingUp,
+  Home, ChartColumn, FolderKanban, Code2, Users, CalendarClock,
+  Send, CreditCard, Swords, Palette, Images,
   LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow, Link2,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/features/admin/lib/adminSections";
-import { LeadMagnetIcon } from "./icons";
+import { LeadMagnetIcon, SearchVisibilityIcon, SeoIcon } from "./icons";
 
 export type NavTone =
   | "blue" | "green" | "teal" | "indigo" | "pink" | "orange" | "violet" | "amber" | "cyan"
@@ -52,8 +52,8 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupSearch",
     heading: "Search",
     items: [
-      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: TrendingUp, tone: "green" },
-      { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: SearchCheck, tone: "teal" },
+      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: SearchVisibilityIcon, tone: "green" },
+      { to: "/app/seo", labelKey: "nav.seo", label: "SEO", icon: SeoIcon, tone: "teal" },
     ],
   },
   {
