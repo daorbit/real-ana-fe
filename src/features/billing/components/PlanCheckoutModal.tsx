@@ -222,6 +222,19 @@ export function PlanCheckoutModal({
               <PlanIncludes plan={plan} />
             </CheckoutBlock>
 
+            {addons.length > 0 && recurring && (
+              <CheckoutBlock
+                title={t("billing.addExtraCredits")}
+                hint={t("billing.optional")}
+                description={t(
+                  "billing.addonsSeparateWithAutoRenew",
+                  "With auto-renew, add-on packs are bought on their own from the Add-ons tab, any time after checkout. They never expire and stay through every renewal.",
+                )}
+              >
+                {null}
+              </CheckoutBlock>
+            )}
+
             {addons.length > 0 && !recurring && (
               <CheckoutBlock
                 title={t("billing.addExtraCredits")}

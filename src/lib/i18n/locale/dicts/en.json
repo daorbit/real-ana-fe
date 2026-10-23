@@ -1438,6 +1438,7 @@
     "renewalHalted": "Auto-renew stopped",
     "cancelSub": "Cancel subscription",
     "dueToday": "Due today",
+    "addonsSeparateWithAutoRenew": "With auto-renew, add-on packs are bought on their own from the Add-ons tab, any time after checkout. They never expire and stay through every renewal.",
     "eyebrowScheduleSwitch": "Schedule plan switch",
     "eyebrowSetUpAutoRenew": "Set up auto-renew",
     "ctaKeepPlan": "Keep {{plan}}",
