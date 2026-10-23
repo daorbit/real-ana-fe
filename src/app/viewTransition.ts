@@ -63,6 +63,38 @@ export function transitionTo(navigate: (to: string) => void, to: string, kind: T
   });
 }
 
+export function withViewTransition(kind: string, update: () => void): void {
+  const doc = document as ViewTransitionDocument;
+  if (!supportsViewTransitions() || inFlight) {
+    update();
+    return;
+  }
+
+  inFlight = true;
+  const root = document.documentElement;
+  root.dataset.vt = kind;
+
+  let safety = 0;
+  const done = () => {
+    window.clearTimeout(safety);
+    if (root.dataset.vt === kind) delete root.dataset.vt;
+    inFlight = false;
+    active = null;
+  };
+
+  try {
+    const transition = doc.startViewTransition!(() => {
+      flushSync(update);
+    });
+    active = transition;
+    safety = window.setTimeout(() => transition.skipTransition?.(), SAFETY_MS);
+    transition.finished.then(done, done);
+  } catch {
+    done();
+    update();
+  }
+}
+
 export function isPlainLeftClick(e: React.MouseEvent): boolean {
   return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
 }

@@ -142,6 +142,46 @@
   background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
+.iconWell[data-image],
+.tile:hover .iconWell[data-image],
+.tile:focus-visible .iconWell[data-image] {
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.iconImage {
+  width: 40px;
+  height: 40px;
+  display: block;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+:global(html[data-vt="workspace"]) .tile[data-picking] .iconWell,
+:global(html[data-vt="workspace"]) .handoffIcon .iconWell {
+  view-transition-name: workspace-hero;
+}
+
+.handoff {
+  position: relative;
+  flex: 1;
+  min-height: 100dvh;
+}
+
+.handoffIcon {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 150px);
+  translate: -50% 0;
+  z-index: 1;
+}
+
+.chevron,
+.rowMeta {
+  display: none;
+}
+
 .tile[data-last] .art {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   background: color-mix(in srgb, var(--accent) 6%, var(--picker-tile));
@@ -256,8 +296,104 @@
   }
 
   .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px 16px;
-    margin-top: 32px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    max-width: 480px;
+    margin-top: 28px;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--picker-tile);
+  }
+
+  .tile {
+    flex-direction: row;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 0;
+    transition: background-color 160ms ease;
+  }
+
+  .tile + .tile {
+    border-top: 1px solid var(--border);
+  }
+
+  .tile:hover,
+  .tile:focus-visible {
+    background: color-mix(in srgb, var(--text) 5%, transparent);
+  }
+
+  .art,
+  .tile[data-last] .art,
+  .tile:hover .art,
+  .tile:focus-visible .art,
+  .tile[data-variant="add"] .art,
+  .tile[data-variant="add"]:hover .art {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    aspect-ratio: auto;
+    margin: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+  }
+
+  .iconWell {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .iconWell svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .iconWell[data-image],
+  .tile:hover .iconWell[data-image],
+  .tile:focus-visible .iconWell[data-image] {
+    border-radius: 12px;
+  }
+
+  .iconImage {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+  }
+
+  .tile[data-variant="add"] .art {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  .tile[data-variant="add"] .art svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .name {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    color: var(--text);
+  }
+
+  .key,
+  .lastUsed {
+    display: none;
+  }
+
+  .rowMeta {
+    display: inline;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .chevron {
+    display: block;
+    flex: none;
+    color: var(--muted);
   }
 }

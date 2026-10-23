@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
+import { faviconForUrl } from "@/shared/lib/favicon";
 import classes from "./LinkLogo.module.css";
-
-function faviconFor(url: string): string | null {
-  try {
-    const host = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`;
-  } catch {
-    return null;
-  }
-}
 
 export function LinkLogo({
   url,
@@ -21,7 +13,7 @@ export function LinkLogo({
   label: string;
   size?: number;
 }) {
-  const sources = [logoUrl, faviconFor(url)].filter((s): s is string => Boolean(s));
+  const sources = [logoUrl, faviconForUrl(url)].filter((s): s is string => Boolean(s));
   const [index, setIndex] = useState(0);
 
   useEffect(() => setIndex(0), [logoUrl, url]);

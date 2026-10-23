@@ -35,6 +35,12 @@ html[data-vt="orbit"] .rail-orbit-mini {
   animation: vt-hero-in 420ms cubic-bezier(0.32, 0.72, 0, 1) 140ms both;
 }
 
+::view-transition-group(workspace-hero) {
+  z-index: 10;
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 @keyframes vt-hero-out {
   to {
     opacity: 0;

@@ -1,27 +1,30 @@
 import { UnstyledButton } from "@mantine/core";
-import { Check, FolderKanban } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
+import type { WorkspaceIcon as WorkspaceIconData } from "@/shared/types";
+import { WorkspaceIcon } from "./WorkspaceIcon";
 import classes from "./WorkspacePicker.module.css";
 
 type Props = {
   name: string;
+  icon?: WorkspaceIconData | null;
   shortcut?: number;
   lastUsed: boolean;
   lastUsedLabel: string;
+  picking: boolean;
   onClick: () => void;
 };
 
-export function WorkspaceTile({ name, shortcut, lastUsed, lastUsedLabel, onClick }: Props) {
+export function WorkspaceTile({ name, icon, shortcut, lastUsed, lastUsedLabel, picking, onClick }: Props) {
   return (
     <UnstyledButton
       className={classes.tile}
       data-last={lastUsed || undefined}
+      data-picking={picking || undefined}
       onClick={onClick}
       title={name}
     >
       <span className={classes.art}>
-        <span className={classes.iconWell}>
-          <FolderKanban size={30} strokeWidth={1.6} />
-        </span>
+        <WorkspaceIcon icon={icon} />
         {shortcut !== undefined && <kbd className={classes.key}>{shortcut}</kbd>}
         {lastUsed && (
           <span className={classes.lastUsed}>
@@ -31,6 +34,8 @@ export function WorkspaceTile({ name, shortcut, lastUsed, lastUsedLabel, onClick
         )}
       </span>
       <span className={classes.name}>{name}</span>
+      {lastUsed && <span className={classes.rowMeta}>{lastUsedLabel}</span>}
+      <ChevronRight size={16} className={classes.chevron} aria-hidden />
     </UnstyledButton>
   );
 }

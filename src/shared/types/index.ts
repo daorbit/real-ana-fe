@@ -1128,7 +1128,10 @@ export type Workspace = {
   billing: QuotaSummary;
   navPrefs?: NavPrefs | null;
   apps?: WorkspaceApps;
+  icon?: WorkspaceIcon | null;
 };
+
+export type WorkspaceIcon = { logoUrl: string | null; domain: string | null };
 
 export type WorkspaceAppId =
   | "compare"

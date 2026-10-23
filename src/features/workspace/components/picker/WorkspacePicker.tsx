@@ -7,10 +7,11 @@ import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
 import { readLastWorkspace } from "@/features/workspace/lib/storedWorkspace";
 import { Wordmark } from "@/shared/ui/Brand";
-import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 import { WorkspaceTile } from "./WorkspaceTile";
 import { NewWorkspaceTile } from "./NewWorkspaceTile";
 import { PickerProfile } from "./PickerProfile";
+import { PickerHandoff } from "./PickerHandoff";
+import { lastUsedFirst } from "./orderWorkspaces";
 import { usePickTransition } from "./usePickTransition";
 import { SHORTCUT_LIMIT, usePickerShortcuts } from "./usePickerShortcuts";
 import classes from "./WorkspacePicker.module.css";
@@ -24,26 +25,27 @@ export default function WorkspacePicker() {
   const nav = useNavigate();
   const { user, logout } = useAuth();
   const { workspaces } = useWorkspace();
-  const { picked, pick } = usePickTransition();
+  const { picked, pickingId, pick } = usePickTransition();
   const [query, setQuery] = useState("");
   const [lastId] = useState(readLastWorkspace);
 
-  const ids = useMemo(() => workspaces.map((w) => w._id), [workspaces]);
+  const ordered = useMemo(() => lastUsedFirst(workspaces, lastId), [workspaces, lastId]);
+  const ids = useMemo(() => ordered.map((w) => w._id), [ordered]);
   usePickerShortcuts(picked ? NO_IDS : ids, pick);
 
   const q = query.trim().toLowerCase();
   const shown = useMemo(
     () =>
-      workspaces
+      ordered
         .map((w, index) => ({ w, index }))
         .filter(({ w }) => !q || w.name.toLowerCase().includes(q)),
-    [workspaces, q],
+    [ordered, q],
   );
 
   if (picked) {
     return (
       <div className={classes.screen}>
-        <SwitchVisual inline label={t("workspaces.picker.opening", { name: picked.name })} />
+        <PickerHandoff workspace={picked} />
       </div>
     );
   }
@@ -90,9 +92,11 @@ export default function WorkspacePicker() {
             <WorkspaceTile
               key={w._id}
               name={w.name}
+              icon={w.icon}
               shortcut={index < SHORTCUT_LIMIT ? index + 1 : undefined}
               lastUsed={w._id === lastId}
               lastUsedLabel={t("workspaces.picker.lastUsed")}
+              picking={w._id === pickingId}
               onClick={() => pick(w._id)}
             />
           ))}
@@ -107,7 +111,6 @@ export default function WorkspacePicker() {
         {q && shown.length === 0 && (
           <p className={classes.empty}>{t("workspaces.picker.noMatch", { query: query.trim() })}</p>
         )}
-
       </main>
     </div>
   );
