@@ -61,6 +61,9 @@ export function PlanCard({
       ? action.to === "yearly"
         ? t("billing.ctaSwitchYearly", "Switch to yearly")
         : t("billing.ctaSwitchMonthly", "Switch to monthly")
+    : action.kind === "keep" ? t("billing.ctaKeepPlan", "Keep {{plan}}", { plan: plan.name })
+    : action.kind === "downgrade" ? t("billing.ctaSwitchAtEnd", "Switch at period end")
+    : action.kind === "scheduled" ? t("billing.ctaScheduled", "Starts at period end")
     : action.kind === "current" ? t("billing.ctaCurrentPlan")
     : action.kind === "lower" ? t("billing.ctaIncludedInNamed", "Included in {{plan}}", { plan: action.currentName })
     : action.kind === "free" ? t("billing.ctaIncludedFree")

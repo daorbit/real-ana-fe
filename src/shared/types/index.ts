@@ -658,6 +658,9 @@ export type RenewalSummary = {
   autoRenew: boolean;
   status: RenewalStatus | null;
   nextChargeAt: string | null;
+  planSlug: string | null;
+  planName: string | null;
+  cycle: BillingCycle | null;
 };
 
 export type QuotaSummary = {

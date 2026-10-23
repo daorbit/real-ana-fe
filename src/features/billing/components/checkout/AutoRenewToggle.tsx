@@ -18,8 +18,8 @@ export function AutoRenewToggle({
   const { t } = useTranslation();
   const description = checked
     ? cycle === "yearly"
-      ? t("billing.autoRenewOnYear", "Charged every year until you turn it off")
-      : t("billing.autoRenewOnMonth", "Charged every month until you turn it off")
+      ? t("billing.autoRenewOnYear", "Charged every year until you cancel")
+      : t("billing.autoRenewOnMonth", "Charged every month until you cancel")
     : t("billing.autoRenewOff", "Pay once and renew by hand");
 
   return (

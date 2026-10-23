@@ -153,7 +153,8 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
           await refreshUser();
           if (deferred) {
             notify.success(
-              t("billing.autoRenewOnToast", "Auto-renew is on. First charge on {{date}}.", {
+              t("billing.autoRenewOnToast", "{{plan}} renews automatically from {{date}}.", {
+                plan: plan.name,
                 date: shortDate(started.startsAt),
               }),
             );

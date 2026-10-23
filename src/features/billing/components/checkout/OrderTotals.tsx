@@ -13,6 +13,7 @@ export function OrderTotals({
   chargeable,
   percentOff,
   couponCode,
+  totalLabel,
   money,
 }: {
   lines: OrderLine[];
@@ -21,6 +22,7 @@ export function OrderTotals({
   chargeable: number;
   percentOff: number;
   couponCode?: string;
+  totalLabel?: string;
   money: (amountMinor: number) => string;
 }) {
   const { t } = useTranslation();
@@ -57,7 +59,7 @@ export function OrderTotals({
       )}
 
       <div className={classes.total}>
-        <span className={classes.totalLabel}>{t("billing.total")}</span>
+        <span className={classes.totalLabel}>{totalLabel ?? t("billing.total")}</span>
         <span className={classes.totalValue}>{money(chargeable)}</span>
       </div>
 

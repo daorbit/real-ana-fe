@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
 import { Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, ArrowUpRight, CircleX, Clock, Infinity as InfinityIcon, RefreshCw, RotateCcw, ShoppingCart } from "lucide-react";
+import { ArrowUpRight, CircleX, Clock, Infinity as InfinityIcon, RefreshCw, RotateCcw, ShoppingCart } from "lucide-react";
 import type { QuotaSummary } from "@/shared/types";
+import { shortDate } from "@/shared/lib/format";
 import { useCancelAutoRenew } from "../../hooks/useCancelAutoRenew";
 import { PlanIcon, PLAN_ACCENTS } from "../PlanIcons";
 import { RIBBON_FALLBACK } from "../../lib/constants";
@@ -10,10 +11,6 @@ import { daysUntil } from "../../lib/usageMonth";
 import classes from "./PlanOverview.module.css";
 
 const RENEW_SOON_DAYS = 7;
-
-function shortDate(iso: string, options: Intl.DateTimeFormatOptions = {}) {
-  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", ...options });
-}
 
 export function PlanOverview({
   usage,
@@ -33,6 +30,9 @@ export function PlanOverview({
   const periodEnd = usage.currentPeriodEnd;
   const renewal = usage.renewal;
   const autoRenewing = !expired && !!renewal?.autoRenew;
+  const switching =
+    !!renewal?.planSlug &&
+    (renewal.planSlug !== usage.plan.slug || (!!renewal.cycle && renewal.cycle !== usage.cycle));
   const paidPlan = usage.plan.slug !== "free";
   const canTurnOn = !expired && !autoRenewing && paidPlan;
   const daysLeft = periodEnd && !expired && !autoRenewing && paidPlan ? daysUntil(periodEnd) : null;
@@ -66,12 +66,20 @@ export function PlanOverview({
             )}
             {periodEnd && (paidPlan || expired) && (
               <div className={classes.meta}>
-                {autoRenewing ? (
+                {autoRenewing && switching && renewal?.nextChargeAt ? (
+                  <span className={classes.metaItem}>
+                    <RefreshCw size={13} />
+                    {t("billing.switchesTo", "Switches to {{plan}} on {{date}}", {
+                      plan: renewal.planName ?? renewal.planSlug,
+                      date: shortDate(renewal.nextChargeAt),
+                    })}
+                  </span>
+                ) : autoRenewing ? (
                   <span className={classes.metaItem}>
                     <RefreshCw size={13} />
                     {renewal?.nextChargeAt
                       ? t("billing.autoRenewsOn", "Renews automatically on {{date}}", {
-                          date: shortDate(renewal.nextChargeAt, { year: "numeric" }),
+                          date: shortDate(renewal.nextChargeAt),
                         })
                       : t("billing.autoRenewsOnNoDate", "Renews automatically")}
                     {t("billing.billedSuffix", { cycle: cycleWord })}
@@ -80,7 +88,7 @@ export function PlanOverview({
                   <span className={classes.metaItem}>
                     <Clock size={13} />
                     {t(expired ? "billing.expiredOn" : "billing.renewsOn", {
-                      date: shortDate(periodEnd, { year: "numeric" }),
+                      date: shortDate(periodEnd),
                     })}
                     {t("billing.billedSuffix", { cycle: cycleWord })}
                   </span>
@@ -105,6 +113,7 @@ export function PlanOverview({
                 )}
               </div>
             )}
+            {expired && <p className={classes.expiredLine}>{t("billing.expiredNotice")}</p>}
           </div>
         </div>
 
@@ -115,7 +124,7 @@ export function PlanOverview({
             </Button>
           )}
           {canTurnOn && (
-            <Button variant="subtle" color="gray" radius="md" leftSection={<RefreshCw size={15} />} onClick={onTurnOnAutoRenew}>
+            <Button variant="light" color="emerald" radius="md" leftSection={<RefreshCw size={15} />} onClick={onTurnOnAutoRenew}>
               {t("billing.turnOnAutoRenew", "Turn on auto-renew")}
             </Button>
           )}
@@ -132,13 +141,6 @@ export function PlanOverview({
           </Button>
         </div>
       </header>
-
-      {expired && (
-        <div className={classes.expiredNote}>
-          <AlertTriangle size={15} />
-          <span>{t("billing.expiredNotice")}</span>
-        </div>
-      )}
     </section>
   );
 }

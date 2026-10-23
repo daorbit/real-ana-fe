@@ -21,7 +21,7 @@ import { PeriodPreview } from "./checkout/PeriodPreview";
 import { TrustList } from "./checkout/TrustList";
 import { AutoRenewToggle } from "./checkout/AutoRenewToggle";
 import { CouponRow } from "./checkout/CouponRow";
-import { autoRenewTerms } from "../lib/autoRenew";
+import { autoRenewTerms, isLowerPlan } from "../lib/autoRenew";
 import { num } from "@/shared/lib";
 import { shortDate } from "@/shared/lib/format";
 import { formatMoney, priceIn } from "@/shared/lib/currency";
@@ -79,7 +79,8 @@ export function PlanCheckoutModal({
     if (plan) setSelection({});
   }, [plan?.slug]);
 
-  const startsLater = !!plan && autoRenew && autoRenewTerms(usage, plan, cycle).deferred;
+  const lower = !!plan && isLowerPlan(plans, usage, plan);
+  const startsLater = !!plan && (autoRenew || lower) && autoRenewTerms(usage, plan, cycle, lower).deferred;
   useEffect(() => {
     if (startsLater && coupon) onCoupon(null);
   }, [startsLater, coupon]);
@@ -90,8 +91,8 @@ export function PlanCheckoutModal({
   const planPrice = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
   const isFreePlan =
     priceIn(plan.priceMonthly, currency) === 0 && priceIn(plan.priceYearly, currency) === 0;
-  const recurring = autoRenew && !isFreePlan;
-  const terms = autoRenewTerms(usage, plan, cycle);
+  const terms = autoRenewTerms(usage, plan, cycle, lower);
+  const recurring = (autoRenew || terms.scheduledSwitch) && !isFreePlan;
   const deferred = recurring && terms.deferred;
   const blockedOneTime = !recurring && !isFreePlan && terms.renewalLive;
 
@@ -180,7 +181,13 @@ export function PlanCheckoutModal({
               </span>
               <div className={s.heroText}>
                 <span className={s.eyebrow}>
-                  {renewing ? t("billing.confirmRenewal", "Confirm renewal") : t("billing.confirmSubscription")}
+                  {deferred && terms.scheduledSwitch
+                    ? t("billing.eyebrowScheduleSwitch", "Schedule plan switch")
+                    : deferred
+                      ? t("billing.eyebrowSetUpAutoRenew", "Set up auto-renew")
+                      : renewing
+                        ? t("billing.confirmRenewal", "Confirm renewal")
+                        : t("billing.confirmSubscription")}
                 </span>
                 <h1 className={s.heroTitle}>{planLabel}</h1>
                 {plan.description && <p className={s.heroDesc}>{plan.description}</p>}
@@ -256,14 +263,17 @@ export function PlanCheckoutModal({
               chargeable={chargeable}
               percentOff={percentOff}
               couponCode={deferred ? undefined : coupon?.coupon?.code}
+              totalLabel={deferred ? t("billing.dueToday", "Due today") : undefined}
               money={money}
             />
 
             <SavingsCard lines={savings} money={money} />
 
-            {!isFreePlan && (
+            {!isFreePlan && !(terms.scheduledSwitch && deferred) && (
               <div className={classes.options}>
-                <AutoRenewToggle checked={autoRenew} cycle={cycle} busy={busy} onChange={toggleAutoRenew} />
+                {!terms.scheduledSwitch && (
+                  <AutoRenewToggle checked={autoRenew} cycle={cycle} busy={busy} onChange={toggleAutoRenew} />
+                )}
                 {!deferred && (
                   <CouponRow
                     amount={subtotal}
@@ -299,6 +309,8 @@ export function PlanCheckoutModal({
             >
               {recurring && terms.alreadyRenewing
                 ? t("billing.alreadyAutoRenewing", "Already renews automatically")
+                : deferred && terms.scheduledSwitch
+                  ? t("billing.scheduleSwitch", "Switch to {{plan}} at period end", { plan: plan.name })
                 : deferred
                   ? t("billing.turnOnAutoRenew", "Turn on auto-renew")
                   : noCharge
@@ -316,8 +328,16 @@ export function PlanCheckoutModal({
               <span>
                 {isFreePlan
                   ? t("billing.planIsFree")
+                  : deferred && terms.scheduledSwitch && terms.firstChargeAt && usage
+                    ? t("billing.scheduledSwitchNote", "You keep {{current}} until {{date}}. Then {{plan}} starts and Razorpay charges {{amount}} every {{cycle}}. Nothing is charged today.", {
+                        current: usage.plan.name,
+                        plan: plan.name,
+                        date: shortDate(terms.firstChargeAt),
+                        amount: money(planPrice),
+                        cycle: cycleNoun,
+                      })
                   : deferred && terms.firstChargeAt
-                    ? t("billing.autoRenewDeferredNote", "Nothing is charged today. Razorpay charges {{amount}} on {{date}}, then every {{cycle}}. Turn it off any time in Billing.", {
+                    ? t("billing.autoRenewDeferredNote", "Nothing is charged today. Razorpay charges {{amount}} on {{date}}, then every {{cycle}}. Cancel any time in Billing.", {
                         amount: money(planPrice),
                         date: shortDate(terms.firstChargeAt),
                         cycle: cycleNoun,
@@ -332,7 +352,7 @@ export function PlanCheckoutModal({
                           cycle: cycleNoun,
                         })
                       : blockedOneTime
-                        ? t("billing.autoRenewBlocksOneTime", "Auto-renew is on for this workspace. Turn it off in Billing to pay once instead.")
+                        ? t("billing.autoRenewBlocksOneTime", "This workspace renews automatically. Cancel the subscription in Billing to pay once instead.")
                         : noCharge
                           ? t("billing.couponCovers", "Your coupon covers the full {{cycle}} price. You'll get a {{zero}} receipt for your records.", {
                               cycle: cycleWord,
