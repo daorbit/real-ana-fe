@@ -662,6 +662,22 @@
   opacity: 0.5;
 }
 
+.pay.pay[data-loading] {
+  opacity: 1;
+  cursor: progress;
+  background: var(--pa, var(--mantine-color-emerald-6));
+  color: var(--pa-on, #ffffff);
+}
+
+.pay.pay[data-loading]::before {
+  display: none;
+}
+
+.pay.pay :global(.mantine-Loader-root) {
+  --loader-color: var(--pa-on, #ffffff);
+  color: var(--pa-on, #ffffff);
+}
+
 .footnote {
   display: flex;
   align-items: flex-start;

@@ -1,8 +1,8 @@
 import { Modal, Title, Text, Button, Stack } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { creditType } from "../lib/credits";
 import type { Celebration } from "../hooks/useCheckout";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleX } from "lucide-react";
+import { CelebrationModal } from "./CelebrationModal";
 
 interface Props {
   /** What was abandoned at the payment sheet, if anything. */
@@ -50,53 +50,7 @@ export function CheckoutOutcome({ cancelled, setCancelled, celebration, setCeleb
     </Stack>
   </Modal>
 
-  <Modal
-    opened={!!celebration}
-    onClose={() => setCelebration(null)}
-    centered
-    radius="lg"
-    padding={0}
-    withCloseButton={false}
-    size={440}
-  >
-    {celebration && (
-      <Stack gap={0}>
-        <Stack align="center" gap="sm" px={26} pt={32} pb={24}>
-          <CircleCheck size={40} strokeWidth={1.6} color="var(--green)" />
-          <Title order={4} ta="center">
-            {celebration.kind === "plan"
-              ? t("billing.celebrationPlanTitle")
-              : t("billing.celebrationAddonTitle")}
-          </Title>
-          <Text size="sm" c="dimmed" ta="center" maw={300}>
-            {celebration.kind === "plan" ? (
-              <>
-                {t("billing.celebrationPlanBody", { plan: celebration.planName })}
-                {celebration.credits.length > 0 &&
-                  t("billing.celebrationPlanExtra", {
-                    extras: celebration.credits
-                      .map((c) => `${c.credits} ${creditType(t, c.type, c.credits)}`)
-                      .join(t("billing.and")),
-                  })}
-              </>
-            ) : (
-              t("billing.celebrationAddonBody", {
-                n: celebration.pack.quantity * celebration.packs,
-                type: creditType(
-                  t,
-                  celebration.pack.type,
-                  celebration.pack.quantity * celebration.packs,
-                ),
-              })
-            )}
-          </Text>
-          <Button fullWidth color="emerald" radius="md" mt="xs" onClick={() => setCelebration(null)}>
-            {t("billing.letsGo")}
-          </Button>
-        </Stack>
-      </Stack>
-    )}
-  </Modal>
+  <CelebrationModal celebration={celebration} onClose={() => setCelebration(null)} />
     </>
   );
 }

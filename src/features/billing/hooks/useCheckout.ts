@@ -19,8 +19,26 @@ import type {
 
 /** What the page shows after a purchase lands. */
 export type Celebration =
-  | { kind: "plan"; planName: string; credits: { type: string; credits: number }[] }
+  | {
+      kind: "plan";
+      planName: string;
+      credits: { type: string; credits: number }[];
+      planSlug?: string;
+      highlights?: string[];
+    }
   | { kind: "addon"; pack: AddonPack; packs: number };
+
+const HIGHLIGHT_COUNT = 3;
+
+function planCelebration(plan: Plan, credits: { type: string; credits: number }[] = []): Celebration {
+  return {
+    kind: "plan",
+    planName: plan.name,
+    credits,
+    planSlug: plan.slug,
+    highlights: plan.features.slice(0, HIGHLIGHT_COUNT),
+  };
+}
 
 interface Options {
   workspaceId: string | null;
@@ -162,7 +180,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
             );
             return;
           }
-          setCelebration({ kind: "plan", planName: plan.name, credits: [] });
+          setCelebration(planCelebration(plan));
           fireConfetti();
         } catch (e) {
           notify.error(errMessage(e, t("billing.verifyFailed")));
@@ -208,7 +226,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
       // no sheet to open.
       if ("free" in started && started.free) {
         await refreshUser();
-        setCelebration({ kind: "plan", planName: plan.name, credits: [] });
+        setCelebration(planCelebration(plan));
         fireConfetti();
         return;
       }
@@ -221,7 +239,7 @@ export function useCheckout({ workspaceId, cycle, currency, planCoupon, addonCou
       const boughtCredits = (started.addons ?? []).map((a) => ({ type: a.type, credits: a.credits }));
       const onPaid = async () => {
         await refreshUser();
-        setCelebration({ kind: "plan", planName: plan.name, credits: boughtCredits });
+        setCelebration(planCelebration(plan, boughtCredits));
         fireConfetti();
       };
 
