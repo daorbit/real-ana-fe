@@ -1967,7 +1967,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   color: var(--auth-ink-faint);
 }
 .mantine-Button-root[data-variant="filled"] .mantine-Loader-root {
-  --loader-color: currentColor;
+  --loader-color: currentColor !important;
 }
 .mantine-Button-root[data-variant="filled"][data-loading]::before {
   display: none;

@@ -597,22 +597,22 @@
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 30px;
-  padding: 0 13px;
+  gap: 4px;
+  height: 28px;
+  padding: 0 12px 0 10px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   font-size: 12.5px;
   font-weight: 600;
+  letter-spacing: -0.005em;
   color: var(--accent);
   white-space: nowrap;
   transition: background-color 140ms ease, border-color 140ms ease;
 }
 
 .optionRowButton:hover .optionPill {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .optionPill[data-tone="neutral"] {
@@ -674,7 +674,7 @@
 }
 
 .pay.pay :global(.mantine-Loader-root) {
-  --loader-color: var(--pa-on, #ffffff);
+  --loader-color: var(--pa-on, #ffffff) !important;
   color: var(--pa-on, #ffffff);
 }
 

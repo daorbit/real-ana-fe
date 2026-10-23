@@ -358,8 +358,8 @@
   margin-top: -1px;
   padding: 3px;
   border-radius: 50%;
-  color: var(--text-2);
-  background: var(--surface-2);
+  color: var(--good, var(--green));
+  background: color-mix(in srgb, var(--good, var(--green)) 14%, transparent);
 }
 
 .packGrid {
