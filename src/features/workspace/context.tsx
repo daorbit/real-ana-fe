@@ -5,17 +5,9 @@ import { api, useGetWorkspacesQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
 import { demoWorkspaces } from "@/features/demo/demoData";
 import { ROLE_RANK, type Workspace, type QuotaSummary } from "@/shared/types";
+import { readStoredWorkspace, writeStoredWorkspace } from "./lib/storedWorkspace";
 
-/**
- * Where the chosen workspace is remembered between visits.
- *
- * Exported because the invite-accept page has to set it from outside this
- * provider — that route renders for signed-out visitors, so the context is not
- * mounted there and the only way to hand off a selection is the storage key
- * itself.
- */
-export const ACTIVE_WORKSPACE_KEY = "rta_active_ws";
-const ACTIVE_KEY = ACTIVE_WORKSPACE_KEY;
+export { ACTIVE_WORKSPACE_KEY } from "./lib/storedWorkspace";
 
 /** A stable empty array — `data ?? []` would mint a new reference on every
  *  render while `data` is undefined, which is a dependency-array trap: the
@@ -32,7 +24,9 @@ type WsState = {
    * failed fetch never gets mistaken for "no workspaces yet" and sent to
    * onboarding. */
   fetchFailed: boolean;
+  needsChoice: boolean;
   setActive: (id: string) => void;
+  clearActive: () => void;
   refresh: () => Promise<unknown>;
 };
 
@@ -44,26 +38,28 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { demo } = useDemo();
   const workspaces = demo ? demoWorkspaces : data ?? EMPTY;
 
-  const [activeId, setActiveId] = useState<string | null>(() =>
-    localStorage.getItem(ACTIVE_KEY)
-  );
+  const [activeId, setActiveId] = useState<string | null>(readStoredWorkspace);
 
-  // Keep the stored choice if it still exists, otherwise fall back to the first.
   useEffect(() => {
     if (!workspaces.length) return;
-    setActiveId((cur) =>
-      cur && workspaces.some((w) => w._id === cur) ? cur : workspaces[0]._id
-    );
-  }, [workspaces]);
+    setActiveId((cur) => {
+      if (cur && workspaces.some((w) => w._id === cur)) return cur;
+      return demo || workspaces.length === 1 ? workspaces[0]._id : null;
+    });
+  }, [workspaces, demo]);
 
+  const hasWorkspaces = workspaces.length > 0;
   useEffect(() => {
-    if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
-  }, [activeId]);
+    if (activeId) writeStoredWorkspace(activeId);
+    else if (hasWorkspaces) writeStoredWorkspace(null);
+  }, [activeId, hasWorkspaces]);
 
   const setActive = useCallback((id: string) => setActiveId(id), []);
+  const clearActive = useCallback(() => setActiveId(null), []);
   const refresh = useCallback(() => refetch(), [refetch]);
 
   const active = workspaces.find((w) => w._id === activeId) ?? null;
+  const needsChoice = !demo && !active && workspaces.length > 1;
 
   return (
     <Ctx.Provider
@@ -72,7 +68,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         active,
         loading: demo ? false : isLoading,
         fetchFailed: demo ? false : isError,
+        needsChoice,
         setActive,
+        clearActive,
         refresh,
       }}
     >
@@ -89,7 +87,9 @@ export function useWorkspace(): WsState {
       active: null,
       loading: false,
       fetchFailed: false,
+      needsChoice: false,
       setActive: () => undefined,
+      clearActive: () => undefined,
       refresh: async () => undefined,
     };
   }

@@ -81,12 +81,13 @@ const BioPages = lazy(() => import("@/features/bio/pages/BioPages"));
 const BioStudio = lazy(() => import("@/features/bio/pages/BioStudio"));
 const PublicBio = lazy(() => import("@/features/bio/pages/PublicBio"));
 const EmbedWidget = lazy(() => import("@/features/embed/pages/EmbedWidget"));
+const WorkspacePicker = lazy(() => import("@/features/workspace/components/picker/WorkspacePicker"));
 const WelcomeOverlay = lazy(() =>
   import("@/shared/ui/WelcomeOverlay").then((m) => ({ default: m.WelcomeOverlay })),
 );
 
 function RequireSetup({ children }: { children: ReactNode }) {
-  const { workspaces, loading, fetchFailed } = useWorkspace();
+  const { workspaces, loading, fetchFailed, needsChoice } = useWorkspace();
   const { user } = useAuth();
   const [locked, setLocked] = useState(isLocked());
 
@@ -114,7 +115,13 @@ function RequireSetup({ children }: { children: ReactNode }) {
           />
         </Suspense>
       )}
-      {children}
+      {needsChoice ? (
+        <Suspense fallback={<AppBootSkeleton />}>
+          <WorkspacePicker />
+        </Suspense>
+      ) : (
+        children
+      )}
     </>
   );
 }

@@ -343,6 +343,18 @@
     "title": "Espacios de trabajo",
     "description": "Gestiona tus espacios de trabajo y los sitios que registran.",
     "newWorkspace": "Nuevo espacio de trabajo",
+    "picker": {
+      "title": "¿Qué espacio de trabajo?",
+      "subtitle": "Elige dónde quieres trabajar. Lo recordaremos en este dispositivo.",
+      "open": "Elegir espacio de trabajo",
+      "signOut": "Cerrar sesión",
+      "role": {
+        "owner": "Propietario",
+        "admin": "Administrador",
+        "editor": "Editor",
+        "viewer": "Lector"
+      }
+    },
     "nameLabel": "Nombre del espacio de trabajo",
     "createTitle": "Crear espacio de trabajo",
     "namePlaceholder": "p. ej. Acme S.L.",

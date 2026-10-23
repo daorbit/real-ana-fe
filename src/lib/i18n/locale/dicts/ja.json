@@ -343,6 +343,18 @@
     "title": "ワークスペース",
     "description": "ワークスペースと、そこで計測しているサイトを管理します。",
     "newWorkspace": "新しいワークスペース",
+    "picker": {
+      "title": "どのワークスペースを使いますか？",
+      "subtitle": "作業するワークスペースを選んでください。この端末に記憶されます。",
+      "open": "ワークスペースを選ぶ",
+      "signOut": "ログアウト",
+      "role": {
+        "owner": "オーナー",
+        "admin": "管理者",
+        "editor": "編集者",
+        "viewer": "閲覧者"
+      }
+    },
     "nameLabel": "ワークスペース名",
     "createTitle": "ワークスペースを作成",
     "namePlaceholder": "例: Acme Inc",

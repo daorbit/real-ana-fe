@@ -1,5 +1,5 @@
 import { ActionIcon, Menu, Tooltip, UnstyledButton } from "@mantine/core";
-import { FolderKanban, Plus, RefreshCw } from "lucide-react";
+import { FolderKanban, LayoutGrid, Plus, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/features/workspace/context";
@@ -60,7 +60,7 @@ export function WorkspaceMenuItems() {
   const { t } = useTranslation();
   const nav = useNavigate();
   const { user } = useAuth();
-  const { workspaces, active, setActive, refresh } = useWorkspace();
+  const { workspaces, active, setActive, clearActive, refresh } = useWorkspace();
 
   return (
     <Menu.Dropdown>
@@ -102,6 +102,12 @@ export function WorkspaceMenuItems() {
       >
         {t("workspaces.newWorkspace", "New workspace")}
       </Menu.Item>
+
+      {!user?.demo && workspaces.length > 1 && (
+        <Menu.Item leftSection={<LayoutGrid size={15} />} onClick={clearActive}>
+          {t("workspaces.picker.open")}
+        </Menu.Item>
+      )}
     </Menu.Dropdown>
   );
 }
