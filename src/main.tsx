@@ -18,12 +18,10 @@ import '@/app/fonts.css'
 import { theme } from '@/app/theme'
 import App from '@/app/App'
 import { ErrorBoundary } from '@/app/ErrorBoundary'
-// Initialise i18next before the first render so `t()` resolves on first paint,
-// and set the document language/direction to match the saved preference.
-import { i18n, applyDocumentLang, readLanguage } from '@/lib/i18n/locale'
+import { i18n, startGoogleTranslate } from '@/lib/i18n/locale'
 import { loadAndApplyTheme } from '@/shared/lib/theme'
 void i18n
-applyDocumentLang(readLanguage())
+startGoogleTranslate()
 
 // Accent + background are applied directly to <html> before first paint, so
 // there's no flash of the default blue/flat theme. Mode ("system" | "light"
