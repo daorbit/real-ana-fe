@@ -1144,11 +1144,12 @@ export type WorkspaceAppId =
   | "popups"
   | "publicDashboard"
   | "seoReports"
-  | "bio";
+  | "bio"
+  | "funnels";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string; paidAt?: string }>>;
 
-export type PaidAppId = "notes" | "reviews" | "alerts" | "links" | "bio" | "popups";
+export type PaidAppId = "notes" | "reviews" | "alerts" | "links" | "bio" | "popups" | "funnels";
 
 export type AppPrice = {
   appId: PaidAppId;
@@ -1156,7 +1157,9 @@ export type AppPrice = {
   price: CurrencyPrices;
 };
 
-export type StartAppPurchaseResponse = GatewayOrder & { app: { id: PaidAppId; name: string } };
+export type StartAppPurchaseResponse =
+  | (GatewayOrder & { app: { id: PaidAppId; name: string } })
+  | { free: true; app: { id: PaidAppId; name: string } };
 
 export type CustomLinkMode = "external" | "internal";
 
@@ -1545,7 +1548,16 @@ export type Marker = {
 export type FunnelStepInput = { type: "page" | "event"; value: string };
 
 /** A named funnel definition saved for reuse. */
-export type SavedFunnel = { id: string; name: string; steps: FunnelStepInput[] };
+export type SavedFunnel = { id: string; name: string; steps: FunnelStepInput[]; updatedAt?: string };
+
+export type FunnelOverviewRow = {
+  id: string;
+  entered: number;
+  completed: number;
+  conversion: number;
+  previousConversion: number | null;
+  biggestDrop: { index: number; dropped: number; dropFromPrev: number } | null;
+};
 
 /** One computed step of a funnel — how many sessions reached it. */
 export type FunnelResultStep = {
@@ -1555,8 +1567,26 @@ export type FunnelResultStep = {
   count: number;
   /** Conversion from the top of the funnel, as a percentage. */
   rate: number;
+  stepRate: number;
   /** Drop-off from the previous step, as a percentage. */
   dropFromPrev: number;
+  dropped: number;
+  avgSecondsFromPrev: number | null;
+  previousCount: number | null;
+};
+
+export type FunnelPeriod = { since: string; until: string; entered: number; completed: number; conversion: number };
+
+export type FunnelTrendUnit = "5min" | "hour" | "day" | "week";
+
+export type FunnelTrendPoint = { at: string; entered: number; completed: number; conversion: number };
+
+export type FunnelReport = {
+  steps: FunnelResultStep[];
+  current?: FunnelPeriod;
+  previous?: FunnelPeriod | null;
+  trend?: { unit: FunnelTrendUnit; points: FunnelTrendPoint[] };
+  biggestDrop?: { index: number; dropped: number; dropFromPrev: number } | null;
 };
 
 /** One page in the navigation graph, with how many sessions visited it. */

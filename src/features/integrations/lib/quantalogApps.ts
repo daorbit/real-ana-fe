@@ -188,6 +188,22 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Yours to style", body: "Light or dark, your accent colour and button shape, on a fast page at your own address." },
     ],
   },
+  funnels: {
+    id: "funnels",
+    tileId: "quantalog-funnels",
+    name: "Quantalog Funnels",
+    navLabel: "Funnels",
+    route: "/app/funnels",
+    location: "in the sidebar",
+    offNote: "Your saved funnels are kept, so turning it back on picks up where you left off.",
+    tagline: "See exactly where visitors drop off on the way to signing up or buying.",
+    description: "Chain the pages and events that lead to a sale or signup, and see how many visitors make it through each step, where they leave, and how many you lose.",
+    features: [
+      { title: "Pages and events together", body: "Mix pages like /pricing with events like checkout_started, up to eight steps in order." },
+      { title: "The leak, named", body: "Every step shows who reached it and who left, and the biggest drop is called out for you." },
+      { title: "Saved for the team", body: "Save a funnel once and anyone in the workspace can open it for any date range." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

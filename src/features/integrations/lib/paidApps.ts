@@ -1,6 +1,6 @@
 import type { PaidAppId, WorkspaceAppId, WorkspaceApps } from "@/shared/types";
 
-export const PAID_APP_IDS: PaidAppId[] = ["notes", "reviews", "alerts", "links", "bio", "popups"];
+export const PAID_APP_IDS: PaidAppId[] = ["notes", "reviews", "alerts", "links", "bio", "popups", "funnels"];
 
 const PAYMENT_ONLY_APP_IDS: PaidAppId[] = ["notes", "popups"];
 

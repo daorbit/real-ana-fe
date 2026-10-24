@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
@@ -14,7 +14,6 @@ import {
   ArrowDownWideNarrow, Zap, Split, CloudOff,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
-import { PlanGate } from "@/features/billing/components/PlanGate";
 import { StatCard } from "@/shared/ui/StatCard";
 import { TrafficTrendCard } from "@/features/analytics/components/trend/TrafficTrendCard";
 import { TREND_FOR_STAT, withBaseline, type TrendMetric } from "@/features/analytics/lib/trafficSeries";
@@ -26,7 +25,6 @@ import { ClicksPanel } from "@/features/analytics/components/ClicksPanel";
 import { Heatmap } from "@/shared/ui/Heatmap";
 import { ScrollPanel, LandingPanel } from "@/features/analytics/components/EngagementPanels";
 import { CustomEventsPanel } from "@/features/analytics/components/CustomEventsPanel";
-import { FunnelBuilder } from "@/features/analytics/components/FunnelBuilder";
 import { UserFlowPanel } from "@/features/analytics/components/UserFlowPanel";
 import { PageHeatmapPanel } from "@/features/analytics/components/heatmap/PageHeatmapPanel";
 import { RetentionGrid } from "@/features/analytics/components/RetentionGrid";
@@ -94,15 +92,17 @@ function SectionLabel({
 export default function Analytics() {
   useTitle("Analytics");
   const { t } = useTranslation();
-  // Funnels are entitled per workspace, so this follows the active one.
   const billing = useActiveBilling();
-  const funnelLocked = (billing?.plan?.slug ?? "free") === "free";
   const { active, loading } = useWorkspace();
   const { canEdit } = usePermissions();
   const {
     rangeState, setRangeState, compareState, setCompareState,
     filter, setFilter, section, tab, setView, setTab,
   } = useAnalyticsUrlState(billing?.allowedRanges);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (tab === "funnel") navigate("/app/funnels", { replace: true });
+  }, [tab, navigate]);
   const range = rangeState.preset;
   // Demo sessions never hit the network, so the per-panel comparison — which
   // has no fixture behind it — stays off there.
@@ -733,15 +733,6 @@ export default function Analytics() {
           <UserFlowPanel workspaceId={active._id} range={range} sites={siteScope} />
         </Tabs.Panel>
 
-        <Tabs.Panel value="funnel">
-          <PlanGate
-            locked={funnelLocked}
-            title="Funnels need Starter or Pro"
-            body="Track step-by-step drop-off across pages and events. Upgrade to unlock funnel analysis."
-          >
-            <FunnelBuilder workspaceId={active._id} range={range} stats={view} sites={siteScope} />
-          </PlanGate>
-        </Tabs.Panel>
 
         <Tabs.Panel value="retention">
           <RetentionGrid workspaceId={active._id} sites={siteScope} />

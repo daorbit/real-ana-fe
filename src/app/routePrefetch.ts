@@ -21,6 +21,8 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/analytics": () => import("@/features/analytics/pages/Analytics"),
   "/app/dashboards": () => import("@/features/dashboards/pages/Dashboards"),
   "/app/goals": () => import("@/features/goals/pages/Goals"),
+  "/app/funnels": () => import("@/features/funnels/pages/Funnels"),
+  "/app/funnels/new": () => import("@/features/funnels/pages/FunnelEdit"),
   "/app/alerts": () => import("@/features/alerts/pages/Alerts"),
   "/app/popups": () => import("@/features/popups/pages/Popups"),
   "/app/popups/new": () => import("@/features/popups/pages/PopupStudio"),

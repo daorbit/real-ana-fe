@@ -496,6 +496,9 @@ export function applyTheme(input: ThemePrefs) {
 
   root.style.setProperty("--rail-wash", "none");
   root.setAttribute("data-theme-preset", prefs.preset);
+  const themePreset = THEME_PRESETS.find((p) => p.id === prefs.preset);
+  if (themePreset?.apply) root.style.setProperty("--preset-wash", themePreset.swatch);
+  else root.style.removeProperty("--preset-wash");
 
   root.setAttribute("data-density", prefs.density);
 

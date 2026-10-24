@@ -39,12 +39,17 @@ export function useAppUnlock(app: WorkspaceAppId) {
         gateway,
         ...(phone ? { phone } : {}),
       }).unwrap();
+      const unlocked = () => {
+        setCheckoutOpen(false);
+        notify.success(`${info.name} is unlocked and on. Find ${info.navLabel} ${info.location}.`);
+      };
+      if ("free" in started) {
+        unlocked();
+        return;
+      }
       await payOrder(started, {
         description: info.name,
-        onPaid: () => {
-          setCheckoutOpen(false);
-          notify.success(`${info.name} is unlocked and on. Find ${info.navLabel} ${info.location}.`);
-        },
+        onPaid: unlocked,
         onCancelled: () => notify.info("Payment cancelled. Nothing was charged."),
       });
     } catch (e) {

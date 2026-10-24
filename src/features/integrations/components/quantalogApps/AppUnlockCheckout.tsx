@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, CloseButton, Modal } from "@mantine/core";
-import { Lock, ShieldCheck } from "lucide-react";
+import { Lock, LockOpen, ShieldCheck } from "lucide-react";
 import { CheckoutProduct } from "@/features/billing/components/checkout/CheckoutProduct";
 import { OrderTotals } from "@/features/billing/components/checkout/OrderTotals";
 import { GatewayPicker } from "@/features/billing/components/checkout/GatewayPicker";
@@ -37,7 +37,8 @@ export function AppUnlockCheckout({
   const money = (amountMinor: number) => formatMoney(amountMinor, currency);
   const percentOff = coupon?.coupon?.percentOff ?? 0;
   const total = percentOff ? Math.floor((price * (100 - percentOff)) / 100) : price;
-  const chargeable = Math.max(total, MIN_CHARGE);
+  const free = total === 0;
+  const chargeable = free ? 0 : Math.max(total, MIN_CHARGE);
 
   return (
     <Modal
@@ -75,32 +76,33 @@ export function AppUnlockCheckout({
 
         <CouponField amount={price} result={coupon} onChange={setCoupon} />
 
-        <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />
+        {!free && <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />}
 
         <Button
           fullWidth
           size="lg"
           color="emerald"
           className={classes.pay}
-          leftSection={<Lock size={15} />}
+          leftSection={free ? <LockOpen size={15} /> : <Lock size={15} />}
           loading={busy}
-          disabled={!gatewayChoice.canPay}
+          disabled={!free && !gatewayChoice.canPay}
           onClick={() =>
             onConfirm({
               couponCode: coupon?.coupon?.code,
               gateway: gatewayChoice.gateway,
-              phone: gatewayChoice.phoneForGateway,
+              phone: free ? undefined : gatewayChoice.phoneForGateway,
             })
           }
         >
-          Pay {money(chargeable)}
+          {free ? "Unlock for free" : `Pay ${money(chargeable)}`}
         </Button>
 
         <p className={classes.footnote}>
           <ShieldCheck size={14} />
           <span>
-            Pay once and {info.name} stays unlocked for this workspace for good. It turns on as soon as payment is
-            confirmed, and you get a receipt by email.
+            {free
+              ? `Your coupon covers the full price, so nothing is charged. ${info.name} unlocks for this workspace for good and turns on right away.`
+              : `Pay once and ${info.name} stays unlocked for this workspace for good. It turns on as soon as payment is confirmed, and you get a receipt by email.`}
           </span>
         </p>
       </div>

@@ -6,6 +6,7 @@ import {
 import { demoDashboards, demoTargets } from "@/features/demo/demoDashboards";
 import { demoAlerts } from "@/features/demo/demoAlerts";
 import { demoPopups } from "@/features/demo/demoPopups";
+import { demoFunnelOverview, demoSavedFunnels } from "@/features/demo/demoFunnels";
 import { demoHeatmapPages, demoPageHeatmap } from "@/features/demo/demoHeatmap";
 import { demoAccountActivity, demoAuditPage } from "@/features/demo/demoAudit";
 import type { AuditCategory } from "@/shared/types";
@@ -42,6 +43,8 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   }
   if (/\/retention$/.test(path)) return [];
   if (/\/funnel$/.test(path)) return { steps: [] };
+  if (/\/funnels\/overview$/.test(path)) return demoFunnelOverview(params.get("range") ?? "7d");
+  if (/\/funnels$/.test(path)) return demoSavedFunnels;
   if (/\/user-flow$/.test(path)) return demoUserFlow();
   if (/\/heatmap\/pages$/.test(path)) return demoHeatmapPages();
   if (/\/heatmap$/.test(path)) return demoPageHeatmap(params.get("path") ?? "/", params.get("device"));

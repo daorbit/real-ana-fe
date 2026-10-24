@@ -74,6 +74,9 @@ const DashboardTemplates = lazy(() => import("@/features/dashboards/pages/Dashbo
 const DashboardView = lazy(() => import("@/features/dashboards/pages/DashboardView"));
 const DashboardStudio = lazy(() => import("@/features/dashboards/pages/DashboardStudio"));
 const Goals = lazy(() => import("@/features/goals/pages/Goals"));
+const Funnels = lazy(() => import("@/features/funnels/pages/Funnels"));
+const FunnelView = lazy(() => import("@/features/funnels/pages/FunnelView"));
+const FunnelEdit = lazy(() => import("@/features/funnels/pages/FunnelEdit"));
 const Alerts = lazy(() => import("@/features/alerts/pages/Alerts"));
 const Popups = lazy(() => import("@/features/popups/pages/Popups"));
 const PopupStudio = lazy(() => import("@/features/popups/pages/PopupStudio"));
@@ -263,6 +266,10 @@ export default function App() {
                 <Route path="/app/dashboards/:id" element={<DashboardView />} />
                 <Route path="/app/dashboards/:id/studio" element={<DashboardStudio />} />
                 <Route path="/app/goals" element={<Goals />} />
+                <Route path="/app/funnels" element={<Funnels />} />
+                <Route path="/app/funnels/new" element={<FunnelEdit />} />
+                <Route path="/app/funnels/:funnelId" element={<FunnelView />} />
+                <Route path="/app/funnels/:funnelId/edit" element={<FunnelEdit />} />
                 <Route path="/app/alerts" element={<Alerts />} />
                 <Route path="/app/popups" element={<Popups />} />
                 <Route path="/app/popups/new" element={<PopupStudio />} />

@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import {
-  AlertTriangle, AppWindow, ArrowDownWideNarrow, Eye, Flame, GitBranch, Globe2, LayoutDashboard,
+  AlertTriangle, AppWindow, ArrowDownWideNarrow, Eye, Flame, Globe2, LayoutDashboard,
   MousePointerClick, Repeat, Tag, Target, Waypoints, Zap, type LucideIcon,
 } from "lucide-react";
 
@@ -38,7 +38,6 @@ export function getAnalyticsSections(t: TFunction): AnalyticsSection[] {
       icon: Target,
       tabs: [
         { value: "flow", label: t("analytics.tab.flow"), icon: Waypoints },
-        { value: "funnel", label: t("analytics.tab.funnel"), icon: GitBranch },
         { value: "events", label: t("analytics.tab.events"), icon: Zap },
         { value: "retention", label: t("analytics.tab.retention"), icon: Repeat },
         { value: "errors", label: t("analytics.tab.errors"), icon: AlertTriangle },

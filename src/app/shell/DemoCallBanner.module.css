@@ -6,13 +6,21 @@
   margin: -6px -6px 6px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
+  background: var(
+    --preset-wash,
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--accent) 22%, var(--surface-2)) 0%,
+      color-mix(in srgb, var(--accent) 8%, var(--surface-2)) 55%,
+      var(--surface-2) 100%
+    )
+  );
   text-align: left;
-  transition: background-color 160ms ease;
+  transition: border-color 160ms ease;
 }
 
 .banner:hover {
-  background: var(--surface-hover);
+  border-bottom-color: var(--border-strong);
 }
 
 .text {

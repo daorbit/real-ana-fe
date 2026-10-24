@@ -7,7 +7,7 @@ import { reportLoadFailure } from "@/shared/lib/loadFailure";
 import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession";
 import type {
   AdminUserPage, AdminUserBilling, AdminUserOverview, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
-  FunnelStepInput, FunnelResultStep, SavedFunnel, RetentionCohort, FlowNode, FlowEdge,
+  FunnelStepInput, FunnelReport, FunnelOverviewRow, SavedFunnel, RetentionCohort, FlowNode, FlowEdge,
   HeatmapDevice, HeatmapPagesResponse, PageHeatmap,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
   MailLayout, Branding, BrandingInput, NavPrefs,
@@ -1090,14 +1090,44 @@ export const api = createApi({
     }),
 
     computeFunnel: build.mutation<
-      { steps: FunnelResultStep[] },
-      { workspaceId: string; steps: FunnelStepInput[]; range: string; sites?: string[] }
+      FunnelReport,
+      {
+        workspaceId: string;
+        steps: FunnelStepInput[];
+        range: string;
+        sites?: string[];
+        from?: string;
+        to?: string;
+        compare?: boolean;
+      }
     >({
-      query: ({ workspaceId, steps, range, sites }) => ({
+      query: ({ workspaceId, steps, range, sites, from, to, compare }) => ({
         url: `/api/workspaces/${workspaceId}/funnel`,
         method: "POST",
-        body: { steps, range, ...(sites && sites.length ? { sites } : {}) },
+        body: {
+          steps,
+          range,
+          compare: compare ?? true,
+          ...(sites && sites.length ? { sites } : {}),
+          ...(range === "custom" && from && to ? { from, to } : {}),
+        },
       }),
+    }),
+
+    getFunnelOverview: build.query<
+      FunnelOverviewRow[],
+      { workspaceId: string; range: string; from?: string; to?: string; sites?: string[]; compare: boolean }
+    >({
+      query: ({ workspaceId, range, from, to, sites, compare }) => {
+        const params = new URLSearchParams({ range, compare: compare ? "1" : "0" });
+        if (range === "custom" && from && to) {
+          params.set("from", from);
+          params.set("to", to);
+        }
+        if (sites?.length) params.set("sites", sites.join(","));
+        return `/api/workspaces/${workspaceId}/funnels/overview?${params.toString()}`;
+      },
+      providesTags: ["Funnel"],
     }),
 
     getFunnels: build.query<SavedFunnel[], string>({
@@ -2390,6 +2420,7 @@ export const api = createApi({
       }
     >({
       query: ({ appId, ...body }) => ({ url: `/api/billing/apps/${appId}/purchase`, method: "POST", body }),
+      invalidatesTags: (result) => (result && "free" in result ? ["Billing", "Usage", "Workspace", "Referral"] : []),
     }),
 
     cancelAutoRenew: build.mutation<{ ok: true }, { workspaceId: string }>({
@@ -3077,6 +3108,7 @@ export const {
   useGetLiveQuery,
   useGetStatsCompareQuery,
   useComputeFunnelMutation,
+  useGetFunnelOverviewQuery,
   useGetFunnelsQuery,
   useCreateFunnelMutation,
   useUpdateFunnelMutation,
