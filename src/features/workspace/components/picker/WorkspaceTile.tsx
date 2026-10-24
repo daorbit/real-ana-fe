@@ -7,14 +7,13 @@ import classes from "./WorkspacePicker.module.css";
 type Props = {
   name: string;
   icon?: WorkspaceIconData | null;
-  shortcut?: number;
   lastUsed: boolean;
   lastUsedLabel: string;
   picking: boolean;
   onClick: () => void;
 };
 
-export function WorkspaceTile({ name, icon, shortcut, lastUsed, lastUsedLabel, picking, onClick }: Props) {
+export function WorkspaceTile({ name, icon, lastUsed, lastUsedLabel, picking, onClick }: Props) {
   return (
     <UnstyledButton
       className={classes.tile}
@@ -25,7 +24,6 @@ export function WorkspaceTile({ name, icon, shortcut, lastUsed, lastUsedLabel, p
     >
       <span className={classes.art}>
         <WorkspaceIcon icon={icon} />
-        {shortcut !== undefined && <kbd className={classes.key}>{shortcut}</kbd>}
         {lastUsed && (
           <span className={classes.lastUsed}>
             <Check size={12} strokeWidth={2.4} />

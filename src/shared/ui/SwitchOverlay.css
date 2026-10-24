@@ -59,6 +59,10 @@
 }
 
 .switch-overlay__word {
+  max-width: min(70vw, 420px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--text);
 }
 

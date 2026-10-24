@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { QuantalogMark } from "@/shared/ui/QuantalogMark";
 import "@/shared/ui/SwitchOverlay.css";
@@ -40,12 +40,12 @@ export function SwitchOverlay({
  * trailing accent dot tracing a small orbit, over a thin rule that sweeps a
  * bright segment left to right. Pure CSS; only transform and opacity animate.
  */
-function LoaderMark() {
+function LoaderMark({ mark, name }: { mark?: ReactNode; name?: string }) {
   return (
     <div className="switch-overlay__mark" aria-hidden>
       <div className="switch-overlay__wordmark">
-        <QuantalogMark size={32} />
-        <span className="switch-overlay__word">Quantalog</span>
+        {mark ?? <QuantalogMark size={32} />}
+        <span className="switch-overlay__word">{name ?? "Quantalog"}</span>
         <span className="switch-overlay__dot" />
       </div>
       <div className="switch-overlay__rule">
@@ -65,11 +65,15 @@ export function SwitchVisual({
   sublabel,
   loop = false,
   inline = false,
+  mark,
+  name,
 }: {
   label?: string;
   sublabel?: string;
   loop?: boolean;
   inline?: boolean;
+  mark?: ReactNode;
+  name?: string;
 }) {
   return (
     <div
@@ -80,7 +84,7 @@ export function SwitchVisual({
       aria-live="polite"
     >
       <div className="switch-overlay__body">
-        <LoaderMark />
+        <LoaderMark mark={mark} name={name} />
         {label && <p className="switch-overlay__label">{label}</p>}
         {sublabel && <p className="switch-overlay__sub">{sublabel}</p>}
       </div>

@@ -159,7 +159,7 @@
 }
 
 :global(html[data-vt="workspace"]) .tile[data-picking] .iconWell,
-:global(html[data-vt="workspace"]) .handoffIcon .iconWell {
+:global(html[data-vt="workspace"]) .handoffMark .iconWell {
   view-transition-name: workspace-hero;
 }
 
@@ -169,12 +169,27 @@
   min-height: 100dvh;
 }
 
-.handoffIcon {
-  position: absolute;
-  left: 50%;
-  top: calc(50% - 150px);
-  translate: -50% 0;
-  z-index: 1;
+.handoffMark {
+  display: inline-flex;
+  flex: none;
+}
+
+.handoffMark .iconWell,
+.handoffMark .iconWell[data-image] {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.handoffMark .iconWell svg {
+  width: 18px;
+  height: 18px;
+}
+
+.handoffMark .iconImage {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
 }
 
 .chevron,
@@ -198,29 +213,6 @@
   border-color: var(--accent);
   color: var(--accent);
   background: var(--picker-tile);
-}
-
-.key {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  min-width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  padding: 0 6px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--shell);
-  font: 500 11px/1 var(--mantine-font-family-monospace);
-  color: var(--muted);
-  opacity: 0;
-  transition: opacity 160ms ease;
-}
-
-.tile:hover .key,
-.tile:focus-visible .key {
-  opacity: 1;
 }
 
 .lastUsed {
@@ -379,7 +371,6 @@
     color: var(--text);
   }
 
-  .key,
   .lastUsed {
     display: none;
   }

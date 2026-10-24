@@ -1039,7 +1039,8 @@
       "noMatch": "No workspace matches “{{query}}”",
       "greeting": "Welcome back, {{name}}",
       "greetingNoName": "Welcome back",
-      "opening": "Opening {{name}}"
+      "opening": "Opening {{name}}",
+      "openingWorkspace": "Opening workspace"
     },
     "nameLabel": "Workspace name",
     "createTitle": "Create workspace",

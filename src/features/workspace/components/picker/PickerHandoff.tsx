@@ -9,10 +9,16 @@ export function PickerHandoff({ workspace }: { workspace: Workspace }) {
 
   return (
     <div className={classes.handoff}>
-      <span className={classes.handoffIcon}>
-        <WorkspaceIcon icon={workspace.icon} />
-      </span>
-      <SwitchVisual inline label={t("workspaces.picker.opening", { name: workspace.name })} />
+      <SwitchVisual
+        inline
+        name={workspace.name}
+        mark={
+          <span className={classes.handoffMark}>
+            <WorkspaceIcon icon={workspace.icon} />
+          </span>
+        }
+        label={t("workspaces.picker.openingWorkspace")}
+      />
     </div>
   );
 }

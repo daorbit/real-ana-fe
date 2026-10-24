@@ -13,7 +13,7 @@ import { PickerProfile } from "./PickerProfile";
 import { PickerHandoff } from "./PickerHandoff";
 import { lastUsedFirst } from "./orderWorkspaces";
 import { usePickTransition } from "./usePickTransition";
-import { SHORTCUT_LIMIT, usePickerShortcuts } from "./usePickerShortcuts";
+import { usePickerShortcuts } from "./usePickerShortcuts";
 import classes from "./WorkspacePicker.module.css";
 
 const NEW_WORKSPACE_PATH = "/app/onboarding?mode=workspace";
@@ -88,12 +88,11 @@ export default function WorkspacePicker() {
         )}
 
         <div className={classes.grid}>
-          {shown.map(({ w, index }) => (
+          {shown.map(({ w }) => (
             <WorkspaceTile
               key={w._id}
               name={w.name}
               icon={w.icon}
-              shortcut={index < SHORTCUT_LIMIT ? index + 1 : undefined}
               lastUsed={w._id === lastId}
               lastUsedLabel={t("workspaces.picker.lastUsed")}
               picking={w._id === pickingId}
