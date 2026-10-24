@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TextInput, PasswordInput, PinInput, Title, Text, Alert, Stack,
-  Anchor, Group, Center,
+  Anchor, Group, Center, Box,
 } from "@mantine/core";
 import { ArrowLeft, MailCheck } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
@@ -155,24 +155,11 @@ export default function ForgotPassword() {
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
           <Stack gap="lg">
-            <div>
-              <Anchor
-                component={Link}
-                to="/login"
-                size="sm"
-                c="dimmed"
-                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-              >
-                <ArrowLeft size={14} />
-                Back to login
-              </Anchor>
-            </div>
-
             {step === "request" ? (
               <>
                 <div>
                   <Title order={2}>Reset your password</Title>
-                  <Text c="dimmed" size="sm" mt={4} ta="center">
+                  <Text c="dimmed" size="sm" mt={4}>
                     Enter the address you signed up with and we&apos;ll send you a
                     6-digit code.
                   </Text>
@@ -238,9 +225,9 @@ export default function ForgotPassword() {
                     }}
                   />
                   {password && (
-                    <div style={{ marginTop: 8 }}>
+                    <Box mt={8}>
                       <PasswordStrength value={password} />
-                    </div>
+                    </Box>
                   )}
                 </div>
 
@@ -317,6 +304,15 @@ export default function ForgotPassword() {
                 </Stack>
               </>
             )}
+
+            <Group justify="center">
+              <Anchor component={Link} to="/login" size="sm" c="dimmed">
+                <Group component="span" gap={6} wrap="nowrap">
+                  <ArrowLeft size={14} />
+                  Back to login
+                </Group>
+              </Anchor>
+            </Group>
           </Stack>
         </motion.form>
       </div>

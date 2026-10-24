@@ -2140,6 +2140,22 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 .auth-top .wordmark-dot { color: var(--accent); }
 
+.auth-home-link {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: opacity 0.15s ease;
+}
+
+.auth-home-link:hover {
+  opacity: 0.75;
+}
+
+.auth-home-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .auth-top-link {
   display: inline-flex;
   align-items: center;
