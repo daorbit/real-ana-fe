@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { notify } from "@/shared/lib/notify";
-import { getToken } from "@/shared/lib/http";
+import { useWorkspace } from "@/features/workspace/context";
+import { socialConnectUrl } from "@/features/social/lib/socialConnectUrl";
 
 /**
  * Starting an Instagram connection from anywhere in the studio.
@@ -15,8 +16,6 @@ import { getToken } from "@/shared/lib/http";
  * @param onConnected Runs after a successful connection, to refresh whatever
  *                    the calling page shows.
  */
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 /**
  * The reasons the server reports, in words.
@@ -41,6 +40,7 @@ const REASON_TEXT: Record<string, string> = {
 };
 
 export function useInstagramConnect(onConnected?: () => void) {
+  const workspaceId = useWorkspace().active?._id ?? "";
   const [connecting, setConnecting] = useState(false);
   // Held so the "did they just close it?" poll can be cleared on unmount.
   const timer = useRef<number | null>(null);
@@ -82,8 +82,7 @@ export function useInstagramConnect(onConnected?: () => void) {
   }, []);
 
   const connect = useCallback(() => {
-    const token = getToken() ?? "";
-    const url = `${API_BASE}/api/auth/instagram?token=${encodeURIComponent(token)}`;
+    const url = socialConnectUrl("instagram", workspaceId);
 
     setConnecting(true);
     const popup = window.open(url, "instagram-oauth", "width=600,height=720,menubar=no,toolbar=no");
@@ -108,7 +107,7 @@ export function useInstagramConnect(onConnected?: () => void) {
       // arrived; re-reading the status settles which.
       done.current?.();
     }, 700);
-  }, []);
+  }, [workspaceId]);
 
   return { connect, connecting };
 }

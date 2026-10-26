@@ -38,7 +38,11 @@ export default function SocialPosts() {
   const { active } = useWorkspace();
   const canUseInstagram = useCanUseInstagram();
   const { demo } = useDemo();
-  const { data: realData, isLoading: realLoading, isFetching: realFetching, refetch } = useGetScheduledPostsQuery();
+  const workspaceId = active?._id ?? "";
+  const { data: realData, isLoading: realLoading, isFetching: realFetching, refetch } = useGetScheduledPostsQuery(
+    workspaceId,
+    { skip: !workspaceId },
+  );
   const demoScheduled = useMemo(() => (demo ? demoScheduledPostsResponse() : null), [demo]);
   const data = demoScheduled ?? realData;
   const isLoading = demoScheduled ? false : realLoading;
@@ -86,14 +90,12 @@ export default function SocialPosts() {
     refetch: refetchSent,
   } = useGetSentPostsQuery(
     {
+      workspaceId,
       ...(sentCursor ? { cursor: sentCursor } : {}),
       ...(onFailed ? { status: "failed" as const } : {}),
     },
     {
-      // Not fetched until one of the two shelves that read runs is opened:
-      // most visits never look at history, and the query is a second round
-      // trip on a page that already made one.
-      skip: !onSent && !onFailed,
+      skip: !workspaceId || (!onSent && !onFailed),
     },
   );
 

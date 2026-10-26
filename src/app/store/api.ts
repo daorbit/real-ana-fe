@@ -450,8 +450,8 @@ export const api = createApi({
      * Never carries the access token — the server projects a small profile
      * subset by hand, and the token column is excluded at the model level.
      */
-    getLinkedInStatus: build.query<LinkedInStatus, void>({
-      query: () => "/api/auth/linkedin/status",
+    getLinkedInStatus: build.query<LinkedInStatus, string>({
+      query: (workspaceId) => `/api/auth/linkedin/status?workspaceId=${encodeURIComponent(workspaceId)}`,
       providesTags: ["LinkedIn"],
     }),
 
@@ -459,8 +459,11 @@ export const api = createApi({
      * Drop the stored connection. Invalidating the tag is what flips the Share
      * Panel back to "Connect LinkedIn" without a reload.
      */
-    disconnectLinkedIn: build.mutation<{ connected: false }, void>({
-      query: () => ({ url: "/api/auth/linkedin", method: "DELETE" }),
+    disconnectLinkedIn: build.mutation<{ connected: false }, string>({
+      query: (workspaceId) => ({
+        url: `/api/auth/linkedin?workspaceId=${encodeURIComponent(workspaceId)}`,
+        method: "DELETE",
+      }),
       invalidatesTags: ["LinkedIn"],
     }),
 
@@ -684,8 +687,8 @@ export const api = createApi({
      * Same contract as the LinkedIn status above: the access token is excluded
      * at the model level and never reaches this response.
      */
-    getInstagramStatus: build.query<InstagramStatus, void>({
-      query: () => "/api/auth/instagram/status",
+    getInstagramStatus: build.query<InstagramStatus, string>({
+      query: (workspaceId) => `/api/auth/instagram/status?workspaceId=${encodeURIComponent(workspaceId)}`,
       providesTags: ["Instagram"],
     }),
 
@@ -696,8 +699,11 @@ export const api = createApi({
      * on disconnect, and the list must show that rather than rows still claiming
      * to be active.
      */
-    disconnectInstagram: build.mutation<{ connected: false }, void>({
-      query: () => ({ url: "/api/auth/instagram", method: "DELETE" }),
+    disconnectInstagram: build.mutation<{ connected: false }, string>({
+      query: (workspaceId) => ({
+        url: `/api/auth/instagram?workspaceId=${encodeURIComponent(workspaceId)}`,
+        method: "DELETE",
+      }),
       invalidatesTags: ["Instagram", "ScheduledPost"],
     }),
 
@@ -715,7 +721,7 @@ export const api = createApi({
      */
     postToLinkedIn: build.mutation<
       { posted: true; postUrl: string | null },
-      { caption: string; image: string }
+      { workspaceId: string; caption: string; image: string }
     >({
       query: (body) => ({ url: "/api/auth/linkedin/post", method: "POST", body }),
       // `SentPost` too: a share is a publish like any other and is recorded as
@@ -730,8 +736,8 @@ export const api = createApi({
      * LinkedIn token, so the whole set is theirs regardless of which workspace
      * each post is about.
      */
-    getScheduledPosts: build.query<ScheduledPostsResponse, void>({
-      query: () => "/api/social/posts",
+    getScheduledPosts: build.query<ScheduledPostsResponse, string>({
+      query: (workspaceId) => `/api/social/posts?workspaceId=${encodeURIComponent(workspaceId)}`,
       providesTags: ["ScheduledPost"],
     }),
 
@@ -749,24 +755,16 @@ export const api = createApi({
      */
     getSentPosts: build.query<
       SentPostsResponse,
-      { cursor?: string; status?: "failed" } | void
+      { workspaceId: string; cursor?: string; status?: "failed" }
     >({
-      query: (args) => {
-        const cursor = args && "cursor" in args ? args.cursor : undefined;
-        const status = args && "status" in args ? args.status : undefined;
-        const params = new URLSearchParams();
+      query: ({ workspaceId, cursor, status }) => {
+        const params = new URLSearchParams({ workspaceId });
         if (cursor) params.set("cursor", cursor);
         if (status) params.set("status", status);
-        const qs = params.toString();
-        return qs ? `/api/social/posts/sent?${qs}` : "/api/social/posts/sent";
+        return `/api/social/posts/sent?${params.toString()}`;
       },
-      // Keyed by the subset being read, not by the page within it: pages merge
-      // into one list, but "everything published" and "only what failed" are
-      // two lists and must not merge into each other.
-      serializeQueryArgs: ({ queryArgs }) => {
-        const status = queryArgs && "status" in queryArgs ? queryArgs.status : undefined;
-        return status ? `sent:${status}` : "sent";
-      },
+      serializeQueryArgs: ({ queryArgs }) =>
+        `sent:${queryArgs.workspaceId}${queryArgs.status ? `:${queryArgs.status}` : ""}`,
       merge: (existing, incoming, { arg }) => {
         // A fetch with no cursor is a refresh of the first page, not a
         // continuation — it replaces the list. Appending it instead would

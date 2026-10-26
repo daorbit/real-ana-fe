@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { getToken } from "@/shared/lib/http";
 import { useAuth } from "@/features/auth/context";
+import { useWorkspace } from "@/features/workspace/context";
+import { socialConnectUrl } from "@/features/social/lib/socialConnectUrl";
 import { useGetLinkedInStatusQuery, useDisconnectLinkedInMutation } from "@/app/store";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const POPUP_POLL_MS = 700;
 
-function openLinkedInPopup(): Window | null {
-  const token = getToken() ?? "";
-  const url = `${API_BASE}/api/auth/linkedin?token=${encodeURIComponent(token)}`;
+function openLinkedInPopup(workspaceId: string): Window | null {
+  const url = socialConnectUrl("linkedin", workspaceId);
   const popup = window.open(url, "linkedin-oauth", "width=600,height=720,menubar=no,toolbar=no");
   if (!popup) window.location.href = url;
   return popup;
@@ -19,7 +18,9 @@ function openLinkedInPopup(): Window | null {
 export function useLinkedInConnect({ onConnected, source = "share_composer" }: { onConnected?: () => void; source?: string } = {}) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: status, isLoading, refetch } = useGetLinkedInStatusQuery();
+  const { active } = useWorkspace();
+  const workspaceId = active?._id ?? "";
+  const { data: status, isLoading, refetch } = useGetLinkedInStatusQuery(workspaceId, { skip: !workspaceId });
   const [disconnectMutation, { isLoading: disconnecting }] = useDisconnectLinkedInMutation();
   const [connecting, setConnecting] = useState(false);
 
@@ -47,7 +48,7 @@ export function useLinkedInConnect({ onConnected, source = "share_composer" }: {
 
   const connect = useCallback(() => {
     setConnecting(true);
-    const popup = openLinkedInPopup();
+    const popup = openLinkedInPopup(workspaceId);
     if (!popup) return setConnecting(false);
     const timer = window.setInterval(() => {
       if (!popup.closed) return;
@@ -55,16 +56,16 @@ export function useLinkedInConnect({ onConnected, source = "share_composer" }: {
       setConnecting(false);
       refetch();
     }, POPUP_POLL_MS);
-  }, [user?.id, source, refetch]);
+  }, [user?.id, source, refetch, workspaceId]);
 
   const disconnect = useCallback(async () => {
     try {
-      await disconnectMutation().unwrap();
+      await disconnectMutation(workspaceId).unwrap();
       notify.success(t("sharePost.linkedinDisconnected"));
     } catch (e) {
       notify.error(errMessage(e, t("sharePost.linkedinDisconnectError")));
     }
-  }, [user?.id, source, disconnectMutation, t]);
+  }, [user?.id, source, disconnectMutation, t, workspaceId]);
 
   return { status, isLoading, connecting, disconnecting, needsReconnect, needsPostingPermission, connect, disconnect };
 }

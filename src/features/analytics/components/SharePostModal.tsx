@@ -67,7 +67,7 @@ export function SharePostModal({
   const [justPosted, setJustPosted] = useState(false);
   // Read here as well as inside the connection panel: RTK Query serves both
   // from one cache entry, so this is the same request, not a second one.
-  const { data: linkedInStatus } = useGetLinkedInStatusQuery();
+  const { data: linkedInStatus } = useGetLinkedInStatusQuery(workspaceId, { skip: !workspaceId });
   // Whether the caption on screen came from Orbit. Drives the button's label,
   // and the note under the editor that says so plainly.
   const [written, setWritten] = useState(false);
@@ -193,7 +193,7 @@ export function SharePostModal({
     setJustPosted(false);
     setPostedUrl(null);
     try {
-      const res = await postToLinkedIn({ caption, image }).unwrap();
+      const res = await postToLinkedIn({ workspaceId, caption, image }).unwrap();
       setPostedUrl(res.postUrl);
       setJustPosted(true);
       notify.success(t("sharePost.linkedinPosted"));

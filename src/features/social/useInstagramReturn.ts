@@ -27,7 +27,7 @@ const REASON_TEXT: Record<string, string> = {
   instagram_failed: "Instagram could not complete the connection. Please try again.",
   save_failed: "The connection could not be saved. Please try again.",
   no_publish: "Posting permission was not granted. Reconnect and allow publishing to continue.",
-  already_connected: "That Instagram account is already connected to a different Quantalog account.",
+  already_connected: "That Instagram account is already connected to a different Quantalog workspace.",
   not_professional:
     "Only Instagram Business or Creator accounts can be connected. Switch your account type in the Instagram app, then try again.",
 };

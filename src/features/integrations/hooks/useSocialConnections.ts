@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useGetInstagramStatusQuery, useGetLinkedInStatusQuery } from "@/app/store";
 import { useCanUseInstagram } from "@/features/auth/context";
+import { useWorkspace } from "@/features/workspace/context";
 import type { ConnectionState, Searchable } from "../lib/filter";
 
 export type SocialId = "linkedin" | "instagram" | "facebook";
@@ -25,9 +26,12 @@ function socialState(status: SocialStatus | undefined): ConnectionState {
 
 export function useSocialConnections(): { entries: SocialEntry[]; canUseInstagram: boolean; loading: boolean } {
   const canUseInstagram = useCanUseInstagram();
-  const { data: linkedIn, isLoading: linkedInLoading } = useGetLinkedInStatusQuery();
-  const { data: instagram, isLoading: instagramLoading } = useGetInstagramStatusQuery(undefined, {
-    skip: !canUseInstagram,
+  const workspaceId = useWorkspace().active?._id ?? "";
+  const { data: linkedIn, isLoading: linkedInLoading } = useGetLinkedInStatusQuery(workspaceId, {
+    skip: !workspaceId,
+  });
+  const { data: instagram, isLoading: instagramLoading } = useGetInstagramStatusQuery(workspaceId, {
+    skip: !canUseInstagram || !workspaceId,
   });
 
   const entries = useMemo<SocialEntry[]>(
