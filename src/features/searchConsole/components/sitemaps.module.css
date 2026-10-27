@@ -54,17 +54,41 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 56px;
-  padding: 0 8px 0 18px;
-  border-radius: 999px;
-  border: 1px solid var(--border-strong);
+  height: 52px;
+  padding: 0 8px 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
   background: var(--surface);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .urlBar:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+
+.dots {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.dots i:nth-child(1) {
+  background: #ff5f57;
+}
+
+.dots i:nth-child(2) {
+  background: #febc2e;
+}
+
+.dots i:nth-child(3) {
+  background: #28c840;
 }
 
 .urlField {
@@ -73,9 +97,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 38px;
-  padding: 0 4px;
-  background: transparent;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: color-mix(in oklab, var(--text) 5%, transparent);
   color: var(--muted);
   cursor: text;
 }
@@ -133,9 +158,9 @@
 
 .submitButton {
   flex: none;
-  height: 38px;
-  padding-inline: 20px;
-  border-radius: 999px;
+  height: 36px;
+  padding-inline: 18px;
+  border-radius: 9px;
   font-weight: 600;
 }
 
@@ -375,7 +400,7 @@
   }
 
   .urlField {
-    padding: 0;
+    padding: 0 8px;
   }
 
   .base {
