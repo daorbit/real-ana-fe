@@ -5,7 +5,7 @@ import {
 import { Box, Button, Group, Text, Transition, Portal } from "@mantine/core";
 
  
-type Entry = { dirty: boolean; save: () => Promise<void>; reset: () => void };
+type Entry = { dirty: boolean; save: () => Promise<void>; reset: () => void; inline?: boolean };
 
 type Ctx = {
   register: (id: string, entry: Entry) => void;
@@ -35,6 +35,7 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
 
   const dirty = [...entries.current.values()].filter((e) => e.dirty);
   const count = dirty.length;
+  const floatingCount = dirty.filter((e) => !e.inline).length;
 
   const discardAll = useCallback(() => {
     [...entries.current.values()].forEach((e) => e.dirty && e.reset());
@@ -51,7 +52,7 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
     try {
       // Snapshot first: saving mutates the underlying data, which re-registers
       // entries mid-loop.
-      await Promise.all([...entries.current.values()].filter((e) => e.dirty).map((e) => e.save()));
+      await Promise.all([...entries.current.values()].filter((e) => e.dirty && !e.inline).map((e) => e.save()));
     } finally {
       setSaving(false);
     }
@@ -82,7 +83,7 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
           }}
         >
           <Transition
-            mounted={count > 0}
+            mounted={floatingCount > 0}
             transition="slide-up"
             duration={220}
             timingFunction="cubic-bezier(0.22, 1, 0.36, 1)"
@@ -105,7 +106,7 @@ export function SaveBarProvider({ children }: { children: ReactNode }) {
                 }}
               >
                 <Text size="sm" fw={550}>
-                  {count} unsaved {count === 1 ? "change" : "changes"}
+                  {floatingCount} unsaved {floatingCount === 1 ? "change" : "changes"}
                 </Text>
                 <Group gap="xs" wrap="nowrap">
                   <Button variant="subtle" color="gray" size="sm" onClick={discardAll} disabled={saving}>
@@ -151,6 +152,7 @@ export function useSaveRegistration(id: string, entry: Entry) {
       },
       save: () => latest.current.save(),
       reset: () => latest.current.reset(),
+      inline: latest.current.inline,
     });
     return () => unregister(id);
     // Re-register when dirtiness flips so the bar re-reads; callbacks are read

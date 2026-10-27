@@ -1,0 +1,38 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+
+.status[data-dirty] {
+  color: var(--text-2);
+}
+
+.status[data-dirty] .dot {
+  background: var(--amber);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

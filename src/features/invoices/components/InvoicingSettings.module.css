@@ -1,30 +1,18 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-lg);
+  gap: var(--space-8);
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--mantine-spacing-sm);
-  padding-bottom: var(--mantine-spacing-lg);
-  border-bottom: 1px solid var(--border);
+.prefix {
+  max-width: 160px;
 }
 
-.section:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
+.short {
+  max-width: 220px;
 }
 
-.label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--muted);
-}
-
-.hint {
+.error {
   font-size: 13px;
   color: var(--text-2);
 }

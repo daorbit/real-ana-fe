@@ -12,7 +12,7 @@ export function useInvoicingProfileDraft(workspaceId: string) {
   const { currentData, isLoading, isError } = useGetInvoicingProfileQuery(workspaceId);
   const saved = currentData?.profile ?? null;
   const [draft, setDraft] = useState<InvoicingProfile | null>(saved);
-  const [save] = useSaveInvoicingProfileMutation();
+  const [save, { isLoading: saving }] = useSaveInvoicingProfileMutation();
 
   useEffect(() => {
     setDraft(saved);
@@ -33,7 +33,19 @@ export function useInvoicingProfileDraft(workspaceId: string) {
     }
   };
 
-  useSaveRegistration("invoicing-profile", { dirty, save: persist, reset: () => setDraft(saved) });
+  const discard = () => setDraft(saved);
 
-  return { draft, setField, complete: currentData?.complete ?? false, loading: isLoading, failed: isError };
+  useSaveRegistration("invoicing-profile", { dirty, save: persist, reset: discard, inline: true });
+
+  return {
+    draft,
+    setField,
+    dirty,
+    saving,
+    save: persist,
+    discard,
+    complete: currentData?.complete ?? false,
+    loading: isLoading,
+    failed: isError,
+  };
 }
