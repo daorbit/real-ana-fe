@@ -16,10 +16,10 @@ export const MAX_PAYMENT_TERMS_DAYS = 365;
 export const MAX_LOGO_BYTES = 300 * 1024;
 
 export const INVOICE_TEMPLATES: { value: InvoiceTemplate; label: string }[] = [
-  { value: "classic", label: "Classic" },
-  { value: "modern", label: "Modern" },
-  { value: "minimal", label: "Minimal" },
-  { value: "bold", label: "Bold" },
+  { value: "classic", label: "Standard" },
+  { value: "modern", label: "Spreadsheet" },
+  { value: "minimal", label: "Minimalist" },
+  { value: "bold", label: "Grand" },
 ];
 
 export const INVOICE_ACCENTS: { value: InvoiceAccent; label: string }[] = [
