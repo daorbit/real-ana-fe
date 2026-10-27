@@ -22,11 +22,18 @@ const ROLE_FILTERS = [
   { label: "Admins", value: "admin" },
 ];
 
+const AUDIENCE_FILTERS = [
+  { label: "All", value: "" },
+  { label: "Internal", value: "internal" },
+  { label: "External", value: "external" },
+];
+
 export default function UsersPanel() {
   const mobile = useMediaQuery("(max-width: 48em)") ?? false;
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
+  const [audience, setAudience] = useState("");
   const [page, setPage] = useState(1);
   const actions = useAdminUserActions();
 
@@ -35,11 +42,12 @@ export default function UsersPanel() {
     return () => clearTimeout(t);
   }, [query]);
 
-  useEffect(() => setPage(1), [search, role]);
+  useEffect(() => setPage(1), [search, role, audience]);
 
   const { data, isLoading, isFetching, refetch } = useGetAdminUsersQuery({
     q: search || undefined,
     role: role || undefined,
+    audience: audience || undefined,
     page,
   });
 
@@ -76,9 +84,13 @@ export default function UsersPanel() {
         {mobile ? (
           <div className={classes.chipsRow}>
             <FilterChips value={role} onChange={setRole} data={ROLE_FILTERS} ariaLabel="Filter by role" />
+            <FilterChips value={audience} onChange={setAudience} data={AUDIENCE_FILTERS} ariaLabel="Filter by user type" />
           </div>
         ) : (
-          <SegmentedControl size="sm" radius="md" value={role} onChange={setRole} data={ROLE_FILTERS} />
+          <>
+            <SegmentedControl size="sm" radius="md" value={audience} onChange={setAudience} data={AUDIENCE_FILTERS} aria-label="Filter by user type" />
+            <SegmentedControl size="sm" radius="md" value={role} onChange={setRole} data={ROLE_FILTERS} />
+          </>
         )}
       </div>
 

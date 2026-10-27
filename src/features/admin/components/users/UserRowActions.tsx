@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ActionIcon, Button, Loader, Tooltip } from "@mantine/core";
-import { CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2, UserCog } from "lucide-react";
+import { Building2, CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2, UserCog } from "lucide-react";
 import { prefetchRoute } from "@/app/routePrefetch";
 import type { AdminUser } from "@/shared/types";
 import { adminUserPath } from "../../lib/adminSections";
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function UserRowActions({ user: u, actions }: Props) {
-  const { isSuperAdmin, busy, deleting, resetting2fa, resettingLock, changingRole } = actions;
+  const { isSuperAdmin, busy, deleting, resetting2fa, resettingLock, changingRole, changingAudience } = actions;
   const { admin, isSelf, rowBusy, impersonateBlocked } = actions.rowState(u);
 
   return (
@@ -77,6 +77,19 @@ export function UserRowActions({ user: u, actions }: Props) {
           onClick={() => actions.openMessage(u)}
         >
           <Mail size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label={u.audience === "internal" ? "Mark as external" : "Mark as internal"} withArrow>
+        <ActionIcon
+          variant="light"
+          color={u.audience === "internal" ? "blue" : "gray"}
+          size="lg"
+          radius="md"
+          disabled={rowBusy || changingAudience}
+          aria-label={`Change user type for ${u.email}`}
+          onClick={() => actions.toggleAudience(u)}
+        >
+          <Building2 size={16} />
         </ActionIcon>
       </Tooltip>
       {isSuperAdmin && (

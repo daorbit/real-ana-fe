@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@mantine/core";
-import { ChevronDown, CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
+import { Building2, ChevronDown, CreditCard, Eye, LockKeyholeOpen, LogIn, Mail, ShieldOff, Trash2 } from "lucide-react";
 import { adminUserPath } from "../../lib/adminSections";
 import { ROLE_LABELS } from "../../lib/userRoles";
 import { UserRoleMenu } from "./UserRoleMenu";
@@ -121,6 +121,13 @@ export function UserSheet({ user, actions, onClose }: Props) {
               disabled={state.rowBusy}
               onClick={() => run(actions.openMessage)}
               chevron
+            />
+            <InsetRow
+              leading={<RowIcon tone="blue"><Building2 size={15} /></RowIcon>}
+              title={u.audience === "internal" ? "Mark as external" : "Mark as internal"}
+              subtitle={u.audience === "internal" ? "Internal user" : "External user"}
+              disabled={state.rowBusy || actions.changingAudience}
+              onClick={() => run(actions.toggleAudience)}
             />
           </InsetList>
 

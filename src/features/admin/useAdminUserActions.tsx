@@ -5,6 +5,7 @@ import {
   useAdminReset2faMutation,
   useAdminResetScreenLockMutation,
   useSetAdminUserRoleMutation,
+  useSetAdminUserAudienceMutation,
 } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage, confirmDelete } from "@/shared/lib/notify";
@@ -31,6 +32,7 @@ export function useAdminUserActions() {
   const [reset2fa, { isLoading: resetting2fa }] = useAdminReset2faMutation();
   const [resetScreenLock, { isLoading: resettingLock }] = useAdminResetScreenLockMutation();
   const [setRole, { isLoading: changingRole }] = useSetAdminUserRoleMutation();
+  const [setAudience, { isLoading: changingAudience }] = useSetAdminUserAudienceMutation();
   const isSuperAdmin = user?.role === "super_admin" && !user?.impersonating;
 
   const rowState = (u: AdminUser): AdminUserRow => ({
@@ -143,6 +145,16 @@ export function useAdminUserActions() {
 
   const confirmGrant = (secret: string) => (granting ? applyRole(granting, "super_admin", secret) : Promise.resolve(false));
 
+  const toggleAudience = async (u: AdminUser) => {
+    const audience = u.audience === "internal" ? "external" : "internal";
+    try {
+      await setAudience({ userId: u.id, audience }).unwrap();
+      notify.success(`${u.email} is now ${audience}.`);
+    } catch (e) {
+      notify.error(errMessage(e, "Could not change the user type."));
+    }
+  };
+
   const remove = (u: AdminUser) => {
     confirmDelete({
       title: "Delete this account?",
@@ -175,6 +187,8 @@ export function useAdminUserActions() {
     resetting2fa,
     resettingLock,
     changingRole,
+    changingAudience,
+    toggleAudience,
     messaging,
     planUser,
     granting,

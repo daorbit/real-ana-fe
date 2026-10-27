@@ -3,7 +3,7 @@ import { num, shortDate, timeAgo } from "@/shared/lib";
 import type { AdminUser } from "@/shared/types";
 import type { AdminUserActions } from "../../useAdminUserActions";
 import { UserAccountCell } from "./UserAccountCell";
-import { UserPlanBadge, UserRoleBadge } from "./UserBadges";
+import { UserAudienceBadge, UserPlanBadge, UserRoleBadge } from "./UserBadges";
 import { UserRowActions } from "./UserRowActions";
 import classes from "../Admin.module.css";
 
@@ -22,6 +22,7 @@ export function UsersTable({ users, fetching, actions }: Props) {
             <Table.Tr>
               <Table.Th>Account</Table.Th>
               <Table.Th>Role</Table.Th>
+              <Table.Th>Type</Table.Th>
               <Table.Th>Plan</Table.Th>
               <Table.Th>Joined</Table.Th>
               <Table.Th>Workspaces</Table.Th>
@@ -35,6 +36,7 @@ export function UsersTable({ users, fetching, actions }: Props) {
               <Table.Tr key={u.id}>
                 <Table.Td><UserAccountCell user={u} /></Table.Td>
                 <Table.Td><UserRoleBadge user={u} /></Table.Td>
+                <Table.Td><UserAudienceBadge user={u} /></Table.Td>
                 <Table.Td><UserPlanBadge user={u} /></Table.Td>
                 <Table.Td><Text size="sm">{shortDate(u.createdAt)}</Text></Table.Td>
                 <Table.Td><Text size="sm">{u.workspaceCount}</Text></Table.Td>

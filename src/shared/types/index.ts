@@ -994,8 +994,11 @@ export type AdminUser = {
   plan: { slug: string; name: string; expired: boolean } | null;
   totpEnabled: boolean;
   screenLockEnabled: boolean;
+  audience: UserAudience;
   referralSources?: ReferralSource[];
 };
+
+export type UserAudience = "internal" | "external";
 
 export type AdminUserSite = {
   id: string;

@@ -11,6 +11,15 @@ export function UserRoleBadge({ user }: { user: AdminUser }) {
   );
 }
 
+export function UserAudienceBadge({ user }: { user: AdminUser }) {
+  const internal = user.audience === "internal";
+  return (
+    <Badge size="sm" variant="light" color={internal ? "blue" : "gray"}>
+      {internal ? "Internal" : "External"}
+    </Badge>
+  );
+}
+
 export function UserPlanBadge({ user }: { user: AdminUser }) {
   if (!user.plan) return <Text size="xs" c="dimmed">none</Text>;
   return (

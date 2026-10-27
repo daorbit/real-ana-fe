@@ -6,7 +6,7 @@ import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import { reportLoadFailure } from "@/shared/lib/loadFailure";
 import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession";
 import type {
-  AdminUserPage, AdminUserBilling, AdminUserOverview, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
+  AdminUserPage, UserAudience, AdminUserBilling, AdminUserOverview, ApiKey, ApiKeyUsage, ApiKeyUsageWindow, Site, Stats, Workspace,
   FunnelStepInput, FunnelReport, FunnelOverviewRow, SavedFunnel, RetentionCohort, FlowNode, FlowEdge,
   HeatmapDevice, HeatmapPagesResponse, PageHeatmap,
   EmailStatus, EmailSegment, EmailSegmentId, EmailRecipient, EmailSendResult, MailTemplate,
@@ -1329,12 +1329,13 @@ export const api = createApi({
 
     getAdminUsers: build.query<
       AdminUserPage,
-      { q?: string; role?: string; page?: number }
+      { q?: string; role?: string; audience?: string; page?: number }
     >({
-      query: ({ q, role, page }) => {
+      query: ({ q, role, audience, page }) => {
         const p = new URLSearchParams();
         if (q) p.set("q", q);
         if (role) p.set("role", role);
+        if (audience) p.set("audience", audience);
         if (page && page > 1) p.set("page", String(page));
         const qs = p.toString();
         return `/api/admin/users${qs ? `?${qs}` : ""}`;
@@ -1350,6 +1351,18 @@ export const api = createApi({
         url: `/api/admin/users/${userId}/role`,
         method: "PUT",
         body: { role, ...(proof ?? {}) },
+      }),
+      invalidatesTags: ["AdminUser"],
+    }),
+
+    setAdminUserAudience: build.mutation<
+      { id: string; audience: UserAudience },
+      { userId: string; audience: UserAudience }
+    >({
+      query: ({ userId, audience }) => ({
+        url: `/api/admin/users/${userId}/audience`,
+        method: "PUT",
+        body: { audience },
       }),
       invalidatesTags: ["AdminUser"],
     }),
@@ -3127,6 +3140,7 @@ export const {
   useGetAdminUsersQuery,
   useDeleteAdminUserMutation,
   useSetAdminUserRoleMutation,
+  useSetAdminUserAudienceMutation,
   useAdminReset2faMutation,
   useAdminResetScreenLockMutation,
   useGetAdminUserBillingQuery,

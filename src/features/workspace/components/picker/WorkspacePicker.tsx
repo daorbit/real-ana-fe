@@ -94,7 +94,6 @@ export default function WorkspacePicker() {
               name={w.name}
               icon={w.icon}
               lastUsed={w._id === lastId}
-              lastUsedLabel={t("workspaces.picker.lastUsed")}
               picking={w._id === pickingId}
               onClick={() => pick(w._id)}
             />
