@@ -20,6 +20,12 @@ export const INVOICE_TEMPLATES: { value: InvoiceTemplate; label: string }[] = [
   { value: "modern", label: "Spreadsheet" },
   { value: "minimal", label: "Minimalist" },
   { value: "bold", label: "Grand" },
+  { value: "soft", label: "Soft Cards" },
+  { value: "studio", label: "Studio" },
+  { value: "agency", label: "Agency" },
+  { value: "capsule", label: "Capsule" },
+  { value: "banner", label: "Banner" },
+  { value: "panel", label: "Panel" },
 ];
 
 export const INVOICE_ACCENTS: { value: InvoiceAccent; label: string }[] = [

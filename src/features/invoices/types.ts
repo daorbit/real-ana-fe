@@ -1,4 +1,14 @@
-export type InvoiceTemplate = "classic" | "modern" | "minimal" | "bold";
+export type InvoiceTemplate =
+  | "classic"
+  | "modern"
+  | "minimal"
+  | "bold"
+  | "soft"
+  | "studio"
+  | "agency"
+  | "capsule"
+  | "banner"
+  | "panel";
 export type InvoiceAccent = "blue" | "indigo" | "teal" | "emerald" | "amber" | "crimson" | "slate";
 
 export interface InvoicingProfile {
