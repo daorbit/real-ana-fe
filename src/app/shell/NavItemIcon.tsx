@@ -1,4 +1,5 @@
 import type { WorkspaceAppId } from "@/shared/types";
+import { appLogoUrl } from "@/shared/lib/appLogo";
 import type { NavItem } from "./navItems";
 
 const APP_IMAGE_FILE: Partial<Record<WorkspaceAppId, string>> = {
@@ -6,7 +7,7 @@ const APP_IMAGE_FILE: Partial<Record<WorkspaceAppId, string>> = {
 };
 
 export function navImage(item: Pick<NavItem, "app">): string | undefined {
-  if (typeof item.app === "string") return `/apps/${APP_IMAGE_FILE[item.app] ?? `quantalog-${item.app}.svg`}`;
+  if (typeof item.app === "string") return appLogoUrl(APP_IMAGE_FILE[item.app] ?? `quantalog-${item.app}.svg`);
   return undefined;
 }
 

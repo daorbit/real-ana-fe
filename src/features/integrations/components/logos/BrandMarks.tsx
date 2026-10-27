@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Webhook } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
+import { appLogoUrl } from "@/shared/lib/appLogo";
 import classes from "./Logos.module.css";
 
 interface MarkProps {
@@ -147,7 +148,7 @@ function PayuMark({ size = 24 }: MarkProps) {
 
 function appMark(file: string, name: string) {
   return function AppMark({ size = 24 }: MarkProps) {
-    return <img src={`/apps/${file}`} width={size} height={size} alt={name} className={classes.appLogo} />;
+    return <img src={appLogoUrl(file)} width={size} height={size} alt={name} className={classes.appLogo} />;
   };
 }
 

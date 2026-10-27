@@ -1,14 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="28 28 200 200" width="256" height="256" role="img" aria-label="Quantalog Media">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="Quantalog Media">
   <defs>
-    <clipPath id="qm-card">
-      <rect x="28" y="84" width="168" height="134" rx="24"/>
-    </clipPath>
+    <linearGradient id="p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E7ECF5"/><stop offset="1" stop-color="#B3BED2"/></linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F80FF"/><stop offset="1" stop-color="#5A3EEF"/></linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#0B1020" flood-opacity="0.35"/></filter>
   </defs>
-  <rect x="84" y="38" width="144" height="122" rx="24" fill="#007AFF"/>
-  <rect x="28" y="84" width="168" height="134" rx="24" fill="#FF6482"/>
-  <g clip-path="url(#qm-card)">
-    <path d="M70 222 136 146 204 222Z" fill="#FF2D55" stroke="#FF2D55" stroke-width="10" stroke-linejoin="round"/>
-    <path d="M20 222 84 160 148 222Z" fill="#C4153F" stroke="#C4153F" stroke-width="10" stroke-linejoin="round"/>
-  </g>
-  <circle cx="152" cy="122" r="16" fill="#FFE08A"/>
+  <rect x="6" y="9" width="52" height="46" rx="10" fill="url(#p)" stroke="#8F9BB1" stroke-width="1.4" filter="url(#s)"/>
+  <path d="M14 47l12-16 8 9.5 6-6.5 10 13z" fill="#3E475C" stroke="#3E475C" stroke-width="1.8" stroke-linejoin="round"/>
+  <circle cx="44" cy="21" r="6" fill="url(#b)"/>
 </svg>

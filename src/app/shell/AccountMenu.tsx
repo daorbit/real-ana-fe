@@ -10,6 +10,7 @@ import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import { LanguageItems } from "@/lib/i18n/LanguagePicker";
 import { CONTACT_URL, LEGAL_URLS } from "@/shared/lib/docsSlugs";
+import { appLogoUrl } from "@/shared/lib/appLogo";
 import type { ThemeMode } from "@/shared/lib/theme";
 import { ADMIN_TOOLS_PATH } from "@/features/admin/lib/adminSections";
 import { ThemeSwitch } from "./ThemeSwitch";
@@ -113,7 +114,7 @@ export function AccountMenu({
           </div>
 
           {notesOn && (
-            <Menu.Item leftSection={<MenuArtIcon src="/apps/quantalog-notes.svg" />} onClick={() => notes.open()}>
+            <Menu.Item leftSection={<MenuArtIcon src={appLogoUrl("quantalog-notes.svg")} />} onClick={() => notes.open()}>
               {t("nav.notes", "Notes")}
             </Menu.Item>
           )}
