@@ -5,7 +5,10 @@ import { LEAD_FORMS_BASE } from "./themeParams";
 const COUNT = "quantalog:unread-count";
 const COUNT_REQUEST = "quantalog:unread-count-request";
 
-export function useFrameUnreadCount(frameRef: RefObject<HTMLIFrameElement | null>) {
+export function useFrameUnreadCount(
+  frameRef: RefObject<HTMLIFrameElement | null>,
+  frameBase: string = LEAD_FORMS_BASE,
+) {
   const { count } = useActivityPanel();
   const latest = useRef(count);
   latest.current = count;
@@ -13,9 +16,9 @@ export function useFrameUnreadCount(frameRef: RefObject<HTMLIFrameElement | null
   const send = useCallback(
     (target?: Window | null) => {
       const frame = target ?? frameRef.current?.contentWindow;
-      frame?.postMessage({ type: COUNT, count: latest.current }, LEAD_FORMS_BASE);
+      frame?.postMessage({ type: COUNT, count: latest.current }, frameBase);
     },
-    [frameRef],
+    [frameRef, frameBase],
   );
 
   useEffect(() => {
@@ -23,15 +26,15 @@ export function useFrameUnreadCount(frameRef: RefObject<HTMLIFrameElement | null
   }, [count, send]);
 
   useEffect(() => {
-    const formsOrigin = new URL(LEAD_FORMS_BASE, window.location.href).origin;
+    const frameOrigin = new URL(frameBase, window.location.href).origin;
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== formsOrigin) return;
+      if (event.origin !== frameOrigin) return;
       if ((event.data as { type?: unknown } | null)?.type !== COUNT_REQUEST) return;
       send(event.source as Window | null);
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [send]);
+  }, [send, frameBase]);
 
   return send;
 }

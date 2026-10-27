@@ -29,14 +29,14 @@ function isFramePlanMessage(data: unknown): data is FramePlanMessage {
 }
 
 
-export function useEmbeddedPlanLimit() {
+export function useEmbeddedPlanLimit(frameBase: string = LEAD_FORMS_BASE) {
   const navigate = useNavigate();
   const { open: openActivityPanel } = useActivityPanel();
   useEffect(() => {
-    const formsOrigin = new URL(LEAD_FORMS_BASE, window.location.href).origin;
+    const frameOrigin = new URL(frameBase, window.location.href).origin;
 
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== formsOrigin) return;
+      if (event.origin !== frameOrigin) return;
       if (!isFramePlanMessage(event.data)) return;
 
       if (event.data.type === UPGRADE) {
@@ -56,5 +56,5 @@ export function useEmbeddedPlanLimit() {
 
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [navigate, openActivityPanel]);
+  }, [navigate, openActivityPanel, frameBase]);
 }
