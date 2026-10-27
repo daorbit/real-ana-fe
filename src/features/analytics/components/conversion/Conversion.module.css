@@ -1,0 +1,149 @@
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 16px;
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--border);
+}
+
+.statLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.statValue[data-money] {
+  color: var(--green);
+}
+
+.statNote {
+  overflow: hidden;
+  font-size: 11.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+
+.money {
+  font-weight: 600;
+  color: var(--green);
+}
+
+.rate {
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.snippet {
+  display: block;
+  margin: 12px 0 0;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  overflow-x: auto;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.step + .step {
+  border-top: 1px solid var(--border);
+}
+
+.stepNum {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stepTitle {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.stepBody {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.guideAction {
+  margin-top: 6px;
+}
+
+.flowCanvas {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-2);
+}
+
+@media (max-width: 720px) {
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat + .stat {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .flowCanvas {
+    height: 460px;
+  }
+}

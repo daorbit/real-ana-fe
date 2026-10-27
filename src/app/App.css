@@ -1321,13 +1321,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .retention-table .ret-cell {
   text-align: center;
-  padding: 8px 6px;
-  border-radius: 7px;
-  font-weight: 600;
-  min-width: 46px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  min-width: 48px;
 }
 .retention-table .ret-empty {
-  background: transparent;
+  background: var(--viz-track);
 }
 
 .click-href { color: var(--muted); flex-shrink: 0; }

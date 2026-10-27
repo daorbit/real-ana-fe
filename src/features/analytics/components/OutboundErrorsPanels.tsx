@@ -20,7 +20,7 @@ export function OutboundPanel({ items }: { items: OutboundBucket[] }) {
     <RankCard
       title="Outbound & downloads"
       icon={ExternalLink}
-      tone="cyan"
+      tone="teal"
       subtitle={items.length > 0 ? `${num(total)} exits` : undefined}
     >
       {items.length === 0 ? (
@@ -46,9 +46,15 @@ export function OutboundPanel({ items }: { items: OutboundBucket[] }) {
 }
 
 export function ErrorsPanel({ items }: { items: ErrorBucket[] }) {
+  const total = items.reduce((sum, i) => sum + i.count, 0);
 
   return (
-    <RankCard title="JavaScript errors" icon={AlertTriangle} tone="rose">
+    <RankCard
+      title="JavaScript errors"
+      icon={AlertTriangle}
+      tone="rose"
+      subtitle={items.length > 0 ? `${num(total)} reports · ${items.length} unique` : undefined}
+    >
       {items.length === 0 ? (
         <RankEmpty icon={AlertTriangle}>No errors reported — all clear</RankEmpty>
       ) : (
@@ -59,6 +65,7 @@ export function ErrorsPanel({ items }: { items: ErrorBucket[] }) {
             label: i.key || "(unknown error)",
             title: i.lastSeen ? `${i.key}\nLast seen ${new Date(i.lastSeen).toLocaleString()}` : i.key,
             meta: [i.path, i.lastSeen ? timeAgo(i.lastSeen) : null].filter(Boolean).join(" · "),
+            weight: i.count,
             value: num(i.count),
           }))}
         />

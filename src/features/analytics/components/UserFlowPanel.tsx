@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import { Card, Group, Text, Center, Stack, ThemeIcon } from "@mantine/core";
 import { Inbox, Waypoints } from "lucide-react";
 import {
   ReactFlow, Background, BackgroundVariant, Controls, MarkerType, useNodesState,
@@ -8,7 +7,9 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useGetUserFlowQuery } from "@/app/store";
 import { FlowGraphSkeleton } from "@/shared/ui/Skeletons";
+import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { FlowPageNode, type FlowPageNodeData } from "./FlowPageNode";
+import classes from "./conversion/Conversion.module.css";
 
 const NODE_W = 208;
 /** Every node renders the same height now that paths are truncated to one
@@ -119,7 +120,7 @@ export function UserFlowPanel({
       const share = e.count / maxEdgeCount;
       // Heavier paths draw heavier, so the dominant route through the site is
       // visible before any label is read.
-      const stroke = share > 0.6 ? "var(--accent-2)" : "var(--border-strong)";
+      const stroke = share > 0.6 ? "var(--viz-1)" : "var(--border-hover)";
       return {
         id: `e${i}-${e.source}-${e.target}`,
         source: e.source,
@@ -134,7 +135,7 @@ export function UserFlowPanel({
         className: "flow-edge",
         labelStyle: { fill: "var(--text-2)", fontSize: 10, fontWeight: 600 },
         animated: share > 0.6,
-        style: { stroke, strokeWidth: 1 + share * 1.6 },
+        style: { stroke, strokeWidth: 1.25 + share * 2 },
         markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 14, height: 14 },
       };
     });
@@ -148,27 +149,19 @@ export function UserFlowPanel({
   useEffect(() => setNodes(initialNodes), [initialNodes, setNodes]);
 
   return (
-    <Card withBorder radius="lg" padding="lg">
-      <Group gap={8} mb="md">
-        <Waypoints size={15} className="sect-ic" />
-        <Text fw={600} c="dimmed" size="sm">User flow</Text>
-      </Group>
-
+    <RankCard
+      title="User flow"
+      subtitle={nodes.length > 0 ? "How visitors move between pages. Thicker lines carry more sessions." : undefined}
+      icon={Waypoints}
+      tone="blue"
+      fill={false}
+    >
       {isFetching ? (
         <FlowGraphSkeleton height={600} />
       ) : nodes.length === 0 ? (
-        <Center py="lg">
-          <Stack align="center" gap="xs" maw={380}>
-            <ThemeIcon variant="light" color="gray" size="md" radius="md">
-              <Inbox size={16} />
-            </ThemeIcon>
-            <Text c="dimmed" size="xs" ta="center">
-              Waiting for enough sessions to draw a navigation graph.
-            </Text>
-          </Stack>
-        </Center>
+        <RankEmpty icon={Inbox}>Waiting for enough sessions to draw a navigation graph.</RankEmpty>
       ) : (
-        <div style={{ height: 600, width: "100%", position: "relative" }}>
+        <div className={classes.flowCanvas}>
           <ReactFlow
             nodes={nodes}
             nodeTypes={nodeTypes}
@@ -183,11 +176,11 @@ export function UserFlowPanel({
             edgesFocusable={false}
             proOptions={{ hideAttribution: true }}
           >
-            <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--border)" />
+            <Background variant={BackgroundVariant.Dots} gap={22} size={1.2} color="var(--border-strong)" />
             <Controls showInteractive={false} position="bottom-right" />
           </ReactFlow>
         </div>
       )}
-    </Card>
+    </RankCard>
   );
 }

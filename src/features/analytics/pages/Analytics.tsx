@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import {
-  Text, Group, Button, SimpleGrid, Card,
+  Text, Group, Button, SimpleGrid,
   Stack, Tabs, Box,
   Alert,
 } from "@mantine/core";
 import {
   Users, Eye, Radio, FolderKanban, MousePointerClick, Timer,
   Layers, LogIn, LogOut, AppWindow, MonitorSmartphone, Globe2, Languages, Tag,
-  ArrowDownWideNarrow, Zap, Split, CloudOff,
+  ArrowDownWideNarrow, Split, CloudOff,
 } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { StatCard } from "@/shared/ui/StatCard";
@@ -31,7 +31,7 @@ import { RetentionGrid } from "@/features/analytics/components/RetentionGrid";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
 import { VisitorSplitPanel } from "@/features/analytics/components/VisitorSplitPanel";
 import { BarList } from "@/features/analytics/components/BarList";
-import { ClassicBarList } from "@/features/analytics/components/ClassicBarList";
+import { EventsGuideCard } from "@/features/analytics/components/conversion/EventsGuideCard";
 import { FilterBar } from "@/features/analytics/components/FilterBar";
 import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import dimClasses from "@/features/analytics/components/layout/ScopeDim.module.css";
@@ -588,13 +588,13 @@ export default function Analytics() {
 
         <Tabs.Panel value="pages">
           <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-            <ClassicBarList title={t("analytics.list.topPages")} icon={Eye} items={view?.topPages ?? []} color="teal"
-                            filterKey="path" onFilter={addFilter}
-                            dimension="path" useCompare={useBreakdownCompare} />
-            <ClassicBarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="emerald"
-                            empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
-            <ClassicBarList title={t("analytics.list.exitPages")} icon={LogOut} items={view?.exitPages ?? []} color="pink"
-                            empty="No completed sessions yet" filterKey="path" onFilter={addFilter} />
+            <BarList title={t("analytics.list.topPages")} icon={Eye} items={view?.topPages ?? []} color="blue"
+                     filterKey="path" onFilter={addFilter}
+                     dimension="path" useCompare={useBreakdownCompare} />
+            <BarList title={t("analytics.list.entryPages")} icon={LogIn} items={view?.entryPages ?? []} color="teal"
+                     empty="No sessions recorded yet" filterKey="path" onFilter={addFilter} />
+            <BarList title={t("analytics.list.exitPages")} icon={LogOut} items={view?.exitPages ?? []} color="orange"
+                     empty="No completed sessions yet" filterKey="path" onFilter={addFilter} />
           </SimpleGrid>
         </Tabs.Panel>
 
@@ -695,37 +695,7 @@ export default function Analytics() {
                 totalRevenue={view?.totalRevenue ?? 0}
               />
             </div>
-            <Card withBorder radius="lg" padding="lg" h="100%">
-              <Group gap={8} mb="md">
-                <Zap size={15} className="sect-ic" />
-                <Text fw={600} c="dimmed" size="sm">About events</Text>
-              </Group>
-              <Stack gap="sm">
-                <Text size="sm" c="dimmed">
-                  Custom events are actions you care about — a signup, a purchase, a
-                  plan upgrade — sent from your own site with one line of code.
-                </Text>
-                <Text size="sm" c="dimmed">
-                  Conversion rate is the share of visitors in this period who fired
-                  the event at least once.
-                </Text>
-                <Text size="sm" c="dimmed">
-                  Pass a numeric <b>value</b> in the event props — e.g.{" "}
-                  <code>{`{ value: 49 }`}</code> — and it&apos;s summed into revenue
-                  per event and overall.
-                </Text>
-                <Button
-                  component={Link}
-                  to="/app/developers"
-                  variant="light"
-                  size="xs"
-                  mt="xs"
-                  leftSection={<AppWindow size={14} />}
-                >
-                  See the tracking docs
-                </Button>
-              </Stack>
-            </Card>
+            <EventsGuideCard />
           </SimpleGrid>
         </Tabs.Panel>
 

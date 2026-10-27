@@ -1,8 +1,17 @@
-import { Card, Group, Text, Stack, Center, ThemeIcon, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
 import { CalendarClock, Inbox } from "lucide-react";
+import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import type { HeatCell } from "@/shared/types";
+import classes from "./Heatmap.module.css";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const HOURS = Array.from({ length: 24 }, (_, h) => h);
+const LEVELS = 8;
+
+function levelOf(count: number, max: number): number {
+  if (count <= 0) return 0;
+  return Math.max(1, Math.ceil((count / max) * LEVELS));
+}
 
 /**
  * When traffic actually happens, by weekday and hour.
@@ -13,36 +22,19 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
  */
 export function Heatmap({ cells }: { cells: HeatCell[] }) {
   const max = Math.max(1, ...cells.map((c) => c.count));
-
-  // Sparse input: most day/hour pairs have no traffic at all.
   const byCell = new Map(cells.map((c) => [`${c.day}-${c.hour}`, c.count]));
-  const empty = cells.length === 0;
 
   return (
-    <Card withBorder radius="lg" padding="lg">
-      <Group gap={8} mb="md">
-        <CalendarClock size={15} className="sect-ic" />
-        <Text fw={600} c="dimmed" size="sm">When your visitors show up</Text>
-      </Group>
-
-      {empty ? (
-        <Center py="lg">
-          <Stack align="center" gap={4}>
-            <ThemeIcon variant="light" color="gray" size="md" radius="md">
-              <Inbox size={16} />
-            </ThemeIcon>
-            <Text c="dimmed" size="xs">Waiting for data…</Text>
-          </Stack>
-        </Center>
+    <RankCard title="When your visitors show up" icon={CalendarClock} tone="blue" fill={false}>
+      {cells.length === 0 ? (
+        <RankEmpty icon={Inbox}>Waiting for data…</RankEmpty>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <div style={{ minWidth: 560 }}>
+        <div className={classes.scroll}>
+          <div className={classes.grid}>
             {DAYS.map((day, d) => (
-              <Group key={day} gap={3} wrap="nowrap" mb={3} align="center">
-                <Text size="xs" c="dimmed" w={32} style={{ flexShrink: 0 }}>
-                  {day}
-                </Text>
-                {Array.from({ length: 24 }, (_, h) => {
+              <div key={day} className={classes.row}>
+                <span className={classes.day}>{day}</span>
+                {HOURS.map((h) => {
                   const count = byCell.get(`${d}-${h}`) ?? 0;
                   return (
                     <Tooltip
@@ -51,44 +43,30 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
                       withArrow
                       openDelay={80}
                     >
-                      <div
-                        style={{
-                          flex: 1,
-                          height: 18,
-                          minWidth: 14,
-                          borderRadius: 3,
-                          background: count
-                            ? `color-mix(in srgb, var(--viz-seq) ${Math.round(
-                                (count / max) * 100
-                              )}%, transparent)`
-                            : "var(--surface)",
-                          border: "1px solid var(--border)",
-                        }}
-                      />
+                      <span className={classes.cell} data-level={levelOf(count, max)} />
                     </Tooltip>
                   );
                 })}
-              </Group>
+              </div>
             ))}
-
-            <Group gap={3} wrap="nowrap" mt={6} align="center">
-              <div style={{ width: 32, flexShrink: 0 }} />
-              {Array.from({ length: 24 }, (_, h) => (
-                <Text
-                  key={h}
-                  size="9px"
-                  c="dimmed"
-                  ta="center"
-                  style={{ flex: 1, minWidth: 14 }}
-                >
-                  {/* Every hour label would be unreadable at this width. */}
+            <div className={classes.row}>
+              <span className={classes.day} />
+              {HOURS.map((h) => (
+                <span key={h} className={classes.hour}>
                   {h % 3 === 0 ? h : ""}
-                </Text>
+                </span>
               ))}
-            </Group>
+            </div>
+          </div>
+          <div className={classes.scale} aria-hidden>
+            <span>Less</span>
+            {Array.from({ length: LEVELS + 1 }, (_, l) => (
+              <span key={l} className={classes.swatch} data-level={l} />
+            ))}
+            <span>More</span>
           </div>
         </div>
       )}
-    </Card>
+    </RankCard>
   );
 }

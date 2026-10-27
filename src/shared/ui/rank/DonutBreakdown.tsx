@@ -3,8 +3,8 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { num, share } from "@/shared/lib";
 import classes from "./Donut.module.css";
 
-const PALETTE = ["#14b8a6", "#3b82f6", "#a855f7", "#f97316", "#ec4899", "#f59e0b"];
-const OTHER_COLOR = "#94a3b8";
+const PALETTE = ["var(--viz-1)", "var(--viz-2)", "var(--viz-3)", "var(--viz-4)", "var(--viz-5)", "var(--viz-6)"];
+const OTHER_COLOR = "var(--viz-other)";
 const OTHER_ID = "__other";
 
 export type DonutItem = { id: string; label: ReactNode; title?: string; value: number };
@@ -49,14 +49,15 @@ export function DonutBreakdown({
               data={slices}
               dataKey="value"
               nameKey="id"
-              innerRadius="70%"
+              innerRadius="74%"
               outerRadius="100%"
-              paddingAngle={slices.length > 1 ? 2 : 0}
-              cornerRadius={5}
+              paddingAngle={slices.length > 1 ? 1.5 : 0}
+              cornerRadius={6}
               startAngle={90}
               endAngle={-270}
-              stroke="none"
-              animationDuration={600}
+              stroke="var(--surface)"
+              strokeWidth={2}
+              animationDuration={700}
               onMouseEnter={(_, i) => setActive(i)}
               onMouseLeave={() => setActive(null)}
               onClick={(_, i) => select(slices[i])}
@@ -89,6 +90,7 @@ export function DonutBreakdown({
             role={canSelect(s) ? "button" : undefined}
             tabIndex={canSelect(s) ? 0 : undefined}
             title={s.title}
+            style={{ "--dot": s.color, "--share": `${total ? (s.value / total) * 100 : 0}%` } as CSSProperties}
             onMouseEnter={() => setActive(i)}
             onMouseLeave={() => setActive(null)}
             onFocus={() => setActive(i)}
@@ -96,10 +98,13 @@ export function DonutBreakdown({
             onClick={() => select(s)}
             onKeyDown={onKeyDown(s)}
           >
-            <span className={classes.dot} style={{ "--dot": s.color } as CSSProperties} />
+            <span className={classes.dot} />
             <span className={classes.legendLabel}>{s.label}</span>
             <span className={classes.legendShare}>{share(s.value, total)}</span>
             <span className={classes.legendValue}>{num(s.value)}</span>
+            <span className={classes.legendTrack} aria-hidden>
+              <span className={classes.legendBar} />
+            </span>
           </li>
         ))}
       </ul>

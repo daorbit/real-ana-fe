@@ -3,10 +3,10 @@ import { Button, Card, Group, Stack, Text } from "@mantine/core";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, CartesianGrid } from "recharts";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { AnalyticsArt } from "@/shared/ui/Brand";
+import { TrafficTrendTooltip } from "@/features/analytics/components/trend/TrafficTrendTooltip";
 import type { Stats } from "@/shared/types";
 
-const TOOLTIP_STYLE = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 };
-const LABEL_STYLE = { color: "var(--muted)" };
+const VIEWS_ONLY = ["views"] as const;
 
 export function TrafficCard({
   stats,
@@ -33,10 +33,24 @@ export function TrafficCard({
       {hasData ? (
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={series} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--viz-grid)" vertical={false} />
-            <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} />
-            <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={LABEL_STYLE} />
-            <Area type="monotone" dataKey="views" stroke="var(--viz-1)" strokeWidth={2} fill="var(--viz-1)" fillOpacity={0.08} dot={false} />
+            <CartesianGrid stroke="var(--viz-grid)" vertical={false} />
+            <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "var(--muted)" }} tickLine={false} axisLine={false} tickMargin={10} minTickGap={24} />
+            <Tooltip
+              content={<TrafficTrendTooltip metrics={[...VIEWS_ONLY]} comparing={false} />}
+              cursor={{ stroke: "var(--viz-cursor)", strokeWidth: 1 }}
+            />
+            <Area
+              type="monotone"
+              dataKey="views"
+              stroke="var(--viz-1)"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="var(--viz-1)"
+              fillOpacity={0.12}
+              dot={false}
+              activeDot={{ r: 5, fill: "var(--viz-1)", stroke: "var(--surface)", strokeWidth: 2.5 }}
+            />
           </AreaChart>
         </ResponsiveContainer>
       ) : embedded ? (

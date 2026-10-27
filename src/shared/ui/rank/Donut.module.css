@@ -9,8 +9,8 @@
 .chart {
   position: relative;
   flex: none;
-  width: 148px;
-  height: 148px;
+  width: 156px;
+  height: 156px;
   margin: 0 auto;
 }
 
@@ -27,7 +27,7 @@
 }
 
 .centerValue {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -62,13 +62,46 @@
 }
 
 .legendRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 10px;
-  min-height: 32px;
-  padding: 4px 8px;
-  border-radius: 8px;
+  gap: 6px 10px;
+  padding: 7px 8px 8px;
+  border-radius: 10px;
   transition: background-color 140ms ease, opacity 140ms ease;
+}
+
+.legendTrack {
+  grid-column: 2 / -1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--viz-track);
+  overflow: hidden;
+}
+
+.legendBar {
+  display: block;
+  width: var(--share);
+  height: 100%;
+  border-radius: 999px;
+  background: var(--dot);
+  transform-origin: left center;
+  animation: legend-bar-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes legend-bar-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legendBar {
+    animation: none;
+  }
 }
 
 .legendRow[data-active] {
@@ -92,7 +125,7 @@
   flex: none;
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: 50%;
   background: var(--dot);
 }
 

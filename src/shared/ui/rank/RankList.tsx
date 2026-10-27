@@ -45,7 +45,7 @@ function RankRow({
     <li
       className={classes.row}
       data-tone={item.tone}
-      data-bar={share !== undefined || undefined}
+      data-ranked={showRank || undefined}
       data-selectable={selectable || undefined}
       data-selected={selected || undefined}
       aria-pressed={onSelect ? selected : undefined}
@@ -55,23 +55,27 @@ function RankRow({
       onClick={selectable ? () => onSelect?.(item.id) : undefined}
       onKeyDown={selectable ? onKeyDown : undefined}
     >
-      {share !== undefined && (
-        <span className={classes.bar} style={{ "--share": `${share}%` } as CSSProperties} aria-hidden />
-      )}
-      {showRank && <span className={classes.rank}>{position}</span>}
-      {item.leading && <span className={classes.leading}>{item.leading}</span>}
-      <span className={classes.label}>
-        <span className={classes.labelText}>{item.label}</span>
-        {item.meta && <span className={classes.meta}>{item.meta}</span>}
+      <span className={classes.line}>
+        {showRank && <span className={classes.rank}>{position}</span>}
+        {item.leading && <span className={classes.leading}>{item.leading}</span>}
+        <span className={classes.label}>
+          <span className={classes.labelText}>{item.label}</span>
+          {item.meta && <span className={classes.meta}>{item.meta}</span>}
+        </span>
+        {selectable && !selected && (
+          <span className={classes.hint}>
+            <HintIcon size={11} />
+            {selectHint}
+          </span>
+        )}
+        {item.aside && <span className={classes.aside}>{item.aside}</span>}
+        <span className={classes.value}>{item.value}</span>
       </span>
-      {selectable && !selected && (
-        <span className={classes.hint}>
-          <HintIcon size={11} />
-          {selectHint}
+      {share !== undefined && (
+        <span className={classes.track} aria-hidden>
+          <span className={classes.bar} style={{ "--share": `${share}%` } as CSSProperties} />
         </span>
       )}
-      {item.aside && <span className={classes.aside}>{item.aside}</span>}
-      <span className={classes.value}>{item.value}</span>
     </li>
   );
 }

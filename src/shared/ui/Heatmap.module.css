@@ -1,0 +1,106 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 560px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.day {
+  flex: none;
+  width: 34px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.cell,
+.swatch {
+  border-radius: 5px;
+  background: var(--viz-track);
+  transition: opacity 140ms ease;
+}
+
+.cell {
+  flex: 1;
+  min-width: 14px;
+  height: 20px;
+}
+
+.cell:hover {
+  opacity: 0.75;
+}
+
+.hour {
+  flex: 1;
+  min-width: 14px;
+  font-size: 10px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.scale {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.cell[data-level="1"],
+.swatch[data-level="1"] {
+  background: color-mix(in srgb, var(--viz-seq) 16%, var(--viz-track));
+}
+
+.cell[data-level="2"],
+.swatch[data-level="2"] {
+  background: color-mix(in srgb, var(--viz-seq) 26%, var(--viz-track));
+}
+
+.cell[data-level="3"],
+.swatch[data-level="3"] {
+  background: color-mix(in srgb, var(--viz-seq) 36%, var(--viz-track));
+}
+
+.cell[data-level="4"],
+.swatch[data-level="4"] {
+  background: color-mix(in srgb, var(--viz-seq) 47%, var(--viz-track));
+}
+
+.cell[data-level="5"],
+.swatch[data-level="5"] {
+  background: color-mix(in srgb, var(--viz-seq) 58%, var(--viz-track));
+}
+
+.cell[data-level="6"],
+.swatch[data-level="6"] {
+  background: color-mix(in srgb, var(--viz-seq) 70%, var(--viz-track));
+}
+
+.cell[data-level="7"],
+.swatch[data-level="7"] {
+  background: color-mix(in srgb, var(--viz-seq) 84%, var(--viz-track));
+}
+
+.cell[data-level="8"],
+.swatch[data-level="8"] {
+  background: var(--viz-seq);
+}

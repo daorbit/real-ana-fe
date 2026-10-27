@@ -1,18 +1,18 @@
-import { Card, Group, Text, Stack, Center, ThemeIcon, Loader } from "@mantine/core";
+import { Center, Loader } from "@mantine/core";
 import { Repeat, Inbox } from "lucide-react";
 import { useGetRetentionQuery } from "@/app/store";
+import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { num } from "@/shared/lib";
 
 /** Colour a retention cell from empty (0%) to strong (100%). */
 function cellStyle(pct: number): React.CSSProperties {
-  // Emerald with opacity scaled to the percentage, so a denser cell = stickier.
-  const alpha = pct === 0 ? 0 : 0.12 + (pct / 100) * 0.66;
+  const alpha = pct === 0 ? 0 : 0.14 + (pct / 100) * 0.76;
   return {
     background:
       pct === 0
         ? "var(--surface)"
-        : `color-mix(in srgb, var(--mantine-color-emerald-6) ${Math.round(alpha * 100)}%, transparent)`,
-    color: pct >= 55 ? "#04150e" : "var(--mantine-color-text)",
+        : `color-mix(in srgb, var(--viz-seq) ${Math.round(alpha * 100)}%, transparent)`,
+    color: pct >= 55 ? "#ffffff" : "var(--mantine-color-text)",
   };
 }
 
@@ -36,29 +36,20 @@ export function RetentionGrid({
   const hasData = cohorts.some((c) => c.size > 0);
 
   return (
-    <Card withBorder radius="lg" padding="lg">
-      <Group justify="space-between" mb="md">
-        <Group gap={8}>
-          <Repeat size={15} className="sect-ic" />
-          <Text fw={600} c="dimmed" size="sm">Weekly retention</Text>
-        </Group>
-        <Text size="xs" c="dimmed">Share of each cohort active in later weeks</Text>
-      </Group>
-
+    <RankCard
+      title="Weekly retention"
+      subtitle="Share of each cohort active in later weeks"
+      icon={Repeat}
+      tone="blue"
+      fill={false}
+    >
       {isLoading ? (
-        <Center py="xl"><Loader size="sm" color="emerald" /></Center>
+        <Center py="xl"><Loader size="sm" /></Center>
       ) : !hasData ? (
-        <Center py="xl">
-          <Stack align="center" gap="xs" maw={380}>
-            <ThemeIcon variant="light" color="gray" size="md" radius="md">
-              <Inbox size={16} />
-            </ThemeIcon>
-            <Text c="dimmed" size="xs" ta="center">
-              Not enough history yet. Retention needs visitors returning across
-              several weeks — check back once the site has run for a while.
-            </Text>
-          </Stack>
-        </Center>
+        <RankEmpty icon={Inbox}>
+          Not enough history yet. Retention needs visitors returning across several weeks — check back once the
+          site has run for a while.
+        </RankEmpty>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <table className="retention-table">
@@ -95,6 +86,6 @@ export function RetentionGrid({
           </table>
         </div>
       )}
-    </Card>
+    </RankCard>
   );
 }

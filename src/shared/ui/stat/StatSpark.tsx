@@ -50,11 +50,13 @@ export function StatSpark({
             type="monotone"
             dataKey={dataKey}
             stroke={accent}
-            strokeWidth={1.5}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
             fill={accent}
-            fillOpacity={0.08}
+            fillOpacity={0.12}
             dot={false}
-            activeDot={{ r: 3, strokeWidth: 0, fill: accent }}
+            activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2, fill: accent }}
             isAnimationActive={false}
           />
         </AreaChart>

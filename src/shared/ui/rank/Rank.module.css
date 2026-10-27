@@ -1,62 +1,56 @@
 .card {
-  --tone: #14b8a6;
+  --tone: var(--viz-3);
 }
 
 .card[data-tone="teal"],
 .row[data-tone="teal"] {
-  --tone: #14b8a6;
+  --tone: var(--viz-3);
 }
 
 .card[data-tone="emerald"],
 .row[data-tone="emerald"] {
-  --tone: #10b981;
+  --tone: var(--viz-6);
 }
 
 .card[data-tone="blue"],
-.row[data-tone="blue"] {
-  --tone: #3b82f6;
+.row[data-tone="blue"],
+.card[data-tone="cyan"],
+.row[data-tone="cyan"] {
+  --tone: var(--viz-1);
 }
 
 .card[data-tone="indigo"],
-.row[data-tone="indigo"] {
-  --tone: #6366f1;
-}
-
+.row[data-tone="indigo"],
 .card[data-tone="violet"],
 .row[data-tone="violet"] {
-  --tone: #a855f7;
+  --tone: var(--viz-7);
 }
 
 .card[data-tone="pink"],
 .row[data-tone="pink"] {
-  --tone: #ec4899;
+  --tone: var(--viz-5);
 }
 
 .card[data-tone="rose"],
 .row[data-tone="rose"] {
-  --tone: #f43f5e;
+  --tone: var(--viz-8);
 }
 
 .card[data-tone="orange"],
 .row[data-tone="orange"] {
-  --tone: #f97316;
+  --tone: var(--viz-2);
 }
 
 .card[data-tone="amber"],
 .row[data-tone="amber"] {
-  --tone: #f59e0b;
-}
-
-.card[data-tone="cyan"],
-.row[data-tone="cyan"] {
-  --tone: #06b6d4;
+  --tone: var(--viz-4);
 }
 
 .card {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 18px 18px 14px;
+  padding: 20px 20px 16px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -128,22 +122,26 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 0 -6px;
+  gap: 2px;
+  margin: 0 -8px;
   padding: 0;
   list-style: none;
 }
 
 .row {
-  position: relative;
-  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 8px 10px 9px;
+  border-radius: 10px;
+  transition: background-color 140ms ease;
+}
+
+.line {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 38px;
-  padding: 6px 10px;
-  border-radius: 9px;
-  transition: background-color 140ms ease;
+  min-width: 0;
 }
 
 .row:hover {
@@ -158,22 +156,25 @@
   font-weight: 650;
 }
 
-.bar {
-  position: absolute;
-  inset-block: 3px;
-  left: 0;
-  z-index: -1;
-  width: var(--share);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--tone) 13%, transparent);
-  transform-origin: left center;
-  animation: bar-in 600ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  transition: background-color 140ms ease;
+.track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--viz-track);
+  overflow: hidden;
 }
 
-.row:hover .bar,
-.row[data-selected] .bar {
-  background: color-mix(in srgb, var(--tone) 22%, transparent);
+.row[data-ranked] .track {
+  margin-left: 30px;
+}
+
+.bar {
+  display: block;
+  width: var(--share);
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tone);
+  transform-origin: left center;
+  animation: bar-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 .pathDir {
   font-weight: 400;
@@ -217,9 +218,10 @@
   height: 20px;
   border-radius: 6px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
+  background: var(--viz-track);
 }
 
 
