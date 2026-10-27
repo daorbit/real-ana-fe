@@ -84,9 +84,9 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 168px);
+  grid-template-columns: repeat(4, 140px);
   justify-content: center;
-  gap: 36px 28px;
+  gap: 28px 24px;
   width: 100%;
   margin-top: 44px;
   animation: pickerIn 420ms ease-out 180ms both;
@@ -122,8 +122,8 @@
 }
 
 .iconWell {
-  width: 68px;
-  height: 68px;
+  width: 88px;
+  height: 88px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -145,14 +145,14 @@
 .iconWell[data-image],
 .tile:hover .iconWell[data-image],
 .tile:focus-visible .iconWell[data-image] {
-  border-radius: 18px;
+  border-radius: 22px;
   background: #ffffff;
   border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
 }
 
 .iconImage {
-  width: 58px;
-  height: 58px;
+  width: 76px;
+  height: 76px;
   display: block;
   object-fit: contain;
   border-radius: 8px;
@@ -257,7 +257,7 @@
 
 @media (max-width: 860px) {
   .grid {
-    grid-template-columns: repeat(3, 152px);
+    grid-template-columns: repeat(3, 140px);
   }
 }
 

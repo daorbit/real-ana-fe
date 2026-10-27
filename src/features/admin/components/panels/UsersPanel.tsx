@@ -33,7 +33,7 @@ export default function UsersPanel() {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
-  const [audience, setAudience] = useState("");
+  const [audience, setAudience] = useState("external");
   const [page, setPage] = useState(1);
   const actions = useAdminUserActions();
 
