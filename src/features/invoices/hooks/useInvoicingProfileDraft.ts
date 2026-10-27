@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGetInvoicingProfileQuery, useSaveInvoicingProfileMutation } from "@/app/store/api";
 import { notify, notifyError } from "@/shared/lib/notify";
 import { useSaveRegistration } from "@/shared/ui/SaveBar";
-import type { InvoicingProfile } from "../types";
+import type { InvoicingProfile, SetProfileField } from "../types";
 
 function sameProfile(a: InvoicingProfile | null, b: InvoicingProfile | null): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -20,8 +20,7 @@ export function useInvoicingProfileDraft(workspaceId: string) {
 
   const dirty = Boolean(draft && saved && !sameProfile(draft, saved));
 
-  const setField = <K extends keyof InvoicingProfile>(field: K, value: InvoicingProfile[K]) =>
-    setDraft((d) => (d ? { ...d, [field]: value } : d));
+  const setField: SetProfileField = (field, value) => setDraft((d) => (d ? { ...d, [field]: value } : d));
 
   const persist = async () => {
     if (!draft) return;

@@ -4,14 +4,6 @@
   gap: var(--space-8);
 }
 
-.prefix {
-  max-width: 160px;
-}
-
-.short {
-  max-width: 220px;
-}
-
 .error {
   font-size: 13px;
   color: var(--text-2);

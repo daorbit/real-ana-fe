@@ -1,3 +1,5 @@
+import type { InvoiceAccent, InvoiceTemplate } from "../types";
+
 export const INVOICE_CURRENCIES = [
   { value: "INR", label: "INR, Indian rupee" },
   { value: "USD", label: "USD, US dollar" },
@@ -10,3 +12,22 @@ export const INVOICE_CURRENCIES = [
 ];
 
 export const MAX_PAYMENT_TERMS_DAYS = 365;
+
+export const MAX_LOGO_BYTES = 300 * 1024;
+
+export const INVOICE_TEMPLATES: { value: InvoiceTemplate; label: string }[] = [
+  { value: "classic", label: "Classic" },
+  { value: "modern", label: "Modern" },
+  { value: "minimal", label: "Minimal" },
+  { value: "bold", label: "Bold" },
+];
+
+export const INVOICE_ACCENTS: { value: InvoiceAccent; label: string }[] = [
+  { value: "blue", label: "Blue" },
+  { value: "indigo", label: "Indigo" },
+  { value: "teal", label: "Teal" },
+  { value: "emerald", label: "Emerald" },
+  { value: "amber", label: "Amber" },
+  { value: "crimson", label: "Crimson" },
+  { value: "slate", label: "Slate" },
+];

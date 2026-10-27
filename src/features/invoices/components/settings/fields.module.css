@@ -1,0 +1,86 @@
+.short {
+  max-width: 220px;
+}
+
+.prefix {
+  max-width: 160px;
+}
+
+.logoRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoBox {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 56px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+}
+
+.logoImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logoEmpty {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  outline: 1px solid var(--border);
+  color: #ffffff;
+  transition: outline-color 0.15s ease;
+}
+
+.swatch[data-active] {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.swatch[data-accent="blue"] {
+  background: #2f6bff;
+}
+
+.swatch[data-accent="indigo"] {
+  background: #4f46e5;
+}
+
+.swatch[data-accent="teal"] {
+  background: #0d9488;
+}
+
+.swatch[data-accent="emerald"] {
+  background: #059669;
+}
+
+.swatch[data-accent="amber"] {
+  background: #b45309;
+}
+
+.swatch[data-accent="crimson"] {
+  background: #dc2626;
+}
+
+.swatch[data-accent="slate"] {
+  background: #334155;
+}
