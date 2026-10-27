@@ -58,9 +58,24 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
   };
 
   const open = () => {
-    onClose();
-    if (info.route) navigate(info.route);
-    else notes.open();
+    const go = () => {
+      onClose();
+      if (info.route) navigate(info.route);
+      else notes.open();
+    };
+    if (!unsaved.dirtyCount) {
+      go();
+      return;
+    }
+    confirmDelete({
+      title: "Discard unsaved changes?",
+      body: "You have changes that haven't been saved. Opening the app now throws them away.",
+      confirmLabel: "Discard",
+      onConfirm: () => {
+        unsaved.discardAll();
+        go();
+      },
+    });
   };
 
   const turnOff = () =>
@@ -85,7 +100,7 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
           Close
         </Button>
       )}
-      {showSettings ? (
+      {showSettings && !info.route ? (
         <Button type="button" onClick={requestClose}>
           Done
         </Button>

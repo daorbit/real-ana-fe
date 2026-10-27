@@ -10,4 +10,7 @@ export const APP_SETTINGS: Partial<Record<WorkspaceAppId, AppSettings>> = {
   seoReports: lazy(() =>
     import("@/features/analytics/components/share/seo/SeoShareTab").then((m) => ({ default: m.SeoShareTab })),
   ),
+  invoicing: lazy(() =>
+    import("@/features/invoices/components/InvoicingSettings").then((m) => ({ default: m.InvoicingSettings })),
+  ),
 };

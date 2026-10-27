@@ -1148,7 +1148,8 @@ export type WorkspaceAppId =
   | "publicDashboard"
   | "seoReports"
   | "bio"
-  | "funnels";
+  | "funnels"
+  | "invoicing";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string; paidAt?: string }>>;
 

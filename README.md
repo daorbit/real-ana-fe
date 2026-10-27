@@ -35,6 +35,7 @@ Set them in `.env.development` / `.env.production` locally and in the Vercel pro
 | `VITE_GOOGLE_CLIENT_ID` | Google sign-in |
 | `CLOUDFLARE_SITE_KEY` | Cloudflare Turnstile site key (bot protection on login) |
 | `VITE_LEAD_FORMS_URL` | Origin of the embedded forms service |
+| `VITE_INVOICES_URL` | Origin of the embedded invoices service. Unset shows a coming-soon page at `/app/invoices` |
 | `VITE_SENTRY_DSN` | Optional. Turns on error tracking |
 | `VITE_RELEASE` | Optional. Release name attached to error reports |
 

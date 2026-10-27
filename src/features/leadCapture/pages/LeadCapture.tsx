@@ -11,7 +11,7 @@ import { useFrameUnreadCount } from "../useFrameUnreadCount";
 import { useFrameRailCollapse } from "../useFrameRailCollapse";
 import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
-import { api } from "@/shared/lib/http";
+import { useHostFrameToken } from "@/shared/hooks/useHostFrameToken";
 
 
 const DEMO_FORMS_WORKSPACE = "default";
@@ -38,58 +38,7 @@ export default function LeadCapture() {
 
   const workspaceId = isDemo ? null : active?._id;
 
-
-  const [bootToken, setBootToken] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (!workspaceId) return;
-    let cancelled = false;
-    setBootToken(undefined);
-    api
-      .post<{ token: string }>(`/api/workspaces/${workspaceId}/forms-token`, {})
-      .then((res) => {
-        if (!cancelled) setBootToken(res.token);
-      })
-      .catch(() => {
-        // A viewer has no editor role and gets no token. The frame still loads
-        // — it is only the payment screens that need one, and they report the
-        // refusal themselves.
-        if (!cancelled) setBootToken("");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [workspaceId]);
-
-  useEffect(() => {
-    if (!workspaceId) return;
-    function onMessage(event: MessageEvent) {
-      if (event.data?.type !== "quantalog:workspace-token-request") return;
-      const frame = event.source as Window | null;
-      if (!frame) return;
-      api
-        .post<{ token: string }>(`/api/workspaces/${workspaceId}/forms-token`, {})
-        .then((res) => {
-          // Targeted at the forms app's own origin rather than "*": this is a
-          // credential, and it goes to the frame that asked for it, nobody else.
-          frame.postMessage(
-            { type: "quantalog:workspace-token", token: res.token },
-            LEAD_FORMS_BASE,
-          );
-        })
-        .catch(() => {
-          // A viewer has no editor role and gets no token. Answering with an
-          // empty one lets the frame stop waiting and say so, rather than
-          // hanging until its own timeout.
-          frame.postMessage(
-            { type: "quantalog:workspace-token", token: "" },
-            LEAD_FORMS_BASE,
-          );
-        });
-    }
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [workspaceId]);
+  const bootToken = useHostFrameToken(workspaceId, "forms-token", LEAD_FORMS_BASE);
 
   // Rebuilt only when the workspace changes: a new src reloads the frame, and
   // doing that on every render would throw away whatever was being edited.

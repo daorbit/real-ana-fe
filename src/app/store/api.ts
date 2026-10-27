@@ -16,6 +16,8 @@ import type {
 import type { Placed } from "@/features/analytics/widgetCatalog";
 import type { TrackerOptions } from "@/features/workspace/tracker";
 import { formsQuery } from "@/features/integrations/lib/formsClient";
+import { invoicesQuery } from "@/features/invoices/lib/invoicesClient";
+import type { InvoicingProfile, InvoicingProfileResponse } from "@/features/invoices/types";
 import type {
   FormsApp, FormsAppTestResult, PaymentSettings, PaymentSettingsInput, PaymentTestResult,
   PaymentMode, PaymentProvider, CalendarStatus, SheetsStatus,
@@ -127,7 +129,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   return result;
 };
 
-export const API_TAGS = ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram", "WhatsApp", "AdminOpsAlerts"] as const;
+export const API_TAGS = ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram", "WhatsApp", "AdminOpsAlerts", "InvoicingProfile"] as const;
 
 export const api = createApi({
   reducerPath: "api",
@@ -471,6 +473,23 @@ export const api = createApi({
       queryFn: (workspaceId, queryApi, extra, baseQuery) =>
         formsQuery<FormsApp[]>({ workspaceId, path: "/apps" }, queryApi, extra, baseQuery),
       providesTags: ["FormsApps"],
+    }),
+
+    getInvoicingProfile: build.query<InvoicingProfileResponse, string>({
+      queryFn: (workspaceId, queryApi, extra, baseQuery) =>
+        invoicesQuery<InvoicingProfileResponse>({ workspaceId, path: "/settings" }, queryApi, extra, baseQuery),
+      providesTags: (_result, _error, workspaceId) => [{ type: "InvoicingProfile", id: workspaceId }],
+    }),
+
+    saveInvoicingProfile: build.mutation<InvoicingProfileResponse, { workspaceId: string; profile: InvoicingProfile }>({
+      queryFn: ({ workspaceId, profile }, queryApi, extra, baseQuery) =>
+        invoicesQuery<InvoicingProfileResponse>(
+          { workspaceId, path: "/settings", method: "PUT", body: profile },
+          queryApi,
+          extra,
+          baseQuery,
+        ),
+      invalidatesTags: (_result, _error, { workspaceId }) => [{ type: "InvoicingProfile", id: workspaceId }],
     }),
 
     saveFormsApp: build.mutation<
@@ -3086,6 +3105,8 @@ export const {
   useDisconnectLinkedInMutation,
   useGetFormsAppsQuery,
   useSaveFormsAppMutation,
+  useGetInvoicingProfileQuery,
+  useSaveInvoicingProfileMutation,
   useTestFormsAppMutation,
   useDisconnectFormsAppMutation,
   useGetFormsPaymentsQuery,

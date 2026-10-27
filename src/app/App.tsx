@@ -58,6 +58,7 @@ const Reports = lazy(() => import("@/features/reports/pages"));
 const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
 const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
 const LeadCapture = lazy(() => import("@/features/leadCapture/pages/LeadCapture"));
+const Invoices = lazy(() => import("@/features/invoices/pages/Invoices"));
 const LinkFrame = lazy(() => import("@/features/customLinks/pages/LinkFrame"));
 const Settings = lazy(() => import("@/features/auth/pages/Settings"));
 const Apps = lazy(() => import("@/features/integrations/pages/Apps"));
@@ -297,6 +298,7 @@ export default function App() {
                 <Route path="/app/social" element={<SocialPosts />} />
                 <Route path="/app/reviews" element={<Reviews />} />
                 <Route path="/app/lead-capture" element={<LeadCapture />} />
+                <Route path="/app/invoices" element={<Invoices />} />
                 <Route path="/app/link/:slug" element={<LinkFrame />} />
                 <Route path="/app/developers" element={<Developers />} />
                 <Route path="/app/settings/:section?" element={<Settings />} />

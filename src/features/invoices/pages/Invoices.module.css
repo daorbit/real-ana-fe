@@ -1,0 +1,28 @@
+:global(body[data-page="invoices"]) :global(.app-panel__scroll) {
+  overflow: hidden;
+  padding: 1px;
+}
+
+:global(body[data-page="invoices"]) :global(.app-panel__scroll > .route-fade) {
+  height: 100%;
+}
+
+@media (max-width: 48em) {
+  :global(body[data-page="invoices"]) :global(.app-panel__scroll) {
+    padding: 0 0 calc(var(--m-tabbar-h, 50px) + var(--m-tabbar-inset, env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: calc(16px - 2px);
+}
+
+@media (max-width: 48em) {
+  .frame {
+    border-radius: 0;
+  }
+}

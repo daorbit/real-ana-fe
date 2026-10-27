@@ -204,9 +204,33 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Saved for the team", body: "Save a funnel once and anyone in the workspace can open it for any date range." },
     ],
   },
+  invoicing: {
+    id: "invoicing",
+    tileId: "quantalog-invoicing",
+    name: "Quantalog Invoicing",
+    navLabel: "Invoices",
+    route: "/app/invoices",
+    location: "in the sidebar",
+    offNote: "Your invoices, quotations and business details are kept, so turning it back on picks up where you left off.",
+    tagline: "Send quotations and invoices to your leads without leaving Quantalog.",
+    description: "Create quotations and invoices with your business details filled in, turn an accepted quote into an invoice in one click, and see what has been paid and what is still due.",
+    features: [
+      { title: "Your details, every time", body: "Add your business name, address and GSTIN once. Every new quote and invoice starts with them." },
+      { title: "Quote to invoice", body: "Convert an accepted quotation into a numbered invoice in one click, nothing typed twice." },
+      { title: "Paid and pending", body: "See revenue, unpaid invoices and open quotes for the workspace at a glance." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];
+
+const APP_AVAILABLE: Partial<Record<WorkspaceAppId, boolean>> = {
+  invoicing: Boolean(import.meta.env.VITE_INVOICES_URL),
+};
+
+function appAvailable(id: WorkspaceAppId): boolean {
+  return APP_AVAILABLE[id] ?? true;
+}
 
 export function quantalogAppTile(info: WorkspaceAppInfo, enabled: boolean, price?: string): IntegrationTile {
   return {
@@ -226,7 +250,7 @@ export function quantalogAppTiles(
   apps: EnabledApps,
   prices: Partial<Record<WorkspaceAppId, string>> = {},
 ): { info: WorkspaceAppInfo; tile: IntegrationTile }[] {
-  return WORKSPACE_APP_IDS.map((id) => ({
+  return WORKSPACE_APP_IDS.filter(appAvailable).map((id) => ({
     info: WORKSPACE_APP_INFO[id],
     tile: quantalogAppTile(WORKSPACE_APP_INFO[id], apps[id], prices[id]),
   }));
