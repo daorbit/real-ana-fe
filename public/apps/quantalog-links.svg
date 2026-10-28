@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="Quantalog Links">
-  <defs>
-    <linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CC0FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
-    <radialGradient id="h" cx="0.22" cy="0.12" r="0.85"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.38"/><stop offset="0.6" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
-    <linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#DBEAFE"/></linearGradient>
-    <filter id="d" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.6" flood-color="#172554" flood-opacity="0.45"/></filter>
-  </defs>
-  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#t)"/>
-  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#h)"/>
-  <rect x="2.5" y="2.5" width="59" height="59" rx="14.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.2"/>
-  <rect x="22.5" y="13" width="27" height="27" rx="7" fill="#FFFFFF" opacity="0.4"/><rect x="14.5" y="21.5" width="28" height="28" rx="7.5" fill="url(#w)" filter="url(#d)"/><path d="M22.5 41.5L34.5 29.5M27.5 29.5h7v7" fill="none" stroke="#2563EB" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="256" height="256" role="img" aria-label="Quantalog Links">
+  <clipPath id="c"><circle cx="256" cy="262" r="206"/></clipPath>
+  <circle cx="256" cy="262" r="206" fill="#5AA5F5"/>
+  <g clip-path="url(#c)" fill="#CEE85E">
+    <rect x="306" y="88" width="190" height="62" rx="31"/>
+    <rect x="130" y="370" width="110" height="52" rx="26"/>
+    <rect x="356" y="360" width="160" height="60" rx="30"/>
+  </g>
+  <circle cx="256" cy="262" r="206" fill="none" stroke="#000000" stroke-width="18" stroke-dasharray="870 26 18 26 2000" stroke-linecap="round"/>
+  <rect x="14" y="160" width="484" height="196" rx="42" fill="#FFB957" stroke="#000000" stroke-width="18"/>
+  <text x="256" y="300" fill="#000000" font-family="Arial Rounded MT Bold, Arial, Helvetica, sans-serif" font-size="118" font-weight="700" text-anchor="middle">http://</text>
 </svg>
