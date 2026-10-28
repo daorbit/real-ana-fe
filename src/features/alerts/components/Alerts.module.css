@@ -351,11 +351,19 @@
 .timeline {
   display: flex;
   flex-direction: column;
-  padding: 6px 0 10px;
+  max-height: min(560px, 62dvh);
+  padding: 0 0 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 .dayLabel {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   padding: 12px 20px 6px;
+  background: var(--surface);
   font-size: 11px;
   font-weight: 650;
   letter-spacing: 0.06em;
