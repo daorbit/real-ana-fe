@@ -1,0 +1,197 @@
+.decor {
+  --festive-gold: #f5b22d;
+  --festive-marigold: #ff8c1a;
+  --festive-rose: #f2557f;
+  --festive-core: #fff1c2;
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 76px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.lights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+}
+
+.wire {
+  fill: none;
+  stroke: color-mix(in srgb, var(--festive-gold) 45%, transparent);
+  stroke-width: 0.8;
+}
+
+.socket {
+  fill: color-mix(in srgb, var(--festive-gold) 65%, transparent);
+}
+
+.bulbGold,
+.bulbMarigold,
+.bulbRose {
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+
+.bulbGold {
+  fill: var(--festive-gold);
+}
+
+.bulbMarigold {
+  fill: var(--festive-marigold);
+  animation-delay: 0.8s;
+}
+
+.bulbRose {
+  fill: var(--festive-rose);
+  animation-delay: 1.6s;
+}
+
+.firework {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  overflow: visible;
+  opacity: 0.6;
+}
+
+.toneGold {
+  --firework-tone: var(--festive-gold);
+}
+
+.toneRose {
+  --firework-tone: var(--festive-rose);
+}
+
+.toneMarigold {
+  --firework-tone: var(--festive-marigold);
+}
+
+.trail {
+  fill: none;
+  stroke: var(--festive-gold);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: trail 3.6s ease-out infinite;
+}
+
+.burst {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  opacity: 0;
+  animation: burst 3.6s ease-out infinite;
+}
+
+.ray {
+  fill: none;
+  stroke: var(--firework-tone);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.spark {
+  fill: var(--festive-gold);
+}
+
+.core {
+  fill: var(--festive-core);
+}
+
+.burstA {
+  top: 8px;
+  right: 58px;
+}
+
+.burstB {
+  top: 30px;
+  right: 18%;
+}
+
+.burstC {
+  top: 4px;
+  left: 42%;
+}
+
+.burstB .trail,
+.burstB .burst {
+  animation-delay: 1.2s;
+}
+
+.burstC .trail,
+.burstC .burst {
+  animation-delay: 2.4s;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes trail {
+  0% {
+    translate: 0 28px;
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  18% {
+    translate: 0 0;
+    opacity: 1;
+  }
+  21%,
+  100% {
+    translate: 0 0;
+    opacity: 0;
+  }
+}
+
+@keyframes burst {
+  0%,
+  18% {
+    scale: 0.15;
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  48% {
+    scale: 1;
+    opacity: 0.95;
+  }
+  64%,
+  100% {
+    scale: 1.12;
+    opacity: 0;
+  }
+}
+
+:global([data-motion="off"]) .bulbGold,
+:global([data-motion="off"]) .bulbMarigold,
+:global([data-motion="off"]) .bulbRose {
+  animation: none;
+}
+
+:global([data-motion="off"]) .firework {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bulbGold,
+  .bulbMarigold,
+  .bulbRose {
+    animation: none;
+  }
+
+  .firework {
+    display: none;
+  }
+}

@@ -1,3 +1,7 @@
+.rail {
+  isolation: isolate;
+}
+
 .foot {
   position: relative;
   display: flex;
