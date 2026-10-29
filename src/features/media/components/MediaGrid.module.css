@@ -1,55 +1,37 @@
-/*
- * CSS columns rather than a grid: uploads arrive at whatever aspect ratio they
- * have, and a grid would either crop them all to one shape or leave ragged
- * gaps. Columns let each tile keep its own height and close up behind it.
- */
 .masonry {
-  column-count: 2;
-  column-gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
 }
 
 @media (min-width: 48em) {
   .masonry {
-    column-count: 3;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 75em) {
   .masonry {
-    column-count: 4;
-  }
-}
-
-/* The picker gives each tile more room, so an image reads at a glance. */
-.threeUp {
-  column-count: 2;
-}
-
-@media (min-width: 48em) {
-  .threeUp {
-    column-count: 3;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 75em) {
   .threeUp {
-    column-count: 3;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 .tile {
   position: relative;
-  /* Stops a tile being split across a column break mid-image. */
-  break-inside: avoid;
-  margin-bottom: 12px;
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-md);
   background: var(--mantine-color-body);
   cursor: pointer;
-  transition:
-    border-color 120ms ease,
-    box-shadow 120ms ease;
+  transition: border-color 120ms ease;
 }
 
 .tile:hover {
@@ -61,6 +43,12 @@
   outline-offset: 2px;
 }
 
+.skeletonTile,
+.skeletonTile:hover {
+  cursor: default;
+  border-color: var(--mantine-color-default-border);
+}
+
 .selected,
 .selected:hover {
   border-color: var(--selected-border);
@@ -69,17 +57,24 @@
 .image {
   display: block;
   width: 100%;
-  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--mantine-color-default-hover);
 }
 
-/* A file with no visual preview still needs a tile of a sensible height. */
+.thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
 .fileTile {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 120px;
+  width: 100%;
+  aspect-ratio: 4 / 3;
   color: var(--mantine-color-dimmed);
   background: var(--mantine-color-default-hover);
 }
@@ -89,7 +84,6 @@
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
-/* Actions sit over the preview, revealed on hover so the wall stays quiet. */
 .actions {
   position: absolute;
   top: 6px;
