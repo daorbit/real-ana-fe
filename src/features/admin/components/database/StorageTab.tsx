@@ -1,12 +1,18 @@
 import { useMemo } from "react";
 import { Box, Card, Divider, Group, RingProgress, SimpleGrid, Stack, Table, Text, Tooltip } from "@mantine/core";
 import { num } from "@/shared/lib";
-import type { DbStats } from "@/shared/types";
+import type { CloudinaryUsage, DbStorageStats } from "@/shared/types";
 import { bytes, prettyName, splitCollections } from "./utils";
 import { Metric, Num } from "./shared";
 import { CloudinaryCard } from "./CloudinaryCard";
 
-export function StorageTab({ data }: { data: DbStats }) {
+export function StorageTab({
+  data,
+  limitNote,
+}: {
+  data: DbStorageStats & { cloudinary?: CloudinaryUsage | null };
+  limitNote: string;
+}) {
   const rows = useMemo(() => splitCollections(data.collectionStats, data.used), [data]);
 
   const pct = data.limit > 0 ? (data.used / data.limit) * 100 : 0;
@@ -45,7 +51,7 @@ export function StorageTab({ data }: { data: DbStats }) {
                 {bytes(data.limit - data.used)} free
               </Text>
               <Text size="xs" c="dimmed" mt={2}>
-                Atlas M0 free-tier ceiling
+                {limitNote}
               </Text>
             </Box>
           </Group>

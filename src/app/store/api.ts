@@ -27,7 +27,7 @@ import type {
   SeoCompetitorAnalysis, SeoCompetitorHistoryPoint, SeoCompetitorBriefResponse,
   SeoFieldVitals, SeoCrawlReport,
   SeoShareState, SeoSharePanels, SeoShareLink, PublicSeoReport,
-  DemoUsage, DbStats, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
+  DemoUsage, DbStats, DbStorageStats, DbConnection, DbConnectionInput, WorkersAiTrendPoint, OpsAlertSettings, OpsAlertSettingsInput, Role, LinkedInStatus, InstagramStatus, ScheduledPost, ScheduledPostsResponse, SentPostsResponse,
   PostFrequency, PostMode, PostProvider,
   Plan, AppPrice, PaidAppId, StartAppPurchaseResponse, OrbitImageModelOption, AddonPack, BillingCycle, Currency, CurrencyPrices, FxStatus, FxSnapshot,
   ReportSchedule, ReportScheduleInput, WhatsAppStatus, TelegramStatus, TelegramChat,
@@ -129,7 +129,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   return result;
 };
 
-export const API_TAGS = ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram", "WhatsApp", "AdminOpsAlerts", "InvoicingProfile"] as const;
+export const API_TAGS = ["Workspace", "Site", "Stats", "ApiKey", "InstallStatus", "Layout", "Theme", "AdminUser", "AdminUserBilling", "Funnel", "Share", "Seo", "Competitor", "DemoUsage", "DbStats", "EmailSegment", "Plan", "AddonPack", "Billing", "Coupon", "Fx", "ReportSchedule", "Segment", "Marker", "Members", "Branding", "Media", "Usage", "LinkedIn", "Instagram", "ScheduledPost", "SentPost", "OrbitConversation", "GoogleReviews", "GoogleReviewList", "SearchConsole", "SearchPerformance", "Notification", "NotificationCount", "NotificationPrefs", "Referral", "AdminReferral", "Audit", "FormsApps", "FormsPayments", "FormsCalendar", "FormsSheets", "FormsWebhook", "Telegram", "WhatsApp", "AdminOpsAlerts", "InvoicingProfile", "DbConnection"] as const;
 
 export const api = createApi({
   reducerPath: "api",
@@ -1772,6 +1772,26 @@ export const api = createApi({
       providesTags: ["DbStats"],
     }),
 
+    getDbConnections: build.query<DbConnection[], void>({
+      query: () => "/api/admin/db/connections",
+      providesTags: [{ type: "DbConnection", id: "LIST" }],
+    }),
+
+    getDbConnectionStats: build.query<DbStorageStats, string>({
+      query: (id) => `/api/admin/db/connections/${id}/stats`,
+      providesTags: (_r, _e, id) => [{ type: "DbConnection", id }],
+    }),
+
+    addDbConnection: build.mutation<DbConnection, DbConnectionInput>({
+      query: (body) => ({ url: "/api/admin/db/connections", method: "POST", body }),
+      invalidatesTags: [{ type: "DbConnection", id: "LIST" }],
+    }),
+
+    removeDbConnection: build.mutation<{ ok: true }, string>({
+      query: (id) => ({ url: `/api/admin/db/connections/${id}`, method: "DELETE" }),
+      invalidatesTags: (_r, _e, id) => [{ type: "DbConnection", id: "LIST" }, { type: "DbConnection", id }],
+    }),
+
     getWorkersAiTrend: build.query<{ points: WorkersAiTrendPoint[] }, { range: "today" | "7d" }>({
       query: ({ range }) => ({
         url: "/api/admin/workers-ai/trend",
@@ -3229,6 +3249,10 @@ export const {
   useGetDemoUsageQuery,
   useSetDemoLimitMutation,
   useGetDbStatsQuery,
+  useGetDbConnectionsQuery,
+  useGetDbConnectionStatsQuery,
+  useAddDbConnectionMutation,
+  useRemoveDbConnectionMutation,
   useGetWorkersAiTrendQuery,
   useGetCompetitorsQuery,
   useGetCompetitorAnalysisQuery,

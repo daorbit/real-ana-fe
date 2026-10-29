@@ -1,50 +1,74 @@
-import { useRef } from "react";
-import { Center, Loader, Stack, Text } from "@mantine/core";
-import { useGetDbStatsQuery } from "@/app/store";
-import { StorageTab } from "@/features/admin/components/database/StorageTab";
-import { WorkersAiTrendCard, type WorkersAiTrendCardHandle } from "@/features/admin/components/database/WorkersAiTrendCard";
-import { WorkersAiCard } from "@/features/admin/components/database/WorkersAiCard";
+import { Button, Group, Stack } from "@mantine/core";
+import { Plus } from "lucide-react";
+import { PageTabs } from "@/shared/ui/PageTabs";
+import { pageTabId, pageTabPanelId } from "@/shared/ui/pageTabIds";
+import { PrimaryDbTab } from "@/features/admin/components/database/PrimaryDbTab";
+import { ConnectionDbTab } from "@/features/admin/components/database/ConnectionDbTab";
+import { AiUsageTab } from "@/features/admin/components/database/AiUsageTab";
+import { AddDbConnectionModal } from "@/features/admin/components/database/AddDbConnectionModal";
+import { AI_TAB, useDatabaseTabs } from "../../useDatabaseTabs";
+import { useAddDbConnectionForm } from "../../useAddDbConnectionForm";
 import { AdminSection } from "../layout/AdminSection";
 import { AdminRefreshButton } from "../layout/AdminRefreshButton";
 
-function SubHeading({ title, text }: { title: string; text: string }) {
-  return (
-    <div>
-      <Text fw={650} size="sm">{title}</Text>
-      <Text size="xs" c="dimmed" mt={2}>{text}</Text>
-    </div>
-  );
-}
+const TAB_PREFIX = "database";
 
 export default function DatabasePanel() {
-  const { data, isFetching, refetch } = useGetDbStatsQuery();
-  const trendRef = useRef<WorkersAiTrendCardHandle>(null);
-
-  const refresh = () => {
-    refetch();
-    trendRef.current?.refetch();
-  };
+  const db = useDatabaseTabs();
+  const form = useAddDbConnectionForm((created) => db.setActive(created.id));
 
   return (
-    <AdminSection id="database" actions={<AdminRefreshButton onClick={refresh} loading={isFetching} />}>
-      {!data ? (
-        <Center py={64}><Loader size="sm" /></Center>
-      ) : (
-        <Stack gap={40}>
-          <Stack gap="md">
-            <SubHeading title="Storage" text={`What “${data.name}” is using, and how much room is left on the plan.`} />
-            <StorageTab data={data} />
-          </Stack>
+    <AdminSection
+      id="database"
+      actions={
+        <Group gap="xs" wrap="nowrap">
+          <Button variant="default" size="sm" radius="md" leftSection={<Plus size={14} />} onClick={form.open}>
+            Add database
+          </Button>
+          <AdminRefreshButton onClick={db.refresh} loading={db.refreshing} />
+        </Group>
+      }
+    >
+      <Stack gap="lg">
+        <PageTabs
+          items={db.tabs}
+          active={db.current}
+          onChange={db.setActive}
+          label="Databases"
+          idPrefix={TAB_PREFIX}
+        />
 
-          {data.workersAi.length > 0 && (
-            <Stack gap="md">
-              <SubHeading title="AI usage" text="Workers AI requests across the connected Cloudflare accounts." />
-              <WorkersAiTrendCard ref={trendRef} />
-              <WorkersAiCard accounts={data.workersAi} />
-            </Stack>
+        <div
+          role="tabpanel"
+          id={pageTabPanelId(TAB_PREFIX, db.current)}
+          aria-labelledby={pageTabId(TAB_PREFIX, db.current)}
+        >
+          {db.current === AI_TAB ? (
+            <AiUsageTab accounts={db.primary.data?.workersAi} trendRef={db.trendRef} />
+          ) : db.connection ? (
+            <ConnectionDbTab
+              connection={db.connection}
+              data={db.connectionStats.currentData}
+              error={db.connectionStats.error}
+              fetching={db.connectionStats.isFetching}
+              onRetry={db.refresh}
+              onRemove={() => db.connection && db.remove(db.connection)}
+            />
+          ) : (
+            <PrimaryDbTab data={db.primary.data} />
           )}
-        </Stack>
-      )}
+        </div>
+      </Stack>
+
+      <AddDbConnectionModal
+        opened={form.opened}
+        draft={form.draft}
+        saving={form.saving}
+        canSubmit={form.canSubmit}
+        set={form.set}
+        onClose={form.close}
+        onSubmit={form.submit}
+      />
     </AdminSection>
   );
 }

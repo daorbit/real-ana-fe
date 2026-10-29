@@ -31,6 +31,15 @@ export function Meter({
   );
 }
 
+export function SubHeading({ title, text }: { title: string; text: string }) {
+  return (
+    <div>
+      <Text fw={650} size="sm">{title}</Text>
+      <Text size="xs" c="dimmed" mt={2}>{text}</Text>
+    </div>
+  );
+}
+
 export function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div>

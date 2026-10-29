@@ -89,7 +89,7 @@ export const ADMIN_GROUPS: { label: string; sections: AdminSectionMeta[] }[] = [
         id: "database",
         labelKey: "nav.adminDatabase",
         label: "Database",
-        description: "Storage used against the plan limit, and Workers AI usage.",
+        description: "Storage for each MongoDB database against its limit, and Workers AI usage.",
         icon: Database,
         tone: "gray",
       },

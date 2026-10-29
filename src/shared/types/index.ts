@@ -449,7 +449,7 @@ export type WorkersAiTrendPoint = {
  * `cloudinary` and `workersAi` ride along on the same request; unrelated to
  * the database but the same "how full are we" question.
  */
-export type DbStats = {
+export type DbStorageStats = {
   name: string;
   collections: number;
   objects: number;
@@ -459,8 +459,27 @@ export type DbStats = {
   used: number;
   limit: number;
   collectionStats: DbCollectionStats[];
+};
+
+export type DbStats = DbStorageStats & {
   cloudinary: CloudinaryUsage | null;
   workersAi: WorkersAiUsage[];
+};
+
+export type DbConnection = {
+  id: string;
+  label: string;
+  host: string;
+  dbName: string;
+  limit: number;
+  createdAt: string;
+};
+
+export type DbConnectionInput = {
+  label: string;
+  uri: string;
+  dbName?: string;
+  limitMb: number;
 };
 
 
