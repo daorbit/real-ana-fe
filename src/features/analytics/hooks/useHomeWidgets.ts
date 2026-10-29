@@ -9,14 +9,8 @@ export { WIDGETS, WIDGET_GROUPS, WIDGET_MAP } from "@/features/analytics/widgetC
 export type { WidgetKind, Span, Widget, Placed, WidgetId } from "@/features/analytics/widgetCatalog";
 
 const DEFAULTS: Placed[] = [
-  { id: "visitors", span: 1 },
-  { id: "pageviews", span: 1 },
-  { id: "live", span: 1 },
-  { id: "sites", span: 1 },
-  { id: "traffic", span: 3 },
-  { id: "livePages", span: 1 },
-  { id: "topPages", span: 2 },
-  { id: "topReferrers", span: 2 },
+  { id: "worldMap", span: 4 },
+  { id: "heatmap", span: 4 },
 ];
 
 export function useHomeWidgets() {

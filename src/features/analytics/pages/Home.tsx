@@ -114,7 +114,7 @@ export default function Home() {
   if (setup) {
     return (
       <AppShell>
-        <SetupScreen pageTitle="Home" state={setup} workspaceId={active._id} onVerified={() => void refreshSites()} />
+        <SetupScreen state={setup} workspaceId={active._id} onVerified={() => void refreshSites()} />
       </AppShell>
     );
   }

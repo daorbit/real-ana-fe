@@ -13,7 +13,7 @@ export function PageHeader({
   children,
   docsPath,
 }: {
-  title: ReactNode;
+  title?: ReactNode;
   description?: ReactNode;
   /** Buttons and controls, right-aligned on wide screens. */
   actions?: ReactNode;
@@ -25,16 +25,20 @@ export function PageHeader({
   return (
     <Box className={classes.header}>
       <Group justify="space-between" align="flex-start" gap="md" wrap="wrap">
-        <div className={classes.titleCol}>
-          <Title order={1} className={classes.title}>
-            {title}
-          </Title>
-          {description && (
-            <Text c="dimmed" size="sm" mt={6} className={classes.description}>
-              {description}
-            </Text>
-          )}
-        </div>
+        {title ? (
+          <div className={classes.titleCol}>
+            <Title order={1} className={classes.title}>
+              {title}
+            </Title>
+            {description && (
+              <Text c="dimmed" size="sm" mt={6} className={classes.description}>
+                {description}
+              </Text>
+            )}
+          </div>
+        ) : (
+          <div className={classes.titleCol} />
+        )}
         <Group gap="sm" wrap="wrap" justify="flex-end" className={classes.actions}>
           {actions}
           <Group gap="sm" wrap="nowrap" visibleFrom="sm">

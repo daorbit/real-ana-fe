@@ -349,7 +349,7 @@ export default function Analytics() {
   if (setup) {
     return (
       <AppShell>
-        <SetupScreen pageTitle="Analytics" state={setup} workspaceId={active._id} onVerified={() => void refreshSites()} />
+        <SetupScreen state={setup} workspaceId={active._id} onVerified={() => void refreshSites()} />
       </AppShell>
     );
   }

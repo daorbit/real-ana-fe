@@ -16,12 +16,10 @@ import classes from "./SetupScreen.module.css";
 const TOTAL_STEPS = 3;
 
 export function SetupScreen({
-  pageTitle,
   state,
   workspaceId,
   onVerified,
 }: {
-  pageTitle: string;
   state: NonNullable<SetupState>;
   workspaceId: string;
   onVerified: () => void;
@@ -50,7 +48,7 @@ export function SetupScreen({
 
   return (
     <>
-      <PageHeader title={pageTitle} docsPath={DOCS_SLUGS.tracking} />
+      <PageHeader docsPath={DOCS_SLUGS.tracking} />
 
       <section className={classes.screen}>
         <div className={classes.hero}>
