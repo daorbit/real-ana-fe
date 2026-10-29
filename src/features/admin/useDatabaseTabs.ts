@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { Cpu, Database } from "lucide-react";
+import { Cpu, Database, type LucideIcon } from "lucide-react";
 import {
   useGetDbConnectionsQuery,
   useGetDbConnectionStatsQuery,
@@ -8,12 +8,13 @@ import {
   useRemoveDbConnectionMutation,
 } from "@/app/store";
 import { confirmDelete, errMessage, notify } from "@/shared/lib/notify";
-import type { PageTabItem } from "@/shared/ui/PageTabs";
 import type { DbConnection } from "@/shared/types";
 import type { WorkersAiTrendCardHandle } from "./components/database/WorkersAiTrendCard";
 
 export const PRIMARY_TAB = "primary";
 export const AI_TAB = "ai";
+
+export type DatabaseTab = { id: string; label: string; icon: LucideIcon };
 
 const NO_CONNECTIONS: DbConnection[] = [];
 
@@ -30,7 +31,7 @@ export function useDatabaseTabs() {
   const connectionStats = useGetDbConnectionStatsQuery(connection?.id ?? skipToken);
 
   const primaryName = primary.data?.name;
-  const tabs = useMemo<PageTabItem<string>[]>(
+  const tabs = useMemo<DatabaseTab[]>(
     () => [
       { id: PRIMARY_TAB, label: primaryName ?? "Primary", icon: Database },
       ...connections.map((c) => ({ id: c.id, label: c.label, icon: Database })),
