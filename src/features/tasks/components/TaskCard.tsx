@@ -1,10 +1,11 @@
 import { Tooltip, UnstyledButton } from "@mantine/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CheckSquare, Link2, NotebookText, UserPlus } from "lucide-react";
+import { CheckSquare, Link2, UserPlus } from "lucide-react";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
 import type { Task } from "../types";
+import { dueLabel, dueState, PRIORITY_LABEL, STATUS_LABEL, taskKey } from "../lib/board";
 import { DueChip, LabelPill, PriorityIcon, ProgressButton, ProgressGlyph } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
@@ -20,12 +21,19 @@ type CardProps = {
 
 export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }: CardProps) {
   const checked = task.checklist.filter((c) => c.done).length;
-  const hasMeta =
-    task.status === "doing" || task.priority !== "none" || Boolean(task.notes) || Boolean(task.link) || task.checklist.length > 0;
+  const state = dueState(task.dueDate, task.status);
+  const hasMeta = task.priority !== "none" || Boolean(task.link) || task.checklist.length > 0;
 
   return (
     <>
       <div className={classes.cardBody}>
+        <div className={classes.cardEyebrow}>
+          <span className={classes.key}>{taskKey(task.key)}</span>
+          <span className={classes.statusBadge} data-status={task.status}>
+            <ProgressGlyph status={task.status} size={14} />
+            {STATUS_LABEL[task.status]}
+          </span>
+        </div>
         {task.labels.length > 0 && (
           <div className={classes.labels}>
             {task.labels.map((l) => (
@@ -39,6 +47,7 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
             <span className={classes.cardTitle}>{task.title}</span>
           </UnstyledButton>
         </div>
+        {task.notes && <p className={classes.cardNotes}>{task.notes}</p>}
         {task.checklistOnCard && task.checklist.length > 0 && (
           <div className={classes.cardChecklist}>
             {task.checklist.slice(0, CARD_CHECK_ITEMS).map((item) => (
@@ -53,25 +62,18 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
         )}
         {hasMeta && (
           <div className={classes.cardIcons}>
-            {task.status === "doing" && (
-              <Tooltip label="In progress" withArrow>
-                <span className={classes.progress} data-status="doing">
-                  <ProgressGlyph status="doing" size={15} />
-                </span>
-              </Tooltip>
-            )}
-            <PriorityIcon priority={task.priority} />
-            {task.notes && (
-              <Tooltip label="Has notes" withArrow>
-                <span className={classes.meta}>
-                  <NotebookText size={14} />
-                </span>
-              </Tooltip>
+            {task.priority !== "none" && (
+              <span className={classes.cardPriority} data-level={task.priority}>
+                <PriorityIcon priority={task.priority} />
+                {PRIORITY_LABEL[task.priority]}
+              </span>
             )}
             {task.link && (
-              <span className={classes.meta}>
-                <Link2 size={14} />
-              </span>
+              <Tooltip label="Has link" withArrow>
+                <span className={classes.meta}>
+                  <Link2 size={14} />
+                </span>
+              </Tooltip>
             )}
             {task.checklist.length > 0 && (
               <span className={classes.meta}>
@@ -83,7 +85,19 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
         )}
       </div>
       <div className={classes.cardFoot}>
-        {task.dueDate && <DueChip dueDate={task.dueDate} status={task.status} />}
+        {task.dueDate && (
+          <DueChip
+            dueDate={task.dueDate}
+            status={task.status}
+            label={
+            state === "overdue"
+              ? `Overdue · ${dueLabel(task.dueDate, state)}`
+              : state === "soon"
+                ? `Due ${dueLabel(task.dueDate, state)}`
+                : undefined
+            }
+          />
+        )}
         <span className={classes.footEnd}>
           {assignees.length ? (
             <span className={classes.assigneeAvatars}>

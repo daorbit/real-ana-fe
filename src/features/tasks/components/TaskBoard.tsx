@@ -12,6 +12,7 @@ import {
   type UniqueIdentifier,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import { MoveHorizontal } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { buildColumns, columnKeyOf, groupTasks, MULTIPLE_ASSIGNEES, orderAt, topOf } from "../lib/board";
 import type { Bucket, GroupBy, Task, TaskPatch } from "../types";
@@ -146,7 +147,11 @@ export function TaskBoard({
         setItems(null);
       }}
     >
-      <div className={classes.boardScroll}>
+      <div className={classes.boardHint}>
+        <MoveHorizontal size={14} />
+        Swipe to browse columns
+      </div>
+      <div className={classes.boardScroll} role="region" aria-label="Task board columns" tabIndex={0}>
         <div className={classes.board}>
           {columns.map((column) => (
             <BoardColumn

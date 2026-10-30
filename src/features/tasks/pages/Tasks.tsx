@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { Button } from "@mantine/core";
-import { Plus } from "lucide-react";
+import { ListTodo, Plus, SearchX } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { usePermissions, useWorkspace } from "@/features/workspace/context";
@@ -74,6 +75,15 @@ export default function Tasks() {
       return next;
     });
 
+  const clearFilters = () => {
+    setQuery("");
+    setPeople(new Set());
+    setMyTasksOnly(false);
+    setDueFilter("all");
+  };
+
+  const filtersActive = Boolean(query.trim() || people.size || myTasksOnly || dueFilter !== "all");
+
   const topOfStatus = (status: Task["status"]) => topOf(groupTasks(tasks, "progress", buckets).get(status) ?? NO_TASKS);
 
   const withOrder = (task: Task, patch: TaskPatch): TaskPatch =>
@@ -111,6 +121,14 @@ export default function Tasks() {
             members={members}
             people={people}
             onTogglePerson={togglePerson}
+            onRemovePerson={(id) =>
+              setPeople((currentPeople) => {
+                const next = new Set(currentPeople);
+                next.delete(id);
+                return next;
+              })
+            }
+            onClearFilters={clearFilters}
             userId={taskUserId}
             myTasksOnly={myTasksOnly}
             onMyTasks={() => setMyTasksOnly((value) => !value)}
@@ -122,7 +140,28 @@ export default function Tasks() {
             onView={setView}
             usage={actions.usage}
           />
-          {view === "board" ? (
+          {visible.length === 0 ? (
+            <EmptyState
+              compact
+              minHeight="35vh"
+              icon={tasks.length ? SearchX : ListTodo}
+              title={tasks.length ? "No tasks match these filters" : "No tasks yet"}
+              description={
+                tasks.length
+                  ? "Try changing your search or removing a filter to see more tasks."
+                  : canEdit
+                    ? "Add a task to start planning the team's work here."
+                    : "Tasks added to this workspace will appear here."
+              }
+              action={
+                tasks.length && filtersActive
+                  ? { label: "Clear filters", onClick: clearFilters }
+                  : !tasks.length && canEdit
+                    ? { label: "Add task", onClick: () => setDialog({ open: true, id: null, defaults: NO_DEFAULTS }), icon: Plus }
+                    : undefined
+              }
+            />
+          ) : view === "board" ? (
             <TaskBoard
               tasks={visible}
               allTasks={tasks}

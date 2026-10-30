@@ -9,6 +9,7 @@ import {
   Search,
   Table2,
   UserRoundCheck,
+  X,
 } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { GROUP_LABEL } from "../lib/board";
@@ -36,6 +37,8 @@ export function TasksToolbar({
   members,
   people,
   onTogglePerson,
+  onRemovePerson,
+  onClearFilters,
   userId,
   myTasksOnly,
   onMyTasks,
@@ -52,6 +55,8 @@ export function TasksToolbar({
   members: WorkspaceMember[];
   people: Set<string>;
   onTogglePerson: (id: string) => void;
+  onRemovePerson: (id: string) => void;
+  onClearFilters: () => void;
   userId: string | null;
   myTasksOnly: boolean;
   onMyTasks: () => void;
@@ -63,6 +68,8 @@ export function TasksToolbar({
   onView: (value: BoardView) => void;
   usage: string | null;
 }) {
+  const filtersActive = Boolean(query.trim() || people.size || myTasksOnly || dueFilter !== "all");
+
   return (
     <div className={classes.toolbar}>
       <TextInput
@@ -144,6 +151,58 @@ export function TasksToolbar({
           </UnstyledButton>
         ))}
       </Group>
+      {filtersActive && (
+        <div className={classes.activeFilters} aria-label="Active task filters">
+          <span className={classes.activeFiltersLabel}>Showing</span>
+          {query.trim() && (
+            <UnstyledButton
+              className={classes.filterChip}
+              title={query.trim()}
+              aria-label={`Remove search filter: ${query.trim()}`}
+              onClick={() => onQuery("")}
+            >
+              <span className={classes.filterChipText}>Search: {query.trim()}</span>
+              <X size={13} />
+            </UnstyledButton>
+          )}
+          {[...people].map((id) => {
+            const member = members.find((item) => item.userId === id);
+            const label = id === "__none" ? "Unassigned" : member?.name || member?.email || "Former member";
+            return (
+              <UnstyledButton
+                key={id}
+                className={classes.filterChip}
+                aria-label={`Remove ${label} filter`}
+                onClick={() => onRemovePerson(id)}
+              >
+                <span className={classes.filterChipText}>{label}</span>
+                <X size={13} />
+              </UnstyledButton>
+            );
+          })}
+          {myTasksOnly && (
+            <UnstyledButton className={classes.filterChip} onClick={onMyTasks} aria-label="Remove My tasks filter">
+              <span className={classes.filterChipText}>My tasks</span>
+              <X size={13} />
+            </UnstyledButton>
+          )}
+          {dueFilter !== "all" && (
+            <UnstyledButton
+              className={classes.filterChip}
+              onClick={() => onDueFilter("all")}
+              aria-label={`Remove ${DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "due date"} filter`}
+            >
+              <span className={classes.filterChipText}>
+                {DUE_FILTERS.find((item) => item.value === dueFilter)?.label}
+              </span>
+              <X size={13} />
+            </UnstyledButton>
+          )}
+          <UnstyledButton className={classes.clearFilters} onClick={onClearFilters}>
+            Clear all
+          </UnstyledButton>
+        </div>
+      )}
     </div>
   );
 }

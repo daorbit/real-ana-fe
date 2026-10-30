@@ -69,12 +69,12 @@ export function LabelPill({ label, onRemove }: { label: TaskLabel; onRemove?: ()
   );
 }
 
-export function DueChip({ dueDate, status }: { dueDate: string; status: TaskStatus }) {
+export function DueChip({ dueDate, status, label }: { dueDate: string; status: TaskStatus; label?: string }) {
   const state = dueState(dueDate, status);
   return (
     <span className={classes.due} data-state={status === "done" ? "done" : state ?? undefined}>
       <CalendarDays size={12} />
-      {dueLabel(dueDate, state)}
+      {label ?? dueLabel(dueDate, state)}
     </span>
   );
 }
