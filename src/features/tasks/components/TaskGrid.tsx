@@ -2,6 +2,7 @@ import { Table } from "@mantine/core";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
 import { bucketKeyOf, PRIORITY_LABEL, PRIORITY_ORDER, STATUS_ORDER, taskKey } from "../lib/board";
+import { shortDate } from "../lib/dates";
 import type { Bucket, Task } from "../types";
 import { DueChip, LabelPill, PriorityIcon, ProgressButton, StatusText } from "./TaskBits";
 import classes from "./Tasks.module.css";
@@ -40,6 +41,7 @@ export function TaskGrid({
             <Table.Th>Assigned to</Table.Th>
             <Table.Th>Progress</Table.Th>
             <Table.Th>Priority</Table.Th>
+            <Table.Th>Start date</Table.Th>
             <Table.Th>Due date</Table.Th>
             <Table.Th>Labels</Table.Th>
           </Table.Tr>
@@ -84,6 +86,7 @@ export function TaskGrid({
                     {PRIORITY_LABEL[task.priority]}
                   </span>
                 </Table.Td>
+                <Table.Td>{task.startDate ? <span className={classes.usage}>{shortDate(task.startDate)}</span> : null}</Table.Td>
                 <Table.Td>{task.dueDate ? <DueChip dueDate={task.dueDate} status={task.status} /> : null}</Table.Td>
                 <Table.Td>
                   <span className={classes.rowLabels}>

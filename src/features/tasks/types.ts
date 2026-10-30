@@ -17,7 +17,10 @@ export type Task = {
   status: TaskStatus;
   priority: TaskPriority;
   assigneeIds: string[];
+  startDate: string | null;
   dueDate: string | null;
+  parentId: string | null;
+  blockedBy: string[];
   order: number;
   link: string;
   labels: TaskLabel[];
@@ -30,15 +33,34 @@ export type Task = {
 };
 
 export type TaskPatch = Partial<
-  Pick<Task, "title" | "notes" | "status" | "priority" | "assigneeIds" | "dueDate" | "order" | "link" | "labels" | "checklist" | "checklistOnCard" | "bucketId">
+  Pick<
+    Task,
+    | "title"
+    | "notes"
+    | "status"
+    | "priority"
+    | "assigneeIds"
+    | "startDate"
+    | "dueDate"
+    | "parentId"
+    | "blockedBy"
+    | "order"
+    | "link"
+    | "labels"
+    | "checklist"
+    | "checklistOnCard"
+    | "bucketId"
+  >
 >;
 
 export type GroupBy = "bucket" | "progress" | "assignee" | "priority";
 
 export type DueFilter = "all" | "overdue" | "soon";
 
-export type Bucket = { id: string; name: string; order: number };
+export type Bucket = { id: string; name: string; order: number; limit: number | null };
+
+export type BucketUpdate = { name?: string; limit?: number | null };
 
 export type TasksResponse = { buckets: Bucket[]; tasks: Task[] };
 
-export type BoardView = "board" | "grid" | "charts";
+export type BoardView = "board" | "grid" | "calendar" | "timeline" | "mine" | "charts";

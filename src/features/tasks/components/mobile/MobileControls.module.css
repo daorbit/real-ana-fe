@@ -1,0 +1,49 @@
+.row {
+  display: none;
+}
+
+.control {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.unassigned {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px dashed var(--border-hover);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+}
+
+.clear {
+  justify-content: center;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+@media (max-width: 48em) {
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+}

@@ -1,10 +1,10 @@
 import { notify, notifyError, confirmDelete } from "@/shared/lib/notify";
-import { useCreateBucketMutation, useDeleteBucketMutation, useRenameBucketMutation } from "../api";
+import { useCreateBucketMutation, useDeleteBucketMutation, useUpdateBucketMutation } from "../api";
 import type { Bucket } from "../types";
 
 export function useBucketActions(workspaceId: string, buckets: Bucket[], demo: boolean) {
   const [createBucket, { isLoading: adding }] = useCreateBucketMutation();
-  const [renameBucket] = useRenameBucketMutation();
+  const [updateBucket] = useUpdateBucketMutation();
   const [deleteBucket] = useDeleteBucketMutation();
   const blocked = () => notify.error("Turn off demo data to make changes.");
 
@@ -25,9 +25,18 @@ export function useBucketActions(workspaceId: string, buckets: Bucket[], demo: b
   const rename = async (bucket: Bucket, name: string) => {
     if (demo) return blocked();
     try {
-      await renameBucket({ workspaceId, id: bucket.id, name }).unwrap();
+      await updateBucket({ workspaceId, id: bucket.id, update: { name } }).unwrap();
     } catch (e) {
       notifyError(e, "Could not rename the bucket");
+    }
+  };
+
+  const setLimit = async (bucket: Bucket, limit: number | null) => {
+    if (demo) return blocked();
+    try {
+      await updateBucket({ workspaceId, id: bucket.id, update: { limit } }).unwrap();
+    } catch (e) {
+      notifyError(e, "Could not set the limit");
     }
   };
 
@@ -49,5 +58,5 @@ export function useBucketActions(workspaceId: string, buckets: Bucket[], demo: b
     });
   };
 
-  return { add, adding, rename, remove };
+  return { add, adding, rename, setLimit, remove };
 }

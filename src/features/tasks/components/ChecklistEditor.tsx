@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { ActionIcon, Checkbox, TextInput, UnstyledButton } from "@mantine/core";
-import { X } from "lucide-react";
+import { ActionIcon, Checkbox, Tooltip, UnstyledButton } from "@mantine/core";
+import { ListTree, X } from "lucide-react";
 import { newCheckId } from "../lib/labels";
 import type { CheckItem } from "../types";
+import { AddItemRow } from "./AddItemRow";
 import { ProgressGlyph } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
@@ -14,21 +14,21 @@ export function ChecklistEditor({
   readOnly,
   onChange,
   onCardChange,
+  onMakeSubtask,
 }: {
   items: CheckItem[];
   onCard: boolean;
   readOnly: boolean;
   onChange: (items: CheckItem[]) => void;
   onCardChange: (value: boolean) => void;
+  onMakeSubtask?: (item: CheckItem) => void;
 }) {
-  const [text, setText] = useState("");
   const done = items.filter((i) => i.done).length;
 
-  const add = () => {
-    const value = text.trim();
-    if (!value || items.length >= MAX_ITEMS) return;
-    onChange([...items, { id: newCheckId(), text: value, done: false }]);
-    setText("");
+  const add = (text: string) => {
+    if (items.length >= MAX_ITEMS) return false;
+    onChange([...items, { id: newCheckId(), text, done: false }]);
+    return true;
   };
 
   return (
@@ -65,6 +65,20 @@ export function ChecklistEditor({
             <span className={classes.checkText} data-done={item.done || undefined}>
               {item.text}
             </span>
+            {!readOnly && onMakeSubtask && !item.done && (
+              <Tooltip label="Make it a subtask" withArrow>
+                <ActionIcon
+                  className={classes.checkRemove}
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  onClick={() => onMakeSubtask(item)}
+                  aria-label={`Make “${item.text}” a subtask`}
+                >
+                  <ListTree size={14} />
+                </ActionIcon>
+              </Tooltip>
+            )}
             {!readOnly && (
               <ActionIcon
                 className={classes.checkRemove}
@@ -80,23 +94,11 @@ export function ChecklistEditor({
           </div>
         ))}
         {!readOnly && items.length < MAX_ITEMS && (
-          <div className={classes.checkItem}>
-            <span className={classes.progress} data-status="todo">
-              <ProgressGlyph status="todo" size={18} />
-            </span>
-            <TextInput
-              className={classes.checkAdd}
-              classNames={{ input: classes.bareInput }}
-              variant="unstyled"
-              placeholder={items.length ? "Add an item" : "Add steps to complete this task. Mark them done as you go."}
-              maxLength={200}
-              value={text}
-              onChange={(e) => setText(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === "Enter" && add()}
-              onBlur={add}
-              aria-label="Add a checklist item"
-            />
-          </div>
+          <AddItemRow
+            placeholder={items.length ? "Add an item" : "Add steps to complete this task. Mark them done as you go."}
+            ariaLabel="Add a checklist item"
+            onAdd={add}
+          />
         )}
       </div>
     </section>

@@ -891,7 +891,10 @@
 
 .checklist .checkAdd .bareInput,
 .checklist .checkAdd .bareInput:focus,
-.checklist .checkAdd .bareInput:focus-within {
+.checklist .checkAdd .bareInput:focus-within,
+.checklist .taskPicker .bareInput,
+.checklist .taskPicker .bareInput:focus,
+.checklist .taskPicker .bareInput:focus-within {
   min-height: 0;
   height: 38px;
   padding: 0;
@@ -1097,8 +1100,164 @@
   border-color: var(--text);
 }
 
+.limit {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.limit[data-state="near"] {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.limit[data-state="over"] {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.allClear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 8px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--green);
+}
+
+.cardParent {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  margin-bottom: -4px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.cardParentTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blocked {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.parentCrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding-left: 36px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  transition: color var(--duration-fast) ease;
+}
+
+.parentCrumb:hover {
+  color: var(--accent-text);
+}
+
+.relatedOpen {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  text-align: left;
+}
+
+.relatedOpen .checkText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relatedOpen:hover .checkText {
+  color: var(--accent-text);
+}
+
+.taskPicker {
+  flex: 1;
+  min-width: 0;
+}
+
+.checklist .taskPicker .bareInput,
+.checklist .taskPicker .bareInput:focus,
+.checklist .taskPicker .bareInput:focus-within {
+  padding-inline-end: 28px;
+  text-overflow: ellipsis;
+}
+
+.pickerIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+}
+
+.sectionHint {
+  padding: 8px 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.dependencies {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.dependencies .propLabel {
+  padding: 0 4px 4px;
+}
+
+
+@media (hover: none) {
+  .checkRemove,
+  .columnMenu {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 90em) {
+  .viewLabel {
+    display: none;
+  }
+
+  .viewIcon {
+    margin-right: 0;
+  }
+}
 
 @media (max-width: 48em) {
+
+  .dependencies {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .parentCrumb {
+    padding-left: 0;
+  }
+
   .toolbar {
     flex-direction: column;
     flex-wrap: nowrap;
@@ -1119,52 +1278,44 @@
     min-width: 0;
   }
 
-  .filterRow {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-inline: calc(var(--m-gutter) * -1);
-    padding: 2px var(--m-gutter);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
+  .search .searchInput {
+    height: 40px;
+    border-radius: 12px;
+    font-size: 15px;
   }
 
-  .filterRow::-webkit-scrollbar {
-    display: none;
-  }
-
-  .filterRow > * {
-    flex-shrink: 0;
-  }
-
-  .groupBy {
-    order: 0;
-  }
-
+  .filterRow,
   .spacer,
-  .usage {
-    display: none;
-  }
-
+  .usage,
   .views {
-    order: 0;
-    width: 100%;
-  }
-
-  .views > * {
-    flex: 1;
+    display: none;
   }
 
   .activeFilters {
+    flex-wrap: nowrap;
     order: 0;
     gap: 6px;
-    margin-top: 0;
+    margin: 0 calc(var(--m-gutter) * -1);
+    padding: 0 var(--m-gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .activeFilters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .activeFilters > * {
+    flex-shrink: 0;
+  }
+
+  .activeFiltersLabel {
+    display: none;
   }
 
   .columnPicker {
     display: block;
-    margin: 0 calc(var(--m-gutter) * -1) 14px;
+    margin: 4px calc(var(--m-gutter) * -1) 12px;
   }
 
   .columnPicker > * {
@@ -1196,12 +1347,31 @@
     display: none;
   }
 
-  .columnTitle {
-    font-size: 20px;
+  .columnMenu {
+    margin-left: 0;
+    opacity: 1;
   }
 
-  .columnMenu {
-    opacity: 1;
+  .columnBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+  }
+
+  .columnBar .addTask {
+    flex: 1;
+    width: auto;
+  }
+
+  .columnBar .bucketInput,
+  .columnBar .createBox {
+    flex: 1 0 100%;
+  }
+
+  .columnBar:has(.createBox) > :not(.createBox) {
+    display: none;
   }
 
   .cards {

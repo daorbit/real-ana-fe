@@ -6,9 +6,20 @@ import type { Bucket, Task } from "../../types";
 import { ChartCard, SeriesLegend } from "./ChartParts";
 import { StackedBars } from "./StackedBars";
 import { StatusDonut } from "./StatusDonut";
+import { ShippedRecap } from "../recap/ShippedRecap";
 import classes from "./Charts.module.css";
 
-export function TaskCharts({ tasks, buckets, members }: { tasks: Task[]; buckets: Bucket[]; members: WorkspaceMember[] }) {
+export function TaskCharts({
+  tasks,
+  buckets,
+  members,
+  memberMap,
+}: {
+  tasks: Task[];
+  buckets: Bucket[];
+  members: WorkspaceMember[];
+  memberMap: Map<string, WorkspaceMember>;
+}) {
   const counts = useMemo(() => countStates(tasks), [tasks]);
 
   const byPriority = useMemo(
@@ -31,6 +42,9 @@ export function TaskCharts({ tasks, buckets, members }: { tasks: Task[]; buckets
 
   return (
     <div className={classes.grid}>
+      <ChartCard title="This week" wide>
+        <ShippedRecap tasks={tasks} memberMap={memberMap} />
+      </ChartCard>
       <ChartCard title="Status">
         <StatusDonut counts={counts} />
         <SeriesLegend counts={counts} />

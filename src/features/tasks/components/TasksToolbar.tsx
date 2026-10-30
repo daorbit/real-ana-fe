@@ -1,36 +1,15 @@
-import { ActionIcon, Button, Group, Menu, TextInput, UnstyledButton } from "@mantine/core";
-import {
-  CalendarClock,
-  ChartPie,
-  Check,
-  ChevronDown,
-  Columns3,
-  Plus,
-  Rows3,
-  Search,
-  Table2,
-  UserRoundCheck,
-  X,
-} from "lucide-react";
+import { ActionIcon, Button, Group, Menu, TextInput, Tooltip, UnstyledButton } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { CalendarClock, Check, ChevronDown, Plus, Rows3, Search, UserRoundCheck, X } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { GROUP_LABEL } from "../lib/board";
 import type { BoardView, DueFilter, GroupBy } from "../types";
 import { PeopleFilter } from "./PeopleFilter";
+import { DUE_FILTERS, dueFilterLabel, GROUPS, VIEWS } from "./toolbarOptions";
+import { MobileFilterSheet } from "./mobile/MobileFilterSheet";
+import { MobileViewMenu } from "./mobile/MobileViewMenu";
+import mobileClasses from "./mobile/MobileControls.module.css";
 import classes from "./Tasks.module.css";
-
-const GROUPS: GroupBy[] = ["bucket", "progress", "assignee", "priority"];
-
-const DUE_FILTERS: { value: DueFilter; label: string }[] = [
-  { value: "all", label: "Any due date" },
-  { value: "overdue", label: "Overdue" },
-  { value: "soon", label: "Due soon" },
-];
-
-const VIEWS: { value: BoardView; label: string; icon: typeof Columns3 }[] = [
-  { value: "board", label: "Board", icon: Columns3 },
-  { value: "grid", label: "Grid", icon: Table2 },
-  { value: "charts", label: "Charts", icon: ChartPie },
-];
 
 export function TasksToolbar({
   query,
@@ -72,12 +51,14 @@ export function TasksToolbar({
   onAdd?: () => void;
 }) {
   const filtersActive = Boolean(query.trim() || people.size || myTasksOnly || dueFilter !== "all");
+  const wideViews = useMediaQuery("(min-width: 90em)") ?? false;
 
   return (
     <div className={classes.toolbar}>
       <div className={classes.searchRow}>
         <TextInput
           className={classes.search}
+          classNames={{ input: classes.searchInput }}
           size="sm"
           leftSection={<Search size={15} />}
           placeholder="Search tasks or T-12"
@@ -86,11 +67,30 @@ export function TasksToolbar({
           aria-label="Search tasks"
         />
         {onAdd && (
-          <ActionIcon hiddenFrom="sm" size={36} radius="xl" onClick={onAdd} aria-label="Add task">
-            <Plus size={18} />
+          <ActionIcon hiddenFrom="sm" size={40} radius="xl" onClick={onAdd} aria-label="Add task">
+            <Plus size={20} />
           </ActionIcon>
         )}
       </div>
+
+      <div className={mobileClasses.row}>
+        <MobileViewMenu view={view} onView={onView} />
+        <MobileFilterSheet
+          view={view}
+          members={members}
+          people={people}
+          onTogglePerson={onTogglePerson}
+          userId={userId}
+          myTasksOnly={myTasksOnly}
+          onMyTasks={onMyTasks}
+          dueFilter={dueFilter}
+          onDueFilter={onDueFilter}
+          groupBy={groupBy}
+          onGroupBy={onGroupBy}
+          onClearFilters={onClearFilters}
+        />
+      </div>
+
       <div className={classes.filterRow}>
         <PeopleFilter members={members} selected={people} onToggle={onTogglePerson} />
         <Button
@@ -110,11 +110,9 @@ export function TasksToolbar({
               size="sm"
               leftSection={<CalendarClock size={15} />}
               rightSection={<ChevronDown size={14} />}
-              aria-label={`Due date filter: ${
-                DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "Any due date"
-              }`}
+              aria-label={`Due date filter: ${dueFilterLabel(dueFilter)}`}
             >
-              {DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "Any due date"}
+              {dueFilterLabel(dueFilter)}
             </Button>
           </Menu.Target>
           <Menu.Dropdown>
@@ -156,17 +154,19 @@ export function TasksToolbar({
       {usage && <span className={classes.usage}>{usage} open tasks</span>}
       <Group gap={2} wrap="nowrap" className={`range-segmented ${classes.views}`} role="tablist" aria-label="View">
         {VIEWS.map(({ value, label, icon: Icon }) => (
-          <UnstyledButton
-            key={value}
-            role="tab"
-            aria-selected={view === value}
-            className="range-seg-btn"
-            data-active={view === value}
-            onClick={() => onView(value)}
-          >
-            <Icon size={14} className={classes.viewIcon} />
-            {label}
-          </UnstyledButton>
+          <Tooltip key={value} label={label} withArrow disabled={wideViews}>
+            <UnstyledButton
+              role="tab"
+              aria-selected={view === value}
+              className="range-seg-btn"
+              data-active={view === value}
+              onClick={() => onView(value)}
+              aria-label={label}
+            >
+              <Icon size={14} className={classes.viewIcon} />
+              <span className={classes.viewLabel}>{label}</span>
+            </UnstyledButton>
+          </Tooltip>
         ))}
       </Group>
       {filtersActive && (
@@ -208,11 +208,9 @@ export function TasksToolbar({
             <UnstyledButton
               className={classes.filterChip}
               onClick={() => onDueFilter("all")}
-              aria-label={`Remove ${DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "due date"} filter`}
+              aria-label={`Remove ${dueFilterLabel(dueFilter)} filter`}
             >
-              <span className={classes.filterChipText}>
-                {DUE_FILTERS.find((item) => item.value === dueFilter)?.label}
-              </span>
+              <span className={classes.filterChipText}>{dueFilterLabel(dueFilter)}</span>
               <X size={13} />
             </UnstyledButton>
           )}

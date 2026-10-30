@@ -2,7 +2,7 @@ import { useState } from "react";
 import { UnstyledButton } from "@mantine/core";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { ChevronRight } from "lucide-react";
+import { CalendarCheck, ChevronRight } from "lucide-react";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
 import { MULTIPLE_ASSIGNEES, type BoardColumn as Column } from "../lib/board";
@@ -16,6 +16,7 @@ import classes from "./Tasks.module.css";
 export function BoardColumn({
   column,
   ids,
+  openTotal,
   taskMap,
   splitCompleted,
   members,
@@ -26,10 +27,13 @@ export function BoardColumn({
   onOpen,
   onToggleDone,
   onRenameBucket,
+  onSetBucketLimit,
   onDeleteBucket,
+  compact = false,
 }: {
   column: Column;
   ids: string[];
+  openTotal: number;
   taskMap: Map<string, Task>;
   splitCompleted: boolean;
   members: Map<string, WorkspaceMember>;
@@ -40,7 +44,9 @@ export function BoardColumn({
   onOpen: (task: Task) => void;
   onToggleDone: (task: Task) => void;
   onRenameBucket: (name: string) => void;
+  onSetBucketLimit: (limit: number | null) => void;
   onDeleteBucket: () => void;
+  compact?: boolean;
 }) {
   const [showCompleted, setShowCompleted] = useState(false);
   const { setNodeRef, isOver } = useDroppable({ id: column.key });
@@ -61,37 +67,60 @@ export function BoardColumn({
     />
   );
 
+  const bucketHeader = column.bucket && (
+    <BucketHeader
+      name={column.title}
+      count={open.length}
+      total={openTotal}
+      limit={column.bucket.limit}
+      compact={compact}
+      canEdit={canEdit}
+      canDelete={canDeleteBucket}
+      onRename={onRenameBucket}
+      onSetLimit={onSetBucketLimit}
+      onDelete={onDeleteBucket}
+    />
+  );
+  const create = canEdit && column.key !== MULTIPLE_ASSIGNEES && <InlineCreate busy={creating} onCreate={onCreate} />;
+
   return (
     <section ref={setNodeRef} className={classes.column} data-over={isOver || undefined} aria-label={column.title}>
-      <header className={classes.columnHead}>
-        {column.member && <UserAvatar src={column.member.avatarUrl} name={column.title} size={22} radius="xl" />}
-        {column.status && (
-          <span className={classes.progress} data-status={column.status}>
-            <ProgressGlyph status={column.status} size={16} />
-          </span>
-        )}
-        {column.priority && <PriorityIcon priority={column.priority} />}
-        {column.bucket ? (
-          <BucketHeader
-            name={column.title}
-            count={open.length}
-            canEdit={canEdit}
-            canDelete={canDeleteBucket}
-            onRename={onRenameBucket}
-            onDelete={onDeleteBucket}
-          />
-        ) : (
-          <span className={classes.columnTitle}>
-            {column.title} ({open.length})
-          </span>
-        )}
-      </header>
-
-      {canEdit && column.key !== MULTIPLE_ASSIGNEES && <InlineCreate busy={creating} onCreate={onCreate} />}
+      {compact ? (
+        (create || bucketHeader) && (
+          <div className={classes.columnBar}>
+            {create}
+            {bucketHeader}
+          </div>
+        )
+      ) : (
+        <>
+          <header className={classes.columnHead}>
+            {column.member && <UserAvatar src={column.member.avatarUrl} name={column.title} size={22} radius="xl" />}
+            {column.status && (
+              <span className={classes.progress} data-status={column.status}>
+                <ProgressGlyph status={column.status} size={16} />
+              </span>
+            )}
+            {column.priority && <PriorityIcon priority={column.priority} />}
+            {bucketHeader || (
+              <span className={classes.columnTitle}>
+                {column.title} ({open.length})
+              </span>
+            )}
+          </header>
+          {create}
+        </>
+      )}
 
       <SortableContext items={visible.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div className={classes.cards}>
-          {visible.length === 0 && (
+          {open.length === 0 && completed.length > 0 && !showCompleted && (
+            <div className={classes.allClear}>
+              <CalendarCheck size={16} />
+              All clear. Nice work.
+            </div>
+          )}
+          {visible.length === 0 && completed.length === 0 && (
             <div className={classes.empty}>
               {canEdit && column.key !== MULTIPLE_ASSIGNEES ? "Drag tasks here" : "No tasks"}
             </div>

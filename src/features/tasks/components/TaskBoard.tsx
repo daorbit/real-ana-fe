@@ -42,6 +42,7 @@ export function TaskBoard({
   onToggleDone,
   onAddBucket,
   onRenameBucket,
+  onSetBucketLimit,
   onDeleteBucket,
 }: {
   tasks: Task[];
@@ -59,11 +60,21 @@ export function TaskBoard({
   onToggleDone: (task: Task) => void;
   onAddBucket: (name: string) => Promise<boolean>;
   onRenameBucket: (bucket: Bucket, name: string) => void;
+  onSetBucketLimit: (bucket: Bucket, limit: number | null) => void;
   onDeleteBucket: (bucket: Bucket) => void;
 }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const columns = useMemo(() => buildColumns(allTasks, groupBy, members, buckets), [allTasks, groupBy, members, buckets]);
   const taskMap = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
+  const openTotals = useMemo(() => {
+    const totals = new Map<string, number>();
+    for (const task of allTasks) {
+      if (task.status === "done") continue;
+      const key = columnKeyOf(task, groupBy, buckets);
+      totals.set(key, (totals.get(key) ?? 0) + 1);
+    }
+    return totals;
+  }, [allTasks, groupBy, buckets]);
   const base = useMemo<Items>(() => {
     const groups = groupTasks(tasks, groupBy, buckets);
     return Object.fromEntries(columns.map((c) => [c.key, (groups.get(c.key) ?? []).map((t) => t.id)]));
@@ -170,6 +181,8 @@ export function TaskBoard({
               key={column.key}
               column={column}
               ids={live[column.key] ?? []}
+              openTotal={openTotals.get(column.key) ?? 0}
+              compact={mobile}
               taskMap={taskMap}
               splitCompleted={splitCompleted}
               members={memberMap}
@@ -182,6 +195,7 @@ export function TaskBoard({
               onOpen={open}
               onToggleDone={onToggleDone}
               onRenameBucket={(name) => column.bucket && onRenameBucket(column.bucket, name)}
+              onSetBucketLimit={(limit) => column.bucket && onSetBucketLimit(column.bucket, limit)}
               onDeleteBucket={() => column.bucket && onDeleteBucket(column.bucket)}
             />
           ))}

@@ -8,7 +8,10 @@ export type TaskForm = {
   status: TaskStatus;
   priority: TaskPriority;
   assigneeIds: string[];
+  start: string;
   due: string;
+  parentId: string | null;
+  blockedBy: string[];
   link: string;
   labels: TaskLabel[];
   checklist: CheckItem[];
@@ -22,7 +25,10 @@ const BLANK: TaskForm = {
   status: "todo",
   priority: "medium",
   assigneeIds: [],
+  start: "",
   due: "",
+  parentId: null,
+  blockedBy: [],
   link: "",
   labels: [],
   checklist: [],
@@ -38,7 +44,10 @@ function formOf(task: Task | null, defaults: Partial<TaskForm>): TaskForm {
     status: task.status,
     priority: task.priority,
     assigneeIds: task.assigneeIds,
+    start: toDateField(task.startDate),
     due: toDateField(task.dueDate),
+    parentId: task.parentId,
+    blockedBy: task.blockedBy,
     link: task.link,
     labels: task.labels,
     checklist: task.checklist,
@@ -48,9 +57,11 @@ function formOf(task: Task | null, defaults: Partial<TaskForm>): TaskForm {
 }
 
 export function toPatch(form: Partial<TaskForm>): TaskPatch {
-  const { due, bucketId, ...rest } = form;
+  const { due, start, bucketId, ...rest } = form;
   const patch: TaskPatch = bucketId ? { ...rest, bucketId } : rest;
-  return due === undefined ? patch : { ...patch, dueDate: fromDateField(due) };
+  if (start !== undefined) patch.startDate = fromDateField(start);
+  if (due !== undefined) patch.dueDate = fromDateField(due);
+  return patch;
 }
 
 type TextKey = "title" | "notes" | "link";
@@ -66,6 +77,10 @@ export function useTaskEditor(
   useEffect(() => {
     if (opened) setForm(formOf(task, defaults));
   }, [opened, task?.id]);
+
+  useEffect(() => {
+    if (task) setForm((f) => ({ ...f, blockedBy: task.blockedBy, parentId: task.parentId, status: task.status }));
+  }, [task?.blockedBy, task?.parentId, task?.status]);
 
   const change = (patch: Partial<TaskForm>) => {
     setForm((f) => ({ ...f, ...patch }));

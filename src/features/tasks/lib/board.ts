@@ -1,4 +1,5 @@
 import type { WorkspaceMember } from "@/shared/types";
+import { shortDate } from "./dates";
 import type { Bucket, DueFilter, GroupBy, Task, TaskPatch, TaskPriority, TaskStatus } from "../types";
 
 export const STATUS_ORDER: TaskStatus[] = ["todo", "doing", "done"];
@@ -162,5 +163,5 @@ export function dueState(dueDate: string | null, status: TaskStatus): DueState |
 
 export function dueLabel(dueDate: string, state: DueState | null): string {
   if (state === "today") return "Today";
-  return new Date(dueDate).toLocaleDateString(undefined, { day: "2-digit", month: "2-digit" });
+  return shortDate(dueDate);
 }

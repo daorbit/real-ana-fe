@@ -17,17 +17,17 @@ import { useGetTasksQuery } from "../api";
 import { useTaskActions } from "../hooks/useTaskActions";
 import { useTaskMembers } from "../hooks/useTaskMembers";
 import { useBucketActions } from "../hooks/useBucketActions";
+import { useTaskWorkflow } from "../hooks/useTaskWorkflow";
+import { TaskIndexProvider } from "../hooks/TaskIndexContext";
 import type { TaskForm } from "../hooks/useTaskEditor";
-import { filterTasks, groupTasks, topOf } from "../lib/board";
+import { filterTasks } from "../lib/board";
 import { knownLabels } from "../lib/labels";
 import { TasksToolbar } from "../components/TasksToolbar";
-import { TaskBoard } from "../components/TaskBoard";
-import { TaskGrid } from "../components/TaskGrid";
-import { TaskCharts } from "../components/charts/TaskCharts";
+import { TaskViews } from "../components/TaskViews";
 import { TaskDialog } from "../components/TaskDialog";
 import { TasksSkeleton } from "../components/TasksSkeleton";
 import classes from "../components/Tasks.module.css";
-import type { BoardView, Bucket, DueFilter, GroupBy, Task, TaskPatch } from "../types";
+import type { BoardView, Bucket, DueFilter, GroupBy, Task } from "../types";
 
 const NO_TASKS: Task[] = [];
 const NO_BUCKETS: Bucket[] = [];
@@ -48,6 +48,7 @@ export default function Tasks() {
   const { members, byId } = useTaskMembers(workspaceId, demo, on);
   const actions = useTaskActions(workspaceId, tasks, demo);
   const bucketActions = useBucketActions(workspaceId, buckets, demo);
+  const workflow = useTaskWorkflow(tasks, buckets, actions);
 
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState<Set<string>>(() => new Set());
@@ -85,141 +86,132 @@ export default function Tasks() {
   };
 
   const filtersActive = Boolean(query.trim() || people.size || myTasksOnly || dueFilter !== "all");
-
-  const topOfStatus = (status: Task["status"]) => topOf(groupTasks(tasks, "progress", buckets).get(status) ?? NO_TASKS);
-
-  const withOrder = (task: Task, patch: TaskPatch): TaskPatch =>
-    patch.status && patch.status !== task.status && patch.order === undefined
-      ? { ...patch, order: topOfStatus(patch.status) }
-      : patch;
-
-  const toggleDone = (task: Task) =>
-    void actions.update(task.id, withOrder(task, { status: task.status === "done" ? "todo" : "done" }));
-
   const openNew = () => setDialog({ open: true, id: null, defaults: NO_DEFAULTS });
+  const openTask = (task: Task) => setDialog({ open: true, id: task.id, defaults: NO_DEFAULTS });
+  const update = (task: Task, patch: Parameters<typeof workflow.update>[1]) => void workflow.update(task, patch);
+  const showEmpty = visible.length === 0 && view !== "mine";
 
-  useBodyPage("tasks-board", on && view === "board" && visible.length > 0);
+  useBodyPage("tasks-board", on && view === "board" && !showEmpty);
 
   return (
     <AppShell>
-      <div className={classes.page}>
-        <PageHeader
-          title="Tasks"
-          description="Plan the team's work on one board: who does what, by when."
-          docsPath={DOCS_SLUGS.quantalogTasks}
-          actions={
-            on && canEdit ? (
-              <Button visibleFrom="sm" leftSection={<Plus size={15} />} onClick={openNew}>
-                Add task
-              </Button>
-            ) : undefined
-          }
-        />
+      <TaskIndexProvider tasks={tasks}>
+        <div className={classes.page}>
+          <PageHeader
+            title="Tasks"
+            description="Plan the team's work on one board: who does what, by when."
+            docsPath={DOCS_SLUGS.quantalogTasks}
+            actions={
+              on && canEdit ? (
+                <Button visibleFrom="sm" leftSection={<Plus size={15} />} onClick={openNew}>
+                  Add task
+                </Button>
+              ) : undefined
+            }
+          />
 
-        {!active ? null : !on ? (
-          <QuantalogAppGate app="tasks" />
-        ) : isLoading && !demo ? (
-          <TasksSkeleton />
-        ) : (
-          <>
-            <TasksToolbar
-              query={query}
-              onQuery={setQuery}
-              members={members}
-              people={people}
-              onTogglePerson={togglePerson}
-              onRemovePerson={(id) =>
-                setPeople((currentPeople) => {
-                  const next = new Set(currentPeople);
-                  next.delete(id);
-                  return next;
-                })
-              }
-              onClearFilters={clearFilters}
-              userId={taskUserId}
-              myTasksOnly={myTasksOnly}
-              onMyTasks={() => setMyTasksOnly((value) => !value)}
-              dueFilter={dueFilter}
-              onDueFilter={setDueFilter}
-              groupBy={groupBy}
-              onGroupBy={setGroupBy}
-              view={view}
-              onView={setView}
-              usage={actions.usage}
-              onAdd={canEdit ? openNew : undefined}
-            />
-            {visible.length === 0 ? (
-              <EmptyState
-                compact
-                minHeight="35vh"
-                icon={tasks.length ? SearchX : ListTodo}
-                title={tasks.length ? "No tasks match these filters" : "No tasks yet"}
-                description={
-                  tasks.length
-                    ? "Try changing your search or removing a filter to see more tasks."
-                    : canEdit
-                      ? "Add a task to start planning the team's work here."
-                      : "Tasks added to this workspace will appear here."
-                }
-                action={
-                  tasks.length && filtersActive
-                    ? { label: "Clear filters", onClick: clearFilters }
-                    : !tasks.length && canEdit
-                      ? { label: "Add task", onClick: openNew, icon: Plus }
-                      : undefined
-                }
-              />
-            ) : view === "board" ? (
-              <TaskBoard
-                tasks={visible}
-                allTasks={tasks}
-                buckets={buckets}
-                groupBy={groupBy}
+          {!active ? null : !on ? (
+            <QuantalogAppGate app="tasks" />
+          ) : isLoading && !demo ? (
+            <TasksSkeleton />
+          ) : (
+            <>
+              <TasksToolbar
+                query={query}
+                onQuery={setQuery}
                 members={members}
-                memberMap={byId}
-                canEdit={canEdit}
-                creating={actions.creating}
-                onCreate={(title, patch) => actions.create({ ...patch, title })}
-                onOpen={(task) => setDialog({ open: true, id: task.id, defaults: NO_DEFAULTS })}
-                onMove={(task, patch) => void actions.update(task.id, patch)}
-                onToggleDone={toggleDone}
-                addingBucket={bucketActions.adding}
-                onAddBucket={bucketActions.add}
-                onRenameBucket={(bucket, name) => void bucketActions.rename(bucket, name)}
-                onDeleteBucket={bucketActions.remove}
+                people={people}
+                onTogglePerson={togglePerson}
+                onRemovePerson={(id) =>
+                  setPeople((currentPeople) => {
+                    const next = new Set(currentPeople);
+                    next.delete(id);
+                    return next;
+                  })
+                }
+                onClearFilters={clearFilters}
+                userId={taskUserId}
+                myTasksOnly={myTasksOnly}
+                onMyTasks={() => setMyTasksOnly((value) => !value)}
+                dueFilter={dueFilter}
+                onDueFilter={setDueFilter}
+                groupBy={groupBy}
+                onGroupBy={setGroupBy}
+                view={view}
+                onView={setView}
+                usage={actions.usage}
+                onAdd={canEdit ? openNew : undefined}
               />
-            ) : view === "grid" ? (
-              <TaskGrid
-                tasks={visible}
-                buckets={buckets}
-                members={byId}
-                canEdit={canEdit}
-                onOpen={(task) => setDialog({ open: true, id: task.id, defaults: NO_DEFAULTS })}
-                onToggleDone={toggleDone}
-              />
-            ) : (
-              <TaskCharts tasks={visible} buckets={buckets} members={members} />
-            )}
-          </>
-        )}
-      </div>
+              {showEmpty ? (
+                <EmptyState
+                  compact
+                  minHeight="35vh"
+                  icon={tasks.length ? SearchX : ListTodo}
+                  title={tasks.length ? "No tasks match these filters" : "No tasks yet"}
+                  description={
+                    tasks.length
+                      ? "Try changing your search or removing a filter to see more tasks."
+                      : canEdit
+                        ? "Add a task to start planning the team's work here."
+                        : "Tasks added to this workspace will appear here."
+                  }
+                  action={
+                    tasks.length && filtersActive
+                      ? { label: "Clear filters", onClick: clearFilters }
+                      : !tasks.length && canEdit
+                        ? { label: "Add task", onClick: openNew, icon: Plus }
+                        : undefined
+                  }
+                />
+              ) : (
+                <TaskViews
+                  view={view}
+                  visible={visible}
+                  tasks={tasks}
+                  buckets={buckets}
+                  groupBy={groupBy}
+                  members={members}
+                  memberMap={byId}
+                  userId={taskUserId}
+                  canEdit={canEdit}
+                  creating={actions.creating}
+                  addingBucket={bucketActions.adding}
+                  onOpen={openTask}
+                  onCreate={(title, patch) => actions.create({ ...patch, title })}
+                  onUpdate={update}
+                  onToggleDone={workflow.toggleDone}
+                  onAddBucket={bucketActions.add}
+                  onRenameBucket={(bucket, name) => void bucketActions.rename(bucket, name)}
+                  onSetBucketLimit={(bucket, limit) => void bucketActions.setLimit(bucket, limit)}
+                  onDeleteBucket={bucketActions.remove}
+                />
+              )}
+            </>
+          )}
+        </div>
 
-      <TaskDialog
-        opened={dialog.open}
-        task={current}
-        defaults={dialog.defaults}
-        planName={active?.name ?? "Tasks"}
-        buckets={buckets}
-        members={members}
-        memberMap={byId}
-        knownLabels={labels}
-        canEdit={canEdit}
-        creating={actions.creating}
-        onClose={() => setDialog((d) => ({ ...d, open: false }))}
-        onCreate={(patch) => actions.create({ ...patch, order: topOfStatus(patch.status ?? "todo") })}
-        onUpdate={(patch) => current && void actions.update(current.id, withOrder(current, patch))}
-        onDelete={(task) => actions.remove(task, () => setDialog((d) => ({ ...d, open: false })))}
-      />
+        <TaskDialog
+          opened={dialog.open}
+          task={current}
+          tasks={tasks}
+          defaults={dialog.defaults}
+          planName={active?.name ?? "Tasks"}
+          buckets={buckets}
+          members={members}
+          memberMap={byId}
+          knownLabels={labels}
+          canEdit={canEdit}
+          creating={actions.creating}
+          onClose={() => setDialog((d) => ({ ...d, open: false }))}
+          onCreate={workflow.create}
+          onUpdate={(patch) => current && update(current, patch)}
+          onUpdateOther={update}
+          onToggleDone={workflow.toggleDone}
+          onCreateSubtask={workflow.createSubtask}
+          onOpenTask={openTask}
+          onDelete={(task) => actions.remove(task, () => setDialog((d) => ({ ...d, open: false })))}
+        />
+      </TaskIndexProvider>
     </AppShell>
   );
 }

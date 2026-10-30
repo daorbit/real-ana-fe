@@ -1,0 +1,235 @@
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.month {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--border);
+  gap: 1px;
+}
+
+.weekday {
+  padding: 8px 10px;
+  background: var(--surface);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 112px;
+  padding: 6px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.day:hover {
+  background: color-mix(in srgb, var(--text) 2.5%, var(--surface));
+}
+
+.day[data-outside] {
+  background: var(--bg-2);
+}
+
+.day[data-outside] .dayNumber {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.day[data-over] {
+  background: var(--accent-soft);
+}
+
+.day[data-selected] {
+  outline: 1.5px solid var(--accent);
+  outline-offset: -1.5px;
+}
+
+.dayNumber {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.day[data-today] .dayNumber {
+  background: var(--accent);
+  color: #fff;
+}
+
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  touch-action: manipulation;
+  transition: border-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
+}
+
+.chip:hover {
+  border-color: var(--border-hover);
+}
+
+.chip[data-state="overdue"] {
+  border-color: color-mix(in srgb, var(--red) 45%, transparent);
+}
+
+.chip[data-done] {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.chip[data-dragging] {
+  opacity: 0.35;
+}
+
+.chip[data-overlay] {
+  max-width: 220px;
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-lg);
+  cursor: grabbing;
+}
+
+.chipMark {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--muted);
+}
+
+.chipMark[data-status="doing"],
+.dot[data-status="doing"] {
+  background: var(--accent);
+}
+
+.chipMark[data-status="done"],
+.dot[data-status="done"] {
+  background: var(--green);
+}
+
+.chipTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more {
+  padding: 0 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.dots {
+  display: none;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--muted);
+}
+
+.note {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+@media (max-width: 48em) {
+  .calendar {
+    gap: 16px;
+  }
+
+  .month {
+    font-size: 17px;
+  }
+
+  .grid {
+    border-radius: 12px;
+  }
+
+  .weekday {
+    padding: 6px 0;
+    text-align: center;
+    font-size: 10.5px;
+  }
+
+  .day {
+    align-items: center;
+    gap: 3px;
+    min-height: 52px;
+    padding: 5px 0;
+  }
+
+  .dayNumber {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .chips {
+    display: none;
+  }
+
+  .dots {
+    display: flex;
+    gap: 3px;
+  }
+}

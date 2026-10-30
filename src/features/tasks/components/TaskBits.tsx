@@ -1,6 +1,7 @@
 import { Tooltip, UnstyledButton } from "@mantine/core";
 import { ArrowDown, BellRing, CalendarDays, CircleAlert, X } from "lucide-react";
 import { dueLabel, dueState, PRIORITY_LABEL, STATUS_LABEL } from "../lib/board";
+import { shortDate } from "../lib/dates";
 import type { TaskLabel, TaskPriority, TaskStatus } from "../types";
 import classes from "./Tasks.module.css";
 
@@ -75,6 +76,15 @@ export function DueChip({ dueDate, status, label }: { dueDate: string; status: T
     <span className={classes.due} data-state={status === "done" ? "done" : state ?? undefined}>
       <CalendarDays size={12} />
       {label ?? dueLabel(dueDate, state)}
+    </span>
+  );
+}
+
+export function StartChip({ startDate }: { startDate: string }) {
+  return (
+    <span className={classes.due}>
+      <CalendarDays size={12} />
+      Starts {shortDate(startDate)}
     </span>
   );
 }

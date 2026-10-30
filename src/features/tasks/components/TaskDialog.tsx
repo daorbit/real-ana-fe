@@ -1,18 +1,35 @@
 import type { ReactNode } from "react";
-import { ActionIcon, Button, Menu, Modal, Select, TextInput, Textarea } from "@mantine/core";
+import { ActionIcon, Button, Menu, Modal, Select, TextInput, Textarea, UnstyledButton } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { Link } from "react-router-dom";
-import { CalendarDays, Columns3, ExternalLink, Flag, MoreHorizontal, Tag, Trash2, UserPlus, X } from "lucide-react";
+import {
+  CalendarArrowUp,
+  CalendarDays,
+  Columns3,
+  CornerDownRight,
+  ExternalLink,
+  Flag,
+  ListTree,
+  MoreHorizontal,
+  Tag,
+  Trash2,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { timeAgo } from "@/shared/lib/format";
 import type { WorkspaceMember } from "@/shared/types";
 import { PRIORITY_LABEL, PRIORITY_ORDER, STATUS_LABEL, STATUS_ORDER, taskKey } from "../lib/board";
+import { parentCandidates, taskOption } from "../lib/relations";
 import { toPatch, useTaskEditor, type TaskForm } from "../hooks/useTaskEditor";
+import { useTaskIndex } from "../hooks/TaskIndexContext";
 import type { Bucket, Task, TaskLabel, TaskPatch, TaskPriority, TaskStatus } from "../types";
 import { AssigneePicker } from "./AssigneePicker";
 import { ChecklistEditor } from "./ChecklistEditor";
 import { LabelEditor } from "./LabelEditor";
 import { TaskNotesEditor } from "./TaskNotesEditor";
 import { ProgressButton, ProgressGlyph } from "./TaskBits";
+import { DependenciesSection } from "./relations/DependenciesSection";
+import { SubtasksSection } from "./relations/SubtasksSection";
 import classes from "./Tasks.module.css";
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -36,6 +53,7 @@ function IconRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
 export function TaskDialog({
   opened,
   task,
+  tasks,
   defaults,
   planName,
   buckets,
@@ -47,10 +65,15 @@ export function TaskDialog({
   onClose,
   onCreate,
   onUpdate,
+  onUpdateOther,
+  onToggleDone,
+  onCreateSubtask,
+  onOpenTask,
   onDelete,
 }: {
   opened: boolean;
   task: Task | null;
+  tasks: Task[];
   defaults: Partial<TaskForm>;
   planName: string;
   buckets: Bucket[];
@@ -62,15 +85,28 @@ export function TaskDialog({
   onClose: () => void;
   onCreate: (patch: TaskPatch & { title: string }) => Promise<boolean>;
   onUpdate: (patch: TaskPatch) => void;
+  onUpdateOther: (task: Task, patch: TaskPatch) => void;
+  onToggleDone: (task: Task) => void;
+  onCreateSubtask: (parent: Task, title: string) => Promise<boolean>;
+  onOpenTask: (task: Task) => void;
   onDelete: (task: Task) => void;
 }) {
   const { form, change, type, commit } = useTaskEditor(task, opened, { bucketId: buckets[0]?.id ?? null, ...defaults }, onUpdate);
+  const index = useTaskIndex();
   const readOnly = !canEdit;
   const author = task?.createdBy ? memberMap.get(task.createdBy) : undefined;
+  const parent = form.parentId ? index.byId.get(form.parentId) : undefined;
+  const parents = parentCandidates(tasks, task, index);
+  const canHaveSubtasks = Boolean(task && !task.parentId);
 
   const create = async () => {
     const ok = await onCreate({ ...toPatch(form), title: form.title.trim(), link: form.link.trim() });
     if (ok) onClose();
+  };
+
+  const makeSubtask = async (item: TaskForm["checklist"][number]) => {
+    if (!task) return;
+    if (await onCreateSubtask(task, item.text)) change({ checklist: form.checklist.filter((i) => i.id !== item.id) });
   };
 
   return (
@@ -135,6 +171,13 @@ export function TaskDialog({
               aria-label="Task name"
             />
           </div>
+          {parent && (
+            <UnstyledButton className={classes.parentCrumb} onClick={() => onOpenTask(parent)}>
+              <CornerDownRight size={13} />
+              Subtask of <span className={classes.key}>{taskKey(parent.key)}</span>
+              <span className={classes.cardParentTitle}>{parent.title}</span>
+            </UnstyledButton>
+          )}
           {task && (
             <span className={classes.lastChanged}>
               Last changed {timeAgo(task.updatedAt)}
@@ -183,6 +226,19 @@ export function TaskDialog({
               data={PRIORITY_ORDER.map((p) => ({ value: p, label: PRIORITY_LABEL[p] }))}
             />
           </Field>
+          <Field label="Start date">
+            <DatePickerInput
+              placeholder="Set start date"
+              valueFormat="D MMM YYYY"
+              clearable
+              readOnly={readOnly}
+              leftSection={<CalendarArrowUp size={15} />}
+              value={form.start || null}
+              maxDate={form.due || undefined}
+              onChange={(value) => change({ start: value ?? "" })}
+              popoverProps={{ radius: "lg", shadow: "lg", position: "bottom-start" }}
+            />
+          </Field>
           <Field label="Due date">
             <DatePickerInput
               placeholder="Set due date"
@@ -191,6 +247,7 @@ export function TaskDialog({
               readOnly={readOnly}
               leftSection={<CalendarDays size={15} />}
               value={form.due || null}
+              minDate={form.start || undefined}
               onChange={(value) => change({ due: value ?? "" })}
               popoverProps={{ radius: "lg", shadow: "lg", position: "bottom-start" }}
             />
@@ -205,7 +262,33 @@ export function TaskDialog({
               data={buckets.map((b) => ({ value: b.id, label: b.name }))}
             />
           </Field>
+          {(parents.length > 0 || parent) && (
+            <Field label="Parent task">
+              <Select
+                searchable
+                clearable
+                readOnly={readOnly}
+                leftSection={<ListTree size={15} />}
+                placeholder="Not a subtask"
+                nothingFoundMessage="No matching tasks"
+                value={form.parentId}
+                onChange={(v) => change({ parentId: v ?? null })}
+                data={(parent && !parents.includes(parent) ? [parent, ...parents] : parents).map(taskOption)}
+              />
+            </Field>
+          )}
         </div>
+
+        {task && canHaveSubtasks && (
+          <SubtasksSection
+            task={task}
+            readOnly={readOnly}
+            onOpen={onOpenTask}
+            onToggleDone={onToggleDone}
+            onCreate={(title) => onCreateSubtask(task, title)}
+            onDetach={(subtask) => onUpdateOther(subtask, { parentId: null })}
+          />
+        )}
 
         <ChecklistEditor
           items={form.checklist}
@@ -213,6 +296,22 @@ export function TaskDialog({
           readOnly={readOnly}
           onChange={(checklist) => change({ checklist })}
           onCardChange={(checklistOnCard) => change({ checklistOnCard })}
+          onMakeSubtask={canHaveSubtasks ? (item) => void makeSubtask(item) : undefined}
+        />
+
+        <DependenciesSection
+          task={task}
+          blockedBy={form.blockedBy}
+          tasks={tasks}
+          readOnly={readOnly}
+          onOpen={onOpenTask}
+          onBlockedByChange={(blockedBy) => change({ blockedBy })}
+          onBlocksChange={(other, blocks) =>
+            task &&
+            onUpdateOther(other, {
+              blockedBy: blocks ? [...other.blockedBy, task.id] : other.blockedBy.filter((id) => id !== task.id),
+            })
+          }
         />
 
         <section className={classes.section}>

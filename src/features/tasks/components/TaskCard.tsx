@@ -1,13 +1,16 @@
 import { Tooltip, UnstyledButton } from "@mantine/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CheckSquare, Link2, UserPlus } from "lucide-react";
+import { CheckSquare, CornerDownRight, Link2, ListTree, Lock, UserPlus } from "lucide-react";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
 import type { Task } from "../types";
 import { dueLabel, dueState, PRIORITY_LABEL, STATUS_LABEL, taskKey } from "../lib/board";
+import { shortDate } from "../lib/dates";
+import { openBlockers, subtaskProgress } from "../lib/relations";
 import { taskNotesPlainText } from "../lib/taskNotes";
-import { DueChip, LabelPill, PriorityIcon, ProgressButton, ProgressGlyph } from "./TaskBits";
+import { useTaskIndex } from "../hooks/TaskIndexContext";
+import { DueChip, LabelPill, PriorityIcon, ProgressButton, ProgressGlyph, StartChip } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
 const CARD_CHECK_ITEMS = 8;
@@ -20,10 +23,26 @@ type CardProps = {
   onToggleDone: (task: Task) => void;
 };
 
+function dueChipLabel(task: Task, state: ReturnType<typeof dueState>): string | undefined {
+  if (!task.dueDate) return undefined;
+  const due =
+    state === "overdue"
+      ? `Overdue · ${dueLabel(task.dueDate, state)}`
+      : state === "soon"
+        ? `Due ${dueLabel(task.dueDate, state)}`
+        : dueLabel(task.dueDate, state);
+  return task.startDate ? `${shortDate(task.startDate)} – ${dueLabel(task.dueDate, state)}` : due;
+}
+
 export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }: CardProps) {
+  const index = useTaskIndex();
   const checked = task.checklist.filter((c) => c.done).length;
   const state = dueState(task.dueDate, task.status);
-  const hasMeta = task.priority !== "none" || Boolean(task.link) || task.checklist.length > 0;
+  const parent = task.parentId ? index.byId.get(task.parentId) : undefined;
+  const blockers = openBlockers(index, task);
+  const subtasks = subtaskProgress(index, task.id);
+  const hasMeta =
+    task.priority !== "none" || Boolean(task.link) || task.checklist.length > 0 || blockers.length > 0 || Boolean(subtasks);
 
   return (
     <>
@@ -41,6 +60,13 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
               <LabelPill key={l.text} label={l} />
             ))}
           </div>
+        )}
+        {parent && (
+          <span className={classes.cardParent}>
+            <CornerDownRight size={13} />
+            <span className={classes.key}>{taskKey(parent.key)}</span>
+            <span className={classes.cardParentTitle}>{parent.title}</span>
+          </span>
         )}
         <div className={classes.titleRow}>
           <ProgressButton status={task.status === "done" ? "done" : "todo"} disabled={!canEdit} onToggle={() => onToggleDone(task)} />
@@ -63,6 +89,14 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
         )}
         {hasMeta && (
           <div className={classes.cardIcons}>
+            {blockers.length > 0 && (
+              <Tooltip label={`Blocked by ${blockers.map((b) => taskKey(b.key)).join(", ")}`} withArrow>
+                <span className={classes.blocked}>
+                  <Lock size={13} />
+                  Blocked
+                </span>
+              </Tooltip>
+            )}
             {task.priority !== "none" && (
               <span className={classes.cardPriority} data-level={task.priority}>
                 <PriorityIcon priority={task.priority} />
@@ -82,23 +116,23 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
                 {checked} / {task.checklist.length}
               </span>
             )}
+            {subtasks && (
+              <Tooltip label="Subtasks done" withArrow>
+                <span className={classes.meta}>
+                  <ListTree size={14} />
+                  {subtasks.done} / {subtasks.total}
+                </span>
+              </Tooltip>
+            )}
           </div>
         )}
       </div>
       <div className={classes.cardFoot}>
-        {task.dueDate && (
-          <DueChip
-            dueDate={task.dueDate}
-            status={task.status}
-            label={
-            state === "overdue"
-              ? `Overdue · ${dueLabel(task.dueDate, state)}`
-              : state === "soon"
-                ? `Due ${dueLabel(task.dueDate, state)}`
-                : undefined
-            }
-          />
-        )}
+        {task.dueDate ? (
+          <DueChip dueDate={task.dueDate} status={task.status} label={dueChipLabel(task, state)} />
+        ) : task.startDate ? (
+          <StartChip startDate={task.startDate} />
+        ) : null}
         <span className={classes.footEnd}>
           {assignees.length ? (
             <span className={classes.assigneeAvatars}>

@@ -1,5 +1,5 @@
 import { api } from "@/app/store/api";
-import type { Bucket, Task, TaskPatch, TasksResponse } from "./types";
+import type { Bucket, BucketUpdate, Task, TaskPatch, TasksResponse } from "./types";
 
 const base = (workspaceId: string) => `/api/workspaces/${workspaceId}/tasks`;
 
@@ -51,6 +51,10 @@ const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints
         const optimistic = dispatch(
           tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
             draft.tasks = draft.tasks.filter((t) => t.id !== id);
+            for (const task of draft.tasks) {
+              if (task.parentId === id) task.parentId = null;
+              if (task.blockedBy.includes(id)) task.blockedBy = task.blockedBy.filter((b) => b !== id);
+            }
           }),
         );
         try {
@@ -73,13 +77,13 @@ const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints
       },
     }),
 
-    renameBucket: build.mutation<Bucket, { workspaceId: string; id: string; name: string }>({
-      query: ({ workspaceId, id, name }) => ({ url: `${base(workspaceId)}/buckets/${id}`, method: "PATCH", body: { name } }),
-      async onQueryStarted({ workspaceId, id, name }, { dispatch, queryFulfilled }) {
+    updateBucket: build.mutation<Bucket, { workspaceId: string; id: string; update: BucketUpdate }>({
+      query: ({ workspaceId, id, update }) => ({ url: `${base(workspaceId)}/buckets/${id}`, method: "PATCH", body: update }),
+      async onQueryStarted({ workspaceId, id, update }, { dispatch, queryFulfilled }) {
         const optimistic = dispatch(
           tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
             const bucket = draft.buckets.find((b) => b.id === id);
-            if (bucket) bucket.name = name;
+            if (bucket) Object.assign(bucket, update);
           }),
         );
         try {
@@ -111,6 +115,6 @@ export const {
   useUpdateTaskMutation,
   useDeleteTaskMutation,
   useCreateBucketMutation,
-  useRenameBucketMutation,
+  useUpdateBucketMutation,
   useDeleteBucketMutation,
 } = tasksApi;
