@@ -11,6 +11,7 @@ import type { Bucket, Task, TaskLabel, TaskPatch, TaskPriority, TaskStatus } fro
 import { AssigneePicker } from "./AssigneePicker";
 import { ChecklistEditor } from "./ChecklistEditor";
 import { LabelEditor } from "./LabelEditor";
+import { TaskNotesEditor } from "./TaskNotesEditor";
 import { ProgressButton, ProgressGlyph } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
@@ -216,15 +217,10 @@ export function TaskDialog({
 
         <section className={classes.section}>
           <span className={classes.sectionTitle}>Notes</span>
-          <Textarea
-            autosize
-            minRows={4}
-            maxRows={14}
-            maxLength={4000}
-            placeholder="Type a description or add notes here"
+          <TaskNotesEditor
             readOnly={readOnly}
             value={form.notes}
-            onChange={(e) => type("notes", e.currentTarget.value)}
+            onChange={(notes) => type("notes", notes)}
             onBlur={() => commit("notes")}
           />
         </section>

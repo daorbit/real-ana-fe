@@ -32,8 +32,8 @@ import styles from "./ActivityDrawer.module.css";
  * the page from a point that moves; a drawer is the same component at every
  * rail width and becomes a full-screen sheet on a phone for free.
  *
- * The list is fetched when the drawer opens, not on a timer. Only the badge
- * polls — see `useNotificationCount`.
+ * The list is fetched when the drawer opens and when the polled badge changes
+ * while it is open. Only the badge polls — see `useNotificationCount`.
  */
 export function ActivityDrawer({
   opened,
@@ -74,7 +74,8 @@ export function ActivityDrawer({
   );
 
   /*
-   * Reopening the panel fetches the feed again.
+   * Reopening the panel fetches the feed again. If a new notification arrives
+   * while it is open, the unread count changes and refreshes the first page.
    *
    * The badge polls on its own timer, so a notification that arrived since the
    * last open is counted long before the list knows about it. Without this the
@@ -89,7 +90,7 @@ export function ActivityDrawer({
     // `cursor` is read but deliberately not a trigger — this fires on open,
     // not on every page loaded while the panel is already up.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opened, demo, refetch]);
+  }, [opened, demo, unreadCount, refetch]);
 
   // Same swap as the stats hook: generated rows while demo mode is on, so an
   // empty workspace does not show the one panel in the app that still looks

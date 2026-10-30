@@ -6,6 +6,7 @@ import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
 import type { Task } from "../types";
 import { dueLabel, dueState, PRIORITY_LABEL, STATUS_LABEL, taskKey } from "../lib/board";
+import { taskNotesPlainText } from "../lib/taskNotes";
 import { DueChip, LabelPill, PriorityIcon, ProgressButton, ProgressGlyph } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
@@ -47,7 +48,7 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
             <span className={classes.cardTitle}>{task.title}</span>
           </UnstyledButton>
         </div>
-        {task.notes && <p className={classes.cardNotes}>{task.notes}</p>}
+        {task.notes && <p className={classes.cardNotes}>{taskNotesPlainText(task.notes)}</p>}
         {task.checklistOnCard && task.checklist.length > 0 && (
           <div className={classes.cardChecklist}>
             {task.checklist.slice(0, CARD_CHECK_ITEMS).map((item) => (

@@ -930,6 +930,47 @@
   color: var(--text);
 }
 
+.notesEditor {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--mantine-radius-md);
+  background: var(--bg-2);
+}
+
+.notesToolbar {
+  border-bottom: 1px solid var(--border);
+}
+
+.notesContent {
+  min-height: 112px;
+}
+
+.notesContent [contenteditable="true"] {
+  min-height: 112px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.notesContent p,
+.notesContent blockquote {
+  margin: 0 0 8px;
+}
+
+.notesContent ul,
+.notesContent ol {
+  margin: 0 0 8px;
+  padding-left: 22px;
+}
+
+.notesContent blockquote {
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+}
+
 .sectionMeta {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
