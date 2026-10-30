@@ -237,9 +237,15 @@ export function notificationCopy(
 
     case "task.assigned": {
       const title = str(d, "title", t("activity.taskAssigned.aTask", "a task"));
+      const workspace = str(d, "workspaceName");
       return {
         title: t("activity.taskAssigned.title", "Task assigned to you"),
-        body: t("activity.taskAssigned.body", "You were assigned “{{title}}”.", { title }),
+        body: workspace
+          ? t("activity.taskAssigned.bodyInWorkspace", "You were assigned “{{title}}” in {{workspace}}.", {
+              title,
+              workspace,
+            })
+          : t("activity.taskAssigned.body", "You were assigned “{{title}}”.", { title }),
       };
     }
 

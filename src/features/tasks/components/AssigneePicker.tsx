@@ -1,4 +1,4 @@
-import { Menu, UnstyledButton } from "@mantine/core";
+import { Menu, Tooltip, UnstyledButton } from "@mantine/core";
 import { Check, UserMinus } from "lucide-react";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
@@ -11,22 +11,43 @@ export function AssigneePicker({
   readOnly,
   onChange,
 }: {
-  value: string | null;
+  value: string[];
   members: WorkspaceMember[];
   memberMap: Map<string, WorkspaceMember>;
   readOnly: boolean;
-  onChange: (userId: string | null) => void;
+  onChange: (userIds: string[]) => void;
 }) {
-  const current = value ? memberMap.get(value) : undefined;
+  const assigned = value.map((id) => memberMap.get(id)).filter((member): member is WorkspaceMember => Boolean(member));
   const chip = (
-    <UnstyledButton className={classes.assignee} data-empty={!current || undefined} disabled={readOnly}>
-      {current ? (
+    <UnstyledButton className={classes.assignee} data-empty={!value.length || undefined} disabled={readOnly}>
+      {assigned.length ? (
         <>
-          <UserAvatar src={current.avatarUrl} name={current.name || current.email} size={26} radius="xl" />
-          <span className={classes.assigneeName}>{current.name || current.email}</span>
+          <span className={classes.assigneeAvatars}>
+            {assigned.slice(0, 3).map((member) => (
+              <Tooltip key={member.userId} label={member.name || member.email} withArrow>
+                <span>
+                  <UserAvatar
+                    src={member.avatarUrl}
+                    name={member.name || member.email}
+                    size={26}
+                    radius="xl"
+                  />
+                </span>
+              </Tooltip>
+            ))}
+          </span>
+          <span className={classes.assigneeName}>
+            {assigned.length === 1 && value.length === 1
+              ? assigned[0].name || assigned[0].email
+              : value.length > assigned.length
+                ? `${value.length} assignees`
+                : assigned.length <= 2
+                  ? assigned.map((member) => member.name || member.email).join(", ")
+                : `${value.length} people`}
+          </span>
         </>
       ) : (
-        <span className={classes.assigneeEmpty}>Assign</span>
+        <span className={classes.assigneeEmpty}>{value.length ? "Former member assigned" : "Assign"}</span>
       )}
     </UnstyledButton>
   );
@@ -41,18 +62,25 @@ export function AssigneePicker({
         {members.map((m) => (
           <Menu.Item
             key={m.userId}
+            closeMenuOnClick={false}
             leftSection={<UserAvatar src={m.avatarUrl} name={m.name || m.email} size={22} radius="xl" />}
-            rightSection={m.userId === value ? <Check size={14} /> : null}
-            onClick={() => onChange(m.userId)}
+            rightSection={value.includes(m.userId) ? <Check size={14} /> : null}
+            onClick={() =>
+              onChange(
+                value.includes(m.userId)
+                  ? value.filter((id) => id !== m.userId)
+                  : [...value, m.userId],
+              )
+            }
           >
             {m.name || m.email}
           </Menu.Item>
         ))}
-        {value && (
+        {value.length > 0 && (
           <>
             <Menu.Divider />
-            <Menu.Item leftSection={<UserMinus size={14} />} onClick={() => onChange(null)}>
-              Unassign
+            <Menu.Item leftSection={<UserMinus size={14} />} onClick={() => onChange([])}>
+              Unassign everyone
             </Menu.Item>
           </>
         )}

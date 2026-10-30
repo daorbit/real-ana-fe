@@ -46,7 +46,7 @@ export function TaskGrid({
         </Table.Thead>
         <Table.Tbody>
           {sortForGrid(tasks).map((task) => {
-            const assignee = task.assigneeId ? members.get(task.assigneeId) : undefined;
+            const assignees = task.assigneeIds.map((id) => members.get(id)).filter((member): member is WorkspaceMember => Boolean(member));
             return (
               <Table.Tr key={task.id} className={classes.row} onClick={() => onOpen(task)}>
                 <Table.Td>
@@ -62,10 +62,14 @@ export function TaskGrid({
                   <span className={classes.usage}>{buckets.find((b) => b.id === bucketKeyOf(task, buckets))?.name ?? ""}</span>
                 </Table.Td>
                 <Table.Td>
-                  {assignee ? (
-                    <span className={classes.personCell}>
-                      <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={22} radius="xl" />
-                      {assignee.name || assignee.email}
+                  {assignees.length ? (
+                    <span className={classes.assigneesCell}>
+                      {assignees.map((assignee) => (
+                        <span key={assignee.userId} className={classes.personCell}>
+                          <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={22} radius="xl" />
+                          {assignee.name || assignee.email}
+                        </span>
+                      ))}
                     </span>
                   ) : (
                     <span className={classes.usage}>Unassigned</span>

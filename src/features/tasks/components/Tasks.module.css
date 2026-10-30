@@ -553,6 +553,13 @@
   white-space: nowrap;
 }
 
+.assigneesCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
 
 
 .dialogTopEnd {
@@ -701,6 +708,18 @@
   font-size: 13.5px;
   font-weight: 500;
   color: var(--text);
+}
+
+.assigneeAvatars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.assigneeOverflow {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .assigneeEmpty {

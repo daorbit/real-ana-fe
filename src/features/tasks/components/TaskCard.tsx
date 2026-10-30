@@ -12,13 +12,13 @@ const CARD_CHECK_ITEMS = 8;
 
 type CardProps = {
   task: Task;
-  assignee: WorkspaceMember | undefined;
+  assignees: WorkspaceMember[];
   canEdit: boolean;
   onOpen: (task: Task) => void;
   onToggleDone: (task: Task) => void;
 };
 
-export function TaskCardView({ task, assignee, canEdit, onOpen, onToggleDone }: CardProps) {
+export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }: CardProps) {
   const checked = task.checklist.filter((c) => c.done).length;
   const hasMeta =
     task.status === "doing" || task.priority !== "none" || Boolean(task.notes) || Boolean(task.link) || task.checklist.length > 0;
@@ -85,12 +85,17 @@ export function TaskCardView({ task, assignee, canEdit, onOpen, onToggleDone }: 
       <div className={classes.cardFoot}>
         {task.dueDate && <DueChip dueDate={task.dueDate} status={task.status} />}
         <span className={classes.footEnd}>
-          {assignee ? (
-            <Tooltip label={assignee.name || assignee.email} withArrow>
-              <span>
-                <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={26} radius="xl" />
-              </span>
-            </Tooltip>
+          {assignees.length ? (
+            <span className={classes.assigneeAvatars}>
+              {assignees.slice(0, 3).map((assignee) => (
+                <Tooltip key={assignee.userId} label={assignee.name || assignee.email} withArrow>
+                  <span>
+                    <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={26} radius="xl" />
+                  </span>
+                </Tooltip>
+              ))}
+              {assignees.length > 3 && <span className={classes.assigneeOverflow}>+{assignees.length - 3}</span>}
+            </span>
           ) : (
             <span className={classes.meta}>
               <UserPlus size={16} />

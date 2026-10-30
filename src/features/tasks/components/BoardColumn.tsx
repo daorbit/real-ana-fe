@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { ChevronRight } from "lucide-react";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
-import type { BoardColumn as Column } from "../lib/board";
+import { MULTIPLE_ASSIGNEES, type BoardColumn as Column } from "../lib/board";
 import type { Task } from "../types";
 import { BucketHeader } from "./BucketHeader";
 import { InlineCreate } from "./InlineCreate";
@@ -54,7 +54,7 @@ export function BoardColumn({
     <TaskCard
       key={task.id}
       task={task}
-      assignee={task.assigneeId ? members.get(task.assigneeId) : undefined}
+      assignees={task.assigneeIds.map((id) => members.get(id)).filter((member): member is WorkspaceMember => Boolean(member))}
       canEdit={canEdit}
       onOpen={onOpen}
       onToggleDone={onToggleDone}
@@ -87,11 +87,15 @@ export function BoardColumn({
         )}
       </header>
 
-      {canEdit && <InlineCreate busy={creating} onCreate={onCreate} />}
+      {canEdit && column.key !== MULTIPLE_ASSIGNEES && <InlineCreate busy={creating} onCreate={onCreate} />}
 
       <SortableContext items={visible.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div className={classes.cards}>
-          {visible.length === 0 && <div className={classes.empty}>{canEdit ? "Drag tasks here" : "No tasks"}</div>}
+          {visible.length === 0 && (
+            <div className={classes.empty}>
+              {canEdit && column.key !== MULTIPLE_ASSIGNEES ? "Drag tasks here" : "No tasks"}
+            </div>
+          )}
           {open.map(card)}
           {completed.length > 0 && (
             <UnstyledButton className={classes.completedToggle} onClick={() => setShowCompleted((v) => !v)}>

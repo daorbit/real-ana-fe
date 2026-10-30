@@ -148,11 +148,11 @@ export function TaskDialog({
           </IconRow>
           <IconRow icon={<UserPlus size={17} />}>
             <AssigneePicker
-              value={form.assigneeId}
+              value={form.assigneeIds}
               members={members}
               memberMap={memberMap}
               readOnly={readOnly}
-              onChange={(assigneeId) => change({ assigneeId })}
+              onChange={(assigneeIds) => change({ assigneeIds })}
             />
           </IconRow>
         </div>

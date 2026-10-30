@@ -27,6 +27,7 @@ export const GROUP_LABEL: Record<GroupBy, string> = {
 };
 
 export const UNASSIGNED = "__none";
+export const MULTIPLE_ASSIGNEES = "__multiple";
 
 export const taskKey = (key: number) => `T-${key}`;
 
@@ -51,7 +52,14 @@ export function matchesSearch(task: Task, query: string): boolean {
 }
 
 export function filterTasks(tasks: Task[], query: string, people: Set<string>): Task[] {
-  return tasks.filter((t) => matchesSearch(t, query) && (!people.size || people.has(t.assigneeId ?? UNASSIGNED)));
+  return tasks.filter(
+    (task) =>
+      matchesSearch(task, query) &&
+      (!people.size ||
+        (task.assigneeIds.length
+          ? task.assigneeIds.some((id) => people.has(id))
+          : people.has(UNASSIGNED))),
+  );
 }
 
 export function bucketKeyOf(task: Task, buckets: Bucket[]): string {
@@ -61,7 +69,10 @@ export function bucketKeyOf(task: Task, buckets: Bucket[]): string {
 
 export function columnKeyOf(task: Task, groupBy: GroupBy, buckets: Bucket[]): string {
   if (groupBy === "bucket") return bucketKeyOf(task, buckets);
-  if (groupBy === "assignee") return task.assigneeId ?? UNASSIGNED;
+  if (groupBy === "assignee")
+    return task.assigneeIds.length > 1
+      ? MULTIPLE_ASSIGNEES
+      : task.assigneeIds[0] ?? UNASSIGNED;
   if (groupBy === "priority") return task.priority;
   return task.status;
 }
@@ -81,11 +92,15 @@ export function buildColumns(
 
   const known = new Set(members.map((m) => m.userId));
   const columns: BoardColumn[] = [
-    { key: UNASSIGNED, title: "Unassigned", patch: { assigneeId: null } },
-    ...members.map((m) => ({ key: m.userId, title: m.name || m.email, member: m, patch: { assigneeId: m.userId } })),
+    { key: UNASSIGNED, title: "Unassigned", patch: { assigneeIds: [] } },
+    ...members.map((m) => ({ key: m.userId, title: m.name || m.email, member: m, patch: { assigneeIds: [m.userId] } })),
   ];
-  const orphans = new Set(tasks.map((t) => t.assigneeId).filter((id): id is string => Boolean(id) && !known.has(id as string)));
-  for (const id of orphans) columns.push({ key: id, title: "Former member", patch: { assigneeId: id } });
+  const orphans = new Set(
+    tasks.flatMap((task) => task.assigneeIds).filter((id) => !known.has(id)),
+  );
+  for (const id of orphans) columns.push({ key: id, title: "Former member", patch: { assigneeIds: [id] } });
+  if (tasks.some((task) => task.assigneeIds.length > 1))
+    columns.push({ key: MULTIPLE_ASSIGNEES, title: "Multiple assignees", patch: {} });
   return columns;
 }
 

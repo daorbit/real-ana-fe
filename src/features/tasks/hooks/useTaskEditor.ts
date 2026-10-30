@@ -7,7 +7,7 @@ export type TaskForm = {
   notes: string;
   status: TaskStatus;
   priority: TaskPriority;
-  assigneeId: string | null;
+  assigneeIds: string[];
   due: string;
   link: string;
   labels: TaskLabel[];
@@ -21,7 +21,7 @@ const BLANK: TaskForm = {
   notes: "",
   status: "todo",
   priority: "medium",
-  assigneeId: null,
+  assigneeIds: [],
   due: "",
   link: "",
   labels: [],
@@ -37,7 +37,7 @@ function formOf(task: Task | null, defaults: Partial<TaskForm>): TaskForm {
     notes: task.notes,
     status: task.status,
     priority: task.priority,
-    assigneeId: task.assigneeId,
+    assigneeIds: task.assigneeIds,
     due: toDateField(task.dueDate),
     link: task.link,
     labels: task.labels,

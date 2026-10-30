@@ -16,7 +16,7 @@ export type Task = {
   notes: string;
   status: TaskStatus;
   priority: TaskPriority;
-  assigneeId: string | null;
+  assigneeIds: string[];
   dueDate: string | null;
   order: number;
   link: string;
@@ -30,7 +30,7 @@ export type Task = {
 };
 
 export type TaskPatch = Partial<
-  Pick<Task, "title" | "notes" | "status" | "priority" | "assigneeId" | "dueDate" | "order" | "link" | "labels" | "checklist" | "checklistOnCard" | "bucketId">
+  Pick<Task, "title" | "notes" | "status" | "priority" | "assigneeIds" | "dueDate" | "order" | "link" | "labels" | "checklist" | "checklistOnCard" | "bucketId">
 >;
 
 export type GroupBy = "bucket" | "progress" | "assignee" | "priority";

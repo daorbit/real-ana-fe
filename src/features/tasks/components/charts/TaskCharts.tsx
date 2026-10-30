@@ -24,7 +24,7 @@ export function TaskCharts({ tasks, buckets, members }: { tasks: Task[]; buckets
       breakdown(
         tasks,
         [...members.map((m) => ({ key: m.userId, name: m.name || m.email })), { key: UNASSIGNED, name: "Unassigned" }],
-        (t) => t.assigneeId ?? UNASSIGNED,
+        (task) => task.assigneeIds.length ? task.assigneeIds : [UNASSIGNED],
       ),
     [tasks, members],
   );

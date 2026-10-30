@@ -23,7 +23,7 @@ function task(id: string, title: string, status: Task["status"], order: number, 
     notes: "",
     status,
     priority: "medium",
-    assigneeId: null,
+    assigneeIds: [],
     dueDate: null,
     order,
     link: "",
@@ -42,14 +42,14 @@ export const demoTasks: Task[] = [
   task("demo-task-1", "Fix missing meta descriptions on the pricing page", "todo", 0, {
     bucketId: bucket(1),
     priority: "urgent",
-    assigneeId: "demo-user-priya",
+    assigneeIds: ["demo-user-priya", "demo-user-marcus"],
     dueDate: iso(-1 * DAY),
     link: "/app/seo",
     labels: [{ text: "SEO", color: "teal" }],
   }),
   task("demo-task-2", "Write a launch post for the spring sale", "todo", 1, {
     bucketId: bucket(0),
-    assigneeId: "demo-user-marcus",
+    assigneeIds: ["demo-user-marcus"],
     dueDate: iso(2 * DAY),
     labels: [
       { text: "Marketing", color: "pink" },
@@ -70,7 +70,7 @@ export const demoTasks: Task[] = [
   task("demo-task-4", "Compress hero images on the home page", "doing", 0, {
     bucketId: bucket(2),
     priority: "high",
-    assigneeId: "demo-user-hinata",
+    assigneeIds: ["demo-user-hinata"],
     dueDate: iso(0),
     notes: "Lighthouse flags 1.8 MB of images above the fold.",
     labels: [{ text: "Speed", color: "amber" }],
@@ -82,9 +82,9 @@ export const demoTasks: Task[] = [
   }),
   task("demo-task-5", "Reply to new Google reviews", "doing", 1, {
     bucketId: bucket(3),
-    assigneeId: "demo-user-priya",
+    assigneeIds: ["demo-user-priya"],
     labels: [{ text: "Reviews", color: "blue" }],
   }),
-  task("demo-task-6", "Set up the weekly traffic report", "done", 0, { assigneeId: "demo-user-marcus", bucketId: bucket(5) }),
+  task("demo-task-6", "Set up the weekly traffic report", "done", 0, { assigneeIds: ["demo-user-marcus"], bucketId: bucket(5) }),
   task("demo-task-7", "Connect Search Console", "done", 1, { labels: [{ text: "SEO", color: "teal" }], bucketId: bucket(5) }),
 ];

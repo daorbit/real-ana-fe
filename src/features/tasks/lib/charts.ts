@@ -32,14 +32,17 @@ export function countStates(tasks: Task[]): StateCounts {
 export function breakdown(
   tasks: Task[],
   groups: { key: string; name: string }[],
-  keyOf: (task: Task) => string,
+  keyOf: (task: Task) => string | string[],
 ): ChartRow[] {
   const rows = new Map(groups.map((g) => [g.key, { name: g.name, total: 0, ...empty() }]));
   for (const task of tasks) {
-    const row = rows.get(keyOf(task));
-    if (!row) continue;
-    row[stateOf(task)] += 1;
-    row.total += 1;
+    const keys = keyOf(task);
+    for (const key of Array.isArray(keys) ? keys : [keys]) {
+      const row = rows.get(key);
+      if (!row) continue;
+      row[stateOf(task)] += 1;
+      row.total += 1;
+    }
   }
   return [...rows.values()];
 }

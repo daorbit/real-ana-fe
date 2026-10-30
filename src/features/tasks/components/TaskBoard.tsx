@@ -13,7 +13,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import type { WorkspaceMember } from "@/shared/types";
-import { buildColumns, columnKeyOf, groupTasks, orderAt, topOf } from "../lib/board";
+import { buildColumns, columnKeyOf, groupTasks, MULTIPLE_ASSIGNEES, orderAt, topOf } from "../lib/board";
 import type { Bucket, GroupBy, Task, TaskPatch } from "../types";
 import { AddBucket } from "./AddBucket";
 import { BoardColumn } from "./BoardColumn";
@@ -94,6 +94,7 @@ export function TaskBoard({
       const from = containerOf(active.id, current);
       const to = containerOf(over.id, current);
       if (!from || !to || from === to) return current;
+      if (groupBy === "assignee" && to === MULTIPLE_ASSIGNEES) return current;
       const target = current[to].filter((id) => id !== active.id);
       const overIndex = target.indexOf(String(over.id));
       target.splice(overIndex >= 0 ? overIndex : target.length, 0, String(active.id));
@@ -109,6 +110,8 @@ export function TaskBoard({
     if (!task || !to) return setItems(null);
 
     let list = live[to];
+    if (groupBy === "assignee" && to === MULTIPLE_ASSIGNEES && columnKeyOf(task, groupBy, buckets) !== to)
+      return setItems(null);
     const oldIndex = list.indexOf(task.id);
     const overIndex = list.indexOf(String(over!.id));
     if (oldIndex >= 0 && overIndex >= 0 && oldIndex !== overIndex) list = arrayMove(list, oldIndex, overIndex);
@@ -172,7 +175,7 @@ export function TaskBoard({
         {active ? (
           <TaskCardOverlay
             task={active}
-            assignee={active.assigneeId ? memberMap.get(active.assigneeId) : undefined}
+            assignees={active.assigneeIds.map((id) => memberMap.get(id)).filter((member): member is WorkspaceMember => Boolean(member))}
             canEdit={false}
             onOpen={() => undefined}
             onToggleDone={() => undefined}
