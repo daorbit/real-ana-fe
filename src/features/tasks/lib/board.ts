@@ -1,5 +1,5 @@
 import type { WorkspaceMember } from "@/shared/types";
-import type { GroupBy, Task, TaskPatch, TaskPriority, TaskStatus } from "../types";
+import type { Bucket, GroupBy, Task, TaskPatch, TaskPriority, TaskStatus } from "../types";
 
 export const STATUS_ORDER: TaskStatus[] = ["todo", "doing", "done"];
 
@@ -20,6 +20,7 @@ export const PRIORITY_LABEL: Record<TaskPriority, string> = {
 };
 
 export const GROUP_LABEL: Record<GroupBy, string> = {
+  bucket: "Bucket",
   progress: "Progress",
   assignee: "Assigned to",
   priority: "Priority",
@@ -35,6 +36,7 @@ export type BoardColumn = {
   status?: TaskStatus;
   priority?: TaskPriority;
   member?: WorkspaceMember;
+  bucket?: Bucket;
   patch: TaskPatch;
 };
 
@@ -52,13 +54,26 @@ export function filterTasks(tasks: Task[], query: string, people: Set<string>): 
   return tasks.filter((t) => matchesSearch(t, query) && (!people.size || people.has(t.assigneeId ?? UNASSIGNED)));
 }
 
-export function columnKeyOf(task: Task, groupBy: GroupBy): string {
+export function bucketKeyOf(task: Task, buckets: Bucket[]): string {
+  if (task.bucketId && buckets.some((b) => b.id === task.bucketId)) return task.bucketId;
+  return buckets[0]?.id ?? "";
+}
+
+export function columnKeyOf(task: Task, groupBy: GroupBy, buckets: Bucket[]): string {
+  if (groupBy === "bucket") return bucketKeyOf(task, buckets);
   if (groupBy === "assignee") return task.assigneeId ?? UNASSIGNED;
   if (groupBy === "priority") return task.priority;
   return task.status;
 }
 
-export function buildColumns(tasks: Task[], groupBy: GroupBy, members: WorkspaceMember[]): BoardColumn[] {
+export function buildColumns(
+  tasks: Task[],
+  groupBy: GroupBy,
+  members: WorkspaceMember[],
+  buckets: Bucket[],
+): BoardColumn[] {
+  if (groupBy === "bucket")
+    return buckets.map((bucket) => ({ key: bucket.id, title: bucket.name, bucket, patch: { bucketId: bucket.id } }));
   if (groupBy === "progress")
     return STATUS_ORDER.map((status) => ({ key: status, title: STATUS_LABEL[status], status, patch: { status } }));
   if (groupBy === "priority")
@@ -74,10 +89,10 @@ export function buildColumns(tasks: Task[], groupBy: GroupBy, members: Workspace
   return columns;
 }
 
-export function groupTasks(tasks: Task[], groupBy: GroupBy): Map<string, Task[]> {
+export function groupTasks(tasks: Task[], groupBy: GroupBy, buckets: Bucket[]): Map<string, Task[]> {
   const groups = new Map<string, Task[]>();
   for (const task of tasks) {
-    const key = columnKeyOf(task, groupBy);
+    const key = columnKeyOf(task, groupBy, buckets);
     const list = groups.get(key) ?? [];
     list.push(task);
     groups.set(key, list);

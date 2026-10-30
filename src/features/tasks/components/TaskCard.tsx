@@ -11,39 +11,19 @@ import classes from "./Tasks.module.css";
 
 const CARD_CHECK_ITEMS = 4;
 
-export function TaskCard({
-  task,
-  column,
-  assignee,
-  canEdit,
-  onOpen,
-  onToggleDone,
-}: {
+type CardProps = {
   task: Task;
-  column: string;
   assignee: WorkspaceMember | undefined;
   canEdit: boolean;
   onOpen: (task: Task) => void;
   onToggleDone: (task: Task) => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: task.id,
-    disabled: !canEdit,
-    data: { column },
-  });
-  const done = task.status === "done";
+};
+
+export function TaskCardView({ task, assignee, canEdit, onOpen, onToggleDone }: CardProps) {
   const checked = task.checklist.filter((c) => c.done).length;
 
   return (
-    <div
-      ref={setNodeRef}
-      className={classes.card}
-      data-dragging={isDragging || undefined}
-      data-done={done || undefined}
-      style={{ transform: CSS.Translate.toString(transform), transition }}
-      {...attributes}
-      {...listeners}
-    >
+    <>
       {task.labels.length > 0 && (
         <div className={classes.labels}>
           {task.labels.map((l) => (
@@ -81,11 +61,9 @@ export function TaskCard({
             </span>
           )}
           {task.notes && (
-            <Tooltip label="Has notes" withArrow>
-              <span className={classes.meta}>
-                <NotebookText size={13} />
-              </span>
-            </Tooltip>
+            <span className={classes.meta}>
+              <NotebookText size={13} />
+            </span>
           )}
           {task.link && (
             <span className={classes.meta}>
@@ -101,6 +79,36 @@ export function TaskCard({
           )}
         </span>
       </div>
+    </>
+  );
+}
+
+export function TaskCard(props: CardProps) {
+  const { task, canEdit } = props;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id,
+    disabled: !canEdit,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={classes.card}
+      data-placeholder={isDragging || undefined}
+      data-done={task.status === "done" || undefined}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...attributes}
+      {...listeners}
+    >
+      <TaskCardView {...props} />
+    </div>
+  );
+}
+
+export function TaskCardOverlay(props: CardProps) {
+  return (
+    <div className={classes.card} data-overlay data-done={props.task.status === "done" || undefined}>
+      <TaskCardView {...props} />
     </div>
   );
 }

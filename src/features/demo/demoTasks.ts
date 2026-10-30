@@ -1,4 +1,4 @@
-import type { Task } from "@/features/tasks/types";
+import type { Bucket, Task } from "@/features/tasks/types";
 
 const now = Date.now();
 const DAY = 86_400_000;
@@ -6,10 +6,19 @@ const iso = (offsetMs: number) => new Date(now + offsetMs).toISOString();
 
 let nextKey = 1;
 
+export const demoBuckets: Bucket[] = ["Backlog", "To do", "In progress", "Review", "Blocked", "Done"].map((name, order) => ({
+  id: `demo-bucket-${order}`,
+  name,
+  order,
+}));
+
+const bucket = (index: number) => demoBuckets[index].id;
+
 function task(id: string, title: string, status: Task["status"], order: number, extra: Partial<Task> = {}): Task {
   return {
     id,
     key: nextKey++,
+    bucketId: bucket(1),
     title,
     notes: "",
     status,
@@ -31,6 +40,7 @@ function task(id: string, title: string, status: Task["status"], order: number, 
 
 export const demoTasks: Task[] = [
   task("demo-task-1", "Fix missing meta descriptions on the pricing page", "todo", 0, {
+    bucketId: bucket(1),
     priority: "urgent",
     assigneeId: "demo-user-priya",
     dueDate: iso(-1 * DAY),
@@ -38,6 +48,7 @@ export const demoTasks: Task[] = [
     labels: [{ text: "SEO", color: "teal" }],
   }),
   task("demo-task-2", "Write a launch post for the spring sale", "todo", 1, {
+    bucketId: bucket(0),
     assigneeId: "demo-user-marcus",
     dueDate: iso(2 * DAY),
     labels: [
@@ -52,10 +63,12 @@ export const demoTasks: Task[] = [
     checklistOnCard: true,
   }),
   task("demo-task-3", "Add FAQ schema to the help centre", "todo", 2, {
+    bucketId: bucket(0),
     priority: "low",
     labels: [{ text: "SEO", color: "teal" }],
   }),
   task("demo-task-4", "Compress hero images on the home page", "doing", 0, {
+    bucketId: bucket(2),
     priority: "high",
     assigneeId: "demo-user-hinata",
     dueDate: iso(0),
@@ -68,9 +81,10 @@ export const demoTasks: Task[] = [
     ],
   }),
   task("demo-task-5", "Reply to new Google reviews", "doing", 1, {
+    bucketId: bucket(3),
     assigneeId: "demo-user-priya",
     labels: [{ text: "Reviews", color: "blue" }],
   }),
-  task("demo-task-6", "Set up the weekly traffic report", "done", 0, { assigneeId: "demo-user-marcus" }),
-  task("demo-task-7", "Connect Search Console", "done", 1, { labels: [{ text: "SEO", color: "teal" }] }),
+  task("demo-task-6", "Set up the weekly traffic report", "done", 0, { assigneeId: "demo-user-marcus", bucketId: bucket(5) }),
+  task("demo-task-7", "Connect Search Console", "done", 1, { labels: [{ text: "SEO", color: "teal" }], bucketId: bucket(5) }),
 ];

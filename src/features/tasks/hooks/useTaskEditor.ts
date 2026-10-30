@@ -13,6 +13,7 @@ export type TaskForm = {
   labels: TaskLabel[];
   checklist: CheckItem[];
   checklistOnCard: boolean;
+  bucketId: string | null;
 };
 
 const BLANK: TaskForm = {
@@ -26,6 +27,7 @@ const BLANK: TaskForm = {
   labels: [],
   checklist: [],
   checklistOnCard: false,
+  bucketId: null,
 };
 
 function formOf(task: Task | null, defaults: Partial<TaskForm>): TaskForm {
@@ -41,12 +43,14 @@ function formOf(task: Task | null, defaults: Partial<TaskForm>): TaskForm {
     labels: task.labels,
     checklist: task.checklist,
     checklistOnCard: task.checklistOnCard,
+    bucketId: task.bucketId,
   };
 }
 
 export function toPatch(form: Partial<TaskForm>): TaskPatch {
-  const { due, ...rest } = form;
-  return due === undefined ? rest : { ...rest, dueDate: fromDateField(due) };
+  const { due, bucketId, ...rest } = form;
+  const patch: TaskPatch = bucketId ? { ...rest, bucketId } : rest;
+  return due === undefined ? patch : { ...patch, dueDate: fromDateField(due) };
 }
 
 type TextKey = "title" | "notes" | "link";

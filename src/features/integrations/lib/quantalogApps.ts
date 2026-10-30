@@ -229,7 +229,7 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
     location: "in the sidebar",
     offNote: "Your tasks are kept, so turning it back on picks up where you left off.",
     tagline: "Plan the team's work on one board: who does what, by when.",
-    description: "A planner board for the workspace. Add tasks, give them owners, labels, checklists and due dates, and drag them from Not started to Completed. Group the board by progress, person or priority.",
+    description: "A planner board for the workspace. Organise tasks in buckets you name yourself, give them owners, labels, checklists and due dates, and drag them where they belong. Group the board by bucket, progress, person or priority.",
     features: [
       { title: "A real planner board", body: "Drag cards between columns, group by progress, person or priority, or switch to a grid of every task." },
       { title: "Clear owners", body: "Assign a task to anyone in the workspace. They hear about it in the bell straight away." },

@@ -11,6 +11,7 @@ export type CheckItem = { id: string; text: string; done: boolean };
 export type Task = {
   id: string;
   key: number;
+  bucketId: string | null;
   title: string;
   notes: string;
   status: TaskStatus;
@@ -29,9 +30,13 @@ export type Task = {
 };
 
 export type TaskPatch = Partial<
-  Pick<Task, "title" | "notes" | "status" | "priority" | "assigneeId" | "dueDate" | "order" | "link" | "labels" | "checklist" | "checklistOnCard">
+  Pick<Task, "title" | "notes" | "status" | "priority" | "assigneeId" | "dueDate" | "order" | "link" | "labels" | "checklist" | "checklistOnCard" | "bucketId">
 >;
 
-export type GroupBy = "progress" | "assignee" | "priority";
+export type GroupBy = "bucket" | "progress" | "assignee" | "priority";
+
+export type Bucket = { id: string; name: string; order: number };
+
+export type TasksResponse = { buckets: Bucket[]; tasks: Task[] };
 
 export type BoardView = "board" | "grid";

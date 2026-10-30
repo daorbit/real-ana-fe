@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ActionIcon, Checkbox, Progress, Switch, TextInput } from "@mantine/core";
-import { Plus, X } from "lucide-react";
+import { ActionIcon, Checkbox, TextInput, UnstyledButton } from "@mantine/core";
+import { X } from "lucide-react";
 import { newCheckId } from "../lib/labels";
 import type { CheckItem } from "../types";
+import { ProgressGlyph } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
 const MAX_ITEMS = 30;
@@ -36,11 +37,11 @@ export function ChecklistEditor({
         <span className={classes.sectionTitle}>Checklist</span>
         {items.length > 0 && (
           <span className={classes.sectionMeta}>
-            {done}/{items.length}
+            {done} / {items.length}
           </span>
         )}
         <span className={classes.sectionEnd}>
-          <Switch
+          <Checkbox
             size="xs"
             label="Show on card"
             checked={onCard}
@@ -49,19 +50,18 @@ export function ChecklistEditor({
           />
         </span>
       </div>
-      {items.length > 0 && <Progress value={(done / items.length) * 100} size={4} radius="xl" color="var(--green)" aria-label="Checklist progress" />}
-      <div>
+      <div className={classes.checklist}>
         {items.map((item) => (
           <div key={item.id} className={classes.checkItem}>
-            <Checkbox
-              size="sm"
-              radius="xl"
-              color="var(--green)"
-              checked={item.done}
+            <UnstyledButton
+              className={classes.progress}
+              data-status={item.done ? "done" : "todo"}
               disabled={readOnly}
-              onChange={(e) => onChange(items.map((i) => (i.id === item.id ? { ...i, done: e.currentTarget.checked } : i)))}
-              aria-label={item.text}
-            />
+              onClick={() => onChange(items.map((i) => (i.id === item.id ? { ...i, done: !i.done } : i)))}
+              aria-label={item.done ? `Mark “${item.text}” not done` : `Mark “${item.text}” done`}
+            >
+              <ProgressGlyph status={item.done ? "done" : "todo"} size={18} />
+            </UnstyledButton>
             <span className={classes.checkText} data-done={item.done || undefined}>
               {item.text}
             </span>
@@ -79,21 +79,26 @@ export function ChecklistEditor({
             )}
           </div>
         ))}
+        {!readOnly && items.length < MAX_ITEMS && (
+          <div className={classes.checkItem}>
+            <span className={classes.progress} data-status="todo">
+              <ProgressGlyph status="todo" size={18} />
+            </span>
+            <TextInput
+              className={classes.checkAdd}
+              classNames={{ input: classes.bareInput }}
+              variant="unstyled"
+              placeholder={items.length ? "Add an item" : "Add steps to complete this task. Mark them done as you go."}
+              maxLength={200}
+              value={text}
+              onChange={(e) => setText(e.currentTarget.value)}
+              onKeyDown={(e) => e.key === "Enter" && add()}
+              onBlur={add}
+              aria-label="Add a checklist item"
+            />
+          </div>
+        )}
       </div>
-      {!readOnly && items.length < MAX_ITEMS && (
-        <TextInput
-          size="sm"
-          variant="unstyled"
-          leftSection={<Plus size={15} />}
-          placeholder="Add an item"
-          maxLength={200}
-          value={text}
-          onChange={(e) => setText(e.currentTarget.value)}
-          onKeyDown={(e) => e.key === "Enter" && add()}
-          onBlur={add}
-          aria-label="Add a checklist item"
-        />
-      )}
     </section>
   );
 }

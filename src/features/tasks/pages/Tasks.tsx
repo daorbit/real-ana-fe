@@ -8,11 +8,12 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { useDemo } from "@/features/demo/context";
-import { demoTasks } from "@/features/demo/demoTasks";
+import { demoBuckets, demoTasks } from "@/features/demo/demoTasks";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { useGetTasksQuery } from "../api";
 import { useTaskActions } from "../hooks/useTaskActions";
 import { useTaskMembers } from "../hooks/useTaskMembers";
+import { useBucketActions } from "../hooks/useBucketActions";
 import type { TaskForm } from "../hooks/useTaskEditor";
 import { filterTasks, groupTasks, topOf } from "../lib/board";
 import { knownLabels } from "../lib/labels";
@@ -20,10 +21,11 @@ import { TasksToolbar } from "../components/TasksToolbar";
 import { TaskBoard } from "../components/TaskBoard";
 import { TaskGrid } from "../components/TaskGrid";
 import { TaskDialog } from "../components/TaskDialog";
-import type { BoardView, GroupBy, Task, TaskPatch } from "../types";
+import type { BoardView, Bucket, GroupBy, Task, TaskPatch } from "../types";
 import classes from "../components/Tasks.module.css";
 
 const NO_TASKS: Task[] = [];
+const NO_BUCKETS: Bucket[] = [];
 const NO_DEFAULTS: Partial<TaskForm> = {};
 
 export default function Tasks() {
@@ -35,13 +37,15 @@ export default function Tasks() {
   const workspaceId = active?._id ?? "";
 
   const { currentData, isLoading } = useGetTasksQuery(workspaceId, { skip: !workspaceId || !on || demo });
-  const tasks = demo ? demoTasks : currentData ?? NO_TASKS;
+  const tasks = demo ? demoTasks : currentData?.tasks ?? NO_TASKS;
+  const buckets = demo ? demoBuckets : currentData?.buckets ?? NO_BUCKETS;
   const { members, byId } = useTaskMembers(workspaceId, demo, on);
   const actions = useTaskActions(workspaceId, tasks, demo);
+  const bucketActions = useBucketActions(workspaceId, buckets, demo);
 
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState<Set<string>>(() => new Set());
-  const [groupBy, setGroupBy] = useState<GroupBy>("progress");
+  const [groupBy, setGroupBy] = useState<GroupBy>("bucket");
   const [view, setView] = useState<BoardView>("board");
   const [dialog, setDialog] = useState<{ open: boolean; id: string | null; defaults: Partial<TaskForm> }>({
     open: false,
@@ -61,7 +65,7 @@ export default function Tasks() {
       return next;
     });
 
-  const topOfStatus = (status: Task["status"]) => topOf(groupTasks(tasks, "progress").get(status) ?? NO_TASKS);
+  const topOfStatus = (status: Task["status"]) => topOf(groupTasks(tasks, "progress", buckets).get(status) ?? NO_TASKS);
 
   const withOrder = (task: Task, patch: TaskPatch): TaskPatch =>
     patch.status && patch.status !== task.status && patch.order === undefined
@@ -112,6 +116,7 @@ export default function Tasks() {
             <TaskBoard
               tasks={visible}
               allTasks={tasks}
+              buckets={buckets}
               groupBy={groupBy}
               members={members}
               memberMap={byId}
@@ -121,10 +126,15 @@ export default function Tasks() {
               onOpen={(task) => setDialog({ open: true, id: task.id, defaults: NO_DEFAULTS })}
               onMove={(task, patch) => void actions.update(task.id, patch)}
               onToggleDone={toggleDone}
+              addingBucket={bucketActions.adding}
+              onAddBucket={bucketActions.add}
+              onRenameBucket={(bucket, name) => void bucketActions.rename(bucket, name)}
+              onDeleteBucket={bucketActions.remove}
             />
           ) : (
             <TaskGrid
               tasks={visible}
+              buckets={buckets}
               members={byId}
               canEdit={canEdit}
               onOpen={(task) => setDialog({ open: true, id: task.id, defaults: NO_DEFAULTS })}
@@ -138,6 +148,8 @@ export default function Tasks() {
         opened={dialog.open}
         task={current}
         defaults={dialog.defaults}
+        planName={active?.name ?? "Tasks"}
+        buckets={buckets}
         members={members}
         memberMap={byId}
         knownLabels={labels}

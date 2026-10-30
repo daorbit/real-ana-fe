@@ -1,11 +1,11 @@
 import { api } from "@/app/store/api";
-import type { Task, TaskPatch } from "./types";
+import type { Bucket, Task, TaskPatch, TasksResponse } from "./types";
 
 const base = (workspaceId: string) => `/api/workspaces/${workspaceId}/tasks`;
 
 const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints({
   endpoints: (build) => ({
-    getTasks: build.query<Task[], string>({
+    getTasks: build.query<TasksResponse, string>({
       query: (workspaceId) => base(workspaceId),
       providesTags: (_r, _e, workspaceId) => [{ type: "Task", id: workspaceId }],
     }),
@@ -16,7 +16,7 @@ const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints
         const { data } = await queryFulfilled;
         dispatch(
           tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
-            draft.push(data);
+            draft.tasks.push(data);
           }),
         );
       },
@@ -27,7 +27,7 @@ const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints
       async onQueryStarted({ workspaceId, id, patch }, { dispatch, queryFulfilled }) {
         const optimistic = dispatch(
           tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
-            const task = draft.find((t) => t.id === id);
+            const task = draft.tasks.find((t) => t.id === id);
             if (task) Object.assign(task, patch);
           }),
         );
@@ -35,8 +35,8 @@ const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints
           const { data } = await queryFulfilled;
           dispatch(
             tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
-              const index = draft.findIndex((t) => t.id === id);
-              if (index >= 0) draft[index] = data;
+              const index = draft.tasks.findIndex((t) => t.id === id);
+              if (index >= 0) draft.tasks[index] = data;
             }),
           );
         } catch {
@@ -49,7 +49,9 @@ const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints
       query: ({ workspaceId, id }) => ({ url: `${base(workspaceId)}/${id}`, method: "DELETE" }),
       async onQueryStarted({ workspaceId, id }, { dispatch, queryFulfilled }) {
         const optimistic = dispatch(
-          tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => draft.filter((t) => t.id !== id)),
+          tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
+            draft.tasks = draft.tasks.filter((t) => t.id !== id);
+          }),
         );
         try {
           await queryFulfilled;
@@ -58,7 +60,57 @@ const tasksApi = api.enhanceEndpoints({ addTagTypes: ["Task"] }).injectEndpoints
         }
       },
     }),
+
+    createBucket: build.mutation<Bucket, { workspaceId: string; name: string }>({
+      query: ({ workspaceId, name }) => ({ url: `${base(workspaceId)}/buckets`, method: "POST", body: { name } }),
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(
+          tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
+            draft.buckets.push(data);
+          }),
+        );
+      },
+    }),
+
+    renameBucket: build.mutation<Bucket, { workspaceId: string; id: string; name: string }>({
+      query: ({ workspaceId, id, name }) => ({ url: `${base(workspaceId)}/buckets/${id}`, method: "PATCH", body: { name } }),
+      async onQueryStarted({ workspaceId, id, name }, { dispatch, queryFulfilled }) {
+        const optimistic = dispatch(
+          tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
+            const bucket = draft.buckets.find((b) => b.id === id);
+            if (bucket) bucket.name = name;
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          optimistic.undo();
+        }
+      },
+    }),
+
+    deleteBucket: build.mutation<{ movedTo: string }, { workspaceId: string; id: string }>({
+      query: ({ workspaceId, id }) => ({ url: `${base(workspaceId)}/buckets/${id}`, method: "DELETE" }),
+      async onQueryStarted({ workspaceId, id }, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(
+          tasksApi.util.updateQueryData("getTasks", workspaceId, (draft) => {
+            draft.buckets = draft.buckets.filter((b) => b.id !== id);
+            for (const task of draft.tasks) if (task.bucketId === id) task.bucketId = data.movedTo;
+          }),
+        );
+      },
+    }),
   }),
 });
 
-export const { useGetTasksQuery, useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } = tasksApi;
+export const {
+  useGetTasksQuery,
+  useCreateTaskMutation,
+  useUpdateTaskMutation,
+  useDeleteTaskMutation,
+  useCreateBucketMutation,
+  useRenameBucketMutation,
+  useDeleteBucketMutation,
+} = tasksApi;

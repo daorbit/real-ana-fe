@@ -1,8 +1,8 @@
 import { Table } from "@mantine/core";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
-import { PRIORITY_LABEL, PRIORITY_ORDER, STATUS_ORDER, taskKey } from "../lib/board";
-import type { Task } from "../types";
+import { bucketKeyOf, PRIORITY_LABEL, PRIORITY_ORDER, STATUS_ORDER, taskKey } from "../lib/board";
+import type { Bucket, Task } from "../types";
 import { DueChip, LabelPill, PriorityIcon, ProgressButton, StatusText } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
@@ -17,12 +17,14 @@ function sortForGrid(tasks: Task[]): Task[] {
 
 export function TaskGrid({
   tasks,
+  buckets,
   members,
   canEdit,
   onOpen,
   onToggleDone,
 }: {
   tasks: Task[];
+  buckets: Bucket[];
   members: Map<string, WorkspaceMember>;
   canEdit: boolean;
   onOpen: (task: Task) => void;
@@ -34,6 +36,7 @@ export function TaskGrid({
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Task name</Table.Th>
+            <Table.Th>Bucket</Table.Th>
             <Table.Th>Assigned to</Table.Th>
             <Table.Th>Progress</Table.Th>
             <Table.Th>Priority</Table.Th>
@@ -54,6 +57,9 @@ export function TaskGrid({
                     <span className={classes.key}>{taskKey(task.key)}</span>
                     {task.title}
                   </span>
+                </Table.Td>
+                <Table.Td>
+                  <span className={classes.usage}>{buckets.find((b) => b.id === bucketKeyOf(task, buckets))?.name ?? ""}</span>
                 </Table.Td>
                 <Table.Td>
                   {assignee ? (

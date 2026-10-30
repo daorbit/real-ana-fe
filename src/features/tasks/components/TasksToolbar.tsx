@@ -1,4 +1,4 @@
-import { Button, Menu, SegmentedControl, TextInput } from "@mantine/core";
+import { Button, Group, Menu, TextInput, UnstyledButton } from "@mantine/core";
 import { Check, ChevronDown, Columns3, Rows3, Search, Table2 } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { GROUP_LABEL } from "../lib/board";
@@ -6,7 +6,12 @@ import type { BoardView, GroupBy } from "../types";
 import { PeopleFilter } from "./PeopleFilter";
 import classes from "./Tasks.module.css";
 
-const GROUPS: GroupBy[] = ["progress", "assignee", "priority"];
+const GROUPS: GroupBy[] = ["bucket", "progress", "assignee", "priority"];
+
+const VIEWS: { value: BoardView; label: string; icon: typeof Columns3 }[] = [
+  { value: "board", label: "Board", icon: Columns3 },
+  { value: "grid", label: "Grid", icon: Table2 },
+];
 
 export function TasksToolbar({
   query,
@@ -61,16 +66,21 @@ export function TasksToolbar({
           </Menu.Dropdown>
         </Menu>
       )}
-      <SegmentedControl
-        size="sm"
-        classNames={{ label: classes.segItem }}
-        value={view}
-        onChange={(v) => onView(v as BoardView)}
-        data={[
-          { value: "board", label: <span className={classes.segLabel}><Columns3 size={14} />Board</span> },
-          { value: "grid", label: <span className={classes.segLabel}><Table2 size={14} />Grid</span> },
-        ]}
-      />
+      <Group gap={2} wrap="nowrap" className="range-segmented" role="tablist" aria-label="View">
+        {VIEWS.map(({ value, label, icon: Icon }) => (
+          <UnstyledButton
+            key={value}
+            role="tab"
+            aria-selected={view === value}
+            className="range-seg-btn"
+            data-active={view === value}
+            onClick={() => onView(value)}
+          >
+            <Icon size={14} className={classes.viewIcon} />
+            {label}
+          </UnstyledButton>
+        ))}
+      </Group>
     </div>
   );
 }
