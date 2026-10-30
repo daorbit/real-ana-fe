@@ -1,6 +1,6 @@
 import { readThemePrefs } from "@/shared/lib/theme";
 
-const COLORS = ["#2f6bff", "#98b2ff", "#818cf8", "#34d399", "#fbbf24"];
+const COLORS = ["#0071e3", "#7fb1f2", "#818cf8", "#34d399", "#fbbf24"];
 const Z_INDEX = 1000;
 const OPEN_DELAY_MS = 180;
 

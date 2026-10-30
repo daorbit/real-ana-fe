@@ -531,13 +531,15 @@ body { overflow-wrap: break-word; }
 
 
 .mantine-SegmentedControl-root {
-  background: color-mix(in srgb, var(--text) 6%, transparent);
+  background: var(--segment-track);
   border: 0;
+  padding: 3px;
 }
 
 .mantine-SegmentedControl-label {
   color: var(--text-2);
   font-weight: 500;
+  letter-spacing: -0.005em;
 }
 
 .mantine-DatePicker-calendarHeaderLevel,
@@ -680,17 +682,13 @@ body { overflow-wrap: break-word; }
 }
 
 .mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active]::before {
-  background-color: var(--surface);
-  box-shadow: 0 0 0 1px var(--border);
-}
-
-[data-mantine-color-scheme="dark"] .mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active]::before {
-  background-color: var(--gray-7);
-  box-shadow: none;
+  background-color: var(--segment-thumb);
+  box-shadow: 0 0 0 1px var(--segment-thumb-edge);
 }
 
 .mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active] {
   color: var(--text);
+  font-weight: 600;
 }
 
 
@@ -989,9 +987,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   box-sizing: border-box;
   height: 36px;
   align-items: stretch;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--segment-track);
+  border: 0;
+  border-radius: 10px;
   padding: 3px;
 }
 .range-seg-btn {
@@ -999,21 +997,26 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 0 12px;
-  border-radius: calc(var(--radius-sm) - 3px);
+  min-width: 44px;
+  padding: 0 13px;
+  border-radius: 7px;
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1;
-  color: var(--muted);
-  transition: background 0.15s ease, color 0.15s ease;
+  letter-spacing: -0.005em;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
-.range-seg-btn:hover:not([data-locked="true"]) {
+.range-seg-btn:hover:not([data-locked="true"]):not([data-active="true"]) {
   color: var(--text);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
 }
 .range-seg-btn[data-active="true"] {
-  background: var(--bg);
+  background: var(--segment-thumb);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--segment-thumb-edge);
 }
 .range-seg-btn[data-locked="true"] {
   color: var(--muted);

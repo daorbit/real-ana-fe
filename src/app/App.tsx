@@ -21,6 +21,7 @@ import { consumeWelcomePending } from "@/shared/ui/welcomePending";
 import "@/app/tokens.css";
 import "@/app/App.css";
 import "@/polish.css";
+import "@/app/controls.css";
 import "@/app/viewTransitions.css";
 import "@/app/dropdown.css";
 // Last, so the phone layout wins over the desktop rules it adjusts.

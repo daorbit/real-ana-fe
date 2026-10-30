@@ -1,0 +1,42 @@
+html:root[data-mantine-color-scheme="light"] {
+  --mantine-color-default-border: var(--border-strong);
+  --mantine-color-gray-light: color-mix(in srgb, var(--text) 5%, transparent);
+  --mantine-color-gray-light-hover: color-mix(in srgb, var(--text) 9%, transparent);
+  --mantine-color-gray-light-color: var(--text-2);
+  --mantine-color-dark-light: color-mix(in srgb, var(--text) 5%, transparent);
+  --mantine-color-dark-light-hover: color-mix(in srgb, var(--text) 9%, transparent);
+}
+
+.app-button {
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.app-button[data-variant="subtle"]:not([data-disabled]):hover {
+  color: var(--text);
+}
+
+:root[data-mantine-color-scheme="light"] .mantine-Button-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]),
+:root[data-mantine-color-scheme="light"] .mantine-ActionIcon-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]) {
+  --button-bg: var(--surface) !important;
+  --button-hover: var(--gray-2) !important;
+  --button-bd: 1px solid var(--border-strong) !important;
+  --ai-bg: var(--surface) !important;
+  --ai-hover: var(--gray-2) !important;
+  --ai-bd: 1px solid var(--border-strong) !important;
+}
+
+:root[data-mantine-color-scheme="light"] .mantine-Button-root[data-variant="default"]:not([data-disabled]):hover,
+:root[data-mantine-color-scheme="light"] .mantine-ActionIcon-root[data-variant="default"]:not([data-disabled]):hover {
+  border-color: var(--border-hover);
+}
+
+:root .mantine-Input-input:hover:not(:focus):not(:focus-within):not([data-disabled]):not([data-error]) {
+  border-color: var(--border-hover);
+}
+
+.mantine-SegmentedControl-control {
+  transition: color var(--duration-fast) ease;
+}

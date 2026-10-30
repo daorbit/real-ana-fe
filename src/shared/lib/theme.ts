@@ -424,7 +424,7 @@ export function buildBgValue(
   return `repeating-linear-gradient(45deg, ${border} 0, ${border} 1px, transparent 1px, transparent 22px), ${bg}`;
 }
 
-export const FIXED_ACCENT = { light: "#2f6bff", dark: "#4776ff" };
+export const FIXED_ACCENT = { light: "#0071e3", dark: "#0a84ff" };
 
 const NEUTRAL_SOFT = {
   light: "color-mix(in srgb, var(--text) 6%, transparent)",

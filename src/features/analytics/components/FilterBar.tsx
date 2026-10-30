@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
-  Group, Badge, Text, Button, Menu, Modal, TextInput, Stack, ActionIcon, Tooltip,
+  Group, Text, Button, Menu, Modal, TextInput, Stack, ActionIcon, Tooltip,
   type MantineSpacing,
 } from "@mantine/core";
-import { Filter, X, Bookmark, BookmarkPlus, Trash2, Pin, ChevronDown } from "lucide-react";
+import { Filter, Bookmark, BookmarkPlus, Trash2, Pin, ChevronDown } from "lucide-react";
 import type { StatsFilter, Segment } from "@/shared/types";
+import { Chip } from "@/shared/ui/Chip";
+import styles from "./FilterBar.module.css";
 
 /** Human labels for each filterable dimension. */
 const LABELS: Record<keyof StatsFilter, string> = {
@@ -113,43 +115,34 @@ export function FilterBar({
 
   return (
     <>
-      <Group gap="xs" mb={mb} wrap="wrap">
+      <Group gap={8} mb={mb} wrap="wrap" className={styles.bar}>
         {segments.length > 0 && (
           <>
-            <Group gap={6} wrap="nowrap">
-              <Bookmark size={14} className="sect-ic" />
-              <Text size="xs" fw={600} c="dimmed" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
-                Segments
-              </Text>
-            </Group>
+            <span className={styles.label}>
+              <Bookmark size={13} />
+              Segments
+            </span>
 
             {/* Pinned segments are one click; the rest sit behind the menu.
                 A saved view is only a shortcut if the daily ones are reachable
                 without opening anything. */}
-            {pinned.map((segment) => {
-              const active = sameFilter(segment.filter, filter);
-              return (
-                <Badge
-                  key={segment.id}
-                  variant={active ? "filled" : "light"}
-                  color={active ? "emerald" : "gray"}
-                  size="lg"
-                  radius="sm"
-                  style={{ cursor: "pointer", textTransform: "none" }}
-                  onClick={() => onApplySegment?.(segment)}
-                  title={describe(segment.filter)}
-                >
-                  {segment.name}
-                </Badge>
-              );
-            })}
+            {pinned.map((segment) => (
+              <Chip
+                key={segment.id}
+                active={sameFilter(segment.filter, filter)}
+                title={describe(segment.filter)}
+                onClick={() => onApplySegment?.(segment)}
+              >
+                {segment.name}
+              </Chip>
+            ))}
 
             <Menu shadow="md" position="bottom-start" radius="md" width={280}>
               <Menu.Target>
                 <Button
                   variant="subtle"
                   color="gray"
-                  size="compact-xs"
+                  size="compact-sm"
                   rightSection={<ChevronDown size={13} />}
                 >
                   All ({segments.length})
@@ -209,34 +202,23 @@ export function FilterBar({
 
         {hasFilter && (
           <>
-            <Group gap={6} wrap="nowrap" ml={segments.length ? "sm" : 0}>
-              <Filter size={14} className="sect-ic" />
-              <Text size="xs" fw={600} c="dimmed" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
-                Filtered by
-              </Text>
-            </Group>
+            <span className={styles.label} data-spaced={segments.length > 0 || undefined}>
+              <Filter size={13} />
+              Filtered by
+            </span>
 
             {entries.map(([key, value]) => (
-              <Badge
-                key={key}
-                variant="light"
-                color="emerald"
-                size="lg"
-                radius="sm"
-                style={{ cursor: "pointer", textTransform: "none" }}
-                rightSection={<X size={12} style={{ display: "block" }} />}
-                onClick={() => onRemove(key)}
-                title="Remove filter"
-              >
-                {LABELS[key]}: <b>{value}</b>
-              </Badge>
+              <Chip key={key} active removable title="Remove filter" onClick={() => onRemove(key)}>
+                <span className={styles.key}>{LABELS[key]}</span>
+                <span className={styles.value}>{value}</span>
+              </Chip>
             ))}
 
             {canSave && !alreadySaved && (
               <Button
                 variant="subtle"
                 color="emerald"
-                size="compact-xs"
+                size="compact-sm"
                 leftSection={<BookmarkPlus size={13} />}
                 loading={saving}
                 onClick={() => setNaming(true)}
@@ -245,7 +227,7 @@ export function FilterBar({
               </Button>
             )}
 
-            <Button variant="subtle" color="gray" size="compact-xs" onClick={onClear}>
+            <Button variant="subtle" color="gray" size="compact-sm" onClick={onClear}>
               Clear all
             </Button>
           </>
