@@ -65,6 +65,7 @@ export function AppAddonCard({ app }: { app: PaidAppId }) {
           price={unlock.price}
           currency={unlock.currency}
           busy={unlock.buying}
+          canManage={canManage}
           onClose={unlock.closeCheckout}
           onConfirm={(request) => void unlock.buy(request)}
         />

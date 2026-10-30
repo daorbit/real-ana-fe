@@ -61,6 +61,7 @@ export function QuantalogAppGate({ app }: { app: WorkspaceAppId }) {
           price={unlock.price}
           currency={unlock.currency}
           busy={unlock.buying}
+          canManage={toggle.canManage}
           onClose={unlock.closeCheckout}
           onConfirm={(request) => void unlock.buy(request)}
         />
