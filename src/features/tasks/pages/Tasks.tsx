@@ -8,6 +8,7 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { useDemo } from "@/features/demo/context";
+import { useAuth } from "@/features/auth/context";
 import { demoBuckets, demoTasks } from "@/features/demo/demoTasks";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { useGetTasksQuery } from "../api";
@@ -23,7 +24,7 @@ import { TaskGrid } from "../components/TaskGrid";
 import { TaskCharts } from "../components/charts/TaskCharts";
 import { TaskDialog } from "../components/TaskDialog";
 import { TasksSkeleton } from "../components/TasksSkeleton";
-import type { BoardView, Bucket, GroupBy, Task, TaskPatch } from "../types";
+import type { BoardView, Bucket, DueFilter, GroupBy, Task, TaskPatch } from "../types";
 
 const NO_TASKS: Task[] = [];
 const NO_BUCKETS: Bucket[] = [];
@@ -33,6 +34,7 @@ export default function Tasks() {
   useTitle("Tasks");
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
+  const { user } = useAuth();
   const { tasks: on } = useWorkspaceApps();
   const { demo } = useDemo();
   const workspaceId = active?._id ?? "";
@@ -46,6 +48,8 @@ export default function Tasks() {
 
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState<Set<string>>(() => new Set());
+  const [myTasksOnly, setMyTasksOnly] = useState(false);
+  const [dueFilter, setDueFilter] = useState<DueFilter>("all");
   const [groupBy, setGroupBy] = useState<GroupBy>("bucket");
   const [view, setView] = useState<BoardView>("board");
   const [dialog, setDialog] = useState<{ open: boolean; id: string | null; defaults: Partial<TaskForm> }>({
@@ -54,7 +58,11 @@ export default function Tasks() {
     defaults: NO_DEFAULTS,
   });
 
-  const visible = useMemo(() => filterTasks(tasks, query, people), [tasks, query, people]);
+  const taskUserId = demo ? "demo-user-priya" : user?.id ?? null;
+  const visible = useMemo(
+    () => filterTasks(tasks, query, people, dueFilter, myTasksOnly, taskUserId),
+    [tasks, query, people, dueFilter, myTasksOnly, taskUserId],
+  );
   const labels = useMemo(() => knownLabels(tasks), [tasks]);
   const current = dialog.id ? tasks.find((t) => t.id === dialog.id) ?? null : null;
 
@@ -103,6 +111,11 @@ export default function Tasks() {
             members={members}
             people={people}
             onTogglePerson={togglePerson}
+            userId={taskUserId}
+            myTasksOnly={myTasksOnly}
+            onMyTasks={() => setMyTasksOnly((value) => !value)}
+            dueFilter={dueFilter}
+            onDueFilter={setDueFilter}
             groupBy={groupBy}
             onGroupBy={setGroupBy}
             view={view}

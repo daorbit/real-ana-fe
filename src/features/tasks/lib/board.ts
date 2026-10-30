@@ -1,5 +1,5 @@
 import type { WorkspaceMember } from "@/shared/types";
-import type { Bucket, GroupBy, Task, TaskPatch, TaskPriority, TaskStatus } from "../types";
+import type { Bucket, DueFilter, GroupBy, Task, TaskPatch, TaskPriority, TaskStatus } from "../types";
 
 export const STATUS_ORDER: TaskStatus[] = ["todo", "doing", "done"];
 
@@ -51,10 +51,19 @@ export function matchesSearch(task: Task, query: string): boolean {
   );
 }
 
-export function filterTasks(tasks: Task[], query: string, people: Set<string>): Task[] {
+export function filterTasks(
+  tasks: Task[],
+  query: string,
+  people: Set<string>,
+  dueFilter: DueFilter,
+  myTasksOnly: boolean,
+  userId: string | null,
+): Task[] {
   return tasks.filter(
     (task) =>
       matchesSearch(task, query) &&
+      (!myTasksOnly || Boolean(userId && task.assigneeIds.includes(userId))) &&
+      (dueFilter === "all" || dueState(task.dueDate, task.status) === dueFilter) &&
       (!people.size ||
         (task.assigneeIds.length
           ? task.assigneeIds.some((id) => people.has(id))

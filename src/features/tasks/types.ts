@@ -35,6 +35,8 @@ export type TaskPatch = Partial<
 
 export type GroupBy = "bucket" | "progress" | "assignee" | "priority";
 
+export type DueFilter = "all" | "overdue" | "soon";
+
 export type Bucket = { id: string; name: string; order: number };
 
 export type TasksResponse = { buckets: Bucket[]; tasks: Task[] };
