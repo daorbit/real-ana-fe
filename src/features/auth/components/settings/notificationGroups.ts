@@ -48,6 +48,8 @@ export const NOTIFICATION_GROUPS: NotificationGroup[] = [
       "social.post.failed",
       "lead.captured",
       "form.submission",
+      "task.assigned",
+      "insights.ready",
     ],
   },
 ];

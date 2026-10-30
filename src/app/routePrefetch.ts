@@ -35,6 +35,8 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/search-console/page": () => import("@/features/searchConsole/pages/SearchConsolePageDetail"),
   "/app/compare": () => import("@/features/compare/pages/Compare"),
   "/app/backlinks": () => import("@/features/backlinks/pages/Backlinks"),
+  "/app/tasks": () => import("@/features/tasks/pages/Tasks"),
+  "/app/insights": () => import("@/features/insights/pages/Insights"),
   "/app/reviews": () => import("@/features/reviews/pages/Reviews"),
   "/app/workspaces": () => import("@/features/workspace/pages/Workspaces"),
   "/app/install": () => import("@/features/workspace/pages/InstallSite"),

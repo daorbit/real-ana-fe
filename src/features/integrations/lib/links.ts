@@ -37,6 +37,8 @@ const APP_GUIDES: Record<string, string> = {
   "quantalog-seo-reports": docsUrl(DOCS_SLUGS.quantalogSeoReports),
   "quantalog-funnels": docsUrl(DOCS_SLUGS.funnels),
   "quantalog-invoicing": docsUrl(DOCS_SLUGS.quantalogInvoicing),
+  "quantalog-tasks": docsUrl(DOCS_SLUGS.quantalogTasks),
+  "quantalog-insights": docsUrl(DOCS_SLUGS.quantalogInsights),
   linkedin: SOCIAL,
   instagram: SOCIAL,
 };

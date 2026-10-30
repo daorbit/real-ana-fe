@@ -220,6 +220,38 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Paid and pending", body: "See revenue, unpaid invoices and open quotes for the workspace at a glance." },
     ],
   },
+  tasks: {
+    id: "tasks",
+    tileId: "quantalog-tasks",
+    name: "Quantalog Tasks",
+    navLabel: "Tasks",
+    route: "/app/tasks",
+    location: "in the sidebar",
+    offNote: "Your tasks are kept, so turning it back on picks up where you left off.",
+    tagline: "Plan the team's work on one board: who does what, by when.",
+    description: "A planner board for the workspace. Add tasks, give them owners, labels, checklists and due dates, and drag them from Not started to Completed. Group the board by progress, person or priority.",
+    features: [
+      { title: "A real planner board", body: "Drag cards between columns, group by progress, person or priority, or switch to a grid of every task." },
+      { title: "Clear owners", body: "Assign a task to anyone in the workspace. They hear about it in the bell straight away." },
+      { title: "Details that matter", body: "Labels, checklists you can show on the card, priorities and due dates that turn red when late." },
+    ],
+  },
+  insights: {
+    id: "insights",
+    tileId: "quantalog-insights",
+    name: "Quantalog Insights",
+    navLabel: "Insights",
+    route: "/app/insights",
+    location: "in the sidebar",
+    offNote: "Past weeks' insights are kept, so turning it back on picks up where you left off.",
+    tagline: "What changed on your site this week, and why it matters.",
+    description: "Every Monday, Insights compares the week with the one before and calls out what moved: new traffic sources, pages taking off or slipping, new countries and changes in how people browse, with a short summary from Orbit.",
+    features: [
+      { title: "Changes, not charts", body: "Only what actually moved, ranked by how much it matters, in plain sentences." },
+      { title: "The why behind it", body: "Each insight shows this week against last, with Orbit's two-line read on the week." },
+      { title: "From insight to action", body: "Open the matching analytics view, or turn any insight into a task in one click." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

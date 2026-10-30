@@ -758,6 +758,7 @@ export type QuotaSummary = {
   goalTargets?: FeatureAllowance;
   popups?: FeatureAllowance;
   bioPages?: FeatureAllowance;
+  tasks?: FeatureAllowance;
   alertCheckHours?: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */
   allowedRanges: ("1h" | "24h" | "7d" | "30d" | "custom")[];
@@ -1168,7 +1169,9 @@ export type WorkspaceAppId =
   | "seoReports"
   | "bio"
   | "funnels"
-  | "invoicing";
+  | "invoicing"
+  | "tasks"
+  | "insights";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string; paidAt?: string }>>;
 
@@ -2802,7 +2805,9 @@ export type NotificationType =
   | "admin.message"
   | "security.alert"
   | "form.submission"
-  | "referral.rewarded";
+  | "referral.rewarded"
+  | "task.assigned"
+  | "insights.ready";
 
 /**
  * One row in the panel.

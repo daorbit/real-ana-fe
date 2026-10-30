@@ -45,6 +45,8 @@ const SearchConsole = lazy(() => import("@/features/searchConsole/pages/SearchCo
 const SearchConsolePageDetail = lazy(() => import("@/features/searchConsole/pages/SearchConsolePageDetail"));
 const Compare = lazy(() => import("@/features/compare/pages/Compare"));
 const Backlinks = lazy(() => import("@/features/backlinks/pages/Backlinks"));
+const Tasks = lazy(() => import("@/features/tasks/pages/Tasks"));
+const Insights = lazy(() => import("@/features/insights/pages/Insights"));
 const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"));
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
 const InstallSite = lazy(() => import("@/features/workspace/pages/InstallSite"));
@@ -286,6 +288,8 @@ export default function App() {
                 <Route path="/app/search-console/page/:pageKey" element={<SearchConsolePageDetail />} />
                 <Route path="/app/compare" element={<Compare />} />
                 <Route path="/app/backlinks" element={<Backlinks />} />
+                <Route path="/app/tasks" element={<Tasks />} />
+                <Route path="/app/insights" element={<Insights />} />
                 <Route path="/app/workspaces" element={<Workspaces />} />
               <Route path="/app/install" element={<InstallSite />} />
               <Route path="/app/install/:siteId" element={<InstallSite />} />

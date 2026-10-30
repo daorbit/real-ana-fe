@@ -1,7 +1,7 @@
 import { useActiveBilling } from "@/features/workspace/context";
 import { notify } from "@/shared/lib/notify";
 
-export type CountedFeature = "dashboards" | "embeds" | "goalTargets" | "popups" | "bioPages";
+export type CountedFeature = "dashboards" | "embeds" | "goalTargets" | "popups" | "bioPages" | "tasks";
 
 const COPY: Record<CountedFeature, { kind: string; label: string; noun: string; plural: string }> = {
   dashboards: { kind: "dashboards", label: "Dashboards", noun: "custom dashboard", plural: "custom dashboards" },
@@ -9,6 +9,7 @@ const COPY: Record<CountedFeature, { kind: string; label: string; noun: string; 
   goalTargets: { kind: "goal_targets", label: "Goal targets", noun: "goal target", plural: "goal targets" },
   popups: { kind: "popups", label: "Website popups", noun: "website popup", plural: "website popups" },
   bioPages: { kind: "bio_pages", label: "Link-in-bio pages", noun: "link-in-bio page", plural: "link-in-bio pages" },
+  tasks: { kind: "tasks", label: "Open tasks", noun: "open task", plural: "open tasks" },
 };
 
 export function useFeatureAllowance(feature: CountedFeature, used: number) {

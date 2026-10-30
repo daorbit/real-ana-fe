@@ -227,6 +227,22 @@ export function notificationCopy(
       };
     }
 
+    case "insights.ready": {
+      const count = Number(d.count ?? 0);
+      return {
+        title: t("activity.insightsReady.title", "Weekly insights ready"),
+        body: t("activity.insightsReady.body", "{{count}} changes worth a look this week.", { count }),
+      };
+    }
+
+    case "task.assigned": {
+      const title = str(d, "title", t("activity.taskAssigned.aTask", "a task"));
+      return {
+        title: t("activity.taskAssigned.title", "Task assigned to you"),
+        body: t("activity.taskAssigned.body", "You were assigned “{{title}}”.", { title }),
+      };
+    }
+
     case "seo.audit.done": {
       const site = str(d, "siteName", t("activity.yourSite", "your site"));
       return {
@@ -302,6 +318,8 @@ export function notificationTypeLabel(type: NotificationType, t: TFunction): str
     "security.alert": ["activity.pref.securityAlert", "Security alerts"],
     "form.submission": ["activity.pref.formSubmission", "Form submissions"],
     "referral.rewarded": ["activity.pref.referralRewarded", "Referral rewards"],
+    "task.assigned": ["activity.pref.taskAssigned", "Tasks assigned to you"],
+    "insights.ready": ["activity.pref.insightsReady", "Weekly insights"],
   };
 
   const [key, fallback] = labels[type];
