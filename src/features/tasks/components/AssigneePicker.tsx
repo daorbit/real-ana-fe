@@ -19,7 +19,7 @@ export function AssigneePicker({
 }) {
   const current = value ? memberMap.get(value) : undefined;
   const chip = (
-    <UnstyledButton className={classes.assignee} disabled={readOnly}>
+    <UnstyledButton className={classes.assignee} data-empty={!current || undefined} disabled={readOnly}>
       {current ? (
         <>
           <UserAvatar src={current.avatarUrl} name={current.name || current.email} size={26} radius="xl" />

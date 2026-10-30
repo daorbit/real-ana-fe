@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { Plus } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -20,7 +20,9 @@ import { knownLabels } from "../lib/labels";
 import { TasksToolbar } from "../components/TasksToolbar";
 import { TaskBoard } from "../components/TaskBoard";
 import { TaskGrid } from "../components/TaskGrid";
+import { TaskCharts } from "../components/charts/TaskCharts";
 import { TaskDialog } from "../components/TaskDialog";
+import { TasksSkeleton } from "../components/TasksSkeleton";
 import type { BoardView, Bucket, GroupBy, Task, TaskPatch } from "../types";
 import classes from "../components/Tasks.module.css";
 
@@ -93,11 +95,7 @@ export default function Tasks() {
       {!active ? null : !on ? (
         <QuantalogAppGate app="tasks" />
       ) : isLoading && !demo ? (
-        <div className={classes.board}>
-          <Skeleton height={420} width={300} radius="lg" />
-          <Skeleton height={420} width={300} radius="lg" />
-          <Skeleton height={420} width={300} radius="lg" />
-        </div>
+        <TasksSkeleton />
       ) : (
         <>
           <TasksToolbar
@@ -131,7 +129,7 @@ export default function Tasks() {
               onRenameBucket={(bucket, name) => void bucketActions.rename(bucket, name)}
               onDeleteBucket={bucketActions.remove}
             />
-          ) : (
+          ) : view === "grid" ? (
             <TaskGrid
               tasks={visible}
               buckets={buckets}
@@ -140,6 +138,8 @@ export default function Tasks() {
               onOpen={(task) => setDialog({ open: true, id: task.id, defaults: NO_DEFAULTS })}
               onToggleDone={toggleDone}
             />
+          ) : (
+            <TaskCharts tasks={visible} buckets={buckets} members={members} />
           )}
         </>
       )}

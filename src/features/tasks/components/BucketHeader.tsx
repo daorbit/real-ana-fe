@@ -57,9 +57,8 @@ export function BucketHeader({
         onDoubleClick={() => canEdit && setEditing(true)}
         title={canEdit ? "Double-click to rename" : undefined}
       >
-        {name}
+        {name} ({count})
       </span>
-      <span className={classes.columnCount}>{count}</span>
       {canEdit && (
         <Menu position="bottom-end" width={180}>
           <Menu.Target>

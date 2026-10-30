@@ -81,10 +81,9 @@ export function BoardColumn({
             onDelete={onDeleteBucket}
           />
         ) : (
-          <>
-            <span className={classes.columnTitle}>{column.title}</span>
-            <span className={classes.columnCount}>{open.length}</span>
-          </>
+          <span className={classes.columnTitle}>
+            {column.title} ({open.length})
+          </span>
         )}
       </header>
 

@@ -30,6 +30,7 @@ export function InlineCreate({ busy, onCreate }: { busy: boolean; onCreate: (tit
   return (
     <div className={classes.createBox}>
       <Textarea
+        classNames={{ input: classes.createInput }}
         variant="unstyled"
         autosize
         minRows={2}
@@ -48,10 +49,10 @@ export function InlineCreate({ busy, onCreate }: { busy: boolean; onCreate: (tit
         aria-label="New task name"
       />
       <div className={classes.createActions}>
-        <Button size="compact-sm" variant="subtle" color="gray" onClick={close}>
+        <Button size="xs" variant="subtle" color="gray" onClick={close}>
           Cancel
         </Button>
-        <Button size="compact-sm" loading={busy} disabled={!title.trim()} onClick={() => void submit()}>
+        <Button size="xs" loading={busy} disabled={!title.trim()} onClick={() => void submit()}>
           Add task
         </Button>
       </div>

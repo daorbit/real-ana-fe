@@ -69,15 +69,15 @@
 
 .board {
   display: flex;
-  gap: 16px;
+  gap: 22px;
   height: 100%;
 }
 
 .column {
   display: flex;
-  flex: 0 0 300px;
+  flex: 0 0 290px;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   height: 100%;
   min-height: 0;
   border-radius: 14px;
@@ -98,18 +98,15 @@
 
 .columnTitle {
   overflow: hidden;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
   color: var(--text);
 }
 
-.columnCount {
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-}
 
 .columnMenu {
   margin-left: auto;
@@ -154,23 +151,20 @@
 
 .addTask {
   display: flex;
+  flex: none;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   width: 100%;
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  font-size: 13px;
+  height: 32px;
+  padding: 0 2px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--text-2);
-  transition: border-color var(--duration-fast) ease, color var(--duration-fast) ease;
+  transition: color var(--duration-fast) ease;
 }
 
 .addTask:hover {
-  border-color: var(--border-hover);
-  color: var(--text);
+  color: var(--accent-text);
 }
 
 .cards {
@@ -218,15 +212,29 @@
 
 .card {
   display: flex;
+  flex: none;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
   cursor: grab;
   touch-action: manipulation;
   transition: border-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 12px;
+}
+
+.cardIcons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding-left: 28px;
 }
 
 .card:hover {
@@ -346,8 +354,8 @@
 .cardChecklist {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-left: 26px;
+  gap: 6px;
+  padding-left: 28px;
 }
 
 .cardCheckItem {
@@ -367,8 +375,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 24px;
-  padding-left: 26px;
+  min-height: 46px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
 }
 
 .key {
@@ -390,22 +399,24 @@
 .due {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 20px;
-  padding: 0 7px;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--text-2);
 }
 
 .due[data-state="overdue"] {
-  background: var(--red);
-  color: #fff;
+  border-color: var(--red);
+  color: var(--red);
 }
 
 .due[data-state="today"] {
-  background: color-mix(in srgb, var(--amber) 16%, transparent);
+  border-color: var(--amber);
   color: var(--amber);
 }
 
@@ -443,6 +454,48 @@
   border: 1px solid var(--accent);
   border-radius: 12px;
   background: var(--surface);
+}
+
+.createBox .createInput,
+.createBox .createInput:focus,
+.createBox .createInput:focus-within {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.skeletonCard {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.skeletonLines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 3px;
+}
+
+.skeletonPeople {
+  display: flex;
+  gap: 4px;
+}
+
+.skeletonAdd {
+  display: flex;
+  align-items: center;
+  height: 32px;
 }
 
 .createActions {
@@ -551,7 +604,11 @@
 }
 
 .dialogProgress {
-  margin-top: 6px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 27px;
 }
 
 .dialogTitleRow .titleField .titleInput,
@@ -606,9 +663,34 @@
   align-items: center;
   gap: 8px;
   height: 32px;
+  margin-left: -3px;
   padding: 0 10px 0 3px;
   border-radius: var(--radius-pill);
   transition: background-color var(--duration-fast) ease;
+}
+
+.assignee[data-empty] {
+  margin-left: 0;
+  padding: 0;
+}
+
+.assignee[data-empty]:hover:not(:disabled) {
+  background: transparent;
+}
+
+.assignee[data-empty]:hover:not(:disabled) .assigneeEmpty,
+.inlineAction:hover {
+  color: var(--text);
+}
+
+.inlineAction {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color var(--duration-fast) ease;
 }
 
 .assignee:hover:not(:disabled) {
@@ -622,9 +704,10 @@
 }
 
 .assigneeEmpty {
-  padding-left: 7px;
   font-size: 13.5px;
+  font-weight: 500;
   color: var(--muted);
+  transition: color var(--duration-fast) ease;
 }
 
 .fields {
@@ -652,7 +735,7 @@
 .dialogTitleRow {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
 }
 
 

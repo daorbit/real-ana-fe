@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ActionIcon, Button, Menu, Modal, Select, TextInput, Textarea } from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
 import { Link } from "react-router-dom";
 import { CalendarDays, Columns3, ExternalLink, Flag, MoreHorizontal, Tag, Trash2, UserPlus, X } from "lucide-react";
 import { timeAgo } from "@/shared/lib/format";
@@ -182,12 +183,15 @@ export function TaskDialog({
             />
           </Field>
           <Field label="Due date">
-            <TextInput
-              type="date"
+            <DatePickerInput
+              placeholder="Set due date"
+              valueFormat="D MMM YYYY"
+              clearable
               readOnly={readOnly}
               leftSection={<CalendarDays size={15} />}
-              value={form.due}
-              onChange={(e) => change({ due: e.currentTarget.value })}
+              value={form.due || null}
+              onChange={(value) => change({ due: value ?? "" })}
+              popoverProps={{ radius: "lg", shadow: "lg", position: "bottom-start" }}
             />
           </Field>
           <Field label="Bucket">

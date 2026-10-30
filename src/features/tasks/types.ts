@@ -39,4 +39,4 @@ export type Bucket = { id: string; name: string; order: number };
 
 export type TasksResponse = { buckets: Bucket[]; tasks: Task[] };
 
-export type BoardView = "board" | "grid";
+export type BoardView = "board" | "grid" | "charts";

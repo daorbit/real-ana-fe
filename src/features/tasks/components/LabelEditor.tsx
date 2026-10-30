@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button, Popover, TextInput, UnstyledButton } from "@mantine/core";
-import { Plus } from "lucide-react";
 import { LABEL_COLORS } from "../lib/labels";
 import type { LabelColor, TaskLabel } from "../types";
 import { LabelPill } from "./TaskBits";
@@ -45,9 +44,9 @@ export function LabelEditor({
       {!readOnly && value.length < MAX_LABELS && (
         <Popover opened={open} onChange={setOpen} position="bottom-start" width={270} trapFocus>
           <Popover.Target>
-            <Button variant="subtle" color="gray" size="compact-sm" leftSection={<Plus size={14} />} onClick={() => setOpen((o) => !o)}>
+            <UnstyledButton className={classes.inlineAction} onClick={() => setOpen((o) => !o)}>
               Add label
-            </Button>
+            </UnstyledButton>
           </Popover.Target>
           <Popover.Dropdown>
             <div className={classes.labelPicker}>

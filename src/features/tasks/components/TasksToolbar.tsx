@@ -1,5 +1,5 @@
 import { Button, Group, Menu, TextInput, UnstyledButton } from "@mantine/core";
-import { Check, ChevronDown, Columns3, Rows3, Search, Table2 } from "lucide-react";
+import { ChartPie, Check, ChevronDown, Columns3, Rows3, Search, Table2 } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { GROUP_LABEL } from "../lib/board";
 import type { BoardView, GroupBy } from "../types";
@@ -11,6 +11,7 @@ const GROUPS: GroupBy[] = ["bucket", "progress", "assignee", "priority"];
 const VIEWS: { value: BoardView; label: string; icon: typeof Columns3 }[] = [
   { value: "board", label: "Board", icon: Columns3 },
   { value: "grid", label: "Grid", icon: Table2 },
+  { value: "charts", label: "Charts", icon: ChartPie },
 ];
 
 export function TasksToolbar({

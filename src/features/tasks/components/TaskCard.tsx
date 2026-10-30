@@ -1,15 +1,14 @@
 import { Tooltip, UnstyledButton } from "@mantine/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CheckSquare, Link2, NotebookText } from "lucide-react";
+import { CheckSquare, Link2, NotebookText, UserPlus } from "lucide-react";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
-import { taskKey } from "../lib/board";
 import type { Task } from "../types";
 import { DueChip, LabelPill, PriorityIcon, ProgressButton, ProgressGlyph } from "./TaskBits";
 import classes from "./Tasks.module.css";
 
-const CARD_CHECK_ITEMS = 4;
+const CARD_CHECK_ITEMS = 8;
 
 type CardProps = {
   task: Task;
@@ -21,61 +20,81 @@ type CardProps = {
 
 export function TaskCardView({ task, assignee, canEdit, onOpen, onToggleDone }: CardProps) {
   const checked = task.checklist.filter((c) => c.done).length;
+  const hasMeta =
+    task.status === "doing" || task.priority !== "none" || Boolean(task.notes) || Boolean(task.link) || task.checklist.length > 0;
 
   return (
     <>
-      {task.labels.length > 0 && (
-        <div className={classes.labels}>
-          {task.labels.map((l) => (
-            <LabelPill key={l.text} label={l} />
-          ))}
+      <div className={classes.cardBody}>
+        {task.labels.length > 0 && (
+          <div className={classes.labels}>
+            {task.labels.map((l) => (
+              <LabelPill key={l.text} label={l} />
+            ))}
+          </div>
+        )}
+        <div className={classes.titleRow}>
+          <ProgressButton status={task.status === "done" ? "done" : "todo"} disabled={!canEdit} onToggle={() => onToggleDone(task)} />
+          <UnstyledButton className={classes.cardOpen} onClick={() => onOpen(task)}>
+            <span className={classes.cardTitle}>{task.title}</span>
+          </UnstyledButton>
         </div>
-      )}
-      <div className={classes.titleRow}>
-        <ProgressButton status={task.status} disabled={!canEdit} onToggle={() => onToggleDone(task)} />
-        <UnstyledButton className={classes.cardOpen} onClick={() => onOpen(task)}>
-          <span className={classes.cardTitle}>{task.title}</span>
-        </UnstyledButton>
-      </div>
-      {task.checklistOnCard && task.checklist.length > 0 && (
-        <div className={classes.cardChecklist}>
-          {task.checklist.slice(0, CARD_CHECK_ITEMS).map((item) => (
-            <span key={item.id} className={classes.cardCheckItem} data-done={item.done || undefined}>
-              <span className={classes.progress} data-status={item.done ? "done" : "todo"}>
-                <ProgressGlyph status={item.done ? "done" : "todo"} size={13} />
+        {task.checklistOnCard && task.checklist.length > 0 && (
+          <div className={classes.cardChecklist}>
+            {task.checklist.slice(0, CARD_CHECK_ITEMS).map((item) => (
+              <span key={item.id} className={classes.cardCheckItem} data-done={item.done || undefined}>
+                <span className={classes.progress} data-status={item.done ? "done" : "todo"}>
+                  <ProgressGlyph status={item.done ? "done" : "todo"} size={15} />
+                </span>
+                {item.text}
               </span>
-              {item.text}
-            </span>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+        {hasMeta && (
+          <div className={classes.cardIcons}>
+            {task.status === "doing" && (
+              <Tooltip label="In progress" withArrow>
+                <span className={classes.progress} data-status="doing">
+                  <ProgressGlyph status="doing" size={15} />
+                </span>
+              </Tooltip>
+            )}
+            <PriorityIcon priority={task.priority} />
+            {task.notes && (
+              <Tooltip label="Has notes" withArrow>
+                <span className={classes.meta}>
+                  <NotebookText size={14} />
+                </span>
+              </Tooltip>
+            )}
+            {task.link && (
+              <span className={classes.meta}>
+                <Link2 size={14} />
+              </span>
+            )}
+            {task.checklist.length > 0 && (
+              <span className={classes.meta}>
+                <CheckSquare size={14} />
+                {checked} / {task.checklist.length}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
       <div className={classes.cardFoot}>
-        <span className={classes.key}>{taskKey(task.key)}</span>
-        <PriorityIcon priority={task.priority} />
         {task.dueDate && <DueChip dueDate={task.dueDate} status={task.status} />}
         <span className={classes.footEnd}>
-          {task.checklist.length > 0 && (
-            <span className={classes.meta}>
-              <CheckSquare size={13} />
-              {checked}/{task.checklist.length}
-            </span>
-          )}
-          {task.notes && (
-            <span className={classes.meta}>
-              <NotebookText size={13} />
-            </span>
-          )}
-          {task.link && (
-            <span className={classes.meta}>
-              <Link2 size={13} />
-            </span>
-          )}
-          {assignee && (
+          {assignee ? (
             <Tooltip label={assignee.name || assignee.email} withArrow>
               <span>
-                <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={24} radius="xl" />
+                <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={26} radius="xl" />
               </span>
             </Tooltip>
+          ) : (
+            <span className={classes.meta}>
+              <UserPlus size={16} />
+            </span>
           )}
         </span>
       </div>
