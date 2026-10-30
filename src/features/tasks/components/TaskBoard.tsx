@@ -12,12 +12,13 @@ import {
   type UniqueIdentifier,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { MoveHorizontal } from "lucide-react";
+import { useMediaQuery } from "@mantine/hooks";
 import type { WorkspaceMember } from "@/shared/types";
 import { buildColumns, columnKeyOf, groupTasks, MULTIPLE_ASSIGNEES, orderAt, topOf } from "../lib/board";
 import type { Bucket, GroupBy, Task, TaskPatch } from "../types";
 import { AddBucket } from "./AddBucket";
 import { BoardColumn } from "./BoardColumn";
+import { ColumnPicker } from "./ColumnPicker";
 import { TaskCardOverlay } from "./TaskCard";
 import classes from "./Tasks.module.css";
 
@@ -68,10 +69,15 @@ export function TaskBoard({
     return Object.fromEntries(columns.map((c) => [c.key, (groups.get(c.key) ?? []).map((t) => t.id)]));
   }, [tasks, groupBy, buckets, columns]);
 
+  const mobile = useMediaQuery("(max-width: 48em)") ?? false;
+  const [picked, setPicked] = useState<string | null>(null);
   const [items, setItems] = useState<Items | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const droppedAt = useRef(0);
   const live = items ?? base;
+  const pickedKey = columns.some((c) => c.key === picked) ? picked! : columns[0]?.key ?? "";
+  const shown = mobile ? columns.filter((c) => c.key === pickedKey) : columns;
+  const splitCompleted = groupBy !== "progress";
 
   useEffect(() => {
     if (!activeId) setItems(null);
@@ -147,19 +153,25 @@ export function TaskBoard({
         setItems(null);
       }}
     >
-      <div className={classes.boardHint}>
-        <MoveHorizontal size={14} />
-        Swipe to browse columns
-      </div>
-      <div className={classes.boardScroll} role="region" aria-label="Task board columns" tabIndex={0}>
+      {mobile && (
+        <ColumnPicker
+          columns={columns}
+          items={live}
+          taskMap={taskMap}
+          splitCompleted={splitCompleted}
+          value={pickedKey}
+          onChange={setPicked}
+        />
+      )}
+      <div className={classes.boardScroll} role="region" aria-label="Task board columns" tabIndex={mobile ? undefined : 0}>
         <div className={classes.board}>
-          {columns.map((column) => (
+          {shown.map((column) => (
             <BoardColumn
               key={column.key}
               column={column}
               ids={live[column.key] ?? []}
               taskMap={taskMap}
-              splitCompleted={groupBy !== "progress"}
+              splitCompleted={splitCompleted}
               members={memberMap}
               canEdit={canEdit}
               canDeleteBucket={buckets.length > 1}

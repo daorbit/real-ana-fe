@@ -1,9 +1,35 @@
+.page {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+@media (min-width: 48em) {
+  :global(body[data-page="tasks-board"]) :global(.app-panel__scroll) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global(body[data-page="tasks-board"]) :global(.app-panel__scroll > .route-fade) {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+  }
+}
+
 .toolbar {
   display: flex;
+  flex: none;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
+}
+
+.searchRow,
+.filterRow {
+  display: contents;
 }
 
 .search {
@@ -12,12 +38,26 @@
 
 .spacer {
   flex: 1;
+  order: 1;
 }
 
 .usage {
+  order: 2;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
+}
+
+.groupBy {
+  order: 3;
+}
+
+.views {
+  order: 4;
+}
+
+.columnPicker {
+  display: none;
 }
 
 .people {
@@ -52,6 +92,7 @@
 .activeFilters {
   display: flex;
   flex: 1 0 100%;
+  order: 5;
   flex-wrap: wrap;
   align-items: center;
   gap: 7px;
@@ -117,7 +158,8 @@
 }
 
 .boardScroll {
-  height: calc(100dvh - 230px);
+  display: flex;
+  flex: 1 1 0;
   min-height: 420px;
   overflow-x: auto;
   overflow-y: hidden;
@@ -127,14 +169,10 @@
 
 .board {
   display: flex;
+  flex: none;
   gap: 22px;
-  height: 100%;
   width: max-content;
   min-width: 100%;
-}
-
-.boardHint {
-  display: none;
 }
 
 .column {
@@ -142,7 +180,6 @@
   flex: 0 0 290px;
   flex-direction: column;
   gap: 6px;
-  height: 100%;
   min-height: 0;
   border-radius: 14px;
   transition: background-color var(--duration-fast) ease;
@@ -1062,16 +1099,125 @@
 
 
 @media (max-width: 48em) {
-  .search {
-    width: 100%;
+  .toolbar {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
   }
 
-  .spacer {
+  .searchRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .search {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  .filterRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-inline: calc(var(--m-gutter) * -1);
+    padding: 2px var(--m-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .filterRow::-webkit-scrollbar {
     display: none;
   }
 
+  .filterRow > * {
+    flex-shrink: 0;
+  }
+
+  .groupBy {
+    order: 0;
+  }
+
+  .spacer,
+  .usage {
+    display: none;
+  }
+
+  .views {
+    order: 0;
+    width: 100%;
+  }
+
+  .views > * {
+    flex: 1;
+  }
+
   .activeFilters {
+    order: 0;
     gap: 6px;
+    margin-top: 0;
+  }
+
+  .columnPicker {
+    display: block;
+    margin: 0 calc(var(--m-gutter) * -1) 14px;
+  }
+
+  .columnPicker > * {
+    padding-inline: var(--m-gutter);
+    scroll-padding-inline: var(--m-gutter);
+  }
+
+  .boardScroll {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .board {
+    display: block;
+    width: auto;
+    min-width: 0;
+  }
+
+  .column {
+    gap: 4px;
+  }
+
+  .column[data-over] {
+    background: transparent;
+  }
+
+  .skeletonColumn:not(:first-child) {
+    display: none;
+  }
+
+  .columnTitle {
+    font-size: 20px;
+  }
+
+  .columnMenu {
+    opacity: 1;
+  }
+
+  .cards {
+    flex: none;
+    gap: 10px;
+    min-height: 0;
+    padding-bottom: 0;
+    overflow: visible;
+  }
+
+  .addTask {
+    height: 40px;
+  }
+
+  .addBucket {
+    margin-top: 20px;
   }
 
   .fields {
@@ -1080,35 +1226,6 @@
 
   .dialogBody {
     padding: 18px 16px 22px;
-  }
-
-
-
-  .column {
-    flex-basis: min(86vw, 360px);
-    scroll-snap-align: start;
-  }
-
-  .boardScroll {
-    height: min(62dvh, 680px);
-    min-height: 360px;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: 8px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .board {
-    gap: 14px;
-    padding: 0 8px 8px;
-  }
-
-  .boardHint {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: -8px 0 10px;
-    font-size: 12px;
-    color: var(--muted);
   }
 
   .cardBody {

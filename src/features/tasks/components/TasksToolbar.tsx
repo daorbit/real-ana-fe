@@ -1,10 +1,11 @@
-import { Button, Group, Menu, TextInput, UnstyledButton } from "@mantine/core";
+import { ActionIcon, Button, Group, Menu, TextInput, UnstyledButton } from "@mantine/core";
 import {
   CalendarClock,
   ChartPie,
   Check,
   ChevronDown,
   Columns3,
+  Plus,
   Rows3,
   Search,
   Table2,
@@ -49,6 +50,7 @@ export function TasksToolbar({
   view,
   onView,
   usage,
+  onAdd,
 }: {
   query: string;
   onQuery: (value: string) => void;
@@ -67,76 +69,92 @@ export function TasksToolbar({
   view: BoardView;
   onView: (value: BoardView) => void;
   usage: string | null;
+  onAdd?: () => void;
 }) {
   const filtersActive = Boolean(query.trim() || people.size || myTasksOnly || dueFilter !== "all");
 
   return (
     <div className={classes.toolbar}>
-      <TextInput
-        className={classes.search}
-        size="sm"
-        leftSection={<Search size={15} />}
-        placeholder="Search tasks or T-12"
-        value={query}
-        onChange={(e) => onQuery(e.currentTarget.value)}
-        aria-label="Search tasks"
-      />
-      <PeopleFilter members={members} selected={people} onToggle={onTogglePerson} />
-      <Button
-        variant={myTasksOnly ? "light" : "default"}
-        size="sm"
-        leftSection={<UserRoundCheck size={15} />}
-        aria-pressed={myTasksOnly}
-        disabled={!userId}
-        onClick={onMyTasks}
-      >
-        My tasks
-      </Button>
-      <Menu position="bottom-start" width={180}>
-        <Menu.Target>
-          <Button
-            variant={dueFilter !== "all" ? "light" : "default"}
-            size="sm"
-            leftSection={<CalendarClock size={15} />}
-            rightSection={<ChevronDown size={14} />}
-            aria-label={`Due date filter: ${
-              DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "Any due date"
-            }`}
-          >
-            {DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "Any due date"}
-          </Button>
-        </Menu.Target>
-        <Menu.Dropdown>
-          {DUE_FILTERS.map((item) => (
-            <Menu.Item
-              key={item.value}
-              onClick={() => onDueFilter(item.value)}
-              rightSection={item.value === dueFilter ? <Check size={14} /> : null}
-            >
-              {item.label}
-            </Menu.Item>
-          ))}
-        </Menu.Dropdown>
-      </Menu>
-      <span className={classes.spacer} />
-      {usage && <span className={classes.usage}>{usage} open tasks</span>}
-      {view === "board" && (
-        <Menu position="bottom-end" width={200}>
+      <div className={classes.searchRow}>
+        <TextInput
+          className={classes.search}
+          size="sm"
+          leftSection={<Search size={15} />}
+          placeholder="Search tasks or T-12"
+          value={query}
+          onChange={(e) => onQuery(e.currentTarget.value)}
+          aria-label="Search tasks"
+        />
+        {onAdd && (
+          <ActionIcon hiddenFrom="sm" size={36} radius="xl" onClick={onAdd} aria-label="Add task">
+            <Plus size={18} />
+          </ActionIcon>
+        )}
+      </div>
+      <div className={classes.filterRow}>
+        <PeopleFilter members={members} selected={people} onToggle={onTogglePerson} />
+        <Button
+          variant={myTasksOnly ? "light" : "default"}
+          size="sm"
+          leftSection={<UserRoundCheck size={15} />}
+          aria-pressed={myTasksOnly}
+          disabled={!userId}
+          onClick={onMyTasks}
+        >
+          My tasks
+        </Button>
+        <Menu position="bottom-start" width={180}>
           <Menu.Target>
-            <Button variant="default" size="sm" leftSection={<Rows3 size={15} />} rightSection={<ChevronDown size={14} />}>
-              Group by {GROUP_LABEL[groupBy]}
+            <Button
+              variant={dueFilter !== "all" ? "light" : "default"}
+              size="sm"
+              leftSection={<CalendarClock size={15} />}
+              rightSection={<ChevronDown size={14} />}
+              aria-label={`Due date filter: ${
+                DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "Any due date"
+              }`}
+            >
+              {DUE_FILTERS.find((item) => item.value === dueFilter)?.label ?? "Any due date"}
             </Button>
           </Menu.Target>
           <Menu.Dropdown>
-            {GROUPS.map((g) => (
-              <Menu.Item key={g} onClick={() => onGroupBy(g)} rightSection={g === groupBy ? <Check size={14} /> : null}>
-                {GROUP_LABEL[g]}
+            {DUE_FILTERS.map((item) => (
+              <Menu.Item
+                key={item.value}
+                onClick={() => onDueFilter(item.value)}
+                rightSection={item.value === dueFilter ? <Check size={14} /> : null}
+              >
+                {item.label}
               </Menu.Item>
             ))}
           </Menu.Dropdown>
         </Menu>
-      )}
-      <Group gap={2} wrap="nowrap" className="range-segmented" role="tablist" aria-label="View">
+        {view === "board" && (
+          <Menu position="bottom-end" width={200}>
+            <Menu.Target>
+              <Button
+                className={classes.groupBy}
+                variant="default"
+                size="sm"
+                leftSection={<Rows3 size={15} />}
+                rightSection={<ChevronDown size={14} />}
+              >
+                Group by {GROUP_LABEL[groupBy]}
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              {GROUPS.map((g) => (
+                <Menu.Item key={g} onClick={() => onGroupBy(g)} rightSection={g === groupBy ? <Check size={14} /> : null}>
+                  {GROUP_LABEL[g]}
+                </Menu.Item>
+              ))}
+            </Menu.Dropdown>
+          </Menu>
+        )}
+      </div>
+      <span className={classes.spacer} />
+      {usage && <span className={classes.usage}>{usage} open tasks</span>}
+      <Group gap={2} wrap="nowrap" className={`range-segmented ${classes.views}`} role="tablist" aria-label="View">
         {VIEWS.map(({ value, label, icon: Icon }) => (
           <UnstyledButton
             key={value}

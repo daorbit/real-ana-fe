@@ -41,6 +41,13 @@ export type BoardColumn = {
   patch: TaskPatch;
 };
 
+export function countOpen(ids: string[], taskMap: Map<string, Task>, splitCompleted: boolean): number {
+  return ids.filter((id) => {
+    const task = taskMap.get(id);
+    return Boolean(task) && (!splitCompleted || task!.status !== "done");
+  }).length;
+}
+
 export function matchesSearch(task: Task, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;

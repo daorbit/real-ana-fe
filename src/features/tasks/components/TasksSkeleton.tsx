@@ -49,7 +49,7 @@ export function TasksSkeleton() {
       <div className={classes.boardScroll}>
         <div className={classes.board}>
           {COLUMNS.map((cards, i) => (
-            <div key={i} className={classes.column}>
+            <div key={i} className={`${classes.column} ${classes.skeletonColumn}`}>
               <div className={classes.columnHead}>
                 <Skeleton height={16} width={110} radius="sm" />
               </div>
