@@ -24,7 +24,6 @@ import { TaskCharts } from "../components/charts/TaskCharts";
 import { TaskDialog } from "../components/TaskDialog";
 import { TasksSkeleton } from "../components/TasksSkeleton";
 import type { BoardView, Bucket, GroupBy, Task, TaskPatch } from "../types";
-import classes from "../components/Tasks.module.css";
 
 const NO_TASKS: Task[] = [];
 const NO_BUCKETS: Bucket[] = [];
