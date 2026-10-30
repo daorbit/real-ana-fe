@@ -2,7 +2,7 @@ import { CloseButton, TextInput, Loader, UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Tag } from "lucide-react";
 import type { CouponCheckResult } from "@/shared/types";
-import { useCouponCode } from "../hooks/useCouponCode";
+import { useCouponCode, type CouponValidationState } from "../hooks/useCouponCode";
 import classes from "./checkout/Checkout.module.css";
 
 export function CouponField({
@@ -10,14 +10,16 @@ export function CouponField({
   result,
   onChange,
   initialCode,
+  onValidationChange,
 }: {
   amount: number;
   result: CouponCheckResult | null;
   onChange: (result: CouponCheckResult | null) => void;
   initialCode?: string;
+  onValidationChange?: (state: CouponValidationState) => void;
 }) {
   const { t } = useTranslation();
-  const coupon = useCouponCode(amount, onChange, initialCode);
+  const coupon = useCouponCode(amount, onChange, initialCode, onValidationChange);
   const applied = result?.coupon;
 
   if (!applied && !coupon.open && !coupon.code) {

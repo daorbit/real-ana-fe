@@ -12,7 +12,7 @@ import { appUnlocked, isPaidApp } from "../lib/paidApps";
 export type UnlockRequest = { couponCode?: string; gateway: PaymentGateway; phone?: string };
 
 export function useAppUnlock(app: WorkspaceAppId) {
-  const { active } = useWorkspace();
+  const { active, refresh } = useWorkspace();
   const { demo } = useDemo();
   const info = WORKSPACE_APP_INFO[app];
   const paid = isPaidApp(app);
@@ -41,8 +41,9 @@ export function useAppUnlock(app: WorkspaceAppId) {
         gateway,
         ...(phone ? { phone } : {}),
       }).unwrap();
-      const unlocked = () => {
+      const unlocked = async () => {
         setCheckoutOpen(false);
+        await refresh();
         notify.success(`${info.name} is unlocked and on. Find ${info.navLabel} ${info.location}.`);
       };
       if ("free" in started) {

@@ -6,6 +6,7 @@ import { OrderTotals } from "@/features/billing/components/checkout/OrderTotals"
 import { GatewayPicker } from "@/features/billing/components/checkout/GatewayPicker";
 import { CouponField } from "@/features/billing/components/CouponField";
 import { useGatewayChoice } from "@/features/billing/hooks/useGatewayChoice";
+import type { CouponValidationState } from "@/features/billing/hooks/useCouponCode";
 import { MIN_CHARGE } from "@/features/billing/lib/constants";
 import { formatMoney } from "@/shared/lib/currency";
 import type { CouponCheckResult, Currency } from "@/shared/types";
@@ -34,6 +35,7 @@ export function AppUnlockCheckout({
   onConfirm: (request: UnlockRequest) => void;
 }) {
   const [coupon, setCoupon] = useState<CouponCheckResult | null>(null);
+  const [couponState, setCouponState] = useState<CouponValidationState>("empty");
   const gatewayChoice = useGatewayChoice(currency);
 
   const money = (amountMinor: number) => formatMoney(amountMinor, currency);
@@ -76,7 +78,7 @@ export function AppUnlockCheckout({
           money={money}
         />
 
-        <CouponField amount={price} result={coupon} onChange={setCoupon} />
+        <CouponField amount={price} result={coupon} onChange={setCoupon} onValidationChange={setCouponState} />
 
         {!free && <GatewayPicker choice={gatewayChoice} currency={currency} busy={busy} />}
 
@@ -87,7 +89,12 @@ export function AppUnlockCheckout({
           className={classes.pay}
           leftSection={free ? <LockOpen size={15} /> : <Lock size={15} />}
           loading={busy}
-          disabled={!canManage || (!free && !gatewayChoice.canPay)}
+          disabled={
+            !canManage ||
+            couponState === "checking" ||
+            couponState === "invalid" ||
+            (!free && !gatewayChoice.canPay)
+          }
           onClick={() =>
             onConfirm({
               couponCode: coupon?.coupon?.code,
