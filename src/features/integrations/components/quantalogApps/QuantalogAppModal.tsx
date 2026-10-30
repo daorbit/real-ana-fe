@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Badge, Button, Group, Text } from "@mantine/core";
 import { ArrowRight, LockOpen, Power } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -38,8 +39,14 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
   const unsaved = useUnsavedChanges();
   const app = useToggleWorkspaceApp(info.id);
   const unlock = useAppUnlock(info.id);
-  const showSettings = hasAppSettings(info.id) && app.enabled && app.canManage && Boolean(active);
+  const openCheckout = unlock.openCheckout;
+  const available = app.enabled && !unlock.locked;
+  const showSettings = hasAppSettings(info.id) && available && app.canManage && Boolean(active);
   const unlockLabel = unlock.priceLabel ? `Unlock for ${unlock.priceLabel}` : "Unlock";
+
+  useEffect(() => {
+    if (opened && app.enabled && unlock.locked) openCheckout();
+  }, [opened, app.enabled, unlock.locked, openCheckout]);
 
   const requestClose = () => {
     if (!unsaved.dirtyCount) {
@@ -104,10 +111,6 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
         <Button type="button" onClick={requestClose}>
           Done
         </Button>
-      ) : app.enabled ? (
-        <Button type="button" rightSection={<ArrowRight size={15} />} onClick={open}>
-          Open {info.navLabel}
-        </Button>
       ) : unlock.locked ? (
         <Button
           type="button"
@@ -117,6 +120,10 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
           onClick={unlock.openCheckout}
         >
           {unlockLabel}
+        </Button>
+      ) : app.enabled ? (
+        <Button type="button" rightSection={<ArrowRight size={15} />} onClick={open}>
+          Open {info.navLabel}
         </Button>
       ) : (
         <Button
@@ -180,9 +187,9 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
       }
     >
       <StudioHero
-        state={app.enabled ? "live" : "off"}
-        pill={app.enabled ? "On" : unlock.locked ? "Locked" : "Off"}
-        title={app.enabled ? `${info.name} is on` : unlock.locked ? `Unlock ${info.name}` : `Turn on ${info.name}`}
+        state={available ? "live" : "off"}
+        pill={available ? "On" : unlock.locked ? "Locked" : "Off"}
+        title={available ? `${info.name} is on` : unlock.locked ? `Unlock ${info.name}` : `Turn on ${info.name}`}
         description={info.tagline}
       />
 
@@ -193,7 +200,7 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
           <span className={classes.overviewLabel}>What you get</span>
           <QuantalogAppFeatures info={info} />
           <p className={classes.note}>
-            {app.enabled
+            {available
               ? `Open ${info.navLabel} any time ${info.location}.`
               : unlock.locked
                 ? app.canManage
@@ -213,6 +220,7 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
           price={unlock.price}
           currency={unlock.currency}
           busy={unlock.buying}
+          canManage={app.canManage}
           onClose={unlock.closeCheckout}
           onConfirm={(request) => void unlock.buy(request)}
         />

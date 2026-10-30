@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useGetAppPricesQuery, useStartAppPurchaseMutation } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
 import { useDemo } from "@/features/demo/context";
@@ -26,6 +26,8 @@ export function useAppUnlock(app: WorkspaceAppId) {
   const payOrder = usePayOrder();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [buying, setBuying] = useState(false);
+  const openCheckout = useCallback(() => setCheckoutOpen(true), []);
+  const closeCheckout = useCallback(() => setCheckoutOpen(false), []);
 
   const buy = async ({ couponCode, gateway, phone }: UnlockRequest) => {
     if (!active || !isPaidApp(app)) return;
@@ -65,8 +67,8 @@ export function useAppUnlock(app: WorkspaceAppId) {
     currency,
     priceLabel: price !== null ? formatMoney(price, currency) : null,
     checkoutOpen,
-    openCheckout: () => setCheckoutOpen(true),
-    closeCheckout: () => setCheckoutOpen(false),
+    openCheckout,
+    closeCheckout,
     buying,
     buy,
   };

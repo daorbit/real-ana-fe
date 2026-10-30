@@ -20,6 +20,7 @@ export function AppUnlockCheckout({
   price,
   currency,
   busy,
+  canManage,
   onClose,
   onConfirm,
 }: {
@@ -28,6 +29,7 @@ export function AppUnlockCheckout({
   price: number;
   currency: Currency;
   busy: boolean;
+  canManage: boolean;
   onClose: () => void;
   onConfirm: (request: UnlockRequest) => void;
 }) {
@@ -85,7 +87,7 @@ export function AppUnlockCheckout({
           className={classes.pay}
           leftSection={free ? <LockOpen size={15} /> : <Lock size={15} />}
           loading={busy}
-          disabled={!free && !gatewayChoice.canPay}
+          disabled={!canManage || (!free && !gatewayChoice.canPay)}
           onClick={() =>
             onConfirm({
               couponCode: coupon?.coupon?.code,
@@ -94,13 +96,15 @@ export function AppUnlockCheckout({
             })
           }
         >
-          {free ? "Unlock for free" : `Pay ${money(chargeable)}`}
+          {!canManage ? "Ask an admin to unlock" : free ? "Unlock for free" : `Pay ${money(chargeable)}`}
         </Button>
 
         <p className={classes.footnote}>
           <ShieldCheck size={14} />
           <span>
-            {free
+            {!canManage
+              ? `Only a workspace admin can unlock ${info.name}. Ask an admin to complete the one-time purchase.`
+              : free
               ? `Your coupon covers the full price, so nothing is charged. ${info.name} unlocks for this workspace for good and turns on right away.`
               : `Pay once and ${info.name} stays unlocked for this workspace for good. It turns on as soon as payment is confirmed, and you get a receipt by email.`}
           </span>
