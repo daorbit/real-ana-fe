@@ -281,7 +281,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
-  cursor: grab;
+  cursor: pointer;
   touch-action: manipulation;
   transition: border-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
 }

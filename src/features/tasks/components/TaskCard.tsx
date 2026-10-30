@@ -136,6 +136,10 @@ export function TaskCard(props: CardProps) {
       data-placeholder={isDragging || undefined}
       data-done={task.status === "done" || undefined}
       style={{ transform: CSS.Transform.toString(transform), transition }}
+      onClick={(event) => {
+        if ((event.target as HTMLElement).closest("button, a, input, select, textarea")) return;
+        props.onOpen(task);
+      }}
       {...attributes}
       {...listeners}
     >
