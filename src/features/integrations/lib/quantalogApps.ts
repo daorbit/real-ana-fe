@@ -227,7 +227,7 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
     navLabel: "Tasks",
     route: "/app/tasks",
     location: "in the sidebar",
-    offNote: "Your tasks are kept, so turning it back on picks up where you left off.",
+    offNote: "All tasks in this workspace will be permanently deleted. This cannot be undone. Turning Tasks back on starts with an empty task list.",
     tagline: "Plan the team's work on one board: who does what, by when.",
     description: "A planner board for the workspace. Organise tasks in buckets you name yourself, give them owners, labels, checklists and due dates, and drag them where they belong. Group the board by bucket, progress, person or priority.",
     features: [

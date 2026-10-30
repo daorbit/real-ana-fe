@@ -18,7 +18,13 @@ export function useToggleWorkspaceApp(app: WorkspaceAppId) {
     if (!active) return false;
     try {
       await setApp({ workspaceId: active._id, app, enabled }).unwrap();
-      notify.success(enabled ? `${info.name} is on. Find ${info.navLabel} ${info.location}.` : `${info.name} is off.`);
+      notify.success(
+        enabled
+          ? `${info.name} is on. Find ${info.navLabel} ${info.location}.`
+          : app === "tasks"
+            ? `${info.name} is off. All tasks in this workspace were deleted.`
+            : `${info.name} is off.`,
+      );
       return true;
     } catch (e) {
       notifyError(e, `Could not change ${info.name}.`);
