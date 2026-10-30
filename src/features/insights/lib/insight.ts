@@ -22,13 +22,25 @@ export const KIND_ICON: Record<InsightKind, LucideIcon> = {
   campaign: Megaphone,
 };
 
-export const SECTIONS: { tone: InsightTone; title: string }[] = [
-  { tone: "good", title: "What went well" },
-  { tone: "bad", title: "Worth a look" },
-  { tone: "info", title: "Also noticed" },
-];
+export const KIND_LABEL: Record<InsightKind, string> = {
+  traffic: "Visitors",
+  engagement: "Engagement",
+  source: "Traffic sources",
+  page: "Pages",
+  country: "Countries",
+  device: "Devices",
+  campaign: "Campaigns",
+};
+
+export const TONE_LABEL: Record<InsightTone, string> = {
+  good: "Going well",
+  bad: "Worth a look",
+  info: "Noticed",
+};
 
 const FILTER_KEYS = new Set(["referrer", "path", "country", "device", "utmSource"]);
+
+const isPercent = (insight: Insight) => insight.unit === "points" || insight.unit === "% share";
 
 export function insightHref(insight: Insight): string {
   if (insight.dimension && insight.key && FILTER_KEYS.has(insight.dimension))
@@ -36,17 +48,19 @@ export function insightHref(insight: Insight): string {
   return "/app/analytics";
 }
 
-export function deltaLabel(insight: Insight): string | null {
+export function changeLabel(insight: Insight): string {
   if (insight.delta === null) return "New";
-  if (insight.unit === "points" || insight.unit === "% share")
-    return `${insight.delta > 0 ? "+" : ""}${insight.delta} pts`;
-  return `${insight.delta > 0 ? "+" : ""}${insight.delta}%`;
+  const sign = insight.delta > 0 ? "+" : "−";
+  return isPercent(insight) ? `${sign}${Math.abs(insight.delta)} pts` : `${sign}${Math.abs(insight.delta)}%`;
 }
 
-export function comparisonLabel(insight: Insight): string {
-  const fmt = (n: number) => n.toLocaleString();
-  if (insight.unit === "points" || insight.unit === "% share") return `${insight.current}% vs ${insight.previous}%`;
-  return `${fmt(insight.current)} vs ${fmt(insight.previous)} ${insight.unit}`;
+export function barsOf(insight: Insight) {
+  const max = Math.max(insight.current, insight.previous, 1);
+  const show = (n: number) => (isPercent(insight) ? `${n}%` : n.toLocaleString());
+  return {
+    current: { value: show(insight.current), pct: (insight.current / max) * 100 },
+    previous: { value: show(insight.previous), pct: (insight.previous / max) * 100 },
+  };
 }
 
 export function weekLabel(start: string, end?: string): string {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Select, Skeleton, Stack } from "@mantine/core";
+import { Button, Skeleton, Stack } from "@mantine/core";
 import { RefreshCw, ScanSearch } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -14,9 +14,9 @@ import { demoInsights } from "@/features/demo/demoInsights";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { useGetInsightDigestQuery, useGetInsightsQuery, useRefreshInsightsMutation } from "../api";
 import { useInsightTask } from "../hooks/useInsightTask";
-import { weekLabel } from "../lib/insight";
-import { InsightsHero } from "../components/InsightsHero";
-import { InsightSections } from "../components/InsightSections";
+import { WeeklySummary } from "../components/WeeklySummary";
+import { HighlightList } from "../components/HighlightList";
+import classes from "../components/Insights.module.css";
 
 export default function Insights() {
   useTitle("Insights");
@@ -37,6 +37,11 @@ export default function Insights() {
   );
   const digest = picked ? older : overview?.digest ?? null;
 
+  const weeks = overview?.history ?? [];
+  const index = weeks.findIndex((w) => w.id === (picked ?? latestId));
+  const olderWeek = index >= 0 ? weeks[index + 1] : undefined;
+  const newerWeek = index > 0 ? weeks[index - 1] : undefined;
+
   const [refresh, { isLoading: refreshing }] = useRefreshInsightsMutation();
   const { toTask, busyId } = useInsightTask(workspaceId, demo);
 
@@ -51,8 +56,6 @@ export default function Insights() {
     }
   };
 
-  const weeks = overview?.history ?? [];
-
   return (
     <AppShell>
       <PageHeader
@@ -60,25 +63,10 @@ export default function Insights() {
         description="What changed on your sites this week, and why it matters."
         docsPath={DOCS_SLUGS.quantalogInsights}
         actions={
-          on && overview ? (
-            <>
-              {weeks.length > 1 && (
-                <Select
-                  size="sm"
-                  w={210}
-                  allowDeselect={false}
-                  value={picked ?? latestId}
-                  onChange={(v) => setWeekId(v)}
-                  data={weeks.map((w) => ({ value: w.id, label: `Week of ${weekLabel(w.weekStart)}` }))}
-                  aria-label="Week"
-                />
-              )}
-              {canEdit && overview.canRefresh && (
-                <Button variant="default" leftSection={<RefreshCw size={15} />} loading={refreshing} onClick={() => void runRefresh()}>
-                  Refresh
-                </Button>
-              )}
-            </>
+          on && canEdit && overview?.canRefresh ? (
+            <Button variant="default" leftSection={<RefreshCw size={15} />} loading={refreshing} onClick={() => void runRefresh()}>
+              Refresh
+            </Button>
           ) : undefined
         }
       />
@@ -86,9 +74,9 @@ export default function Insights() {
       {!active ? null : !on ? (
         <QuantalogAppGate app="insights" />
       ) : (isLoading && !demo) || (picked && olderLoading && !older) ? (
-        <Stack gap="lg">
-          <Skeleton height={150} radius="lg" />
-          <Skeleton height={260} radius="lg" />
+        <Stack gap="lg" className={classes.page}>
+          <Skeleton height={230} radius={22} />
+          <Skeleton height={300} radius={20} />
         </Stack>
       ) : !digest ? (
         <EmptyState
@@ -97,10 +85,20 @@ export default function Insights() {
           description="Insights compare each week with the one before. Check back in a few minutes, or on Monday for the next full week."
         />
       ) : (
-        <>
-          <InsightsHero digest={digest} />
-          <InsightSections insights={digest.insights} canTask={tasksOn && canEdit} busyId={busyId} onTask={(i) => void toTask(i)} />
-        </>
+        <div className={classes.page}>
+          <WeeklySummary
+            digest={digest}
+            onOlder={olderWeek ? () => setWeekId(olderWeek.id) : null}
+            onNewer={newerWeek ? () => setWeekId(newerWeek.id) : null}
+          />
+          <HighlightList
+            key={digest.id}
+            insights={digest.insights}
+            canTask={tasksOn && canEdit}
+            busyId={busyId}
+            onTask={(i) => void toTask(i)}
+          />
+        </div>
       )}
     </AppShell>
   );
