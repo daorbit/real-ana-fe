@@ -1,11 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="256" height="256" role="img" aria-label="Quantalog Alerts">
-  <g fill="none" stroke-linecap="round" stroke-width="28">
-    <path d="M78 196A172 172 0 0 0 78 460M434 196A172 172 0 0 1 434 460" stroke="#FFE13B"/>
-    <path d="M120 228A140 140 0 0 0 120 428M392 228A140 140 0 0 1 392 428" stroke="#FFB300"/>
-    <path d="M156 268A90 90 0 0 0 156 388M356 268A90 90 0 0 1 356 388" stroke="#FF9100"/>
+  <g fill="none" stroke-linecap="round" stroke-width="34">
+    <path d="M101 28A236 236 0 0 0 25 157M136 72A180 180 0 0 0 81 162" stroke="#FF8A70"/>
+    <path d="M411 28A236 236 0 0 1 487 157M376 72A180 180 0 0 1 431 162" stroke="#FF6550"/>
   </g>
-  <path d="M184 76A72 72 0 0 1 328 76L310 318A54 54 0 0 1 202 318Z" fill="#FF6B4F"/>
-  <path d="M256 4A72 72 0 0 1 328 76L310 318A54 54 0 0 1 256 372Z" fill="#F04A30"/>
-  <circle cx="256" cy="452" r="54" fill="#FF6B4F"/>
-  <path d="M256 398A54 54 0 0 1 256 506Z" fill="#F04A30"/>
+  <path d="M256 0A46 46 0 0 0 210 46V96H256Z" fill="#FFA41C"/>
+  <path d="M256 0A46 46 0 0 1 302 46V96H256Z" fill="#FF8F00"/>
+  <path d="M256 430H196V452A60 60 0 0 0 256 512Z" fill="#FFA41C"/>
+  <path d="M256 430H316V452A60 60 0 0 1 256 512Z" fill="#FF8F00"/>
+  <path d="M256 58C178 58 115 121 115 199V300C115 334 90 348 80 380H256Z" fill="#FFCB2D"/>
+  <path d="M256 58C334 58 397 121 397 199V300C397 334 422 348 432 380H256Z" fill="#FFBA2E"/>
+  <path d="M256 372H94A22 22 0 0 0 72 394V430A22 22 0 0 0 94 452H256Z" fill="#FFF266"/>
+  <path d="M256 372H418A22 22 0 0 1 440 394V430A22 22 0 0 1 418 452H256Z" fill="#FFE03D"/>
 </svg>
