@@ -167,7 +167,7 @@
 
 .checkOpen {
   flex-shrink: 0;
-  color: var(--faint);
+  color: var(--muted);
 }
 
 .secure {

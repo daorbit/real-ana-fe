@@ -615,11 +615,10 @@
 .resourceArrow {
   flex-shrink: 0;
   color: var(--text-2);
-  transition: transform 120ms ease;
+  transition: color 120ms ease;
 }
 
 .resource:hover .resourceArrow {
-  transform: translate(1px, -1px);
   color: var(--text);
 }
 

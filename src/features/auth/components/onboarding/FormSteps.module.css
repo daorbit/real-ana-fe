@@ -127,11 +127,11 @@
   background: var(--accent);
   color: #fff;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .badge:hover {
-  transform: scale(1.08);
+  opacity: 0.88;
 }
 
 .identityText {

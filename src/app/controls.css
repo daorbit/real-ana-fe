@@ -7,11 +7,18 @@ html:root[data-mantine-color-scheme="light"] {
   --mantine-color-dark-light-hover: color-mix(in srgb, var(--text) 9%, transparent);
 }
 
-.app-button {
+.app-button,
+.mantine-ActionIcon-root {
   transition:
     background-color var(--duration-fast) ease,
     border-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
+    color var(--duration-fast) ease,
+    opacity var(--duration-fast) ease;
+}
+
+.mantine-active:active:not(:disabled):not([data-disabled]):not([data-loading]) {
+  transform: none;
+  opacity: 0.8;
 }
 
 .app-button[data-variant="subtle"]:not([data-disabled]):hover {
@@ -39,4 +46,37 @@ html:root[data-mantine-color-scheme="light"] {
 
 .mantine-SegmentedControl-control {
   transition: color var(--duration-fast) ease;
+}
+
+@media (pointer: coarse) {
+  .mantine-Button-root {
+    --button-height-xs: 32px;
+    --button-height-sm: 40px;
+  }
+
+  .mantine-ActionIcon-root {
+    --ai-size-sm: 32px;
+    --ai-size-md: 36px;
+    --ai-size-lg: 40px;
+  }
+
+  .mantine-Input-wrapper {
+    --input-height-xs: 32px;
+    --input-height-sm: 40px;
+  }
+
+  .mantine-Input-input,
+  .mantine-PillsInput-input,
+  input:not([type="checkbox"], [type="radio"], [type="range"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  .mantine-SegmentedControl-label {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

@@ -176,11 +176,10 @@
 .starterArrow {
   flex-shrink: 0;
   color: var(--q-fg-faint);
-  transition: transform 160ms ease, color 160ms ease;
+  transition: color 160ms ease;
 }
 
 .starter:hover .starterArrow {
-  transform: translateX(2px);
   color: var(--q-fg);
 }
 

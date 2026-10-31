@@ -8,12 +8,7 @@
 
 .cover {
   height: 96px;
-  background: linear-gradient(
-    115deg,
-    color-mix(in srgb, var(--hue-indigo) 22%, var(--surface-2)) 0%,
-    color-mix(in srgb, var(--hue-violet) 12%, var(--surface-2)) 50%,
-    var(--surface-2) 100%
-  );
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
   border-bottom: 1px solid var(--border);
 }
 

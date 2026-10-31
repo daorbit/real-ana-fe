@@ -602,11 +602,7 @@
   height: 22px;
   border-radius: 999px;
   color: var(--mantine-color-dimmed);
-  transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
-}
-
-.threadActionBtn:hover {
-  transform: translateY(-1px);
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
 .threadActionBtn[data-tone='edit']:hover {

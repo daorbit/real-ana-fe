@@ -58,7 +58,6 @@ export function SearchConsoleConnectCard({
             loading={connecting}
             onClick={onConnect}
             className={`${classes.cta} ${classes.googleButton}`}
-            classNames={{ label: classes.googleLabel }}
           >
             {variant === "reconnect" ? "Sign in with Google" : "Connect with Google"}
           </Button>

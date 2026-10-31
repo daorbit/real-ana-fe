@@ -271,7 +271,7 @@ type ThemePrefs = {
 };
 
 const DEFAULT_PREFS: ThemePrefs = {
-  mode: "light",
+  mode: "system",
   preset: "none",
   cta: "accent",
   accent: "blue",

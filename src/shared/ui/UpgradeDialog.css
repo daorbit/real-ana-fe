@@ -47,16 +47,10 @@
   place-items: center;
   border-radius: 50%;
   color: var(--mantine-color-emerald-4);
-  background:
-    radial-gradient(circle at 30% 25%, rgb(255 255 255 / 0.14), transparent 60%),
-    var(--mantine-color-dark-6, rgb(0 0 0 / 0.25));
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.08),
-    0 10px 30px -12px var(--accent-2, var(--mantine-color-emerald-8));
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
-/* A single slow pulse ring. One, not a loop of three: this is a lock, not a
-   loading state, and a permanently animating dialog reads as busy. */
 .upgrade-dialog__seal::after {
   content: "";
   position: absolute;
