@@ -8,7 +8,12 @@ export type InvoiceTemplate =
   | "agency"
   | "capsule"
   | "banner"
-  | "panel";
+  | "panel"
+  | "executive"
+  | "sidebar"
+  | "headline"
+  | "geometric"
+  | "corporate";
 export type InvoiceAccent = "blue" | "indigo" | "teal" | "emerald" | "amber" | "crimson" | "slate";
 
 export interface InvoicingProfile {

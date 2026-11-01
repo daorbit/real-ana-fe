@@ -26,6 +26,11 @@ export const INVOICE_TEMPLATES: { value: InvoiceTemplate; label: string }[] = [
   { value: "capsule", label: "Capsule" },
   { value: "banner", label: "Banner" },
   { value: "panel", label: "Panel" },
+  { value: "executive", label: "Executive" },
+  { value: "sidebar", label: "Sidebar" },
+  { value: "headline", label: "Headline" },
+  { value: "geometric", label: "Geometric" },
+  { value: "corporate", label: "Corporate" },
 ];
 
 export const INVOICE_ACCENTS: { value: InvoiceAccent; label: string }[] = [
