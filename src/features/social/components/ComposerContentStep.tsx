@@ -1,8 +1,7 @@
-import { useEffect, type RefObject } from "react";
+import type { RefObject } from "react";
 import {
   Box, Group, RingProgress, SegmentedControl, Text, TextInput,
 } from "@mantine/core";
-import { useCanUseInstagram } from "@/features/auth/context";
 import {
   CaptionEditor, CaptionToolbar, type CaptionEditorHandle,
 } from "@/shared/components/CaptionEditor";
@@ -44,14 +43,6 @@ export function ComposerContentStep({
   /** True when editing: the network is fixed for the life of a post. */
   lockProvider?: boolean;
 }) {
-  const canUseInstagram = useCanUseInstagram();
-
-  useEffect(() => {
-    if (!canUseInstagram && !lockProvider && draft.provider === "instagram") {
-      patch({ provider: "linkedin" });
-    }
-  }, [canUseInstagram, lockProvider, draft.provider, patch]);
-
   const providerOptions = [
     {
       value: "linkedin",
@@ -62,19 +53,15 @@ export function ComposerContentStep({
         </Group>
       ),
     },
-    ...(canUseInstagram || draft.provider === "instagram"
-      ? [
-          {
-            value: "instagram",
-            label: (
-              <Group gap={6} justify="center" wrap="nowrap">
-                <InstagramMark size={14} />
-                <span>Instagram</span>
-              </Group>
-            ),
-          },
-        ]
-      : []),
+    {
+      value: "instagram",
+      label: (
+        <Group gap={6} justify="center" wrap="nowrap">
+          <InstagramMark size={14} />
+          <span>Instagram</span>
+        </Group>
+      ),
+    },
   ];
 
   return (

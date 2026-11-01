@@ -145,7 +145,7 @@ export function ConnectionsBoard() {
           <QuantalogAppsConnection quantalogApps={quantalogApps} filter={filter} />
           {assistantCards}
           {visibleSocial.length > 0 && (
-            <SocialGroup entries={visibleSocial} canUseInstagram={social.canUseInstagram} />
+            <SocialGroup entries={visibleSocial} />
           )}
           {searchCard}
           <FormsIntegrations

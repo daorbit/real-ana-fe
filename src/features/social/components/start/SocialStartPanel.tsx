@@ -5,19 +5,17 @@ import { StartHero, StartScreen } from "@/shared/ui/start/StartScreen";
 import { APPS_PATH } from "@/features/integrations/lib/appsPath";
 import { WeekStrip } from "./WeekStrip";
 
+const NETWORKS = "LinkedIn or Instagram";
+
 export function SocialStartPanel({
   connected,
-  instagramAvailable,
   disabled,
   onCreate,
 }: {
   connected: boolean;
-  instagramAvailable: boolean;
   disabled: boolean;
   onCreate: (date?: string) => void;
 }) {
-  const networks = instagramAvailable ? "LinkedIn or Instagram" : "LinkedIn";
-
   return (
     <StartScreen>
       <StartHero
@@ -27,7 +25,7 @@ export function SocialStartPanel({
         text={
           connected
             ? "Write a post, pick a time and Quantalog publishes it for you — once, or on a repeating schedule."
-            : `Connect ${networks} and Quantalog publishes your posts at the time you choose — once, or every week on repeat.`
+            : `Connect ${NETWORKS} and Quantalog publishes your posts at the time you choose — once, or every week on repeat.`
         }
       >
         {connected ? (
@@ -43,7 +41,7 @@ export function SocialStartPanel({
               color="emerald"
               leftSection={<Link2 size={16} />}
             >
-              Connect {networks}
+              Connect {NETWORKS}
             </Button>
             <Text size="xs" c="dimmed" ta="center">
               Takes a few seconds. You can disconnect it any time from Apps.

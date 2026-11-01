@@ -13,7 +13,6 @@ import { CARD_MARK_SIZE } from "../logos/BrandMarks";
 
 interface Props {
   entries: SocialEntry[];
-  canUseInstagram: boolean;
 }
 
 function statusFor(state: ConnectionState | undefined): ConnectionCardStatus {
@@ -22,7 +21,7 @@ function statusFor(state: ConnectionState | undefined): ConnectionCardStatus {
   return "idle";
 }
 
-export function SocialGroup({ entries, canUseInstagram }: Props) {
+export function SocialGroup({ entries }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
   const linkedInStatus = statusFor(entries.find((e) => e.id === "linkedin")?.state);
@@ -54,12 +53,11 @@ export function SocialGroup({ entries, canUseInstagram }: Props) {
         brand="instagram"
         name="Instagram"
         hint="Feed posts from the same composer."
-        soon={!canUseInstagram}
-        docsUrl={canUseInstagram ? appGuideUrl("instagram") : undefined}
-        status={canUseInstagram ? instagramStatus : undefined}
+        docsUrl={appGuideUrl("instagram")}
+        status={instagramStatus}
         celebrate={instagramCelebrate}
       >
-        {canUseInstagram && <InstagramTileFooter celebrate={instagramCelebrate} onConnected={goToSocial} />}
+        <InstagramTileFooter celebrate={instagramCelebrate} onConnected={goToSocial} />
       </ConnectionCard>
     ),
     facebook: (

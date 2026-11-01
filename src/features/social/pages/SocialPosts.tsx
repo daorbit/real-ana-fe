@@ -18,7 +18,6 @@ import {
   useGetWorkspaceUsageQuery,
 } from "@/app/store";
 import { usePostActions } from "@/features/social/hooks/usePostActions";
-import { useCanUseInstagram } from "@/features/auth/context";
 import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
 import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
@@ -36,7 +35,6 @@ import { useTitle } from "@/shared/lib/useTitle";
 export default function SocialPosts() {
   useTitle("Scheduled posts");
   const { active } = useWorkspace();
-  const canUseInstagram = useCanUseInstagram();
   const { demo } = useDemo();
   const workspaceId = active?._id ?? "";
   const { data: realData, isLoading: realLoading, isFetching: realFetching, refetch } = useGetScheduledPostsQuery(
@@ -134,9 +132,7 @@ export default function SocialPosts() {
 
   const posts = data?.posts ?? [];
   const linkedin = data?.linkedin;
-  // Instagram is held back to super_admins while the integration is finished:
-  // masked off here so every "is it usable" check below already excludes it.
-  const instagram = canUseInstagram ? data?.instagram : undefined;
+  const instagram = data?.instagram;
   /** Whether an account can actually publish: connected, live, and granted. */
   const usable = (account?: PostAccount) =>
     Boolean(account?.connected && !account.expired && account.canPublish !== false);
@@ -491,7 +487,6 @@ export default function SocialPosts() {
       ) : posts.length === 0 ? (
         <SocialStartPanel
           connected={ready}
-          instagramAvailable={canUseInstagram}
           disabled={postsFull}
           onCreate={(date) => openNew(date)}
         />

@@ -381,8 +381,3 @@ export function useAdminToolsAccess(): AdminToolsAccess {
   if (user.role === "super_admin") return "full";
   return user.role === "admin" ? "limited" : null;
 }
-
-export function useCanUseInstagram(): boolean {
-  const { user } = useAuth();
-  return user?.role === "super_admin";
-}
