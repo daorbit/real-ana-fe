@@ -87,7 +87,9 @@
     "groupAnalytics": "Analytics",
     "groupSearch": "Search",
     "groupBrand": "Brand",
-    "groupQuantalogApps": "Quantalog apps",
+    "groupQuantalogApps": "Q Apps",
+    "groupGrowth": "Growth",
+    "allApps": "All apps",
     "groupTeam": "Team"
   },
   "settings": {

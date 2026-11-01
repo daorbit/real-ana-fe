@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Box, UnstyledButton } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -7,10 +6,10 @@ import { useFavouriteDashboards } from "@/features/dashboards/favourites";
 import { ExternalNavLink, NavLink } from "./NavLink";
 import { DashboardsTreeNode } from "./DashboardsTreeNode";
 import { navImage } from "./NavItemIcon";
+import { usePersistedFlag } from "./useRailState";
 import type { NavGroup } from "./navItems";
 
 const DASHBOARDS_PATH = "/app/dashboards";
-
 
 function NavGroupBlock({
   group,
@@ -28,18 +27,15 @@ function NavGroupBlock({
   onToggleAdmin: () => void;
 }) {
   const { t } = useTranslation();
-  const [ownOpen, setOwnOpen] = useState(true);
+  const [ownOpen, toggleOwn] = usePersistedFlag(`nav:group:${group.headingKey}`, true);
   const favourites = useFavouriteDashboards(useWorkspace().active?._id);
   const onFavourite = !collapsed && favourites.some((f) => pathname.startsWith(`${DASHBOARDS_PATH}/${f.id}`));
-
 
   const isActive = (to: string) =>
     pathname === to || (to !== "/app" && pathname.startsWith(`${to}/`));
   const holdsCurrent = group.items.some((n) => !n.external && isActive(n.to));
-  const open = group.collapsible
-    ? adminOpen || holdsCurrent
-    : ownOpen || holdsCurrent;
-  const toggle = group.collapsible ? onToggleAdmin : () => setOwnOpen((v) => !v);
+  const open = group.bare || (group.collapsible ? adminOpen : ownOpen) || holdsCurrent;
+  const toggle = group.collapsible ? onToggleAdmin : toggleOwn;
 
   const rows = group.items.map((n, i) => {
     if (n.external) {
@@ -83,6 +79,7 @@ function NavGroupBlock({
         icon={n.icon}
         image={navImage(n)}
         tone={n.tone}
+        quiet={n.quiet}
         active={active}
         collapsed={collapsed}
       />
@@ -90,26 +87,25 @@ function NavGroupBlock({
   });
 
   return (
-    <Box className="nav-group" mb={collapsed ? 6 : 14}>
+    <Box className="nav-group" mb={collapsed ? 6 : 18}>
       {collapsed && showRule && <Box className="nav-rule" data-collapsed />}
 
-      {!collapsed && (
+      {!collapsed && !group.bare && (
         <UnstyledButton
           className="nav-heading nav-heading--button"
           onClick={toggle}
           aria-expanded={open}
         >
+          <span className="nav-heading__label">{t(group.headingKey, group.heading)}</span>
           <ChevronRight
-            size={15}
+            size={12}
             className="nav-heading__chevron"
             data-open={open || undefined}
           />
-          <span>{t(group.headingKey, group.heading)}</span>
         </UnstyledButton>
       )}
 
-   
-      {(collapsed || open) && <div>{rows}</div>}
+      {(collapsed || open) && <div className="nav-group__rows">{rows}</div>}
     </Box>
   );
 }

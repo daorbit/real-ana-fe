@@ -20,6 +20,7 @@ export function NavLink({
   logo,
   image,
   tone,
+  quiet,
   active,
   collapsed,
 }: {
@@ -29,10 +30,12 @@ export function NavLink({
   logo?: { url: string; logoUrl?: string };
   image?: string;
   tone?: NavTone;
+  quiet?: boolean;
   active: boolean;
   collapsed?: boolean;
 }) {
   const navigate = useNavigate();
+  const iconSize = collapsed || image ? 18 : 16;
 
   const link = (
     <UnstyledButton
@@ -40,6 +43,7 @@ export function NavLink({
       to={to}
       className="nav-link"
       data-active={active}
+      data-quiet={quiet || undefined}
       data-collapsed={collapsed || undefined}
       aria-current={active ? "page" : undefined}
       // Named explicitly: collapsed, the visible label is gone and the icon
@@ -59,15 +63,15 @@ export function NavLink({
     >
       <span className="nav-link-icon">
         {logo ? (
-          <LinkLogo url={logo.url} logoUrl={logo.logoUrl} label={label} size={collapsed ? 18 : 16} />
+          <LinkLogo url={logo.url} logoUrl={logo.logoUrl} label={label} size={iconSize} />
         ) : image ? (
-          <img src={image} width={collapsed ? 18 : 16} height={collapsed ? 18 : 16} alt="" className="nav-app-logo" />
+          <img src={image} width={iconSize} height={iconSize} alt="" className="nav-app-logo" />
         ) : (
-          <Icon size={collapsed ? 18 : 16} className="nav-tone-icon" data-tone={tone} />
+          <Icon size={iconSize} className="nav-tone-icon" data-tone={tone} />
         )}
       </span>
       {!collapsed && (
-        <Text fz={12} fw={active ? 600 : 450} lh={1.4} truncate>
+        <Text fz={13} fw={active ? 600 : 450} lh={1.4} truncate>
           {label}
         </Text>
       )}
@@ -108,7 +112,7 @@ export function ExternalNavLink({
       </span>
       {!collapsed && (
         <>
-          <Text fz={12} fw={450} lh={1.4} truncate>
+          <Text fz={13} fw={450} lh={1.4} truncate>
             {label}
           </Text>
           <ExternalLink size={12} className="nav-link-meta" />
