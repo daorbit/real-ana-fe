@@ -694,8 +694,11 @@ body { overflow-wrap: break-word; }
 }
 
 
-* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+}
 *::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-button { display: none; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 *::-webkit-scrollbar-thumb:hover { background: var(--muted); }
@@ -3481,7 +3484,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .app-panel__scroll::-webkit-scrollbar { width: 10px; }
-.app-panel__scroll::-webkit-scrollbar-track { background: transparent; }
+.app-panel__scroll::-webkit-scrollbar-track { background: transparent; margin-block: 12px; }
 
 .app-panel__scroll::-webkit-scrollbar-thumb {
   background: var(--border-strong);
@@ -3490,7 +3493,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background-clip: content-box;
 }
 .app-panel__scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-.app-panel__scroll { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+@supports not selector(::-webkit-scrollbar) {
+  .app-panel__scroll { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+}
 
 
 @media (max-width: 48em) {
