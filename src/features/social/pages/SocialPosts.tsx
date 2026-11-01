@@ -30,12 +30,14 @@ import {
 } from "@/features/social/components/draft";
 import type { PostAccount, ScheduledPost, SentPost } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
+import { useInstagramAccess } from "@/features/social/hooks/useInstagramAccess";
 
  
 export default function SocialPosts() {
   useTitle("Scheduled posts");
   const { active } = useWorkspace();
   const { demo } = useDemo();
+  const instagramOpen = useInstagramAccess();
   const workspaceId = active?._id ?? "";
   const { data: realData, isLoading: realLoading, isFetching: realFetching, refetch } = useGetScheduledPostsQuery(
     workspaceId,
@@ -139,7 +141,8 @@ export default function SocialPosts() {
   // Either network is enough to start composing — the picker in the composer
   // chooses between them. Gating on LinkedIn alone would lock out someone who
   // connected only Instagram.
-  const ready = usable(linkedin) || usable(instagram);
+  const instagramUsable = instagramOpen && usable(instagram);
+  const ready = usable(linkedin) || instagramUsable;
 
   /**
    * A blank draft, aimed at a network the user can actually publish to.
@@ -156,12 +159,12 @@ export default function SocialPosts() {
    */
   const connectedNames = [
     usable(linkedin) ? "LinkedIn" : "",
-    usable(instagram) ? "Instagram" : "",
+    instagramUsable ? "Instagram" : "",
   ].filter(Boolean).join(" and ");
 
   const newDraft = (): Draft => ({
     ...emptyDraft(),
-    provider: !usable(linkedin) && usable(instagram) ? "instagram" : "linkedin",
+    provider: !usable(linkedin) && instagramUsable ? "instagram" : "linkedin",
   });
 
   const openNew = (date?: string) => {

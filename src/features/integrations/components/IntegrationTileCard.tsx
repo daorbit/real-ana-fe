@@ -133,6 +133,7 @@ function statusOf(tile: IntegrationTile): ConnectionCardStatus {
 }
 
 function TileFooter({ tile, busy, lockedReason, onOpen, celebrate }: Props & { celebrate: boolean }) {
+  if (tile.soon) return null;
   if (lockedReason) {
     return (
       <div className={classes.footer}>
@@ -166,7 +167,8 @@ export function IntegrationTileCard(props: Props) {
       name={tile.name}
       hint={tile.description}
       badge={<ModeBadge tile={tile} />}
-      docsUrl={appGuideUrl(tile.id)}
+      soon={tile.soon}
+      docsUrl={tile.soon ? undefined : appGuideUrl(tile.id)}
       status={status}
       celebrate={celebrate}
     >

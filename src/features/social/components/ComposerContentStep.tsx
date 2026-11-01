@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import {
-  Box, Group, RingProgress, SegmentedControl, Text, TextInput,
+  Badge, Box, Group, RingProgress, SegmentedControl, Text, TextInput,
 } from "@mantine/core";
 import {
   CaptionEditor, CaptionToolbar, type CaptionEditorHandle,
@@ -11,6 +11,7 @@ import { StoryFitNote } from "./StoryFitNote";
 import { ComposerField } from "./ComposerField";
 import { MAX_HASHTAGS, type Draft } from "./draft";
 import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
+import { useInstagramAccess } from "../hooks/useInstagramAccess";
 
 /**
  * Step one: what the post says.
@@ -43,6 +44,7 @@ export function ComposerContentStep({
   /** True when editing: the network is fixed for the life of a post. */
   lockProvider?: boolean;
 }) {
+  const instagramOpen = useInstagramAccess();
   const providerOptions = [
     {
       value: "linkedin",
@@ -55,10 +57,16 @@ export function ComposerContentStep({
     },
     {
       value: "instagram",
+      disabled: !instagramOpen,
       label: (
         <Group gap={6} justify="center" wrap="nowrap">
           <InstagramMark size={14} />
           <span>Instagram</span>
+          {!instagramOpen && (
+            <Badge size="xs" variant="light" color="gray">
+              Coming soon
+            </Badge>
+          )}
         </Group>
       ),
     },

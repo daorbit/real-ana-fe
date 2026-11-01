@@ -20,7 +20,7 @@ export function QuantalogAppsConnection({ quantalogApps, filter }: Props) {
   const requested = params.get("app");
 
   useEffect(() => {
-    const match = quantalogApps.items.find((item) => item.info.tileId === requested);
+    const match = quantalogApps.items.find((item) => item.info.tileId === requested && !item.tile.soon);
     if (!match) return;
     setOpenId(match.info.id);
     const next = new URLSearchParams(params);

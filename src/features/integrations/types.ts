@@ -153,4 +153,5 @@ export interface IntegrationTile {
   account?: string;
   lastUsedAt?: string;
   price?: string;
+  soon?: boolean;
 }

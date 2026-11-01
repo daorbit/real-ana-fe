@@ -10,6 +10,7 @@ import { FactList } from "./common/FactList";
 import { AddonPackCard } from "./addons/AddonPackCard";
 import { AppAddonCard } from "./addons/AppAddonCard";
 import { PAID_APP_IDS } from "@/features/integrations/lib/paidApps";
+import { appOffered } from "@/features/integrations/lib/quantalogApps";
 import { sortPacks } from "../lib/credits";
 import classes from "./addons/Addons.module.css";
 
@@ -107,7 +108,7 @@ export function AddonsTab({
         <>
           <p className={classes.appsLabel}>{t("billing.appsLabel")}</p>
           <ul className={classes.packs}>
-            {PAID_APP_IDS.map((app) => (
+            {PAID_APP_IDS.filter(appOffered).map((app) => (
               <AppAddonCard key={app} app={app} />
             ))}
           </ul>

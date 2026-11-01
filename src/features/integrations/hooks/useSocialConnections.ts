@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useGetInstagramStatusQuery, useGetLinkedInStatusQuery } from "@/app/store";
 import { useWorkspace } from "@/features/workspace/context";
+import { useInstagramAccess } from "@/features/social/hooks/useInstagramAccess";
 import type { ConnectionState, Searchable } from "../lib/filter";
 
 export type SocialId = "linkedin" | "instagram" | "facebook";
@@ -25,11 +26,12 @@ function socialState(status: SocialStatus | undefined): ConnectionState {
 
 export function useSocialConnections(): { entries: SocialEntry[]; loading: boolean } {
   const workspaceId = useWorkspace().active?._id ?? "";
+  const instagramOpen = useInstagramAccess();
   const { data: linkedIn, isLoading: linkedInLoading } = useGetLinkedInStatusQuery(workspaceId, {
     skip: !workspaceId,
   });
   const { data: instagram, isLoading: instagramLoading } = useGetInstagramStatusQuery(workspaceId, {
-    skip: !workspaceId,
+    skip: !workspaceId || !instagramOpen,
   });
 
   const entries = useMemo<SocialEntry[]>(
@@ -46,7 +48,7 @@ export function useSocialConnections(): { entries: SocialEntry[]; loading: boole
         name: "Instagram",
         description: "Feed posts from the same composer.",
         group: SOCIAL_GROUP,
-        state: socialState(instagram),
+        state: instagramOpen ? socialState(instagram) : "soon",
       },
       {
         id: "facebook",
@@ -56,7 +58,7 @@ export function useSocialConnections(): { entries: SocialEntry[]; loading: boole
         state: "soon",
       },
     ],
-    [linkedIn, instagram],
+    [linkedIn, instagram, instagramOpen],
   );
 
   return { entries, loading: linkedInLoading || instagramLoading };

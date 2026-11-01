@@ -3,9 +3,8 @@ import { Button, Text } from "@mantine/core";
 import { Link2, Plus, Send } from "lucide-react";
 import { StartHero, StartScreen } from "@/shared/ui/start/StartScreen";
 import { APPS_PATH } from "@/features/integrations/lib/appsPath";
+import { useInstagramAccess } from "@/features/social/hooks/useInstagramAccess";
 import { WeekStrip } from "./WeekStrip";
-
-const NETWORKS = "LinkedIn or Instagram";
 
 export function SocialStartPanel({
   connected,
@@ -16,6 +15,7 @@ export function SocialStartPanel({
   disabled: boolean;
   onCreate: (date?: string) => void;
 }) {
+  const networks = useInstagramAccess() ? "LinkedIn or Instagram" : "LinkedIn";
   return (
     <StartScreen>
       <StartHero
@@ -25,7 +25,7 @@ export function SocialStartPanel({
         text={
           connected
             ? "Write a post, pick a time and Quantalog publishes it for you — once, or on a repeating schedule."
-            : `Connect ${NETWORKS} and Quantalog publishes your posts at the time you choose — once, or every week on repeat.`
+            : `Connect ${networks} and Quantalog publishes your posts at the time you choose — once, or every week on repeat.`
         }
       >
         {connected ? (
@@ -41,7 +41,7 @@ export function SocialStartPanel({
               color="emerald"
               leftSection={<Link2 size={16} />}
             >
-              Connect {NETWORKS}
+              Connect {networks}
             </Button>
             <Text size="xs" c="dimmed" ta="center">
               Takes a few seconds. You can disconnect it any time from Apps.

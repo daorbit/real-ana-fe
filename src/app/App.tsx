@@ -46,10 +46,10 @@ const SearchConsolePageDetail = lazy(() => import("@/features/searchConsole/page
 const Compare = lazy(() => import("@/features/compare/pages/Compare"));
 const Backlinks = lazy(() => import("@/features/backlinks/pages/Backlinks"));
 const Tasks = lazy(() => import("@/features/tasks/pages/Tasks"));
-const Insights = lazy(() => import("@/features/insights/pages/Insights"));
-const Experiments = lazy(() => import("@/features/experiments/pages/Experiments"));
-const ExperimentEditor = lazy(() => import("@/features/experiments/pages/ExperimentEditor"));
-const ExperimentDetail = lazy(() => import("@/features/experiments/pages/ExperimentDetail"));
+// const Insights = lazy(() => import("@/features/insights/pages/Insights"));
+// const Experiments = lazy(() => import("@/features/experiments/pages/Experiments"));
+// const ExperimentEditor = lazy(() => import("@/features/experiments/pages/ExperimentEditor"));
+// const ExperimentDetail = lazy(() => import("@/features/experiments/pages/ExperimentDetail"));
 const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"));
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
 const InstallSite = lazy(() => import("@/features/workspace/pages/InstallSite"));
@@ -62,7 +62,7 @@ const AcceptInvite = lazy(() => import("@/features/workspace/pages/AcceptInvite"
 const ConnectAuthorize = lazy(() => import("@/features/connectors/pages/ConnectAuthorize"));
 const Reports = lazy(() => import("@/features/reports/pages"));
 const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
-const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
+// const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
 const LeadCapture = lazy(() => import("@/features/leadCapture/pages/LeadCapture"));
 const Invoices = lazy(() => import("@/features/invoices/pages/Invoices"));
 const LinkFrame = lazy(() => import("@/features/customLinks/pages/LinkFrame"));
@@ -85,10 +85,10 @@ const Funnels = lazy(() => import("@/features/funnels/pages/Funnels"));
 const FunnelView = lazy(() => import("@/features/funnels/pages/FunnelView"));
 const FunnelEdit = lazy(() => import("@/features/funnels/pages/FunnelEdit"));
 const Alerts = lazy(() => import("@/features/alerts/pages/Alerts"));
-const Popups = lazy(() => import("@/features/popups/pages/Popups"));
-const PopupStudio = lazy(() => import("@/features/popups/pages/PopupStudio"));
-const BioPages = lazy(() => import("@/features/bio/pages/BioPages"));
-const BioStudio = lazy(() => import("@/features/bio/pages/BioStudio"));
+// const Popups = lazy(() => import("@/features/popups/pages/Popups"));
+// const PopupStudio = lazy(() => import("@/features/popups/pages/PopupStudio"));
+// const BioPages = lazy(() => import("@/features/bio/pages/BioPages"));
+// const BioStudio = lazy(() => import("@/features/bio/pages/BioStudio"));
 const PublicBio = lazy(() => import("@/features/bio/pages/PublicBio"));
 const EmbedWidget = lazy(() => import("@/features/embed/pages/EmbedWidget"));
 const WorkspacePicker = lazy(() => import("@/features/workspace/components/picker/WorkspacePicker"));
@@ -278,12 +278,12 @@ export default function App() {
                 <Route path="/app/funnels/:funnelId" element={<FunnelView />} />
                 <Route path="/app/funnels/:funnelId/edit" element={<FunnelEdit />} />
                 <Route path="/app/alerts" element={<Alerts />} />
-                <Route path="/app/popups" element={<Popups />} />
-                <Route path="/app/popups/new" element={<PopupStudio />} />
-                <Route path="/app/popups/:popupId" element={<PopupStudio />} />
-                <Route path="/app/bio" element={<BioPages />} />
-                <Route path="/app/bio/new" element={<BioStudio />} />
-                <Route path="/app/bio/:pageId" element={<BioStudio />} />
+                {/* <Route path="/app/popups" element={<Popups />} /> */}
+                {/* <Route path="/app/popups/new" element={<PopupStudio />} /> */}
+                {/* <Route path="/app/popups/:popupId" element={<PopupStudio />} /> */}
+                {/* <Route path="/app/bio" element={<BioPages />} /> */}
+                {/* <Route path="/app/bio/new" element={<BioStudio />} /> */}
+                {/* <Route path="/app/bio/:pageId" element={<BioStudio />} /> */}
                 <Route path="/app/seo" element={<Seo />} />
                 <Route path="/app/search-visibility" element={<SearchConsole />} />
                 <Route path="/app/search-visibility/page/:pageKey" element={<SearchConsolePageDetail />} />
@@ -292,11 +292,11 @@ export default function App() {
                 <Route path="/app/compare" element={<Compare />} />
                 <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/tasks" element={<Tasks />} />
-                <Route path="/app/insights" element={<Insights />} />
-                <Route path="/app/experiments" element={<Experiments />} />
-                <Route path="/app/experiments/new" element={<ExperimentEditor />} />
-                <Route path="/app/experiments/:experimentId" element={<ExperimentDetail />} />
-                <Route path="/app/experiments/:experimentId/edit" element={<ExperimentEditor />} />
+                {/* <Route path="/app/insights" element={<Insights />} /> */}
+                {/* <Route path="/app/experiments" element={<Experiments />} /> */}
+                {/* <Route path="/app/experiments/new" element={<ExperimentEditor />} /> */}
+                {/* <Route path="/app/experiments/:experimentId" element={<ExperimentDetail />} /> */}
+                {/* <Route path="/app/experiments/:experimentId/edit" element={<ExperimentEditor />} /> */}
                 <Route path="/app/workspaces" element={<Workspaces />} />
               <Route path="/app/install" element={<InstallSite />} />
               <Route path="/app/install/:siteId" element={<InstallSite />} />
@@ -308,7 +308,7 @@ export default function App() {
                 <Route path="/app/share" element={<Navigate to="/app/apps?app=quantalog-public-dashboard" replace />} />
                 <Route path="/app/reports" element={<Reports />} />
                 <Route path="/app/social" element={<SocialPosts />} />
-                <Route path="/app/reviews" element={<Reviews />} />
+                {/* <Route path="/app/reviews" element={<Reviews />} /> */}
                 <Route path="/app/lead-capture" element={<LeadCapture />} />
                 <Route path="/app/invoices" element={<Invoices />} />
                 <Route path="/app/link/:slug" element={<LinkFrame />} />

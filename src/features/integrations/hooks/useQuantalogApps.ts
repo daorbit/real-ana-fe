@@ -7,14 +7,14 @@ import { detectCurrency, formatMoney, getStoredCurrency } from "@/shared/lib/cur
 import type { WorkspaceAppId } from "@/shared/types";
 import { CATEGORY_TITLE } from "../lib/catalog";
 import { tileState, type Searchable } from "../lib/filter";
-import { quantalogAppTiles } from "../lib/quantalogApps";
+import { appOffered, quantalogAppTiles } from "../lib/quantalogApps";
 import { PAID_APP_IDS, appUnlocked } from "../lib/paidApps";
 
 export function useQuantalogApps() {
   const apps = useWorkspaceApps();
   const { active } = useWorkspace();
   const { demo } = useDemo();
-  const anyLocked = !demo && PAID_APP_IDS.some((id) => !appUnlocked(active?.apps, id));
+  const anyLocked = !demo && PAID_APP_IDS.some((id) => appOffered(id) && !appUnlocked(active?.apps, id));
   const { data: appPrices } = useGetAppPricesQuery(undefined, { skip: !anyLocked });
 
   const prices = useMemo(() => {

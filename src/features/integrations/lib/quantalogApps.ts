@@ -270,27 +270,59 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
   },
 };
 
-export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];
+export const WORKSPACE_APP_IDS: WorkspaceAppId[] = [
+  "compare",
+  "goals",
+  "notes",
+  "reviews",
+  "links",
+  "media",
+  "alerts",
+  // "popups",
+  "publicDashboard",
+  "seoReports",
+  // "bio",
+  "funnels",
+  "invoicing",
+  "tasks",
+  // "insights",
+  // "experiments",
+];
 
 const APP_AVAILABLE: Partial<Record<WorkspaceAppId, boolean>> = {
   invoicing: Boolean(import.meta.env.VITE_INVOICES_URL),
+};
+
+const APP_COMING_SOON: Partial<Record<WorkspaceAppId, boolean>> = {
+  reviews: true,
 };
 
 function appAvailable(id: WorkspaceAppId): boolean {
   return APP_AVAILABLE[id] ?? true;
 }
 
+export function appComingSoon(id: WorkspaceAppId): boolean {
+  return APP_COMING_SOON[id] ?? false;
+}
+
+export function appOffered(id: WorkspaceAppId): boolean {
+  return WORKSPACE_APP_IDS.includes(id) && !appComingSoon(id);
+}
+
 export function quantalogAppTile(info: WorkspaceAppInfo, enabled: boolean, price?: string): IntegrationTile {
+  const soon = appComingSoon(info.id);
+  const on = enabled && !soon;
   return {
     kind: "quantalog-app",
     id: info.tileId,
     name: info.name,
     category: "quantalog",
     description: info.tagline,
-    connected: enabled,
-    enabled,
-    account: enabled ? `${info.navLabel}, ${info.location}` : undefined,
-    price: enabled ? undefined : price,
+    connected: on,
+    enabled: on,
+    account: on ? `${info.navLabel}, ${info.location}` : undefined,
+    price: on || soon ? undefined : price,
+    soon,
   };
 }
 

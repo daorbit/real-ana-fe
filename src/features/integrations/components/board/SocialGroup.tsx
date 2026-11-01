@@ -25,7 +25,8 @@ export function SocialGroup({ entries }: Props) {
   const { t } = useTranslation();
   const nav = useNavigate();
   const linkedInStatus = statusFor(entries.find((e) => e.id === "linkedin")?.state);
-  const instagramStatus = statusFor(entries.find((e) => e.id === "instagram")?.state);
+  const instagramState = entries.find((e) => e.id === "instagram")?.state;
+  const instagramStatus = statusFor(instagramState);
   const linkedInCelebrate = useJustConnected(linkedInStatus === "connected");
   const instagramCelebrate = useJustConnected(instagramStatus === "connected");
   const goToSocial = useCallback(() => nav("/app/social"), [nav]);
@@ -46,7 +47,9 @@ export function SocialGroup({ entries }: Props) {
         <LinkedInTileFooter celebrate={linkedInCelebrate} onConnected={goToSocial} />
       </ConnectionCard>
     ),
-    instagram: (
+    instagram: instagramState === "soon" ? (
+      <ConnectionCard key="instagram" mark={<InstagramMark size={CARD_MARK_SIZE} />} brand="instagram" name="Instagram" hint="Feed posts from the same composer." soon />
+    ) : (
       <ConnectionCard
         key="instagram"
         mark={<InstagramMark size={CARD_MARK_SIZE} />}

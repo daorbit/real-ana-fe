@@ -22,6 +22,7 @@ export interface Searchable {
 export const EMPTY_FILTER: ConnectionFilter = { query: "", status: "all", category: ALL_CATEGORIES };
 
 export function tileState(tile: IntegrationTile): ConnectionState {
+  if (tile.soon) return "soon";
   if (tile.enabled) return "connected";
   if (tile.connected) return "attention";
   return "available";

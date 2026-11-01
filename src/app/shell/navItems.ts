@@ -1,8 +1,9 @@
 import {
   Home, ChartColumn, FolderKanban, Code2, Users, CalendarClock,
   Send, CreditCard, Swords, Palette, Images,
-  LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow, Link2, Filter, ReceiptText,
-  ListTodo, ScanSearch, FlaskConical,
+  LayoutDashboard, Flag, Settings, ScrollText, Blocks, BellRing, Filter, ReceiptText,
+  ListTodo,
+  // AppWindow, Link2, ScanSearch, FlaskConical, Star,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/features/admin/lib/adminSections";
@@ -60,15 +61,15 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupQuantalogApps",
     heading: "Q Apps",
     items: [
-      { to: "/app/insights", labelKey: "nav.insights", label: "Insights", icon: ScanSearch, app: "insights" },
+      // { to: "/app/insights", labelKey: "nav.insights", label: "Insights", icon: ScanSearch, app: "insights" },
       { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag, app: "goals" },
       { to: "/app/funnels", labelKey: "nav.funnels", label: "Funnels", icon: Filter, app: "funnels" },
-      { to: "/app/experiments", labelKey: "nav.experiments", label: "A/B tests", icon: FlaskConical, app: "experiments" },
+      // { to: "/app/experiments", labelKey: "nav.experiments", label: "A/B tests", icon: FlaskConical, app: "experiments" },
       { to: "/app/alerts", labelKey: "nav.alerts", label: "Alerts", icon: BellRing, app: "alerts" },
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords, app: "compare" },
-      { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
-      { to: "/app/bio", labelKey: "nav.bio", label: "Link in bio", icon: Link2, app: "bio" },
-      { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
+      // { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
+      // { to: "/app/bio", labelKey: "nav.bio", label: "Link in bio", icon: Link2, app: "bio" },
+      // { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
       { to: "/app/tasks", labelKey: "nav.tasks", label: "Tasks", icon: ListTodo, app: "tasks" },
       { to: "/app/invoices", labelKey: "nav.invoices", label: "Invoices", icon: ReceiptText, app: "invoicing" },
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images, app: "media" },
