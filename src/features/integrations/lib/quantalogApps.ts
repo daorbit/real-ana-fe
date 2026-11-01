@@ -252,6 +252,22 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "From insight to action", body: "Open the matching analytics view, or turn any insight into a task in one click." },
     ],
   },
+  experiments: {
+    id: "experiments",
+    tileId: "quantalog-experiments",
+    name: "Quantalog A/B Tests",
+    navLabel: "A/B tests",
+    route: "/app/experiments",
+    location: "in the sidebar",
+    offNote: "Running tests stop and every visitor sees your original pages. Tests and results are kept, so turning it back on picks up where you left off.",
+    tagline: "Test a new headline, button or page and keep the one that converts.",
+    description: "Split your visitors between the original and up to three variants, by changing text and links on the page, by sending them to a different page, or in your own code. Quantalog counts who reaches your goal and calls the winner when the difference is real.",
+    features: [
+      { title: "Three ways to test", body: "Change text, links and styles on the page, send visitors to a different page, or read the variant in your code." },
+      { title: "No flicker", body: "Variants apply before the page shows, and each visitor keeps the same version on every visit." },
+      { title: "A winner you can trust", body: "Conversion, uplift and the chance each variant beats the original, with a winner called at 95%." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS = Object.keys(WORKSPACE_APP_INFO) as WorkspaceAppId[];

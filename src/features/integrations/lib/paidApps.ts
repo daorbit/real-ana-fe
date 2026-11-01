@@ -12,6 +12,7 @@ export const PAID_APP_IDS: PaidAppId[] = [
   "insights",
   "tasks",
   "invoicing",
+  "experiments",
 ];
 
 const PAYMENT_ONLY_APP_IDS: PaidAppId[] = [
@@ -21,6 +22,7 @@ const PAYMENT_ONLY_APP_IDS: PaidAppId[] = [
   "insights",
   "tasks",
   "invoicing",
+  "experiments",
 ];
 
 export function isPaidApp(id: WorkspaceAppId): id is PaidAppId {

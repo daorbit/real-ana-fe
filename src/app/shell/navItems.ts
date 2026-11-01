@@ -2,7 +2,7 @@ import {
   Home, ChartColumn, FolderKanban, Code2, Users, CalendarClock,
   Send, CreditCard, Swords, Palette, Images,
   LayoutDashboard, Flag, Settings, ScrollText, Blocks, Star, BellRing, AppWindow, Link2, Filter, ReceiptText,
-  ListTodo, ScanSearch,
+  ListTodo, ScanSearch, FlaskConical,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/features/admin/lib/adminSections";
@@ -75,6 +75,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/tasks", labelKey: "nav.tasks", label: "Tasks", icon: ListTodo, app: "tasks" },
       { to: "/app/insights", labelKey: "nav.insights", label: "Insights", icon: ScanSearch, app: "insights" },
       { to: "/app/funnels", labelKey: "nav.funnels", label: "Funnels", icon: Filter, app: "funnels" },
+      { to: "/app/experiments", labelKey: "nav.experiments", label: "A/B tests", icon: FlaskConical, app: "experiments" },
       { to: "/app/invoices", labelKey: "nav.invoices", label: "Invoices", icon: ReceiptText, app: "invoicing" },
       { to: "/app/alerts", labelKey: "nav.alerts", label: "Alerts", icon: BellRing, app: "alerts" },
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords, app: "compare" },

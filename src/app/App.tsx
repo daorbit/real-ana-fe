@@ -47,6 +47,9 @@ const Compare = lazy(() => import("@/features/compare/pages/Compare"));
 const Backlinks = lazy(() => import("@/features/backlinks/pages/Backlinks"));
 const Tasks = lazy(() => import("@/features/tasks/pages/Tasks"));
 const Insights = lazy(() => import("@/features/insights/pages/Insights"));
+const Experiments = lazy(() => import("@/features/experiments/pages/Experiments"));
+const ExperimentEditor = lazy(() => import("@/features/experiments/pages/ExperimentEditor"));
+const ExperimentDetail = lazy(() => import("@/features/experiments/pages/ExperimentDetail"));
 const SeoReportPrint = lazy(() => import("@/features/seo/pages/SeoReportPrint"));
 const Workspaces = lazy(() => import("@/features/workspace/pages/Workspaces"));
 const InstallSite = lazy(() => import("@/features/workspace/pages/InstallSite"));
@@ -290,6 +293,10 @@ export default function App() {
                 <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/tasks" element={<Tasks />} />
                 <Route path="/app/insights" element={<Insights />} />
+                <Route path="/app/experiments" element={<Experiments />} />
+                <Route path="/app/experiments/new" element={<ExperimentEditor />} />
+                <Route path="/app/experiments/:experimentId" element={<ExperimentDetail />} />
+                <Route path="/app/experiments/:experimentId/edit" element={<ExperimentEditor />} />
                 <Route path="/app/workspaces" element={<Workspaces />} />
               <Route path="/app/install" element={<InstallSite />} />
               <Route path="/app/install/:siteId" element={<InstallSite />} />

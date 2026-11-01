@@ -37,6 +37,9 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/backlinks": () => import("@/features/backlinks/pages/Backlinks"),
   "/app/tasks": () => import("@/features/tasks/pages/Tasks"),
   "/app/insights": () => import("@/features/insights/pages/Insights"),
+  "/app/experiments": () => import("@/features/experiments/pages/Experiments"),
+  "/app/experiments/new": () => import("@/features/experiments/pages/ExperimentEditor"),
+  "/app/experiments/view": () => import("@/features/experiments/pages/ExperimentDetail"),
   "/app/reviews": () => import("@/features/reviews/pages/Reviews"),
   "/app/workspaces": () => import("@/features/workspace/pages/Workspaces"),
   "/app/install": () => import("@/features/workspace/pages/InstallSite"),
@@ -73,6 +76,10 @@ export function prefetchRoute(to: string): Promise<void> {
       ? "/app/popups/new"
     : exact.startsWith("/app/bio/")
       ? "/app/bio/new"
+    : exact === "/app/experiments/new" || (exact.startsWith("/app/experiments/") && exact.endsWith("/edit"))
+      ? "/app/experiments/new"
+    : exact.startsWith("/app/experiments/")
+      ? "/app/experiments/view"
     : exact.startsWith("/app/admin-tools/users/")
       ? "/app/admin-tools/users"
       : exact.startsWith("/app/admin-tools/")

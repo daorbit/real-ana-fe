@@ -44,6 +44,7 @@ export const DOCS_SLUGS = {
   quantalogInvoicing: "/quantalog-invoicing",
   quantalogTasks: "/quantalog-tasks",
   quantalogInsights: "/quantalog-insights",
+  quantalogExperiments: "/quantalog-experiments",
   searchVisibility: "/search-visibility",
   emailReports: "/email-reports",
   scheduledPosts: "/scheduled-posts",
