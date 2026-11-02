@@ -17,20 +17,13 @@
   color: var(--text);
 }
 
-.nav {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-
 .timeline {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: var(--surface);
+  background: var(--surface-2);
 }
 
 .names {
@@ -47,10 +40,8 @@
   height: 44px;
   padding: 0 14px 9px;
   border-bottom: 1px solid var(--border);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
   color: var(--muted);
 }
 
@@ -132,8 +123,12 @@
 }
 
 .dayLabel[data-today] {
-  fill: var(--accent);
+  fill: var(--accent-contrast);
   font-weight: 700;
+}
+
+.todayDot {
+  fill: var(--accent);
 }
 
 .rule {

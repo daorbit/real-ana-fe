@@ -1,12 +1,13 @@
 import { Fragment, useMemo, useState } from "react";
-import { ActionIcon, Button, UnstyledButton } from "@mantine/core";
-import { ChartGantt, ChevronLeft, ChevronRight } from "lucide-react";
+import { UnstyledButton } from "@mantine/core";
+import { ChartGantt } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { taskKey } from "../../lib/board";
 import { addDays, startOfWeek } from "../../lib/dates";
 import { layoutTimeline, TIMELINE_DAYS, TIMELINE_STEP, timelineDays } from "../../lib/timeline";
 import type { Bucket, Task } from "../../types";
 import { TimelineChart } from "./TimelineChart";
+import { PeriodNav } from "../PeriodNav";
 import classes from "./Timeline.module.css";
 
 function defaultStart(): Date {
@@ -27,17 +28,13 @@ export function TaskTimeline({ tasks, buckets, onOpen }: { tasks: Task[]; bucket
     <div className={classes.wrap}>
       <header className={classes.head}>
         <span className={classes.range}>{rangeTitle(from)}</span>
-        <span className={classes.nav}>
-          <Button size="xs" variant="default" onClick={() => setFrom(defaultStart())}>
-            Today
-          </Button>
-          <ActionIcon variant="subtle" color="gray" onClick={() => setFrom((d) => addDays(d, -TIMELINE_STEP))} aria-label="Earlier">
-            <ChevronLeft size={18} />
-          </ActionIcon>
-          <ActionIcon variant="subtle" color="gray" onClick={() => setFrom((d) => addDays(d, TIMELINE_STEP))} aria-label="Later">
-            <ChevronRight size={18} />
-          </ActionIcon>
-        </span>
+        <PeriodNav
+          previousLabel="Earlier"
+          nextLabel="Later"
+          onPrevious={() => setFrom((d) => addDays(d, -TIMELINE_STEP))}
+          onToday={() => setFrom(defaultStart())}
+          onNext={() => setFrom((d) => addDays(d, TIMELINE_STEP))}
+        />
       </header>
 
       {layout.groups.length === 0 ? (

@@ -13,21 +13,21 @@
   flex-direction: column;
   min-width: 0;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--surface);
+  border-radius: 14px;
+  background: var(--surface-2);
 }
 
 .cardHead {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
+  padding: 16px 18px 0;
 }
 
 .cardTitle {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 
@@ -36,7 +36,7 @@
   flex: 1;
   flex-direction: column;
   gap: 14px;
-  padding: 18px;
+  padding: 14px 18px 18px;
 }
 
 .plot {

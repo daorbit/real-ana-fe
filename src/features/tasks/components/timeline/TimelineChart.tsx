@@ -45,6 +45,7 @@ export function TimelineChart({
               {date.toLocaleDateString(undefined, { month: "short" })}
             </text>
           )}
+          {i === todayIndex && <circle className={classes.todayDot} cx={i * DAY_WIDTH + DAY_WIDTH / 2} cy={30} r={10} />}
           <text className={classes.dayLabel} data-today={i === todayIndex || undefined} x={i * DAY_WIDTH + DAY_WIDTH / 2} y={34}>
             {date.getDate()}
           </text>

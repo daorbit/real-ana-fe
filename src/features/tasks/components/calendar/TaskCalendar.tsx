@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
-import { ActionIcon, Button } from "@mantine/core";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { bucketKeyOf } from "../../lib/board";
 import { firstOfMonth, monthGrid, monthTitle, moveToDay, shiftMonth, tasksByDueDay, WEEKDAYS } from "../../lib/calendar";
@@ -11,6 +9,7 @@ import { TaskListGroup } from "../list/TaskListGroup";
 import { TaskListRow } from "../list/TaskListRow";
 import { CalendarChipView } from "./CalendarChip";
 import { CalendarDay } from "./CalendarDay";
+import { PeriodNav } from "../PeriodNav";
 import listClasses from "../list/TaskList.module.css";
 import classes from "./Calendar.module.css";
 
@@ -69,17 +68,13 @@ export function TaskCalendar({
     <div className={classes.calendar}>
       <header className={classes.head}>
         <span className={classes.month}>{monthTitle(month)}</span>
-        <span className={classes.nav}>
-          <Button size="xs" variant="default" onClick={goToday}>
-            Today
-          </Button>
-          <ActionIcon variant="subtle" color="gray" onClick={() => setMonth((m) => shiftMonth(m, -1))} aria-label="Previous month">
-            <ChevronLeft size={18} />
-          </ActionIcon>
-          <ActionIcon variant="subtle" color="gray" onClick={() => setMonth((m) => shiftMonth(m, 1))} aria-label="Next month">
-            <ChevronRight size={18} />
-          </ActionIcon>
-        </span>
+        <PeriodNav
+          previousLabel="Previous month"
+          nextLabel="Next month"
+          onPrevious={() => setMonth((m) => shiftMonth(m, -1))}
+          onToday={goToday}
+          onNext={() => setMonth((m) => shiftMonth(m, 1))}
+        />
       </header>
 
       <DndContext

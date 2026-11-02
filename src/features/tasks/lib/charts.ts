@@ -1,4 +1,5 @@
 import { dueState } from "./board";
+import { dayDiff } from "./dates";
 import type { Task } from "../types";
 
 export const SERIES = [
@@ -21,6 +22,23 @@ export function stateOf(task: Task): SeriesKey {
   if (dueState(task.dueDate, task.status) === "overdue") return "late";
   if (task.status === "doing") return "inProgress";
   return "notStarted";
+}
+
+export type TaskTotals = { open: number; inProgress: number; dueThisWeek: number; overdue: number };
+
+export function taskTotals(tasks: Task[]): TaskTotals {
+  const totals: TaskTotals = { open: 0, inProgress: 0, dueThisWeek: 0, overdue: 0 };
+  const today = new Date();
+  for (const task of tasks) {
+    if (task.status === "done") continue;
+    totals.open += 1;
+    if (task.status === "doing") totals.inProgress += 1;
+    if (!task.dueDate) continue;
+    const days = dayDiff(today, new Date(task.dueDate));
+    if (days < 0) totals.overdue += 1;
+    else if (days <= 7) totals.dueThisWeek += 1;
+  }
+  return totals;
 }
 
 export function countStates(tasks: Task[]): StateCounts {

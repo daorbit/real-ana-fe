@@ -1,4 +1,4 @@
-import { ActionIcon, Checkbox, Tooltip, UnstyledButton } from "@mantine/core";
+import { ActionIcon, Switch, Tooltip, UnstyledButton } from "@mantine/core";
 import { ListTree, X } from "lucide-react";
 import { newCheckId } from "../lib/labels";
 import type { CheckItem } from "../types";
@@ -41,8 +41,9 @@ export function ChecklistEditor({
           </span>
         )}
         <span className={classes.sectionEnd}>
-          <Checkbox
-            size="xs"
+          <Switch
+            size="sm"
+            labelPosition="left"
             label="Show on card"
             checked={onCard}
             disabled={readOnly}

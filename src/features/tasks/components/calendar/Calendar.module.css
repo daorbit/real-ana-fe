@@ -17,13 +17,6 @@
   color: var(--text);
 }
 
-.nav {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -36,11 +29,10 @@
 
 .weekday {
   padding: 8px 10px;
-  background: var(--surface);
-  font-size: 11.5px;
+  background: var(--surface-2);
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  text-align: right;
   color: var(--muted);
 }
 
@@ -51,14 +43,14 @@
   min-width: 0;
   min-height: 112px;
   padding: 6px;
-  background: var(--surface);
+  background: var(--surface-2);
   cursor: pointer;
   transition: background-color var(--duration-fast) ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .day:hover {
-  background: color-mix(in srgb, var(--text) 2.5%, var(--surface));
+  background: color-mix(in srgb, var(--text) 3%, var(--surface-2));
 }
 
 .day[data-outside] {
@@ -81,6 +73,7 @@
 
 .dayNumber {
   display: grid;
+  align-self: flex-end;
   place-items: center;
   width: 24px;
   height: 24px;
@@ -110,23 +103,22 @@
   min-width: 0;
   height: 22px;
   padding: 0 6px;
-  border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--surface);
+  background: var(--segment-track);
   font-size: 12px;
   font-weight: 500;
   color: var(--text);
   text-align: left;
   touch-action: manipulation;
-  transition: border-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
+  transition: background-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
 }
 
 .chip:hover {
-  border-color: var(--border-hover);
+  background: color-mix(in srgb, var(--text) 14%, transparent);
 }
 
 .chip[data-state="overdue"] {
-  border-color: color-mix(in srgb, var(--red) 45%, transparent);
+  background: color-mix(in srgb, var(--red) 16%, transparent);
 }
 
 .chip[data-done] {
@@ -140,7 +132,7 @@
 
 .chip[data-overlay] {
   max-width: 220px;
-  border-color: var(--border-hover);
+  background: var(--surface-active);
   box-shadow: var(--shadow-lg);
   cursor: grabbing;
 }
@@ -219,6 +211,7 @@
   }
 
   .dayNumber {
+    align-self: center;
     width: 28px;
     height: 28px;
     font-size: 14px;

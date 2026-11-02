@@ -110,9 +110,10 @@ export function BucketHeader({
           onDoubleClick={() => canEdit && setEditing("name")}
           title={canEdit ? "Double-click to rename" : undefined}
         >
-          {limit ? name : `${name} (${count})`}
+          {name}
         </span>
       )}
+      {!compact && !limit && <span className={classes.columnCount}>{count}</span>}
       {limit ? (
         <Tooltip label={state === "over" ? "Over the limit for this bucket" : `Limit of ${limit} open tasks`} withArrow>
           <span className={classes.limit} data-state={state}>

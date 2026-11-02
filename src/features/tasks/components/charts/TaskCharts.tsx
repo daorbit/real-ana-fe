@@ -7,6 +7,7 @@ import { ChartCard, SeriesLegend } from "./ChartParts";
 import { StackedBars } from "./StackedBars";
 import { StatusDonut } from "./StatusDonut";
 import { ShippedRecap } from "../recap/ShippedRecap";
+import { TaskTotalsTiles } from "./TaskTotalsTiles";
 import classes from "./Charts.module.css";
 
 export function TaskCharts({
@@ -42,6 +43,9 @@ export function TaskCharts({
 
   return (
     <div className={classes.grid}>
+      <div className={classes.wide}>
+        <TaskTotalsTiles tasks={tasks} show={["open", "inProgress", "dueThisWeek", "overdue"]} />
+      </div>
       <ChartCard title="This week" wide>
         <ShippedRecap tasks={tasks} memberMap={memberMap} />
       </ChartCard>

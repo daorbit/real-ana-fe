@@ -106,9 +106,10 @@ export function BoardColumn({
             )}
             {column.priority && <PriorityIcon priority={column.priority} />}
             {bucketHeader || (
-              <span className={classes.columnTitle}>
-                {column.title} ({open.length})
-              </span>
+              <>
+                <span className={classes.columnTitle}>{column.title}</span>
+                <span className={classes.columnCount}>{open.length}</span>
+              </>
             )}
           </header>
           {create}

@@ -34,51 +34,55 @@ export function DependenciesSection({
     <section className={classes.section}>
       <span className={classes.sectionTitle}>Dependencies</span>
       <div className={classes.dependencies}>
-        <div className={classes.checklist}>
+        <div className={classes.depColumn}>
           <span className={classes.propLabel}>Blocked by</span>
-          {blockers.map((blocker) => (
-            <RelatedTaskRow
-              key={blocker.id}
-              task={blocker}
-              onOpen={onOpen}
-              onRemove={readOnly ? undefined : () => onBlockedByChange(blockedBy.filter((id) => id !== blocker.id))}
-              removeLabel={`Remove ${blocker.title} from blockers`}
-            />
-          ))}
-          {!readOnly && blockedBy.length < MAX_BLOCKERS && (
-            <TaskPicker
-              candidates={linkCandidates(tasks, selfId, [...blockedBy, ...blocksIds])}
-              placeholder="Add a task that must finish first"
-              onPick={(id) => onBlockedByChange([...blockedBy, id])}
-            />
-          )}
-          {readOnly && !blockers.length && <span className={classes.sectionHint}>Nothing.</span>}
-        </div>
-        {task && (
           <div className={classes.checklist}>
-            <span className={classes.propLabel}>Blocks</span>
-            {blocks.map((other) => (
+            {blockers.map((blocker) => (
               <RelatedTaskRow
-                key={other.id}
-                task={other}
+                key={blocker.id}
+                task={blocker}
                 onOpen={onOpen}
-                onRemove={readOnly ? undefined : () => onBlocksChange(other, false)}
-                removeLabel={`Stop blocking ${other.title}`}
+                onRemove={readOnly ? undefined : () => onBlockedByChange(blockedBy.filter((id) => id !== blocker.id))}
+                removeLabel={`Remove ${blocker.title} from blockers`}
               />
             ))}
-            {!readOnly && (
+            {!readOnly && blockedBy.length < MAX_BLOCKERS && (
               <TaskPicker
-                candidates={linkCandidates(tasks, selfId, [...blockedBy, ...blocksIds]).filter(
-                  (t) => t.blockedBy.length < MAX_BLOCKERS,
-                )}
-                placeholder="Add a task that waits on this one"
-                onPick={(id) => {
-                  const other = index.byId.get(id);
-                  if (other) onBlocksChange(other, true);
-                }}
+                candidates={linkCandidates(tasks, selfId, [...blockedBy, ...blocksIds])}
+                placeholder="Add a task that must finish first"
+                onPick={(id) => onBlockedByChange([...blockedBy, id])}
               />
             )}
-            {readOnly && !blocks.length && <span className={classes.sectionHint}>Nothing.</span>}
+            {readOnly && !blockers.length && <span className={classes.sectionHint}>Nothing.</span>}
+          </div>
+        </div>
+        {task && (
+          <div className={classes.depColumn}>
+            <span className={classes.propLabel}>Blocks</span>
+            <div className={classes.checklist}>
+              {blocks.map((other) => (
+                <RelatedTaskRow
+                  key={other.id}
+                  task={other}
+                  onOpen={onOpen}
+                  onRemove={readOnly ? undefined : () => onBlocksChange(other, false)}
+                  removeLabel={`Stop blocking ${other.title}`}
+                />
+              ))}
+              {!readOnly && (
+                <TaskPicker
+                  candidates={linkCandidates(tasks, selfId, [...blockedBy, ...blocksIds]).filter(
+                    (t) => t.blockedBy.length < MAX_BLOCKERS,
+                  )}
+                  placeholder="Add a task that waits on this one"
+                  onPick={(id) => {
+                    const other = index.byId.get(id);
+                    if (other) onBlocksChange(other, true);
+                  }}
+                />
+              )}
+              {readOnly && !blocks.length && <span className={classes.sectionHint}>Nothing.</span>}
+            </div>
           </div>
         )}
       </div>

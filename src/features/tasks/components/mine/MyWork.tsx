@@ -8,6 +8,7 @@ import type { Bucket, Task } from "../../types";
 import { TaskListGroup } from "../list/TaskListGroup";
 import { TaskListRow } from "../list/TaskListRow";
 import { ShippedRecap } from "../recap/ShippedRecap";
+import { TaskTotalsTiles } from "../charts/TaskTotalsTiles";
 import listClasses from "../list/TaskList.module.css";
 import classes from "./MyWork.module.css";
 
@@ -29,13 +30,19 @@ export function MyWork({
   onToggleDone: (task: Task) => void;
 }) {
   const groups = useMemo(() => myWork(tasks, userId), [tasks, userId]);
-  const open = [...groups.values()].reduce((sum, list) => sum + list.length, 0);
+  const mine = useMemo(() => [...groups.values()].flat(), [groups]);
+  const open = mine.length;
   const bucketName = (task: Task) => buckets.find((b) => b.id === bucketKeyOf(task, buckets))?.name;
 
   if (!userId) return <EmptyState compact icon={UserRound} title="Sign in to see your work" description="Tasks assigned to you show up here." />;
 
   return (
     <div className={classes.page}>
+      <header className={classes.head}>
+        <span className={classes.title}>Assigned to you</span>
+        <span className={classes.subtitle}>Grouped by when they are due.</span>
+      </header>
+      <TaskTotalsTiles tasks={mine} show={["open", "dueThisWeek", "overdue"]} />
       <ShippedRecap tasks={tasks} memberMap={memberMap} userId={userId} />
       {open === 0 ? (
         <EmptyState

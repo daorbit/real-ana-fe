@@ -36,6 +36,17 @@
   width: 240px;
 }
 
+.searchInput {
+  border-color: transparent;
+  border-radius: 9px;
+  background: var(--segment-track);
+}
+
+.searchInput:focus,
+.searchInput:focus-within {
+  border-color: var(--accent);
+}
+
 .spacer {
   flex: 1;
   order: 1;
@@ -196,10 +207,23 @@
   min-height: 32px;
 }
 
+.columnCount {
+  flex: none;
+  min-width: 20px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--segment-track);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
 .columnTitle {
   overflow: hidden;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 650;
   letter-spacing: -0.01em;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -327,8 +351,9 @@
 
 .empty {
   padding: 18px 8px;
-  border: 1px dashed var(--border);
+  border: 1px solid var(--border);
   border-radius: 12px;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
   font-size: 12.5px;
   text-align: center;
   color: var(--muted);
@@ -340,7 +365,7 @@
   flex-direction: column;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--surface-2);
   cursor: pointer;
   touch-action: manipulation;
   transition: border-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
@@ -349,8 +374,8 @@
 .cardBody {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px 14px 12px;
+  gap: 8px;
+  padding: 12px 12px 8px;
 }
 
 .cardEyebrow {
@@ -535,9 +560,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 46px;
-  padding: 8px 14px;
-  border-top: 1px solid var(--border);
+  min-height: 34px;
+  padding: 0 12px 10px 40px;
 }
 
 .key {
@@ -560,23 +584,23 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 24px;
-  padding: 0 8px;
-  border: 1px solid var(--border-strong);
+  height: 22px;
+  padding: 0 7px;
   border-radius: 6px;
-  font-size: 12px;
+  background: var(--segment-track);
+  font-size: 11.5px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
 }
 
 .due[data-state="overdue"] {
-  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 16%, transparent);
   color: var(--red);
 }
 
 .due[data-state="today"] {
-  border-color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 16%, transparent);
   color: var(--amber);
 }
 
@@ -667,8 +691,8 @@
 .tableWrap {
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--surface);
+  border-radius: 12px;
+  background: var(--surface-2);
 }
 
 .table {
@@ -752,48 +776,6 @@
 
 
 
-.dialogTopEnd {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: auto;
-}
-
-.dialogContent {
-  overflow: hidden;
-}
-
-.dialogHeader {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 16px 16px 26px;
-  border-bottom: 1px solid var(--border);
-}
-
-.planName {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-
-.crumbKey {
-  font-size: 12.5px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-}
-
-.dialogBody {
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
-  max-height: min(74vh, 760px);
-  padding: 24px 28px 30px;
-  overflow-y: auto;
-}
-
 .titleBlock {
   display: flex;
   flex-direction: column;
@@ -827,32 +809,6 @@
   padding-left: 36px;
   font-size: 12px;
   color: var(--muted);
-}
-
-.iconRows {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.iconRow {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 32px;
-}
-
-.iconRowIcon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 22px;
-  color: var(--muted);
-}
-
-.iconRowBody {
-  flex: 1;
-  min-width: 0;
 }
 
 .assignee {
@@ -919,12 +875,6 @@
   transition: color var(--duration-fast) ease;
 }
 
-.fields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 18px;
-}
-
 .checkAdd {
   flex: 1;
 }
@@ -965,29 +915,9 @@
 
 
 
-.prop {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
 .propLabel {
   font-size: 12px;
   font-weight: 600;
-  color: var(--muted);
-}
-
-.dialogFooter {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 24px;
-  border-top: 1px solid var(--border);
-  background: var(--bg-2);
-  font-size: 12px;
   color: var(--muted);
 }
 
@@ -1013,8 +943,12 @@
 .notesEditor {
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: var(--mantine-radius-md);
+  border-radius: 12px;
   background: var(--bg-2);
+}
+
+.notesEditor:focus-within {
+  border-color: var(--accent);
 }
 
 .notesToolbar {
@@ -1064,15 +998,30 @@
 .checklist {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--segment-track);
 }
 
 .checkItem {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 40px;
-  padding: 0 4px;
+  min-height: 42px;
+  padding: 0 8px 0 12px;
   border-bottom: 1px solid var(--border);
+}
+
+.checkItem:last-child {
+  border-bottom: 0;
+}
+
+.depColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
 .checkText {
@@ -1167,8 +1116,9 @@
   justify-content: center;
   gap: 6px;
   padding: 18px 8px;
-  border: 1px dashed var(--border);
+  border: 1px solid var(--border);
   border-radius: 12px;
+  background: color-mix(in srgb, var(--green) 8%, transparent);
   font-size: 12.5px;
   font-weight: 500;
   color: var(--green);
@@ -1255,7 +1205,7 @@
 }
 
 .sectionHint {
-  padding: 8px 4px;
+  padding: 11px 12px;
   font-size: 12.5px;
   color: var(--muted);
 }
@@ -1267,7 +1217,7 @@
 }
 
 .dependencies .propLabel {
-  padding: 0 4px 4px;
+  padding: 0 2px;
 }
 
 
@@ -1434,18 +1384,14 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .dialogBody {
-    padding: 18px 16px 22px;
-  }
-
   .cardBody {
     gap: 9px;
-    padding: 12px 12px 10px;
+    padding: 12px 12px 8px;
   }
 
   .cardFoot {
-    min-height: 42px;
-    padding: 7px 12px;
+    min-height: 36px;
+    padding: 0 12px 10px 40px;
   }
 
   .cardTitle {

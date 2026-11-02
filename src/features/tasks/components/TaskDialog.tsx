@@ -1,54 +1,24 @@
-import type { ReactNode } from "react";
-import { ActionIcon, Button, Menu, Modal, Select, TextInput, Textarea, UnstyledButton } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
+import { ActionIcon, Button, Modal, TextInput, Textarea, UnstyledButton } from "@mantine/core";
 import { Link } from "react-router-dom";
-import {
-  CalendarArrowUp,
-  CalendarDays,
-  Columns3,
-  CornerDownRight,
-  ExternalLink,
-  Flag,
-  ListTree,
-  MoreHorizontal,
-  Tag,
-  Trash2,
-  UserPlus,
-  X,
-} from "lucide-react";
+import { CornerDownRight, ExternalLink, Link2 } from "lucide-react";
 import { timeAgo } from "@/shared/lib/format";
 import type { WorkspaceMember } from "@/shared/types";
-import { PRIORITY_LABEL, PRIORITY_ORDER, STATUS_LABEL, STATUS_ORDER, taskKey } from "../lib/board";
-import { parentCandidates, taskOption } from "../lib/relations";
+import { taskKey } from "../lib/board";
+import { parentCandidates } from "../lib/relations";
 import { toPatch, useTaskEditor, type TaskForm } from "../hooks/useTaskEditor";
 import { useTaskIndex } from "../hooks/TaskIndexContext";
-import type { Bucket, Task, TaskLabel, TaskPatch, TaskPriority, TaskStatus } from "../types";
+import type { Bucket, Task, TaskLabel, TaskPatch } from "../types";
 import { AssigneePicker } from "./AssigneePicker";
 import { ChecklistEditor } from "./ChecklistEditor";
 import { LabelEditor } from "./LabelEditor";
 import { TaskNotesEditor } from "./TaskNotesEditor";
-import { ProgressButton, ProgressGlyph } from "./TaskBits";
+import { ProgressButton } from "./TaskBits";
 import { DependenciesSection } from "./relations/DependenciesSection";
 import { SubtasksSection } from "./relations/SubtasksSection";
+import { TaskDialogHeader } from "./dialog/TaskDialogHeader";
+import { TaskSettings } from "./dialog/TaskSettings";
 import classes from "./Tasks.module.css";
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className={classes.prop}>
-      <span className={classes.propLabel}>{label}</span>
-      {children}
-    </div>
-  );
-}
-
-function IconRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
-  return (
-    <div className={classes.iconRow}>
-      <span className={classes.iconRowIcon}>{icon}</span>
-      <div className={classes.iconRowBody}>{children}</div>
-    </div>
-  );
-}
+import dialog from "./dialog/TaskDialog.module.css";
 
 export function TaskDialog({
   opened,
@@ -98,6 +68,8 @@ export function TaskDialog({
   const parent = form.parentId ? index.byId.get(form.parentId) : undefined;
   const parents = parentCandidates(tasks, task, index);
   const canHaveSubtasks = Boolean(task && !task.parentId);
+  const bucketName = buckets.find((b) => b.id === form.bucketId)?.name ?? null;
+  const toggleDone = () => change({ status: form.status === "done" ? "todo" : "done" });
 
   const create = async () => {
     const ok = await onCreate({ ...toPatch(form), title: form.title.trim(), link: form.link.trim() });
@@ -113,84 +85,113 @@ export function TaskDialog({
     <Modal
       opened={opened}
       onClose={onClose}
-      size={720}
+      size={920}
       withCloseButton={false}
       padding={0}
       radius="lg"
-      classNames={{ content: classes.dialogContent }}
+      overlayProps={{ backgroundOpacity: 0.5, blur: 6 }}
+      classNames={{ content: dialog.content }}
     >
-      <header className={classes.dialogHeader}>
-        <span className={classes.planName}>{planName}</span>
-        {task && <span className={classes.crumbKey}>{taskKey(task.key)}</span>}
-        <span className={classes.dialogTopEnd}>
-          {task && canEdit && (
-            <Menu position="bottom-end" width={180}>
-              <Menu.Target>
-                <ActionIcon variant="subtle" color="gray" aria-label="More actions">
-                  <MoreHorizontal size={18} />
-                </ActionIcon>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Item className="danger-item" leftSection={<Trash2 size={14} />} onClick={() => onDelete(task)}>
-                  Delete task
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
-          )}
-          <ActionIcon variant="subtle" color="gray" onClick={onClose} aria-label="Close">
-            <X size={18} />
-          </ActionIcon>
-        </span>
-      </header>
+      <TaskDialogHeader
+        planName={planName}
+        bucketName={bucketName}
+        task={task}
+        canEdit={canEdit}
+        done={form.status === "done"}
+        onToggleDone={toggleDone}
+        onDelete={onDelete}
+        onClose={onClose}
+      />
 
-      <div className={classes.dialogBody}>
-        <div className={classes.titleBlock}>
-          <div className={classes.dialogTitleRow}>
-            <span className={classes.dialogProgress}>
-              <ProgressButton
-                status={form.status}
-                size={22}
-                disabled={readOnly}
-                onToggle={() => change({ status: form.status === "done" ? "todo" : "done" })}
+      <div className={dialog.body}>
+        <div className={dialog.main}>
+          <div className={classes.titleBlock}>
+            <div className={classes.dialogTitleRow}>
+              <span className={classes.dialogProgress}>
+                <ProgressButton status={form.status} size={22} disabled={readOnly} onToggle={toggleDone} />
+              </span>
+              <Textarea
+                className={classes.titleField}
+                classNames={{ input: classes.titleInput }}
+                variant="unstyled"
+                autosize
+                minRows={1}
+                maxLength={200}
+                placeholder="Task name"
+                readOnly={readOnly}
+                value={form.title}
+                onChange={(e) => type("title", e.currentTarget.value)}
+                onBlur={() => commit("title")}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), e.currentTarget.blur())}
+                data-autofocus={!task || undefined}
+                aria-label="Task name"
               />
-            </span>
-            <Textarea
-              className={classes.titleField}
-              classNames={{ input: classes.titleInput }}
-              variant="unstyled"
-              autosize
-              minRows={1}
-              maxLength={200}
-              placeholder="Task name"
-              readOnly={readOnly}
-              value={form.title}
-              onChange={(e) => type("title", e.currentTarget.value)}
-              onBlur={() => commit("title")}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), e.currentTarget.blur())}
-              data-autofocus={!task || undefined}
-              aria-label="Task name"
-            />
-          </div>
-          {parent && (
-            <UnstyledButton className={classes.parentCrumb} onClick={() => onOpenTask(parent)}>
-              <CornerDownRight size={13} />
-              Subtask of <span className={classes.key}>{taskKey(parent.key)}</span>
-              <span className={classes.cardParentTitle}>{parent.title}</span>
-            </UnstyledButton>
-          )}
-          {task && (
+            </div>
+            {parent && (
+              <UnstyledButton className={classes.parentCrumb} onClick={() => onOpenTask(parent)}>
+                <CornerDownRight size={13} />
+                Subtask of <span className={classes.key}>{taskKey(parent.key)}</span>
+                <span className={classes.cardParentTitle}>{parent.title}</span>
+              </UnstyledButton>
+            )}
             <span className={classes.lastChanged}>
-              Last changed {timeAgo(task.updatedAt)}
-              {author ? ` · created by ${author.name || author.email}` : ""}
+              {task
+                ? `Last changed ${timeAgo(task.updatedAt)}${author ? ` · created by ${author.name || author.email}` : ""}`
+                : "Not saved yet"}
             </span>
+          </div>
+
+          <section className={classes.section}>
+            <span className={classes.sectionTitle}>Notes</span>
+            <TaskNotesEditor
+              readOnly={readOnly}
+              value={form.notes}
+              onChange={(notes) => type("notes", notes)}
+              onBlur={() => commit("notes")}
+            />
+          </section>
+
+          {task && canHaveSubtasks && (
+            <SubtasksSection
+              task={task}
+              readOnly={readOnly}
+              onOpen={onOpenTask}
+              onToggleDone={onToggleDone}
+              onCreate={(title) => onCreateSubtask(task, title)}
+              onDetach={(subtask) => onUpdateOther(subtask, { parentId: null })}
+            />
           )}
+
+          <ChecklistEditor
+            items={form.checklist}
+            onCard={form.checklistOnCard}
+            readOnly={readOnly}
+            onChange={(checklist) => change({ checklist })}
+            onCardChange={(checklistOnCard) => change({ checklistOnCard })}
+            onMakeSubtask={canHaveSubtasks ? (item) => void makeSubtask(item) : undefined}
+          />
+
+          <DependenciesSection
+            task={task}
+            blockedBy={form.blockedBy}
+            tasks={tasks}
+            readOnly={readOnly}
+            onOpen={onOpenTask}
+            onBlockedByChange={(blockedBy) => change({ blockedBy })}
+            onBlocksChange={(other, blocks) =>
+              task &&
+              onUpdateOther(other, {
+                blockedBy: blocks ? [...other.blockedBy, task.id] : other.blockedBy.filter((id) => id !== task.id),
+              })
+            }
+          />
         </div>
 
-        <div className={classes.iconRows}>
-          <IconRow icon={<Tag size={17} />}>
-            <LabelEditor value={form.labels} known={knownLabels} readOnly={readOnly} onChange={(labels) => change({ labels })} />
-          </IconRow>
-          <IconRow icon={<UserPlus size={17} />}>
+        <aside className={dialog.side} aria-label="Task details">
+          <TaskSettings form={form} readOnly={readOnly} buckets={buckets} parent={parent} parents={parents} onChange={change} />
+
+          <section className={classes.section}>
+            <span className={classes.sectionTitle}>Assignees</span>
             <AssigneePicker
               value={form.assigneeIds}
               members={members}
@@ -198,165 +199,60 @@ export function TaskDialog({
               readOnly={readOnly}
               onChange={(assigneeIds) => change({ assigneeIds })}
             />
-          </IconRow>
-        </div>
+          </section>
 
-        <div className={classes.fields}>
-          <Field label="Progress">
-            <Select
-              allowDeselect={false}
+          <section className={classes.section}>
+            <span className={classes.sectionTitle}>Labels</span>
+            <LabelEditor value={form.labels} known={knownLabels} readOnly={readOnly} onChange={(labels) => change({ labels })} />
+          </section>
+
+          <section className={classes.section}>
+            <span className={classes.sectionTitle}>Link</span>
+            <TextInput
+              variant="filled"
+              aria-label="Link"
+              placeholder="https://… or a page like /app/seo"
               readOnly={readOnly}
-              leftSection={
-                <span className={classes.progress} data-status={form.status}>
-                  <ProgressGlyph status={form.status} size={15} />
-                </span>
+              leftSection={<Link2 size={15} />}
+              value={form.link}
+              onChange={(e) => type("link", e.currentTarget.value)}
+              onBlur={() => commit("link")}
+              rightSection={
+                task?.link ? (
+                  task.link.startsWith("/app/") ? (
+                    <ActionIcon component={Link} to={task.link} variant="subtle" color="gray" aria-label="Open link">
+                      <ExternalLink size={15} />
+                    </ActionIcon>
+                  ) : (
+                    <ActionIcon component="a" href={task.link} target="_blank" rel="noopener noreferrer" variant="subtle" color="gray" aria-label="Open link">
+                      <ExternalLink size={15} />
+                    </ActionIcon>
+                  )
+                ) : undefined
               }
-              value={form.status}
-              onChange={(v) => v && change({ status: v as TaskStatus })}
-              data={STATUS_ORDER.map((s) => ({ value: s, label: STATUS_LABEL[s] }))}
             />
-          </Field>
-          <Field label="Priority">
-            <Select
-              allowDeselect={false}
-              readOnly={readOnly}
-              leftSection={<Flag size={15} />}
-              value={form.priority}
-              onChange={(v) => v && change({ priority: v as TaskPriority })}
-              data={PRIORITY_ORDER.map((p) => ({ value: p, label: PRIORITY_LABEL[p] }))}
-            />
-          </Field>
-          <Field label="Start date">
-            <DatePickerInput
-              placeholder="Set start date"
-              valueFormat="D MMM YYYY"
-              clearable
-              readOnly={readOnly}
-              leftSection={<CalendarArrowUp size={15} />}
-              value={form.start || null}
-              maxDate={form.due || undefined}
-              onChange={(value) => change({ start: value ?? "" })}
-              popoverProps={{ radius: "lg", shadow: "lg", position: "bottom-start" }}
-            />
-          </Field>
-          <Field label="Due date">
-            <DatePickerInput
-              placeholder="Set due date"
-              valueFormat="D MMM YYYY"
-              clearable
-              readOnly={readOnly}
-              leftSection={<CalendarDays size={15} />}
-              value={form.due || null}
-              minDate={form.start || undefined}
-              onChange={(value) => change({ due: value ?? "" })}
-              popoverProps={{ radius: "lg", shadow: "lg", position: "bottom-start" }}
-            />
-          </Field>
-          <Field label="Bucket">
-            <Select
-              allowDeselect={false}
-              readOnly={readOnly}
-              leftSection={<Columns3 size={15} />}
-              value={form.bucketId}
-              onChange={(v) => v && change({ bucketId: v })}
-              data={buckets.map((b) => ({ value: b.id, label: b.name }))}
-            />
-          </Field>
-          {(parents.length > 0 || parent) && (
-            <Field label="Parent task">
-              <Select
-                searchable
-                clearable
-                readOnly={readOnly}
-                leftSection={<ListTree size={15} />}
-                placeholder="Not a subtask"
-                nothingFoundMessage="No matching tasks"
-                value={form.parentId}
-                onChange={(v) => change({ parentId: v ?? null })}
-                data={(parent && !parents.includes(parent) ? [parent, ...parents] : parents).map(taskOption)}
-              />
-            </Field>
-          )}
-        </div>
-
-        {task && canHaveSubtasks && (
-          <SubtasksSection
-            task={task}
-            readOnly={readOnly}
-            onOpen={onOpenTask}
-            onToggleDone={onToggleDone}
-            onCreate={(title) => onCreateSubtask(task, title)}
-            onDetach={(subtask) => onUpdateOther(subtask, { parentId: null })}
-          />
-        )}
-
-        <ChecklistEditor
-          items={form.checklist}
-          onCard={form.checklistOnCard}
-          readOnly={readOnly}
-          onChange={(checklist) => change({ checklist })}
-          onCardChange={(checklistOnCard) => change({ checklistOnCard })}
-          onMakeSubtask={canHaveSubtasks ? (item) => void makeSubtask(item) : undefined}
-        />
-
-        <DependenciesSection
-          task={task}
-          blockedBy={form.blockedBy}
-          tasks={tasks}
-          readOnly={readOnly}
-          onOpen={onOpenTask}
-          onBlockedByChange={(blockedBy) => change({ blockedBy })}
-          onBlocksChange={(other, blocks) =>
-            task &&
-            onUpdateOther(other, {
-              blockedBy: blocks ? [...other.blockedBy, task.id] : other.blockedBy.filter((id) => id !== task.id),
-            })
-          }
-        />
-
-        <section className={classes.section}>
-          <span className={classes.sectionTitle}>Notes</span>
-          <TaskNotesEditor
-            readOnly={readOnly}
-            value={form.notes}
-            onChange={(notes) => type("notes", notes)}
-            onBlur={() => commit("notes")}
-          />
-        </section>
-
-        <section className={classes.section}>
-          <span className={classes.sectionTitle}>Link</span>
-          <TextInput
-            placeholder="https://… or a Quantalog page like /app/seo"
-            readOnly={readOnly}
-            value={form.link}
-            onChange={(e) => type("link", e.currentTarget.value)}
-            onBlur={() => commit("link")}
-            rightSection={
-              task?.link ? (
-                task.link.startsWith("/app/") ? (
-                  <ActionIcon component={Link} to={task.link} variant="subtle" color="gray" aria-label="Open link">
-                    <ExternalLink size={15} />
-                  </ActionIcon>
-                ) : (
-                  <ActionIcon component="a" href={task.link} target="_blank" rel="noopener noreferrer" variant="subtle" color="gray" aria-label="Open link">
-                    <ExternalLink size={15} />
-                  </ActionIcon>
-                )
-              ) : undefined
-            }
-          />
-        </section>
+          </section>
+        </aside>
       </div>
 
-      {!task && (
-        <footer className={classes.dialogFooter}>
-          <span>Fill in what you know. Everything can be changed later.</span>
-          <Button loading={creating} disabled={!form.title.trim()} onClick={() => void create()}>
-            Add task
-          </Button>
-        </footer>
-      )}
+      <footer className={dialog.footer}>
+        {task ? (
+          <>
+            <span className={dialog.footerNote}>{readOnly ? "View only" : "Saved automatically"}</span>
+            <Button onClick={onClose}>Done</Button>
+          </>
+        ) : (
+          <>
+            <span className={dialog.footerNote}>Fill in what you know. Everything can be changed later.</span>
+            <Button variant="default" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button loading={creating} disabled={!form.title.trim()} onClick={() => void create()}>
+              Create task
+            </Button>
+          </>
+        )}
+      </footer>
     </Modal>
   );
 }
