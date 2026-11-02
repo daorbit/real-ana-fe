@@ -94,13 +94,8 @@ export function ChecklistEditor({
             )}
           </div>
         ))}
-        {!readOnly && items.length < MAX_ITEMS && (
-          <AddItemRow
-            placeholder={items.length ? "Add an item" : "Add steps to complete this task. Mark them done as you go."}
-            ariaLabel="Add a checklist item"
-            onAdd={add}
-          />
-        )}
+        {!items.length && <span className={classes.sectionHint}>Add steps to complete this task. Mark them done as you go.</span>}
+        {!readOnly && items.length < MAX_ITEMS && <AddItemRow placeholder="Add item" ariaLabel="Add a checklist item" onAdd={add} />}
       </div>
     </section>
   );

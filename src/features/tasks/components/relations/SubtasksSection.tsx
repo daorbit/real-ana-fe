@@ -44,14 +44,12 @@ export function SubtasksSection({
             removeLabel={`Stop “${subtask.title}” being a subtask`}
           />
         ))}
-        {!readOnly && (
-          <AddItemRow
-            placeholder={subtasks.length ? "Add a subtask" : "Split this into subtasks, each with its own owner and date."}
-            ariaLabel="Add a subtask"
-            onAdd={onCreate}
-          />
+        {!subtasks.length && (
+          <span className={classes.sectionHint}>
+            {readOnly ? "No subtasks." : "Split this into subtasks, each with its own owner and date."}
+          </span>
         )}
-        {readOnly && !subtasks.length && <span className={classes.sectionHint}>No subtasks.</span>}
+        {!readOnly && <AddItemRow placeholder="Add subtask" ariaLabel="Add a subtask" onAdd={onCreate} />}
       </div>
     </section>
   );

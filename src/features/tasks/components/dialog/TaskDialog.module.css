@@ -139,7 +139,7 @@
   transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
-.settingInput:hover {
+.group .settingRow .settingInput:hover {
   background: color-mix(in srgb, var(--text) 8%, transparent);
   color: var(--text);
 }

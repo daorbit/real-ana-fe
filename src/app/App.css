@@ -416,10 +416,15 @@ body { overflow-wrap: break-word; }
 }
 
 :root .mantine-Input-input {
-  border-color: var(--border-strong);
-  background: var(--surface);
+  border-color: transparent;
+  background: var(--segment-track);
   color: var(--text);
-  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  transition: border-color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+}
+
+:root .mantine-Input-input[data-variant="unstyled"] {
+  border-color: transparent;
+  background: transparent;
 }
 
 :root .mantine-Input-input::placeholder {
@@ -484,30 +489,28 @@ body { overflow-wrap: break-word; }
 .mantine-Input-input:focus,
 .mantine-Input-input:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: none;
 }
 
-[data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="default"],
+:root .mantine-Input-input[data-variant="unstyled"]:focus,
+:root .mantine-Input-input[data-variant="unstyled"]:focus-within {
+  border-color: transparent;
+}
+
 [data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="light"],
-[data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="default"],
 [data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="light"] {
   border-color: var(--border);
 }
 
-:root[data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]),
-:root[data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]) {
-  --button-bg: var(--surface) !important;
-  --button-hover: var(--surface-2) !important;
-  --button-bd: 1px solid var(--border) !important;
-  --ai-bg: var(--surface) !important;
-  --ai-hover: var(--surface-2) !important;
-  --ai-bd: 1px solid var(--border) !important;
+:root .mantine-Button-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]),
+:root .mantine-ActionIcon-root[data-variant="default"]:not([data-keep-color]):not([data-disabled]) {
+  --button-bg: var(--segment-track) !important;
+  --button-hover: color-mix(in srgb, var(--text) 14%, transparent) !important;
+  --button-bd: 1px solid transparent !important;
+  --ai-bg: var(--segment-track) !important;
+  --ai-hover: color-mix(in srgb, var(--text) 14%, transparent) !important;
+  --ai-bd: 1px solid transparent !important;
   background-clip: padding-box;
-}
-
-[data-mantine-color-scheme="dark"] .mantine-Button-root[data-variant="default"]:hover,
-[data-mantine-color-scheme="dark"] .mantine-ActionIcon-root[data-variant="default"]:hover {
-  border-color: var(--border-strong);
 }
 
 .mantine-Button-section[data-position="left"] {
@@ -689,7 +692,7 @@ body { overflow-wrap: break-word; }
 }
 
 .mantine-SegmentedControl-root .mantine-SegmentedControl-label[data-active] {
-  color: var(--text);
+  color: var(--accent-text);
   font-weight: 600;
 }
 
@@ -1019,7 +1022,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 .range-seg-btn[data-active="true"] {
   background: var(--segment-thumb);
-  color: var(--text);
+  color: var(--accent-text);
   font-weight: 600;
   box-shadow: 0 0 0 1px var(--segment-thumb-edge);
 }

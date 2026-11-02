@@ -378,13 +378,6 @@
   padding: 12px 12px 8px;
 }
 
-.cardEyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 18px;
-}
-
 .cardMenu {
   margin: -3px -4px -3px auto;
   transition: opacity var(--duration-fast) ease;
@@ -414,14 +407,6 @@
   -webkit-box-orient: vertical;
 }
 
-.cardIcons {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  padding-left: 28px;
-}
-
 .card:hover {
   border-color: var(--border-hover);
 }
@@ -440,12 +425,6 @@
   border-color: var(--border-hover);
   box-shadow: var(--shadow-lg);
   cursor: grabbing;
-}
-
-.labels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
 }
 
 .label {
@@ -488,7 +467,7 @@
 .titleRow {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
 }
 
 .progress {
@@ -726,34 +705,72 @@
   color: var(--text-2);
 }
 
-.cardEyebrow .statusBadge {
-  font-size: 11.5px;
-}
-
-.cardEyebrow .statusBadge[data-status="doing"] {
-  color: var(--accent-text);
-}
-
-.cardEyebrow .statusBadge[data-status="done"] {
-  color: var(--green);
-}
-
 .cardPriority {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--amber) 14%, transparent);
   font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text-2);
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.cardPriority .priority {
+  color: inherit;
 }
 
 .cardPriority[data-level="urgent"],
 .cardPriority[data-level="high"] {
+  background: color-mix(in srgb, var(--red) 16%, transparent);
   color: var(--red);
 }
 
 .cardPriority[data-level="low"] {
+  background: var(--accent-soft);
   color: var(--accent-text);
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding-left: 28px;
+}
+
+.cardMeta .key {
+  font-weight: 500;
+}
+
+.cardMeta .assigneeAvatars {
+  gap: 0;
+}
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+.cardAvatar {
+  display: inline-flex;
+  border: 2px solid var(--surface-2);
+  border-radius: var(--radius-pill);
+}
+
+.cardAvatar + .cardAvatar {
+  margin-left: -7px;
 }
 
 .viewIcon {
@@ -1017,6 +1034,19 @@
   border-bottom: 0;
 }
 
+.addRow .pickerIcon {
+  color: var(--accent-text);
+}
+
+.checklist .addRow .bareInput::placeholder {
+  color: var(--accent-text);
+  opacity: 1;
+}
+
+.checklist .sectionHint:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
 .depColumn {
   display: flex;
   flex-direction: column;
@@ -1130,6 +1160,7 @@
   gap: 5px;
   min-width: 0;
   margin-bottom: -4px;
+  padding-left: 28px;
   font-size: 11.5px;
   color: var(--muted);
 }
@@ -1144,6 +1175,10 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--amber) 16%, transparent);
   font-size: 11.5px;
   font-weight: 600;
   color: var(--amber);

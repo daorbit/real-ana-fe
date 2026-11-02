@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TextInput } from "@mantine/core";
-import { ProgressGlyph } from "./TaskBits";
+import { Plus } from "lucide-react";
 import classes from "./Tasks.module.css";
 
 export function AddItemRow({
@@ -23,9 +23,9 @@ export function AddItemRow({
   };
 
   return (
-    <div className={classes.checkItem}>
-      <span className={classes.progress} data-status="todo">
-        <ProgressGlyph status="todo" size={18} />
+    <div className={`${classes.checkItem} ${classes.addRow}`}>
+      <span className={classes.pickerIcon} aria-hidden>
+        <Plus size={16} />
       </span>
       <TextInput
         className={classes.checkAdd}

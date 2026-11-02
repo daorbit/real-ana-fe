@@ -97,8 +97,8 @@ export const theme = createTheme({
     Switch: {
       vars: (_theme: unknown, props: { color?: string }) => ({
         root: {
-          "--switch-bg": "var(--surface-2)",
-          "--switch-bd": "1px solid var(--border)",
+          "--switch-bg": "color-mix(in srgb, var(--text) 18%, transparent)",
+          "--switch-bd": "1px solid transparent",
           "--switch-thumb-bg": "#ffffff",
           ...(props.color ? {} : { "--switch-color": "var(--accent)" }),
         },

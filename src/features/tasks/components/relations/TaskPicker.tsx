@@ -14,7 +14,7 @@ export function TaskPicker({
   onPick: (id: string) => void;
 }) {
   return (
-    <div className={classes.checkItem}>
+    <div className={`${classes.checkItem} ${classes.addRow}`}>
       <span className={classes.pickerIcon} aria-hidden>
         <Plus size={16} />
       </span>
