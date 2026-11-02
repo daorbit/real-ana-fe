@@ -1,48 +1,39 @@
-.legend {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
+.legendRow {
+  margin-bottom: 10px;
 }
 
-.legendItem {
+.periods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.period {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  height: 28px;
-  padding: 0 11px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-2);
-  white-space: nowrap;
 }
 
-.legendButton {
-  cursor: pointer;
-  transition: opacity var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+.line {
+  flex: none;
+  width: 16px;
+  height: 0;
+  border-top: 2px solid var(--viz-1);
+  border-radius: 2px;
 }
 
-.legendButton:hover {
-  color: var(--text);
-  border-color: var(--border-hover);
+.line[data-metric="views"] {
+  border-top-color: var(--metric-orange);
 }
 
-.legendButton[aria-pressed="true"] {
-  color: var(--text);
-  border-color: var(--accent);
-  background: var(--accent-soft);
+.line[data-metric="visitors"] {
+  border-top-color: var(--metric-blue);
 }
 
-.legendButton:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.legendButton[data-dim] {
-  opacity: 0.5;
+.line[data-metric="baseline"] {
+  border-top: 2px dashed var(--viz-baseline);
 }
 
 .dot {
@@ -53,11 +44,11 @@
 }
 
 .dot[data-metric="views"] {
-  background: var(--viz-1);
+  background: var(--metric-orange);
 }
 
 .dot[data-metric="visitors"] {
-  background: var(--viz-2);
+  background: var(--metric-blue);
 }
 
 .dot[data-metric="baseline"] {

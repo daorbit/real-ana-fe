@@ -25,7 +25,6 @@ export function ScrollPanel({
   return (
     <RankCard
       title="Scroll depth"
-      icon={ArrowDownWideNarrow}
       tone="indigo"
       subtitle={items.length > 0 ? "Average depth · share who reach the end" : undefined}
     >
@@ -37,14 +36,14 @@ export function ScrollPanel({
         </RankEmpty>
       ) : (
         <RankList
-          showRank={false}
+          columns={{ label: "Page", value: "Avg depth", aside: "Finish" }}
           items={items.map((i) => ({
             id: i.key,
             leading: <DepthRing percent={i.avgDepth} />,
             label: <PathLabel path={i.key} />,
             title: onSelectPath ? `Filter by ${i.key}` : i.key,
             value: `${i.avgDepth}%`,
-            aside: `${i.completionRate}% finish`,
+            aside: `${i.completionRate}%`,
             tone: depthTone(i.avgDepth),
           }))}
           onSelect={onSelectPath}
@@ -66,7 +65,6 @@ export function LandingPanel({
   return (
     <RankCard
       title="Landing pages"
-      icon={LogIn}
       tone="blue"
       subtitle={items.length > 0 ? `${num(total)} sessions` : undefined}
     >
@@ -74,6 +72,7 @@ export function LandingPanel({
         <RankEmpty icon={LogIn}>Waiting for data…</RankEmpty>
       ) : (
         <RankList
+          columns={{ label: "Landing page", value: "Sessions", aside: "Share" }}
           items={items.map((i) => ({
             id: i.key,
             label: <PathLabel path={i.key} />,

@@ -1,6 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Loader } from "@mantine/core";
-import { useStuck } from "@/shared/lib/useStuck";
 import type { AnalyticsSection } from "./analyticsSections";
 import classes from "./AnalyticsLayout.module.css";
 
@@ -11,6 +10,7 @@ export function AnalyticsControlDeck({
   sections,
   active,
   onSection,
+  status,
 }: {
   controls: ReactNode;
   updating: boolean;
@@ -18,23 +18,9 @@ export function AnalyticsControlDeck({
   sections: AnalyticsSection[];
   active: string;
   onSection: (value: string) => void;
+  status?: ReactNode;
 }) {
-  const { sentinel, stuck } = useStuck();
   const bar = useRef<HTMLDivElement>(null);
-  const deck = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = deck.current;
-    const tabs = bar.current;
-    if (!el || !tabs) return;
-    const scroller = el.closest<HTMLElement>(".app-panel__scroll");
-    const observer = new ResizeObserver(() => {
-      const inset = scroller ? parseFloat(getComputedStyle(scroller).paddingTop) || 0 : 0;
-      el.style.setProperty("--deck-pin", `${-(tabs.offsetTop + inset)}px`);
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const el = bar.current?.querySelector<HTMLElement>("[data-active]");
@@ -47,39 +33,36 @@ export function AnalyticsControlDeck({
   }, [active]);
 
   return (
-    <>
-      <div ref={sentinel} className={classes.anchor} aria-hidden />
-      <div ref={deck} className={classes.deck} data-stuck={stuck || undefined}>
-        <div className={classes.bar}>
-          <div ref={bar} className={classes.tabbar} role="tablist" aria-label="Analytics sections">
-            {sections.map((s) => {
-              const on = s.value === active;
-              const Icon = s.icon;
-              return (
-                <button
-                  key={s.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={on}
-                  data-active={on || undefined}
-                  className={classes.tab}
-                  onClick={() => onSection(s.value)}
-                >
-                  <Icon size={15} />
-                  {s.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className={`${classes.controls} an-range`}>
-            {updating && <Loader size={14} color="emerald" type="oval" aria-label="Updating" />}
-            {controls}
-          </div>
+    <div className={classes.deck}>
+      <div className={classes.filters}>
+        <div className={`${classes.controls} an-range`}>
+          {controls}
+          {updating && <Loader size={14} color="gray" type="oval" aria-label="Updating" />}
         </div>
-
         {chips && <div className={classes.chips}>{chips}</div>}
       </div>
-    </>
+
+      <div className={classes.bar}>
+        <div ref={bar} className={classes.tabbar} role="tablist" aria-label="Analytics sections">
+          {sections.map((s) => {
+            const on = s.value === active;
+            return (
+              <button
+                key={s.value}
+                type="button"
+                role="tab"
+                aria-selected={on}
+                data-active={on || undefined}
+                className={classes.tab}
+                onClick={() => onSection(s.value)}
+              >
+                {s.label}
+              </button>
+            );
+          })}
+        </div>
+        {status && <span className={classes.status}>{status}</span>}
+      </div>
+    </div>
   );
 }

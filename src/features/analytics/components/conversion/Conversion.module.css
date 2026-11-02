@@ -1,10 +1,8 @@
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0 0 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 16px;
 }
 
 .stat {
@@ -13,23 +11,24 @@
   gap: 4px;
   min-width: 0;
   padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--seo-hairline, var(--border));
+  background: var(--surface);
 }
 
-.stat + .stat {
-  border-left: 1px solid var(--border);
-}
 
 .statLabel {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-2);
 }
 
 .statValue {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
   color: var(--text);
 }
 
@@ -39,111 +38,37 @@
 
 .statNote {
   overflow: hidden;
-  font-size: 11.5px;
+  font-size: 12px;
   white-space: nowrap;
   text-overflow: ellipsis;
   color: var(--muted);
 }
 
-.money {
-  font-weight: 600;
-  color: var(--green);
-}
-
-.rate {
-  font-weight: 600;
+.guideText {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
   color: var(--text-2);
 }
 
 .snippet {
   display: block;
   margin: 12px 0 0;
-  text-align: left;
   padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
+  border: 1px solid var(--seo-hairline, var(--border));
+  border-radius: 10px;
+  background: var(--bg-2);
   font-family: var(--font-mono);
   font-size: 12px;
+  line-height: 1.6;
+  text-align: left;
+  white-space: pre;
   color: var(--text);
   overflow-x: auto;
 }
 
-.steps {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.step {
-  display: flex;
-  gap: 12px;
-  padding: 12px 0;
-}
-
-.step + .step {
-  border-top: 1px solid var(--border);
-}
-
-.stepNum {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--accent-text);
-  background: var(--accent-soft);
-}
-
-.stepText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.stepTitle {
-  font-size: 13px;
-  font-weight: 650;
-  color: var(--text);
-}
-
-.stepBody {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--muted);
-}
-
-.guideAction {
-  margin-top: 6px;
-}
-
-.flowCanvas {
-  position: relative;
-  width: 100%;
-  height: 600px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--bg-2);
-}
-
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .summary {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .stat + .stat {
-    border-left: 0;
-    border-top: 1px solid var(--border);
-  }
-
-  .flowCanvas {
-    height: 460px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -5,7 +5,6 @@ import classes from "./Rank.module.css";
 
 export function RankCard({
   title,
-  icon: Icon,
   tone = "teal",
   subtitle,
   actions,
@@ -13,7 +12,6 @@ export function RankCard({
   children,
 }: {
   title: ReactNode;
-  icon?: LucideIcon;
   tone?: RankTone;
   subtitle?: ReactNode;
   actions?: ReactNode;
@@ -23,14 +21,9 @@ export function RankCard({
   return (
     <section className={classes.card} data-tone={tone} data-fill={fill || undefined}>
       <header className={classes.head}>
-        {Icon && (
-          <span className={classes.icon}>
-            <Icon size={15} strokeWidth={2.2} />
-          </span>
-        )}
         <div className={classes.headText}>
           <h3 className={classes.title}>{title}</h3>
-          {subtitle && <span className={classes.subtitle}>{subtitle}</span>}
+          {subtitle && <p className={classes.subtitle}>{subtitle}</p>}
         </div>
         {actions && <div className={classes.actions}>{actions}</div>}
       </header>

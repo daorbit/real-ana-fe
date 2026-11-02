@@ -3,7 +3,14 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { num, share } from "@/shared/lib";
 import classes from "./Donut.module.css";
 
-const PALETTE = ["var(--viz-1)", "var(--viz-2)", "var(--viz-3)", "var(--viz-4)", "var(--viz-5)", "var(--viz-6)"];
+const PALETTE = [
+  "var(--metric-blue)",
+  "var(--metric-teal)",
+  "var(--metric-orange)",
+  "var(--metric-purple)",
+  "var(--metric-pink)",
+  "var(--metric-yellow)",
+];
 const OTHER_COLOR = "var(--viz-other)";
 const OTHER_ID = "__other";
 
@@ -31,7 +38,7 @@ export function DonutBreakdown({
   const [active, setActive] = useState<number | null>(null);
   const slices = toSlices(items, limit);
   const total = slices.reduce((sum, s) => sum + s.value, 0);
-  const focus = active === null ? null : slices[active] ?? null;
+  const focus = (active === null ? null : slices[active]) ?? slices[0] ?? null;
   const canSelect = (s: Slice) => Boolean(onSelect) && s.id !== OTHER_ID;
   const select = (s: Slice | undefined) => s && canSelect(s) && onSelect?.(s.id);
   const onKeyDown = (s: Slice) => (e: KeyboardEvent<HTMLLIElement>) => {
@@ -49,10 +56,10 @@ export function DonutBreakdown({
               data={slices}
               dataKey="value"
               nameKey="id"
-              innerRadius="74%"
+              innerRadius="80%"
               outerRadius="100%"
               paddingAngle={slices.length > 1 ? 1.5 : 0}
-              cornerRadius={6}
+              cornerRadius={3}
               startAngle={90}
               endAngle={-270}
               stroke="var(--surface)"
@@ -75,8 +82,7 @@ export function DonutBreakdown({
         </ResponsiveContainer>
         <div className={classes.center}>
           <span className={classes.centerValue}>{focus ? share(focus.value, total) : num(total)}</span>
-          <span className={classes.centerLabel}>{focus ? focus.label : totalLabel}</span>
-        </div>
+          <span className={classes.centerLabel}>{focus ? focus.label : totalLabel}</span>        </div>
       </div>
 
       <ul className={classes.legend}>
@@ -90,7 +96,7 @@ export function DonutBreakdown({
             role={canSelect(s) ? "button" : undefined}
             tabIndex={canSelect(s) ? 0 : undefined}
             title={s.title}
-            style={{ "--dot": s.color, "--share": `${total ? (s.value / total) * 100 : 0}%` } as CSSProperties}
+            style={{ "--dot": s.color } as CSSProperties}
             onMouseEnter={() => setActive(i)}
             onMouseLeave={() => setActive(null)}
             onFocus={() => setActive(i)}
@@ -100,11 +106,8 @@ export function DonutBreakdown({
           >
             <span className={classes.dot} />
             <span className={classes.legendLabel}>{s.label}</span>
-            <span className={classes.legendShare}>{share(s.value, total)}</span>
             <span className={classes.legendValue}>{num(s.value)}</span>
-            <span className={classes.legendTrack} aria-hidden>
-              <span className={classes.legendBar} />
-            </span>
+            <span className={classes.legendShare}>{share(s.value, total)}</span>
           </li>
         ))}
       </ul>

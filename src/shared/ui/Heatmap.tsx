@@ -1,5 +1,5 @@
 import { Tooltip } from "@mantine/core";
-import { CalendarClock, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import type { HeatCell } from "@/shared/types";
 import classes from "./Heatmap.module.css";
@@ -25,7 +25,12 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
   const byCell = new Map(cells.map((c) => [`${c.day}-${c.hour}`, c.count]));
 
   return (
-    <RankCard title="When your visitors show up" icon={CalendarClock} tone="blue" fill={false}>
+    <RankCard
+      title="When visitors come"
+      subtitle="Views by weekday and hour, in your time zone"
+      tone="blue"
+      fill={false}
+    >
       {cells.length === 0 ? (
         <RankEmpty icon={Inbox}>Waiting for data…</RankEmpty>
       ) : (
@@ -53,7 +58,7 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
               <span className={classes.day} />
               {HOURS.map((h) => (
                 <span key={h} className={classes.hour}>
-                  {h % 3 === 0 ? h : ""}
+                  {h % 6 === 0 ? String(h).padStart(2, "0") : ""}
                 </span>
               ))}
             </div>

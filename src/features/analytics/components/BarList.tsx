@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { ActionIcon, Tooltip } from "@mantine/core";
-import { GitCompareArrows, Inbox, type LucideIcon } from "lucide-react";
+import { ActionIcon, Button, Tooltip } from "@mantine/core";
+import { GitCompareArrows, Inbox } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { num, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
@@ -13,9 +13,9 @@ import type { Bucket, StatsFilter } from "@/shared/types";
 
 export function BarList({
   title,
+  subtitle,
   items,
   color = "teal",
-  icon,
   format,
   empty,
   filterKey,
@@ -24,12 +24,16 @@ export function BarList({
   dimension,
   useCompare,
   chart = "list",
+  columns,
+  limit,
+  link,
+  autoCompare = false,
 }: {
   chart?: "list" | "donut";
   title: string;
+  subtitle?: string;
   items: Bucket[];
   color?: string;
-  icon?: LucideIcon;
   format?: (key: string) => ReactNode;
   empty?: string;
   filterKey?: keyof StatsFilter;
@@ -37,10 +41,16 @@ export function BarList({
   fill?: boolean;
   dimension?: string;
   useCompare?: BreakdownCompareHook;
+  columns?: { label: string; value: string };
+  limit?: number;
+  link?: { label: string; onClick: () => void };
+  autoCompare?: boolean;
 }) {
   const { t } = useTranslation();
-  const [compareOn, setCompareOn] = useState(false);
+  const [override, setOverride] = useState<boolean | null>(null);
   const canCompare = Boolean(dimension && useCompare);
+  const compareOn = override ?? (autoCompare && chart === "list");
+  const setCompareOn = (next: (on: boolean) => boolean) => setOverride(next(compareOn));
 
   const compareHook = useCompare ?? NO_COMPARE;
   const { rows: compareRows, loading: compareLoading } = compareHook(dimension ?? "", compareOn && canCompare);
@@ -49,30 +59,39 @@ export function BarList({
   const shown: Bucket[] = showCompare ? compareRows.map((r) => ({ key: r.key, count: r.count })) : items;
   const deltaByKey = new Map(compareRows?.map((r) => [r.key, r]) ?? []);
   const total = shown.reduce((sum, i) => sum + i.count, 0);
+  const summary = shown.length > 0 ? `${num(total)} total · ${shown.length} ${shown.length === 1 ? "item" : "items"}` : undefined;
 
   return (
     <RankCard
       title={title}
-      icon={icon}
       tone={toRankTone(color)}
       fill={fill}
-      subtitle={shown.length > 0 ? `${num(total)} total · ${shown.length} ${shown.length === 1 ? "item" : "items"}` : undefined}
+      subtitle={subtitle ?? summary}
       actions={
-        canCompare && (
-          <Tooltip label="Compare to the baseline period" withArrow>
-            <ActionIcon
-              variant={compareOn ? "filled" : "subtle"}
-              color={compareOn ? "emerald" : "gray"}
-              size="md"
-              radius="md"
-              loading={compareLoading}
-              onClick={() => setCompareOn((v) => !v)}
-              aria-label="Compare to the baseline period"
-              aria-pressed={compareOn}
-            >
-              <GitCompareArrows size={15} />
-            </ActionIcon>
-          </Tooltip>
+        (canCompare || link) && (
+        <>
+          {canCompare && (
+            <Tooltip label="Compare to the baseline period" withArrow>
+              <ActionIcon
+                variant={compareOn ? "light" : "subtle"}
+                color="gray"
+                size="md"
+                radius="md"
+                loading={compareLoading}
+                onClick={() => setCompareOn((v) => !v)}
+                aria-label="Compare to the baseline period"
+                aria-pressed={compareOn}
+              >
+                <GitCompareArrows size={15} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+          {link && (
+            <Button variant="subtle" size="compact-sm" onClick={link.onClick}>
+              {link.label}
+            </Button>
+          )}
+        </>
         )
       }
     >
@@ -90,6 +109,8 @@ export function BarList({
         />
       ) : (
         <RankList
+          limit={limit}
+          columns={columns && { ...columns, aside: showCompare ? "Change" : "Share" }}
           items={shown.map((i) => ({
             id: i.key,
             label: format ? format(i.key) : isPathKey(i.key) ? <PathLabel path={i.key} /> : i.key,

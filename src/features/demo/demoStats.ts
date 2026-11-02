@@ -102,10 +102,16 @@ export function demoStats(range: string): Stats {
     const weekly = 1 + Math.sin((i / points) * Math.PI * 2) * 0.18;
     const jitter = 0.85 + rand() * 0.3;
     const views = Math.round(120 * trend * weekly * jitter);
+    const sessions = Math.round(views * (0.46 + rand() * 0.06));
     return {
       bucket: label(i, points),
       views,
       visitors: Math.round(views * (0.62 + rand() * 0.08)),
+      sessions,
+      bounceRate: Math.round(36 + rand() * 12),
+      avgSessionMs: Math.round(150_000 + rand() * 40_000),
+      avgTimeOnPageMs: Math.round(48_000 + rand() * 14_000),
+      pagesPerSession: Math.round((views / Math.max(1, sessions)) * 10) / 10,
     };
   });
 

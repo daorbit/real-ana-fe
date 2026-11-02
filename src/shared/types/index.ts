@@ -1406,7 +1406,16 @@ export type ClickBucket = Bucket & {
   tag?: string;
 };
 
-export type Point = { bucket: string; views: number; visitors: number };
+export type Point = {
+  bucket: string;
+  views: number;
+  visitors: number;
+  sessions?: number;
+  bounceRate?: number;
+  avgSessionMs?: number;
+  avgTimeOnPageMs?: number;
+  pagesPerSession?: number;
+};
 
 /** First-time vs repeat visitors over the selected window. */
 export type VisitorSplit = {

@@ -1,24 +1,25 @@
-import { MousePointerClick } from "lucide-react";
 import type { AnalyticsTab } from "./analyticsSections";
 import classes from "./AnalyticsLayout.module.css";
 
 export function AnalyticsSubTabs({
+  label,
   tabs,
   active,
   onChange,
 }: {
+  label: string;
   tabs: AnalyticsTab[];
   active: string;
   onChange: (value: string) => void;
 }) {
   if (!tabs.length) return null;
+  const current = tabs.find((tab) => tab.value === active) ?? tabs[0];
 
   return (
     <div className={classes.subRow}>
-      <div className={classes.subtabs} role="tablist" aria-label="Views">
+      <div className={classes.subtabs} role="tablist" aria-label={`${label} views`}>
         {tabs.map((tab) => {
           const on = tab.value === active;
-          const Icon = tab.icon;
           return (
             <button
               key={tab.value}
@@ -29,16 +30,12 @@ export function AnalyticsSubTabs({
               className={classes.subtab}
               onClick={() => onChange(tab.value)}
             >
-              <Icon size={14} />
               {tab.label}
             </button>
           );
         })}
       </div>
-      <span className={classes.tip}>
-        <MousePointerClick size={13} />
-        Click any row to filter the whole dashboard by it.
-      </span>
+      <p className={classes.intro}>{current.intro}</p>
     </div>
   );
 }

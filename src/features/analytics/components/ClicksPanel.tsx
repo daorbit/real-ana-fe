@@ -14,13 +14,11 @@ export function ClicksPanel({
   total: number;
   limit?: number;
 }) {
-
   return (
     <RankCard
-      title="CTA clicks"
-      icon={MousePointerClick}
+      title="Most clicked"
       tone="violet"
-      subtitle={total > 0 ? `${num(total)} clicks across ${clicks.length} buttons` : undefined}
+      subtitle={total > 0 ? `${num(total)} clicks across ${clicks.length} buttons and links` : "Buttons and links on your pages"}
     >
       {clicks.length === 0 ? (
         <RankEmpty icon={MousePointerClick}>
@@ -29,6 +27,7 @@ export function ClicksPanel({
       ) : (
         <RankList
           limit={limit}
+          columns={{ label: "Element", value: "Clicks", aside: "Share" }}
           items={clicks.map((c) => ({
             weight: c.count,
             id: `${c.key}|${c.path}`,

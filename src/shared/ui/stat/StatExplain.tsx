@@ -1,46 +1,42 @@
-import { useState } from "react";
-import { ActionIcon, CloseButton, Group, Loader, Popover, Text } from "@mantine/core";
+import { Loader, Tooltip, UnstyledButton } from "@mantine/core";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
+import classes from "@/shared/ui/stat/StatCard.module.css";
 
-export function StatExplain({
-  onExplain,
+export function StatExplainButton({
+  open,
+  explaining,
+  onToggle,
+}: {
+  open: boolean;
+  explaining?: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <Tooltip label="Why did this change? Ask Orbit" withArrow disabled={open}>
+      <UnstyledButton
+        className={classes.info}
+        aria-label={open ? "Hide Orbit's explanation" : "Why did this change? Ask Orbit"}
+        aria-pressed={open}
+        onClick={onToggle}
+      >
+        {explaining ? <Loader size={10} color="gray" /> : <OrbitMark size={14} />}
+      </UnstyledButton>
+    </Tooltip>
+  );
+}
+
+export function StatExplanation({
   explaining,
   explanation,
   explainError,
 }: {
-  onExplain: () => void;
   explaining?: boolean;
   explanation?: string | null;
   explainError?: string | null;
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <Popover width={280} position="bottom-end" withArrow shadow="md" opened={open} onClose={() => setOpen(false)}>
-      <Popover.Target>
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          size="xs"
-          onClick={() => {
-            const opening = !open;
-            setOpen(opening);
-            if (opening) onExplain();
-          }}
-          aria-label="Why did this change? — ask Orbit"
-        >
-          {explaining ? <Loader size={10} /> : <OrbitMark size={14} />}
-        </ActionIcon>
-      </Popover.Target>
-      <Popover.Dropdown>
-        <Group justify="space-between" wrap="nowrap" mb={6} gap={8}>
-          <Text size="xs" fw={600} c="dimmed">Orbit</Text>
-          <CloseButton size="xs" onClick={() => setOpen(false)} />
-        </Group>
-        <Text size="xs" c={explainError ? "red" : undefined}>
-          {explaining ? "Thinking…" : explainError ?? explanation ?? ""}
-        </Text>
-      </Popover.Dropdown>
-    </Popover>
+    <p className={classes.explanation} data-error={explainError ? true : undefined}>
+      {explaining ? "Looking at what changed…" : explainError ?? explanation ?? ""}
+    </p>
   );
 }

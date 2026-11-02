@@ -93,6 +93,14 @@
   --viz-6: #008300;
   --viz-7: #9085e9;
   --viz-8: #e66767;
+  --metric-blue: #0a84ff;
+  --metric-orange: #ff9f0a;
+  --metric-purple: #bf5af2;
+  --metric-pink: #ff375f;
+  --metric-teal: #64d2ff;
+  --metric-indigo: #5e5ce6;
+  --metric-yellow: #ffd60a;
+  --metric-green: #30d158;
   --viz-other: var(--gray-9);
   --viz-pos: var(--green);
   --viz-neg: var(--red);
@@ -256,6 +264,14 @@
   --viz-6: #008300;
   --viz-7: #6250d6;
   --viz-8: #e34948;
+  --metric-blue: #007aff;
+  --metric-orange: #f28a00;
+  --metric-purple: #a550d6;
+  --metric-pink: #ff2d55;
+  --metric-teal: #1d9bc7;
+  --metric-indigo: #5856d6;
+  --metric-yellow: #d9a400;
+  --metric-green: #28a745;
   --viz-grid: color-mix(in srgb, var(--text) 8%, transparent);
   --viz-track: color-mix(in srgb, var(--text) 6%, transparent);
 

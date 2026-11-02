@@ -1,25 +1,23 @@
-import { Zap, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { num } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
-import { RankList } from "@/shared/ui/rank/RankList";
 import type { EventBucket } from "@/shared/types";
-import { EventsSummary } from "./conversion/EventsSummary";
 import { formatMoney } from "./conversion/formatMoney";
 import classes from "./conversion/Conversion.module.css";
+import table from "./table/AnalyticsTable.module.css";
 
 export function CustomEventsPanel({
   items,
-  totalRevenue = 0,
+  onSelect,
 }: {
   items: EventBucket[];
-  totalRevenue?: number;
+  onSelect?: (key: string) => void;
 }) {
   return (
     <RankCard
       title="Custom events"
-      icon={Zap}
       tone="violet"
-      subtitle={items.length > 0 ? "Fires, visitors and conversion rate per event" : undefined}
+      subtitle={onSelect ? "Click an event to filter the report by it" : "Events, visitors and conversion rate per event"}
     >
       {items.length === 0 ? (
         <RankEmpty icon={Inbox}>
@@ -27,25 +25,36 @@ export function CustomEventsPanel({
           <code className={classes.snippet}>{`rta.track("signup", { plan: "pro" });`}</code>
         </RankEmpty>
       ) : (
-        <>
-          <EventsSummary items={items} totalRevenue={totalRevenue} />
-          <RankList
-            items={items.map((i) => ({
-              id: i.key,
-              label: i.key,
-              title: i.key,
-              weight: i.count,
-              meta: (
-                <>
-                  {num(i.visitors)} {i.visitors === 1 ? "visitor" : "visitors"}
-                  {i.revenue > 0 && <span className={classes.money}>{formatMoney(i.revenue)}</span>}
-                </>
-              ),
-              aside: <span className={classes.rate}>{i.conversionRate}% conv.</span>,
-              value: num(i.count),
-            }))}
-          />
-        </>
+        <div className={table.scroll}>
+          <div className={table.table} data-kind="events" role="table" aria-label="Custom events">
+            <div className={table.head} role="row">
+              <span role="columnheader">Event</span>
+              <span role="columnheader">Events</span>
+              <span role="columnheader">Visitors</span>
+              <span role="columnheader">Conv.</span>
+              <span role="columnheader">Revenue</span>
+            </div>
+            {items.map((i) => (
+              <button
+                key={i.key}
+                type="button"
+                role="row"
+                className={table.row}
+                title={onSelect ? `Filter by ${i.key}` : i.key}
+                onClick={onSelect ? () => onSelect(i.key) : undefined}
+                disabled={!onSelect}
+              >
+                <span role="cell" className={table.mono}>{i.key}</span>
+                <span role="cell" className={table.strong}>{num(i.count)}</span>
+                <span role="cell" className={table.muted}>{num(i.visitors)}</span>
+                <span role="cell" className={table.muted}>{i.conversionRate}%</span>
+                <span role="cell" className={i.revenue > 0 ? table.money : table.muted}>
+                  {i.revenue > 0 ? formatMoney(i.revenue) : "—"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </RankCard>
   );

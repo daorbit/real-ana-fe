@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Inbox, type LucideIcon } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { num, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
@@ -11,7 +11,6 @@ import type { Bucket } from "@/shared/types";
 export function MiniList({
   title,
   items,
-  icon,
   tone = "teal",
   chart = "list",
   format,
@@ -20,7 +19,6 @@ export function MiniList({
 }: {
   title: string;
   items: Bucket[];
-  icon: LucideIcon;
   tone?: RankTone;
   chart?: "list" | "donut";
   format?: (key: string) => ReactNode;
@@ -33,7 +31,6 @@ export function MiniList({
   return (
     <RankCard
       title={title}
-      icon={icon}
       tone={tone}
       subtitle={items.length > 0 ? `${num(total)} total` : undefined}
     >

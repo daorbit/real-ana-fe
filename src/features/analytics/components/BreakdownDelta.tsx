@@ -1,6 +1,7 @@
-import { Text, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
 import { num } from "@/shared/lib";
 import type { BreakdownComparisonRow } from "@/shared/types";
+import classes from "./BreakdownDelta.module.css";
 
 export type BreakdownCompareHook = (
   dimension: string,
@@ -10,21 +11,25 @@ export type BreakdownCompareHook = (
 export const NO_COMPARE: BreakdownCompareHook = () => ({ rows: undefined, loading: false });
 
 export function BreakdownDelta({ row }: { row?: BreakdownComparisonRow }) {
-  if (!row) return null;
+  if (!row) return <span className={classes.delta}>—</span>;
   const { delta: pct, previous } = row;
 
   if (previous === 0) {
-    return <Text size="xs" c="emerald" fw={600}>new</Text>;
+    return (
+      <span className={classes.delta} data-dir="up">
+        New
+      </span>
+    );
   }
-  if (pct === null) return <Text size="xs" c="dimmed">—</Text>;
+  if (pct === null) return <span className={classes.delta}>—</span>;
 
   const up = pct > 0;
   const flat = pct === 0;
   return (
     <Tooltip label={`${num(previous)} in the baseline period`} withArrow>
-      <Text size="xs" fw={600} c={flat ? "dimmed" : up ? "emerald" : "red"}>
+      <span className={classes.delta} data-dir={flat ? undefined : up ? "up" : "down"}>
         {flat ? "±0%" : `${up ? "+" : ""}${pct}%`}
-      </Text>
+      </span>
     </Tooltip>
   );
 }

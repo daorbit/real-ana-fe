@@ -200,6 +200,8 @@ export function FilterBar({
           </>
         )}
 
+        {!hasFilter && <span className={styles.hint}>Click any row in a list to filter the whole report.</span>}
+
         {hasFilter && (
           <>
             <span className={styles.label} data-spaced={segments.length > 0 || undefined}>

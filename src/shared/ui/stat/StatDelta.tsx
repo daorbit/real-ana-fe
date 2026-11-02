@@ -1,4 +1,4 @@
-import { Badge, Text, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import classes from "@/shared/ui/stat/StatCard.module.css";
 
@@ -17,28 +17,22 @@ export function StatDelta({
   inverse?: boolean;
   comparison?: StatComparison;
 }) {
-  if (delta === null) {
-    return (
-      <Text size="xs" c="dimmed" fw={500}>
-        —
-      </Text>
-    );
-  }
+  if (delta === null) return <span className={classes.trend}>—</span>;
 
   const up = delta > 0;
   const flat = delta === 0;
   const good = inverse ? !up : up;
-  const color = flat ? "gray" : good ? "teal" : "red";
   const Icon = flat ? Minus : up ? TrendingUp : TrendingDown;
 
-  const badge = (
-    <Badge size="sm" variant="light" color={color} leftSection={<Icon size={10} />} className={classes.deltaTrigger}>
+  const trend = (
+    <span className={classes.trend} data-tone={flat ? undefined : good ? "good" : "bad"} tabIndex={comparison ? 0 : undefined}>
+      <Icon size={13} strokeWidth={2.4} />
       {up ? "+" : ""}
       {delta}%
-    </Badge>
+    </span>
   );
 
-  if (!comparison) return badge;
+  if (!comparison) return trend;
 
   return (
     <Tooltip
@@ -56,7 +50,7 @@ export function StatDelta({
         </span>
       }
     >
-      <span tabIndex={0}>{badge}</span>
+      {trend}
     </Tooltip>
   );
 }

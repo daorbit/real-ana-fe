@@ -1,18 +1,19 @@
 import { Center, Loader } from "@mantine/core";
-import { Repeat, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
+import dayjs from "dayjs";
 import { useGetRetentionQuery } from "@/app/store";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { num } from "@/shared/lib";
+import classes from "./RetentionGrid.module.css";
 
-/** Colour a retention cell from empty (0%) to strong (100%). */
-function cellStyle(pct: number): React.CSSProperties {
-  const alpha = pct === 0 ? 0 : 0.14 + (pct / 100) * 0.76;
+function cellStyle(pct: number, first: boolean, strongest: number): React.CSSProperties {
+  const alpha = pct === 0 ? 0 : first ? 0.9 : 0.14 + (pct / Math.max(1, strongest)) * 0.6;
   return {
     background:
       pct === 0
         ? "var(--surface)"
         : `color-mix(in srgb, var(--viz-seq) ${Math.round(alpha * 100)}%, transparent)`,
-    color: pct >= 55 ? "#ffffff" : "var(--mantine-color-text)",
+    color: alpha >= 0.45 ? "#ffffff" : "var(--mantine-color-text)",
   };
 }
 
@@ -34,12 +35,13 @@ export function RetentionGrid({
   const weeks = data?.weeks ?? 6;
   const cohorts = data?.cohorts ?? [];
   const hasData = cohorts.some((c) => c.size > 0);
+  const strongest = Math.max(0, ...cohorts.flatMap((c) => c.retention.slice(1)));
+  const weekOf = (cohort: number) => dayjs().subtract((weeks - cohort) * 7, "day").format("MMM D");
 
   return (
     <RankCard
       title="Weekly retention"
-      subtitle="Share of each cohort active in later weeks"
-      icon={Repeat}
+      subtitle="Visitors grouped by the week of their first visit"
       tone="blue"
       fill={false}
     >
@@ -51,31 +53,30 @@ export function RetentionGrid({
           site has run for a while.
         </RankEmpty>
       ) : (
-        <div style={{ overflowX: "auto" }}>
+        <div className={classes.scroll}>
           <table className="retention-table">
             <thead>
               <tr>
-                <th className="ret-head">Cohort</th>
+                <th className="ret-head">Week of</th>
                 <th className="ret-head">Visitors</th>
                 {Array.from({ length: weeks }, (_, i) => (
-                  <th key={i} className="ret-head ret-week">W{i}</th>
+                  <th key={i} className="ret-head ret-week">Week {i}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {cohorts.map((c) => (
                 <tr key={c.cohort}>
-                  <td className="ret-label">Week {c.cohort + 1}</td>
+                  <td className="ret-label">{weekOf(c.cohort)}</td>
                   <td className="ret-size">{num(c.size)}</td>
                   {Array.from({ length: weeks }, (_, i) => {
                     const pct = c.retention[i];
-                    // A cohort can only be measured up to the present week.
                     const measurable = i <= weeks - 1 - c.cohort;
                     if (!measurable || pct == null) {
                       return <td key={i} className="ret-cell ret-empty" />;
                     }
                     return (
-                      <td key={i} className="ret-cell" style={cellStyle(pct)}>
+                      <td key={i} className="ret-cell" style={cellStyle(pct, i === 0, strongest)}>
                         {pct}%
                       </td>
                     );
@@ -84,6 +85,9 @@ export function RetentionGrid({
               ))}
             </tbody>
           </table>
+          <p className={classes.note}>
+            Week 0 is the week a visitor first came. Each cell is the share that came back that many weeks later.
+          </p>
         </div>
       )}
     </RankCard>

@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import { ChevronDown, Filter, type LucideIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { RankTone } from "./tones";
 import classes from "./Rank.module.css";
 
@@ -15,14 +15,18 @@ export type RankItem = {
   tone?: RankTone;
 };
 
+export type RankColumns = {
+  label: ReactNode;
+  value: ReactNode;
+  aside?: ReactNode;
+};
+
 function RankRow({
   item,
   position,
   showRank,
   share,
   selected,
-  selectHint,
-  hintIcon: HintIcon,
   onSelect,
 }: {
   item: RankItem;
@@ -30,8 +34,6 @@ function RankRow({
   showRank: boolean;
   share?: number;
   selected: boolean;
-  selectHint: string;
-  hintIcon: LucideIcon;
   onSelect?: (id: string) => void;
 }) {
   const selectable = Boolean(onSelect);
@@ -45,7 +47,6 @@ function RankRow({
     <li
       className={classes.row}
       data-tone={item.tone}
-      data-ranked={showRank || undefined}
       data-selectable={selectable || undefined}
       data-selected={selected || undefined}
       aria-pressed={onSelect ? selected : undefined}
@@ -55,27 +56,21 @@ function RankRow({
       onClick={selectable ? () => onSelect?.(item.id) : undefined}
       onKeyDown={selectable ? onKeyDown : undefined}
     >
-      <span className={classes.line}>
-        {showRank && <span className={classes.rank}>{position}</span>}
-        {item.leading && <span className={classes.leading}>{item.leading}</span>}
+      {showRank && <span className={classes.rank}>{position}</span>}
+      {item.leading && <span className={classes.leading}>{item.leading}</span>}
+      <span className={classes.main}>
         <span className={classes.label}>
           <span className={classes.labelText}>{item.label}</span>
           {item.meta && <span className={classes.meta}>{item.meta}</span>}
         </span>
-        {selectable && !selected && (
-          <span className={classes.hint}>
-            <HintIcon size={11} />
-            {selectHint}
+        {share !== undefined && (
+          <span className={classes.track} aria-hidden>
+            <span className={classes.bar} style={{ "--share": `${share}%` } as CSSProperties} />
           </span>
         )}
-        {item.aside && <span className={classes.aside}>{item.aside}</span>}
-        <span className={classes.value}>{item.value}</span>
       </span>
-      {share !== undefined && (
-        <span className={classes.track} aria-hidden>
-          <span className={classes.bar} style={{ "--share": `${share}%` } as CSSProperties} />
-        </span>
-      )}
+      <span className={classes.value}>{item.value}</span>
+      {item.aside && <span className={classes.aside}>{item.aside}</span>}
     </li>
   );
 }
@@ -83,18 +78,16 @@ function RankRow({
 export function RankList({
   items,
   limit = 8,
-  showRank = true,
+  showRank = false,
   selectedId,
-  selectHint = "Filter",
-  hintIcon = Filter,
+  columns,
   onSelect,
 }: {
   items: RankItem[];
   limit?: number;
   showRank?: boolean;
   selectedId?: string | null;
-  selectHint?: string;
-  hintIcon?: LucideIcon;
+  columns?: RankColumns;
   onSelect?: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -105,6 +98,13 @@ export function RankList({
 
   return (
     <div className={classes.listWrap}>
+      {columns && (
+        <div className={classes.columns} aria-hidden>
+          <span className={classes.columnLabel}>{columns.label}</span>
+          <span>{columns.value}</span>
+          {columns.aside && <span className={classes.columnAside}>{columns.aside}</span>}
+        </div>
+      )}
       <ol className={classes.list}>
         {visible.map((item, index) => (
           <RankRow
@@ -114,8 +114,6 @@ export function RankList({
             showRank={showRank}
             share={weighted && top > 0 ? Math.max(((item.weight ?? 0) / top) * 100, 1.5) : undefined}
             selected={selectedId === item.id}
-            selectHint={selectHint}
-            hintIcon={hintIcon}
             onSelect={onSelect}
           />
         ))}

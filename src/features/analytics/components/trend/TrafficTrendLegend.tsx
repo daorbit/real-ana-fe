@@ -1,34 +1,46 @@
-import { UnstyledButton } from "@mantine/core";
-import { TREND_METRICS, TREND_SERIES, type TrendMetric } from "@/features/analytics/lib/trafficSeries";
+import { SegmentedControl } from "@mantine/core";
+import { TREND_SERIES, type TrendMetric } from "@/features/analytics/lib/trafficSeries";
 import classes from "@/features/analytics/components/trend/TrafficTrend.module.css";
 
-export function TrafficTrendLegend({
-  focus,
-  onFocus,
-  comparing,
+const METRIC_ORDER: TrendMetric[] = ["visitors", "views"];
+
+export function TrafficMetricSwitch({
+  value,
+  onChange,
 }: {
-  focus: TrendMetric | null;
-  onFocus: (metric: TrendMetric) => void;
-  comparing: boolean;
+  value: TrendMetric;
+  onChange: (metric: TrendMetric) => void;
 }) {
   return (
-    <div className={classes.legend}>
-      {TREND_METRICS.map((metric) => (
-        <UnstyledButton
-          key={metric}
-          className={`${classes.legendItem} ${classes.legendButton}`}
-          data-dim={(focus && focus !== metric) || undefined}
-          aria-pressed={focus === metric}
-          onClick={() => onFocus(metric)}
-        >
-          <span className={classes.dot} data-metric={metric} />
-          {TREND_SERIES[metric].label}
-        </UnstyledButton>
-      ))}
+    <SegmentedControl
+      size="xs"
+      value={value}
+      onChange={(v) => onChange(v as TrendMetric)}
+      data={METRIC_ORDER.map((metric) => ({ value: metric, label: TREND_SERIES[metric].label }))}
+      aria-label="Chart metric"
+    />
+  );
+}
+
+export function TrafficPeriodLegend({
+  metric,
+  comparing,
+  baselineLabel,
+}: {
+  metric: TrendMetric;
+  comparing: boolean;
+  baselineLabel: string;
+}) {
+  return (
+    <div className={classes.periods}>
+      <span className={classes.period}>
+        <span className={classes.line} data-metric={metric} aria-hidden />
+        This period
+      </span>
       {comparing && (
-        <span className={classes.legendItem}>
-          <span className={classes.dot} data-metric="baseline" />
-          Baseline
+        <span className={classes.period}>
+          <span className={classes.line} data-metric="baseline" aria-hidden />
+          {baselineLabel}
         </span>
       )}
     </div>

@@ -1,8 +1,11 @@
-import { Badge, Card, Center, Group, Stack, Text } from "@mantine/core";
+import { Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { LiveAudience } from "@/shared/types";
-import { audienceSegments } from "./audienceMeta";
-import { AudienceLegend } from "./AudienceLegend";
+import { num } from "@/shared/lib";
+import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
+import { RankList } from "@/shared/ui/rank/RankList";
+import { PathLabel } from "@/shared/ui/rank/PathLabel";
+import { LiveStatFooter } from "./LiveStatFooter";
 import { LiveVisitorList } from "./LiveVisitorList";
 import classes from "./LiveAudience.module.css";
 
@@ -10,59 +13,62 @@ export function LiveNowCard({
   pages,
   total,
   audience,
+  onSelectPath,
 }: {
   pages: { key: string; count: number }[];
   total: number;
   audience: LiveAudience | null;
+  onSelectPath?: (path: string) => void;
 }) {
   const { t } = useTranslation();
   const people = audience ? audience.humans : total;
-  const segments = audience ? audienceSegments(audience) : [];
   const nobody = audience ? audience.total === 0 : pages.length === 0;
 
   return (
-    <Card withBorder radius="lg" padding="lg" h="100%">
-      <Group justify="space-between" mb="md">
-        <Group gap={8}>
-          <span className={`status-dot live ${classes.liveDot}`} />
-          <Text fw={600} c="dimmed" size="sm">{t("analytics.rightNow")}</Text>
-        </Group>
-        <Badge variant="light" color="teal" size="sm">
-          {people} {audience ? (people === 1 ? "person" : "people") : people === 1 ? "visitor" : "visitors"}
-        </Badge>
-      </Group>
+    <RankCard
+      title="Live now"
+      tone="emerald"
+      actions={
+        <span className={classes.updates}>
+          <span className={`status-dot live ${classes.liveDot}`} aria-hidden />
+          Updates every 10 s
+        </span>
+      }
+    >
+      <div className={classes.hero}>
+        <span className={classes.heroValue}>{num(people)}</span>
+        <span className={classes.heroLabel}>on your sites</span>
+      </div>
+      <LiveStatFooter audience={audience} bar={false} />
 
       {nobody ? (
-        <Center py="lg">
-          <Text c="dimmed" size="xs">{t("analytics.nobodyOnSite")}</Text>
-        </Center>
+        <RankEmpty icon={Radio}>{t("analytics.nobodyOnSite")}</RankEmpty>
       ) : (
         <>
-          {audience && (
-            <>
-              <AudienceLegend segments={segments} />
-              {audience.visitors.length > 0 && (
-                <>
-                  <div className={classes.sectionLabel}>Who is on the site</div>
-                  <LiveVisitorList audience={audience} />
-                </>
-              )}
-            </>
-          )}
-
           {pages.length > 0 && (
-            <Stack gap="xs">
-              <div className={classes.sectionLabel}>Active pages</div>
-              {pages.map((p) => (
-                <Group key={p.key} justify="space-between" gap="xs" wrap="nowrap">
-                  <Text size="sm" truncate className={classes.pageKey}>{p.key}</Text>
-                  <Badge variant="light" color="gray" size="sm">{p.count}</Badge>
-                </Group>
-              ))}
-            </Stack>
+            <div className={classes.block}>
+              <RankList
+                limit={6}
+                columns={{ label: "Page", value: "Now" }}
+                items={pages.map((p) => ({
+                  id: p.key,
+                  label: <PathLabel path={p.key} />,
+                  title: onSelectPath ? `Filter by ${p.key}` : p.key,
+                  weight: p.count,
+                  value: num(p.count),
+                }))}
+                onSelect={onSelectPath}
+              />
+            </div>
+          )}
+          {audience && audience.visitors.length > 0 && (
+            <div className={classes.block}>
+              <div className={classes.sectionLabel}>Who is on the site</div>
+              <LiveVisitorList audience={audience} />
+            </div>
           )}
         </>
       )}
-    </Card>
+    </RankCard>
   );
 }

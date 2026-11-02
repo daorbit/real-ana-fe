@@ -1,0 +1,54 @@
+.figures {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.value {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.count {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.bar {
+  display: flex;
+  gap: 3px;
+  height: 10px;
+}
+
+.fresh {
+  width: var(--share);
+  border-radius: 999px;
+  background: var(--metric-blue);
+}
+
+.returning {
+  flex: 1;
+  border-radius: 999px;
+  background: var(--gray-10, var(--muted));
+}
+
+.note {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+}

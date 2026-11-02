@@ -1,21 +1,23 @@
 import { useState } from "react";
-import { SimpleGrid } from "@mantine/core";
+import { Select, SegmentedControl } from "@mantine/core";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { Flame, Inbox, MousePointerClick } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { useGetHeatmapPagesQuery, useGetPageHeatmapQuery } from "@/app/store";
 import { num } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
-import { PathLabel } from "@/shared/ui/rank/PathLabel";
 import { ChartSkeleton } from "@/shared/ui/Skeletons";
 import { HeatmapDeviceSwitch } from "@/features/analytics/components/heatmap/HeatmapDeviceSwitch";
 import { HeatmapFrame } from "@/features/analytics/components/heatmap/HeatmapFrame";
 import { HeatmapSummary } from "@/features/analytics/components/heatmap/HeatmapSummary";
 import { HeatmapSetup } from "@/features/analytics/components/heatmap/HeatmapSetup";
-import type { HeatmapDevice, HeatmapPage } from "@/shared/types";
+import { halfwayDepth } from "@/features/analytics/lib/heatmapDraw";
+import type { ClickBucket, HeatmapDevice, HeatmapPage } from "@/shared/types";
 import classes from "@/features/analytics/components/heatmap/PageHeatmap.module.css";
 
 const EMPTY_PAGES: HeatmapPage[] = [];
+const EMPTY_CLICKS: ClickBucket[] = [];
+const QUICK_PAGES = 4;
 
 export function PageHeatmapPanel({
   workspaceId,
@@ -23,12 +25,16 @@ export function PageHeatmapPanel({
   from,
   to,
   sites,
+  clicks = EMPTY_CLICKS,
+  host,
 }: {
   workspaceId: string;
   range: string;
   from?: string;
   to?: string;
   sites?: string[];
+  clicks?: ClickBucket[];
+  host?: string;
 }) {
   const [device, setDevice] = useState<HeatmapDevice>("desktop");
   const [picked, setPicked] = useState<string | null>(null);
@@ -37,6 +43,7 @@ export function PageHeatmapPanel({
   const { currentData: pagesData, isFetching: pagesLoading, isError: pagesFailed } = useGetHeatmapPagesQuery(scope);
   const pages = pagesData?.pages ?? EMPTY_PAGES;
   const path = picked && pages.some((p) => p.path === picked) ? picked : pages[0]?.path ?? null;
+  const current = pages.find((p) => p.path === path);
 
   const { currentData: heatmap, isFetching: heatmapLoading } = useGetPageHeatmapQuery(
     path ? { ...scope, path } : skipToken,
@@ -44,65 +51,91 @@ export function PageHeatmapPanel({
 
   if (pagesData && !pagesData.enabled && pages.length === 0) return <HeatmapSetup enabled={false} />;
 
-  return (
-    <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-      <RankCard
-        title="Pages"
-        icon={Flame}
-        tone="orange"
-        subtitle={pages.length ? `${pages.length} with heatmap data` : undefined}
-        actions={<HeatmapDeviceSwitch value={device} onChange={setDevice} />}
-      >
-        {pagesLoading && !pagesData ? (
-          <ChartSkeleton height={240} />
-        ) : pagesFailed ? (
-          <RankEmpty icon={Inbox}>Heatmaps couldn&apos;t load. Refresh to try again.</RankEmpty>
-        ) : pages.length === 0 ? (
-          <RankEmpty icon={Inbox}>
-            No {device} clicks in this range yet. Check that the snippet on your site includes
-            data-heatmap=&quot;on&quot;, or try another device.
-          </RankEmpty>
-        ) : (
-          <RankList
-            limit={12}
-            selectedId={path}
-            selectHint="View"
-            hintIcon={MousePointerClick}
-            onSelect={setPicked}
-            items={pages.map((p) => ({
-              id: p.path,
-              label: <PathLabel path={p.path} />,
-              title: p.path,
-              weight: p.clicks,
-              value: num(p.clicks),
-              aside: `${num(p.sessions)} visits`,
-            }))}
-          />
-        )}
-      </RankCard>
+  const quick = pages.slice(0, QUICK_PAGES).map((p) => p.path);
+  const rest = pages.slice(QUICK_PAGES).map((p) => p.path);
+  const onPage = clicks.filter((c) => c.path === path);
+  const halfway = heatmap && heatmap.scroll.sessions > 0 ? halfwayDepth(heatmap.scroll.reach) : null;
 
-      <div className="grid-span-2">
-        <RankCard
-          title={path ?? "Page heatmap"}
-          icon={MousePointerClick}
-          tone="orange"
-          subtitle="Where visitors click, and how far they scroll"
-        >
-          {!path ? (
-            <RankEmpty icon={Inbox}>Pick a page to see its heatmap.</RankEmpty>
-          ) : heatmapLoading || !heatmap ? (
-            <ChartSkeleton height={420} />
-          ) : (
-            <>
-              <HeatmapSummary heatmap={heatmap} />
-              <HeatmapFrame heatmap={heatmap} />
-              <p className={classes.note}>
-                Positions are shown on a scaled outline of the page. Shaded bands are where most visitors have already left.
-              </p>
-            </>
+  return (
+    <RankCard
+      title="Click heatmap"
+      subtitle="Clicks on one page in this period"
+      tone="orange"
+      fill={false}
+    >
+      <div className={classes.toolbar}>
+        <div className={classes.picker}>
+          {quick.length > 0 && (
+            <SegmentedControl
+              size="xs"
+              value={quick.includes(path ?? "") ? path ?? "" : ""}
+              onChange={setPicked}
+              data={quick}
+              className={classes.pickerControl}
+              aria-label="Page"
+            />
           )}
-        </RankCard>
+          {rest.length > 0 && (
+            <Select
+              size="xs"
+              placeholder="More pages"
+              data={rest}
+              value={rest.includes(path ?? "") ? path : null}
+              onChange={(v) => v && setPicked(v)}
+              searchable
+              className={classes.more}
+              aria-label="More pages"
+            />
+          )}
+        </div>
+        <HeatmapDeviceSwitch value={device} onChange={setDevice} />
       </div>
-    </SimpleGrid>
+
+      {pagesLoading && !pagesData ? (
+        <ChartSkeleton height={420} />
+      ) : pagesFailed ? (
+        <RankEmpty icon={Inbox}>Heatmaps couldn&apos;t load. Refresh to try again.</RankEmpty>
+      ) : pages.length === 0 ? (
+        <RankEmpty icon={Inbox}>
+          No {device} clicks in this range yet. Check that the snippet on your site includes
+          data-heatmap=&quot;on&quot;, or try another device.
+        </RankEmpty>
+      ) : (
+        <div className={classes.layout}>
+          <div className={classes.stage}>
+            {heatmapLoading || !heatmap ? (
+              <ChartSkeleton height={420} />
+            ) : (
+              <HeatmapFrame heatmap={heatmap} host={host} />
+            )}
+          </div>
+
+          <aside className={classes.side}>
+            {heatmap && <HeatmapSummary heatmap={heatmap} visits={current?.sessions ?? 0} />}
+            <div className={classes.pages}>
+              {onPage.length > 0 ? (
+                <RankList
+                  limit={6}
+                  columns={{ label: "Most clicked", value: "Clicks" }}
+                  items={onPage.map((c) => ({
+                    id: c.key,
+                    label: c.key,
+                    title: c.href ?? c.key,
+                    weight: c.count,
+                    value: num(c.count),
+                  }))}
+                />
+              ) : (
+                <p className={classes.note}>No named buttons or links were clicked on this page.</p>
+              )}
+            </div>
+            <p className={classes.note}>
+              Brighter spots mean more clicks. The page drawing is a stand-in for the live page.
+              {halfway !== null && ` Half of visitors have left by ${halfway}% down the page.`}
+            </p>
+          </aside>
+        </div>
+      )}
+    </RankCard>
   );
 }

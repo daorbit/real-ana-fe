@@ -1,19 +1,11 @@
-import { Center, SegmentedControl } from "@mantine/core";
-import { Monitor, Smartphone, Tablet } from "lucide-react";
+import { SegmentedControl } from "@mantine/core";
 import type { HeatmapDevice } from "@/shared/types";
 
 const OPTIONS = [
-  { value: "desktop", icon: Monitor, label: "Desktop" },
-  { value: "tablet", icon: Tablet, label: "Tablet" },
-  { value: "mobile", icon: Smartphone, label: "Mobile" },
-].map(({ value, icon: Icon, label }) => ({
-  value,
-  label: (
-    <Center h={16}>
-      <Icon size={14} aria-label={label} />
-    </Center>
-  ),
-}));
+  { value: "desktop", label: "Desktop" },
+  { value: "mobile", label: "Mobile" },
+  { value: "tablet", label: "Tablet" },
+];
 
 export function HeatmapDeviceSwitch({
   value,

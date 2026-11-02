@@ -1,0 +1,14 @@
+.delta {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.delta[data-dir="up"] {
+  color: var(--green);
+}
+
+.delta[data-dir="down"] {
+  color: var(--red);
+}

@@ -1,50 +1,39 @@
 import { Link } from "react-router-dom";
-import { Button } from "@mantine/core";
-import { BookOpen, Info } from "lucide-react";
+import { Button, CopyButton, Group } from "@mantine/core";
+import { Check, Copy } from "lucide-react";
 import { RankCard } from "@/shared/ui/rank/RankCard";
 import classes from "./Conversion.module.css";
 
-const STEPS = [
-  {
-    title: "Send an event",
-    body: "Fire a signup, a purchase or a plan upgrade from your own site with one line of code.",
-  },
-  {
-    title: "Read the conversion rate",
-    body: "The share of visitors in this period who fired the event at least once.",
-  },
-  {
-    title: "Attach a value",
-    body: "Pass a numeric value in the event props and it is summed into revenue per event and overall.",
-  },
-];
+const SNIPPET = `rta.track("checkout_completed", {
+  value: 2499,
+  plan: "pro"
+});`;
 
 export function EventsGuideCard() {
   return (
-    <RankCard title="About events" icon={Info} tone="violet">
-      <ol className={classes.steps}>
-        {STEPS.map((step, i) => (
-          <li key={step.title} className={classes.step}>
-            <span className={classes.stepNum}>{i + 1}</span>
-            <span className={classes.stepText}>
-              <span className={classes.stepTitle}>{step.title}</span>
-              <span className={classes.stepBody}>{step.body}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-      <code className={classes.snippet}>{`rta.track("purchase", { value: 49 });`}</code>
-      <Button
-        component={Link}
-        to="/app/developers"
-        variant="default"
-        size="xs"
-        radius="md"
-        className={classes.guideAction}
-        leftSection={<BookOpen size={14} />}
-      >
-        See the tracking docs
-      </Button>
+    <RankCard title="Send an event" subtitle="One line of code" tone="violet">
+      <p className={classes.guideText}>
+        Call this from your site after a signup, purchase or any action you care about. Pass a value to see it as
+        revenue here.
+      </p>
+      <pre className={classes.snippet}>{SNIPPET}</pre>
+      <Group gap="sm" mt="md">
+        <CopyButton value={SNIPPET}>
+          {({ copied, copy }) => (
+            <Button
+              variant="default"
+              size="sm"
+              leftSection={copied ? <Check size={14} /> : <Copy size={14} />}
+              onClick={copy}
+            >
+              {copied ? "Copied" : "Copy snippet"}
+            </Button>
+          )}
+        </CopyButton>
+        <Button component={Link} to="/app/developers" variant="subtle" size="sm">
+          Events guide
+        </Button>
+      </Group>
     </RankCard>
   );
 }

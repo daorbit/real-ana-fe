@@ -1,18 +1,19 @@
 .scroll {
+  --viz-seq: var(--metric-blue);
   overflow-x: auto;
 }
 
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 560px;
+  gap: 3px;
+  min-width: 640px;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .day {
@@ -25,7 +26,7 @@
 
 .cell,
 .swatch {
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--viz-track);
   transition: opacity 140ms ease;
 }

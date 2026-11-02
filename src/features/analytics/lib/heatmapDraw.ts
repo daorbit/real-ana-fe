@@ -32,12 +32,6 @@ export function drawHeat(
   ctx.globalAlpha = 1;
 }
 
-export function reachLevel(pct: number): "high" | "mid" | "low" {
-  if (pct >= 60) return "high";
-  if (pct >= 30) return "mid";
-  return "low";
-}
-
 export function halfwayDepth(reach: number[]): number | null {
   if (!reach.length) return null;
   const band = reach.findIndex((pct) => pct < 50);
