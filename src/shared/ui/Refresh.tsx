@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Group, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Button, Group, Text, Tooltip } from "@mantine/core";
 import { RotateCw } from "lucide-react";
 import { timeAgo } from "@/shared/lib";
 
@@ -9,12 +9,14 @@ export function RefreshButton({
   lastUpdated,
   /** Renders a small button without the "Updated x ago" label — for inline use. */
   compact,
+  iconOnly,
   hint = "Auto-refreshes every minute",
 }: {
   onRefresh: () => void;
   refreshing: boolean;
   lastUpdated: Date | null;
   compact?: boolean;
+  iconOnly?: boolean;
   hint?: string;
 }) {
   // Re-render every 15s so the "x ago" label stays honest between polls.
@@ -23,6 +25,16 @@ export function RefreshButton({
     const id = window.setInterval(() => tick((t) => t + 1), 15_000);
     return () => window.clearInterval(id);
   }, []);
+
+  if (iconOnly) {
+    return (
+      <Tooltip label={`${hint} · Updated ${timeAgo(lastUpdated)}`} withArrow>
+        <ActionIcon variant="default" size={36} radius="md" onClick={onRefresh} aria-label="Refresh">
+          <RotateCw size={16} className={refreshing ? "spin" : undefined} />
+        </ActionIcon>
+      </Tooltip>
+    );
+  }
 
   return (
     <Group gap="xs" wrap="nowrap">

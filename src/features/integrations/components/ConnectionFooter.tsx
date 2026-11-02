@@ -1,12 +1,12 @@
-import type { ReactNode } from "react";
 import { Button, Group, Text } from "@mantine/core";
 import classes from "./IntegrationTileCard.module.css";
 
+export type FooterTone = "ok" | "idle" | "warn" | "paused";
+
 export interface ConnectionFooterProps {
-  icon: ReactNode;
+  tone: FooterTone;
   label: string;
   action: string;
-  actionIcon: ReactNode;
   variant: "default" | "light" | "filled";
   color?: string;
   busy?: boolean;
@@ -17,10 +17,9 @@ export interface ConnectionFooterProps {
 }
 
 export function ConnectionFooter({
-  icon,
+  tone,
   label,
   action,
-  actionIcon,
   variant,
   color,
   busy,
@@ -30,9 +29,9 @@ export function ConnectionFooter({
   onAction,
 }: ConnectionFooterProps) {
   return (
-    <Group justify="space-between" gap="sm" wrap="nowrap" className={classes.footer}>
-      <Group gap={8} wrap="nowrap" className={classes.status}>
-        {icon}
+    <Group gap="sm" wrap="nowrap" className={classes.footer}>
+      <Group gap={7} wrap="nowrap" className={classes.status}>
+        <span className={classes.dot} data-tone={celebrate ? "ok" : tone} aria-hidden />
         <Text size="xs" c={celebrate ? "green" : "dimmed"} fw={celebrate ? 600 : undefined} truncate aria-live="polite">
           {celebrate ? "Connected just now" : label}
         </Text>
@@ -40,12 +39,10 @@ export function ConnectionFooter({
       <Button
         type="button"
         size="xs"
-        radius="md"
         variant={variant}
         color={color}
         loading={busy}
         disabled={disabled}
-        leftSection={actionIcon}
         onClick={onAction}
         className={classes.action}
         aria-label={ariaLabel}
@@ -55,10 +52,3 @@ export function ConnectionFooter({
     </Group>
   );
 }
-
-export const footerIconClass = {
-  ok: classes.ok,
-  idle: classes.idle,
-  warn: classes.warn,
-  paused: classes.paused,
-};

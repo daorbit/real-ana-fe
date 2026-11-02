@@ -1,23 +1,10 @@
-import type { ReactNode } from "react";
 import { Badge, Text } from "@mantine/core";
-import {
-  Check,
-  CircleDashed,
-  CirclePause,
-  Link2,
-  LockKeyhole,
-  LockOpen,
-  Power,
-  RefreshCw,
-  Settings2,
-  TriangleAlert,
-} from "lucide-react";
 import { ConnectionCard, type ConnectionCardStatus } from "@/features/auth/components/settings/ConnectionCard";
 import { timeAgo } from "@/shared/lib/format";
 import { BrandMark, CARD_MARK_SIZE } from "./logos/BrandMarks";
 import { appGuideUrl } from "../lib/links";
 import { useJustConnected } from "../hooks/useJustConnected";
-import { ConnectionFooter } from "./ConnectionFooter";
+import { ConnectionFooter, type FooterTone } from "./ConnectionFooter";
 import type { IntegrationTile } from "../types";
 import classes from "./IntegrationTileCard.module.css";
 
@@ -29,10 +16,9 @@ interface Props {
 }
 
 interface Footer {
-  icon: ReactNode;
+  tone: FooterTone;
   label: string;
   action: string;
-  actionIcon: ReactNode;
   variant: "default" | "light" | "filled";
   color?: string;
 }
@@ -46,77 +32,26 @@ function enabledLabel(tile: IntegrationTile): string {
 function footerFor(tile: IntegrationTile): Footer {
   const webhook = tile.kind === "webhook";
   if (tile.kind === "quantalog-app" && !tile.enabled && tile.price) {
-    return {
-      icon: <LockKeyhole size={14} className={classes.idle} />,
-      label: `${tile.price} · one-time`,
-      action: "Unlock",
-      actionIcon: <LockOpen size={14} />,
-      variant: "filled",
-      color: "emerald",
-    };
+    return { tone: "idle", label: `${tile.price} · one-time`, action: "Unlock", variant: "filled", color: "emerald" };
   }
   if (tile.kind === "quantalog-app") {
     return tile.enabled
-      ? {
-          icon: <Check size={14} className={classes.ok} />,
-          label: tile.account ?? "On",
-          action: "Manage",
-          actionIcon: <Settings2 size={14} />,
-          variant: "default",
-        }
-      : {
-          icon: <CircleDashed size={14} className={classes.idle} />,
-          label: "Off",
-          action: "Enable",
-          actionIcon: <Power size={14} />,
-          variant: "light",
-        };
+      ? { tone: "ok", label: tile.account ?? "On", action: "Open", variant: "default" }
+      : { tone: "idle", label: "Off", action: "Turn on", variant: "light" };
   }
   if (tile.enabled) {
-    return {
-      icon: <Check size={14} className={classes.ok} />,
-      label: enabledLabel(tile),
-      action: webhook ? "Turn off" : "Manage",
-      actionIcon: webhook ? <Power size={14} /> : <Settings2 size={14} />,
-      variant: "default",
-    };
+    return { tone: "ok", label: enabledLabel(tile), action: webhook ? "Turn off" : "Manage", variant: "default" };
   }
   if (tile.connected) {
     const expired = tile.kind === "calendar" || tile.kind === "sheets" || tile.kind === "search-console";
     return expired
-      ? {
-          icon: <TriangleAlert size={14} className={classes.warn} />,
-          label: "Access expired",
-          action: "Reconnect",
-          actionIcon: <RefreshCw size={14} />,
-          variant: "light",
-          color: "orange",
-        }
-      : {
-          icon: <CirclePause size={14} className={classes.paused} />,
-          label: "Saved, switched off",
-          action: "Turn on",
-          actionIcon: <Power size={14} />,
-          variant: "light",
-        };
+      ? { tone: "warn", label: "Access expired", action: "Reconnect", variant: "light", color: "orange" }
+      : { tone: "paused", label: "Saved, switched off", action: "Turn on", variant: "light" };
   }
-  return {
-    icon: <CircleDashed size={14} className={classes.idle} />,
-    label: "Not connected",
-    action: webhook ? "Turn on" : "Connect",
-    actionIcon: webhook ? <Power size={14} /> : <Link2 size={14} />,
-    variant: "light",
-  };
+  return { tone: "idle", label: "Not connected", action: webhook ? "Turn on" : "Connect", variant: "light" };
 }
 
 function ModeBadge({ tile }: { tile: IntegrationTile }) {
-  if (tile.kind === "quantalog-app") {
-    return (
-      <Badge size="xs" variant="light" color="blue">
-        Official
-      </Badge>
-    );
-  }
   if (tile.kind !== "payment" || !tile.enabled) return null;
   const live = tile.account === "Live mode";
   return (

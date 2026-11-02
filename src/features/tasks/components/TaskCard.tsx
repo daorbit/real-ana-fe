@@ -5,12 +5,12 @@ import { CheckSquare, CornerDownRight, Link2, ListTree, Lock } from "lucide-reac
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
 import type { Task } from "../types";
-import { dueLabel, dueState, PRIORITY_LABEL, taskKey } from "../lib/board";
+import { dueLabel, dueState, PRIORITY_LABEL, PRIORITY_MARKS, taskKey } from "../lib/board";
 import { shortDate } from "../lib/dates";
 import { openBlockers, subtaskProgress } from "../lib/relations";
 import { taskNotesPlainText } from "../lib/taskNotes";
 import { useTaskIndex } from "../hooks/TaskIndexContext";
-import { DueChip, LabelPill, PriorityIcon, ProgressButton, ProgressGlyph, StartChip } from "./TaskBits";
+import { DueChip, LabelPill, ProgressButton, ProgressGlyph, StartChip } from "./TaskBits";
 import { TaskCardMenu } from "./TaskCardMenu";
 import classes from "./Tasks.module.css";
 
@@ -44,6 +44,8 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone, o
   const parent = task.parentId ? index.byId.get(task.parentId) : undefined;
   const blockers = openBlockers(index, task);
   const subtasks = subtaskProgress(index, task.id);
+  const hasTail =
+    Boolean(task.dueDate || task.startDate || task.link || subtasks) || task.checklist.length > 0 || assignees.length > 0;
 
   return (
     <div className={classes.cardBody}>
@@ -95,51 +97,55 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone, o
         ))}
         {task.priority !== "none" && (
           <span className={classes.cardPriority} data-level={task.priority}>
-            <PriorityIcon priority={task.priority} size={12} />
+            <span aria-hidden>{PRIORITY_MARKS[task.priority]}</span>
             {PRIORITY_LABEL[task.priority]}
           </span>
         )}
-        {task.dueDate ? (
-          <DueChip dueDate={task.dueDate} status={task.status} label={dueChipLabel(task, state)} />
-        ) : task.startDate ? (
-          <StartChip startDate={task.startDate} />
-        ) : null}
-        {task.checklist.length > 0 && (
-          <span className={classes.meta}>
-            <CheckSquare size={12} />
-            {checked}/{task.checklist.length}
-          </span>
-        )}
-        {subtasks && (
-          <Tooltip label="Subtasks done" withArrow>
-            <span className={classes.meta}>
-              <ListTree size={12} />
-              {subtasks.done}/{subtasks.total}
-            </span>
-          </Tooltip>
-        )}
-        {task.link && (
-          <Tooltip label="Has link" withArrow>
-            <span className={classes.meta}>
-              <Link2 size={13} />
-            </span>
-          </Tooltip>
-        )}
-        {assignees.length > 0 && (
-          <span className={classes.footEnd}>
-            <span className={classes.assigneeAvatars}>
-              {assignees.slice(0, CARD_AVATARS).map((assignee) => (
-                <Tooltip key={assignee.userId} label={assignee.name || assignee.email} withArrow>
-                  <span className={classes.cardAvatar}>
-                    <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={22} radius="xl" />
-                  </span>
-                </Tooltip>
-              ))}
-              {assignees.length > CARD_AVATARS && <span className={classes.assigneeOverflow}>+{assignees.length - CARD_AVATARS}</span>}
-            </span>
-          </span>
-        )}
       </div>
+      {hasTail && (
+        <div className={classes.cardTail}>
+          {task.dueDate ? (
+            <DueChip dueDate={task.dueDate} status={task.status} label={dueChipLabel(task, state)} />
+          ) : task.startDate ? (
+            <StartChip startDate={task.startDate} />
+          ) : null}
+          {task.checklist.length > 0 && (
+            <span className={classes.meta}>
+              <CheckSquare size={12} />
+              {checked}/{task.checklist.length}
+            </span>
+          )}
+          {subtasks && (
+            <Tooltip label="Subtasks done" withArrow>
+              <span className={classes.meta}>
+                <ListTree size={12} />
+                {subtasks.done}/{subtasks.total}
+              </span>
+            </Tooltip>
+          )}
+          {task.link && (
+            <Tooltip label="Has link" withArrow>
+              <span className={classes.meta}>
+                <Link2 size={13} />
+              </span>
+            </Tooltip>
+          )}
+          {assignees.length > 0 && (
+            <span className={classes.footEnd}>
+              <span className={classes.assigneeAvatars}>
+                {assignees.slice(0, CARD_AVATARS).map((assignee) => (
+                  <Tooltip key={assignee.userId} label={assignee.name || assignee.email} withArrow>
+                    <span className={classes.cardAvatar}>
+                      <UserAvatar src={assignee.avatarUrl} name={assignee.name || assignee.email} size={22} radius="xl" />
+                    </span>
+                  </Tooltip>
+                ))}
+                {assignees.length > CARD_AVATARS && <span className={classes.assigneeOverflow}>+{assignees.length - CARD_AVATARS}</span>}
+              </span>
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

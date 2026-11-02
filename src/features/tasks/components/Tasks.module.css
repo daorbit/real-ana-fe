@@ -49,22 +49,16 @@
 
 .spacer {
   flex: 1;
-  order: 1;
 }
 
 .usage {
-  order: 2;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
 
-.groupBy {
-  order: 3;
-}
-
-.views {
-  order: 4;
+.headerSearch {
+  width: 240px;
 }
 
 .columnPicker {
@@ -375,7 +369,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px 12px 8px;
+  padding: 12px 12px 12px;
 }
 
 .cardMenu {
@@ -718,10 +712,6 @@
   color: var(--amber);
 }
 
-.cardPriority .priority {
-  color: inherit;
-}
-
 .cardPriority[data-level="urgent"],
 .cardPriority[data-level="high"] {
   background: color-mix(in srgb, var(--red) 16%, transparent);
@@ -737,8 +727,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px 6px;
   min-height: 22px;
+  margin-top: 2px;
   padding-left: 28px;
 }
 
@@ -746,7 +737,16 @@
   font-weight: 500;
 }
 
-.cardMeta .assigneeAvatars {
+.cardTail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+  margin-top: 2px;
+  padding-left: 28px;
+}
+
+.cardTail .assigneeAvatars {
   gap: 0;
 }
 
@@ -1421,7 +1421,7 @@
 
   .cardBody {
     gap: 9px;
-    padding: 12px 12px 8px;
+    padding: 12px;
   }
 
   .cardFoot {

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { Badge, Button, Group, Text } from "@mantine/core";
-import { ArrowRight, LockOpen, Power } from "lucide-react";
+import { Button } from "@mantine/core";
+import { ArrowRight, BookOpen, LockOpen, Power } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useNotes } from "@/features/notes";
 import { confirmDelete } from "@/shared/lib/notify";
@@ -11,8 +11,10 @@ import { AppUnlockCheckout } from "./AppUnlockCheckout";
 import { appGuideUrl } from "../../lib/links";
 import type { WorkspaceAppInfo } from "../../lib/quantalogApps";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
-import { AsideBlock, StudioHero } from "../studio/StudioParts";
 import { QuantalogAppFeatures } from "./QuantalogAppFeatures";
+import { AppPageHero } from "./AppPageHero";
+import { AppFacts, type AppFact } from "./AppFacts";
+import { AppTurnOffRow } from "./AppTurnOffRow";
 import { QuantalogAppSettings, hasAppSettings } from "./QuantalogAppSettings";
 import { useWorkspace } from "@/features/workspace/context";
 import { SaveBarProvider, useUnsavedChanges } from "@/shared/ui/SaveBar";
@@ -96,24 +98,14 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
       },
     });
 
-  const footer = (
-    <Group justify="space-between" wrap="nowrap">
-      {app.enabled && app.canManage ? (
-        <Button type="button" variant="subtle" color="red" leftSection={<Power size={15} />} disabled={app.saving} onClick={turnOff}>
-          Turn off
-        </Button>
-      ) : (
-        <Button type="button" variant="default" onClick={requestClose} disabled={app.saving}>
-          Close
-        </Button>
-      )}
-      {showSettings && !info.route ? (
-        <Button type="button" onClick={requestClose}>
-          Done
-        </Button>
-      ) : unlock.locked ? (
+  const opensElsewhere = Boolean(info.route) || !hasAppSettings(info.id);
+
+  const heroActions = (
+    <>
+      {unlock.locked ? (
         <Button
           type="button"
+          radius="xl"
           leftSection={<LockOpen size={15} />}
           loading={unlock.buying}
           disabled={!app.canManage || unlock.price === null}
@@ -122,95 +114,78 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
           {unlockLabel}
         </Button>
       ) : app.enabled ? (
-        <Button type="button" rightSection={<ArrowRight size={15} />} onClick={open}>
-          Open {info.navLabel}
-        </Button>
+        opensElsewhere && (
+          <Button type="button" radius="xl" rightSection={<ArrowRight size={15} />} onClick={open}>
+            Open {info.navLabel}
+          </Button>
+        )
       ) : (
         <Button
           type="button"
+          radius="xl"
           leftSection={<Power size={15} />}
           loading={app.saving}
           disabled={!app.canManage}
           onClick={() => void app.toggle(true)}
         >
-          Enable {info.navLabel}
+          Turn on
         </Button>
       )}
-    </Group>
+      <Button
+        component="a"
+        href={appGuideUrl(info.tileId)}
+        target="_blank"
+        rel="noreferrer"
+        radius="xl"
+        variant="default"
+        leftSection={<BookOpen size={15} />}
+      >
+        Setup guide
+      </Button>
+    </>
   );
+
+  const facts: AppFact[] = [
+    unlock.locked
+      ? { label: "Status", value: "Locked", note: unlock.priceLabel ? `${unlock.priceLabel} once` : "One-time unlock" }
+      : available
+        ? { label: "Status", value: "On", tone: "on", note: app.enabledAt ? `Since ${dateTime(app.enabledAt)}` : "For everyone here" }
+        : { label: "Status", value: "Off", note: "Not turned on" },
+    { label: "Find it", value: info.navLabel, note: info.location },
+    { label: "Access", value: "Admins", note: "turn it on and off" },
+    { label: "Made by", value: "Quantalog", note: "Official app" },
+  ];
+
+  const offHint = unlock.locked
+    ? app.canManage
+      ? `A one-time payment${unlock.priceLabel ? ` of ${unlock.priceLabel}` : ""} unlocks it, and everyone in this workspace finds ${info.navLabel} ${info.location}.`
+      : "Ask a workspace admin to unlock it."
+    : app.canManage
+      ? `Turn it on and everyone in this workspace finds ${info.navLabel} ${info.location}.`
+      : "Ask a workspace admin to turn it on.";
 
   return (
     <IntegrationStudio
+      variant="page"
       opened={opened}
       onClose={requestClose}
       brand={info.tileId}
       title={info.name}
-      subtitle="Official Quantalog app"
-      badge={
-        unlock.locked && unlock.priceLabel ? (
-          <Badge size="sm" variant="light" color="emerald">
-            {unlock.priceLabel} · one-time
-          </Badge>
-        ) : (
-          <Badge size="sm" variant="light" color={app.enabled ? "teal" : "gray"}>
-            {app.enabled ? "On" : "Off"}
-          </Badge>
-        )
-      }
-      docsUrl={appGuideUrl(info.tileId)}
       closeDisabled={app.saving}
-      footer={footer}
-      aside={
-        <>
-          <AsideBlock label="About">
-            <Text size="sm">{info.description}</Text>
-          </AsideBlock>
-          {unlock.locked && (
-            <AsideBlock label="Price">
-              <Text size="sm">
-                {unlock.priceLabel ?? "…"} once, for this workspace. No subscription, and it stays unlocked for good.
-              </Text>
-            </AsideBlock>
-          )}
-          <AsideBlock label="Access">
-            <Text size="sm" c="dimmed">
-              Workspace admins turn apps on and off. Once on, everyone in the workspace finds {info.navLabel}{" "}
-              {info.location}.
-            </Text>
-          </AsideBlock>
-          {app.enabled && app.enabledAt && (
-            <AsideBlock label="Turned on">
-              <Text size="sm">{dateTime(app.enabledAt)}</Text>
-            </AsideBlock>
-          )}
-        </>
-      }
     >
-      <StudioHero
-        state={available ? "live" : "off"}
-        pill={available ? "On" : unlock.locked ? "Locked" : "Off"}
-        title={available ? `${info.name} is on` : unlock.locked ? `Unlock ${info.name}` : `Turn on ${info.name}`}
-        description={info.tagline}
-      />
+      <AppPageHero info={info} actions={heroActions} />
+      <AppFacts facts={facts} />
 
-      {showSettings && active ? (
-        <QuantalogAppSettings app={info.id} workspaceId={active._id} />
-      ) : (
-        <section className={classes.overview}>
-          <span className={classes.overviewLabel}>What you get</span>
-          <QuantalogAppFeatures info={info} />
-          <p className={classes.note}>
-            {available
-              ? `Open ${info.navLabel} any time ${info.location}.`
-              : unlock.locked
-                ? app.canManage
-                  ? `A one-time payment${unlock.priceLabel ? ` of ${unlock.priceLabel}` : ""} unlocks it, and everyone in this workspace finds ${info.navLabel} ${info.location}.`
-                  : "Ask a workspace admin to unlock it."
-                : app.canManage
-                  ? `Enable it and everyone in this workspace finds ${info.navLabel} ${info.location}.`
-                  : "Ask a workspace admin to enable it."}
-          </p>
-        </section>
+      <section className={classes.overview}>
+        <p className={classes.description}>{info.description}</p>
+        <QuantalogAppFeatures info={info} />
+        {!available && <p className={classes.note}>{offHint}</p>}
+      </section>
+
+      {showSettings && active && <QuantalogAppSettings app={info.id} workspaceId={active._id} />}
+
+      {app.enabled && app.canManage && (
+        <AppTurnOffRow name={info.name} note={info.offNote} disabled={app.saving} onTurnOff={turnOff} />
       )}
 
       {unlock.locked && unlock.price !== null && (

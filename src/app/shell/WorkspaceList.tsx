@@ -60,6 +60,7 @@ export function WorkspaceList({
             <Menu.Item
               key={w._id}
               data-ws-item
+              data-current={current || undefined}
               onClick={() => onPick(w._id)}
               rightSection={
                 current ? (

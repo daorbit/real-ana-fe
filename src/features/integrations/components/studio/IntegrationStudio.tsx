@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ActionIcon, Anchor, Button, Group, Modal, Text, Tooltip } from "@mantine/core";
-import { ArrowLeft, BookOpen, RefreshCw, X } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronLeft, RefreshCw, X } from "lucide-react";
 import cardClasses from "@/features/auth/components/settings/ConnectionCard.module.css";
 import { BrandMark } from "../logos/BrandMarks";
 import { AsideBlock } from "./StudioParts";
@@ -20,7 +20,32 @@ interface Props {
   onRefresh?: () => void;
   refreshing?: boolean;
   refreshDisabled?: boolean;
+  variant?: "panel" | "page";
   children: ReactNode;
+}
+
+function PageTopbar({ title, closeDisabled, onClose }: Pick<Props, "title" | "closeDisabled" | "onClose">) {
+  return (
+    <header className={classes.topbar} data-variant="page">
+      <Button
+        type="button"
+        variant="subtle"
+        size="compact-md"
+        className={classes.pageBack}
+        leftSection={<ChevronLeft size={17} />}
+        disabled={closeDisabled}
+        onClick={onClose}
+      >
+        Apps
+      </Button>
+      <Text fw={600} size="sm" truncate className={classes.pageTitle}>
+        {title}
+      </Text>
+      <ActionIcon variant="default" radius="xl" size={30} onClick={onClose} disabled={closeDisabled} aria-label="Close">
+        <X size={14} />
+      </ActionIcon>
+    </header>
+  );
 }
 
 export function IntegrationStudio({
@@ -37,8 +62,31 @@ export function IntegrationStudio({
   onRefresh,
   refreshing,
   refreshDisabled,
+  variant = "panel",
   children,
 }: Props) {
+  if (variant === "page") {
+    return (
+      <Modal
+        opened={opened}
+        onClose={onClose}
+        fullScreen
+        padding={0}
+        withCloseButton={false}
+        classNames={{ content: classes.modalContent, body: classes.modalBody }}
+        closeOnEscape={!closeDisabled}
+        transitionProps={{ transition: "fade", duration: 160 }}
+      >
+        <div className={classes.studio}>
+          <PageTopbar title={title} closeDisabled={closeDisabled} onClose={onClose} />
+          <div className={classes.scroll}>
+            <div className={classes.pageInner}>{children}</div>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
       opened={opened}

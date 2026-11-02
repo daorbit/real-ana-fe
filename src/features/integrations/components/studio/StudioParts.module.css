@@ -102,9 +102,9 @@
 }
 
 .sectionTitle {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
   color: var(--text);
 }
 

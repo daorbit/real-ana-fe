@@ -1,10 +1,11 @@
-import { ActionIcon, Button, Group, Menu, TextInput, Tooltip, UnstyledButton } from "@mantine/core";
+import { ActionIcon, Button, Group, Menu, Tooltip, UnstyledButton } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { CalendarClock, Check, ChevronDown, Plus, Rows3, Search, X } from "lucide-react";
+import { CalendarClock, Check, ChevronDown, Plus, Rows3, X } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { GROUP_LABEL } from "../lib/board";
 import type { BoardView, DueFilter, GroupBy } from "../types";
 import { PeopleFilter } from "./PeopleFilter";
+import { TaskSearchInput } from "./TaskSearchInput";
 import { DUE_FILTERS, dueFilterLabel, GROUPS, VIEWS } from "./toolbarOptions";
 import { MobileFilterSheet } from "./mobile/MobileFilterSheet";
 import { MobileViewMenu } from "./mobile/MobileViewMenu";
@@ -25,7 +26,6 @@ export function TasksToolbar({
   onGroupBy,
   view,
   onView,
-  usage,
   onAdd,
 }: {
   query: string;
@@ -41,7 +41,6 @@ export function TasksToolbar({
   onGroupBy: (value: GroupBy) => void;
   view: BoardView;
   onView: (value: BoardView) => void;
-  usage: string | null;
   onAdd?: () => void;
 }) {
   const filtersActive = Boolean(query.trim() || people.size || dueFilter !== "all");
@@ -50,16 +49,7 @@ export function TasksToolbar({
   return (
     <div className={classes.toolbar}>
       <div className={classes.searchRow}>
-        <TextInput
-          className={classes.search}
-          classNames={{ input: classes.searchInput }}
-          size="sm"
-          leftSection={<Search size={15} />}
-          placeholder="Search tasks or T-12"
-          value={query}
-          onChange={(e) => onQuery(e.currentTarget.value)}
-          aria-label="Search tasks"
-        />
+        <TaskSearchInput className={classes.search} hiddenFrom="sm" query={query} onQuery={onQuery} />
         {onAdd && (
           <ActionIcon hiddenFrom="sm" size={40} radius="xl" onClick={onAdd} aria-label="Add task">
             <Plus size={20} />
@@ -81,6 +71,25 @@ export function TasksToolbar({
           onClearFilters={onClearFilters}
         />
       </div>
+
+      <Group gap={2} wrap="nowrap" className={`range-segmented ${classes.views}`} role="tablist" aria-label="View">
+        {VIEWS.map(({ value, label, icon: Icon }) => (
+          <Tooltip key={value} label={label} withArrow disabled={wideViews}>
+            <UnstyledButton
+              role="tab"
+              aria-selected={view === value}
+              className="range-seg-btn"
+              data-active={view === value}
+              onClick={() => onView(value)}
+              aria-label={label}
+            >
+              <Icon size={14} className={classes.viewIcon} />
+              <span className={classes.viewLabel}>{label}</span>
+            </UnstyledButton>
+          </Tooltip>
+        ))}
+      </Group>
+      <span className={classes.spacer} />
 
       <div className={classes.filterRow}>
         <PeopleFilter members={members} selected={people} onToggle={onTogglePerson} />
@@ -112,7 +121,6 @@ export function TasksToolbar({
           <Menu position="bottom-end" width={200}>
             <Menu.Target>
               <Button
-                className={classes.groupBy}
                 variant="default"
                 size="sm"
                 leftSection={<Rows3 size={15} />}
@@ -131,25 +139,6 @@ export function TasksToolbar({
           </Menu>
         )}
       </div>
-      <span className={classes.spacer} />
-      {usage && <span className={classes.usage}>{usage} open tasks</span>}
-      <Group gap={2} wrap="nowrap" className={`range-segmented ${classes.views}`} role="tablist" aria-label="View">
-        {VIEWS.map(({ value, label, icon: Icon }) => (
-          <Tooltip key={value} label={label} withArrow disabled={wideViews}>
-            <UnstyledButton
-              role="tab"
-              aria-selected={view === value}
-              className="range-seg-btn"
-              data-active={view === value}
-              onClick={() => onView(value)}
-              aria-label={label}
-            >
-              <Icon size={14} className={classes.viewIcon} />
-              <span className={classes.viewLabel}>{label}</span>
-            </UnstyledButton>
-          </Tooltip>
-        ))}
-      </Group>
       {filtersActive && (
         <div className={classes.activeFilters} aria-label="Active task filters">
           <span className={classes.activeFiltersLabel}>Showing</span>

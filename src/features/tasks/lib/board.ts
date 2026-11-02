@@ -12,6 +12,14 @@ export const STATUS_LABEL: Record<TaskStatus, string> = {
 
 export const PRIORITY_ORDER: TaskPriority[] = ["urgent", "high", "medium", "low", "none"];
 
+export const PRIORITY_MARKS: Record<TaskPriority, string> = {
+  urgent: "!!!",
+  high: "!!!",
+  medium: "!!",
+  low: "!",
+  none: "",
+};
+
 export const PRIORITY_LABEL: Record<TaskPriority, string> = {
   urgent: "Urgent",
   high: "Important",

@@ -24,6 +24,7 @@ import type { TaskForm } from "../hooks/useTaskEditor";
 import { filterTasks } from "../lib/board";
 import { knownLabels } from "../lib/labels";
 import { TasksToolbar } from "../components/TasksToolbar";
+import { TaskSearchInput } from "../components/TaskSearchInput";
 import { TaskViews } from "../components/TaskViews";
 import { TaskDialog } from "../components/TaskDialog";
 import { TasksSkeleton } from "../components/TasksSkeleton";
@@ -100,13 +101,17 @@ export default function Tasks() {
         <div className={classes.page}>
           <PageHeader
             title="Tasks"
-            description="Plan the team's work on one board: who does what, by when."
+            description={
+              on && actions.usage ? `${actions.usage} open tasks` : "Plan the team's work on one board: who does what, by when."
+            }
             docsPath={DOCS_SLUGS.quantalogTasks}
             actions={
               on ? (
                 <>
+                  <TaskSearchInput className={classes.headerSearch} visibleFrom="sm" query={query} onQuery={setQuery} />
                   {!demo && (
                     <RefreshButton
+                      iconOnly
                       hint="Load the latest tasks"
                       onRefresh={() => void refetch()}
                       refreshing={isFetching && !isLoading}
@@ -115,7 +120,7 @@ export default function Tasks() {
                   )}
                   {canEdit && (
                     <Button visibleFrom="sm" leftSection={<Plus size={15} />} onClick={openNew}>
-                      Add task
+                      New task
                     </Button>
                   )}
                 </>
@@ -149,7 +154,6 @@ export default function Tasks() {
                 onGroupBy={setGroupBy}
                 view={view}
                 onView={setView}
-                usage={actions.usage}
                 onAdd={canEdit ? openNew : undefined}
               />
               {showEmpty ? (

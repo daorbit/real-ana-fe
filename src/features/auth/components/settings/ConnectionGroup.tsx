@@ -14,7 +14,7 @@ export function ConnectionGroup({ title, hint, aside, children }: Props) {
     <Box component="section" className={classes.group}>
       <Group justify="space-between" align="flex-end" wrap="nowrap" mb="sm">
         <Box>
-          <Text fw={600} className={classes.title}>
+          <Text fw={700} className={classes.title}>
             {title}
           </Text>
           <Text c="dimmed" size="sm" mt={2}>

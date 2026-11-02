@@ -27,6 +27,35 @@
   flex-shrink: 0;
 }
 
+.topbar[data-variant="page"] {
+  height: 56px;
+  border-bottom: 0;
+  background: color-mix(in srgb, var(--mantine-color-body) 72%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.pageBack {
+  flex-shrink: 0;
+  color: var(--accent-text);
+}
+
+.pageTitle {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.pageInner {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 32px 72px;
+}
+
 .divider {
   width: 1px;
   height: 24px;
@@ -153,6 +182,11 @@
   .inner {
     gap: var(--space-6);
     padding: var(--space-5) var(--space-4) var(--space-6);
+  }
+
+  .pageInner {
+    gap: 26px;
+    padding: 16px 16px 48px;
   }
 
   .footer {

@@ -1,6 +1,6 @@
 .content {
   overflow: hidden;
-  border: 1px solid var(--border-strong);
+  border: 0;
   background: color-mix(in srgb, var(--surface-2) 88%, transparent);
   backdrop-filter: saturate(180%) blur(40px);
   -webkit-backdrop-filter: saturate(180%) blur(40px);
