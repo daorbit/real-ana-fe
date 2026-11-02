@@ -92,7 +92,7 @@ export function PageHeatmapPanel({
       </div>
 
       {pagesLoading && !pagesData ? (
-        <ChartSkeleton height={420} />
+        <ChartSkeleton height={420} bare />
       ) : pagesFailed ? (
         <RankEmpty icon={Inbox}>Heatmaps couldn&apos;t load. Refresh to try again.</RankEmpty>
       ) : pages.length === 0 ? (
@@ -104,7 +104,7 @@ export function PageHeatmapPanel({
         <div className={classes.layout}>
           <div className={classes.stage}>
             {heatmapLoading || !heatmap ? (
-              <ChartSkeleton height={420} />
+              <ChartSkeleton height={420} bare />
             ) : (
               <HeatmapFrame heatmap={heatmap} host={host} />
             )}

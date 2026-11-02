@@ -1,0 +1,140 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  padding: 20px 20px 22px;
+  border-radius: 16px;
+  border: 1px solid var(--seo-hairline, var(--border));
+  background: var(--surface);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.columns {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--seo-hairline, var(--border));
+}
+
+.columnsEnd {
+  display: flex;
+  gap: 18px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 0;
+}
+
+.row + .row {
+  border-top: 1px solid var(--seo-hairline, var(--border));
+}
+
+.rowMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  min-height: 168px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--seo-hairline, var(--border));
+  background: var(--surface);
+}
+
+.statBody {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 0;
+}
+
+.statHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.statSpark {
+  margin-top: auto;
+  padding: 12px 0 0;
+}
+
+.chartLegend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.chartArea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.gridLine {
+  height: 1px;
+  background: var(--viz-grid);
+}
+
+.chartTicks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.flowColumn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.flowNode {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--seo-hairline, var(--border));
+  background: var(--surface-2);
+}
+
+.flowArrow {
+  flex: none;
+  width: 18px;
+}

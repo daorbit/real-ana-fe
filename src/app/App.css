@@ -3845,6 +3845,16 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   );
 }
 
+.an-report .skeleton-shimmer[data-visible]::after,
+.seo-report .skeleton-shimmer[data-visible]::after {
+  background-color: color-mix(in srgb, var(--text) 9%, var(--surface));
+}
+
+[data-mantine-color-scheme="light"] .an-report .skeleton-shimmer[data-visible]::after,
+[data-mantine-color-scheme="light"] .seo-report .skeleton-shimmer[data-visible]::after {
+  background-color: color-mix(in srgb, var(--text) 7%, var(--surface));
+}
+
 @keyframes skeleton-sweep {
   from { background-position: 120% 0; }
   to { background-position: -120% 0; }

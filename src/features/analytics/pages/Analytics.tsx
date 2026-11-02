@@ -39,7 +39,7 @@ import layoutClasses from "@/features/analytics/components/layout/AnalyticsLayou
 import { RangePicker } from "@/features/analytics/components/RangePicker";
 import { ComparePicker } from "@/features/analytics/components/ComparePicker";
 import { ExportMenu } from "@/shared/ui/ExportMenu";
-import { AnalyticsSkeleton } from "@/shared/ui/Skeletons";
+import { AnalyticsSkeleton } from "@/features/analytics/components/layout/AnalyticsSkeleton";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { AnalyticsHeader } from "@/features/analytics/components/layout/AnalyticsHeader";
 import { setupStateFor } from "@/features/workspace/setupState";

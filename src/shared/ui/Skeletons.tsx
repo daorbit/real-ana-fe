@@ -1,100 +1,139 @@
 import { Box, Card, Grid, Group, Skeleton, SimpleGrid, Stack } from "@mantine/core";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
+import classes from "./Skeletons.module.css";
 
-/** A stat card placeholder — icon, big number, label. */
-export function StatCardSkeleton() {
+const LABEL_WIDTHS = ["62%", "48%", "70%", "40%", "56%", "44%", "52%", "36%"];
+
+export function StatCardSkeleton({ spark = true }: { spark?: boolean }) {
   return (
-    <Card withBorder radius="lg" padding="lg">
-      <Group justify="space-between" align="flex-start">
-        <Skeleton height={40} width={40} radius="md" />
-        <Skeleton height={20} width={54} radius="xl" />
-      </Group>
-      <Skeleton height={30} width="55%" mt="md" radius="sm" />
-      <Skeleton height={12} width="40%" mt={10} radius="sm" />
-    </Card>
+    <div className={classes.stat}>
+      <div className={classes.statBody}>
+        <div className={classes.statHead}>
+          <Group gap={8} wrap="nowrap">
+            <Skeleton height={16} width={16} radius={5} />
+            <Skeleton height={10} width={70} radius="sm" />
+          </Group>
+          <Skeleton height={10} width={44} radius="sm" />
+        </div>
+        <Skeleton height={30} width="46%" mt={18} radius={8} />
+        <Skeleton height={9} width="58%" mt={10} radius="sm" />
+      </div>
+      {spark && (
+        <div className={classes.statSpark}>
+          <Skeleton height={46} radius={0} />
+        </div>
+      )}
+    </div>
   );
 }
 
-/** A ranked-list panel placeholder. */
-export function ListSkeleton({ rows = 5 }: { rows?: number }) {
+export function SkeletonCardHead({ actions = 0 }: { actions?: number }) {
   return (
-    <Card withBorder radius="lg" padding="lg" h="100%">
-      <Skeleton height={12} width={110} mb="lg" radius="sm" />
-      <Stack gap="md">
-        {Array.from({ length: rows }).map((_, i) => (
-          <div key={i}>
-            <Group justify="space-between" mb={6}>
-              <Skeleton height={10} width={`${70 - i * 8}%`} radius="sm" />
-              <Skeleton height={10} width={28} radius="sm" />
-            </Group>
-            <Skeleton height={6} radius="xl" />
+    <div className={classes.head}>
+      <div className={classes.headText}>
+        <Skeleton height={12} width={120} radius="sm" />
+        <Skeleton height={9} width={170} radius="sm" />
+      </div>
+      {actions > 0 && (
+        <Group gap={8} wrap="nowrap">
+          {Array.from({ length: actions }).map((_, i) => (
+            <Skeleton key={i} height={28} width={i === 0 ? 150 : 84} radius={8} />
+          ))}
+        </Group>
+      )}
+    </div>
+  );
+}
+
+export function SkeletonRows({ rows = 5, aside = true }: { rows?: number; aside?: boolean }) {
+  return (
+    <>
+      <div className={classes.columns}>
+        <Skeleton height={8} width={46} radius="sm" />
+        <div className={classes.columnsEnd}>
+          <Skeleton height={8} width={40} radius="sm" />
+          {aside && <Skeleton height={8} width={40} radius="sm" />}
+        </div>
+      </div>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className={classes.row}>
+          <div className={classes.rowMain}>
+            <Skeleton height={10} width={LABEL_WIDTHS[i % LABEL_WIDTHS.length]} radius="sm" />
+            <Skeleton height={4} width={`${92 - i * 12}%`} radius="xl" />
           </div>
+          <Skeleton height={10} width={38} radius="sm" />
+          {aside && <Skeleton height={10} width={34} radius="sm" />}
+        </div>
+      ))}
+    </>
+  );
+}
+
+export function ListSkeleton({ rows = 5, aside = true }: { rows?: number; aside?: boolean }) {
+  return (
+    <div className={classes.card}>
+      <SkeletonCardHead />
+      <SkeletonRows rows={rows} aside={aside} />
+    </div>
+  );
+}
+
+function ChartBones({ height }: { height: number }) {
+  return (
+    <>
+      <Box h={height} className={classes.chartArea}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <span key={i} className={classes.gridLine} />
         ))}
-      </Stack>
-    </Card>
+      </Box>
+      <div className={classes.chartTicks}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} height={8} width={34} radius="sm" />
+        ))}
+      </div>
+    </>
   );
 }
 
-/** A chart panel placeholder. */
-export function ChartSkeleton({ height = 220 }: { height?: number }) {
+export function ChartSkeleton({ height = 220, bare = false }: { height?: number; bare?: boolean }) {
+  if (bare) return <Skeleton height={height} radius={12} />;
   return (
-    <Card withBorder radius="lg" padding="lg" h="100%">
-      <Group justify="space-between" mb="lg">
-        <Skeleton height={12} width={130} radius="sm" />
-        <Skeleton height={22} width={70} radius="sm" />
-      </Group>
-      <Skeleton height={height} radius="md" />
-    </Card>
+    <div className={classes.card}>
+      <SkeletonCardHead actions={2} />
+      <div className={classes.chartLegend}>
+        <Skeleton height={8} width={78} radius="sm" />
+        <Skeleton height={8} width={92} radius="sm" />
+      </div>
+      <ChartBones height={height} />
+    </div>
   );
 }
 
-/**
- * A node-graph placeholder — columns of page cards joined by connector stubs,
- * so the loading state has the shape of the graph that replaces it rather than
- * a bare spinner in an empty panel.
- */
-export function FlowGraphSkeleton({
-  height = 600,
-  columns = [1, 2, 2, 1],
-}: {
-  height?: number;
-  columns?: number[];
-}) {
+export function FlowGraphSkeleton() {
   return (
-    <Box
-      style={{
-        height,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 22,
-        overflow: "hidden",
-      }}
-    >
-      {columns.map((rows, col) => (
-        <Group key={col} gap={22} wrap="nowrap" align="center">
-          <Stack gap={28}>
-            {Array.from({ length: rows }).map((_, row) => (
-              <Box
-                key={row}
-                style={{
-                  width: 208,
-                  padding: "10px 12px",
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-sm)",
-                  background: "var(--surface)",
-                }}
-              >
-                <Skeleton height={10} width={`${60 + row * 10}%`} radius="sm" />
-                <Skeleton height={18} width={56} mt={8} radius="sm" />
-                <Skeleton height={3} mt={10} radius="xl" />
-              </Box>
+    <div className={classes.flow}>
+      {Array.from({ length: 3 }).map((_, col) => (
+        <Group key={col} gap={10} wrap="nowrap" flex={1} miw={0}>
+          <div className={classes.flowColumn}>
+            <Group justify="space-between" wrap="nowrap">
+              <Skeleton height={10} width={72} radius="sm" />
+              <Skeleton height={8} width={56} radius="sm" />
+            </Group>
+            {Array.from({ length: 3 }).map((__, row) => (
+              <div key={row} className={classes.flowNode}>
+                <Skeleton height={10} width={LABEL_WIDTHS[(col + row) % LABEL_WIDTHS.length]} radius="sm" />
+                <Group justify="space-between" wrap="nowrap">
+                  <Skeleton height={16} width={52} radius="sm" />
+                  <Skeleton height={8} width={48} radius="sm" />
+                </Group>
+                <Skeleton height={4} width={`${90 - row * 22}%`} radius="xl" />
+              </div>
             ))}
-          </Stack>
-          {col < columns.length - 1 && <Skeleton height={2} width={40} radius="xl" />}
+          </div>
+          {col < 2 && <Skeleton height={2} className={classes.flowArrow} radius="xl" />}
         </Group>
       ))}
-    </Box>
+    </div>
   );
 }
 
@@ -124,42 +163,6 @@ export function HomeSkeleton() {
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
         <ListSkeleton />
         <ListSkeleton />
-      </SimpleGrid>
-    </>
-  );
-}
-
-/** The Analytics page while its data loads. */
-export function AnalyticsSkeleton() {
-  return (
-    <>
-      <Group justify="space-between" align="flex-start" mb="lg">
-        <div>
-          <Skeleton height={28} width={160} radius="sm" />
-          <Skeleton height={12} width={320} mt={10} radius="sm" />
-        </div>
-        <Group gap="sm">
-          <Skeleton height={36} width={110} radius="md" />
-          <Skeleton height={32} width={180} radius="md" />
-        </Group>
-      </Group>
-
-      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} mb="md">
-        {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
-      </SimpleGrid>
-      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} mb="lg">
-        {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
-      </SimpleGrid>
-
-      <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="lg">
-        <div className="grid-span-2"><ChartSkeleton height={260} /></div>
-        <ListSkeleton rows={4} />
-      </SimpleGrid>
-
-      <Skeleton height={34} width={340} radius="md" mb="lg" />
-
-      <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-        <ListSkeleton /><ListSkeleton /><ListSkeleton />
       </SimpleGrid>
     </>
   );

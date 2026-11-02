@@ -29,7 +29,7 @@ export function UserFlowPanel({
       fill={false}
     >
       {isFetching ? (
-        <FlowGraphSkeleton height={340} />
+        <FlowGraphSkeleton />
       ) : columns.length === 0 ? (
         <RankEmpty icon={Inbox}>Waiting for enough sessions to show how visitors move between pages.</RankEmpty>
       ) : (
