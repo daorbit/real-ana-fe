@@ -1,5 +1,19 @@
-import { Building2, CalendarDays, ChartLine, FileText, Inbox, LockKeyhole, ShieldCheck, type LucideIcon } from "lucide-react";
+import {
+  Building2,
+  CalendarDays,
+  ChartLine,
+  FileText,
+  Inbox,
+  ListChecks,
+  LockKeyhole,
+  NotebookPen,
+  ShieldCheck,
+  SquarePen,
+  StickyNote,
+  type LucideIcon,
+} from "lucide-react";
 import type { ConnectorScope } from "@/features/connectors/lib/connectorApi";
+import { accessAssurance } from "@/features/connectors/lib/scopeAccess";
 import classes from "./PermissionList.module.css";
 
 const SCOPES: Record<string, { icon: LucideIcon; label: string }> = {
@@ -8,6 +22,10 @@ const SCOPES: Record<string, { icon: LucideIcon; label: string }> = {
   "submissions:read": { icon: Inbox, label: "Responses & leads" },
   "bookings:read": { icon: CalendarDays, label: "Bookings" },
   "analytics:read": { icon: ChartLine, label: "Website traffic" },
+  "tasks:read": { icon: ListChecks, label: "Tasks" },
+  "tasks:write": { icon: SquarePen, label: "Add & edit tasks" },
+  "notes:read": { icon: StickyNote, label: "Your notes" },
+  "notes:write": { icon: NotebookPen, label: "Add & edit notes" },
 };
 
 export function PermissionList({ scopes }: { scopes: ConnectorScope[] }) {
@@ -27,7 +45,7 @@ export function PermissionList({ scopes }: { scopes: ConnectorScope[] }) {
       </ul>
       <p className={classes.assure}>
         <LockKeyhole size={13} />
-        Read-only — nothing can be created, changed or deleted.
+        {accessAssurance(scopes)}
       </p>
     </div>
   );

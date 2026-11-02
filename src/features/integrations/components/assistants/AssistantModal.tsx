@@ -4,7 +4,7 @@ import type { ConnectedApp } from "@/features/connectors/lib/connectorApi";
 import { timeAgo } from "@/shared/lib/format";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
 import { AsideBlock, SecureNote, StudioHero, StudioSection } from "../studio/StudioParts";
-import { ASSISTANT_CAN_READ, ASSISTANT_PROMPTS, type AssistantInfo } from "../../lib/aiAssistants";
+import { ASSISTANT_CAN_DO, ASSISTANT_PROMPTS, type AssistantInfo } from "../../lib/aiAssistants";
 import { appGuideUrl } from "../../lib/links";
 import classes from "./Assistant.module.css";
 
@@ -24,9 +24,9 @@ interface Props {
 function Aside({ name }: { name: string }) {
   return (
     <>
-      <AsideBlock label={`What ${name} can read`}>
+      <AsideBlock label={`What ${name} can do`}>
         <ul className={classes.list}>
-          {ASSISTANT_CAN_READ.map((item) => (
+          {ASSISTANT_CAN_DO.map((item) => (
             <li key={item}>
               <Check size={14} className={classes.check} />
               {item}
@@ -36,8 +36,9 @@ function Aside({ name }: { name: string }) {
       </AsideBlock>
       <AsideBlock label="Security">
         <SecureNote>
-          Read-only: {name} can't create, change or delete anything. Each connection belongs to one person and one
-          workspace, uses short-lived tokens, and stops the moment you disconnect it or leave the workspace.
+          {name} can add and update tasks and notes, and can't delete anything or change anything else. Each
+          connection belongs to one person and one workspace, uses short-lived tokens, and stops the moment you
+          disconnect it or leave the workspace.
         </SecureNote>
       </AsideBlock>
     </>
@@ -124,7 +125,7 @@ export function AssistantModal({
       brand={info.id}
       title={info.name}
       docsUrl={appGuideUrl(info.id)}
-      subtitle={`Read-only access to ${workspaceName || "this workspace"}`}
+      subtitle={`Connected to ${workspaceName || "this workspace"}`}
       badge={
         <Badge color={connected ? "teal" : "gray"} variant="light" size="sm">
           {connected ? "Connected" : "Not connected"}
@@ -136,11 +137,11 @@ export function AssistantModal({
     >
       <StudioHero
         state={connected ? "live" : "off"}
-        title={connected ? `${info.name} can read this workspace` : `Connect ${info.name} to Quantalog`}
+        title={connected ? `${info.name} is connected to this workspace` : `Connect ${info.name} to Quantalog`}
         description={
           connected
-            ? `Ask ${info.name} about your forms, leads, bookings and traffic in plain language. Disconnect any connection below.`
-            : `Add Quantalog as a connector in ${info.name}, then ask questions about your forms, leads, bookings and traffic.`
+            ? `Ask ${info.name} about your forms, leads, bookings and traffic, or have it add and update tasks and notes. Disconnect any connection below.`
+            : `Add Quantalog as a connector in ${info.name}, then ask about your forms, leads and traffic, or have it manage your tasks and notes.`
         }
         stats={
           connected

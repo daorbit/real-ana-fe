@@ -164,7 +164,6 @@
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  scrollbar-width: thin;
 }
 
 .board {
@@ -276,7 +275,30 @@
   min-height: 60px;
   padding-bottom: 12px;
   overflow-y: auto;
-  scrollbar-width: thin;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+
+.cards::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.column:hover .cards::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+}
+
+.column:hover .cards::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .cards {
+    scrollbar-color: transparent transparent;
+  }
+
+  .column:hover .cards {
+    scrollbar-color: var(--border-strong) transparent;
+  }
 }
 
 .completedToggle {

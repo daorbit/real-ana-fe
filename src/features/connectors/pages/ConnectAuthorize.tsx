@@ -8,6 +8,7 @@ import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import { useAuthorizationRequest } from "@/features/connectors/hooks/useAuthorizationRequest";
 import { PermissionList } from "@/features/connectors/components/PermissionList";
 import { WorkspaceSelect } from "@/features/connectors/components/WorkspaceSelect";
+import { accessSummary } from "@/features/connectors/lib/scopeAccess";
 import { assistantForHost } from "@/features/integrations/lib/aiAssistants";
 import { rememberReturnPath } from "@/shared/lib/session";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -146,7 +147,7 @@ export default function ConnectAuthorize() {
       </div>
 
       <h1 className={classes.title}>Connect {clientName}</h1>
-      <p className={classes.lead}>Read-only access to one workspace.</p>
+      <p className={classes.lead}>{accessSummary(request.scopes)}</p>
 
       <section className={classes.section}>
         <p className={classes.label}>Workspace</p>
@@ -159,7 +160,7 @@ export default function ConnectAuthorize() {
       </section>
 
       <section className={classes.section}>
-        <p className={classes.label}>{clientName} will be able to see</p>
+        <p className={classes.label}>{clientName} will be able to use</p>
         <PermissionList scopes={request.scopes} />
       </section>
 

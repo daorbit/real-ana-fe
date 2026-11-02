@@ -18,14 +18,14 @@ export const AI_ASSISTANTS: AssistantInfo[] = [
     name: "Claude",
     logo: "/apps/claude.svg",
     hosts: ["claude.ai", "claude.com"],
-    description: "Ask Claude about your forms, leads, bookings and website traffic. Read-only, per workspace.",
+    description: "Ask Claude about your forms, leads, bookings and traffic, and have it add or update tasks and notes. Per workspace.",
     connectorsUrl: "https://claude.ai/settings/connectors",
     connectorsLabel: "Open Claude connectors",
     steps: [
       "In Claude, open Settings → Connectors.",
       "Choose Add custom connector, name it Quantalog and paste the URL above. It is unique to this workspace.",
       "Click Connect, sign in to Quantalog and approve access to this workspace.",
-      "Ask Claude about your forms, leads, bookings or traffic.",
+      "Ask Claude about your forms, leads, bookings or traffic, or ask it to add a task or note.",
     ],
   },
   {
@@ -33,7 +33,7 @@ export const AI_ASSISTANTS: AssistantInfo[] = [
     name: "ChatGPT",
     logo: "/apps/openai-chatgpt.svg",
     hosts: ["chatgpt.com", "chat.openai.com"],
-    description: "Ask ChatGPT about your forms, leads, bookings and website traffic. Read-only, per workspace.",
+    description: "Ask ChatGPT about your forms, leads, bookings and traffic, and have it add or update tasks and notes. Per workspace.",
     connectorsUrl: "https://chatgpt.com/#settings/Connectors",
     connectorsLabel: "Open ChatGPT settings",
     steps: [
@@ -51,14 +51,18 @@ export const ASSISTANT_PROMPTS = [
   "Show my 10 newest leads from the contact form.",
   "How many bookings are coming up this week?",
   "Summarise my website traffic for the last 7 days.",
+  "What tasks are due this week, and which are assigned to me?",
+  "Turn these meeting notes into tasks and save them as a note.",
 ];
 
-export const ASSISTANT_CAN_READ = [
+export const ASSISTANT_CAN_DO = [
   "Workspace name, your role and tracked sites",
   "Forms, their questions and form analytics",
   "Form responses and the lead pipeline",
   "Booking counts and upcoming booked slots",
   "Website traffic summaries",
+  "Read, add and update tasks (editors and above)",
+  "Read, add and update your personal notes",
 ];
 
 export function workspaceMcpUrl(baseUrl: string, workspaceId: string | null, assistant: AssistantId): string {
