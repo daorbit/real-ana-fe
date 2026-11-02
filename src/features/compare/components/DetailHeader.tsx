@@ -1,7 +1,8 @@
 import { ActionIcon, Progress, Tooltip } from "@mantine/core";
-import { ExternalLink, RefreshCw, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 import type { SeoCompareBaseline, SeoCompareSnapshot, SeoCompetitorComparison } from "@/shared/types";
 import { SiteFavicon } from "@/shared/ui/SiteFavicon";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import { FreshnessBadge } from "./FreshnessBadge";
 import { ProvenanceLine } from "./ProvenanceLine";
 import { TrustNotices } from "./TrustNotices";
@@ -90,18 +91,13 @@ export function DetailHeader({
           <FreshnessBadge checkedAt={comparison.lastCheckedAt} />
           {canEdit && (
             <>
-              <Tooltip label="Re-fetch their page and yours" withArrow>
-                <ActionIcon
-                  variant="subtle"
-                  color="gray"
-                  radius="md"
-                  onClick={onRefresh}
-                  loading={refreshing}
-                  aria-label="Re-fetch both pages"
-                >
-                  <RefreshCw size={15} />
-                </ActionIcon>
-              </Tooltip>
+              <RefreshButton
+                hint="Re-fetch their page and yours"
+                label="Re-fetch both pages"
+                refreshing={refreshing}
+                disabled={refreshing}
+                onRefresh={onRefresh}
+              />
               <Tooltip label="Stop tracking" withArrow>
                 <ActionIcon variant="subtle" color="red" radius="md" onClick={onDelete} aria-label="Stop tracking">
                   <Trash2 size={15} />

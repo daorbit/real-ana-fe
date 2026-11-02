@@ -1,8 +1,9 @@
-import { ActionIcon, Group, Skeleton, Tooltip } from "@mantine/core";
-import { Activity, Plus, RotateCw } from "lucide-react";
+import { Group, Skeleton } from "@mantine/core";
+import { Activity, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { num, timeAgo } from "@/shared/lib/format";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import type { ApiKeyUsageWindow } from "@/shared/types";
 import { latestUse, successRate } from "../../developers";
@@ -78,17 +79,13 @@ export function UsageOverview({
               focusKeyId={activeFocus}
               onFocusKey={onFocusKey}
             />
-            <Tooltip label={t("developers.refreshUsage")} withArrow>
-              <ActionIcon
-                variant="default"
-                size={30}
-                onClick={refresh}
-                disabled={refreshing}
-                aria-label={t("developers.refreshUsage")}
-              >
-                <RotateCw size={14} className={refreshing ? "spin" : undefined} />
-              </ActionIcon>
-            </Tooltip>
+            <RefreshButton
+              hint={t("developers.refreshUsage")}
+              label={t("developers.refreshUsage")}
+              refreshing={refreshing}
+              disabled={refreshing}
+              onRefresh={refresh}
+            />
           </Group>
         }
       />

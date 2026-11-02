@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { ActionIcon, Anchor, Button, Group, Modal, Text, Tooltip } from "@mantine/core";
-import { ArrowLeft, BookOpen, ChevronLeft, RefreshCw, X } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronLeft, X } from "lucide-react";
 import cardClasses from "@/features/auth/components/settings/ConnectionCard.module.css";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import { BrandMark } from "../logos/BrandMarks";
 import { AsideBlock } from "./StudioParts";
 import classes from "./IntegrationStudio.module.css";
@@ -135,23 +136,18 @@ export function IntegrationStudio({
 
           <Group gap={6} wrap="nowrap" className={classes.actions}>
             {onRefresh && (
-              <Tooltip label="Refresh" withArrow>
-                <ActionIcon
-                  variant="default"
-                  size={34}
-                  onClick={onRefresh}
-                  loading={refreshing}
-                  disabled={refreshDisabled}
-                  aria-label="Refresh"
-                >
-                  <RefreshCw size={16} />
-                </ActionIcon>
-              </Tooltip>
+              <RefreshButton
+                hint="Refresh"
+                refreshing={Boolean(refreshing)}
+                disabled={refreshing || refreshDisabled}
+                onRefresh={onRefresh}
+              />
             )}
             <Tooltip label="Close" withArrow>
               <ActionIcon
                 variant="default"
-                size={34}
+                size={36}
+                radius="md"
                 onClick={onClose}
                 disabled={closeDisabled}
                 aria-label="Close"

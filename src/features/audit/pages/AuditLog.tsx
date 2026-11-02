@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { Button } from "@mantine/core";
 import { motion } from "framer-motion";
-import { RotateCw, ScrollText, ShieldCheck } from "lucide-react";
+import { ScrollText, ShieldCheck } from "lucide-react";
 import { useGetMembersQuery } from "@/app/store";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -84,15 +84,11 @@ export default function AuditLog() {
         title="Audit log"
         description={`A permanent record of who changed what in ${active.name}.`}
         actions={
-          <Button
-            variant="default"
-            radius="md"
-            leftSection={<RotateCw size={15} />}
-            loading={audit.refreshing && !audit.loading}
-            onClick={audit.reload}
-          >
-            Refresh
-          </Button>
+          <RefreshButton
+            hint="Load the latest activity"
+            refreshing={audit.refreshing && !audit.loading}
+            onRefresh={audit.reload}
+          />
         }
       />
 

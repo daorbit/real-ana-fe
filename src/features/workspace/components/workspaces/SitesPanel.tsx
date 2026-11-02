@@ -83,7 +83,7 @@ export function SitesPanel({
               aria-label={t("workspaces.filterAria")}
             />
           )}
-          <RefreshButton onRefresh={onRefresh} refreshing={refreshing} lastUpdated={lastUpdated} compact />
+          <RefreshButton onRefresh={onRefresh} refreshing={refreshing} lastUpdated={lastUpdated} />
         </Box>
       </Box>
 

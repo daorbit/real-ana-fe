@@ -1502,9 +1502,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   }
 
 
-  .refresh-ago { display: none; }
-
-
   .an-toolbar-btns { width: 100%; justify-content: flex-start; gap: 6px; }
   .an-toolbar-btns .mantine-Button-root {
     height: 32px;

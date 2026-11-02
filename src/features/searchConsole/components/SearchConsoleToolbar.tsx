@@ -1,9 +1,10 @@
-import { ActionIcon, Menu, Select, Text, Tooltip } from "@mantine/core";
-import { ExternalLink, Link2Off, LogOut, MoreHorizontal, RefreshCw } from "lucide-react";
+import { ActionIcon, Menu, Select, Text } from "@mantine/core";
+import { ExternalLink, Link2Off, LogOut, MoreHorizontal } from "lucide-react";
 import { useRefreshSearchPerformanceMutation } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { timeAgo } from "@/shared/lib";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import type { SearchType } from "@/shared/types";
 import { SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
 import { SearchRangeSelect } from "./SearchRangeSelect";
@@ -105,17 +106,12 @@ export function SearchConsoleToolbar({
             disabled={refreshing}
           />
         </div>
-        <Tooltip label="Fetch the latest from Google" withArrow>
-          <ActionIcon
-            variant="default"
-            size={36}
-            loading={refreshing || busy}
-            onClick={() => void reload()}
-            aria-label="Refresh"
-          >
-            <RefreshCw size={15} />
-          </ActionIcon>
-        </Tooltip>
+        <RefreshButton
+          hint="Fetch the latest from Google"
+          refreshing={refreshing || busy}
+          disabled={refreshing || busy}
+          onRefresh={() => void reload()}
+        />
         <Menu position="bottom-end" withArrow width={280}>
           <Menu.Target>
             <ActionIcon variant="default" size={36} aria-label="Search visibility settings">

@@ -1,6 +1,7 @@
 import { Button, Loader, Tooltip } from "@mantine/core";
-import { CreditCard, LogIn, Mail, RotateCw, UserCog } from "lucide-react";
+import { CreditCard, LogIn, Mail, UserCog } from "lucide-react";
 import { shortDate } from "@/shared/lib";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import type { AdminUser } from "@/shared/types";
 import type { AdminUserActions } from "../../useAdminUserActions";
 import { AdminUserAvatar } from "../users/AdminUserAvatar";
@@ -65,9 +66,7 @@ export function UserDetailHeader({ user, actions, refreshing, onRefresh }: Props
             </Button>
           </UserRoleMenu>
         )}
-        <Button size="sm" radius="md" variant="default" leftSection={<RotateCw size={15} />} loading={refreshing} onClick={onRefresh}>
-          Refresh
-        </Button>
+        <RefreshButton hint="Refresh" refreshing={refreshing} onRefresh={onRefresh} />
       </div>
     </div>
   );

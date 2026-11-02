@@ -1,5 +1,4 @@
-import { ActionIcon, Tooltip } from "@mantine/core";
-import { RefreshCw } from "lucide-react";
+import { RefreshButton } from "@/shared/ui/Refresh";
 
 export function RefetchButton({
   label,
@@ -10,11 +9,5 @@ export function RefetchButton({
   loading: boolean;
   onClick: () => void;
 }) {
-  return (
-    <Tooltip label={label}>
-      <ActionIcon variant="default" size={36} radius="md" loading={loading} onClick={onClick} aria-label={label}>
-        <RefreshCw size={15} />
-      </ActionIcon>
-    </Tooltip>
-  );
+  return <RefreshButton hint={label} label={label} refreshing={loading} onRefresh={onClick} />;
 }

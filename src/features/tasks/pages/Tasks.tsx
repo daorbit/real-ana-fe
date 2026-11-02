@@ -111,7 +111,6 @@ export default function Tasks() {
                   <TaskSearchInput className={classes.headerSearch} visibleFrom="sm" query={query} onQuery={setQuery} />
                   {!demo && (
                     <RefreshButton
-                      iconOnly
                       hint="Load the latest tasks"
                       onRefresh={() => void refetch()}
                       refreshing={isFetching && !isLoading}

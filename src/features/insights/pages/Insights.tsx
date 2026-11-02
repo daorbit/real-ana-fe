@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Button, Skeleton, Stack } from "@mantine/core";
-import { RefreshCw, ScanSearch } from "lucide-react";
+import { Skeleton, Stack } from "@mantine/core";
+import { ScanSearch } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
@@ -64,9 +65,7 @@ export default function Insights() {
         docsPath={DOCS_SLUGS.quantalogInsights}
         actions={
           on && canEdit && overview?.canRefresh ? (
-            <Button variant="default" leftSection={<RefreshCw size={15} />} loading={refreshing} onClick={() => void runRefresh()}>
-              Refresh
-            </Button>
+            <RefreshButton hint="Refresh this week's insights" refreshing={refreshing} disabled={refreshing} onRefresh={() => void runRefresh()} />
           ) : undefined
         }
       />

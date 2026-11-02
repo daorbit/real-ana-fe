@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActionIcon, Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
+  Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
-import { CalendarDays, List as ListIcon, Plus, RefreshCw } from "lucide-react";
+import { CalendarDays, List as ListIcon, Plus } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { useWorkspace } from "@/features/workspace/context";
@@ -360,13 +361,10 @@ export default function SocialPosts() {
               elsewhere: a scheduled post publishes on the server's clock, and
               a reconnected LinkedIn account clears a failure — neither of
               which this page hears about while it sits open. */}
-          <Tooltip label={onSent ? "Refresh published posts" : "Refresh"} withArrow>
-            <ActionIcon
-              variant="default"
-              size="lg"
-              aria-label="Refresh"
-              loading={onSent || onFailed ? sentFetching : isFetching}
-              onClick={() => {
+          <RefreshButton
+            hint={onSent ? "Refresh published posts" : "Refresh"}
+            refreshing={onSent || onFailed ? sentFetching : isFetching}
+            onRefresh={() => {
                 // The Failed shelf reads both collections at once, so it
                 // refreshes both — refreshing only the half someone happens to
                 // be looking at leaves the other stale under the same button.
@@ -379,10 +377,7 @@ export default function SocialPosts() {
                   else refetchSent();
                 }
               }}
-            >
-              <RefreshCw size={16} />
-            </ActionIcon>
-          </Tooltip>
+          />
 
           <PageHelpButton />
 
