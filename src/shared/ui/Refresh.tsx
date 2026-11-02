@@ -9,11 +9,13 @@ export function RefreshButton({
   lastUpdated,
   /** Renders a small button without the "Updated x ago" label — for inline use. */
   compact,
+  hint = "Auto-refreshes every minute",
 }: {
   onRefresh: () => void;
   refreshing: boolean;
   lastUpdated: Date | null;
   compact?: boolean;
+  hint?: string;
 }) {
   // Re-render every 15s so the "x ago" label stays honest between polls.
   const [, tick] = useState(0);
@@ -29,7 +31,7 @@ export function RefreshButton({
           Updated {timeAgo(lastUpdated)}
         </Text>
       )}
-      <Tooltip label="Auto-refreshes every minute" withArrow>
+      <Tooltip label={hint} withArrow>
         <Button
           // Default size matches the other header buttons (Customize, Full analytics).
           size={compact ? "xs" : "sm"}

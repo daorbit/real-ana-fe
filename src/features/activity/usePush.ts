@@ -5,7 +5,17 @@ import {
   useSendTestPushMutation,
 } from "@/app/store";
 import { useAuth } from "@/features/auth/context";
-import { clearPushSync, markPushSynced, needsPushSync, pushSyncKey } from "@/features/activity/pushSync";
+import { clearPushSync } from "@/features/activity/pushSync";
+import {
+  SW_URL,
+  isOurWorker,
+  linkSubscription,
+  markSubscriptionLinked,
+  pushSupported,
+  subscriptionBody,
+} from "@/features/activity/pushLink";
+
+export { pushSupported };
 
 /**
  * Browser push: permission, registration, and the switch that turns it on.
@@ -35,15 +45,6 @@ export type PushState =
   /** A registration or permission request is in flight. */
   | "working";
 
-export function pushSupported(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    "serviceWorker" in navigator &&
-    "PushManager" in window &&
-    "Notification" in window
-  );
-}
-
 /**
  * The VAPID public key travels as base64url in JSON and has to reach
  * `subscribe()` as a Uint8Array. Neither end of that is negotiable, so the
@@ -56,14 +57,6 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
   const output = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
   return output;
-}
-
-
-const SW_URL = "/sw.js";
-
-function isOurWorker(reg: ServiceWorkerRegistration): boolean {
-  const worker = reg.active ?? reg.waiting ?? reg.installing;
-  return Boolean(worker && new URL(worker.scriptURL).pathname === SW_URL);
 }
 
 async function registration(): Promise<ServiceWorkerRegistration> {
@@ -83,12 +76,6 @@ function sameServerKey(sub: PushSubscription, vapidPublicKey: string): boolean {
   const a = new Uint8Array(current);
   const b = urlBase64ToUint8Array(vapidPublicKey);
   return a.length === b.length && a.every((v, i) => v === b[i]);
-}
-
-function subscriptionBody(sub: PushSubscription) {
-  const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
-  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return null;
-  return { endpoint: json.endpoint, keys: { p256dh: json.keys.p256dh, auth: json.keys.auth } };
 }
 
 export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
@@ -121,16 +108,11 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
               : null;
         }
 
-        const body = existing ? subscriptionBody(existing) : null;
-        if (body) {
-          const key = pushSyncKey(userId, body.endpoint);
-          if (needsPushSync(key)) {
-            const synced = await subscribe(body).unwrap().then(() => true, () => false);
-            if (synced) markPushSynced(key);
-          }
-        }
+        const kept = existing
+          ? await linkSubscription(existing, userId, (body) => subscribe(body).unwrap())
+          : false;
 
-        if (!cancelled) setState(body ? "on" : "off");
+        if (!cancelled) setState(kept ? "on" : "off");
       } catch {
         // A worker that will not register means push cannot work here, whatever
         // the reason — treat it as unsupported rather than offering a switch
@@ -173,7 +155,7 @@ export function usePush(vapidPublicKey: string, pushConfigured: boolean) {
       }
 
       await subscribe(body).unwrap();
-      markPushSynced(pushSyncKey(userId, body.endpoint));
+      markSubscriptionLinked(userId, body.endpoint);
 
       setState("on");
     } catch {

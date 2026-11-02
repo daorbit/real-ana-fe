@@ -1,5 +1,5 @@
 import { Button, Menu } from "@mantine/core";
-import { Check, ListFilter, UserRound, UserRoundCheck } from "lucide-react";
+import { Check, ListFilter, UserRound } from "lucide-react";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
 import type { WorkspaceMember } from "@/shared/types";
 import { GROUP_LABEL, UNASSIGNED } from "../../lib/board";
@@ -14,9 +14,6 @@ export function MobileFilterSheet({
   members,
   people,
   onTogglePerson,
-  userId,
-  myTasksOnly,
-  onMyTasks,
   dueFilter,
   onDueFilter,
   groupBy,
@@ -27,16 +24,13 @@ export function MobileFilterSheet({
   members: WorkspaceMember[];
   people: Set<string>;
   onTogglePerson: (id: string) => void;
-  userId: string | null;
-  myTasksOnly: boolean;
-  onMyTasks: () => void;
   dueFilter: DueFilter;
   onDueFilter: (filter: DueFilter) => void;
   groupBy: GroupBy;
   onGroupBy: (value: GroupBy) => void;
   onClearFilters: () => void;
 }) {
-  const count = people.size + Number(myTasksOnly) + Number(dueFilter !== "all");
+  const count = people.size + Number(dueFilter !== "all");
 
   return (
     <Menu position="bottom-end" closeOnItemClick={false}>
@@ -52,16 +46,6 @@ export function MobileFilterSheet({
         </Button>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Label>Show</Menu.Label>
-        <Menu.Item
-          leftSection={<UserRoundCheck size={18} />}
-          rightSection={myTasksOnly ? CHECK : null}
-          disabled={!userId}
-          onClick={onMyTasks}
-        >
-          Only my tasks
-        </Menu.Item>
-
         <Menu.Label>Due date</Menu.Label>
         {DUE_FILTERS.map((item) => (
           <Menu.Item key={item.value} rightSection={item.value === dueFilter ? CHECK : null} onClick={() => onDueFilter(item.value)}>

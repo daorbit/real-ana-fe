@@ -20,6 +20,7 @@ import { Starfield } from "@/shared/ui/Starfield";
 import { BG_STYLES, readThemePrefs } from "@/shared/lib/theme";
 import { ActivityPanelProvider } from "@/features/activity/ActivityPanelContext";
 import { TabBadge } from "@/features/activity/TabBadge";
+import { usePushSessionLink } from "@/features/activity/usePushSessionLink";
 import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
@@ -88,6 +89,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const { sentinel: scrollTop, stuck: scrolled } = useStuck();
 
   useSyncWorkspaceTheme(active?._id);
+  usePushSessionLink();
   const [navOpen, { toggle: toggleNav, close: closeNav }] =
     useDisclosure(false);
   const pageKey = routeKey(loc.pathname);

@@ -11,6 +11,7 @@ import { openBlockers, subtaskProgress } from "../lib/relations";
 import { taskNotesPlainText } from "../lib/taskNotes";
 import { useTaskIndex } from "../hooks/TaskIndexContext";
 import { DueChip, LabelPill, PriorityIcon, ProgressButton, ProgressGlyph, StartChip } from "./TaskBits";
+import { TaskCardMenu } from "./TaskCardMenu";
 import classes from "./Tasks.module.css";
 
 const CARD_CHECK_ITEMS = 8;
@@ -21,6 +22,7 @@ type CardProps = {
   canEdit: boolean;
   onOpen: (task: Task) => void;
   onToggleDone: (task: Task) => void;
+  onDelete?: (task: Task) => void;
 };
 
 function dueChipLabel(task: Task, state: ReturnType<typeof dueState>): string | undefined {
@@ -34,7 +36,7 @@ function dueChipLabel(task: Task, state: ReturnType<typeof dueState>): string | 
   return task.startDate ? `${shortDate(task.startDate)} – ${dueLabel(task.dueDate, state)}` : due;
 }
 
-export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }: CardProps) {
+export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone, onDelete }: CardProps) {
   const index = useTaskIndex();
   const checked = task.checklist.filter((c) => c.done).length;
   const state = dueState(task.dueDate, task.status);
@@ -53,6 +55,7 @@ export function TaskCardView({ task, assignees, canEdit, onOpen, onToggleDone }:
             <ProgressGlyph status={task.status} size={14} />
             {STATUS_LABEL[task.status]}
           </span>
+          {canEdit && onDelete && <TaskCardMenu task={task} onOpen={onOpen} onDelete={onDelete} />}
         </div>
         {task.labels.length > 0 && (
           <div className={classes.labels}>

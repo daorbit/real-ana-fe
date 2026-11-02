@@ -23,6 +23,7 @@ export type TaskViewsProps = {
   onCreate: (title: string, patch: TaskPatch) => Promise<boolean>;
   onUpdate: (task: Task, patch: TaskPatch) => void;
   onToggleDone: (task: Task) => void;
+  onDeleteTask: (task: Task) => void;
   onAddBucket: (name: string) => Promise<boolean>;
   onRenameBucket: (bucket: Bucket, name: string) => void;
   onSetBucketLimit: (bucket: Bucket, limit: number | null) => void;
@@ -47,6 +48,7 @@ export function TaskViews(props: TaskViewsProps) {
         onOpen={onOpen}
         onMove={onUpdate}
         onToggleDone={onToggleDone}
+        onDeleteTask={props.onDeleteTask}
         addingBucket={props.addingBucket}
         onAddBucket={props.onAddBucket}
         onRenameBucket={props.onRenameBucket}

@@ -4,6 +4,7 @@ import { ListTodo, Plus, SearchX } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { RefreshButton } from "@/shared/ui/Refresh";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useBodyPage } from "@/shared/lib/useBodyPage";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
@@ -42,7 +43,9 @@ export default function Tasks() {
   const { demo } = useDemo();
   const workspaceId = active?._id ?? "";
 
-  const { currentData, isLoading } = useGetTasksQuery(workspaceId, { skip: !workspaceId || !on || demo });
+  const { currentData, isLoading, isFetching, fulfilledTimeStamp, refetch } = useGetTasksQuery(workspaceId, {
+    skip: !workspaceId || !on || demo,
+  });
   const tasks = demo ? demoTasks : currentData?.tasks ?? NO_TASKS;
   const buckets = demo ? demoBuckets : currentData?.buckets ?? NO_BUCKETS;
   const { members, byId } = useTaskMembers(workspaceId, demo, on);
@@ -52,7 +55,6 @@ export default function Tasks() {
 
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState<Set<string>>(() => new Set());
-  const [myTasksOnly, setMyTasksOnly] = useState(false);
   const [dueFilter, setDueFilter] = useState<DueFilter>("all");
   const [groupBy, setGroupBy] = useState<GroupBy>("bucket");
   const [view, setView] = useState<BoardView>("board");
@@ -64,8 +66,8 @@ export default function Tasks() {
 
   const taskUserId = demo ? "demo-user-priya" : user?.id ?? null;
   const visible = useMemo(
-    () => filterTasks(tasks, query, people, dueFilter, myTasksOnly, taskUserId),
-    [tasks, query, people, dueFilter, myTasksOnly, taskUserId],
+    () => filterTasks(tasks, query, people, dueFilter),
+    [tasks, query, people, dueFilter],
   );
   const labels = useMemo(() => knownLabels(tasks), [tasks]);
   const current = dialog.id ? tasks.find((t) => t.id === dialog.id) ?? null : null;
@@ -81,11 +83,10 @@ export default function Tasks() {
   const clearFilters = () => {
     setQuery("");
     setPeople(new Set());
-    setMyTasksOnly(false);
     setDueFilter("all");
   };
 
-  const filtersActive = Boolean(query.trim() || people.size || myTasksOnly || dueFilter !== "all");
+  const filtersActive = Boolean(query.trim() || people.size || dueFilter !== "all");
   const openNew = () => setDialog({ open: true, id: null, defaults: NO_DEFAULTS });
   const openTask = (task: Task) => setDialog({ open: true, id: task.id, defaults: NO_DEFAULTS });
   const update = (task: Task, patch: Parameters<typeof workflow.update>[1]) => void workflow.update(task, patch);
@@ -102,10 +103,22 @@ export default function Tasks() {
             description="Plan the team's work on one board: who does what, by when."
             docsPath={DOCS_SLUGS.quantalogTasks}
             actions={
-              on && canEdit ? (
-                <Button visibleFrom="sm" leftSection={<Plus size={15} />} onClick={openNew}>
-                  Add task
-                </Button>
+              on ? (
+                <>
+                  {!demo && (
+                    <RefreshButton
+                      hint="Load the latest tasks"
+                      onRefresh={() => void refetch()}
+                      refreshing={isFetching && !isLoading}
+                      lastUpdated={fulfilledTimeStamp ? new Date(fulfilledTimeStamp) : null}
+                    />
+                  )}
+                  {canEdit && (
+                    <Button visibleFrom="sm" leftSection={<Plus size={15} />} onClick={openNew}>
+                      Add task
+                    </Button>
+                  )}
+                </>
               ) : undefined
             }
           />
@@ -130,9 +143,6 @@ export default function Tasks() {
                   })
                 }
                 onClearFilters={clearFilters}
-                userId={taskUserId}
-                myTasksOnly={myTasksOnly}
-                onMyTasks={() => setMyTasksOnly((value) => !value)}
                 dueFilter={dueFilter}
                 onDueFilter={setDueFilter}
                 groupBy={groupBy}
@@ -180,6 +190,7 @@ export default function Tasks() {
                   onCreate={(title, patch) => actions.create({ ...patch, title })}
                   onUpdate={update}
                   onToggleDone={workflow.toggleDone}
+                  onDeleteTask={(task) => actions.remove(task)}
                   onAddBucket={bucketActions.add}
                   onRenameBucket={(bucket, name) => void bucketActions.rename(bucket, name)}
                   onSetBucketLimit={(bucket, limit) => void bucketActions.setLimit(bucket, limit)}

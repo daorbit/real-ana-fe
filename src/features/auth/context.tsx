@@ -2,9 +2,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useDispatch } from "react-redux";
 import {
-  api, setToken, clearToken, getToken,
+  api, setToken, clearToken, getToken, ownToken,
   startImpersonating, stopImpersonating,
 } from "@/shared/lib/http";
+import { releasePushSubscription } from "@/features/activity/pushLink";
 import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
 import { setReportingUser } from "@/shared/lib/errorReporting";
@@ -318,6 +319,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    void releasePushSubscription(ownToken());
     clearToken();
     hideLock();
     setUser(null);

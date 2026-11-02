@@ -1,6 +1,6 @@
 import { ActionIcon, Button, Group, Menu, TextInput, Tooltip, UnstyledButton } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { CalendarClock, Check, ChevronDown, Plus, Rows3, Search, UserRoundCheck, X } from "lucide-react";
+import { CalendarClock, Check, ChevronDown, Plus, Rows3, Search, X } from "lucide-react";
 import type { WorkspaceMember } from "@/shared/types";
 import { GROUP_LABEL } from "../lib/board";
 import type { BoardView, DueFilter, GroupBy } from "../types";
@@ -19,9 +19,6 @@ export function TasksToolbar({
   onTogglePerson,
   onRemovePerson,
   onClearFilters,
-  userId,
-  myTasksOnly,
-  onMyTasks,
   dueFilter,
   onDueFilter,
   groupBy,
@@ -38,9 +35,6 @@ export function TasksToolbar({
   onTogglePerson: (id: string) => void;
   onRemovePerson: (id: string) => void;
   onClearFilters: () => void;
-  userId: string | null;
-  myTasksOnly: boolean;
-  onMyTasks: () => void;
   dueFilter: DueFilter;
   onDueFilter: (filter: DueFilter) => void;
   groupBy: GroupBy;
@@ -50,7 +44,7 @@ export function TasksToolbar({
   usage: string | null;
   onAdd?: () => void;
 }) {
-  const filtersActive = Boolean(query.trim() || people.size || myTasksOnly || dueFilter !== "all");
+  const filtersActive = Boolean(query.trim() || people.size || dueFilter !== "all");
   const wideViews = useMediaQuery("(min-width: 90em)") ?? false;
 
   return (
@@ -80,9 +74,6 @@ export function TasksToolbar({
           members={members}
           people={people}
           onTogglePerson={onTogglePerson}
-          userId={userId}
-          myTasksOnly={myTasksOnly}
-          onMyTasks={onMyTasks}
           dueFilter={dueFilter}
           onDueFilter={onDueFilter}
           groupBy={groupBy}
@@ -93,16 +84,6 @@ export function TasksToolbar({
 
       <div className={classes.filterRow}>
         <PeopleFilter members={members} selected={people} onToggle={onTogglePerson} />
-        <Button
-          variant={myTasksOnly ? "light" : "default"}
-          size="sm"
-          leftSection={<UserRoundCheck size={15} />}
-          aria-pressed={myTasksOnly}
-          disabled={!userId}
-          onClick={onMyTasks}
-        >
-          My tasks
-        </Button>
         <Menu position="bottom-start" width={180}>
           <Menu.Target>
             <Button
@@ -198,12 +179,6 @@ export function TasksToolbar({
               </UnstyledButton>
             );
           })}
-          {myTasksOnly && (
-            <UnstyledButton className={classes.filterChip} onClick={onMyTasks} aria-label="Remove My tasks filter">
-              <span className={classes.filterChipText}>My tasks</span>
-              <X size={13} />
-            </UnstyledButton>
-          )}
           {dueFilter !== "all" && (
             <UnstyledButton
               className={classes.filterChip}

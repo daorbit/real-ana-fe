@@ -64,13 +64,10 @@ export function filterTasks(
   query: string,
   people: Set<string>,
   dueFilter: DueFilter,
-  myTasksOnly: boolean,
-  userId: string | null,
 ): Task[] {
   return tasks.filter(
     (task) =>
       matchesSearch(task, query) &&
-      (!myTasksOnly || Boolean(userId && task.assigneeIds.includes(userId))) &&
       (dueFilter === "all" || dueState(task.dueDate, task.status) === dueFilter) &&
       (!people.size ||
         (task.assigneeIds.length

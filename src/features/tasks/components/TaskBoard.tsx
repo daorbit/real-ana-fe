@@ -40,6 +40,7 @@ export function TaskBoard({
   onOpen,
   onMove,
   onToggleDone,
+  onDeleteTask,
   onAddBucket,
   onRenameBucket,
   onSetBucketLimit,
@@ -58,6 +59,7 @@ export function TaskBoard({
   onOpen: (task: Task) => void;
   onMove: (task: Task, patch: TaskPatch) => void;
   onToggleDone: (task: Task) => void;
+  onDeleteTask: (task: Task) => void;
   onAddBucket: (name: string) => Promise<boolean>;
   onRenameBucket: (bucket: Bucket, name: string) => void;
   onSetBucketLimit: (bucket: Bucket, limit: number | null) => void;
@@ -194,6 +196,7 @@ export function TaskBoard({
               }
               onOpen={open}
               onToggleDone={onToggleDone}
+              onDeleteTask={onDeleteTask}
               onRenameBucket={(name) => column.bucket && onRenameBucket(column.bucket, name)}
               onSetBucketLimit={(limit) => column.bucket && onSetBucketLimit(column.bucket, limit)}
               onDeleteBucket={() => column.bucket && onDeleteBucket(column.bucket)}

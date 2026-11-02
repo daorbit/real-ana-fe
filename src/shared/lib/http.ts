@@ -39,15 +39,26 @@ export function isImpersonating(): boolean {
   return localStorage.getItem(ADMIN_TOKEN_KEY) !== null;
 }
 
-export function isDemoToken(): boolean {
-  const token = getToken();
-  if (!token) return false;
+export function ownToken(): string | null {
+  return localStorage.getItem(ADMIN_TOKEN_KEY) ?? getToken();
+}
+
+function tokenPayload(token: string | null): Record<string, unknown> | null {
+  if (!token) return null;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1] ?? ""));
-    return payload?.demo === true;
+    return JSON.parse(atob(token.split(".")[1] ?? ""));
   } catch {
-    return false;
+    return null;
   }
+}
+
+export function isDemoToken(): boolean {
+  return tokenPayload(getToken())?.demo === true;
+}
+
+export function tokenSessionId(): string {
+  const jti = tokenPayload(getToken())?.jti;
+  return typeof jti === "string" ? jti : "";
 }
 
 /** An error from the API, carrying the HTTP status and parsed body. */
@@ -106,6 +117,8 @@ export const api = {
   get: <T>(p: string) => request<T>(p),
   post: <T>(p: string, body: unknown) =>
     request<T>(p, { method: "POST", body: JSON.stringify(body) }),
+  postAs: <T>(token: string, p: string, body: unknown) =>
+    request<T>(p, { method: "POST", body: JSON.stringify(body), headers: { Authorization: `Bearer ${token}` } }),
   patch: <T>(p: string, body: unknown) =>
     request<T>(p, { method: "PATCH", body: JSON.stringify(body) }),
   del: (p: string) => request<void>(p, { method: "DELETE" }),

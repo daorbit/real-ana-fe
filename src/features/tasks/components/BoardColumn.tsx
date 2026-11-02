@@ -26,6 +26,7 @@ export function BoardColumn({
   onCreate,
   onOpen,
   onToggleDone,
+  onDeleteTask,
   onRenameBucket,
   onSetBucketLimit,
   onDeleteBucket,
@@ -43,6 +44,7 @@ export function BoardColumn({
   onCreate: (title: string) => Promise<boolean>;
   onOpen: (task: Task) => void;
   onToggleDone: (task: Task) => void;
+  onDeleteTask?: (task: Task) => void;
   onRenameBucket: (name: string) => void;
   onSetBucketLimit: (limit: number | null) => void;
   onDeleteBucket: () => void;
@@ -64,6 +66,7 @@ export function BoardColumn({
       canEdit={canEdit}
       onOpen={onOpen}
       onToggleDone={onToggleDone}
+      onDelete={onDeleteTask}
     />
   );
 
