@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Card, SegmentedControl } from "@mantine/core";
+import { SegmentedControl } from "@mantine/core";
 import { Maximize2 } from "lucide-react";
 import type { SeoPerformance } from "@/shared/types";
+import { SeoCard } from "@/features/seo/components/shared/SeoCard";
 import { ScreenshotModal } from "./ScreenshotModal";
 import classes from "./overviewCards.module.css";
 
@@ -21,7 +22,16 @@ function capturedOn(fetchTime?: string): string {
   return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function PagePreviewCard({ performance }: { performance: SeoPerformance }) {
+function hostOf(url?: string): string {
+  if (!url) return "";
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+}
+
+export function PagePreviewCard({ performance, url }: { performance: SeoPerformance; url?: string }) {
   const shots = pageScreenshots(performance);
   const [view, setView] = useState<View>(shots.desktop ? "desktop" : "mobile");
   const [zoomed, setZoomed] = useState(false);
@@ -32,10 +42,11 @@ export function PagePreviewCard({ performance }: { performance: SeoPerformance }
   if (!src) return null;
 
   return (
-    <Card withBorder radius="md" padding="lg" className={`col-4 seo-panel ${classes.fill}`}>
-      <div className={classes.head}>
-        <span className={classes.title}>Page preview</span>
-        {shots.mobile && shots.desktop && (
+    <SeoCard
+      className={`col-4 ${classes.fill}`}
+      title="Page preview"
+      right={
+        shots.mobile && shots.desktop ? (
           <SegmentedControl
             size="xs"
             value={active}
@@ -45,34 +56,42 @@ export function PagePreviewCard({ performance }: { performance: SeoPerformance }
               { value: "mobile", label: "Mobile" },
             ]}
           />
-        )}
+        ) : undefined
+      }
+    >
+      <div className={classes.browser}>
+        <div className={classes.browserBar} aria-hidden>
+          <span className={classes.browserDot} />
+          <span className={classes.browserDot} />
+          <span className={classes.browserDot} />
+          <span className={classes.browserUrl}>{hostOf(url)}</span>
+        </div>
+        <button
+          type="button"
+          className={classes.preview}
+          data-view={active}
+          onClick={() => setZoomed(true)}
+          aria-label={`Open the ${active} screenshot full size`}
+        >
+          <img
+            src={src}
+            alt={`How the page looked to Google on ${active}`}
+            className={classes.previewImg}
+            loading="lazy"
+            decoding="async"
+          />
+          <span className={classes.previewHint}>
+            <Maximize2 size={13} aria-hidden />
+            View full size
+          </span>
+        </button>
       </div>
-
-      <button
-        type="button"
-        className={classes.preview}
-        data-view={active}
-        onClick={() => setZoomed(true)}
-        aria-label={`Open the ${active} screenshot full size`}
-      >
-        <img
-          src={src}
-          alt={`How the page looked to Google on ${active}`}
-          className={classes.previewImg}
-          loading="lazy"
-          decoding="async"
-        />
-        <span className={classes.previewHint}>
-          <Maximize2 size={13} aria-hidden />
-          View full size
-        </span>
-      </button>
 
       <ScreenshotModal src={src} view={active} opened={zoomed} onClose={() => setZoomed(false)} />
 
       <div className={classes.previewCaption}>
         As Google loaded it{date ? ` · ${date}` : ""}
       </div>
-    </Card>
+    </SeoCard>
   );
 }

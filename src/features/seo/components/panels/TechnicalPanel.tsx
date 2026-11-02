@@ -1,219 +1,56 @@
-import {
-  Anchor, Badge, Box, Divider, Group, SimpleGrid, Stack, Text,
-} from "@mantine/core";
-import {
-  Image as ImageIcon, ShieldCheck, Smartphone, Share2, Bot, Server, Clock,
-  FileText,
-} from "lucide-react";
-import type {
-  SeoScores, SeoSiteFiles, SeoStrategyResult, SeoTechnical,
-} from "@/shared/types";
-import { scoreColor } from "@/features/seo/components/ScoreRing";
-import { CrawlerFilesPanel } from "@/features/seo/components/SchemaPanel";
-import { Panel, CheckRow } from "@/features/seo/components/shared/Panel";
-import { Tile } from "@/features/seo/components/shared/Tile";
-import { METRIC_ROWS, pageSize } from "@/features/seo/components/utils";
+import type { SeoSiteFiles, SeoTechnical } from "@/shared/types";
+import { num } from "@/shared/lib";
+import { CheckRow } from "@/features/seo/components/shared/Panel";
+import { FactStrip, type Fact } from "@/features/seo/components/shared/FactStrip";
+import { SeoList } from "@/features/seo/components/shared/SeoList";
+import { pageSize } from "@/features/seo/components/utils";
+import { CrawlerFilesCard, CrawlerFilesPanel } from "./site/CrawlerFilesPanel";
+import classes from "./site/site.module.css";
 
-export function MetricsTable({ result }: { result: SeoStrategyResult }) {
-  return (
-    <Stack gap={0}>
-      {METRIC_ROWS.map((row, i) => {
-        const v = result.metrics[row.key];
-        if (v === null) return null;
-        const display =
-          row.unit === "s" ? `${(v / 1000).toFixed(1)} s` : row.unit === "ms" ? `${v} ms` : String(v);
-        const color = v <= row.good ? "teal" : v <= row.good * 2 ? "yellow" : "red";
-        return (
-          <Box key={row.key}>
-            {i > 0 && <Divider />}
-            <Group justify="space-between" py={9} wrap="nowrap">
-              <Text size="sm">{row.label}</Text>
-              <Badge size="sm" variant="light" color={color}>
-                {display}
-              </Badge>
-            </Group>
-          </Box>
-        );
-      })}
-    </Stack>
-  );
-}
-
-/**
- * The three category scores other than Performance, which already has the ring
- * in the panel header. Lighthouse scores every category per profile, and the
- * two runs disagree often enough — accessibility in particular, where tap
- * target and viewport audits only apply on mobile — that showing one profile's
- * numbers for both would be wrong.
- */
-export function CategoryScores({ scores }: { scores: SeoScores }) {
-  const cats = [
-    { label: "SEO", value: scores.seo },
-    { label: "Accessibility", value: scores.accessibility },
-    { label: "Best practices", value: scores.bestPractices },
+function responseFacts(technical: SeoTechnical): Fact[] {
+  const { statusCode, responseTimeMs } = technical;
+  return [
+    {
+      label: "Status code",
+      value: String(statusCode),
+      tone: statusCode < 300 ? "good" : statusCode < 400 ? "warn" : "bad",
+    },
+    {
+      label: "Response time",
+      value: `${num(responseTimeMs)} ms`,
+      tone: responseTimeMs < 600 ? "good" : responseTimeMs < 1500 ? "warn" : "bad",
+    },
+    { label: "Page size", value: pageSize(technical.contentLength) },
+    { label: "Server", value: technical.server || "—" },
+    { label: "Content type", value: technical.contentType.split(";")[0] || "—" },
   ];
-  if (cats.every((c) => c.value === null)) return null;
-
-  return (
-    <>
-      <Divider my="sm" />
-      <Group gap="lg" wrap="wrap">
-        {cats.map((c) => (
-          <Group key={c.label} gap={6} wrap="nowrap">
-            <Box
-              w={7}
-              h={7}
-              style={{
-                borderRadius: "50%",
-                background: `var(--mantine-color-${scoreColor(c.value)}-6)`,
-              }}
-            />
-            <Text size="xs" c="dimmed">
-              {c.label}{" "}
-              <Text span fw={650} c="var(--mantine-color-text)">
-                {c.value ?? "—"}
-              </Text>
-            </Text>
-          </Group>
-        ))}
-      </Group>
-    </>
-  );
 }
 
-/**
- * Whether the page is set up correctly for a crawler.
- *
- * Speed lives on the Performance tab: this one is about correctness — the tags
- * a crawler looks for, what the server answered, and the site-wide files.
- */
-export function TechnicalPanel({
-  technical,
-  siteFiles,
-}: {
-  technical: SeoTechnical;
-  siteFiles: SeoSiteFiles;
-}) {
+export function TechnicalPanel({ technical, siteFiles }: { technical: SeoTechnical; siteFiles: SeoSiteFiles }) {
+  const missingAlt = technical.missingAltImages;
+
   return (
-    <Stack gap="lg">
-      <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-        <Panel
-          title="Page checks"
-          description="The signals a crawler looks for on every page."
-          icon={ShieldCheck}
-          color="teal"
-        >
-          <Stack gap={0}>
-            <CheckRow ok={technical.hasHttps} label="Served over HTTPS" />
-            <Divider />
-            <CheckRow ok={technical.hasMobileViewport} label="Mobile viewport tag" icon={Smartphone} />
-            <Divider />
-            <CheckRow ok={technical.hasFavicon} label="Favicon" />
-            <Divider />
-            <CheckRow ok={technical.hasOpenGraph} label="Open Graph tags" icon={Share2} />
-            <Divider />
-            <CheckRow ok={technical.hasTwitterCards} label="Twitter Card tags" icon={Share2} />
-            <Divider />
-            <CheckRow ok={technical.hasStructuredData} label="Structured data (JSON-LD)" />
-            <Divider />
-            <CheckRow
-              ok={technical.missingAltImages === 0}
-              label="All images have alt text"
-              detail={`${technical.imageAltCount} of ${technical.totalImages} images`}
-              icon={ImageIcon}
-            />
-          </Stack>
-        </Panel>
+    <div className={classes.stack}>
+      <FactStrip facts={responseFacts(technical)} />
 
-        <Stack gap="lg">
-          <Panel title="Response" description="What the server sent back." icon={Server} color="cyan">
-            <SimpleGrid cols={2} spacing="md" mb="md">
-              <Tile
-                label="Status code"
-                value={String(technical.statusCode)}
-                icon={Server}
-                tone={technical.statusCode < 300 ? "good" : technical.statusCode < 400 ? "warn" : "bad"}
-              />
-              <Tile
-                label="Response time"
-                value={`${technical.responseTimeMs} ms`}
-                icon={Clock}
-                tone={
-                  technical.responseTimeMs < 600
-                    ? "good"
-                    : technical.responseTimeMs < 1500
-                    ? "warn"
-                    : "bad"
-                }
-                hint="Under 600 ms is a reasonable target."
-              />
-            </SimpleGrid>
-            <Stack gap={0}>
-              <Group justify="space-between" py={7} wrap="nowrap">
-                <Text size="sm">Content type</Text>
-                <Text size="xs" c="dimmed" truncate maw={200}>
-                  {technical.contentType || "—"}
-                </Text>
-              </Group>
-              <Divider />
-              <Group justify="space-between" py={7} wrap="nowrap">
-                <Text size="sm">Server</Text>
-                <Text size="xs" c="dimmed" truncate maw={200}>
-                  {technical.server || "—"}
-                </Text>
-              </Group>
-              <Divider />
-              <Group justify="space-between" py={7} wrap="nowrap">
-                <Text size="sm">Page size</Text>
-                <Text size="xs" c="dimmed">
-                  {pageSize(technical.contentLength)}
-                </Text>
-              </Group>
-            </Stack>
-          </Panel>
+      <div className="seo-bento">
+        <SeoList className="col-8">
+          <CheckRow ok={technical.hasHttps} label="Served over HTTPS" />
+          <CheckRow ok={technical.hasMobileViewport} label="Mobile viewport tag" />
+          <CheckRow ok={technical.hasFavicon} label="Favicon" />
+          <CheckRow ok={technical.hasOpenGraph} label="Open Graph tags" />
+          <CheckRow ok={technical.hasTwitterCards} label="Twitter Card tags" />
+          <CheckRow ok={technical.hasStructuredData} label="Structured data (JSON-LD)" />
+          <CheckRow
+            ok={missingAlt === 0}
+            label="All images have alt text"
+            state={missingAlt ? `${missingAlt} missing` : `${technical.imageAltCount} of ${technical.totalImages}`}
+          />
+        </SeoList>
+        <CrawlerFilesCard className="col-4" siteFiles={siteFiles} hasFavicon={technical.hasFavicon} />
+      </div>
 
-          {/* Reports predating the validator only carry presence flags, so the
-              old two-tick view stays as the fallback for those. */}
-          {siteFiles.robotsReport || siteFiles.sitemapReport ? (
-            <CrawlerFilesPanel
-              robots={siteFiles.robotsReport}
-              sitemap={siteFiles.sitemapReport}
-            />
-          ) : (
-            <Panel
-              title="Crawler files"
-              description="How search engines discover the rest of the site."
-              icon={Bot}
-              color="indigo"
-            >
-              <Stack gap={0}>
-                <CheckRow
-                  ok={siteFiles.robotsTxt.present}
-                  label="robots.txt"
-                  detail={siteFiles.robotsTxt.url}
-                  icon={Bot}
-                />
-                <Divider />
-                <CheckRow
-                  ok={siteFiles.sitemap.present}
-                  label="Sitemap"
-                  detail={siteFiles.sitemap.urls[0] ?? "Not referenced in robots.txt or at /sitemap.xml"}
-                  icon={FileText}
-                />
-              </Stack>
-              {siteFiles.sitemap.urls.length > 1 && (
-                <Stack gap={2} mt="xs" pl={38}>
-                  {siteFiles.sitemap.urls.slice(1).map((u) => (
-                    <Anchor key={u} href={u} target="_blank" size="xs" truncate>
-                      {u}
-                    </Anchor>
-                  ))}
-                </Stack>
-              )}
-            </Panel>
-          )}
-        </Stack>
-      </SimpleGrid>
-    </Stack>
+      <CrawlerFilesPanel robots={siteFiles.robotsReport} sitemap={siteFiles.sitemapReport} />
+    </div>
   );
 }

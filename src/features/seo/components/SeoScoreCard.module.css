@@ -1,0 +1,136 @@
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.body {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.gaugeCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.side {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cats {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.catTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.catValue {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.track {
+  background: var(--segment-track);
+}
+
+.issues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.footDot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.footDot[data-band="good"] {
+  background: var(--green);
+}
+
+.footDot[data-band="warn"] {
+  background: var(--amber);
+}
+
+.footDot[data-band="bad"] {
+  background: var(--red);
+}
+
+.footText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 150px;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--muted);
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.emptyText {
+  max-width: 240px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.emptyAction {
+  margin-top: 6px;
+}

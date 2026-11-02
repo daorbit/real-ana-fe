@@ -11,17 +11,17 @@ import type { SeoIssue, SeoStrategyResult } from "@/shared/types";
  *  three tiers below it read as the semantic good/warn/bad. */
 export function bandHex(score: number | null): string {
   if (score === null) return "var(--muted)";
-  if (score >= 90) return "var(--mantine-color-teal-6)";
-  if (score >= 50) return "var(--mantine-color-yellow-6)";
-  return "var(--mantine-color-red-6)";
+  if (score >= 90) return "var(--green)";
+  if (score >= 50) return "var(--amber)";
+  return "var(--red)";
 }
 
 /** A severity's bar/rail colour, or a neutral track when there is nothing. */
 export function severityHex(s: SeoIssue["severity"] | null): string {
-  if (s === "critical") return "var(--mantine-color-red-6)";
-  if (s === "warning") return "var(--mantine-color-yellow-6)";
-  if (s === "info") return "var(--mantine-color-emerald-6)";
-  return "var(--surface-2)";
+  if (s === "critical") return "var(--red)";
+  if (s === "warning") return "var(--amber)";
+  if (s === "info") return "var(--accent)";
+  return "var(--segment-track)";
 }
 
 /** Sort key: critical first, then warning, then info. */

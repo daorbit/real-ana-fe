@@ -116,7 +116,7 @@
 }
 
 .link[data-active] .icon {
-  color: var(--accent-2);
+  color: var(--text);
 }
 
 .name {

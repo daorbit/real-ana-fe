@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  Anchor, Badge, Box, Button, Card, Drawer, Group, SegmentedControl, Stack,
+  Badge, Box, Button, Card, Modal, Group, Stack,
   Table, Text, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
   Pagination,
 } from "@mantine/core";
 import {
-  RefreshCw, History, Trash2, Trophy, ExternalLink,
-  TrendingUp, TrendingDown, Minus, Printer, Clock,
+  RefreshCw, History, Trash2, Trophy,
+  TrendingUp, TrendingDown, Minus, Printer,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
@@ -50,6 +50,7 @@ import {
   SEO_TABS, resolveSeoSection, type SeoSubId, type SeoTabId,
 } from "@/features/seo/components/sections";
 import { SeoTabs, SeoTabIntro, type SeoTabCount } from "@/features/seo/components/layout/SeoTabs";
+import { ReportMeta } from "@/features/seo/components/layout/ReportMeta";
 import layout from "@/features/seo/components/layout/SeoLayout.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useSiteScope } from "@/features/analytics";
@@ -327,7 +328,6 @@ export default function Seo() {
     const top = tabsTop.current;
     if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: "start" });
   };
-  const [speedView, setSpeedView] = useState<"metrics" | "opportunities">("metrics");
   /** Set when the user opens an older report from history. */
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -560,6 +560,11 @@ export default function Seo() {
         actions={
           report && (
             <Group gap="sm">
+              {history.length > 0 && (
+                <Button variant="default" leftSection={<History size={15} />} onClick={() => setHistoryOpen(true)}>
+                  Audit history
+                </Button>
+              )}
               <Button
                 variant="default"
                 leftSection={<Printer size={15} />}
@@ -596,49 +601,6 @@ export default function Seo() {
         (report || analyzing) && inspectBar(false)
       )}
 
-      {data && report && (
-        <div className={layout.reportMeta}>
-          <a className={layout.reportUrl} href={data.finalUrl} target="_blank" rel="noopener noreferrer">
-            <span>{data.finalUrl}</span>
-            <ExternalLink size={12} style={{ flexShrink: 0, opacity: 0.6 }} />
-          </a>
-          {data.finalUrl !== data.url && (
-            <Tooltip label={`Redirected from ${data.url}`} withArrow>
-              <Badge size="xs" variant="light" color="yellow">
-                redirected
-              </Badge>
-            </Tooltip>
-          )}
-          <span className={layout.metaDot} />
-          <Tooltip label={dateTime(report.createdAt)} withArrow>
-            <span>Audited {timeAgo(report.createdAt)}</span>
-          </Tooltip>
-          {history.length > 0 && (
-            <>
-              <span className={layout.metaDot} />
-              <Anchor component="button" type="button" size="xs" onClick={() => setHistoryOpen(true)}>
-                <Group gap={4} wrap="nowrap" component="span">
-                  <History size={12} />
-                  View history ({history.length})
-                </Group>
-              </Anchor>
-            </>
-          )}
-          {viewingId && latest && viewingId !== latest._id && (
-            <>
-              <span className={layout.metaDot} />
-              <span className={layout.viewingOld}>
-                <Clock size={12} />
-                Viewing an older audit
-              </span>
-              <Anchor component="button" type="button" size="xs" onClick={() => setViewingId(null)}>
-                Back to latest
-              </Anchor>
-            </>
-          )}
-        </div>
-      )}
-
       <Box mt="xs">
         {loading && !data && (
           <Stack gap="lg">
@@ -650,7 +612,19 @@ export default function Seo() {
         {data && report && (
           <>
             <div ref={tabsTop} className={layout.anchor} />
-            <SeoTabs active={tab} counts={tabCounts} onChange={setTab} />
+            <SeoTabs
+              active={tab}
+              counts={tabCounts}
+              onChange={setTab}
+              aside={
+                <ReportMeta
+                  report={report}
+                  data={data}
+                  viewingOld={Boolean(viewingId && latest && viewingId !== latest._id)}
+                  onBackToLatest={() => setViewingId(null)}
+                />
+              }
+            />
             <SeoTabIntro tab={tabDef} onHelp={() => setHelpOpen(true)} onJump={jumpTo} />
 
             <HelpDrawer
@@ -658,7 +632,7 @@ export default function Seo() {
               onClose={() => setHelpOpen(false)}
               title={t("help.seo.title")}
               sections={getSeoHelp(t)}
-              initialId={tab === "performance" && speedView === "opportunities" ? "suggestions" : tabDef.helpId}
+              initialId={tabDef.helpId}
             />
 
             <div className="seo-report">
@@ -674,6 +648,7 @@ export default function Seo() {
                     <OverviewPanel
                       data={{
                         score: data.score,
+                        url: data.finalUrl,
                         performance: data.performance,
                         issues: data.issues,
                         content: data.content,
@@ -694,30 +669,11 @@ export default function Seo() {
                     </>
                   )}
                   {x.id === "performance" && (
-                    <Stack gap="lg">
-                      <SegmentedControl
-                        value={speedView}
-                        onChange={(v) => setSpeedView(v as "metrics" | "opportunities")}
-                        data={[
-                          { value: "metrics", label: "Metrics" },
-                          {
-                            value: "opportunities",
-                            label: data.performance.suggestions.length
-                              ? `Opportunities (${data.performance.suggestions.length})`
-                              : "Opportunities",
-                          },
-                        ]}
-                        style={{ alignSelf: "flex-start" }}
-                      />
-                      {speedView === "metrics" ? (
-                        <PerformancePanel
-                          performance={data.performance}
-                          vitals={<VitalsPanel vitals={fieldVitals} />}
-                        />
-                      ) : (
-                        <SuggestionsPanel performance={data.performance} />
-                      )}
-                    </Stack>
+                    <PerformancePanel
+                      performance={data.performance}
+                      vitals={<VitalsPanel vitals={fieldVitals} />}
+                      suggestions={<SuggestionsPanel performance={data.performance} />}
+                    />
                   )}
                   {x.id === "site" && (
                     <>
@@ -735,15 +691,15 @@ export default function Seo() {
               ))}
             </div>
 
-            <Drawer
+            <Modal
               opened={historyOpen}
               onClose={() => setHistoryOpen(false)}
-              position="right"
               size="xl"
-              title={<Text fw={600}>Audit history</Text>}
+              centered
+              title={<Text fw={700} fz={19}>Audit history</Text>}
             >
               <Text size="sm" c="dimmed" mb="md">
-                Every past audit of this site. Open one to see how the page scored then.
+                Every audit you run is kept here, so you can confirm a fix moved the score.
               </Text>
               <HistoryPanel
                 history={history}
@@ -756,7 +712,7 @@ export default function Seo() {
                 }}
                 onDelete={canEdit ? remove : null}
               />
-            </Drawer>
+            </Modal>
           </>
         )}
       </Box>

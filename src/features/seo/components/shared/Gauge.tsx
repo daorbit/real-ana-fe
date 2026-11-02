@@ -25,7 +25,7 @@ export function Gauge({
   return (
     <Box className="seo-gauge" style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--surface-2)" strokeWidth={thickness} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--segment-track)" strokeWidth={thickness} />
         <circle
           cx={size / 2}
           cy={size / 2}

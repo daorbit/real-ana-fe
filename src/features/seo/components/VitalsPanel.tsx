@@ -1,258 +1,95 @@
-import {
-  Alert, Badge, Box, Card, Group, ScrollArea, SimpleGrid, Table, Text,
-  Tooltip,
-} from "@mantine/core";
-import { Info, Users } from "lucide-react";
-import type { SeoFieldVitals, SeoVitalKey, SeoVitalSummary } from "@/shared/types";
+import type { SeoFieldVitals, SeoVitalSummary } from "@/shared/types";
 import { num } from "@/shared/lib";
+import { SeoCard, SeoSection } from "@/features/seo/components/shared/SeoCard";
+import { Pill } from "@/features/seo/components/shared/Pill";
+import { ListHead, SeoList } from "@/features/seo/components/shared/SeoList";
+import { Tiles } from "@/features/seo/components/shared/Tile";
+import type { Tone } from "@/features/seo/components/shared/tone";
+import { VitalCard } from "@/features/seo/components/panels/performance/VitalCard";
+import { VITALS, formatVital } from "@/features/seo/components/panels/performance/vitalMeta";
+import sharedClasses from "@/features/seo/components/shared/seoUi.module.css";
+import classes from "@/features/seo/components/panels/performance/performance.module.css";
 
-/**
- * Core Web Vitals from real visitors.
- *
- * Shown beside the Lighthouse numbers rather than instead of them: Lighthouse
- * is a lab test on synthetic hardware and this is what actually happened on
- * real devices. Where they disagree, the field data is what Google ranks on —
- * and the disagreement is itself worth seeing.
- */
-
-const METRICS: {
-  key: SeoVitalKey;
-  label: string;
-  hint: string;
-  unit: "ms" | "s" | "";
-}[] = [
-  {
-    key: "lcp",
-    label: "LCP",
-    hint: "Largest Contentful Paint — when the main content finished rendering. Good ≤ 2.5s.",
-    unit: "s",
-  },
-  {
-    key: "inp",
-    label: "INP",
-    hint: "Interaction to Next Paint — how quickly the page responds to a tap or click. Good ≤ 200ms.",
-    unit: "ms",
-  },
-  {
-    key: "cls",
-    label: "CLS",
-    hint: "Cumulative Layout Shift — how much the page jumps around while loading. Good ≤ 0.1.",
-    unit: "",
-  },
-  {
-    key: "fcp",
-    label: "FCP",
-    hint: "First Contentful Paint — when anything first appeared. Good ≤ 1.8s.",
-    unit: "s",
-  },
-  {
-    key: "ttfb",
-    label: "TTFB",
-    hint: "Time to First Byte — server response time. Good ≤ 800ms.",
-    unit: "ms",
-  },
-];
-
-const RATING_COLOR: Record<SeoVitalSummary["rating"], string> = {
-  good: "teal",
-  "needs-improvement": "yellow",
-  poor: "red",
-  none: "gray",
+const RATING: Record<SeoVitalSummary["rating"], { tone: Tone; label: string }> = {
+  good: { tone: "good", label: "Passing" },
+  "needs-improvement": { tone: "warn", label: "Needs work" },
+  poor: { tone: "bad", label: "Failing" },
+  none: { tone: "neutral", label: "No data" },
 };
 
-const RATING_LABEL: Record<SeoVitalSummary["rating"], string> = {
-  good: "Good",
-  "needs-improvement": "Needs work",
-  poor: "Poor",
-  none: "No data",
-};
-
-function format(value: number | null, unit: "ms" | "s" | ""): string {
-  if (value === null) return "—";
-  if (unit === "s") return `${(value / 1000).toFixed(2)}s`;
-  if (unit === "ms") return `${Math.round(value)}ms`;
-  return value.toFixed(3);
+function lcpTone(lcp: number | null): Tone {
+  if (lcp === null) return "neutral";
+  return lcp <= 2500 ? "good" : lcp <= 4000 ? "warn" : "bad";
 }
 
 export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
   if (!vitals) return null;
 
-  // Two different empty states with two different fixes: an out-of-date script
-  // needs re-copying, while a current one just needs visitors.
-  const needsUpgrade = vitals.trackerVersion < vitals.requiredVersion;
-
   if (vitals.samples === 0) {
+    const needsUpgrade = vitals.trackerVersion < vitals.requiredVersion;
     return (
-      <Card withBorder radius="md" padding="lg">
-        <Group gap="sm" mb="md">
-          <div>
-            <Text fw={650} size="sm">
-              Real-user vitals
-            </Text>
-            <Text size="xs" c="dimmed">
-              Core Web Vitals as your visitors actually experienced them.
-            </Text>
-          </div>
-        </Group>
-
-        <Alert
-          color={needsUpgrade ? "yellow" : "gray"}
-          variant="light"
-          radius="md"
-          icon={<Info size={15} />}
-        >
-          {needsUpgrade ? (
-            <>
-              <Text size="sm" fw={600} mb={4}>
-                Your tracking snippet is out of date
-              </Text>
-              <Text size="sm">
-                This site reports tracker v{vitals.trackerVersion}, and real-user vitals need
-                v{vitals.requiredVersion}. Re-copy the snippet from the site&apos;s settings —
-                data starts arriving as soon as visitors load the new script.
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text size="sm" fw={600} mb={4}>
-                No measurements yet
-              </Text>
-              <Text size="sm">
-                Your tracker is current, so vitals will appear once real visitors have
-                loaded the page. Unlike a Lighthouse audit, this needs actual traffic.
-              </Text>
-            </>
-          )}
-        </Alert>
-      </Card>
+      <SeoSection title="Your visitors" description="Core Web Vitals as your own visitors experienced them.">
+        <SeoCard>
+          <p className={classes.noteTitle}>
+            {needsUpgrade ? "Your tracking snippet is out of date" : "No measurements yet"}
+          </p>
+          <p className={classes.note}>
+            {needsUpgrade
+              ? `This site reports tracker v${vitals.trackerVersion}, and real-user vitals need v${vitals.requiredVersion}. Copy the snippet again from the site's settings and data starts arriving as visitors load the new script.`
+              : "Your tracker is current, so vitals appear once real visitors have loaded the page."}
+          </p>
+        </SeoCard>
+      </SeoSection>
     );
   }
 
   return (
-    <Card withBorder radius="md" padding="lg">
-      <Group justify="space-between" mb="md" wrap="nowrap">
-        <Group gap="sm">
-          <div>
-            <Text fw={650} size="sm">
-              Real-user vitals
-            </Text>
-            <Text size="xs" c="dimmed">
-              75th percentile over {vitals.days} days — the figure Google judges.
-            </Text>
-          </div>
-        </Group>
-        <Tooltip label="Page loads carrying at least one measurement" withArrow>
-          <Badge size="sm" variant="light" color="grape" leftSection={<Users size={11} />}>
-            {num(vitals.samples)}
-          </Badge>
-        </Tooltip>
-      </Group>
-
-      <SimpleGrid cols={{ base: 2, sm: 3, lg: 5 }} spacing="md" mb="lg">
-        {METRICS.map((m) => {
-          const s = vitals.metrics[m.key];
-          const color = RATING_COLOR[s.rating];
+    <SeoSection
+      title="Your visitors"
+      description={`75th percentile over ${vitals.days} days · ${num(vitals.samples)} page loads measured.`}
+    >
+      <Tiles wide>
+        {VITALS.map((v) => {
+          const s = vitals.metrics[v.key];
+          const rating = RATING[s.rating];
           return (
-            <Tooltip key={m.key} label={m.hint} withArrow multiline w={250}>
-              <Box className="seo-tile" p="md" style={{ cursor: "help" }}>
-                <Group justify="space-between" mb={6} wrap="nowrap">
-                  <Text size="xs" fw={700} c="dimmed">
-                    {m.label}
-                  </Text>
-                  <Badge size="xs" variant="light" color={color}>
-                    {RATING_LABEL[s.rating]}
-                  </Badge>
-                </Group>
-                <Text fz={20.5} fw={750} lh={1.15} style={{ letterSpacing: "-0.02em" }}>
-                  {format(s.p75, m.unit)}
-                </Text>
-                {s.samples > 0 && (
-                  <>
-                    <Group gap={0} mt={8} wrap="nowrap" style={{ height: 4 }}>
-                      <Box
-                        style={{
-                          width: `${s.good}%`,
-                          background: "var(--mantine-color-teal-6)",
-                          height: "100%",
-                          borderRadius: "2px 0 0 2px",
-                        }}
-                      />
-                      <Box
-                        style={{
-                          width: `${s.needsImprovement}%`,
-                          background: "var(--mantine-color-yellow-6)",
-                          height: "100%",
-                        }}
-                      />
-                      <Box
-                        style={{
-                          width: `${s.poor}%`,
-                          background: "var(--mantine-color-red-6)",
-                          height: "100%",
-                          borderRadius: "0 2px 2px 0",
-                        }}
-                      />
-                    </Group>
-                    <Text size="xs" c="dimmed" mt={4}>
-                      {s.good}% good · {num(s.samples)} samples
-                    </Text>
-                  </>
-                )}
-              </Box>
-            </Tooltip>
+            <VitalCard
+              key={v.key}
+              label={v.label}
+              name={v.name}
+              hint={v.hint}
+              value={formatVital(s.p75, v.unit)}
+              status={rating.label}
+              tone={rating.tone}
+              split={s.samples > 0 ? { good: s.good, mid: s.needsImprovement, poor: s.poor } : undefined}
+              foot={s.samples > 0 ? `${s.good}% good · ${num(s.samples)} samples` : undefined}
+            />
           );
         })}
-      </SimpleGrid>
+      </Tiles>
 
       {vitals.byPage.length > 0 && (
-        <>
-          <Text size="xs" fw={650} c="dimmed" tt="uppercase" mb="sm" style={{ letterSpacing: "0.05em" }}>
-            Slowest pages
-          </Text>
-          <ScrollArea.Autosize mah={280}>
-            <Table verticalSpacing="xs" fz="xs">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Page</Table.Th>
-                  <Table.Th w={90}>LCP</Table.Th>
-                  <Table.Th w={80}>CLS</Table.Th>
-                  <Table.Th w={80}>Samples</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {vitals.byPage.map((p) => (
-                  <Table.Tr key={p.path}>
-                    <Table.Td style={{ maxWidth: 260 }}>
-                      <Text size="xs" truncate>
-                        {p.path}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge
-                        size="sm"
-                        variant="light"
-                        color={p.lcp === null ? "gray" : p.lcp <= 2500 ? "teal" : p.lcp <= 4000 ? "yellow" : "red"}
-                      >
-                        {format(p.lcp, "s")}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="xs" c="dimmed">
-                        {format(p.cls, "")}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="xs" c="dimmed">
-                        {num(p.samples)}
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          </ScrollArea.Autosize>
-        </>
+        <SeoList>
+          <ListHead>
+            <span className={classes.colGrow}>Slowest pages</span>
+            <span className={classes.colNum}>LCP</span>
+            <span className={classes.colNum}>CLS</span>
+            <span className={classes.colNum}>Samples</span>
+          </ListHead>
+          {vitals.byPage.map((p) => (
+            <div key={p.path} className={sharedClasses.row}>
+              <span className={`${classes.colGrow} ${sharedClasses.mono} ${sharedClasses.rowSub}`} title={p.path}>
+                {p.path}
+              </span>
+              <span className={classes.colNum}>
+                <Pill tone={lcpTone(p.lcp)}>{formatVital(p.lcp, "s")}</Pill>
+              </span>
+              <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{formatVital(p.cls, "")}</span>
+              <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{num(p.samples)}</span>
+            </div>
+          ))}
+        </SeoList>
       )}
-    </Card>
+    </SeoSection>
   );
 }

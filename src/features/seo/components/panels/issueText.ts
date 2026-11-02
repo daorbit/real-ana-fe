@@ -10,6 +10,26 @@ export type IssueRow = {
   url?: string;
 };
 
+const SOURCE_LABEL: Record<string, string> = {
+  meta: "Meta tags",
+  content: "Content",
+  technical: "Technical",
+  files: "Crawler files",
+  ai: "AI search",
+  links: "Links",
+  schema: "Structured data",
+  "robots.txt": "robots.txt",
+  sitemap: "Sitemap",
+  performance: "Performance",
+  accessibility: "Accessibility",
+  seo: "SEO",
+  "best-practices": "Best practices",
+};
+
+export function sourceLabel(source: string): string {
+  return SOURCE_LABEL[source] ?? source.charAt(0).toUpperCase() + source.slice(1);
+}
+
 /**
  * One issue as plain text, for pasting into a ticket or a message.
  *

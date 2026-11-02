@@ -1,174 +1,103 @@
-import {
-  Badge, Box, Group, Progress, ScrollArea, SimpleGrid, Stack, Text,
-} from "@mantine/core";
-import {
-  FileText, Image as ImageIcon, Link2, Type, Gauge, ExternalLink, Hash,
-} from "lucide-react";
+import { Progress } from "@mantine/core";
 import type { SeoContent } from "@/shared/types";
 import { num } from "@/shared/lib";
-import { Panel, Empty } from "@/features/seo/components/shared/Panel";
-import { Tile } from "@/features/seo/components/shared/Tile";
+import { Empty } from "@/features/seo/components/shared/Panel";
+import { SeoCard } from "@/features/seo/components/shared/SeoCard";
+import { Pill } from "@/features/seo/components/shared/Pill";
+import { Tile, Tiles } from "@/features/seo/components/shared/Tile";
 import { readabilityBand } from "@/features/seo/components/utils";
+import sharedClasses from "@/features/seo/components/shared/seoUi.module.css";
+import classes from "./onpage.module.css";
+
+const HEADINGS_SHOWN = 6;
+
+function qualityColor(value: number): string {
+  return value >= 70 ? "var(--green)" : value >= 40 ? "var(--amber)" : "var(--red)";
+}
+
+function Meter({ value, label }: { value: number; label: string }) {
+  return (
+    <div className={classes.meter}>
+      <Progress
+        value={value}
+        color={qualityColor(value)}
+        size={8}
+        radius="xl"
+        className={classes.meterTrack}
+        classNames={{ root: sharedClasses.track }}
+        aria-label={`${label} ${value}`}
+      />
+      <span className={classes.meterLabel}>{label}</span>
+    </div>
+  );
+}
 
 export function ContentPanel({ content }: { content: SeoContent }) {
   const band = readabilityBand(content.readabilityScore);
+  const outline = content.headingStructure.flatMap((h) =>
+    h.texts.slice(0, HEADINGS_SHOWN).map((text, i) => ({ level: h.level, text, key: `${h.level}-${i}` }))
+  );
 
   return (
-    <Stack gap="lg">
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
-        <Tile label="Words" value={num(content.wordCount)} icon={FileText} hint="300+ is a reasonable floor for a page meant to rank." />
+    <div className={classes.stack}>
+      <Tiles>
+        <Tile
+          label="Words"
+          value={num(content.wordCount)}
+          tone={content.wordCount >= 300 ? undefined : "warn"}
+          hint="300+ is a reasonable floor for a page meant to rank."
+        />
         <Tile
           label="H1 headings"
           value={String(content.h1Count)}
-          icon={Type}
-          tone={content.h1Count === 1 ? "good" : "warn"}
+          tone={content.h1Count === 1 ? undefined : "warn"}
           hint="Exactly one H1 per page."
         />
-        <Tile
-          label="H2 / H3"
-          value={`${content.h2Count} / ${content.h3Count}`}
-          icon={Type}
-          hint="Subheadings that break the page into sections."
-        />
-        <Tile label="Images" value={String(content.imgCount)} icon={ImageIcon} />
-        <Tile
-          label="Links total"
-          value={String(content.linkCount)}
-          icon={Link2}
-          hint="Every anchor on the page, internal and external."
-        />
-        <Tile label="Internal links" value={String(content.internalLinks)} icon={Link2} />
-        <Tile label="External links" value={String(content.externalLinks)} icon={ExternalLink} />
-        <Tile
-          label={band.label}
-          value={String(content.readabilityScore)}
-          icon={Gauge}
-          tone={content.readabilityScore >= 70 ? "good" : content.readabilityScore >= 50 ? "warn" : "bad"}
-          hint="Flesch Reading Ease, 0-100. Higher is easier to read."
-        />
-      </SimpleGrid>
+        <Tile label="H2 / H3" value={`${content.h2Count} / ${content.h3Count}`} />
+        <Tile label="Internal links" value={num(content.internalLinks)} />
+        <Tile label="External links" value={num(content.externalLinks)} />
+        <Tile label="Images" value={num(content.imgCount)} />
+      </Tiles>
 
-      <Panel
-        title="Content quality"
-        description="A composite of length, heading structure, alt text, links and structured data."
-        icon={Gauge}
-        semantic
-        color={content.contentQuality >= 70 ? "teal" : content.contentQuality >= 40 ? "yellow" : "red"}
-        right={
-          <Badge
-            size="lg"
-            variant="light"
-            color={content.contentQuality >= 70 ? "teal" : content.contentQuality >= 40 ? "yellow" : "red"}
-          >
-            {content.contentQuality} / 100
-          </Badge>
-        }
-      >
-        <Progress
-          value={content.contentQuality}
-          size="lg"
-          radius="xl"
-          color={content.contentQuality >= 70 ? "teal" : content.contentQuality >= 40 ? "yellow" : "red"}
-          mb="md"
-        />
-        <Group justify="space-between" wrap="nowrap" gap="md">
-          <Group gap={8}>
-            <Text size="xs" c="dimmed">
-              Structured data
-            </Text>
-            {content.hasSchema ? (
-              <Badge size="xs" variant="light" color="teal">
-                Present
-              </Badge>
-            ) : (
-              <Badge size="xs" variant="light" color="yellow">
-                None
-              </Badge>
-            )}
-          </Group>
-          {content.schemaTypes.length > 0 && (
-            <Group gap={5} wrap="wrap" justify="flex-end">
-              {content.schemaTypes.map((t) => (
-                <Badge key={t} size="xs" variant="default">
-                  {t}
-                </Badge>
+      <div className="seo-bento">
+        <SeoCard className="col-7" title="Heading structure" description="How the page is outlined for crawlers.">
+          {outline.length ? (
+            <div className={classes.scroll}>
+              {outline.map((h) => (
+                <div key={h.key} className={classes.headingRow} data-level={h.level}>
+                  <Pill tone="info" mono>H{h.level}</Pill>
+                  <span className={classes.headingText} title={h.text}>
+                    {h.text}
+                  </span>
+                </div>
               ))}
-            </Group>
-          )}
-        </Group>
-      </Panel>
-
-      <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-        <Panel
-          title="Heading structure"
-          description="How the page is outlined for crawlers."
-          icon={Type}
-          color="teal"
-        >
-          {content.headingStructure.length ? (
-            <ScrollArea.Autosize mah={340}>
-              <Stack gap="md">
-                {content.headingStructure.map((h) => (
-                  <Box key={h.level}>
-                    <Group gap={8} mb={6}>
-                      <Badge size="sm" variant="light" color="emerald">
-                        H{h.level}
-                      </Badge>
-                      <Text size="xs" c="dimmed">
-                        {h.count} on the page
-                      </Text>
-                    </Group>
-                    <Stack gap={3} pl="md" style={{ borderLeft: "1px solid var(--mantine-color-default-border)" }}>
-                      {h.texts.slice(0, 6).map((t, i) => (
-                        <Text key={i} size="xs" c="dimmed" truncate>
-                          {t}
-                        </Text>
-                      ))}
-                    </Stack>
-                  </Box>
-                ))}
-              </Stack>
-            </ScrollArea.Autosize>
+            </div>
           ) : (
             <Empty>No headings found. Crawlers use headings to understand what a page covers.</Empty>
           )}
-        </Panel>
+        </SeoCard>
 
-        <Panel
-          title="Top keywords"
-          description="Share of body text, common words excluded."
-          icon={Hash}
-          color="grape"
-        >
+        <SeoCard className="col-5" title="Top keywords" description="Share of body text, common words left out.">
           {content.keywordDensity.length ? (
-            <ScrollArea.Autosize mah={340}>
-              <Stack gap={10}>
-                {content.keywordDensity.map((k) => (
-                  <Box key={k.word}>
-                    <Group justify="space-between" gap="xs" mb={4}>
-                      <Text size="xs" fw={500} truncate>
-                        {k.word}
-                      </Text>
-                      <Text size="xs" c="dimmed">
-                        {k.count}× · {k.density}%
-                      </Text>
-                    </Group>
-                    <Progress
-                      value={Math.min(100, k.density * 12)}
-                      size="sm"
-                      radius="xl"
-                      color="grape"
-                    />
-                  </Box>
-                ))}
-              </Stack>
-            </ScrollArea.Autosize>
+            <div className={classes.chips}>
+              {content.keywordDensity.map((k) => (
+                <span key={k.word} className={classes.chip} title={`${k.density}% of body text`}>
+                  {k.word}
+                  <span className={classes.chipCount}>{k.count}</span>
+                </span>
+              ))}
+            </div>
           ) : (
             <Empty>Not enough text on this page to measure keyword density.</Empty>
           )}
-        </Panel>
-      </SimpleGrid>
 
-    </Stack>
+          <h4 className={classes.subTitle}>Readability</h4>
+          <Meter value={content.readabilityScore} label={band.label} />
+
+          <h4 className={classes.subTitle}>Content quality</h4>
+          <Meter value={content.contentQuality} label={`${content.contentQuality} / 100`} />
+        </SeoCard>
+      </div>
+    </div>
   );
 }

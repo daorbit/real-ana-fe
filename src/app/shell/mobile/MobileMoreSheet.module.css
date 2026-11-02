@@ -102,13 +102,13 @@
 }
 
 .row[data-active] .icon {
-  background: var(--accent-soft);
-  color: var(--accent-2);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  color: var(--text);
 }
 
 .row[data-active] .label {
   font-weight: 600;
-  color: var(--accent-2);
+  color: var(--text);
 }
 
 .orbitIcon {

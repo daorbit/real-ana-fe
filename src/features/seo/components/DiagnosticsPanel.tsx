@@ -1,16 +1,10 @@
-import { Badge, Box, Card, Group, Progress, SimpleGrid, Table, Text } from "@mantine/core";
-import { Boxes, ExternalLink } from "lucide-react";
+import { Progress } from "@mantine/core";
 import type { SeoDiagnostics } from "@/shared/types";
+import { SeoCard, SeoSection } from "@/features/seo/components/shared/SeoCard";
+import { ListHead, SeoList } from "@/features/seo/components/shared/SeoList";
+import sharedClasses from "@/features/seo/components/shared/seoUi.module.css";
+import classes from "@/features/seo/components/panels/performance/performance.module.css";
 
-/**
- * What the page is actually made of, and what third parties cost it.
- *
- * Lighthouse reports these whatever the page scores, so they never surface as
- * suggestions — a page can pass every audit and still be carrying 400 KB of
- * third-party JavaScript worth knowing about.
- */
-
-/** Lighthouse resource type keys, in the order worth reading them. */
 const TYPE_LABEL: Record<string, string> = {
   script: "JavaScript",
   stylesheet: "CSS",
@@ -37,111 +31,76 @@ export function DiagnosticsPanel({ diagnostics }: { diagnostics?: SeoDiagnostics
   if (!diagnostics) return null;
 
   const { byType, totalBytes, totalRequests, thirdParty } = diagnostics;
-  const hasComposition = byType.length > 0 && totalBytes;
+  const hasComposition = byType.length > 0 && Boolean(totalBytes);
   const hasThirdParty = thirdParty.length > 0;
 
-  // Older reports carry none of this; a card with three em-dashes helps nobody.
   if (!hasComposition && !hasThirdParty && diagnostics.domElements === null) return null;
 
   return (
-    <Card withBorder radius="md" padding="lg">
-      <Group gap={8} mb="md" wrap="nowrap">
-        <Boxes size={15} className="sect-ic" />
-        <Text fw={600} size="sm">
-          Page composition
-        </Text>
-        {totalRequests !== null && totalBytes !== null && (
-          <Badge size="xs" variant="light" color="gray">
-            {totalRequests} requests · {kb(totalBytes)}
-          </Badge>
-        )}
-      </Group>
-
-      <SimpleGrid cols={{ base: 1, lg: hasThirdParty ? 2 : 1 }} spacing="lg">
+    <SeoSection
+      title="Page composition"
+      description={
+        totalRequests !== null && totalBytes !== null
+          ? `${totalRequests} requests · ${kb(totalBytes)} transferred.`
+          : "What the page is made of, and what third parties cost it."
+      }
+    >
+      <div className="seo-bento">
         {hasComposition && (
-          <Box>
-            <Text size="xs" c="dimmed" mb="sm">
-              Transfer size by resource type
-            </Text>
-            {byType.slice(0, 7).map((row) => {
-              const share = totalBytes ? Math.round((row.bytes / totalBytes) * 100) : 0;
-              return (
-                <Box key={row.type} mb={10}>
-                  <Group justify="space-between" mb={3} wrap="nowrap">
-                    <Text size="xs">{TYPE_LABEL[row.type] ?? row.type}</Text>
-                    <Text size="xs" c="dimmed">
+          <SeoCard className={hasThirdParty ? "col-6" : "col-12"} title="Transfer size by type">
+            <div className={classes.composition}>
+              {byType.slice(0, 7).map((row) => (
+                <div key={row.type} className={sharedClasses.bar}>
+                  <div className={sharedClasses.barTop}>
+                    <span>{TYPE_LABEL[row.type] ?? row.type}</span>
+                    <span className={sharedClasses.barValue}>
                       {kb(row.bytes)} · {row.requests}
-                    </Text>
-                  </Group>
-                  <Progress value={share} size={5} color="cyan" />
-                </Box>
-              );
-            })}
-          </Box>
+                    </span>
+                  </div>
+                  <Progress
+                    value={totalBytes ? (row.bytes / totalBytes) * 100 : 0}
+                    color="var(--accent)"
+                    size={6}
+                    radius="xl"
+                    classNames={{ root: sharedClasses.track }}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className={classes.stats}>
+              <Stat label="DOM elements" value={diagnostics.domElements?.toLocaleString() ?? "—"} />
+              <Stat label="Main thread" value={ms(diagnostics.mainThreadMs)} />
+              <Stat label="Server response" value={ms(diagnostics.serverResponseMs)} />
+            </div>
+          </SeoCard>
         )}
 
         {hasThirdParty && (
-          <Box>
-            <Group justify="space-between" mb="sm" wrap="nowrap">
-              <Text size="xs" c="dimmed">
-                Third parties, by main-thread time
-              </Text>
-              <ExternalLink size={12} className="sect-ic" />
-            </Group>
-            <Box style={{ overflowX: "auto" }}>
-              <Table verticalSpacing={6} fz="xs" miw={280}>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Origin</Table.Th>
-                    <Table.Th ta="right">Blocking</Table.Th>
-                    <Table.Th ta="right">Size</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {thirdParty.slice(0, 6).map((t) => (
-                    <Table.Tr key={t.entity}>
-                      <Table.Td>
-                        <Text size="xs" truncate maw={160}>
-                          {t.entity}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td ta="right">
-                        <Text size="xs" c={t.blockingMs > 250 ? "red" : undefined}>
-                          {t.blockingMs ? ms(t.blockingMs) : "—"}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td ta="right">
-                        <Text size="xs" c="dimmed">
-                          {t.bytes ? kb(t.bytes) : "—"}
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Box>
-          </Box>
+          <SeoList className={hasComposition ? "col-6" : "col-12"}>
+            <ListHead>
+              <span className={classes.colGrow}>Third party</span>
+              <span className={classes.colNum}>Blocking</span>
+              <span className={classes.colNum}>Size</span>
+            </ListHead>
+            {thirdParty.slice(0, 8).map((t) => (
+              <div key={t.entity} className={sharedClasses.row}>
+                <span className={`${classes.colGrow} ${sharedClasses.rowText}`}>{t.entity}</span>
+                <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{t.blockingMs ? ms(t.blockingMs) : "—"}</span>
+                <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{t.bytes ? kb(t.bytes) : "—"}</span>
+              </div>
+            ))}
+          </SeoList>
         )}
-      </SimpleGrid>
-
-      <Group gap="lg" mt="md" wrap="wrap">
-        <Stat label="DOM elements" value={diagnostics.domElements?.toLocaleString() ?? "—"} />
-        <Stat label="Main thread" value={ms(diagnostics.mainThreadMs)} />
-        <Stat label="Server response" value={ms(diagnostics.serverResponseMs)} />
-      </Group>
-    </Card>
+      </div>
+    </SeoSection>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <Box>
-      <Text size="xs" c="dimmed">
-        {label}
-      </Text>
-      <Text size="sm" fw={650}>
-        {value}
-      </Text>
-    </Box>
+    <div className={classes.stat}>
+      <span className={classes.statLabel}>{label}</span>
+      <span className={classes.statValue}>{value}</span>
+    </div>
   );
 }

@@ -450,22 +450,6 @@
   .seo-report { --seo-gap: 12px; }
   .seo-bento { gap: 10px; }
 
-  /* Audit summary: the score ring centred on its own line and the four
-     category bars under it at full width, instead of a row that ran off the
-     card's right edge. */
-  .mantine-Group-root:has(> .seo-cats) {
-    justify-content: center;
-    gap: 18px !important;
-  }
-  .seo-cats {
-    flex: 1 1 100%;
-    gap: 12px 18px;
-  }
-  .seo-cat .top .v { font-size: 14px; }
-
-  .seo-mstrip .mv { font-size: 17px; }
-  .seo-hbar { grid-template-columns: 76px 1fr 22px; gap: 10px; }
-
   /* Wide tables scroll inside their card rather than pushing the page. */
   .seo-report .mantine-Table-table { font-size: 12px; }
 

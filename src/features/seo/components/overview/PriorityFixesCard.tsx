@@ -1,7 +1,7 @@
-import { Card } from "@mantine/core";
-import { ArrowRight, CircleCheck } from "lucide-react";
-import { useIssueBreakdown } from "@/features/seo/components/hooks";
+import { ArrowRight, ChevronRight, CircleCheck } from "lucide-react";
+import type { IssueBreakdown } from "@/features/seo/components/hooks";
 import { SEVERITY } from "@/features/seo/components/shared/Panel";
+import { SeoCard } from "@/features/seo/components/shared/SeoCard";
 import { AREA_LABEL } from "@/features/seo/components/utils";
 import classes from "./overviewCards.module.css";
 
@@ -9,37 +9,34 @@ export function PriorityFixesCard({
   breakdown,
   onViewIssues,
 }: {
-  breakdown: ReturnType<typeof useIssueBreakdown>;
+  breakdown: IssueBreakdown;
   onViewIssues?: () => void;
 }) {
   const { priority, total } = breakdown;
 
   return (
-    <Card withBorder radius="md" padding="lg" className="col-7 seo-panel">
-      <div className={classes.head}>
-        <span className={classes.title}>Priority fixes</span>
-        <span className="seo-eyebrow">Worst first</span>
-      </div>
-
+    <SeoCard className="col-6" title="Priority fixes" right={<span className="seo-eyebrow">Worst first</span>}>
       {priority.length ? (
         <>
           <ol className={classes.fixList}>
             {priority.map((issue, index) => (
               <li key={`${issue.title}-${index}`} className={classes.fix}>
-                <span className={classes.rank} data-sev={issue.severity}>
-                  {index + 1}
-                </span>
-                <div className={classes.fixBody}>
-                  <div className={classes.fixTitle}>{issue.title}</div>
-                  <div className={classes.fixDetail}>{issue.detail}</div>
-                  <div className={classes.fixMeta}>
-                    <span className={classes.sev} data-sev={issue.severity}>
-                      <span className={classes.dot} />
-                      {SEVERITY[issue.severity].label}
+                <button
+                  type="button"
+                  className={classes.fixButton}
+                  data-sev={issue.severity}
+                  onClick={onViewIssues}
+                  disabled={!onViewIssues}
+                >
+                  <span className={classes.dot} aria-hidden />
+                  <span className={classes.fixText}>
+                    <span className={classes.fixTitle}>{issue.title}</span>
+                    <span className={classes.fixMeta}>
+                      {SEVERITY[issue.severity].label} · {AREA_LABEL[issue.area]}
                     </span>
-                    <span className={classes.areaTag}>{AREA_LABEL[issue.area]}</span>
-                  </div>
-                </div>
+                  </span>
+                  {onViewIssues && <ChevronRight size={14} className={classes.chev} aria-hidden />}
+                </button>
               </li>
             ))}
           </ol>
@@ -59,6 +56,6 @@ export function PriorityFixesCard({
           Every check came back clean.
         </div>
       )}
-    </Card>
+    </SeoCard>
   );
 }

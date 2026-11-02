@@ -27,20 +27,21 @@
 }
 
 .jump {
-  padding: 4px 10px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--segment-track);
   color: var(--text-2);
-  font-size: var(--mantine-font-size-xs);
+  font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 120ms ease, border-color 120ms ease;
+  transition: color 120ms ease, background-color 120ms ease;
 }
 
 .jump:hover {
   color: var(--text);
-  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--text) 12%, transparent);
 }
 
 .jump:focus-visible {
@@ -48,77 +49,74 @@
   outline-offset: 1px;
 }
 
-/* A block inside a grouped tab. */
 .block {
   scroll-margin-top: 64px;
 }
 
 .block + .block {
-  margin-top: calc(var(--mantine-spacing-xl) * 1.4);
+  margin-top: 40px;
 }
 
 .blockHead {
-  margin-bottom: var(--mantine-spacing-md);
+  margin-bottom: 14px;
 }
 
 .blockTitle {
   margin: 0;
-  font-size: var(--mantine-font-size-md);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
   color: var(--text);
 }
 
 .blockDesc {
   margin: 2px 0 0;
-  font-size: var(--mantine-font-size-xs);
+  font-size: 13px;
+  line-height: 1.45;
   color: var(--text-2);
 }
-
-/* ---------- Inspect bar ---------- */
 
 .inspect {
   display: flex;
   align-items: center;
-  gap: 4px;
-  max-width: 860px;
-  min-height: 46px;
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
   background: var(--surface);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color 120ms ease;
 }
 
 .inspect:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .inspect[data-hero] {
-  max-width: none;
-  width: 100%;
-  min-height: 58px;
-  padding: 6px;
-  border-radius: 16px;
-  background: var(--shell);
+  min-height: 60px;
+  padding: 8px;
 }
 
-.inspect[data-hero] .address {
-  height: 44px;
-}
-
-.inspect[data-hero] .inspectButton {
-  border-radius: 11px;
+.inspect[data-hero] .address,
+.inspect[data-hero] .siteSelect {
+  height: 42px;
 }
 
 .siteSelect {
-  flex: 0 0 210px;
+  flex: 0 0 220px;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--segment-track);
 }
 
-/* The app's global input styles draw a border even on the unstyled variant;
-   inside the joined field the outer border is the only one. */
+.siteSelect :global(.mantine-Select-wrapper) {
+  width: 100%;
+}
+
 .siteSelect input {
   border: 0 !important;
   background: transparent !important;
@@ -129,13 +127,6 @@
   cursor: pointer;
 }
 
-.inspectDivider {
-  flex-shrink: 0;
-  width: 1px;
-  height: 22px;
-  background: var(--border);
-}
-
 .address {
   flex: 1;
   min-width: 0;
@@ -143,7 +134,9 @@
   align-items: center;
   gap: 8px;
   height: 36px;
-  padding: 0 10px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--segment-track);
   cursor: text;
 }
 
@@ -160,7 +153,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--mantine-font-size-sm);
-  color: var(--text-2);
+  color: var(--text);
 }
 
 .pathInput {
@@ -177,23 +170,15 @@
 
 .inspectButton {
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: 8px;
 }
 
 @media (max-width: 36em) {
   .inspect {
     flex-wrap: wrap;
   }
-  .siteSelect {
-    flex: 1 1 100%;
-  }
-  .inspectDivider {
-    display: none;
-  }
-  .address {
-    flex: 1 1 100%;
-    border-top: 1px solid var(--border);
-  }
+  .siteSelect,
+  .address,
   .inspectButton {
     flex: 1 1 100%;
   }
@@ -203,32 +188,29 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 14px;
-  margin-top: var(--mantine-spacing-sm);
-  font-size: var(--mantine-font-size-xs);
+  gap: 6px 10px;
+  min-width: 0;
+  font-size: 12.5px;
   color: var(--text-2);
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--green);
 }
 
 .reportUrl {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  min-width: 0;
-  max-width: 100%;
-  color: var(--text);
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.reportUrl span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--muted);
+  transition: color 120ms ease;
 }
 
 .reportUrl:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--text);
 }
 
 .metaDot {
@@ -243,5 +225,5 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--mantine-color-yellow-6);
+  color: var(--amber);
 }

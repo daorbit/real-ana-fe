@@ -12,6 +12,10 @@
   transition: background-color 150ms ease;
 }
 
+.tabbarWrap[data-static] {
+  position: static;
+}
+
 .tabbarWrap[data-stuck] {
   background: var(--shell);
 }
@@ -28,6 +32,19 @@
   overflow-x: auto;
   scrollbar-width: none;
   box-shadow: inset 0 -1px 0 var(--border);
+}
+
+.tabRow[data-aside] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.tabRow[data-aside] > .tabbar {
+  margin-bottom: 0;
 }
 
 .tabbar::-webkit-scrollbar {
@@ -90,6 +107,39 @@
   font-weight: 600;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.tabbar[data-variant="segmented"] {
+  display: inline-flex;
+  max-width: 100%;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--segment-track);
+  box-shadow: none;
+}
+
+.tabbar[data-variant="segmented"] .tab {
+  height: 32px;
+  margin-right: 0;
+  padding: 0 14px;
+  border-radius: 8px;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tabbar[data-variant="segmented"] .tab::after {
+  display: none;
+}
+
+.tabbar[data-variant="segmented"] .tab[data-active] {
+  background: var(--segment-thumb);
+  color: var(--segment-fg);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--segment-thumb-edge);
+}
+
+.tabbar[data-variant="segmented"] .tab:focus-visible {
+  border-radius: 8px;
 }
 
 .count[data-alarm] {

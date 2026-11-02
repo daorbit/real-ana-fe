@@ -1,67 +1,38 @@
 import { useState } from "react";
-import {
-  Alert, Anchor, Badge, Box, Card, Center, ScrollArea, SimpleGrid,
-  Stack, Table, Text, ThemeIcon, Tooltip,
-} from "@mantine/core";
-import {
-  AlertTriangle, CheckCircle2, Clock, Link2, Link2Off, ServerCrash, ShieldAlert,
-  CornerDownRight, Info,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Anchor, Tooltip } from "@mantine/core";
+import { Link2 } from "lucide-react";
 import type { SeoLinkCheck, SeoLinkResult, SeoLinkStatus } from "@/shared/types";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { Pill } from "@/features/seo/components/shared/Pill";
+import { ListEmpty, ListHead, SeoList } from "@/features/seo/components/shared/SeoList";
+import { Tile, Tiles } from "@/features/seo/components/shared/Tile";
+import type { Tone } from "@/features/seo/components/shared/tone";
+import sharedClasses from "@/features/seo/components/shared/seoUi.module.css";
+import classes from "@/features/seo/components/panels/site/site.module.css";
 
-const STATUS: Record<
-  SeoLinkStatus,
-  { label: string; color: string; icon: LucideIcon; explain: string }
-> = {
-  ok: { label: "OK", color: "teal", icon: CheckCircle2, explain: "Responded normally." },
-  broken: {
-    label: "Broken",
-    color: "red",
-    icon: Link2Off,
-    explain: "The target does not exist. Visitors following this link hit a dead end.",
-  },
-  "server-error": {
-    label: "Server error",
-    color: "orange",
-    icon: ServerCrash,
-    explain: "The target server failed. This may be temporary — worth re-checking later.",
-  },
-  redirect: {
-    label: "Redirect",
-    color: "yellow",
-    icon: CornerDownRight,
-    explain: "Resolves, but only after a detour. Each hop costs crawl budget.",
-  },
-  timeout: {
-    label: "Timeout",
-    color: "orange",
-    icon: Clock,
-    explain: "No response in time. The target may be slow rather than broken.",
-  },
-  blocked: {
-    label: "Blocked",
-    color: "gray",
-    icon: ShieldAlert,
-    explain: "Not checked — the address is not publicly reachable.",
-  },
-  skipped: {
-    label: "Skipped",
-    color: "gray",
-    icon: Info,
-    explain: "Over the per-audit link limit.",
-  },
+const STATUS: Record<SeoLinkStatus, { label: string; tone: Tone; explain: string }> = {
+  ok: { label: "OK", tone: "good", explain: "Responded normally." },
+  broken: { label: "Broken", tone: "bad", explain: "The target does not exist. Visitors following this link hit a dead end." },
+  "server-error": { label: "Server error", tone: "bad", explain: "The target server failed. This may be temporary." },
+  redirect: { label: "Redirect", tone: "warn", explain: "Resolves, but only after a detour. Each hop costs crawl budget." },
+  timeout: { label: "Timeout", tone: "warn", explain: "No response in time. The target may be slow rather than broken." },
+  blocked: { label: "Blocked", tone: "neutral", explain: "Not checked, because the address is not publicly reachable." },
+  skipped: { label: "Skipped", tone: "neutral", explain: "Over the per-audit link limit." },
 };
 
 type Filter = "problems" | "all" | SeoLinkStatus;
 
-/**
- * Link check results.
- *
- * Defaults to problems only: a page with 90 healthy links and 3 dead ones
- * should open on the 3. The full list is one click away.
- */
+const FILTER_LABEL: Partial<Record<Filter, string>> = {
+  ok: "Working",
+  broken: "Broken",
+  redirect: "Redirects",
+  "server-error": "Errors",
+};
+
+function isProblem(r: SeoLinkResult): boolean {
+  return r.status !== "ok" && r.status !== "skipped" && r.status !== "blocked";
+}
+
 export function LinksPanel({ links }: { links?: SeoLinkCheck }) {
   const [filter, setFilter] = useState<Filter>("problems");
 
@@ -71,217 +42,109 @@ export function LinksPanel({ links }: { links?: SeoLinkCheck }) {
         compact
         icon={Link2}
         title="Not checked on this report"
-        description="This audit ran before link checking was added. Re-run it to test every link on the page."
+        description="This audit ran before link checking was added. Run it again to test every link on the page."
       />
     );
   }
 
-  const problems = links.results.filter(
-    (r) => r.status !== "ok" && r.status !== "skipped" && r.status !== "blocked"
-  );
-
+  const problems = links.results.filter(isProblem);
+  const healthy = links.results.filter((r) => r.status === "ok").length;
+  const errors = links.serverErrors + links.timeouts;
   const shown =
     filter === "all"
       ? links.results
       : filter === "problems"
-      ? problems
-      : links.results.filter((r) => r.status === filter);
-
-  const healthy = links.results.filter((r) => r.status === "ok").length;
+        ? problems
+        : filter === "server-error"
+          ? links.results.filter((r) => r.status === "server-error" || r.status === "timeout")
+          : links.results.filter((r) => r.status === filter);
+  const internalBroken = links.results.some((r) => r.status === "broken" && r.internal);
+  const tabs: { id: Filter; label: string }[] = [
+    { id: "problems", label: `Problems ${problems.length}` },
+    { id: "all", label: `All ${links.results.length}` },
+    ...(FILTER_LABEL[filter] ? [{ id: filter, label: FILTER_LABEL[filter] as string }] : []),
+  ];
 
   return (
-    <Stack gap="lg">
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
-        <Tile
-          label="Working"
-          value={healthy}
-          icon={CheckCircle2}
-          color="teal"
-          onClick={() => setFilter("ok")}
-        />
-        <Tile
-          label="Broken"
-          value={links.broken}
-          icon={Link2Off}
-          color={links.broken ? "red" : "gray"}
-          onClick={() => setFilter("broken")}
-        />
-        <Tile
-          label="Redirects"
-          value={links.redirects}
-          icon={CornerDownRight}
-          color={links.redirects ? "yellow" : "gray"}
-          onClick={() => setFilter("redirect")}
-        />
-        <Tile
-          label="Errors / timeouts"
-          value={links.serverErrors + links.timeouts}
-          icon={ServerCrash}
-          color={links.serverErrors + links.timeouts ? "orange" : "gray"}
-          onClick={() => setFilter("server-error")}
-        />
-      </SimpleGrid>
+    <div className={classes.stack}>
+      <Tiles>
+        <Tile label="Working" value={String(healthy)} tone={healthy ? "good" : undefined} onClick={() => setFilter("ok")} />
+        <Tile label="Redirects" value={String(links.redirects)} tone={links.redirects ? "warn" : undefined} onClick={() => setFilter("redirect")} />
+        <Tile label="Broken" value={String(links.broken)} tone={links.broken ? "bad" : undefined} onClick={() => setFilter("broken")} />
+        <Tile label="Errors / timeouts" value={String(errors)} tone={errors ? "warn" : undefined} onClick={() => setFilter("server-error")} />
+      </Tiles>
 
-      {links.results.some((r) => r.status === "broken" && r.internal) && (
-        <Alert color="red" variant="light" radius="md" icon={<AlertTriangle size={16} />}>
-          Some broken links point at your own site. Those are entirely within your control
-          and should be fixed first.
-        </Alert>
-      )}
-
-      {links.skipped > 0 && (
-        <Alert color="gray" variant="light" radius="md" icon={<Info size={15} />}>
-          {links.skipped} link{links.skipped === 1 ? " was" : "s were"} not checked — one
-          audit tests at most 100, internal links first.
-        </Alert>
-      )}
-
-      <Card withBorder radius="md" padding={0}>
-        <Box p="md">
-          <Box className="seo-segment">
-            <button
-              type="button"
-              data-active={filter === "problems" || undefined}
-              onClick={() => setFilter("problems")}
-            >
-              Problems ({problems.length})
-            </button>
-            <button
-              type="button"
-              data-active={filter === "all" || undefined}
-              onClick={() => setFilter("all")}
-            >
-              All ({links.results.length})
-            </button>
-          </Box>
-        </Box>
-
-        {shown.length ? (
-          <ScrollArea>
-            <Table highlightOnHover verticalSpacing="xs" fz="xs" miw={640}>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th w={120}>Status</Table.Th>
-                  <Table.Th>Link</Table.Th>
-                  <Table.Th w={180}>Anchor text</Table.Th>
-                  <Table.Th w={80}>Scope</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {shown.map((r, i) => (
-                  <LinkRow key={`${r.url}-${i}`} result={r} />
-                ))}
-              </Table.Tbody>
-            </Table>
-          </ScrollArea>
-        ) : (
-          <Center py="xl">
-            <Stack align="center" gap={6}>
-              <ThemeIcon size={40} radius="xl" variant="light" color="teal">
-                <CheckCircle2 size={20} />
-              </ThemeIcon>
-              <Text size="sm" fw={600}>
-                {filter === "problems" ? "Every link works" : "Nothing in this view"}
-              </Text>
-              <Text size="xs" c="dimmed">
-                {links.checked} link{links.checked === 1 ? "" : "s"} checked.
-              </Text>
-            </Stack>
-          </Center>
+      <SeoList>
+        <div className={classes.toolbar}>
+          <div className="seo-segment" role="group" aria-label="Show links">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                data-active={filter === t.id || undefined}
+                aria-pressed={filter === t.id}
+                onClick={() => setFilter(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <span className={sharedClasses.rowMeta}>{links.checked} checked</span>
+        </div>
+        {internalBroken && (
+          <p className={classes.note} data-tone="bad">
+            Some broken links point at your own site. Those are fully in your control, so fix them first.
+          </p>
         )}
-      </Card>
-    </Stack>
+        {links.skipped > 0 && (
+          <p className={classes.note}>
+            {links.skipped} link{links.skipped === 1 ? " was" : "s were"} not checked. One audit tests at most 100, internal links first.
+          </p>
+        )}
+        <ListHead>
+          <span className={classes.colGrow}>Link</span>
+          <span className={classes.colAnchor}>Anchor text</span>
+          <span className={classes.colScope}>Scope</span>
+          <span className={classes.colStatus}>Status</span>
+        </ListHead>
+        {shown.length ? (
+          shown.map((r, i) => <LinkRow key={`${r.url}-${i}`} result={r} />)
+        ) : (
+          <ListEmpty>{filter === "problems" ? "Every link works." : "Nothing in this view."}</ListEmpty>
+        )}
+      </SeoList>
+    </div>
   );
 }
 
 function LinkRow({ result }: { result: SeoLinkResult }) {
   const s = STATUS[result.status];
-  const Icon = s.icon;
-
   return (
-    <Table.Tr>
-      <Table.Td>
-        <Tooltip label={result.note ?? s.explain} withArrow multiline w={260}>
-          <Badge
-            size="sm"
-            variant="light"
-            color={s.color}
-            leftSection={<Icon size={10} />}
-            style={{ cursor: "help" }}
-          >
-            {result.statusCode ?? s.label}
-          </Badge>
-        </Tooltip>
-      </Table.Td>
-      <Table.Td style={{ maxWidth: 340 }}>
+    <div className={sharedClasses.row}>
+      <span className={classes.colGrow}>
         <Anchor
           href={result.url}
           target="_blank"
           rel="noopener noreferrer"
-          size="xs"
-          truncate
-          display="block"
+          className={`${classes.truncate} ${sharedClasses.mono}`}
         >
           {result.url}
         </Anchor>
-        {result.chain.length > 1 && (
-          <Text size="xs" c="dimmed" truncate>
-            → {result.chain[result.chain.length - 1]}
-          </Text>
-        )}
-      </Table.Td>
-      <Table.Td>
-        <Text size="xs" c="dimmed" truncate>
-          {result.text || "—"}
-        </Text>
-      </Table.Td>
-      <Table.Td>
-        <Badge size="xs" variant="default">
-          {result.internal ? "Internal" : "External"}
-        </Badge>
-      </Table.Td>
-    </Table.Tr>
-  );
-}
-
-function Tile({
-  label,
-  value,
-  color,
-  onClick,
-}: {
-  label: string;
-  value: number;
-  /** Accepted for call-site compatibility; tiles show no icon. */
-  icon?: LucideIcon;
-  color: string;
-  onClick: () => void;
-}) {
-  // Count colours are a status signal here (broken=red, working=teal), but a
-  // zero is not a problem, so it reads neutral regardless of tone.
-  return (
-    <Box
-      component="button"
-      type="button"
-      className="seo-tile"
-      px="md"
-      py={12}
-      onClick={onClick}
-      style={{ cursor: "pointer", textAlign: "left", width: "100%", border: 0, color: "inherit", font: "inherit" }}
-    >
-      <Text size="xs" c="dimmed" truncate>
-        {label}
-      </Text>
-      <Text
-        fz={20.5}
-        fw={650}
-        lh={1.2}
-        mt={4}
-        c={value > 0 && color !== "gray" ? `${color}.6` : undefined}
-        style={{ letterSpacing: "-0.02em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}
-      >
-        {value}
-      </Text>
-    </Box>
+        {result.chain.length > 1 && <span className={classes.chain}>→ {result.chain[result.chain.length - 1]}</span>}
+      </span>
+      <span className={`${classes.colAnchor} ${classes.truncate} ${sharedClasses.rowText}`} title={result.text}>
+        {result.text || "—"}
+      </span>
+      <span className={`${classes.colScope} ${sharedClasses.rowMeta}`}>{result.internal ? "Internal" : "External"}</span>
+      <span className={classes.colStatus}>
+        <Tooltip label={result.note ?? s.explain} withArrow multiline w={260}>
+          <span>
+            <Pill tone={s.tone}>
+              {result.statusCode ? `${result.statusCode} ${s.label}` : s.label}
+            </Pill>
+          </span>
+        </Tooltip>
+      </span>
+    </div>
   );
 }

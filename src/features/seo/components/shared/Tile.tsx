@@ -1,44 +1,51 @@
-import { Box, Text, Tooltip } from "@mantine/core";
+import type { ReactNode } from "react";
+import { Tooltip } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
+import type { Tone } from "./tone";
+import classes from "./seoUi.module.css";
 
-/**
- * A compact metric: a label over a number.
- *
- * Neutral by default — the value only takes colour when `tone` marks it as a
- * verdict (good/warn/bad). `icon` and `color` are accepted for call-site
- * compatibility but not drawn: a grid of icon chips read as clutter.
- */
+type LegacyTone = "good" | "warn" | "bad";
+
+export function Tiles({ wide = false, children }: { wide?: boolean; children: ReactNode }) {
+  return (
+    <div className={classes.tiles} data-wide={wide || undefined}>
+      {children}
+    </div>
+  );
+}
+
 export function Tile({
   label,
   value,
+  note,
   tone,
   hint,
+  onClick,
 }: {
   label: string;
   value: string;
+  note?: string;
   icon?: LucideIcon;
   color?: string;
-  tone?: "good" | "warn" | "bad";
+  tone?: LegacyTone | Tone;
   hint?: string;
+  onClick?: () => void;
 }) {
-  const toneColor = tone === "good" ? "teal" : tone === "warn" ? "yellow" : tone === "bad" ? "red" : undefined;
-  const body = (
-    <Box className="seo-tile" px="md" py={12}>
-      <Text size="xs" c="dimmed" truncate>
-        {label}
-      </Text>
-      <Text
-        fz={20.5}
-        fw={650}
-        lh={1.2}
-        mt={4}
-        c={toneColor ? `${toneColor}.6` : undefined}
-        truncate
-        style={{ letterSpacing: "-0.02em", fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-nums" }}
-      >
-        {value}
-      </Text>
-    </Box>
+  const inner = (
+    <>
+      <span className={classes.tileLabel}>{label}</span>
+      <span className={classes.tileValue}>{value}</span>
+      {note && <span className={classes.tileNote}>{note}</span>}
+    </>
+  );
+  const body = onClick ? (
+    <button type="button" className={classes.tile} data-tone={tone} onClick={onClick}>
+      {inner}
+    </button>
+  ) : (
+    <div className={classes.tile} data-tone={tone}>
+      {inner}
+    </div>
   );
   return hint ? (
     <Tooltip label={hint} withArrow multiline w={260}>

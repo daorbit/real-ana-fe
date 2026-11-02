@@ -1,4 +1,4 @@
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useStuck } from "@/shared/lib/useStuck";
 import { pageTabId, pageTabPanelId } from "./pageTabIds";
@@ -20,12 +20,18 @@ export function PageTabs<T extends string>({
   onChange,
   label,
   idPrefix,
+  variant = "underline",
+  aside,
+  sticky = true,
 }: {
   items: PageTabItem<T>[];
   active: T;
   onChange: (id: T) => void;
   label: string;
   idPrefix: string;
+  variant?: "underline" | "segmented";
+  aside?: ReactNode;
+  sticky?: boolean;
 }) {
   const bar = useRef<HTMLDivElement>(null);
   const { sentinel, stuck } = useStuck();
@@ -57,33 +63,47 @@ export function PageTabs<T extends string>({
   return (
     <>
       <div ref={sentinel} className={classes.anchor} aria-hidden />
-      <div className={classes.tabbarWrap} data-stuck={stuck || undefined}>
-        <div ref={bar} className={classes.tabbar} role="tablist" aria-label={label} onKeyDown={onKeyDown}>
-          {items.map(({ id, label: text, icon: Icon, count, alarm }) => {
-            const on = id === active;
-            return (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                id={pageTabId(idPrefix, id)}
-                aria-selected={on}
-                aria-controls={pageTabPanelId(idPrefix, id)}
-                tabIndex={on ? 0 : -1}
-                data-active={on || undefined}
-                className={classes.tab}
-                onClick={() => onChange(id)}
-              >
-                {Icon && <Icon size={15} strokeWidth={on ? 2.2 : 1.9} />}
-                {text}
-                {count !== undefined && count > 0 && (
-                  <span className={classes.count} data-alarm={alarm || undefined}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+      <div
+        className={classes.tabbarWrap}
+        data-static={!sticky || undefined}
+        data-stuck={(sticky && stuck) || undefined}
+      >
+        <div className={classes.tabRow} data-aside={aside ? true : undefined}>
+          <div
+            ref={bar}
+            className={classes.tabbar}
+            data-variant={variant}
+            role="tablist"
+            aria-label={label}
+            onKeyDown={onKeyDown}
+          >
+            {items.map(({ id, label: text, icon: Icon, count, alarm }) => {
+              const on = id === active;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  id={pageTabId(idPrefix, id)}
+                  aria-selected={on}
+                  aria-controls={pageTabPanelId(idPrefix, id)}
+                  tabIndex={on ? 0 : -1}
+                  data-active={on || undefined}
+                  className={classes.tab}
+                  onClick={() => onChange(id)}
+                >
+                  {Icon && <Icon size={15} strokeWidth={on ? 2.2 : 1.9} />}
+                  {text}
+                  {count !== undefined && count > 0 && (
+                    <span className={classes.count} data-alarm={alarm || undefined}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {aside}
         </div>
       </div>
     </>

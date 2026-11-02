@@ -1,5 +1,5 @@
 import { Button, Select } from "@mantine/core";
-import { Globe, Search } from "lucide-react";
+import { Globe, Link2 } from "lucide-react";
 import type { Site } from "@/shared/types";
 import layout from "./SeoLayout.module.css";
 
@@ -41,9 +41,8 @@ export function SeoInspectBar({
       />
       {canEdit && (
         <>
-          <span className={layout.inspectDivider} aria-hidden />
           <label className={layout.address}>
-            <Search size={15} className={layout.addressIcon} />
+            <Link2 size={15} className={layout.addressIcon} />
             {domainLabel && <span className={layout.domain}>{domainLabel}</span>}
             <input
               className={layout.pathInput}
@@ -57,12 +56,12 @@ export function SeoInspectBar({
           </label>
           <Button
             size={hero ? "md" : "sm"}
-            color={hero ? "emerald" : undefined}
+            radius="sm"
             disabled={analyzing}
             onClick={onRun}
             className={layout.inspectButton}
           >
-            {hero ? "Run audit" : "Inspect page"}
+            Run audit
           </Button>
         </>
       )}

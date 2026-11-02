@@ -64,8 +64,9 @@
   --selected-icon-bg: var(--accent-soft-hover);
 
   --segment-track: color-mix(in srgb, var(--text) 8%, transparent);
-  --segment-thumb: color-mix(in srgb, var(--blue-9) 22%, transparent);
+  --segment-thumb: var(--gray-8);
   --segment-thumb-edge: transparent;
+  --segment-fg: var(--text);
 
   --green: #30d158;
   --amber: #ff9f0a;
@@ -216,8 +217,9 @@
   --cta-fg: #ffffff;
 
   --segment-track: color-mix(in srgb, var(--text) 6%, transparent);
-  --segment-thumb: color-mix(in srgb, var(--blue-9) 12%, transparent);
-  --segment-thumb-edge: transparent;
+  --segment-thumb: #ffffff;
+  --segment-thumb-edge: color-mix(in srgb, var(--text) 9%, transparent);
+  --segment-fg: var(--text);
 
   --green: #15803d;
   --amber: #b25e00;

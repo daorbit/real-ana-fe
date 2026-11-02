@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Anchor } from "@mantine/core";
 import { PageTabs, type PageTabItem } from "@/shared/ui/PageTabs";
 import { useRegisterHeaderHelp } from "@/shared/lib/headerHelp";
@@ -10,9 +11,10 @@ interface Props {
   active: SeoTabId;
   counts: Partial<Record<SeoTabId, SeoTabCount>>;
   onChange: (id: SeoTabId) => void;
+  aside?: ReactNode;
 }
 
-export function SeoTabs({ active, counts, onChange }: Props) {
+export function SeoTabs({ active, counts, onChange, aside }: Props) {
   const items: PageTabItem<SeoTabId>[] = SEO_TABS.map((t) => ({
     id: t.id,
     label: t.label,
@@ -20,7 +22,18 @@ export function SeoTabs({ active, counts, onChange }: Props) {
     alarm: counts[t.id]?.alarm,
   }));
 
-  return <PageTabs items={items} active={active} onChange={onChange} label="SEO report" idPrefix="seo" />;
+  return (
+    <PageTabs
+      items={items}
+      active={active}
+      onChange={onChange}
+      label="SEO report"
+      idPrefix="seo"
+      variant="segmented"
+      sticky={false}
+      aside={aside}
+    />
+  );
 }
 
 /** The line under the tab bar: what this tab is for, and jump links to its blocks. */
