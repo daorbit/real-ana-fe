@@ -3577,8 +3577,9 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 
 .account-menu .mantine-Menu-item {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  min-height: 32px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   gap: 10px;
 }
 .account-menu .mantine-Menu-itemLabel {

@@ -59,7 +59,7 @@ export function AccountMenu({
       data-expanded={opened || undefined}
       aria-label={collapsed ? name || "Account" : undefined}
     >
-      <UserAvatar src={avatarUrl} color="emerald" radius="md" size={collapsed ? 30 : 34}>
+      <UserAvatar src={avatarUrl} color="emerald" radius="xl" size={collapsed ? 30 : 32}>
         {initials}
       </UserAvatar>
       {!collapsed && (
@@ -92,7 +92,7 @@ export function AccountMenu({
 
         <Menu.Dropdown className={`account-menu ${classes.menu}`}>
           <div className={classes.menuHeader}>
-            <UserAvatar src={avatarUrl} color="emerald" radius="md" size={38}>
+            <UserAvatar src={avatarUrl} color="emerald" radius="xl" size={36}>
               {initials}
             </UserAvatar>
             <span className={classes.accountText}>
