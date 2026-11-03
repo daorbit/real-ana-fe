@@ -65,6 +65,10 @@
   --selected-icon-bg: var(--accent-soft-hover);
 
   --segment-track: color-mix(in srgb, var(--text) 8%, transparent);
+  --field-bg: var(--segment-track);
+  --field-bg-hover: color-mix(in srgb, var(--text) 12%, transparent);
+  --field-border: transparent;
+  --field-border-hover: transparent;
   --segment-thumb: var(--gray-8);
   --segment-thumb-edge: transparent;
   --segment-fg: var(--text);
@@ -226,7 +230,11 @@
   --cta-hover: #333336;
   --cta-fg: #ffffff;
 
-  --segment-track: color-mix(in srgb, var(--text) 6%, transparent);
+  --segment-track: color-mix(in srgb, var(--text) 4%, transparent);
+  --field-bg: var(--surface);
+  --field-bg-hover: var(--surface);
+  --field-border: var(--border);
+  --field-border-hover: var(--border-strong);
   --segment-thumb: #ffffff;
   --segment-thumb-edge: color-mix(in srgb, var(--text) 9%, transparent);
   --segment-fg: var(--text);
