@@ -17,6 +17,7 @@ import { useCheckout } from "../hooks/useCheckout";
 import { useCheckoutIntent } from "../hooks/useCheckoutIntent";
 import { useCouponIntent } from "../hooks/useCouponIntent";
 import { featuredPlanSlug } from "../lib/planFeatures";
+import { PRICING_STALE_S } from "../lib/constants";
 import { PlanOverview } from "../components/overview/PlanOverview";
 import { BillingTabs } from "../components/BillingTabs";
 import { PlansTab } from "../components/PlansTab";
@@ -50,10 +51,10 @@ export default function Billing() {
 
   const {
     data: plans = [], isLoading: plansLoading, isFetching: plansFetching, refetch: refetchPlans,
-  } = useGetPlansQuery({ currency, workspaceId: selectedWorkspaceId }, { refetchOnMountOrArgChange: true });
+  } = useGetPlansQuery({ currency, workspaceId: selectedWorkspaceId }, { refetchOnMountOrArgChange: PRICING_STALE_S });
   const {
     data: addons = [], isLoading: addonsLoading, isFetching: addonsFetching, refetch: refetchAddons,
-  } = useGetAddonPacksQuery({ currency }, { refetchOnMountOrArgChange: true });
+  } = useGetAddonPacksQuery({ currency }, { refetchOnMountOrArgChange: PRICING_STALE_S });
 
   const {
     data: liveUsage, isFetching: usageFetching, refetch: refetchUsage,

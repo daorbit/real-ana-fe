@@ -11,4 +11,8 @@ export const COMPARE_PLANS_PATH = "/app/billing/plans";
 export const CHECKOUT_PARAM = "checkout";
 export const COUPON_PARAM = "coupon";
 
+export const PRICING_STALE_S = 300;
+
+export const USAGE_HISTORY_STALE_S = 60;
+
 export const CHECKOUT_LOGO = "https://studio-quantalog.daorbit.in/favicon-rounded.png";

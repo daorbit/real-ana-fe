@@ -21,7 +21,7 @@ import { PlanGrid } from "../components/plans/PlanGrid";
 import { usePlanFacts } from "../components/plans/usePlanFacts";
 import { PlanComparisonTable } from "../components/compare/PlanComparisonTable";
 import { featuredPlanSlug } from "../lib/planFeatures";
-import { BILLING_PATH, CHECKOUT_PARAM } from "../lib/constants";
+import { BILLING_PATH, CHECKOUT_PARAM, PRICING_STALE_S } from "../lib/constants";
 import compare from "../components/compare/Compare.module.css";
 
 export default function ComparePlans() {
@@ -36,7 +36,7 @@ export default function ComparePlans() {
   const workspaceId = active?._id ?? null;
   const { data: plans = [], isLoading, isError, isFetching, refetch } = useGetPlansQuery(
     { currency, workspaceId },
-    { refetchOnMountOrArgChange: true },
+    { refetchOnMountOrArgChange: PRICING_STALE_S },
   );
   const { data: liveUsage } = useGetWorkspaceUsageQuery(workspaceId ?? "", { skip: !workspaceId });
   const usage = liveUsage ?? active?.billing ?? null;

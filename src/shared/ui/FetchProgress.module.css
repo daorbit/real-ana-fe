@@ -1,0 +1,51 @@
+.bar {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 350;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 40%;
+  border-radius: 999px;
+  background: var(--accent, var(--mantine-color-emerald-5));
+  transform: translateX(-100%);
+}
+
+.bar[data-visible] {
+  opacity: 1;
+}
+
+.bar[data-visible]::after {
+  animation: sweep 1.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar::after {
+    width: 100%;
+    transform: none;
+  }
+
+  .bar[data-visible]::after {
+    animation: none;
+    opacity: 0.85;
+  }
+}

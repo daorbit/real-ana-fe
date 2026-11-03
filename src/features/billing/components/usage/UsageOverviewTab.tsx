@@ -8,12 +8,13 @@ import { UsageTabSkeleton } from "./UsageTabSkeleton";
 import { MonthlyEventsChart } from "./MonthlyEventsChart";
 import { MonthlyUsageTable } from "./MonthlyUsageTable";
 import { PlanTimeline } from "./PlanTimeline";
+import { USAGE_HISTORY_STALE_S } from "../../lib/constants";
 import classes from "./UsageOverview.module.css";
 
 export function UsageOverviewTab({ workspaceId, usage }: { workspaceId: string; usage: QuotaSummary }) {
   const { data, isLoading, isFetching, error, refetch } = useGetWorkspaceUsageHistoryQuery(workspaceId, {
     skip: !workspaceId,
-    refetchOnMountOrArgChange: true,
+    refetchOnMountOrArgChange: USAGE_HISTORY_STALE_S,
   });
 
   if (isLoading) return <UsageTabSkeleton />;
