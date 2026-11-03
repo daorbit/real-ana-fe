@@ -5,25 +5,36 @@ const BASE = import.meta.env.VITE_API_BASE ?? "";
 const LEGACY_TOKEN_KEY = "rta_token";
 const LEGACY_ADMIN_TOKEN_KEY = "rta_admin_token";
 
-function takeLegacyToken(): string | null {
+function readLegacyToken(): string | null {
   try {
-    const token = localStorage.getItem(LEGACY_ADMIN_TOKEN_KEY) ?? localStorage.getItem(LEGACY_TOKEN_KEY);
-    localStorage.removeItem(LEGACY_TOKEN_KEY);
-    localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
-    return token;
+    return localStorage.getItem(LEGACY_ADMIN_TOKEN_KEY) ?? localStorage.getItem(LEGACY_TOKEN_KEY);
   } catch {
     return null;
   }
 }
 
+function dropLegacyToken() {
+  try {
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
+  } catch {
+    return;
+  }
+}
+
 async function adoptLegacyToken(): Promise<void> {
-  const token = takeLegacyToken();
+  const token = readLegacyToken();
   if (!token) return;
   try {
     const r = await api.postAs<{ session: SessionHint }>(token, "/api/auth/session", {});
     rememberSession(r.session);
-  } catch {
-    forgetSession();
+    dropLegacyToken();
+  } catch (e) {
+    const status = (e as ApiError).status;
+    if (status === 401 || status === 403) {
+      dropLegacyToken();
+      forgetSession();
+    }
   }
 }
 
