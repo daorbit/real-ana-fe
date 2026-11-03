@@ -1,4 +1,5 @@
 import type { TrackerOptions } from "@/features/workspace/tracker";
+import type { SessionHint } from "@/shared/lib/sessionHint";
 
 export type Role = "super_admin" | "admin" | "user";
 
@@ -51,6 +52,7 @@ export type User = {
   impersonating?: boolean;
   /** True on the read-only public demo session. */
   demo?: boolean;
+  session?: SessionHint;
   // No billing field: a plan belongs to a workspace, not to an account. See
   // `Workspace.billing`.
   /**

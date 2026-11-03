@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Menu, Button } from "@mantine/core";
 import { Download, FileSpreadsheet, FileText, ChevronDown } from "lucide-react";
-import { getToken } from "@/shared/lib/http";
 import { notify } from "@/shared/lib/notify";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -40,9 +39,8 @@ export function ExportMenu({
         qs.set("from", from);
         qs.set("to", to);
       }
-      const token = getToken();
       const res = await fetch(`${BASE}/api/workspaces/${workspaceId}/export?${qs.toString()}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        credentials: "include",
       });
       if (!res.ok) throw new Error(`Export failed (${res.status})`);
 

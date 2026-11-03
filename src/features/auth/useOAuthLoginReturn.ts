@@ -26,7 +26,7 @@ function failureMessage(provider: string, reason: string | null): string {
 }
 
 export function useOAuthLoginReturn({ param, method, provider, onError, onRequires2fa }: Options) {
-  const { adoptToken } = useAuth();
+  const { adoptSession } = useAuth();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const handled = useRef(false);
@@ -52,15 +52,14 @@ export function useOAuthLoginReturn({ param, method, provider, onError, onRequir
 
     if (status === "cancelled") return;
 
-    const token = params.get("token");
     const created = status === "created";
-    if ((status !== "ok" && !created) || !token) {
+    if (status !== "ok" && !created) {
       fail();
       return;
     }
 
     setBusy(true);
-    adoptToken(token, method, created)
+    adoptSession(method, created)
       .then(() => {
         if (created) {
           notify.success("Account created. Let's get you tracking.", `Signed up with ${provider}`);
@@ -72,7 +71,7 @@ export function useOAuthLoginReturn({ param, method, provider, onError, onRequir
       })
       .catch(fail)
       .finally(() => setBusy(false));
-  }, [adoptToken, nav, onError, onRequires2fa, param, method, provider]);
+  }, [adoptSession, nav, onError, onRequires2fa, param, method, provider]);
 
   return [busy, setBusy] as const;
 }

@@ -28,10 +28,11 @@ async function json<T>(res: APIResponse): Promise<T> {
 export async function login(email: string, password: string): Promise<string> {
   const ctx = await request.newContext({ baseURL: API_URL });
   try {
-    const body = await json<{ token: string }>(
-      await ctx.post("/api/auth/login", { data: { email, password } }),
-    );
-    return body.token;
+    await json(await ctx.post("/api/auth/login", { data: { email, password } }));
+    const { cookies } = await ctx.storageState();
+    const session = cookies.find((cookie) => cookie.name === "qa_session")?.value;
+    if (!session) throw new Error("login set no session cookie");
+    return session;
   } finally {
     await ctx.dispose();
   }

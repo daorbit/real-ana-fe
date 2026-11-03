@@ -1,4 +1,4 @@
-import { tokenSessionId } from "@/shared/lib/http";
+import { sessionId } from "@/shared/lib/sessionHint";
 
 const STORE_KEY = "quantalog:push-synced";
 const RESYNC_MS = 24 * 60 * 60 * 1000;
@@ -15,7 +15,7 @@ function readMark(): Partial<SyncMark> | null {
 }
 
 export function pushSyncKey(userId: string | undefined, endpoint: string): string {
-  return `${userId ?? ""}:${tokenSessionId()}:${endpoint}`;
+  return `${userId ?? ""}:${sessionId()}:${endpoint}`;
 }
 
 export function pushSyncOwner(): string | null {

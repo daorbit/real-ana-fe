@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getToken } from "@/shared/lib/http";
 import { notify } from "@/shared/lib/notify";
 import type { Invoice } from "@/shared/types";
 
@@ -13,10 +12,9 @@ export function useReceiptDownload() {
   const download = async (invoice: Invoice) => {
     setDownloading(invoice.id);
     try {
-      const token = getToken();
       const res = await fetch(
         `${API_BASE}/api/billing/invoices/${invoice.kind}/${invoice.id}/pdf`,
-        { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
+        { credentials: "include" },
       );
       if (!res.ok) throw new Error(`Download failed (${res.status})`);
 

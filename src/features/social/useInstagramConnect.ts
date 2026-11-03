@@ -8,10 +8,9 @@ import { socialConnectUrl } from "@/features/social/lib/socialConnectUrl";
  *
  * The sibling of `useLinkedInConnect`, and the same shape for the same reasons:
  * the flow runs in a popup so the page someone was on — and anything typed into
- * it — is still there when they come back, and the app's own token rides in the
- * query string because a top-level navigation cannot carry an `Authorization`
- * header. The server verifies it, mints a signed state token, and redirects to
- * instagram.com immediately.
+ * it — is still there when they come back, and the navigation carries the
+ * session cookie. The server verifies it, mints a signed state token, and
+ * redirects to instagram.com immediately.
  *
  * @param onConnected Runs after a successful connection, to refresh whatever
  *                    the calling page shows.

@@ -1,4 +1,3 @@
-import { getToken } from "@/shared/lib/http";
 import { useOAuthPopup } from "@/shared/lib/useOAuthPopup";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -26,8 +25,7 @@ export function useSearchConsoleConnect(workspaceId: string | undefined, onConne
     source: "quantalog-search-console",
     buildUrl: () =>
       workspaceId
-        ? `${API_BASE}/api/auth/search-console` +
-          `?token=${encodeURIComponent(getToken() ?? "")}&workspaceId=${encodeURIComponent(workspaceId)}`
+        ? `${API_BASE}/api/auth/search-console?workspaceId=${encodeURIComponent(workspaceId)}`
         : null,
     reasonText: REASON_TEXT,
     successMessage: "Search visibility connected",

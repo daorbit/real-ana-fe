@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useDispatch } from "react-redux";
+import { api, migrateLegacySession } from "@/shared/lib/http";
 import {
-  api, setToken, clearToken, getToken, ownToken,
-  startImpersonating, stopImpersonating,
-} from "@/shared/lib/http";
+  forgetSession, hasSession, isImpersonating, rememberSession, type SessionHint,
+} from "@/shared/lib/sessionHint";
 import { releasePushSubscription } from "@/features/activity/pushLink";
 import { api as rtkApi } from "@/app/store";
 import { setDatePrefs } from "@/shared/lib";
@@ -31,7 +31,7 @@ type AuthState = {
     credential: string,
   ) => Promise<{ requires2fa: false; created: boolean } | { requires2fa: true; pendingToken: string }>;
 
-  adoptToken: (token: string, method?: LoginMethod, created?: boolean) => Promise<void>;
+  adoptSession: (method?: LoginMethod, created?: boolean) => Promise<void>;
   /** Starts a signup and emails a code. No account exists until `verifySignup`. */
   signup: (email: string, password: string, name: string) => Promise<void>;
   /** Proves the code and creates the account, signing the user in. */
@@ -68,7 +68,13 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null);
 
-type AuthResp = { token: string; user: User };
+type AuthResp = { session: SessionHint; user: User };
+
+async function endServerSession(): Promise<void> {
+  if (isImpersonating()) await api.post("/api/auth/impersonation/exit", {}).catch(() => undefined);
+  await releasePushSubscription();
+  await api.post("/api/auth/logout", {}).catch(() => undefined);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
@@ -87,13 +93,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // On mount, restore session if token present
   useEffect(() => {
-    if (!getToken()) {
+    void migrateLegacySession().then(restoreSession);
+  }, []);
+
+  function restoreSession() {
+    if (!hasSession()) {
       setLoading(false);
       return;
     }
     api
       .get<User>("/api/auth/me")
       .then((me) => {
+        rememberSession(me.session);
         setUser(me);
         // Before `setLoading(false)`, so `LockScreen` is already seeded from
         // `isLocked()` on its very first render rather than waiting for a
@@ -109,10 +120,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           showLock();
           return;
         }
-        clearToken();
+        forgetSession();
       })
       .finally(() => setLoading(false));
-  }, []);
+  }
 
   const login = async (email: string, password: string, turnstileToken?: string) => {
     const r = await api.post<AuthResp | { requires2fa: true; pendingToken: string }>(
@@ -125,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
     if ("requires2fa" in r) return { requires2fa: true as const, pendingToken: r.pendingToken };
 
-    setToken(r.token);
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
     rememberUser(r.user, "password");
@@ -134,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyTotp = async (pendingToken: string, code: string, method: LoginMethod = "password") => {
     const r = await api.post<AuthResp>("/api/auth/2fa/verify", { pendingToken, code });
-    setToken(r.token);
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
     rememberUser(r.user, method);
@@ -146,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     >("/api/auth/google", { credential });
     if ("requires2fa" in r) return { requires2fa: true as const, pendingToken: r.pendingToken };
 
-    setToken(r.token);
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     if (r.created) {
       // A brand-new account must not inherit the onboarding flags a previous
@@ -160,22 +171,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { requires2fa: false as const, created: Boolean(r.created) };
   };
 
-  const adoptToken = async (token: string, method: LoginMethod = "linkedin", created = false) => {
-    setToken(token);
+  const adoptSession = async (method: LoginMethod = "linkedin", created = false) => {
     dispatch(rtkApi.util.resetApiState());
     if (created) {
       localStorage.removeItem("quantalog_onboarding_skipped");
       localStorage.removeItem("quantalog_onboarding_dismissed");
       localStorage.removeItem("rta_active_ws");
     }
-    const me = await api.get<AuthResp["user"]>("/api/auth/me");
+    const me = await api.get<User>("/api/auth/me");
+    rememberSession(me.session);
     setUser(me);
     rememberUser(me, method);
   };
 
   const startDemo = async () => {
     const r = await api.post<AuthResp>("/api/auth/demo", {});
-    setToken(r.token);
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     localStorage.removeItem("rta_active_ws");
     setUser({ ...r.user, demo: true });
@@ -187,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifySignup = async (email: string, code: string) => {
     const r = await api.post<AuthResp>("/api/auth/signup/verify", { email, code });
-    setToken(r.token);
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     // A previous account may have skipped setup on this browser; the flag is
     // per-browser, so a new account has to start with a clean slate.
@@ -215,7 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /** Prove the code and set the new password. Signs in on success. */
   const resetPassword = async (email: string, code: string, password: string) => {
     const r = await api.post<AuthResp>("/api/auth/reset-password", { email, code, password });
-    setToken(r.token);
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     setUser(r.user);
   };
@@ -319,8 +330,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    void releasePushSubscription(ownToken());
-    clearToken();
+    void endServerSession();
+    forgetSession();
     hideLock();
     setUser(null);
     // Drop every cached response — otherwise the next user to log in on this
@@ -336,14 +347,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const impersonate = async (userId: string) => {
     const r = await api.post<AuthResp>(`/api/admin/impersonate/${userId}`, {});
-    startImpersonating(r.token);
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     setUser({ ...r.user, impersonating: true });
     localStorage.removeItem("rta_active_ws");
   };
 
   const exitImpersonation = async () => {
-    if (!stopImpersonating()) return;
+    const r = await api
+      .post<{ session: SessionHint }>("/api/auth/impersonation/exit", {})
+      .catch(() => null);
+    if (!r) return;
+    rememberSession(r.session);
     dispatch(rtkApi.util.resetApiState());
     localStorage.removeItem("rta_active_ws");
     const me = await api.get<User>("/api/auth/me");
@@ -357,7 +372,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptToken, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, setPin, enableScreenLock, disableScreenLock, lockScreenNow, unlockScreen, startDemo, logout, deleteAccount, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
+      value={{ user, loading, isDemo: Boolean(user?.demo), login, verifyTotp, googleSignIn, adoptSession, signup, verifySignup, resendSignupCode, forgotPassword, resetPassword, resendResetCode, changePassword, setPin, enableScreenLock, disableScreenLock, lockScreenNow, unlockScreen, startDemo, logout, deleteAccount, updateProfile, uploadAvatar, removeAvatar, impersonate, exitImpersonation, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

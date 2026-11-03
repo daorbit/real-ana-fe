@@ -1,4 +1,3 @@
-import { getToken } from "@/shared/lib/http";
 import { useOAuthPopup } from "@/shared/lib/useOAuthPopup";
 
 /**
@@ -8,10 +7,9 @@ import { useOAuthPopup } from "@/shared/lib/useOAuthPopup";
  * detour, and the page someone was on should still be there when they come
  * back. A full navigation of *some* window is unavoidable, since the endpoint
  * redirects to accounts.google.com and the consent screen has to render in an
- * address bar. That is also why the app's own token rides in the query string:
- * a navigation cannot carry an `Authorization` header. The server verifies it,
- * checks workspace membership, mints a signed state token, and redirects away
- * immediately.
+ * address bar. The navigation carries the session cookie; the server verifies
+ * it, checks workspace membership, mints a signed state token, and redirects
+ * away immediately.
  *
  * Unlike the LinkedIn hook this one carries a workspace id, because a Google
  * connection belongs to a workspace rather than to the person who authorised
@@ -54,8 +52,7 @@ export function useGoogleConnect(workspaceId: string | undefined, onConnected?: 
     source: "quantalog-google-reviews",
     buildUrl: () =>
       workspaceId
-        ? `${API_BASE}/api/auth/google-business` +
-          `?token=${encodeURIComponent(getToken() ?? "")}&workspaceId=${encodeURIComponent(workspaceId)}`
+        ? `${API_BASE}/api/auth/google-business?workspaceId=${encodeURIComponent(workspaceId)}`
         : null,
     reasonText: REASON_TEXT,
     successMessage: "Google connected",

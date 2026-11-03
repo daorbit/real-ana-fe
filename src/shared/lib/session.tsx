@@ -1,6 +1,6 @@
 import { modals } from "@mantine/modals";
 import { Button, Stack, Text } from "@mantine/core";
-import { clearToken, getToken, isImpersonating } from "./http";
+import { forgetSession, hasSession, isImpersonating } from "./sessionHint";
 import { navigateTo } from "@/app/navigation";
 
 /**
@@ -22,7 +22,7 @@ export function handleSessionExpired() {
   // No token means this is an ordinary unauthenticated call (login page,
   // public dashboard) — not an expiry. Impersonation exits are handled by
   // their own flow and must not trip this.
-  if (handling || !getToken() || isImpersonating()) return;
+  if (handling || !hasSession() || isImpersonating()) return;
   handling = true;
 
   try {
@@ -32,7 +32,7 @@ export function handleSessionExpired() {
     /* private mode — losing the return path is acceptable */
   }
 
-  clearToken();
+  forgetSession();
 
   modals.open({
     modalId: "session-expired",

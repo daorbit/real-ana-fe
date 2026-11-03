@@ -23,10 +23,8 @@ export function hostThemeParams(): URLSearchParams {
   return params;
 }
 
-export function hostFrameUrl(base: string, path: string, workspaceToken?: string): string {
+export function hostFrameUrl(base: string, path: string): string {
   const params = hostThemeParams();
   params.set("embedded", "1");
-  if (workspaceToken) params.set("wt", workspaceToken);
-
   return `${base}${path}?${params.toString()}`;
 }

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { getToken, isDemoToken } from "@/shared/lib/http";
+import { hasSession, isDemoSession } from "@/shared/lib/sessionHint";
 import { notify, errMessage, isPlanLimit, quotaLimitInfo, planLimitReason } from "@/shared/lib/notify";
 import { resolveDemoRequest } from "@/features/demo/demoResolver";
 import { reportLoadFailure } from "@/shared/lib/loadFailure";
@@ -51,11 +51,7 @@ const BASE = import.meta.env.VITE_API_BASE ?? "";
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE,
-  prepareHeaders: (headers) => {
-    const token = getToken();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-    return headers;
-  },
+  credentials: "include",
 });
 
 
@@ -77,7 +73,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   const url = typeof args === "string" ? args : args.url;
   const isWrite = method.toUpperCase() !== "GET";
 
-  if (isDemoToken() && !isPublicCatalogue(url, isWrite)) {
+  if (isDemoSession() && !isPublicCatalogue(url, isWrite)) {
 
     if (isWrite) {
       notify.info("You're in demo mode — changes are turned off here.", "Read-only demo");
@@ -105,7 +101,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
     if (result.error) reportLoadFailure(apiArg.signal);
   }
 
-  if (result.error?.status === 401 && getToken() && !url.includes("/auth/")) {
+  if (result.error?.status === 401 && hasSession() && !url.includes("/auth/")) {
     void import("@/shared/lib/session").then((m) => m.handleSessionExpired());
   }
 

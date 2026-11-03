@@ -1,6 +1,6 @@
 import { api } from "@/app/store/api";
 import type { AppDispatch } from "@/app/store";
-import { getToken, isDemoToken } from "@/shared/lib/http";
+import { hasSession, isDemoSession } from "@/shared/lib/sessionHint";
 import { ACTIVE_WORKSPACE_KEY } from "@/features/workspace/context";
 import { savedScope } from "@/features/analytics/hooks/useSiteScope";
 
@@ -15,7 +15,7 @@ function rememberedWorkspace(): string | null {
 }
 
 export function prefetchBootData({ dispatch }: { dispatch: AppDispatch }): void {
-  if (!getToken() || isDemoToken()) return;
+  if (!hasSession() || isDemoSession()) return;
   const { pathname } = window.location;
   if (pathname !== "/" && !pathname.startsWith("/app")) return;
 

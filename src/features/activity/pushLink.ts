@@ -61,9 +61,8 @@ export function markSubscriptionLinked(userId: string | undefined, endpoint: str
   markPushSynced(pushSyncKey(userId, endpoint));
 }
 
-export async function releasePushSubscription(token: string | null): Promise<void> {
-  if (!token) return;
+export async function releasePushSubscription(): Promise<void> {
   const sub = await currentSubscription().catch(() => null);
   if (!sub) return;
-  await api.postAs(token, UNSUBSCRIBE_PATH, { endpoint: sub.endpoint }).catch(() => undefined);
+  await api.post(UNSUBSCRIBE_PATH, { endpoint: sub.endpoint }).catch(() => undefined);
 }

@@ -30,12 +30,9 @@ export default function Invoices() {
     };
   }, [workspaceId]);
 
-  const bootToken = useHostFrameToken(workspaceId, "invoices-token", INVOICES_APP_BASE);
+  useHostFrameToken(workspaceId, "invoices-token", INVOICES_APP_BASE);
 
-  const src = useMemo(() => {
-    if (!workspaceId || bootToken === undefined) return null;
-    return invoicesAppUrl(workspaceId, bootToken);
-  }, [workspaceId, bootToken]);
+  const src = useMemo(() => (workspaceId ? invoicesAppUrl(workspaceId) : null), [workspaceId]);
 
   if (isDemo || !configured) {
     return (

@@ -1,64 +1,37 @@
+import { forgetSession, hasSession, rememberSession, type SessionHint } from "./sessionHint";
+
 const BASE = import.meta.env.VITE_API_BASE ?? "";
 
-const TOKEN_KEY = "rta_token";
-/** Holds the admin's own token while they are impersonating someone. */
-const ADMIN_TOKEN_KEY = "rta_admin_token";
+const LEGACY_TOKEN_KEY = "rta_token";
+const LEGACY_ADMIN_TOKEN_KEY = "rta_admin_token";
 
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-export function setToken(t: string) {
-  localStorage.setItem(TOKEN_KEY, t);
-}
-export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(ADMIN_TOKEN_KEY);
-}
-
-/**
- * Swap in an impersonation token, keeping the admin's own token aside so
- * `stopImpersonating` can put it back. Surviving a refresh is the point of
- * storing it rather than holding it in memory.
- */
-export function startImpersonating(token: string) {
-  const own = getToken();
-  if (own) localStorage.setItem(ADMIN_TOKEN_KEY, own);
-  setToken(token);
-}
-
-/** Restore the admin's own token. Returns false if there was nothing to restore. */
-export function stopImpersonating(): boolean {
-  const own = localStorage.getItem(ADMIN_TOKEN_KEY);
-  if (!own) return false;
-  setToken(own);
-  localStorage.removeItem(ADMIN_TOKEN_KEY);
-  return true;
-}
-
-export function isImpersonating(): boolean {
-  return localStorage.getItem(ADMIN_TOKEN_KEY) !== null;
-}
-
-export function ownToken(): string | null {
-  return localStorage.getItem(ADMIN_TOKEN_KEY) ?? getToken();
-}
-
-function tokenPayload(token: string | null): Record<string, unknown> | null {
-  if (!token) return null;
+function takeLegacyToken(): string | null {
   try {
-    return JSON.parse(atob(token.split(".")[1] ?? ""));
+    const token = localStorage.getItem(LEGACY_ADMIN_TOKEN_KEY) ?? localStorage.getItem(LEGACY_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
+    return token;
   } catch {
     return null;
   }
 }
 
-export function isDemoToken(): boolean {
-  return tokenPayload(getToken())?.demo === true;
+async function adoptLegacyToken(): Promise<void> {
+  const token = takeLegacyToken();
+  if (!token) return;
+  try {
+    const r = await api.postAs<{ session: SessionHint }>(token, "/api/auth/session", {});
+    rememberSession(r.session);
+  } catch {
+    forgetSession();
+  }
 }
 
-export function tokenSessionId(): string {
-  const jti = tokenPayload(getToken())?.jti;
-  return typeof jti === "string" ? jti : "";
+let migration: Promise<void> | null = null;
+
+export function migrateLegacySession(): Promise<void> {
+  migration ??= adoptLegacyToken();
+  return migration;
 }
 
 /** An error from the API, carrying the HTTP status and parsed body. */
@@ -68,12 +41,11 @@ export type ApiError = Error & {
 };
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
@@ -90,7 +62,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     // sign-in attempt. Route it through the one shared handler. The `/auth`
     // endpoints are exempt: a wrong password there is a normal 401 the form
     // shows inline, not a reason to blow the whole session away.
-    if (res.status === 401 && token && !path.includes("/auth/")) {
+    if (res.status === 401 && hasSession() && !path.includes("/auth/")) {
       void import("./session").then((m) => m.handleSessionExpired());
     }
     // A 423 means the account's screen lock is engaged — surfaced here so any

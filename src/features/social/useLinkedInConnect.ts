@@ -12,10 +12,9 @@ import { socialConnectUrl } from "@/features/social/lib/socialConnectUrl";
  * page someone was on should still be there when they come back.
  *
  * A full navigation of *some* window is unavoidable — the endpoint redirects to
- * linkedin.com and the consent screen has to render in an address bar. That is
- * also why the app's own token rides in the query string: a navigation cannot
- * carry an `Authorization` header. The server verifies it, mints a signed state
- * token, and redirects away immediately.
+ * linkedin.com and the consent screen has to render in an address bar. The
+ * navigation carries the session cookie; the server verifies it, mints a signed
+ * state token, and redirects away immediately.
  *
  * @param onConnected Runs after a successful connection, to refresh whatever
  *                    the calling page shows.

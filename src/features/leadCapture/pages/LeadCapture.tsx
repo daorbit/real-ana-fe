@@ -30,7 +30,7 @@ export default function LeadCapture() {
 
   const workspaceId = isDemo ? null : active?._id;
 
-  const bootToken = useHostFrameToken(workspaceId, "forms-token", LEAD_FORMS_BASE);
+  useHostFrameToken(workspaceId, "forms-token", LEAD_FORMS_BASE);
 
   // Rebuilt only when the workspace changes: a new src reloads the frame, and
   // doing that on every render would throw away whatever was being edited.
@@ -39,14 +39,9 @@ export default function LeadCapture() {
       // A demo session's workspace id is a fixture, not a real workspace the
       // forms app knows — it goes to the sample workspace regardless.
       const frameWorkspace = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
-      if (!frameWorkspace) return null;
-      // A demo session has no real workspace and mints no token, so it never
-      // waits for one. Otherwise hold until the mint settles: loading the frame
-      // first only means its opening request is refused and repeated.
-      if (!isDemo && bootToken === undefined) return null;
-      return leadFormsUrl(`/${frameWorkspace}/forms`, isDemo ? undefined : bootToken);
+      return frameWorkspace ? leadFormsUrl(`/${frameWorkspace}/forms`) : null;
     },
-    [active, isDemo, bootToken],
+    [active, isDemo],
   );
  
 
