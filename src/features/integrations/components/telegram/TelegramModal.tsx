@@ -7,7 +7,7 @@ import { useTelegramOwnBot } from "../../hooks/useTelegramOwnBot";
 import { appGuideUrl } from "../../lib/links";
 import { ChatMessagePreview } from "../chat/ChatMessagePreview";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
-import { AsideBlock, SecureNote, SetupChecklist, StudioSection } from "../studio/StudioParts";
+import { AsideBlock, SecureNote, SetupChecklist, StudioAside, StudioSection } from "../studio/StudioParts";
 import { TelegramBotChooser } from "./TelegramBotChooser";
 import { TelegramStatusCard } from "./TelegramStatusCard";
 import { TelegramLinkWaiting } from "./TelegramLinkWaiting";
@@ -51,6 +51,7 @@ function TelegramBody({ workspaceId }: { workspaceId: string }) {
   return (
     <>
       <TelegramStatusCard status={status} testing={testState.isLoading} onTest={runTest} />
+      <StudioAside />
 
       <StudioSection title="Bot" description="Who your messages come from.">
         <TelegramBotChooser status={status} bot={bot} />

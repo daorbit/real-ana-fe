@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
-import { ActionIcon, Anchor, Button, Group, Modal, Text, Tooltip } from "@mantine/core";
-import { ArrowLeft, BookOpen, ChevronLeft, X } from "lucide-react";
-import cardClasses from "@/features/auth/components/settings/ConnectionCard.module.css";
+import { ActionIcon, Button, Group, Modal, Text } from "@mantine/core";
+import { BookOpen, ChevronLeft, X } from "lucide-react";
 import { RefreshButton } from "@/shared/ui/Refresh";
-import { BrandMark } from "../logos/BrandMarks";
-import { AsideBlock } from "./StudioParts";
+import { StudioPageHero } from "./StudioPageHero";
+import { StudioAsideContext } from "./studioAsideContext";
 import classes from "./IntegrationStudio.module.css";
 
 interface Props {
@@ -21,30 +20,49 @@ interface Props {
   onRefresh?: () => void;
   refreshing?: boolean;
   refreshDisabled?: boolean;
-  variant?: "panel" | "page";
+  customHero?: boolean;
   children: ReactNode;
 }
 
-function PageTopbar({ title, closeDisabled, onClose }: Pick<Props, "title" | "closeDisabled" | "onClose">) {
+function PageTopbar({
+  title,
+  closeDisabled,
+  onClose,
+  onRefresh,
+  refreshing,
+  refreshDisabled,
+}: Pick<Props, "title" | "closeDisabled" | "onClose" | "onRefresh" | "refreshing" | "refreshDisabled">) {
   return (
-    <header className={classes.topbar} data-variant="page">
-      <Button
-        type="button"
-        variant="subtle"
-        size="compact-md"
-        className={classes.pageBack}
-        leftSection={<ChevronLeft size={17} />}
-        disabled={closeDisabled}
-        onClick={onClose}
-      >
-        Apps
-      </Button>
+    <header className={classes.topbar}>
+      <div className={classes.topbarSide}>
+        <Button
+          type="button"
+          variant="subtle"
+          size="compact-md"
+          className={classes.pageBack}
+          leftSection={<ChevronLeft size={17} />}
+          disabled={closeDisabled}
+          onClick={onClose}
+        >
+          Apps
+        </Button>
+      </div>
       <Text fw={600} size="sm" truncate className={classes.pageTitle}>
         {title}
       </Text>
-      <ActionIcon variant="default" radius="xl" size={30} onClick={onClose} disabled={closeDisabled} aria-label="Close">
-        <X size={14} />
-      </ActionIcon>
+      <Group gap={6} wrap="nowrap" justify="flex-end" className={classes.topbarSide}>
+        {onRefresh && (
+          <RefreshButton
+            hint="Refresh"
+            refreshing={Boolean(refreshing)}
+            disabled={refreshing || refreshDisabled}
+            onRefresh={onRefresh}
+          />
+        )}
+        <ActionIcon variant="default" radius="xl" size={30} onClick={onClose} disabled={closeDisabled} aria-label="Close">
+          <X size={14} />
+        </ActionIcon>
+      </Group>
     </header>
   );
 }
@@ -63,31 +81,9 @@ export function IntegrationStudio({
   onRefresh,
   refreshing,
   refreshDisabled,
-  variant = "panel",
+  customHero,
   children,
 }: Props) {
-  if (variant === "page") {
-    return (
-      <Modal
-        opened={opened}
-        onClose={onClose}
-        fullScreen
-        padding={0}
-        withCloseButton={false}
-        classNames={{ content: classes.modalContent, body: classes.modalBody }}
-        closeOnEscape={!closeDisabled}
-        transitionProps={{ transition: "fade", duration: 160 }}
-      >
-        <div className={classes.studio}>
-          <PageTopbar title={title} closeDisabled={closeDisabled} onClose={onClose} />
-          <div className={classes.scroll}>
-            <div className={classes.pageInner}>{children}</div>
-          </div>
-        </div>
-      </Modal>
-    );
-  }
-
   return (
     <Modal
       opened={opened}
@@ -100,89 +96,47 @@ export function IntegrationStudio({
       transitionProps={{ transition: "fade", duration: 160 }}
     >
       <div className={classes.studio}>
-        <header className={classes.topbar}>
-          <Button
-            type="button"
-            variant="subtle"
-            color="gray"
-            size="compact-sm"
-            className={classes.back}
-            leftSection={<ArrowLeft size={16} />}
-            disabled={closeDisabled}
-            onClick={onClose}
-          >
-            <span className={classes.backLabel}>Apps</span>
-          </Button>
-          <span className={classes.divider} aria-hidden />
-
-          <div className={classes.identity}>
-            <span className={`${classes.mark} ${cardClasses.mark}`} data-brand={brand} aria-hidden>
-              <BrandMark id={brand} size={28} />
-            </span>
-            <div className={classes.identityText}>
-              <Group gap={8} wrap="nowrap">
-                <Text fw={650} truncate>
-                  {title}
-                </Text>
-                {badge}
-              </Group>
-              {subtitle && (
-                <Text size="xs" c="dimmed" truncate>
-                  {subtitle}
-                </Text>
-              )}
-            </div>
-          </div>
-
-          <Group gap={6} wrap="nowrap" className={classes.actions}>
-            {onRefresh && (
-              <RefreshButton
-                hint="Refresh"
-                refreshing={Boolean(refreshing)}
-                disabled={refreshing || refreshDisabled}
-                onRefresh={onRefresh}
+        <PageTopbar
+          title={title}
+          closeDisabled={closeDisabled}
+          onClose={onClose}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+          refreshDisabled={refreshDisabled}
+        />
+        <div className={classes.scroll}>
+          <div className={classes.pageInner}>
+            {!customHero && (
+              <StudioPageHero
+                brand={brand}
+                name={title}
+                tagline={subtitle}
+                badge={badge}
+                actions={
+                  docsUrl && (
+                    <Button
+                      component="a"
+                      href={docsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      radius="xl"
+                      variant="default"
+                      leftSection={<BookOpen size={15} />}
+                    >
+                      Setup guide
+                    </Button>
+                  )
+                }
               />
             )}
-            <Tooltip label="Close" withArrow>
-              <ActionIcon
-                variant="default"
-                size={36}
-                radius="md"
-                onClick={onClose}
-                disabled={closeDisabled}
-                aria-label="Close"
-              >
-                <X size={17} />
-              </ActionIcon>
-            </Tooltip>
-          </Group>
-        </header>
-
-        <div className={classes.layout}>
-          {(aside || docsUrl) && (
-            <aside className={classes.aside}>
-              {aside}
-              {docsUrl && (
-                <AsideBlock label="Guide">
-                  <Anchor href={docsUrl} target="_blank" rel="noreferrer" size="sm" className={classes.guide}>
-                    <BookOpen size={15} />
-                    {title} setup guide
-                  </Anchor>
-                </AsideBlock>
-              )}
-            </aside>
-          )}
-          <div className={classes.main}>
-            <div className={classes.scroll}>
-              <div className={classes.inner}>{children}</div>
-            </div>
-            {footer && (
-              <footer className={classes.footer}>
-                <div className={classes.footerInner}>{footer}</div>
-              </footer>
-            )}
+            <StudioAsideContext.Provider value={aside ?? null}>{children}</StudioAsideContext.Provider>
           </div>
         </div>
+        {footer && (
+          <footer className={classes.footer}>
+            <div className={classes.footerInner}>{footer}</div>
+          </footer>
+        )}
       </div>
     </Modal>
   );

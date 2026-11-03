@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
 import { Text } from "@mantine/core";
 import { CircleCheck, CircleDashed, LockKeyhole } from "lucide-react";
+import { StudioFacts, type StudioFact } from "./StudioFacts";
+import { StudioAsideContext } from "./studioAsideContext";
 import classes from "./StudioParts.module.css";
 
 export type StudioState = "live" | "saved" | "off";
@@ -11,18 +13,40 @@ export interface StudioStat {
   tone?: "ok" | "warn";
 }
 
-const PILL_TEXT: Record<StudioState, string> = {
+const STATE_TEXT: Record<StudioState, string> = {
   live: "Live",
   saved: "Needs attention",
   off: "Not connected",
 };
+
+const STATE_TONE: Record<StudioState, StudioFact["tone"]> = {
+  live: "on",
+  saved: "warn",
+  off: undefined,
+};
+
+function factsFor(state: StudioState, pill: string | undefined, stats: StudioStat[]): StudioFact[] {
+  const facts: StudioFact[] = stats.map((stat) => ({
+    label: stat.label,
+    value: stat.value,
+    tone: stat.tone === "ok" ? "on" : stat.tone,
+  }));
+  if (stats.some((stat) => stat.label === "Status")) return facts;
+  return [{ label: "Status", value: pill ?? STATE_TEXT[state], tone: STATE_TONE[state] }, ...facts];
+}
+
+export function StudioAside() {
+  const aside = useContext(StudioAsideContext);
+  if (!aside) return null;
+  return <section className={classes.asideGrid}>{aside}</section>;
+}
 
 export function StudioHero({
   state,
   pill,
   title,
   description,
-  stats,
+  stats = [],
 }: {
   state: StudioState;
   pill?: string;
@@ -31,30 +55,16 @@ export function StudioHero({
   stats?: StudioStat[];
 }) {
   return (
-    <header className={classes.hero}>
-      <div className={classes.heroHead}>
-        <span className={classes.pill} data-state={state}>
-          <span className={classes.pillDot} aria-hidden />
-          {pill ?? PILL_TEXT[state]}
-        </span>
-        <Text component="h2" className={classes.heroTitle}>
+    <>
+      <StudioFacts facts={factsFor(state, pill, stats)} />
+      <section className={classes.overview}>
+        <Text component="h2" className={classes.overviewTitle}>
           {title}
         </Text>
-        <Text className={classes.heroDescription}>{description}</Text>
-      </div>
-      {stats && stats.length > 0 && (
-        <div className={classes.stats}>
-          {stats.map((stat) => (
-            <div key={stat.label} className={classes.stat} data-tone={stat.tone}>
-              <div className={classes.statValue}>{stat.value}</div>
-              <Text size="xs" c="dimmed" mt={6}>
-                {stat.label}
-              </Text>
-            </div>
-          ))}
-        </div>
-      )}
-    </header>
+        <Text className={classes.overviewDescription}>{description}</Text>
+      </section>
+      <StudioAside />
+    </>
   );
 }
 

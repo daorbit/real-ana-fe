@@ -12,8 +12,8 @@ import { appGuideUrl } from "../../lib/links";
 import type { WorkspaceAppInfo } from "../../lib/quantalogApps";
 import { IntegrationStudio } from "../studio/IntegrationStudio";
 import { QuantalogAppFeatures } from "./QuantalogAppFeatures";
-import { AppPageHero } from "./AppPageHero";
-import { AppFacts, type AppFact } from "./AppFacts";
+import { StudioPageHero } from "../studio/StudioPageHero";
+import { StudioFacts, type StudioFact } from "../studio/StudioFacts";
 import { AppTurnOffRow } from "./AppTurnOffRow";
 import { QuantalogAppSettings, hasAppSettings } from "./QuantalogAppSettings";
 import { useWorkspace } from "@/features/workspace/context";
@@ -145,7 +145,7 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
     </>
   );
 
-  const facts: AppFact[] = [
+  const facts: StudioFact[] = [
     unlock.locked
       ? { label: "Status", value: "Locked", note: unlock.priceLabel ? `${unlock.priceLabel} once` : "One-time unlock" }
       : available
@@ -166,15 +166,15 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
 
   return (
     <IntegrationStudio
-      variant="page"
+      customHero
       opened={opened}
       onClose={requestClose}
       brand={info.tileId}
       title={info.name}
       closeDisabled={app.saving}
     >
-      <AppPageHero info={info} actions={heroActions} />
-      <AppFacts facts={facts} />
+      <StudioPageHero brand={info.tileId} name={info.name} tagline={info.tagline} actions={heroActions} />
+      <StudioFacts facts={facts} />
 
       <section className={classes.overview}>
         <p className={classes.description}>{info.description}</p>

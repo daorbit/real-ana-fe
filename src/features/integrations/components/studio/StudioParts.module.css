@@ -1,94 +1,28 @@
-.hero {
+.overview {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: 6px;
 }
 
-.heroHead {
-  max-width: 620px;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: var(--space-2);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.pillDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--faint);
-}
-
-.pill[data-state="live"] {
-  color: var(--text-2);
-}
-
-.pill[data-state="live"] .pillDot {
-  background-color: var(--green);
-}
-
-.pill[data-state="saved"] {
-  color: var(--text-2);
-}
-
-.pill[data-state="saved"] .pillDot {
-  background-color: var(--amber);
-}
-
-.heroTitle {
-  font-size: 26px;
-  font-weight: 650;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+.overviewTitle {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
   color: var(--text);
 }
 
-.heroDescription {
-  margin-top: var(--space-2);
-  font-size: 15px;
-  line-height: 1.5;
+.overviewDescription {
+  font-size: 16px;
+  line-height: 1.6;
   color: var(--text-2);
 }
 
-.stats {
+.asideGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
-.stat {
-  min-width: 0;
-  padding: var(--space-4) var(--space-5);
-  box-shadow: -1px 0 0 var(--border);
-}
-
-.statValue {
-  overflow: hidden;
-  font-size: 22px;
-  font-weight: 650;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
-
-.stat[data-tone="ok"] .statValue {
-  color: var(--green);
-}
-
-.stat[data-tone="warn"] .statValue {
-  color: var(--amber);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  align-items: start;
 }
 
 .section {
@@ -123,8 +57,15 @@
   min-width: 0;
 }
 
-.block + .block {
-  margin-top: var(--space-5);
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
 }
 
 .block :global(.mantine-Text-root),
@@ -134,13 +75,12 @@
 }
 
 .block > :global(.mantine-Text-root) {
-  color: var(--text-2);
+  color: var(--muted);
 }
 
 .label {
-  margin-bottom: var(--space-1);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 650;
   letter-spacing: -0.005em;
   color: var(--text);
 }
@@ -174,9 +114,6 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius);
-  background-color: var(--surface-2);
 }
 
 .secureIcon {
@@ -188,27 +125,4 @@
 .grow {
   flex: 1;
   min-width: 0;
-}
-
-@media (max-width: 48em) {
-  .heroTitle {
-    font-size: 22px;
-  }
-
-  .heroDescription {
-    font-size: 14px;
-  }
-
-  .stats {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .stat {
-    padding: var(--space-3) var(--space-4);
-    box-shadow: -1px 0 0 var(--border), 0 -1px 0 var(--border);
-  }
-
-  .statValue {
-    font-size: 18px;
-  }
 }

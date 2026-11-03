@@ -1,0 +1,85 @@
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 22px 28px;
+}
+
+.icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  overflow: hidden;
+  border-radius: 26px;
+}
+
+.icon img {
+  width: 112px;
+  height: 112px;
+}
+
+.icon svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.text {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+.tagline {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+@media (max-width: 48em) {
+  .hero {
+    gap: 16px;
+  }
+
+  .icon,
+  .icon img {
+    width: 84px;
+    height: 84px;
+  }
+
+  .icon {
+    border-radius: 20px;
+  }
+
+  .name {
+    font-size: 24px;
+  }
+}
