@@ -28,8 +28,10 @@ export function useHostFrameToken(
   }, [workspaceId, tokenPath]);
 
   useEffect(() => {
-    if (!workspaceId) return;
+    if (!workspaceId || !frameBase) return;
+    const frameOrigin = new URL(frameBase).origin;
     function onMessage(event: MessageEvent) {
+      if (event.origin !== frameOrigin) return;
       if (event.data?.type !== "quantalog:workspace-token-request") return;
       const frame = event.source as Window | null;
       if (!frame) return;
