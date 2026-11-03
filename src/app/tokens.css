@@ -206,10 +206,10 @@
   --blue-11: #0066cc;
   --blue-12: #00305f;
 
-  --bg: var(--gray-2);
+  --bg: var(--gray-1);
   --bg-2: #ffffff;
   --shell: var(--gray-1);
-  --rail: var(--gray-2);
+  --rail: var(--gray-1);
   --surface: #ffffff;
   --surface-2: var(--gray-3);
   --overlay-bg: color-mix(in srgb, var(--surface) 96%, transparent);
