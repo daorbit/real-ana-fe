@@ -1,9 +1,8 @@
-import { Text } from "@mantine/core";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { num } from "@/shared/lib";
 import type { SearchBreakdownRow } from "@/shared/types";
 import { deviceMeta } from "../deviceMeta";
-import { ClickChange } from "./SearchCells";
+import { SearchCardHead } from "./SearchSectionHead";
 import classes from "./devices.module.css";
 
 export function DeviceShareDonut({ rows }: { rows: SearchBreakdownRow[] }) {
@@ -14,14 +13,10 @@ export function DeviceShareDonut({ rows }: { rows: SearchBreakdownRow[] }) {
 
   return (
     <section className={classes.card}>
-      <header>
-        <Text fw={650} size="sm">
-          Share of {useImpressions ? "impressions" : "clicks"}
-        </Text>
-        <Text size="xs" c="dimmed" mt={2}>
-          Which devices people search on before visiting.
-        </Text>
-      </header>
+      <SearchCardHead
+        title={`Share of ${useImpressions ? "impressions" : "clicks"}`}
+        description="Which devices people search on before they click."
+      />
 
       <div className={classes.donut}>
         <ResponsiveContainer width="100%" height="100%">
@@ -52,18 +47,12 @@ export function DeviceShareDonut({ rows }: { rows: SearchBreakdownRow[] }) {
       <ul className={classes.legend}>
         {rows.map((r) => {
           const meta = deviceMeta(r.key);
-          const Icon = meta.icon;
           const share = sum ? (valueOf(r) / sum) * 100 : 0;
           return (
             <li key={r.key} className={classes.legendRow} data-device={meta.id}>
-              <span className={classes.legendIcon}>
-                <Icon size={15} />
-              </span>
+              <span className={classes.legendSwatch} aria-hidden />
               <span className={classes.legendName}>{meta.label}</span>
               <span className={classes.legendShare}>{share.toFixed(0)}%</span>
-              <span className={classes.legendChange}>
-                <ClickChange clicks={r.clicks} previousClicks={r.previousClicks} />
-              </span>
             </li>
           );
         })}

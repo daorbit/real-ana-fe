@@ -1,0 +1,28 @@
+.owned {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--red) 35%, var(--border));
+  background: color-mix(in srgb, var(--red) 6%, transparent);
+}
+
+.ownedTitle {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--red);
+}
+
+.ownedList {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.ownedNote {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-2);
+}

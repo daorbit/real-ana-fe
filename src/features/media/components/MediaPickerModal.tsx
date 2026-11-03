@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Modal, TextInput, Group, Button, Stack, Text, Center,
-  SegmentedControl, Pagination, Box,
+  Modal, TextInput, Button, Text, SegmentedControl, Pagination, Box,
 } from "@mantine/core";
 import { Search, ImageOff, Upload } from "lucide-react";
 import { useDebouncedValue } from "@mantine/hooks";
@@ -16,29 +15,18 @@ import { MediaGridSkeleton } from "./MediaGridSkeleton";
 import { UploadTray, type UploadItem } from "./UploadTray";
 import { MAX_ASSET_BYTES, MAX_ASSET_LABEL } from "../lib";
 import { uploadInBatches } from "../uploadInBatches";
+import classes from "./MediaPickerModal.module.css";
 
-/** Enough to fill the wall without making the modal scroll far. */
 const PER_PAGE = 12;
 
 interface Props {
   opened: boolean;
   onClose: () => void;
   onPick: (asset: MediaAsset) => void;
-  /** Narrows the library to what this field can actually use. */
   kind?: MediaKind;
   title?: string;
 }
 
-/**
- * The library as a chooser.
- *
- * Picking is deliberately two steps — click a tile, then confirm — rather than
- * closing on the first click. At this size a tile is easy to hit by accident,
- * and the field being filled is usually one someone has already thought about.
- *
- * Upload also lives here (button, drop zone) so a file that isn't in the
- * library yet doesn't force a trip to the Media page and back.
- */
 export function MediaPickerModal({
   opened,
   onClose,
@@ -49,8 +37,6 @@ export function MediaPickerModal({
   const { active } = useWorkspace();
   const perms = usePermissions();
   const { demo } = useDemo();
-  // Nothing uploaded through the picker in demo mode would belong to a real
-  // workspace, so picking stays read-only over the sample library.
   const canEdit = perms.canEdit && !demo;
   const workspaceId = active?._id ?? "";
   const fileInput = useRef<HTMLInputElement>(null);
@@ -59,14 +45,11 @@ export function MediaPickerModal({
   const [dragging, setDragging] = useState(false);
 
   const [q, setQ] = useState("");
-  // The library would be queried per keystroke otherwise, and a search that
-  // fires on every letter is a request per letter.
   const [debouncedQ] = useDebouncedValue(q, 250);
   const [filter, setFilter] = useState<MediaKind | "all">(kind ?? "image");
   const [selected, setSelected] = useState<MediaAsset | null>(null);
   const [page, setPage] = useState(1);
 
-  // Each opening starts clean rather than resuming the last search.
   useEffect(() => {
     if (!opened) return;
     setSelected(null);
@@ -77,7 +60,6 @@ export function MediaPickerModal({
     setDragging(false);
   }, [opened, kind]);
 
-  // A narrowed result set may be shorter than the page being viewed.
   useEffect(() => {
     setPage(1);
   }, [filter, debouncedQ]);
@@ -168,10 +150,10 @@ export function MediaPickerModal({
       onClose={onClose}
       title={title}
       size={1040}
+      radius="lg"
       centered
-      styles={{ title: { fontWeight: 600, fontSize: "var(--mantine-font-size-lg)" } }}
+      classNames={{ content: classes.content, header: classes.header, title: classes.title, body: classes.body }}
     >
-      <Stack>
         <input
           ref={fileInput}
           type="file"
@@ -181,19 +163,20 @@ export function MediaPickerModal({
           onChange={(e) => onFiles(e.currentTarget.files)}
         />
 
-        <Group gap="sm">
+        <div className={classes.toolbar}>
           <TextInput
-            style={{ flex: 1 }}
+            className={classes.search}
+            radius="md"
             placeholder="Search by name"
-            leftSection={<Search size={16} />}
+            leftSection={<Search size={15} />}
             value={q}
             onChange={(e) => setQ(e.currentTarget.value)}
+            aria-label="Search files"
           />
-          {/* Hidden when the field only accepts one kind — a logo picker has
-              nothing to filter between. */}
           {!kind && (
             <SegmentedControl
               size="xs"
+              radius="md"
               value={filter}
               onChange={(v) => setFilter(v as MediaKind | "all")}
               data={[
@@ -207,19 +190,17 @@ export function MediaPickerModal({
           {canEdit && (
             <Button
               variant="default"
-              size="sm"
+              radius="md"
               leftSection={<Upload size={15} />}
               onClick={() => fileInput.current?.click()}
             >
               Upload
             </Button>
           )}
-        </Group>
+        </div>
 
-        {/* The wall scrolls, not the modal: the search row and the footer stay
-            put while the files move. Also takes a drop, same as the library page. */}
         <Box
-          style={{ maxHeight: "58vh", overflowY: "auto", position: "relative" }}
+          className={classes.scroll}
           onDragOver={(e) => {
             if (!canEdit) return;
             e.preventDefault();
@@ -235,60 +216,57 @@ export function MediaPickerModal({
           data-dragging={dragging || undefined}
         >
           {isFetching && !items.length ? (
-            /* Fewer than the library page draws: this is a 58vh scroll box, and
-               a full wall of placeholders below the fold is wasted motion. */
-            <MediaGridSkeleton count={6} threeUp />
+            <MediaGridSkeleton count={8} picker />
           ) : items.length === 0 ? (
-            <Center py={50}>
-              <Stack align="center" gap="xs">
-                <ImageOff size={26} opacity={0.4} />
-                <Text size="sm" c="dimmed">
-                  {debouncedQ ? "Nothing matches that." : "Nothing here yet."}
-                </Text>
-                {!debouncedQ && canEdit && (
-                  <Button
-                    variant="light"
-                    size="xs"
-                    leftSection={<Upload size={14} />}
-                    onClick={() => fileInput.current?.click()}
-                  >
-                    Upload a file
-                  </Button>
-                )}
-              </Stack>
-            </Center>
+            <div className={classes.empty}>
+              <span className={classes.emptyIcon}>
+                <ImageOff size={20} />
+              </span>
+              <Text size="sm" fw={600} c="var(--text)">
+                {debouncedQ ? "Nothing matches that" : "Nothing here yet"}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {debouncedQ ? "Try a different name." : canEdit ? "Upload a file or drop one here." : "Files added to Media show up here."}
+              </Text>
+              {!debouncedQ && canEdit && (
+                <Button
+                  variant="default"
+                  size="xs"
+                  radius="md"
+                  mt={4}
+                  leftSection={<Upload size={14} />}
+                  onClick={() => fileInput.current?.click()}
+                >
+                  Upload a file
+                </Button>
+              )}
+            </div>
           ) : (
-            <MediaGrid
-              items={items}
-              selectedId={selected?.id}
-              onSelect={setSelected}
-              maxColumns={3}
-            />
+            <MediaGrid items={items} selectedId={selected?.id} onSelect={setSelected} picker />
           )}
         </Box>
 
         {pages > 1 && (
-          <Group justify="center">
-            <Pagination size="sm" value={page} onChange={setPage} total={pages} />
-          </Group>
+          <div className={classes.pager}>
+            <Pagination size="sm" radius="md" value={page} onChange={setPage} total={pages} />
+          </div>
         )}
 
         <UploadTray items={tray} />
 
-        <Group justify="space-between">
-          <Text size="xs" c="dimmed">
+        <div className={classes.footer}>
+          <span className={classes.selection} data-picked={selected ? true : undefined}>
             {selected ? selected.name : "Select a file"}
-          </Text>
-          <Group gap="xs">
-            <Button variant="default" onClick={onClose}>
+          </span>
+          <div className={classes.footerActions}>
+            <Button variant="default" radius="md" onClick={onClose}>
               Cancel
             </Button>
-            <Button disabled={!selected} onClick={confirm}>
+            <Button radius="md" disabled={!selected} onClick={confirm}>
               Use this file
             </Button>
-          </Group>
-        </Group>
-      </Stack>
+          </div>
+        </div>
     </Modal>
   );
 }

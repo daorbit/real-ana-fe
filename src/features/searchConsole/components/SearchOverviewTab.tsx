@@ -8,6 +8,7 @@ import type { ExplainProps } from "../useSearchOrbitExplain";
 import { SearchPerformanceChart } from "./SearchPerformanceChart";
 import { MetricLegend } from "./MetricLegend";
 import { SearchTopTable } from "./SearchTopTable";
+import { SearchCardHead } from "./SearchSectionHead";
 import classes from "./searchConsole.module.css";
 
 function plural(n: number, word: string) {
@@ -26,7 +27,7 @@ function Headline({ data }: { data: SearchPerformance }) {
     : null;
 
   return (
-    <div className={classes.headline}>
+    <section className={classes.headline} aria-label="Summary">
       <div className={classes.headlineText}>
         <p className={classes.headlineTitle}>
           In the last {days} days, Google showed your site <b>{plural(impressions, "time")}</b> and{" "}
@@ -45,7 +46,7 @@ function Headline({ data }: { data: SearchPerformance }) {
           {ranking && <>You typically rank {ranking}.</>}
         </p>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -82,19 +83,17 @@ export function SearchOverviewTab({
         onToggle={(key) => setSelected((s) => toggleMetric(s, key))}
       />
 
-      <div className={classes.card}>
-        <div className={classes.cardHead}>
-          <div>
-            <Text fw={650} size="sm">
-              Performance over time
-            </Text>
-            <Text size="xs" c="dimmed" mt={2}>
+      <section className={classes.card}>
+        <SearchCardHead
+          title="Performance over time"
+          description={
+            <>
               {dayjs(data.startDate).format("MMM D")} – {dayjs(data.endDate).format("MMM D, YYYY")} · Tap a card
               above to show or hide it. The last 2–3 days can still rise.
-            </Text>
-          </div>
-          <MetricLegend selected={selected} />
-        </div>
+            </>
+          }
+          right={<MetricLegend selected={selected} />}
+        />
         {data.daily.length ? (
           <SearchPerformanceChart daily={data.daily} selected={selected} />
         ) : (
@@ -102,7 +101,7 @@ export function SearchOverviewTab({
             No search data for this period yet. New properties take a few days to fill in.
           </Text>
         )}
-      </div>
+      </section>
 
       {hourly}
 

@@ -21,7 +21,7 @@ export function InsightActionItem({ action, onOpen }: { action: InsightAction; o
         <span className={classes.actionDetail}>{action.detail}</span>
       </span>
       <span className={classes.impact}>{action.impact}</span>
-      <ChevronRight size={16} className={classes.actionChevron} />
+      <ChevronRight size={14} className={classes.actionChevron} />
     </UnstyledButton>
   );
 }

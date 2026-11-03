@@ -1,7 +1,7 @@
 .tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--mantine-spacing-lg);
+  gap: 12px;
 }
 
 .tiles[data-columns="2"] {
@@ -18,13 +18,13 @@
   gap: 3px;
   font-size: var(--mantine-font-size-xs);
   font-weight: 600;
-  color: var(--mantine-color-red-5);
+  color: var(--red);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .change[data-good] {
-  color: var(--mantine-color-teal-5);
+  color: var(--green);
 }
 
 .change[data-flat] {
@@ -105,28 +105,29 @@
   align-items: center;
   justify-content: center;
   min-width: 38px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 650;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
-  background: var(--surface-2);
+  background: var(--segment-track);
 }
 
 .position[data-tone="top"] {
-  color: var(--mantine-color-teal-4);
-  background: color-mix(in srgb, var(--mantine-color-teal-6) 16%, transparent);
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 16%, transparent);
 }
 
 .position[data-tone="first"] {
-  color: var(--mantine-color-blue-4);
-  background: color-mix(in srgb, var(--mantine-color-blue-6) 16%, transparent);
+  color: var(--accent-text);
+  background: var(--accent-soft);
 }
 
 .position[data-tone="near"] {
-  color: var(--mantine-color-yellow-5);
-  background: color-mix(in srgb, var(--mantine-color-yellow-6) 14%, transparent);
+  color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 16%, transparent);
 }
 
 .share {
@@ -137,18 +138,29 @@
 }
 
 .shareTrack {
+  width: 120px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--segment-track);
+  overflow: hidden;
+}
+
+.share[data-compact] .shareTrack {
   width: 56px;
   height: 4px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  overflow: hidden;
+}
+
+.shareValue {
+  min-width: 44px;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .shareFill {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--mantine-color-blue-5);
+  background: var(--green);
 }
 
 @media (max-width: 75em) {

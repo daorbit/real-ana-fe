@@ -1,43 +1,57 @@
 .identity {
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.cover {
-  height: 96px;
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
-  border-bottom: 1px solid var(--border);
 }
 
 .identityBody {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-wrap: wrap;
-  gap: var(--mantine-spacing-md);
-  padding: 0 var(--mantine-spacing-lg) var(--mantine-spacing-lg);
+  gap: 16px 18px;
+  padding: 20px;
 }
 
-.avatarWrap {
-  margin-top: -40px;
-  padding: 4px;
-  border-radius: 20px;
-  background: var(--surface);
+.avatar {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--segment-track);
+  color: var(--text);
+  font-weight: 650;
 }
 
 .who {
   flex: 1 1 220px;
   min-width: 0;
-  padding-bottom: 4px;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.role {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--text-2);
+  background: var(--segment-track);
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--mantine-spacing-xs);
-  padding-bottom: 4px;
+  gap: 8px;
 }
 
 .grid {
@@ -55,23 +69,34 @@
 .preview {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: var(--mantine-spacing-lg);
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--border-strong);
-  background: var(--surface-2);
+  margin: 20px -20px -20px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text) 2%, transparent);
 }
 
 .previewLabel {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-2);
 }
 
 .previewValue {
   font-family: var(--mantine-font-family-monospace);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text);
+}
+
+@media (max-width: 48em) {
+  .identityBody {
+    padding: 16px;
+  }
+
+  .preview {
+    margin: 16px -16px -16px;
+    padding: 12px 16px;
+  }
 }

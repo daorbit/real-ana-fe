@@ -49,17 +49,19 @@ export function SearchIndexStatusCard({
     return (
       <div className={classes.status}>
         <div className={classes.statusHead}>
-          <Lock size={18} />
-          <Text fw={650} size="sm">
+          <span className={classes.statusIcon}>
+            <Lock size={17} />
+          </span>
+          <h3 className={classes.statusTitle}>
             {ent.inspectionQuota > 0 ? "No index checks left this month" : "Check if this page is on Google"}
-          </Text>
+          </h3>
         </div>
         <Text size="xs" c="dimmed">
           {ent.inspectionQuota > 0
             ? `You've used all ${ent.inspectionQuota} Google index checks on the ${ent.planName} plan. Upgrade for more, or check it directly in Search Console.`
             : "See whether Google has indexed this page, when it was last crawled, and why not if it isn't. Included from the Starter plan."}
         </Text>
-        <Button size="xs" color="emerald" rightSection={<ArrowRight size={13} />} onClick={goToPlans}>
+        <Button size="xs" radius="xl" rightSection={<ArrowRight size={13} />} onClick={goToPlans}>
           See plans
         </Button>
         <Anchor href={inspectUrl} target="_blank" rel="noopener noreferrer" size="xs">
@@ -75,10 +77,10 @@ export function SearchIndexStatusCard({
     return (
       <div className={classes.status} data-tone="warn">
         <div className={classes.statusHead}>
-          <AlertTriangle size={18} />
-          <Text fw={650} size="sm">
-            Index status unavailable
-          </Text>
+          <span className={classes.statusIcon}>
+            <AlertTriangle size={17} />
+          </span>
+          <h3 className={classes.statusTitle}>Index status unavailable</h3>
         </div>
         <Text size="xs" c="dimmed">
           {errMessage(error, "Google did not return an inspection result for this URL.")}
@@ -103,11 +105,13 @@ export function SearchIndexStatusCard({
   return (
     <div className={classes.status} data-tone={verdict.tone}>
       <div className={classes.statusHead}>
-        <Icon size={20} />
+        <span className={classes.statusIcon}>
+          <Icon size={18} />
+        </span>
         <div>
-          <Text fw={700} size="md">
+          <h3 className={classes.statusTitle} data-large>
             {verdict.title}
-          </Text>
+          </h3>
           <Text size="xs" c="dimmed">
             URL Inspection · checked {dayjs(data.fetchedAt).format("MMM D, HH:mm")}
           </Text>

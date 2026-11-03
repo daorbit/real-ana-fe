@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  Group, Loader, Pagination, ScrollArea, Select, Table, Text, TextInput, UnstyledButton,
+  Button, Group, Loader, ScrollArea, Table, Text, TextInput, UnstyledButton,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
@@ -13,13 +13,14 @@ import type {
   SearchBreakdownDimension, SearchBreakdownRow, SearchBreakdownSort, SearchType,
 } from "@/shared/types";
 import { METRIC_BY_KEY } from "../searchMetrics";
-import { ClickChange, PositionChip, ShareBar } from "./SearchCells";
+import { ClickDelta, PositionChip, ShareBar } from "./SearchCells";
 import { BreakdownSkeleton } from "./SearchSkeletons";
 import { SearchUpgradeNote } from "./SearchUpgradeNote";
+import { SearchSectionHead } from "./SearchSectionHead";
 import { useSearchEntitlements } from "../useSearchEntitlements";
 import classes from "./searchConsole.module.css";
 
-const PAGE_SIZES = ["25", "50", "100", "200"];
+const PAGE_SIZE = 25;
 
 const plural = (word: string) => (word.endsWith("y") ? `${word.slice(0, -1)}ies` : `${word}s`);
 
@@ -52,11 +53,11 @@ export function SearchBreakdownTab({
   const [q] = useDebouncedValue(filter.trim(), 300);
   const [sort, setSort] = useState<{ key: SearchBreakdownSort; desc: boolean }>({ key: "clicks", desc: true });
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const pageSize = PAGE_SIZE;
   const hasSearchLabel = typeof searchLabel === "function";
   const ent = useSearchEntitlements();
 
-  useEffect(() => setPage(1), [q, sort, days, type, dimension, pageSize]);
+  useEffect(() => setPage(1), [q, sort, days, type, dimension]);
 
   const realBreakdown = useGetSearchBreakdownQuery({
     workspaceId,
@@ -132,92 +133,96 @@ export function SearchBreakdownTab({
   );
 
   return (
-    <div className={classes.card}>
-      <div className={classes.cardHead}>
-        <div>
-          <Text fw={650} size="sm">
+    <section className={classes.group}>
+      <SearchSectionHead
+        large
+        title={
+          <>
             {title}
-            {data.totalAll > 0 && (
-              <Text span size="xs" c="dimmed" fw={500} ml={8}>
-                {data.totalAll.toLocaleString()} total
-              </Text>
-            )}
-          </Text>
-          <Text size="xs" c="dimmed" mt={2}>
+            {data.totalAll > 0 && <span className={classes.groupCount}>{data.totalAll.toLocaleString()} total</span>}
+          </>
+        }
+        description={
+          <>
             {description}
             {data.truncated && " Google returns up to 25,000 rows per report."}
-          </Text>
-        </div>
-        <Group gap="xs" wrap="nowrap" className={classes.searchGroup}>
-          {isFetching && <Loader size={14} />}
-          <TextInput
-            size="sm"
-            className={classes.searchInput}
-            placeholder={`Search ${plural(labelHeader.toLowerCase())}…`}
-            leftSection={<Search size={14} />}
-            value={filter}
-            onChange={(e) => setFilter(e.currentTarget.value)}
-            aria-label={hasSearchLabel ? `Filter ${plural(labelHeader.toLowerCase())}` : `Search ${title.toLowerCase()}`}
-          />
-        </Group>
-      </div>
+          </>
+        }
+        right={
+          <Group gap="xs" wrap="nowrap" className={classes.searchGroup}>
+            {isFetching && <Loader size={14} />}
+            <TextInput
+              size="sm"
+              radius="md"
+              className={classes.searchInput}
+              placeholder={`Search ${plural(labelHeader.toLowerCase())}`}
+              leftSection={<Search size={14} />}
+              value={filter}
+              onChange={(e) => setFilter(e.currentTarget.value)}
+              aria-label={hasSearchLabel ? `Filter ${plural(labelHeader.toLowerCase())}` : `Search ${title.toLowerCase()}`}
+            />
+          </Group>
+        }
+      />
 
-      {data.rows.length === 0 ? (
-        <Text size="sm" c="dimmed">
-          {data.totalAll ? "Nothing matches that search." : "No data for this period yet."}
-        </Text>
-      ) : (
-        <ScrollArea className={classes.tableScroll}>
-          <Table verticalSpacing={9} fz="xs" className={classes.table} highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th className={classes.rankCell}>#</Table.Th>
-                {header("key", labelHeader, false)}
-                {header("clicks", "Clicks")}
-                {header("change", "Change")}
-                {showViews && header("views", "Views")}
-                {header("impressions", "Impressions")}
-                {header("ctr", "CTR")}
-                {header("position", "Position")}
-                {onOpenRow && <Table.Th />}
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {data.rows.map((row, i) => (
-                <Table.Tr
-                  key={`${row.key}-${i}`}
-                  className={onOpenRow ? classes.clickableRow : undefined}
-                  onClick={onOpenRow ? () => onOpenRow(row) : undefined}
-                >
-                  <Table.Td className={classes.rankCell}>{offset + i + 1}</Table.Td>
-                  <Table.Td className={classes.labelCell} title={row.key}>
-                    {renderLabel(row)}
-                  </Table.Td>
-                  <Table.Td className={classes.numCell}>
-                    <ShareBar value={row.clicks} max={maxClicks} label={METRIC_BY_KEY.clicks.format(row.clicks)} />
-                  </Table.Td>
-                  <Table.Td className={classes.numCell}>
-                    <ClickChange clicks={row.clicks} previousClicks={row.previousClicks} />
-                  </Table.Td>
-                  {showViews && (
-                    <Table.Td className={classes.numCell}>{METRIC_BY_KEY.clicks.format(row.views ?? 0)}</Table.Td>
-                  )}
-                  <Table.Td className={classes.numCell}>{METRIC_BY_KEY.impressions.format(row.impressions)}</Table.Td>
-                  <Table.Td className={classes.numCell}>{METRIC_BY_KEY.ctr.format(row.ctr)}</Table.Td>
-                  <Table.Td className={classes.numCell}>
-                    <PositionChip position={row.position} />
-                  </Table.Td>
-                  {onOpenRow && (
-                    <Table.Td className={classes.chevronCell}>
-                      <ChevronRight size={14} />
-                    </Table.Td>
-                  )}
+      <div className={classes.listCard}>
+        {data.rows.length === 0 ? (
+          <p className={classes.emptyRow}>
+            {data.totalAll ? "Nothing matches that search." : "No data for this period yet."}
+          </p>
+        ) : (
+          <ScrollArea className={classes.tableScroll}>
+            <Table fz="xs" className={classes.table} highlightOnHover={Boolean(onOpenRow)}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th className={classes.rankCell}>#</Table.Th>
+                  {header("key", labelHeader, false)}
+                  {header("clicks", "Clicks")}
+                  {header("change", "Change")}
+                  {showViews && header("views", "Views")}
+                  {header("impressions", "Impressions")}
+                  {header("ctr", "CTR")}
+                  {header("position", "Position")}
+                  {onOpenRow && <Table.Th className={classes.chevronCell} />}
                 </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </ScrollArea>
-      )}
+              </Table.Thead>
+              <Table.Tbody>
+                {data.rows.map((row, i) => (
+                  <Table.Tr
+                    key={`${row.key}-${i}`}
+                    className={onOpenRow ? classes.clickableRow : undefined}
+                    onClick={onOpenRow ? () => onOpenRow(row) : undefined}
+                  >
+                    <Table.Td className={classes.rankCell}>{offset + i + 1}</Table.Td>
+                    <Table.Td className={classes.labelCell} title={row.key}>
+                      {renderLabel(row)}
+                    </Table.Td>
+                    <Table.Td className={classes.numCell}>
+                      <ShareBar value={row.clicks} max={maxClicks} label={METRIC_BY_KEY.clicks.format(row.clicks)} />
+                    </Table.Td>
+                    <Table.Td className={classes.numCell}>
+                      <ClickDelta clicks={row.clicks} previousClicks={row.previousClicks} />
+                    </Table.Td>
+                    {showViews && (
+                      <Table.Td className={classes.numCell}>{METRIC_BY_KEY.clicks.format(row.views ?? 0)}</Table.Td>
+                    )}
+                    <Table.Td className={classes.numCell}>{METRIC_BY_KEY.impressions.format(row.impressions)}</Table.Td>
+                    <Table.Td className={classes.numCell}>{METRIC_BY_KEY.ctr.format(row.ctr)}</Table.Td>
+                    <Table.Td className={classes.numCell}>
+                      <PositionChip position={row.position} />
+                    </Table.Td>
+                    {onOpenRow && (
+                      <Table.Td className={classes.chevronCell}>
+                        <ChevronRight size={14} />
+                      </Table.Td>
+                    )}
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
+        )}
+      </div>
 
       {data.limitedTo ? (
         <SearchUpgradeNote>
@@ -227,25 +232,37 @@ export function SearchBreakdownTab({
       ) : null}
 
       {data.total > 0 && (
-        <Group justify="space-between" mt="md" gap="sm">
-          <Group gap="xs" wrap="nowrap">
-            <Text size="xs" c="dimmed">
-              {((data.page - 1) * data.pageSize + 1).toLocaleString()}–
-              {Math.min(data.page * data.pageSize, data.total).toLocaleString()} of {data.total.toLocaleString()}
-            </Text>
-            <Select
-              size="xs"
-              w={84}
-              aria-label="Rows per page"
-              data={PAGE_SIZES}
-              value={String(pageSize)}
-              onChange={(v) => v && setPageSize(Number(v))}
-              allowDeselect={false}
-            />
-          </Group>
-          {pages > 1 && <Pagination size="sm" radius="xl" className={classes.pager} total={pages} value={data.page} onChange={setPage} siblings={1} />}
+        <Group justify="space-between" gap="sm" className={classes.pagerRow}>
+          <Text size="xs" c="dimmed">
+            {((data.page - 1) * data.pageSize + 1).toLocaleString()}–
+            {Math.min(data.page * data.pageSize, data.total).toLocaleString()} of {data.total.toLocaleString()}
+          </Text>
+          {pages > 1 && (
+            <Group gap={6} wrap="nowrap">
+              <Button
+                variant="default"
+                radius="xl"
+                size="compact-sm"
+                className={classes.pillButton}
+                disabled={data.page <= 1}
+                onClick={() => setPage(data.page - 1)}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="default"
+                radius="xl"
+                size="compact-sm"
+                className={classes.pillButton}
+                disabled={data.page >= pages}
+                onClick={() => setPage(data.page + 1)}
+              >
+                Next
+              </Button>
+            </Group>
+          )}
         </Group>
       )}
-    </div>
+    </section>
   );
 }

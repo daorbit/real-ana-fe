@@ -4,7 +4,10 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/features/auth/context";
 import { useUnsavedGuard, useEscapeDiscard } from "@/shared/hooks";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { mobileError } from "./constants";
+import { formatLocalNumber, guessCountry, splitNumber, type DialCode } from "@/shared/lib/dialCodes";
+import { joinNumber, localNumberError } from "@/shared/ui/PhoneInput";
+
+const digitsOf = (v: string) => v.replace(/[^\d]/g, "");
 
 export function useProfileForm() {
   const { t } = useTranslation();
@@ -15,7 +18,8 @@ export function useProfileForm() {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [phoneCountry, setPhoneCountryState] = useState<DialCode>(guessCountry);
+  const [phoneLocal, setPhoneLocalState] = useState("");
   const avatarUrl = user?.avatarUrl ?? "";
   const [dateLocale, setDateLocale] = useState("");
   const [timezone, setTimezone] = useState("");
@@ -50,7 +54,9 @@ export function useProfileForm() {
     if (!user) return;
     setFirstName(user.firstName ?? "");
     setLastName(user.lastName ?? "");
-    setMobile(user.mobile ?? "");
+    const split = splitNumber(user.mobile ?? "");
+    setPhoneCountryState(user.mobile ? split.country : guessCountry());
+    setPhoneLocalState(formatLocalNumber(split.country, split.local));
     setDateLocale(user.dateLocale ?? "");
     setTimezone(user.timezone ?? "");
     setErrors({});
@@ -61,11 +67,23 @@ export function useProfileForm() {
     seedFromUser();
   }, [user?.id, user?.impersonating]);
 
+  const mobile = digitsOf(phoneLocal) ? joinNumber(phoneCountry, phoneLocal) : "";
+
+  const setPhoneCountry = (next: DialCode) => {
+    setPhoneCountryState(next);
+    setPhoneLocalState((v) => formatLocalNumber(next, v));
+  };
+
+  const setPhoneLocal = (v: string) => {
+    setPhoneLocalState(formatLocalNumber(phoneCountry, v));
+    setErrors((prev) => (prev.mobile ? { ...prev, mobile: null } : prev));
+  };
+
   const dirty =
     !!user &&
     (firstName !== (user.firstName ?? "") ||
       lastName !== (user.lastName ?? "") ||
-      mobile !== (user.mobile ?? "") ||
+      mobile !== digitsOf(user.mobile ?? "") ||
       dateLocale !== (user.dateLocale ?? "") ||
       timezone !== (user.timezone ?? ""));
 
@@ -92,7 +110,7 @@ export function useProfileForm() {
 
     const next: Record<string, string | null> = {
       firstName: firstName.trim() ? null : "settings.firstNameRequired",
-      mobile: mobileError(mobile),
+      mobile: digitsOf(phoneLocal) ? localNumberError(phoneLocal) : null,
     };
     setErrors(next);
     if (Object.values(next).some(Boolean)) return;
@@ -102,7 +120,7 @@ export function useProfileForm() {
       await updateProfile({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        mobile: mobile.trim(),
+        mobile,
         dateLocale,
         timezone,
       });
@@ -179,8 +197,10 @@ export function useProfileForm() {
     setFirstName,
     lastName,
     setLastName,
-    mobile,
-    setMobile,
+    phoneCountry,
+    setPhoneCountry,
+    phoneLocal,
+    setPhoneLocal,
     avatarUrl,
     avatarBroken,
     setAvatarBroken,

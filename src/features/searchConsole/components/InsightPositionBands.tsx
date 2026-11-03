@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { Text } from "@mantine/core";
 import { num } from "@/shared/lib";
+import { SearchCardHead } from "./SearchSectionHead";
 import type { SearchPositionBand } from "@/shared/types";
 import classes from "./insights.module.css";
 
@@ -27,16 +27,10 @@ export function InsightPositionBands({ bands }: { bands: SearchPositionBand[] })
 
   return (
     <section className={classes.panel}>
-      <header className={classes.panelHead}>
-        <div>
-          <Text fw={650} size="sm">
-            Where your queries rank
-          </Text>
-          <Text size="xs" c="dimmed" mt={2}>
-            {num(total)} queries by average position. Moves compare the same queries with the previous period.
-          </Text>
-        </div>
-      </header>
+      <SearchCardHead
+        title="Where your queries rank"
+        description={`${num(total)} queries by average position. Moves compare the same queries with the previous period.`}
+      />
 
       <div className={classes.bandBar} role="img" aria-label="Share of queries in each position range">
         {bands.map((b) =>

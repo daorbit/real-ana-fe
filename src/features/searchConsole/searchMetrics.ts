@@ -19,7 +19,7 @@ export const METRICS: MetricDef[] = [
     label: "Total clicks",
     short: "Clicks",
     tone: "emerald",
-    color: "#059669",
+    color: "#30d158",
     format: (v) => num(Math.round(v)),
     lowerIsBetter: false,
   },
@@ -28,7 +28,7 @@ export const METRICS: MetricDef[] = [
     label: "Total impressions",
     short: "Impressions",
     tone: "cyan",
-    color: "#3b82f6",
+    color: "#0a84ff",
     format: (v) => num(Math.round(v)),
     lowerIsBetter: false,
   },
@@ -37,7 +37,7 @@ export const METRICS: MetricDef[] = [
     label: "Average CTR",
     short: "CTR",
     tone: "amber",
-    color: "#d97706",
+    color: "#ff9f0a",
     format: (v) => `${(v * 100).toFixed(1)}%`,
     lowerIsBetter: false,
   },
@@ -46,7 +46,7 @@ export const METRICS: MetricDef[] = [
     label: "Average position",
     short: "Position",
     tone: "pink",
-    color: "#ec4899",
+    color: "#ff375f",
     format: (v) => (v ? v.toFixed(1) : "—"),
     lowerIsBetter: true,
   },
@@ -55,11 +55,11 @@ export const METRICS: MetricDef[] = [
 export const METRIC_BY_KEY = Object.fromEntries(METRICS.map((m) => [m.key, m])) as Record<MetricKey, MetricDef>;
 
 export const RANGES = [
-  { value: "7", label: "7 days" },
-  { value: "28", label: "28 days" },
-  { value: "90", label: "3 months" },
-  { value: "180", label: "6 months" },
-  { value: "480", label: "16 months" },
+  { value: "7", label: "7 days", short: "7D" },
+  { value: "28", label: "28 days", short: "28D" },
+  { value: "90", label: "3 months", short: "3M" },
+  { value: "180", label: "6 months", short: "6M" },
+  { value: "480", label: "16 months", short: "16M" },
 ];
 
 export const SEARCH_TYPE_OPTIONS = [

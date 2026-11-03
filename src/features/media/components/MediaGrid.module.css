@@ -23,13 +23,29 @@
   }
 }
 
+.picker {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 36em) {
+  .picker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 62em) {
+  .picker {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .tile {
   position: relative;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-md);
-  background: var(--mantine-color-body);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
   cursor: pointer;
   transition: border-color 120ms ease;
 }
@@ -46,7 +62,7 @@
 .skeletonTile,
 .skeletonTile:hover {
   cursor: default;
-  border-color: var(--mantine-color-default-border);
+  border-color: var(--border);
 }
 
 .selected,
@@ -59,10 +75,11 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  background: var(--mantine-color-default-hover);
+  background: var(--segment-track);
 }
 
 .thumb {
+  display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
 }
@@ -75,13 +92,25 @@
   gap: 6px;
   width: 100%;
   aspect-ratio: 4 / 3;
-  color: var(--mantine-color-dimmed);
-  background: var(--mantine-color-default-hover);
+  color: var(--text-2);
+  background: var(--segment-track);
 }
 
 .meta {
-  padding: 6px 8px 7px;
-  border-top: 1px solid var(--mantine-color-default-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px 9px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.skeletonMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 10px 11px;
+  border-top: 1px solid var(--border);
 }
 
 .actions {
@@ -99,13 +128,13 @@
 
 .check {
   position: absolute;
-  top: 6px;
-  left: 6px;
+  top: 8px;
+  left: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
   background: var(--selected-fg);
   color: #fff;
@@ -117,6 +146,6 @@
   left: 6px;
   padding: 3px;
   border-radius: var(--mantine-radius-sm);
-  background: var(--mantine-color-body);
-  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.2);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }

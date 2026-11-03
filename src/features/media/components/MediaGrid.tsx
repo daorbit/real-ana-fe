@@ -8,36 +8,30 @@ import classes from "./MediaGrid.module.css";
 
 interface Props {
   items: MediaAsset[];
-  /** The one currently chosen, in a single-pick picker. */
   selectedId?: string | null;
   onSelect?: (asset: MediaAsset) => void;
   renderActions?: (asset: MediaAsset) => ReactNode;
-  /** Widest column count. Fewer columns = bigger tiles (the picker wants this). */
   maxColumns?: 3 | 4;
-  /** Ids ticked for a bulk action. When passed, a tile click toggles the tick. */
+  picker?: boolean;
   selectedIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
 }
 
-/**
- * The library as a wall of tiles.
- *
- * Shared by the library page and the picker so the two cannot drift — what
- * someone browses and what they choose from should look the same.
- */
 export function MediaGrid({
   items,
   selectedId,
   onSelect,
   renderActions,
   maxColumns = 4,
+  picker = false,
   selectedIds,
   onToggleSelect,
 }: Props) {
   const multiSelect = Boolean(selectedIds);
+  const layout = picker ? classes.picker : maxColumns === 3 ? classes.threeUp : "";
 
   return (
-    <Box className={`${classes.masonry} ${maxColumns === 3 ? classes.threeUp : ""}`}>
+    <Box className={`${classes.masonry} ${layout}`}>
       {items.map((asset) => {
         const ticked = selectedIds?.has(asset.id) ?? false;
         const activate = multiSelect
@@ -90,10 +84,10 @@ export function MediaGrid({
             )}
 
             <Box className={classes.meta}>
-              <Text size="xs" fw={500} lineClamp={1} title={asset.name}>
+              <Text size="xs" fw={550} lineClamp={1} title={asset.name}>
                 {asset.name}
               </Text>
-              <Text size="10px" c="dimmed">
+              <Text size="11px" c="dimmed">
                 {asset.width && asset.height
                   ? `${asset.width}×${asset.height} · ${formatBytes(asset.bytes)}`
                   : formatBytes(asset.bytes)}
@@ -106,7 +100,6 @@ export function MediaGrid({
   );
 }
 
-/** The tile's picture, or an icon for a file that has none. */
 function Preview({ asset }: { asset: MediaAsset }) {
   const url = previewUrl(asset);
 

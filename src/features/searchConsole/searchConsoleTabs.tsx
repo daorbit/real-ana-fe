@@ -16,14 +16,39 @@ export type SearchConsoleTabId =
   | "devices"
   | "sitemaps";
 
-export const SEARCH_CONSOLE_TABS: { id: SearchConsoleTabId; label: string; icon: LucideIcon }[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "insights", label: "Insights", icon: Lightbulb },
-  { id: "queries", label: "Queries", icon: Search },
-  { id: "pages", label: "Pages", icon: FileSearch },
-  { id: "countries", label: "Countries", icon: Globe2 },
-  { id: "devices", label: "Devices", icon: MonitorSmartphone },
-  { id: "sitemaps", label: "Sitemaps", icon: ListTree },
+export const SEARCH_CONSOLE_TABS: { id: SearchConsoleTabId; label: string; icon: LucideIcon; intro: string }[] = [
+  {
+    id: "overview",
+    label: "Overview",
+    icon: LayoutDashboard,
+    intro: "Clicks, impressions and rankings from Google, with your top queries and pages.",
+  },
+  {
+    id: "insights",
+    label: "Insights",
+    icon: Lightbulb,
+    intro: "Your Google data turned into a ranked to-do list: quick wins, slipping pages and new demand.",
+  },
+  { id: "queries", label: "Queries", icon: Search, intro: "Every search that showed your site in Google results." },
+  {
+    id: "pages",
+    label: "Pages",
+    icon: FileSearch,
+    intro: "Your pages that appeared in Google results, with their index status one tap away.",
+  },
+  { id: "countries", label: "Countries", icon: Globe2, intro: "Where the people searching are." },
+  {
+    id: "devices",
+    label: "Devices",
+    icon: MonitorSmartphone,
+    intro: "How mobile, desktop and tablet searchers find and click on you.",
+  },
+  {
+    id: "sitemaps",
+    label: "Sitemaps",
+    icon: ListTree,
+    intro: "Tell Google where your pages are, and see when it last read them.",
+  },
 ];
 
 export function resolveTab(value: string | null): SearchConsoleTabId {

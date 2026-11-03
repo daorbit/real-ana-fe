@@ -50,22 +50,11 @@ export function SearchSitemapsTab({
     );
   }
 
-  // Demo data has no backing property to submit or remove sitemaps against.
   const manage = canAdmin && data.access.canSubmit && !demo;
   const pages = data.sitemaps.reduce((sum, s) => sum + s.submitted, 0);
 
   return (
     <div className={classes.root}>
-      <header className={classes.head}>
-        <div>
-          <div className={classes.title}>Sitemaps</div>
-          <div className={classes.subtitle}>Tell Google where your pages are, and see when it last read them.</div>
-        </div>
-        <a href={consoleUrl} target="_blank" rel="noopener noreferrer" className={classes.consoleLink}>
-          Open in Search Console <ExternalLink size={12} />
-        </a>
-      </header>
-
       {canAdmin && (
         <SitemapSubmitBar
           base={sitemapBase(propertyUrl)}
@@ -77,29 +66,31 @@ export function SearchSitemapsTab({
         />
       )}
 
-      {data.sitemaps.length === 0 ? (
-        <div className={classes.empty}>
-          <span className={classes.emptyIcon}>
-            <FileText size={20} />
-          </span>
-          <Text size="sm" fw={600}>
-            No sitemaps yet
-          </Text>
-          <Text size="xs" c="dimmed">
-            {manage
-              ? "Add one above so Google can find every page on your site."
-              : "Submitting a sitemap helps Google find every page on your site."}
-          </Text>
-        </div>
-      ) : (
-        <div className={classes.listCard}>
-          <div className={classes.listHead}>
-            <span className={classes.eyebrow}>Submitted sitemaps</span>
+      <div className={classes.listCard}>
+        <div className={classes.listHead}>
+          <span className={classes.eyebrow}>Submitted sitemaps</span>
+          {data.sitemaps.length > 0 && (
             <span className={classes.listCount}>
               {data.sitemaps.length} sitemap{data.sitemaps.length === 1 ? "" : "s"}
               {pages ? ` · ${num(pages)} pages` : ""}
             </span>
+          )}
+        </div>
+        {data.sitemaps.length === 0 ? (
+          <div className={classes.empty}>
+            <span className={classes.emptyIcon}>
+              <FileText size={20} />
+            </span>
+            <Text size="sm" fw={600}>
+              No sitemaps yet
+            </Text>
+            <Text size="xs" c="dimmed">
+              {manage
+                ? "Add one above so Google can find every page on your site."
+                : "Submitting a sitemap helps Google find every page on your site."}
+            </Text>
           </div>
+        ) : (
           <ul className={classes.list}>
             {data.sitemaps.map((s) => (
               <SitemapRow
@@ -112,8 +103,12 @@ export function SearchSitemapsTab({
               />
             ))}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
+
+      <a href={consoleUrl} target="_blank" rel="noopener noreferrer" className={classes.consoleLink}>
+        Open sitemaps in Search Console <ExternalLink size={12} />
+      </a>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Box, TextInput } from "@mantine/core";
 import { Lock, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { mobileError } from "./constants";
+import { PhoneInput } from "@/shared/ui/PhoneInput";
 import { SettingsCard } from "./SettingsCard";
 import type { ProfileForm } from "./useProfileForm";
 import classes from "./Profile.module.css";
@@ -14,8 +14,10 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
     setFirstName,
     lastName,
     setLastName,
-    mobile,
-    setMobile,
+    phoneCountry,
+    setPhoneCountry,
+    phoneLocal,
+    setPhoneLocal,
     errors,
     clearIfValid,
     validateOnBlur,
@@ -53,20 +55,13 @@ export function ProfileFields({ form }: { form: ProfileForm }) {
           disabled
           rightSection={<Lock size={14} />}
         />
-        <TextInput
+        <PhoneInput
           label={t("settings.mobile")}
           description={t("common.optional")}
-          placeholder="+91 98765 43210"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={mobile}
-          onChange={(e) => {
-            const v = e.currentTarget.value;
-            setMobile(v);
-            clearIfValid("mobile", mobileError, v);
-          }}
-          onBlur={(e) => validateOnBlur("mobile", mobileError, e.currentTarget.value)}
+          country={phoneCountry}
+          onCountry={setPhoneCountry}
+          local={phoneLocal}
+          onLocal={setPhoneLocal}
           error={errText(errors.mobile)}
         />
       </Box>

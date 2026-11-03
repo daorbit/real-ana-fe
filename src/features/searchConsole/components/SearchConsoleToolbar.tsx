@@ -1,16 +1,13 @@
-import { ActionIcon, Menu, Select, Text } from "@mantine/core";
-import { ExternalLink, Link2Off, LogOut, MoreHorizontal } from "lucide-react";
+import { Menu, Tooltip, UnstyledButton } from "@mantine/core";
+import { ExternalLink, Globe, Link2Off, LogOut, MoreHorizontal, RotateCw } from "lucide-react";
 import { useRefreshSearchPerformanceMutation } from "@/app/store";
 import { errMessage, notify } from "@/shared/lib/notify";
 import { timeAgo } from "@/shared/lib";
-import { GoogleMark } from "@/shared/ui/GoogleMark";
-import { RefreshButton } from "@/shared/ui/Refresh";
 import type { SearchType } from "@/shared/types";
-import { SEARCH_TYPE_OPTIONS, propertyLabel } from "../searchMetrics";
+import { propertyLabel } from "../searchMetrics";
 import { SearchRangeSelect } from "./SearchRangeSelect";
+import { SearchTypeMenu } from "./SearchTypeMenu";
 import type { SearchConsoleLink } from "./SearchConsoleGate";
-import { PageFinder } from "./PageFinder";
-import { AskOrbitSearchButton } from "./AskOrbitSearchButton";
 import classes from "./searchConsole.module.css";
 
 export function SearchConsoleToolbar({
@@ -23,8 +20,6 @@ export function SearchConsoleToolbar({
   link,
   busy,
   fetchedAt,
-  onOpenPage,
-  onAskOrbit,
 }: {
   workspaceId: string;
   siteId: string;
@@ -35,11 +30,10 @@ export function SearchConsoleToolbar({
   link: SearchConsoleLink;
   busy: boolean;
   fetchedAt?: string;
-  onOpenPage: (url: string) => void;
-  onAskOrbit?: () => void;
 }) {
   const [refresh, { isLoading: refreshing }] = useRefreshSearchPerformanceMutation();
   const consoleUrl = `https://search.google.com/search-console?resource_id=${encodeURIComponent(link.propertyUrl)}`;
+  const spinning = refreshing || busy;
 
   const reload = async () => {
     try {
@@ -50,73 +44,44 @@ export function SearchConsoleToolbar({
     }
   };
 
+  const meta = [
+    link.propertyUrl.startsWith("sc-domain:") ? "Domain property" : "URL-prefix property",
+    link.googleEmail || null,
+    fetchedAt ? `Updated ${timeAgo(fetchedAt)}` : null,
+  ].filter(Boolean);
+
   return (
     <div className={classes.toolbar}>
       <div className={classes.headerText}>
-        <span className={classes.brandMark}>
-          <GoogleMark size={18} />
+        <span className={classes.brandMark} aria-hidden>
+          <Globe size={16} />
         </span>
         <div className={classes.propertyText}>
-          <Text fw={650} size="sm" truncate>
-            {propertyLabel(link.propertyUrl)}
-          </Text>
-          <div className={classes.meta}>
-            <span>{link.propertyUrl.startsWith("sc-domain:") ? "Domain property" : "URL-prefix property"}</span>
-            {link.googleEmail && (
-              <>
-                <span className={classes.metaDot} />
-                <span>{link.googleEmail}</span>
-              </>
-            )}
-            {fetchedAt && (
-              <>
-                <span className={classes.metaDot} />
-                <span>Updated {timeAgo(fetchedAt)}</span>
-              </>
-            )}
-          </div>
+          <span className={classes.propertyName}>{propertyLabel(link.propertyUrl)}</span>
+          <span className={classes.meta}>{meta.join(" · ")}</span>
         </div>
       </div>
 
       <div className={classes.headerActions}>
-        {onAskOrbit && <AskOrbitSearchButton onClick={onAskOrbit} />}
-        <PageFinder
-          workspaceId={workspaceId}
-          siteId={siteId}
-          propertyUrl={link.propertyUrl}
-          days={days}
-          type={type}
-          onOpen={onOpenPage}
-        />
         <div className={classes.filters}>
-          <Select
-            size="sm"
-            className={classes.typeSelect}
-            aria-label="Search type"
-            data={SEARCH_TYPE_OPTIONS}
-            value={type}
-            onChange={(v) => v && onTypeChange(v as SearchType)}
-            allowDeselect={false}
-            disabled={refreshing}
-          />
-          <SearchRangeSelect
-            className={classes.rangeSelect}
-            days={days}
-            onChange={onDaysChange}
-            disabled={refreshing}
-          />
+          <SearchTypeMenu type={type} onChange={onTypeChange} disabled={refreshing} />
+          <SearchRangeSelect days={days} onChange={onDaysChange} disabled={refreshing} />
         </div>
-        <RefreshButton
-          hint="Fetch the latest from Google"
-          refreshing={refreshing || busy}
-          disabled={refreshing || busy}
-          onRefresh={() => void reload()}
-        />
-        <Menu position="bottom-end" withArrow width={280}>
+        <Tooltip label="Fetch the latest from Google" withArrow>
+          <UnstyledButton
+            className={classes.iconButton}
+            aria-label="Fetch the latest from Google"
+            disabled={spinning}
+            onClick={() => void reload()}
+          >
+            <RotateCw size={15} className={spinning ? "spin" : undefined} />
+          </UnstyledButton>
+        </Tooltip>
+        <Menu position="bottom-end" width={270}>
           <Menu.Target>
-            <ActionIcon variant="default" size={36} aria-label="Search visibility settings">
-              <MoreHorizontal size={15} />
-            </ActionIcon>
+            <UnstyledButton className={classes.iconButton} aria-label="Search visibility settings">
+              <MoreHorizontal size={16} />
+            </UnstyledButton>
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item

@@ -53,7 +53,7 @@ export function SearchDevicesTab({
   if (!data.rows.length) {
     return (
       <div className={classes.card}>
-        <Text size="sm" c="dimmed">
+        <Text size="sm" c="dimmed" ta="center">
           No device data for this period yet.
         </Text>
       </div>

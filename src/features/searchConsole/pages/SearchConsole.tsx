@@ -5,12 +5,11 @@ import { useGetSitesQuery } from "@/app/store";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { SitesLoadError } from "@/features/workspace";
 import { useSiteScope } from "@/features/analytics";
-import { PageHeader } from "@/shared/ui/Page";
-import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { SearchConsoleGate } from "../components/SearchConsoleGate";
 import { SearchConsoleBody } from "../components/SearchConsoleBody";
+import { SearchPageHeader } from "../components/SearchPageHeader";
 import { ConsoleSkeleton } from "../components/SearchSkeletons";
 import { SearchStartPanel } from "../components/start/SearchStartPanel";
 import { resolveTab, type SearchConsoleTabId } from "../searchConsoleTabs";
@@ -58,34 +57,35 @@ export default function SearchConsole() {
     );
   }
 
+  if (loading || sitesLoading || (sitesFailed && !sites.length) || !site) {
+    return (
+      <AppShell>
+        <SearchPageHeader />
+        {loading || sitesLoading ? (
+          <ConsoleSkeleton />
+        ) : !site && !(sitesFailed && !sites.length) ? (
+          <SearchStartPanel canEdit={canEdit} />
+        ) : (
+          <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
+        )}
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
-      <PageHeader
-        title="Search visibility"
-        description="How your sites appear in Google Search — clicks, impressions, queries, pages and sitemaps, straight from Google."
-        docsPath={DOCS_SLUGS.searchVisibility}
-      />
-
-      {loading || sitesLoading ? (
-        <ConsoleSkeleton />
-      ) : sitesFailed && !sites.length ? (
-        <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
-      ) : !site ? (
-        <SearchStartPanel canEdit={canEdit} />
-      ) : (
-        <SearchConsoleGate workspaceId={workspaceId} siteId={site.siteId}>
-          {(link) => (
-            <SearchConsoleBody
-              key={site.siteId}
-              workspaceId={workspaceId}
-              siteId={site.siteId}
-              link={link}
-              tab={tab}
-              onTabChange={setTab}
-            />
-          )}
-        </SearchConsoleGate>
-      )}
+      <SearchConsoleGate workspaceId={workspaceId} siteId={site.siteId} header={<SearchPageHeader />}>
+        {(link) => (
+          <SearchConsoleBody
+            key={site.siteId}
+            workspaceId={workspaceId}
+            siteId={site.siteId}
+            link={link}
+            tab={tab}
+            onTabChange={setTab}
+          />
+        )}
+      </SearchConsoleGate>
     </AppShell>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Button, Text } from "@mantine/core";
-import { Check, Link2, Lock, Send } from "lucide-react";
+import { Check, Link2, Lock } from "lucide-react";
 import type { SearchSitemapAccess } from "@/shared/types";
 import { resolveSitemapUrl } from "../sitemapUrl";
 import classes from "./sitemaps.module.css";
@@ -87,18 +87,15 @@ export function SitemapSubmitBar({
   };
 
   return (
-    <div>
-      <label className={classes.eyebrow} htmlFor="sitemap-url">
-        Add a sitemap
-      </label>
+    <section className={classes.submitCard} aria-labelledby="sitemap-add-title">
+      <div className={classes.submitText}>
+        <h3 id="sitemap-add-title" className={classes.submitTitle}>
+          Add a sitemap
+        </h3>
+        <p className={classes.hint}>Type the path or paste the full URL. Google reads it within a day or two.</p>
+      </div>
       <form className={classes.urlBar} onSubmit={(e) => void handleSubmit(e)}>
-        <span className={classes.dots} aria-hidden>
-          <i />
-          <i />
-          <i />
-        </span>
         <label className={classes.urlField} htmlFor="sitemap-url">
-          <Lock size={13} aria-hidden />
           {!full && (
             <span className={classes.base} title={base} aria-hidden>
               {base}
@@ -122,16 +119,15 @@ export function SitemapSubmitBar({
         </label>
         <Button
           type="submit"
+          radius="xl"
           className={classes.submitButton}
           loading={submitting}
           disabled={!trimmed}
-          leftSection={<Send size={14} />}
           aria-label="Submit sitemap"
         >
-          <span className={classes.submitLabel}>Submit</span>
+          Submit
         </Button>
       </form>
-      <div className={classes.hint}>Type the path, or paste the full sitemap URL. Google reads new sitemaps within a few hours to a few days.</div>
-    </div>
+    </section>
   );
 }

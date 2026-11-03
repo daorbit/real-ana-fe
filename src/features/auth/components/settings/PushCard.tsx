@@ -1,34 +1,32 @@
-import { Alert, Badge, Box, Button, Group, Switch, Text } from "@mantine/core";
+import { Box, Button, Group, Switch, Text } from "@mantine/core";
 import { BellRing, Info, MonitorSmartphone, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { PushState } from "@/features/activity/usePush";
 import { SettingsCard } from "./SettingsCard";
 import classes from "./Notifications.module.css";
 
-const STATUS: Record<PushState, { color: string; key: string; label: string }> = {
-  on: { color: "green", key: "activity.push.statusOn", label: "Enabled" },
-  off: { color: "gray", key: "activity.push.statusOff", label: "Off" },
-  working: { color: "gray", key: "activity.push.statusWorking", label: "Updating…" },
-  denied: { color: "orange", key: "activity.push.statusDenied", label: "Blocked" },
-  unsupported: { color: "gray", key: "activity.push.statusUnsupported", label: "Not supported" },
-  unconfigured: { color: "gray", key: "activity.push.statusUnconfigured", label: "Unavailable" },
+const STATUS: Record<PushState, { tone?: "on" | "warn"; key: string; label: string }> = {
+  on: { tone: "on", key: "activity.push.statusOn", label: "Enabled" },
+  off: { key: "activity.push.statusOff", label: "Off" },
+  working: { key: "activity.push.statusWorking", label: "Updating…" },
+  denied: { tone: "warn", key: "activity.push.statusDenied", label: "Blocked" },
+  unsupported: { key: "activity.push.statusUnsupported", label: "Not supported" },
+  unconfigured: { key: "activity.push.statusUnconfigured", label: "Unavailable" },
 };
 
-const HELP: Partial<Record<PushState, { key: string; text: string; color: string }>> = {
+const HELP: Partial<Record<PushState, { key: string; text: string; tone?: "warn" }>> = {
   denied: {
     key: "activity.push.denied",
     text: "This browser is blocking notifications for the site. You'll need to allow them in your browser's site settings — it can't be re-asked from here.",
-    color: "orange",
+    tone: "warn",
   },
   unsupported: {
     key: "activity.push.unsupported",
     text: "This browser doesn't support push notifications. On iPhone and iPad, add the dashboard to your home screen first.",
-    color: "gray",
   },
   unconfigured: {
     key: "activity.push.unconfigured",
     text: "Push notifications aren't set up on this deployment yet.",
-    color: "gray",
   },
 };
 
@@ -64,9 +62,9 @@ export function PushCard({ state, onEnable, onDisable, onTest, testing }: Props)
             <Text size="sm" fw={600}>
               {t("activity.push.thisBrowser", "This browser")}
             </Text>
-            <Badge size="sm" variant="light" color={status.color} mt={4}>
+            <span className={classes.status} data-tone={status.tone}>
               {t(status.key, status.label)}
-            </Badge>
+            </span>
           </Box>
         </Box>
         <Switch
@@ -79,9 +77,10 @@ export function PushCard({ state, onEnable, onDisable, onTest, testing }: Props)
       </Group>
 
       {help && (
-        <Alert color={help.color} variant="light" mt="md" icon={<Info size={15} />}>
+        <p className={classes.help} data-tone={help.tone}>
+          <Info size={14} />
           {t(help.key, help.text)}
-        </Alert>
+        </p>
       )}
 
       {state === "on" && (
@@ -92,7 +91,7 @@ export function PushCard({ state, onEnable, onDisable, onTest, testing }: Props)
               "Use the Push column below to choose which notifications pop up on this device.",
             )}
           </Text>
-          <Button size="xs" variant="default" leftSection={<Send size={13} />} loading={testing} onClick={onTest}>
+          <Button size="xs" radius="xl" variant="default" leftSection={<Send size={13} />} loading={testing} onClick={onTest}>
             {t("activity.push.test", "Send test notification")}
           </Button>
         </Group>

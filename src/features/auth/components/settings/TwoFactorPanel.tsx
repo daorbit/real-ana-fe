@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Button, Modal, Stack, Text } from "@mantine/core";
+import { Button, Modal, Stack, Text } from "@mantine/core";
 import { ShieldCheck, ShieldOff, Smartphone } from "lucide-react";
 import { SecurityRow } from "./SecurityGroup";
 import { StatusBadge } from "./StatusBadge";
@@ -12,10 +12,6 @@ import { api } from "@/shared/lib/http";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 
-/**
- * Closing the setup modal partway through abandons the attempt rather than
- * leaving a half-configured secret sitting in the account.
- */
 export function TwoFactorPanel() {
   const { user, refreshUser } = useAuth();
   const [starting, setStarting] = useState(false);
@@ -24,7 +20,6 @@ export function TwoFactorPanel() {
   const [disableOpen, setDisableOpen] = useState(false);
   const [disablePassword, setDisablePassword] = useState("");
   const [disabling, setDisabling] = useState(false);
-  const [disableError, setDisableError] = useState<string | null>(null);
 
   if (!user) return null;
 
@@ -42,7 +37,6 @@ export function TwoFactorPanel() {
   const disable = async () => {
     if (!disablePassword.trim()) return;
     setDisabling(true);
-    setDisableError(null);
     try {
       await api.post("/api/auth/2fa/disable", identityProof(user, disablePassword));
       setDisableOpen(false);
@@ -50,7 +44,7 @@ export function TwoFactorPanel() {
       await refreshUser();
       notify.success("Two-factor authentication turned off.", "Security");
     } catch (err) {
-      setDisableError(errMessage(err, user.hasPassword ? "Incorrect password." : "Incorrect PIN or code."));
+      notify.error(errMessage(err, user.hasPassword ? "Incorrect password." : "Incorrect PIN or code."), "Security");
     } finally {
       setDisabling(false);
     }
@@ -95,20 +89,21 @@ export function TwoFactorPanel() {
         opened={disableOpen}
         onClose={() => setDisableOpen(false)}
         title="Turn off two-factor authentication"
+        radius="lg"
+        size={400}
         centered
       >
         <Stack gap="md">
           <Text size="sm" c="dimmed">
             {identityPrompt(user)} to turn off two-factor authentication for this account.
           </Text>
-          {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
           <ConfirmIdentityField
             user={user}
             value={disablePassword}
             onChange={setDisablePassword}
             onSubmit={() => void disable()}
           />
-          <Button color="red" loading={disabling} disabled={!disablePassword.trim()} onClick={() => void disable()}>
+          <Button fullWidth size="md" color="red" loading={disabling} disabled={!disablePassword.trim()} onClick={() => void disable()}>
             Turn off
           </Button>
         </Stack>

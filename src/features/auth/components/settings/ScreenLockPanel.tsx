@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Alert, Button, Modal, PasswordInput, PinInput, Stack, Text,
+  Button, Modal, PasswordInput, PinInput, Stack, Text,
 } from "@mantine/core";
 import { KeyRound, Lock, LockKeyhole, LockKeyholeOpen } from "lucide-react";
 import { SecurityRow } from "./SecurityGroup";
@@ -11,11 +11,6 @@ import { identityProof, identityPrompt } from "./identityProof";
 import { useAuth } from "@/features/auth/context";
 import { notify, errMessage } from "@/shared/lib/notify";
 
-/**
- * Turning the lock on needs a PIN set first, unless 2FA already covers
- * unlocking — same rule the server enforces in `/me/screen-lock/enable`, kept
- * here too so the form asks for the PIN instead of just failing after submit.
- */
 export function ScreenLockPanel() {
   const { user, enableScreenLock, disableScreenLock, lockScreenNow, setPin } = useAuth();
   const [locking, setLocking] = useState(false);
@@ -23,18 +18,15 @@ export function ScreenLockPanel() {
   const [enableOpen, setEnableOpen] = useState(false);
   const [enablePin, setEnablePin] = useState("");
   const [enabling, setEnabling] = useState(false);
-  const [enableError, setEnableError] = useState<string | null>(null);
 
   const [disableOpen, setDisableOpen] = useState(false);
   const [disablePassword, setDisablePassword] = useState("");
   const [disabling, setDisabling] = useState(false);
-  const [disableError, setDisableError] = useState<string | null>(null);
 
   const [pinOpen, setPinOpen] = useState(false);
   const [currentPin, setCurrentPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [pinBusy, setPinBusy] = useState(false);
-  const [pinError, setPinError] = useState<string | null>(null);
 
   if (!user) return null;
 
@@ -42,20 +34,18 @@ export function ScreenLockPanel() {
 
   const openEnable = () => {
     setEnablePin("");
-    setEnableError(null);
     setEnableOpen(true);
   };
 
   const confirmEnable = async () => {
     if (needsPinToEnable && enablePin.trim().length !== 4) return;
     setEnabling(true);
-    setEnableError(null);
     try {
       await enableScreenLock(needsPinToEnable ? enablePin.trim() : undefined);
       setEnableOpen(false);
       notify.success("Screen lock turned on.", "Security");
     } catch (err) {
-      setEnableError(errMessage(err, "Could not turn on the screen lock."));
+      notify.error(errMessage(err, "Could not turn on the screen lock."), "Security");
     } finally {
       setEnabling(false);
     }
@@ -75,14 +65,13 @@ export function ScreenLockPanel() {
   const disable = async () => {
     if (!disablePassword.trim()) return;
     setDisabling(true);
-    setDisableError(null);
     try {
       await disableScreenLock(identityProof(user, disablePassword));
       setDisableOpen(false);
       setDisablePassword("");
       notify.success("Screen lock turned off.", "Security");
     } catch (err) {
-      setDisableError(errMessage(err, user.hasPassword ? "Incorrect password." : "Incorrect PIN or code."));
+      notify.error(errMessage(err, user.hasPassword ? "Incorrect password." : "Incorrect PIN or code."), "Security");
     } finally {
       setDisabling(false);
     }
@@ -91,7 +80,6 @@ export function ScreenLockPanel() {
   const savePin = async () => {
     if (newPin.trim().length !== 4) return;
     setPinBusy(true);
-    setPinError(null);
     try {
       await setPin(newPin.trim(), user.hasPin ? currentPin.trim() : undefined);
       setPinOpen(false);
@@ -99,7 +87,7 @@ export function ScreenLockPanel() {
       setNewPin("");
       notify.success(user.hasPin ? "PIN changed." : "PIN set.", "Security");
     } catch (err) {
-      setPinError(errMessage(err, "Could not update the PIN."));
+      notify.error(errMessage(err, "Could not update the PIN."), "Security");
     } finally {
       setPinBusy(false);
     }
@@ -162,7 +150,6 @@ export function ScreenLockPanel() {
         centered
       >
         <Stack gap="lg" pt={4}>
-          {enableError && <Alert color="red" variant="light">{enableError}</Alert>}
           {needsPinToEnable ? (
             <Stack gap="md" align="center">
               <Text size="sm" c="dimmed" ta="center">
@@ -209,7 +196,6 @@ export function ScreenLockPanel() {
           <Text size="sm" c="dimmed">
             {identityPrompt(user)} to turn off the screen lock for this account.
           </Text>
-          {disableError && <Alert color="red" variant="light">{disableError}</Alert>}
           <ConfirmIdentityField
             user={user}
             value={disablePassword}
@@ -231,7 +217,6 @@ export function ScreenLockPanel() {
         centered
       >
         <Stack gap="md" pt={4}>
-          {pinError && <Alert color="red" variant="light">{pinError}</Alert>}
           {user.hasPin && (
             <PasswordInput
               label="Current PIN"

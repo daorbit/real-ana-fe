@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Alert, Button, List, Modal, Stack, Text, TextInput } from "@mantine/core";
+import { Button, Modal, Stack, Text, TextInput } from "@mantine/core";
 import { ConfirmIdentityField } from "./ConfirmIdentityField";
 import { hasIdentityFactor, identityProof, identityPrompt } from "./identityProof";
 import { useAuth } from "@/features/auth/context";
 import { useWorkspace } from "@/features/workspace/context";
-import { errMessage } from "@/shared/lib/notify";
+import { errMessage, notify } from "@/shared/lib/notify";
+import classes from "./DeleteAccount.module.css";
 import type { User } from "@/shared/types";
 
 export function DeleteAccountModal({ user, onClose }: { user: User; onClose: () => void }) {
@@ -13,7 +14,6 @@ export function DeleteAccountModal({ user, onClose }: { user: User; onClose: () 
   const [secret, setSecret] = useState("");
   const [typedEmail, setTypedEmail] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const owned = workspaces.filter((w) => w.role === "owner");
   const needsSecret = hasIdentityFactor(user);
@@ -23,11 +23,10 @@ export function DeleteAccountModal({ user, onClose }: { user: User; onClose: () 
   const submit = async () => {
     if (!ready) return;
     setDeleting(true);
-    setError(null);
     try {
       await deleteAccount(typedEmail.trim(), needsSecret ? identityProof(user, secret) : undefined);
     } catch (err) {
-      setError(errMessage(err, "Could not delete your account."));
+      notify.error(errMessage(err, "Could not delete your account."));
       setDeleting(false);
     }
   };
@@ -40,19 +39,18 @@ export function DeleteAccountModal({ user, onClose }: { user: User; onClose: () 
         </Text>
 
         {owned.length > 0 && (
-          <Alert color="red" variant="light" title="These workspaces will be deleted too">
-            <List size="sm" spacing={2}>
+          <section className={classes.owned} aria-label="Workspaces that will be deleted">
+            <p className={classes.ownedTitle}>These workspaces will be deleted too</p>
+            <ul className={classes.ownedList}>
               {owned.map((w) => (
-                <List.Item key={w._id}>{w.name}</List.Item>
+                <li key={w._id}>{w.name}</li>
               ))}
-            </List>
-            <Text size="xs" mt="xs">
+            </ul>
+            <p className={classes.ownedNote}>
               Their sites, analytics, forms and submissions, reports and media go with them, including for every other member.
-            </Text>
-          </Alert>
+            </p>
+          </section>
         )}
-
-        {error && <Alert color="red" variant="light">{error}</Alert>}
 
         {needsSecret && (
           <Stack gap={6}>

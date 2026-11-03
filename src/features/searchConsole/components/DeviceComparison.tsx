@@ -2,6 +2,7 @@ import { Text } from "@mantine/core";
 import type { SearchBreakdownRow } from "@/shared/types";
 import { METRICS } from "../searchMetrics";
 import { deviceMeta } from "../deviceMeta";
+import { SearchCardHead } from "./SearchSectionHead";
 import classes from "./devices.module.css";
 
 function takeaway(rows: SearchBreakdownRow[]): string {
@@ -19,14 +20,7 @@ function takeaway(rows: SearchBreakdownRow[]): string {
 export function DeviceComparison({ rows }: { rows: SearchBreakdownRow[] }) {
   return (
     <section className={classes.card}>
-      <header>
-        <Text fw={650} size="sm">
-          Device comparison
-        </Text>
-        <Text size="xs" c="dimmed" mt={2}>
-          {takeaway(rows)}
-        </Text>
-      </header>
+      <SearchCardHead title="Device comparison" description={takeaway(rows)} />
 
       <div className={classes.metrics}>
         {METRICS.map((m) => {

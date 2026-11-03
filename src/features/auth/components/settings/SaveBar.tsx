@@ -1,6 +1,7 @@
 import { Box, Button, Group, Text } from "@mantine/core";
 import { Save, Undo2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import classes from "./SettingsCard.module.css";
 
 export function SaveBar({
   saving,
@@ -14,7 +15,7 @@ export function SaveBar({
   return (
     <Box className="save-bar">
       <Group justify="space-between" gap="md" wrap="nowrap">
-        <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
+        <Group gap={8} wrap="nowrap" className={classes.saveLabel}>
           <span className="save-bar__dot" aria-hidden />
           <Text size="sm" fw={500} truncate>
             {t("common.unsavedChanges")}

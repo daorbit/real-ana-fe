@@ -7,19 +7,18 @@
 
 .label {
   margin: 0;
-  padding: 0 6px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.005em;
-  color: var(--text-2);
+  padding: 0 4px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
 
 .card {
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .footer {
@@ -152,7 +151,7 @@
 }
 
 .linkRow:hover {
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--text) 3%, transparent);
 }
 
 .linkRow:disabled {
@@ -178,11 +177,11 @@
 }
 
 .status[data-on] {
-  color: var(--accent-2);
+  color: var(--green);
 }
 
 .status[data-on]::before {
-  background: var(--accent);
+  background: var(--green);
 }
 
 @media (max-width: 36em) {

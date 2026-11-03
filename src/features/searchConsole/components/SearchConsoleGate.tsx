@@ -26,12 +26,20 @@ export type SearchConsoleLink = {
 export function SearchConsoleGate({
   workspaceId,
   siteId,
+  header,
   children,
 }: {
   workspaceId: string;
   siteId: string;
+  header?: ReactNode;
   children: (link: SearchConsoleLink) => ReactNode;
 }) {
+  const framed = (node: ReactNode) => (
+    <>
+      {header}
+      {node}
+    </>
+  );
   const { canAdmin } = usePermissions();
 
   const dispatch = useDispatch();
@@ -52,47 +60,49 @@ export function SearchConsoleGate({
     return <>{children({ propertyUrl: DEMO_PROPERTY_URL, googleEmail: sample.connection!.googleEmail })}</>;
   }
 
-  if (isLoading) return <ConsoleSkeleton />;
-  if (!status) return null;
+  if (isLoading) return framed(<ConsoleSkeleton />);
+  if (!status) return framed(null);
 
-  if (!status.configured) return <SearchConsoleConnectCard variant="not-configured" />;
+  if (!status.configured) return framed(<SearchConsoleConnectCard variant="not-configured" />);
 
   if (!status.connected || !status.connection) {
-    return canAdmin ? (
-      <SearchConsoleConnectCard variant="connect" onConnect={connect} connecting={connecting} />
-    ) : (
-      <SearchConsoleConnectCard variant="ask-admin" />
+    return framed(
+      canAdmin ? (
+        <SearchConsoleConnectCard variant="connect" onConnect={connect} connecting={connecting} />
+      ) : (
+        <SearchConsoleConnectCard variant="ask-admin" />
+      ),
     );
   }
 
   if (status.connection.status !== "active") {
-    return canAdmin ? (
-      <SearchConsoleConnectCard
-        variant="reconnect"
-        onConnect={connect}
-        connecting={connecting}
-      />
-    ) : (
-      <SearchConsoleConnectCard variant="ask-admin" message={status.connection.statusMessage} />
+    return framed(
+      canAdmin ? (
+        <SearchConsoleConnectCard variant="reconnect" onConnect={connect} connecting={connecting} />
+      ) : (
+        <SearchConsoleConnectCard variant="ask-admin" message={status.connection.statusMessage} />
+      ),
     );
   }
 
   const link = status.links.find((l) => l.siteId === siteId);
 
   if (!link) {
-    return canAdmin ? (
-      <SearchConsolePropertyPicker
-        workspaceId={workspaceId}
-        siteId={siteId}
-        googleEmail={status.connection.googleEmail}
-        onSwitchAccount={connect}
-        switching={connecting}
-      />
-    ) : (
-      <SearchConsoleConnectCard
-        variant="ask-admin"
-        message="Search visibility is connected, but no property is linked to this site yet. A workspace admin can link one."
-      />
+    return framed(
+      canAdmin ? (
+        <SearchConsolePropertyPicker
+          workspaceId={workspaceId}
+          siteId={siteId}
+          googleEmail={status.connection.googleEmail}
+          onSwitchAccount={connect}
+          switching={connecting}
+        />
+      ) : (
+        <SearchConsoleConnectCard
+          variant="ask-admin"
+          message="Search visibility is connected, but no property is linked to this site yet. A workspace admin can link one."
+        />
+      ),
     );
   }
 

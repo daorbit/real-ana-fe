@@ -71,6 +71,8 @@ function SettingsPage({ id }: { id: SettingsSectionId }) {
           onChange={select}
           label={t("settings.title", "Settings")}
           idPrefix={TABS_ID}
+          variant="segmented"
+          sticky={false}
         />
 
         <motion.div

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Avatar, Badge, Box, Button, Group, Text } from "@mantine/core";
+import { Avatar, Box, Button, Group, Text } from "@mantine/core";
 import { Trash2, Images, Smile } from "lucide-react";
 import { MediaPickerModal } from "@/features/media/components/MediaPickerModal";
 import { AvatarPresetPicker } from "@/shared/ui/AvatarPresetPicker";
@@ -28,35 +28,29 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
   const initials =
     `${firstName} ${lastName}`.trim().slice(0, 2).toUpperCase() ||
     user.name.slice(0, 2).toUpperCase();
-  const isAdmin = user.role === "admin" || user.role === "super_admin";
 
   return (
-    <Box component="section" className={classes.identity}>
-      <Box className={classes.cover} />
+    <Box component="section" className={classes.identity} aria-label={t("settings.profile")}>
       <Box className={classes.identityBody}>
-        <Box className={classes.avatarWrap}>
-          <Avatar
-            src={avatarBroken ? null : avatarUrl || null}
-            color="emerald"
-            radius={16}
-            size={84}
-            imageProps={{
-              onError: () => setAvatarBroken(true),
-              referrerPolicy: "no-referrer",
-            }}
-          >
-            {initials}
-          </Avatar>
-        </Box>
+        <Avatar
+          src={avatarBroken ? null : avatarUrl || null}
+          radius="xl"
+          size={72}
+          className={classes.avatar}
+          imageProps={{
+            onError: () => setAvatarBroken(true),
+            referrerPolicy: "no-referrer",
+          }}
+        >
+          {initials}
+        </Avatar>
 
         <Box className={classes.who}>
-          <Group gap="xs" wrap="nowrap">
-            <Text fw={700} size="lg" truncate>
+          <Group gap={10} wrap="nowrap">
+            <Text className={classes.name} truncate>
               {`${firstName} ${lastName}`.trim() || user.name}
             </Text>
-            <Badge size="sm" variant="light" color={isAdmin ? "grape" : "gray"} tt="capitalize">
-              {user.role.replace("_", " ")}
-            </Badge>
+            <span className={classes.role}>{user.role.replace("_", " ")}</span>
           </Group>
           <Text size="sm" c="dimmed" truncate>
             {user.email}
@@ -66,6 +60,7 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
         <Box className={classes.actions}>
           <Button
             size="xs"
+            radius="md"
             variant="default"
             leftSection={<Images size={14} />}
             loading={avatarBusy}
@@ -83,6 +78,7 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
           >
             <Button
               size="xs"
+              radius="md"
               variant="default"
               leftSection={<Smile size={14} />}
               disabled={avatarBusy}
@@ -94,6 +90,7 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
           {avatarUrl && (
             <Button
               size="xs"
+              radius="md"
               variant="subtle"
               color="red"
               leftSection={<Trash2 size={14} />}

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Alert, Stack, Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { FileSearch } from "lucide-react";
 import { ErrorState } from "@/shared/ui/ErrorState";
+import { EmptyState } from "@/shared/ui/EmptyState";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { AppShell } from "@/app/AppShell";
@@ -16,11 +17,14 @@ import { METRIC_BY_KEY, metricChange, pagePath, type MetricKey } from "../search
 import { SearchMetricTile } from "../components/SearchMetricTile";
 import { searchPageHref } from "../useOpenSearchPage";
 import { PageDetailHeader } from "../components/PageDetailHeader";
+import { SearchConsoleToolbar } from "../components/SearchConsoleToolbar";
 import { SearchMetricTiles, toggleMetric } from "../components/SearchMetricTiles";
 import { SearchPerformanceChart } from "../components/SearchPerformanceChart";
 import { SearchTopTable } from "../components/SearchTopTable";
+import { SearchCardHead } from "../components/SearchSectionHead";
 import { SearchIndexStatusCard } from "../components/SearchIndexStatusCard";
-import { SearchDrilldownDrawer } from "../components/SearchDrilldownDrawer";
+import { SearchQuerySheet } from "../components/SearchQuerySheet";
+import { askAboutQueryPrompt } from "../searchOrbitPrompts";
 import { SearchOrbitPanel } from "../components/SearchOrbitPanel";
 import { useOrbitOptional } from "@/features/orbit/components/OrbitProvider";
 import { useSearchOrbitExplain } from "../useSearchOrbitExplain";
@@ -72,22 +76,28 @@ export default function SearchConsolePageDetail() {
   const loaded = data && data.value === pageUrl && (demoData || !isFetching) ? data : null;
 
   const openPage = (url: string) => navigate(searchPageHref({ workspaceId, siteId, days, type, url }));
-  const setDays = (next: number) =>
+  const setParam = (key: "days" | "type", value: string) =>
     setSearch(
       (prev) => {
         const out = new URLSearchParams(prev);
-        out.set("days", String(next));
+        out.set(key, value);
         return out;
       },
       { replace: true },
     );
+  const setDays = (next: number) => setParam("days", String(next));
+  const setType = (next: SearchType) => setParam("type", next);
+  const link = propertyUrl ? { propertyUrl, googleEmail: status?.connection?.googleEmail ?? "" } : null;
 
   if (!ready) {
     return (
       <AppShell>
-        <Alert color="red" variant="light" icon={<FileSearch size={16} />}>
-          This page link is incomplete. Open a page from Search visibility to see its details.
-        </Alert>
+        <EmptyState
+          icon={FileSearch}
+          title="This page link is incomplete"
+          description="Open a page from Search visibility to see its details."
+          action={{ label: "Go to Search visibility", to: "/app/search-visibility?tab=pages" }}
+        />
       </AppShell>
     );
   }
@@ -102,10 +112,22 @@ export default function SearchConsolePageDetail() {
           pageUrl={pageUrl}
           days={days}
           type={type}
-          onDaysChange={setDays}
           onOpenPage={openPage}
-          onAskOrbit={orbitAvailable ? () => setOrbitOpen(true) : undefined}
         />
+
+        {link && (
+          <SearchConsoleToolbar
+            workspaceId={workspaceId}
+            siteId={siteId}
+            days={days}
+            onDaysChange={setDays}
+            type={type}
+            onTypeChange={setType}
+            link={link}
+            busy={isFetching}
+            fetchedAt={loaded?.fetchedAt}
+          />
+        )}
 
         {error && !loaded ? (
           <ErrorState
@@ -129,7 +151,7 @@ export default function SearchConsolePageDetail() {
               <SearchMetricTile
                 id="views"
                 label="Page views"
-                color="#8b5cf6"
+                color="#bf5af2"
                 value={num(loaded.views.total)}
                 change={metricChange(METRIC_BY_KEY.clicks, loaded.views.total, loaded.views.previous)}
                 spark={loaded.views.daily}
@@ -144,18 +166,11 @@ export default function SearchConsolePageDetail() {
 
         <div className={classes.layout}>
           {loaded ? (
-            <div className={cardClasses.card}>
-              <div className={cardClasses.cardHead}>
-                <div>
-                  <Text fw={650} size="sm">
-                    Performance over time
-                  </Text>
-                  <Text size="xs" c="dimmed" mt={2}>
-                    Last {days} days · updated {dayjs(loaded.fetchedAt).format("MMM D, HH:mm")} · tick the cards
-                    above to compare
-                  </Text>
-                </div>
-              </div>
+            <section className={cardClasses.card}>
+              <SearchCardHead
+                title="Performance over time"
+                description={`Last ${days} days · updated ${dayjs(loaded.fetchedAt).format("MMM D, HH:mm")} · tap a card above to compare`}
+              />
               {loaded.daily.length > 1 ? (
                 <SearchPerformanceChart daily={loaded.daily} selected={selected} />
               ) : (
@@ -165,7 +180,7 @@ export default function SearchConsolePageDetail() {
                   </Text>
                 </div>
               )}
-            </div>
+            </section>
           ) : (
             !error && <ChartCardSkeleton />
           )}
@@ -182,8 +197,9 @@ export default function SearchConsolePageDetail() {
         {loaded ? (
           <SearchTopTable
             title="Queries bringing people to this page"
-            description="Click a query to see its trend and the other pages ranking for it."
+            description="Tap a query to see its trend and the other pages ranking for it."
             labelHeader="Query"
+            showCtr
             rows={loaded.related.map((r) => ({ ...r, label: r.key }))}
             emptyText="No queries recorded for this page in this period."
             onOpenRow={(row) => setQuery(row.key)}
@@ -204,13 +220,22 @@ export default function SearchConsolePageDetail() {
         />
       )}
 
-      <SearchDrilldownDrawer
+      <SearchQuerySheet
         query={query}
         onClose={() => setQuery(null)}
         onOpenPage={(url) => {
           setQuery(null);
           openPage(url);
         }}
+        onAskOrbit={
+          orbitAvailable
+            ? (text) => {
+                setQuery(null);
+                setOrbitOpen(true);
+                orbitChat.send(askAboutQueryPrompt(text));
+              }
+            : undefined
+        }
         workspaceId={workspaceId}
         siteId={siteId}
         days={days}

@@ -86,7 +86,6 @@
   border-radius: 14px;
   background: #fff;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
 }
 
 .qr {
@@ -111,8 +110,8 @@
 .keyBox {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px dashed var(--border);
-  background: var(--surface-2);
+  border: 1px solid var(--border);
+  background: var(--segment-track);
 }
 
 .keyHead {

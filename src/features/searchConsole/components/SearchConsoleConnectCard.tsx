@@ -1,14 +1,16 @@
-import { Button, Text } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { Lock, ShieldCheck } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
+import { StartHero, StartScreen } from "@/shared/ui/start/StartScreen";
+import { SearchStartGuide } from "./start/SearchStartGuide";
 import classes from "./connect.module.css";
 
 export type ConnectVariant = "connect" | "ask-admin" | "not-configured" | "reconnect";
 
 const COPY: Record<ConnectVariant, { title: string; body: string }> = {
   connect: {
-    title: "Connect Google Search Console",
-    body: "See the searches that bring visitors, the pages that rank, and where you're climbing or slipping — straight from Google.",
+    title: "See how people find you on Google",
+    body: "Connect Google Search Console to see the searches that bring visitors in, where you rank for them, and which pages Google has indexed, right next to your traffic.",
   },
   "ask-admin": {
     title: "Search visibility isn't connected yet",
@@ -20,9 +22,11 @@ const COPY: Record<ConnectVariant, { title: string; body: string }> = {
   },
   reconnect: {
     title: "Sign in to Google again",
-    body: "Your Google Search Console sign-in has expired. Sign in again to keep seeing search data — your linked properties and settings are kept.",
+    body: "Your Google Search Console sign-in has expired. Sign in again to keep seeing search data. Your linked properties and settings are kept.",
   },
 };
+
+const WITH_GUIDE: ConnectVariant[] = ["connect", "ask-admin"];
 
 export function SearchConsoleConnectCard({
   variant,
@@ -39,34 +43,26 @@ export function SearchConsoleConnectCard({
   const canConnect = (variant === "connect" || variant === "reconnect") && onConnect;
 
   return (
-    <div className={classes.hero}>
-      <div className={classes.pitch}>
-        <span className={classes.mark} aria-hidden>
-          <GoogleMark size={30} />
-        </span>
-
-        <Text component="h2" className={classes.title}>
-          {copy.title}
-        </Text>
-        <Text className={classes.body}>{message || copy.body}</Text>
-
+    <StartScreen>
+      <StartHero id="search-connect-title" icon={<GoogleMark size={28} />} title={copy.title} text={message || copy.body}>
         {canConnect && (
           <Button
             size="md"
+            radius="xl"
             variant="default"
             leftSection={<GoogleMark size={18} />}
             loading={connecting}
             onClick={onConnect}
             className={`${classes.cta} ${classes.googleButton}`}
           >
-            {variant === "reconnect" ? "Sign in with Google" : "Connect with Google"}
+            {variant === "reconnect" ? "Sign in with Google" : "Connect Search Console"}
           </Button>
         )}
 
         {canConnect && (
           <span className={classes.trust}>
             <ShieldCheck size={13} />
-            Only sitemaps you submit are changed · Disconnect anytime
+            Data comes straight from Google · Only sitemaps you submit are changed · Disconnect anytime
           </span>
         )}
 
@@ -76,7 +72,9 @@ export function SearchConsoleConnectCard({
             Only workspace admins can connect Google accounts.
           </span>
         )}
-      </div>
-    </div>
+      </StartHero>
+
+      {WITH_GUIDE.includes(variant) && <SearchStartGuide />}
+    </StartScreen>
   );
 }

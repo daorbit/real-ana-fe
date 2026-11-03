@@ -38,10 +38,3 @@ export const BROWSER_TZ = (() => {
     return null;
   }
 })();
-
-export function mobileError(v: string): string | null {
-  const s = v.trim();
-  if (!s) return null;
-  if (!/^\+?[\d\s\-()]{6,20}$/.test(s)) return "settings.badPhone";
-  return null;
-}

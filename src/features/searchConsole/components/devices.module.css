@@ -1,53 +1,46 @@
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
-  gap: var(--mantine-spacing-lg);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 14px;
   align-items: start;
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-lg);
   min-width: 0;
-  padding: 22px var(--mantine-spacing-lg) var(--mantine-spacing-lg);
-  border-radius: 22px;
+  padding: 20px 20px 22px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow:
-    inset 0 0 0 1px var(--border),
-    var(--shadow-sm);
 }
 
 .legendRow,
 .bar {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 56px;
-  align-items: center;
-  gap: 12px;
-  font-size: var(--mantine-font-size-xs);
+  --device: var(--viz-5);
 }
 
 .legendRow[data-device="MOBILE"],
 .bar[data-device="MOBILE"] {
-  --device: var(--accent);
+  --device: var(--viz-1);
 }
 
 .legendRow[data-device="DESKTOP"],
 .bar[data-device="DESKTOP"] {
-  --device: #22d3ee;
+  --device: var(--viz-2);
 }
 
 .legendRow[data-device="TABLET"],
 .bar[data-device="TABLET"] {
-  --device: #f59e0b;
+  --device: var(--viz-4);
 }
 
 .donut {
   position: relative;
   width: 100%;
-  max-width: 220px;
+  max-width: 200px;
   aspect-ratio: 1;
-  margin: 0 auto;
+  margin: 4px auto 18px;
 }
 
 .donutCenter {
@@ -62,15 +55,15 @@
 
 .donutValue {
   font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
 
 .donutLabel {
-  font-size: var(--mantine-font-size-xs);
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -86,30 +79,26 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 0;
+  min-height: 42px;
   border-top: 1px solid var(--border);
-  font-size: var(--mantine-font-size-sm);
+  font-size: 13.5px;
 }
 
-.legendIcon {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
+.legendSwatch {
+  width: 9px;
+  height: 9px;
   flex-shrink: 0;
-  border-radius: 50%;
-  color: var(--device);
-  background: color-mix(in srgb, var(--device) 14%, transparent);
+  border-radius: 3px;
+  background: var(--device);
 }
 
 .legendName {
   flex: 1;
-  font-weight: 600;
   color: var(--text);
 }
 
 .legendShare {
-  font-weight: 700;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
@@ -122,30 +111,28 @@
 .metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
+  gap: 18px 28px;
 }
 
 .metric {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
 .metricLabel {
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
 }
 
 .bar {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 70px;
+  grid-template-columns: 60px minmax(0, 1fr) 64px;
   align-items: center;
   gap: 10px;
-  font-size: var(--mantine-font-size-xs);
+  font-size: 12.5px;
 }
 
 .barName {
@@ -153,9 +140,9 @@
 }
 
 .barTrack {
-  height: 6px;
+  height: 8px;
   border-radius: 999px;
-  background: var(--surface-2);
+  background: var(--segment-track);
   overflow: hidden;
 }
 
@@ -171,14 +158,9 @@
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  font-weight: 650;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
-
-.barValue {
   color: var(--text-2);
-  font-weight: 550;
 }
 
 .barValue[data-best] {
@@ -193,6 +175,10 @@
 }
 
 @media (max-width: 48em) {
+  .card {
+    padding: 16px;
+  }
+
   .metrics {
     grid-template-columns: minmax(0, 1fr);
   }

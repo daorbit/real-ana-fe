@@ -8,6 +8,7 @@ import { useDemo } from "@/features/demo/context";
 import { demoSearchHourly } from "@/features/demo/demoSearchConsole";
 import type { SearchHourly, SearchMetrics, SearchType } from "@/shared/types";
 import { METRIC_BY_KEY, metricChange } from "../searchMetrics";
+import { SearchCardHead } from "./SearchSectionHead";
 import classes from "./searchConsole.module.css";
 import h from "./hourly.module.css";
 
@@ -76,27 +77,22 @@ export function SearchHourlyCard({ workspaceId, siteId, type }: { workspaceId: s
   const ticks = points.filter((p) => dayjs(p.hour).hour() % 6 === 0).map((p) => p.hour);
 
   return (
-    <div className={classes.card}>
-      <div className={classes.cardHead}>
-        <div>
-          <Text fw={650} size="sm">
-            Last 48 hours
-          </Text>
-          <Text size="xs" c="dimmed" mt={2}>
-            Hour by hour in your time zone. Google updates this through the day, so it shows the effect of a new post
-            or launch long before the daily chart.
-          </Text>
-        </div>
-        <SegmentedControl
-          size="xs"
-          value={metric}
-          onChange={(v) => setMetric(v as HourlyMetric)}
-          data={[
-            { value: "impressions", label: "Impressions" },
-            { value: "clicks", label: "Clicks" },
-          ]}
-        />
-      </div>
+    <section className={classes.card}>
+      <SearchCardHead
+        title="Last 48 hours"
+        description="Hour by hour in your time zone. It shows the effect of a new post or launch long before the daily chart."
+        right={
+          <SegmentedControl
+            size="xs"
+            value={metric}
+            onChange={(v) => setMetric(v as HourlyMetric)}
+            data={[
+              { value: "impressions", label: "Impressions" },
+              { value: "clicks", label: "Clicks" },
+            ]}
+          />
+        }
+      />
 
       {isLoading ? (
         <Skeleton height={260} radius="md" />
@@ -160,6 +156,6 @@ export function SearchHourlyCard({ workspaceId, siteId, type }: { workspaceId: s
           </div>
         </>
       )}
-    </div>
+    </section>
   );
 }

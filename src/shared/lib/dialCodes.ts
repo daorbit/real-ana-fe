@@ -107,3 +107,26 @@ export function splitNumber(stored: string): { country: DialCode; local: string 
   }
   return { country: guessCountry(), local: digits };
 }
+
+const GROUPS: Record<string, number[]> = {
+  "91": [5, 5],
+  "1": [3, 3, 4],
+  "44": [4, 6],
+  "61": [3, 3, 3],
+  "65": [4, 4],
+  "971": [2, 3, 4],
+};
+
+export function formatLocalNumber(country: DialCode, local: string): string {
+  const digits = local.replace(/[^\d]/g, "");
+  const groups = GROUPS[country.dial] ?? [3, 3, 4];
+  const parts: string[] = [];
+  let at = 0;
+  for (const size of groups) {
+    if (at >= digits.length) break;
+    parts.push(digits.slice(at, at + size));
+    at += size;
+  }
+  if (at < digits.length) parts.push(digits.slice(at));
+  return parts.join(" ");
+}

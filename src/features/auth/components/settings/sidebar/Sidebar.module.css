@@ -39,9 +39,8 @@
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 16px;
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .panelHead {
@@ -71,7 +70,7 @@
   margin: 3px 0 0;
   font-size: 12.5px;
   line-height: 1.5;
-  color: var(--muted);
+  color: var(--text-2);
 }
 
 .panelBody > * {
@@ -94,7 +93,7 @@
   justify-content: flex-end;
   padding: 12px 20px;
   border-top: 1px solid var(--border);
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--text) 2%, transparent);
 }
 
 .search {
@@ -114,10 +113,9 @@
   min-height: 38px;
   font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-  background: var(--surface-2);
+  color: var(--text-2);
+  background: color-mix(in srgb, var(--text) 2%, transparent);
+  border-bottom: 1px solid var(--border);
 }
 
 .pageRow {
@@ -206,7 +204,7 @@
 
 .tile[data-accent] {
   background: var(--accent-soft);
-  color: var(--accent-2);
+  color: var(--accent-text);
 }
 
 .logoTile {
@@ -308,7 +306,8 @@
   height: 30px;
   flex-shrink: 0;
   border-radius: 8px;
-  border: 1px dashed var(--border-strong);
+  border: 1px solid var(--border);
+  background: var(--segment-track);
 }
 
 .resetLink {
