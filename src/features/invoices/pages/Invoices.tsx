@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useComputedColorScheme } from "@mantine/core";
 import { FolderOpen, ReceiptText } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -9,6 +8,7 @@ import { useAuth } from "@/features/auth/context";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useHostFrameToken } from "@/shared/hooks/useHostFrameToken";
+import { useFrameTheme } from "@/shared/hooks/useFrameTheme";
 import { useEmbeddedPlanLimit } from "@/features/leadCapture/useEmbeddedPlanLimit";
 import { useFrameUnreadCount } from "@/features/leadCapture/useFrameUnreadCount";
 import { INVOICES_APP_BASE, invoicesAppUrl } from "../lib/invoicesApp";
@@ -19,7 +19,6 @@ export default function Invoices() {
   const { active } = useWorkspace();
   const { isDemo } = useAuth();
   const { invoicing: on } = useWorkspaceApps();
-  const colorScheme = useComputedColorScheme("light");
   const configured = Boolean(INVOICES_APP_BASE);
   const workspaceId = isDemo || !configured || !on ? null : active?._id;
 
@@ -35,8 +34,8 @@ export default function Invoices() {
 
   const src = useMemo(() => {
     if (!workspaceId || bootToken === undefined) return null;
-    return invoicesAppUrl(workspaceId, colorScheme, bootToken);
-  }, [workspaceId, colorScheme, bootToken]);
+    return invoicesAppUrl(workspaceId, bootToken);
+  }, [workspaceId, bootToken]);
 
   if (isDemo || !configured) {
     return (
@@ -78,6 +77,7 @@ function InvoicesFrame({ src }: { src: string }) {
   useEmbeddedPlanLimit(INVOICES_APP_BASE);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const sendUnreadCount = useFrameUnreadCount(frameRef, INVOICES_APP_BASE);
+  const sendTheme = useFrameTheme(frameRef, INVOICES_APP_BASE);
   return (
     <iframe
       ref={frameRef}
@@ -86,7 +86,10 @@ function InvoicesFrame({ src }: { src: string }) {
       title="Invoices"
       className={classes.frame}
       allow="clipboard-write"
-      onLoad={() => sendUnreadCount()}
+      onLoad={() => {
+        sendUnreadCount();
+        sendTheme();
+      }}
     />
   );
 }

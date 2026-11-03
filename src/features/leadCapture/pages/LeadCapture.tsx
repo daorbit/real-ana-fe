@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useComputedColorScheme } from "@mantine/core";
+import { useEffect, useMemo, useRef } from "react";
 import { FolderOpen } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -12,6 +11,7 @@ import { useFrameRailCollapse } from "../useFrameRailCollapse";
 import "./LeadCapture.css";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useHostFrameToken } from "@/shared/hooks/useHostFrameToken";
+import { useFrameTheme } from "@/shared/hooks/useFrameTheme";
 
 
 const DEMO_FORMS_WORKSPACE = "default";
@@ -20,19 +20,11 @@ export default function LeadCapture() {
   useTitle("Lead capture");
   const { active } = useWorkspace();
   const { isDemo } = useAuth();
-  const [themeVersion, setThemeVersion] = useState(0);
-  const colorScheme = useComputedColorScheme("light");
   useEffect(() => {
     document.body.dataset.page = "lead-capture";
     return () => {
       delete document.body.dataset.page;
     };
-  }, []);
-
-  useEffect(() => {
-    const refresh = () => setThemeVersion((version) => version + 1);
-    window.addEventListener("quantalog-theme-change", refresh);
-    return () => window.removeEventListener("quantalog-theme-change", refresh);
   }, []);
 
 
@@ -52,14 +44,9 @@ export default function LeadCapture() {
       // waits for one. Otherwise hold until the mint settles: loading the frame
       // first only means its opening request is refused and repeated.
       if (!isDemo && bootToken === undefined) return null;
-      const url = leadFormsUrl(
-        `/${frameWorkspace}/forms`,
-        colorScheme,
-        isDemo ? undefined : bootToken,
-      );
-      return `${url}&themeRevision=${themeVersion}`;
+      return leadFormsUrl(`/${frameWorkspace}/forms`, isDemo ? undefined : bootToken);
     },
-    [active, isDemo, colorScheme, themeVersion, bootToken],
+    [active, isDemo, bootToken],
   );
  
 
@@ -91,6 +78,7 @@ function LeadCaptureFrame({ src }: { src: string }) {
   useFrameRailCollapse();
   const frameRef = useRef<HTMLIFrameElement>(null);
   const sendUnreadCount = useFrameUnreadCount(frameRef);
+  const sendTheme = useFrameTheme(frameRef, LEAD_FORMS_BASE);
   return (
     <iframe
       ref={frameRef}
@@ -99,7 +87,10 @@ function LeadCaptureFrame({ src }: { src: string }) {
       title="Lead forms"
       className="lead-capture__frame"
       allow="clipboard-write"
-      onLoad={() => sendUnreadCount()}
+      onLoad={() => {
+        sendUnreadCount();
+        sendTheme();
+      }}
     />
   );
 }
