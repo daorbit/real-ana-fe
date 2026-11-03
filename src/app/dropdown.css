@@ -22,13 +22,9 @@
   transition: background-color 120ms ease, color 120ms ease;
 }
 
-.app-combobox-option:where([data-combobox-selected], :hover) {
-  color: var(--accent-contrast);
-  background: var(--accent);
-}
-
-.app-combobox-option:where([data-combobox-selected], :hover) > svg {
-  color: var(--accent-contrast);
+.app-combobox-option:is([data-combobox-selected], :hover):not([data-combobox-disabled]) {
+  color: var(--text);
+  background: var(--accent-soft);
 }
 
 .app-combobox-option[data-checked] {
