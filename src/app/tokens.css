@@ -69,6 +69,7 @@
   --field-bg-hover: color-mix(in srgb, var(--text) 12%, transparent);
   --field-border: transparent;
   --field-border-hover: transparent;
+  --card-bg: var(--surface-2);
   --segment-thumb: var(--gray-8);
   --segment-thumb-edge: transparent;
   --segment-fg: var(--text);
@@ -235,6 +236,7 @@
   --field-bg-hover: var(--surface);
   --field-border: var(--border);
   --field-border-hover: var(--border-strong);
+  --card-bg: var(--surface);
   --segment-thumb: #ffffff;
   --segment-thumb-edge: color-mix(in srgb, var(--text) 9%, transparent);
   --segment-fg: var(--text);

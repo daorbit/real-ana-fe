@@ -45,6 +45,7 @@ export function ConnectionFooter({
         disabled={disabled}
         onClick={onAction}
         className={classes.action}
+        data-keep-color
         aria-label={ariaLabel}
       >
         {action}

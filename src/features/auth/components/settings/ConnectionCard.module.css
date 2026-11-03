@@ -2,14 +2,14 @@
   position: relative;
   gap: 0;
   border-color: var(--border);
-  background: var(--surface-2);
+  background: var(--card-bg);
   transition: border-color var(--duration) ease, background-color var(--duration) ease;
   animation: card-in 320ms var(--ease-out) both;
 }
 
 .card:hover {
   border-color: var(--border-strong);
-  background: color-mix(in srgb, var(--text) 3%, var(--surface-2));
+  background: color-mix(in srgb, var(--text) 2%, var(--card-bg));
 }
 
 .card[data-celebrate] {

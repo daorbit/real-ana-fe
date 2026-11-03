@@ -37,9 +37,13 @@
 }
 
 .action:is([data-variant="light"], [data-variant="default"]):not([data-disabled]) {
-  --button-bg: var(--segment-track) !important;
-  --button-hover: color-mix(in srgb, var(--text) 14%, transparent) !important;
-  --button-bd: 1px solid transparent !important;
+  --button-bg: var(--field-bg) !important;
+  --button-hover: var(--field-bg-hover) !important;
+  --button-bd: 1px solid var(--field-border) !important;
   --button-color: var(--accent-text) !important;
   font-weight: 650;
+}
+
+.action:is([data-variant="light"], [data-variant="default"]):not([data-disabled]):hover {
+  --button-bd: 1px solid var(--field-border-hover) !important;
 }
