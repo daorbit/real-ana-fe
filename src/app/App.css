@@ -528,7 +528,7 @@ body { overflow-wrap: break-word; }
 }
 
 [data-mantine-color-scheme="dark"] .mantine-Popover-dropdown {
-  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 97%, transparent);
   backdrop-filter: saturate(180%) blur(30px);
   -webkit-backdrop-filter: saturate(180%) blur(30px);
 }
@@ -2606,7 +2606,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 :root .mantine-Menu-dropdown {
   border-radius: 13px;
-  background: color-mix(in srgb, var(--surface-2) 86%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 96%, transparent);
   backdrop-filter: saturate(180%) blur(30px);
   -webkit-backdrop-filter: saturate(180%) blur(30px);
 }

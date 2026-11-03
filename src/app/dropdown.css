@@ -3,7 +3,7 @@
   padding: 5px;
   border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
   border-radius: 13px;
-  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 96%, transparent);
   -webkit-backdrop-filter: saturate(180%) blur(30px);
   backdrop-filter: saturate(180%) blur(30px);
 }
