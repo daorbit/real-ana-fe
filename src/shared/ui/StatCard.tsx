@@ -28,7 +28,7 @@ export const ACCENT: Record<string, string> = {
   yellow: "var(--metric-yellow)",
 };
 
-const COMPACT_FROM = 10_000;
+const COMPACT_FROM = 1_000;
 
 function StatValue({ value }: { value: number | string }) {
   const numeric = typeof value === "number";
@@ -87,7 +87,7 @@ export function StatCard({
   const [open, setOpen] = useState(false);
   const accent = ACCENT[color] ?? ACCENT.emerald;
   const hasSpark = Boolean(spark && spark.length > 1 && spark.some((row) => typeof row[sparkKey] === "number"));
-  const subline = note ?? (comparison ? `vs ${comparison.previous} · ${comparison.label}` : null);
+  const subline = note ?? (comparison ? `vs ${comparison.previousShort} · ${comparison.label}` : null);
 
   const toggleExplain = () => {
     const opening = !open;

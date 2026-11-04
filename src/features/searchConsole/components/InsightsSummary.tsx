@@ -1,4 +1,4 @@
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { ACTION_KINDS, type ActionKind, type InsightAction } from "../insightActions";
 import classes from "./insights.module.css";
 
@@ -24,7 +24,7 @@ export function InsightsSummary({
             : "Nothing needs your attention right now"}
         </p>
         <p className={classes.summarySub}>
-          Ranked by clicks to gain or win back, from {num(queries)} queries and {num(pages)} pages in the last {days}{" "}
+          Ranked by clicks to gain or win back, from {compact(queries)} queries and {compact(pages)} pages in the last {days}{" "}
           days.
         </p>
       </div>

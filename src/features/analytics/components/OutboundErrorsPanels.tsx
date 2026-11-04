@@ -1,5 +1,5 @@
 import { ExternalLink, Download, AlertTriangle } from "lucide-react";
-import { num, timeAgo } from "@/shared/lib";
+import { compact, timeAgo } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import type { OutboundBucket, ErrorBucket } from "@/shared/types";
@@ -21,7 +21,7 @@ export function OutboundPanel({ items }: { items: OutboundBucket[] }) {
     <RankCard
       title="Outbound links"
       tone="teal"
-      subtitle={items.length > 0 ? `${num(total)} clicks that left your site` : "Clicks that left your site"}
+      subtitle={items.length > 0 ? `${compact(total)} clicks that left your site` : "Clicks that left your site"}
     >
       {items.length === 0 ? (
         <RankEmpty icon={ExternalLink}>No outbound clicks or downloads yet</RankEmpty>
@@ -37,7 +37,7 @@ export function OutboundPanel({ items }: { items: OutboundBucket[] }) {
               title: i.key,
               weight: i.count,
               meta: rest && rest !== "/" ? rest : i.kind === "download" ? "Download" : undefined,
-              value: num(i.count),
+              value: compact(i.count),
             };
           })}
         />
@@ -87,7 +87,7 @@ export function ErrorsPanel({ items, onSelectPath }: { items: ErrorBucket[]; onS
                 <span role="cell" className={table.left}>
                   <span className={table.mono}>{i.path || "—"}</span>
                 </span>
-                <span role="cell" className={table.strong}>{num(i.count)}</span>
+                <span role="cell" className={table.strong}>{compact(i.count)}</span>
                 <span role="cell" className={table.muted}>{i.lastSeen ? timeAgo(i.lastSeen) : "—"}</span>
               </button>
             ))}

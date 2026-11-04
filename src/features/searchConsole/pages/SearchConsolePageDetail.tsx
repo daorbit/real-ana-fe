@@ -9,7 +9,7 @@ import { AppShell } from "@/app/AppShell";
 import { useGetSearchConsoleStatusQuery, useGetSearchDrilldownQuery } from "@/app/store";
 import { errMessage } from "@/shared/lib/notify";
 import { useTitle } from "@/shared/lib/useTitle";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchConsoleStatus, demoSearchDrilldown } from "@/features/demo/demoSearchConsole";
 import type { SearchType } from "@/shared/types";
@@ -152,7 +152,7 @@ export default function SearchConsolePageDetail() {
                 id="views"
                 label="Page views"
                 color="#bf5af2"
-                value={num(loaded.views.total)}
+                value={compact(loaded.views.total)}
                 change={metricChange(METRIC_BY_KEY.clicks, loaded.views.total, loaded.views.previous)}
                 spark={loaded.views.daily}
                 sparkKey="views"

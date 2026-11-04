@@ -1,5 +1,7 @@
 /** Formatting helpers shared across the dashboard. */
 
+const COMPACT_NUMBER = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+
 /** 1234567 -> "1,234,567" */
 export function num(n: number): string {
   return n.toLocaleString();
@@ -7,9 +9,7 @@ export function num(n: number): string {
 
 /** 1234567 -> "1.2M" — for tight spaces like stat cards. */
 export function compact(n: number): string {
-  if (n < 1000) return String(n);
-  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}k`;
-  return `${(n / 1_000_000).toFixed(1)}M`;
+  return COMPACT_NUMBER.format(n);
 }
 
 /** ms -> "2m 14s" */

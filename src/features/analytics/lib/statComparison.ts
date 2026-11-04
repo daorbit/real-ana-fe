@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { duration, num } from "@/shared/lib";
+import { compact, duration, num } from "@/shared/lib";
 import type { Comparison, Stats } from "@/shared/types";
 import type { StatComparison } from "@/shared/ui/StatCard";
 
@@ -12,6 +12,12 @@ const FORMAT: Record<ComparedMetric, (v: number) => string> = {
   bounceRate: (v) => `${v}%`,
   avgSessionMs: duration,
   pagesPerSession: (v) => String(v),
+};
+
+const SHORT_FORMAT: Partial<Record<ComparedMetric, (v: number) => string>> = {
+  visitors: compact,
+  pageviews: compact,
+  sessions: compact,
 };
 
 export function comparisonLabel(comparison: Comparison, range: string): string {
@@ -30,6 +36,7 @@ export function statComparison(
   const format = FORMAT[metric];
   return {
     previous: format(base[metric] ?? 0),
+    previousShort: (SHORT_FORMAT[metric] ?? format)(base[metric] ?? 0),
     current: format(view[metric] ?? 0),
     label: comparisonLabel(base, range),
   };

@@ -1,4 +1,4 @@
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import type { SearchInsightRow, SearchInsights, SearchLostRow } from "@/shared/types";
 import { METRIC_BY_KEY, pagePath } from "./searchMetrics";
 
@@ -43,8 +43,8 @@ export function buildActions(data: SearchInsights): InsightAction[] {
       dimension: "query",
       target: row.key,
       title: `Improve click-through for ${label("query", row.key)}`,
-      detail: `Ranks ${fmtPos(row.position)} with ${num(row.impressions)} impressions, but only ${fmtCtr(row.ctr)} click. Sharpen the page title and description.`,
-      impact: `~${num(missed)} more clicks`,
+      detail: `Ranks ${fmtPos(row.position)} with ${compact(row.impressions)} impressions, but only ${fmtCtr(row.ctr)} click. Sharpen the page title and description.`,
+      impact: `~${compact(missed)} more clicks`,
       score: missed,
     });
   }
@@ -58,8 +58,8 @@ export function buildActions(data: SearchInsights): InsightAction[] {
       dimension: "query",
       target: row.key,
       title: `Push ${label("query", row.key)} ${goal}`,
-      detail: `Ranks ${fmtPos(row.position)} with ${num(row.impressions)} impressions. Expand the content and add internal links to the ranking page.`,
-      impact: `~${num(potential)} more clicks`,
+      detail: `Ranks ${fmtPos(row.position)} with ${compact(row.impressions)} impressions. Expand the content and add internal links to the ranking page.`,
+      impact: `~${compact(potential)} more clicks`,
       score: potential,
     });
   }
@@ -73,8 +73,8 @@ export function buildActions(data: SearchInsights): InsightAction[] {
         dimension,
         target: row.key,
         title: dimension === "page" ? `Recover ${label(dimension, row.key)}` : `${label(dimension, row.key)} is slipping`,
-        detail: `Down from ${num(row.previousClicks ?? 0)} to ${num(row.clicks)} clicks${row.previousPosition ? `, position ${fmtPos(row.previousPosition)} → ${fmtPos(row.position)}` : ""}.`,
-        impact: `−${num(lost)} clicks`,
+        detail: `Down from ${compact(row.previousClicks ?? 0)} to ${compact(row.clicks)} clicks${row.previousPosition ? `, position ${fmtPos(row.previousPosition)} → ${fmtPos(row.position)}` : ""}.`,
+        impact: `−${compact(lost)} clicks`,
         score: lost * 1.5,
       });
     }
@@ -89,8 +89,8 @@ export function buildActions(data: SearchInsights): InsightAction[] {
       dimension: "query",
       target: row.key,
       title: `Lost all clicks for ${label("query", row.key)}`,
-      detail: `Brought ${num(row.previousClicks)} clicks last period and none now. Check the page that used to rank still exists and is indexed.`,
-      impact: `−${num(row.previousClicks)} clicks`,
+      detail: `Brought ${compact(row.previousClicks)} clicks last period and none now. Check the page that used to rank still exists and is indexed.`,
+      impact: `−${compact(row.previousClicks)} clicks`,
       score: row.previousClicks * 1.5,
     });
   }
@@ -106,8 +106,8 @@ export function buildActions(data: SearchInsights): InsightAction[] {
         title: isNew ? `New demand: ${label(dimension, row.key)}` : `${label(dimension, row.key)} is gaining`,
         detail: isNew
           ? `Started bringing clicks this period at position ${fmtPos(row.position)}. Make sure the page fully answers it.`
-          : `Up from ${num(row.previousClicks ?? 0)} to ${num(row.clicks)} clicks. Refresh it and link to it while momentum lasts.`,
-        impact: `+${num(gained)} clicks`,
+          : `Up from ${compact(row.previousClicks ?? 0)} to ${compact(row.clicks)} clicks. Refresh it and link to it while momentum lasts.`,
+        impact: `+${compact(gained)} clicks`,
         score: gained,
       });
     }

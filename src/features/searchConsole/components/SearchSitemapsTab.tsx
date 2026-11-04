@@ -5,7 +5,7 @@ import { useGetSearchSitemapsQuery } from "@/app/store";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { usePermissions } from "@/features/workspace/context";
 import { errMessage } from "@/shared/lib/notify";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { useDemo } from "@/features/demo/context";
 import { demoSearchSitemaps } from "@/features/demo/demoSearchConsole";
 import { useSearchConsoleConnect } from "../useSearchConsoleConnect";
@@ -72,7 +72,7 @@ export function SearchSitemapsTab({
           {data.sitemaps.length > 0 && (
             <span className={classes.listCount}>
               {data.sitemaps.length} sitemap{data.sitemaps.length === 1 ? "" : "s"}
-              {pages ? ` · ${num(pages)} pages` : ""}
+              {pages ? ` · ${compact(pages)} pages` : ""}
             </span>
           )}
         </div>

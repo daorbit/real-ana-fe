@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { ChartNoAxesColumn } from "lucide-react";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
 import { SearchWidgetCard, SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
 import { useSearchInsightsData } from "@/features/searchConsole/widgets/useSearchWidgetData";
@@ -26,7 +26,7 @@ export function SearchRankingsWidget({ source }: { source: SearchSource }) {
     <SearchWidgetCard
       icon={ChartNoAxesColumn}
       title="Ranking positions"
-      subtitle={ready ? `${num(total)} queries · last ${data.days} days` : undefined}
+      subtitle={ready ? `${compact(total)} queries · last ${data.days} days` : undefined}
       tab="insights"
     >
       {source.kind === "loading" || loading ? (
@@ -56,9 +56,9 @@ export function SearchRankingsWidget({ source }: { source: SearchSource }) {
                   <span className={insights.bandDot} />
                   {BAND_LABEL[b.band]}
                 </span>
-                <span className={classes.bandCount}>{num(b.queries)}</span>
+                <span className={classes.bandCount}>{compact(b.queries)}</span>
                 <span className={insights.bandMove} data-dir={b.netMoved > 0 ? "up" : b.netMoved < 0 ? "down" : undefined}>
-                  {b.netMoved === 0 ? "±0" : `${b.netMoved > 0 ? "+" : "−"}${num(Math.abs(b.netMoved))}`}
+                  {b.netMoved === 0 ? "±0" : `${b.netMoved > 0 ? "+" : "−"}${compact(Math.abs(b.netMoved))}`}
                 </span>
               </div>
             ))}

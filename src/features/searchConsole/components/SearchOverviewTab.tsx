@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Text } from "@mantine/core";
 import dayjs from "dayjs";
+import { compact } from "@/shared/lib";
 import type { SearchPerformance } from "@/shared/types";
 import { METRIC_BY_KEY, metricChange, pagePath, type MetricKey } from "../searchMetrics";
 import { SearchMetricTiles, toggleMetric } from "./SearchMetricTiles";
@@ -12,7 +13,7 @@ import { SearchCardHead } from "./SearchSectionHead";
 import classes from "./searchConsole.module.css";
 
 function plural(n: number, word: string) {
-  return `${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`;
+  return `${compact(n)} ${word}${n === 1 ? "" : "s"}`;
 }
 
 function Headline({ data }: { data: SearchPerformance }) {
@@ -31,7 +32,7 @@ function Headline({ data }: { data: SearchPerformance }) {
       <div className={classes.headlineText}>
         <p className={classes.headlineTitle}>
           In the last {days} days, Google showed your site <b>{plural(impressions, "time")}</b> and{" "}
-          <b>{clicks === 1 ? "1 person" : `${clicks.toLocaleString()} people`}</b> clicked through.
+          <b>{clicks === 1 ? "1 person" : `${compact(clicks)} people`}</b> clicked through.
         </p>
         <p className={classes.headlineSub}>
           {change && !change.flat && (

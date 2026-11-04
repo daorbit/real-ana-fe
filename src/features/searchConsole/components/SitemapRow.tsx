@@ -1,5 +1,5 @@
 import { AlertTriangle, CheckCircle2, Clock, FileText, XCircle } from "lucide-react";
-import { num, timeAgo } from "@/shared/lib";
+import { compact, timeAgo } from "@/shared/lib";
 import type { SearchSitemap } from "@/shared/types";
 import { sitemapPath } from "../sitemapUrl";
 import { SitemapRowActions } from "./SitemapRowActions";
@@ -32,7 +32,7 @@ export function SitemapRow({
   const status = statusOf(sitemap);
   const StatusIcon = status.icon;
   const meta = [
-    sitemap.submitted ? `${num(sitemap.submitted)} page${sitemap.submitted === 1 ? "" : "s"}` : null,
+    sitemap.submitted ? `${compact(sitemap.submitted)} page${sitemap.submitted === 1 ? "" : "s"}` : null,
     sitemap.lastSubmitted ? `Submitted ${timeAgo(sitemap.lastSubmitted)}` : null,
     sitemap.lastDownloaded ? `Read by Google ${timeAgo(sitemap.lastDownloaded)}` : "Not read by Google yet",
   ].filter(Boolean) as string[];

@@ -5,6 +5,7 @@ import {
 import { useDebouncedValue } from "@mantine/hooks";
 import { ArrowDown, ArrowUp, ChevronRight, Search } from "lucide-react";
 import { useGetSearchBreakdownQuery } from "@/app/store";
+import { compact } from "@/shared/lib";
 import { errMessage } from "@/shared/lib/notify";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { useDemo } from "@/features/demo/context";
@@ -139,7 +140,7 @@ export function SearchBreakdownTab({
         title={
           <>
             {title}
-            {data.totalAll > 0 && <span className={classes.groupCount}>{data.totalAll.toLocaleString()} total</span>}
+            {data.totalAll > 0 && <span className={classes.groupCount}>{compact(data.totalAll)} total</span>}
           </>
         }
         description={
@@ -227,7 +228,7 @@ export function SearchBreakdownTab({
       {data.limitedTo ? (
         <SearchUpgradeNote>
           Showing your top {data.limitedTo} {labelHeader.toLowerCase()}s by clicks, out of{" "}
-          {data.totalAll.toLocaleString()}. Upgrade to see and search every {labelHeader.toLowerCase()}.
+          {compact(data.totalAll)}. Upgrade to see and search every {labelHeader.toLowerCase()}.
         </SearchUpgradeNote>
       ) : null}
 

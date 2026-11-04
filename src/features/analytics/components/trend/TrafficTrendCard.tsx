@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button, Center, Group, Stack, Text } from "@mantine/core";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { compact } from "@/shared/lib";
 import { AnalyticsArt } from "@/shared/ui/Brand";
 import { RankCard } from "@/shared/ui/rank/RankCard";
 import { ADD_SITE_PATH } from "@/features/workspace/paths";
@@ -62,7 +63,7 @@ export function TrafficTrendCard({
             <AreaChart data={series} syncId="analytics-overview" margin={CHART_MARGIN}>
               <CartesianGrid stroke="var(--viz-grid)" vertical={false} />
               <XAxis dataKey="bucket" tick={AXIS_TICK} tickLine={false} axisLine={false} tickMargin={10} minTickGap={24} />
-              <YAxis tick={AXIS_TICK} allowDecimals={false} tickLine={false} axisLine={false} width={44} />
+              <YAxis tick={AXIS_TICK} allowDecimals={false} tickLine={false} axisLine={false} width={44} tickFormatter={compact} />
               <Tooltip
                 content={<TrafficTrendTooltip metrics={[metric]} comparing={comparing} />}
                 cursor={{ stroke: "var(--viz-cursor)", strokeWidth: 1 }}

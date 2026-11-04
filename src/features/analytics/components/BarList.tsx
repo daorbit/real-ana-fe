@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { ActionIcon, Button, Tooltip } from "@mantine/core";
 import { GitCompareArrows, Inbox } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { num, share } from "@/shared/lib";
+import { compact, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import { DonutBreakdown } from "@/shared/ui/rank/DonutBreakdown";
@@ -59,7 +59,7 @@ export function BarList({
   const shown: Bucket[] = showCompare ? compareRows.map((r) => ({ key: r.key, count: r.count })) : items;
   const deltaByKey = new Map(compareRows?.map((r) => [r.key, r]) ?? []);
   const total = shown.reduce((sum, i) => sum + i.count, 0);
-  const summary = shown.length > 0 ? `${num(total)} total · ${shown.length} ${shown.length === 1 ? "item" : "items"}` : undefined;
+  const summary = shown.length > 0 ? `${compact(total)} total · ${shown.length} ${shown.length === 1 ? "item" : "items"}` : undefined;
 
   return (
     <RankCard
@@ -116,7 +116,7 @@ export function BarList({
             label: format ? format(i.key) : isPathKey(i.key) ? <PathLabel path={i.key} /> : i.key,
             weight: i.count,
             title: filterKey && onFilter ? `Filter by ${i.key}` : i.key,
-            value: num(i.count),
+            value: compact(i.count),
             aside: showCompare ? <BreakdownDelta row={deltaByKey.get(i.key)} /> : share(i.count, total),
           }))}
           onSelect={filterKey && onFilter ? (key) => onFilter(filterKey, key) : undefined}

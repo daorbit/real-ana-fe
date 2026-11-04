@@ -1,4 +1,5 @@
 import { Progress } from "@mantine/core";
+import { compact } from "@/shared/lib";
 import type { SeoDiagnostics } from "@/shared/types";
 import { SeoCard, SeoSection } from "@/features/seo/components/shared/SeoCard";
 import { ListHead, SeoList } from "@/features/seo/components/shared/SeoList";
@@ -68,7 +69,7 @@ export function DiagnosticsPanel({ diagnostics }: { diagnostics?: SeoDiagnostics
               ))}
             </div>
             <div className={classes.stats}>
-              <Stat label="DOM elements" value={diagnostics.domElements?.toLocaleString() ?? "—"} />
+              <Stat label="DOM elements" value={diagnostics.domElements != null ? compact(diagnostics.domElements) : "—"} />
               <Stat label="Main thread" value={ms(diagnostics.mainThreadMs)} />
               <Stat label="Server response" value={ms(diagnostics.serverResponseMs)} />
             </div>

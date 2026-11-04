@@ -1,6 +1,6 @@
 import { Tooltip } from "@mantine/core";
 import { MousePointerClick, Link2 } from "lucide-react";
-import { num, share } from "@/shared/lib";
+import { compact, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import type { ClickBucket } from "@/shared/types";
@@ -18,7 +18,7 @@ export function ClicksPanel({
     <RankCard
       title="Most clicked"
       tone="violet"
-      subtitle={total > 0 ? `${num(total)} clicks across ${clicks.length} buttons and links` : "Buttons and links on your pages"}
+      subtitle={total > 0 ? `${compact(total)} clicks across ${clicks.length} buttons and links` : "Buttons and links on your pages"}
     >
       {clicks.length === 0 ? (
         <RankEmpty icon={MousePointerClick}>
@@ -33,7 +33,7 @@ export function ClicksPanel({
             id: `${c.key}|${c.path}`,
             label: c.key,
             title: c.key,
-            value: num(c.count),
+            value: compact(c.count),
             aside: share(c.count, total),
             meta: (
               <>

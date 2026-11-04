@@ -1,6 +1,6 @@
 import { Progress } from "@mantine/core";
 import type { SeoContent } from "@/shared/types";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { Empty } from "@/features/seo/components/shared/Panel";
 import { SeoCard } from "@/features/seo/components/shared/SeoCard";
 import { Pill } from "@/features/seo/components/shared/Pill";
@@ -43,7 +43,7 @@ export function ContentPanel({ content }: { content: SeoContent }) {
       <Tiles>
         <Tile
           label="Words"
-          value={num(content.wordCount)}
+          value={compact(content.wordCount)}
           tone={content.wordCount >= 300 ? undefined : "warn"}
           hint="300+ is a reasonable floor for a page meant to rank."
         />
@@ -54,9 +54,9 @@ export function ContentPanel({ content }: { content: SeoContent }) {
           hint="Exactly one H1 per page."
         />
         <Tile label="H2 / H3" value={`${content.h2Count} / ${content.h3Count}`} />
-        <Tile label="Internal links" value={num(content.internalLinks)} />
-        <Tile label="External links" value={num(content.externalLinks)} />
-        <Tile label="Images" value={num(content.imgCount)} />
+        <Tile label="Internal links" value={compact(content.internalLinks)} />
+        <Tile label="External links" value={compact(content.externalLinks)} />
+        <Tile label="Images" value={compact(content.imgCount)} />
       </Tiles>
 
       <div className="seo-bento">

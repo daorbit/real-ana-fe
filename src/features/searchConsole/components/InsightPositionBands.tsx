@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { SearchCardHead } from "./SearchSectionHead";
 import type { SearchPositionBand } from "@/shared/types";
 import classes from "./insights.module.css";
@@ -16,7 +16,7 @@ function MoveChip({ value }: { value: number }) {
   return (
     <span className={classes.bandMove} data-dir={value > 0 ? "up" : "down"}>
       {value > 0 ? "+" : "−"}
-      {num(Math.abs(value))} moved {value > 0 ? "in" : "out"}
+      {compact(Math.abs(value))} moved {value > 0 ? "in" : "out"}
     </span>
   );
 }
@@ -29,7 +29,7 @@ export function InsightPositionBands({ bands }: { bands: SearchPositionBand[] })
     <section className={classes.panel}>
       <SearchCardHead
         title="Where your queries rank"
-        description={`${num(total)} queries by average position. Moves compare the same queries with the previous period.`}
+        description={`${compact(total)} queries by average position. Moves compare the same queries with the previous period.`}
       />
 
       <div className={classes.bandBar} role="img" aria-label="Share of queries in each position range">
@@ -52,9 +52,9 @@ export function InsightPositionBands({ bands }: { bands: SearchPositionBand[] })
               <span className={classes.bandDot} />
               {BAND_LABELS[b.band].label}
             </span>
-            <span className={classes.bandValue}>{num(b.queries)}</span>
+            <span className={classes.bandValue}>{compact(b.queries)}</span>
             <span className={classes.bandMeta}>
-              {BAND_LABELS[b.band].range} · {num(b.clicks)} clicks
+              {BAND_LABELS[b.band].range} · {compact(b.clicks)} clicks
             </span>
             <MoveChip value={b.netMoved} />
           </div>

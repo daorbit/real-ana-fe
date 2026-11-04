@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { UnstyledButton } from "@mantine/core";
 import { SearchSegmented } from "./SearchSegmented";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import type { SearchInsights } from "@/shared/types";
 import { buildMovers, type Mover } from "../insightActions";
 import { SearchCardHead } from "./SearchSectionHead";
@@ -14,7 +14,7 @@ function MoverRow({ mover, onOpen }: { mover: Mover; onOpen: () => void }) {
       <span className={classes.moverLabel}>{mover.label}</span>
       <span className={classes.moverValue} data-dir={up ? "up" : "down"}>
         {up ? "+" : "−"}
-        {num(Math.abs(mover.delta))}
+        {compact(Math.abs(mover.delta))}
       </span>
     </UnstyledButton>
   );

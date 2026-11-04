@@ -1,4 +1,4 @@
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { positionTone } from "@/features/searchConsole/searchMetrics";
 import classes from "@/features/searchConsole/widgets/searchWidgets.module.css";
 
@@ -24,7 +24,7 @@ export function SearchRowList({ rows, labelHeader, valueHeader }: { rows: Search
             {r.label}
             {r.sub && <span className={classes.rowSub}>{r.sub}</span>}
           </span>
-          <span className={classes.num}>{num(Math.round(r.value))}</span>
+          <span className={classes.num}>{compact(Math.round(r.value))}</span>
           <span className={classes.position} data-tone={positionTone(r.position)}>
             {r.position ? r.position.toFixed(1) : "—"}
           </span>

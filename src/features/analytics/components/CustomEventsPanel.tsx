@@ -1,5 +1,5 @@
 import { Inbox } from "lucide-react";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import type { EventBucket } from "@/shared/types";
 import { formatMoney } from "./conversion/formatMoney";
@@ -45,8 +45,8 @@ export function CustomEventsPanel({
                 disabled={!onSelect}
               >
                 <span role="cell" className={table.mono}>{i.key}</span>
-                <span role="cell" className={table.strong}>{num(i.count)}</span>
-                <span role="cell" className={table.muted}>{num(i.visitors)}</span>
+                <span role="cell" className={table.strong}>{compact(i.count)}</span>
+                <span role="cell" className={table.muted}>{compact(i.visitors)}</span>
                 <span role="cell" className={table.muted}>{i.conversionRate}%</span>
                 <span role="cell" className={i.revenue > 0 ? table.money : table.muted}>
                   {i.revenue > 0 ? formatMoney(i.revenue) : "—"}

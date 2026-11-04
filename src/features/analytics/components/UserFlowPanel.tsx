@@ -1,7 +1,7 @@
 import { Fragment, useMemo, type CSSProperties } from "react";
 import { ArrowRight, Inbox } from "lucide-react";
 import { useGetUserFlowQuery } from "@/app/store";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { FlowGraphSkeleton } from "@/shared/ui/Skeletons";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { flowColumns } from "@/features/analytics/lib/flowColumns";
@@ -53,7 +53,7 @@ export function UserFlowPanel({
                     >
                       <span className={classes.path}>{n.path}</span>
                       <span className={classes.figures}>
-                        <span className={classes.sessions}>{num(n.sessions)}</span>
+                        <span className={classes.sessions}>{compact(n.sessions)}</span>
                         <span className={classes.leave}>{n.leavePct}% leave</span>
                       </span>
                       <span className={classes.track} aria-hidden>

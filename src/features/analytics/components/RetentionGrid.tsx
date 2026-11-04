@@ -3,7 +3,7 @@ import { Inbox } from "lucide-react";
 import dayjs from "dayjs";
 import { useGetRetentionQuery } from "@/app/store";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import classes from "./RetentionGrid.module.css";
 
 function cellStyle(pct: number, first: boolean, strongest: number): React.CSSProperties {
@@ -68,7 +68,7 @@ export function RetentionGrid({
               {cohorts.map((c) => (
                 <tr key={c.cohort}>
                   <td className="ret-label">{weekOf(c.cohort)}</td>
-                  <td className="ret-size">{num(c.size)}</td>
+                  <td className="ret-size">{compact(c.size)}</td>
                   {Array.from({ length: weeks }, (_, i) => {
                     const pct = c.retention[i];
                     const measurable = i <= weeks - 1 - c.cohort;

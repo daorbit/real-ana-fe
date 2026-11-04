@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Repeat } from "lucide-react";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import type { VisitorSplit } from "@/shared/types";
 import classes from "./VisitorSplitPanel.module.css";
@@ -21,12 +21,12 @@ export function VisitorSplitPanel({ split }: { split?: VisitorSplit | null }) {
             <div className={classes.figure}>
               <span className={classes.label}>New</span>
               <span className={classes.value}>{freshPct}%</span>
-              <span className={classes.count}>{num(fresh)} visitors</span>
+              <span className={classes.count}>{compact(fresh)} visitors</span>
             </div>
             <div className={classes.figure}>
               <span className={classes.label}>Returning</span>
               <span className={classes.value}>{100 - freshPct}%</span>
-              <span className={classes.count}>{num(returning)} visitors</span>
+              <span className={classes.count}>{compact(returning)} visitors</span>
             </div>
           </div>
           <div className={classes.bar} aria-hidden>

@@ -1,5 +1,5 @@
 import { ArrowDownWideNarrow, LogIn } from "lucide-react";
-import { num, share } from "@/shared/lib";
+import { compact, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import { DepthRing } from "@/shared/ui/rank/DepthRing";
@@ -66,7 +66,7 @@ export function LandingPanel({
     <RankCard
       title="Landing pages"
       tone="blue"
-      subtitle={items.length > 0 ? `${num(total)} sessions` : undefined}
+      subtitle={items.length > 0 ? `${compact(total)} sessions` : undefined}
     >
       {items.length === 0 ? (
         <RankEmpty icon={LogIn}>Waiting for data…</RankEmpty>
@@ -78,7 +78,7 @@ export function LandingPanel({
             label: <PathLabel path={i.key} />,
             weight: i.count,
             title: onSelectPath ? `Filter by ${i.key}` : i.key,
-            value: num(i.count),
+            value: compact(i.count),
             aside: share(i.count, total),
             meta: `${i.bounceRate}% bounce · ${i.pagesPerSession} pages / session`,
           }))}

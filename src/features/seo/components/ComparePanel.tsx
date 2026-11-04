@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { SeoCompetitor, SeoCompareSnapshot, SeoReportData } from "@/shared/types";
 import { scoreColor } from "@/features/seo/components/ScoreRing";
-import { timeAgo } from "@/shared/lib";
+import { compact, timeAgo } from "@/shared/lib";
 import { EmptyState } from "@/shared/ui/EmptyState";
 
 /**
@@ -355,7 +355,7 @@ function Num({
   const color = good ? (good(value) ? "teal" : "yellow") : undefined;
   return (
     <Text size="sm" fw={500} c={color}>
-      {value.toLocaleString()}
+      {compact(value)}
       {suffix}
     </Text>
   );

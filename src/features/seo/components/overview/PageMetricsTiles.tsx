@@ -1,5 +1,5 @@
 import type { SeoContent, SeoPerformance, SeoTechnical } from "@/shared/types";
-import { num } from "@/shared/lib";
+import { compact, num } from "@/shared/lib";
 import { Tile, Tiles } from "@/features/seo/components/shared/Tile";
 import { pageSize, readabilityBand } from "@/features/seo/components/utils";
 
@@ -20,22 +20,22 @@ export function PageMetricsTiles({
       <Tiles>
         <Tile
           label="Words"
-          value={num(content.wordCount)}
+          value={compact(content.wordCount)}
           note={content.wordCount >= 300 ? "Good length" : "Thin page"}
           tone={content.wordCount >= 300 ? undefined : "warn"}
         />
         <Tile label="Response" value={`${num(technical.responseTimeMs)} ms`} note="Server response" />
         <Tile label="Page size" value={pageSize(technical.contentLength)} note="HTML document" />
-        {requests !== null && <Tile label="Requests" value={num(requests)} note="All resources" />}
+        {requests !== null && <Tile label="Requests" value={compact(requests)} note="All resources" />}
         <Tile
           label="Images"
-          value={num(technical.totalImages)}
+          value={compact(technical.totalImages)}
           note={missingAlt ? `${missingAlt} without alt` : "All have alt text"}
         />
         <Tile
           label="Links"
-          value={num(content.linkCount)}
-          note={`${num(content.internalLinks)} internal`}
+          value={compact(content.linkCount)}
+          note={`${compact(content.internalLinks)} internal`}
         />
         {requests === null && (
           <Tile label="Readability" value={String(content.readabilityScore)} note={readabilityBand(content.readabilityScore).label} />

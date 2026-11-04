@@ -1,5 +1,5 @@
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import type { SearchBreakdownRow } from "@/shared/types";
 import { deviceMeta } from "../deviceMeta";
 import { SearchCardHead } from "./SearchSectionHead";
@@ -39,7 +39,7 @@ export function DeviceShareDonut({ rows }: { rows: SearchBreakdownRow[] }) {
           </PieChart>
         </ResponsiveContainer>
         <div className={classes.donutCenter}>
-          <span className={classes.donutValue}>{num(sum)}</span>
+          <span className={classes.donutValue}>{compact(sum)}</span>
           <span className={classes.donutLabel}>{useImpressions ? "impressions" : "clicks"}</span>
         </div>
       </div>

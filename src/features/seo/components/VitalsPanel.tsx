@@ -1,5 +1,5 @@
 import type { SeoFieldVitals, SeoVitalSummary } from "@/shared/types";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { SeoCard, SeoSection } from "@/features/seo/components/shared/SeoCard";
 import { Pill } from "@/features/seo/components/shared/Pill";
 import { ListHead, SeoList } from "@/features/seo/components/shared/SeoList";
@@ -46,7 +46,7 @@ export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
   return (
     <SeoSection
       title="Your visitors"
-      description={`75th percentile over ${vitals.days} days · ${num(vitals.samples)} page loads measured.`}
+      description={`75th percentile over ${vitals.days} days · ${compact(vitals.samples)} page loads measured.`}
     >
       <Tiles wide>
         {VITALS.map((v) => {
@@ -62,7 +62,7 @@ export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
               status={rating.label}
               tone={rating.tone}
               split={s.samples > 0 ? { good: s.good, mid: s.needsImprovement, poor: s.poor } : undefined}
-              foot={s.samples > 0 ? `${s.good}% good · ${num(s.samples)} samples` : undefined}
+              foot={s.samples > 0 ? `${s.good}% good · ${compact(s.samples)} samples` : undefined}
             />
           );
         })}
@@ -85,7 +85,7 @@ export function VitalsPanel({ vitals }: { vitals?: SeoFieldVitals }) {
                 <Pill tone={lcpTone(p.lcp)}>{formatVital(p.lcp, "s")}</Pill>
               </span>
               <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{formatVital(p.cls, "")}</span>
-              <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{num(p.samples)}</span>
+              <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{compact(p.samples)}</span>
             </div>
           ))}
         </SeoList>

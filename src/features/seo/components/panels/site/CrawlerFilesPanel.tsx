@@ -1,3 +1,4 @@
+import { compact } from "@/shared/lib";
 import type { SeoRobotsReport, SeoSiteFiles, SeoSitemapReport } from "@/shared/types";
 import { Pill, SeverityIcon, StatusMark } from "@/features/seo/components/shared/Pill";
 import { ListRow, ListTitle, SeoList } from "@/features/seo/components/shared/SeoList";
@@ -40,7 +41,7 @@ export function CrawlerFilesCard({
         title="Sitemap"
         sub={
           sitemap?.present
-            ? `${sitemap.urlCount.toLocaleString()} URL${sitemap.urlCount === 1 ? "" : "s"}${sitemap.isIndex ? " · sitemap index" : ""}`
+            ? `${compact(sitemap.urlCount)} URL${sitemap.urlCount === 1 ? "" : "s"}${sitemap.isIndex ? " · sitemap index" : ""}`
             : siteFiles.sitemap.urls[0] ?? "Not referenced in robots.txt or at /sitemap.xml"
         }
         clip

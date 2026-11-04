@@ -1,7 +1,7 @@
 import { Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { LiveAudience } from "@/shared/types";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import { PathLabel } from "@/shared/ui/rank/PathLabel";
@@ -36,7 +36,7 @@ export function LiveNowCard({
       }
     >
       <div className={classes.hero}>
-        <span className={classes.heroValue}>{num(people)}</span>
+        <span className={classes.heroValue}>{compact(people)}</span>
         <span className={classes.heroLabel}>on your sites</span>
       </div>
       <LiveStatFooter audience={audience} bar={false} />
@@ -55,7 +55,7 @@ export function LiveNowCard({
                   label: <PathLabel path={p.key} />,
                   title: onSelectPath ? `Filter by ${p.key}` : p.key,
                   weight: p.count,
-                  value: num(p.count),
+                  value: compact(p.count),
                 }))}
                 onSelect={onSelectPath}
               />

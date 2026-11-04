@@ -1,5 +1,5 @@
 import { Lightbulb } from "lucide-react";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
 import { SearchWidgetCard, SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
 import { SearchRowList } from "@/features/searchConsole/widgets/SearchRowList";
@@ -17,7 +17,7 @@ export function SearchOpportunitiesWidget({ source }: { source: SearchSource }) 
     ? data.quickWins.slice(0, LIMIT).map((q) => ({
         key: q.key,
         label: q.key,
-        sub: q.missedClicks ? `≈ ${num(Math.round(q.missedClicks))} more clicks on page one` : undefined,
+        sub: q.missedClicks ? `≈ ${compact(Math.round(q.missedClicks))} more clicks on page one` : undefined,
         value: q.impressions,
         position: q.position,
       }))

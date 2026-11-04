@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { LiveAudience } from "@/shared/types";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import classes from "./LiveAudience.module.css";
 
 export function LiveStatFooter({ audience, bar = true }: { audience: LiveAudience | null; bar?: boolean }) {
@@ -18,7 +18,7 @@ export function LiveStatFooter({ audience, bar = true }: { audience: LiveAudienc
         </div>
       )}
       <span className={classes.heroNote}>
-        {num(audience.humans)} {audience.humans === 1 ? "person" : "people"} · {num(others)}{" "}
+        {compact(audience.humans)} {audience.humans === 1 ? "person" : "people"} · {compact(others)}{" "}
         {others === 1 ? "bot" : "bots"} filtered out
       </span>
     </div>

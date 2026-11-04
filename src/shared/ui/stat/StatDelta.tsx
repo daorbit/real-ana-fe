@@ -4,6 +4,7 @@ import classes from "@/shared/ui/stat/StatCard.module.css";
 
 export type StatComparison = {
   previous: string;
+  previousShort: string;
   current: string;
   label: string;
 };

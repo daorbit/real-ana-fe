@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button, Tooltip } from "@mantine/core";
 import { Layers, Play } from "lucide-react";
 import type { SeoCrawlReport, SeoCrawlPage } from "@/shared/types";
-import { num, timeAgo } from "@/shared/lib";
+import { compact, timeAgo } from "@/shared/lib";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { Pill, SeverityIcon, StatusMark } from "@/features/seo/components/shared/Pill";
 import { ListEmpty, ListHead, ListRow, ListTitle, SeoList } from "@/features/seo/components/shared/SeoList";
@@ -42,10 +42,10 @@ export function CrawlPanel({
   return (
     <div className={classes.stack}>
       <Tiles>
-        <Tile label="Pages crawled" value={num(data.crawled)} note={`Crawled ${timeAgo(report.createdAt)}`} />
+        <Tile label="Pages crawled" value={compact(data.crawled)} note={`Crawled ${timeAgo(report.createdAt)}`} />
         <Tile label="Average score" value={String(data.score)} tone={scoreTone(data.score)} />
-        <Tile label="In sitemap" value={num(data.discovered)} />
-        <Tile label="Findings" value={num(data.findings.length)} tone={data.findings.length ? "warn" : undefined} />
+        <Tile label="In sitemap" value={compact(data.discovered)} />
+        <Tile label="Findings" value={compact(data.findings.length)} tone={data.findings.length ? "warn" : undefined} />
       </Tiles>
 
       <SeoList>
@@ -129,7 +129,7 @@ function PageRow({ page }: { page: SeoCrawlPage }) {
           </>
         )}
       </span>
-      <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{num(page.wordCount)}</span>
+      <span className={`${classes.colNum} ${sharedClasses.rowMeta}`}>{compact(page.wordCount)}</span>
       <span className={classes.colNum}>
         <Pill tone={lengthTone(page.descriptionLength, 70, 160)}>{page.descriptionLength || "—"}</Pill>
       </span>

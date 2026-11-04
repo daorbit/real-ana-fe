@@ -3,7 +3,7 @@ import { Select, SegmentedControl } from "@mantine/core";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Inbox } from "lucide-react";
 import { useGetHeatmapPagesQuery, useGetPageHeatmapQuery } from "@/app/store";
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
 import { ChartSkeleton } from "@/shared/ui/Skeletons";
@@ -122,7 +122,7 @@ export function PageHeatmapPanel({
                     label: c.key,
                     title: c.href ?? c.key,
                     weight: c.count,
-                    value: num(c.count),
+                    value: compact(c.count),
                   }))}
                 />
               ) : (

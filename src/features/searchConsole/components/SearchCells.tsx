@@ -1,4 +1,4 @@
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import { positionTone, type MetricChange } from "../searchMetrics";
 import classes from "./metrics.module.css";
 
@@ -14,7 +14,7 @@ export function ChangeText({ change }: { change: MetricChange | null }) {
 export function ClickDelta({ clicks, previousClicks }: { clicks: number; previousClicks: number | null }) {
   if (previousClicks === null) return <ChangeText change={{ text: "New", good: true, flat: false }} />;
   const delta = clicks - previousClicks;
-  const change = { text: `${delta > 0 ? "+" : delta < 0 ? "−" : ""}${num(Math.abs(delta))}`, good: delta >= 0, flat: delta === 0 };
+  const change = { text: `${delta > 0 ? "+" : delta < 0 ? "−" : ""}${compact(Math.abs(delta))}`, good: delta >= 0, flat: delta === 0 };
   return <ChangeText change={change} />;
 }
 

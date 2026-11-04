@@ -1,4 +1,4 @@
-import { num } from "@/shared/lib";
+import { compact } from "@/shared/lib";
 import type { SearchMetrics, SearchType } from "@/shared/types";
 
 export type MetricKey = keyof SearchMetrics;
@@ -20,7 +20,7 @@ export const METRICS: MetricDef[] = [
     short: "Clicks",
     tone: "emerald",
     color: "#30d158",
-    format: (v) => num(Math.round(v)),
+    format: (v) => compact(Math.round(v)),
     lowerIsBetter: false,
   },
   {
@@ -29,7 +29,7 @@ export const METRICS: MetricDef[] = [
     short: "Impressions",
     tone: "cyan",
     color: "#0a84ff",
-    format: (v) => num(Math.round(v)),
+    format: (v) => compact(Math.round(v)),
     lowerIsBetter: false,
   },
   {
