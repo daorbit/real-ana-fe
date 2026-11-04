@@ -35,7 +35,7 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--surface-2);
+  background: var(--card-bg);
 }
 
 .row {

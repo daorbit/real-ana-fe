@@ -107,7 +107,8 @@
 .tone-tile[data-tone="teal"] { --tone: #0d9488; }
 .tone-tile[data-tone="blue"] { --tone: #2563eb; }
 .tone-tile[data-tone="violet"] { --tone: #7c3aed; }
-.tone-tile[data-tone="amber"] { --tone: #b45309; }
+.tone-tile[data-tone="amber"] { --tone: var(--amber); }
+.tone-tile[data-tone="accent"] { --tone: var(--accent); }
 .tone-tile[data-tone="rose"] { --tone: #e11d48; }
 .tone-tile[data-tone="slate"] { --tone: #475569; }
 .tone-tile[data-tone="indigo"] { --tone: #4f46e5; }

@@ -359,7 +359,7 @@
   flex-direction: column;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--surface-2);
+  background: var(--card-bg);
   cursor: pointer;
   touch-action: manipulation;
   transition: border-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
@@ -665,7 +665,7 @@
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--surface-2);
+  background: var(--card-bg);
 }
 
 .table {

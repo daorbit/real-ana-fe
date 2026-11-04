@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
-  Button, Modal, PasswordInput, PinInput, Stack, Text,
+  Button, Modal, PasswordInput, Stack, Text,
 } from "@mantine/core";
 import { KeyRound, Lock, LockKeyhole, LockKeyholeOpen } from "lucide-react";
+import { CodeInput } from "../CodeInput";
 import { SecurityRow } from "./SecurityGroup";
 import { StatusBadge } from "./StatusBadge";
 import { SECURITY_ROW_IDS } from "./securityRows";
@@ -155,11 +156,8 @@ export function ScreenLockPanel() {
               <Text size="sm" c="dimmed" ta="center">
                 Set a 4-digit PIN. You'll enter it to unlock after being idle.
               </Text>
-              <PinInput
+              <CodeInput
                 length={4}
-                type="number"
-                size="lg"
-                radius="md"
                 autoFocus
                 value={enablePin}
                 onChange={setEnablePin}

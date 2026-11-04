@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { ActionIcon, Button, CopyButton, Modal, PinInput, Text, Tooltip } from "@mantine/core";
-import { Check, Copy, Download, KeyRound, ShieldCheck } from "lucide-react";
+import { useRef, useState } from "react";
+import { KeyRound, ShieldCheck } from "lucide-react";
 import { api } from "@/shared/lib/http";
-import { errMessage } from "@/shared/lib/notify";
-import { TwoFactorSetupSteps } from "./TwoFactorSetupSteps";
-import { downloadBackupCodes, formatSecret, type TotpSetup } from "./twoFactorSetup";
-import classes from "./TwoFactorSetup.module.css";
+import { errMessage, notify } from "@/shared/lib/notify";
+import { CodeInput } from "../CodeInput";
+import { SecureDialog, SecureDialogButton, SecureDialogLink } from "../SecureDialog";
+import { useTrapSafeFocus } from "../useTrapSafeFocus";
+import { TwoFactorBackupCodes } from "./TwoFactorBackupCodes";
+import { TwoFactorScanStep } from "./TwoFactorScanStep";
+import type { TotpSetup } from "./twoFactorSetup";
 
 type EnableResp = { backupCodes: string[] };
 
@@ -18,18 +20,19 @@ export function TwoFactorSetupModal({
   onClose: () => void;
   onEnabled: () => Promise<void>;
 }) {
+  const [step, setStep] = useState<"scan" | "verify">("scan");
   const [code, setCode] = useState("");
   const [enabling, setEnabling] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const codeRef = useRef<HTMLInputElement>(null);
+  const focusCode = useTrapSafeFocus(codeRef, step === "verify");
 
   const done = backupCodes.length > 0;
-  const activeStep = done ? 2 : code.length > 0 ? 1 : 0;
+  const opened = setup !== null;
 
   const confirm = async (value = code) => {
     if (!setup || value.trim().length !== 6) return;
     setEnabling(true);
-    setError(null);
     try {
       const r = await api.post<EnableResp>("/api/auth/2fa/enable", {
         secret: setup.secret,
@@ -38,161 +41,79 @@ export function TwoFactorSetupModal({
       setBackupCodes(r.backupCodes);
       await onEnabled();
     } catch (err) {
-      setError(errMessage(err, "That code didn't match — try the next one."));
+      notify.error(errMessage(err, "That code didn't match. Try the next one."), "Two-factor authentication");
       setCode("");
+      focusCode();
     } finally {
       setEnabling(false);
     }
   };
 
+  if (done) {
+    return (
+      <SecureDialog
+        opened={opened}
+        onClose={onClose}
+        icon={KeyRound}
+        eyebrow="Step 3 of 3"
+        title="Save your backup codes"
+        description="Two-factor is on. Each code works once if you lose your authenticator. We've emailed them to you too, and they won't be shown here again."
+        size={440}
+        closeOnClickOutside={false}
+        contentKey="done"
+      >
+        <TwoFactorBackupCodes codes={backupCodes} onDone={onClose} />
+      </SecureDialog>
+    );
+  }
+
+  if (step === "scan") {
+    return (
+      <SecureDialog
+        opened={opened}
+        onClose={onClose}
+        eyebrow="Step 1 of 3"
+        title="Scan this QR code"
+        description="Open Google Authenticator, 1Password or any authenticator app, add an account, and point your camera at the code."
+        size={440}
+        contentKey="scan"
+      >
+        {setup && <TwoFactorScanStep setup={setup} onContinue={() => setStep("verify")} />}
+      </SecureDialog>
+    );
+  }
+
   return (
-    <Modal
-      opened={setup !== null}
+    <SecureDialog
+      opened={opened}
       onClose={onClose}
-      title={done ? "Save your backup codes" : "Set up two-factor authentication"}
-      radius="lg"
-      size={done ? 480 : 640}
-      padding="lg"
-      centered
+      icon={ShieldCheck}
+      eyebrow="Step 2 of 3"
+      title="Enter the 6-digit code"
+      description="Type the code your authenticator app shows for Quantalog. It refreshes every 30 seconds."
+      size={440}
       closeOnClickOutside={!enabling}
+      contentKey="verify"
     >
-      <div>
-        <div className={classes.body}>
-          <TwoFactorSetupSteps active={activeStep} />
-
-          {setup && !done && (
-            <div className={classes.grid}>
-              <div className={classes.qrColumn}>
-                <div className={classes.qrFrame}>
-                  <img src={setup.qrDataUrl} alt="QR code for your authenticator app" className={classes.qr} />
-                </div>
-                <Text size="xs" c="dimmed" className={classes.qrHint}>
-                  Works with Google Authenticator, Microsoft Authenticator, 1Password and Authy.
-                </Text>
-              </div>
-
-              <div className={classes.formColumn}>
-                <div>
-                  <Text fw={600} size="sm">Scan the QR code</Text>
-                  <Text size="xs" c="dimmed" mt={4}>
-                    Open your authenticator app, tap “Add account”, and point your camera at the code.
-                  </Text>
-                </div>
-
-                <div className={classes.keyBox}>
-                  <div className={classes.keyHead}>
-                    <KeyRound size={13} />
-                    <Text size="xs" fw={600}>Can't scan? Enter this key</Text>
-                    <CopyButton value={setup.secret} timeout={1500}>
-                      {({ copied, copy }) => (
-                        <Tooltip label={copied ? "Copied" : "Copy key"} withArrow>
-                          <ActionIcon
-                            variant="subtle"
-                            color={copied ? "green" : "gray"}
-                            size="sm"
-                            onClick={copy}
-                            aria-label="Copy key"
-                            className={classes.keyCopy}
-                          >
-                            {copied ? <Check size={14} /> : <Copy size={14} />}
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
-                    </CopyButton>
-                  </div>
-                  <code className={classes.keyValue}>{formatSecret(setup.secret)}</code>
-                </div>
-
-                <div className={classes.divider} />
-
-                <div>
-                  <Text fw={600} size="sm">Enter the 6-digit code</Text>
-                  <Text size="xs" c="dimmed" mt={4}>
-                    The code refreshes every 30 seconds.
-                  </Text>
-                </div>
-
-                <PinInput
-                  length={6}
-                  type="number"
-                  size="md"
-                  oneTimeCode
-                  value={code}
-                  onChange={setCode}
-                  onComplete={(value) => void confirm(value)}
-                  error={Boolean(error)}
-                  disabled={enabling}
-                />
-                {error && <Text size="xs" c="red">{error}</Text>}
-
-                <Button
-                  fullWidth
-                  size="md"
-                  leftSection={<ShieldCheck size={16} />}
-                  loading={enabling}
-                  disabled={code.trim().length !== 6}
-                  onClick={() => void confirm()}
-                >
-                  Verify and turn on
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {done && (
-            <>
-              <div className={classes.success}>
-                <span className={classes.successIcon}>
-                  <Check size={18} />
-                </span>
-                <div>
-                  <Text fw={650} size="sm">Two-factor authentication is on</Text>
-                  <Text size="xs" c="dimmed">You'll be asked for a code each time you log in.</Text>
-                </div>
-              </div>
-
-              <div>
-                <Text fw={600} size="sm">Save your backup codes</Text>
-                <Text size="xs" c="dimmed" mt={4}>
-                  Each code works once if you lose access to your authenticator app. We've emailed
-                  them to you too — they won't be shown here again.
-                </Text>
-              </div>
-
-              <ol className={classes.codes}>
-                {backupCodes.map((c) => (
-                  <li key={c} className={classes.code}>{c}</li>
-                ))}
-              </ol>
-
-              <div className={classes.actions}>
-                <CopyButton value={backupCodes.join("\n")} timeout={1500}>
-                  {({ copied, copy }) => (
-                    <Button
-                      variant="default"
-                      color={copied ? "green" : undefined}
-                      leftSection={copied ? <Check size={15} /> : <Copy size={15} />}
-                      onClick={copy}
-                    >
-                      {copied ? "Copied" : "Copy all"}
-                    </Button>
-                  )}
-                </CopyButton>
-                <Button
-                  variant="default"
-                  leftSection={<Download size={15} />}
-                  onClick={() => downloadBackupCodes(backupCodes)}
-                >
-                  Download
-                </Button>
-                <Button className={classes.done} onClick={onClose}>
-                  I've saved them
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </Modal>
+      <CodeInput
+        ref={codeRef}
+        length={6}
+        oneTimeCode
+        value={code}
+        onChange={setCode}
+        onComplete={(value) => void confirm(value)}
+        disabled={enabling}
+      />
+      <SecureDialogButton
+        loading={enabling}
+        disabled={code.trim().length !== 6}
+        onClick={() => void confirm()}
+      >
+        Verify and turn on
+      </SecureDialogButton>
+      <SecureDialogLink onClick={() => { setCode(""); setStep("scan"); }}>
+        Back to the QR code
+      </SecureDialogLink>
+    </SecureDialog>
   );
 }

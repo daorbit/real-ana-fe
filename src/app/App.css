@@ -264,12 +264,6 @@ body { overflow-wrap: break-word; }
 
 
 
-.verify-card {
-  position: relative;
-  overflow: hidden;
-}
-
-
 .verify-rise {
   animation: verify-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -2671,12 +2665,14 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   --seo-hairline: color-mix(in srgb, var(--text) 6%, transparent);
   --surface: #1c1c1e;
   --surface-2: #242426;
+  --card-bg: var(--surface-2);
 }
 [data-mantine-color-scheme="light"] .seo-report,
 [data-mantine-color-scheme="light"] .an-report {
   --seo-hairline: color-mix(in srgb, var(--text) 10%, transparent);
   --surface: #ffffff;
   --surface-2: var(--gray-3);
+  --card-bg: #ffffff;
 }
 
 .seo-card-title {
@@ -3605,7 +3601,7 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: var(--surface-2);
+  background: var(--card-bg);
 }
 
 .connection-card__mark {

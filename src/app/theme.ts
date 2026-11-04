@@ -142,6 +142,7 @@ export const theme = createTheme({
         transitionProps: { transition: "pop", duration: 180 },
       },
     },
+    PinInput: { defaultProps: { placeholder: "" } },
     Drawer: { defaultProps: { overlayProps: { backgroundOpacity: 0.4, blur: 6 } } },
     Menu: {
       defaultProps: {

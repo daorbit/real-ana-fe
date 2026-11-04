@@ -1,0 +1,151 @@
+.card {
+  position: relative;
+  padding: 36px 32px 28px;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--q-bg-subtle);
+  color: var(--q-fg);
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--q-fg-faint);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--q-fg);
+}
+
+.description {
+  max-width: 320px;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--q-fg-muted);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  background: var(--q-bg-subtle);
+  color: var(--q-fg-muted);
+}
+
+.close:hover {
+  background: var(--q-border);
+  color: var(--q-fg);
+}
+
+.codeRoot {
+  width: 100%;
+  justify-content: center;
+}
+
+.codeRoot .codeCell {
+  flex: 0 1 50px;
+  width: auto;
+  height: auto;
+  min-width: 0;
+}
+
+.codeRoot .codeField {
+  height: 54px;
+  border: 1px solid var(--q-border);
+  border-radius: 14px;
+  background: var(--q-surface);
+  color: var(--q-fg);
+  font-size: 1.1875rem;
+  font-weight: 500;
+}
+
+.codeRoot .codeField:focus {
+  border-color: var(--q-accent);
+}
+
+.card .primary {
+  height: 50px;
+  border-radius: 999px;
+  background: var(--q-cta);
+  color: var(--q-cta-fg);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.card .primary:hover:not([data-disabled]) {
+  background: var(--q-cta-hover);
+}
+
+.card .primary[data-disabled] {
+  background: var(--q-border);
+  color: var(--q-fg-faint);
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--q-accent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.textField {
+  width: 100%;
+}
+
+.textField input {
+  height: 54px;
+  border: 1px solid var(--q-border);
+  border-radius: 14px;
+  background: var(--q-surface);
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.textField input:focus {
+  border-color: var(--q-accent);
+}

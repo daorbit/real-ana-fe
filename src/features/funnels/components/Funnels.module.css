@@ -87,7 +87,7 @@
   padding: 5px 11px 5px 5px;
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  background: var(--surface-2);
+  background: var(--card-bg);
   font-size: 13px;
   font-weight: 500;
   color: var(--text);
@@ -322,7 +322,7 @@
   list-style: none;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: var(--surface-2);
+  background: var(--card-bg);
   overflow: hidden;
 }
 

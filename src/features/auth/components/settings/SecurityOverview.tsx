@@ -22,13 +22,13 @@ export function SecurityOverview() {
   const allDone = left === 0;
 
   return (
-    <section className={`${classes.overview} tone-tile`} data-tone={allDone ? "teal" : "amber"}>
+    <section className={`${classes.overview} tone-tile`} data-tone={allDone ? "teal" : "accent"}>
       <div className={classes.summary}>
         <RingProgress
           size={76}
           thickness={6}
           roundCaps
-          rootColor="var(--surface-2)"
+          rootColor="var(--viz-track)"
           sections={[{ value: (done / checks.length) * 100, color: "var(--tone)" }]}
           label={
             <span className={classes.ringLabel}>

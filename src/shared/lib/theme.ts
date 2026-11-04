@@ -22,7 +22,7 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "emerald", label: "Emerald", hex: "#059669" },
   { id: "lime", label: "Lime", hex: "#65a30d" },
   { id: "olive", label: "Olive", hex: "#65733f" },
-  { id: "gold", label: "Gold", hex: "#b45309" },
+  { id: "gold", label: "Gold", hex: "#d97706" },
   { id: "amber", label: "Amber", hex: "#ea580c" },
   { id: "terracotta", label: "Terracotta", hex: "#c2410c" },
   { id: "red", label: "Red", hex: "#dc2626" },

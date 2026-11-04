@@ -106,7 +106,7 @@
   background: #fff;
 }
 .print-score[data-band="good"] { border-color: #10b981; color: #047857; }
-.print-score[data-band="ok"]   { border-color: #f59e0b; color: #b45309; }
+.print-score[data-band="ok"]   { border-color: #f59e0b; color: #d97706; }
 .print-score[data-band="poor"] { border-color: #ef4444; color: #b91c1c; }
 .print-score-value {
   font-family: "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;

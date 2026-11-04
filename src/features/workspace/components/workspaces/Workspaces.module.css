@@ -72,7 +72,7 @@
 .tab[data-active] {
   color: var(--text);
   border-color: var(--border-strong);
-  background: var(--surface-2);
+  background: var(--accent-soft);
   box-shadow: 0 4px 14px -8px rgba(0, 0, 0, 0.5);
 }
 
@@ -286,7 +286,7 @@
   height: 6px;
   margin-top: 4px;
   border-radius: 999px;
-  background: var(--surface-2);
+  background: var(--viz-track);
   overflow: hidden;
 }
 

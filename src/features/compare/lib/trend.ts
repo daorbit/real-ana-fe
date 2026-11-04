@@ -5,7 +5,7 @@ export type TrendRow = { date: string; [seriesId: string]: string | number | nul
 
 export const MAX_SERIES = 6;
 
-const SERIES_LIGHT = ["#2a78d6", "#e0662d", "#7c5cd6", "#c98500", "#d4487c", "#0f8fb0"];
+const SERIES_LIGHT = ["#2a78d6", "#eb6834", "#7c5cd6", "#eda100", "#d4487c", "#0f8fb0"];
 const SERIES_DARK = ["#4a90e8", "#e5773f", "#9b7cf0", "#d9a019", "#e0608f", "#2bb3d4"];
 
 export function seriesPalette(dark: boolean): string[] {

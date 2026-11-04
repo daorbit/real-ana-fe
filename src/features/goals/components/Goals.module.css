@@ -498,7 +498,7 @@
   position: relative;
   height: 6px;
   border-radius: 999px;
-  background: var(--surface-2);
+  background: var(--viz-track);
 }
 
 .track[data-size="sm"] {
