@@ -1,70 +1,112 @@
-import { useEffect, useRef } from "react";
-import { Tooltip, UnstyledButton } from "@mantine/core";
-import { Check, Plus } from "lucide-react";
+import { useState } from "react";
+import { Popover, TextInput, UnstyledButton } from "@mantine/core";
+import { Check, ChevronDown, Plus, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { PlanIcon } from "@/features/billing/components/PlanIcons";
 import type { Workspace } from "@/shared/types";
-import { WorkspaceMark } from "./WorkspaceMark";
 import { roleLabel } from "./format";
 import classes from "./Workspaces.module.css";
 
 interface Props {
   workspaces: Workspace[];
-  activeId: string;
+  active: Workspace;
   onSelect: (id: string) => void;
-  onCreate: () => void;
+  onCreate?: () => void;
 }
 
-/**
- * Every workspace as a tab in one scrollable strip. Picking one makes it the
- * current workspace — the one every other page reads from.
- */
-export function WorkspaceSwitcher({ workspaces, activeId, onSelect, onCreate }: Props) {
+export function WorkspaceSwitcher({ workspaces, active, onSelect, onCreate }: Props) {
   const { t } = useTranslation();
-  const activeRef = useRef<HTMLButtonElement>(null);
+  const [opened, setOpened] = useState(false);
+  const [query, setQuery] = useState("");
 
-  // Keep the current workspace in view when the strip overflows.
-  useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [activeId]);
+  const q = query.trim().toLowerCase();
+  const shown = q ? workspaces.filter((w) => w.name.toLowerCase().includes(q)) : workspaces;
+
+  const close = () => {
+    setOpened(false);
+    setQuery("");
+  };
 
   return (
-    <nav className={classes.switcher} aria-label={t("workspaces.switchLabel", "Switch workspace")}>
-      <div className={classes.switcherTrack}>
-        {workspaces.map((w) => {
-          const isActive = w._id === activeId;
-          const sites = w.billing?.sites.used ?? 0;
-          return (
-            <UnstyledButton
-              key={w._id}
-              ref={isActive ? activeRef : undefined}
-              className={classes.tab}
-              data-active={isActive || undefined}
-              aria-current={isActive ? "true" : undefined}
-              onClick={() => onSelect(w._id)}
-            >
-              <WorkspaceMark />
-              <span className={classes.tabText}>
-                <span className={classes.tabName}>{w.name}</span>
-                <span className={classes.tabMeta}>
-                  {w.billing?.plan?.name ?? roleLabel(w.role)}
-                  {" · "}
-                  {t("workspaces.siteCount", { count: sites, defaultValue_one: "{{count}} site", defaultValue_other: "{{count}} sites" })}
-                </span>
-              </span>
-              {isActive && (
-                <span className={classes.tabCheck}>
-                  <Check size={11} strokeWidth={3} />
-                </span>
-              )}
-            </UnstyledButton>
-          );
-        })}
-      </div>
-      <Tooltip label={t("workspaces.newWorkspace")} withArrow>
-        <UnstyledButton className={classes.tabNew} onClick={onCreate} aria-label={t("workspaces.newWorkspace")}>
-          <Plus size={16} />
+    <Popover
+      opened={opened}
+      onChange={(next) => (next ? setOpened(true) : close())}
+      position="bottom-start"
+      width={360}
+      radius="lg"
+      shadow="lg"
+      offset={8}
+      trapFocus
+      withinPortal
+      classNames={{ dropdown: classes.switcherMenu }}
+    >
+      <Popover.Target>
+        <UnstyledButton
+          className={classes.switcherTrigger}
+          aria-label={t("workspaces.switchLabel")}
+          aria-expanded={opened}
+          data-open={opened || undefined}
+          onClick={() => (opened ? close() : setOpened(true))}
+        >
+          <span className={classes.switcherName}>{active.name}</span>
+          <ChevronDown size={20} className={classes.chev} />
         </UnstyledButton>
-      </Tooltip>
-    </nav>
+      </Popover.Target>
+
+      <Popover.Dropdown>
+        <TextInput
+          data-autofocus
+          variant="unstyled"
+          className={classes.switcherSearch}
+          leftSection={<Search size={14} />}
+          placeholder={t("workspaces.findWorkspace")}
+          aria-label={t("workspaces.findWorkspace")}
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+        />
+
+        <div className={classes.switcherList}>
+          {shown.map((w) => {
+            const isActive = w._id === active._id;
+            const plan = w.billing?.plan;
+            return (
+              <UnstyledButton
+                key={w._id}
+                className={classes.switcherRow}
+                data-active={isActive || undefined}
+                aria-current={isActive ? "true" : undefined}
+                onClick={() => {
+                  onSelect(w._id);
+                  close();
+                }}
+              >
+                {plan && <PlanIcon slug={plan.slug} size={20} uid={`switcher-${w._id}`} />}
+                <span className={classes.switcherRowText}>
+                  <span className={classes.switcherRowName}>{w.name}</span>
+                  <span className={classes.switcherRowMeta}>{plan?.name ?? roleLabel(w.role)}</span>
+                </span>
+                {isActive && <Check size={15} strokeWidth={2.5} className={classes.switcherCheck} />}
+              </UnstyledButton>
+            );
+          })}
+          {shown.length === 0 && (
+            <p className={classes.switcherEmpty}>{t("workspaces.picker.noMatch", { query: query.trim() })}</p>
+          )}
+        </div>
+
+        {onCreate && (
+          <UnstyledButton
+            className={classes.switcherNew}
+            onClick={() => {
+              close();
+              onCreate();
+            }}
+          >
+            <Plus size={15} />
+            {t("workspaces.newWorkspace")}
+          </UnstyledButton>
+        )}
+      </Popover.Dropdown>
+    </Popover>
   );
 }

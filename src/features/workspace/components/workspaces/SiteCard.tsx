@@ -3,16 +3,19 @@ import {
   ActionIcon, Box, Button, Collapse, CopyButton, Divider, Group, Menu, Tooltip,
 } from "@mantine/core";
 import { SendToDeveloperButton } from "@/features/workspace/components/SendToDeveloperButton";
-import { Activity, Check, ChevronDown, Code2, Copy, ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Check, ChevronDown, Code2, Copy, ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { InstallCheck } from "@/features/workspace/components/InstallCheck";
 import { SnippetBuilder } from "@/features/workspace/components/SnippetBuilder";
 import { useSiteStatus } from "@/features/workspace";
 import { getFramework, type FrameworkId } from "@/features/workspace/frameworks";
 import { compact, timeAgo } from "@/shared/lib/format";
-import { SiteFavicon } from "@/shared/ui/SiteFavicon";
 import { BrandIcon } from "@/shared/ui/BrandIcon";
+import { RefreshButton } from "@/shared/ui/Refresh";
+import { SiteFavicon } from "@/shared/ui/SiteFavicon";
 import type { Site } from "@/shared/types";
+import { SiteStatusStat } from "./SiteStatusStat";
+import { Stat } from "./Stat";
 import { TrackerStatus } from "./TrackerStatus";
 import classes from "./Workspaces.module.css";
 
@@ -21,14 +24,22 @@ interface Props {
   workspaceId: string;
   onEdit: (() => void) | null;
   onDelete: (() => void) | null;
+  onRefresh: () => void;
+  refreshing: boolean;
+  lastUpdated: Date | null;
   focused?: boolean;
 }
 
-/**
- * One tracked site as a card. Opening "Install & verify" widens it to the full
- * row, so the snippet builder has room to breathe.
- */
-export function SiteCard({ site, workspaceId, onEdit, onDelete, focused = false }: Props) {
+export function SiteCard({
+  site,
+  workspaceId,
+  onEdit,
+  onDelete,
+  onRefresh,
+  refreshing,
+  lastUpdated,
+  focused = false,
+}: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(focused);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -41,6 +52,7 @@ export function SiteCard({ site, workspaceId, onEdit, onDelete, focused = false 
     );
     return () => cancelAnimationFrame(frame);
   }, [focused]);
+
   const status = useSiteStatus(workspaceId, site.siteId);
   const installed = status ? status.installed : null;
 
@@ -49,108 +61,100 @@ export function SiteCard({ site, workspaceId, onEdit, onDelete, focused = false 
   const frameworkLabel = guide.id === "other" ? null : guide.label;
 
   return (
-    <Box ref={cardRef} className={classes.siteCard} data-open={open || undefined} data-live={installed || undefined}>
+    <Box ref={cardRef} className={classes.card}>
       <Box className={classes.siteTop}>
         <span className={classes.siteFavicon}>
-          <SiteFavicon domain={site.domain} framework={site.framework} logoUrl={site.logoUrl} size={24} />
+          <SiteFavicon domain={site.domain} framework={site.framework} logoUrl={site.logoUrl} size={30} />
         </span>
 
         <Box className={classes.siteText}>
           <div className={classes.siteName}>{site.name}</div>
-          <a className={classes.siteDomain} href={`https://${site.domain}`} target="_blank" rel="noopener noreferrer">
-            {site.domain}
-            <ExternalLink size={11} />
-          </a>
+          <div className={classes.siteMeta}>
+            <a className={classes.siteDomain} href={`https://${site.domain}`} target="_blank" rel="noopener noreferrer">
+              {site.domain}
+              <ExternalLink size={12} />
+            </a>
+            {frameworkLabel && (
+              <span className={classes.siteFramework}>
+                <BrandIcon framework={site.framework as FrameworkId} size={12} />
+                {frameworkLabel}
+              </span>
+            )}
+          </div>
         </Box>
 
-        <Menu position="bottom-end" withinPortal shadow="md" width={190}>
-          <Menu.Target>
-            <ActionIcon variant="subtle" color="gray" size={30} aria-label={t("workspaces.siteActions", "Site actions")}>
-              <MoreHorizontal size={16} />
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<ExternalLink size={14} />}
-              component="a"
-              href={`https://${site.domain}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("workspaces.openSite", "Open site")}
-            </Menu.Item>
-            {onEdit && (
-              <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>
-                {t("workspaces.editSite", "Edit name & domain")}
-              </Menu.Item>
+        <Box className={classes.actions}>
+          <Button
+            variant="default"
+            radius="xl"
+            className={classes.verifyBtn}
+            data-open={open || undefined}
+            rightSection={<ChevronDown size={14} className={classes.chev} />}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+          >
+            {t("workspaces.installVerify", "Install & verify")}
+          </Button>
+          <CopyButton value={snippet}>
+            {({ copied, copy }) => (
+              <Tooltip label={copied ? t("workspaces.copied") : t("workspaces.copySnippet")} withArrow>
+                <Button
+                  variant="default"
+                  radius="xl"
+                  leftSection={copied ? <Check size={14} /> : <Code2 size={14} />}
+                  onClick={copy}
+                >
+                  {copied ? t("workspaces.copied") : t("workspaces.snippet")}
+                </Button>
+              </Tooltip>
             )}
-            <Menu.Item leftSection={<Copy size={14} />} onClick={() => void navigator.clipboard.writeText(site.siteId)}>
-              {t("workspaces.copySiteId", "Copy site ID")}
-            </Menu.Item>
-            {onDelete && (
-              <>
-                <Menu.Divider />
-                <Menu.Item className="danger-item" color="red" leftSection={<Trash2 size={14} />} onClick={onDelete}>
-                  {t("workspaces.deleteSite")}
-                </Menu.Item>
-              </>
-            )}
-          </Menu.Dropdown>
-        </Menu>
-      </Box>
-
-      <Box className={classes.siteInfo}>
-        {installed !== null && (
-          <Tooltip label={installed ? t("workspaces.receivingData") : t("workspaces.waitingFirstView")} withArrow>
-            <span className={classes.status} data-live={installed || undefined}>
-              <span className={classes.statusDot} />
-              {installed ? t("workspaces.statusLive", "Live") : t("workspaces.statusWaiting", "Waiting for data")}
-            </span>
-          </Tooltip>
-        )}
-        {frameworkLabel && (
-          <span className={classes.siteTag}>
-            <BrandIcon framework={site.framework as FrameworkId} size={11} />
-            {frameworkLabel}
-          </span>
-        )}
-        {status?.installed && (
-          <span className={classes.siteActivity}>
-            <Activity size={12} />
-            {t("workspaces.eventsSeen", { count: compact(status.eventCount), defaultValue: "{{count}} events" })}
-            {status.lastEventAt && <> · {timeAgo(status.lastEventAt)}</>}
-          </span>
-        )}
-        <TrackerStatus workspaceId={workspaceId} siteId={site.siteId} />
-      </Box>
-
-      <Box className={classes.siteFoot}>
-        <Button
-          size="xs"
-          variant={installed === false ? "light" : "default"}
-          className={classes.verifyBtn}
-          data-open={open || undefined}
-          rightSection={<ChevronDown size={13} className={classes.chev} />}
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-        >
-          {t("workspaces.installVerify", "Install & verify")}
-        </Button>
-        <CopyButton value={snippet}>
-          {({ copied, copy }) => (
-            <Tooltip label={copied ? t("workspaces.copied") : t("workspaces.copySnippet")} withArrow>
-              <Button
-                size="xs"
-                variant="subtle"
-                color="gray"
-                leftSection={copied ? <Check size={13} /> : <Code2 size={13} />}
-                onClick={copy}
+          </CopyButton>
+          <RefreshButton onRefresh={onRefresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+          <Menu position="bottom-end" withinPortal shadow="md" width={200}>
+            <Menu.Target>
+              <ActionIcon variant="default" radius="xl" size={36} aria-label={t("workspaces.siteActions", "Website actions")}>
+                <MoreHorizontal size={17} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<ExternalLink size={14} />}
+                component="a"
+                href={`https://${site.domain}`}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                {copied ? t("workspaces.copied") : t("workspaces.snippet")}
-              </Button>
-            </Tooltip>
-          )}
-        </CopyButton>
+                {t("workspaces.openSite", "Open website")}
+              </Menu.Item>
+              {onEdit && (
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>
+                  {t("workspaces.editSite", "Edit name & domain")}
+                </Menu.Item>
+              )}
+              <Menu.Item leftSection={<Copy size={14} />} onClick={() => void navigator.clipboard.writeText(site.siteId)}>
+                {t("workspaces.copySiteId", "Copy site ID")}
+              </Menu.Item>
+              {onDelete && (
+                <>
+                  <Menu.Divider />
+                  <Menu.Item className="danger-item" color="red" leftSection={<Trash2 size={14} />} onClick={onDelete}>
+                    {t("workspaces.deleteSite")}
+                  </Menu.Item>
+                </>
+              )}
+            </Menu.Dropdown>
+          </Menu>
+        </Box>
+      </Box>
+
+      <Box className={classes.stats} data-size="facts">
+        <SiteStatusStat installed={installed} />
+        <Stat label={t("workspaces.statEvents")} value={status ? compact(status.eventCount) : "—"} />
+        <Stat
+          label={t("workspaces.statLastEvent")}
+          value={status?.lastEventAt ? timeAgo(status.lastEventAt) : t("workspaces.noEventsYet")}
+        />
+        <TrackerStatus workspaceId={workspaceId} siteId={site.siteId} />
       </Box>
 
       <Collapse expanded={open}>

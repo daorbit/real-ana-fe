@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, TextInput } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { FolderKanban, Plus, Search } from "lucide-react";
+import { FolderKanban, Plus } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { useSites } from "@/features/workspace";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
@@ -12,7 +12,10 @@ import { AddSiteWizard } from "@/features/workspace/components/AddSiteWizard";
 import { useWorkspaceActions } from "@/features/workspace/hooks/useWorkspaceActions";
 import { useWorkspacesDeepLink } from "@/features/workspace/hooks/useWorkspacesDeepLink";
 import { WorkspaceSwitcher } from "@/features/workspace/components/workspaces/WorkspaceSwitcher";
-import { WorkspaceHero } from "@/features/workspace/components/workspaces/WorkspaceHero";
+import { WorkspaceMeta } from "@/features/workspace/components/workspaces/WorkspaceMeta";
+import { WorkspaceActions } from "@/features/workspace/components/workspaces/WorkspaceActions";
+import { WorkspaceDetails } from "@/features/workspace/components/workspaces/WorkspaceDetails";
+import { OtherWorkspaces } from "@/features/workspace/components/workspaces/OtherWorkspaces";
 import { SitesPanel } from "@/features/workspace/components/workspaces/SitesPanel";
 import classes from "@/features/workspace/components/workspaces/Workspaces.module.css";
 import { hasSiteSlot } from "@/features/workspace/siteLimit";
@@ -24,8 +27,6 @@ import { PageHelpButton } from "@/shared/ui/PageHelpButton";
 import { useTitle } from "@/shared/lib/useTitle";
 
 const NEW_WORKSPACE_PATH = "/app/onboarding?mode=workspace";
-/** Past this many workspaces, the header gets a search box. */
-const SEARCH_FROM = 4;
 
 export default function Workspaces() {
   useTitle("Workspaces");
@@ -34,23 +35,20 @@ export default function Workspaces() {
   const { workspaces, active, setActive, loading } = useWorkspace();
   const { demo } = useDemo();
   const perms = usePermissions();
-  // Demo shows every control so the page reads as the real thing, but none
-  // of them may actually write — there is no account behind the sample data
-  // for a create/rename/delete to land on.
   const canEdit = perms.canEdit && !demo;
   const canAdmin = perms.canAdmin && !demo;
   const canDelete = perms.canDelete && !demo;
   const [siteOpen, setSiteOpen] = useState(false);
+  const topRef = useRef<HTMLDivElement>(null);
 
   const { sites, refresh, refreshing, lastUpdated } = useSites(active?._id);
   const actions = useWorkspaceActions(active ?? null, sites.length);
-  const [query, setQuery] = useState("");
-  const q = query.trim().toLowerCase();
-  const shownWorkspaces = q ? workspaces.filter((w) => w.name.toLowerCase().includes(q)) : workspaces;
-
-  const canAddSite = canEdit && hasSiteSlot(active?.billing, sites.length);
 
   const createWorkspace = () => nav(NEW_WORKSPACE_PATH);
+  const selectFromCards = (id: string) => {
+    setActive(id);
+    topRef.current?.scrollIntoView({ block: "start" });
+  };
   const openAddSite = () => {
     if (!hasSiteSlot(active?.billing, sites.length)) {
       notify.info(t("workspaces.oneSiteToast"));
@@ -62,98 +60,94 @@ export default function Workspaces() {
 
   if (loading) return <AppShell><WorkspacesSkeleton /></AppShell>;
 
-  return (
-    <AppShell>
-      <PageHeader
-        title={t("workspaces.title")}
-        description={t("workspaces.description")}
-        actions={
-          <>
-            {workspaces.length >= SEARCH_FROM && (
-              <TextInput
-                className={classes.search}
-                placeholder={t("workspaces.findWorkspace", "Search workspaces")}
-                leftSection={<Search size={14} />}
-                value={query}
-                onChange={(e) => setQuery(e.currentTarget.value)}
-                aria-label={t("workspaces.findWorkspace", "Search workspaces")}
-              />
-            )}
-            <Button
-              variant="default"
-              leftSection={<Plus size={16} />}
-              onClick={createWorkspace}
-              disabled={demo}
-              title={demo ? "Turn off demo data to create a workspace" : undefined}
-            >
-              {t("workspaces.newWorkspace")}
-            </Button>
-            <PageHelpButton />
-          </>
-        }
-      />
-
-      {active && (
-        <AddSiteWizard
-          opened={siteOpen}
-          onClose={() => setSiteOpen(false)}
-          workspaceId={active._id}
-          existingDomains={sites.map((s) => s.domain.toLowerCase())}
+  if (!active) {
+    return (
+      <AppShell>
+        <PageHeader
+          title={t("workspaces.title")}
+          description={t("workspaces.description")}
+          actions={
+            <>
+              <Button
+                variant="default"
+                radius="xl"
+                leftSection={<Plus size={16} />}
+                onClick={createWorkspace}
+                disabled={demo}
+              >
+                {t("workspaces.newWorkspace")}
+              </Button>
+              <PageHelpButton />
+            </>
+          }
         />
-      )}
-
-      {!active ? (
         <EmptyState
           icon={FolderKanban}
           title={t("workspaces.emptyTitle")}
           description={t("workspaces.emptyBody")}
           action={{ label: t("workspaces.emptyCta"), icon: Plus, onClick: createWorkspace }}
         />
-      ) : (
-        <Box className={classes.layout}>
-          <WorkspaceSwitcher
-            workspaces={shownWorkspaces}
-            activeId={active._id}
-            onSelect={setActive}
-            onCreate={createWorkspace}
-          />
+      </AppShell>
+    );
+  }
 
-          <motion.div
-            key={active._id}
-            className={classes.main}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18 }}
-          >
-            <WorkspaceHero
+  return (
+    <AppShell>
+      <div ref={topRef} />
+      <PageHeader
+        title={
+          <WorkspaceSwitcher
+            workspaces={workspaces}
+            active={active}
+            onSelect={setActive}
+            onCreate={demo ? undefined : createWorkspace}
+          />
+        }
+        description={<WorkspaceMeta workspace={active} />}
+        actions={
+          <>
+            <WorkspaceActions
               workspace={active}
-              siteCount={sites.length}
-              canEdit={canEdit}
-              canAddSite={canAddSite}
               canAdmin={canAdmin}
               canDelete={canDelete}
               validateName={actions.validateName}
               onRename={actions.rename}
               renaming={actions.renaming}
-              onAddSite={openAddSite}
               onDelete={() => actions.removeWorkspace(active)}
             />
-            <SitesPanel
-              sites={sites}
-              workspaceId={active._id}
-              canEdit={canEdit}
-              canAddSite={canAddSite}
-              onAddSite={openAddSite}
-              onCreateWorkspace={demo ? undefined : createWorkspace}
-              onDeleteSite={actions.removeSite}
-              onRefresh={refresh}
-              refreshing={refreshing}
-              lastUpdated={lastUpdated}
-              focusedSiteId={focusedSiteId}
-            />
-          </motion.div>
-        </Box>
-      )}
+            <PageHelpButton />
+          </>
+        }
+      />
+
+      <AddSiteWizard
+        opened={siteOpen}
+        onClose={() => setSiteOpen(false)}
+        workspaceId={active._id}
+        existingDomains={sites.map((s) => s.domain.toLowerCase())}
+      />
+
+      <motion.div
+        key={active._id}
+        className={classes.main}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18 }}
+      >
+        <SitesPanel
+          sites={sites}
+          workspaceId={active._id}
+          canEdit={canEdit}
+          onAddSite={openAddSite}
+          onDeleteSite={actions.removeSite}
+          onRefresh={refresh}
+          refreshing={refreshing}
+          lastUpdated={lastUpdated}
+          focusedSiteId={focusedSiteId}
+        />
+        <WorkspaceDetails workspace={active} canEdit={canEdit} canAdmin={canAdmin} />
+        <OtherWorkspaces workspaces={workspaces} activeId={active._id} onSelect={selectFromCards} />
+      </motion.div>
     </AppShell>
   );
 }

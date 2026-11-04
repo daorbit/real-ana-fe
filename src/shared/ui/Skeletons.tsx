@@ -180,38 +180,10 @@ export function WorkspacesSkeleton() {
         <Skeleton height={36} width={160} radius="md" />
       </Group>
 
-      <Grid gap="xl">
-        <Grid.Col span={{ base: 12, md: 3 }}>
-          <Skeleton height={260} radius="md" />
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 9 }}>
-          <Stack gap="lg">
-            <Skeleton height={170} radius="md" />
-            <SimpleGrid cols={{ base: 2, lg: 4 }}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} height={104} radius="md" />
-              ))}
-            </SimpleGrid>
-            <Card withBorder radius="md" padding={0}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Group key={i} justify="space-between" wrap="nowrap" p="md">
-                  <Group gap="md" wrap="nowrap" flex={1}>
-                    <Skeleton height={40} width={40} radius="md" />
-                    <Box flex={1}>
-                      <Skeleton height={12} width="35%" radius="sm" />
-                      <Skeleton height={10} width="25%" mt={8} radius="sm" />
-                    </Box>
-                  </Group>
-                  <Group gap={6}>
-                    <Skeleton height={28} width={72} radius="md" />
-                    <Skeleton height={28} width={78} radius="md" />
-                  </Group>
-                </Group>
-              ))}
-            </Card>
-          </Stack>
-        </Grid.Col>
-      </Grid>
+      <Stack gap="md">
+        <Skeleton height={206} radius="lg" />
+        <Skeleton height={96} radius="lg" />
+      </Stack>
     </>
   );
 }
