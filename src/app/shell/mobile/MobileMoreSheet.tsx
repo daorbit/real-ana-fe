@@ -1,13 +1,12 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ActionIcon, UnstyledButton } from "@mantine/core";
-import { CalendarCheck, ChevronRight, Search, X } from "lucide-react";
+import { CalendarCheck, ChevronRight, X } from "lucide-react";
 import { DemoCallModal } from "../DemoCallModal";
 import { useTranslation } from "react-i18next";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import type { NavGroup } from "../navItems";
 import { MOBILE_TAB_PATHS } from "../mobileTabs";
-import { openPalette } from "../openPalette";
 import { useNavGroups } from "../useNavGroups";
 import { MobileNavList } from "./MobileNavList";
 import classes from "./MobileMoreSheet.module.css";
@@ -48,11 +47,6 @@ export function MobileMoreSheet({
           <X size={16} />
         </ActionIcon>
       </header>
-
-      <UnstyledButton className={classes.search} onClick={openPalette}>
-        <Search size={16} />
-        <span>{t("nav.search")}</span>
-      </UnstyledButton>
 
       <div className={classes.scroll}>
         {!onOrbit && (

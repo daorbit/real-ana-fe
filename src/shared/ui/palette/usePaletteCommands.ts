@@ -49,7 +49,7 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
           section: "Go to",
           icon: item.icon,
           keys: key ? ["G", key.toUpperCase()] : undefined,
-          keywords: t(group.headingKey, group.heading),
+          keywords: [t(group.headingKey, group.heading), item.keywords].filter(Boolean).join(" "),
           run: go(item.to),
         };
       }),

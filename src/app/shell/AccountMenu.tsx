@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, UnstyledButton } from "@mantine/core";
-import {
-  ChevronsUpDown, Languages, ShieldCheck, Lightbulb, LifeBuoy, Scale, LogOut,
-} from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
@@ -21,6 +19,10 @@ import classes from "./Rail.module.css";
 import { MenuVersion } from "./MenuVersion";
 import { MenuArtIcon } from "./MenuArtIcon";
 import { MenuToneIcon } from "./MenuToneIcon";
+import {
+  AdminToolsColorIcon, ContactSupportColorIcon, LanguageColorIcon, LegalColorIcon, LogOutColorIcon,
+  RequestFeatureColorIcon,
+} from "./colorIcons";
 
 export function AccountMenu({
   collapsed,
@@ -121,7 +123,7 @@ export function AccountMenu({
 
           <Menu.Sub>
             <Menu.Sub.Target>
-              <Menu.Sub.Item leftSection={<MenuToneIcon icon={Languages} tone="indigo" />}>{t("nav.language", "Language")}</Menu.Sub.Item>
+              <Menu.Sub.Item leftSection={<MenuToneIcon icon={LanguageColorIcon} tone="indigo" />}>{t("nav.language", "Language")}</Menu.Sub.Item>
             </Menu.Sub.Target>
             <Menu.Sub.Dropdown>
               <LanguageItems />
@@ -129,7 +131,7 @@ export function AccountMenu({
           </Menu.Sub>
 
           {isAdmin && (
-            <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<MenuToneIcon icon={ShieldCheck} tone="blue" />}>
+            <Menu.Item component={Link} to={ADMIN_TOOLS_PATH} leftSection={<MenuToneIcon icon={AdminToolsColorIcon} tone="blue" />}>
               {t("nav.adminTools", "Admin tools")}
             </Menu.Item>
           )}
@@ -137,15 +139,15 @@ export function AccountMenu({
           <Menu.Divider />
           <div className={classes.menuSection}>{t("nav.help", "Help")}</div>
 
-          <Menu.Item leftSection={<MenuToneIcon icon={Lightbulb} tone="amber" />} onClick={() => setFeatureOpen(true)}>
+          <Menu.Item leftSection={<MenuToneIcon icon={RequestFeatureColorIcon} tone="amber" />} onClick={() => setFeatureOpen(true)}>
             {t("nav.requestFeature", "Request a feature")}
           </Menu.Item>
-          <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<MenuToneIcon icon={LifeBuoy} tone="orange" />}>
+          <Menu.Item component="a" href={CONTACT_URL} target="_blank" rel="noreferrer" leftSection={<MenuToneIcon icon={ContactSupportColorIcon} tone="orange" />}>
             {t("nav.contactSupport", "Contact support")}
           </Menu.Item>
           <Menu.Sub>
             <Menu.Sub.Target>
-              <Menu.Sub.Item leftSection={<MenuToneIcon icon={Scale} tone="slate" />}>{t("nav.legal", "Legal")}</Menu.Sub.Item>
+              <Menu.Sub.Item leftSection={<MenuToneIcon icon={LegalColorIcon} tone="slate" />}>{t("nav.legal", "Legal")}</Menu.Sub.Item>
             </Menu.Sub.Target>
             <Menu.Sub.Dropdown>
               <Menu.Item component="a" href={LEGAL_URLS.terms} target="_blank" rel="noreferrer">
@@ -162,7 +164,7 @@ export function AccountMenu({
 
           <Menu.Divider />
 
-          <Menu.Item color="red" className="danger-item" leftSection={<MenuToneIcon icon={LogOut} tone="red" />} onClick={onLogout}>
+          <Menu.Item color="red" className="danger-item" leftSection={<MenuToneIcon icon={LogOutColorIcon} tone="red" />} onClick={onLogout}>
             {t("nav.logout", "Log out")}
           </Menu.Item>
 

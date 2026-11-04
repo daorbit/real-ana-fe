@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useId, type ReactNode } from "react";
 import type { LucideProps } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 
@@ -30,48 +30,61 @@ export const LeadMagnetIcon = forwardRef<SVGSVGElement, LucideProps>(
 
 LeadMagnetIcon.displayName = "LeadMagnetIcon";
 
-function outlineIcon(displayName: string, paths: string[]) {
-  const Icon = forwardRef<SVGSVGElement, LucideProps>(
-    ({ color = "currentColor", size = 24, strokeWidth = 2, ...props }, ref) => (
+const DETAILED_ICON_MIN_SIZE = 18;
+
+export function detailedIconSize(size: LucideProps["size"]) {
+  return typeof size === "number" ? Math.max(size, DETAILED_ICON_MIN_SIZE) : size;
+}
+
+const ICON_TONES = {
+  red: { top: "#ff8073", bottom: "#e0352c" },
+  yellow: { top: "#ffdc7a", bottom: "#f4a51c" },
+  orange: { top: "#ffb56e", bottom: "#ec7418" },
+  blue: { top: "#74baff", bottom: "#1d6fe8" },
+  deepBlue: { top: "#2f7ff0", bottom: "#134fbd" },
+  green: { top: "#62dfa0", bottom: "#14a35f" },
+  deepGreen: { top: "#128a52", bottom: "#0c6f41" },
+  purple: { top: "#ad9fff", bottom: "#6548ec" },
+  deepPurple: { top: "#5f45dc", bottom: "#4730b4" },
+  slate: { top: "#b8c4d6", bottom: "#62718a" },
+  paper: { top: "#ffffff", bottom: "#dbe3f0" },
+};
+
+export type IconTone = keyof typeof ICON_TONES;
+
+export function colorIcon(
+  displayName: string,
+  tones: IconTone[],
+  renderShapes: (paint: (tone: IconTone) => string) => ReactNode,
+) {
+  const Icon = forwardRef<SVGSVGElement, LucideProps>(({ size = 24, ...props }, ref) => {
+    const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+    const iconSize = detailedIconSize(size);
+    return (
       <svg
         ref={ref}
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
+        width={iconSize}
+        height={iconSize}
+        viewBox="0 0 512 512"
         fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
         xmlns="http://www.w3.org/2000/svg"
         {...props}
       >
-        {paths.map((d) => (
-          <path key={d} d={d} />
-        ))}
+        <defs>
+          {tones.map((tone) => (
+            <linearGradient key={tone} id={`${id}${tone}`} x1="0" y1="0" x2="0" y2="1">
+              <stop stopColor={ICON_TONES[tone].top} />
+              <stop offset="1" stopColor={ICON_TONES[tone].bottom} />
+            </linearGradient>
+          ))}
+        </defs>
+        {renderShapes((tone) => `url(#${id}${tone})`)}
       </svg>
-    ),
-  );
+    );
+  });
   Icon.displayName = displayName;
   return Icon;
 }
-
-export const SearchVisibilityIcon = outlineIcon("SearchVisibilityIcon", [
-  "M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0",
-  "M12 18c-.328 0 -.652 -.017 -.97 -.05c-3.172 -.332 -5.85 -2.315 -8.03 -5.95c2.4 -4 5.4 -6 9 -6c3.465 0 6.374 1.853 8.727 5.558",
-  "M15 18a3 3 0 1 0 6 0a3 3 0 1 0 -6 0",
-  "M20.2 20.2l1.8 1.8",
-]);
-
-export const SeoIcon = outlineIcon("SeoIcon", [
-  "M21 12a9 9 0 1 0 -9 9",
-  "M3.6 9h16.8",
-  "M3.6 15h7.9",
-  "M11.5 3a17 17 0 0 0 0 18",
-  "M12.5 3a16.984 16.984 0 0 1 2.574 8.62",
-  "M15 18a3 3 0 1 0 6 0a3 3 0 1 0 -6 0",
-  "M20.2 20.2l1.8 1.8",
-]);
 
 /**
  * Orbit's rail row uses the product's own mark, not a line glyph.

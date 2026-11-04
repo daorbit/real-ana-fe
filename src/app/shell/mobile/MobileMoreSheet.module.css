@@ -20,19 +20,6 @@
   color: var(--text);
 }
 
-.search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  margin: 0 16px 4px;
-  padding: 0 12px;
-  border-radius: 12px;
-  background: var(--surface-2);
-  color: var(--muted);
-  font-size: 14px;
-}
-
 .scroll {
   flex: 1;
   min-height: 0;

@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { Menu } from "lucide-react";
 import { prefetchRoute } from "@/app/routePrefetch";
 import { haptic } from "@/shared/lib/haptics";
+import { MoreColorIcon } from "./colorIcons";
 import { MOBILE_TABS as TABS } from "./mobileTabs";
 
 export function MobileTabBar({
@@ -24,47 +24,51 @@ export function MobileTabBar({
 
   return (
     <nav className="m-tabbar" aria-label={t("nav.primary", "Primary")}>
-      {TABS.map(({ to, labelKey, label, icon: Icon, exact }) => {
-        const active = !moreOpen && onTab(to, exact);
-        return (
-          <Link
-            key={to}
-            to={to}
-            className="m-tab"
-            data-active={active}
-            aria-current={active ? "page" : undefined}
-            onTouchStart={() => void prefetchRoute(to)}
-            onFocus={() => void prefetchRoute(to)}
-            onClick={(e) => {
-              haptic();
-              if (pathname !== to) return;
-              e.preventDefault();
-              onReselect();
-            }}
-          >
-            <span className="m-tab__pill">
-              <Icon size={22} strokeWidth={active ? 2.25 : 1.75} />
-            </span>
-            <span className="m-tab__label">{t(labelKey, label)}</span>
-          </Link>
-        );
-      })}
-      <UnstyledButton
-        className="m-tab"
-        // "More" is where you are when the drawer is open, or when the current
-        // page is one of the destinations that only lives in the drawer.
-        data-active={moreOpen || !anyTab}
-        aria-expanded={moreOpen}
-        onClick={() => {
-          haptic();
-          onMore();
-        }}
-      >
-        <span className="m-tab__pill">
-          <Menu size={22} strokeWidth={moreOpen || !anyTab ? 2.25 : 1.75} />
-        </span>
-        <span className="m-tab__label">{t("nav.more", "More")}</span>
-      </UnstyledButton>
+      <div className="m-tabbar__glass m-tabbar__tabs">
+        {TABS.map(({ to, labelKey, label, icon: Icon, exact }) => {
+          const active = !moreOpen && onTab(to, exact);
+          return (
+            <Link
+              key={to}
+              to={to}
+              className="m-tab"
+              data-active={active}
+              aria-current={active ? "page" : undefined}
+              onTouchStart={() => void prefetchRoute(to)}
+              onFocus={() => void prefetchRoute(to)}
+              onClick={(e) => {
+                haptic();
+                if (pathname !== to) return;
+                e.preventDefault();
+                onReselect();
+              }}
+            >
+              <span className="m-tab__pill">
+                <Icon size={24} />
+              </span>
+              <span className="m-tab__label">{t(labelKey, label)}</span>
+            </Link>
+          );
+        })}
+      </div>
+      <div className="m-tabbar__glass m-tabbar__more">
+        <UnstyledButton
+          className="m-tab"
+          // "More" is where you are when the drawer is open, or when the current
+          // page is one of the destinations that only lives in the drawer.
+          data-active={moreOpen || !anyTab}
+          aria-expanded={moreOpen}
+          onClick={() => {
+            haptic();
+            onMore();
+          }}
+        >
+          <span className="m-tab__pill">
+            <MoreColorIcon size={24} />
+          </span>
+          <span className="m-tab__label">{t("nav.more", "More")}</span>
+        </UnstyledButton>
+      </div>
     </nav>
   );
 }

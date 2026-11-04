@@ -37,3 +37,8 @@
   top: -4px;
   right: -4px;
 }
+
+:global(.m-header) .badge {
+  top: -1px;
+  right: -1px;
+}
