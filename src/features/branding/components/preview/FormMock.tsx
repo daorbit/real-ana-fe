@@ -11,7 +11,7 @@ const FIELDS = ["Your name", "Email"];
 
 export function FormMock({ header, showPoweredBy, poweredByLabel }: Props) {
   return (
-    <Box className={`${classes.screen} ${classes.formScreen}`}>
+    <Box className={classes.formScreen}>
       <Box className={classes.formCard}>
         {header && (
           <Box className={classes.brand}>
@@ -21,7 +21,7 @@ export function FormMock({ header, showPoweredBy, poweredByLabel }: Props) {
         )}
         <div className={classes.formTitle}>Contact us</div>
         {FIELDS.map((label) => (
-          <Box key={label}>
+          <Box key={label} className={classes.field}>
             <div className={classes.fieldLabel}>{label}</div>
             <div className={classes.fieldBox} />
           </Box>

@@ -1,7 +1,39 @@
-import { Badge, Box, Switch } from "@mantine/core";
-import { Section, Field } from "@/shared/ui/Page";
+import { Badge, Switch } from "@mantine/core";
 import type { BrandingForm } from "../hooks/useBrandingForm";
+import { BrandingGroup } from "./BrandingGroup";
 import classes from "./Branding.module.css";
+
+function CreditRow({
+  label,
+  hint,
+  ariaLabel,
+  checked,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  hint: string;
+  ariaLabel: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className={classes.creditRow}>
+      <div className={classes.creditText}>
+        <div className={classes.rowLabel}>{label}</div>
+        <div className={classes.rowHint}>{hint}</div>
+      </div>
+      <Switch
+        size="md"
+        aria-label={ariaLabel}
+        checked={checked}
+        onChange={(e) => onChange(e.currentTarget.checked)}
+        disabled={disabled}
+      />
+    </div>
+  );
+}
 
 export function CreditsSection({ form }: { form: BrandingForm }) {
   const {
@@ -16,42 +48,27 @@ export function CreditsSection({ form }: { form: BrandingForm }) {
   } = form;
 
   return (
-    <Section
+    <BrandingGroup
       title={`${defaultName} credits`}
-      description="Small marks we add to your pages and images. Pro workspaces can switch them off."
+      description="Small marks on your pages and images. Pro workspaces can switch them off."
       actions={!editable && <Badge variant="light" color="violet" size="sm">Pro</Badge>}
     >
-      <Field
+      <CreditRow
         label={`"${poweredByLabel}" footer`}
-        hint="Appears under your public forms, on thank-you screens and in emails to respondents."
-      >
-        <Box className={classes.switchCell}>
-          <Switch
-            aria-label="Show powered-by footer"
-            checked={showPoweredBy}
-            onChange={(e) => setShowPoweredBy(e.currentTarget.checked)}
-            disabled={locked}
-            label={showPoweredBy ? "Shown" : "Hidden"}
-            labelPosition="left"
-          />
-        </Box>
-      </Field>
-      <Field
+        hint="Appears under public forms, on thank-you screens and in emails to respondents."
+        ariaLabel="Show powered-by footer"
+        checked={showPoweredBy}
+        onChange={setShowPoweredBy}
+        disabled={locked}
+      />
+      <CreditRow
         label="AI image watermark"
         hint="Marks images Orbit AI generates for you as AI-made."
-        last
-      >
-        <Box className={classes.switchCell}>
-          <Switch
-            aria-label="Watermark AI images"
-            checked={watermarkAiImages}
-            onChange={(e) => setWatermarkAiImages(e.currentTarget.checked)}
-            disabled={locked}
-            label={watermarkAiImages ? "On" : "Off"}
-            labelPosition="left"
-          />
-        </Box>
-      </Field>
-    </Section>
+        ariaLabel="Watermark AI images"
+        checked={watermarkAiImages}
+        onChange={setWatermarkAiImages}
+        disabled={locked}
+      />
+    </BrandingGroup>
   );
 }

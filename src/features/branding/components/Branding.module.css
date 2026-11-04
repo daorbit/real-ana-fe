@@ -1,14 +1,14 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--mantine-spacing-xl);
+  gap: 28px;
   align-items: start;
 }
 
 .main {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-xl);
+  gap: 24px;
   min-width: 0;
 }
 
@@ -23,7 +23,7 @@
 
 @media (min-width: 62em) {
   .layout {
-    grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 440px);
   }
 
   .aside {
@@ -32,43 +32,182 @@
   }
 }
 
-.logoRow {
+.group {
   display: flex;
-  align-items: center;
-  gap: var(--mantine-spacing-sm);
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 
-.logoThumb {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
+.groupHead {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--border);
-  background: var(--surface-2);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.groupText {
+  margin: 2px 0 0;
+  font-size: 14px;
   color: var(--text-2);
 }
 
-.logoThumb[data-filled] {
-  border-style: solid;
+.groupCard {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.groupCard > * + * {
+  border-top: 1px solid var(--border);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 24px;
+  padding: 20px 28px;
+}
+
+.rowText {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.rowControl {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.rowLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--text);
+}
+
+.rowHint {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.logoRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 20px;
+  padding: 24px 28px;
+}
+
+.logoThumb {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--muted);
 }
 
 .logoImg {
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
+}
+
+.logoText {
+  flex: 1 1 220px;
+  min-width: 0;
 }
 
 .logoActions {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
-.switchCell {
+.accent {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--swatch);
+  color: #fff;
+  transition: opacity 120ms ease;
+}
+
+.swatch:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.swatch:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.swatch:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.accentInput {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.accentDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--swatch);
+}
+
+.creditRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 28px;
+}
+
+.creditText {
+  min-width: 0;
+}
+
+@media (max-width: 48em) {
+  .row,
+  .logoRow,
+  .creditRow {
+    padding: 18px 16px;
+  }
 }

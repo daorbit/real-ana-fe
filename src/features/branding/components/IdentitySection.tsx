@@ -1,52 +1,41 @@
-import { Badge, ColorInput, TextInput } from "@mantine/core";
-import { Section, Field } from "@/shared/ui/Page";
-import { ACCENT_SWATCHES, DEFAULT_ACCENT } from "../constants";
+import { Badge, TextInput } from "@mantine/core";
 import type { BrandingForm } from "../hooks/useBrandingForm";
+import { AccentField } from "./AccentField";
+import { BrandingGroup, BrandingRow } from "./BrandingGroup";
 import { LogoField } from "./LogoField";
 
 export function IdentitySection({ form }: { form: BrandingForm }) {
-  const { name, setName, accentColor, setAccentColor, locked, editable, defaultName } = form;
+  const { name, setName, locked, editable, defaultName } = form;
 
   return (
-    <Section
+    <BrandingGroup
       title="Your brand"
-      description="How your business appears to people filling in your forms and paying through them."
       actions={!editable && <Badge variant="light" color="violet" size="sm">Pro</Badge>}
     >
-      <Field
+      <LogoField form={form} />
+      <BrandingRow
         label="Business name"
-        hint={`Shown at the top of your forms and on the payment window. Leave empty to keep forms unbranded and show "${defaultName}" when people pay.`}
+        htmlFor="brand-name"
+        hint="Shown at the top of your forms and on the payment window."
       >
         <TextInput
+          id="brand-name"
+          size="md"
+          radius={12}
           placeholder={defaultName}
           value={name}
           onChange={(e) => setName(e.currentTarget.value)}
           disabled={locked}
           maxLength={60}
         />
-      </Field>
-      <Field
-        label="Logo"
-        hint="A square image works best. It sits next to your name on forms and payments."
-      >
-        <LogoField form={form} />
-      </Field>
-      <Field
+      </BrandingRow>
+      <BrandingRow
         label="Brand colour"
-        hint="Colours the payment window. Each form keeps the colours from its own theme."
-        last
+        htmlFor="brand-colour"
+        hint="Colours the payment window. Each form keeps its own theme colours."
       >
-        <ColorInput
-          placeholder={DEFAULT_ACCENT}
-          value={accentColor}
-          onChange={setAccentColor}
-          disabled={locked}
-          format="hex"
-          swatches={ACCENT_SWATCHES}
-          swatchesPerRow={10}
-          withEyeDropper={false}
-        />
-      </Field>
-    </Section>
+        <AccentField form={form} id="brand-colour" />
+      </BrandingRow>
+    </BrandingGroup>
   );
 }

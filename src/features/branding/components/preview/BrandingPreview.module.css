@@ -1,172 +1,230 @@
-.card {
+.preview {
   display: flex;
   flex-direction: column;
-  gap: var(--mantine-spacing-sm);
-  padding: var(--mantine-spacing-md);
+  gap: 10px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.tab {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.tab[data-active],
+.tab[data-active]:hover {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
 }
 
 .window {
-  overflow: hidden;
-  border-radius: var(--radius-sm);
+  padding: 20px;
+  border-radius: 18px;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-}
-
-.screen {
-  min-height: 380px;
-  display: flex;
-  flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #111827;
+  background: var(--surface);
 }
 
 .formScreen {
-  justify-content: center;
-  padding: 24px 20px;
-  background: #f5f6f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
 
 .formCard {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #e5e5ea;
   background: #fff;
+  color: #1d1d1f;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f1f3;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e5ea;
 }
 
 .brandLogo {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
   object-fit: contain;
-  background: #f3f4f6;
 }
 
 .brandName {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .formTitle {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   text-align: center;
-  font-size: 16px;
-  font-weight: 700;
+}
+
+.field {
+  margin-top: 14px;
 }
 
 .fieldLabel {
-  margin-bottom: 5px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #4b5563;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .fieldBox {
-  height: 34px;
-  border-radius: 7px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #e5e5ea;
 }
 
 .submit {
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  height: 44px;
+  margin-top: 18px;
+  border-radius: 10px;
   background: #059669;
   color: #fff;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .poweredBy {
-  margin-top: 14px;
-  text-align: center;
-  font-size: 11px;
-  color: #6b7280;
+  font-size: 12px;
+  color: var(--muted);
 }
 
-.payScreen {
+.pay {
+  max-width: 360px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid #e5e5ea;
   background: #fff;
+  color: #1d1d1f;
 }
 
 .payHeader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 24px 20px 20px;
+  padding: 20px;
   background: var(--brand-accent);
   color: #fff;
 }
 
-.payLogo {
-  width: 44px;
-  height: 44px;
+.payBrand {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 4px;
+  gap: 10px;
+  min-width: 0;
+}
+
+.payLogo {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-  object-fit: contain;
   background: #fff;
   color: var(--brand-accent);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 700;
+}
+
+.payLogoImg {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 .payName {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .payAmount {
-  padding: 4px 14px;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.18);
-  font-size: 12px;
+  margin-top: 14px;
+  font-size: 26px;
   font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .payBody {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px 20px;
+  padding: 16px 20px 18px;
 }
 
 .payHeading {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #4b5563;
+}
+
+.payList {
+  margin-top: 8px;
 }
 
 .payMethod {
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  border-top: 1px solid #e5e5ea;
+  font-size: 14px;
+}
+
+.payMethod svg {
+  color: #6e6e73;
 }
 
 .paySecured {
-  margin-top: auto;
-  padding-top: 8px;
+  margin-top: 10px;
+  font-size: 12px;
   text-align: center;
-  font-size: 11px;
-  color: #9ca3af;
+  color: #6e6e73;
 }
