@@ -11,16 +11,6 @@
   border-bottom-color: var(--border-strong);
 }
 
-.bar :global(.rail-workspace__name--page) {
-  max-height: 20px;
-  transition: opacity 180ms ease, max-height 180ms ease;
-}
-
-:global(body:not([data-page])) .bar:not([data-scrolled]) :global(.rail-workspace__name--page) {
-  max-height: 0;
-  opacity: 0;
-}
-
 .row {
   display: flex;
   align-items: center;

@@ -372,6 +372,14 @@
   .home-toolbar-btns > *,
   .an-toolbar-btns > * { flex-shrink: 0; }
 
+  .home-toolbar-btns > :first-child,
+  .an-toolbar-btns > :first-child { margin-left: auto; }
+
+  .an-toolbar-btns {
+    padding-inline: 0;
+    scroll-padding-inline: 0;
+  }
+
   .home-toolbar-btns .mantine-Button-root,
   .an-toolbar-btns .mantine-Button-root {
     height: 34px;

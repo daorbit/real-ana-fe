@@ -25,7 +25,6 @@ import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
 import { MobileAppBar } from "./shell/mobile/MobileAppBar";
-import { MobileLargeTitle } from "./shell/mobile/MobileLargeTitle";
 import { PullIndicator } from "./shell/mobile/PullIndicator";
 import { useMobileGestures } from "./shell/mobile/useMobileGestures";
 import { useStuck } from "@/shared/lib/useStuck";
@@ -182,7 +181,6 @@ export function ShellFrame({ children }: { children: ReactNode }) {
             )}
             {mobile && <PullIndicator ref={indicator} />}
             <div className="app-panel__scroll" ref={scroller}>
-              {mobile && !isDetail && <MobileLargeTitle />}
               <div ref={scrollTop} className="app-panel__top" aria-hidden />
               <PlanExpiryNotice />
               <QuotaNudge />
