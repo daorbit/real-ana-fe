@@ -149,8 +149,26 @@
     transform: translateY(0) !important;
     visibility: visible;
     transition:
-      transform 280ms cubic-bezier(0.32, 0.72, 0, 1),
+      transform 420ms cubic-bezier(0.34, 1.18, 0.64, 1),
       visibility 0s !important;
+  }
+
+  .mantine-AppShell-navbar::after {
+    content: "";
+    position: absolute;
+    inset-inline: -1px;
+    top: 100%;
+    height: 48px;
+    background: inherit;
+  }
+
+  .m-nav-scrim {
+    animation: m-scrim-in 240ms ease;
+  }
+
+  @keyframes m-scrim-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   /* --------------------------------------------------------- tab bar --- */
@@ -163,6 +181,42 @@
     display: flex;
     gap: 8px;
     height: calc(var(--m-tabbar-h) - var(--m-tabbar-gap));
+    transition:
+      height 320ms cubic-bezier(0.32, 0.72, 0, 1),
+      inset-inline 320ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .m-tabbar[data-compact] {
+    height: 44px;
+    inset-inline: 44px;
+  }
+
+  .m-tabbar[data-compact] .m-tab__pill {
+    scale: 0.86;
+  }
+
+  .m-tabbar__slider {
+    position: absolute;
+    inset-block: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / 4);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 420ms cubic-bezier(0.34, 1.45, 0.64, 1),
+      scale 160ms ease,
+      opacity 150ms ease;
+  }
+
+  .m-tabbar__slider[data-visible] { opacity: 1; }
+  .m-tabbar__slider[data-index="1"] { transform: translateX(100%); }
+  .m-tabbar__slider[data-index="2"] { transform: translateX(200%); }
+  .m-tabbar__slider[data-index="3"] { transform: translateX(300%); }
+
+  .m-tabbar__tabs:has(.m-tab[data-active="true"]:active) .m-tabbar__slider {
+    scale: 1.08 0.92;
   }
 
   .m-tabbar__glass {
@@ -180,6 +234,7 @@
   }
 
   .m-tabbar__tabs {
+    position: relative;
     flex: 1;
   }
 
@@ -212,14 +267,13 @@
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-    transition: color 150ms ease, background-color 150ms ease;
+    transition: color 150ms ease, background-color 150ms ease, scale 160ms ease;
   }
   .m-tab__pill {
     display: grid;
     place-items: center;
     height: 26px;
-    opacity: 0.72;
-    transition: transform 120ms ease, opacity 150ms ease;
+    transition: transform 120ms ease, scale 320ms ease;
   }
   .m-tab__label {
     position: absolute;
@@ -229,11 +283,11 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .m-tab[data-active="true"] {
-    color: var(--accent);
+  .m-tab[data-active="true"] { color: var(--accent); }
+  .m-tabbar__more .m-tab[data-active="true"] {
     background: color-mix(in srgb, var(--accent) 14%, transparent);
   }
-  .m-tab[data-active="true"] .m-tab__pill { opacity: 1; }
+  .m-tabbar__more .m-tab:active { scale: 1.08 0.92; }
   .m-tab:active .m-tab__pill { transform: scale(0.92); }
 
   /* ----------------------------------------------------------- header --- */
@@ -426,15 +480,6 @@
     mask-image: none;
   }
   .hero-pad > .mantine-Group-root { gap: 18px !important; }
-  .hero-pad > .mantine-Group-root > .mantine-Group-root {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    width: 100%;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
-  .hero-pad > .mantine-Group-root > .mantine-Group-root > :nth-child(3) { display: none; }
 
   /* -------------------------------------------------------- analytics --- */
 
@@ -716,6 +761,9 @@
 
 @media (max-width: 48em) and (prefers-reduced-motion: reduce) {
   .m-tab,
+  .m-tabbar,
+  .m-tabbar__slider,
   .m-tab__pill { transition: none; }
+  .m-nav-scrim { animation: none; }
   .mantine-Menu-dropdown { animation: none !important; }
 }

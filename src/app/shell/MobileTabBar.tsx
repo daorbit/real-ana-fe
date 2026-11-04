@@ -1,3 +1,4 @@
+import { useRef, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import { UnstyledButton } from "@mantine/core";
 import { useTranslation } from "react-i18next";
@@ -5,26 +6,39 @@ import { prefetchRoute } from "@/app/routePrefetch";
 import { haptic } from "@/shared/lib/haptics";
 import { MoreColorIcon } from "./colorIcons";
 import { MOBILE_TABS as TABS } from "./mobileTabs";
+import { useCompactOnScroll } from "./mobile/useCompactOnScroll";
 
 export function MobileTabBar({
   pathname,
   moreOpen,
   onMore,
   onReselect,
+  scroller,
 }: {
   pathname: string;
   moreOpen: boolean;
   onMore: () => void;
   onReselect: () => void;
+  scroller: RefObject<HTMLElement | null>;
 }) {
   const { t } = useTranslation();
+  const compact = useCompactOnScroll(scroller, pathname);
   const onTab = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(`${to}/`);
   const anyTab = TABS.some((tab) => onTab(tab.to, tab.exact));
+  const activeIndex = moreOpen ? -1 : TABS.findIndex((tab) => onTab(tab.to, tab.exact));
+  const sliderIndex = useRef(0);
+  if (activeIndex >= 0) sliderIndex.current = activeIndex;
 
   return (
-    <nav className="m-tabbar" aria-label={t("nav.primary", "Primary")}>
+    <nav className="m-tabbar" data-compact={(compact && !moreOpen) || undefined} aria-label={t("nav.primary", "Primary")}>
       <div className="m-tabbar__glass m-tabbar__tabs">
+        <span
+          className="m-tabbar__slider"
+          data-index={sliderIndex.current}
+          data-visible={activeIndex >= 0 || undefined}
+          aria-hidden
+        />
         {TABS.map(({ to, labelKey, label, icon: Icon, exact }) => {
           const active = !moreOpen && onTab(to, exact);
           return (

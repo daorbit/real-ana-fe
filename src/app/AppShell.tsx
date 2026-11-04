@@ -25,6 +25,7 @@ import { Rail } from "./shell/Rail";
 import { useRailState } from "./shell/useRailState";
 import { MobileTabBar } from "./shell/MobileTabBar";
 import { MobileAppBar } from "./shell/mobile/MobileAppBar";
+import { MobileLargeTitle } from "./shell/mobile/MobileLargeTitle";
 import { PullIndicator } from "./shell/mobile/PullIndicator";
 import { useMobileGestures } from "./shell/mobile/useMobileGestures";
 import { useStuck } from "@/shared/lib/useStuck";
@@ -145,10 +146,12 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         {navOpen && (
           <Overlay
             hiddenFrom="sm"
+            className="m-nav-scrim"
             onClick={closeNav}
             zIndex={100}
             color="#000"
             backgroundOpacity={0.35}
+            blur={6}
           />
         )}
 
@@ -179,6 +182,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
             )}
             {mobile && <PullIndicator ref={indicator} />}
             <div className="app-panel__scroll" ref={scroller}>
+              {mobile && !isDetail && <MobileLargeTitle />}
               <div ref={scrollTop} className="app-panel__top" aria-hidden />
               <PlanExpiryNotice />
               <QuotaNudge />
@@ -206,7 +210,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </MantineShell.Main>
 
         {mobile && (
-          <MobileTabBar pathname={loc.pathname} moreOpen={navOpen} onMore={toggleNav} onReselect={scrollToTop} />
+          <MobileTabBar pathname={loc.pathname} moreOpen={navOpen} onMore={toggleNav} onReselect={scrollToTop} scroller={scroller} />
         )}
       </MantineShell>
     </ActivityPanelProvider>

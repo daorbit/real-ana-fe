@@ -149,3 +149,11 @@
 .heroBreakdown {
   margin-top: 14px;
 }
+
+@media (max-width: 48em) {
+  .heroBreakdown .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+  }
+}
