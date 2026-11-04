@@ -90,7 +90,7 @@ function QuantalogAppStudio({ info, opened, onClose }: Props) {
   const turnOff = () =>
     confirmDelete({
       title: `Turn off ${info.name}?`,
-      body: `${info.navLabel} disappears for everyone in this workspace. ${info.offNote}`,
+      body: `${info.navLabel} turns off for everyone in this workspace. ${info.offNote}`,
       confirmLabel: "Turn off",
       onConfirm: async () => {
         unsaved.discardAll();

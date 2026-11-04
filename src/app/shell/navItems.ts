@@ -23,6 +23,7 @@ export type NavItem = {
   linkUrl?: string;
   logoUrl?: string;
   app?: WorkspaceAppId | WorkspaceAppId[];
+  showWhenOff?: boolean;
   tone?: NavTone;
   quiet?: boolean;
 };
@@ -70,8 +71,8 @@ export const NAV_GROUPS: NavGroup[] = [
       // { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
       // { to: "/app/bio", labelKey: "nav.bio", label: "Link in bio", icon: Link2, app: "bio" },
       // { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
-      { to: "/app/tasks", labelKey: "nav.tasks", label: "Tasks", icon: ListTodo, app: "tasks" },
-      { to: "/app/invoices", labelKey: "nav.invoices", label: "Invoices", icon: ReceiptText, app: "invoicing" },
+      { to: "/app/tasks", labelKey: "nav.tasks", label: "Tasks", icon: ListTodo, app: "tasks", showWhenOff: true },
+      { to: "/app/invoices", labelKey: "nav.invoices", label: "Invoices", icon: ReceiptText, app: "invoicing", showWhenOff: Boolean(import.meta.env.VITE_INVOICES_URL) },
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images, app: "media" },
       { to: "/app/apps", labelKey: "nav.allApps", label: "All apps", icon: Blocks, tone: "gold", quiet: true },
     ],

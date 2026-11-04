@@ -5,7 +5,7 @@ import { useNavPrefs } from "./navPrefs";
 import { applyNavPrefs } from "./applyNavPrefs";
 
 function itemVisible(item: NavItem, apps: EnabledApps): boolean {
-  if (!item.app) return true;
+  if (!item.app || item.showWhenOff) return true;
   return Array.isArray(item.app) ? item.app.some((id) => apps[id]) : apps[item.app];
 }
 
