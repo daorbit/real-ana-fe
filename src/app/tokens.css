@@ -60,8 +60,8 @@
   --violet-soft: var(--accent-soft);
 
   --selected-border: var(--accent);
-  --selected-fg: var(--accent-text);
-  --selected-bg: var(--accent-soft);
+  --selected-fg: var(--text);
+  --selected-bg: color-mix(in srgb, var(--text) 9%, transparent);
   --selected-icon-bg: var(--accent-soft-hover);
 
   --segment-track: color-mix(in srgb, var(--text) 8%, transparent);
@@ -223,6 +223,8 @@
   --toast-bg: color-mix(in srgb, var(--accent) 82%, transparent);
   --accent-soft: color-mix(in srgb, var(--blue-9) 9%, transparent);
   --accent-soft-hover: color-mix(in srgb, var(--blue-9) 14%, transparent);
+  --selected-bg: var(--accent-soft);
+  --selected-fg: var(--accent-text);
   --accent-text: var(--blue-11);
   --focus-ring: color-mix(in srgb, var(--blue-9) 40%, transparent);
 

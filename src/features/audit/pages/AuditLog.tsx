@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useMediaQuery } from "@mantine/hooks";
 import { motion } from "framer-motion";
 import { ScrollText, ShieldCheck } from "lucide-react";
 import { useGetMembersQuery } from "@/app/store";
@@ -20,9 +21,11 @@ import { AuditPager } from "../components/AuditPager";
 import { AuditSkeleton, AuditOverviewSkeleton } from "../components/AuditSkeleton";
 import { AuditEmpty } from "../components/AuditEmpty";
 import { AuditDetailDrawer } from "../components/AuditDetailDrawer";
+import { AuditInspector } from "../components/AuditInspector";
 import classes from "../components/AuditLog.module.css";
 
 const NO_MEMBERS: WorkspaceMember[] = [];
+const NARROW_QUERY = "(max-width: 61.99em)";
 
 export default function AuditLog() {
   useTitle("Audit log");
@@ -40,10 +43,11 @@ export default function AuditLog() {
     [demo, membersData],
   );
 
-  const [selected, setSelected] = useState<AuditEntry | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const narrow = useMediaQuery(NARROW_QUERY);
   const openDetail = (entry: AuditEntry) => {
-    setSelected(entry);
+    setSelectedId(entry.id);
     setDetailOpen(true);
   };
 
@@ -75,6 +79,7 @@ export default function AuditLog() {
 
   const { data, overview } = audit;
   const items = data?.items ?? [];
+  const current = items.find((entry) => entry.id === selectedId) ?? items[0] ?? null;
   const filtered = Boolean(audit.category || audit.actor);
   const neverUsed = !filtered && overview?.summary.total === 0;
 
@@ -121,12 +126,15 @@ export default function AuditLog() {
             ) : (
               <motion.div
                 key={`${workspaceId}-${audit.category ?? "all"}-${audit.actor ?? "anyone"}`}
+                className={classes.layout}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.22 }}
               >
+                <div className={classes.activity}>
                 <AuditTimeline
                   entries={items}
+                  selectedId={current?.id ?? null}
                   onSelect={openDetail}
                   footer={
                     audit.pagination && (
@@ -146,13 +154,15 @@ export default function AuditLog() {
                       : undefined
                   }
                 />
+                </div>
+                {current && <AuditInspector entry={current} />}
               </motion.div>
             )}
           </section>
         )}
       </div>
 
-      <AuditDetailDrawer entry={selected} opened={detailOpen} onClose={() => setDetailOpen(false)} />
+      <AuditDetailDrawer entry={current} opened={detailOpen && Boolean(narrow)} onClose={() => setDetailOpen(false)} />
     </AppShell>
   );
 }

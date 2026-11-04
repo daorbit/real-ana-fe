@@ -1,5 +1,4 @@
 import { Select } from "@mantine/core";
-import { UserRound } from "lucide-react";
 import type { AuditSummary, WorkspaceMember } from "@/shared/types";
 import type { WorkspaceAuditCategory } from "../lib/categories";
 import { AreaChips } from "./AreaChips";
@@ -23,20 +22,22 @@ export function AuditFilters({
   return (
     <div className={classes.toolbar}>
       <AreaChips summary={summary} category={category} onCategory={onCategory} />
-      <Select
-        className={classes.actorSelect}
-        size="sm"
-        radius="md"
-        placeholder="Everyone"
-        clearable
-        searchable
-        leftSection={<UserRound size={15} />}
-        value={actor}
-        onChange={onActor}
-        data={members.map((m) => ({ value: m.userId, label: m.name || m.email }))}
-        nothingFoundMessage="No member by that name"
-        aria-label="Filter by person"
-      />
+      <label className={classes.actorFilter}>
+        Person
+        <Select
+          className={classes.actorSelect}
+          size="xs"
+          radius={10}
+          placeholder="Everyone"
+          clearable
+          searchable
+          value={actor}
+          onChange={onActor}
+          data={members.map((m) => ({ value: m.userId, label: m.name || m.email }))}
+          nothingFoundMessage="No member by that name"
+          aria-label="Filter by person"
+        />
+      </label>
     </div>
   );
 }

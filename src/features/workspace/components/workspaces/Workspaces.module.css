@@ -89,7 +89,7 @@
 
 .switcherRow[data-active],
 .switcherRow[data-active]:hover {
-  background: var(--accent-soft);
+  background: var(--selected-bg);
 }
 
 .switcherRowText {
@@ -113,7 +113,7 @@
 
 .switcherRow[data-active] .switcherRowName {
   font-weight: 600;
-  color: var(--accent-text);
+  color: var(--selected-fg);
 }
 
 .switcherRowMeta {
@@ -123,7 +123,7 @@
 
 .switcherCheck {
   flex-shrink: 0;
-  color: var(--accent-text);
+  color: var(--selected-fg);
 }
 
 .switcherEmpty {

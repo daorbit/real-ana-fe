@@ -1,4 +1,4 @@
-import { Loader, Pagination } from "@mantine/core";
+import { Button, Loader } from "@mantine/core";
 import classes from "./AuditLog.module.css";
 
 export function AuditPager({
@@ -22,21 +22,19 @@ export function AuditPager({
   const to = Math.min(page * limit, total);
 
   return (
-    <div className={classes.pager}>
+    <nav className={classes.pager} aria-label="Pages">
       <span className={classes.pagerLabel}>
         {from.toLocaleString()}–{to.toLocaleString()} of {total.toLocaleString()}
+        {loading && <Loader size={13} />}
       </span>
-      <Pagination
-        value={page}
-        total={pages}
-        onChange={onChange}
-        size="sm"
-        radius="md"
-        siblings={1}
-        boundaries={1}
-        disabled={loading}
-      />
-      <span className={classes.pagerSpinner}>{loading && <Loader size={14} />}</span>
-    </div>
+      <span className={classes.pagerButtons}>
+        <Button variant="default" size="xs" radius={10} disabled={loading || page <= 1} onClick={() => onChange(page - 1)}>
+          Previous
+        </Button>
+        <Button variant="default" size="xs" radius={10} disabled={loading || page >= pages} onClick={() => onChange(page + 1)}>
+          Next
+        </Button>
+      </span>
+    </nav>
   );
 }

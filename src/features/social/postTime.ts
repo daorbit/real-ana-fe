@@ -93,3 +93,13 @@ export function daySlots(iso: string): string[] {
     return at.toISOString();
   });
 }
+
+const SLOT_BUFFER_MS = 45 * 60 * 1000;
+
+export function freeSlots(iso: string, posts: ScheduledPost[]): string[] {
+  const taken = posts.map((p) => +new Date(p.nextRunAt));
+  return daySlots(iso).filter((slot) => {
+    const at = +new Date(slot);
+    return at > Date.now() && !taken.some((t) => Math.abs(t - at) < SLOT_BUFFER_MS);
+  });
+}

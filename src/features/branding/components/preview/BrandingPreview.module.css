@@ -46,8 +46,8 @@
 
 .tab[data-active],
 .tab[data-active]:hover {
-  background: var(--accent-soft);
-  color: var(--accent-text);
+  background: var(--selected-bg);
+  color: var(--selected-fg);
   font-weight: 600;
 }
 

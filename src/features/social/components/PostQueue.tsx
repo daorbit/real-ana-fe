@@ -1,20 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Stack, Text } from "@mantine/core";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { CheckCircle2, Inbox } from "lucide-react";
 import { DELIVERY_WINDOW_MINUTES } from "./draft";
+import { OpenSlots } from "./OpenSlots";
 import { PostRow } from "./PostRow";
-import { PostSlotEmpty } from "./PostSlotEmpty";
 import { usePostFilters } from "../hooks/usePostFilters";
-import { dayLabel, daySlots } from "../postTime";
+import { dayLabel, freeSlots } from "../postTime";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import type { ScheduledPost } from "@/shared/types";
+import classes from "./SocialQueue.module.css";
 
+const HORIZON_STEP = 14;
 
 export function PostQueue({
   author,
-  authorPicture,
   instagramAuthor,
-  instagramPicture,
   onEdit,
   onToggle,
   onDelete,
@@ -24,17 +23,8 @@ export function PostQueue({
   recentlyMovedId,
   filters,
 }: {
-  /** The LinkedIn account, shown on LinkedIn rows. */
   author: string;
-  authorPicture?: string;
-  /**
-   * The Instagram account, shown on Instagram rows.
-   *
-   * Passed alongside rather than instead: one queue holds posts for both
-   * networks, so the row picks the account matching its own provider.
-   */
   instagramAuthor?: string;
-  instagramPicture?: string;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
@@ -42,28 +32,20 @@ export function PostQueue({
   onCreate?: (at: string) => void;
   publishingId: string | null;
   recentlyMovedId?: string | null;
-
   filters: ReturnType<typeof usePostFilters>;
 }) {
   const handlers = { onEdit, onToggle, onDelete, onPublish, publishingId, recentlyMovedId };
-
-  /** The account a given post publishes as, by its network. */
-  const authorFor = (post: ScheduledPost) =>
-    post.provider === "instagram"
-      ? { author: instagramAuthor ?? "", authorPicture: instagramPicture }
-      : { author, authorPicture };
+  const authorFor = (post: ScheduledPost) => (post.provider === "instagram" ? instagramAuthor ?? "" : author);
   const { filter, visible } = filters;
 
-
-  // No published section: every shelf this renders is work still ahead, and a
-  // post that has already gone out is read on Sent, from the run history.
-  const upcoming = visible
-    .filter((p) => p.mode !== "repeat")
-    .sort((a, b) => +new Date(a.nextRunAt) - +new Date(b.nextRunAt));
+  const upcoming = useMemo(
+    () =>
+      visible
+        .filter((p) => p.mode !== "repeat")
+        .sort((a, b) => +new Date(a.nextRunAt) - +new Date(b.nextRunAt)),
+    [visible],
+  );
   const repeating = visible.filter((p) => p.mode === "repeat");
-
- 
-  const HORIZON_STEP = 14;
   const [horizon, setHorizon] = useState(HORIZON_STEP);
 
   const days = useMemo(() => {
@@ -72,7 +54,6 @@ export function PostQueue({
       const key = new Date(post.nextRunAt).toDateString();
       byDay.set(key, [...(byDay.get(key) ?? []), post]);
     }
-
 
     const out: { label: string; posts: ScheduledPost[]; date: string }[] = [];
     const cursor = new Date();
@@ -86,7 +67,6 @@ export function PostQueue({
       cursor.setDate(cursor.getDate() + 1);
     }
 
- 
     for (const [key, dayPosts] of byDay) {
       const iso = new Date(key).toISOString();
       out.push({ label: dayLabel(iso), posts: dayPosts, date: iso });
@@ -96,9 +76,8 @@ export function PostQueue({
   }, [upcoming, horizon]);
 
   const canExtend = horizon < 365;
-
- 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !canExtend) return;
@@ -113,124 +92,69 @@ export function PostQueue({
     return () => observer.disconnect();
   }, [canExtend, horizon]);
 
- 
-  const entriesFor = (day: { posts: ScheduledPost[]; date: string }) => {
-    const taken = day.posts.map((p) => +new Date(p.nextRunAt));
-    const free = daySlots(day.date).filter((slot) => {
-      const at = +new Date(slot);
-      return at > Date.now() && !taken.some((t) => Math.abs(t - at) < 45 * 60 * 1000);
-    });
-
-    return [
-      ...day.posts.map((post) => ({ at: +new Date(post.nextRunAt), post, slot: null })),
-      ...free.map((slot) => ({ at: +new Date(slot), post: null, slot })),
-    ].sort((a, b) => a.at - b.at);
-  };
+  if (visible.length === 0 && filter !== "queue") {
+    return filter === "failed" ? (
+      <EmptyState
+        icon={CheckCircle2}
+        title="Nothing has failed"
+        description="Every post has gone out as scheduled. Any that don't will appear here with the reason."
+      />
+    ) : (
+      <EmptyState
+        icon={Inbox}
+        title="No posts here"
+        description="Nothing on this shelf yet. Pick another tab to see the rest of your posts."
+      />
+    );
+  }
 
   return (
-    <Stack gap="lg">
-   
+    <div className={classes.queue}>
+      {days.map((day) => {
+        const slots = filter === "queue" ? freeSlots(day.date, day.posts) : [];
+        if (day.posts.length === 0 && slots.length === 0) return null;
 
- 
+        return (
+          <Day key={day.date} title={day.label}>
+            {day.posts.map((post) => (
+              <PostRow key={post.id} post={post} author={authorFor(post)} {...handlers} />
+            ))}
+            {slots.length > 0 && (
+              <OpenSlots slots={slots} disabled={!onCreate} onCreate={(at) => onCreate?.(at)} />
+            )}
+          </Day>
+        );
+      })}
 
-      {visible.length === 0 && filter !== "queue" ? (
-        /* An empty Failed shelf is the good outcome, so it is not phrased as a
-           shelf that happens to be bare — "nothing here yet" invites the reader
-           to go looking elsewhere for failures that do not exist. */
-        filter === "failed" ? (
-          <EmptyState
-            icon={CheckCircle2}
-            title="Nothing has failed"
-            description="Every post has gone out as scheduled. Any that don't will appear here with the reason."
-          />
-        ) : (
-          <EmptyState
-            icon={Inbox}
-            title="No posts here"
-            description="Nothing on this shelf yet. Pick another tab to see the rest of your posts."
-          />
-        )
-      ) : (
-        /* Days are separated by clearly more air than the rows inside them —
-           that difference is the only thing grouping a day's slots together,
-           since the headings themselves are quiet. */
-        <Stack className="post-timeline" gap={34}>
-   
-          {days.map((day) => {
-            const entries = filter === "queue"
-              ? entriesFor(day)
-              : day.posts.map((post) => ({
-                  at: +new Date(post.nextRunAt), post, slot: null as string | null,
-                }));
-
-       
-            if (entries.length === 0) return null;
-
-            return (
-              <Section key={day.date} title={day.label}>
-                {entries.map((entry) => (
-                  entry.post
-                    ? <PostRow key={entry.post.id} post={entry.post} {...authorFor(entry.post)} {...handlers} />
-                    : <PostSlotEmpty
-                        key={entry.slot}
-                        at={entry.slot!}
-                        disabled={!onCreate}
-                        onCreate={(at) => onCreate?.(at)}
-                      />
-                ))}
-              </Section>
-            );
-          })}
-
- 
-          {filter === "queue" && canExtend && (
-        
-            <Box ref={sentinelRef} className="post-timeline-sentinel" aria-hidden />
-          )}
-
-          {repeating.length > 0 && (
-        
-            <Section title="Repeating">
-              {repeating.map((post) => <PostRow key={post.id} post={post} {...authorFor(post)} {...handlers} />)}
-            </Section>
-          )}
-
-        </Stack>
+      {filter === "queue" && canExtend && (
+        <div ref={sentinelRef} className="post-timeline-sentinel" aria-hidden />
       )}
 
-      {(upcoming.length > 0 || repeating.length > 0 || filter === "queue") && (
-        <Text className="post-timeline-note" size="xs" c="dimmed">
-          Scheduled posts publish within {DELIVERY_WINDOW_MINUTES} minutes of their time, never
-          before it.
-        </Text>
+      {repeating.length > 0 && (
+        <Day title="Repeating">
+          {repeating.map((post) => (
+            <PostRow key={post.id} post={post} author={authorFor(post)} {...handlers} />
+          ))}
+        </Day>
       )}
-    </Stack>
+
+      <p className={classes.note}>
+        Scheduled posts publish within {DELIVERY_WINDOW_MINUTES} minutes of their time, never before it.
+      </p>
+    </div>
   );
 }
 
-function Section({
-  title,
-  dim,
-  children,
-}: {
-  title: string | null;
-  dim?: boolean;
-  children: React.ReactNode;
-}) {
- 
-  const [lead, ...rest] = title?.split(", ") ?? [];
+function Day({ title, children }: { title: string; children: ReactNode }) {
+  const [lead, ...rest] = title.split(", ");
 
   return (
-    <Box>
-      {title && (
-        <Text className="post-day" c={dim ? "dimmed" : undefined}>
-          <strong>{lead}</strong>
-          {rest.length > 0 && <span>, {rest.join(", ")}</span>}
-        </Text>
-      )}
-      {/* Rows within a day sit closer to each other than days do to each other,
-          so the day is read as the group and the slots as its members. */}
-      <Stack gap={10}>{children}</Stack>
-    </Box>
+    <section className={classes.day}>
+      <h2 className={classes.dayTitle}>
+        {lead}
+        {rest.length > 0 && <span className={classes.dayDate}>{rest.join(", ")}</span>}
+      </h2>
+      <div className={classes.card}>{children}</div>
+    </section>
   );
 }

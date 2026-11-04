@@ -6,11 +6,13 @@ import classes from "./AuditLog.module.css";
 
 export function AuditTimeline({
   entries,
+  selectedId,
   footer,
   endNote,
   onSelect,
 }: {
   entries: AuditEntry[];
+  selectedId?: string | null;
   footer?: ReactNode;
   endNote?: string;
   onSelect: (entry: AuditEntry) => void;
@@ -25,7 +27,13 @@ export function AuditTimeline({
             <h2 className={classes.dayLabel}>{day.label}</h2>
             <div className={classes.list}>
               {day.entries.map((entry) => (
-                <AuditRow key={entry.id} entry={entry} perspective="team" onSelect={onSelect} />
+                <AuditRow
+                  key={entry.id}
+                  entry={entry}
+                  perspective="team"
+                  selected={entry.id === selectedId}
+                  onSelect={onSelect}
+                />
               ))}
             </div>
           </section>

@@ -41,6 +41,30 @@ const providerName = (value: unknown) => {
   return role(text) || "payment";
 };
 
+const WORKSPACE_APP_NAMES: Record<string, string> = {
+  compare: "Compare",
+  goals: "Goals",
+  notes: "Notes",
+  reviews: "Reviews",
+  links: "Links",
+  media: "Media",
+  alerts: "Alerts",
+  popups: "Popups",
+  publicDashboard: "Public Dashboard",
+  seoReports: "SEO Reports",
+  bio: "Link-in-bio",
+  funnels: "Funnels",
+  invoicing: "Invoicing",
+  tasks: "Tasks",
+  insights: "Insights",
+  experiments: "A/B Tests",
+};
+
+const describeRouteChange = (route: string) => {
+  const app = route.match(/^apps\/([^/]+)/)?.[1];
+  return app ? `changed the ${WORKSPACE_APP_NAMES[app] ?? app} app` : `made a change in ${route}`;
+};
+
 const TEAM_COPY: Record<string, Describe> = {
   "member.invited": (e) => `invited ${e.target.label} as ${role(e.meta.role)}`,
   "member.invite_withdrawn": (e) => `withdrew the invitation for ${e.target.label}`,
@@ -59,7 +83,7 @@ const TEAM_COPY: Record<string, Describe> = {
         ? "turned on the public dashboard"
         : "turned off the public dashboard",
 
-  "workspace.changed": (e) => `made a change in ${String(e.meta.route ?? "the workspace").replace(/^\//, "")}`,
+  "workspace.changed": (e) => describeRouteChange(String(e.meta.route ?? "the workspace").replace(/^\//, "")),
   "branding.updated": () => "updated the workspace branding",
   "sidebar.updated": () => "changed the shared sidebar",
   "media.uploaded": (e) => `uploaded ${quoted(e.target.label, "a file")} to the media library`,

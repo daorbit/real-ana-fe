@@ -10,19 +10,6 @@ import classes from "./AuditLog.module.css";
 
 const WARN_ACTIONS = new Set(["account.login_locked", "account.2fa_disabled", "account.impersonated"]);
 
-function TeamMark({ entry }: { entry: AuditEntry }) {
-  const Icon = CATEGORY_META[entry.category].icon;
-  const name = actorName(entry);
-  return (
-    <span className={classes.mark}>
-      <UserAvatar src={entry.actor?.avatarUrl} name={name} radius="xl" size={34} />
-      <span className={classes.categoryBadge} aria-hidden>
-        <Icon size={10} />
-      </span>
-    </span>
-  );
-}
-
 function SelfMark({ entry }: { entry: AuditEntry }) {
   const warn = WARN_ACTIONS.has(entry.action);
   const Icon = warn ? ShieldAlert : CATEGORY_META[entry.category].icon;
@@ -36,17 +23,22 @@ function SelfMark({ entry }: { entry: AuditEntry }) {
 export function AuditRow({
   entry,
   perspective,
+  selected = false,
   onSelect,
 }: {
   entry: AuditEntry;
   perspective: "team" | "self";
+  selected?: boolean;
   onSelect?: (entry: AuditEntry) => void;
 }) {
+  const team = perspective === "team";
   const device = deviceLine(entry);
+  const metaText = [team ? CATEGORY_META[entry.category].label : "", device].filter(Boolean).join(" · ");
   const interactive = onSelect
     ? {
         role: "button",
         tabIndex: 0,
+        "aria-pressed": selected,
         "data-clickable": true,
         onClick: () => onSelect(entry),
         onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
@@ -59,12 +51,16 @@ export function AuditRow({
     : {};
 
   return (
-    <div className={classes.row} {...interactive}>
-      {perspective === "team" ? <TeamMark entry={entry} /> : <SelfMark entry={entry} />}
+    <div className={classes.row} data-selected={selected || undefined} {...interactive}>
+      {team ? (
+        <UserAvatar src={entry.actor?.avatarUrl} name={actorName(entry)} radius="xl" size={36} />
+      ) : (
+        <SelfMark entry={entry} />
+      )}
 
       <div className={classes.body}>
         <div className={classes.sentence}>
-          {perspective === "team" ? (
+          {team ? (
             <>
               <span className={classes.actor}>{actorName(entry)}</span> {describeTeamAction(entry)}
             </>
@@ -72,21 +68,17 @@ export function AuditRow({
             describeOwnAction(entry)
           )}
         </div>
-        {(device || entry.viaSupport || entry.source === "forms") && (
+        {(metaText || entry.viaSupport || entry.source === "forms") && (
           <div className={classes.meta}>
-            {entry.viaSupport && perspective === "team" && (
-              <span className={classes.tag} data-tone="support">
-                Via Quantalog support
-              </span>
-            )}
-            {entry.source === "forms" && <span className={classes.tag}>Lead capture</span>}
-            {device && <span>{device}</span>}
+            {entry.viaSupport && team && <span className={classes.tag}>Via Quantalog support</span>}
+            {!team && entry.source === "forms" && <span className={classes.tag}>Lead capture</span>}
+            {metaText && <span>{metaText}</span>}
           </div>
         )}
       </div>
 
       <time className={classes.time} dateTime={entry.createdAt} title={dateTime(entry.createdAt)}>
-        {perspective === "team" ? timeOfDay(entry.createdAt) : dateTime(entry.createdAt)}
+        {team ? timeOfDay(entry.createdAt) : dateTime(entry.createdAt)}
       </time>
     </div>
   );

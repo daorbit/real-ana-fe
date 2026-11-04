@@ -3303,29 +3303,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-.post-slot__empty {
-  flex: 1;
-  min-width: 0;
-  padding: 15px 16px;
-  border: 1px solid transparent;
-  border-radius: var(--mantine-radius-md);
-  background: var(--surface);
-  color: var(--mantine-color-dimmed);
-  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
-}
-
-.post-slot__empty:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  color: var(--mantine-color-text);
-}
-
-.post-slot__empty:disabled { opacity: 0.45; cursor: not-allowed; }
-
-
-.post-slot__time--empty { padding-top: 16px; }
-
-
 .post-day {
   margin-left: var(--post-gutter, 92px);
   margin-bottom: 14px;
@@ -3539,7 +3516,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   flex-wrap: nowrap;
   align-items: stretch;
   gap: 4px;
-  border-bottom: 1px solid var(--border);
 }
 
 .post-filters .mantine-Tabs-tab {

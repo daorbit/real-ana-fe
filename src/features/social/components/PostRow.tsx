@@ -1,30 +1,25 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Group, Menu, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Badge, Button, Menu, UnstyledButton } from "@mantine/core";
 import {
-  ExternalLink, MoreVertical, Pause, Pencil, Pin, Play, Repeat, Send, Trash2,
+  ExternalLink, ImageIcon, MoreHorizontal, Pause, Pencil, Play, Send, Trash2,
 } from "lucide-react";
 import { STAGE_COLOR, STAGE_LABEL, stageOf } from "../postStatus";
-import { relativeTime } from "../postTime";
-import { InstagramMark, LinkedInMark } from "@/shared/ui/LinkedInMark";
 import type { ScheduledPost } from "@/shared/types";
+import classes from "./SocialQueue.module.css";
 
-/** "1:24 PM" — just the clock, since the day is the heading above. */
 function clock(iso: string): string {
   return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
-/**
- * One scheduled post, as a slot on a timeline.
- *
- * The time sits in its own gutter *outside* the card rather than as a column
- * inside it, which is what makes the page read as a schedule running down the
- * day instead of a table of rows that happen to carry times. The card beside it
- * is the post as it will appear: who it goes out as, what it says, and the
- * actions for it along the foot.
- */
+function metaLine(post: ScheduledPost, author: string): string {
+  const instagram = post.provider === "instagram";
+  const network = instagram ? "Instagram" : "LinkedIn";
+  const format = instagram ? (post.format === "story" ? "Story" : "Feed post") : "";
+  return [network, format, author].filter(Boolean).join(" · ");
+}
+
 export function PostRow({
   post,
   author,
-  authorPicture,
   onEdit,
   onToggle,
   onDelete,
@@ -33,192 +28,102 @@ export function PostRow({
   recentlyMovedId,
 }: {
   post: ScheduledPost;
-  /**
-   * The connected account this row publishes as.
-   *
-   * Resolved per row rather than once for the page: a queue can hold LinkedIn
-   * and Instagram posts side by side, and labelling an Instagram post with the
-   * LinkedIn member name states something untrue about where it is going.
-   */
   author: string;
-  authorPicture?: string;
   onEdit: (post: ScheduledPost) => void;
   onToggle: (post: ScheduledPost) => void;
   onDelete: (post: ScheduledPost) => void;
   onPublish: (post: ScheduledPost) => void;
-  /** The row currently publishing, so only its own button spins. */
   publishingId: string | null;
-  /** The post whose time just changed, so its row can say where it went. */
   recentlyMovedId?: string | null;
 }) {
-  const publishing = publishingId === post.id;
-  // Which network this row belongs to, which decides its mark, its accent and
-  // the wording of the link out to the published post.
-  const isInstagram = post.provider === "instagram";
-  const networkName = isInstagram ? "Instagram" : "LinkedIn";
   const stage = stageOf(post);
+  const failed = stage === "failed";
   const sent = post.status === "sent";
   const draft = post.status === "paused";
   const moved = recentlyMovedId === post.id;
+  const networkName = post.provider === "instagram" ? "Instagram" : "LinkedIn";
 
   return (
-    <Group className="post-slot" align="flex-start" wrap="nowrap" gap={0}>
-      {/* The gutter. Repeating posts have no single clock time, so they say
-          their cadence here instead. */}
-      <Box className="post-slot__time">
-        <Text fw={500}>
+    <div className={classes.post} data-moved={moved || undefined}>
+      <UnstyledButton className={classes.postMain} onClick={() => onEdit(post)}>
+        <span className={classes.postTime}>
           {post.mode === "repeat" ? "Repeats" : clock(post.nextRunAt)}
-        </Text>
-        {/* What put the post at this time. A repeating post says its cadence;
-            a one-off says the time was chosen rather than taken from a slot,
-            which is the difference between "this is my 9am" and "I meant
-            exactly 1:24". */}
-        <Group gap={4} wrap="nowrap" mt={2} justify="flex-end">
-          {post.mode === "repeat" ? (
-            <>
-              <Repeat size={11} style={{ color: "var(--mantine-color-dimmed)" }} />
-              <Text size="xs" c="dimmed">{post.frequency}</Text>
-            </>
+          {post.mode === "repeat" && <span className={classes.postFrequency}>{post.frequency}</span>}
+        </span>
+        <span className={classes.thumb} aria-hidden>
+          {post.imageUrl ? (
+            <img className={classes.thumbImage} src={post.imageUrl} alt="" />
           ) : (
-            <>
-              <Pin size={11} style={{ color: "var(--mantine-color-dimmed)" }} />
-              <Text size="xs" c="dimmed">Custom</Text>
-            </>
+            <ImageIcon size={22} strokeWidth={1.6} />
           )}
-        </Group>
-      </Box>
+        </span>
+        <span className={classes.postText}>
+          <span className={classes.postName}>{post.name}</span>
+          {post.caption && <span className={classes.postCaption}>{post.caption}</span>}
+          <span className={classes.postMeta} data-failed={failed || undefined}>
+            {failed && post.lastError ? post.lastError : metaLine(post, author)}
+          </span>
+        </span>
+      </UnstyledButton>
 
-      <Box
-        className="post-slot__card"
-        style={{ borderColor: moved ? "var(--accent)" : undefined }}
-      >
-        {/* Who it goes out as. The same line the post itself will carry in the
-            feed, so the card previews the thing rather than describing it. */}
-        <Group gap={8} wrap="nowrap" align="center" p="md" pb={8}>
-          <Box style={{ position: "relative", flexShrink: 0 }}>
-            <Avatar size={28} radius="xl" color="blue" src={authorPicture || undefined}>
-              {author.trim().charAt(0).toUpperCase() || "?"}
-            </Avatar>
-            <Box
-              className={`post-slot__network${isInstagram ? " post-slot__network--instagram" : ""}`}
-              aria-hidden
-            >
-              {isInstagram
-                ? <InstagramMark size={8} color="#fff" />
-                : <LinkedInMark size={8} color="#fff" />}
-            </Box>
-          </Box>
-          <Text size="sm" fw={600} truncate style={{ flex: 1, minWidth: 0 }}>
-            {author || networkName}
-          </Text>
-          {moved && <Badge size="xs" variant="filled">Moved</Badge>}
+      <div className={classes.postActions}>
+        {moved && <Badge size="sm" variant="light">Moved</Badge>}
+        {(draft || failed) && (
           <Badge size="sm" variant="light" color={STAGE_COLOR[stage]}>
             {STAGE_LABEL[stage]}
           </Badge>
-        </Group>
-
-        <Box px="md" pb={post.imageUrl ? 8 : 12}>
-          <Text size="sm" fw={600} mb={2} truncate>{post.name}</Text>
-          <Text size="sm" c="dimmed" lineClamp={2}>{post.caption}</Text>
-        </Box>
-
-        {post.imageUrl && (
-          <Box px="md" pb={12}>
-            <img className="post-slot__image" src={post.imageUrl} alt="" />
-          </Box>
         )}
-
-        {/* The foot: what happened to it, and what can be done about it. */}
-        <Group className="post-slot__foot" justify="space-between" wrap="nowrap" gap="sm">
-          {/* Provenance rather than status: the badge above already says what
-              stage the post is in, so the foot answers the other question —
-              where this came from and how long it has been sitting here. */}
-          <Text size="xs" c={stage === "failed" ? "orange" : "dimmed"} truncate>
-            {stage === "failed" && post.lastError
-              ? post.lastError
-              : sent && post.lastRunAt
-                ? `Published ${relativeTime(post.lastRunAt)}`
-                : post.postCount > 0
-                  ? `${post.postCount} published so far`
-                  : draft
-                    ? "Saved as a draft — publishes nothing until you schedule it"
-                    : `You created this ${relativeTime(post.createdAt)}`}
-          </Text>
-
-          <Group gap={6} wrap="nowrap">
-            {/* Named rather than an icon: this is the one button on the card
-                that publishes immediately, and an unlabelled paper plane is a
-                guess someone only makes once. */}
-            <Button
-              variant="default"
-              size="compact-sm"
-              leftSection={<Send size={13} />}
-              loading={publishing}
-              onClick={() => onPublish(post)}
+        {failed && (
+          <Button variant="default" size="xs" radius={10} onClick={() => onEdit(post)}>
+            Reschedule
+          </Button>
+        )}
+        <Menu position="bottom-end" withinPortal shadow="md" width={190}>
+          <Menu.Target>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size={32}
+              radius={10}
+              loading={publishingId === post.id}
+              aria-label={`Actions for ${post.name}`}
             >
-              Publish Now
-            </Button>
-            {/* Named on a failed post rather than left as a pencil: the failure
-                text beside it says what went wrong but not what to do, and
-                picking a new time is the thing that clears it. */}
-            {stage === "failed" ? (
-              <Button
-                variant="default"
-                size="compact-sm"
-                leftSection={<Pencil size={13} />}
-                onClick={() => onEdit(post)}
+              <MoreHorizontal size={17} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item leftSection={<Send size={14} />} onClick={() => onPublish(post)}>
+              Publish now
+            </Menu.Item>
+            <Menu.Item leftSection={<Pencil size={14} />} onClick={() => onEdit(post)}>
+              {sent ? "Reschedule" : "Edit"}
+            </Menu.Item>
+            {post.lastPostUrl && (
+              <Menu.Item
+                component="a"
+                href={post.lastPostUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                leftSection={<ExternalLink size={14} />}
               >
-                Reschedule
-              </Button>
-            ) : (
-              <Tooltip label={sent ? "Reschedule" : "Edit"} withArrow>
-                <ActionIcon variant="default" size="md" onClick={() => onEdit(post)} aria-label="Edit">
-                  <Pencil size={14} />
-                </ActionIcon>
-              </Tooltip>
+                View on {networkName}
+              </Menu.Item>
             )}
-
-            {/* The rest behind a menu: three icons is a row of actions, six is
-                a puzzle, and only these two are reached often. */}
-            <Menu position="bottom-end" withArrow>
-              <Menu.Target>
-                <ActionIcon variant="default" size="md" aria-label="More actions">
-                  <MoreVertical size={14} />
-                </ActionIcon>
-              </Menu.Target>
-              <Menu.Dropdown>
-                {post.lastPostUrl && (
-                  <Menu.Item
-                    component="a"
-                    href={post.lastPostUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    leftSection={<ExternalLink size={14} />}
-                  >
-                    View on {networkName}
-                  </Menu.Item>
-                )}
-                {/* Nothing to hold back on a post that has already gone out. */}
-                {!sent && (
-                  <Menu.Item
-                    leftSection={draft ? <Play size={14} /> : <Pause size={14} />}
-                    onClick={() => onToggle(post)}
-                  >
-                    {draft ? "Schedule it" : "Move to drafts"}
-                  </Menu.Item>
-                )}
-                <Menu.Item
-                  color="red"
-                  leftSection={<Trash2 size={14} />}
-                  onClick={() => onDelete(post)}
-                >
-                  Delete
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
-          </Group>
-        </Group>
-      </Box>
-    </Group>
+            {!sent && (
+              <Menu.Item
+                leftSection={draft ? <Play size={14} /> : <Pause size={14} />}
+                onClick={() => onToggle(post)}
+              >
+                {draft ? "Schedule it" : "Move to drafts"}
+              </Menu.Item>
+            )}
+            <Menu.Divider />
+            <Menu.Item color="red" leftSection={<Trash2 size={14} />} onClick={() => onDelete(post)}>
+              Delete
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </div>
+    </div>
   );
 }

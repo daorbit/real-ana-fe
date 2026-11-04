@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Box, Button, Group, SegmentedControl, Stack, Text, Title, Tooltip,
+  Box, Button, Group, Skeleton, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
-import { CalendarDays, List as ListIcon, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { PageHelpButton } from "@/shared/ui/PageHelpButton";
@@ -23,8 +23,11 @@ import type { PaneTab } from "@/features/social/components/ComposerPreviewPane";
 import { PostComposer } from "@/features/social/components/PostComposer";
 import { PostCalendar } from "@/features/social/components/PostCalendar";
 import { PostQueue } from "@/features/social/components/PostQueue";
+import { PostViewToggle, type PostView } from "@/features/social/components/PostViewToggle";
+import { SocialSidebar } from "@/features/social/components/SocialSidebar";
+import queueClasses from "@/features/social/components/SocialQueue.module.css";
 import { SocialStartPanel } from "@/features/social/components/start/SocialStartPanel";
-import { SocialPostsSkeleton } from "@/shared/ui/Skeletons";
+import { SocialQueueSkeleton } from "@/features/social/components/SocialQueueSkeleton";
 import { SentTimeline } from "@/features/social/components/SentTimeline";
 import {
   draftFromPost, draftFromRun, emptyDraft, toDateInput, type Draft,
@@ -67,7 +70,7 @@ export default function SocialPosts() {
  
   // How the posts are laid out, which is a separate question from which posts
   // are being shown — that is the shelf, below.
-  const [view, setView] = useState<"calendar" | "list">("list");
+  const [view, setView] = useState<PostView>("list");
 
   // Which shelf of the queue is showing. Owned here rather than inside the list
   // because the tab bar renders in the sticky header above it.
@@ -276,63 +279,28 @@ export default function SocialPosts() {
     setComposing(true);
   };
 
-  /**
-   * The calendar/list switch, built once and handed to whichever view is on.
-   *
-   * Both views own their own header row, and a control that jumped between two
-   * corners depending on the view would be one people have to look for.
-   */
-  const viewControl = (
-    <SegmentedControl
-      size="sm"
-      data={[
-        {
-          value: "list",
-          label: (
-            <Group gap={6} wrap="nowrap" justify="center">
-              <ListIcon size={15} />
-              <span>List</span>
-            </Group>
-          ),
-        },
-        {
-          value: "calendar",
-          label: (
-            <Group gap={6} wrap="nowrap" justify="center">
-              <CalendarDays size={15} />
-              <span>Calendar</span>
-            </Group>
-          ),
-        },
-      ]}
-      value={view}
-      onChange={(v) => setView(v as "calendar" | "list")}
-    />
-  );
-
-  // Opening a shelf starts from the newest page. A cursor left over from a
-  // previous visit — or from the other run-backed shelf, which pages through a
-  // different list — would silently skip everything since.
   const onFilter = (next: typeof filters.filter) => {
     setSentCursor(undefined);
+    if (next !== "queue") setView("list");
     filters.setFilter(next);
   };
 
-  // The sticky header has no bottom padding of its own: normally the filter
-  // tab bar sits flush against its edge and supplies the border there, and the
-  // header row's own mb="md" is what separates the two. With nothing
-  // connected yet there is no list to filter, so that bar is absent — without
-  // this, the header row's mb="md" would collapse against the box's own zero
-  // padding and the buttons would sit flush against the edge.
-  const showFilters = (isLoading || posts.length > 0 || onSent || onFailed) && view === "list";
+  const onView = (next: PostView) => {
+    if (next === "calendar") filters.setFilter("queue");
+    setView(next);
+  };
+
+  const showFilters = isLoading || posts.length > 0 || onSent || onFailed;
+  const showSidebar = filters.filter === "queue" && view === "list" && posts.length > 0;
 
   return (
     <AppShell>
 
       <Box className="page-header--sticky" pb={showFilters ? 0 : 1}>
       <Group justify="space-between" align="center" wrap="wrap" gap="md" mb="md" className="social-head">
-        <div style={{ minWidth: 0 }}>
-          <Title order={2} lh={1.2}>Social posts</Title>
+        <div className={queueClasses.headMeta}>
+          <Title order={1} className={queueClasses.headTitle}>Social posts</Title>
+          {isLoading && !onSent && <Skeleton height={12} width={280} mt={10} radius="sm" />}
           {(onSent || ready) && (
             <Text size="sm" c="dimmed" mt={4}>
               {onSent
@@ -350,17 +318,6 @@ export default function SocialPosts() {
             </Text>
           )}
 
-
-          {/* Hidden on the two shelves that read runs: neither has empty slots
-              to lay out on a calendar, so the switch there would offer a view
-              that cannot be drawn. */}
-          {!onSent && !onFailed && viewControl}
-
-          {/* Whatever is currently on screen, re-read. Worth its own control
-              because the two things most likely to be stale here happen
-              elsewhere: a scheduled post publishes on the server's clock, and
-              a reconnected LinkedIn account clears a failure — neither of
-              which this page hears about while it sits open. */}
           <RefreshButton
             hint={onSent ? "Refresh published posts" : "Refresh"}
             refreshing={onSent || onFailed ? sentFetching : isFetching}
@@ -381,6 +338,12 @@ export default function SocialPosts() {
 
           <PageHelpButton />
 
+          <Box visibleFrom="sm">
+            <ActivityBellIcon />
+          </Box>
+
+          {isLoading && <Skeleton height={36} width={112} radius={10} />}
+
           {ready && (
             <Tooltip
               label={demo ? "Demo data is read-only" : "This workspace's scheduled posts are full"}
@@ -388,35 +351,27 @@ export default function SocialPosts() {
               withArrow
             >
               <Box>
-                <Button leftSection={<Plus size={16} />} disabled={demo || postsFull} onClick={() => openNew()}>
+                <Button radius={10} leftSection={<Plus size={16} />} disabled={demo || postsFull} onClick={() => openNew()}>
                   New post
                 </Button>
               </Box>
             </Tooltip>
           )}
-
-          <Box visibleFrom="sm">
-            <ActivityBellIcon />
-          </Box>
         </Group>
       </Group>
 
-      {/* Shown while loading too, with the counts it already has — zero for
-          every shelf. A tab bar that appears only once the list lands pushes
-          the whole timeline down at the moment it arrives, which is the jump
-          the skeleton exists to prevent. */}
       {showFilters && (
-        <PostFilters
-          filter={filters.filter}
-          onFilter={onFilter}
-          counts={filters.counts}
-        />
+        <div className={queueClasses.tabsRow}>
+          <PostFilters
+            filter={filters.filter}
+            onFilter={onFilter}
+            counts={filters.counts}
+          />
+          {!onSent && !onFailed && <PostViewToggle view={view} onChange={onView} />}
+        </div>
       )}
       </Box>
 
-      {/* Checked before the loader and the empty state, both of which speak for
-          the schedule list: history is its own collection, and an account with
-          no schedules left can still have published a great deal. */}
       {onSent ? (
         <SentTimeline
           posts={sent?.posts ?? []}
@@ -448,9 +403,7 @@ export default function SocialPosts() {
           {filters.visible.length > 0 && (
             <PostQueue
               author={linkedin?.name ?? ""}
-              authorPicture={linkedin?.picture}
               instagramAuthor={instagram?.name ? `@${instagram.name}` : ""}
-              instagramPicture={instagram?.picture}
               onEdit={openEdit}
               onToggle={toggle}
               onDelete={destroy}
@@ -481,7 +434,7 @@ export default function SocialPosts() {
           />
         </Stack>
       ) : isLoading ? (
-        <SocialPostsSkeleton />
+        <SocialQueueSkeleton />
       ) : posts.length === 0 ? (
         <SocialStartPanel
           connected={ready}
@@ -493,21 +446,29 @@ export default function SocialPosts() {
           <PostCalendar posts={posts} onOpen={openEdit} onCreateOn={openNew} />
         </Box>
       ) : (
-        <PostQueue
-          author={linkedin?.name ?? ""}
-          authorPicture={linkedin?.picture}
-          instagramAuthor={instagram?.name ? `@${instagram.name}` : ""}
-          instagramPicture={instagram?.picture}
-          onEdit={openEdit}
-          onToggle={toggle}
-          onDelete={destroy}
-          onPublish={publishNow}
- 
-          onCreate={ready && !postsFull ? openAt : undefined}
-          publishingId={publishingId}
-          recentlyMovedId={recentlyMovedId}
-          filters={filters}
-        />
+        <div className={queueClasses.layout} data-with-side={showSidebar || undefined}>
+          <PostQueue
+            author={linkedin?.name ?? ""}
+            instagramAuthor={instagram?.name ? `@${instagram.name}` : ""}
+            onEdit={openEdit}
+            onToggle={toggle}
+            onDelete={destroy}
+            onPublish={publishNow}
+            onCreate={ready && !postsFull ? openAt : undefined}
+            publishingId={publishingId}
+            recentlyMovedId={recentlyMovedId}
+            filters={filters}
+          />
+          {showSidebar && (
+            <SocialSidebar
+              linkedin={linkedin}
+              instagram={instagram}
+              showInstagram={instagramOpen}
+              posts={posts}
+              quota={scheduledPosts}
+            />
+          )}
+        </div>
       )}
 
       <PostComposer

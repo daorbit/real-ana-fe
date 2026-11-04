@@ -1,14 +1,7 @@
-import { Badge, Tabs } from "@mantine/core";
+import { Tabs } from "@mantine/core";
 import { FILTERS, type Filter } from "../hooks/usePostFilters";
+import classes from "./SocialQueue.module.css";
 
-/**
- * Which shelf of the queue is showing.
- *
- * One bar, with the rule beneath it running the full width of the page rather
- * than stopping after the last tab: a line that ends mid-air reads as a broken
- * edge, where one that reaches both margins reads as the boundary between the
- * controls and the list they filter.
- */
 export function PostFilters({
   filter,
   onFilter,
@@ -25,36 +18,19 @@ export function PostFilters({
       onChange={(v) => onFilter((v as Filter) ?? "queue")}
     >
       <Tabs.List>
-        {FILTERS.map((f) => {
-          const count = counts[f.value];
-          // Failures carry the app's warning orange, but only when there are
-          // any: an orange nought is an alarm for nothing having gone wrong.
-          const color = count === 0 ? "gray" : f.value === "failed" ? "orange" : undefined;
-          // Neither Sent nor Failed carries a badge. Both are backed by run
-          // history, fetched only once the shelf is opened, and Failed draws
-          // from the schedule list as well — so any number shown here would be
-          // a count of one of its two halves, reading "0 failed" directly above
-          // a post that plainly did.
-          const badge = f.value !== "sent" && f.value !== "failed";
-          // Every shelf, always, including the empty ones: a tab that comes and
-          // goes as posts change moves the others under the pointer, and an
-          // empty shelf is worth being able to see is empty.
-          return (
-            <Tabs.Tab
-              key={f.value}
-              value={f.value}
-              rightSection={
-                badge ? (
-                  <Badge size="sm" variant="light" color={color} circle>
-                    {count}
-                  </Badge>
-                ) : undefined
-              }
-            >
-              {f.label}
-            </Tabs.Tab>
-          );
-        })}
+        {FILTERS.map((f) => (
+          <Tabs.Tab
+            key={f.value}
+            value={f.value}
+            rightSection={
+              f.value !== "sent" && f.value !== "failed" ? (
+                <span className={classes.tabCount}>{counts[f.value]}</span>
+              ) : undefined
+            }
+          >
+            {f.label}
+          </Tabs.Tab>
+        ))}
       </Tabs.List>
     </Tabs>
   );

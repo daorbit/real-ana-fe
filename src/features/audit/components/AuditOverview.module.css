@@ -1,41 +1,24 @@
 .card {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  overflow: hidden;
-  border-radius: var(--radius-lg);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .stat {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  flex-direction: column;
   min-width: 0;
-  padding: 22px 24px;
+  padding: 20px 28px 22px;
 }
 
 .stat + .stat {
-  border-left: 1px solid color-mix(in srgb, var(--tone) 14%, var(--border));
-}
-
-.statIcon {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  color: var(--tone);
-  background: color-mix(in srgb, var(--tone) 13%, transparent);
-}
-
-.statText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  border-left: 1px solid var(--border);
 }
 
 .statLabel {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--muted);
 }
@@ -43,10 +26,10 @@
 .statValue {
   overflow: hidden;
   margin-top: 4px;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
   white-space: nowrap;
   text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
@@ -54,14 +37,14 @@
 }
 
 .statNote {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: 2px;
+  font-size: 12.5px;
   color: var(--text-2);
 }
 
 .upgrade {
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: none;
 }
 
@@ -79,7 +62,7 @@
   }
 
   .stat:nth-child(n + 3) {
-    border-top: 1px solid color-mix(in srgb, var(--tone) 14%, var(--border));
+    border-top: 1px solid var(--border);
   }
 }
 
@@ -89,6 +72,6 @@
   }
 
   .statValue {
-    font-size: 20px;
+    font-size: 21px;
   }
 }

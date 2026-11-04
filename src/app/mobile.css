@@ -555,9 +555,7 @@
   }
 
   .post-timeline { padding-inline: 0; }
-  .post-slot__empty { padding: 9px 12px; }
   .post-slot__time { font-size: 12px; padding-bottom: 4px; }
-  .post-slot__time--empty { padding-top: 0; }
   .post-day { margin-bottom: 10px; font-size: 12.5px; }
 
   .post-calendar-scroll { overflow-x: visible; }
