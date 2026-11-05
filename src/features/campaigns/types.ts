@@ -28,6 +28,10 @@ export type EmailBlock =
 
 export type EmailBlockType = EmailBlock["type"];
 
+type WithoutId<T> = T extends unknown ? Omit<T, "id"> : never;
+
+export type EmailBlockDraft = WithoutId<EmailBlock>;
+
 export interface EmailDesign {
   theme: EmailTheme;
   blocks: EmailBlock[];

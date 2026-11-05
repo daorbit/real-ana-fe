@@ -1,11 +1,8 @@
 import type { CampaignTemplate } from "@/features/campaigns/lib/campaignTemplates";
-import type { EmailBlock } from "@/features/campaigns/types";
+import type { EmailBlockDraft } from "@/features/campaigns/types";
 import classes from "./Templates.module.css";
 
-type ThumbBlock = Omit<EmailBlock, "id">;
-
-function ThumbBlockView({ block }: { block: ThumbBlock }) {
-  const value = block as EmailBlock;
+function ThumbBlockView({ block: value }: { block: EmailBlockDraft }) {
   switch (value.type) {
     case "brand":
       return <div className={classes.brand} data-align={value.align}>Your brand</div>;

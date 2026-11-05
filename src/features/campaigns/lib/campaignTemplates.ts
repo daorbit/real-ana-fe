@@ -1,4 +1,4 @@
-import type { CampaignInput, EmailBlock, EmailTheme } from "@/features/campaigns/types";
+import type { CampaignInput, EmailBlock, EmailBlockDraft, EmailTheme } from "@/features/campaigns/types";
 import { LIGHT_THEME, THEME_PRESETS, blockId } from "./emailDesign";
 
 export type TemplateTone = "light" | "graphite" | "black" | "paper";
@@ -10,7 +10,7 @@ export interface CampaignTemplate {
   subject: string;
   preheader: string;
   theme: EmailTheme;
-  blocks: Omit<EmailBlock, "id">[];
+  blocks: EmailBlockDraft[];
   html?: string;
 }
 
