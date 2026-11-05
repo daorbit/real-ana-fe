@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useStore } from "react-redux";
 import { api, migrateLegacySession } from "@/shared/lib/http";
 import {
   forgetSession, hasSession, isImpersonating, rememberSession, type SessionHint,
@@ -11,6 +11,7 @@ import { setDatePrefs } from "@/shared/lib";
 import { setReportingUser } from "@/shared/lib/errorReporting";
 import { rememberUser, type LoginMethod } from "@/features/auth/lastUser";
 import { hideLock, showLock } from "@/shared/lib/lockState";
+import { retryLockedQueries } from "@/features/auth/retryLockedQueries";
 import type { ProfileUpdate, User } from "@/shared/types";
 import type { IdentityProof } from "@/features/auth/components/settings/identityProof";
 
@@ -78,6 +79,7 @@ async function endServerSession(): Promise<void> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
+  const store = useStore();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -271,25 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const unlockScreen = async (proof: { pin: string } | { totpCode: string }) => {
     await api.post("/api/auth/unlock", proof);
     hideLock();
-    /*
-     * Refetch everything the lock refused.
-     *
-     * While locked, every data route answers 423, and RTK Query caches those
-     * rejections like any other result. Lifting the overlay does not retry
-     * them, so the app came back to a screen of dead panels and the only way
-     * out was a manual reload.
-     *
-     * `resetApiState` rather than `invalidateTags`: invalidation drives off
-     * `providesTags`, which does not run for a failed query — a cache entry
-     * holding an error has no tags to match, so invalidating would skip
-     * exactly the entries that need retrying. Dropping the cache makes every
-     * mounted query refetch from scratch, which is what is wanted here.
-     *
-     * The usual objection to this — components flashing through their loading
-     * state — does not apply: the lock overlay has been covering them, so
-     * there is nothing on screen to flash.
-     */
-    dispatch(rtkApi.util.resetApiState());
+    retryLockedQueries(dispatch, store.getState);
   };
 
   const updateProfile = async (patch: ProfileUpdate) => {

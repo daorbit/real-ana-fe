@@ -57,7 +57,7 @@ All server data goes through RTK Query endpoints in `api.ts`. Raw `fetch` is all
    - Only the billing pages call `useGetWorkspaceUsageQuery` directly.
    - Workspaces and the active workspace: `useWorkspace()`. Sites: `useSites()`. Site scope: `useSiteScope()`.
 7. **No cross-workspace bleed.** Read `currentData`, falling back to `data` only when `originalArgs` matches the current arguments. `useStats` and `useSites` show the pattern.
-8. **Avoid `resetApiState`** except on auth transitions (login, logout, impersonation, unlock), where it is intentional.
+8. **Avoid `resetApiState`** except on auth transitions (login, logout, impersonation), where it is intentional. Unlocking the screen keeps the cache and only retries queries the lock refused (`features/auth/retryLockedQueries.ts`), because a reset sends the whole app back to the boot skeleton.
 9. **Keep `useEffect` dependencies stable.** Use module-level constants such as `const EMPTY: T[] = []` instead of `data ?? []` inside dependency arrays.
 
 ## Startup prefetch (keep in sync)
