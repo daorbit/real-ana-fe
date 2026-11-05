@@ -59,6 +59,7 @@ const WORKSPACE_APP_NAMES: Record<string, string> = {
   tasks: "Tasks",
   insights: "Insights",
   experiments: "A/B Tests",
+  campaigns: "Campaigns",
 };
 
 const describeRouteChange = (route: string) => {

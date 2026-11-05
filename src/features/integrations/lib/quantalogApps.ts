@@ -268,6 +268,22 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "A winner you can trust", body: "Conversion, uplift and the chance each variant beats the original, with a winner called at 95%." },
     ],
   },
+  campaigns: {
+    id: "campaigns",
+    tileId: "quantalog-campaigns",
+    name: "Quantalog Campaigns",
+    navLabel: "Campaigns",
+    route: "/app/campaigns",
+    location: "in the sidebar",
+    offNote: "Any campaign that is sending pauses. Your campaigns and reports are kept, so turning it back on picks up where you left off.",
+    tagline: "Email the people who answered your forms, from your own address.",
+    description: "Write one email and send it to the people who answered your forms, or to a list of your own. It goes out through the email provider you activated in Apps, with an unsubscribe link in every message and a report on what was sent.",
+    features: [
+      { title: "Your leads, ready to email", body: "Pick any form that collects an email address, add your own list, and repeats are removed for you." },
+      { title: "Sent from your provider", body: "Emails go out through your active Resend, Brevo or SMTP account, so replies reach you." },
+      { title: "Unsubscribes handled", body: "Every email carries an unsubscribe link, and anyone who uses it is left out of future campaigns." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS: WorkspaceAppId[] = [
@@ -285,6 +301,7 @@ export const WORKSPACE_APP_IDS: WorkspaceAppId[] = [
   "funnels",
   "invoicing",
   "tasks",
+  "campaigns",
   // "insights",
   // "experiments",
 ];

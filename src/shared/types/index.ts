@@ -1174,7 +1174,8 @@ export type WorkspaceAppId =
   | "invoicing"
   | "tasks"
   | "insights"
-  | "experiments";
+  | "experiments"
+  | "campaigns";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string; paidAt?: string }>>;
 
@@ -1190,7 +1191,8 @@ export type PaidAppId =
   | "insights"
   | "tasks"
   | "invoicing"
-  | "experiments";
+  | "experiments"
+  | "campaigns";
 
 export type AppPrice = {
   appId: PaidAppId;

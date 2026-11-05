@@ -40,12 +40,17 @@ const APP_GUIDES: Record<string, string> = {
   "quantalog-invoicing": docsUrl(DOCS_SLUGS.quantalogInvoicing),
   "quantalog-tasks": docsUrl(DOCS_SLUGS.quantalogTasks),
   "quantalog-insights": docsUrl(DOCS_SLUGS.quantalogInsights),
+  "quantalog-campaigns": docsUrl(DOCS_SLUGS.quantalogCampaigns),
   linkedin: SOCIAL,
   instagram: SOCIAL,
 };
 
 export function appGuideUrl(appId: string): string | undefined {
   return APP_GUIDES[appId];
+}
+
+export function resendWebhookUrl(workspaceId: string): string {
+  return `${FORMS_API_BASE}/public/workspaces/${encodeURIComponent(workspaceId)}/email/webhook/resend`;
 }
 
 export function paymentWebhookUrl(workspaceId: string, provider: string): string {

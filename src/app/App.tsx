@@ -46,6 +46,9 @@ const SearchConsolePageDetail = lazy(() => import("@/features/searchConsole/page
 const Compare = lazy(() => import("@/features/compare/pages/Compare"));
 const Backlinks = lazy(() => import("@/features/backlinks/pages/Backlinks"));
 const Tasks = lazy(() => import("@/features/tasks/pages/Tasks"));
+const Campaigns = lazy(() => import("@/features/campaigns/pages/Campaigns"));
+const CampaignEditor = lazy(() => import("@/features/campaigns/pages/CampaignEditor"));
+const CampaignDetail = lazy(() => import("@/features/campaigns/pages/CampaignDetail"));
 // const Insights = lazy(() => import("@/features/insights/pages/Insights"));
 // const Experiments = lazy(() => import("@/features/experiments/pages/Experiments"));
 // const ExperimentEditor = lazy(() => import("@/features/experiments/pages/ExperimentEditor"));
@@ -292,6 +295,10 @@ export default function App() {
                 <Route path="/app/compare" element={<Compare />} />
                 <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/tasks" element={<Tasks />} />
+                <Route path="/app/campaigns" element={<Campaigns />} />
+                <Route path="/app/campaigns/new" element={<CampaignEditor />} />
+                <Route path="/app/campaigns/:campaignId" element={<CampaignDetail />} />
+                <Route path="/app/campaigns/:campaignId/edit" element={<CampaignEditor />} />
                 {/* <Route path="/app/insights" element={<Insights />} /> */}
                 {/* <Route path="/app/experiments" element={<Experiments />} /> */}
                 {/* <Route path="/app/experiments/new" element={<ExperimentEditor />} /> */}

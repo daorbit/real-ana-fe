@@ -19,7 +19,7 @@ import {
   type StudioState,
 } from "./studio/StudioParts";
 import { initialValues, isDirty, missingRequired, payloadValues, type FieldValues } from "../lib/appForm";
-import { appGuideUrl } from "../lib/links";
+import { appGuideUrl, resendWebhookUrl } from "../lib/links";
 import type { FormsApp } from "../types";
 
 interface Props {
@@ -32,8 +32,8 @@ interface Props {
 }
 
 function StatusBadge({ app }: { app: FormsApp }) {
-  if (app.enabled) return <Badge size="sm" variant="light" color="teal">Connected</Badge>;
-  if (app.connected && app.category === "email") return <Badge size="sm" variant="light" color="gray">Not sending</Badge>;
+  if (app.enabled) return <Badge size="sm" variant="light" color="teal">{app.category === "email" ? "Active" : "Connected"}</Badge>;
+  if (app.connected && app.category === "email") return <Badge size="sm" variant="light" color="gray">Not active</Badge>;
   if (app.connected) return <Badge size="sm" variant="light" color="orange">Switched off</Badge>;
   return <Badge size="sm" variant="light" color="gray">Not connected</Badge>;
 }
@@ -52,10 +52,10 @@ function heroFor(app: FormsApp, sendingAppName?: string): { state: StudioState; 
   if (app.connected && email) {
     return {
       state: "saved",
-      title: `${app.name} is saved but not sending`,
+      title: `${app.name} is saved but not active`,
       description: sendingAppName
-        ? `${sendingAppName} is sending your form emails. Switch to ${app.name} to send through it instead.`
-        : `No provider is sending form emails. Choose ${app.name} to start sending through it.`,
+        ? `${sendingAppName} is sending your form emails. Activate ${app.name} to send through it instead.`
+        : `No provider is sending form emails. Activate ${app.name} to start sending through it.`,
     };
   }
   if (app.connected) {
@@ -96,7 +96,7 @@ function AppAside({ app, dirty }: { app: FormsApp; dirty: boolean }) {
           items={[
             { label: "Details saved", done: app.connected },
             { label: `Verified with ${app.name}`, done: Boolean(app.verifiedAt) && !dirty },
-            { label: app.category === "email" ? "Chosen for sending" : "Turned on", done: app.enabled },
+            { label: app.category === "email" ? "Activated" : "Turned on", done: app.enabled },
           ]}
         />
         {app.verifiedAt && !dirty && (
@@ -123,7 +123,7 @@ function AppAside({ app, dirty }: { app: FormsApp; dirty: boolean }) {
 
 function primaryLabel(app: FormsApp): string {
   if (app.enabled) return "Save changes";
-  if (app.category === "email") return app.connected ? `Send with ${app.name}` : `Connect and send with ${app.name}`;
+  if (app.category === "email") return app.connected ? "Activate" : "Connect and activate";
   return app.connected ? "Save and turn on" : `Connect ${app.name}`;
 }
 
@@ -161,10 +161,10 @@ export function AppConnectModal({ app, sendingAppName, workspaceId, refreshing, 
       notify.success(
         enable
           ? isEmail
-            ? `Form emails now go out through ${app.name}.`
+            ? `${app.name} activated. Form emails now go out through it.`
             : `${app.name} connected. New responses will be posted there.`
           : isEmail
-            ? `${app.name} saved. Choose it under Email delivery when you want to send through it.`
+            ? `${app.name} saved. Activate it when you want to send through it.`
             : `${app.name} saved. Turn it on when you are ready.`,
       );
     } catch (e) {
@@ -256,6 +256,15 @@ export function AppConnectModal({ app, sendingAppName, workspaceId, refreshing, 
           ))}
         </Stack>
       </StudioSection>
+
+      {app.id === "resend" && (
+        <StudioSection
+          title="Bounces and spam reports"
+          description="In Resend, add a webhook with this address for the email.bounced and email.complained events, then paste its signing secret above. Campaigns will stop emailing those addresses."
+        >
+          <TextInput label="Webhook address" readOnly value={resendWebhookUrl(workspaceId)} onFocus={(e) => e.currentTarget.select()} />
+        </StudioSection>
+      )}
 
       {!isEmail && (
         <StudioSection

@@ -27,8 +27,9 @@ export function useWorkspaceApps(): EnabledApps {
   const tasks = on("tasks");
   const insights = on("insights");
   const experiments = on("experiments");
+  const campaigns = on("campaigns");
   return useMemo(
-    () => ({ compare, goals, notes, reviews, links, media, alerts, popups, publicDashboard, seoReports, bio, funnels, invoicing, tasks, insights, experiments }),
-    [compare, goals, notes, reviews, links, media, alerts, popups, publicDashboard, seoReports, bio, funnels, invoicing, tasks, insights, experiments],
+    () => ({ compare, goals, notes, reviews, links, media, alerts, popups, publicDashboard, seoReports, bio, funnels, invoicing, tasks, insights, experiments, campaigns }),
+    [compare, goals, notes, reviews, links, media, alerts, popups, publicDashboard, seoReports, bio, funnels, invoicing, tasks, insights, experiments, campaigns],
   );
 }

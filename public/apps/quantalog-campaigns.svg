@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="256" height="256" role="img" aria-label="Quantalog Campaigns">
+  <path d="M256 150H72A40 40 0 0 0 32 190V422A40 40 0 0 0 72 462H256Z" fill="#4F8DF7"/>
+  <path d="M256 150H440A40 40 0 0 1 480 190V422A40 40 0 0 1 440 462H256Z" fill="#3B76E0"/>
+  <path d="M42 172L256 330V400L36 240V190A40 40 0 0 1 42 172Z" fill="#A9C8FC"/>
+  <path d="M470 172L256 330V400L476 240V190A40 40 0 0 0 470 172Z" fill="#8DB5F9"/>
+  <path d="M72 150H256V330L42 172A40 40 0 0 1 72 150Z" fill="#D8E6FE"/>
+  <path d="M440 150H256V330L470 172A40 40 0 0 0 440 150Z" fill="#C2D8FD"/>
+  <path d="M380 24L492 72L412 104L380 184L332 72Z" fill="#FFB020"/>
+  <path d="M380 24L412 104L492 72Z" fill="#FF9500"/>
+</svg>
