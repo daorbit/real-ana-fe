@@ -12,6 +12,7 @@ export function useCampaignDetail(workspaceId: string | undefined, id: string | 
   const query = useGetCampaignQuery(workspaceId && id && !demo ? { workspaceId, id } : skipToken, {
     pollingInterval: live ? SENDING_POLL_MS : 0,
     skipPollingIfUnfocused: true,
+    refetchOnMountOrArgChange: true,
   });
   const sample = useMemo(() => (demo && id ? demoCampaign(id) : null), [demo, id]);
   const campaign = demo ? sample : (query.currentData ?? null);

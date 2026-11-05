@@ -1,4 +1,37 @@
 export type CampaignStatus = "draft" | "preparing" | "sending" | "paused" | "sent";
+export type CampaignMode = "design" | "html";
+export type EmailFont = "sans" | "serif" | "rounded" | "mono";
+export type EmailAlign = "left" | "center" | "right";
+
+export interface EmailTheme {
+  pageColor: string;
+  cardColor: string;
+  headingColor: string;
+  textColor: string;
+  mutedColor: string;
+  accentColor: string;
+  buttonTextColor: string;
+  font: EmailFont;
+  width: number;
+  radius: number;
+}
+
+export type EmailBlock =
+  | { id: string; type: "brand"; align: EmailAlign }
+  | { id: string; type: "heading"; text: string; size: "s" | "m" | "l" | "xl"; align: EmailAlign }
+  | { id: string; type: "text"; text: string; size: "s" | "m" | "l"; align: EmailAlign }
+  | { id: string; type: "button"; label: string; url: string; align: EmailAlign; fullWidth: boolean }
+  | { id: string; type: "image"; url: string; alt: string; link: string; width: number; radius: number }
+  | { id: string; type: "divider" }
+  | { id: string; type: "spacer"; height: number }
+  | { id: string; type: "columns"; leftTitle: string; leftText: string; rightTitle: string; rightText: string };
+
+export type EmailBlockType = EmailBlock["type"];
+
+export interface EmailDesign {
+  theme: EmailTheme;
+  blocks: EmailBlock[];
+}
 
 export interface CampaignContact {
   email: string;
@@ -8,9 +41,10 @@ export interface CampaignContact {
 export interface CampaignInput {
   name: string;
   subject: string;
-  body: string;
-  ctaLabel: string;
-  ctaUrl: string;
+  preheader: string;
+  mode: CampaignMode;
+  design: EmailDesign;
+  html: string;
   senderAddress: string;
   formIds: string[];
   imported: CampaignContact[];

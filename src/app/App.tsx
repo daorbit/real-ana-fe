@@ -296,7 +296,6 @@ export default function App() {
                 <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/tasks" element={<Tasks />} />
                 <Route path="/app/campaigns" element={<Campaigns />} />
-                <Route path="/app/campaigns/new" element={<CampaignEditor />} />
                 <Route path="/app/campaigns/:campaignId" element={<CampaignDetail />} />
                 <Route path="/app/campaigns/:campaignId/edit" element={<CampaignEditor />} />
                 {/* <Route path="/app/insights" element={<Insights />} /> */}

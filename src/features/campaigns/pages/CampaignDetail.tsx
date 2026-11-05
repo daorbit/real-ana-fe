@@ -68,6 +68,11 @@ export default function CampaignDetail() {
           appOn && writable && campaign ? (
             <div className={studio.saveRow}>
               <CampaignStatusBadge status={campaign.status} />
+              {status === "draft" && (
+                <Button component={Link} to={`/app/campaigns/${campaignId}/edit`}>
+                  Edit
+                </Button>
+              )}
               {status === "sending" && (
                 <Button
                   variant="default"

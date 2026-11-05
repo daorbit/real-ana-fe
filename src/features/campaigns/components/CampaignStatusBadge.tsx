@@ -1,11 +1,12 @@
-import { Badge } from "@mantine/core";
-import { STATUS_COLOR, STATUS_LABEL } from "@/features/campaigns/lib/campaignLabels";
+import { STATUS_LABEL } from "@/features/campaigns/lib/campaignLabels";
 import type { CampaignStatus } from "@/features/campaigns/types";
+import classes from "./Campaigns.module.css";
 
 export function CampaignStatusBadge({ status }: { status: CampaignStatus }) {
   return (
-    <Badge variant="light" color={STATUS_COLOR[status]}>
+    <span className={classes.status}>
+      <span className={classes.statusDot} data-status={status} aria-hidden />
       {STATUS_LABEL[status]}
-    </Badge>
+    </span>
   );
 }

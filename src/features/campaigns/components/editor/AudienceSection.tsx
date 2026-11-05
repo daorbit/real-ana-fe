@@ -4,8 +4,8 @@ import { Upload } from "lucide-react";
 import { notify } from "@/shared/lib/notify";
 import { contactsToText, parseContacts } from "@/features/campaigns/lib/parseContacts";
 import type { CampaignInput, CampaignSources } from "@/features/campaigns/types";
-import classes from "../Campaigns.module.css";
 import { EditorSection } from "./EditorSection";
+import classes from "./Editor.module.css";
 
 interface Props {
   draft: CampaignInput;
@@ -20,7 +20,6 @@ export function AudienceSection({ draft, sources, onChange }: Props) {
     () => (sources?.forms ?? []).map((form) => ({ value: form.id, label: `${form.title} (${form.responses.toLocaleString()})` })),
     [sources],
   );
-
   const edited = useRef(false);
 
   useEffect(() => {
@@ -43,37 +42,39 @@ export function AudienceSection({ draft, sources, onChange }: Props) {
   };
 
   return (
-    <EditorSection title="Audience" text="Pick forms, add your own list, or both. Repeated and unsubscribed addresses are removed before sending.">
-      <MultiSelect
-        label="People who answered these forms"
-        placeholder={options.length ? "Choose forms" : "No forms collect an email address yet"}
-        data={options}
-        value={draft.formIds}
-        disabled={!options.length}
-        searchable
-        onChange={(value) => onChange("formIds", value)}
-      />
-      <Textarea
-        label="Add your own contacts"
-        description="One per line: email, name. Up to 5,000."
-        placeholder={"maya@example.com, Maya\nsam@example.com"}
-        autosize
-        minRows={3}
-        maxRows={8}
-        value={pasted}
-        onChange={(e) => applyText(e.currentTarget.value)}
-      />
-      <div className={classes.importActions}>
-        <FileButton accept=".csv,.txt,text/csv,text/plain" onChange={(file) => void readFile(file)}>
-          {(props) => (
-            <Button {...props} variant="default" size="xs" leftSection={<Upload size={14} />}>
-              Upload CSV
-            </Button>
-          )}
-        </FileButton>
-        <span className={classes.count}>
-          {parsed.contacts.length.toLocaleString()} added{parsed.skipped ? ` · ${parsed.skipped} skipped` : ""}
-        </span>
+    <EditorSection title="Who gets this" note="Repeated and unsubscribed addresses are removed before sending.">
+      <div className={classes.panelBody}>
+        <MultiSelect
+          label="People who answered these forms"
+          placeholder={options.length ? "Choose forms" : "No forms collect an email address yet"}
+          data={options}
+          value={draft.formIds}
+          disabled={!options.length}
+          searchable
+          onChange={(value) => onChange("formIds", value)}
+        />
+        <Textarea
+          label="Add your own contacts"
+          description="One per line: email, name. Up to 5,000."
+          placeholder={"maya@example.com, Maya\nsam@example.com"}
+          autosize
+          minRows={3}
+          maxRows={8}
+          value={pasted}
+          onChange={(e) => applyText(e.currentTarget.value)}
+        />
+        <div className={classes.importActions}>
+          <FileButton accept=".csv,.txt,text/csv,text/plain" onChange={(file) => void readFile(file)}>
+            {(props) => (
+              <Button {...props} variant="default" size="xs" leftSection={<Upload size={14} />}>
+                Upload CSV
+              </Button>
+            )}
+          </FileButton>
+          <span className={classes.count}>
+            {parsed.contacts.length.toLocaleString()} added{parsed.skipped ? ` · ${parsed.skipped} skipped` : ""}
+          </span>
+        </div>
       </div>
     </EditorSection>
   );

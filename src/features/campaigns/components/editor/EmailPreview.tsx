@@ -1,54 +1,31 @@
 import { useState } from "react";
-import { Anchor, Button, Text, TextInput } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Button, SegmentedControl, TextInput } from "@mantine/core";
 import { Send } from "lucide-react";
 import { useAuth } from "@/features/auth/context";
 import { notify, notifyError } from "@/shared/lib/notify";
 import { useTestCampaignMutation } from "@/features/campaigns/api";
 import { useCampaignPreview } from "@/features/campaigns/hooks/useCampaignPreview";
-import type { CampaignInput, CampaignSources } from "@/features/campaigns/types";
-import classes from "../Campaigns.module.css";
+import type { CampaignInput } from "@/features/campaigns/types";
+import classes from "./Editor.module.css";
 
 interface Props {
   workspaceId: string | undefined;
+  campaignId: string | undefined;
   draft: CampaignInput;
-  sources: CampaignSources | undefined;
-  onSave: () => Promise<string | null>;
+  onSave: () => Promise<boolean>;
 }
 
-function DeliveryNote({ delivery }: { delivery: CampaignSources["delivery"] | undefined }) {
-  if (!delivery) return null;
-  if (!delivery.connected) {
-    return (
-      <Text size="xs" c="dimmed" mt="sm">
-        No email provider is active.{" "}
-        <Anchor component={Link} to="/app/apps" size="xs">
-          Activate one in Apps
-        </Anchor>{" "}
-        before sending.
-      </Text>
-    );
-  }
-  return (
-    <Text size="xs" c="dimmed" mt="sm">
-      Sends through {delivery.providerName}
-      {delivery.fromEmail ? ` from ${delivery.fromEmail}` : ""}.
-    </Text>
-  );
-}
-
-export function EmailPreview({ workspaceId, draft, sources, onSave }: Props) {
+export function EmailPreview({ workspaceId, campaignId, draft, onSave }: Props) {
   const { user } = useAuth();
   const html = useCampaignPreview(workspaceId, draft);
+  const [size, setSize] = useState("desktop");
   const [to, setTo] = useState(user?.email ?? "");
   const [test, testState] = useTestCampaignMutation();
 
   const sendTest = async () => {
-    if (!workspaceId) return;
-    const id = await onSave();
-    if (!id) return;
+    if (!workspaceId || !campaignId || !(await onSave())) return;
     try {
-      await test({ workspaceId, id, to: to.trim() }).unwrap();
+      await test({ workspaceId, id: campaignId, to: to.trim() }).unwrap();
       notify.success(`Test email sent to ${to.trim()}.`);
     } catch (e) {
       notifyError(e, "The test email could not be sent.");
@@ -57,10 +34,21 @@ export function EmailPreview({ workspaceId, draft, sources, onSave }: Props) {
 
   return (
     <>
-      <div className={classes.subjectLine}>
-        Subject: <strong>{draft.subject || "No subject yet"}</strong>
+      <div className={classes.previewBar}>
+        <div className={classes.previewSubject}>
+          Subject: <strong>{draft.subject || "No subject yet"}</strong>
+        </div>
+        <SegmentedControl
+          size="xs"
+          aria-label="Preview size"
+          data={[{ value: "desktop", label: "Desktop" }, { value: "phone", label: "Phone" }]}
+          value={size}
+          onChange={setSize}
+        />
       </div>
-      <iframe className={classes.previewFrame} title="Email preview" sandbox="" srcDoc={html} />
+      <div className={classes.frameWrap}>
+        <iframe className={classes.frame} data-size={size} title="Email preview" sandbox="" srcDoc={html} />
+      </div>
       <div className={classes.testRow}>
         <TextInput
           className={classes.grow}
@@ -73,7 +61,6 @@ export function EmailPreview({ workspaceId, draft, sources, onSave }: Props) {
           Send test
         </Button>
       </div>
-      <DeliveryNote delivery={sources?.delivery} />
     </>
   );
 }

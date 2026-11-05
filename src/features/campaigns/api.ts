@@ -50,7 +50,7 @@ const campaignsApi = tags.injectEndpoints({
 
     updateCampaign: build.mutation<Campaign, CampaignInput & IdArgs>({
       query: ({ workspaceId, id, ...body }) => ({ url: `${base(workspaceId)}/${id}`, method: "PUT", body }),
-      invalidatesTags: (_result, _error, { id }) => changed(id),
+      invalidatesTags: ["Campaigns"],
     }),
 
     deleteCampaign: build.mutation<void, IdArgs>({

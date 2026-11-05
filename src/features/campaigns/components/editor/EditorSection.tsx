@@ -1,16 +1,22 @@
 import type { ReactNode } from "react";
-import studio from "@/features/popups/components/studio/PopupStudio.module.css";
+import classes from "./Editor.module.css";
 
-export function EditorSection({ title, text, children }: { title: string; text: string; children: ReactNode }) {
+interface Props {
+  title: string;
+  aside?: ReactNode;
+  note?: string;
+  children: ReactNode;
+}
+
+export function EditorSection({ title, aside, note, children }: Props) {
   return (
-    <section className={studio.section}>
-      <div className={studio.sectionHead}>
-        <div>
-          <h3 className={studio.sectionTitle}>{title}</h3>
-          <p className={studio.sectionText}>{text}</p>
-        </div>
+    <section className={classes.group}>
+      <div className={classes.groupHead}>
+        <h2 className={classes.groupTitle}>{title}</h2>
+        {aside}
       </div>
-      <div className={studio.sectionBody}>{children}</div>
+      <div className={classes.panel}>{children}</div>
+      {note && <p className={classes.groupNote}>{note}</p>}
     </section>
   );
 }
