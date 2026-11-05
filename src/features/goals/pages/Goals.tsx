@@ -63,7 +63,7 @@ export default function Goals() {
           <div className={classes.sectionHead}>
             <h3 className={classes.sectionTitle}>All goals</h3>
             <span className={classes.sectionMeta}>
-              {allowance.usage ? `${allowance.usage} goals on the ${allowance.plan} plan · ` : ""}Refreshes every minute
+              {allowance.usage ? `${allowance.usage} goals on the ${allowance.plan} plan · ` : ""}Refreshes every 2 minutes
             </span>
           </div>
           <div className={classes.grid}>

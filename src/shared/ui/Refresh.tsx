@@ -7,7 +7,7 @@ export function RefreshButton({
   onRefresh,
   refreshing,
   lastUpdated,
-  hint = "Auto-refreshes every minute",
+  hint = "Auto-refreshes every 2 minutes",
   label = "Refresh",
   disabled,
 }: {

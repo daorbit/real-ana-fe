@@ -7,7 +7,7 @@ import { POLL_MS } from "@/shared/hooks/usePolling";
 import { useRefetchOnFocus } from "@/shared/hooks/useRefetchOnFocus";
 import type { CompareMode } from "@/shared/types";
 
-const STATS_FOCUS_STALE_MS = 30_000;
+const STATS_FOCUS_STALE_MS = 120_000;
 
 export function useStats(
   workspaceId: string | undefined,

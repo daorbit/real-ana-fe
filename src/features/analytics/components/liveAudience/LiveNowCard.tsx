@@ -31,7 +31,7 @@ export function LiveNowCard({
       actions={
         <span className={classes.updates}>
           <span className={`status-dot live ${classes.liveDot}`} aria-hidden />
-          Updates every 10 s
+          Updates every 30 s
         </span>
       }
     >

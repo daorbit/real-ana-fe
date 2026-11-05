@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export const POLL_MS = 60_000; // 1 minute
+export const POLL_MS = 120_000;
 
 /**
  * Runs `load` on mount and whenever `deps` change, then every POLL_MS.

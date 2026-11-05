@@ -35,13 +35,15 @@ Code is in the first bundle if `main.tsx`, `App.tsx`, `AppShell.tsx`, `app/shell
 
 All server data goes through RTK Query endpoints in `api.ts`. Raw `fetch` is allowed only for auth calls via `shared/lib/http`, file downloads and exports, and public token pages (share, embed).
 
-1. **Never add `refetchOnFocus: true`.** It refetches on every alt-tab. Use `useRefetchOnFocus(refetch, fulfilledTimeStamp, minAgeMs, enabled)` from `src/shared/hooks/useRefetchOnFocus.ts`. Current thresholds: stats 30s, notification count 15s, sites 5 min.
+1. **Never add `refetchOnFocus: true`.** It refetches on every alt-tab. Use `useRefetchOnFocus(refetch, fulfilledTimeStamp, minAgeMs, enabled)` from `src/shared/hooks/useRefetchOnFocus.ts`. Current thresholds: stats 2 min, notification count 60s, sites 5 min.
 2. **Polling only for live data**, and always with `skipPollingIfUnfocused: true`. These are the only polls on the shell and Home:
-   - `useLive`: 10s
-   - `useStats`: 60s (`POLL_MS`)
-   - `useNotificationCount`: 30s
+   - `useLive`: 30s
+   - `useStats`: 2 min (`POLL_MS`)
+   - `useNotificationCount`: 60s
 
-   `useTargets` also polls at `POLL_MS` (60s), but only on the Goals page and in the optional Goal progress widget.
+   The API runs on Vercel's free plan, which includes 1,000,000 function calls a month, so don't shorten these.
+
+   `useTargets` also polls at `POLL_MS` (2 min), but only on the Goals page and in the optional Goal progress widget.
 
    Lists that change only through the app's own mutations (sites, goals, layouts, members, settings) **must not poll**. They refresh through `providesTags` / `invalidatesTags`.
 3. **Skip until the arguments exist.** Use `skip` or `skipToken` while a workspace id or other required input is missing, and in demo mode where demo data replaces the request.

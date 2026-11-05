@@ -43,7 +43,7 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
     tagline: "Set monthly and quarterly targets that track themselves.",
     description: "Pick a number that matters, such as visitors, form submissions or your Google position, set a target for the month or quarter, and watch progress fill in from your live data.",
     features: [
-      { title: "Targets that track themselves", body: "Progress updates from your analytics every minute. Nothing to enter by hand." },
+      { title: "Targets that track themselves", body: "Progress updates from your analytics every 2 minutes. Nothing to enter by hand." },
       { title: "On pace or behind", body: "Each goal shows whether you are ahead of where you should be today, not only the total so far." },
       { title: "On your Home screen", body: "Add the Goal progress widget to keep every target in view next to your traffic." },
     ],

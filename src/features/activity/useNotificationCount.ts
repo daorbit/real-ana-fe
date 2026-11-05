@@ -5,8 +5,8 @@ import { demoNotificationCount } from "@/features/demo/demoNotifications";
 import { useRefetchOnFocus } from "@/shared/hooks/useRefetchOnFocus";
 
 
-export const NOTIFICATION_POLL_MS = 30_000;
-const NOTIFICATION_FOCUS_STALE_MS = 15_000;
+export const NOTIFICATION_POLL_MS = 60_000;
+const NOTIFICATION_FOCUS_STALE_MS = 60_000;
 
 
 export function useNotificationCount() {
