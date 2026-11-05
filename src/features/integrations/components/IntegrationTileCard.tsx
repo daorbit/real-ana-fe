@@ -39,6 +39,12 @@ function footerFor(tile: IntegrationTile): Footer {
       ? { tone: "ok", label: tile.account ?? "On", action: "Open", variant: "default" }
       : { tone: "idle", label: "Off", action: "Turn on", variant: "light" };
   }
+  if (tile.category === "email" && tile.enabled) {
+    return { tone: "ok", label: "Sending your form emails", action: "Manage", variant: "default" };
+  }
+  if (tile.category === "email" && tile.connected) {
+    return { tone: "idle", label: "Saved, not sending", action: "Manage", variant: "light" };
+  }
   if (tile.enabled) {
     return { tone: "ok", label: enabledLabel(tile), action: webhook ? "Turn off" : "Manage", variant: "default" };
   }
@@ -63,7 +69,7 @@ function ModeBadge({ tile }: { tile: IntegrationTile }) {
 
 function statusOf(tile: IntegrationTile): ConnectionCardStatus {
   if (tile.enabled) return "connected";
-  if (tile.connected) return "attention";
+  if (tile.connected && tile.category !== "email") return "attention";
   return "idle";
 }
 

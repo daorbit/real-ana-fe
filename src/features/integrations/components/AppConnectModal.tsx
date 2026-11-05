@@ -24,6 +24,7 @@ import type { FormsApp } from "../types";
 
 interface Props {
   app: FormsApp | null;
+  sendingAppName?: string;
   workspaceId: string;
   refreshing: boolean;
   onClose: () => void;
@@ -32,11 +33,12 @@ interface Props {
 
 function StatusBadge({ app }: { app: FormsApp }) {
   if (app.enabled) return <Badge size="sm" variant="light" color="teal">Connected</Badge>;
+  if (app.connected && app.category === "email") return <Badge size="sm" variant="light" color="gray">Not sending</Badge>;
   if (app.connected) return <Badge size="sm" variant="light" color="orange">Switched off</Badge>;
   return <Badge size="sm" variant="light" color="gray">Not connected</Badge>;
 }
 
-function heroFor(app: FormsApp): { state: StudioState; title: string; description: string } {
+function heroFor(app: FormsApp, sendingAppName?: string): { state: StudioState; title: string; description: string } {
   const email = app.category === "email";
   if (app.enabled) {
     return {
@@ -45,6 +47,15 @@ function heroFor(app: FormsApp): { state: StudioState; title: string; descriptio
       description: email
         ? `Every form notification email in this workspace is sent through ${app.name}.`
         : `Every new response is posted to ${app.name} for forms that notify you.`,
+    };
+  }
+  if (app.connected && email) {
+    return {
+      state: "saved",
+      title: `${app.name} is saved but not sending`,
+      description: sendingAppName
+        ? `${sendingAppName} is sending your form emails. Switch to ${app.name} to send through it instead.`
+        : `No provider is sending form emails. Choose ${app.name} to start sending through it.`,
     };
   }
   if (app.connected) {
@@ -66,7 +77,9 @@ function heroFor(app: FormsApp): { state: StudioState; title: string; descriptio
 function statsFor(app: FormsApp): StudioStat[] | undefined {
   if (!app.connected) return undefined;
   return [
-    { label: "Status", value: app.enabled ? "On" : "Off", tone: app.enabled ? "ok" : "warn" },
+    app.category === "email"
+      ? { label: "Status", value: app.enabled ? "Sending" : "Not sending", tone: app.enabled ? "ok" : undefined }
+      : { label: "Status", value: app.enabled ? "On" : "Off", tone: app.enabled ? "ok" : "warn" },
     { label: "Last verified", value: app.verifiedAt ? timeAgo(app.verifiedAt) : "Never", tone: app.verifiedAt ? undefined : "warn" },
     { label: "Last used", value: app.lastUsedAt ? timeAgo(app.lastUsedAt) : "Not yet" },
   ];
@@ -83,7 +96,7 @@ function AppAside({ app, dirty }: { app: FormsApp; dirty: boolean }) {
           items={[
             { label: "Details saved", done: app.connected },
             { label: `Verified with ${app.name}`, done: Boolean(app.verifiedAt) && !dirty },
-            { label: "Turned on", done: app.enabled },
+            { label: app.category === "email" ? "Chosen for sending" : "Turned on", done: app.enabled },
           ]}
         />
         {app.verifiedAt && !dirty && (
@@ -108,7 +121,13 @@ function AppAside({ app, dirty }: { app: FormsApp; dirty: boolean }) {
   );
 }
 
-export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefresh }: Props) {
+function primaryLabel(app: FormsApp): string {
+  if (app.enabled) return "Save changes";
+  if (app.category === "email") return app.connected ? `Send with ${app.name}` : `Connect and send with ${app.name}`;
+  return app.connected ? "Save and turn on" : `Connect ${app.name}`;
+}
+
+export function AppConnectModal({ app, sendingAppName, workspaceId, refreshing, onClose, onRefresh }: Props) {
   const { user } = useAuth();
   const [values, setValues] = useState<FieldValues>({});
   const [testTo, setTestTo] = useState("");
@@ -142,9 +161,11 @@ export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefre
       notify.success(
         enable
           ? isEmail
-            ? `${app.name} connected. Notification emails will go out through it.`
+            ? `Form emails now go out through ${app.name}.`
             : `${app.name} connected. New responses will be posted there.`
-          : `${app.name} saved. Turn it on when you are ready.`,
+          : isEmail
+            ? `${app.name} saved. Choose it under Email delivery when you want to send through it.`
+            : `${app.name} saved. Turn it on when you are ready.`,
       );
     } catch (e) {
       notifyError(e, "Could not save the connection.");
@@ -183,7 +204,7 @@ export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefre
         </Button>
       )}
       <Group gap="xs" wrap="nowrap">
-        {app.connected && !app.enabled && (
+        {(app.connected || isEmail) && !app.enabled && (
           <Button type="button" variant="default" disabled={busy} onClick={() => handleSave(false)}>
             Save
           </Button>
@@ -195,7 +216,7 @@ export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefre
           disabled={busy || (app.enabled && !dirty)}
           onClick={() => handleSave(true)}
         >
-          {app.enabled ? "Save changes" : app.connected ? "Save and turn on" : `Connect ${app.name}`}
+          {primaryLabel(app)}
         </Button>
       </Group>
     </Group>
@@ -217,7 +238,7 @@ export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefre
       refreshing={refreshing}
       refreshDisabled={busy || dirty}
     >
-      <StudioHero {...heroFor(app)} stats={statsFor(app)} />
+      <StudioHero {...heroFor(app, sendingAppName)} stats={statsFor(app)} />
 
       <StudioSection
         title={isEmail ? "Account details" : "Channel"}

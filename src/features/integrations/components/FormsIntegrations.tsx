@@ -10,6 +10,7 @@ import { CATEGORY_HINT, CATEGORY_TITLE, isPaymentProvider } from "../lib/catalog
 import { isFiltered, matchesFilter, tileState, type ConnectionFilter } from "../lib/filter";
 import { IntegrationTileCard } from "./IntegrationTileCard";
 import { AppConnectModal } from "./AppConnectModal";
+import { EmailProviderPicker } from "./EmailProviderPicker";
 import { GoogleCalendarModal } from "./GoogleCalendarModal";
 import { GoogleSheetsModal } from "./GoogleSheetsModal";
 import { PaymentsModal } from "./payments/PaymentsModal";
@@ -118,6 +119,7 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
     <>
       <AppConnectModal
         app={openApp}
+        sendingAppName={integrations.apps?.find((app) => app.category === "email" && app.enabled)?.name}
         workspaceId={workspaceId}
         refreshing={integrations.appsFetching}
         onClose={() => setOpenAppId(null)}
@@ -192,6 +194,9 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
     <>
       {visibleSections.map((section) => (
         <ConnectionGroup key={section.category} title={CATEGORY_TITLE[section.category]} hint={CATEGORY_HINT[section.category]}>
+          {section.category === "email" && workspaceId && integrations.apps && (
+            <EmailProviderPicker workspaceId={workspaceId} apps={integrations.apps} onConnect={setOpenAppId} />
+          )}
           {section.tiles.map(renderTile)}
         </ConnectionGroup>
       ))}
