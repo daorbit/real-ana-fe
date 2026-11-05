@@ -11,6 +11,7 @@ export const GOOGLE_SHEETS_DOCS_URL = docsUrl(DOCS_SLUGS.formsGoogleSheets);
 
 const APP_GUIDES: Record<string, string> = {
   brevo: `${NOTIFICATIONS}#email-app`,
+  resend: `${NOTIFICATIONS}#email-app`,
   smtp: `${NOTIFICATIONS}#email-app`,
   slack: `${NOTIFICATIONS}#chat`,
   discord: `${NOTIFICATIONS}#chat`,

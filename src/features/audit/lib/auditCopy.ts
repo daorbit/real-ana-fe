@@ -25,6 +25,7 @@ const LOGIN_METHODS: Record<string, string> = {
 
 const APP_NAMES: Record<string, string> = {
   brevo: "Brevo",
+  resend: "Resend",
   smtp: "Custom SMTP",
   slack: "Slack",
   discord: "Discord",

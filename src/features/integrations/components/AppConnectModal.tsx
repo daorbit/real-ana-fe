@@ -221,7 +221,7 @@ export function AppConnectModal({ app, workspaceId, refreshing, onClose, onRefre
 
       <StudioSection
         title={isEmail ? "Account details" : "Channel"}
-        description={isEmail ? "Copy these from your provider's SMTP settings." : `Where ${app.name} should post new responses.`}
+        description={isEmail ? "Copy these from your email provider's account." : `Where ${app.name} should post new responses.`}
       >
         <Stack gap="md">
           {app.fields.map((field) => (

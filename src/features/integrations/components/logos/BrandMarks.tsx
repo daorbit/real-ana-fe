@@ -16,6 +16,14 @@ function BrevoMark({ size = 24 }: MarkProps) {
   );
 }
 
+function ResendMark({ size = 24 }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" role="img" aria-label="Resend" className={classes.logo}>
+      <path d="M14.679 0c4.648 0 7.413 2.765 7.413 6.434s-2.765 6.434-7.413 6.434H12.33L24 24h-8.245l-8.88-8.44c-.636-.588-.93-1.273-.93-1.86 0-.831.587-1.565 1.713-1.883l4.574-1.224c1.737-.465 2.936-1.81 2.936-3.572 0-2.153-1.761-3.4-3.939-3.4H0V0z" />
+    </svg>
+  );
+}
+
 function SmtpMark({ size = 24 }: MarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 512 512" role="img" aria-label="SMTP server" className={classes.logo}>
@@ -170,6 +178,7 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   "quantalog-insights": appMark("quantalog-insights.svg", "Quantalog Insights"),
   "quantalog-experiments": appMark("quantalog-experiments.svg", "Quantalog A/B Tests"),
   brevo: BrevoMark,
+  resend: ResendMark,
   smtp: SmtpMark,
   slack: SlackMark,
   discord: DiscordMark,
