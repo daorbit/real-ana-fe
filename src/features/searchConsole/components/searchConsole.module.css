@@ -350,6 +350,7 @@
 
 .topLabelCell {
   width: 100%;
+  min-width: 180px;
   max-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

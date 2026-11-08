@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Button, Modal, Skeleton } from "@mantine/core";
+import { Button, Skeleton } from "@mantine/core";
 import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { AppShell } from "@/app/AppShell";
 import { ErrorState } from "@/shared/ui/ErrorState";
@@ -13,11 +14,11 @@ import { demoCampaigns } from "@/features/demo/demoCampaigns";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
-import { useGetCampaignsQuery, useGetCampaignSourcesQuery } from "@/features/campaigns/api";
+import { useUndoableRemoval } from "@/shared/hooks";
+import { useDeleteCampaignMutation, useGetCampaignsQuery, useGetCampaignSourcesQuery } from "@/features/campaigns/api";
 import { CampaignRow } from "@/features/campaigns/components/CampaignRow";
 import { SendingStrip } from "@/features/campaigns/components/SendingStrip";
-import { TemplateGallery } from "@/features/campaigns/components/TemplateGallery";
-import { useCreateCampaign } from "@/features/campaigns/hooks/useCreateCampaign";
+import { TemplatePicker } from "@/features/campaigns/components/TemplatePicker";
 import type { Campaign } from "@/features/campaigns/types";
 import classes from "@/features/campaigns/components/Campaigns.module.css";
 
@@ -42,11 +43,21 @@ export default function Campaigns() {
   const { currentData: sources } = useGetCampaignSourcesQuery(workspaceId && canEdit ? workspaceId : skipToken);
   const sample = useMemo(() => (demo ? demoCampaigns() : null), [demo]);
   const data = sample ?? query.currentData;
-  const campaigns = data?.campaigns ?? EMPTY;
+  const loaded = data?.campaigns ?? EMPTY;
+  const [deleteCampaign] = useDeleteCampaignMutation();
+  const removal = useUndoableRemoval();
+  const campaigns = useMemo(() => loaded.filter((campaign) => !removal.hidden.has(campaign.id)), [loaded, removal.hidden]);
   const [filter, setFilter] = useState<Filter>("all");
-  const [choosing, setChoosing] = useState(false);
-  const { start, creating } = useCreateCampaign(workspaceId, campaigns[0]?.senderAddress ?? "");
   const canCreate = canEdit && !demo;
+  const onDelete = (campaign: Campaign) => {
+    if (!workspaceId) return;
+    removal.remove({
+      ids: [campaign.id],
+      message: `Deleted "${campaign.name}"`,
+      commit: () => deleteCampaign({ workspaceId, id: campaign.id }).unwrap(),
+      errorMessage: "Could not delete the campaign.",
+    });
+  };
   const hasCampaigns = campaigns.length > 0;
   const visible = useMemo(() => campaigns.filter((campaign) => inFilter(campaign, filter)), [campaigns, filter]);
   const tabs = useMemo(
@@ -67,7 +78,7 @@ export default function Campaigns() {
         docsPath={DOCS_SLUGS.quantalogCampaigns}
         actions={
           appOn && canCreate && hasCampaigns ? (
-            <Button leftSection={<Plus size={15} />} onClick={() => setChoosing(true)}>
+            <Button component={Link} to="/app/campaigns/templates" leftSection={<Plus size={15} />}>
               New campaign
             </Button>
           ) : undefined
@@ -88,7 +99,7 @@ export default function Campaigns() {
               {visible.length ? (
                 <div className={classes.list}>
                   {visible.map((campaign) => (
-                    <CampaignRow key={campaign.id} campaign={campaign} />
+                    <CampaignRow key={campaign.id} campaign={campaign} onDelete={canCreate ? onDelete : undefined} />
                   ))}
                 </div>
               ) : (
@@ -99,7 +110,7 @@ export default function Campaigns() {
             <section aria-labelledby="campaign-start" className={classes.stack}>
               <h2 id="campaign-start" className={classes.startTitle}>Start with a template</h2>
               {canCreate ? (
-                <TemplateGallery disabled={creating} onPick={(template) => void start(template)} />
+                <TemplatePicker workspaceId={workspaceId} lastAddress="" />
               ) : (
                 <p className={classes.none}>An editor of this workspace can create campaigns.</p>
               )}
@@ -108,10 +119,6 @@ export default function Campaigns() {
           <SendingStrip usage={data?.usage} sources={sources} />
         </div>
       )}
-
-      <Modal opened={choosing} onClose={() => setChoosing(false)} title="Start with a template" size="xl" centered>
-        <TemplateGallery disabled={creating} onPick={(template) => void start(template)} />
-      </Modal>
     </AppShell>
   );
 }

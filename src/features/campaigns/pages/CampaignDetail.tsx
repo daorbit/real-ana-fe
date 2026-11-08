@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { Button, Group, Modal, Skeleton, Stack, Text } from "@mantine/core";
+import { Button, Skeleton } from "@mantine/core";
 import { ArrowLeft, Pause, Play, Trash2 } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { PageHeader } from "@/shared/ui/Page";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
-import { notify, notifyError } from "@/shared/lib/notify";
+import { notifyError } from "@/shared/lib/notify";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useDemo } from "@/features/demo/context";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
-import { useDeleteCampaignMutation, usePauseCampaignMutation, useResumeCampaignMutation } from "@/features/campaigns/api";
+import { usePauseCampaignMutation, useResumeCampaignMutation } from "@/features/campaigns/api";
+import { useDeleteCampaign } from "@/features/campaigns/hooks/useDeleteCampaign";
 import { CampaignStatusBadge } from "@/features/campaigns/components/CampaignStatusBadge";
 import { CampaignFailures } from "@/features/campaigns/components/detail/CampaignFailures";
 import { CampaignSummary } from "@/features/campaigns/components/detail/CampaignSummary";
@@ -22,7 +22,6 @@ import studio from "@/features/popups/components/studio/PopupStudio.module.css";
 
 export default function CampaignDetail() {
   const { campaignId } = useParams<{ campaignId: string }>();
-  const navigate = useNavigate();
   const { demo } = useDemo();
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
@@ -31,8 +30,7 @@ export default function CampaignDetail() {
   const { campaign, loading, notFound } = useCampaignDetail(workspaceId, campaignId);
   const [pause, pauseState] = usePauseCampaignMutation();
   const [resume, resumeState] = useResumeCampaignMutation();
-  const [remove, removeState] = useDeleteCampaignMutation();
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const askDelete = useDeleteCampaign(workspaceId);
   const writable = canEdit && !demo && Boolean(workspaceId && campaignId);
   useTitle(campaign?.name ?? "Campaign");
 
@@ -43,13 +41,6 @@ export default function CampaignDetail() {
       notifyError(e, failure);
     }
   };
-
-  const onDelete = () =>
-    run(async () => {
-      await remove({ workspaceId: workspaceId!, id: campaignId! }).unwrap();
-      notify.info("Campaign deleted.");
-      navigate("/app/campaigns");
-    }, "Could not delete the campaign.");
 
   const status = campaign?.status;
   const busy = status === "sending" || status === "preparing";
@@ -93,7 +84,7 @@ export default function CampaignDetail() {
                 </Button>
               )}
               {!busy && (
-                <Button variant="subtle" color="red" leftSection={<Trash2 size={15} />} onClick={() => setConfirmDelete(true)}>
+                <Button variant="subtle" color="red" leftSection={<Trash2 size={15} />} onClick={() => campaignId && askDelete(campaignId)}>
                   Delete
                 </Button>
               )}
@@ -116,20 +107,6 @@ export default function CampaignDetail() {
           {workspaceId && campaignId && !demo && campaign.counts.failed > 0 && <CampaignFailures workspaceId={workspaceId} id={campaignId} />}
         </>
       )}
-
-      <Modal opened={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete this campaign?" centered>
-        <Stack gap="md">
-          <Text size="sm">Its report is deleted too. Emails already sent can't be recalled.</Text>
-          <Group justify="flex-end" gap="xs">
-            <Button variant="default" onClick={() => setConfirmDelete(false)}>
-              Cancel
-            </Button>
-            <Button color="red" loading={removeState.isLoading} onClick={() => void onDelete()}>
-              Delete
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
     </AppShell>
   );
 }

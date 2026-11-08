@@ -48,6 +48,7 @@ const Backlinks = lazy(() => import("@/features/backlinks/pages/Backlinks"));
 const Tasks = lazy(() => import("@/features/tasks/pages/Tasks"));
 const Campaigns = lazy(() => import("@/features/campaigns/pages/Campaigns"));
 const CampaignEditor = lazy(() => import("@/features/campaigns/pages/CampaignEditor"));
+const CampaignTemplates = lazy(() => import("@/features/campaigns/pages/CampaignTemplates"));
 const CampaignDetail = lazy(() => import("@/features/campaigns/pages/CampaignDetail"));
 // const Insights = lazy(() => import("@/features/insights/pages/Insights"));
 // const Experiments = lazy(() => import("@/features/experiments/pages/Experiments"));
@@ -296,6 +297,7 @@ export default function App() {
                 <Route path="/app/backlinks" element={<Backlinks />} />
                 <Route path="/app/tasks" element={<Tasks />} />
                 <Route path="/app/campaigns" element={<Campaigns />} />
+                <Route path="/app/campaigns/templates" element={<CampaignTemplates />} />
                 <Route path="/app/campaigns/:campaignId" element={<CampaignDetail />} />
                 <Route path="/app/campaigns/:campaignId/edit" element={<CampaignEditor />} />
                 {/* <Route path="/app/insights" element={<Insights />} /> */}

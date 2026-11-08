@@ -71,18 +71,18 @@ export function metricSources(
 
 export function listSources(stats: Partial<Stats> | null): Record<string, ListSource> {
   return {
-    topPages: { title: "Top pages", icon: Eye, tone: "teal", items: stats?.topPages ?? [], empty: "No pageviews yet", filterKey: "path" },
-    entryPages: { title: "Entry pages", icon: LogIn, tone: "blue", items: stats?.entryPages ?? [], empty: "No sessions yet", filterKey: "path" },
-    exitPages: { title: "Exit pages", icon: LogOut, tone: "pink", items: stats?.exitPages ?? [], empty: "No completed sessions yet", filterKey: "path" },
-    topReferrers: { title: "Referrers", icon: ArrowUpRight, tone: "orange", items: stats?.topReferrers ?? [], empty: "No referrers yet", filterKey: "referrer" },
-    topCountries: { title: "Countries", icon: Globe2, tone: "emerald", items: stats?.countries ?? [], empty: "No location data yet", format: flag, filterKey: "country" },
-    browsers: { title: "Browsers", icon: AppWindow, tone: "cyan", chart: "donut", items: stats?.browsers ?? [], empty: "No data yet", filterKey: "browser" },
-    operatingSystems: { title: "Operating systems", icon: MonitorSmartphone, tone: "blue", chart: "donut", items: stats?.operatingSystems ?? [], empty: "No data yet", filterKey: "os" },
-    devices: { title: "Devices", icon: MonitorSmartphone, tone: "amber", chart: "donut", items: stats?.devices ?? [], empty: "No data yet", filterKey: "device" },
-    screenSizes: { title: "Screen sizes", icon: MonitorSmartphone, tone: "violet", chart: "donut", items: stats?.screenSizes ?? [], empty: "No data yet" },
-    languages: { title: "Languages", icon: Languages, tone: "indigo", items: stats?.languages ?? [], empty: "No data yet", filterKey: "language" },
-    utmSources: { title: "UTM sources", icon: Tag, tone: "indigo", items: stats?.utmSources ?? [], empty: "No campaigns yet", filterKey: "utmSource" },
-    utmCampaigns: { title: "UTM campaigns", icon: Tag, tone: "violet", items: stats?.utmCampaigns ?? [], empty: "No campaigns yet", filterKey: "utmCampaign" },
-    channels: { title: "Channels", icon: Split, tone: "emerald", chart: "donut", items: stats?.channels ?? [], empty: "No traffic yet" },
+    topPages: { title: "Top pages", icon: Eye, tone: "teal", items: stats?.topPages ?? [], empty: "Your most viewed pages show here once visitors start browsing.", filterKey: "path" },
+    entryPages: { title: "Entry pages", icon: LogIn, tone: "blue", items: stats?.entryPages ?? [], empty: "The page each visit starts on shows here after your first visits.", filterKey: "path" },
+    exitPages: { title: "Exit pages", icon: LogOut, tone: "pink", items: stats?.exitPages ?? [], empty: "The page each visit ends on shows here once visits finish.", filterKey: "path" },
+    topReferrers: { title: "Referrers", icon: ArrowUpRight, tone: "orange", items: stats?.topReferrers ?? [], empty: "Sites that send you visitors show here. Direct visits aren't listed.", filterKey: "referrer" },
+    topCountries: { title: "Countries", icon: Globe2, tone: "emerald", items: stats?.countries ?? [], empty: "Where your visitors are from shows here after your first visits.", format: flag, filterKey: "country" },
+    browsers: { title: "Browsers", icon: AppWindow, tone: "cyan", chart: "donut", items: stats?.browsers ?? [], empty: "Browsers show here after your first visits.", filterKey: "browser" },
+    operatingSystems: { title: "Operating systems", icon: MonitorSmartphone, tone: "blue", chart: "donut", items: stats?.operatingSystems ?? [], empty: "Operating systems show here after your first visits.", filterKey: "os" },
+    devices: { title: "Devices", icon: MonitorSmartphone, tone: "amber", chart: "donut", items: stats?.devices ?? [], empty: "Your desktop, mobile and tablet split shows here after your first visits.", filterKey: "device" },
+    screenSizes: { title: "Screen sizes", icon: MonitorSmartphone, tone: "violet", chart: "donut", items: stats?.screenSizes ?? [], empty: "Screen sizes show here after your first visits." },
+    languages: { title: "Languages", icon: Languages, tone: "indigo", items: stats?.languages ?? [], empty: "Your visitors' languages show here after your first visits.", filterKey: "language" },
+    utmSources: { title: "UTM sources", icon: Tag, tone: "indigo", items: stats?.utmSources ?? [], empty: "Add utm_source to the links you share to see where campaign visits come from.", filterKey: "utmSource" },
+    utmCampaigns: { title: "UTM campaigns", icon: Tag, tone: "violet", items: stats?.utmCampaigns ?? [], empty: "Add utm_campaign to the links you share to compare your campaigns here.", filterKey: "utmCampaign" },
+    channels: { title: "Channels", icon: Split, tone: "emerald", chart: "donut", items: stats?.channels ?? [], empty: "Search, social, referral and direct traffic shows here after your first visits." },
   };
 }

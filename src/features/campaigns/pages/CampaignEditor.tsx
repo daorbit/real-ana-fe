@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, SegmentedControl, Skeleton } from "@mantine/core";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Trash2 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { AppShell } from "@/app/AppShell";
@@ -12,6 +12,7 @@ import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { useGetCampaignSourcesQuery } from "@/features/campaigns/api";
 import { useCampaignEditor } from "@/features/campaigns/hooks/useCampaignEditor";
+import { useDeleteCampaign } from "@/features/campaigns/hooks/useDeleteCampaign";
 import { AudienceSection } from "@/features/campaigns/components/editor/AudienceSection";
 import { BlockList } from "@/features/campaigns/components/editor/BlockList";
 import { ContentSection } from "@/features/campaigns/components/editor/ContentSection";
@@ -34,6 +35,7 @@ export default function CampaignEditor() {
   const { draft } = editor;
   const { currentData: sources } = useGetCampaignSourcesQuery(workspaceId && writable ? workspaceId : skipToken);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const askDelete = useDeleteCampaign(workspaceId);
   useTitle(draft?.name || "Campaign");
 
   const review = async () => {
@@ -52,6 +54,14 @@ export default function CampaignEditor() {
         {appOn && writable && draft && !editor.locked && (
           <div className={classes.actions}>
             <span className={classes.saved} aria-live="polite">{savedLabel}</span>
+            <Button
+              variant="subtle"
+              color="red"
+              leftSection={<Trash2 size={15} />}
+              onClick={() => campaignId && askDelete(campaignId)}
+            >
+              Delete
+            </Button>
             <Button onClick={() => void review()} disabled={!draft.name.trim() || editor.saving}>
               Review and send
             </Button>

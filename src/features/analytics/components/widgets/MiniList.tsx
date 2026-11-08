@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Inbox } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { num, share } from "@/shared/lib";
 import { RankCard, RankEmpty } from "@/shared/ui/rank/RankCard";
 import { RankList } from "@/shared/ui/rank/RankList";
@@ -10,6 +11,7 @@ import type { Bucket } from "@/shared/types";
 
 export function MiniList({
   title,
+  icon = Inbox,
   items,
   tone = "teal",
   chart = "list",
@@ -18,6 +20,7 @@ export function MiniList({
   onSelect,
 }: {
   title: string;
+  icon?: LucideIcon;
   items: Bucket[];
   tone?: RankTone;
   chart?: "list" | "donut";
@@ -35,7 +38,7 @@ export function MiniList({
       subtitle={items.length > 0 ? `${num(total)} total` : undefined}
     >
       {items.length === 0 ? (
-        <RankEmpty icon={Inbox}>{empty}</RankEmpty>
+        <RankEmpty icon={icon}>{empty}</RankEmpty>
       ) : chart === "donut" ? (
         <DonutBreakdown
           items={items.map((i) => ({

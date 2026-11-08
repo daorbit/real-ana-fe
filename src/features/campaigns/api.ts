@@ -83,6 +83,10 @@ const campaignsApi = tags.injectEndpoints({
   }),
 });
 
+export function seedCampaign(workspaceId: string, campaign: Campaign) {
+  return campaignsApi.util.upsertQueryData("getCampaign", { workspaceId, id: campaign.id }, campaign);
+}
+
 export const {
   useGetCampaignsQuery,
   useGetCampaignSourcesQuery,

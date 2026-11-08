@@ -66,6 +66,7 @@ export function SortableWidget({
               className="sw-handle"
               {...attributes}
               {...listeners}
+              aria-label={`Drag to move ${label}`}
             >
               <GripVertical size={15} />
             </ActionIcon>
