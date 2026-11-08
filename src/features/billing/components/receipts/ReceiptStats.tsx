@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { formatMoney } from "@/shared/lib/currency";
+import { shortDate } from "@/shared/lib/format";
 import type { Currency, Invoice } from "@/shared/types";
 import classes from "./Receipts.module.css";
 
@@ -18,7 +19,7 @@ export function ReceiptStats({ invoices }: { invoices: Invoice[] }) {
     { label: t("billing.statPayments", "Payments"), value: String(invoices.length) },
     {
       label: t("billing.statLastPayment", "Last payment"),
-      value: new Date(latest.issuedAt).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }),
+      value: shortDate(latest.issuedAt),
     },
   ];
 

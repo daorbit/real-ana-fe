@@ -2,18 +2,14 @@ import { Box, Button, Group, Stack, Text, Title } from "@mantine/core";
 import { ArrowLeft, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/context";
+import { useTitle } from "@/shared/lib/useTitle";
 
-/**
- * The real 404, in place of the old silent redirect to "/".
- *
- * A bad link used to drop the reader on the marketing root with no explanation
- * of why they weren't where they clicked to be. This says what happened and
- * offers the two things they actually want: go back, or go somewhere real.
- */
+
 export function NotFound() {
   const nav = useNavigate();
   const { user } = useAuth();
   const home = user ? "/app" : "/login";
+  useTitle("Page not found");
 
   return (
     <Box style={{ minHeight: "100dvh", display: "grid", placeItems: "center", padding: "2rem" }}>

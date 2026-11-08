@@ -1,5 +1,6 @@
 import { Text } from "@mantine/core";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { formatDate } from "@/shared/lib/format";
 import classes from "./dataDigestTable.module.css";
 
 /** Mirrors `OrbitDataDigest` on the server — see orbit-data.ts. */
@@ -230,7 +231,7 @@ function takenAt(iso?: string): string | null {
   if (Number.isNaN(at.getTime())) return null;
   if (Date.now() - at.getTime() < 5 * 60_000) return null;
 
-  return `as of ${at.toLocaleDateString(undefined, {
+  return `as of ${formatDate(at, {
     day: "numeric",
     month: "short",
     year: at.getFullYear() === new Date().getFullYear() ? undefined : "numeric",

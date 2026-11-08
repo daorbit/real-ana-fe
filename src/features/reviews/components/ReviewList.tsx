@@ -2,28 +2,14 @@ import { Avatar, Badge, Group, Paper, Stack, Text } from "@mantine/core";
 import { CornerDownRight } from "lucide-react";
 import { Stars } from "./RatingSummary";
 import type { GoogleReviewItem } from "@/shared/types";
+import { shortDate } from "@/shared/lib/format";
 
-/**
- * The reviews themselves.
- *
- * Reviewer names and photos are rendered as Google supplied them — the photo
- * straight from Google's URL rather than mirrored into our own storage, which
- * is both what Google's terms expect and one less copy of someone's face on
- * our servers.
- */
 
-/**
- * A review's date, in the reader's locale.
- *
- * Absolute rather than relative: an owner scanning for "did this follow the
- * refit in March" is served by a date, and "8 months ago" makes them do the
- * arithmetic.
- */
 function formatDate(value?: string): string {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return shortDate(date);
 }
 
 export function ReviewList({ reviews }: { reviews: GoogleReviewItem[] }) {

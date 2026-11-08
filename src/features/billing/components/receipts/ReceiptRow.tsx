@@ -2,6 +2,7 @@ import { ActionIcon, Tooltip } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { Download, Layers, ShoppingCart } from "lucide-react";
 import { formatMoney } from "@/shared/lib/currency";
+import { shortDate } from "@/shared/lib/format";
 import type { Invoice } from "@/shared/types";
 import classes from "./Receipts.module.css";
 
@@ -35,7 +36,7 @@ export function ReceiptRow({
       </div>
 
       <span className={classes.date}>
-        {new Date(invoice.issuedAt).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+        {shortDate(invoice.issuedAt)}
       </span>
 
       <span className={classes.amount}>{formatMoney(invoice.amount, invoice.currency)}</span>

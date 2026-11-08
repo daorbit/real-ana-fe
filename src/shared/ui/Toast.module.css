@@ -31,3 +31,29 @@
   letter-spacing: -0.005em;
   text-align: center;
 }
+
+.undoRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.undo {
+  padding: 2px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent-contrast) 45%, transparent);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--accent-contrast);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.undo:hover {
+  background: color-mix(in srgb, var(--accent-contrast) 14%, transparent);
+}
+
+.undo:focus-visible {
+  outline: 2px solid var(--accent-contrast);
+  outline-offset: 2px;
+}

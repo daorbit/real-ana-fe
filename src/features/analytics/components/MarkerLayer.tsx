@@ -7,6 +7,7 @@ import { DateTimePicker } from "@mantine/dates";
 import { ReferenceLine, Label } from "recharts";
 import { Flag, Trash2, Plus } from "lucide-react";
 import type { Marker, MarkerKind, Point } from "@/shared/types";
+import { formatDate } from "@/shared/lib/format";
 
 /**
  * How each kind of marker reads on the chart.
@@ -284,7 +285,7 @@ export function MarkerDialog({
                         <div style={{ minWidth: 0 }}>
                           <Text size="sm" fw={600} truncate>{marker.label}</Text>
                           <Text size="xs" c="dimmed">
-                            {new Date(marker.at).toLocaleString(undefined, {
+                            {formatDate(marker.at, {
                               day: "numeric",
                               month: "short",
                               hour: "2-digit",

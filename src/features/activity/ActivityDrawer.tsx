@@ -12,6 +12,7 @@ import {
   useDeleteNotificationsMutation,
 } from "@/app/store";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { useUndoableRemoval } from "@/shared/hooks/useUndoableRemoval";
 import type { AppNotification } from "@/shared/types";
 import { useDemo } from "@/features/demo/context";
 import { demoNotifications } from "@/features/demo/demoNotifications";
@@ -103,7 +104,8 @@ export function ActivityDrawer({
   const [markSeen] = useMarkNotificationsSeenMutation();
   const [markRead] = useMarkNotificationsReadMutation();
   const [markAllRead, { isLoading: markingAll }] = useMarkAllNotificationsReadMutation();
-  const [deleteNotifications, { isLoading: deleting }] = useDeleteNotificationsMutation();
+  const [deleteNotifications] = useDeleteNotificationsMutation();
+  const removal = useUndoableRemoval();
 
   /*
    * Opening the panel records that these rows were shown, but the badge only
@@ -132,7 +134,10 @@ export function ActivityDrawer({
     }
   }, [opened]);
 
-  const items = data?.items ?? [];
+  const items = useMemo(
+    () => (data?.items ?? []).filter((item) => !removal.hidden.has(item.id)),
+    [data?.items, removal.hidden],
+  );
   const hasUnread = items.some((item) => !item.readAt);
 
   const toggleSelect = (id: string) => {
@@ -144,11 +149,18 @@ export function ActivityDrawer({
     });
   };
 
-  const deleteSelected = async () => {
-    if (!selected.size) return;
-    // Demo rows have no server side to delete — dropping the selection is
-    // enough to end the flow the same way a real delete would.
-    if (!demo) await deleteNotifications({ ids: [...selected] });
+  const deleteSelected = () => {
+    const ids = [...selected];
+    if (!ids.length) return;
+    removal.remove({
+      ids,
+      message:
+        ids.length === 1
+          ? t("activity.deletedOne", "Notification deleted")
+          : t("activity.deletedMany", "{{count}} notifications deleted", { count: ids.length }),
+      commit: () => (demo ? Promise.resolve() : deleteNotifications({ ids }).unwrap()),
+      errorMessage: t("activity.deleteFailed", "Could not delete those notifications."),
+    });
     setSelecting(false);
     setSelected(new Set());
   };
@@ -252,7 +264,6 @@ export function ActivityDrawer({
           canSelect={items.length > 0}
           selecting={selecting}
           selectedCount={selected.size}
-          deleting={deleting}
           onTab={setTab}
           onMarkAll={() => void markAllRead()}
           onSelect={() => setSelecting(true)}
@@ -260,7 +271,7 @@ export function ActivityDrawer({
             setSelecting(false);
             setSelected(new Set());
           }}
-          onDelete={() => void deleteSelected()}
+          onDelete={deleteSelected}
           onClose={onClose}
         />
 

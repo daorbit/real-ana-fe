@@ -17,7 +17,6 @@ export function ActivityHeader({
   canSelect,
   selecting,
   selectedCount,
-  deleting,
   onTab,
   onMarkAll,
   onSelect,
@@ -32,7 +31,6 @@ export function ActivityHeader({
   canSelect: boolean;
   selecting: boolean;
   selectedCount: number;
-  deleting: boolean;
   onTab: (tab: ActivityTab) => void;
   onMarkAll: () => void;
   onSelect: () => void;
@@ -104,8 +102,7 @@ export function ActivityHeader({
               color="red"
               size="compact-sm"
               leftSection={<Trash2 size={14} />}
-              disabled={selectedCount === 0 || deleting}
-              loading={deleting}
+              disabled={selectedCount === 0}
               onClick={onDelete}
             >
               {t("activity.deleteSelected", "Delete")}

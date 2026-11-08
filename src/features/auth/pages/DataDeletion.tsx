@@ -1,25 +1,13 @@
 import { useSearchParams } from "react-router-dom";
 import { Box, Code, Stack, Text, Title } from "@mantine/core";
 import { CheckCircle2 } from "lucide-react";
+import { useTitle } from "@/shared/lib/useTitle";
 
-/**
- * The status page Meta's Data Deletion Request callback points at.
- *
- * Meta requires the callback to answer with a URL where the person can check
- * what happened to their request, and it checks that the URL loads. This is that
- * page — unauthenticated by necessity, since someone who has just deleted their
- * connection has no reason to hold an account here, and being asked to sign in
- * to confirm a deletion is exactly the wrong thing to ask.
- *
- * It states a completed deletion rather than a queued one because that is what
- * actually happens: the callback removes the connection and its schedules
- * synchronously before replying, so by the time this page can be loaded there is
- * nothing left pending. The confirmation code is echoed back for someone
- * matching it against what Meta showed them.
- */
+
 export default function DataDeletion() {
   const [params] = useSearchParams();
   const code = params.get("code") ?? "";
+  useTitle("Data deletion");
 
   return (
     <Box

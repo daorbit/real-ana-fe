@@ -1,10 +1,10 @@
 import { Badge, Text } from "@mantine/core";
 import type { UsagePlanEvent } from "@/shared/types";
+import { shortDate } from "@/shared/lib/format";
 import classes from "./UsageOverview.module.css";
 
 function purchaseDate(iso: string | null) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return iso ? shortDate(iso) : "—";
 }
 
 export function PlanTimeline({ plans }: { plans: UsagePlanEvent[] }) {

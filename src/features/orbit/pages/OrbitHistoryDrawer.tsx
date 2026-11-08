@@ -7,21 +7,10 @@ import {
   AlertTriangle, Check, CheckSquare, MessageSquare, Pencil, Plus, Search, Trash2, X,
 } from "lucide-react";
 import type { useOrbitChat } from "@/features/orbit/useOrbitChat";
+import { formatDate } from "@/shared/lib/format";
 import classes from "./orbitPage.module.css";
 
-/**
- * Saved threads, in a drawer off the right edge.
- *
- * A drawer rather than a permanent column: the conversation is the page, and a
- * list of titles parked beside it takes width from the thing people came for
- * while answering a question they only ask occasionally. Opening it is one
- * click on the header control, and picking a thread closes it again — so the
- * list is never between the user and what they were reading.
- *
- * Right-hand side deliberately. The rail already owns the left edge of the
- * window; a second panel sliding out on the same side reads as the navigation
- * growing a third level.
- */
+
 
 /** How long ago, in the shortest form that is still unambiguous. */
 function ago(iso: string): string {
@@ -33,7 +22,7 @@ function ago(iso: string): string {
   if (hours < 24) return `${hours}h`;
   const days = Math.round(hours / 24);
   if (days < 7) return `${days}d`;
-  return new Date(then).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return formatDate(new Date(then), { day: "numeric", month: "short" });
 }
 
 export function OrbitHistoryDrawer({

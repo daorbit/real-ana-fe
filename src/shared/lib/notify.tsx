@@ -6,8 +6,24 @@ import { TriangleAlert } from "lucide-react";
 import { navigateTo } from "@/app/navigation";
 import { UpgradeDialog } from "@/shared/ui/UpgradeDialog";
 import { CopyablePhrase } from "@/shared/ui/CopyablePhrase";
+import { UndoToastMessage } from "@/shared/ui/UndoToastMessage";
 import type { ReactNode } from "react";
 import toastClasses from "@/shared/ui/Toast.module.css";
+
+const TOAST_CLASS_NAMES = {
+  root: toastClasses.toast,
+  body: toastClasses.body,
+  description: toastClasses.message,
+};
+
+const UNDO_MS = 6000;
+
+export interface UndoToastOptions {
+  message: ReactNode;
+  onCommit: () => void | Promise<void>;
+  onUndo: () => void;
+  undoLabel?: string;
+}
 
 /**
  * Collapse a burst of identical toasts into one.
@@ -37,10 +53,34 @@ function showDeduped(message: ReactNode, tone: ToastTone, autoClose: number) {
     message,
     autoClose,
     withCloseButton: false,
-    classNames: {
-      root: toastClasses.toast,
-      body: toastClasses.body,
-      description: toastClasses.message,
+    classNames: TOAST_CLASS_NAMES,
+  });
+}
+
+function showUndo({ message, onCommit, onUndo, undoLabel = "Undo" }: UndoToastOptions) {
+  const id = `undo-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  let undone = false;
+  notifications.show({
+    id,
+    message: (
+      <UndoToastMessage
+        message={message}
+        label={undoLabel}
+        onUndo={() => {
+          if (undone) return;
+          undone = true;
+          notifications.hide(id);
+          onUndo();
+        }}
+      />
+    ),
+    autoClose: UNDO_MS,
+    withCloseButton: false,
+    classNames: TOAST_CLASS_NAMES,
+    onClose: () => {
+      if (undone) return;
+      undone = true;
+      void onCommit();
     },
   });
 }
@@ -68,6 +108,8 @@ export const notify = {
   error: (message: ReactNode, title?: string) => showDeduped(message || title, "error", 5000),
 
   info: (message: ReactNode, title?: string) => showDeduped(message || title, "neutral", 3000),
+
+  undo: showUndo,
 
   /**
    * A plan/quota limit was hit (workspace, site, audit, crawl, or analytics

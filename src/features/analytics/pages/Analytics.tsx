@@ -70,6 +70,9 @@ import type {
 } from "@/shared/types";
 import { serializeFilter } from "@/shared/types";
 import { useTitle } from "@/shared/lib/useTitle";
+import { useUndoableRemoval } from "@/shared/hooks/useUndoableRemoval";
+
+const NO_SEGMENTS: Segment[] = [];
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className={layoutClasses.sectionTitle}>{children}</h2>;
@@ -155,7 +158,11 @@ export default function Analytics() {
   );
   // Held across range changes (so the timeline doesn't flicker) but dropped on
   // a workspace switch, where they would be another tenant's annotations.
-  const markers = (markerArgs?.wid === active?._id ? markerData : undefined) ?? [];
+  const removal = useUndoableRemoval();
+  const markers = useMemo(
+    () => ((markerArgs?.wid === active?._id ? markerData : undefined) ?? []).filter((m) => !removal.hidden.has(m.id)),
+    [markerArgs?.wid, active?._id, markerData, removal.hidden],
+  );
 
   const [markersOpen, setMarkersOpen] = useState(false);
   const [saveMarker, { isLoading: savingMarker }] = useSaveMarkerMutation();
@@ -176,25 +183,26 @@ export default function Analytics() {
     }
   };
 
-  const [deletingMarker, setDeletingMarker] = useState<string | null>(null);
-
-  const handleDeleteMarker = async (marker: Marker) => {
-    if (!active?._id) return;
-    setDeletingMarker(marker.id);
-    try {
-      await deleteMarker({ wid: active._id, id: marker.id }).unwrap();
-    } catch (e) {
-      notify.error(errMessage(e, "Could not delete that marker."));
-    } finally {
-      setDeletingMarker(null);
-    }
+  const handleDeleteMarker = (marker: Marker) => {
+    const wid = active?._id;
+    if (!wid) return;
+    removal.remove({
+      ids: [marker.id],
+      message: `Deleted "${marker.label}"`,
+      commit: () => deleteMarker({ wid, id: marker.id }).unwrap(),
+      errorMessage: "Could not delete that marker.",
+    });
   };
 
   // Saved segments for this workspace. Skipped until a workspace is known —
   // the endpoint is workspace-scoped and there is nothing to ask for yet.
-  const { currentData: segments = [] } = useGetSegmentsQuery(active?._id ?? "", {
+  const { currentData: savedSegments = NO_SEGMENTS } = useGetSegmentsQuery(active?._id ?? "", {
     skip: !active?._id,
   });
+  const segments = useMemo(
+    () => savedSegments.filter((s) => !removal.hidden.has(s.id)),
+    [savedSegments, removal.hidden],
+  );
   const [saveSegment, { isLoading: savingSegment }] = useSaveSegmentMutation();
   const [updateSegment] = useUpdateSegmentMutation();
   const [deleteSegment] = useDeleteSegmentMutation();
@@ -213,17 +221,15 @@ export default function Analytics() {
     }
   };
 
-  const handleDeleteSegment = async (segment: Segment) => {
-    if (!active?._id) return;
-    setBusySegment(segment.id);
-    try {
-      await deleteSegment({ wid: active._id, id: segment.id }).unwrap();
-      notify.success(`Deleted "${segment.name}"`);
-    } catch (e) {
-      notify.error(errMessage(e, "Could not delete that segment."));
-    } finally {
-      setBusySegment(null);
-    }
+  const handleDeleteSegment = (segment: Segment) => {
+    const wid = active?._id;
+    if (!wid) return;
+    removal.remove({
+      ids: [segment.id],
+      message: `Deleted "${segment.name}"`,
+      commit: () => deleteSegment({ wid, id: segment.id }).unwrap(),
+      errorMessage: "Could not delete that segment.",
+    });
   };
 
   const handleTogglePin = async (segment: Segment) => {
@@ -432,7 +438,6 @@ export default function Analytics() {
         onSave={canEdit ? handleSaveMarker : null}
         onDelete={canEdit ? handleDeleteMarker : null}
         saving={savingMarker}
-        deletingId={deletingMarker}
       />
 
       <AnalyticsHeader

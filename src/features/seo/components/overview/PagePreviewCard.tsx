@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SegmentedControl } from "@mantine/core";
 import { Maximize2 } from "lucide-react";
 import type { SeoPerformance } from "@/shared/types";
+import { shortDate } from "@/shared/lib/format";
 import { SeoCard } from "@/features/seo/components/shared/SeoCard";
 import { ScreenshotModal } from "./ScreenshotModal";
 import classes from "./overviewCards.module.css";
@@ -19,7 +20,7 @@ function capturedOn(fetchTime?: string): string {
   if (!fetchTime) return "";
   const date = new Date(fetchTime);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return shortDate(date);
 }
 
 function hostOf(url?: string): string {
