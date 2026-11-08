@@ -6,6 +6,7 @@ export type TemplateTone = "light" | "graphite" | "black" | "paper";
 export interface CampaignTemplate {
   id: string;
   name: string;
+  blurb: string;
   tone: TemplateTone;
   subject: string;
   preheader: string;
@@ -16,6 +17,20 @@ export interface CampaignTemplate {
 
 function themeFor(tone: TemplateTone): EmailTheme {
   return THEME_PRESETS.find((preset) => preset.id === tone)?.theme ?? LIGHT_THEME;
+}
+
+function isDark(hex: string): boolean {
+  const value = hex.replace("#", "");
+  if (value.length !== 6) return false;
+  const [r, g, b] = [0, 2, 4].map((at) => parseInt(value.slice(at, at + 2), 16));
+  return 0.299 * r + 0.587 * g + 0.114 * b < 110;
+}
+
+export function toneOfTheme(theme: EmailTheme): TemplateTone {
+  if (theme.font === "serif") return "paper";
+  const card = theme.cardColor.toLowerCase();
+  if (card === "#000000") return "black";
+  return isDark(card) ? "graphite" : "light";
 }
 
 const CUSTOM_HTML_STARTER = `<!doctype html>
@@ -33,6 +48,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   {
     id: "launch",
     name: "Product launch",
+    blurb: "Announce something new with one bold image.",
     tone: "black",
     subject: "Meet the new [product name]",
     preheader: "Faster, simpler and ready today.",
@@ -49,6 +65,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   {
     id: "newsletter",
     name: "Newsletter",
+    blurb: "A monthly round-up in two easy columns.",
     tone: "light",
     subject: "What's new this month",
     preheader: "The updates worth your time.",
@@ -66,6 +83,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   {
     id: "offer",
     name: "Special offer",
+    blurb: "A discount with a clear code and one button.",
     tone: "light",
     subject: "20% off, this week only",
     preheader: "A thank you for your interest.",
@@ -81,6 +99,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   {
     id: "event",
     name: "Event invite",
+    blurb: "When, where and a button to save a seat.",
     tone: "graphite",
     subject: "You're invited",
     preheader: "Save your seat.",
@@ -97,6 +116,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   {
     id: "welcome",
     name: "Welcome",
+    blurb: "Greet new leads by name and point the way.",
     tone: "light",
     subject: "Welcome, {{name}}",
     preheader: "Here's how to get started.",
@@ -112,6 +132,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   {
     id: "note",
     name: "Personal note",
+    blurb: "Plain text that reads like a real reply.",
     tone: "paper",
     subject: "A quick note",
     preheader: "Thanks for getting in touch.",
@@ -125,6 +146,7 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
 export const BLANK_TEMPLATE: CampaignTemplate = {
   id: "blank",
   name: "Blank",
+  blurb: "Start from an empty page.",
   tone: "light",
   subject: "",
   preheader: "",
@@ -138,6 +160,7 @@ export const BLANK_TEMPLATE: CampaignTemplate = {
 export const HTML_TEMPLATE: CampaignTemplate = {
   id: "html",
   name: "Custom HTML",
+  blurb: "Paste the HTML you already have.",
   tone: "light",
   subject: "",
   preheader: "",

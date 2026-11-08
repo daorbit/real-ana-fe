@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Code2, Plus } from "lucide-react";
 import { BLANK_TEMPLATE, CAMPAIGN_TEMPLATES, HTML_TEMPLATE, type CampaignTemplate } from "@/features/campaigns/lib/campaignTemplates";
 import { TemplateThumb } from "./TemplateThumb";
@@ -8,23 +9,42 @@ interface Props {
   onPick: (template: CampaignTemplate) => void;
 }
 
+function Tile({
+  template,
+  disabled,
+  onPick,
+  children,
+}: {
+  template: CampaignTemplate;
+  disabled: boolean;
+  onPick: (template: CampaignTemplate) => void;
+  children: ReactNode;
+}) {
+  return (
+    <button type="button" className={classes.tile} disabled={disabled} onClick={() => onPick(template)}>
+      {children}
+      <span className={classes.caption}>
+        <span className={classes.name}>{template.name}</span>
+        <span className={classes.blurb}>{template.blurb}</span>
+      </span>
+    </button>
+  );
+}
+
 export function TemplateGallery({ disabled, onPick }: Props) {
   return (
     <div className={classes.gallery}>
       {CAMPAIGN_TEMPLATES.map((template) => (
-        <button key={template.id} type="button" className={classes.tile} disabled={disabled} onClick={() => onPick(template)}>
+        <Tile key={template.id} template={template} disabled={disabled} onPick={onPick}>
           <TemplateThumb template={template} />
-          <span className={classes.name}>{template.name}</span>
-        </button>
+        </Tile>
       ))}
-      <button type="button" className={classes.tile} disabled={disabled} onClick={() => onPick(BLANK_TEMPLATE)}>
+      <Tile template={BLANK_TEMPLATE} disabled={disabled} onPick={onPick}>
         <span className={classes.empty}><Plus size={26} aria-hidden /></span>
-        <span className={classes.name}>Blank</span>
-      </button>
-      <button type="button" className={classes.tile} disabled={disabled} onClick={() => onPick(HTML_TEMPLATE)}>
+      </Tile>
+      <Tile template={HTML_TEMPLATE} disabled={disabled} onPick={onPick}>
         <span className={classes.empty}><Code2 size={26} aria-hidden /></span>
-        <span className={classes.name}>Custom HTML</span>
-      </button>
+      </Tile>
     </div>
   );
 }

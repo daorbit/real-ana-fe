@@ -3,7 +3,7 @@ import { BarChart3, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Campaign } from "@/features/campaigns/types";
 
-export function CampaignRowMenu({
+export function CampaignMenu({
   campaign,
   to,
   onDelete,

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -16,15 +16,25 @@ import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { useUndoableRemoval } from "@/shared/hooks";
 import { useDeleteCampaignMutation, useGetCampaignsQuery, useGetCampaignSourcesQuery } from "@/features/campaigns/api";
-import { CampaignRow } from "@/features/campaigns/components/CampaignRow";
+import { CampaignCard } from "@/features/campaigns/components/CampaignCard";
+import { CampaignsSkeleton } from "@/features/campaigns/components/CampaignsSkeleton";
+import { NewCampaignCard } from "@/features/campaigns/components/NewCampaignCard";
 import { SendingStrip } from "@/features/campaigns/components/SendingStrip";
 import { TemplatePicker } from "@/features/campaigns/components/TemplatePicker";
 import type { Campaign } from "@/features/campaigns/types";
 import classes from "@/features/campaigns/components/Campaigns.module.css";
+import cards from "@/features/campaigns/components/CampaignCard.module.css";
 
 type Filter = "all" | "sending" | "draft" | "sent";
 
 const EMPTY: Campaign[] = [];
+
+const EMPTY_FILTER: Record<Filter, string> = {
+  all: "No campaigns yet.",
+  sending: "Nothing is sending right now.",
+  draft: "No drafts. New campaigns start here.",
+  sent: "Nothing sent yet. Sent campaigns and their results show here.",
+};
 
 function inFilter(campaign: Campaign, filter: Filter): boolean {
   if (filter === "all") return true;
@@ -88,22 +98,24 @@ export default function Campaigns() {
       {!appOn ? (
         <QuantalogAppGate app="campaigns" />
       ) : !sample && query.isLoading ? (
-        <Skeleton height={320} radius="lg" />
+        <CampaignsSkeleton />
       ) : !sample && query.isError && !query.currentData ? (
         <ErrorState onRetry={() => void query.refetch()} />
       ) : (
         <div className={classes.page}>
+          <SendingStrip usage={data?.usage} sources={sources} />
           {hasCampaigns ? (
             <section aria-label="Your campaigns" className={classes.stack}>
               <PageTabs items={tabs} active={filter} onChange={setFilter} label="Campaign status" idPrefix="campaigns" />
-              {visible.length ? (
-                <div className={classes.list}>
+              {visible.length || (canCreate && filter === "all") ? (
+                <div className={cards.grid}>
                   {visible.map((campaign) => (
-                    <CampaignRow key={campaign.id} campaign={campaign} onDelete={canCreate ? onDelete : undefined} />
+                    <CampaignCard key={campaign.id} campaign={campaign} onDelete={canCreate ? onDelete : undefined} />
                   ))}
+                  {canCreate && filter === "all" && <NewCampaignCard />}
                 </div>
               ) : (
-                <p className={classes.none}>No campaigns here yet.</p>
+                <p className={classes.none}>{EMPTY_FILTER[filter]}</p>
               )}
             </section>
           ) : (
@@ -116,7 +128,6 @@ export default function Campaigns() {
               )}
             </section>
           )}
-          <SendingStrip usage={data?.usage} sources={sources} />
         </div>
       )}
     </AppShell>

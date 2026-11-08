@@ -1,4 +1,4 @@
-import type { CampaignTemplate } from "@/features/campaigns/lib/campaignTemplates";
+import type { CampaignTemplate, TemplateTone } from "@/features/campaigns/lib/campaignTemplates";
 import type { EmailBlockDraft } from "@/features/campaigns/types";
 import classes from "./Templates.module.css";
 
@@ -32,12 +32,24 @@ function ThumbBlockView({ block: value }: { block: EmailBlockDraft }) {
   }
 }
 
-export function TemplateThumb({ template }: { template: CampaignTemplate }) {
+export function EmailThumb({
+  tone,
+  blocks,
+  className,
+}: {
+  tone: TemplateTone;
+  blocks: EmailBlockDraft[];
+  className?: string;
+}) {
   return (
-    <span className={classes.paper} data-tone={template.tone}>
-      {template.blocks.map((block, index) => (
+    <span className={className ? `${classes.paper} ${className}` : classes.paper} data-tone={tone} aria-hidden>
+      {blocks.map((block, index) => (
         <ThumbBlockView key={index} block={block} />
       ))}
     </span>
   );
+}
+
+export function TemplateThumb({ template }: { template: CampaignTemplate }) {
+  return <EmailThumb tone={template.tone} blocks={template.blocks} />;
 }

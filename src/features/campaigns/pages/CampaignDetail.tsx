@@ -16,6 +16,8 @@ import { useDeleteCampaign } from "@/features/campaigns/hooks/useDeleteCampaign"
 import { CampaignStatusBadge } from "@/features/campaigns/components/CampaignStatusBadge";
 import { CampaignFailures } from "@/features/campaigns/components/detail/CampaignFailures";
 import { CampaignSummary } from "@/features/campaigns/components/detail/CampaignSummary";
+import { CampaignEmailCard } from "@/features/campaigns/components/detail/CampaignEmailCard";
+import report from "@/features/campaigns/components/detail/Report.module.css";
 import { useCampaignDetail } from "@/features/campaigns/hooks/useCampaignDetail";
 import classes from "@/features/campaigns/components/Campaigns.module.css";
 import studio from "@/features/popups/components/studio/PopupStudio.module.css";
@@ -96,16 +98,22 @@ export default function CampaignDetail() {
       {!appOn ? (
         <QuantalogAppGate app="campaigns" />
       ) : loading ? (
-        <Skeleton height={160} radius="lg" />
+        <div className={report.layout}>
+          <Skeleton height={260} radius="lg" />
+          <Skeleton height={540} radius="lg" />
+        </div>
       ) : notFound || !campaign ? (
         <ErrorState title="Campaign not found" description="It may have been deleted. Go back to Campaigns to see the rest." />
       ) : (
-        <>
-          <CampaignSummary campaign={campaign} />
-          {busy && <p className={classes.note}>Emails go out in batches every few minutes. This page updates on its own.</p>}
-          {status === "paused" && campaign.lastError && <p className={classes.note}>Paused: {campaign.lastError}</p>}
-          {workspaceId && campaignId && !demo && campaign.counts.failed > 0 && <CampaignFailures workspaceId={workspaceId} id={campaignId} />}
-        </>
+        <div className={report.layout}>
+          <div className={report.main}>
+            <CampaignSummary campaign={campaign} />
+            {busy && <p className={classes.note}>Emails go out in batches every few minutes. This page updates on its own.</p>}
+            {status === "paused" && campaign.lastError && <p className={classes.note}>Paused: {campaign.lastError}</p>}
+            {workspaceId && campaignId && !demo && campaign.counts.failed > 0 && <CampaignFailures workspaceId={workspaceId} id={campaignId} />}
+          </div>
+          <CampaignEmailCard campaign={campaign} />
+        </div>
       )}
     </AppShell>
   );
