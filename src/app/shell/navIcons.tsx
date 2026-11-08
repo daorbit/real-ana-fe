@@ -1,0 +1,17 @@
+export {
+  House as HomeNavIcon,
+  LayoutDashboard as DashboardsNavIcon,
+  ChartSpline as AnalyticsNavIcon,
+  SearchCheck as SearchVisibilityNavIcon,
+  TrendingUp as RankLabNavIcon,
+  Magnet as LeadCaptureNavIcon,
+  CalendarClock as ScheduledPostsNavIcon,
+  FileChartColumn as ReportsNavIcon,
+  UsersRound as MembersNavIcon,
+  Palette as BrandingNavIcon,
+  CreditCard as BillingNavIcon,
+  CodeXml as DevelopersNavIcon,
+  ScrollText as AuditLogNavIcon,
+  Building2 as WorkspacesNavIcon,
+  Settings as SettingsNavIcon,
+} from "lucide-react";

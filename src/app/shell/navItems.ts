@@ -5,11 +5,12 @@ import {
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/features/admin/lib/adminSections";
+import { AllAppsColorIcon } from "./colorIcons";
 import {
-  AllAppsColorIcon, AuditLogColorIcon, BillingColorIcon, BrandingColorIcon, DashboardsColorIcon,
-  DevelopersColorIcon, HomeColorIcon, LeadCaptureColorIcon, MembersColorIcon, ReportsColorIcon,
-  ScheduledPostsIcon, SearchVisibilityColorIcon, SeoColorIcon, SettingsColorIcon, WebsiteAnalyticsIcon, WorkspacesColorIcon,
-} from "./colorIcons";
+  AnalyticsNavIcon, AuditLogNavIcon, BillingNavIcon, BrandingNavIcon, DashboardsNavIcon,
+  DevelopersNavIcon, HomeNavIcon, LeadCaptureNavIcon, MembersNavIcon, RankLabNavIcon, ReportsNavIcon,
+  ScheduledPostsNavIcon, SearchVisibilityNavIcon, SettingsNavIcon, WorkspacesNavIcon,
+} from "./navIcons";
 
 export type NavTone =
   | "blue" | "green" | "teal" | "indigo" | "pink" | "orange" | "violet" | "amber" | "cyan"
@@ -45,20 +46,20 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: "Overview",
     bare: true,
     items: [
-      { to: "/app", labelKey: "nav.home", label: "Home", icon: HomeColorIcon, tone: "sky" },
-      { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: DashboardsColorIcon, tone: "magenta" },
-      { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: WebsiteAnalyticsIcon, tone: "blue" },
+      { to: "/app", labelKey: "nav.home", label: "Home", icon: HomeNavIcon, tone: "sky" },
+      { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: DashboardsNavIcon, tone: "magenta" },
+      { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: AnalyticsNavIcon, tone: "blue" },
     ],
   },
   {
     headingKey: "nav.groupGrowth",
     heading: "Growth",
     items: [
-      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: SearchVisibilityColorIcon, tone: "green" },
-      { to: "/app/seo", labelKey: "nav.seo", label: "Rank Lab", keywords: "seo audit", icon: SeoColorIcon, tone: "teal" },
-      { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadCaptureColorIcon, tone: "orange" },
-      { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: ScheduledPostsIcon, tone: "pink" },
-      { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: ReportsColorIcon, tone: "indigo" },
+      { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: SearchVisibilityNavIcon, tone: "green" },
+      { to: "/app/seo", labelKey: "nav.seo", label: "Rank Lab", keywords: "seo audit", icon: RankLabNavIcon, tone: "teal" },
+      { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadCaptureNavIcon, tone: "orange" },
+      { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: ScheduledPostsNavIcon, tone: "pink" },
+      { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: ReportsNavIcon, tone: "indigo" },
     ],
   },
   {
@@ -85,13 +86,13 @@ export const NAV_GROUPS: NavGroup[] = [
     headingKey: "nav.groupWorkspace",
     heading: "Workspace",
     items: [
-      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: MembersColorIcon, tone: "cyan" },
-      { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: BrandingColorIcon, tone: "violet" },
-      { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: BillingColorIcon, tone: "mint" },
-      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: DevelopersColorIcon, tone: "red" },
-      { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: AuditLogColorIcon, tone: "brown" },
-      { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: WorkspacesColorIcon, tone: "amber" },
-      { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: SettingsColorIcon, tone: "slate" },
+      { to: "/app/members", labelKey: "nav.members", label: "Members", icon: MembersNavIcon, tone: "cyan" },
+      { to: "/app/branding", labelKey: "nav.branding", label: "Branding", icon: BrandingNavIcon, tone: "violet" },
+      { to: "/app/billing", labelKey: "nav.billing", label: "Billing", icon: BillingNavIcon, tone: "mint" },
+      { to: "/app/developers", labelKey: "nav.developers", label: "Developers", icon: DevelopersNavIcon, tone: "red" },
+      { to: "/app/audit-log", labelKey: "nav.auditLog", label: "Audit log", icon: AuditLogNavIcon, tone: "brown" },
+      { to: "/app/workspaces", labelKey: "nav.workspaces", label: "Workspaces", icon: WorkspacesNavIcon, tone: "amber" },
+      { to: "/app/settings", labelKey: "nav.settings", label: "Settings", icon: SettingsNavIcon, tone: "slate" },
     ],
   },
 ];
