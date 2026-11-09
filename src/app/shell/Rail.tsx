@@ -15,7 +15,6 @@ import { DemoCard, OrbitCard } from "./RailCards";
 import { useNavGroups } from "./useNavGroups";
 import { LogoutDialog } from "./LogoutDialog";
 import { MobileMoreSheet } from "./mobile/MobileMoreSheet";
-import { RailFestiveDecor } from "@/features/festive/components/RailFestiveDecor";
 
  
 export function Rail({
@@ -96,8 +95,6 @@ export function Rail({
 
   return (
     <MantineShell.Navbar p={collapsed ? 8 : "md"} pr={collapsed ? 0 : undefined} className={classes.rail}>
-      {!collapsed && <RailFestiveDecor />}
-
       <MantineShell.Section visibleFrom="sm" mb="md">
         <Group gap={4} wrap="nowrap" align="center" justify={collapsed ? "center" : undefined}>
           {!collapsed && (
