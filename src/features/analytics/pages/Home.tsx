@@ -19,7 +19,7 @@ import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
 import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRenderer";
 import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
 import { LayoutEditControls } from "@/features/analytics/components/widgets/LayoutEditControls";
-import { useStats, useLive, useHomeWidgets, useLinkedInReturn, useSiteScope } from "@/features/analytics";
+import { useStats, useLive, useHomeWidgets, useLinkedInReturn, ALL_SITES } from "@/features/analytics";
 import { useHomeDisplay } from "@/features/analytics/homeDisplayPrefs";
 import { useSites } from "@/features/workspace";
 import { setupStateFor } from "@/features/workspace/setupState";
@@ -36,7 +36,7 @@ export default function Home() {
 
   useLinkedInReturn();
 
-  const [siteScope] = useSiteScope(active?._id);
+  const siteScope = ALL_SITES;
 
   const { stats, switching, failed, refresh, refreshing, lastUpdated } = useStats(
     active?._id,
@@ -155,9 +155,6 @@ export default function Home() {
           {!editing && !dirty && (
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
-          {!editing && !dirty && (
-          )}
-
           <LayoutEditControls
             editing={editing}
             dirty={dirty}

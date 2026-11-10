@@ -4,7 +4,6 @@ import { AppShell } from "@/app/AppShell";
 import { useGetSitesQuery } from "@/app/store";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { SitesLoadError } from "@/features/workspace";
-import { useSiteScope } from "@/features/analytics";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { SearchConsoleGate } from "../components/SearchConsoleGate";
@@ -28,8 +27,7 @@ export default function SearchConsole() {
   });
   const webSites = sites.filter((s) => s.platform !== "app");
 
-  const [siteScope] = useSiteScope(workspaceId || undefined);
-  const site = webSites.find((s) => s.siteId === siteScope[0]) ?? webSites[0] ?? null;
+  const site = webSites[0] ?? null;
 
   const [params, setParams] = useSearchParams();
   const tab = resolveTab(params.get("tab"));

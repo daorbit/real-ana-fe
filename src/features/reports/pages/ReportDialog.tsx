@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } fr
 import { ActionIcon, Button, Modal, Switch } from "@mantine/core";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Site, ShareState } from "@/shared/types";
+import type { ShareState } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { frequencyLabel, nextRunLabel } from "@/features/reports/pages/utils";
 import { ReportForm, type FormSection } from "@/features/reports/components/ReportForm";
@@ -24,7 +24,6 @@ export function ReportDialog({
   focusTick,
   submit,
   saving,
-  sites,
   share,
   waEntitled,
   ownerEmail,
@@ -43,7 +42,6 @@ export function ReportDialog({
   focusTick: number;
   submit: () => void;
   saving: boolean;
-  sites: Site[];
   share?: ShareState;
   waEntitled: boolean;
   ownerEmail: string;
@@ -120,7 +118,6 @@ export function ReportDialog({
               draft={draft}
               setDraft={setDraft}
               workspaceId={workspaceId}
-              sites={sites}
               emailInput={emailInput}
               setEmailInput={setEmailInput}
               addEmail={addEmail}

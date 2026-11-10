@@ -4,7 +4,8 @@ import type { AnalyticsSection } from "./analyticsSections";
 import classes from "./AnalyticsLayout.module.css";
 
 export function AnalyticsControlDeck({
-  controls,
+  range,
+  compare,
   updating,
   chips,
   sections,
@@ -12,7 +13,8 @@ export function AnalyticsControlDeck({
   onSection,
   status,
 }: {
-  controls: ReactNode;
+  range: ReactNode;
+  compare: ReactNode;
   updating: boolean;
   chips: ReactNode;
   sections: AnalyticsSection[];
@@ -36,14 +38,8 @@ export function AnalyticsControlDeck({
     <div className={classes.deck}>
       <div className={classes.filters}>
         <div className={`${classes.controls} an-range`}>
-          {controls}
-          {updating && <Loader size={14} color="gray" type="oval" aria-label="Updating" />}
-        </div>
-        {chips && <div className={classes.chips}>{chips}</div>}
-      </div>
-
-      <div className={classes.bar}>
-        <div ref={bar} className={classes.tabbar} role="tablist" aria-label="Analytics sections">
+          {range}
+          <div ref={bar} className={classes.tabbar} role="tablist" aria-label="Analytics sections">
           {sections.map((s) => {
             const on = s.value === active;
             return (
@@ -60,8 +56,12 @@ export function AnalyticsControlDeck({
               </button>
             );
           })}
+          </div>
+          {compare}
+          {updating && <Loader size={14} color="gray" type="oval" aria-label="Updating" />}
+          {status && <span className={classes.status}>{status}</span>}
         </div>
-        {status && <span className={classes.status}>{status}</span>}
+        {chips && <div className={classes.chips}>{chips}</div>}
       </div>
     </div>
   );

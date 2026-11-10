@@ -87,7 +87,6 @@ export default function Goals() {
       {workspaceId && goalsOn && (
         <TargetFormModal
           opened={editor.editing !== null}
-          workspaceId={workspaceId}
           initial={editor.editing?.initial ?? null}
           editing={Boolean(editor.editing?.id)}
           saving={editor.saving}

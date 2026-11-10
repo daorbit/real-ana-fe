@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  Modal, Stack, TextInput, NumberInput, SegmentedControl, Select, Group, Button, Text, UnstyledButton,
+  Modal, Stack, TextInput, NumberInput, SegmentedControl, Group, Button, Text, UnstyledButton,
 } from "@mantine/core";
-import { useSites } from "@/features/workspace";
 import { METRICS, METRIC_MAP, suggestName } from "@/features/goals/metrics";
 import type { TargetInput, TargetMetric, TargetPeriod } from "@/features/goals/types";
 import classes from "@/features/goals/components/Goals.module.css";
@@ -11,7 +10,6 @@ const EMPTY: TargetInput = { name: "", metric: "visitors", target: 10_000, perio
 
 export function TargetFormModal({
   opened,
-  workspaceId,
   initial,
   editing,
   saving,
@@ -19,7 +17,6 @@ export function TargetFormModal({
   onSubmit,
 }: {
   opened: boolean;
-  workspaceId: string;
   initial: Partial<TargetInput> | null;
   editing: boolean;
   saving: boolean;
@@ -28,7 +25,6 @@ export function TargetFormModal({
 }) {
   const [form, setForm] = useState<TargetInput>(EMPTY);
   const [nameTouched, setNameTouched] = useState(false);
-  const { sites } = useSites(workspaceId);
 
   useEffect(() => {
     if (!opened) return;
@@ -107,18 +103,6 @@ export function TargetFormModal({
           </div>
         </Group>
 
-        {meta.needsSite && sites.length > 1 && (
-          <Select
-            label="Site"
-            data={[
-              { value: "", label: "All sites" },
-              ...sites.map((s) => ({ value: s.siteId, label: s.name })),
-            ]}
-            value={form.siteId ?? ""}
-            onChange={(v) => setForm((f) => ({ ...f, siteId: v ?? "" }))}
-            allowDeselect={false}
-          />
-        )}
 
         <TextInput
           label="Name"

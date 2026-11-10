@@ -5,6 +5,7 @@ import type {
 } from "@/shared/types";
 import { demoStats, demoUserFlow } from "@/features/demo/demoStats";
 import { demoNavPrefs } from "@/features/demo/demoNavPrefs";
+import { DEMO_OG_IMAGE } from "@/features/demo/demoImages";
 
 
 
@@ -145,13 +146,13 @@ const demoSeoData: any = {
     charset: "utf-8",
     ogTitle: "Acme — developer tools that get out of the way",
     ogDescription: "Deploy in minutes, scale without the pager, and keep your data yours.",
-    ogImage: "https://acme.example/og.png",
+    ogImage: DEMO_OG_IMAGE,
     ogUrl: "https://acme.example",
     ogType: "website",
     ogSiteName: "Acme",
     twitterTitle: "Acme — developer tools that get out of the way",
     twitterDescription: "Deploy in minutes, scale without the pager.",
-    twitterImage: "https://acme.example/og.png",
+    twitterImage: DEMO_OG_IMAGE,
     twitterCard: "summary_large_image",
     twitterSite: "@acme",
     canonical: "https://acme.example/",

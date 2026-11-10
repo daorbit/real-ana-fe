@@ -13,7 +13,7 @@ import { QuantalogAppGate } from "@/features/integrations/components/quantalogAp
 import type { FunnelStepInput } from "@/shared/types";
 import { useFunnelRange, withSearch } from "../hooks/useFunnelRange";
 import { useFunnelRun } from "../hooks/useFunnelRun";
-import { useFunnelSites } from "../hooks/useFunnelSites";
+import { ALL_SITES } from "@/features/analytics/lib/siteScope";
 import { useFunnelMutations } from "../hooks/useFunnelMutations";
 import { useSavedFunnel } from "../hooks/useSavedFunnels";
 import { BackLink } from "../components/BackLink";
@@ -34,7 +34,7 @@ export default function FunnelView() {
   const { funnels: on } = useWorkspaceApps();
   const workspaceId = active?._id;
   const { range, setRange, compare, setCompare, search } = useFunnelRange();
-  const sites = useFunnelSites(workspaceId);
+  const sites = ALL_SITES;
   const { funnel, loading, missing } = useSavedFunnel(workspaceId, funnelId, on);
   const { report, running } = useFunnelRun(workspaceId, funnel?.steps ?? NO_STEPS, range, sites, compare);
   const { destroy } = useFunnelMutations(workspaceId);

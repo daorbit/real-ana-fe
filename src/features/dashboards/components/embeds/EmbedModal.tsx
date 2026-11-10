@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionIcon, CloseButton, Modal } from "@mantine/core";
 import { ArrowLeft } from "lucide-react";
-import { useSites } from "@/features/workspace";
 import { EmbedWidgetPicker } from "@/features/dashboards/components/embeds/EmbedWidgetPicker";
 import { EmbedSettings } from "@/features/dashboards/components/embeds/EmbedSettings";
 import { EmbedPreview } from "@/features/dashboards/components/embeds/EmbedPreview";
@@ -28,7 +27,6 @@ export function EmbedModal({
   initialRange?: DashboardRange;
   onClose: () => void;
 }) {
-  const { sites } = useSites(workspaceId);
   const { embed, draft, setDraft, setWidget, change, submit, creating } = useEmbedEditor({
     workspaceId, opened, embedId, initialWidget, initialRange,
   });
@@ -97,7 +95,6 @@ export function EmbedModal({
           <EmbedSettings
             embed={embed}
             draft={draft}
-            sites={sites}
             creating={creating}
             onName={(name) => setDraft((d) => ({ ...d, name }))}
             onCommitName={commitName}

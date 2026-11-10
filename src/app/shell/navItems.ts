@@ -56,7 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: "Growth",
     items: [
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: SearchVisibilityNavIcon, tone: "green" },
-      { to: "/app/seo", labelKey: "nav.seo", label: "Rank Lab", keywords: "seo audit", icon: RankLabNavIcon, tone: "teal" },
+      { to: "/app/seo", labelKey: "nav.seo", label: "SEO", keywords: "seo audit", icon: RankLabNavIcon, tone: "teal" },
       { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadCaptureNavIcon, tone: "orange" },
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: ScheduledPostsNavIcon, tone: "pink" },
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: ReportsNavIcon, tone: "indigo" },

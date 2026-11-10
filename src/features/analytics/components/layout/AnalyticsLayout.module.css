@@ -56,20 +56,12 @@
   gap: 10px;
 }
 
-.controls > :first-child {
+.controls > .tabbar {
   margin-right: auto;
 }
 
 .chips:empty {
   display: none;
-}
-
-.bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
 }
 
 .tabbar {

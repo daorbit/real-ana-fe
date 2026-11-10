@@ -1,4 +1,4 @@
-import { Button, Input, MultiSelect, SegmentedControl, TextInput } from "@mantine/core";
+import { Button, Input, SegmentedControl, TextInput } from "@mantine/core";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { WIDGET_MAP } from "@/features/analytics/widgetCatalog";
 import { widgetIcon } from "@/features/dashboards/widgetIcons";
@@ -18,7 +18,6 @@ const RANGES = DASHBOARD_RANGES.map((r) => ({ value: r.value, label: r.label }))
 export function EmbedSettings({
   embed,
   draft,
-  sites,
   creating,
   onName,
   onCommitName,
@@ -28,7 +27,6 @@ export function EmbedSettings({
 }: {
   embed: Embed | null;
   draft: EmbedDraft;
-  sites: { siteId: string; name: string }[];
   creating: boolean;
   onName: (name: string) => void;
   onCommitName: () => void;
@@ -79,16 +77,6 @@ export function EmbedSettings({
           data={THEMES}
         />
       </Input.Wrapper>
-      {sites.length > 1 && (
-        <MultiSelect
-          label="Sites"
-          placeholder={draft.sites.length ? undefined : "All sites"}
-          data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-          value={draft.sites}
-          onChange={(v) => onChange({ sites: v })}
-          clearable
-        />
-      )}
 
       <div className={classes.note}>
         <ShieldCheck size={15} />

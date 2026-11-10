@@ -127,7 +127,6 @@ export default function Reports() {
         focusTick={dialog.focusTick}
         submit={dialog.submit}
         saving={page.saving}
-        sites={page.sites}
         share={page.share}
         waEntitled={page.waEntitled}
         ownerEmail={user?.email ?? ""}

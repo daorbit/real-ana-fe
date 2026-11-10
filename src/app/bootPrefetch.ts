@@ -2,7 +2,7 @@ import { api } from "@/app/store/api";
 import type { AppDispatch } from "@/app/store";
 import { hasSession, isDemoSession } from "@/shared/lib/sessionHint";
 import { ACTIVE_WORKSPACE_KEY } from "@/features/workspace/context";
-import { savedScope } from "@/features/analytics/hooks/useSiteScope";
+import { ALL_SITES } from "@/features/analytics/lib/siteScope";
 
 const HOME_PATHS = new Set(["/", "/app", "/app/"]);
 
@@ -32,7 +32,7 @@ export function prefetchWorkspaceData(dispatch: AppDispatch, workspaceId: string
   dispatch(api.util.prefetch("getWorkspaceTheme", workspaceId, {}));
   if (!HOME_PATHS.has(pathname)) return;
 
-  const sites = savedScope(workspaceId);
+  const sites = ALL_SITES;
   dispatch(api.util.prefetch("getStats", { workspaceId, range: "24h", sites }, {}));
   dispatch(api.util.prefetch("getLive", { workspaceId, sites }, {}));
   dispatch(api.util.prefetch("getLayout", workspaceId, {}));

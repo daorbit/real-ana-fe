@@ -1,10 +1,10 @@
 import { useSites } from "@/features/workspace";
-import { useStats, useLive, useSiteScope } from "@/features/analytics";
+import { useStats, useLive, ALL_SITES } from "@/features/analytics";
 import { rangeLong } from "@/features/dashboards/types";
 import type { DashboardRange } from "@/features/dashboards/types";
 
 export function useDashboardData(workspaceId: string | undefined, range: DashboardRange) {
-  const [siteScope, setSiteScope] = useSiteScope(workspaceId);
+  const siteScope = ALL_SITES;
   const { stats, refresh, refreshing, refetching, lastUpdated } = useStats(workspaceId, range, undefined, siteScope);
   const { live, livePages, liveCountries } = useLive(workspaceId, undefined, siteScope);
   const { sites } = useSites(workspaceId);
@@ -21,5 +21,5 @@ export function useDashboardData(workspaceId: string | undefined, range: Dashboa
     range,
   };
 
-  return { widgetData, sites, siteScope, setSiteScope, refresh, refreshing, refetching, lastUpdated };
+  return { widgetData, sites, siteScope, refresh, refreshing, refetching, lastUpdated };
 }

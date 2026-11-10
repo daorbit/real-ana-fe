@@ -53,7 +53,6 @@ import { SeoTabs, SeoTabIntro, type SeoTabCount } from "@/features/seo/component
 import { ReportMeta } from "@/features/seo/components/layout/ReportMeta";
 import layout from "@/features/seo/components/layout/SeoLayout.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
-import { useSiteScope } from "@/features/analytics";
 
 const HISTORY_LIMIT = 200;
 const HISTORY_PAGE_SIZE = 15;
@@ -281,13 +280,7 @@ export default function Seo() {
   const sitesLoading = !demo && realSitesLoading;
   const sitesFailed = !demo && realSitesFailed;
 
-  const [siteScope, setSiteScope] = useSiteScope(workspaceId || undefined);
-  const [picked, setPicked] = useState<string>(siteScope[0] ?? "");
-
-  // Adopt the scope when it changes elsewhere (workspace switch, Home picker).
-  useEffect(() => {
-    setPicked(siteScope[0] ?? "");
-  }, [siteScope]);
+  const [picked, setPicked] = useState<string>("");
   const [path, setPath] = useState("/");
   const [params, setParams] = useSearchParams();
   const resolved = resolveSeoSection(params.get("section"));
@@ -528,10 +521,7 @@ export default function Seo() {
       hero={hero}
       sites={sites}
       siteId={siteId}
-      onSite={(v) => {
-        setPicked(v);
-        setSiteScope([v]);
-      }}
+      onSite={setPicked}
       canEdit={canEdit}
       domainLabel={domainLabel}
       path={path}

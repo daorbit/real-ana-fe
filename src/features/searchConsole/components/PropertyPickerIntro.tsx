@@ -5,15 +5,11 @@ import { PickerTopBar } from "./PickerTopBar";
 import classes from "./picker.module.css";
 
 export function PropertyPickerIntro({
-  workspaceId,
-  siteId,
   domain,
   googleEmail,
   onSwitchAccount,
   switching,
 }: {
-  workspaceId: string;
-  siteId: string;
   domain: string;
   googleEmail: string;
   onSwitchAccount: () => void;
@@ -21,7 +17,7 @@ export function PropertyPickerIntro({
 }) {
   return (
     <div className={classes.intro}>
-      <PickerTopBar workspaceId={workspaceId} siteId={siteId} />
+      <PickerTopBar />
 
       <ol className={classes.stepper}>
         <li className={classes.stepDone}>

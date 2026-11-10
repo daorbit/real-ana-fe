@@ -1,5 +1,5 @@
 import type { Dispatch, Ref, SetStateAction } from "react";
-import type { ShareState, Site } from "@/shared/types";
+import type { ShareState } from "@/shared/types";
 import type { Draft } from "@/features/reports/pages/types";
 import { BasicsSection } from "./editor/BasicsSection";
 import { ContentSection } from "./editor/ContentSection";
@@ -13,7 +13,6 @@ interface Props {
   draft: Draft;
   setDraft: Dispatch<SetStateAction<Draft>>;
   workspaceId: string;
-  sites: Site[];
   emailInput: string;
   setEmailInput: (v: string) => void;
   addEmail: () => void;
@@ -25,12 +24,12 @@ interface Props {
 }
 
 export function ReportForm({
-  draft, setDraft, workspaceId, sites, emailInput, setEmailInput, addEmail, removeEmail,
+  draft, setDraft, workspaceId, emailInput, setEmailInput, addEmail, removeEmail,
   ownerEmail, waEntitled, share, sectionRef,
 }: Props) {
   return (
     <div className={classes.form}>
-      <BasicsSection draft={draft} setDraft={setDraft} sites={sites} sectionRef={sectionRef} />
+      <BasicsSection draft={draft} setDraft={setDraft} sectionRef={sectionRef} />
       <ContentSection draft={draft} setDraft={setDraft} share={share} sectionRef={sectionRef} />
       <DeliverySection
         draft={draft}

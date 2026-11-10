@@ -60,3 +60,5 @@ export const DEMO_CHART_IMAGE = svg(
   <text x="320" y="200" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#ffffff">$19</text>
   <text x="564" y="220" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#16a34a">$49</text>`,
 );
+
+export const DEMO_OG_IMAGE = `${window.location.origin}/OgImage.png`;

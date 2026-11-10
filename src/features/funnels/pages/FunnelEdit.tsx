@@ -15,7 +15,7 @@ import { useFunnelEditor } from "../hooks/useFunnelEditor";
 import { useFunnelMutations } from "../hooks/useFunnelMutations";
 import { useFunnelRange, withSearch } from "../hooks/useFunnelRange";
 import { useFunnelRun } from "../hooks/useFunnelRun";
-import { useFunnelSites } from "../hooks/useFunnelSites";
+import { ALL_SITES } from "@/features/analytics/lib/siteScope";
 import { useFunnelSourceStats } from "../hooks/useFunnelSourceStats";
 import { useSavedFunnel } from "../hooks/useSavedFunnels";
 import { isRunnable, suggestedName } from "../lib/funnelDraft";
@@ -42,7 +42,7 @@ export default function FunnelEdit() {
   const { funnels: on } = useWorkspaceApps();
   const workspaceId = active?._id;
   const { range, setRange, search } = useFunnelRange();
-  const sites = useFunnelSites(workspaceId);
+  const sites = ALL_SITES;
   const editor = useFunnelEditor();
   const { funnel, missing } = useSavedFunnel(workspaceId, funnelId, on && editing);
   const { stats } = useFunnelSourceStats(workspaceId, range, sites, on && canEdit);

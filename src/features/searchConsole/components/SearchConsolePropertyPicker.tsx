@@ -59,8 +59,6 @@ export function SearchConsolePropertyPicker({
   return (
     <div className={classes.layout}>
       <PropertyPickerIntro
-        workspaceId={workspaceId}
-        siteId={siteId}
         domain={domain}
         googleEmail={googleEmail}
         onSwitchAccount={onSwitchAccount}

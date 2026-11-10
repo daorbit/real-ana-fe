@@ -457,7 +457,6 @@ body { overflow-wrap: break-word; }
 [data-mantine-color-scheme="light"] .auth-form .mantine-Input-input:focus-within,
 [data-mantine-color-scheme="light"] .onb-form .mantine-Input-input:focus,
 [data-mantine-color-scheme="light"] .onb-form .mantine-Input-input:focus-within {
-  border-color: var(--accent);
   background: #ffffff;
 }
 
@@ -1898,14 +1897,30 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .auth-form .mantine-Input-input:focus-within,
 .onb-form .mantine-Input-input:focus,
 .onb-form .mantine-Input-input:focus-within {
-  border-color: var(--auth-line-strong);
+  outline: none;
   background: var(--auth-surface-hover);
 }
-/* Setup's fields light up in the accent while in use. */
-.onb-form .mantine-Input-input:focus,
-.onb-form .mantine-Input-input:focus-within {
+:root .auth-form .mantine-InputWrapper-root .mantine-Input-input:focus,
+:root .auth-form .mantine-InputWrapper-root .mantine-Input-input:focus-within,
+:root .onb-form .mantine-InputWrapper-root .mantine-Input-input:focus,
+:root .onb-form .mantine-InputWrapper-root .mantine-Input-input:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+:root .auth-form .mantine-InputWrapper-root .mantine-Input-input[data-error],
+:root .onb-form .mantine-InputWrapper-root .mantine-Input-input[data-error] {
+  border-color: var(--mantine-color-error);
+}
+:root .auth-form .mantine-InputWrapper-root .mantine-Input-input[data-error]:focus,
+:root .auth-form .mantine-InputWrapper-root .mantine-Input-input[data-error]:focus-within,
+:root .onb-form .mantine-InputWrapper-root .mantine-Input-input[data-error]:focus,
+:root .onb-form .mantine-InputWrapper-root .mantine-Input-input[data-error]:focus-within {
+  border-color: var(--mantine-color-error);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--mantine-color-error) 16%, transparent);
+}
+.auth-form .mantine-PasswordInput-innerInput:focus-visible,
+.onb-form .mantine-PasswordInput-innerInput:focus-visible {
+  outline: none;
 }
 
 .auth-submit {
@@ -3497,6 +3512,10 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   flex-wrap: nowrap;
   align-items: stretch;
   gap: 4px;
+}
+
+.post-filters .mantine-Tabs-list::before {
+  display: none;
 }
 
 .post-filters .mantine-Tabs-tab {

@@ -11,7 +11,7 @@ import { usePermissions, useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
 import { useFunnelRange, withSearch } from "../hooks/useFunnelRange";
-import { useFunnelSites } from "../hooks/useFunnelSites";
+import { ALL_SITES } from "@/features/analytics/lib/siteScope";
 import { useFunnelSourceStats } from "../hooks/useFunnelSourceStats";
 import { useSavedFunnels } from "../hooks/useSavedFunnels";
 import { funnelPresets } from "../lib/funnelPresets";
@@ -29,7 +29,7 @@ export default function Funnels() {
   const { funnels: on } = useWorkspaceApps();
   const workspaceId = active?._id;
   const { range, setRange, compare, setCompare, search } = useFunnelRange();
-  const sites = useFunnelSites(workspaceId);
+  const sites = ALL_SITES;
   const { saved, loading } = useSavedFunnels(workspaceId, on);
   const empty = !loading && saved.length === 0;
 

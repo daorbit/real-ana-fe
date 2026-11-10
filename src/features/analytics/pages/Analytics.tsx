@@ -47,7 +47,7 @@ import { AnalyticsControlDeck } from "@/features/analytics/components/layout/Ana
 import { AnalyticsSubTabs } from "@/features/analytics/components/layout/AnalyticsSubTabs";
 import { getAnalyticsSections } from "@/features/analytics/components/layout/analyticsSections";
 import { getAnalyticsHelp } from "@/features/analytics/components/analyticsHelp";
-import { useStats, useSiteScope, useLive } from "@/features/analytics";
+import { useStats, useLive, ALL_SITES } from "@/features/analytics";
 import { useAnalyticsUrlState } from "@/features/analytics/hooks/useAnalyticsUrlState";
 import { LiveNowCard } from "@/features/analytics/components/liveAudience/LiveNowCard";
 import { LiveStatFooter } from "@/features/analytics/components/liveAudience/LiveStatFooter";
@@ -98,16 +98,9 @@ export default function Analytics() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [chartFocus, setChartFocus] = useState<TrendMetric>("visitors");
 
-  const [pickedSites] = useSiteScope(active?._id);
-
   const { sites, lastUpdated: sitesLoadedAt, refresh: refreshSites } = useSites(active?._id);
   const setup = setupStateFor(sites, Boolean(sitesLoadedAt));
-
-  const siteScope = useMemo(() => {
-    if (!pickedSites.length) return [];
-    const owned = new Set(sites.map((s) => s.siteId));
-    return pickedSites.filter((id) => owned.has(id));
-  }, [pickedSites, sites]);
+  const siteScope = ALL_SITES;
 
 
   const { stats, switching, failed, refresh, refreshing, lastUpdated } =
@@ -467,12 +460,8 @@ export default function Analytics() {
       />
 
       <AnalyticsControlDeck
-        controls={
-          <>
-            <RangePicker value={rangeState} onChange={setRangeState} disabled={updating} />
-            <ComparePicker value={compareState} onChange={setCompareState} disabled={updating} />
-          </>
-        }
+        range={<RangePicker value={rangeState} onChange={setRangeState} disabled={updating} />}
+        compare={<ComparePicker value={compareState} onChange={setCompareState} disabled={updating} />}
         updating={updating}
         chips={
           hasChips ? (
