@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from "react";
 import { Button } from "@mantine/core";
 import { LifeBuoy, ShieldAlert } from "lucide-react";
 import { ACCOUNT_LOCKED_FORM_URL } from "@/shared/lib/formLinks";
+import { FormModal } from "@/shared/ui/FormModal";
 import { SecureDialog } from "./SecureDialog";
 import classes from "./AccountLockedDialog.module.css";
 
@@ -23,6 +24,7 @@ export function AccountLockedDialog({
   onClose: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     if (!lockedUntil) return;
@@ -63,17 +65,16 @@ export function AccountLockedDialog({
         If this wasn't you, someone else may know your password. Change it once the lock lifts.
       </p>
 
-      <Button
-        component="a"
-        href={ACCOUNT_LOCKED_FORM_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        variant="default"
-        radius={10}
-        leftSection={<LifeBuoy size={16} />}
-      >
+      <Button variant="default" radius={10} leftSection={<LifeBuoy size={16} />} onClick={() => setHelpOpen(true)}>
         Contact support
       </Button>
+
+      <FormModal
+        opened={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title="Request assistance"
+        url={ACCOUNT_LOCKED_FORM_URL}
+      />
     </SecureDialog>
   );
 }

@@ -9,6 +9,7 @@ import { demoPopups } from "@/features/demo/demoPopups";
 import { demoFunnelOverview, demoSavedFunnels } from "@/features/demo/demoFunnels";
 import { demoHeatmapPages, demoPageHeatmap } from "@/features/demo/demoHeatmap";
 import { demoAccountActivity, demoAuditPage } from "@/features/demo/demoAudit";
+import { demoMembersResponse } from "@/features/demo/demoWorkspace";
 import type { AuditCategory } from "@/shared/types";
 
 /**
@@ -80,6 +81,7 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   if (/\/alerts$/.test(path)) return demoAlerts();
   if (/\/popups$/.test(path)) return demoPopups();
   if (/\/embeds$/.test(path)) return [];
+  if (/\/members$/.test(path)) return demoMembersResponse();
 
   if (/\/audit$/.test(path)) return demoAuditPage((params.get("category") as AuditCategory | null) ?? null);
   if (path === "/api/auth/activity") return demoAccountActivity();

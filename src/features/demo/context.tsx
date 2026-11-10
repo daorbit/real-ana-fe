@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
-import { useIsPlatformAdmin } from "@/features/auth/context";
+import { useAuth, useIsPlatformAdmin } from "@/features/auth/context";
 
 const KEY = "quantalog_demo_data";
 
@@ -40,6 +40,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   // Same gate as the admin console: the demo toggle fabricates data over a
   // real session, which is not something to hand to every platform admin.
   const available = useIsPlatformAdmin();
+  const { isDemo: demoSession } = useAuth();
 
   const [on, setOn] = useState(() => {
     sessionStorage.removeItem(KEY);
@@ -62,7 +63,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   // Gate the value, not just the control: losing admin mid-session, or
   // landing on an excluded route, must drop back to real data rather than
   // leave stale sample numbers on screen.
-  const demo = available && on && !isExcludedRoute(pathname);
+  const demo = (demoSession || (available && on)) && !isExcludedRoute(pathname);
 
   const value = useMemo(() => ({ demo, available, toggle }), [demo, available, toggle]);
 

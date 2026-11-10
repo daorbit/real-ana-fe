@@ -16,6 +16,7 @@ import { OfflineBar } from "@/shared/ui/OfflineBar";
 import { ImpersonationBar } from "./shell/ImpersonationBar";
 import { FetchProgress } from "@/shared/ui/FetchProgress";
 import { useDemo } from "@/features/demo/context";
+import { DemoUnsupportedDialog } from "@/features/demo/DemoUnsupportedDialog";
 import { Starfield } from "@/shared/ui/Starfield";
 import { BG_STYLES, readThemePrefs } from "@/shared/lib/theme";
 import { ActivityPanelProvider } from "@/features/activity/ActivityPanelContext";
@@ -110,6 +111,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
       <CommandPalette />
       <PushPrompt />
       <OrbitExtensionPrompt />
+      <DemoUnsupportedDialog />
       {wsSwitch.active && active && (
         <SwitchOverlay
           label={active.name}
