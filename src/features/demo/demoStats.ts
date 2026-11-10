@@ -40,6 +40,8 @@ const COUNTRIES = ["US", "IN", "GB", "DE", "CA", "FR", "AU", "NL", "BR", "JP"];
 const DEVICES = ["Desktop", "Mobile", "Tablet"];
 const BROWSERS = ["Chrome", "Safari", "Firefox", "Edge", "Opera"];
 const SYSTEMS = ["Windows", "macOS", "iOS", "Android", "Linux"];
+const BRANDS = ["Apple", "(unknown)", "Samsung", "Google", "Xiaomi", "OnePlus", "Motorola"];
+const MODELS = ["Apple Mac", "Apple iPhone", "Apple iPad", "Samsung Galaxy S23", "Google Pixel 8", "Samsung Galaxy A54", "Xiaomi Redmi Note 12"];
 const LANGUAGES = ["en-US", "en-GB", "de-DE", "fr-FR", "pt-BR", "ja-JP"];
 const SCREENS = ["1920×1080", "1440×900", "390×844", "2560×1440", "768×1024"];
 const CHANNELS = ["Organic Search", "Direct", "Referral", "Social", "Paid", "Email", "AI Referral"];
@@ -181,6 +183,8 @@ export function demoStats(range: string): Stats {
     devices: ranked(DEVICES, visitors, 0.45),
     browsers: ranked(BROWSERS, visitors),
     operatingSystems: ranked(SYSTEMS, visitors),
+    deviceBrands: ranked(BRANDS, visitors),
+    deviceModels: ranked(MODELS, Math.round(visitors * 0.7)),
     countries: ranked(COUNTRIES, visitors),
     languages: ranked(LANGUAGES, visitors),
     screenSizes: ranked(SCREENS, visitors),

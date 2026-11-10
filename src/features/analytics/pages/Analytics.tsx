@@ -664,6 +664,20 @@ export default function Analytics() {
                      filterKey="device" onFilter={addFilter}
                      dimension="device" useCompare={useBreakdownCompare} autoCompare={autoCompare} />
             <BarList title={t("analytics.list.screenSizes")} subtitle="Most common viewports" chart="donut" items={view?.screenSizes ?? []} />
+            <BarList
+              title={t("analytics.list.deviceBrands", "Device brand")}
+              color="indigo"
+              items={view?.deviceBrands ?? []}
+              columns={{ label: "Brand", value: "Visits" }}
+              empty="Brands appear as new visits arrive."
+            />
+            <BarList
+              title={t("analytics.list.deviceModels", "Device model")}
+              color="violet"
+              items={view?.deviceModels ?? []}
+              columns={{ label: "Model", value: "Visits" }}
+              empty="Models appear as new visits arrive."
+            />
           </SimpleGrid>
         </Tabs.Panel>
 

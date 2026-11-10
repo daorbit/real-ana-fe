@@ -1500,6 +1500,8 @@ export type Stats = {
   devices: Bucket[];
   browsers: Bucket[];
   operatingSystems: Bucket[];
+  deviceBrands?: Bucket[];
+  deviceModels?: Bucket[];
   countries: Bucket[];
   languages: Bucket[];
   screenSizes: Bucket[];

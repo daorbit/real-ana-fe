@@ -192,6 +192,8 @@
       "operatingSystems": "Operating systems",
       "devices": "Devices",
       "screenSizes": "Screen sizes",
+      "deviceBrands": "Device brand",
+      "deviceModels": "Device model",
       "countries": "Countries",
       "languages": "Languages"
     }
