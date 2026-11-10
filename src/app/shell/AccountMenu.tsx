@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, UnstyledButton } from "@mantine/core";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, CompassIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotes } from "@/features/notes";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
@@ -139,6 +139,9 @@ export function AccountMenu({
           <Menu.Divider />
           <div className={classes.menuSection}>{t("nav.help", "Help")}</div>
 
+          <Menu.Item component={Link} to="/why-quantalog" leftSection={<MenuToneIcon icon={CompassIcon} tone="teal" />}>
+            {t("nav.whyQuantalog", "Why Quantalog")}
+          </Menu.Item>
           <Menu.Item leftSection={<MenuToneIcon icon={RequestFeatureColorIcon} tone="amber" />} onClick={() => setFeatureOpen(true)}>
             {t("nav.requestFeature", "Request a feature")}
           </Menu.Item>

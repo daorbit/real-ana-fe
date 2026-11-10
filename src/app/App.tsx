@@ -73,6 +73,7 @@ const LinkFrame = lazy(() => import("@/features/customLinks/pages/LinkFrame"));
 const Settings = lazy(() => import("@/features/auth/pages/Settings"));
 const Apps = lazy(() => import("@/features/integrations/pages/Apps"));
 const DataDeletion = lazy(() => import("@/features/auth/pages/DataDeletion"));
+const WhyQuantalog = lazy(() => import("@/features/about/pages/WhyQuantalog"));
 const Billing = lazy(() => import("@/features/billing/pages/Billing"));
 const ComparePlans = lazy(() => import("@/features/billing/pages/ComparePlans"));
 const AdminTools = lazy(() => import("@/features/admin/pages/AdminTools"));
@@ -263,6 +264,7 @@ export default function App() {
               <Route path="/connect/authorize" element={<RouteFrame><ConnectAuthorize /></RouteFrame>} />
               <Route path="/seo-report/:token" element={<RouteFrame><PublicSeoReport /></RouteFrame>} />
               <Route path="/data-deletion" element={<RouteFrame><DataDeletion /></RouteFrame>} />
+              <Route path="/why-quantalog" element={<RouteFrame><WhyQuantalog /></RouteFrame>} />
               <Route path="/app/onboarding" element={<ProtectedRaw><RouteFrame><Onboarding /></RouteFrame></ProtectedRaw>} />
               <Route
                 path="/app/seo/:siteId/report/:reportId/print"

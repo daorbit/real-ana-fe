@@ -64,6 +64,7 @@
     "activeWorkspace": "Active workspace",
     "planName": "{{plan}} plan",
     "documentation": "Documentation",
+    "whyQuantalog": "Why Quantalog",
     "requestFeature": "Request a feature",
     "demoCallTitle": "Book a 1:1 demo call",
     "demoCallSub": "We’ll set up Quantalog with you",
