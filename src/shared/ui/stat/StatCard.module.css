@@ -151,7 +151,8 @@
 }
 
 .spark {
-  height: 58px;
+  flex: 1 1 58px;
+  min-height: 58px;
   margin-top: auto;
   padding-top: 12px;
 }
