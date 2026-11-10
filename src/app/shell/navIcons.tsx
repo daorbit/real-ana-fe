@@ -3,6 +3,8 @@ export {
   LayoutDashboard as DashboardsNavIcon,
   ChartSpline as AnalyticsNavIcon,
   ChartColumnBig as FormAnalyticsNavIcon,
+  Signpost as LeadSourcesNavIcon,
+  CalendarCheck as BookingsNavIcon,
   SearchCheck as SearchVisibilityNavIcon,
   TrendingUp as RankLabNavIcon,
   Magnet as LeadCaptureNavIcon,

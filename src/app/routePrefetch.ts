@@ -56,6 +56,8 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/social": () => import("@/features/social/pages/SocialPosts"),
   "/app/lead-capture": () => import("@/features/leadCapture/pages/LeadCapture"),
   "/app/lead-insights": () => import("@/features/leadCapture/pages/FormAnalytics"),
+  "/app/lead-sources": () => import("@/features/leadCapture/pages/LeadSources"),
+  "/app/bookings": () => import("@/features/leadCapture/pages/Bookings"),
   "/app/invoices": () => import("@/features/invoices/pages/Invoices"),
   "/app/link": () => import("@/features/customLinks/pages/LinkFrame"),
   "/app/why-quantalog": () => import("@/features/about/pages/WhyQuantalog"),

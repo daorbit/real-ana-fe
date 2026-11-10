@@ -8,7 +8,7 @@ import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/feature
 import { AllAppsColorIcon } from "./colorIcons";
 import {
   AnalyticsNavIcon, AuditLogNavIcon, BillingNavIcon, BrandingNavIcon, DashboardsNavIcon,
-  DevelopersNavIcon, FormAnalyticsNavIcon, HomeNavIcon, LeadCaptureNavIcon, MembersNavIcon, RankLabNavIcon, ReportsNavIcon,
+  BookingsNavIcon, DevelopersNavIcon, FormAnalyticsNavIcon, LeadSourcesNavIcon, HomeNavIcon, LeadCaptureNavIcon, MembersNavIcon, RankLabNavIcon, ReportsNavIcon,
   ScheduledPostsNavIcon, SearchVisibilityNavIcon, SettingsNavIcon, WorkspacesNavIcon,
 } from "./navIcons";
 
@@ -68,6 +68,8 @@ export const NAV_GROUPS: NavGroup[] = [
         tone: "orange",
         children: [
           { to: "/app/lead-insights", labelKey: "nav.leadInsights", label: "Lead insights", keywords: "form analytics forms responses conversion", icon: FormAnalyticsNavIcon },
+          { to: "/app/lead-sources", labelKey: "nav.leadSources", label: "Lead sources", keywords: "utm campaigns referrers attribution", icon: LeadSourcesNavIcon },
+          { to: "/app/bookings", labelKey: "nav.bookings", label: "Bookings", keywords: "meetings calendar appointments", icon: BookingsNavIcon },
         ],
       },
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: ScheduledPostsNavIcon, tone: "pink" },
