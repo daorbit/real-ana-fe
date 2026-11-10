@@ -10,7 +10,6 @@ import { demoNavPrefs } from "@/features/demo/demoNavPrefs";
 
 export const DEMO_WORKSPACE_ID = "demo-workspace";
 export const DEMO_SITE_ID = "demo-site-acme";
-export const DEMO_SITE_ID_2 = "demo-site-docs";
 export const DEMO_REPORT_ID = "demo-report-1";
 
 const now = Date.now();
@@ -43,7 +42,7 @@ export const demoWorkspaces: Workspace[] = [
       audits: { planQuota: 50, used: 12, addonCredits: 0 },
       crawls: { planQuota: 50, used: 8, addonCredits: 0 },
       events: { planQuota: 2_000_000, used: 412_880 },
-      sites: { quota: 2, used: 2 },
+      sites: { quota: 1, used: 1 },
       maxSitesPerWorkspace: 1,
       allowedRanges: ["1h", "24h", "7d", "30d", "custom"],
       compareModes: ["previous", "yoy", "custom"],
@@ -62,16 +61,6 @@ export const demoSites: Site[] = [
     siteId: DEMO_SITE_ID,
     firstEventAt: iso(117 * DAY),
     createdAt: iso(118 * DAY),
-  },
-  {
-    _id: "demo-site-doc-2",
-    workspaceId: DEMO_WORKSPACE_ID,
-    name: "Acme Docs",
-    domain: "https://docs.acme.example",
-    framework: "other",
-    siteId: DEMO_SITE_ID_2,
-    firstEventAt: iso(89 * DAY),
-    createdAt: iso(90 * DAY),
   },
 ];
 

@@ -18,7 +18,6 @@ import { isEmbeddable } from "@/features/analytics";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import { SearchWidgetsProvider } from "@/features/searchConsole/widgets/SearchWidgetsProvider";
 import { SearchConnectionBanner } from "@/features/searchConsole/widgets/SearchConnectionBanner";
-import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import { CustomizeDrawer } from "@/features/analytics/components/CustomizeDrawer";
 import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
 import { WidgetRenderer } from "@/features/analytics/components/widgets/WidgetRenderer";
@@ -81,7 +80,7 @@ export default function DashboardView() {
     layout.patch({ range: r }).catch((e) => notify.error(errMessage(e, "Could not save the range.")));
   });
 
-  const { widgetData, sites, siteScope, setSiteScope, refresh, refreshing, refetching, lastUpdated } =
+  const { widgetData, sites, siteScope, refresh, refreshing, refetching, lastUpdated } =
     useDashboardData(workspaceId, range);
   const { duplicateDashboard, deleteDashboard } = useDashboardActions(workspaceId, demo);
   const print = useDashboardPrint();
@@ -188,7 +187,7 @@ export default function DashboardView() {
           title={dashboard.name}
           subtitle={dashboard.description || `${layout.layout.length} widgets`}
           rangeLabel={`Range: ${rangeLong(range)}`}
-          scopeLabel={siteScope?.length ? `${siteScope.length} site${siteScope.length === 1 ? "" : "s"}` : "All sites"}
+          scopeLabel={sites[0]?.name ?? ""}
           skipBranding={demo}
           onReady={print.onReady}
         />
@@ -215,7 +214,6 @@ export default function DashboardView() {
             <span className={classes.updating}><Loader size={12} color="gray" /> Updating…</span>
           )}
           {quiet && <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />}
-          {quiet && <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />}
           {quiet && <RangeControl value={range} allowed={allowed} onChange={change} />}
           {quiet && <FavouriteButton workspaceId={workspaceId} id={dashboard.id} name={dashboard.name} size="lg" />}
           {canEdit && !editing && <AskOrbitSearchButton label="Edit with Orbit" onClick={openStudio} />}

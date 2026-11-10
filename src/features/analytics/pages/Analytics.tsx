@@ -33,7 +33,6 @@ import { BarList } from "@/features/analytics/components/BarList";
 import { EventsGuideCard } from "@/features/analytics/components/conversion/EventsGuideCard";
 import { EventsSummary } from "@/features/analytics/components/conversion/EventsSummary";
 import { FilterBar } from "@/features/analytics/components/FilterBar";
-import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import dimClasses from "@/features/analytics/components/layout/ScopeDim.module.css";
 import layoutClasses from "@/features/analytics/components/layout/AnalyticsLayout.module.css";
 import { RangePicker } from "@/features/analytics/components/RangePicker";
@@ -99,7 +98,7 @@ export default function Analytics() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [chartFocus, setChartFocus] = useState<TrendMetric>("visitors");
 
-  const [pickedSites, setPickedSites] = useSiteScope(active?._id);
+  const [pickedSites] = useSiteScope(active?._id);
 
   const { sites, lastUpdated: sitesLoadedAt, refresh: refreshSites } = useSites(active?._id);
   const setup = setupStateFor(sites, Boolean(sitesLoadedAt));
@@ -470,7 +469,6 @@ export default function Analytics() {
       <AnalyticsControlDeck
         controls={
           <>
-            <SiteFilter sites={sites} selected={siteScope} onChange={setPickedSites} />
             <RangePicker value={rangeState} onChange={setRangeState} disabled={updating} />
             <ComparePicker value={compareState} onChange={setCompareState} disabled={updating} />
           </>

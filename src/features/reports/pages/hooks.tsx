@@ -71,7 +71,7 @@ export function useReportsPage() {
 
   const siteNameFor = (s: ReportSchedule): string => {
     if (!s.siteIds.length) {
-      return t("reports.allSitesIn", { workspace: active?.name ?? t("reports.thisWorkspace") });
+      return sites[0]?.name ?? active?.name ?? t("reports.thisWorkspace");
     }
     const names = s.siteIds
       .map((id) => sites.find((site) => site.siteId === id)?.name)

@@ -1,5 +1,5 @@
 import type { ReportSchedule } from "@/shared/types";
-import { DEMO_SITE_ID, DEMO_SITE_ID_2 } from "@/features/demo/demoData";
+import { DEMO_SITE_ID } from "@/features/demo/demoData";
 
 const now = Date.now();
 const iso = (msAgo: number) => new Date(now - msAgo).toISOString();
@@ -39,8 +39,8 @@ export const demoReports: ReportSchedule[] = [
   },
   {
     id: "demo-report-docs-daily",
-    name: "Docs site daily digest",
-    siteIds: [DEMO_SITE_ID_2],
+    name: "Daily digest",
+    siteIds: [DEMO_SITE_ID],
     frequency: "daily",
     recipients: [
       { email: "owner@acme.example", unsubscribed: false },

@@ -1212,7 +1212,6 @@
     "next": "Next",
     "lastSent": "Last sent",
     "never": "Never",
-    "allSitesIn": "All sites in {{workspace}}",
     "thisWorkspace": "this workspace",
     "siteCount_one": "{{count}} site",
     "siteCount_other": "{{count}} sites",

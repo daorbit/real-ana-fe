@@ -13,7 +13,6 @@ import { RefreshButton } from "@/shared/ui/Refresh";
 import { DocsButton } from "@/shared/ui/DocsButton";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
-import { SiteFilter } from "@/features/analytics/components/SiteFilter";
 import dimClasses from "@/features/analytics/components/layout/ScopeDim.module.css";
 import { CustomizeDrawer } from "@/features/analytics/components/CustomizeDrawer";
 import { WidgetGrid } from "@/features/analytics/components/widgets/WidgetGrid";
@@ -37,7 +36,7 @@ export default function Home() {
 
   useLinkedInReturn();
 
-  const [siteScope, setSiteScope] = useSiteScope(active?._id);
+  const [siteScope] = useSiteScope(active?._id);
 
   const { stats, switching, failed, refresh, refreshing, lastUpdated } = useStats(
     active?._id,
@@ -157,7 +156,6 @@ export default function Home() {
             <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
           )}
           {!editing && !dirty && (
-            <SiteFilter sites={sites} selected={siteScope} onChange={setSiteScope} />
           )}
 
           <LayoutEditControls

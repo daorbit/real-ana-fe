@@ -37,7 +37,7 @@ function InstallView({ site, sites, workspaceId, onInstalled, onPick }: {
     <>
       <Link to={WORKSPACES_PATH} className={classes.back}>
         <ChevronLeft size={15} />
-        {t("install.allSites", "All sites")}
+        {t("install.workspaces", "Workspaces")}
       </Link>
 
       <PageHeader

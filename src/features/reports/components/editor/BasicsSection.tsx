@@ -51,18 +51,20 @@ export function BasicsSection({
           />
         </SettingsField>
 
-        <SettingsField label={t("reports.sitesLabel")} hint={t("reports.sitesDesc")}>
-          <MultiSelect
-            aria-label={t("reports.sitesLabel")}
-            placeholder={draft.siteIds.length ? undefined : t("reports.allSitesPlaceholder")}
-            data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
-            value={draft.siteIds}
-            onChange={(siteIds) => setDraft((d) => ({ ...d, siteIds }))}
-            searchable
-            clearable
-            comboboxProps={{ withinPortal: true }}
-          />
-        </SettingsField>
+        {sites.length > 1 && (
+          <SettingsField label={t("reports.sitesLabel")} hint={t("reports.sitesDesc")}>
+            <MultiSelect
+              aria-label={t("reports.sitesLabel")}
+              placeholder={draft.siteIds.length ? undefined : t("reports.allSitesPlaceholder")}
+              data={sites.map((s) => ({ value: s.siteId, label: s.name }))}
+              value={draft.siteIds}
+              onChange={(siteIds) => setDraft((d) => ({ ...d, siteIds }))}
+              searchable
+              clearable
+              comboboxProps={{ withinPortal: true }}
+            />
+          </SettingsField>
+        )}
       </SettingsGroup>
     </EditorSection>
   );
