@@ -1,9 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { analyticsFilterHref } from "@/features/analytics/lib/analyticsLinks";
-import { MetricTile } from "@/shared/ui/MetricTile";
-import { percentChange } from "@/shared/lib/metricChange";
-import { num } from "@/shared/lib";
+import { StatCard } from "@/shared/ui/StatCard";
 import { Heatmap } from "@/shared/ui/Heatmap";
 import { ChartSkeleton } from "@/shared/ui/Skeletons";
 import { ClicksPanel } from "@/features/analytics/components/ClicksPanel";
@@ -12,7 +10,7 @@ import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/Outb
 import { MiniList } from "@/features/analytics/components/widgets/MiniList";
 import { TrafficCard } from "@/features/analytics/components/widgets/TrafficCard";
 import { LivePagesCard } from "@/features/analytics/components/widgets/LivePagesCard";
-import { METRIC_TONE, listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
+import { listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
 import {
   SearchWidget, SeoScoreCard, TargetsWidget, WorldMap,
 } from "@/features/analytics/components/widgets/lazyWidgets";
@@ -48,16 +46,17 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
   const metric = metricSources(stats, live, sites.length)[id];
   if (metric) {
     return (
-      <MetricTile
-        id={id}
+      <StatCard
+        icon={metric.icon}
         label={metric.label}
-        color={METRIC_TONE[metric.color] ?? METRIC_TONE.emerald}
-        value={typeof metric.value === "number" ? num(metric.value) : metric.value}
-        change={percentChange(metric.delta, metric.inverseDelta)}
+        color={metric.color}
+        value={metric.value}
+        delta={metric.live ? undefined : metric.delta ?? null}
+        inverseDelta={metric.inverseDelta}
+        live={metric.live}
+        note={metric.live ? "people on your sites right now" : undefined}
         spark={metric.spark}
         sparkKey={metric.sparkKey ?? "views"}
-        live={metric.live}
-        tinted
       />
     );
   }

@@ -189,7 +189,7 @@ export default function Home() {
         </Group>
       </Group>
 
-      <div className={dimClasses.dim} data-switching={switching || undefined}>
+      <div className={`${dimClasses.dim} an-report`} data-switching={switching || undefined}>
       {!editing && !dirty && display.hero && (
         <HomeHero
           workspaceName={active.name}

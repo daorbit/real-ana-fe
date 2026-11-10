@@ -85,7 +85,7 @@ export function StatCard({
   footer?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const accent = ACCENT[color] ?? ACCENT.emerald;
+  const accent = ACCENT[color] ?? color;
   const hasSpark = Boolean(spark && spark.length > 1 && spark.some((row) => typeof row[sparkKey] === "number"));
   const subline = note ?? (comparison ? `vs ${comparison.previousShort} · ${comparison.label}` : null);
 

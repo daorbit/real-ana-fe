@@ -1,7 +1,7 @@
 import { Card } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
-import { MetricTile } from "@/shared/ui/MetricTile";
-import { METRIC_BY_KEY, metricChange, type MetricKey } from "@/features/searchConsole/searchMetrics";
+import { StatCard } from "@/shared/ui/StatCard";
+import { METRIC_BY_KEY, percentDelta, type MetricKey } from "@/features/searchConsole/searchMetrics";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
 import { SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
 import { useSearchPerformanceData } from "@/features/searchConsole/widgets/useSearchWidgetData";
@@ -32,17 +32,30 @@ export function SearchKpiWidget({
 
   if (source.kind === "ready" && data && !failure) {
     const current = data.totals[metric];
+    const previous = data.previous?.[metric];
+    const hasPrevious = typeof previous === "number";
     return (
-      <MetricTile
-        id={`search-${metric}`}
+      <StatCard
+        icon={icon}
         label={label}
         color={def.color}
         value={def.format(current)}
-        change={metricChange(def, current, data.previous?.[metric])}
+        delta={hasPrevious ? percentDelta(current, previous) : undefined}
+        inverseDelta={def.lowerIsBetter}
+        comparison={
+          hasPrevious
+            ? {
+                previous: def.format(previous),
+                previousShort: def.format(previous),
+                current: def.format(current),
+                label: `previous ${data.days} days`,
+              }
+            : undefined
+        }
+        note={hasPrevious ? undefined : `Last ${data.days} days`}
         spark={data.daily}
         sparkKey={metric}
         hint={`${HINTS[metric]} Last ${data.days} days.`}
-        tinted
       />
     );
   }
