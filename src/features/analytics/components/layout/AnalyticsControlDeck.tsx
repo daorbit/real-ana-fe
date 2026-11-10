@@ -38,7 +38,6 @@ export function AnalyticsControlDeck({
     <div className={classes.deck}>
       <div className={classes.filters}>
         <div className={`${classes.controls} an-range`}>
-          {range}
           <div ref={bar} className={classes.tabbar} role="tablist" aria-label="Analytics sections">
           {sections.map((s) => {
             const on = s.value === active;
@@ -57,6 +56,7 @@ export function AnalyticsControlDeck({
             );
           })}
           </div>
+          <div className={classes.range}>{range}</div>
           {compare}
           {updating && <Loader size={14} color="gray" type="oval" aria-label="Updating" />}
           {status && <span className={classes.status}>{status}</span>}
