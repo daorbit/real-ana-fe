@@ -475,7 +475,6 @@ export const demoCompetitors: SeoCompetitor[] = [
   {
     _id: "demo-comp-1",
     siteId: DEMO_SITE_ID,
-    firstEventAt: iso(117 * DAY),
     label: "Rival",
     url: "https://rival.example/",
     lastCheckedAt: iso(1 * DAY),
@@ -512,7 +511,6 @@ export const demoCompetitors: SeoCompetitor[] = [
   {
     _id: "demo-comp-2",
     siteId: DEMO_SITE_ID,
-    firstEventAt: iso(117 * DAY),
     label: "Nimbus",
     url: "https://nimbus.example/",
     lastCheckedAt: iso(2 * DAY),
@@ -549,7 +547,6 @@ export const demoCompetitors: SeoCompetitor[] = [
   {
     _id: "demo-comp-3",
     siteId: DEMO_SITE_ID,
-    firstEventAt: iso(117 * DAY),
     label: "Fastlane",
     url: "https://fastlane.example/",
     lastCheckedAt: iso(4 * DAY),
