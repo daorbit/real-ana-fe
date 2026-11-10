@@ -76,6 +76,17 @@ function GoogleChatMark({ size = 24 }: MarkProps) {
   );
 }
 
+function ZohoMark({ size = 24 }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="Zoho CRM" className={classes.logo}>
+      <rect x="3" y="14" width="10" height="20" rx="2.5" fill="#E42527" transform="rotate(-8 8 24)" />
+      <rect x="14" y="14" width="10" height="20" rx="2.5" fill="#089949" transform="rotate(6 19 24)" />
+      <rect x="25" y="14" width="10" height="20" rx="2.5" fill="#226DB4" transform="rotate(-6 30 24)" />
+      <rect x="36" y="14" width="9" height="20" rx="2.5" fill="#F9B21D" transform="rotate(8 40.5 24)" />
+    </svg>
+  );
+}
+
 function WhatsAppMark({ size = 24 }: MarkProps) {
   return (
     <svg width={size} height={size} viewBox="-2 -2 28 28" role="img" aria-label="WhatsApp" className={classes.logo}>
@@ -186,6 +197,7 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   discord: DiscordMark,
   teams: TeamsMark,
   "google-chat": GoogleChatMark,
+  "zoho-crm": ZohoMark,
   whatsapp: WhatsAppMark,
   telegram: TelegramMark,
   "google-calendar": GoogleCalendarMark,
