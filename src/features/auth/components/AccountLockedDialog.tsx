@@ -1,5 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
-import { ShieldAlert } from "lucide-react";
+import { Button } from "@mantine/core";
+import { LifeBuoy, ShieldAlert } from "lucide-react";
+import { ACCOUNT_LOCKED_FORM_URL } from "@/shared/lib/formLinks";
 import { SecureDialog } from "./SecureDialog";
 import classes from "./AccountLockedDialog.module.css";
 
@@ -60,6 +62,18 @@ export function AccountLockedDialog({
       <p className={classes.note}>
         If this wasn't you, someone else may know your password. Change it once the lock lifts.
       </p>
+
+      <Button
+        component="a"
+        href={ACCOUNT_LOCKED_FORM_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        variant="default"
+        radius={10}
+        leftSection={<LifeBuoy size={16} />}
+      >
+        Contact support
+      </Button>
     </SecureDialog>
   );
 }
