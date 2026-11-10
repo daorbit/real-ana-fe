@@ -22,6 +22,13 @@ export const WHY_LEAD =
 
 export const WHY_UPDATED = "Updated November 2026";
 
+export const WHY_FACTS = [
+  { value: "0", label: "Cookie banners needed" },
+  { value: "Live", label: "Data, never sampled" },
+  { value: "< 5 KB", label: "Tracking script" },
+  { value: "10k", label: "Free pageviews a month" },
+];
+
 export const WHY_SECTIONS: DocSection[] = [
   {
     id: "what",
