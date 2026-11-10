@@ -1,3 +1,4 @@
+import { DEMO_CHART_IMAGE, DEMO_HERO_IMAGE, DEMO_LOGO_IMAGE } from "@/features/demo/demoImages";
 import type { MediaAsset, MediaKind, MediaListResult } from "@/shared/types";
 
 const now = Date.now();
@@ -35,21 +36,21 @@ function asset(
 export const demoMedia: MediaAsset[] = [
   asset("1", "hero-banner.png", "image", "png", "image/png", 842_300, 2, {
     alt: "The Acme dashboard showing a deploy in progress",
-    url: "https://acme.example/media/hero-banner.png",
-    thumbnailUrl: "https://acme.example/media/hero-banner.png",
+    url: DEMO_HERO_IMAGE,
+    thumbnailUrl: DEMO_HERO_IMAGE,
     width: 1440,
     height: 900,
   }),
   asset("2", "logo-mark.svg", "image", "svg", "image/svg+xml", 4_120, 40, {
     alt: "Acme",
-    url: "https://acme.example/media/logo-mark.svg",
-    thumbnailUrl: "https://acme.example/media/logo-mark.svg",
+    url: DEMO_LOGO_IMAGE,
+    thumbnailUrl: DEMO_LOGO_IMAGE,
     width: 120,
     height: 32,
   }),
   asset("3", "pricing-chart.png", "image", "png", "image/png", 318_900, 6, {
-    url: "https://acme.example/media/pricing-chart.png",
-    thumbnailUrl: "https://acme.example/media/pricing-chart.png",
+    url: DEMO_CHART_IMAGE,
+    thumbnailUrl: DEMO_CHART_IMAGE,
     width: 800,
     height: 420,
   }),
@@ -58,6 +59,7 @@ export const demoMedia: MediaAsset[] = [
   asset("6", "onboarding-checklist.docx", "raw", "docx",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 88_400, 9),
   asset("7", "launch-recap.mp4", "video", "mp4", "video/mp4", 18_430_000, 4, {
+    thumbnailUrl: DEMO_HERO_IMAGE,
     width: 1920,
     height: 1080,
   }),

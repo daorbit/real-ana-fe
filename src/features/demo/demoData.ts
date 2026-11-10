@@ -4,6 +4,7 @@ import type {
   SeoCompetitor, SeoShareState, SeoShareLink,
 } from "@/shared/types";
 import { demoStats, demoUserFlow } from "@/features/demo/demoStats";
+import { demoNavPrefs } from "@/features/demo/demoNavPrefs";
 
 
 
@@ -26,6 +27,7 @@ export const demoWorkspaces: Workspace[] = [
     // The demo visitor is looking at their "own" workspace, so every control is
     // visible — the write guard, not the role, is what stops them changing it.
     role: "owner",
+    navPrefs: demoNavPrefs,
     /**
      * On Pro, so the demo shows the product rather than the paywall: a Free
      * demo would hide 7d/30d ranges, funnels, and WhatsApp reports behind
@@ -58,6 +60,7 @@ export const demoSites: Site[] = [
     domain: "https://acme.example",
     framework: "react",
     siteId: DEMO_SITE_ID,
+    firstEventAt: iso(117 * DAY),
     createdAt: iso(118 * DAY),
   },
   {
@@ -67,6 +70,7 @@ export const demoSites: Site[] = [
     domain: "https://docs.acme.example",
     framework: "other",
     siteId: DEMO_SITE_ID_2,
+    firstEventAt: iso(89 * DAY),
     createdAt: iso(90 * DAY),
   },
 ];
@@ -471,6 +475,7 @@ export const demoCompetitors: SeoCompetitor[] = [
   {
     _id: "demo-comp-1",
     siteId: DEMO_SITE_ID,
+    firstEventAt: iso(117 * DAY),
     label: "Rival",
     url: "https://rival.example/",
     lastCheckedAt: iso(1 * DAY),
@@ -507,6 +512,7 @@ export const demoCompetitors: SeoCompetitor[] = [
   {
     _id: "demo-comp-2",
     siteId: DEMO_SITE_ID,
+    firstEventAt: iso(117 * DAY),
     label: "Nimbus",
     url: "https://nimbus.example/",
     lastCheckedAt: iso(2 * DAY),
@@ -543,6 +549,7 @@ export const demoCompetitors: SeoCompetitor[] = [
   {
     _id: "demo-comp-3",
     siteId: DEMO_SITE_ID,
+    firstEventAt: iso(117 * DAY),
     label: "Fastlane",
     url: "https://fastlane.example/",
     lastCheckedAt: iso(4 * DAY),

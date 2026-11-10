@@ -10,6 +10,9 @@ import { demoFunnelOverview, demoSavedFunnels } from "@/features/demo/demoFunnel
 import { demoHeatmapPages, demoPageHeatmap } from "@/features/demo/demoHeatmap";
 import { demoAccountActivity, demoAuditPage } from "@/features/demo/demoAudit";
 import { demoMembersResponse } from "@/features/demo/demoWorkspace";
+import {
+  demoOrbitAnswer, demoOrbitConversation, demoOrbitConversations, demoOrbitShortReply, demoOrbitStatus,
+} from "@/features/demo/demoOrbit";
 import type { AuditCategory } from "@/shared/types";
 
 /**
@@ -83,6 +86,10 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   if (/\/embeds$/.test(path)) return [];
   if (/\/members$/.test(path)) return demoMembersResponse();
 
+  if (/\/orbit\/status$/.test(path)) return demoOrbitStatus();
+  if (/\/orbit\/conversations$/.test(path)) return demoOrbitConversations();
+  if (/\/orbit\/conversations\/[^/]+$/.test(path)) return demoOrbitConversation(path.split("/").pop() ?? "");
+
   if (/\/audit$/.test(path)) return demoAuditPage((params.get("category") as AuditCategory | null) ?? null);
   if (path === "/api/auth/activity") return demoAccountActivity();
 
@@ -90,6 +97,13 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   // The demo account is a plain user, so these are never reached in practice.
   if (path.startsWith("/api/admin")) return { users: [], total: 0 };
 
+  return undefined;
+}
+
+export function resolveDemoWrite(url: string, body: unknown): unknown | undefined {
+  const path = url.split("?")[0];
+  if (/\/orbit\/ask$/.test(path)) return demoOrbitAnswer(body);
+  if (/\/orbit\/(explain|search)$/.test(path)) return demoOrbitShortReply();
   return undefined;
 }
 

@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { hasSession, isDemoSession } from "@/shared/lib/sessionHint";
 import { notify, errMessage, isPlanLimit, quotaLimitInfo, planLimitReason } from "@/shared/lib/notify";
-import { resolveDemoRequest } from "@/features/demo/demoResolver";
+import { resolveDemoRequest, resolveDemoWrite } from "@/features/demo/demoResolver";
 import { reportLoadFailure } from "@/shared/lib/loadFailure";
 import { isSearchConsoleSignedOut } from "@/features/searchConsole/googleSession";
 import type {
@@ -56,7 +56,9 @@ const rawBaseQuery = fetchBaseQuery({
 
 
 
-const DEMO_LIVE_READS = ["/api/billing/plans", "/api/billing/addons"];
+const DEMO_ANSWER_DELAY_MS = 700;
+
+const DEMO_LIVE_READS =["/api/billing/plans", "/api/billing/addons"];
 
 function isPublicCatalogue(url: string, isWrite: boolean): boolean {
   if (isWrite) return false;
@@ -76,6 +78,11 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   if (isDemoSession() && !isPublicCatalogue(url, isWrite)) {
 
     if (isWrite) {
+      const answered = resolveDemoWrite(url, typeof args === "string" ? undefined : args.body);
+      if (answered !== undefined) {
+        await new Promise((r) => setTimeout(r, DEMO_ANSWER_DELAY_MS));
+        return { data: answered };
+      }
       notify.info("You're in demo mode — changes are turned off here.", "Read-only demo");
       return Promise.resolve({
         error: { status: 403, data: { error: "demo mode is read-only" } } as FetchBaseQueryError,

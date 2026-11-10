@@ -1,3 +1,4 @@
+import { DEMO_LOGO_IMAGE } from "@/features/demo/demoImages";
 import type { Branding } from "@/shared/types";
 
 /** Matches the emerald already used for demoData's theme-color meta tag. */
@@ -5,7 +6,7 @@ const DEMO_ACCENT = "#10b981";
 
 export const demoBranding: Branding = {
   name: "Acme Inc.",
-  logoUrl: "https://acme.example/logo.svg",
+  logoUrl: DEMO_LOGO_IMAGE,
   accentColor: DEMO_ACCENT,
   showPoweredBy: false,
   poweredByLabel: "Powered by Quantalog Forms",
@@ -16,7 +17,7 @@ export const demoBranding: Branding = {
   defaults: { name: "Quantalog", logoUrl: undefined },
   stored: {
     name: "Acme Inc.",
-    logoUrl: "https://acme.example/logo.svg",
+    logoUrl: DEMO_LOGO_IMAGE,
     accentColor: DEMO_ACCENT,
     hidePoweredBy: true,
     watermarkAiImages: false,

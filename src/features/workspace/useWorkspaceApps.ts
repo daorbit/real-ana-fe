@@ -23,7 +23,7 @@ export function useWorkspaceApps(): EnabledApps {
   const seoReports = on("seoReports");
   const bio = on("bio");
   const funnels = on("funnels");
-  const invoicing = !demo && on("invoicing");
+  const invoicing = on("invoicing");
   const tasks = on("tasks");
   const insights = on("insights");
   const experiments = on("experiments");

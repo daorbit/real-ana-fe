@@ -11,7 +11,7 @@ import { useHostFrameToken } from "@/shared/hooks/useHostFrameToken";
 import { useFrameTheme } from "@/shared/hooks/useFrameTheme";
 import { useEmbeddedPlanLimit } from "@/features/leadCapture/useEmbeddedPlanLimit";
 import { useFrameUnreadCount } from "@/features/leadCapture/useFrameUnreadCount";
-import { INVOICES_APP_BASE, invoicesAppUrl } from "../lib/invoicesApp";
+import { INVOICES_APP_BASE, invoicesAppUrl, invoicesDemoUrl } from "../lib/invoicesApp";
 import classes from "./Invoices.module.css";
 
 export default function Invoices() {
@@ -32,19 +32,24 @@ export default function Invoices() {
 
   useHostFrameToken(workspaceId, "invoices-token", INVOICES_APP_BASE);
 
-  const src = useMemo(() => (workspaceId ? invoicesAppUrl(workspaceId) : null), [workspaceId]);
+  const src = useMemo(() => {
+    if (isDemo) return configured ? invoicesDemoUrl() : null;
+    return workspaceId ? invoicesAppUrl(workspaceId) : null;
+  }, [isDemo, configured, workspaceId]);
 
-  if (isDemo || !configured) {
+  if (!configured) {
     return (
       <AppShell>
         <EmptyState
           icon={ReceiptText}
-          title="Invoicing isn't in the demo"
-          description="Sign up to send quotations and invoices to your leads, right inside Quantalog."
+          title="Invoicing isn't set up"
+          description="The invoices service isn't configured for this dashboard yet."
         />
       </AppShell>
     );
   }
+
+  if (isDemo && src) return <AppShell><InvoicesFrame src={src} /></AppShell>;
 
   if (!active?._id) {
     return (

@@ -1,3 +1,4 @@
+import { DEMO_CHART_IMAGE, DEMO_HERO_IMAGE, DEMO_LOGO_IMAGE } from "@/features/demo/demoImages";
 import type {
   ScheduledPost, ScheduledPostsResponse, SentPost, SentPostsResponse, PostAccount,
 } from "@/shared/types";
@@ -19,7 +20,7 @@ const demoLinkedin: PostAccount = {
   connected: true,
   expired: false,
   name: "Acme Inc.",
-  picture: "https://acme.example/logo.svg",
+  picture: DEMO_LOGO_IMAGE,
   canPublish: true,
 };
 
@@ -27,7 +28,7 @@ const demoInstagram: PostAccount = {
   connected: true,
   expired: false,
   name: "acme.hq",
-  picture: "https://acme.example/logo.svg",
+  picture: DEMO_LOGO_IMAGE,
   canPublish: true,
 };
 
@@ -64,8 +65,8 @@ const demoScheduledPosts: ScheduledPost[] = [
     id: "demo-post-1",
     name: "Launch week teaser",
     caption: "Something new is landing this week. Deploy in minutes, worry less. 🚀",
-    imageUrl: "https://acme.example/hero.png",
-    images: ["https://acme.example/hero.png"],
+    imageUrl: DEMO_HERO_IMAGE,
+    images: [DEMO_HERO_IMAGE],
     mode: "once",
     runAt: inIso(4 * HOUR),
     nextRunAt: inIso(4 * HOUR),
@@ -77,8 +78,8 @@ const demoScheduledPosts: ScheduledPost[] = [
     provider: "instagram",
     name: "Weekly tips reminder",
     caption: "Tip of the week: code-split your analytics bundle. Your LCP will thank you.",
-    imageUrl: "https://acme.example/chart.png",
-    images: ["https://acme.example/chart.png"],
+    imageUrl: DEMO_CHART_IMAGE,
+    images: [DEMO_CHART_IMAGE],
     mode: "repeat",
     frequency: "weekly",
     hour: 10,
@@ -106,8 +107,8 @@ const demoScheduledPosts: ScheduledPost[] = [
     format: "story",
     name: "Changelog story",
     caption: "",
-    imageUrl: "https://acme.example/hero.png",
-    images: ["https://acme.example/hero.png"],
+    imageUrl: DEMO_HERO_IMAGE,
+    images: [DEMO_HERO_IMAGE],
     mode: "once",
     runAt: iso(3 * HOUR),
     nextRunAt: iso(3 * HOUR),
@@ -157,7 +158,7 @@ const demoSentPosts: SentPost[] = [
     scheduledPostId: "demo-post-past-1",
     name: "Developer tools that get out of the way",
     caption: "We rebuilt our onboarding from scratch. Three minutes to first deploy, not thirty.",
-    imageUrl: "https://acme.example/hero.png",
+    imageUrl: DEMO_HERO_IMAGE,
     source: "schedule",
     status: "published",
     postUrl: "https://www.linkedin.com/feed/update/demo-1",
@@ -169,7 +170,7 @@ const demoSentPosts: SentPost[] = [
     scheduledPostId: "demo-post-2",
     name: "Weekly tips reminder",
     caption: "Tip of the week: preload your hero image and serve it as WebP.",
-    imageUrl: "https://acme.example/chart.png",
+    imageUrl: DEMO_CHART_IMAGE,
     source: "schedule",
     status: "published",
     postUrl: "https://www.instagram.com/p/demo-2",
@@ -192,7 +193,7 @@ const demoSentPosts: SentPost[] = [
     scheduledPostId: "demo-post-past-4",
     name: "Changelog carousel",
     caption: "",
-    imageUrl: "https://acme.example/hero.png",
+    imageUrl: DEMO_HERO_IMAGE,
     source: "schedule",
     status: "failed",
     error: "Instagram rejected the image: file too large.",
