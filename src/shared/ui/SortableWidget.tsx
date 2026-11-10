@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
+import { useMasonryRows } from "@/shared/hooks/useMasonryRows";
 import { useSortable } from "@dnd-kit/sortable";
 import { ActionIcon, Group, Paper, SegmentedControl, Text, Tooltip } from "@mantine/core";
 import { GripVertical, X } from "lucide-react";
@@ -37,14 +38,19 @@ export function SortableWidget({
     disabled: !editing,
   });
 
-  const style: React.CSSProperties = {
-    // Span is capped at 4 because the grid is 4 columns wide.
-    gridColumn: `span ${Math.min(span, 4)}`,
-  };
+  const masonryRef = useMasonryRows();
+  const ref = useCallback(
+    (el: HTMLElement | null) => {
+      setNodeRef(el);
+      masonryRef(el);
+    },
+    [setNodeRef, masonryRef]
+  );
+  const columns = String(Math.min(span, 4));
 
   if (!editing) {
     return (
-      <div ref={setNodeRef} style={style}>
+      <div ref={ref} data-span={columns}>
         {children}
       </div>
     );
@@ -55,7 +61,7 @@ export function SortableWidget({
     .join(" ");
 
   return (
-    <div ref={setNodeRef} style={style} className={cls}>
+    <div ref={ref} data-span={columns} className={cls}>
       <Paper withBorder radius="lg" p={6} className="sw-frame">
         <Group justify="space-between" wrap="nowrap" px={4} pb={6}>
           <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
