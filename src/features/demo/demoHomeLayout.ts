@@ -7,4 +7,7 @@ export const DEMO_HOME_LAYOUT: Placed[] = [
   { id: "seoScore", span: 1 },
   { id: "worldMap", span: 3 },
   { id: "topPages", span: 1 },
+  { id: "myTasks", span: 2 },
+  { id: "leads", span: 1 },
+  { id: "invoices", span: 1 },
 ];

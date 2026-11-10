@@ -6,7 +6,7 @@ export type Widget = {
   id: string;
   label: string;
   description: string;
-  group: "Metrics" | "Charts" | "Breakdowns" | "Search";
+  group: "Metrics" | "Charts" | "Breakdowns" | "Search" | "Workspace";
   kind: WidgetKind;
   defaultSpan: Span;
 };
@@ -56,13 +56,17 @@ export const WIDGETS = [
   { id: "searchPages", label: "Top pages in Google", description: "Your pages that earn the most search clicks", group: "Search", kind: "list", defaultSpan: 2 },
   { id: "searchRankings", label: "Ranking positions", description: "How many queries rank top 3, page 1 and beyond", group: "Search", kind: "chart", defaultSpan: 2 },
   { id: "searchOpportunities", label: "Quick wins", description: "Queries close to page one worth improving", group: "Search", kind: "list", defaultSpan: 2 },
+
+  { id: "myTasks", label: "My tasks", description: "Your open tasks, overdue and due soon", group: "Workspace", kind: "list", defaultSpan: 2 },
+  { id: "leads", label: "Leads", description: "New leads by stage and top forms", group: "Workspace", kind: "list", defaultSpan: 2 },
+  { id: "invoices", label: "Invoices", description: "Paid, pending and overdue, with recent invoices", group: "Workspace", kind: "list", defaultSpan: 2 },
 ] as const satisfies readonly Widget[];
 
 export type WidgetId = (typeof WIDGETS)[number]["id"];
 
 export type Placed = { id: WidgetId; span: Span };
 
-export const WIDGET_GROUPS = ["Metrics", "Charts", "Breakdowns", "Search"] as const;
+export const WIDGET_GROUPS = ["Metrics", "Charts", "Breakdowns", "Search", "Workspace"] as const;
 
 export const WIDGET_MAP: Record<string, Widget> = Object.fromEntries(
   WIDGETS.map((w) => [w.id, w as Widget])

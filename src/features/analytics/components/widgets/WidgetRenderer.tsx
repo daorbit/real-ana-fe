@@ -1,4 +1,4 @@
-import { Suspense, type ReactNode } from "react";
+import { Suspense, type ComponentType, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { analyticsFilterHref } from "@/features/analytics/lib/analyticsLinks";
 import { StatCard } from "@/shared/ui/StatCard";
@@ -12,7 +12,7 @@ import { TrafficCard } from "@/features/analytics/components/widgets/TrafficCard
 import { LivePagesCard } from "@/features/analytics/components/widgets/LivePagesCard";
 import { listSources, metricSources } from "@/features/analytics/components/widgets/widgetSources";
 import {
-  SearchWidget, SeoScoreCard, TargetsWidget, WorldMap,
+  InvoicesWidget, LeadsWidget, MyTasksWidget, SearchWidget, SeoScoreCard, TargetsWidget, WorldMap,
 } from "@/features/analytics/components/widgets/lazyWidgets";
 import { isSearchWidget } from "@/features/analytics/widgetCatalog";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
@@ -30,6 +30,12 @@ export type WidgetData = {
   embedded?: boolean;
   range?: string;
   filterLinks?: boolean;
+};
+
+const WORKSPACE_WIDGETS: Partial<Record<WidgetId, ComponentType<{ workspaceId: string }>>> = {
+  myTasks: MyTasksWidget,
+  leads: LeadsWidget,
+  invoices: InvoicesWidget,
 };
 
 function Deferred({ children }: { children: ReactNode }) {
@@ -106,6 +112,15 @@ export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData })
     return (
       <Deferred>
         <TargetsWidget workspaceId={workspaceId} />
+      </Deferred>
+    );
+  }
+  const workspaceWidget = WORKSPACE_WIDGETS[id];
+  if (workspaceWidget) {
+    const Component = workspaceWidget;
+    return (
+      <Deferred>
+        <Component workspaceId={workspaceId} />
       </Deferred>
     );
   }
