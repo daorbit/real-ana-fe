@@ -2,6 +2,7 @@ export {
   House as HomeNavIcon,
   LayoutDashboard as DashboardsNavIcon,
   ChartSpline as AnalyticsNavIcon,
+  ChartColumnBig as FormAnalyticsNavIcon,
   SearchCheck as SearchVisibilityNavIcon,
   TrendingUp as RankLabNavIcon,
   Magnet as LeadCaptureNavIcon,

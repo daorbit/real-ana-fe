@@ -8,7 +8,7 @@ import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/feature
 import { AllAppsColorIcon } from "./colorIcons";
 import {
   AnalyticsNavIcon, AuditLogNavIcon, BillingNavIcon, BrandingNavIcon, DashboardsNavIcon,
-  DevelopersNavIcon, HomeNavIcon, LeadCaptureNavIcon, MembersNavIcon, RankLabNavIcon, ReportsNavIcon,
+  DevelopersNavIcon, FormAnalyticsNavIcon, HomeNavIcon, LeadCaptureNavIcon, MembersNavIcon, RankLabNavIcon, ReportsNavIcon,
   ScheduledPostsNavIcon, SearchVisibilityNavIcon, SettingsNavIcon, WorkspacesNavIcon,
 } from "./navIcons";
 
@@ -49,6 +49,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app", labelKey: "nav.home", label: "Home", icon: HomeNavIcon, tone: "sky" },
       { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: DashboardsNavIcon, tone: "magenta" },
       { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: AnalyticsNavIcon, tone: "blue" },
+      { to: "/app/form-analytics", labelKey: "nav.formAnalytics", label: "Form analytics", keywords: "forms responses conversion", icon: FormAnalyticsNavIcon, tone: "orange" },
     ],
   },
   {

@@ -68,6 +68,7 @@ const Reports = lazy(() => import("@/features/reports/pages"));
 const SocialPosts = lazy(() => import("@/features/social/pages/SocialPosts"));
 // const Reviews = lazy(() => import("@/features/reviews/pages/Reviews"));
 const LeadCapture = lazy(() => import("@/features/leadCapture/pages/LeadCapture"));
+const FormAnalytics = lazy(() => import("@/features/leadCapture/pages/FormAnalytics"));
 const Invoices = lazy(() => import("@/features/invoices/pages/Invoices"));
 const LinkFrame = lazy(() => import("@/features/customLinks/pages/LinkFrame"));
 const Settings = lazy(() => import("@/features/auth/pages/Settings"));
@@ -319,6 +320,7 @@ export default function App() {
                 <Route path="/app/social" element={<SocialPosts />} />
                 {/* <Route path="/app/reviews" element={<Reviews />} /> */}
                 <Route path="/app/lead-capture" element={<LeadCapture />} />
+                <Route path="/app/form-analytics" element={<FormAnalytics />} />
                 <Route path="/app/invoices" element={<Invoices />} />
                 <Route path="/app/link/:slug" element={<LinkFrame />} />
                 <Route path="/app/why-quantalog" element={<WhyQuantalog />} />
