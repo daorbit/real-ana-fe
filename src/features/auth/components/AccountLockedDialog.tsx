@@ -1,9 +1,8 @@
 import { Fragment, useEffect, useState } from "react";
-import { Button } from "@mantine/core";
-import { LifeBuoy, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { ACCOUNT_LOCKED_FORM_URL } from "@/shared/lib/formLinks";
 import { FormModal } from "@/shared/ui/FormModal";
-import { SecureDialog } from "./SecureDialog";
+import { SecureDialog, SecureDialogLink } from "./SecureDialog";
 import classes from "./AccountLockedDialog.module.css";
 
 function remainingParts(ms: number): { value: string; unit: string }[] {
@@ -65,9 +64,10 @@ export function AccountLockedDialog({
         If this wasn't you, someone else may know your password. Change it once the lock lifts.
       </p>
 
-      <Button variant="default" radius={10} leftSection={<LifeBuoy size={16} />} onClick={() => setHelpOpen(true)}>
-        Contact support
-      </Button>
+      <div className={classes.help}>
+        <span className={classes.helpText}>Locked out by mistake?</span>
+        <SecureDialogLink onClick={() => setHelpOpen(true)}>Contact support</SecureDialogLink>
+      </div>
 
       <FormModal
         opened={helpOpen}

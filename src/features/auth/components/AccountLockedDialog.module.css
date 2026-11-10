@@ -3,6 +3,25 @@
   justify-content: center;
   align-items: flex-start;
   gap: 12px;
+  width: 100%;
+  padding: 18px 16px;
+  border: 1px solid var(--q-border);
+  border-radius: 14px;
+}
+
+.help {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding-top: 16px;
+  border-top: 1px solid var(--q-border);
+  font-size: 0.8125rem;
+}
+
+.helpText {
+  color: var(--q-fg-muted);
 }
 
 .unit {

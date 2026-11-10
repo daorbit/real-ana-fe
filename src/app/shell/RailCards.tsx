@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Box, Group, Text, ThemeIcon, Tooltip, UnstyledButton } from "@mantine/core";
+import { Group, Text, ThemeIcon, Tooltip, UnstyledButton } from "@mantine/core";
 import { LogOut, PlayCircle, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
@@ -146,18 +146,18 @@ export function DemoCard({ collapsed, onExit }: { collapsed: boolean; onExit: ()
   }
 
   return (
-    <Box className="demo-card" mb="xs">
-      <Group gap={6} wrap="nowrap" mb={4}>
-        <PlayCircle size={12} style={{ color: "var(--violet-2)", flexShrink: 0 }} />
-        <Text size="xs" fw={650}>{t("nav.demoMode")}</Text>
-      </Group>
-      <Text size="xs" c="dimmed" lh={1.4}>
-        {t("nav.demoBlurb")}
-      </Text>
-      <UnstyledButton className="demo-exit" onClick={onExit}>
-        <LogOut size={11} />
-        {t("nav.exitDemo")}
+    <div className={classes.demo}>
+      <span className={classes.demoIcon}>
+        <PlayCircle size={16} />
+      </span>
+      <span className={classes.orbitText}>
+        <span className={classes.orbitTitle}>{t("nav.demoMode")}</span>
+        <span className={classes.orbitHint}>{t("nav.demoBlurb")}</span>
+      </span>
+      <UnstyledButton className={classes.demoExit} onClick={onExit} aria-label={t("nav.exitDemo")}>
+        <LogOut size={12} />
+        {t("nav.exit", "Exit")}
       </UnstyledButton>
-    </Box>
+    </div>
   );
 }

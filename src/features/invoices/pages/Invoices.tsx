@@ -22,20 +22,20 @@ export default function Invoices() {
   const configured = Boolean(INVOICES_APP_BASE);
   const workspaceId = isDemo || !configured || !on ? null : active?._id;
 
-  useEffect(() => {
-    if (!workspaceId) return;
-    document.body.dataset.page = "invoices";
-    return () => {
-      delete document.body.dataset.page;
-    };
-  }, [workspaceId]);
-
   useHostFrameToken(workspaceId, "invoices-token", INVOICES_APP_BASE);
 
   const src = useMemo(() => {
     if (isDemo) return configured ? invoicesDemoUrl() : null;
     return workspaceId ? invoicesAppUrl(workspaceId) : null;
   }, [isDemo, configured, workspaceId]);
+
+  useEffect(() => {
+    if (!src) return;
+    document.body.dataset.page = "invoices";
+    return () => {
+      delete document.body.dataset.page;
+    };
+  }, [src]);
 
   if (!configured) {
     return (
