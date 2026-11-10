@@ -1,6 +1,6 @@
-import { ADMIN_ITEMS, NAV_GROUPS, type NavItem } from "../navItems";
+import { ADMIN_ITEMS, NAV_GROUPS, withChildren, type NavItem } from "../navItems";
 
-const PARENTS: NavItem[] = [...NAV_GROUPS.flatMap((group) => group.items), ...ADMIN_ITEMS]
+const PARENTS: NavItem[] = [...NAV_GROUPS.flatMap((group) => withChildren(group.items)), ...ADMIN_ITEMS]
   .filter((item) => item.to !== "/app")
   .sort((a, b) => b.to.length - a.to.length);
 

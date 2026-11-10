@@ -8,7 +8,11 @@ import { scoreColor, scoreLabel } from "@/features/seo/components/ScoreRing";
 import { Gauge } from "@/features/seo/components/shared/Gauge";
 import { bandHex } from "@/features/seo/components/utils";
 import { timeAgo } from "@/shared/lib";
+import { useDemo } from "@/features/demo/context";
+import { demoSeoReport } from "@/features/demo/demoData";
 import classes from "./SeoScoreCard.module.css";
+
+const DEMO_LATEST = demoSeoReport;
 
 function band(score: number): "good" | "warn" | "bad" {
   return score >= 90 ? "good" : score >= 50 ? "warn" : "bad";
@@ -61,9 +65,12 @@ export function SeoScoreCard({
   siteId: string;
   siteName?: string;
 }) {
-  const { data: report, isLoading } = useGetLatestSeoReportQuery(
-    workspaceId && siteId ? { workspaceId, siteId } : skipToken
+  const { demo } = useDemo();
+  const { data: realReport, isLoading: loadingReal } = useGetLatestSeoReportQuery(
+    !demo && workspaceId && siteId ? { workspaceId, siteId } : skipToken
   );
+  const report = demo ? DEMO_LATEST : realReport;
+  const isLoading = !demo && loadingReal;
 
   if (isLoading) {
     return (

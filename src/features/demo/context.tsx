@@ -21,6 +21,7 @@ type DemoValue = {
   /** Whether this viewer may switch modes at all. */
   available: boolean;
   toggle: (next: boolean) => void;
+  preview?: boolean;
 };
 
 const Ctx = createContext<DemoValue>({ demo: false, available: false, toggle: () => {} });
@@ -72,4 +73,10 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
 export function useDemo() {
   return useContext(Ctx);
+}
+
+const PREVIEW_VALUE: DemoValue = { demo: true, available: false, toggle: () => {}, preview: true };
+
+export function DemoPreviewScope({ children }: { children: ReactNode }) {
+  return <Ctx.Provider value={PREVIEW_VALUE}>{children}</Ctx.Provider>;
 }

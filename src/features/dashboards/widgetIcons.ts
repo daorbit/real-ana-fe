@@ -2,7 +2,7 @@ import {
   Activity, ArrowDownToLine, Bug, Compass, CornerUpLeft, Eye, ExternalLink, FileText, Files, Flag, Gauge,
   Globe, Grid3x3, Languages, Layers, Link2, LogIn, LogOut, Maximize2, Megaphone, Monitor, MousePointerClick,
   PlaneLanding, Radio, Smartphone, Split, Tag, Target, Timer, TrendingUp, Users,
-  Percent, Medal, Search, FileSearch, ChartNoAxesColumn, Lightbulb,
+  Percent, Medal, Search, FileSearch, ChartNoAxesColumn, Lightbulb, CheckSquare, Inbox, ReceiptText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { WidgetId } from "@/features/analytics/widgetCatalog";
@@ -49,6 +49,9 @@ export const WIDGET_ICON: Record<WidgetId, LucideIcon> = {
   searchPages: FileSearch,
   searchRankings: ChartNoAxesColumn,
   searchOpportunities: Lightbulb,
+  myTasks: CheckSquare,
+  leads: Inbox,
+  invoices: ReceiptText,
 };
 
 export function widgetIcon(id: string): LucideIcon {

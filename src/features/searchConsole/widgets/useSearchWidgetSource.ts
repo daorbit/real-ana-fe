@@ -29,9 +29,11 @@ export function searchDaysFor(range: string | undefined, maxDays: number): numbe
 
 export function useSearchWidgetSource({ workspaceId, sites, siteScope, range }: SearchSourceInput): SearchSource {
   const { maxDays } = useSearchEntitlements();
-  const { data: realStatus, isLoading, isError } = useGetSearchConsoleStatusQuery(workspaceId ?? skipToken);
-
   const { demo } = useDemo();
+  const { data: realStatus, isLoading, isError } = useGetSearchConsoleStatusQuery(
+    demo || !workspaceId ? skipToken : workspaceId,
+  );
+
   const status = demo ? demoSearchConsoleStatus() : realStatus;
 
   if (!workspaceId || (!demo && isLoading)) return { kind: "loading" };

@@ -30,7 +30,10 @@ export type NavItem = {
   showWhenOff?: boolean;
   tone?: NavTone;
   quiet?: boolean;
+  children?: NavChild[];
 };
+
+export type NavChild = { to: string; labelKey: string; label: string; keywords?: string; icon: typeof Home };
 
 export type NavGroup = {
   headingKey: string;
@@ -49,7 +52,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app", labelKey: "nav.home", label: "Home", icon: HomeNavIcon, tone: "sky" },
       { to: "/app/dashboards", labelKey: "nav.dashboards", label: "Dashboards", icon: DashboardsNavIcon, tone: "magenta" },
       { to: "/app/analytics", labelKey: "nav.websiteAnalytics", label: "Website analytics", icon: AnalyticsNavIcon, tone: "blue" },
-      { to: "/app/form-analytics", labelKey: "nav.formAnalytics", label: "Form analytics", keywords: "forms responses conversion", icon: FormAnalyticsNavIcon, tone: "orange" },
     ],
   },
   {
@@ -58,7 +60,16 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: SearchVisibilityNavIcon, tone: "green" },
       { to: "/app/seo", labelKey: "nav.seo", label: "SEO", keywords: "seo audit", icon: RankLabNavIcon, tone: "teal" },
-      { to: "/app/lead-capture", labelKey: "nav.leadCapture", label: "Lead capture", icon: LeadCaptureNavIcon, tone: "orange" },
+      {
+        to: "/app/lead-capture",
+        labelKey: "nav.leadCapture",
+        label: "Lead capture",
+        icon: LeadCaptureNavIcon,
+        tone: "orange",
+        children: [
+          { to: "/app/lead-insights", labelKey: "nav.leadInsights", label: "Lead insights", keywords: "form analytics forms responses conversion", icon: FormAnalyticsNavIcon },
+        ],
+      },
       { to: "/app/social", labelKey: "nav.social", label: "Scheduled posts", icon: ScheduledPostsNavIcon, tone: "pink" },
       { to: "/app/reports", labelKey: "nav.reports", label: "Reports", icon: ReportsNavIcon, tone: "indigo" },
     ],
@@ -105,3 +116,10 @@ export const ADMIN_ITEMS: (NavItem & { section: AdminSectionId })[] = ADMIN_SECT
   icon: section.icon,
   section: section.id,
 }));
+
+export function withChildren(items: NavItem[]): NavItem[] {
+  return items.flatMap((item) => [
+    item,
+    ...(item.children ?? []).map((child) => ({ ...item, ...child, children: undefined })),
+  ]);
+}

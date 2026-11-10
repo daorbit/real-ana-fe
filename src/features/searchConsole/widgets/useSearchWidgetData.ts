@@ -18,15 +18,15 @@ function failureOf(error: FetchBaseQueryError | SerializedError | undefined): Se
   return { kind: "error", message: message ?? "Google didn't respond. Try again in a moment." };
 }
 
-function argsOf(source: SearchSource) {
-  return source.kind === "ready"
+function argsOf(source: SearchSource, demo: boolean) {
+  return source.kind === "ready" && !demo
     ? { workspaceId: source.workspaceId, siteId: source.siteId, days: source.days, type: "web" as const }
     : skipToken;
 }
 
 export function useSearchPerformanceData(source: SearchSource) {
-  const { data: realData, isLoading, isFetching, error, refetch } = useGetSearchPerformanceQuery(argsOf(source));
   const { demo } = useDemo();
+  const { data: realData, isLoading, isFetching, error, refetch } = useGetSearchPerformanceQuery(argsOf(source, demo));
   const tick = useDemoTick(demo);
   const sample = useMemo(
     () => (demo && source.kind === "ready" && tick >= 0 ? demoSearchPerformance(source.days) : null),
@@ -37,8 +37,8 @@ export function useSearchPerformanceData(source: SearchSource) {
 }
 
 export function useSearchInsightsData(source: SearchSource) {
-  const { data: realData, isLoading, isFetching, error, refetch } = useGetSearchInsightsQuery(argsOf(source));
   const { demo } = useDemo();
+  const { data: realData, isLoading, isFetching, error, refetch } = useGetSearchInsightsQuery(argsOf(source, demo));
   const sample = useMemo(
     () => (demo && source.kind === "ready" ? demoSearchInsights(source.days) : null),
     [demo, source],

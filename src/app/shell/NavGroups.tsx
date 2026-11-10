@@ -5,6 +5,8 @@ import { useWorkspace } from "@/features/workspace/context";
 import { useFavouriteDashboards } from "@/features/dashboards/favourites";
 import { ExternalNavLink, NavLink } from "./NavLink";
 import { DashboardsTreeNode } from "./DashboardsTreeNode";
+import { NavTreeNode } from "./NavTreeNode";
+import { NavTreeLinks } from "./NavTreeLinks";
 import { navImage } from "./NavItemIcon";
 import { usePersistedFlag } from "./useRailState";
 import type { NavGroup } from "./navItems";
@@ -33,7 +35,9 @@ function NavGroupBlock({
 
   const isActive = (to: string) =>
     pathname === to || (to !== "/app" && pathname.startsWith(`${to}/`));
-  const holdsCurrent = group.items.some((n) => !n.external && isActive(n.to));
+  const holdsCurrent = group.items.some(
+    (n) => !n.external && (isActive(n.to) || Boolean(n.children?.some((c) => isActive(c.to)))),
+  );
   const open = group.bare || (group.collapsible ? adminOpen : ownOpen) || holdsCurrent;
   const toggle = group.collapsible ? onToggleAdmin : toggleOwn;
 
@@ -69,6 +73,22 @@ function NavGroupBlock({
           favourites={favourites}
           onFavourite={onFavourite}
         />
+      );
+    }
+    if (n.children?.length && !collapsed) {
+      const links = n.children.map((c) => ({ key: c.to, to: c.to, label: t(c.labelKey, c.label), icon: c.icon }));
+      return (
+        <NavTreeNode
+          key={n.to}
+          item={n}
+          label={label}
+          active={active}
+          openKey={`nav:tree:${n.to}`}
+          forceOpen={n.children.some((c) => isActive(c.to))}
+          toggleLabel={`${label} pages`}
+        >
+          <NavTreeLinks pathname={pathname} links={links} ariaLabel={`${label} pages`} />
+        </NavTreeNode>
       );
     }
     return (

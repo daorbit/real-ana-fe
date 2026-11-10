@@ -5,7 +5,7 @@ import { useComputedColorScheme, useMantineColorScheme } from "@mantine/core";
 import {
   BookOpen, FolderKanban, Keyboard, LayoutDashboard, Moon, Orbit, Plus, StickyNote, Sun,
 } from "lucide-react";
-import { NAV_GROUPS, ADMIN_ITEMS } from "@/app/shell/navItems";
+import { NAV_GROUPS, ADMIN_ITEMS, withChildren } from "@/app/shell/navItems";
 import { useWorkspace } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { useNotes } from "@/features/notes";
@@ -41,7 +41,7 @@ export function usePaletteCommands(close: () => void, openShortcuts: () => void)
     };
 
     const pages: PaletteCommand[] = NAV_GROUPS.flatMap((group) =>
-      group.items.map((item) => {
+      withChildren(group.items).map((item) => {
         const key = GO_BY_PATH.get(item.to);
         return {
           id: `page:${item.to}`,

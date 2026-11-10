@@ -1,0 +1,12 @@
+.header {
+  align-items: flex-start;
+}
+
+.title {
+  flex: 1;
+  margin-right: var(--mantine-spacing-sm);
+}
+
+.body {
+  padding-top: 0;
+}

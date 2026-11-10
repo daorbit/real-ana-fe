@@ -1467,32 +1467,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 }
 
 
-.widget-pick {
-  cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease;
-}
-.widget-pick:hover { border-color: var(--border-strong) !important; }
-.widget-pick.active {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
-  background: color-mix(in srgb, var(--accent) 5%, transparent) !important;
-}
-
-.wp {
-  width: 100%; height: 62px;
-  border-radius: 8px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  display: grid; place-items: center;
-  transition: border-color 0.12s ease, background 0.12s ease;
-}
-.wp.active {
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
-}
-.wp-svg { width: 100%; height: 100%; display: block; }
-
-
 @media (max-width: 48em) {
   .an-toolbar,
   .home-toolbar {

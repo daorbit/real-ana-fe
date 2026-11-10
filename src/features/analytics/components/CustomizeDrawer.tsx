@@ -1,17 +1,18 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import {
-  Drawer, Text, Stack, Group, Button, Checkbox, Card, Badge, Divider, Anchor,
-  ScrollArea, TextInput, SimpleGrid, Center, ThemeIcon, SegmentedControl,
-} from "@mantine/core";
-import { motion } from "framer-motion";
-import { RotateCcw, Eraser, Search, SearchX, X, Check } from "lucide-react";
+import { Anchor, Badge, Button, Drawer, Group, Text } from "@mantine/core";
+import { Check, Eraser, RotateCcw } from "lucide-react";
 import { WIDGETS, WIDGET_GROUPS } from "@/features/analytics";
 import type { WidgetId, Span } from "@/features/analytics";
-import { WidgetPreview } from "@/features/analytics/components/WidgetPreview";
+import { WidgetPickerToolbar, type GroupFilter } from "@/features/analytics/components/widgetPicker/WidgetPickerToolbar";
+import { WidgetPickerSections } from "@/features/analytics/components/widgetPicker/WidgetPickerSections";
+import classes from "@/features/analytics/components/widgetPicker/WidgetPicker.module.css";
+import drawerClasses from "@/features/analytics/components/widgetPicker/WidgetPickerDrawer.module.css";
 
-/** The home grid is 4 columns wide, so a widget can span 1 to 4 of them. */
-const SPANS: Span[] = [1, 2, 3, 4];
+function matchesQuery(q: string) {
+  return (w: (typeof WIDGETS)[number]) =>
+    !q || w.label.toLowerCase().includes(q) || w.description.toLowerCase().includes(q) || w.group.toLowerCase().includes(q);
+}
 
 export function CustomizeDrawer({
   opened,
@@ -35,224 +36,83 @@ export function CustomizeDrawer({
   showReset?: boolean;
   opened: boolean;
   onClose: () => void;
-  /** How many widgets are currently on the home page. */
   count: number;
   has: (id: WidgetId) => boolean;
-  /** Current width of a widget on the page, or undefined if it isn't on it. */
   spanOf: (id: WidgetId) => Span | undefined;
   toggle: (id: WidgetId) => void;
   setSpan: (id: WidgetId, span: Span) => void;
   reset: () => void;
   clear: () => void;
-  /** Whether there are edits not yet written to the server. */
   dirty: boolean;
   saving: boolean;
   onSave: () => void;
 }) {
   const [query, setQuery] = useState("");
+  const [group, setGroup] = useState<GroupFilter>("All");
 
-  const matches = useMemo(() => {
+  const sections = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return WIDGETS;
-    return WIDGETS.filter(
-      (w) =>
-        w.label.toLowerCase().includes(q) ||
-        w.description.toLowerCase().includes(q) ||
-        w.group.toLowerCase().includes(q)
-    );
-  }, [query]);
-
-  const groups = WIDGET_GROUPS.map((group) => ({
-    group,
-    items: matches.filter((w) => w.group === group),
-    total: WIDGETS.filter((w) => w.group === group).length,
-  })).filter((g) => g.items.length > 0);
+    const matches = WIDGETS.filter(matchesQuery(q));
+    return WIDGET_GROUPS.filter((g) => group === "All" || g === group)
+      .map((g) => ({ group: g, items: matches.filter((w) => w.group === g) }))
+      .filter((s) => s.items.length > 0);
+  }, [query, group]);
 
   return (
     <Drawer
       opened={opened}
       onClose={onClose}
       position="right"
-      size="xl"
+      size={860}
       radius="lg"
-      scrollAreaComponent={ScrollArea.Autosize}
-      styles={{
-        // The list is long, and the save action belongs to the whole drawer —
-        // pin the header so it stays reachable without scrolling back up.
-        header: {
-          position: "sticky",
-          top: 0,
-          zIndex: 2,
-          alignItems: "flex-start",
-        },
-        title: { flex: 1, marginRight: "var(--mantine-spacing-sm)" },
-      }}
+      classNames={{ header: drawerClasses.header, title: drawerClasses.title, body: drawerClasses.body }}
       title={
         <Group justify="space-between" wrap="nowrap" w="100%">
           <Group gap="sm" wrap="nowrap">
             <Text fw={650}>{title}</Text>
-            <Badge variant="light" color="emerald" size="sm">{count} on your page</Badge>
+            <Badge variant="light" size="sm">{count} on your page</Badge>
           </Group>
-
           {dirty && (
-            <Button
-              size="xs"
-              color="emerald"
-              leftSection={<Check size={14} />}
-              onClick={() => {
-                onSave();
-              }}
-              loading={saving}
-            >
+            <Button size="xs" leftSection={<Check size={14} />} onClick={onSave} loading={saving}>
               Save changes
             </Button>
           )}
         </Group>
       }
     >
-      <Text size="sm" c="dimmed" mb="md">
+      <Text size="sm" c="dimmed" mb="sm">
         {intro ?? (
           <>
-            Pick any widget from Analytics to pin here. The complete breakdown always lives in{" "}
-            <Anchor component={Link} to="/app/analytics" size="sm">Analytics</Anchor>.
+            Previews use sample data. Your real numbers show once a widget is on the page. The full breakdown lives in{" "}
+            <Anchor component={Link} to="/app/analytics" size="sm">Website analytics</Anchor>.
           </>
         )}
       </Text>
 
-      <TextInput
-        placeholder="Search widgets…"
-        value={query}
-        onChange={(e) => setQuery(e.currentTarget.value)}
-        leftSection={<Search size={15} />}
-        rightSection={
-          query ? (
-            <X
-              size={15}
-              style={{ cursor: "pointer" }}
-              onClick={() => setQuery("")}
-            />
-          ) : null
-        }
-        mb="lg"
-      />
+      <WidgetPickerToolbar query={query} onQuery={setQuery} group={group} onGroup={setGroup} has={has} />
 
-      {groups.length === 0 ? (
-        <Center py="xl">
-          <Stack align="center" gap={6}>
-            <ThemeIcon variant="light" color="gray" size="xl" radius="md"><SearchX size={20} /></ThemeIcon>
-            <Text fw={600} size="sm">No widgets match “{query}”</Text>
-            <Button size="xs" variant="subtle" onClick={() => setQuery("")}>Clear search</Button>
-          </Stack>
-        </Center>
-      ) : (
-        <Stack gap="xl">
-          {groups.map(({ group, items, total }) => {
-            const on = items.filter((w) => has(w.id)).length;
-            return (
-              <div key={group}>
-                <Group justify="space-between" mb="sm">
-                  <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.05em" }}>
-                    {group}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {query ? `${items.length} of ${total}` : `${on}/${total}`}
-                  </Text>
-                </Group>
-
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-                  {items.map((w, i) => {
-                    const active = has(w.id);
-                    return (
-                      <motion.div
-                        key={w.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: Math.min(i, 8) * 0.03, duration: 0.22 }}
-                      >
-                        <Card
-                          withBorder
-                          radius="md"
-                          padding="sm"
-                          h="100%"
-                          className={active ? "widget-pick active" : "widget-pick"}
-                          onClick={() => toggle(w.id)}
-                        >
-                          <Group justify="space-between" wrap="nowrap" mb="xs">
-                            <Text fw={600} size="sm" truncate>{w.label}</Text>
-                            <Checkbox
-                              checked={active}
-                              onChange={() => toggle(w.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              color="emerald"
-                              radius="sm"
-                              size="sm"
-                            />
-                          </Group>
-
-                          <WidgetPreview kind={w.kind} active={active} />
-
-                          <Text size="xs" c="dimmed" mt="xs" lineClamp={2}>
-                            {w.description}
-                          </Text>
-
-                          {/* Width only means something once the widget is on the
-                              page, so the control appears with it. Clicks must not
-                              bubble — the card itself toggles the widget off. */}
-                          {active && (
-                            <Group
-                              gap="xs"
-                              wrap="nowrap"
-                              mt="sm"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Text size="xs" c="dimmed" fw={500}>Width</Text>
-                              <SegmentedControl
-                                size="xs"
-                                color="emerald"
-                                value={String(spanOf(w.id) ?? w.defaultSpan)}
-                                onChange={(v) => setSpan(w.id, Number(v) as Span)}
-                                data={SPANS.map((s) => ({ label: String(s), value: String(s) }))}
-                                style={{ flex: 1 }}
-                              />
-                            </Group>
-                          )}
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </SimpleGrid>
-              </div>
-            );
-          })}
-        </Stack>
+      {opened && (
+        <WidgetPickerSections
+          sections={sections}
+          query={query}
+          onClearQuery={() => setQuery("")}
+          has={has}
+          spanOf={spanOf}
+          toggle={toggle}
+          setSpan={setSpan}
+        />
       )}
 
-      <Divider my="lg" />
-      <Group justify="space-between">
-        <Button
-          variant="subtle"
-          color="gray"
-          size="xs"
-          leftSection={<Eraser size={13} />}
-          onClick={() => {
-            clear();
-          }}
-        >
+      <div className={classes.footer}>
+        <Button variant="subtle" color="gray" size="xs" leftSection={<Eraser size={13} />} onClick={clear}>
           Clear all
         </Button>
         {showReset && (
-          <Button
-            variant="light"
-            size="xs"
-            leftSection={<RotateCcw size={13} />}
-            onClick={() => {
-              reset();
-            }}
-          >
+          <Button variant="default" size="xs" leftSection={<RotateCcw size={13} />} onClick={reset}>
             Reset to default
           </Button>
         )}
-      </Group>
+      </div>
     </Drawer>
   );
 }
