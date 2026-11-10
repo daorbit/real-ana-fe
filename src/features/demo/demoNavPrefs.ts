@@ -1,5 +1,6 @@
 import type { NavPrefs } from "@/shared/types";
 import { DEMO_CALL_URL } from "@/shared/lib/docsSlugs";
+import { DEMO_CALL_ICON } from "@/features/demo/demoImages";
 
 export const demoNavPrefs: NavPrefs = {
   hidden: [],
@@ -8,10 +9,10 @@ export const demoNavPrefs: NavPrefs = {
     {
       id: "demo-link-call",
       label: "Book a call",
-      url: DEMO_CALL_URL,
+      url: `${DEMO_CALL_URL}?layout=page`,
       mode: "internal",
       slug: "book-a-call",
-      logoUrl: "",
+      logoUrl: DEMO_CALL_ICON,
     },
     {
       id: "demo-link-docs",

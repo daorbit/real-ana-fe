@@ -21,6 +21,21 @@ export const DEMO_HERO_IMAGE = svg(
   <rect x="1110" y="360" width="50" height="300" rx="8" fill="#4338ca"/>`,
 );
 
+export const DEMO_CALL_ICON = svg(
+  64,
+  64,
+  `<rect x="6" y="10" width="46" height="44" rx="9" fill="#ffffff"/>
+  <path d="M15 10h28a9 9 0 0 1 9 9v5H6v-5a9 9 0 0 1 9-9z" fill="#ef4444"/>
+  <rect x="16" y="5" width="5" height="11" rx="2.5" fill="#334155"/>
+  <rect x="37" y="5" width="5" height="11" rx="2.5" fill="#334155"/>
+  <rect x="13" y="30" width="7" height="6" rx="2" fill="#cbd5e1"/>
+  <rect x="25" y="30" width="7" height="6" rx="2" fill="#cbd5e1"/>
+  <rect x="13" y="41" width="7" height="6" rx="2" fill="#cbd5e1"/>
+  <circle cx="46" cy="46" r="14" fill="#2563eb"/>
+  <circle cx="46" cy="46" r="10" fill="#ffffff"/>
+  <path d="M46 40v6.5l4 2.5" stroke="#2563eb" stroke-width="2.6" stroke-linecap="round" fill="none"/>`,
+);
+
 export const DEMO_LOGO_IMAGE = svg(
   240,
   64,
