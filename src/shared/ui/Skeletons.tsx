@@ -4,6 +4,18 @@ import classes from "./Skeletons.module.css";
 
 const LABEL_WIDTHS = ["62%", "48%", "70%", "40%", "56%", "44%", "52%", "36%"];
 
+const WAVE_LINE = "M0 34 C 12 30, 20 22, 32 24 S 52 32, 64 26 S 84 12, 96 16 S 116 26, 128 18 S 148 8, 160 12 L 200 6";
+const WAVE_FILL = `${WAVE_LINE} L 200 48 L 0 48 Z`;
+
+function SkeletonWave({ className }: { className?: string }) {
+  return (
+    <svg className={`${classes.wave} ${className ?? ""}`} viewBox="0 0 200 48" preserveAspectRatio="none" aria-hidden>
+      <path d={WAVE_FILL} className={classes.waveFill} />
+      <path d={WAVE_LINE} className={classes.waveLine} vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
 export function StatCardSkeleton({ spark = true }: { spark?: boolean }) {
   return (
     <div className={classes.stat}>
@@ -20,7 +32,7 @@ export function StatCardSkeleton({ spark = true }: { spark?: boolean }) {
       </div>
       {spark && (
         <div className={classes.statSpark}>
-          <Skeleton height={46} radius={0} />
+          <SkeletonWave />
         </div>
       )}
     </div>
@@ -85,6 +97,7 @@ function ChartBones({ height }: { height: number }) {
         {Array.from({ length: 4 }).map((_, i) => (
           <span key={i} className={classes.gridLine} />
         ))}
+        <SkeletonWave className={classes.chartWave} />
       </Box>
       <div className={classes.chartTicks}>
         {Array.from({ length: 6 }).map((_, i) => (
@@ -142,12 +155,12 @@ export function HomeSkeleton() {
     <>
       <Group justify="space-between" align="flex-start" mb="xl">
         <div>
-          <Skeleton height={28} width={240} radius="sm" />
-          <Skeleton height={12} width={300} mt={10} radius="sm" />
+          <Skeleton height={22} width={180} radius="sm" />
+          <Skeleton height={10} width={260} mt={12} radius="sm" />
         </div>
-        <Group gap="sm">
-          <Skeleton height={36} width={110} radius="md" />
-          <Skeleton height={36} width={120} radius="md" />
+        <Group gap={8}>
+          <Skeleton height={32} width={32} radius={10} />
+          <Skeleton height={32} width={92} radius={10} />
         </Group>
       </Group>
 
