@@ -46,6 +46,14 @@ const campaignsApi = tags.injectEndpoints({
     createCampaign: build.mutation<Campaign, CampaignInput & { workspaceId: string }>({
       query: ({ workspaceId, ...body }) => ({ url: base(workspaceId), method: "POST", body }),
       invalidatesTags: ["Campaigns"],
+      async onQueryStarted({ workspaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(campaignsApi.util.upsertQueryData("getCampaign", { workspaceId, id: data.id }, data));
+        } catch {
+          return;
+        }
+      },
     }),
 
     updateCampaign: build.mutation<Campaign, CampaignInput & IdArgs>({
@@ -82,10 +90,6 @@ const campaignsApi = tags.injectEndpoints({
     }),
   }),
 });
-
-export function seedCampaign(workspaceId: string, campaign: Campaign) {
-  return campaignsApi.util.upsertQueryData("getCampaign", { workspaceId, id: campaign.id }, campaign);
-}
 
 export const {
   useGetCampaignsQuery,

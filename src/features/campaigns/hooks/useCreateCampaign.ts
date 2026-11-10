@@ -1,14 +1,11 @@
 import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { store } from "@/app/store";
 import { notifyError } from "@/shared/lib/notify";
-import { seedCampaign, useCreateCampaignMutation } from "@/features/campaigns/api";
+import { useCreateCampaignMutation } from "@/features/campaigns/api";
 import { draftFromTemplate, type CampaignTemplate } from "@/features/campaigns/lib/campaignTemplates";
 
 export function useCreateCampaign(workspaceId: string | undefined, lastAddress: string) {
   const navigate = useNavigate();
-  const dispatch = useDispatch<typeof store.dispatch>();
   const [create, state] = useCreateCampaignMutation();
   const [picked, setPicked] = useState<string | null>(null);
 
@@ -18,14 +15,13 @@ export function useCreateCampaign(workspaceId: string | undefined, lastAddress: 
       setPicked(template.name);
       try {
         const created = await create({ workspaceId, ...draftFromTemplate(template, lastAddress) }).unwrap();
-        dispatch(seedCampaign(workspaceId, created));
         navigate(`/app/campaigns/${created.id}/edit`);
       } catch (e) {
         setPicked(null);
         notifyError(e, "Could not start the campaign.");
       }
     },
-    [workspaceId, lastAddress, create, dispatch, navigate],
+    [workspaceId, lastAddress, create, navigate],
   );
 
   return { start, creating: state.isLoading || picked !== null, picked };
