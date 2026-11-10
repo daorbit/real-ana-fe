@@ -1,32 +1,48 @@
 import { useState } from "react";
+import { Button } from "@mantine/core";
+import { CalendarIcon } from "lucide-react";
+import { AppShell } from "@/app/AppShell";
+import { PageHeader } from "@/shared/ui/Page";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DemoCallModal } from "@/app/shell/DemoCallModal";
-import { WhyTopBar } from "../components/WhyTopBar";
-import { WhyHero } from "../components/WhyHero";
-import { PillarGrid } from "../components/PillarGrid";
-import { GrowthJourney } from "../components/GrowthJourney";
-import { StackCompare } from "../components/StackCompare";
-import { TrustList } from "../components/TrustList";
-import { WhyCta } from "../components/WhyCta";
-import classes from "../components/Why.module.css";
+import { DocBlocks } from "../components/DocBlocks";
+import { DocToc } from "../components/DocToc";
+import { WHY_LEAD, WHY_SECTIONS, WHY_TITLE, WHY_UPDATED } from "../lib/whyQuantalog";
+import classes from "../components/Doc.module.css";
 
 export default function WhyQuantalog() {
-  useTitle("Why Quantalog");
+  useTitle(WHY_TITLE);
   const [callOpen, setCallOpen] = useState(false);
-  const bookDemo = () => setCallOpen(true);
 
   return (
-    <div className={classes.shell}>
-      <WhyTopBar onBookDemo={bookDemo} />
-      <main className={classes.page}>
-        <WhyHero onBookDemo={bookDemo} />
-        <PillarGrid />
-        <GrowthJourney />
-        <StackCompare />
-        <TrustList />
-        <WhyCta onBookDemo={bookDemo} />
-      </main>
+    <AppShell>
+      <PageHeader
+        title={WHY_TITLE}
+        description={WHY_LEAD}
+        actions={
+          <Button radius={10} leftSection={<CalendarIcon size={16} />} onClick={() => setCallOpen(true)}>
+            Book a demo
+          </Button>
+        }
+      />
+
+      <div className={classes.layout}>
+        <article className={classes.article}>
+          <p className={classes.updated}>{WHY_UPDATED}</p>
+          {WHY_SECTIONS.map((section, i) => (
+            <section key={section.id} id={section.id} className={classes.section}>
+              <h2 className={classes.h2}>
+                <span className={classes.h2Number}>{String(i + 1).padStart(2, "0")}</span>
+                {section.title}
+              </h2>
+              <DocBlocks blocks={section.blocks} />
+            </section>
+          ))}
+        </article>
+        <DocToc sections={WHY_SECTIONS} />
+      </div>
+
       <DemoCallModal opened={callOpen} onClose={() => setCallOpen(false)} />
-    </div>
+    </AppShell>
   );
 }

@@ -139,7 +139,7 @@ export function AccountMenu({
           <Menu.Divider />
           <div className={classes.menuSection}>{t("nav.help", "Help")}</div>
 
-          <Menu.Item component={Link} to="/why-quantalog" leftSection={<MenuToneIcon icon={CompassIcon} tone="teal" />}>
+          <Menu.Item component={Link} to="/app/why-quantalog" leftSection={<MenuToneIcon icon={CompassIcon} tone="teal" />}>
             {t("nav.whyQuantalog", "Why Quantalog")}
           </Menu.Item>
           <Menu.Item leftSection={<MenuToneIcon icon={RequestFeatureColorIcon} tone="amber" />} onClick={() => setFeatureOpen(true)}>

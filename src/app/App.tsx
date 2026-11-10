@@ -264,7 +264,6 @@ export default function App() {
               <Route path="/connect/authorize" element={<RouteFrame><ConnectAuthorize /></RouteFrame>} />
               <Route path="/seo-report/:token" element={<RouteFrame><PublicSeoReport /></RouteFrame>} />
               <Route path="/data-deletion" element={<RouteFrame><DataDeletion /></RouteFrame>} />
-              <Route path="/why-quantalog" element={<RouteFrame><WhyQuantalog /></RouteFrame>} />
               <Route path="/app/onboarding" element={<ProtectedRaw><RouteFrame><Onboarding /></RouteFrame></ProtectedRaw>} />
               <Route
                 path="/app/seo/:siteId/report/:reportId/print"
@@ -322,6 +321,7 @@ export default function App() {
                 <Route path="/app/lead-capture" element={<LeadCapture />} />
                 <Route path="/app/invoices" element={<Invoices />} />
                 <Route path="/app/link/:slug" element={<LinkFrame />} />
+                <Route path="/app/why-quantalog" element={<WhyQuantalog />} />
                 <Route path="/app/developers" element={<Developers />} />
                 <Route path="/app/settings/:section?" element={<Settings />} />
                 <Route path="/app/apps" element={<Apps />} />

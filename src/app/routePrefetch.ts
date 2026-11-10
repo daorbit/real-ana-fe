@@ -57,7 +57,7 @@ const importers: Record<string, () => Promise<unknown>> = {
   "/app/lead-capture": () => import("@/features/leadCapture/pages/LeadCapture"),
   "/app/invoices": () => import("@/features/invoices/pages/Invoices"),
   "/app/link": () => import("@/features/customLinks/pages/LinkFrame"),
-  "/why-quantalog": () => import("@/features/about/pages/WhyQuantalog"),
+  "/app/why-quantalog": () => import("@/features/about/pages/WhyQuantalog"),
   "/app/developers": () => import("@/features/support/pages/Developers"),
   "/app/settings": () => import("@/features/auth/pages/Settings"),
   "/app/settings/profile": () => import("@/features/auth/pages/Settings"),
