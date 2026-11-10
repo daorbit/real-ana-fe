@@ -22,22 +22,11 @@ import { useAiAssistants } from "../../hooks/useAiAssistants";
 import { AiAssistantsConnection } from "../assistants/AiAssistantsConnection";
 import { FormsIntegrations } from "../FormsIntegrations";
 import { SearchConsoleConnection } from "../SearchConsoleConnection";
-import { ConnectionCardSkeleton, ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
+import { ConnectionGridSkeleton } from "./ConnectionCardSkeleton";
 import { ConnectionsToolbar } from "./ConnectionsToolbar";
 import { SocialGroup } from "./SocialGroup";
 
 const SKELETON_CARDS = 8;
-const FORMS_SKELETON_CARDS = 4;
-
-function FormsSkeletons() {
-  return (
-    <>
-      {Array.from({ length: FORMS_SKELETON_CARDS }, (_, index) => (
-        <ConnectionCardSkeleton key={index} />
-      ))}
-    </>
-  );
-}
 
 function formsLockReason(isDemo: boolean, hasWorkspace: boolean, canEdit: boolean): string | undefined {
   if (isDemo) return "Form apps are connected in your own workspace, not the demo.";
@@ -154,11 +143,6 @@ export function ConnectionsBoard() {
             integrations={integrations}
             filter={filter}
           />
-          {formsLoading && (
-            <div className="connection-grid" aria-busy="true">
-              <FormsSkeletons />
-            </div>
-          )}
         </>
       )}
       </Fragment>

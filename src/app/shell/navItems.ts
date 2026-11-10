@@ -79,7 +79,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/tasks", labelKey: "nav.tasks", label: "Tasks", icon: ListTodo, app: "tasks", showWhenOff: true },
       { to: "/app/invoices", labelKey: "nav.invoices", label: "Invoices", icon: ReceiptText, app: "invoicing", showWhenOff: Boolean(import.meta.env.VITE_INVOICES_URL) },
       { to: "/app/media", labelKey: "nav.media", label: "Media", icon: Images, app: "media" },
-      { to: "/app/apps", labelKey: "nav.allApps", label: "All apps", icon: AllAppsColorIcon, tone: "gold", quiet: true },
+      { to: "/app/apps", labelKey: "nav.allApps", label: "App Store", icon: AllAppsColorIcon, tone: "gold", quiet: true },
     ],
   },
   {

@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Anchor, Group, Text } from "@mantine/core";
 import { useSaveFormsWebhookMutation } from "@/app/store";
 import { ConnectionGroup } from "@/features/auth/components/settings/ConnectionGroup";
+import { ConnectionCardSkeleton } from "./board/ConnectionCardSkeleton";
 import { notify, notifyError } from "@/shared/lib/notify";
 import type { useFormsIntegrations } from "../hooks/useFormsIntegrations";
 import { useGoogleConnect } from "../hooks/useGoogleConnect";
@@ -18,6 +19,7 @@ import { WhatsAppModal } from "./whatsapp/WhatsAppModal";
 import { usePermissions } from "@/features/workspace/context";
 import type { IntegrationTile, PaymentProvider } from "../types";
 
+const FORMS_SKELETON_CARDS = 4;
 const FORMS_TITLE = "Form apps";
 const FORMS_HINT = "Email, payments, calendar and chat apps your lead forms and reports use.";
 
@@ -172,7 +174,16 @@ export function FormsIntegrations({ workspaceId, lockedReason, integrations, fil
     );
   }
 
-  if (loading) return null;
+  if (loading) {
+    if (isFiltered(filter)) return null;
+    return (
+      <ConnectionGroup title={FORMS_TITLE} hint={FORMS_HINT}>
+        {Array.from({ length: FORMS_SKELETON_CARDS }, (_, index) => (
+          <ConnectionCardSkeleton key={index} />
+        ))}
+      </ConnectionGroup>
+    );
+  }
 
   if (failed) {
     return (
