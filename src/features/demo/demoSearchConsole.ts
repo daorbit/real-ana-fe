@@ -4,6 +4,7 @@ import type {
   SearchInspection, SearchDrilldown, SearchMetrics, SearchType,
 } from "@/shared/types";
 import { DEMO_SITE_ID } from "@/features/demo/demoData";
+import { demoDrift } from "@/features/demo/demoDrift";
 
 function rng(seed: number) {
   let s = seed >>> 0;
@@ -76,6 +77,15 @@ export function demoSearchConsoleStatus(siteId: string = DEMO_SITE_ID): SearchCo
 
 export function demoSearchPerformance(days = 28, type: SearchType = "web"): SearchPerformance {
   const daily = dailySeries(days, 0x5e1, 420);
+  const baseClicks = daily.reduce((sum, d) => sum + d.clicks, 0);
+  const reach = demoDrift(5, 0.3);
+  const rank = demoDrift(7, 0.08);
+  daily.slice(-3).forEach((d) => {
+    d.impressions = Math.round(d.impressions * reach);
+    d.clicks = Math.round(d.clicks * reach * reach);
+    d.ctr = d.impressions ? Number((d.clicks / d.impressions).toFixed(4)) : 0;
+    d.position = Number((d.position / rank).toFixed(1));
+  });
   const totals = daily.reduce(
     (acc, d) => ({
       clicks: acc.clicks + d.clicks,
@@ -88,7 +98,7 @@ export function demoSearchPerformance(days = 28, type: SearchType = "web"): Sear
   totals.ctr = totals.impressions ? Number((totals.clicks / totals.impressions).toFixed(4)) : 0;
   totals.position = Number((daily.reduce((s, d) => s + d.position, 0) / daily.length).toFixed(1));
 
-  const previous = metrics(rng(0x5e2), totals.clicks / 0.88);
+  const previous = metrics(rng(0x5e2), baseClicks / 0.88);
 
   return {
     propertyUrl: DEMO_PROPERTY_URL,

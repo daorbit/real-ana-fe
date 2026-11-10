@@ -3,6 +3,7 @@ import { useGetStatsQuery } from "@/app/store";
 import { notifyError } from "@/shared/lib/notify";
 import { useDemo } from "@/features/demo/context";
 import { demoStats } from "@/features/demo/demoStats";
+import { useDemoTick } from "@/features/demo/useDemoTick";
 import { POLL_MS } from "@/shared/hooks/usePolling";
 import { useRefetchOnFocus } from "@/shared/hooks/useRefetchOnFocus";
 import type { CompareMode } from "@/shared/types";
@@ -78,7 +79,8 @@ export function useStats(
   }, [error]);
 
   const { demo } = useDemo();
-  const sample = useMemo(() => (demo ? demoStats(range) : null), [demo, range]);
+  const tick = useDemoTick(demo);
+  const sample = useMemo(() => (demo && tick >= 0 ? demoStats(range) : null), [demo, range, tick]);
 
   if (sample) {
     return {

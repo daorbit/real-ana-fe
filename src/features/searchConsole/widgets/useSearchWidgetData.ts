@@ -4,6 +4,7 @@ import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { SerializedError } from "@reduxjs/toolkit";
 import { useGetSearchInsightsQuery, useGetSearchPerformanceQuery } from "@/app/store";
 import { useDemo } from "@/features/demo/context";
+import { useDemoTick } from "@/features/demo/useDemoTick";
 import { demoSearchInsights, demoSearchPerformance } from "@/features/demo/demoSearchConsole";
 import type { SearchSource } from "@/features/searchConsole/widgets/useSearchWidgetSource";
 
@@ -26,9 +27,10 @@ function argsOf(source: SearchSource) {
 export function useSearchPerformanceData(source: SearchSource) {
   const { data: realData, isLoading, isFetching, error, refetch } = useGetSearchPerformanceQuery(argsOf(source));
   const { demo } = useDemo();
+  const tick = useDemoTick(demo);
   const sample = useMemo(
-    () => (demo && source.kind === "ready" ? demoSearchPerformance(source.days) : null),
-    [demo, source],
+    () => (demo && source.kind === "ready" && tick >= 0 ? demoSearchPerformance(source.days) : null),
+    [demo, source, tick],
   );
   const data = sample ?? realData;
   return { data, loading: !sample && (isLoading || (isFetching && !data)), failure: sample ? null : failureOf(error), retry: refetch };

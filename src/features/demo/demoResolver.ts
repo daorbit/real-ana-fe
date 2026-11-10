@@ -10,6 +10,8 @@ import { demoFunnelOverview, demoSavedFunnels } from "@/features/demo/demoFunnel
 import { demoHeatmapPages, demoPageHeatmap } from "@/features/demo/demoHeatmap";
 import { demoAccountActivity, demoAuditPage } from "@/features/demo/demoAudit";
 import { demoMembersResponse } from "@/features/demo/demoWorkspace";
+import { DEMO_HOME_LAYOUT } from "@/features/demo/demoHomeLayout";
+import { demoLive } from "@/features/demo/demoStats";
 import {
   demoOrbitAnswer, demoOrbitConversation, demoOrbitConversations, demoOrbitShortReply, demoOrbitStatus,
 } from "@/features/demo/demoOrbit";
@@ -35,16 +37,13 @@ export function resolveDemoRequest(url: string): unknown | undefined {
   if (/^\/api\/workspaces\/[^/]+$/.test(path)) return demoWorkspaces[0];
   if (/\/sites$/.test(path)) return demoSites;
   if (/\/sites\/[^/]+\/status$/.test(path)) return demoInstallStatus;
-  if (/\/layout$/.test(path)) return { layout: null };
+  if (/\/layout$/.test(path)) return { layout: DEMO_HOME_LAYOUT };
 
   // analytics
   if (/\/stats$/.test(path)) return demoStats(params.get("range") ?? "24h");
   // Served from the same fixture the stats payload uses, so the hero figure and
   // the live-pages panel agree with each other on a demo dashboard.
-  if (/\/live$/.test(path)) {
-    const s = demoStats("24h");
-    return { live: s.live, livePages: s.livePages };
-  }
+  if (/\/live$/.test(path)) return demoLive();
   if (/\/retention$/.test(path)) return [];
   if (/\/funnel$/.test(path)) return { steps: [] };
   if (/\/funnels\/overview$/.test(path)) return demoFunnelOverview(params.get("range") ?? "7d");

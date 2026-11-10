@@ -1,4 +1,5 @@
 import type { Stats, FlowNode, FlowEdge } from "@/shared/types";
+import { changePct, demoDrift, roundTo } from "@/features/demo/demoDrift";
 
 /**
  * A believable populated dashboard, generated rather than hand-written.
@@ -30,8 +31,33 @@ function ranked(labels: string[], total: number, decay = 0.62): { key: string; c
   const sum = raw.reduce((a, b) => a + b, 0);
   return labels.map((key, i) => ({
     key,
-    count: Math.max(1, Math.round((raw[i] / sum) * total)),
+    count: Math.max(1, Math.round((raw[i] / sum) * total * demoDrift(i * 1.3 + decay * 10, 0.18))),
   }));
+}
+
+export function demoLive() {
+  const s = demoStats("24h");
+  const live = s.live;
+  const bots = Math.round(live * 0.12 * demoDrift(9, 0.5, 90_000));
+  const confirmedHumans = Math.round((live - bots) * 0.55 * demoDrift(11, 0.25, 75_000));
+  const likelyHumans = Math.max(0, live - bots - confirmedHumans);
+  return {
+    live,
+    livePages: ranked([PAGES[0], PAGES[1], PAGES[2], PAGES[3], PAGES[4]], live, 0.55),
+    liveCountries: ranked(COUNTRIES.slice(0, 6), live, 0.55),
+    audience: {
+      total: live,
+      humans: confirmedHumans + likelyHumans,
+      confirmedHumans,
+      likelyHumans,
+      bots,
+      ai: Math.round(bots / 3),
+      crawlers: bots - Math.round(bots / 3),
+      automation: 0,
+      suspect: 0,
+      visitors: [],
+    },
+  };
 }
 
 const PAGES = ["/", "/pricing", "/docs", "/blog/launch", "/features", "/about", "/docs/api", "/changelog"];
@@ -117,9 +143,34 @@ export function demoStats(range: string): Stats {
     };
   });
 
+  const basePageviews = timeseries.reduce((a, b) => a + b.views, 0);
+  const baseVisitors = timeseries.reduce((a, b) => a + b.visitors, 0);
+  const baseSessions = Math.round(baseVisitors * 1.18);
+
+  const flow = demoDrift(1, 0.35);
+  const recent = Math.max(1, Math.round(points / 8));
+  timeseries.forEach((row, i) => {
+    if (i < points - recent) return;
+    row.views = Math.round(row.views * flow);
+    row.visitors = Math.round(row.visitors * flow);
+    row.sessions = Math.round(row.sessions * flow);
+  });
+
   const pageviews = timeseries.reduce((a, b) => a + b.views, 0);
   const visitors = timeseries.reduce((a, b) => a + b.visitors, 0);
   const sessions = Math.round(visitors * 1.18);
+  const quality = demoDrift(3, 0.06);
+  const bounceRate = Math.round(41 / quality);
+  const avgSessionMs = Math.round(168_000 * quality);
+  const pagesPerSession = roundTo(2.4 * quality);
+  const previous = {
+    pageviews: Math.round(basePageviews / 1.124),
+    visitors: Math.round(baseVisitors / 1.091),
+    sessions: Math.round(baseSessions / 1.078),
+    bounceRate: 44,
+    avgSessionMs: Math.round(168_000 / 1.065),
+    pagesPerSession: 2.35,
+  };
 
   const heatmap = Array.from({ length: 7 }, (_, day) =>
     Array.from({ length: 24 }, (_, hour) => {
@@ -140,20 +191,20 @@ export function demoStats(range: string): Stats {
     pageviews,
     visitors,
     sessions,
-    live: 12 + Math.round(rand() * 20),
+    live: Math.max(3, Math.round((12 + rand() * 20) * demoDrift(2, 0.45, 2 * 60_000))),
 
-    bounceRate: 41,
-    avgSessionMs: 168_000,
+    bounceRate,
+    avgSessionMs,
     avgTimeOnPageMs: 54_000,
-    pagesPerSession: 2.4,
+    pagesPerSession,
 
     deltas: {
-      pageviews: 12.4,
-      visitors: 9.1,
-      sessions: 7.8,
-      bounceRate: -3.2,
-      avgSessionMs: 6.5,
-      pagesPerSession: 2.1,
+      pageviews: changePct(pageviews, previous.pageviews),
+      visitors: changePct(visitors, previous.visitors),
+      sessions: changePct(sessions, previous.sessions),
+      bounceRate: changePct(bounceRate, previous.bounceRate),
+      avgSessionMs: changePct(avgSessionMs, previous.avgSessionMs),
+      pagesPerSession: changePct(pagesPerSession, previous.pagesPerSession),
     },
 
     /**
@@ -166,13 +217,8 @@ export function demoStats(range: string): Stats {
       mode: "previous",
       since: new Date(Date.now() - 2 * spanMs(range)).toISOString(),
       until: new Date(Date.now() - spanMs(range)).toISOString(),
-      pageviews: Math.round(pageviews / 1.124),
-      visitors: Math.round(visitors / 1.091),
-      sessions: Math.round(sessions / 1.078),
-      bounceRate: 44,
-      avgSessionMs: Math.round(168_000 / 1.065),
+      ...previous,
       avgTimeOnPageMs: Math.round(54_000 / 1.04),
-      pagesPerSession: 2.35,
       timeseries: null,
     },
 
