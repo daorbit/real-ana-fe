@@ -5,19 +5,21 @@ import { WorkspaceIcon } from "@/features/workspace/components/picker/WorkspaceI
 import { shortDate } from "@/shared/lib";
 import type { Workspace } from "@/shared/types";
 import { roleLabel } from "./format";
+import { NewWorkspaceTile } from "./NewWorkspaceTile";
 import classes from "./Workspaces.module.css";
 
 interface Props {
   workspaces: Workspace[];
   activeId: string;
   onSelect: (id: string) => void;
+  onCreate?: () => void;
 }
 
-export function OtherWorkspaces({ workspaces, activeId, onSelect }: Props) {
+export function OtherWorkspaces({ workspaces, activeId, onSelect, onCreate }: Props) {
   const { t } = useTranslation();
   const others = workspaces.filter((w) => w._id !== activeId);
 
-  if (others.length === 0) return null;
+  if (others.length === 0 && !onCreate) return null;
 
   return (
     <section className={classes.others} aria-labelledby="other-workspaces-title">
@@ -26,6 +28,7 @@ export function OtherWorkspaces({ workspaces, activeId, onSelect }: Props) {
       </h2>
 
       <div className={classes.othersGrid}>
+        {onCreate && <NewWorkspaceTile onCreate={onCreate} />}
         {others.map((w) => {
           const plan = w.billing?.plan;
           const renews = w.billing?.currentPeriodEnd;

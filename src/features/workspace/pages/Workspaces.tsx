@@ -146,7 +146,12 @@ export default function Workspaces() {
           focusedSiteId={focusedSiteId}
         />
         <WorkspaceDetails workspace={active} canEdit={canEdit} canAdmin={canAdmin} />
-        <OtherWorkspaces workspaces={workspaces} activeId={active._id} onSelect={selectFromCards} />
+        <OtherWorkspaces
+          workspaces={workspaces}
+          activeId={active._id}
+          onSelect={selectFromCards}
+          onCreate={demo ? undefined : createWorkspace}
+        />
       </motion.div>
     </AppShell>
   );

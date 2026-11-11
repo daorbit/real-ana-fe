@@ -1062,6 +1062,7 @@
     "statusLive": "Live",
     "statusWaiting": "Waiting",
     "newWorkspace": "New workspace",
+    "newWorkspaceHint": "Track another website",
     "picker": {
       "title": "Which workspace?",
       "open": "Choose workspace",
