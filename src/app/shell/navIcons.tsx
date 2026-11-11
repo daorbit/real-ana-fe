@@ -5,7 +5,7 @@ export {
   ChartColumnBig as FormAnalyticsNavIcon,
   Megaphone as LeadSourcesNavIcon,
   CalendarCheck as BookingsNavIcon,
-  SearchCheck as SearchVisibilityNavIcon,
+  ScanEye as SearchVisibilityNavIcon,
   TrendingUp as RankLabNavIcon,
   Magnet as LeadCaptureNavIcon,
   CalendarClock as ScheduledPostsNavIcon,

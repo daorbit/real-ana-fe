@@ -73,6 +73,27 @@
   background: var(--border);
 }
 
+.row[data-child] {
+  min-height: 44px;
+  padding-left: 30px;
+}
+
+.row[data-child] .icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: transparent;
+}
+
+.row[data-child] .label {
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+.row + .row[data-child]::before {
+  left: 72px;
+}
+
 .row:active {
   background: var(--surface-2);
 }
