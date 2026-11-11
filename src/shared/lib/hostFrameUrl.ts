@@ -23,8 +23,9 @@ export function hostThemeParams(): URLSearchParams {
   return params;
 }
 
-export function hostFrameUrl(base: string, path: string): string {
+export function hostFrameUrl(base: string, path: string, extra?: Record<string, string>): string {
   const params = hostThemeParams();
   params.set("embedded", "1");
+  if (extra) for (const [key, value] of Object.entries(extra)) params.set(key, value);
   return `${base}${path}?${params.toString()}`;
 }

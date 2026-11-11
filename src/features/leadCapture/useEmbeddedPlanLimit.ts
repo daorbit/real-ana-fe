@@ -10,16 +10,30 @@ const PLAN_LIMIT = "quantalog:plan-limit";
 const OPEN_NOTIFICATIONS = "quantalog:open-notifications";
 const OPEN_INTEGRATIONS = "quantalog:open-integrations";
 const OPEN_FORMS = "quantalog:open-forms";
+const OPEN_INSIGHTS = "quantalog:open-insights";
 const FORMS_PATH = "/app/lead-capture";
+const INSIGHTS_PATH = "/app/lead-insights";
 
 interface FramePlanMessage {
-  type: typeof UPGRADE | typeof PLAN_LIMIT | typeof OPEN_NOTIFICATIONS | typeof OPEN_INTEGRATIONS | typeof OPEN_FORMS;
+  type:
+    | typeof UPGRADE
+    | typeof PLAN_LIMIT
+    | typeof OPEN_NOTIFICATIONS
+    | typeof OPEN_INTEGRATIONS
+    | typeof OPEN_FORMS
+    | typeof OPEN_INSIGHTS;
   message?: string;
   limit?: QuotaLimitInfo;
   app?: unknown;
+  form?: unknown;
 }
 
 const APP_ID = /^[a-z0-9-]{1,40}$/;
+const FORM_ID = /^[a-zA-Z0-9_-]{1,64}$/;
+
+function insightsTarget(form: unknown): string {
+  return typeof form === "string" && FORM_ID.test(form) ? `${INSIGHTS_PATH}?form=${form}` : INSIGHTS_PATH;
+}
 
 function connectionsTarget(app: unknown): string {
   return appsPath(typeof app === "string" && APP_ID.test(app) ? app : undefined);
@@ -32,7 +46,8 @@ function isFramePlanMessage(data: unknown): data is FramePlanMessage {
     type === PLAN_LIMIT ||
     type === OPEN_NOTIFICATIONS ||
     type === OPEN_INTEGRATIONS ||
-    type === OPEN_FORMS
+    type === OPEN_FORMS ||
+    type === OPEN_INSIGHTS
   );
 }
 
@@ -61,6 +76,10 @@ export function useEmbeddedPlanLimit(frameBase: string = LEAD_FORMS_BASE) {
       }
       if (event.data.type === OPEN_FORMS) {
         navigate(FORMS_PATH);
+        return;
+      }
+      if (event.data.type === OPEN_INSIGHTS) {
+        navigate(insightsTarget(event.data.form));
         return;
       }
       notify.quotaLimit(event.data.message ?? "Upgrade your plan to continue.", event.data.limit);

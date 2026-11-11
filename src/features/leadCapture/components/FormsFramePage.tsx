@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FolderOpen } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -14,6 +15,7 @@ import { useFrameRailCollapse } from "../useFrameRailCollapse";
 import "../pages/LeadCapture.css";
 
 const DEMO_FORMS_WORKSPACE = "default";
+const FORM_ID = /^[a-zA-Z0-9_-]{1,64}$/;
 
 export function FormsFramePage({ title, path, frameTitle }: { title: string; path: string; frameTitle: string }) {
   useTitle(title);
@@ -30,10 +32,15 @@ export function FormsFramePage({ title, path, frameTitle }: { title: string; pat
   const workspaceId = isDemo ? null : active?._id;
   useHostFrameToken(workspaceId, "forms-token", LEAD_FORMS_BASE);
 
+  const [params] = useSearchParams();
+  const formParam = params.get("form");
+  const formFilter = formParam && FORM_ID.test(formParam) ? formParam : null;
+
   const src = useMemo(() => {
     const frameWorkspace = isDemo ? DEMO_FORMS_WORKSPACE : active?._id;
-    return frameWorkspace ? leadFormsUrl(`/${frameWorkspace}${path}`) : null;
-  }, [active?._id, isDemo, path]);
+    if (!frameWorkspace) return null;
+    return leadFormsUrl(`/${frameWorkspace}${path}`, formFilter ? { form: formFilter } : undefined);
+  }, [active?._id, isDemo, path, formFilter]);
 
   if (!isDemo && !active?._id) {
     return (
