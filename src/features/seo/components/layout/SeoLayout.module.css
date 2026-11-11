@@ -1,3 +1,42 @@
+.subActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 16px;
+}
+
+.overviewLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+.tabTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sectionCount {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.sectionCount[data-alarm] {
+  background: color-mix(in srgb, var(--mantine-color-red-6) 16%, transparent);
+  color: var(--mantine-color-red-5);
+}
+
 .intro {
   display: flex;
   flex-wrap: wrap;
@@ -173,9 +212,65 @@
   border-radius: 8px;
 }
 
+.inspectCard {
+  margin-bottom: var(--mantine-spacing-xl);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.inspect[data-grouped] {
+  gap: 0;
+  min-height: 56px;
+  padding: 8px 8px 8px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.inspect[data-grouped] .siteSelect {
+  flex-basis: 230px;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.inspect[data-grouped] .address {
+  border-radius: 0;
+  background: transparent;
+}
+
+.inspect[data-grouped] .domain {
+  color: var(--text-2);
+}
+
+.inspect[data-grouped] .pathInput {
+  font-weight: 500;
+}
+
+.inspectFoot {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text) 2%, transparent);
+}
+
 @media (max-width: 36em) {
   .inspect {
     flex-wrap: wrap;
+  }
+
+  .inspect[data-grouped] {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .inspect[data-grouped] .siteSelect {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
   }
   .siteSelect,
   .address,

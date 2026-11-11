@@ -9,7 +9,8 @@ import { AllAppsColorIcon } from "./colorIcons";
 import {
   AnalyticsNavIcon, AuditLogNavIcon, BillingNavIcon, BrandingNavIcon, DashboardsNavIcon,
   BookingsNavIcon, DevelopersNavIcon, FormAnalyticsNavIcon, LeadSourcesNavIcon, HomeNavIcon, LeadCaptureNavIcon, MembersNavIcon, RankLabNavIcon, ReportsNavIcon,
-  ScheduledPostsNavIcon, SearchVisibilityNavIcon, SettingsNavIcon, WorkspacesNavIcon,
+  ScheduledPostsNavIcon, SearchVisibilityNavIcon, SeoIssuesNavIcon, SeoOnPageNavIcon, SeoPerformanceNavIcon,
+  SeoSiteHealthNavIcon, SettingsNavIcon, WorkspacesNavIcon,
 } from "./navIcons";
 
 export type NavTone =
@@ -31,6 +32,7 @@ export type NavItem = {
   tone?: NavTone;
   quiet?: boolean;
   children?: NavChild[];
+  defaultOpen?: boolean;
 };
 
 export type NavChild = { to: string; labelKey: string; label: string; keywords?: string; icon: typeof Home };
@@ -59,7 +61,21 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: "Growth",
     items: [
       { to: "/app/search-visibility", labelKey: "nav.searchVisibility", label: "Search visibility", icon: SearchVisibilityNavIcon, tone: "green" },
-      { to: "/app/seo", labelKey: "nav.seo", label: "SEO", keywords: "seo audit", icon: RankLabNavIcon, tone: "teal" },
+      {
+        to: "/app/seo",
+        labelKey: "nav.seo",
+        label: "SEO",
+        keywords: "seo audit",
+        icon: RankLabNavIcon,
+        tone: "teal",
+        defaultOpen: false,
+        children: [
+          { to: "/app/seo/issues", labelKey: "nav.seoIssues", label: "Issues", keywords: "seo problems errors warnings fixes", icon: SeoIssuesNavIcon },
+          { to: "/app/seo/onpage", labelKey: "nav.seoOnPage", label: "On-page", keywords: "meta tags content images structured data schema", icon: SeoOnPageNavIcon },
+          { to: "/app/seo/performance", labelKey: "nav.seoPerformance", label: "Performance", keywords: "core web vitals lighthouse speed", icon: SeoPerformanceNavIcon },
+          { to: "/app/seo/site", labelKey: "nav.seoSiteHealth", label: "Site health", keywords: "technical links crawl robots sitemap ai search", icon: SeoSiteHealthNavIcon },
+        ],
+      },
       {
         to: "/app/lead-capture",
         labelKey: "nav.leadCapture",

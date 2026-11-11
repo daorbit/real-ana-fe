@@ -4,7 +4,7 @@ const PARENTS: NavItem[] = [...NAV_GROUPS.flatMap((group) => withChildren(group.
   .filter((item) => item.to !== "/app")
   .sort((a, b) => b.to.length - a.to.length);
 
-const SECTIONED = ["/app/settings", "/app/admin-tools"];
+const SECTIONED = ["/app/settings", "/app/admin-tools", "/app/seo"];
 
 const isSection = (pathname: string) =>
   SECTIONED.some(

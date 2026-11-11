@@ -33,7 +33,7 @@ export function MobileNavList({ group, pathname }: { group: NavGroup; pathname: 
                 to={to}
                 label={linkUrl ? label : t(labelKey, label)}
                 icon={linkUrl ? <LinkLogo url={linkUrl} logoUrl={logoUrl} label={label} size={16} /> : <NavItemIcon item={item} size={16} />}
-                active={isActivePath(pathname, to)}
+                active={isActivePath(pathname, to) && !children?.some((sub) => isActivePath(pathname, sub.to))}
               />
               {children?.map((sub) => {
                 const Icon = sub.icon;

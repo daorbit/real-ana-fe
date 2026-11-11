@@ -77,6 +77,16 @@ export const SEO_TABS: SeoTab[] = [
 
 const TAB_IDS = SEO_TABS.map((t) => t.id);
 
+export const SEO_BASE = "/app/seo";
+
+export function isSeoTab(value: string | null | undefined): value is SeoTabId {
+  return Boolean(value) && (TAB_IDS as string[]).includes(value as string);
+}
+
+export function seoTabPath(tab: SeoTabId): string {
+  return tab === "overview" ? SEO_BASE : `${SEO_BASE}/${tab}`;
+}
+
 /** Where an old `?section=` value lands now: its tab, and the block within it. */
 export function resolveSeoSection(value: string | null): {
   tab: SeoTabId;

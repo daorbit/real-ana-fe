@@ -80,6 +80,8 @@ export function prefetchRoute(to: string): Promise<void> {
   const exact = to.split(/[?#]/)[0];
   const path = exact.startsWith("/app/link/")
     ? "/app/link"
+    : /^\/app\/seo\/[a-z]+$/.test(exact)
+      ? "/app/seo"
     : exact.startsWith("/app/popups/")
       ? "/app/popups/new"
     : exact.startsWith("/app/bio/")

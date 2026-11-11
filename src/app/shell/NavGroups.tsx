@@ -61,7 +61,8 @@ function NavGroupBlock({
       );
     }
     const label = t(n.labelKey, n.label);
-    const active = isActive(n.to) && !(n.to === DASHBOARDS_PATH && onFavourite);
+    const onChild = Boolean(n.children?.some((c) => isActive(c.to)));
+    const active = isActive(n.to) && !onChild && !(n.to === DASHBOARDS_PATH && onFavourite);
     if (n.to === DASHBOARDS_PATH && !collapsed && favourites.length > 0) {
       return (
         <DashboardsTreeNode
@@ -84,7 +85,7 @@ function NavGroupBlock({
           label={label}
           active={active}
           openKey={`nav:tree:${n.to}`}
-          forceOpen={n.children.some((c) => isActive(c.to))}
+          forceOpen={onChild}
           toggleLabel={`${label} pages`}
         >
           <NavTreeLinks pathname={pathname} links={links} ariaLabel={`${label} pages`} />

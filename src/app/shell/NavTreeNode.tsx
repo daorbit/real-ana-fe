@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
 import { NavLink } from "./NavLink";
@@ -26,8 +26,11 @@ export function NavTreeNode({
   toggleLabel: string;
   children: ReactNode;
 }) {
-  const [stored, toggle] = usePersistedFlag(openKey, true);
-  const open = stored || forceOpen;
+  const [open, toggle, setOpen] = usePersistedFlag(openKey, item.defaultOpen ?? true);
+
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen, setOpen]);
 
   return (
     <div className={classes.node}>
@@ -38,7 +41,6 @@ export function NavTreeNode({
           onClick={toggle}
           aria-expanded={open}
           aria-label={`${open ? "Collapse" : "Expand"} ${toggleLabel}`}
-          disabled={forceOpen}
         >
           {count !== undefined && <span className={classes.count}>{count}</span>}
           <ChevronRight size={13} className={classes.chevron} data-open={open || undefined} />

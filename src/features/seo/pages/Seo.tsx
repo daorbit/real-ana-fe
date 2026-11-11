@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Badge, Box, Button, Card, Modal, Group, Stack,
   Table, Text, ThemeIcon, Tooltip, ActionIcon, ScrollArea, Skeleton,
@@ -47,9 +47,13 @@ import {
 } from "@/features/seo/components/SeoPanels";
 import type { SeoReport, SeoReportSummary } from "@/shared/types";
 import {
-  SEO_TABS, resolveSeoSection, type SeoSubId, type SeoTabId,
+  SEO_TABS, isSeoTab, resolveSeoSection, seoTabPath, type SeoSubId, type SeoTabId,
 } from "@/features/seo/components/sections";
-import { SeoTabs, SeoTabIntro, type SeoTabCount } from "@/features/seo/components/layout/SeoTabs";
+import { SeoInspectSkeleton, SeoTabSkeleton } from "@/features/seo/components/layout/SeoSkeletons";
+import { SeoTabEmpty } from "@/features/seo/components/layout/SeoTabEmpty";
+import {
+  SeoHelpLink, SeoOverviewLink, SeoTabDescription, SeoTabIntro, SeoTabTitle, type SeoTabCount,
+} from "@/features/seo/components/layout/SeoTabs";
 import { ReportMeta } from "@/features/seo/components/layout/ReportMeta";
 import layout from "@/features/seo/components/layout/SeoLayout.module.css";
 import { useTitle } from "@/shared/lib/useTitle";
@@ -282,9 +286,23 @@ export default function Seo() {
 
   const [picked, setPicked] = useState<string>("");
   const [path, setPath] = useState("/");
-  const [params, setParams] = useSearchParams();
-  const resolved = resolveSeoSection(params.get("section"));
-  const tab = resolved.tab;
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const { tab: pathTab } = useParams();
+  const legacySection = params.get("section");
+  const resolved = resolveSeoSection(legacySection);
+  const tab: SeoTabId = isSeoTab(pathTab) ? pathTab : resolved.tab;
+  const onOverview = tab === "overview";
+
+  useEffect(() => {
+    const badPath = pathTab !== undefined && !isSeoTab(pathTab);
+    const tabInQuery = isSeoTab(legacySection);
+    if (!badPath && !tabInQuery) return;
+    const out = new URLSearchParams(window.location.search);
+    if (tabInQuery) out.delete("section");
+    const query = out.toString();
+    navigate(`${seoTabPath(tab)}${query ? `?${query}` : ""}`, { replace: true });
+  }, [pathTab, legacySection, tab, navigate]);
   const tabDef = SEO_TABS.find((x) => x.id === tab) ?? SEO_TABS[0];
 
   // Tabs stay mounted once opened, so switching back is instant and keeps
@@ -306,15 +324,10 @@ export default function Seo() {
   };
 
   const setTab = (next: SeoTabId) => {
-    setParams(
-      (prev) => {
-        const out = new URLSearchParams(prev);
-        if (next === "overview") out.delete("section");
-        else out.set("section", next);
-        return out;
-      },
-      { replace: true },
-    );
+    const out = new URLSearchParams(window.location.search);
+    out.delete("section");
+    const query = out.toString();
+    navigate(`${seoTabPath(next)}${query ? `?${query}` : ""}`);
     // Only when the reader is below the tabs: the new tab then starts right
     // under them instead of halfway down, and a switch near the top of the
     // page doesn't move anything at all.
@@ -484,14 +497,22 @@ export default function Seo() {
   }
 
 
+  const pageTitle = onOverview ? "SEO" : <SeoTabTitle tab={tabDef} count={tabCounts[tab]} />;
+  const pageDescription = onOverview ? (
+    <>
+      Audit a tracked site's meta tags, content, technical setup and Lighthouse scores.{" "}
+      <SeoHelpLink onHelp={() => setHelpOpen(true)} />
+    </>
+  ) : (
+    <SeoTabDescription tab={tabDef} onHelp={() => setHelpOpen(true)} />
+  );
+
   if (sitesLoading) {
     return (
       <AppShell>
-        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath={DOCS_SLUGS.seo} />
-        <Stack gap="lg">
-          <Skeleton height={92} radius="md" />
-          <Skeleton height={220} radius="md" />
-        </Stack>
+        <PageHeader title={pageTitle} description={pageDescription} docsPath={DOCS_SLUGS.seo} />
+        {onOverview && <SeoInspectSkeleton />}
+        <SeoTabSkeleton tab={tab} />
       </AppShell>
     );
   }
@@ -499,7 +520,7 @@ export default function Seo() {
   if (!sites.length && sitesFailed) {
     return (
       <AppShell>
-        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath={DOCS_SLUGS.seo} />
+        <PageHeader title={pageTitle} description={pageDescription} docsPath={DOCS_SLUGS.seo} />
         <SitesLoadError onRetry={() => void refetchSites()} retrying={sitesFetching} />
       </AppShell>
     );
@@ -508,7 +529,7 @@ export default function Seo() {
   if (!sites.length) {
     return (
       <AppShell>
-        <PageHeader title="SEO" description="Audit a tracked site's on-page SEO." docsPath={DOCS_SLUGS.seo} />
+        <PageHeader title={pageTitle} description={pageDescription} docsPath={DOCS_SLUGS.seo} />
         <SeoNoSitePanel canEdit={canEdit} />
       </AppShell>
     );
@@ -516,6 +537,15 @@ export default function Seo() {
 
 
   const showStart = !report && !loading;
+  const reportMeta =
+    report && data ? (
+      <ReportMeta
+        report={report}
+        data={data}
+        viewingOld={Boolean(viewingId && latest && viewingId !== latest._id)}
+        onBackToLatest={() => setViewingId(null)}
+      />
+    ) : null;
   const inspectBar = (hero: boolean) => (
     <SeoInspectBar
       hero={hero}
@@ -528,6 +558,7 @@ export default function Seo() {
       onPath={setPath}
       onRun={() => run(false)}
       analyzing={analyzing}
+      footer={hero ? undefined : reportMeta ?? <Skeleton height={10} width={200} radius="sm" />}
     />
   );
 
@@ -544,11 +575,16 @@ export default function Seo() {
       </RunningDialog>
 
       <PageHeader
-        title="SEO"
-        description="Audit a tracked site's meta tags, content, technical setup and Lighthouse scores."
+        title={pageTitle}
+        description={pageDescription}
         docsPath={DOCS_SLUGS.seo}
         actions={
-          report && (
+          !onOverview ? (
+            <div className={layout.subActions}>
+              <SeoOverviewLink />
+              {reportMeta}
+            </div>
+          ) : report && (
             <Group gap="sm">
               {history.length > 0 && (
                 <Button variant="default" leftSection={<History size={15} />} onClick={() => setHistoryOpen(true)}>
@@ -579,7 +615,9 @@ export default function Seo() {
         }
       />
 
-      {showStart ? (
+      {showStart && !onOverview ? (
+        <SeoTabEmpty tab={tab as Exclude<SeoTabId, "overview">} canEdit={canEdit} />
+      ) : showStart ? (
         <SeoStartPanel
           domain={domainLabel}
           canEdit={canEdit}
@@ -588,34 +626,16 @@ export default function Seo() {
           inspectBar={inspectBar(true)}
         />
       ) : (
-        (report || analyzing) && inspectBar(false)
+        onOverview && (report || analyzing) && inspectBar(false)
       )}
 
       <Box mt="xs">
-        {loading && !data && (
-          <Stack gap="lg">
-            <Skeleton height={180} radius="md" />
-            <Skeleton height={280} radius="md" />
-          </Stack>
-        )}
+        {loading && !data && <SeoTabSkeleton tab={tab} />}
 
         {data && report && (
           <>
             <div ref={tabsTop} className={layout.anchor} />
-            <SeoTabs
-              active={tab}
-              counts={tabCounts}
-              onChange={setTab}
-              aside={
-                <ReportMeta
-                  report={report}
-                  data={data}
-                  viewingOld={Boolean(viewingId && latest && viewingId !== latest._id)}
-                  onBackToLatest={() => setViewingId(null)}
-                />
-              }
-            />
-            <SeoTabIntro tab={tabDef} onHelp={() => setHelpOpen(true)} onJump={jumpTo} />
+            <SeoTabIntro tab={tabDef} onHelp={() => setHelpOpen(true)} onJump={jumpTo} showText={false} />
 
             <HelpDrawer
               opened={helpOpen}
@@ -629,9 +649,7 @@ export default function Seo() {
               {SEO_TABS.filter((x) => visited.has(x.id)).map((x) => (
                 <div
                   key={x.id}
-                  role="tabpanel"
                   id={`seo-panel-${x.id}`}
-                  aria-labelledby={`seo-tab-${x.id}`}
                   hidden={x.id !== tab}
                 >
                   {x.id === "overview" && (

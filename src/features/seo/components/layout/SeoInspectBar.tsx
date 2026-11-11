@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Button, Select } from "@mantine/core";
 import { Globe, Link2 } from "lucide-react";
 import type { Site } from "@/shared/types";
@@ -14,6 +15,7 @@ export function SeoInspectBar({
   onRun,
   analyzing,
   hero = false,
+  footer,
 }: {
   sites: Site[];
   siteId: string;
@@ -25,9 +27,10 @@ export function SeoInspectBar({
   onRun: () => void;
   analyzing: boolean;
   hero?: boolean;
+  footer?: ReactNode;
 }) {
-  return (
-    <div className={layout.inspect} data-hero={hero || undefined}>
+  const bar = (
+    <div className={layout.inspect} data-hero={hero || undefined} data-grouped={footer ? true : undefined}>
       <Select
         variant="unstyled"
         className={layout.siteSelect}
@@ -65,6 +68,15 @@ export function SeoInspectBar({
           </Button>
         </>
       )}
+    </div>
+  );
+
+  if (!footer) return bar;
+
+  return (
+    <div className={layout.inspectCard}>
+      {bar}
+      <div className={layout.inspectFoot}>{footer}</div>
     </div>
   );
 }

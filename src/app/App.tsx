@@ -293,6 +293,7 @@ export default function App() {
                 {/* <Route path="/app/bio/new" element={<BioStudio />} /> */}
                 {/* <Route path="/app/bio/:pageId" element={<BioStudio />} /> */}
                 <Route path="/app/seo" element={<Seo />} />
+                <Route path="/app/seo/:tab" element={<Seo />} />
                 <Route path="/app/search-visibility" element={<SearchConsole />} />
                 <Route path="/app/search-visibility/page/:pageKey" element={<SearchConsolePageDetail />} />
                 <Route path="/app/search-console" element={<SearchConsole />} />

@@ -1,61 +1,71 @@
-import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { Anchor } from "@mantine/core";
-import { PageTabs, type PageTabItem } from "@/shared/ui/PageTabs";
+import { ArrowUpRight } from "lucide-react";
 import { useRegisterHeaderHelp } from "@/shared/lib/headerHelp";
-import { SEO_TABS, type SeoSubId, type SeoTab, type SeoTabId } from "../sections";
+import { seoTabPath, type SeoSubId, type SeoTab } from "../sections";
 import classes from "./SeoLayout.module.css";
 
 export type SeoTabCount = { value: number; alarm?: boolean };
 
-interface Props {
-  active: SeoTabId;
-  counts: Partial<Record<SeoTabId, SeoTabCount>>;
-  onChange: (id: SeoTabId) => void;
-  aside?: ReactNode;
-}
-
-export function SeoTabs({ active, counts, onChange, aside }: Props) {
-  const items: PageTabItem<SeoTabId>[] = SEO_TABS.map((t) => ({
-    id: t.id,
-    label: t.label,
-    count: counts[t.id]?.value,
-    alarm: counts[t.id]?.alarm,
-  }));
-
+export function SeoTabTitle({ tab, count }: { tab: SeoTab; count?: SeoTabCount }) {
   return (
-    <PageTabs
-      items={items}
-      active={active}
-      onChange={onChange}
-      label="SEO report"
-      idPrefix="seo"
-      variant="segmented"
-      sticky={false}
-      aside={aside}
-    />
+    <span className={classes.tabTitle}>
+      {tab.label}
+      {count !== undefined && count.value > 0 && (
+        <span className={classes.sectionCount} data-alarm={count.alarm || undefined}>
+          {count.value}
+        </span>
+      )}
+    </span>
   );
 }
 
-/** The line under the tab bar: what this tab is for, and jump links to its blocks. */
+export function SeoHelpLink({ onHelp }: { onHelp: () => void }) {
+  return (
+    <Anchor component="button" type="button" size="sm" onClick={onHelp} className={classes.learnMore}>
+      Learn more
+    </Anchor>
+  );
+}
+
+export function SeoTabDescription({ tab, onHelp }: { tab: SeoTab; onHelp: () => void }) {
+  return (
+    <>
+      {tab.description} <SeoHelpLink onHelp={onHelp} />
+    </>
+  );
+}
+
+export function SeoOverviewLink() {
+  return (
+    <Anchor component={Link} to={seoTabPath("overview")} size="sm" fw={500} className={classes.overviewLink}>
+      View overview
+      <ArrowUpRight size={14} />
+    </Anchor>
+  );
+}
+
 export function SeoTabIntro({
   tab,
   onHelp,
   onJump,
+  showText = true,
 }: {
   tab: SeoTab;
   onHelp: () => void;
   onJump: (id: SeoSubId) => void;
+  showText?: boolean;
 }) {
   useRegisterHeaderHelp(onHelp);
+  if (!showText && !tab.subs) return null;
 
   return (
     <div className={classes.intro}>
-      <p className={classes.introText}>
-        {tab.description}{" "}
-        <Anchor component="button" type="button" size="sm" onClick={onHelp} className={classes.learnMore}>
-          Learn more
-        </Anchor>
-      </p>
+      {showText && (
+        <p className={classes.introText}>
+          <SeoTabDescription tab={tab} onHelp={onHelp} />
+        </p>
+      )}
       {tab.subs && (
         <nav className={classes.jumps} aria-label={`${tab.label} sections`}>
           {tab.subs.map((s) => (
