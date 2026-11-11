@@ -31,6 +31,10 @@ const APP_NAMES: Record<string, string> = {
   discord: "Discord",
   teams: "Microsoft Teams",
   "google-chat": "Google Chat",
+  "zoho-crm": "Zoho CRM",
+  hubspot: "HubSpot",
+  pipedrive: "Pipedrive",
+  freshsales: "Freshsales",
   webhook: "Webhook",
 };
 

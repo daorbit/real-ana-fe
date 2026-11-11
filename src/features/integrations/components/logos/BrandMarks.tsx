@@ -87,6 +87,45 @@ function ZohoMark({ size = 24 }: MarkProps) {
   );
 }
 
+function HubspotMark({ size = 24 }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="HubSpot" className={classes.logo}>
+      <g stroke="#FF7A59" strokeWidth="4" strokeLinecap="round" fill="none">
+        <circle cx="28" cy="30" r="8" />
+        <path d="M28 22V12M21.5 25 12.5 18.5M22.5 36 16.5 41.5" />
+      </g>
+      <g fill="#FF7A59">
+        <circle cx="28" cy="9" r="4" />
+        <circle cx="10" cy="16.5" r="3.5" />
+        <circle cx="14.5" cy="43" r="3" />
+      </g>
+    </svg>
+  );
+}
+
+function PipedriveMark({ size = 24 }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="Pipedrive" className={classes.logo}>
+      <rect x="2" y="2" width="44" height="44" rx="11" fill="#017737" />
+      <path d="M19 15v22" stroke="#FFFFFF" strokeWidth="4.5" strokeLinecap="round" />
+      <circle cx="26" cy="22" r="7" stroke="#FFFFFF" strokeWidth="4.5" fill="none" />
+    </svg>
+  );
+}
+
+function FreshsalesMark({ size = 24 }: MarkProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="Freshsales" className={classes.logo}>
+      <rect x="2" y="2" width="44" height="44" rx="11" fill="#F26722" />
+      <g fill="#FFFFFF">
+        <rect x="13" y="26" width="6" height="10" rx="2" />
+        <rect x="21" y="20" width="6" height="16" rx="2" />
+        <rect x="29" y="13" width="6" height="23" rx="2" />
+      </g>
+    </svg>
+  );
+}
+
 function WhatsAppMark({ size = 24 }: MarkProps) {
   return (
     <svg width={size} height={size} viewBox="-2 -2 28 28" role="img" aria-label="WhatsApp" className={classes.logo}>
@@ -198,6 +237,9 @@ const MARKS: Record<string, (props: MarkProps) => ReactElement> = {
   teams: TeamsMark,
   "google-chat": GoogleChatMark,
   "zoho-crm": ZohoMark,
+  hubspot: HubspotMark,
+  pipedrive: PipedriveMark,
+  freshsales: FreshsalesMark,
   whatsapp: WhatsAppMark,
   telegram: TelegramMark,
   "google-calendar": GoogleCalendarMark,
