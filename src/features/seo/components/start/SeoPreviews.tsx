@@ -73,17 +73,61 @@ export function HeadingsPreview() {
   );
 }
 
-const CHECKS = [
+export type PreviewCheck = { label: string; ok: boolean };
+
+const CHECKS: PreviewCheck[] = [
   { label: "HTTPS", ok: true },
   { label: "robots.txt", ok: true },
   { label: "sitemap.xml", ok: true },
   { label: "Canonical tag", ok: false },
 ];
 
-export function ChecksPreview() {
+const ISSUES = [
+  { severity: "critical", width: "most" },
+  { severity: "warning", width: "half" },
+  { severity: "warning", width: "most" },
+  { severity: "info", width: "third" },
+] as const;
+
+export function IssuesPreview() {
   return (
     <div className={classes.checks}>
-      {CHECKS.map((c) => (
+      {ISSUES.map((issue, i) => (
+        <div key={i} className={classes.checkRow}>
+          <span className={classes.severityDot} data-severity={issue.severity} />
+          <span className={classes.line} data-width={issue.width} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const VITALS = [
+  { label: "LCP", value: "1.8 s", fill: "96" },
+  { label: "INP", value: "120 ms", fill: "92" },
+  { label: "CLS", value: "0.04", fill: "100" },
+];
+
+export function VitalsPreview() {
+  return (
+    <div className={classes.bars}>
+      {VITALS.map((row) => (
+        <div key={row.label} className={classes.vitalRow}>
+          <span className={classes.barLabel}>{row.label}</span>
+          <span className={classes.barTrack}>
+            <span className={classes.barFill} data-value={row.fill} />
+          </span>
+          <span className={classes.vitalValue}>{row.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function ChecksPreview({ items = CHECKS }: { items?: PreviewCheck[] }) {
+  return (
+    <div className={classes.checks}>
+      {items.map((c) => (
         <div key={c.label} className={classes.checkRow}>
           <span className={classes.checkIcon} data-ok={c.ok || undefined}>
             {c.ok ? <Check size={11} strokeWidth={3} /> : <AlertTriangle size={11} strokeWidth={2.5} />}

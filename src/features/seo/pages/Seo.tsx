@@ -616,7 +616,7 @@ export default function Seo() {
       />
 
       {showStart && !onOverview ? (
-        <SeoTabEmpty tab={tab as Exclude<SeoTabId, "overview">} canEdit={canEdit} />
+        <SeoTabEmpty tab={tab as Exclude<SeoTabId, "overview">} canEdit={canEdit} domain={domainLabel} />
       ) : showStart ? (
         <SeoStartPanel
           domain={domainLabel}
