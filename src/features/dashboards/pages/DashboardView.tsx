@@ -6,7 +6,7 @@ import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { RefreshButton } from "@/shared/ui/Refresh";
 import { ActivityBellIcon } from "@/features/activity/ActivityBell";
-import { HomeSkeleton } from "@/shared/ui/Skeletons";
+import { DashboardSkeleton } from "@/shared/ui/DashboardSkeleton";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { DocsButton } from "@/shared/ui/DocsButton";
@@ -103,7 +103,7 @@ export default function DashboardView() {
     setCustomizing(false);
   }, [id]);
 
-  if (!workspaceId || isLoading) return <AppShell><HomeSkeleton /></AppShell>;
+  if (!workspaceId || isLoading) return <AppShell><DashboardSkeleton /></AppShell>;
 
   if (isError || !dashboard) {
     return (

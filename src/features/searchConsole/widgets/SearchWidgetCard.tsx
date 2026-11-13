@@ -1,21 +1,11 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Card, Skeleton, Text } from "@mantine/core";
+import { Card, Text } from "@mantine/core";
 import { ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GoogleMark } from "@/shared/ui/GoogleMark";
 import type { SearchConsoleTabId } from "@/features/searchConsole/searchConsoleTabs";
 import classes from "@/features/searchConsole/widgets/searchWidgets.module.css";
-
-export function SearchWidgetSkeleton({ lines = 4 }: { lines?: number }) {
-  return (
-    <div className={classes.skeleton}>
-      {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton key={i} height={14} width={`${90 - i * 12}%`} radius="sm" />
-      ))}
-    </div>
-  );
-}
 
 export function SearchWidgetCard({
   icon: Icon,

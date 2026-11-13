@@ -4,7 +4,8 @@ import { METRIC_BY_KEY, type MetricKey } from "@/features/searchConsole/searchMe
 import { SearchPerformanceChart } from "@/features/searchConsole/components/SearchPerformanceChart";
 import { MetricLegend } from "@/features/searchConsole/components/MetricLegend";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
-import { SearchWidgetCard, SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { SearchWidgetCard } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { WidgetSkeleton } from "@/shared/ui/WidgetSkeleton";
 import { useSearchPerformanceData } from "@/features/searchConsole/widgets/useSearchWidgetData";
 import type { SearchSource } from "@/features/searchConsole/widgets/useSearchWidgetSource";
 import classes from "@/features/searchConsole/widgets/searchWidgets.module.css";
@@ -21,7 +22,7 @@ export function SearchTrendWidget({ source }: { source: SearchSource }) {
   return (
     <SearchWidgetCard icon={TrendingUp} title="Search performance" subtitle={subtitle}>
       {source.kind === "loading" || loading ? (
-        <SearchWidgetSkeleton lines={5} />
+        <WidgetSkeleton bare />
       ) : !ready ? (
         <SearchWidgetNotice source={source} failure={failure} onRetry={retry} />
       ) : data.daily.length === 0 ? (

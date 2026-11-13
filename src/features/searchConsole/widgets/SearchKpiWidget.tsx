@@ -3,7 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { StatCard } from "@/shared/ui/StatCard";
 import { METRIC_BY_KEY, percentDelta, type MetricKey } from "@/features/searchConsole/searchMetrics";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
-import { SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { WidgetSkeleton } from "@/shared/ui/WidgetSkeleton";
 import { useSearchPerformanceData } from "@/features/searchConsole/widgets/useSearchWidgetData";
 import type { SearchSource } from "@/features/searchConsole/widgets/useSearchWidgetSource";
 import classes from "@/features/searchConsole/widgets/searchWidgets.module.css";
@@ -55,6 +55,7 @@ export function SearchKpiWidget({
         note={hasPrevious ? undefined : `Last ${data.days} days`}
         spark={data.daily}
         sparkKey={metric}
+        sparkFormat={def.format}
         hint={`${HINTS[metric]} Last ${data.days} days.`}
       />
     );
@@ -69,7 +70,7 @@ export function SearchKpiWidget({
         {label}
       </div>
       {busy ? (
-        <SearchWidgetSkeleton lines={2} />
+        <WidgetSkeleton bare />
       ) : (
         <SearchWidgetNotice compact source={source} failure={failure} onRetry={retry} />
       )}

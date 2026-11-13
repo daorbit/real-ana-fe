@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LayoutGrid, Lock, SearchX } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { EmptyState } from "@/shared/ui/EmptyState";
-import { HomeSkeleton } from "@/shared/ui/Skeletons";
+import { DashboardSkeleton } from "@/shared/ui/DashboardSkeleton";
 import { useTitle } from "@/shared/lib/useTitle";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useDemo } from "@/features/demo/context";
@@ -68,7 +68,7 @@ export default function DashboardStudio() {
     );
   }
 
-  if (id && isLoading) return <AppShell><HomeSkeleton /></AppShell>;
+  if (id && isLoading) return <AppShell><DashboardSkeleton /></AppShell>;
 
   if (id && (isError || !dashboard)) {
     return (

@@ -1,7 +1,8 @@
 import { Lightbulb } from "lucide-react";
 import { compact } from "@/shared/lib";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
-import { SearchWidgetCard, SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { SearchWidgetCard } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { WidgetSkeleton } from "@/shared/ui/WidgetSkeleton";
 import { SearchRowList } from "@/features/searchConsole/widgets/SearchRowList";
 import { useSearchInsightsData } from "@/features/searchConsole/widgets/useSearchWidgetData";
 import type { SearchListRow } from "@/features/searchConsole/widgets/SearchRowList";
@@ -31,7 +32,7 @@ export function SearchOpportunitiesWidget({ source }: { source: SearchSource }) 
       tab="insights"
     >
       {source.kind === "loading" || loading ? (
-        <SearchWidgetSkeleton lines={5} />
+        <WidgetSkeleton bare />
       ) : !ready ? (
         <SearchWidgetNotice source={source} failure={failure} onRetry={retry} />
       ) : rows.length === 0 ? (

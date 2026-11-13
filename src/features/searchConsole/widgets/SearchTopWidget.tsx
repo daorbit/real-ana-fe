@@ -1,7 +1,8 @@
 import { FileSearch, Search } from "lucide-react";
 import { pagePath } from "@/features/searchConsole/searchMetrics";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
-import { SearchWidgetCard, SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { SearchWidgetCard } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { WidgetSkeleton } from "@/shared/ui/WidgetSkeleton";
 import { SearchRowList } from "@/features/searchConsole/widgets/SearchRowList";
 import { useSearchPerformanceData } from "@/features/searchConsole/widgets/useSearchWidgetData";
 import type { SearchListRow } from "@/features/searchConsole/widgets/SearchRowList";
@@ -33,7 +34,7 @@ export function SearchTopWidget({ dimension, source }: { dimension: "query" | "p
       tab={config.tab}
     >
       {source.kind === "loading" || loading ? (
-        <SearchWidgetSkeleton lines={6} />
+        <WidgetSkeleton bare />
       ) : !ready ? (
         <SearchWidgetNotice source={source} failure={failure} onRetry={retry} />
       ) : rows.length === 0 ? (

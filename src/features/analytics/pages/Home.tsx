@@ -26,7 +26,7 @@ import { setupStateFor } from "@/features/workspace/setupState";
 import { SetupScreen } from "@/features/workspace/components/setup/SetupScreen";
 import { useWorkspace } from "@/features/workspace/context";
 import { notify, errMessage } from "@/shared/lib/notify";
-import { HomeSkeleton } from "@/shared/ui/Skeletons";
+import { DashboardSkeleton } from "@/shared/ui/DashboardSkeleton";
 import { useTitle } from "@/shared/lib/useTitle";
 
 export default function Home() {
@@ -93,7 +93,7 @@ export default function Home() {
   }
 
   if (loading || layoutLoading || (active && !stats)) {
-    return <AppShell><HomeSkeleton /></AppShell>;
+    return <AppShell><DashboardSkeleton hero /></AppShell>;
   }
 
   if (!active) {

@@ -2,7 +2,8 @@ import type { CSSProperties } from "react";
 import { ChartNoAxesColumn } from "lucide-react";
 import { compact } from "@/shared/lib";
 import { SearchWidgetNotice } from "@/features/searchConsole/widgets/SearchWidgetNotice";
-import { SearchWidgetCard, SearchWidgetSkeleton } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { SearchWidgetCard } from "@/features/searchConsole/widgets/SearchWidgetCard";
+import { WidgetSkeleton } from "@/shared/ui/WidgetSkeleton";
 import { useSearchInsightsData } from "@/features/searchConsole/widgets/useSearchWidgetData";
 import type { SearchSource } from "@/features/searchConsole/widgets/useSearchWidgetSource";
 import type { SearchPositionBand } from "@/shared/types";
@@ -30,7 +31,7 @@ export function SearchRankingsWidget({ source }: { source: SearchSource }) {
       tab="insights"
     >
       {source.kind === "loading" || loading ? (
-        <SearchWidgetSkeleton lines={5} />
+        <WidgetSkeleton bare />
       ) : !ready ? (
         <SearchWidgetNotice source={source} failure={failure} onRetry={retry} />
       ) : total === 0 ? (

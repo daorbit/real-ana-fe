@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { analyticsFilterHref } from "@/features/analytics/lib/analyticsLinks";
 import { StatCard } from "@/shared/ui/StatCard";
 import { Heatmap } from "@/shared/ui/Heatmap";
-import { ChartSkeleton } from "@/shared/ui/Skeletons";
+import { WidgetSkeleton } from "@/shared/ui/WidgetSkeleton";
 import { ClicksPanel } from "@/features/analytics/components/ClicksPanel";
 import { ScrollPanel, LandingPanel } from "@/features/analytics/components/EngagementPanels";
 import { OutboundPanel, ErrorsPanel } from "@/features/analytics/components/OutboundErrorsPanels";
@@ -39,7 +39,7 @@ const WORKSPACE_WIDGETS: Partial<Record<WidgetId, ComponentType<{ workspaceId: s
 };
 
 function Deferred({ children }: { children: ReactNode }) {
-  return <Suspense fallback={<ChartSkeleton height={160} />}>{children}</Suspense>;
+  return <Suspense fallback={<WidgetSkeleton />}>{children}</Suspense>;
 }
 
 export function WidgetRenderer({ id, data }: { id: WidgetId; data: WidgetData }) {

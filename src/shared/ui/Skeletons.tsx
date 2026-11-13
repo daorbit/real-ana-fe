@@ -150,37 +150,6 @@ export function FlowGraphSkeleton() {
   );
 }
 
-export function HomeSkeleton() {
-  return (
-    <>
-      <Group justify="space-between" align="flex-start" mb="xl">
-        <div>
-          <Skeleton height={22} width={180} radius="sm" />
-          <Skeleton height={10} width={260} mt={12} radius="sm" />
-        </div>
-        <Group gap={8}>
-          <Skeleton height={32} width={32} radius={10} />
-          <Skeleton height={32} width={92} radius={10} />
-        </Group>
-      </Group>
-
-      <SimpleGrid cols={{ base: 2, sm: 2, lg: 4 }} mb="lg">
-        {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
-      </SimpleGrid>
-
-      <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg" mb="lg">
-        <div className="grid-span-2"><ChartSkeleton /></div>
-        <ListSkeleton rows={4} />
-      </SimpleGrid>
-
-      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
-        <ListSkeleton />
-        <ListSkeleton />
-      </SimpleGrid>
-    </>
-  );
-}
-
 /** The Workspaces page while its data loads. */
 export function WorkspacesSkeleton() {
   return (
