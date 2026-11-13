@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionIcon, Box, Modal } from "@mantine/core";
+import { ActionIcon, Box, Modal, Tooltip } from "@mantine/core";
 import { useHotkeys, useMediaQuery } from "@mantine/hooks";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { MediaAsset } from "@/shared/types";
@@ -109,27 +109,31 @@ export function MediaPreviewModal({
           <Box className={classes.main}>
             <Box className={classes.stage}>
               {hasList && (
-                <ActionIcon
-                  className={`${classes.navButton} ${classes.navPrev}`}
-                  disabled={!prev}
-                  onClick={() => prev && onNavigate?.(prev)}
-                  aria-label="Previous file"
-                >
-                  <ChevronLeft size={20} />
-                </ActionIcon>
+                <Tooltip label="Previous file" withArrow>
+                  <ActionIcon
+                    className={`${classes.navButton} ${classes.navPrev}`}
+                    disabled={!prev}
+                    onClick={() => prev && onNavigate?.(prev)}
+                    aria-label="Previous file"
+                  >
+                    <ChevronLeft size={20} />
+                  </ActionIcon>
+                </Tooltip>
               )}
 
               <PreviewSurface asset={asset} />
 
               {hasList && (
-                <ActionIcon
-                  className={`${classes.navButton} ${classes.navNext}`}
-                  disabled={!next}
-                  onClick={() => next && onNavigate?.(next)}
-                  aria-label="Next file"
-                >
-                  <ChevronRight size={20} />
-                </ActionIcon>
+                <Tooltip label="Next file" withArrow>
+                  <ActionIcon
+                    className={`${classes.navButton} ${classes.navNext}`}
+                    disabled={!next}
+                    onClick={() => next && onNavigate?.(next)}
+                    aria-label="Next file"
+                  >
+                    <ChevronRight size={20} />
+                  </ActionIcon>
+                </Tooltip>
               )}
             </Box>
 

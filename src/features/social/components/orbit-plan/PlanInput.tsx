@@ -59,15 +59,17 @@ export function PlanInput({
           {images.map((url) => (
             <div key={url} className={classes.imageChip}>
               <img src={url} alt="Attached" />
-              <ActionIcon
-                size="xs"
-                radius="xl"
-                variant="default"
-                onClick={() => onImages!(images.filter((u) => u !== url))}
-                aria-label="Remove image"
-              >
-                <X size={11} />
-              </ActionIcon>
+              <Tooltip label="Remove image" withArrow>
+                <ActionIcon
+                  size="xs"
+                  radius="xl"
+                  variant="default"
+                  onClick={() => onImages!(images.filter((u) => u !== url))}
+                  aria-label="Remove image"
+                >
+                  <X size={11} />
+                </ActionIcon>
+              </Tooltip>
             </div>
           ))}
         </Group>
@@ -136,19 +138,21 @@ export function PlanInput({
           )}
         </Group>
 
-        <ActionIcon
-          size="md"
-          radius="xl"
-          color="emerald"
-          className={classes.send}
-          variant="filled"
-          loading={thinking || drawing}
-          disabled={!value.trim()}
-          onClick={submit}
-          aria-label={drawMode ? "Draw it" : "Send to Orbit"}
-        >
-          {drawMode ? <Palette size={16} /> : <ArrowUp size={16} />}
-        </ActionIcon>
+        <Tooltip label={drawMode ? "Draw it (Enter)" : "Send to Orbit (Enter)"} withArrow>
+          <ActionIcon
+            size="md"
+            radius="xl"
+            color="emerald"
+            className={classes.send}
+            variant="filled"
+            loading={thinking || drawing}
+            disabled={!value.trim()}
+            onClick={submit}
+            aria-label={drawMode ? "Draw it" : "Send to Orbit"}
+          >
+            {drawMode ? <Palette size={16} /> : <ArrowUp size={16} />}
+          </ActionIcon>
+        </Tooltip>
       </Group>
 
       {canAttach && (

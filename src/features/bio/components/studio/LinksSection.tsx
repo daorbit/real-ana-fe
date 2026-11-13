@@ -30,26 +30,30 @@ export function LinksSection({
           {links.map((link, index) => (
             <div key={link.id} className={classes.listRow} data-off={!link.enabled || undefined}>
               <div className={classes.rowOrder}>
-                <ActionIcon
-                  variant="subtle"
-                  color="gray"
-                  size="sm"
-                  aria-label="Move up"
-                  disabled={index === 0}
-                  onClick={() => onMove(link.id, -1)}
-                >
-                  <ChevronUp size={15} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="subtle"
-                  color="gray"
-                  size="sm"
-                  aria-label="Move down"
-                  disabled={index === links.length - 1}
-                  onClick={() => onMove(link.id, 1)}
-                >
-                  <ChevronDown size={15} />
-                </ActionIcon>
+                <Tooltip label="Move up" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    aria-label="Move up"
+                    disabled={index === 0}
+                    onClick={() => onMove(link.id, -1)}
+                  >
+                    <ChevronUp size={15} />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Move down" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    size="sm"
+                    aria-label="Move down"
+                    disabled={index === links.length - 1}
+                    onClick={() => onMove(link.id, 1)}
+                  >
+                    <ChevronDown size={15} />
+                  </ActionIcon>
+                </Tooltip>
               </div>
 
               <div className={classes.rowFields}>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Button, Card, Center, Group, Loader, Modal, Stack, Table, Text } from "@mantine/core";
+import { ActionIcon, Button, Card, Center, Group, Loader, Modal, Stack, Table, Text, Tooltip } from "@mantine/core";
 import { Pencil } from "lucide-react";
 import { useGetAdminPlansQuery, useSaveAdminPlanPriceMutation } from "@/app/store";
 import { notify, errMessage } from "@/shared/lib/notify";
@@ -71,9 +71,11 @@ export default function PlansPanel() {
                     <Table.Td><Text size="sm">{p.monthlyCrawlQuota}</Text></Table.Td>
                     <Table.Td>
                       <Group justify="flex-end">
-                        <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(p)} aria-label={`Edit ${p.name} price`}>
-                          <Pencil size={15} />
-                        </ActionIcon>
+                        <Tooltip label="Edit price" withArrow>
+                          <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(p)} aria-label={`Edit ${p.name} price`}>
+                            <Pencil size={15} />
+                          </ActionIcon>
+                        </Tooltip>
                       </Group>
                     </Table.Td>
                   </Table.Tr>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActionIcon, CloseButton, Modal } from "@mantine/core";
+import { ActionIcon, CloseButton, Modal, Tooltip } from "@mantine/core";
 import { ArrowLeft } from "lucide-react";
 import { EmbedWidgetPicker } from "@/features/dashboards/components/embeds/EmbedWidgetPicker";
 import { EmbedSettings } from "@/features/dashboards/components/embeds/EmbedSettings";
@@ -65,9 +65,11 @@ export function EmbedModal({
     >
       <div className={classes.modalHead}>
         {!picking && !embed && (
-          <ActionIcon variant="subtle" color="gray" onClick={() => setStep("pick")} aria-label="Back to widgets">
-            <ArrowLeft size={17} />
-          </ActionIcon>
+          <Tooltip label="Back to widgets" withArrow>
+            <ActionIcon variant="subtle" color="gray" onClick={() => setStep("pick")} aria-label="Back to widgets">
+              <ArrowLeft size={17} />
+            </ActionIcon>
+          </Tooltip>
         )}
         <div className={classes.modalTitles}>
           <h2 className={classes.modalTitle}>{title}</h2>

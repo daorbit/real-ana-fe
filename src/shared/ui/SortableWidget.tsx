@@ -65,17 +65,19 @@ export function SortableWidget({
       <Paper withBorder radius="lg" p={6} className="sw-frame">
         <Group justify="space-between" wrap="nowrap" px={4} pb={6}>
           <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="sm"
-              className="sw-handle"
-              {...attributes}
-              {...listeners}
-              aria-label={`Drag to move ${label}`}
-            >
-              <GripVertical size={15} />
-            </ActionIcon>
+            <Tooltip label="Drag to move" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                className="sw-handle"
+                {...attributes}
+                {...listeners}
+                aria-label={`Drag to move ${label}`}
+              >
+                <GripVertical size={15} />
+              </ActionIcon>
+            </Tooltip>
             <Text size="xs" fw={600} truncate>{label}</Text>
           </Group>
 

@@ -207,12 +207,16 @@ export function PostCalendar({
           {/* Stepping arrows sit flush against each other and ahead of the
               label they move, so the period reads as the thing being paged. */}
           <Group gap={2} wrap="nowrap">
-            <ActionIcon variant="subtle" color="gray" size="md" onClick={() => step(-1)} aria-label="Previous">
-              <ChevronLeft size={17} />
-            </ActionIcon>
-            <ActionIcon variant="subtle" color="gray" size="md" onClick={() => step(1)} aria-label="Next">
-              <ChevronRight size={17} />
-            </ActionIcon>
+            <Tooltip label="Previous" withArrow>
+              <ActionIcon variant="subtle" color="gray" size="md" onClick={() => step(-1)} aria-label="Previous">
+                <ChevronLeft size={17} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Next" withArrow>
+              <ActionIcon variant="subtle" color="gray" size="md" onClick={() => step(1)} aria-label="Next">
+                <ChevronRight size={17} />
+              </ActionIcon>
+            </Tooltip>
           </Group>
 
           <Text fw={700} size="lg" style={{ whiteSpace: "nowrap" }}>{label}</Text>

@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Modal, TextInput, Textarea, UnstyledButton } from "@mantine/core";
+import { ActionIcon, Button, Modal, TextInput, Textarea, Tooltip, UnstyledButton } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { CornerDownRight, ExternalLink, Link2 } from "lucide-react";
 import { timeAgo } from "@/shared/lib/format";
@@ -220,13 +220,17 @@ export function TaskDialog({
               rightSection={
                 task?.link ? (
                   task.link.startsWith("/app/") ? (
-                    <ActionIcon component={Link} to={task.link} variant="subtle" color="gray" aria-label="Open link">
-                      <ExternalLink size={15} />
-                    </ActionIcon>
+                    <Tooltip label="Open link" withArrow>
+                      <ActionIcon component={Link} to={task.link} variant="subtle" color="gray" aria-label="Open link">
+                        <ExternalLink size={15} />
+                      </ActionIcon>
+                    </Tooltip>
                   ) : (
-                    <ActionIcon component="a" href={task.link} target="_blank" rel="noopener noreferrer" variant="subtle" color="gray" aria-label="Open link">
-                      <ExternalLink size={15} />
-                    </ActionIcon>
+                    <Tooltip label="Open link in a new tab" withArrow>
+                      <ActionIcon component="a" href={task.link} target="_blank" rel="noopener noreferrer" variant="subtle" color="gray" aria-label="Open link">
+                        <ExternalLink size={15} />
+                      </ActionIcon>
+                    </Tooltip>
                   )
                 ) : undefined
               }

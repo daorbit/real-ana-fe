@@ -1,4 +1,4 @@
-import { ActionIcon, UnstyledButton } from "@mantine/core";
+import { ActionIcon, Tooltip, UnstyledButton } from "@mantine/core";
 import { X } from "lucide-react";
 import { taskKey } from "../../lib/board";
 import type { Task } from "../../types";
@@ -34,16 +34,18 @@ export function RelatedTaskRow({
         </span>
       </UnstyledButton>
       {onRemove && (
-        <ActionIcon
-          className={classes.checkRemove}
-          variant="subtle"
-          color="gray"
-          size="sm"
-          onClick={() => onRemove(task)}
-          aria-label={removeLabel ?? `Remove ${task.title}`}
-        >
-          <X size={14} />
-        </ActionIcon>
+        <Tooltip label={removeLabel ?? "Remove"} withArrow>
+          <ActionIcon
+            className={classes.checkRemove}
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={() => onRemove(task)}
+            aria-label={removeLabel ?? `Remove ${task.title}`}
+          >
+            <X size={14} />
+          </ActionIcon>
+        </Tooltip>
       )}
     </div>
   );

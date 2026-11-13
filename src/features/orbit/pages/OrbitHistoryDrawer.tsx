@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ActionIcon, Box, Button, Checkbox, Drawer, Group, Loader, Modal, ScrollArea,
-  Stack, Text, TextInput, UnstyledButton,
+  Stack, Text, TextInput, Tooltip, UnstyledButton,
 } from "@mantine/core";
 import {
   AlertTriangle, Check, CheckSquare, MessageSquare, Pencil, Plus, Search, Trash2, X,
@@ -380,24 +380,28 @@ export function OrbitHistoryDrawer({
                       rightSectionWidth={48}
                       rightSection={
                         <Group gap={0} wrap="nowrap">
-                          <ActionIcon
-                            variant="subtle"
-                            color="gray"
-                            size="xs"
-                            onClick={() => setEditing(null)}
-                            aria-label="Cancel rename"
-                          >
-                            <X size={11} />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="subtle"
-                            color="emerald"
-                            size="xs"
-                            onClick={() => void commitRename(c.id)}
-                            aria-label="Save title"
-                          >
-                            <Check size={11} />
-                          </ActionIcon>
+                          <Tooltip label="Cancel (Esc)" withArrow>
+                            <ActionIcon
+                              variant="subtle"
+                              color="gray"
+                              size="xs"
+                              onClick={() => setEditing(null)}
+                              aria-label="Cancel rename"
+                            >
+                              <X size={11} />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label="Save title (Enter)" withArrow>
+                            <ActionIcon
+                              variant="subtle"
+                              color="emerald"
+                              size="xs"
+                              onClick={() => void commitRename(c.id)}
+                              aria-label="Save title"
+                            >
+                              <Check size={11} />
+                            </ActionIcon>
+                          </Tooltip>
                         </Group>
                       }
                     />
@@ -446,39 +450,43 @@ export function OrbitHistoryDrawer({
                       that opens the thread. */}
                   {!deleting && !selectMode && (
                     <div className={classes.threadActions}>
-                      <ActionIcon
-                        component="div"
-                        role="button"
-                        tabIndex={0}
-                        variant="subtle"
-                        className={classes.threadActionBtn}
-                        data-tone="edit"
-                        aria-label={`Rename ${c.title}`}
-                        onClick={(e) => {
-                          // Without this the click also opens the thread, and
-                          // the field is replaced the instant it appears.
-                          e.stopPropagation();
-                          beginRename(c.id, c.title);
-                        }}
-                      >
-                        <Pencil size={12} />
-                      </ActionIcon>
-                      <ActionIcon
-                        component="div"
-                        role="button"
-                        tabIndex={0}
-                        variant="subtle"
-                        className={classes.threadActionBtn}
-                        data-tone="delete"
-                        aria-label={`Delete ${c.title}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditing(null);
-                          setConfirmingDelete(c.id);
-                        }}
-                      >
-                        <Trash2 size={12} />
-                      </ActionIcon>
+                      <Tooltip label="Rename" withArrow>
+                        <ActionIcon
+                          component="div"
+                          role="button"
+                          tabIndex={0}
+                          variant="subtle"
+                          className={classes.threadActionBtn}
+                          data-tone="edit"
+                          aria-label={`Rename ${c.title}`}
+                          onClick={(e) => {
+                            // Without this the click also opens the thread, and
+                            // the field is replaced the instant it appears.
+                            e.stopPropagation();
+                            beginRename(c.id, c.title);
+                          }}
+                        >
+                          <Pencil size={12} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Delete" withArrow>
+                        <ActionIcon
+                          component="div"
+                          role="button"
+                          tabIndex={0}
+                          variant="subtle"
+                          className={classes.threadActionBtn}
+                          data-tone="delete"
+                          aria-label={`Delete ${c.title}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditing(null);
+                            setConfirmingDelete(c.id);
+                          }}
+                        >
+                          <Trash2 size={12} />
+                        </ActionIcon>
+                      </Tooltip>
                     </div>
                   )}
                 </UnstyledButton>

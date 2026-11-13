@@ -208,18 +208,20 @@ function HistoryPanel({
                   </Table.Td>
                   {onDelete && (
                     <Table.Td>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        size="sm"
-                        aria-label="Delete audit"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete(h._id);
-                        }}
-                      >
-                        <Trash2 size={14} />
-                      </ActionIcon>
+                      <Tooltip label="Delete audit" withArrow>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          size="sm"
+                          aria-label="Delete audit"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(h._id);
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </ActionIcon>
+                      </Tooltip>
                     </Table.Td>
                   )}
                 </Table.Tr>

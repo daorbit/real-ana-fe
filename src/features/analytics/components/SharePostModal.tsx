@@ -586,18 +586,19 @@ export function SharePostModal({
                 { id: "desktop" as const, Icon: Monitor },
                 { id: "mobile" as const, Icon: Smartphone },
               ]).map(({ id, Icon }) => (
-                <ActionIcon
-                  key={id}
-                  variant={device === id ? "white" : "subtle"}
-                  color={device === id ? "dark" : "gray"}
-                  size="lg"
-                  radius="sm"
-                  onClick={() => setDevice(id)}
-                  aria-label={t(`sharePost.preview_${id}`)}
-                  aria-pressed={device === id}
-                >
-                  <Icon size={17} />
-                </ActionIcon>
+                <Tooltip key={id} label={t(`sharePost.preview_${id}`)} withArrow>
+                  <ActionIcon
+                    variant={device === id ? "white" : "subtle"}
+                    color={device === id ? "dark" : "gray"}
+                    size="lg"
+                    radius="sm"
+                    onClick={() => setDevice(id)}
+                    aria-label={t(`sharePost.preview_${id}`)}
+                    aria-pressed={device === id}
+                  >
+                    <Icon size={17} />
+                  </ActionIcon>
+                </Tooltip>
               ))}
             </Group>
           </Group>

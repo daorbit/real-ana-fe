@@ -1,4 +1,4 @@
-import { ActionIcon, Button, TextInput } from "@mantine/core";
+import { ActionIcon, Button, TextInput, Tooltip } from "@mantine/core";
 import { Mail, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import reportClasses from "../Reports.module.css";
@@ -28,15 +28,17 @@ export function EmailRecipients({ ownerEmail, recipients, emailInput, setEmailIn
           <div key={email} className={reportClasses.recipient}>
             <Mail size={14} className={classes.recipientIcon} />
             <span className={reportClasses.recipientEmail}>{email}</span>
-            <ActionIcon
-              size="sm"
-              variant="subtle"
-              color="gray"
-              onClick={() => removeEmail(email)}
-              aria-label={t("reports.removeRecipient", { email })}
-            >
-              <X size={14} />
-            </ActionIcon>
+            <Tooltip label={t("reports.removeRecipient", { email })} withArrow>
+              <ActionIcon
+                size="sm"
+                variant="subtle"
+                color="gray"
+                onClick={() => removeEmail(email)}
+                aria-label={t("reports.removeRecipient", { email })}
+              >
+                <X size={14} />
+              </ActionIcon>
+            </Tooltip>
           </div>
         ))}
       </div>

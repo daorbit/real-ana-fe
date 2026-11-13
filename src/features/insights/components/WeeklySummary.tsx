@@ -1,4 +1,4 @@
-import { ActionIcon } from "@mantine/core";
+import { ActionIcon, Tooltip } from "@mantine/core";
 import { ArrowDownRight, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
 import { TONE_LABEL, weekLabel } from "../lib/insight";
@@ -29,13 +29,17 @@ export function WeeklySummary({
       <div className={classes.summaryTop}>
         <div>
           <div className={classes.stepper}>
-            <ActionIcon variant="subtle" color="gray" radius="xl" disabled={!onOlder} onClick={onOlder ?? undefined} aria-label="Previous week">
-              <ChevronLeft size={18} />
-            </ActionIcon>
+            <Tooltip label="Previous week" withArrow>
+              <ActionIcon variant="subtle" color="gray" radius="xl" disabled={!onOlder} onClick={onOlder ?? undefined} aria-label="Previous week">
+                <ChevronLeft size={18} />
+              </ActionIcon>
+            </Tooltip>
             <span className={classes.stepperLabel}>{weekLabel(digest.periodStart, digest.periodEnd)}</span>
-            <ActionIcon variant="subtle" color="gray" radius="xl" disabled={!onNewer} onClick={onNewer ?? undefined} aria-label="Next week">
-              <ChevronRight size={18} />
-            </ActionIcon>
+            <Tooltip label="Next week" withArrow>
+              <ActionIcon variant="subtle" color="gray" radius="xl" disabled={!onNewer} onClick={onNewer ?? undefined} aria-label="Next week">
+                <ChevronRight size={18} />
+              </ActionIcon>
+            </Tooltip>
           </div>
           <span className={classes.eyebrow}>Visitors</span>
           <div className={classes.bigNumber}>

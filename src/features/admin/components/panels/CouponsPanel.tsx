@@ -108,12 +108,16 @@ export default function CouponsPanel() {
                               <Calculator size={15} />
                             </ActionIcon>
                           </Tooltip>
-                          <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(c)} aria-label={`Edit ${c.code}`}>
-                            <Pencil size={15} />
-                          </ActionIcon>
-                          <ActionIcon variant="subtle" color="red" onClick={() => askDelete(c)} aria-label={`Delete ${c.code}`}>
-                            <Trash2 size={15} />
-                          </ActionIcon>
+                          <Tooltip label="Edit coupon" withArrow>
+                            <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(c)} aria-label={`Edit ${c.code}`}>
+                              <Pencil size={15} />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label="Delete coupon" withArrow>
+                            <ActionIcon variant="subtle" color="red" onClick={() => askDelete(c)} aria-label={`Delete ${c.code}`}>
+                              <Trash2 size={15} />
+                            </ActionIcon>
+                          </Tooltip>
                         </Group>
                       </Table.Td>
                     </Table.Tr>

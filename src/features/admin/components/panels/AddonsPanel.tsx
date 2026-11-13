@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import {
-  ActionIcon, Badge, Button, Card, Center, Group, Loader, Modal, NumberInput, Select, Stack, Switch, Table, Text, TextInput,
+  ActionIcon, Badge, Button, Card, Center, Group, Loader, Modal, NumberInput, Select, Stack, Switch, Table, Text, TextInput, Tooltip,
 } from "@mantine/core";
 import { CalendarClock, ClipboardList, Globe2, Images, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { OrbitMark } from "@/features/orbit/components/OrbitMark";
@@ -119,12 +119,16 @@ export default function AddonsPanel() {
                     </Table.Td>
                     <Table.Td>
                       <Group gap={4} justify="flex-end" wrap="nowrap">
-                        <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(a)} aria-label={`Edit ${a.name}`}>
-                          <Pencil size={15} />
-                        </ActionIcon>
-                        <ActionIcon variant="subtle" color="red" onClick={() => askDelete(a)} aria-label={`Delete ${a.name}`}>
-                          <Trash2 size={15} />
-                        </ActionIcon>
+                        <Tooltip label="Edit add-on" withArrow>
+                          <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(a)} aria-label={`Edit ${a.name}`}>
+                            <Pencil size={15} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label="Delete add-on" withArrow>
+                          <ActionIcon variant="subtle" color="red" onClick={() => askDelete(a)} aria-label={`Delete ${a.name}`}>
+                            <Trash2 size={15} />
+                          </ActionIcon>
+                        </Tooltip>
                       </Group>
                     </Table.Td>
                   </Table.Tr>

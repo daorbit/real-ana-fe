@@ -81,16 +81,18 @@ export function ChecklistEditor({
               </Tooltip>
             )}
             {!readOnly && (
-              <ActionIcon
-                className={classes.checkRemove}
-                variant="subtle"
-                color="gray"
-                size="sm"
-                onClick={() => onChange(items.filter((i) => i.id !== item.id))}
-                aria-label={`Remove ${item.text}`}
-              >
-                <X size={14} />
-              </ActionIcon>
+              <Tooltip label="Remove item" withArrow>
+                <ActionIcon
+                  className={classes.checkRemove}
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  onClick={() => onChange(items.filter((i) => i.id !== item.id))}
+                  aria-label={`Remove ${item.text}`}
+                >
+                  <X size={14} />
+                </ActionIcon>
+              </Tooltip>
             )}
           </div>
         ))}

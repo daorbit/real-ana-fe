@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Menu, TextInput } from "@mantine/core";
+import { ActionIcon, Button, Menu, TextInput, Tooltip } from "@mantine/core";
 import { Plus, X } from "lucide-react";
 import { BIO_SOCIAL_NETWORKS } from "@/features/bio/lib/bioOptions";
 import type { BioSocial } from "@/features/bio/types";
@@ -31,15 +31,17 @@ export function SocialsSection({ socials, onChange }: { socials: BioSocial[]; on
                   }
                 />
               </div>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size="sm"
-                aria-label={`Remove ${NETWORK[social.network].label}`}
-                onClick={() => onChange(socials.filter((s) => s.network !== social.network))}
-              >
-                <X size={15} />
-              </ActionIcon>
+              <Tooltip label={`Remove ${NETWORK[social.network].label}`} withArrow>
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  aria-label={`Remove ${NETWORK[social.network].label}`}
+                  onClick={() => onChange(socials.filter((s) => s.network !== social.network))}
+                >
+                  <X size={15} />
+                </ActionIcon>
+              </Tooltip>
             </div>
           ))}
         </div>

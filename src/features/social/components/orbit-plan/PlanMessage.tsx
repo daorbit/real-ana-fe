@@ -107,16 +107,18 @@ export function PlanMessage({
 
           {turn.image.status === "ready" && (
             <Group gap={8}>
-              <ActionIcon
-                size="sm"
-                radius="xl"
-                color="emerald"
-                variant="filled"
-                onClick={onApproveImage}
-                aria-label="Use this image"
-              >
-                <Check size={14} />
-              </ActionIcon>
+              <Tooltip label="Use this image" withArrow>
+                <ActionIcon
+                  size="sm"
+                  radius="xl"
+                  color="emerald"
+                  variant="filled"
+                  onClick={onApproveImage}
+                  aria-label="Use this image"
+                >
+                  <Check size={14} />
+                </ActionIcon>
+              </Tooltip>
               <Tooltip label="Draw again" withArrow>
                 <ActionIcon
                   size="sm"
@@ -166,16 +168,18 @@ export function PlanMessage({
                   <Text size="xs" c="emerald.6" fw={500}>Added to the post</Text>
                 </Group>
               ) : (
-                <ActionIcon
-                  size="sm"
-                  radius="xl"
-                  color="emerald"
-                  variant="filled"
-                  onClick={onApproveCaption}
-                  aria-label="Use this caption"
-                >
-                  <Check size={14} />
-                </ActionIcon>
+                <Tooltip label="Use this caption" withArrow>
+                  <ActionIcon
+                    size="sm"
+                    radius="xl"
+                    color="emerald"
+                    variant="filled"
+                    onClick={onApproveCaption}
+                    aria-label="Use this caption"
+                  >
+                    <Check size={14} />
+                  </ActionIcon>
+                </Tooltip>
               )}
             </Group>
           </Box>

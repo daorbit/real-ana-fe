@@ -830,16 +830,18 @@ export default function Orbit() {
         {pendingImage && (
           <div className={classes.imageChip}>
             <img src={pendingImage} alt="Attached" />
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="xs"
-              radius="xl"
-              onClick={() => attachImage(null)}
-              aria-label="Remove attached image"
-            >
-              <X size={12} />
-            </ActionIcon>
+            <Tooltip label="Remove image" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="xs"
+                radius="xl"
+                onClick={() => attachImage(null)}
+                aria-label="Remove attached image"
+              >
+                <X size={12} />
+              </ActionIcon>
+            </Tooltip>
           </div>
         )}
         {pendingDocument && (
@@ -848,16 +850,18 @@ export default function Orbit() {
             <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
               {pendingDocument.name}
             </Text>
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="xs"
-              radius="xl"
-              onClick={() => attachDocument(null)}
-              aria-label="Remove attached file"
-            >
-              <X size={12} />
-            </ActionIcon>
+            <Tooltip label="Remove file" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="xs"
+                radius="xl"
+                onClick={() => attachDocument(null)}
+                aria-label="Remove attached file"
+              >
+                <X size={12} />
+              </ActionIcon>
+            </Tooltip>
           </Group>
         )}
         <Textarea
