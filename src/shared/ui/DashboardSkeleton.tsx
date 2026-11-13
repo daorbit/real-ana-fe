@@ -11,7 +11,7 @@ export function DashboardSkeleton({ hero = false }: { hero?: boolean }) {
           <Skeleton key={i} height={160} radius="lg" />
         ))}
       </SimpleGrid>
-      <Grid gutter="lg">
+      <Grid gap="lg">
         <Grid.Col span={{ base: 12, lg: 8 }}>
           <Skeleton height={320} radius="lg" />
         </Grid.Col>
