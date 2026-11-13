@@ -59,6 +59,7 @@
     "adminBilling": "Plans & addons",
     "adminDatabase": "Database",
     "adminAlerts": "System alerts",
+    "adminStatus": "Status page",
     "adminReferrals": "Referrals",
     "settings": "Settings",
     "logout": "Log out",

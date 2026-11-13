@@ -1,6 +1,6 @@
-import { BellRing, CreditCard, Database, Gift, Mail, Package, PlayCircle, Ticket, Users, type LucideIcon } from "lucide-react";
+import { Activity, BellRing, CreditCard, Database, Gift, Mail, Package, PlayCircle, Ticket, Users, type LucideIcon } from "lucide-react";
 
-export type AdminSectionId = "users" | "email" | "plans" | "addons" | "coupons" | "referrals" | "demo" | "database" | "alerts";
+export type AdminSectionId = "users" | "email" | "plans" | "addons" | "coupons" | "referrals" | "demo" | "database" | "alerts" | "status";
 
 export type AdminTone = "blue" | "violet" | "teal" | "orange" | "pink" | "grape" | "cyan" | "gray";
 
@@ -100,6 +100,14 @@ export const ADMIN_GROUPS: { label: string; sections: AdminSectionMeta[] }[] = [
         description: "Where to send a Telegram message when an API fails, a cron job breaks or a service goes down.",
         icon: BellRing,
         tone: "orange",
+      },
+      {
+        id: "status",
+        labelKey: "nav.adminStatus",
+        label: "Status page",
+        description: "Live health checks, and the incidents and maintenance shown on the public status page.",
+        icon: Activity,
+        tone: "teal",
       },
     ],
   },
