@@ -45,7 +45,7 @@ export default function StatusPanel() {
           <LiveChecks checks={data.components} />
           <IncidentList
             title="Open"
-            note={`${subscribers.toLocaleString()} subscribers${data.subscribers.pending ? `, ${data.subscribers.pending} not confirmed` : ""}${data.pendingEmails ? ` · ${data.pendingEmails} email batches sending` : ""}`}
+            note={`${subscribers.toLocaleString()} email ${subscribers === 1 ? "subscriber" : "subscribers"}${data.subscribers.pending ? `, ${data.subscribers.pending} not confirmed` : ""}${data.pendingEmails && subscribers ? " · emails still sending" : ""} · the public page updates within a minute`}
             incidents={data.open}
             empty="No open incidents or scheduled maintenance."
             onOpen={(i) => setOpenId(i.id)}
