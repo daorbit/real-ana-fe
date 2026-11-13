@@ -284,6 +284,22 @@ export const WORKSPACE_APP_INFO: Record<WorkspaceAppId, WorkspaceAppInfo> = {
       { title: "Unsubscribes handled", body: "Every email carries an unsubscribe link, and anyone who uses it is left out of future campaigns." },
     ],
   },
+  growthRadar: {
+    id: "growthRadar",
+    tileId: "quantalog-growth-radar",
+    name: "Quantalog Growth Radar",
+    navLabel: "Growth Radar",
+    route: "/app/growth-radar",
+    location: "in the sidebar",
+    offNote: "Your opportunities, notes and recorded actions are kept, and scans pause until you turn it back on.",
+    tagline: "Find what deserves attention, see why, and track whether the fix helped.",
+    description: "Every morning Growth Radar checks your analytics, lead capture forms, bookings and Google Search data for changes worth acting on, such as traffic that is not turning into enquiries or a form people stop finishing. Each finding shows the numbers behind it, what to look at next, and how much to trust it.",
+    features: [
+      { title: "Evidence first", body: "Every finding shows the exact numbers, the periods compared and the sample size, with its limits spelled out." },
+      { title: "Ranked, not scored", body: "High, Medium or Low priority, explained by impact, confidence and urgency instead of a mystery number." },
+      { title: "Did it help?", body: "Record what you changed, and Growth Radar compares the same measure afterwards, labelled as an observed change." },
+    ],
+  },
 };
 
 export const WORKSPACE_APP_IDS: WorkspaceAppId[] = [
@@ -302,6 +318,7 @@ export const WORKSPACE_APP_IDS: WorkspaceAppId[] = [
   "invoicing",
   "tasks",
   "campaigns",
+  "growthRadar",
   // "insights",
   // "experiments",
 ];

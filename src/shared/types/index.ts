@@ -1175,7 +1175,8 @@ export type WorkspaceAppId =
   | "tasks"
   | "insights"
   | "experiments"
-  | "campaigns";
+  | "campaigns"
+  | "growthRadar";
 
 export type WorkspaceApps = Partial<Record<WorkspaceAppId, { enabled?: boolean; enabledAt?: string; paidAt?: string }>>;
 
@@ -2835,7 +2836,8 @@ export type NotificationType =
   | "form.submission"
   | "referral.rewarded"
   | "task.assigned"
-  | "insights.ready";
+  | "insights.ready"
+  | "radar.opportunity";
 
 /**
  * One row in the panel.

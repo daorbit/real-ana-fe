@@ -64,6 +64,23 @@ const WORKSPACE_APP_NAMES: Record<string, string> = {
   insights: "Insights",
   experiments: "A/B Tests",
   campaigns: "Campaigns",
+  growthRadar: "Growth Radar",
+};
+
+const RADAR_STATUS: Record<string, string> = {
+  open: "reopened",
+  planned: "marked as planned",
+  investigating: "started investigating",
+  resolved: "resolved",
+  dismissed: "dismissed",
+};
+
+const describeRadarUpdate = (e: AuditEntry) => {
+  const label = quoted(e.target.label, "a Growth Radar finding");
+  if (typeof e.meta.status === "string") return `${RADAR_STATUS[e.meta.status] ?? "updated"} ${label}`;
+  if (e.meta.snoozedUntil !== undefined) return e.meta.snoozedUntil ? `snoozed ${label}` : `ended the snooze on ${label}`;
+  if (e.meta.assigneeId !== undefined) return `changed the owner of ${label}`;
+  return `updated ${label}`;
 };
 
 const describeRouteChange = (route: string) => {
@@ -123,6 +140,9 @@ const TEAM_COPY: Record<string, Describe> = {
   "funnel.created": (e) => named("saved the funnel", e),
   "funnel.updated": (e) => named("edited the funnel", e),
   "funnel.deleted": (e) => named("deleted the funnel", e),
+  "radar.opportunity_updated": describeRadarUpdate,
+  "radar.action_recorded": (e) => named("recorded an action on", e),
+  "radar.settings_updated": () => "changed the Growth Radar settings",
 
   "seo.audit_run": (e) => named("ran an SEO audit of", e),
   "seo.crawl_run": () => "started a site crawl",

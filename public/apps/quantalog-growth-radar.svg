@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="256" height="256" role="img" aria-label="Quantalog Growth Radar">
+  <circle cx="256" cy="256" r="216" fill="#1565C0"/>
+  <path d="M256 256V40a216 216 0 0 1 187 108z" fill="#42A5F5"/>
+  <g fill="none" stroke="#90CAF9" stroke-width="14">
+    <circle cx="256" cy="256" r="146"/>
+    <circle cx="256" cy="256" r="76"/>
+  </g>
+  <path d="M256 256L443 148" stroke="#E3F2FD" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="332" cy="150" r="26" fill="#FFCA28"/>
+  <circle cx="170" cy="330" r="20" fill="#66BB6A"/>
+  <circle cx="256" cy="256" r="22" fill="#E3F2FD"/>
+</svg>

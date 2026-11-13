@@ -19,6 +19,7 @@ import {
   Gift,
   ListTodo,
   ScanSearch,
+  Radar,
   type LucideIcon,
 } from "lucide-react";
 import type { NotificationType } from "@/shared/types";
@@ -70,6 +71,7 @@ export const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> 
   "referral.rewarded": { icon: Gift, color: "teal" },
   "task.assigned": { icon: ListTodo, color: "blue" },
   "insights.ready": { icon: ScanSearch, color: "blue" },
+  "radar.opportunity": { icon: Radar, color: "blue" },
 };
 
 

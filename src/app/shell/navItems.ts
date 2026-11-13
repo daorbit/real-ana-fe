@@ -1,6 +1,6 @@
 import {
   Home, Swords, Images, Flag, BellRing, Filter, ReceiptText,
-  ListTodo, Mail,
+  ListTodo, Mail, Radar,
   // AppWindow, Link2, ScanSearch, FlaskConical, Star,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
@@ -97,6 +97,7 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: "Q Apps",
     items: [
       // { to: "/app/insights", labelKey: "nav.insights", label: "Insights", icon: ScanSearch, app: "insights" },
+      { to: "/app/growth-radar", labelKey: "nav.growthRadar", label: "Growth Radar", keywords: "opportunities insights findings signals", icon: Radar, app: "growthRadar" },
       { to: "/app/goals", labelKey: "nav.goals", label: "Goals", icon: Flag, app: "goals" },
       { to: "/app/funnels", labelKey: "nav.funnels", label: "Funnels", icon: Filter, app: "funnels" },
       // { to: "/app/experiments", labelKey: "nav.experiments", label: "A/B tests", icon: FlaskConical, app: "experiments" },

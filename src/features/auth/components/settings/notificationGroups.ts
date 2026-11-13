@@ -50,6 +50,7 @@ export const NOTIFICATION_GROUPS: NotificationGroup[] = [
       "form.submission",
       "task.assigned",
       "insights.ready",
+      "radar.opportunity",
     ],
   },
 ];

@@ -50,6 +50,8 @@ const Campaigns = lazy(() => import("@/features/campaigns/pages/Campaigns"));
 const CampaignEditor = lazy(() => import("@/features/campaigns/pages/CampaignEditor"));
 const CampaignTemplates = lazy(() => import("@/features/campaigns/pages/CampaignTemplates"));
 const CampaignDetail = lazy(() => import("@/features/campaigns/pages/CampaignDetail"));
+const GrowthRadar = lazy(() => import("@/features/growthRadar/pages/GrowthRadar"));
+const RadarOpportunity = lazy(() => import("@/features/growthRadar/pages/RadarOpportunity"));
 // const Insights = lazy(() => import("@/features/insights/pages/Insights"));
 // const Experiments = lazy(() => import("@/features/experiments/pages/Experiments"));
 // const ExperimentEditor = lazy(() => import("@/features/experiments/pages/ExperimentEditor"));
@@ -305,6 +307,8 @@ export default function App() {
                 <Route path="/app/campaigns/templates" element={<CampaignTemplates />} />
                 <Route path="/app/campaigns/:campaignId" element={<CampaignDetail />} />
                 <Route path="/app/campaigns/:campaignId/edit" element={<CampaignEditor />} />
+                <Route path="/app/growth-radar" element={<GrowthRadar />} />
+                <Route path="/app/growth-radar/:opportunityId" element={<RadarOpportunity />} />
                 {/* <Route path="/app/insights" element={<Insights />} /> */}
                 {/* <Route path="/app/experiments" element={<Experiments />} /> */}
                 {/* <Route path="/app/experiments/new" element={<ExperimentEditor />} /> */}

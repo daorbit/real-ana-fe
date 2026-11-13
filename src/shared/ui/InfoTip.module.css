@@ -1,0 +1,27 @@
+.tip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--faint);
+  cursor: help;
+  transition: color var(--duration-fast) ease;
+}
+
+.tip:hover {
+  color: var(--text-2);
+}
+
+.text {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--faint);
+  text-underline-offset: 3px;
+}
+
+.text:focus-visible,
+.tip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

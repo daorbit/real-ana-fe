@@ -4,6 +4,7 @@ import type { NavItem } from "./navItems";
 
 const APP_IMAGE_FILE: Partial<Record<WorkspaceAppId, string>> = {
   invoicing: "quantalog-invoicing.png",
+  growthRadar: "quantalog-growth-radar.svg",
 };
 
 export function navImage(item: Pick<NavItem, "app">): string | undefined {

@@ -235,6 +235,20 @@ export function notificationCopy(
       };
     }
 
+    case "radar.opportunity": {
+      const count = Number(d.count ?? 0);
+      const title = str(d, "title");
+      return count > 1
+        ? {
+            title: t("activity.radarOpportunity.titleMany", "Growth Radar found new opportunities"),
+            body: t("activity.radarOpportunity.bodyMany", "{{count}} high-priority findings, starting with “{{title}}”.", { count, title }),
+          }
+        : {
+            title: t("activity.radarOpportunity.title", "Growth Radar found an opportunity"),
+            body: title,
+          };
+    }
+
     case "task.assigned": {
       const title = str(d, "title", t("activity.taskAssigned.aTask", "a task"));
       const workspace = str(d, "workspaceName");
@@ -326,6 +340,7 @@ export function notificationTypeLabel(type: NotificationType, t: TFunction): str
     "referral.rewarded": ["activity.pref.referralRewarded", "Referral rewards"],
     "task.assigned": ["activity.pref.taskAssigned", "Tasks assigned to you"],
     "insights.ready": ["activity.pref.insightsReady", "Weekly insights"],
+    "radar.opportunity": ["activity.pref.radarOpportunity", "High-priority Growth Radar findings"],
   };
 
   const [key, fallback] = labels[type];
