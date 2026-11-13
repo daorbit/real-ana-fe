@@ -1,12 +1,10 @@
-import type { CSSProperties } from "react";
 import { Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { ArrowUpRight, CircleX, Clock, Infinity as InfinityIcon, RefreshCw, RotateCcw, ShoppingCart } from "lucide-react";
 import type { QuotaSummary } from "@/shared/types";
 import { shortDate } from "@/shared/lib/format";
 import { useCancelAutoRenew } from "../../hooks/useCancelAutoRenew";
-import { PlanIcon, PLAN_ACCENTS } from "../PlanIcons";
-import { RIBBON_FALLBACK } from "../../lib/constants";
+import { PlanIcon } from "../PlanIcons";
 import { daysUntil } from "../../lib/usageMonth";
 import classes from "./PlanOverview.module.css";
 
@@ -26,7 +24,6 @@ export function PlanOverview({
   onTurnOnAutoRenew: () => void;
 }) {
   const { t } = useTranslation();
-  const accent = PLAN_ACCENTS[usage.plan.slug] ?? RIBBON_FALLBACK;
   const periodEnd = usage.currentPeriodEnd;
   const renewal = usage.renewal;
   const autoRenewing = !expired && !!renewal?.autoRenew;
@@ -44,7 +41,6 @@ export function PlanOverview({
       className={classes.root}
       data-plan={usage.plan.slug}
       data-expired={expired || undefined}
-      style={{ "--plan-accent": accent } as CSSProperties}
     >
       <header className={classes.head}>
         <div className={classes.identity}>

@@ -17,22 +17,8 @@
 }
 
 .card[data-highlight] {
-  border-color: color-mix(in srgb, var(--plan-accent) 55%, var(--border));
-  background:
-    radial-gradient(ellipse 70% 42% at 50% 0%, color-mix(in srgb, var(--plan-accent) 16%, transparent), transparent 72%),
-    var(--surface);
-  box-shadow: 0 28px 64px -36px color-mix(in srgb, var(--plan-accent) 60%, transparent);
-}
-
-.card[data-highlight]::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 18%;
-  right: 18%;
-  height: 1px;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--plan-accent) 75%, transparent), transparent);
+  border-color: var(--accent);
+  background: var(--surface);
 }
 
 .top {
@@ -52,8 +38,8 @@
   font-size: 11.5px;
   font-weight: 650;
   white-space: nowrap;
-  color: var(--plan-on);
-  background: var(--plan-gradient);
+  color: var(--accent-text);
+  background: var(--accent-soft);
 }
 
 .name {
@@ -121,7 +107,7 @@
   margin: 0 0 12px;
   font-size: 12px;
   font-weight: 700;
-  color: var(--plan-accent);
+  color: var(--accent);
 }
 
 .features {
@@ -152,15 +138,15 @@
 }
 
 .seeAll svg {
-  color: var(--plan-accent);
+  color: var(--accent);
 }
 
 .seeAll:hover {
-  color: var(--plan-accent);
+  color: var(--accent);
 }
 
 .seeAll:focus-visible {
-  outline: 2px solid var(--plan-accent);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
 }
@@ -182,8 +168,8 @@
   height: 18px;
   margin-top: 1px;
   border-radius: 50%;
-  color: var(--check, var(--plan-accent, var(--accent)));
-  background: color-mix(in srgb, var(--check, var(--plan-accent, var(--accent))) 15%, transparent);
+  color: var(--check, var(--accent));
+  background: color-mix(in srgb, var(--check, var(--accent)) 15%, transparent);
 }
 
 @media (max-width: 48em) {

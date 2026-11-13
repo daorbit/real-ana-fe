@@ -1,9 +1,8 @@
-import { Fragment, type CSSProperties } from "react";
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { priceIn } from "@/shared/lib/currency";
 import type { BillingCycle, Currency, Plan } from "@/shared/types";
-import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../PlanIcons";
-import { RIBBON_FALLBACK } from "../../lib/constants";
+import { PlanIcon } from "../PlanIcons";
 import { allPlanFeatures } from "../../lib/planFeatures";
 import { CompareCell } from "./CompareCell";
 import { featureRows, limitRows, type ComparisonRow } from "./comparisonRows";
@@ -50,11 +49,6 @@ export function PlanComparisonTable({ plans, currentSlug, featuredSlug, cycle, c
                     scope="col"
                     className={classes.planHead}
                     {...columnState(plan)}
-                    style={{
-                      "--plan-accent": PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK,
-                      "--plan-gradient": PLAN_GRADIENTS[plan.slug] ?? PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK,
-                      "--plan-on": PLAN_ON_ACCENT[plan.slug] ?? "#fff",
-                    } as CSSProperties}
                   >
                     <div className={classes.planHeadInner}>
                       <PlanIcon slug={plan.slug} size={26} uid={`matrix-${plan.slug}`} />

@@ -68,8 +68,8 @@
   font-size: 10.5px;
   font-weight: 650;
   letter-spacing: 0.02em;
-  color: var(--plan-on);
-  background: var(--plan-gradient);
+  color: var(--accent-text);
+  background: var(--accent-soft);
 }
 
 .planHead[data-current] .planTag {

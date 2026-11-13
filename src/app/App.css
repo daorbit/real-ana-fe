@@ -1732,13 +1732,12 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   --auth-line-strong: rgba(255, 255, 255, 0.32);
   --auth-surface: rgba(255, 255, 255, 0.05);
   --auth-surface-hover: rgba(255, 255, 255, 0.08);
-  --auth-glow: rgba(255, 255, 255, 0.035);
   /* The primary button is the inverse of the ground, in both schemes. */
   --auth-solid: #ffffff;
   --auth-solid-ink: #0a0b0d;
   --auth-solid-hover: rgba(255, 255, 255, 0.88);
 
-  background: linear-gradient(150deg, #0c0e10 0%, #101215 50%, #08090b 100%);
+  background: #000000;
 }
 
 /* Onboarding reuses the auth form's field rules but sits outside
@@ -1756,7 +1755,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   --auth-line-strong: rgba(255, 255, 255, 0.32);
   --auth-surface: rgba(255, 255, 255, 0.05);
   --auth-surface-hover: rgba(255, 255, 255, 0.08);
-  --auth-glow: rgba(255, 255, 255, 0.035);
   --auth-solid: #ffffff;
   --auth-solid-ink: #0a0b0d;
   --auth-solid-hover: rgba(255, 255, 255, 0.88);
@@ -1764,24 +1762,23 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 [data-mantine-color-scheme="light"] .auth-split,
 [data-mantine-color-scheme="light"] .onb-form {
-  --auth-ink: rgba(17, 24, 39, 0.95);
-  --auth-ink-dim: rgba(17, 24, 39, 0.72);
-  --auth-ink-faint: rgba(17, 24, 39, 0.58);
-  --auth-ink-ghost: rgba(17, 24, 39, 0.48);
-  --auth-line: #c9ced8;
-  --auth-line-strong: #8b93a3;
+  --auth-ink: rgba(29, 29, 31, 0.95);
+  --auth-ink-dim: rgba(29, 29, 31, 0.72);
+  --auth-ink-faint: rgba(29, 29, 31, 0.58);
+  --auth-ink-ghost: rgba(29, 29, 31, 0.48);
+  --auth-line: #d2d2d7;
+  --auth-line-strong: #86868b;
   --auth-surface: #ffffff;
   --auth-surface-hover: #ffffff;
-  --auth-glow: rgba(17, 24, 39, 0.04);
-  --auth-solid: #111827;
+  --auth-solid: #1d1d1f;
   --auth-solid-ink: #ffffff;
-  --auth-solid-hover: #1f2937;
+  --auth-solid-hover: #333336;
 }
 
 /* Only the auth page paints a ground; onboarding sits inside a surface that
    already has one. */
 [data-mantine-color-scheme="light"] .auth-split {
-  background: linear-gradient(150deg, #f6f7f9 0%, #eef0f4 50%, #f8f9fb 100%);
+  background: #f5f5f7;
 }
 
 
@@ -1791,11 +1788,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   padding: 2rem; background: transparent;
 }
 
-.auth-panel::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(46% 40% at 50% 50%,
-    var(--auth-glow) 0%, transparent 70%);
-}
 .auth-form { position: relative; z-index: 1; width: 100%; max-width: 380px; }
 
 
@@ -2986,17 +2978,6 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   background: var(--bg-2);
 }
 
-.share-post-preview::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background:
-    radial-gradient(55% 80% at 0% 0%, color-mix(in srgb, #818cf8 16%, transparent), transparent 62%),
-    radial-gradient(55% 80% at 100% 0%, color-mix(in srgb, #eab308 12%, transparent), transparent 62%);
-}
 .share-post-preview > * {
   position: relative;
   z-index: 1;

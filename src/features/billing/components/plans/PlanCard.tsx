@@ -1,12 +1,10 @@
-import type { CSSProperties } from "react";
 import { Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, ArrowUpRight, Check, Clock, CreditCard } from "lucide-react";
 import { priceIn } from "@/shared/lib/currency";
 import type { BillingCycle, Currency, Plan, QuotaSummary } from "@/shared/types";
-import { PlanIcon, PLAN_ACCENTS, PLAN_GRADIENTS, PLAN_ON_ACCENT } from "../PlanIcons";
+import { PlanIcon } from "../PlanIcons";
 import { FeatureLine } from "../FeatureLine";
-import { RIBBON_FALLBACK } from "../../lib/constants";
 import { planFeatureLines } from "../../lib/planFeatures";
 import { isActionable, planAction } from "../../lib/planAction";
 import classes from "./Plans.module.css";
@@ -33,9 +31,6 @@ export function PlanCard({
   isDemo, selectedWorkspaceId, subscribing, onPick, featureLimit, onSeeAll,
 }: Props) {
   const { t } = useTranslation();
-  const accent = PLAN_ACCENTS[plan.slug] ?? RIBBON_FALLBACK;
-  const gradient = PLAN_GRADIENTS[plan.slug] ?? accent;
-  const onAccent = PLAN_ON_ACCENT[plan.slug] ?? "#fff";
 
   const price = priceIn(cycle === "yearly" ? plan.priceYearly : plan.priceMonthly, currency);
   const buyable = price > 0;
@@ -81,7 +76,6 @@ export function PlanCard({
     <article
       className={classes.card}
       data-highlight={highlight || undefined}
-      style={{ "--plan-accent": accent, "--plan-gradient": gradient, "--plan-on": onAccent } as CSSProperties}
     >
       <div className={classes.top}>
         <PlanIcon slug={plan.slug} size={44} uid={`card-${plan.slug}`} />

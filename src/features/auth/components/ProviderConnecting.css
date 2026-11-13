@@ -6,9 +6,7 @@
   flex-direction: column;
   align-items: center;
   padding: 28px 24px calc(28px + env(safe-area-inset-bottom, 0px));
-  background:
-    radial-gradient(ellipse 60% 45% at 50% 42%, color-mix(in srgb, var(--text) 4%, transparent), transparent 70%),
-    var(--bg);
+  background: var(--bg);
   animation: provider-connecting-fade 260ms ease both;
 }
 
