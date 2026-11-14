@@ -85,7 +85,9 @@ export function ImageTile({
         tile
       )}
 
-      <MediaPickerModal opened={crop.picking} onClose={crop.closePicker} kind="image" title={pickerTitle} onPick={crop.pick} />
+      <MediaPickerModal opened={crop.picking} onClose={crop.closePicker} kind="image" title={pickerTitle} onPick={crop.pick}
+        onUploadFile={crop.cropUpload}
+      />
       <AvatarCropper
         file={crop.cropFile}
         busy={crop.busy}

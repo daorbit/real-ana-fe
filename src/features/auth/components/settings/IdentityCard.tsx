@@ -18,6 +18,7 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
     firstName,
     lastName,
     pickAvatarFromLibrary,
+    setCropFile,
     clearAvatar,
   } = form;
   const [picking, setPicking] = useState(false);
@@ -107,6 +108,7 @@ export function IdentityCard({ form }: { form: ProfileForm }) {
         opened={picking}
         onClose={() => setPicking(false)}
         onPick={(asset) => void pickAvatarFromLibrary(asset.url, asset.name)}
+        onUploadFile={setCropFile}
         kind="image"
         title={t("settings.avatarPickerTitle", "Choose a profile photo")}
       />

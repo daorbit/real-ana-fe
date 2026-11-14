@@ -31,6 +31,11 @@ export function useImageCrop(workspaceId: string | undefined, fileName: string, 
     void cropFromUrl(asset.url);
   };
 
+  const cropUpload = (file: File) => {
+    setPicking(false);
+    setCropFile(file);
+  };
+
   const save = async (blob: Blob) => {
     const file = new File([blob], `${fileName}-${Date.now()}.jpg`, { type: "image/jpeg" });
     setBusy(true);
@@ -54,6 +59,7 @@ export function useImageCrop(workspaceId: string | undefined, fileName: string, 
     openPicker: () => setPicking(true),
     closePicker: () => setPicking(false),
     pick,
+    cropUpload,
     adjust: (url: string) => void cropFromUrl(url),
     cropFile,
     cancelCrop: () => setCropFile(null),

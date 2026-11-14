@@ -23,6 +23,7 @@ interface Props {
   opened: boolean;
   onClose: () => void;
   onPick: (asset: MediaAsset) => void;
+  onUploadFile?: (file: File) => void;
   kind?: MediaKind;
   title?: string;
 }
@@ -31,6 +32,7 @@ export function MediaPickerModal({
   opened,
   onClose,
   onPick,
+  onUploadFile,
   kind,
   title = "Choose a file",
 }: Props) {
@@ -92,8 +94,22 @@ export function MediaPickerModal({
   const items = data?.items ?? [];
   const pages = data ? Math.max(1, Math.ceil(data.total / data.perPage)) : 1;
 
+  function handOver(file: File) {
+    if (fileInput.current) fileInput.current.value = "";
+    if (file.size > MAX_ASSET_BYTES) {
+      notify.error(`That file is larger than ${MAX_ASSET_LABEL}.`);
+      return;
+    }
+    onUploadFile?.(file);
+    onClose();
+  }
+
   async function onFiles(list: FileList | null) {
     if (!list?.length || !canEdit || !workspaceId) return;
+    if (onUploadFile) {
+      handOver(list[0]);
+      return;
+    }
 
     const files = Array.from(list);
     const queued: UploadItem[] = files.map((file) =>
@@ -157,7 +173,7 @@ export function MediaPickerModal({
         <input
           ref={fileInput}
           type="file"
-          multiple
+          multiple={!onUploadFile}
           accept={kind === "image" ? "image/*" : kind === "video" ? "video/*" : undefined}
           hidden
           onChange={(e) => onFiles(e.currentTarget.files)}
