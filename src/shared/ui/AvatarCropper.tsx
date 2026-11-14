@@ -110,6 +110,7 @@ export default function AvatarCropper({
   const [rotation, setRotation] = useState(0);
   const [area, setArea] = useState<Area | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   // Hold the file as a blob URL for as long as the modal is open, and reset the
   // editing state for each new pick. Revoking on cleanup matters: an un-revoked
@@ -154,6 +155,8 @@ export default function AvatarCropper({
     <Modal
       opened={Boolean(file)}
       onClose={onCancel}
+      onEnterTransitionEnd={() => setReady(true)}
+      onExitTransitionEnd={() => setReady(false)}
       title={title}
       centered
       radius="lg"
@@ -180,7 +183,7 @@ export default function AvatarCropper({
                 background: "var(--mantine-color-dark-8)",
               }}
             >
-              {src && (
+              {src && ready && (
                 <Cropper
                   image={src}
                   crop={crop}

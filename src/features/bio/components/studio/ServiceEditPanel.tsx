@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { BIO_ACTIONS, CUSTOM_SERVICE_ID, serviceById } from "@/features/bio/lib/serviceCatalog";
+import { contactKind } from "@/features/bio/lib/contactLink";
 import type { BioServiceRow } from "@/features/bio/types";
 import { ServiceLogo } from "../ServiceLogo";
 import { DetailField } from "./ui/ExpandableRow";
 import { ServicePickerList } from "./ui/ServicePickerList";
 import { Toggle } from "./ui/Toggle";
+import { ContactField } from "./ui/ContactField";
 import list from "./ui/List.module.css";
 import classes from "./ui/Tiles.module.css";
 
@@ -22,6 +24,7 @@ export function ServiceEditPanel({
 }) {
   const [changing, setChanging] = useState(false);
   const custom = row.service === CUSTOM_SERVICE_ID;
+  const contact = contactKind(row.service);
 
   if (changing) {
     return (
@@ -53,16 +56,20 @@ export function ServiceEditPanel({
       </button>
 
       <div className={classes.panelBody}>
-        <DetailField label="Link">
-          <input
-            autoFocus
-            className={list.input}
-            placeholder={`Paste the ${row.name || "service"} link`}
-            inputMode="url"
-            value={row.url}
-            onChange={(e) => onChange({ url: e.currentTarget.value })}
-          />
-        </DetailField>
+        {contact ? (
+          <ContactField kind={contact} autoFocus url={row.url} onChange={(url) => onChange({ url })} />
+        ) : (
+          <DetailField label="Link">
+            <input
+              autoFocus
+              className={list.input}
+              placeholder={`Paste the ${row.name || "service"} link`}
+              inputMode="url"
+              value={row.url}
+              onChange={(e) => onChange({ url: e.currentTarget.value })}
+            />
+          </DetailField>
+        )}
 
         {custom && (
           <DetailField label="Name">
