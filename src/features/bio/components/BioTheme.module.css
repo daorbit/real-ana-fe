@@ -50,6 +50,15 @@
   --bio-page-muted: color-mix(in srgb, var(--bio-accent-fg) 66%, transparent);
 }
 
+.tokens[data-background="deep"] {
+  --bio-bg: color-mix(in srgb, var(--bio-accent) 20%, #07080a);
+  --bio-surface: color-mix(in srgb, var(--bio-accent) 14%, #131418);
+  --bio-border: color-mix(in srgb, var(--bio-accent) 22%, #2a2b31);
+  --bio-text: #f5f5f7;
+  --bio-text-2: #c4c5cc;
+  --bio-muted: #9a9ca5;
+}
+
 .credit {
   font-size: 12px;
   font-weight: 500;

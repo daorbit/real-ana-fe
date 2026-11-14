@@ -1,0 +1,15 @@
+.title {
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.body {
+  padding: 4px var(--space-6) var(--space-6);
+}
+
+.note {
+  margin: 0 0 var(--space-5);
+  font-size: 14px;
+  color: var(--text-2);
+}

@@ -28,6 +28,15 @@
   border-color: var(--accent);
 }
 
+.card[data-active] .phone {
+  border-color: var(--accent);
+}
+
+.check {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
 .body {
   display: flex;
   flex-direction: column;
@@ -37,6 +46,9 @@
 }
 
 .name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.01em;

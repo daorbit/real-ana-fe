@@ -1,43 +1,79 @@
+import { splitNumber, type DialCode } from "@/shared/lib/dialCodes";
+
 export type ContactKind = "whatsapp" | "telegram";
+export type ContactMode = "number" | "handle";
 
-type ContactField = { label: string; placeholder: string; inputMode: "tel" | "text"; empty: string };
-
-export const CONTACT_FIELDS: Record<ContactKind, ContactField> = {
-  whatsapp: { label: "WhatsApp number, with country code", placeholder: "+91 98765 43210", inputMode: "tel", empty: "Add the number" },
-  telegram: { label: "Telegram username or number", placeholder: "@yourname or +91 98765 43210", inputMode: "text", empty: "Add the username" },
+type ContactSpec = {
+  name: string;
+  modes: { value: ContactMode; label: string }[];
+  handlePlaceholder: string;
+  empty: string;
 };
 
-const PHONE = /^\+?[\d\s().-]{6,24}$/;
+export const CONTACT_SPECS: Record<ContactKind, ContactSpec> = {
+  whatsapp: {
+    name: "WhatsApp",
+    modes: [
+      { value: "number", label: "Number" },
+      { value: "handle", label: "Link" },
+    ],
+    handlePlaceholder: "Paste a wa.me or group invite link",
+    empty: "Add the number",
+  },
+  telegram: {
+    name: "Telegram",
+    modes: [
+      { value: "handle", label: "Username" },
+      { value: "number", label: "Number" },
+    ],
+    handlePlaceholder: "@yourname",
+    empty: "Add the username",
+  },
+};
+
+const NUMBER_LINK: Record<ContactKind, RegExp> = {
+  whatsapp: /^(?:https?:\/\/)?(?:www\.)?wa\.me\/(\d{6,15})\/?$/i,
+  telegram: /^(?:https?:\/\/)?(?:www\.)?t\.me\/\+(\d{6,15})\/?$/i,
+};
+const TELEGRAM_USER_LINK = /^(?:https?:\/\/)?(?:www\.)?t\.me\/([a-z][a-z0-9_]{4,31})\/?$/i;
 const TELEGRAM_USERNAME = /^@?([a-z][a-z0-9_]{4,31})$/i;
-const WHATSAPP_LINK = /^(?:https?:\/\/)?(?:www\.)?wa\.me\/(\d{8,15})\/?$/i;
-const TELEGRAM_LINK = /^(?:https?:\/\/)?(?:www\.)?t\.me\/(\+?)([a-z0-9_]{5,32})\/?$/i;
 
 export function contactKind(id: string): ContactKind | null {
   return id === "whatsapp" || id === "telegram" ? id : null;
 }
 
-function phoneDigits(value: string): string | null {
-  if (!PHONE.test(value)) return null;
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 8 && digits.length <= 15 ? digits : null;
+export function numberInLink(kind: ContactKind, url: string): string | null {
+  return NUMBER_LINK[kind].exec(url.trim())?.[1] ?? null;
 }
 
-export function toContactLink(kind: ContactKind, value: string): string {
-  const trimmed = value.trim();
-  const digits = phoneDigits(trimmed);
-  if (kind === "whatsapp") return digits ? `https://wa.me/${digits}` : value;
-  if (digits) return `https://t.me/+${digits}`;
-  const user = TELEGRAM_USERNAME.exec(trimmed);
+export function numberLink(kind: ContactKind, digits: string): string {
+  return kind === "whatsapp" ? `https://wa.me/${digits}` : `https://t.me/+${digits}`;
+}
+
+export function initialMode(kind: ContactKind, url: string): ContactMode {
+  if (!url.trim()) return CONTACT_SPECS[kind].modes[0].value;
+  return numberInLink(kind, url) ? "number" : "handle";
+}
+
+export function initialNumber(digits: string | null, home: DialCode): { country: DialCode; local: string } {
+  if (!digits) return { country: home, local: "" };
+  if (digits.startsWith(home.dial)) return { country: home, local: digits.slice(home.dial.length) };
+  return splitNumber(digits);
+}
+
+export function handleDisplay(kind: ContactKind, url: string): string {
+  if (kind !== "telegram") return url;
+  const user = TELEGRAM_USER_LINK.exec(url.trim());
+  return user ? `@${user[1]}` : url;
+}
+
+export function handleLink(kind: ContactKind, value: string): string {
+  if (kind !== "telegram") return value;
+  const user = TELEGRAM_USERNAME.exec(value.trim());
   return user ? `https://t.me/${user[1]}` : value;
 }
 
 export function contactDisplay(kind: ContactKind, url: string): string {
-  const trimmed = url.trim();
-  if (kind === "whatsapp") {
-    const match = WHATSAPP_LINK.exec(trimmed);
-    return match ? `+${match[1]}` : url;
-  }
-  const match = TELEGRAM_LINK.exec(trimmed);
-  if (!match) return url;
-  return match[1] ? `+${match[2]}` : `@${match[2]}`;
+  const digits = numberInLink(kind, url);
+  return digits ? `+${digits}` : handleDisplay(kind, url);
 }

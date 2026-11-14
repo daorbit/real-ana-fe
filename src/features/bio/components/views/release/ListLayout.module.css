@@ -122,7 +122,8 @@ a.row:hover {
   transition: border-color 150ms ease, background-color 150ms ease;
 }
 
-.root[data-appearance="dark"] .action {
+.root[data-appearance="dark"] .action,
+.root[data-background="deep"] .action {
   border-color: var(--bio-border);
   color: var(--bio-text);
 }

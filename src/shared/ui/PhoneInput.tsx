@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Combobox, Text, TextInput, UnstyledButton, useCombobox,
+  Combobox, Text, TextInput, UnstyledButton, useCombobox, type MantineSize,
 } from "@mantine/core";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { DIAL_CODES, type DialCode } from "@/shared/lib/dialCodes";
@@ -17,6 +17,8 @@ export function PhoneInput({
   label = "Mobile number",
   description,
   autoFocus,
+  size,
+  withinPortal = true,
 }: {
   country: DialCode;
   onCountry: (c: DialCode) => void;
@@ -26,6 +28,8 @@ export function PhoneInput({
   label?: string;
   description?: string;
   autoFocus?: boolean;
+  size?: MantineSize;
+  withinPortal?: boolean;
 }) {
  
   const nameFor = (iso: string) => DIAL_CODES.find((c) => c.iso === iso)?.name ?? "";
@@ -62,6 +66,7 @@ export function PhoneInput({
       {/* One field: the country code sits inside it, behind a divider, so
           the pair reads as a single phone number rather than two controls. */}
       <TextInput
+        size={size}
         placeholder="98765 43210"
         inputMode="tel"
         autoComplete="tel-national"
@@ -76,6 +81,7 @@ export function PhoneInput({
             store={combobox}
             width={300}
             position="bottom-start"
+            withinPortal={withinPortal}
             onOptionSubmit={(iso) => {
               const hit = DIAL_CODES.find((c) => c.iso === iso);
               if (hit) onCountry(hit);

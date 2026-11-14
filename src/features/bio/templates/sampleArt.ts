@@ -16,6 +16,10 @@ const MOTIFS: Record<ArtMotif, string> = {
   person: `<circle cx="200" cy="160" r="64" fill="${INK}"/><path d="M90 340 C 100 260, 300 260, 310 340 Z" fill="${INK}"/>`,
   plate: `<circle cx="200" cy="200" r="118" fill="${SOFT}"/><circle cx="200" cy="200" r="84" fill="${INK}"/><rect x="58" y="110" width="10" height="180" rx="5" fill="${INK}"/><rect x="332" y="110" width="10" height="180" rx="5" fill="${INK}"/>`,
   house: `<path d="M200 90 L320 190 V310 H80 V190 Z" fill="${INK}"/><rect x="176" y="236" width="48" height="74" rx="6" fill="rgba(0,0,0,0.3)"/>`,
+  arch: `<path d="M110 340 V210 A90 90 0 0 1 290 210 V340 Z" fill="${SOFT}"/><path d="M146 340 V218 A54 54 0 0 1 254 218 V340 Z" fill="${INK}"/><circle cx="200" cy="150" r="16" fill="rgba(0,0,0,0.3)"/>`,
+  rings: `<circle cx="168" cy="200" r="118" fill="none" stroke="${SOFT}" stroke-width="2"/><circle cx="168" cy="200" r="80" fill="none" stroke="${SOFT}" stroke-width="2"/><circle cx="168" cy="200" r="42" fill="none" stroke="${SOFT}" stroke-width="2"/><circle cx="286" cy="200" r="22" fill="${INK}"/>`,
+  lens: `<circle cx="160" cy="200" r="96" fill="${SOFT}"/><circle cx="240" cy="200" r="96" fill="${SOFT}"/><path d="M200 113 A96 96 0 0 1 200 287 A96 96 0 0 1 200 113 Z" fill="${INK}"/>`,
+  book: `<rect x="96" y="96" width="208" height="232" rx="10" fill="${INK}"/><rect x="96" y="96" width="26" height="232" rx="6" fill="rgba(0,0,0,0.22)"/><rect x="146" y="148" width="124" height="10" rx="5" fill="rgba(0,0,0,0.3)"/><rect x="146" y="172" width="88" height="10" rx="5" fill="rgba(0,0,0,0.2)"/>`,
 };
 
 export function sampleArt(color: string, motif: ArtMotif): string {

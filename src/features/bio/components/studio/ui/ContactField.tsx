@@ -1,6 +1,11 @@
-import { CONTACT_FIELDS, contactDisplay, toContactLink, type ContactKind } from "@/features/bio/lib/contactLink";
-import { DetailField } from "./ExpandableRow";
+import { useState } from "react";
+import {
+  CONTACT_SPECS, handleDisplay, handleLink, initialMode, type ContactKind, type ContactMode,
+} from "@/features/bio/lib/contactLink";
+import { ContactNumber } from "./ContactNumber";
+import { Segmented } from "./Segmented";
 import list from "./List.module.css";
+import classes from "./ContactField.module.css";
 
 export function ContactField({
   kind,
@@ -13,23 +18,37 @@ export function ContactField({
   autoFocus?: boolean;
   onChange: (url: string) => void;
 }) {
-  const field = CONTACT_FIELDS[kind];
+  const spec = CONTACT_SPECS[kind];
+  const [mode, setMode] = useState<ContactMode>(() => initialMode(kind, url));
+
+  const switchMode = (next: ContactMode) => {
+    if (next === mode) return;
+    setMode(next);
+    onChange("");
+  };
 
   return (
-    <DetailField label={field.label}>
-      <input
-        autoFocus={autoFocus}
-        className={list.input}
-        placeholder={field.placeholder}
-        inputMode={field.inputMode}
-        spellCheck={false}
-        value={contactDisplay(kind, url)}
-        onChange={(e) => onChange(e.currentTarget.value)}
-        onBlur={(e) => {
-          const next = toContactLink(kind, e.currentTarget.value);
-          if (next !== url) onChange(next);
-        }}
-      />
-    </DetailField>
+    <div className={list.field}>
+      <div className={classes.head}>
+        <span className={list.fieldLabel}>{spec.name}</span>
+        <Segmented size="sm" label={`${spec.name} contact type`} value={mode} options={spec.modes} onChange={switchMode} />
+      </div>
+      {mode === "number" ? (
+        <ContactNumber kind={kind} url={url} autoFocus={autoFocus} onChange={onChange} />
+      ) : (
+        <input
+          autoFocus={autoFocus}
+          className={list.input}
+          placeholder={spec.handlePlaceholder}
+          spellCheck={false}
+          value={handleDisplay(kind, url)}
+          onChange={(e) => onChange(e.currentTarget.value)}
+          onBlur={(e) => {
+            const next = handleLink(kind, e.currentTarget.value);
+            if (next !== url) onChange(next);
+          }}
+        />
+      )}
+    </div>
   );
 }

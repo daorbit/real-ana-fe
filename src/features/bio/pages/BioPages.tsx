@@ -1,5 +1,4 @@
 import { Button } from "@mantine/core";
-import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -17,6 +16,7 @@ import { useBioAllowances } from "@/features/bio/hooks/useBioAllowances";
 import { BioPageSection } from "@/features/bio/components/BioPageSection";
 import { BioEmpty } from "@/features/bio/components/BioEmpty";
 import { QrDialog } from "@/features/bio/components/QrDialog";
+import { BioPagesSkeleton } from "@/features/bio/components/skeletons/BioPagesSkeleton";
 import classes from "@/features/bio/components/BioPages.module.css";
 
 function sectionMeta(statsDays: number, usage: string | null, plan: string): string {
@@ -61,10 +61,7 @@ export default function BioPages() {
       {!bioOn ? (
         <QuantalogAppGate app="bio" />
       ) : loading ? (
-        <div className={classes.grid}>
-          <PanelSkeleton height={210} />
-          <PanelSkeleton height={210} />
-        </div>
+        <BioPagesSkeleton />
       ) : failed ? (
         <ErrorState onRetry={() => void refresh()} retrying={refreshing} />
       ) : !hasPages ? (

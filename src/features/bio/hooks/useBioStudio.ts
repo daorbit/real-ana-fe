@@ -40,6 +40,7 @@ export function useBioStudio(
 
   const set = (patch: Partial<BioPageInput>) => setDraft((d) => ({ ...d, ...patch }));
   const setTheme = (patch: Partial<BioTheme>) => setDraft((d) => ({ ...d, theme: { ...d.theme, ...patch } }));
+  const applyTemplate = (next: BioTemplate) => setDraft((d) => ({ ...d, theme: { ...next.theme } }));
 
   const addLink = (patch: Partial<BioLink> = {}): string => {
     const id = newRowId();
@@ -94,6 +95,7 @@ export function useBioStudio(
     draft,
     set,
     setTheme,
+    applyTemplate,
     addLink,
     updateLink,
     removeLink,

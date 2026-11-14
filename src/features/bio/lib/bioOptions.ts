@@ -36,6 +36,7 @@ export const BIO_BACKGROUNDS: { value: BioBackground; label: string }[] = [
   { value: "plain", label: "Plain" },
   { value: "soft", label: "Soft" },
   { value: "accent", label: "Colour" },
+  { value: "deep", label: "Deep" },
 ];
 
 export const BIO_PROFILE_LAYOUTS: { value: BioProfileLayout; label: string }[] = [

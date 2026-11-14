@@ -2,7 +2,7 @@ import type { DragHandleProps } from "@/shared/ui/SortableList";
 import { BIO_SOCIAL_NETWORKS } from "@/features/bio/lib/bioOptions";
 import type { BioSocial } from "@/features/bio/types";
 import { SocialLogo } from "../SocialLogo";
-import { CONTACT_FIELDS, contactDisplay, contactKind } from "@/features/bio/lib/contactLink";
+import { CONTACT_SPECS, contactDisplay, contactKind } from "@/features/bio/lib/contactLink";
 import { ContactField } from "./ui/ContactField";
 import { DetailField, ExpandableRow } from "./ui/ExpandableRow";
 import classes from "./ui/List.module.css";
@@ -33,7 +33,7 @@ export function SocialRowEditor({
     <ExpandableRow
       lead={<SocialLogo network={social.network} size="sm" />}
       title={social.label?.trim() || network.label}
-      subtitle={shown || (contact ? CONTACT_FIELDS[contact].empty : "Add the link")}
+      subtitle={shown || (contact ? CONTACT_SPECS[contact].empty : "Add the link")}
       missing={!url.trim()}
       open={open}
       handle={handle}

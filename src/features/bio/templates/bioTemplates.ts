@@ -1,12 +1,14 @@
+import { toPreviewPage } from "@/features/bio/lib/bioDraft";
 import { emptyRelease, newRowId, randomSlug } from "@/features/bio/lib/bioOptions";
 import { newServiceRow } from "@/features/bio/lib/serviceRows";
-import type { BioPageInput, PublicBioPage } from "@/features/bio/types";
+import type { BioPageInput, BioTheme, PublicBioPage } from "@/features/bio/types";
 import { PROFILE_TEMPLATES } from "./profileTemplates";
 import { RELEASE_TEMPLATES } from "./releaseTemplates";
 import { sampleArt } from "./sampleArt";
+import { SIGNATURE_TEMPLATES } from "./signatureTemplates";
 import type { BioTemplate } from "./templateTypes";
 
-export const BIO_TEMPLATES: BioTemplate[] = [...RELEASE_TEMPLATES, ...PROFILE_TEMPLATES];
+export const BIO_TEMPLATES: BioTemplate[] = [...SIGNATURE_TEMPLATES, ...RELEASE_TEMPLATES, ...PROFILE_TEMPLATES];
 
 export function templateById(id: string | null): BioTemplate | null {
   return BIO_TEMPLATES.find((t) => t.id === id) ?? null;
@@ -56,4 +58,34 @@ export function templatePreview(template: BioTemplate): PublicBioPage {
       : null,
     theme: draft.theme,
   };
+}
+
+export function templateOnContent(template: BioTemplate, draft: BioPageInput): PublicBioPage {
+  const sample = templatePreview(template);
+  const own = toPreviewPage(draft);
+  const release = own.release && sample.release
+    ? {
+        ...own.release,
+        artworkUrl: own.release.artworkUrl || sample.release.artworkUrl,
+        rows: own.release.rows.length ? own.release.rows : sample.release.rows,
+      }
+    : sample.release;
+  return {
+    ...own,
+    title: own.title.trim() || sample.title,
+    bio: own.bio.trim() || sample.bio,
+    avatarUrl: own.avatarUrl || sample.avatarUrl,
+    links: own.links.length ? own.links : sample.links,
+    socials: own.socials.length ? own.socials : sample.socials,
+    release,
+    theme: { ...template.theme },
+  };
+}
+
+function sameTheme(a: BioTheme, b: BioTheme): boolean {
+  return (Object.keys(a) as (keyof BioTheme)[]).every((key) => a[key] === b[key]);
+}
+
+export function templateForTheme(theme: BioTheme): BioTemplate | null {
+  return BIO_TEMPLATES.find((t) => sameTheme(t.theme, theme)) ?? null;
 }

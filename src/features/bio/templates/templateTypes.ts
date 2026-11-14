@@ -2,7 +2,7 @@ import type { BioPageKind, BioSocialNetwork, BioTheme } from "@/features/bio/typ
 
 export type TemplateCategory = "music" | "podcast" | "creator" | "business" | "shop" | "events" | "apps";
 
-export type ArtMotif = "disc" | "sun" | "wave" | "bars" | "grid" | "person" | "plate" | "house";
+export type ArtMotif = "disc" | "sun" | "wave" | "bars" | "grid" | "person" | "plate" | "house" | "arch" | "rings" | "lens" | "book";
 
 export type TemplateService = { service: string; action?: string };
 

@@ -2,7 +2,7 @@ import type { HeatCell } from "@/shared/types";
 
 export type BioAppearance = "light" | "dark";
 export type BioButtonStyle = "rounded" | "pill" | "square";
-export type BioBackground = "plain" | "soft" | "accent";
+export type BioBackground = "plain" | "soft" | "accent" | "deep";
 export type BioProfileLayout = "classic" | "hero" | "grid" | "editorial" | "cards";
 export type BioReleaseLayout = "list" | "poster" | "tiles";
 export type BioLayout = BioProfileLayout | BioReleaseLayout;

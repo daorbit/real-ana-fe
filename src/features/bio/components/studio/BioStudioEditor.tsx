@@ -1,13 +1,18 @@
+import { useMemo, useState } from "react";
 import { Button } from "@mantine/core";
+import { LayoutTemplate } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { PageHeader } from "@/shared/ui/Page";
 import { ErrorState } from "@/shared/ui/ErrorState";
+import { notify } from "@/shared/lib/notify";
 import { useTitle } from "@/shared/lib/useTitle";
 import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useBioStudio } from "@/features/bio/hooks/useBioStudio";
 import { BIO_KIND_LABEL } from "@/features/bio/lib/bioOptions";
+import { templateForTheme } from "@/features/bio/templates/bioTemplates";
 import type { BioTemplate } from "@/features/bio/templates/templateTypes";
+import { TemplateSwitcher } from "../templates/TemplateSwitcher";
+import { BioStudioSkeleton } from "./BioStudioSkeleton";
 import { DesignPanel } from "./DesignPanel";
 import { EditorShell } from "./EditorShell";
 import { LinksEditor } from "./LinksEditor";
@@ -33,7 +38,9 @@ export function BioStudioEditor({
   canEdit: boolean;
 }) {
   const studio = useBioStudio(workspaceId, workspaceName, pageId, template);
+  const [switching, setSwitching] = useState(false);
   const { draft } = studio;
+  const current = useMemo(() => templateForTheme(draft.theme), [draft.theme]);
   const label = BIO_KIND_LABEL[draft.kind];
   useTitle(studio.isNew ? `New ${label.toLowerCase()}` : draft.title || label);
 
@@ -44,8 +51,8 @@ export function BioStudioEditor({
       <PageHeader
         title={studio.isNew ? `New ${label.toLowerCase()}` : draft.title || `Edit ${label.toLowerCase()}`}
         description={
-          studio.isNew && template
-            ? `Started from the ${template.name} template. Add your links on the left; the phone shows what visitors see.`
+          current
+            ? `Using the ${current.name} template. Add your links on the left; the phone shows what visitors see.`
             : "Build it on the left. The phone shows exactly what visitors see."
         }
         docsPath={DOCS_SLUGS.quantalogBio}
@@ -60,11 +67,10 @@ export function BioStudioEditor({
                 />
                 {draft.published ? "Live" : "Draft"}
               </span>
-              {studio.isNew ? (
-                <Button variant="subtle" color="gray" component={Link} to="/app/bio/new">
-                  Change template
-                </Button>
-              ) : (
+              <Button variant="default" leftSection={<LayoutTemplate size={15} />} onClick={() => setSwitching(true)}>
+                Change template
+              </Button>
+              {!studio.isNew && (
                 <Button variant="default" component={Link} to="/app/bio">
                   Cancel
                 </Button>
@@ -80,10 +86,7 @@ export function BioStudioEditor({
       {studio.notFound ? (
         <ErrorState title="Page not found" description="It may have been deleted. Go back to see the rest." />
       ) : !ready ? (
-        <div className={classes.studio}>
-          <PanelSkeleton height={560} />
-          <PanelSkeleton height={680} />
-        </div>
+        <BioStudioSkeleton />
       ) : (
         <div className={classes.studio}>
           <EditorShell
@@ -109,6 +112,16 @@ export function BioStudioEditor({
           </div>
         </div>
       )}
+
+      <TemplateSwitcher
+        opened={switching}
+        draft={draft}
+        onClose={() => setSwitching(false)}
+        onPick={(next) => {
+          studio.applyTemplate(next);
+          notify.success(`Switched to ${next.name}. Save to keep it.`, "Link-in-bio");
+        }}
+      />
     </>
   );
 }
