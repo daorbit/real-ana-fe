@@ -172,9 +172,10 @@
 .settingRow {
   border-top: 1px solid var(--border);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   min-height: 52px;
   padding: 8px 12px 8px 16px;
 }
