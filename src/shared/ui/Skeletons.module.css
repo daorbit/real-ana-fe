@@ -82,8 +82,27 @@
 
 .statSpark {
   margin-top: auto;
-  height: 46px;
+  height: 70px;
   padding: 12px 0 0;
+}
+
+.statFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding: 14px 16px 16px;
+}
+
+.hero {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.heroRows {
+  margin-top: 18px;
 }
 
 .wave {

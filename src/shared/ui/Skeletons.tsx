@@ -16,7 +16,7 @@ function SkeletonWave({ className }: { className?: string }) {
   );
 }
 
-export function StatCardSkeleton({ spark = true }: { spark?: boolean }) {
+export function StatCardSkeleton({ spark = true, footer = false }: { spark?: boolean; footer?: boolean }) {
   return (
     <div className={classes.stat}>
       <div className={classes.statBody}>
@@ -35,6 +35,31 @@ export function StatCardSkeleton({ spark = true }: { spark?: boolean }) {
           <SkeletonWave />
         </div>
       )}
+      {footer && (
+        <div className={classes.statFooter}>
+          <Skeleton height={6} radius="xl" />
+          <Skeleton height={9} width="72%" radius="sm" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function HeroListSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className={classes.card}>
+      <div className={classes.head}>
+        <Skeleton height={12} width={72} radius="sm" />
+        <Skeleton height={9} width={110} radius="sm" />
+      </div>
+      <div className={classes.hero}>
+        <Skeleton height={40} width={64} radius={8} />
+        <Skeleton height={10} width={84} radius="sm" />
+      </div>
+      <Skeleton height={9} width="60%" radius="sm" />
+      <div className={classes.heroRows}>
+        <SkeletonRows rows={rows} aside={false} />
+      </div>
     </div>
   );
 }
