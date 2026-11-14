@@ -14,6 +14,7 @@ import { NotesProvider, NotesPanel } from "@/features/notes";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { NotFound } from "@/shared/ui/NotFound";
 import { AppBootSkeleton } from "@/shared/ui/Skeletons";
+import { BioPageLoader } from "@/features/bio/components/BioPageLoader";
 import { ShellLayout } from "@/app/shell/ShellLayout";
 import { LEGACY_ADMIN_PATHS } from "@/features/admin/lib/adminSections";
 import { LegacyAdminRedirect } from "@/features/admin/components/LegacyAdminRedirect";
@@ -218,11 +219,11 @@ function FocusOnRouteChange() {
 }
 
  
-function RouteFrame({ children }: { children: ReactNode }) {
+function RouteFrame({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
   const { pathname } = useLocation();
   return (
     <ErrorBoundary variant="route" resetKey={pathname}>
-      <Suspense fallback={null}>{children}</Suspense>
+      <Suspense fallback={fallback}>{children}</Suspense>
     </ErrorBoundary>
   );
 }
@@ -266,7 +267,7 @@ export default function App() {
               <Route path="/forgot-password" element={<PublicOnly><ForgotPassword /></PublicOnly>} />
               <Route path="/share/:token" element={<RouteFrame><PublicDashboard /></RouteFrame>} />
               <Route path="/embed/:token" element={<RouteFrame><EmbedWidget /></RouteFrame>} />
-              <Route path="/l/:slug" element={<RouteFrame><PublicBio /></RouteFrame>} />
+              <Route path="/l/:slug" element={<RouteFrame fallback={<BioPageLoader />}><PublicBio /></RouteFrame>} />
               <Route path="/bio/:slug" element={<RouteFrame><LegacyBioRedirect /></RouteFrame>} />
               <Route path="/invite/:token" element={<RouteFrame><AcceptInvite /></RouteFrame>} />
               <Route path="/connect/authorize" element={<RouteFrame><ConnectAuthorize /></RouteFrame>} />

@@ -1,7 +1,7 @@
-import { Loader } from "@mantine/core";
 import { Link2Off } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { EmptyState } from "@/shared/ui/EmptyState";
+import { BioPageLoader } from "@/features/bio/components/BioPageLoader";
 import { useTitle } from "@/shared/lib/useTitle";
 import { usePublicBioPage } from "@/features/bio/hooks/usePublicBioPage";
 import { useBioBeacon } from "@/features/bio/hooks/useBioBeacon";
@@ -15,13 +15,7 @@ export default function PublicBio() {
   const trackClick = useBioBeacon(page?.slug ?? null);
   useTitle(page ? page.title : "Quantalog");
 
-  if (state.status === "loading") {
-    return (
-      <div className={classes.center}>
-        <Loader size="sm" />
-      </div>
-    );
-  }
+  if (state.status === "loading") return <BioPageLoader />;
 
   if (!page) {
     return (
