@@ -1,0 +1,39 @@
+.logo,
+.glyph {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.logo {
+  display: block;
+  object-fit: contain;
+}
+
+.glyph {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bio-border, var(--border));
+  border-radius: 8px;
+  color: var(--bio-text-2, var(--text-2));
+}
+
+.logo[data-size="sm"],
+.glyph[data-size="sm"] {
+  width: 24px;
+  height: 24px;
+}
+
+.glyph[data-size="sm"] {
+  border-radius: 6px;
+}
+
+.logo[data-size="lg"],
+.glyph[data-size="lg"] {
+  width: 40px;
+  height: 40px;
+}
+
+.glyph[data-size="lg"] {
+  border-radius: 10px;
+}

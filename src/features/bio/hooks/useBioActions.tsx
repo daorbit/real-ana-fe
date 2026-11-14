@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useDeleteBioPageMutation, useUpdateBioPageMutation } from "@/features/bio/api";
+import { useBioMutations } from "@/features/bio/hooks/useBioMutations";
 import { BIO_DEMO_MESSAGE, toBioInput } from "@/features/bio/lib/bioDraft";
 import { publicBioUrl } from "@/features/bio/lib/bioOptions";
+import { copyText } from "@/features/bio/lib/copyText";
 import type { BioPage } from "@/features/bio/types";
 import { useDemo } from "@/features/demo/context";
 import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/notify";
@@ -9,8 +10,8 @@ import { confirmDelete, errMessage, notify, notifyError } from "@/shared/lib/not
 export function useBioActions(workspaceId: string | undefined) {
   const { demo } = useDemo();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [update] = useUpdateBioPageMutation();
-  const [remove] = useDeleteBioPageMutation();
+  const [qrPage, setQrPage] = useState<BioPage | null>(null);
+  const mutations = useBioMutations(workspaceId);
 
   const guard = () => {
     if (!workspaceId) return false;
@@ -22,11 +23,11 @@ export function useBioActions(workspaceId: string | undefined) {
   };
 
   const togglePublished = async (page: BioPage, published: boolean) => {
-    if (!guard() || !workspaceId) return;
+    if (!guard()) return;
     setBusyId(page.id);
     try {
-      await update({ workspaceId, id: page.id, ...toBioInput(page), published }).unwrap();
-      notify.success(published ? `“${page.title}” is live.` : `“${page.title}” is now a draft.`, "Link in bio");
+      await mutations.update(page.id, { ...toBioInput(page), published });
+      notify.success(published ? `“${page.title}” is live.` : `“${page.title}” is now a draft.`, "Link-in-bio");
     } catch (e) {
       notifyError(e, "Could not update the page.");
     } finally {
@@ -34,29 +35,30 @@ export function useBioActions(workspaceId: string | undefined) {
     }
   };
 
-  const copyLink = async (page: BioPage) => {
-    try {
-      await navigator.clipboard.writeText(publicBioUrl(page.slug));
-      notify.success("Link copied.");
-    } catch {
-      notify.error("Could not copy the link.");
-    }
-  };
+  const copyLink = (page: BioPage) => copyText(publicBioUrl(page.slug));
 
   const askDelete = (page: BioPage) => {
-    if (!guard() || !workspaceId) return;
+    if (!guard()) return;
     confirmDelete({
       title: "Delete page?",
       body: <>“{page.title}” and its stats will be deleted, and its link will stop working.</>,
       onConfirm: () => {
         setBusyId(page.id);
-        remove({ workspaceId, id: page.id })
-          .unwrap()
+        mutations
+          .remove(page.id)
           .catch((e) => notify.error(errMessage(e, "Could not delete the page.")))
           .finally(() => setBusyId(null));
       },
     });
   };
 
-  return { busyId, togglePublished, copyLink, askDelete };
+  return {
+    busyId,
+    togglePublished,
+    copyLink,
+    askDelete,
+    qrPage,
+    openQr: (page: BioPage) => setQrPage(page),
+    closeQr: () => setQrPage(null),
+  };
 }

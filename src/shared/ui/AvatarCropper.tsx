@@ -29,6 +29,9 @@ type Props = {
   /** Receives the cropped square as a JPEG blob, ready to upload. */
   onConfirm: (cropped: Blob) => void;
   busy?: boolean;
+  title?: string;
+  shape?: "round" | "rect";
+  outputSize?: number;
 };
 
 /**
@@ -39,7 +42,7 @@ type Props = {
  * the original still has. Rotation is applied by drawing into an intermediate
  * canvas first, because `croppedAreaPixels` is expressed in the rotated frame.
  */
-async function cropToBlob(src: string, area: Area, rotation: number): Promise<Blob> {
+async function cropToBlob(src: string, area: Area, rotation: number, size: number): Promise<Blob> {
   const image = await new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -66,20 +69,20 @@ async function cropToBlob(src: string, area: Area, rotation: number): Promise<Bl
   rctx.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2);
 
   const out = document.createElement("canvas");
-  out.width = OUTPUT_SIZE;
-  out.height = OUTPUT_SIZE;
+  out.width = size;
+  out.height = size;
   const ctx = out.getContext("2d");
   if (!ctx) throw new Error("Could not process that image.");
 
   // JPEG has no alpha, so a transparent PNG would come out black wherever it
   // was see-through. White is the safe backdrop.
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
+  ctx.fillRect(0, 0, size, size);
 
   ctx.drawImage(
     rotated,
     area.x, area.y, area.width, area.height,
-    0, 0, OUTPUT_SIZE, OUTPUT_SIZE
+    0, 0, size, size
   );
 
   return new Promise<Blob>((resolve, reject) => {
@@ -92,7 +95,15 @@ async function cropToBlob(src: string, area: Area, rotation: number): Promise<Bl
   });
 }
 
-export default function AvatarCropper({ file, onCancel, onConfirm, busy }: Props) {
+export default function AvatarCropper({
+  file,
+  onCancel,
+  onConfirm,
+  busy,
+  title = "Crop your profile image",
+  shape = "round",
+  outputSize = OUTPUT_SIZE,
+}: Props) {
   const [src, setSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -133,7 +144,7 @@ export default function AvatarCropper({ file, onCancel, onConfirm, busy }: Props
   const confirm = async () => {
     if (!src || !area) return;
     try {
-      onConfirm(await cropToBlob(src, area, rotation));
+      onConfirm(await cropToBlob(src, area, rotation, outputSize));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not process that image.");
     }
@@ -143,7 +154,7 @@ export default function AvatarCropper({ file, onCancel, onConfirm, busy }: Props
     <Modal
       opened={Boolean(file)}
       onClose={onCancel}
-      title="Crop your profile image"
+      title={title}
       centered
       radius="lg"
       size="sm"
@@ -176,7 +187,7 @@ export default function AvatarCropper({ file, onCancel, onConfirm, busy }: Props
                   zoom={zoom}
                   rotation={rotation}
                   aspect={1}
-                  cropShape="round"
+                  cropShape={shape}
                   showGrid={false}
                   minZoom={1}
                   maxZoom={3}

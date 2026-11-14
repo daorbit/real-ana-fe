@@ -15,7 +15,7 @@ export function useBioPages(workspaceId: string | undefined) {
   const { refetch } = query;
 
   const refresh = useCallback(async () => {
-    if (demo) return;
+    if (sample) return;
     setRefreshing(true);
     try {
       await refetch().unwrap();
@@ -24,7 +24,7 @@ export function useBioPages(workspaceId: string | undefined) {
     } finally {
       setRefreshing(false);
     }
-  }, [demo, refetch]);
+  }, [sample, refetch]);
 
   const data = sample ?? query.currentData;
   return {

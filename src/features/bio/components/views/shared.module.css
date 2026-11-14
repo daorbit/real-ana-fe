@@ -1,0 +1,62 @@
+.iconTile {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: var(--bio-accent);
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.socials[data-align="start"] {
+  justify-content: flex-start;
+  margin-left: -9px;
+}
+
+.social {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--bio-page-text);
+  transition: background-color 150ms ease;
+}
+
+a.social:hover {
+  background: color-mix(in srgb, var(--bio-page-text) 10%, transparent);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bio-page-text) 8%, transparent);
+  color: var(--bio-page-muted);
+}
+
+.avatar[data-size="sm"] {
+  width: 48px;
+  height: 48px;
+}
+
+.avatar[data-size="lg"] {
+  width: 112px;
+  height: 112px;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

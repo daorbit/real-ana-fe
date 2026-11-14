@@ -6,7 +6,7 @@ import { NAV_GROUPS, type NavItem } from "@/app/shell/navItems";
 import { NavItemIcon } from "@/app/shell/NavItemIcon";
 import { withItemState, withPinnedOrder } from "@/app/shell/navPrefs";
 import { SidebarCard } from "./SidebarCard";
-import { SortableList } from "./SortableList";
+import { SortableList } from "@/shared/ui/SortableList";
 import type { NavPrefsEditor } from "./useNavPrefsEditor";
 import classes from "./Sidebar.module.css";
 
@@ -41,6 +41,7 @@ export function PinnedSection({ editor, workspaceName }: { editor: NavPrefsEdito
         </div>
       ) : (
         <SortableList
+          itemClassName={classes.sortable}
           items={items}
           disabled={!editable}
           onReorder={(from, to) => apply(withPinnedOrder(prefs, from, to))}

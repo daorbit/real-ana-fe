@@ -1,0 +1,186 @@
+.layouts {
+  display: flex;
+  gap: 14px;
+  margin: -6px;
+  padding: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.layoutOption,
+.fontOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.layoutThumb {
+  transition: border-color 160ms ease;
+}
+
+.layoutOption:hover .layoutThumb {
+  border-color: var(--border-strong);
+}
+
+.layoutOption[data-active] .layoutThumb {
+  border-color: var(--selected-border);
+  outline: 2px solid var(--selected-border);
+  outline-offset: 2px;
+}
+
+.optionLabel {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.layoutOption[data-active] .optionLabel,
+.fontOption[data-active] .optionLabel {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.fonts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fontOption {
+  padding: 14px 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.fontOption:hover {
+  border-color: var(--border-strong);
+}
+
+.fontOption[data-active] {
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
+}
+
+.fontSample {
+  composes: fontFace from "../BioTheme.module.css";
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.swatch {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transition: border-color 160ms ease;
+}
+
+.swatch[data-active] {
+  border-color: var(--selected-border);
+}
+
+.swatch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.swatchDot {
+  width: 26px;
+  height: 26px;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: 50%;
+}
+
+.swatchDot[data-color="#1d1d1f"] {
+  background: #1d1d1f;
+}
+
+.swatchDot[data-color="#0071e3"] {
+  background: #0071e3;
+}
+
+.swatchDot[data-color="#30a46c"] {
+  background: #30a46c;
+}
+
+.swatchDot[data-color="#e5484d"] {
+  background: #e5484d;
+}
+
+.swatchDot[data-color="#f76b15"] {
+  background: #f76b15;
+}
+
+.swatchDot[data-color="#8e4ec6"] {
+  background: #8e4ec6;
+}
+
+.swatchDot[data-color="#0091ff"] {
+  background: #0091ff;
+}
+
+.swatchDot[data-color="#d6409f"] {
+  background: #d6409f;
+}
+
+.colorInput {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px dashed var(--border-strong);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.colorInput::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.colorInput::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.colorInput::-moz-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.settingRow {
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 12px 8px 16px;
+}
+
+.settingLabel {
+  font-size: 15.5px;
+  color: var(--text);
+}

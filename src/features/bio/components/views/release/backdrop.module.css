@@ -1,0 +1,19 @@
+.backdrop {
+  position: absolute;
+  inset: -48px;
+  z-index: -2;
+  width: calc(100% + 96px);
+  height: calc(100% + 96px);
+  object-fit: cover;
+  filter: blur(48px) saturate(1.15);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.scrim[data-art] {
+  background: color-mix(in srgb, var(--bio-bg) 50%, transparent);
+}

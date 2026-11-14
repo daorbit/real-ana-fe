@@ -11,15 +11,20 @@ import { DOCS_SLUGS } from "@/shared/lib/docsSlugs";
 import { useWorkspace, usePermissions } from "@/features/workspace/context";
 import { useWorkspaceApps } from "@/features/workspace/useWorkspaceApps";
 import { QuantalogAppGate } from "@/features/integrations/components/quantalogApps/QuantalogAppGate";
-import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
 import { useBioPages } from "@/features/bio/hooks/useBioPages";
 import { useBioActions } from "@/features/bio/hooks/useBioActions";
-import { BioPageCard } from "@/features/bio/components/BioPageCard";
+import { useBioAllowances } from "@/features/bio/hooks/useBioAllowances";
+import { BioPageSection } from "@/features/bio/components/BioPageSection";
 import { BioEmpty } from "@/features/bio/components/BioEmpty";
+import { QrDialog } from "@/features/bio/components/QrDialog";
 import classes from "@/features/bio/components/BioPages.module.css";
 
+function sectionMeta(statsDays: number, usage: string | null, plan: string): string {
+  return `Last ${statsDays} days${usage ? ` · ${usage} on the ${plan} plan` : ""}`;
+}
+
 export default function BioPages() {
-  useTitle("Link in bio");
+  useTitle("Link-in-bio");
   const navigate = useNavigate();
   const { active } = useWorkspace();
   const { canEdit } = usePermissions();
@@ -27,15 +32,17 @@ export default function BioPages() {
   const workspaceId = active?._id;
   const { pages, statsDays, loading, failed, refresh, refreshing, lastUpdated } = useBioPages(bioOn ? workspaceId : undefined);
   const actions = useBioActions(workspaceId);
-  const allowance = useFeatureAllowance("bioPages", pages.length);
+  const allowances = useBioAllowances(pages);
   const hasPages = bioOn && pages.length > 0;
-  const openNew = () => allowance.guard(() => navigate("/app/bio/new"));
+  const profiles = pages.filter((p) => p.kind !== "release");
+  const releases = pages.filter((p) => p.kind === "release");
+  const openNew = () => navigate("/app/bio/new");
 
   return (
     <AppShell>
       <PageHeader
-        title="Link in bio"
-        description="One link for your social bios, with every tap counted."
+        title="Link-in-bio"
+        description="Bio pages and smart links at short addresses, with every tap counted."
         docsPath={DOCS_SLUGS.quantalogBio}
         actions={
           hasPages ? (
@@ -43,7 +50,7 @@ export default function BioPages() {
               <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
               {canEdit && (
                 <Button leftSection={<Plus size={15} />} onClick={openNew}>
-                  New page
+                  New
                 </Button>
               )}
             </>
@@ -63,29 +70,25 @@ export default function BioPages() {
       ) : !hasPages ? (
         <BioEmpty canEdit={canEdit} onCreate={openNew} />
       ) : (
-        <>
-          <div className={classes.sectionHead}>
-            <h3 className={classes.sectionTitle}>Your pages</h3>
-            <span className={classes.sectionMeta}>
-              Last {statsDays} days
-              {allowance.usage ? ` · ${allowance.usage} on the ${allowance.plan} plan` : ""}
-            </span>
-          </div>
-          <div className={classes.grid}>
-            {pages.map((page) => (
-              <BioPageCard
-                key={page.id}
-                page={page}
-                canEdit={canEdit}
-                busy={actions.busyId === page.id}
-                onTogglePublished={(published) => void actions.togglePublished(page, published)}
-                onCopy={() => void actions.copyLink(page)}
-                onDelete={() => actions.askDelete(page)}
-              />
-            ))}
-          </div>
-        </>
+        <div className={classes.sections}>
+          <BioPageSection
+            title="Smart links"
+            meta={sectionMeta(statsDays, allowances.release.usage, allowances.release.plan)}
+            pages={releases}
+            canEdit={canEdit}
+            actions={actions}
+          />
+          <BioPageSection
+            title="Bio pages"
+            meta={sectionMeta(statsDays, allowances.profile.usage, allowances.profile.plan)}
+            pages={profiles}
+            canEdit={canEdit}
+            actions={actions}
+          />
+        </div>
       )}
+
+      <QrDialog page={actions.qrPage} onClose={actions.closeQr} />
     </AppShell>
   );
 }

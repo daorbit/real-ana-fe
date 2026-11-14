@@ -1,7 +1,7 @@
 import {
   Home, Swords, Images, Flag, BellRing, Filter, ReceiptText,
-  ListTodo, Mail, Radar,
-  // AppWindow, Link2, ScanSearch, FlaskConical, Star,
+  ListTodo, Mail, Radar, Link2,
+  // AppWindow, ScanSearch, FlaskConical, Star,
 } from "lucide-react";
 import type { WorkspaceAppId } from "@/shared/types";
 import { ADMIN_SECTIONS, adminSectionPath, type AdminSectionId } from "@/features/admin/lib/adminSections";
@@ -104,7 +104,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/alerts", labelKey: "nav.alerts", label: "Alerts", icon: BellRing, app: "alerts" },
       { to: "/app/compare", labelKey: "nav.compare", label: "Compare", icon: Swords, app: "compare" },
       // { to: "/app/popups", labelKey: "nav.popups", label: "Popups", icon: AppWindow, app: "popups" },
-      // { to: "/app/bio", labelKey: "nav.bio", label: "Link in bio", icon: Link2, app: "bio" },
+      { to: "/app/bio", labelKey: "nav.bio", label: "Link-in-bio", keywords: "smart links bio page linktree", icon: Link2, app: "bio" },
       // { to: "/app/reviews", labelKey: "nav.reviews", label: "Reviews", icon: Star, app: "reviews" },
       { to: "/app/campaigns", labelKey: "nav.campaigns", label: "Campaigns", keywords: "email newsletter marketing", icon: Mail, app: "campaigns", showWhenOff: true },
       { to: "/app/tasks", labelKey: "nav.tasks", label: "Tasks", icon: ListTodo, app: "tasks", showWhenOff: true },

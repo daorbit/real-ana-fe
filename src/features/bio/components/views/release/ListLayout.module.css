@@ -1,0 +1,145 @@
+.root {
+  composes: tokens from "../../BioTheme.module.css";
+  position: relative;
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+  padding: 40px 16px 28px;
+  overflow: hidden;
+  background: var(--bio-page-bg);
+  isolation: isolate;
+}
+
+.root[data-variant="preview"] {
+  padding-top: 64px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.card {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--bio-border);
+  border-radius: 14px;
+  background: var(--bio-surface);
+}
+
+.cover {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  background: color-mix(in srgb, var(--bio-text) 6%, var(--bio-surface));
+  color: var(--bio-muted);
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.head {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--bio-border);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--bio-text);
+  overflow-wrap: anywhere;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--bio-text-2);
+}
+
+.upcoming {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bio-accent);
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li + li {
+  border-top: 1px solid var(--bio-border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 10px 16px 10px 18px;
+  color: var(--bio-text);
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+
+a.row:hover {
+  background: color-mix(in srgb, var(--bio-text) 4%, transparent);
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.action {
+  flex-shrink: 0;
+  min-width: 84px;
+  padding: 7px 14px;
+  border: 1px solid color-mix(in srgb, var(--bio-accent) 45%, var(--bio-border));
+  border-radius: 10px;
+  color: var(--bio-accent);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.root[data-appearance="dark"] .action {
+  border-color: var(--bio-border);
+  color: var(--bio-text);
+}
+
+a.row:hover .action {
+  border-color: var(--bio-accent);
+}
+
+.action[data-shape="pill"] {
+  border-radius: 999px;
+}
+
+.action[data-shape="square"] {
+  border-radius: 4px;
+}
+
+.credit {
+  composes: credit from "../../BioTheme.module.css";
+  margin-top: 24px;
+}

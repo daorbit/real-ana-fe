@@ -1,0 +1,120 @@
+.root {
+  composes: tokens from "../../BioTheme.module.css";
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+  padding: 56px 16px 28px;
+  background: var(--bio-page-bg);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 4px;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--bio-page-text);
+  overflow-wrap: anywhere;
+}
+
+.bio {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--bio-page-text-2);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 124px;
+  padding: 14px;
+  border: 1px solid var(--bio-border);
+  border-radius: 18px;
+  background: var(--bio-surface);
+  color: var(--bio-text);
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+
+a.tile:hover {
+  border-color: var(--bio-accent);
+}
+
+.tile[data-shape="featured"] {
+  grid-column: 1 / -1;
+  min-height: 108px;
+  border-color: transparent;
+  background: var(--bio-accent);
+  color: var(--bio-accent-fg);
+}
+
+.tile[data-shape="featured"] .tileTop > span {
+  color: var(--bio-accent-fg);
+}
+
+.root[data-background="accent"] .tile[data-shape="featured"] {
+  background: var(--bio-accent-fg);
+  color: var(--bio-accent);
+}
+
+.root[data-background="accent"] .tile[data-shape="featured"] .tileTop > span {
+  color: var(--bio-accent);
+}
+
+.tileTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.arrow {
+  opacity: 0.5;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.credit {
+  composes: credit from "../../BioTheme.module.css";
+  align-self: center;
+  margin-top: 8px;
+}

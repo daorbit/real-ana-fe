@@ -1,0 +1,84 @@
+.root {
+  composes: tokens from "../../BioTheme.module.css";
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+  padding: 64px 22px 32px;
+  background: var(--bio-page-bg);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.title {
+  margin: 14px 0 0;
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--bio-page-text);
+  overflow-wrap: anywhere;
+}
+
+.bio {
+  max-width: 380px;
+  margin: 2px 0 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--bio-page-text-2);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 22px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: var(--bio-accent);
+  color: var(--bio-accent-fg);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: opacity 150ms ease;
+}
+
+a.link:hover {
+  opacity: 0.86;
+}
+
+.root[data-background="accent"] .link {
+  background: var(--bio-accent-fg);
+  color: var(--bio-accent);
+}
+
+.link[data-shape="pill"] {
+  border-radius: 999px;
+}
+
+.link[data-shape="square"] {
+  border-radius: 3px;
+}
+
+.credit {
+  composes: credit from "../../BioTheme.module.css";
+  margin-top: 40px;
+}

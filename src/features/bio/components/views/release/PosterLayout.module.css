@@ -1,0 +1,120 @@
+.root {
+  composes: tokens from "../../BioTheme.module.css";
+  display: flow-root;
+  min-height: 100%;
+  background: var(--bio-page-bg);
+}
+
+.art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: color-mix(in srgb, var(--bio-page-text) 8%, var(--bio-page-bg));
+  color: var(--bio-page-muted);
+}
+
+.artImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 22px 22px 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bio-page-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--bio-page-text);
+  overflow-wrap: anywhere;
+}
+
+.upcoming {
+  margin: 10px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bio-page-text);
+}
+
+.rows {
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li {
+  border-top: 1px solid color-mix(in srgb, var(--bio-page-text) 14%, transparent);
+}
+
+.rows > li:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--bio-page-text) 14%, transparent);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  color: var(--bio-page-text);
+  text-decoration: none;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.action {
+  flex-shrink: 0;
+  min-width: 78px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: var(--bio-page-text);
+  color: var(--bio-page-bg);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  transition: opacity 150ms ease;
+}
+
+a.row:hover .action {
+  opacity: 0.82;
+}
+
+.action[data-shape="pill"] {
+  border-radius: 999px;
+}
+
+.action[data-shape="square"] {
+  border-radius: 3px;
+}
+
+.credit {
+  composes: credit from "../../BioTheme.module.css";
+  align-self: center;
+  margin-top: 28px;
+}

@@ -1,0 +1,60 @@
+.tile {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: #8e8e93;
+  color: #ffffff;
+}
+
+.tile[data-size="sm"] {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+
+.tile[data-tone="red"] {
+  background: #ff3b30;
+}
+
+.tile[data-tone="orange"] {
+  background: #ff9500;
+}
+
+.tile[data-tone="yellow"] {
+  background: #ffcc00;
+}
+
+.tile[data-tone="green"] {
+  background: #34c759;
+}
+
+.tile[data-tone="mint"] {
+  background: #00c7be;
+}
+
+.tile[data-tone="teal"] {
+  background: #30b0c7;
+}
+
+.tile[data-tone="cyan"] {
+  background: #32ade6;
+}
+
+.tile[data-tone="blue"] {
+  background: #007aff;
+}
+
+.tile[data-tone="indigo"] {
+  background: #5856d6;
+}
+
+.tile[data-tone="purple"] {
+  background: #af52de;
+}
+
+.tile[data-tone="pink"] {
+  background: #ff2d55;
+}

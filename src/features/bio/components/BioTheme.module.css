@@ -1,0 +1,62 @@
+.tokens {
+  --bio-accent: #1d1d1f;
+  --bio-accent-fg: #ffffff;
+  --bio-bg: #f5f5f7;
+  --bio-surface: #ffffff;
+  --bio-border: #e5e5ea;
+  --bio-text: #1d1d1f;
+  --bio-text-2: #55555e;
+  --bio-muted: #6e6e78;
+  --bio-page-bg: var(--bio-bg);
+  --bio-page-text: var(--bio-text);
+  --bio-page-text-2: var(--bio-text-2);
+  --bio-page-muted: var(--bio-muted);
+  color: var(--bio-text);
+  font-family: var(--font);
+}
+
+.tokens[data-appearance="dark"] {
+  --bio-bg: #0b0c0e;
+  --bio-surface: #16171a;
+  --bio-border: #28292e;
+  --bio-text: #f2f2f4;
+  --bio-text-2: #b0b2ba;
+  --bio-muted: #8a8c95;
+}
+
+.tokens[data-font="serif"],
+.fontFace[data-font="serif"] {
+  font-family: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+}
+
+.tokens[data-font="rounded"],
+.fontFace[data-font="rounded"] {
+  font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", system-ui, sans-serif;
+}
+
+.tokens[data-font="mono"],
+.fontFace[data-font="mono"] {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.tokens[data-background="soft"] {
+  --bio-page-bg: color-mix(in srgb, var(--bio-accent) 10%, var(--bio-bg));
+}
+
+.tokens[data-background="accent"] {
+  --bio-page-bg: var(--bio-accent);
+  --bio-page-text: var(--bio-accent-fg);
+  --bio-page-text-2: color-mix(in srgb, var(--bio-accent-fg) 82%, transparent);
+  --bio-page-muted: color-mix(in srgb, var(--bio-accent-fg) 66%, transparent);
+}
+
+.credit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--bio-page-muted);
+  text-decoration: none;
+}
+
+a.credit:hover {
+  color: var(--bio-page-text);
+}

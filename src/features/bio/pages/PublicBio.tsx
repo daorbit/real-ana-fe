@@ -4,14 +4,16 @@ import { useParams } from "react-router-dom";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useTitle } from "@/shared/lib/useTitle";
 import { usePublicBioPage } from "@/features/bio/hooks/usePublicBioPage";
-import { bioClickUrl } from "@/features/bio/lib/bioOptions";
-import { BioView } from "@/features/bio/components/BioView";
+import { useBioBeacon } from "@/features/bio/hooks/useBioBeacon";
+import { BioPageView } from "@/features/bio/components/BioPageView";
 import classes from "@/features/bio/components/PublicBio.module.css";
 
 export default function PublicBio() {
   const { slug } = useParams<{ slug: string }>();
   const state = usePublicBioPage(slug?.toLowerCase());
-  useTitle(state.status === "ready" ? state.page.title : "Link in bio");
+  const page = state.status === "ready" ? state.page : null;
+  const trackClick = useBioBeacon(page?.slug ?? null);
+  useTitle(page ? page.title : "Quantalog");
 
   if (state.status === "loading") {
     return (
@@ -21,7 +23,7 @@ export default function PublicBio() {
     );
   }
 
-  if (state.status === "missing") {
+  if (!page) {
     return (
       <div className={classes.center}>
         <EmptyState
@@ -34,18 +36,9 @@ export default function PublicBio() {
     );
   }
 
-  const { page } = state;
   return (
     <div className={classes.page}>
-      <BioView
-        title={page.title}
-        bio={page.bio}
-        avatarUrl={page.avatarUrl}
-        links={page.links}
-        socials={page.socials}
-        theme={page.theme}
-        linkHref={(link) => bioClickUrl(page.slug, link.id)}
-      />
+      <BioPageView page={page} onLinkClick={trackClick} />
     </div>
   );
 }

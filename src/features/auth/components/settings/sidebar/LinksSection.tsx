@@ -4,7 +4,7 @@ import { ChevronRight, GripVertical, Link2, Plus } from "lucide-react";
 import { LinkLogo } from "@/app/shell/LinkLogo";
 import { MAX_CUSTOM_LINKS, linkPath, withLinkOrder, type CustomLink } from "@/app/shell/navPrefs";
 import { SidebarCard } from "./SidebarCard";
-import { SortableList } from "./SortableList";
+import { SortableList } from "@/shared/ui/SortableList";
 import { LinkSheet } from "./LinkSheet";
 import { linkHost } from "@/features/customLinks/lib/linkUrl";
 import type { NavPrefsEditor } from "./useNavPrefsEditor";
@@ -39,6 +39,7 @@ export function LinksSection({ editor }: { editor: NavPrefsEditor }) {
           </div>
         ) : (
           <SortableList
+            itemClassName={classes.sortable}
             items={prefs.links}
             disabled={!editable}
             onReorder={(from, to) => apply(withLinkOrder(prefs, from, to))}

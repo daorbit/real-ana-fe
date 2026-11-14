@@ -1,0 +1,110 @@
+.root {
+  composes: tokens from "../../BioTheme.module.css";
+  position: relative;
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+  padding: 56px 16px 28px;
+  overflow: hidden;
+  background: var(--bio-page-bg);
+  isolation: isolate;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+}
+
+.cover {
+  display: grid;
+  place-items: center;
+  width: 176px;
+  height: 176px;
+  overflow: hidden;
+  border: 1px solid var(--bio-border);
+  border-radius: 14px;
+  background: var(--bio-surface);
+  color: var(--bio-muted);
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.title {
+  margin: 18px 0 0;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--bio-page-text);
+  overflow-wrap: anywhere;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  color: var(--bio-page-text-2);
+}
+
+.upcoming {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bio-page-text);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 14px 6px 12px;
+  border: 1px solid var(--bio-border);
+  border-radius: 16px;
+  background: var(--bio-surface);
+  color: var(--bio-text);
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+
+a.tile:hover {
+  border-color: var(--bio-accent);
+}
+
+.name {
+  max-width: 100%;
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.action {
+  font-size: 11.5px;
+  color: var(--bio-muted);
+}
+
+.credit {
+  composes: credit from "../../BioTheme.module.css";
+  margin-top: 28px;
+}

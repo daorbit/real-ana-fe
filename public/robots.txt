@@ -3,6 +3,7 @@
 # that reaches a crawler does not become a permanently indexed page.
 User-agent: *
 Disallow: /share/
+Disallow: /l/
 
 # The rest of the app is behind auth and has nothing to index either.
 Disallow: /app/

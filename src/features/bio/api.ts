@@ -1,11 +1,18 @@
 import { api } from "@/app/store/api";
-import type { BioPage, BioPageInput, BioPagesResponse } from "@/features/bio/types";
+import type { BioPage, BioPageInput, BioPageStatsDetail, BioPagesResponse, BioResolvedLink } from "@/features/bio/types";
 
-const queries = api.enhanceEndpoints({ addTagTypes: ["BioPages"] }).injectEndpoints({
+type StatsArgs = { workspaceId: string; id: string; days: number };
+
+const queries = api.enhanceEndpoints({ addTagTypes: ["BioPages", "BioStats"] }).injectEndpoints({
   endpoints: (build) => ({
     getBioPages: build.query<BioPagesResponse, string>({
       query: (workspaceId) => `/api/workspaces/${workspaceId}/bio`,
       providesTags: ["BioPages"],
+    }),
+
+    getBioPageStats: build.query<BioPageStatsDetail, StatsArgs>({
+      query: ({ workspaceId, id, days }) => `/api/workspaces/${workspaceId}/bio/${id}/stats?days=${days}`,
+      providesTags: (_r, _e, { id }) => [{ type: "BioStats", id }],
     }),
   }),
 });
@@ -25,6 +32,7 @@ const bioApi = queries.injectEndpoints({
 
     updateBioPage: build.mutation<BioPage, BioPageInput & { workspaceId: string; id: string }>({
       query: ({ workspaceId, id, ...body }) => ({ url: `/api/workspaces/${workspaceId}/bio/${id}`, method: "PUT", body }),
+      invalidatesTags: (_r, _e, { id }) => [{ type: "BioStats", id }],
       async onQueryStarted({ workspaceId, id }, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled.catch(() => ({ data: null }));
         if (!data) return;
@@ -45,8 +53,12 @@ const bioApi = queries.injectEndpoints({
         }));
       },
     }),
+
+    resolveBioLink: build.mutation<BioResolvedLink, { workspaceId: string; url: string }>({
+      query: ({ workspaceId, url }) => ({ url: `/api/workspaces/${workspaceId}/bio/resolve`, method: "POST", body: { url } }),
+    }),
   }),
 });
 
-export const { useGetBioPagesQuery } = queries;
-export const { useCreateBioPageMutation, useUpdateBioPageMutation, useDeleteBioPageMutation } = bioApi;
+export const { useGetBioPagesQuery, useGetBioPageStatsQuery } = queries;
+export const { useCreateBioPageMutation, useUpdateBioPageMutation, useDeleteBioPageMutation, useResolveBioLinkMutation } = bioApi;

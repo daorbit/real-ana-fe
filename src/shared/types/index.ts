@@ -760,6 +760,7 @@ export type QuotaSummary = {
   goalTargets?: FeatureAllowance;
   popups?: FeatureAllowance;
   bioPages?: FeatureAllowance;
+  smartLinks?: FeatureAllowance;
   tasks?: FeatureAllowance;
   alertCheckHours?: number;
   /** Analytics date ranges this plan may query — everything else needs an upgrade. */

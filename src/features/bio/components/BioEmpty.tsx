@@ -1,15 +1,15 @@
 import { useMemo } from "react";
 import { Button } from "@mantine/core";
-import { BarChart3, Palette, Plus, Share2 } from "lucide-react";
+import { ChartSpline, Palette, Plus, Share2 } from "lucide-react";
 import { demoBioPages } from "@/features/demo/demoBio";
 import { toBioInput } from "@/features/bio/lib/bioDraft";
 import { PhonePreview } from "./studio/PhonePreview";
 import classes from "./BioEmpty.module.css";
 
 const POINTS = [
-  { icon: Palette, title: "Ready in a minute", text: "A photo, a short bio, your links and social icons, in your colours." },
-  { icon: Share2, title: "One address for every bio", text: "Paste it into Instagram, LinkedIn, TikTok or X and keep it there." },
-  { icon: BarChart3, title: "See what people tap", text: "Views and clicks for every link, with bots left out." },
+  { icon: Palette, title: "Bio pages", text: "A photo, a short bio, your links and social icons, in your colours." },
+  { icon: Share2, title: "Smart links", text: "One page per song, video or product. Paste a link and every service gets its own row." },
+  { icon: ChartSpline, title: "See what people tap", text: "Clicks per button, where visitors came from, their country and device." },
 ];
 
 export function BioEmpty({ canEdit, onCreate }: { canEdit: boolean; onCreate: () => void }) {
@@ -18,11 +18,11 @@ export function BioEmpty({ canEdit, onCreate }: { canEdit: boolean; onCreate: ()
   return (
     <section className={classes.empty}>
       <div className={classes.intro}>
-        <div className={classes.eyebrow}>Quantalog Link-in-bio</div>
-        <h2 className={classes.title}>One link for everything you share.</h2>
+        <div className={classes.eyebrow}>Quantalog Link-in-bio & Smart Links</div>
+        <h2 className={classes.title}>Short links for everything you share.</h2>
         <p className={classes.text}>
-          Build a clean page of your most important links, put its address in your social bios, and see which links your
-          audience actually taps.
+          Make a bio page for your social profiles and a smart link for every release, each at a short address with a QR
+          code, and see which buttons your audience actually taps.
         </p>
 
         <ul className={classes.points}>
@@ -41,7 +41,7 @@ export function BioEmpty({ canEdit, onCreate }: { canEdit: boolean; onCreate: ()
 
         {canEdit ? (
           <Button size="md" leftSection={<Plus size={16} />} onClick={onCreate}>
-            Create your first page
+            Create your first link
           </Button>
         ) : (
           <p className={classes.note}>Ask a workspace editor to create the first page.</p>

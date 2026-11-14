@@ -44,6 +44,17 @@
   ],
   "rewrites": [
     {
+      "source": "/l/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(linkedinbot|facebookexternalhit|facebookcatalog|twitterbot|slackbot|whatsapp|telegrambot|discordbot|pinterest|redditbot|applebot|skypeuripreview|googlebot|bingbot|embedly).*"
+        }
+      ],
+      "destination": "https://quantalog-be.daorbit.in/api/public/bio/:slug/preview"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

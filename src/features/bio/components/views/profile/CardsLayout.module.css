@@ -1,0 +1,109 @@
+.root {
+  composes: tokens from "../../BioTheme.module.css";
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+  padding: 56px 16px 28px;
+  background: var(--bio-page-bg);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.title {
+  margin: 12px 0 0;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--bio-page-text);
+  overflow-wrap: anywhere;
+}
+
+.bio {
+  max-width: 360px;
+  margin: 0 0 6px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--bio-page-text-2);
+  white-space: pre-line;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 22px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px 10px 10px;
+  border: 1px solid var(--bio-border);
+  border-radius: 18px;
+  background: var(--bio-surface);
+  color: var(--bio-text);
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+
+a.card:hover {
+  border-color: var(--bio-accent);
+}
+
+.iconBox {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--bio-accent) 12%, var(--bio-surface));
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.label {
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.host {
+  overflow: hidden;
+  font-size: 12.5px;
+  color: var(--bio-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.arrow {
+  flex-shrink: 0;
+  color: var(--bio-muted);
+}
+
+.credit {
+  composes: credit from "../../BioTheme.module.css";
+  margin-top: 32px;
+}

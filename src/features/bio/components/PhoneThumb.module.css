@@ -1,0 +1,44 @@
+.phone {
+  flex-shrink: 0;
+  width: 200px;
+  height: 410px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 34px;
+  background: var(--surface);
+  pointer-events: none;
+  transition: border-color var(--duration) ease;
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 28px;
+  background: var(--surface-2);
+}
+
+.screen > * {
+  width: 390px;
+  height: 830px;
+  min-height: 830px;
+  transform: scale(0.477);
+  transform-origin: top left;
+}
+
+.phone[data-size="sm"] {
+  width: 92px;
+  height: 188px;
+  padding: 3px;
+  border-radius: 18px;
+}
+
+.phone[data-size="sm"] .screen {
+  border-radius: 15px;
+}
+
+.phone[data-size="sm"] .screen > * {
+  height: 836px;
+  min-height: 836px;
+  transform: scale(0.2154);
+}

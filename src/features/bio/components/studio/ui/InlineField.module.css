@@ -1,0 +1,84 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.input {
+  min-width: 3ch;
+  max-width: 100%;
+  margin: 0 -6px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-overflow: ellipsis;
+  field-sizing: content;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.input[data-missing]::placeholder {
+  color: var(--accent);
+}
+
+.input:hover {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.input:focus {
+  background: var(--surface);
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
+.pencil {
+  flex-shrink: 0;
+  margin-left: 4px;
+  color: var(--muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.wrap:hover .pencil {
+  opacity: 0.8;
+}
+
+.wrap:focus-within .pencil {
+  opacity: 0;
+}
+
+.wrap[data-tone="title"] .input {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.wrap[data-tone="strong"] .input {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wrap[data-tone="body"] .input {
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.wrap[data-tone="sub"] .input {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+@media (hover: none) {
+  .pencil {
+    opacity: 0.6;
+  }
+}
