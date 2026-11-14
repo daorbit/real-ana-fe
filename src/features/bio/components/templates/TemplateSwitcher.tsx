@@ -32,19 +32,20 @@ export function TemplateSwitcher({
       opened={opened}
       onClose={onClose}
       title="Change template"
-      size={1080}
-      radius="lg"
-      centered
-      classNames={{ title: classes.title, body: classes.body }}
+      fullScreen
+      transitionProps={{ transition: "fade", duration: 180 }}
+      classNames={{ content: classes.content, header: classes.header, title: classes.title, body: classes.body }}
     >
-      <p className={classes.note}>Your text, links and images stay. Only the design changes, and nothing is saved until you save.</p>
-      <SwitcherGallery
-        draft={draft}
-        onPick={(template) => {
-          onPick(template);
-          onClose();
-        }}
-      />
+      <div className={classes.inner}>
+        <p className={classes.note}>Your text, links and images stay. Only the design changes, and nothing is saved until you save.</p>
+        <SwitcherGallery
+          draft={draft}
+          onPick={(template) => {
+            onPick(template);
+            onClose();
+          }}
+        />
+      </div>
     </Modal>
   );
 }
