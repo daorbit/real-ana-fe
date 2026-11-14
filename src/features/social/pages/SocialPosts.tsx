@@ -342,16 +342,14 @@ export default function SocialPosts() {
             <ActivityBellIcon />
           </Box>
 
-          {isLoading && <Skeleton height={36} width={112} radius={10} />}
-
-          {ready && (
+          {(isLoading || ready) && (
             <Tooltip
               label={demo ? "Demo data is read-only" : "This workspace's scheduled posts are full"}
-              disabled={!demo && !postsFull}
+              disabled={isLoading || (!demo && !postsFull)}
               withArrow
             >
               <Box>
-                <Button radius={10} leftSection={<Plus size={16} />} disabled={demo || postsFull} onClick={() => openNew()}>
+                <Button radius={10} leftSection={<Plus size={16} />} disabled={isLoading || demo || postsFull} onClick={() => openNew()}>
                   New post
                 </Button>
               </Box>

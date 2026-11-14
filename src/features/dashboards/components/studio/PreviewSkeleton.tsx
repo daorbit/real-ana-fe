@@ -1,16 +1,18 @@
-import { Skeleton } from "@mantine/core";
+import { StatCardSkeleton, ChartSkeleton, ListSkeleton, PanelSkeleton } from "@/shared/ui/Skeletons";
 import classes from "@/features/dashboards/components/studio/Studio.module.css";
 
 export function PreviewSkeleton() {
   return (
     <div className={classes.skeletonGrid} aria-hidden>
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} height={112} radius="lg" />
+        <StatCardSkeleton key={i} spark={false} />
       ))}
-      <Skeleton className={classes.skWide} height={300} radius="lg" />
-      <Skeleton height={300} radius="lg" />
-      <Skeleton className={classes.skHalf} height={240} radius="lg" />
-      <Skeleton className={classes.skHalf} height={240} radius="lg" />
+      <div className={classes.skWide}>
+        <ChartSkeleton height={190} />
+      </div>
+      <ListSkeleton rows={4} aside={false} />
+      <PanelSkeleton className={classes.skHalf} height={240} />
+      <PanelSkeleton className={classes.skHalf} height={240} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Box, Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -59,11 +60,13 @@ export default function Popups() {
         <QuantalogAppGate app="popups" />
       ) : loading ? (
         <>
-          <Skeleton height={86} radius="lg" mb={26} />
+          <Box mb={26}>
+            <PanelSkeleton height={86} />
+          </Box>
           <div className={classes.grid}>
-            <Skeleton height={380} radius="lg" />
-            <Skeleton height={380} radius="lg" />
-            <Skeleton height={380} radius="lg" />
+            <PanelSkeleton height={380} />
+            <PanelSkeleton height={380} />
+            <PanelSkeleton height={380} />
           </div>
         </>
       ) : failed ? (

@@ -79,6 +79,52 @@ export default function Home() {
     setEditing(false);
   };
 
+  const booting = loading || layoutLoading || Boolean(active && !stats);
+  const idle = !editing && !dirty;
+
+  const toolbar = (
+    <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap" className="home-toolbar">
+      {!booting && idle && display.greeting && <HomeGreeting firstName={user?.firstName ?? ""} last={lastVisit} />}
+      <Group gap="sm" wrap="wrap" justify="flex-end" className="home-toolbar-btns">
+        {idle && (
+          <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
+        )}
+        <LayoutEditControls
+          disabled={booting}
+          editing={editing}
+          dirty={dirty}
+          saving={saving}
+          onToggleEdit={() => setEditing((v) => !v)}
+          onDiscard={onDiscard}
+          onSave={onSave}
+          onAdd={() => {
+            setCustomizing(true);
+          }}
+          onPreset={(preset) => {
+            apply(preset.layout);
+            setEditing(true);
+          }}
+        />
+
+        {idle && (
+          <Button
+            component={Link}
+            to="/app/analytics"
+            visibleFrom="sm"
+            leftSection={<BarChart3 size={16} />}
+          >
+            Full analytics
+          </Button>
+        )}
+
+        <Group gap="sm" wrap="nowrap" visibleFrom="sm">
+          {idle && <DocsButton path={DOCS_SLUGS.overview} />}
+          <ActivityBellIcon />
+        </Group>
+      </Group>
+    </Group>
+  );
+
   if (active && !stats && failed && !layoutLoading) {
     return (
       <AppShell>
@@ -92,8 +138,13 @@ export default function Home() {
     );
   }
 
-  if (loading || layoutLoading || (active && !stats)) {
-    return <AppShell><DashboardSkeleton hero /></AppShell>;
+  if (booting) {
+    return (
+      <AppShell>
+        {toolbar}
+        <DashboardSkeleton hero={display.hero} />
+      </AppShell>
+    );
   }
 
   if (!active) {
@@ -148,46 +199,7 @@ export default function Home() {
         }}
       />
 
-      <Group justify="flex-end" align="center" mb="md" gap="md" wrap="wrap" className="home-toolbar">
-        {!editing && !dirty && display.greeting && <HomeGreeting firstName={user?.firstName ?? ""} last={lastVisit} />}
-        <Group gap="sm" wrap="wrap" justify="flex-end" className="home-toolbar-btns">
-
-          {!editing && !dirty && (
-            <RefreshButton onRefresh={refresh} refreshing={refreshing} lastUpdated={lastUpdated} />
-          )}
-          <LayoutEditControls
-            editing={editing}
-            dirty={dirty}
-            saving={saving}
-            onToggleEdit={() => setEditing((v) => !v)}
-            onDiscard={onDiscard}
-            onSave={onSave}
-            onAdd={() => {
-              setCustomizing(true);
-            }}
-            onPreset={(preset) => {
-              apply(preset.layout);
-              setEditing(true);
-            }}
-          />
-
-          {!editing && !dirty && (
-            <Button
-              component={Link}
-              to="/app/analytics"
-              visibleFrom="sm"
-              leftSection={<BarChart3 size={16} />}
-            >
-              Full analytics
-            </Button>
-          )}
-
-          <Group gap="sm" wrap="nowrap" visibleFrom="sm">
-            {!editing && !dirty && <DocsButton path={DOCS_SLUGS.overview} />}
-            <ActivityBellIcon />
-          </Group>
-        </Group>
-      </Group>
+      {toolbar}
 
       <div className={`${dimClasses.dim} an-report`} data-switching={switching || undefined}>
       {!editing && !dirty && display.hero && (

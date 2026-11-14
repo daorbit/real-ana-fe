@@ -1,4 +1,5 @@
-import { Skeleton } from "@mantine/core";
+import { Box } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ErrorState } from "@/shared/ui/ErrorState";
 import { useRadarSettings } from "../hooks/useRadarData";
 import { useRadarSettingsDraft } from "../hooks/useRadarSettingsDraft";
@@ -13,7 +14,11 @@ export function SettingsTab({ workspaceId, canEdit }: { workspaceId: string; can
   const { draft, setDetector, setFlag } = useRadarSettingsDraft(workspaceId, settings?.config ?? null);
 
   if (failed) return <ErrorState />;
-  if (loading || !settings || !draft) return <Skeleton height={420} radius="md" mt="xl" />;
+  if (loading || !settings || !draft) return (
+      <Box mt="xl">
+        <PanelSkeleton height={420} />
+      </Box>
+    );
 
   return (
     <div className={classes.page}>

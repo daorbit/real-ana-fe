@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Box, Card, Grid, Group, Skeleton, SimpleGrid, Stack } from "@mantine/core";
 import { SwitchVisual } from "@/shared/ui/SwitchOverlay";
 import classes from "./Skeletons.module.css";
@@ -42,6 +43,36 @@ export function StatCardSkeleton({ spark = true, footer = false }: { spark?: boo
         </div>
       )}
     </div>
+  );
+}
+
+export function SkeletonCard({ children }: { children: ReactNode }) {
+  return <div className={classes.card}>{children}</div>;
+}
+
+const PANEL_CHROME = 104;
+const PANEL_ROW = 48;
+const PANEL_MAX_ROWS = 10;
+
+export function PanelSkeleton({ height, className }: { height: number; className?: string }) {
+  const rows = Math.min(PANEL_MAX_ROWS, Math.floor((height - PANEL_CHROME) / PANEL_ROW));
+  return (
+    <Box className={`${classes.card} ${className ?? ""}`} mih={height} aria-hidden>
+      {rows > 0 ? (
+        <>
+          <SkeletonCardHead />
+          <SkeletonRows rows={rows} aside={false} />
+        </>
+      ) : (
+        <div className={classes.compact}>
+          <div className={classes.headText}>
+            <Skeleton height={12} width={160} radius="sm" />
+            <Skeleton height={9} width={240} maw="100%" radius="sm" />
+          </div>
+          <Skeleton height={28} width={84} radius={8} />
+        </div>
+      )}
+    </Box>
   );
 }
 
@@ -188,8 +219,8 @@ export function WorkspacesSkeleton() {
       </Group>
 
       <Stack gap="md">
-        <Skeleton height={206} radius="lg" />
-        <Skeleton height={96} radius="lg" />
+        <PanelSkeleton height={206} />
+        <PanelSkeleton height={96} />
       </Stack>
     </>
   );

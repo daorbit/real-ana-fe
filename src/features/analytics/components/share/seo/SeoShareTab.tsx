@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Center, Select, Skeleton, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Center, Select, Stack, Text, ThemeIcon } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useGetSeoShareLinksQuery, useGetSitesQuery } from "@/app/store";
@@ -32,8 +33,8 @@ export function SeoShareTab({ workspaceId }: { workspaceId: string }) {
   if (sitesLoading) {
     return (
       <div className={classes.stack}>
-        <Skeleton height={120} radius="md" />
-        <Skeleton height={240} radius="md" />
+        <PanelSkeleton height={120} />
+        <PanelSkeleton height={240} />
       </div>
     );
   }
@@ -74,7 +75,7 @@ export function SeoShareTab({ workspaceId }: { workspaceId: string }) {
           }
         />
         {linksLoading ? (
-          <Skeleton height={120} radius="md" />
+          <PanelSkeleton height={120} />
         ) : links.length ? (
           <div className={classes.card}>
             {links.map((link) => (
@@ -100,7 +101,7 @@ export function SeoShareTab({ workspaceId }: { workspaceId: string }) {
           actions={<PanelCountActions on={panels.onCount} total={SEO_ALL_PANELS.length} onSetAll={panels.setAll} />}
         />
         {panels.loading ? (
-          <Skeleton height={200} radius="md" />
+          <PanelSkeleton height={200} />
         ) : (
           <PanelSwitchList groups={SEO_PANEL_GROUPS} values={panels.panels} onToggle={panels.setPanel} />
         )}

@@ -1,4 +1,5 @@
-import { Skeleton, Stack, Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { useInvoicingProfileDraft } from "../hooks/useInvoicingProfileDraft";
 import { BusinessSection } from "./settings/BusinessSection";
 import { StyleSection } from "./settings/StyleSection";
@@ -15,8 +16,8 @@ export function InvoicingSettings({ workspaceId }: { workspaceId: string }) {
   if (profile.loading) {
     return (
       <Stack gap="lg">
-        <Skeleton height={260} radius="md" />
-        <Skeleton height={180} radius="md" />
+        <PanelSkeleton height={260} />
+        <PanelSkeleton height={180} />
       </Stack>
     );
   }

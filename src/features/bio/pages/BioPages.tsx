@@ -1,4 +1,5 @@
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -54,8 +55,8 @@ export default function BioPages() {
         <QuantalogAppGate app="bio" />
       ) : loading ? (
         <div className={classes.grid}>
-          <Skeleton height={210} radius="lg" />
-          <Skeleton height={210} radius="lg" />
+          <PanelSkeleton height={210} />
+          <PanelSkeleton height={210} />
         </div>
       ) : failed ? (
         <ErrorState onRetry={() => void refresh()} retrying={refreshing} />

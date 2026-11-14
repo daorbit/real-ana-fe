@@ -1,4 +1,5 @@
-import { Button, Skeleton, Stack, Tooltip } from "@mantine/core";
+import { Button, Stack, Tooltip } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { RotateCw } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -72,9 +73,9 @@ export default function GrowthRadar() {
         <ErrorState onRetry={() => void refetch()} />
       ) : loading || !overview ? (
         <Stack gap="lg" mt="xl">
-          <Skeleton height={120} radius="md" />
-          <Skeleton height={280} radius="md" />
-          <Skeleton height={160} radius="md" />
+          <PanelSkeleton height={120} />
+          <PanelSkeleton height={280} />
+          <PanelSkeleton height={160} />
         </Stack>
       ) : (
         <>

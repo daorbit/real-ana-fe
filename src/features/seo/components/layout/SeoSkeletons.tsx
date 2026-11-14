@@ -1,7 +1,41 @@
 import { Skeleton } from "@mantine/core";
-import { ChartSkeleton, ListSkeleton, StatCardSkeleton } from "@/shared/ui/Skeletons";
+import { ChartSkeleton, ListSkeleton, SkeletonCard, SkeletonCardHead, StatCardSkeleton } from "@/shared/ui/Skeletons";
 import type { SeoTabId } from "../sections";
 import classes from "./SeoSkeletons.module.css";
+import layout from "./SeoLayout.module.css";
+
+function ScoreCardSkeleton() {
+  return (
+    <SkeletonCard>
+      <SkeletonCardHead />
+      <div className={classes.score}>
+        <Skeleton height={112} circle />
+        <div className={classes.scoreLines}>
+          {[78, 64, 72, 56].map((w) => (
+            <Skeleton key={w} height={10} width={`${w}%`} radius="sm" />
+          ))}
+        </div>
+      </div>
+    </SkeletonCard>
+  );
+}
+
+function SeverityCardSkeleton() {
+  return (
+    <SkeletonCard>
+      <SkeletonCardHead />
+      <div className={classes.severity}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className={classes.severityRow}>
+            <Skeleton height={10} width={90} radius="sm" />
+            <Skeleton height={6} radius="xl" />
+            <Skeleton height={10} width={24} radius="sm" />
+          </div>
+        ))}
+      </div>
+    </SkeletonCard>
+  );
+}
 
 function Tiles({ count }: { count: number }) {
   return (
@@ -37,8 +71,8 @@ function OverviewSkeleton() {
   return (
     <div className={classes.stack}>
       <div className={classes.split}>
-        <Skeleton height={210} radius={16} />
-        <Skeleton height={210} radius={16} />
+        <ScoreCardSkeleton />
+        <SeverityCardSkeleton />
       </div>
       <Tiles count={4} />
       <div className={classes.split}>
@@ -99,5 +133,20 @@ export function SeoTabSkeleton({ tab }: { tab: SeoTabId }) {
 }
 
 export function SeoInspectSkeleton() {
-  return <Skeleton height={98} radius={16} className={classes.inspect} />;
+  return (
+    <div className={layout.inspectCard} aria-hidden>
+      <div className={layout.inspect} data-grouped>
+        <div className={layout.siteSelect}>
+          <Skeleton height={10} width={120} ml={12} radius="sm" />
+        </div>
+        <div className={layout.address}>
+          <Skeleton height={10} width={220} radius="sm" />
+        </div>
+        <Skeleton height={36} width={96} radius={8} />
+      </div>
+      <div className={layout.inspectFoot}>
+        <Skeleton height={10} width={200} radius="sm" />
+      </div>
+    </div>
+  );
 }

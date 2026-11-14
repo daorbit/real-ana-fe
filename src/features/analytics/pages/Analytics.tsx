@@ -38,7 +38,7 @@ import layoutClasses from "@/features/analytics/components/layout/AnalyticsLayou
 import { RangePicker } from "@/features/analytics/components/RangePicker";
 import { ComparePicker } from "@/features/analytics/components/ComparePicker";
 import { ExportMenu } from "@/shared/ui/ExportMenu";
-import { AnalyticsSkeleton } from "@/features/analytics/components/layout/AnalyticsSkeleton";
+import { AnalyticsPanelSkeleton, AnalyticsSkeleton } from "@/features/analytics/components/layout/AnalyticsSkeleton";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { AnalyticsHeader } from "@/features/analytics/components/layout/AnalyticsHeader";
 import { setupStateFor } from "@/features/workspace/setupState";
@@ -295,7 +295,92 @@ export default function Analytics() {
     [active?._id, explainSiteId, explainKey, explainState, explainPendingKey, explainMetric, range, rangeState, compareState],
   );
 
-  // Skeleton only on a true first load, when there is nothing to show at all.
+  const SECTIONS = getAnalyticsSections(t);
+  const activeSection = SECTIONS.find((s) => s.value === section) ?? SECTIONS[0];
+  const hasChips = Object.values(filter).some(Boolean) || segments.length > 0;
+  const updating = switching;
+  const liveNow = liveAudience ? liveAudience.humans : view?.live ?? 0;
+
+  const goSection = (value: string) => {
+    const s = SECTIONS.find((x) => x.value === value);
+    setView(value, s && s.tabs.length ? s.tabs[0].value : undefined);
+  };
+
+  const shownSites = view?.siteCount ?? sites.length;
+  const compareMode = view?.comparison?.mode ?? compareState.mode;
+  const compareSince = view?.comparison?.since ?? compareState.from;
+  const subtitle = active ? (
+    <>
+      Aggregated across {shownSites} site{shownSites === 1 ? "" : "s"} in <b>{active.name}</b>.
+      {compareMode === "yoy"
+        ? " Changes compare to the same period last year."
+        : compareMode === "custom" && compareSince
+          ? ` Changes compare to the ${range} from ${dayjs(compareSince).format("MMM D, YYYY")}.`
+          : ` Changes compare to the previous ${range}.`}
+    </>
+  ) : null;
+
+  const chrome = (
+    <>
+      <HelpDrawer
+        opened={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title={t("analytics.help")}
+        sections={getAnalyticsHelp(t)}
+      />
+
+      <AnalyticsHeader
+        subtitle={subtitle}
+        onRefresh={refresh}
+        refreshing={refreshing}
+        lastUpdated={lastUpdated}
+        onHelp={() => setHelpOpen(true)}
+        exportMenu={
+          <ExportMenu
+            workspaceId={active?._id}
+            range={range}
+            from={rangeState.from}
+            to={rangeState.to}
+            filter={serializeFilter(filter)}
+            sites={siteScope}
+          />
+        }
+      />
+
+      <AnalyticsControlDeck
+        range={<RangePicker value={rangeState} onChange={setRangeState} disabled={updating} />}
+        compare={<ComparePicker value={compareState} onChange={setCompareState} disabled={updating} />}
+        updating={updating}
+        chips={
+          hasChips ? (
+            <FilterBar
+              mb={0}
+              filter={filter}
+              onRemove={removeFilter}
+              onClear={clearFilter}
+              segments={segments}
+              onApplySegment={(s) => setFilter(s.filter)}
+              onSaveSegment={canEdit ? handleSaveSegment : undefined}
+              onDeleteSegment={canEdit ? handleDeleteSegment : undefined}
+              onTogglePin={canEdit ? handleTogglePin : undefined}
+              saving={savingSegment}
+              busyId={busySegment}
+            />
+          ) : null
+        }
+        sections={SECTIONS}
+        active={section}
+        onSection={goSection}
+        status={
+          <>
+            <span className="status-dot live" aria-hidden />
+            {liveNow} on your sites now
+          </>
+        }
+      />
+    </>
+  );
+
   if (active && !view && failed) {
     return (
       <AppShell>
@@ -310,7 +395,21 @@ export default function Analytics() {
   }
 
   if (loading || (active && !view)) {
-    return <AppShell><AnalyticsSkeleton /></AppShell>;
+    return (
+      <AppShell>
+        <div className="an-report">
+          {chrome}
+          {section === "overview" ? (
+            <AnalyticsSkeleton />
+          ) : (
+            <>
+              <AnalyticsSubTabs label={activeSection.label} tabs={activeSection.tabs} active={tab} onChange={setTab} />
+              <AnalyticsPanelSkeleton />
+            </>
+          )}
+        </div>
+      </AppShell>
+    );
   }
 
   if (!active) {
@@ -334,7 +433,6 @@ export default function Analytics() {
     );
   }
 
-  const siteCount = view?.siteCount ?? 0;
   // Impressions and scroll depth cannot exist for a site on an older script, so
   // their empty states should say that rather than "waiting for data".
   const anyOutdated = (view?.outdatedSites?.length ?? 0) > 0;
@@ -390,19 +488,6 @@ export default function Analytics() {
       hint: "How many pages a typical visit touches. Higher means people explore more." },
   ] as const;
 
-  const SECTIONS = getAnalyticsSections(t);
-  const hasChips = Object.values(filter).some(Boolean) || segments.length > 0;
-  const updating = switching;
-
-  const activeSection = SECTIONS.find((s) => s.value === section) ?? SECTIONS[0];
-
-  // Switch section: jump to its first detail tab so a panel is always showing.
-  const goSection = (value: string) => {
-    const s = SECTIONS.find((x) => x.value === value);
-    setView(value, s && s.tabs.length ? s.tabs[0].value : undefined);
-  };
-
-  const liveNow = liveAudience ? liveAudience.humans : view?.live ?? 0;
   const autoCompare = Boolean(view?.comparison) && !demo;
   const scopedSites = siteScope.length ? sites.filter((s) => siteScope.includes(s.siteId)) : sites;
   const heatmapHost = scopedSites.length === 1 ? scopedSites[0].domain : undefined;
@@ -416,13 +501,6 @@ export default function Analytics() {
   return (
     <AppShell>
       <div className="an-report">
-      <HelpDrawer
-        opened={helpOpen}
-        onClose={() => setHelpOpen(false)}
-        title={t("analytics.help")}
-        sections={getAnalyticsHelp(t)}
-      />
-
       <MarkerDialog
         opened={markersOpen}
         onClose={() => setMarkersOpen(false)}
@@ -432,67 +510,8 @@ export default function Analytics() {
         saving={savingMarker}
       />
 
-      <AnalyticsHeader
-        subtitle={
-          <>
-            Aggregated across {siteCount} site{siteCount === 1 ? "" : "s"} in <b>{active.name}</b>.
-            {view?.comparison?.mode === "yoy"
-              ? " Changes compare to the same period last year."
-              : view?.comparison?.mode === "custom"
-                ? ` Changes compare to the ${range} from ${dayjs(view.comparison.since).format("MMM D, YYYY")}.`
-                : ` Changes compare to the previous ${range}.`}
-          </>
-        }
-        onRefresh={refresh}
-        refreshing={refreshing}
-        lastUpdated={lastUpdated}
-        onHelp={() => setHelpOpen(true)}
-        exportMenu={
-          <ExportMenu
-            workspaceId={active?._id}
-            range={range}
-            from={rangeState.from}
-            to={rangeState.to}
-            filter={serializeFilter(filter)}
-            sites={siteScope}
-          />
-        }
-      />
+      {chrome}
 
-      <AnalyticsControlDeck
-        range={<RangePicker value={rangeState} onChange={setRangeState} disabled={updating} />}
-        compare={<ComparePicker value={compareState} onChange={setCompareState} disabled={updating} />}
-        updating={updating}
-        chips={
-          hasChips ? (
-            <FilterBar
-              mb={0}
-              filter={filter}
-              onRemove={removeFilter}
-              onClear={clearFilter}
-              segments={segments}
-              onApplySegment={(s) => setFilter(s.filter)}
-              onSaveSegment={canEdit ? handleSaveSegment : undefined}
-              onDeleteSegment={canEdit ? handleDeleteSegment : undefined}
-              onTogglePin={canEdit ? handleTogglePin : undefined}
-              saving={savingSegment}
-              busyId={busySegment}
-            />
-          ) : null
-        }
-        sections={SECTIONS}
-        active={section}
-        onSection={goSection}
-        status={
-          <>
-            <span className="status-dot live" aria-hidden />
-            {liveNow} on your sites now
-          </>
-        }
-      />
-
-      {/* The previous range stays on screen, dimmed, until the new one lands —
-          so the numbers visibly go stale rather than the page going blank. */}
       {failed && (
         <Alert
           color="red"

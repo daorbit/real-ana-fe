@@ -1,4 +1,5 @@
-import { Button, Skeleton, Switch } from "@mantine/core";
+import { Button, Switch } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -66,8 +67,8 @@ export default function PopupStudio() {
         <ErrorState title="Popup not found" description="It may have been deleted. Go back to Popups to see the rest." />
       ) : !ready || !workspaceId ? (
         <div className={classes.studio}>
-          <Skeleton height={520} radius="lg" />
-          <Skeleton height={560} radius="lg" />
+          <PanelSkeleton height={520} />
+          <PanelSkeleton height={560} />
         </div>
       ) : (
         <div className={classes.studio}>

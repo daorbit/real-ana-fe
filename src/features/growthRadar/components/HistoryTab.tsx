@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { History } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useRadarList } from "../hooks/useRadarData";
@@ -20,7 +21,7 @@ function HistoryPage({
   onMore: (next: string) => void;
 }) {
   const { list, loading, fetching } = useRadarList(workspaceId, "history", before, true);
-  if (loading) return <Skeleton height={200} radius="md" />;
+  if (loading) return <PanelSkeleton height={200} />;
   if (!list?.items.length) {
     return before ? null : (
       <EmptyState

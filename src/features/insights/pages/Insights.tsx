@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Skeleton, Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ScanSearch } from "lucide-react";
 import { AppShell } from "@/app/AppShell";
 import { PageHeader } from "@/shared/ui/Page";
@@ -74,8 +75,8 @@ export default function Insights() {
         <QuantalogAppGate app="insights" />
       ) : (isLoading && !demo) || (picked && olderLoading && !older) ? (
         <Stack gap="lg" className={classes.page}>
-          <Skeleton height={230} radius={22} />
-          <Skeleton height={300} radius={20} />
+          <PanelSkeleton height={230} />
+          <PanelSkeleton height={300} />
         </Stack>
       ) : !digest ? (
         <EmptyState

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -48,7 +49,7 @@ export default function Experiments() {
       {!appOn ? (
         <QuantalogAppGate app="experiments" />
       ) : list.loading ? (
-        <Skeleton height={280} radius="lg" />
+        <PanelSkeleton height={280} />
       ) : list.failed ? (
         <ErrorState onRetry={() => void list.refetch()} />
       ) : !hasTests ? (

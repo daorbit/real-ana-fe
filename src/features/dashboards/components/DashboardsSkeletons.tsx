@@ -1,22 +1,9 @@
 import { Skeleton } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import home from "@/features/dashboards/components/home/Home.module.css";
 
-function HeaderSkeleton() {
-  return (
-    <div className={home.skeletonHeader}>
-      <div className={home.skeletonHeaderRow}>
-        <div className={home.skeletonStack}>
-          <Skeleton height={30} width={190} radius="sm" />
-          <Skeleton height={12} width={360} maw="100%" radius="sm" />
-        </div>
-        <div className={home.skeletonInline}>
-          <Skeleton height={36} width={150} radius={10} />
-          <Skeleton height={36} width={36} radius={10} />
-        </div>
-      </div>
-      <Skeleton height={42} width={320} maw="100%" radius={12} />
-    </div>
-  );
+export function ViewSwitchSkeleton() {
+  return <Skeleton height={42} width={320} maw="100%" radius={12} />;
 }
 
 function CardSkeleton() {
@@ -50,7 +37,6 @@ function CardSkeleton() {
 export function DashboardListSkeleton() {
   return (
     <>
-      <HeaderSkeleton />
       <div className={home.library}>
         <div className={home.libraryHead}>
           <Skeleton height={14} width={120} radius="sm" />
@@ -77,16 +63,13 @@ export function DashboardListSkeleton() {
 
 export function DashboardWelcomeSkeleton() {
   return (
-    <>
-      <HeaderSkeleton />
-      <div className={home.start}>
-        <Skeleton height={440} radius={20} />
-        <div className={home.alts}>
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} height={236} radius={16} />
-          ))}
-        </div>
+    <div className={home.start}>
+      <PanelSkeleton height={440} />
+      <div className={home.alts}>
+        {Array.from({ length: 4 }, (_, i) => (
+          <PanelSkeleton key={i} height={236} />
+        ))}
       </div>
-    </>
+    </div>
   );
 }

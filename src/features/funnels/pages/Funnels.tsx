@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -66,9 +67,9 @@ export default function Funnels() {
         <QuantalogAppGate app="funnels" />
       ) : loading ? (
         <div className={classes.listSkeleton}>
-          <Skeleton height={76} radius="lg" />
-          <Skeleton height={76} radius="lg" />
-          <Skeleton height={76} radius="lg" />
+          <PanelSkeleton height={76} />
+          <PanelSkeleton height={76} />
+          <PanelSkeleton height={76} />
         </div>
       ) : empty ? (
         <FunnelsEmpty presets={presets} canEdit={canEdit} />

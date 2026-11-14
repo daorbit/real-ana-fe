@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button, Menu, Skeleton, Text } from "@mantine/core";
+import { Button, Menu, Text } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ArrowLeft, MoreVertical, Pause, Pencil, Play, Square, Trash2 } from "lucide-react";
 import { modals } from "@mantine/modals";
 import { Link, useParams } from "react-router-dom";
@@ -101,7 +102,7 @@ export default function ExperimentDetail() {
       {!appOn ? (
         <QuantalogAppGate app="experiments" />
       ) : view.loading ? (
-        <Skeleton height={320} radius="lg" />
+        <PanelSkeleton height={320} />
       ) : view.failed || !experiment || !results ? (
         <ErrorState title="Test not found" description="It may have been deleted. Go back to A/B tests to see the rest." />
       ) : (

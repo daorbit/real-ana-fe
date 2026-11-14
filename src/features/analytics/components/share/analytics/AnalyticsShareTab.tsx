@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { useTranslation } from "react-i18next";
 import { Share2 } from "lucide-react";
 import { useGetShareQuery, useSetShareMutation } from "@/app/store";
@@ -89,8 +90,8 @@ export function AnalyticsShareTab({ workspaceId }: { workspaceId: string }) {
   if (isLoading) {
     return (
       <div className={classes.stack}>
-        <Skeleton height={132} radius="md" />
-        <Skeleton height={320} radius="md" />
+        <PanelSkeleton height={132} />
+        <PanelSkeleton height={320} />
       </div>
     );
   }

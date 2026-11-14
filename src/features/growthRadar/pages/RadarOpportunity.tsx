@@ -1,4 +1,5 @@
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ArrowLeft, ListTodo } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -60,8 +61,8 @@ export default function RadarOpportunity() {
         <QuantalogAppGate app="growthRadar" />
       ) : loading ? (
         <div className={classes.layout}>
-          <Skeleton height={520} radius="md" />
-          <Skeleton height={360} radius="md" />
+          <PanelSkeleton height={520} />
+          <PanelSkeleton height={360} />
         </div>
       ) : notFound || !detail ? (
         <ErrorState title="Finding not found" description="It may belong to another workspace. Go back to Growth Radar to see the rest." />

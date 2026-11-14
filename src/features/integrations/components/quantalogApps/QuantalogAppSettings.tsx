@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { Skeleton, Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import type { WorkspaceAppId } from "@/shared/types";
 import { APP_SETTINGS } from "./appSettings";
 
@@ -14,8 +15,8 @@ export function QuantalogAppSettings({ app, workspaceId }: { app: WorkspaceAppId
     <Suspense
       fallback={
         <Stack gap="md">
-          <Skeleton height={132} radius="md" />
-          <Skeleton height={280} radius="md" />
+          <PanelSkeleton height={132} />
+          <PanelSkeleton height={280} />
         </Stack>
       }
     >

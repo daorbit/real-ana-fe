@@ -1,4 +1,5 @@
-import { Group, Skeleton } from "@mantine/core";
+import { Box, Group } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Activity, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { num, timeAgo } from "@/shared/lib/format";
@@ -96,8 +97,10 @@ export function UsageOverview({
         </div>
       ) : isLoading || !view ? (
         <>
-          <Skeleton height={92} radius="md" />
-          <Skeleton height={300} radius="md" mt="md" />
+          <PanelSkeleton height={92} />
+          <Box mt="md">
+            <PanelSkeleton height={300} />
+          </Box>
         </>
       ) : (
         <>

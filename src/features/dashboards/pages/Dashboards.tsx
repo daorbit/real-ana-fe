@@ -16,7 +16,9 @@ import { useGetDashboardsQuery, useGetEmbedsQuery } from "@/features/dashboards/
 import { ViewSwitch } from "@/features/dashboards/components/home/ViewSwitch";
 import { DashboardLibrary } from "@/features/dashboards/components/home/DashboardLibrary";
 import { StartPanel } from "@/features/dashboards/components/home/StartPanel";
-import { DashboardListSkeleton, DashboardWelcomeSkeleton } from "@/features/dashboards/components/DashboardsSkeletons";
+import {
+  DashboardListSkeleton, DashboardWelcomeSkeleton, ViewSwitchSkeleton,
+} from "@/features/dashboards/components/DashboardsSkeletons";
 import { useHasDashboardsHint } from "@/features/dashboards/hooks/useHasDashboardsHint";
 import { useFeatureAllowance } from "@/features/billing/hooks/useFeatureAllowance";
 import { EmbedsPanel } from "@/features/dashboards/components/embeds/EmbedsPanel";
@@ -27,6 +29,11 @@ import { useOpenStudio } from "@/features/dashboards/hooks/useOpenStudio";
 import type { DashboardsView } from "@/features/dashboards/components/home/ViewSwitch";
 
 type EmbedTarget = { id: string | null } | null;
+
+const DESCRIPTIONS: Record<DashboardsView, string> = {
+  dashboards: "Focused views built from any widget, arranged the way you work.",
+  embeds: "Single live charts and numbers you can put on any website.",
+};
 
 export default function Dashboards() {
   useTitle("Dashboards");
@@ -70,9 +77,17 @@ export default function Dashboards() {
   }
 
   if (isLoading) {
+    const listing = expectsList || tab === "embeds";
     return (
       <AppShell>
-        {expectsList || tab === "embeds" ? <DashboardListSkeleton /> : <DashboardWelcomeSkeleton />}
+        <PageHeader
+          title="Dashboards"
+          description={listing ? DESCRIPTIONS[tab] : undefined}
+          docsPath={DOCS_SLUGS.dashboards}
+        >
+          {listing && <ViewSwitchSkeleton />}
+        </PageHeader>
+        {listing ? <DashboardListSkeleton /> : <DashboardWelcomeSkeleton />}
       </AppShell>
     );
   }
@@ -124,13 +139,7 @@ export default function Dashboards() {
     <AppShell>
       <PageHeader
         title="Dashboards"
-        description={
-          nothingYet
-            ? undefined
-            : tab === "dashboards"
-              ? "Focused views built from any widget, arranged the way you work."
-              : "Single live charts and numbers you can put on any website."
-        }
+        description={nothingYet ? undefined : DESCRIPTIONS[tab]}
         actions={action}
         docsPath={DOCS_SLUGS.dashboards}
       >

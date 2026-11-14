@@ -37,8 +37,31 @@
   margin-top: 16px;
 }
 
-.inspect {
-  margin-bottom: var(--mantine-spacing-xl);
+.score {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.scoreLines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.severity {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.severityRow {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 14px;
 }
 
 @media (max-width: 62em) {

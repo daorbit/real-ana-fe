@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { SegmentedControl, Skeleton } from "@mantine/core";
+import { SegmentedControl } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { AlarmClock, Radar } from "lucide-react";
 import { EmptyState } from "@/shared/ui/EmptyState";
 import { useRadarList } from "../hooks/useRadarData";
@@ -22,7 +23,7 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 function SnoozedList({ workspaceId }: { workspaceId: string }) {
   const { list, loading } = useRadarList(workspaceId, "snoozed", undefined, true);
-  if (loading) return <Skeleton height={200} radius="md" />;
+  if (loading) return <PanelSkeleton height={200} />;
   if (!list?.items.length) {
     return <EmptyState compact icon={AlarmClock} title="Nothing is snoozed" description="Snoozed findings return to your list on the date you pick." />;
   }

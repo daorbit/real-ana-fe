@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button, SegmentedControl, Skeleton } from "@mantine/core";
+import { Button, SegmentedControl } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ChevronLeft, Trash2 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -75,8 +76,8 @@ export default function CampaignEditor() {
         <ErrorState title="Campaign not found" description="It may have been deleted. Go back to Campaigns to see the rest." />
       ) : editor.loading || !draft ? (
         <div className={classes.layout}>
-          <Skeleton height={520} radius="lg" />
-          <Skeleton height={520} radius="lg" />
+          <PanelSkeleton height={520} />
+          <PanelSkeleton height={520} />
         </div>
       ) : editor.locked ? (
         <ErrorState title="This campaign was already sent" description="A sent campaign can't be changed. Create a new one instead." />

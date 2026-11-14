@@ -1,4 +1,5 @@
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { Pencil, SearchX } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -100,8 +101,8 @@ export default function FunnelView() {
         />
       ) : !funnel || !report ? (
         <div className={classes.viewSkeleton}>
-          <Skeleton height={96} radius="lg" />
-          <Skeleton height={320} radius="lg" />
+          <PanelSkeleton height={96} />
+          <PanelSkeleton height={320} />
         </div>
       ) : (
         <div className={classes.viewStack}>

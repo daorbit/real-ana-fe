@@ -35,7 +35,9 @@ export function LayoutEditControls({
   onSave,
   onAdd,
   onPreset,
+  disabled,
 }: {
+  disabled?: boolean;
   editing: boolean;
   dirty: boolean;
   saving: boolean;
@@ -49,10 +51,11 @@ export function LayoutEditControls({
 
   if (!editing && !dirty) {
     return (
-      <Menu position="bottom-end" withinPortal shadow="md" width={240}>
+      <Menu position="bottom-end" withinPortal shadow="md" width={240} disabled={disabled}>
         <Menu.Target>
           <Button
             variant="default"
+            disabled={disabled}
             leftSection={<SlidersHorizontal size={15} />}
             rightSection={<ChevronDown size={14} />}
           >

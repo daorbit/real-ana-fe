@@ -105,6 +105,14 @@
   margin-top: 18px;
 }
 
+.compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
 .wave {
   display: block;
   width: 100%;

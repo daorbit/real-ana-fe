@@ -1,4 +1,5 @@
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -58,8 +59,8 @@ export default function ExperimentEditor() {
         <ErrorState title="Test not found" description="It may have been deleted. Go back to A/B tests to see the rest." />
       ) : editor.loading ? (
         <div className={studio.studio}>
-          <Skeleton height={520} radius="lg" />
-          <Skeleton height={360} radius="lg" />
+          <PanelSkeleton height={520} />
+          <PanelSkeleton height={360} />
         </div>
       ) : editor.locked ? (
         <ErrorState

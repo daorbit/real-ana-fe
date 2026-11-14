@@ -1,4 +1,5 @@
-import { Skeleton, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { dateTime } from "@/shared/lib/format";
 import { useRadarScans } from "../hooks/useRadarData";
 import { SCAN_HELP, SCAN_STATUS_HELP } from "../lib/help";
@@ -29,7 +30,7 @@ function summary(scan: RadarScan): string {
 
 export function ScanHistory({ workspaceId }: { workspaceId: string }) {
   const { scans, loading } = useRadarScans(workspaceId, true);
-  if (loading) return <Skeleton height={200} radius="md" />;
+  if (loading) return <PanelSkeleton height={200} />;
   if (!scans?.length) return null;
 
   return (

@@ -1,4 +1,5 @@
-import { Button, Skeleton } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ArrowLeft, Pause, Play, Trash2 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -99,8 +100,8 @@ export default function CampaignDetail() {
         <QuantalogAppGate app="campaigns" />
       ) : loading ? (
         <div className={report.layout}>
-          <Skeleton height={260} radius="lg" />
-          <Skeleton height={540} radius="lg" />
+          <PanelSkeleton height={260} />
+          <PanelSkeleton height={540} />
         </div>
       ) : notFound || !campaign ? (
         <ErrorState title="Campaign not found" description="It may have been deleted. Go back to Campaigns to see the rest." />

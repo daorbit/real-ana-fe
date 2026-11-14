@@ -1,4 +1,5 @@
-import { Button, Skeleton, Switch } from "@mantine/core";
+import { Button, Switch } from "@mantine/core";
+import { PanelSkeleton } from "@/shared/ui/Skeletons";
 import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AppShell } from "@/app/AppShell";
@@ -64,8 +65,8 @@ export default function BioStudio() {
         <ErrorState title="Page not found" description="It may have been deleted. Go back to Link in bio to see the rest." />
       ) : !ready ? (
         <div className={classes.studio}>
-          <Skeleton height={560} radius="lg" />
-          <Skeleton height={680} radius={36} />
+          <PanelSkeleton height={560} />
+          <PanelSkeleton height={680} />
         </div>
       ) : (
         <div className={classes.studio}>

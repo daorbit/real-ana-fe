@@ -1,56 +1,9 @@
-import { Group, SimpleGrid, Skeleton } from "@mantine/core";
+import { SimpleGrid, Skeleton } from "@mantine/core";
 import { ChartSkeleton, HeroListSkeleton, ListSkeleton, StatCardSkeleton } from "@/shared/ui/Skeletons";
 import classes from "./AnalyticsLayout.module.css";
 
-const TABBAR_WIDTH = 430;
-
 function SectionTitleSkeleton({ width }: { width: number }) {
   return <Skeleton height={16} width={width} radius="sm" mb={14} />;
-}
-
-function HeaderSkeleton() {
-  return (
-    <header className={classes.header}>
-      <div className={classes.headerText}>
-        <Skeleton height={32} width={150} radius={8} mt={3} />
-        <Skeleton height={14} width={380} maw="100%" mt={10} mb={4} radius="sm" />
-      </div>
-      <div className={classes.actions}>
-        <Skeleton height={36} width={36} radius={10} />
-        <Skeleton height={36} width={104} radius={10} />
-        <Skeleton height={34} width={34} radius={10} />
-        <Group gap="sm" wrap="nowrap" visibleFrom="sm">
-          <Skeleton height={34} width={34} radius={10} />
-          <Skeleton height={34} width={34} radius={10} />
-        </Group>
-      </div>
-    </header>
-  );
-}
-
-function DeckSkeleton() {
-  return (
-    <div className={classes.deck}>
-      <div className={classes.filters}>
-        <div className={classes.controls}>
-          <Skeleton height={38} width={TABBAR_WIDTH} radius={11} />
-          <div className={classes.range}>
-            <Group gap="xs" wrap="nowrap">
-              <Skeleton height={36} width={196} radius={10} />
-              <Skeleton height={36} width={104} radius={10} />
-            </Group>
-          </div>
-          <Group gap="xs" wrap="nowrap">
-            <Skeleton height={36} width={112} radius={10} />
-            <Skeleton height={36} width={150} radius={10} />
-          </Group>
-          <span className={classes.status}>
-            <Skeleton height={10} width={130} radius="sm" />
-          </span>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function StatBand({ titleWidth, live = false }: { titleWidth: number; live?: boolean }) {
@@ -67,12 +20,18 @@ function StatBand({ titleWidth, live = false }: { titleWidth: number; live?: boo
   );
 }
 
+export function AnalyticsPanelSkeleton() {
+  return (
+    <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md" aria-busy="true" aria-label="Loading analytics">
+      <ListSkeleton rows={6} />
+      <ListSkeleton rows={6} />
+    </SimpleGrid>
+  );
+}
+
 export function AnalyticsSkeleton() {
   return (
-    <div className="an-report" aria-busy="true" aria-label="Loading analytics">
-      <HeaderSkeleton />
-      <DeckSkeleton />
-
+    <div aria-busy="true" aria-label="Loading analytics">
       <StatBand titleWidth={78} live />
       <StatBand titleWidth={104} />
 
