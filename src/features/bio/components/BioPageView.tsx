@@ -8,8 +8,11 @@ import { EditorialLayout } from "./views/profile/EditorialLayout";
 import { GridLayout } from "./views/profile/GridLayout";
 import { HeroLayout } from "./views/profile/HeroLayout";
 import { ListLayout } from "./views/release/ListLayout";
+import { MinimalLayout } from "./views/release/MinimalLayout";
 import { PosterLayout } from "./views/release/PosterLayout";
+import { SpotlightLayout } from "./views/release/SpotlightLayout";
 import { TilesLayout } from "./views/release/TilesLayout";
+import { VinylLayout } from "./views/release/VinylLayout";
 
 const PROFILE: Partial<Record<BioLayout, ComponentType<ProfileLayoutProps>>> = {
   classic: ClassicLayout,
@@ -23,6 +26,9 @@ const RELEASE: Partial<Record<BioLayout, ComponentType<ReleaseLayoutProps>>> = {
   list: ListLayout,
   poster: PosterLayout,
   tiles: TilesLayout,
+  vinyl: VinylLayout,
+  spotlight: SpotlightLayout,
+  minimal: MinimalLayout,
 };
 
 export function BioPageView({

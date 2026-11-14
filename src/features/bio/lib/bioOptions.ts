@@ -51,6 +51,9 @@ export const BIO_RELEASE_LAYOUTS: { value: BioReleaseLayout; label: string }[] =
   { value: "list", label: "List" },
   { value: "poster", label: "Poster" },
   { value: "tiles", label: "Tiles" },
+  { value: "vinyl", label: "Vinyl" },
+  { value: "spotlight", label: "Spotlight" },
+  { value: "minimal", label: "Minimal" },
 ];
 
 export const BIO_FONTS: { value: BioFont; label: string }[] = [

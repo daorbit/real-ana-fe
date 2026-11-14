@@ -1,0 +1,140 @@
+.root {
+  composes: tokens from "../../BioTheme.module.css";
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+  padding: 48px 24px 28px;
+  background: var(--bio-page-bg);
+}
+
+.root[data-variant="preview"] {
+  padding-top: 72px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.art {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 76px;
+  height: 76px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--bio-page-text) 14%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bio-page-text) 8%, var(--bio-page-bg));
+  color: var(--bio-page-muted);
+}
+
+.art svg {
+  width: 30px;
+  height: 30px;
+}
+
+.artImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headText {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bio-page-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--bio-page-text);
+  overflow-wrap: anywhere;
+}
+
+.upcoming {
+  margin: 14px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bio-page-text);
+}
+
+.rows {
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li {
+  border-top: 1px solid color-mix(in srgb, var(--bio-page-text) 14%, transparent);
+}
+
+.rows > li:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--bio-page-text) 14%, transparent);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 66px;
+  color: var(--bio-page-text);
+  text-decoration: none;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.action {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bio-page-muted);
+  transition: color 150ms ease;
+}
+
+.arrow {
+  flex-shrink: 0;
+  color: var(--bio-page-muted);
+  transition: color 150ms ease;
+}
+
+a.row:hover .action,
+a.row:hover .arrow {
+  color: var(--bio-page-text);
+}
+
+.credit {
+  composes: credit from "../../BioTheme.module.css";
+  align-self: center;
+  margin-top: 32px;
+}

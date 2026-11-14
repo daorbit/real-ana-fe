@@ -134,7 +134,7 @@ const SIGNATURE_RELEASES: BioTemplate[] = [
     kind: "release",
     title: "Artist – Album name",
     subtitle: "Stream or buy the record",
-    theme: { appearance: "light", accent: "#1d1d1f", buttonStyle: "square", background: "plain", layout: "tiles", font: "mono" },
+    theme: { appearance: "light", accent: "#1d1d1f", buttonStyle: "square", background: "plain", layout: "vinyl", font: "mono" },
     services: [
       { service: "spotify" },
       { service: "apple-music" },
@@ -153,7 +153,7 @@ const SIGNATURE_RELEASES: BioTemplate[] = [
     kind: "release",
     title: "Book title",
     subtitle: "Choose where to read it",
-    theme: { appearance: "dark", accent: "#4cc38a", buttonStyle: "rounded", background: "deep", layout: "poster", font: "serif" },
+    theme: { appearance: "dark", accent: "#4cc38a", buttonStyle: "rounded", background: "deep", layout: "minimal", font: "serif" },
     services: [
       { service: "amazon", action: "Buy" },
       { service: "flipkart", action: "Buy" },
@@ -205,7 +205,7 @@ const SIGNATURE_RELEASES: BioTemplate[] = [
     kind: "release",
     title: "Show name – Episode title",
     subtitle: "Listen wherever you are",
-    theme: { appearance: "dark", accent: "#ff7ab6", buttonStyle: "pill", background: "deep", layout: "list", font: "rounded" },
+    theme: { appearance: "dark", accent: "#ff7ab6", buttonStyle: "pill", background: "deep", layout: "spotlight", font: "rounded" },
     services: [
       { service: "spotify-podcasts" },
       { service: "apple-podcasts" },
