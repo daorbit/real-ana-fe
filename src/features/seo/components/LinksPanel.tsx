@@ -17,7 +17,7 @@ const STATUS: Record<SeoLinkStatus, { label: string; tone: Tone; explain: string
   redirect: { label: "Redirect", tone: "warn", explain: "Resolves, but only after a detour. Each hop costs crawl budget." },
   timeout: { label: "Timeout", tone: "warn", explain: "No response in time. The target may be slow rather than broken." },
   blocked: { label: "Blocked", tone: "neutral", explain: "Not checked, because the address is not publicly reachable." },
-  skipped: { label: "Skipped", tone: "neutral", explain: "Over the per-audit link limit." },
+  skipped: { label: "Not checked", tone: "neutral", explain: "Not checked in this audit." },
 };
 
 type Filter = "problems" | "all" | SeoLinkStatus;
