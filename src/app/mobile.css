@@ -466,10 +466,12 @@
   /* Two across: stat cards pair up, everything else takes the full row. */
   .home-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    column-gap: 12px;
+    row-gap: 0;
   }
   .home-grid > * { grid-column: span 2 !important; }
   .home-grid > :has(> div > .stat-card) { grid-column: span 1 !important; }
+  .home-grid > [data-solo] { grid-column: span 2 !important; }
 
   /* The hero: the trend gets its own strip under the numbers instead of
      running through them, the two totals pair up, and the "Period" tag goes —

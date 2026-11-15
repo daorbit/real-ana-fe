@@ -19,6 +19,7 @@ const SPANS: Span[] = [1, 2, 3, 4];
 export function SortableWidget({
   id,
   span,
+  solo = false,
   label,
   editing,
   onSpan,
@@ -27,6 +28,7 @@ export function SortableWidget({
 }: {
   id: WidgetId;
   span: Span;
+  solo?: boolean;
   label: string;
   editing: boolean;
   onSpan: (span: Span) => void;
@@ -47,10 +49,11 @@ export function SortableWidget({
     [setNodeRef, masonryRef]
   );
   const columns = String(Math.min(span, 4));
+  const soloAttr = solo || undefined;
 
   if (!editing) {
     return (
-      <div ref={ref} data-span={columns}>
+      <div ref={ref} data-span={columns} data-solo={soloAttr}>
         {children}
       </div>
     );
@@ -61,7 +64,7 @@ export function SortableWidget({
     .join(" ");
 
   return (
-    <div ref={ref} data-span={columns} className={cls}>
+    <div ref={ref} data-span={columns} data-solo={soloAttr} className={cls}>
       <Paper withBorder radius="lg" p={6} className="sw-frame">
         <Group justify="space-between" wrap="nowrap" px={4} pb={6}>
           <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>

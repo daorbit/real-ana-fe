@@ -6,7 +6,7 @@ import {
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { SortableWidget, WidgetDragPreview } from "@/shared/ui/SortableWidget";
-import { WIDGET_MAP } from "@/features/analytics/widgetCatalog";
+import { WIDGET_MAP, unpairedMetric } from "@/features/analytics/widgetCatalog";
 import type { Placed, Span, WidgetId } from "@/features/analytics/widgetCatalog";
 import classes from "@/features/analytics/components/widgets/Widgets.module.css";
 
@@ -31,6 +31,8 @@ export function WidgetGrid({
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  const soloId = unpairedMetric(layout);
 
   const onDragStart = (e: DragStartEvent) => setDragging(e.active.id as WidgetId);
 
@@ -59,6 +61,7 @@ export function WidgetGrid({
               key={p.id}
               id={p.id}
               span={p.span}
+              solo={p.id === soloId}
               label={WIDGET_MAP[p.id]?.label ?? p.id}
               editing={editing}
               onSpan={(s: Span) => onSpan(p.id, s)}

@@ -79,6 +79,11 @@ export const EMBEDDABLE_WIDGETS: WidgetId[] = [
   "operatingSystems", "devices", "languages", "channels", "utmSources", "utmCampaigns",
 ];
 
+export function unpairedMetric(layout: Placed[]): WidgetId | null {
+  const metrics = layout.filter((p) => WIDGET_MAP[p.id]?.kind === "metric");
+  return metrics.length % 2 === 1 ? metrics[metrics.length - 1].id : null;
+}
+
 export function isSearchWidget(id: string): boolean {
   return WIDGET_MAP[id]?.group === "Search";
 }
