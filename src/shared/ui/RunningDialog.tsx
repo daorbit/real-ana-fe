@@ -1,12 +1,11 @@
-import { Modal, Stack, Text, Box, Button, Group, UnstyledButton, Portal } from "@mantine/core";
-import { Check, Minimize2, Maximize2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Modal, Stack, Text, Box, Button } from "@mantine/core";
+import { Minimize2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { RunningSteps } from "@/shared/ui/RunningSteps";
+import { RunningPill } from "@/shared/ui/RunningPill";
+import { useMinimizedRun } from "@/shared/hooks/useMinimizedRun";
 import "@/shared/ui/RunningDialog.css";
-
-const SUCCESS_HOLD = 2600;
-
 
 export function RunningDialog({
   opened,
@@ -24,19 +23,13 @@ export function RunningDialog({
   size?: number;
   children?: ReactNode;
   description?: ReactNode;
-  /** Optional rotating status lines, ~3s each, held on the last one. */
   steps?: string[];
-  /** Show the minimize control. */
   minimizable?: boolean;
-  /** One-liner for the docked pill. Defaults to `title`. */
   minimizedLabel?: string;
-  /** Shown in the pill for a moment after a minimized job finishes. */
   successMessage?: string;
 }) {
   const [step, setStep] = useState(0);
-  const [minimized, setMinimized] = useState(false);
-  const [done, setDone] = useState(false);
-  const wasOpen = useRef(false);
+  const { expanded, showPill, done, minimize, restore } = useMinimizedRun(opened);
 
   useEffect(() => {
     if (!opened || !steps?.length) return;
@@ -48,34 +41,11 @@ export function RunningDialog({
     return () => clearInterval(id);
   }, [opened, steps]);
 
-  useEffect(() => {
-    if (opened) {
-      // A fresh run always starts expanded.
-      if (!wasOpen.current) {
-        wasOpen.current = true;
-        setMinimized(false);
-        setDone(false);
-      }
-      return;
-    }
-    if (!wasOpen.current) return;
-    wasOpen.current = false;
-    if (!minimized) return;
-    setDone(true);
-    const id = setTimeout(() => {
-      setDone(false);
-      setMinimized(false);
-    }, SUCCESS_HOLD);
-    return () => clearTimeout(id);
-  }, [opened, minimized]);
-
-  const showPill = (opened && minimized) || done;
-
   return (
     <>
       <Modal
-        opened={opened && !minimized}
-        onClose={() => setMinimized(true)}
+        opened={expanded}
+        onClose={minimize}
         withCloseButton={false}
         closeOnClickOutside={false}
         closeOnEscape={minimizable}
@@ -111,7 +81,7 @@ export function RunningDialog({
                 size="xs"
                 radius="xl"
                 leftSection={<Minimize2 size={14} />}
-                onClick={() => setMinimized(true)}
+                onClick={minimize}
               >
                 Minimize — keep working
               </Button>
@@ -121,31 +91,12 @@ export function RunningDialog({
       </Modal>
 
       {showPill && (
-        <Portal>
-          <UnstyledButton
-            className={`running-pill${done ? " running-pill--done" : ""}`}
-            onClick={() => !done && setMinimized(false)}
-            aria-live="polite"
-            title={done ? successMessage : "Show details"}
-          >
-            {done ? (
-              <span className="running-pill__icon running-pill__icon--check">
-                <Check size={13} strokeWidth={3} />
-              </span>
-            ) : (
-              <span className="running-pill__icon running-pill__icon--spin" />
-            )}
-
-            <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
-              <Text size="sm" fw={500} truncate>
-                {done ? successMessage : minimizedLabel ?? title}
-              </Text>
-              {!done && <Maximize2 size={13} opacity={0.5} />}
-            </Group>
-
-            {!done && <span className="running-pill__line" />}
-          </UnstyledButton>
-        </Portal>
+        <RunningPill
+          done={done}
+          label={minimizedLabel ?? title}
+          successMessage={successMessage}
+          onRestore={restore}
+        />
       )}
     </>
   );

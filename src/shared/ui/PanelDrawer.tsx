@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ActionIcon, Drawer, ScrollArea } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { X } from "lucide-react";
+import { usePanelOverlayRoot } from "@/shared/hooks/usePanelOverlayRoot";
 import styles from "./PanelDrawer.module.css";
 
 export function PanelDrawer({
@@ -24,11 +25,7 @@ export function PanelDrawer({
   size?: number;
 }) {
   const mobile = useMediaQuery("(max-width: 48em)") ?? false;
-  const [panelRoot, setPanelRoot] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    setPanelRoot(document.getElementById("panel-overlay-root"));
-  }, []);
+  const panelRoot = usePanelOverlayRoot();
 
   return (
     <Drawer

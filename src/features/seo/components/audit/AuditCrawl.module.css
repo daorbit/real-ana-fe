@@ -1,0 +1,392 @@
+.view {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--shell);
+  pointer-events: auto;
+  animation: viewIn 0.24s ease both;
+}
+
+.view[hidden] {
+  display: none;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.headMain {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.live {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 420px;
+  height: 28px;
+  padding: 0 12px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.lock {
+  flex: none;
+  color: var(--green);
+}
+
+.addressText {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface-2);
+  container-type: size;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.frame[data-loaded="true"] {
+  opacity: 1;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--shell) 18%, transparent);
+  backdrop-filter: blur(2.5px);
+  pointer-events: none;
+  transition: background-color 0.6s ease, backdrop-filter 0.6s ease;
+}
+
+.stage[data-phase="4"] .veil {
+  background: color-mix(in srgb, var(--shell) 45%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.beam {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 72px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-bottom: 2px solid var(--accent);
+  pointer-events: none;
+  animation: scan 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transition: opacity 0.4s ease;
+}
+
+.stage[data-phase="0"] .beam,
+.stage[data-phase="4"] .beam {
+  opacity: 0;
+}
+
+.spiders {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.spider {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+}
+
+.spider path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--bug) 72%, #000);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.body {
+  fill: var(--bug);
+}
+
+.eye {
+  fill: #fff;
+}
+
+.legsA,
+.legsB {
+  transform-box: view-box;
+  transform-origin: 32px 34px;
+  animation: scuttle 0.2s ease-in-out infinite alternate;
+}
+
+.legsB {
+  animation-direction: alternate-reverse;
+}
+
+.walker {
+  --bug: var(--mantine-color-blue-5);
+  --size: 54px;
+  --dur: 18s;
+  --lag: 0s;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  animation: moveA var(--dur) linear var(--lag) infinite;
+}
+
+.turn {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: turnA var(--dur) linear var(--lag) infinite;
+}
+
+.ring {
+  position: absolute;
+  inset: -40%;
+  border: 1.5px solid var(--bug);
+  border-radius: 50%;
+  opacity: 0;
+  animation: ringPulse 1.8s ease-out var(--lag) infinite;
+}
+
+.walker[data-lag] {
+  --size: 40px;
+  --lag: calc(var(--dur) * -0.5);
+}
+
+.walker[data-route="b"] {
+  --dur: 22s;
+  animation-name: moveB;
+}
+
+.walker[data-route="b"] .turn {
+  animation-name: turnB;
+}
+
+.walker[data-route="c"] {
+  --dur: 15s;
+  animation-name: moveC;
+}
+
+.walker[data-route="c"] .turn {
+  animation-name: turnC;
+}
+
+.walker[data-route="d"] {
+  --dur: 20s;
+  animation-name: moveD;
+}
+
+.walker[data-route="d"] .turn {
+  animation-name: turnD;
+}
+
+.walker[data-route="b"]:not([data-lag]) {
+  --size: 48px;
+}
+
+.walker[data-route="c"]:not([data-lag]) {
+  --size: 44px;
+}
+
+.walker[data-route="d"]:not([data-lag]) {
+  --size: 50px;
+}
+
+.walker[data-tone="violet"] { --bug: var(--mantine-color-violet-5); }
+.walker[data-tone="orange"] { --bug: var(--mantine-color-orange-5); }
+.walker[data-tone="teal"] { --bug: var(--mantine-color-teal-5); }
+.walker[data-tone="pink"] { --bug: var(--mantine-color-pink-5); }
+.walker[data-tone="green"] { --bug: var(--mantine-color-green-5); }
+.walker[data-tone="red"] { --bug: var(--mantine-color-red-5); }
+.walker[data-tone="indigo"] { --bug: var(--mantine-color-indigo-5); }
+
+.chip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  padding: 2px 8px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  background: var(--bug);
+  border-radius: 10px;
+  translate: -50% 10px;
+  animation: chipIn 0.3s ease both;
+}
+
+@keyframes viewIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes scan {
+  from { translate: 0 -72px; }
+  to { translate: 0 100cqh; }
+}
+
+@keyframes chipIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ringPulse {
+  0% { opacity: 0.7; scale: 0.45; }
+  100% { opacity: 0; scale: 1.15; }
+}
+
+@keyframes scuttle {
+  from { rotate: -6deg; }
+  to { rotate: 6deg; }
+}
+
+@keyframes moveA {
+  0% { translate: 8cqw 78cqh; }
+  18%, 21% { translate: 38cqw 42cqh; }
+  38%, 41% { translate: 72cqw 30cqh; }
+  58%, 61% { translate: 86cqw 70cqh; }
+  78%, 81% { translate: 48cqw 86cqh; }
+  97%, 100% { translate: 8cqw 78cqh; }
+}
+
+@keyframes turnA {
+  0%, 18% { rotate: 53deg; }
+  21%, 38% { rotate: 77deg; }
+  41%, 58% { rotate: 151deg; }
+  61%, 78% { rotate: 255deg; }
+  81%, 97% { rotate: 277deg; }
+  100% { rotate: 413deg; }
+}
+
+@keyframes moveB {
+  0% { translate: 70cqw 12cqh; }
+  22%, 25% { translate: 22cqw 24cqh; }
+  47%, 50% { translate: 30cqw 62cqh; }
+  72%, 75% { translate: 62cqw 58cqh; }
+  97%, 100% { translate: 70cqw 12cqh; }
+}
+
+@keyframes turnB {
+  0%, 22% { rotate: -99deg; }
+  25%, 47% { rotate: -199deg; }
+  50%, 72% { rotate: -274deg; }
+  75%, 97% { rotate: -344deg; }
+  100% { rotate: -459deg; }
+}
+
+@keyframes moveC {
+  0% { translate: 84cqw 14cqh; }
+  30%, 34% { translate: 56cqw 44cqh; }
+  63%, 67% { translate: 88cqw 52cqh; }
+  96%, 100% { translate: 84cqw 14cqh; }
+}
+
+@keyframes turnC {
+  0%, 30% { rotate: -124deg; }
+  34%, 63% { rotate: -261deg; }
+  67%, 96% { rotate: -369deg; }
+  100% { rotate: -484deg; }
+}
+
+@keyframes moveD {
+  0% { translate: 20cqw 30cqh; }
+  30%, 34% { translate: 50cqw 70cqh; }
+  63%, 67% { translate: 14cqw 88cqh; }
+  96%, 100% { translate: 20cqw 30cqh; }
+}
+
+@keyframes turnD {
+  0%, 30% { rotate: 130deg; }
+  34%, 63% { rotate: 253deg; }
+  67%, 96% { rotate: 370deg; }
+  100% { rotate: 490deg; }
+}
+
+@media (max-width: 48em) {
+  .header {
+    padding: 10px 12px;
+  }
+
+  .headMain {
+    flex-basis: 100%;
+    gap: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spiders,
+  .beam {
+    display: none;
+  }
+
+  .view,
+  .liveDot {
+    animation: none;
+  }
+}
+
+:global([data-motion="off"]) .spiders,
+:global([data-motion="off"]) .beam {
+  display: none;
+}

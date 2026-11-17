@@ -62,7 +62,7 @@ export function SeoInspectBar({
             radius="sm"
             disabled={analyzing}
             onClick={onRun}
-            className={layout.inspectButton}
+            classNames={{ root: layout.inspectButton, label: layout.inspectButtonLabel }}
           >
             Run audit
           </Button>

@@ -134,6 +134,10 @@
   to { opacity: 0; transform: translate(-50%, 10px) scale(0.98); }
 }
 
+.running-pill__label {
+  min-width: 0;
+}
+
 .running-pill__icon {
   display: grid;
   flex: 0 0 auto;

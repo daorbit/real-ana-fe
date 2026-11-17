@@ -27,8 +27,6 @@ export function useAuditProgress(running: boolean) {
   const phase = phaseAt(elapsed);
   const checks = AUDIT_PHASES[phase].checks;
   const check = checks[Math.floor(elapsed / CHECK_EVERY) % checks.length];
-  const seconds = Math.floor(elapsed / 1000);
-  const clock = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
-  return { phase, check, clock, total: AUDIT_PHASES.length };
+  return { phase, check };
 }

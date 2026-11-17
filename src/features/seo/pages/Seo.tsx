@@ -11,8 +11,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/app/AppShell";
-import { RunningDialog } from "@/shared/ui/RunningDialog";
-import { AuditScan } from "@/features/seo/components/audit/AuditScan";
+import { AuditCrawlView } from "@/features/seo/components/audit/AuditCrawlView";
 import { HelpDrawer } from "@/shared/ui/HelpDrawer";
 import { getSeoHelp } from "@/features/seo/components/help";
 import { PageHeader } from "@/shared/ui/Page";
@@ -350,6 +349,8 @@ export default function Seo() {
   }, [siteId]);
 
   const [analyze, { isLoading: analyzing }] = useAnalyzeSeoMutation();
+  const auditRequest = useRef<{ abort: () => void } | null>(null);
+  const auditCancelled = useRef(false);
   const [deleteReport] = useDeleteSeoReportMutation();
 
   const { data: realFieldVitals } = useGetFieldVitalsQuery(
@@ -459,22 +460,32 @@ export default function Seo() {
       notify.error("Turn off demo data to run an audit.");
       return;
     }
+    auditCancelled.current = false;
+    const request = analyze({
+      workspaceId,
+      siteId: site.siteId,
+      url: targetUrl,
+      refresh,
+    });
+    auditRequest.current = request;
     try {
-      const res = await analyze({
-        workspaceId,
-        siteId: site.siteId,
-        url: targetUrl,
-        refresh,
-      }).unwrap();
+      const res = await request.unwrap();
       setViewingId(res.report._id);
       notify.success(
         res.cached ? "Showing the most recent audit for this URL" : "Analysis complete"
       );
-      // A cache hit costs no quota — only refresh when a real audit ran.
       if (!res.cached) await refreshUser();
     } catch (e) {
-      notifyError(e, "Analysis failed");
+      if (auditCancelled.current) notify.info("Audit cancelled");
+      else notifyError(e, "Analysis failed");
+    } finally {
+      auditRequest.current = null;
     }
+  }
+
+  function cancelAudit() {
+    auditCancelled.current = true;
+    auditRequest.current?.abort();
   }
 
   function remove(id: string) {
@@ -566,15 +577,13 @@ export default function Seo() {
 
   return (
     <AppShell>
-      <RunningDialog
-        opened={analyzing}
-        title="Running SEO audit"
-        minimizedLabel="Running SEO audit…"
-        successMessage="SEO audit complete"
-        size={440}
-      >
-        <AuditScan url={targetUrl} running={analyzing} />
-      </RunningDialog>
+      <AuditCrawlView
+        workspaceId={workspaceId}
+        siteId={siteId}
+        url={targetUrl}
+        running={analyzing}
+        onCancel={cancelAudit}
+      />
 
       <PageHeader
         title={pageTitle}

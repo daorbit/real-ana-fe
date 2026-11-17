@@ -1882,6 +1882,15 @@ export const api = createApi({
       providesTags: (_r, _e, { siteId }) => [{ type: "Seo", id: siteId }],
     }),
 
+    getSeoPreview: build.query<
+      { html: string },
+      { workspaceId: string; siteId: string; url: string }
+    >({
+      query: ({ workspaceId, siteId, url }) =>
+        `/api/workspaces/${workspaceId}/sites/${siteId}/seo/preview?url=${encodeURIComponent(url)}`,
+      keepUnusedDataFor: 60,
+    }),
+
     getLatestSeoReport: build.query<
       SeoReport,
       { workspaceId: string; siteId: string; url?: string }
@@ -3240,6 +3249,7 @@ export const {
   useAnalyzeSeoMutation,
   useGetSeoReportsQuery,
   useGetLatestSeoReportQuery,
+  useGetSeoPreviewQuery,
   useGetSeoReportQuery,
   useDeleteSeoReportMutation,
   useGetSeoShareQuery,

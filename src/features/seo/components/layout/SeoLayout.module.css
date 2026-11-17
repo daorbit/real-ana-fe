@@ -212,6 +212,11 @@
   border-radius: 8px;
 }
 
+.inspectButtonLabel {
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+}
+
 .inspectCard {
   margin-bottom: var(--mantine-spacing-xl);
   overflow: hidden;
